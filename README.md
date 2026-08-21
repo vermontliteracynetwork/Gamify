@@ -5,9 +5,20 @@ combining ideas from Baamboozle, Blooket, and Wordwall. General-purpose
 game engine, not literacy-only, though the first demo content is literacy
 vocabulary.
 
-See `docs/platform-spec.md` for the full product spec and roadmap, and
-`docs/plink-oh-spec.md` for the first game module's rules and open
-questions.
+## Project documentation (start here)
+
+Everything about where this project is headed lives in this repo, not
+scattered across chats or other repos:
+
+| Doc | What's in it |
+|---|---|
+| [`CLAUDE.md`](./CLAUDE.md) | The binding development standard -- the Three-Lens testing bar every change is held to, plus standing product facts |
+| [`docs/platform-spec.md`](./docs/platform-spec.md) | Full product spec: vision, differentiators, data model, accessibility requirements, phased roadmap |
+| [`docs/plink-oh-spec.md`](./docs/plink-oh-spec.md) | First game module ("Ohhh...Plink"): confirmed rules, open assumptions, and the pixel-exact size spec for matching art/assets |
+| [`docs/testing-standards.md`](./docs/testing-standards.md) | The Three Lenses in full -- checklists, test methods, the browser-driven testing harness, real case studies, and current known gaps |
+
+Bookmark this README (or the repo root) and every planning doc is one
+click away.
 
 ## Development
 
@@ -16,7 +27,7 @@ npm install
 npm run dev
 ```
 
-Then open the printed local URL and go to `/games/plink-oh`.
+Then open the printed local URL and go to `/games/ohhh-plink`.
 
 ## Build
 
@@ -30,7 +41,8 @@ files (Vercel, Netlify, etc.), no server required.
 ## Structure
 
 - `src/games/<game-id>/` -- each game is a self-contained module (own
-  component, own data/logic files). `plink-oh` is the first one.
+  component, own data/logic files). `plink-oh` (displayed as
+  "Ohhh...Plink") is the first one.
 - `src/App.jsx` / `src/Home.jsx` -- top-level routing and the game picker
   landing page.
 

@@ -5,8 +5,8 @@ import { ArrowRight, Target } from '@phosphor-icons/react';
 
 const GAMES = [
   {
-    path: '/games/plink-oh',
-    name: 'Plink-oh!',
+    path: '/games/ohhh-plink',
+    name: 'Ohhh...Plink',
     description: 'Answer a question, drop a ball, chase the high-value bucket.',
     icon: Target,
     color: '#f7c948',

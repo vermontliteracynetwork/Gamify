@@ -20,7 +20,7 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
-          <Route path="/games/plink-oh" element={<PlinkOhGame />} />
+          <Route path="/games/ohhh-plink" element={<PlinkOhGame />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

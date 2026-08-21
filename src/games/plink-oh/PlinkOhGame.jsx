@@ -221,7 +221,7 @@ export default function PlinkOhGame() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-8 pb-24">
-      <h1 className="font-display text-3xl font-bold text-center text-text mb-1">Plink-oh!</h1>
+      <h1 className="font-display text-3xl font-bold text-center text-text mb-1">Ohhh...Plink</h1>
       <p className="text-muted text-center text-xs mb-6 max-w-[46ch] mx-auto">
         Answer a question, drop a ball, chase the high-value bucket.
       </p>

@@ -1,5 +1,9 @@
 # Plink-oh Game Module Spec
 
+> Displayed on the site as **"Ohhh...Plink"** -- the module, file, and
+> route are still internally named `plink-oh` / `ohhh-plink` for code
+> stability; this doc uses the original working name throughout.
+
 First game module built against the platform architecture in
 `docs/platform-spec.md`. Rules were reconstructed from the Baamboozle
 "Plink-oh!" Notion walkthrough (screenshots supplied directly, since
@@ -87,6 +91,31 @@ data platform at all.
 join-code hosted sessions (this is local hot-seat play only), and
 accessibility toggles beyond Sounds/timer (dyslexia font, screen reader,
 reduced-motion "calm mode" are not wired in yet).
+
+## Board size spec (px)
+
+Reference for building matching Canva assets (backgrounds, ball skins,
+bucket art). Pulled directly from `PlinkoBoard.jsx`'s constants -- if
+those constants change, this table is stale and should be re-pulled from
+source rather than hand-edited.
+
+| Element | Size | Notes |
+|---|---|---|
+| Board canvas | 560 x 360 | Internal resolution; scales responsively up to 560px wide |
+| Board border radius | 20px | Site "panel" shape token |
+| Board border | 3px | Solid, site border color |
+| Peg grid | 11 cols x 8 rows | Alternating rows offset by half a column |
+| Column spacing | 46.67px | 560 / 12 |
+| Row spacing | 32.89px | (360 - top margin - bottom margin) / 9 |
+| Top margin (drop zone -> first peg row) | 34px | |
+| Bottom margin (last peg row -> buckets) | 30px | |
+| Peg dot | 3.5px radius | Regular pegs |
+| Spike peg | ~10px wide x 10px tall triangle | Every 3rd row when Spikes is on |
+| Ball | 9px radius base | Squashes +/-12% (~7.9-10.1px) on each bounce |
+| Bounce arc | 5px vertical lift | Small hop between peg rows during the fall |
+| Drop-zone buttons | 12px radius, 2px border, 4px gap | Row above the board |
+| Bucket strip | 12px radius, 4px gap, equal-width flex | Row below the board |
+| Full drop animation | ~1.84s | 190ms/row x 8 rows + 320ms landing settle |
 
 ## Open question for the user
 
