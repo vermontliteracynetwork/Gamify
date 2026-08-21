@@ -7,7 +7,8 @@ const PEG_ROWS = 8;
 const PEG_COLS = 11; // odd count so alternating rows stagger evenly
 const TOP_MARGIN = 34;
 const BOTTOM_MARGIN = 30;
-const ROW_STEP_MS = 170;
+const ROW_DURATION_MS = 190;
+const LAND_SETTLE_MS = 320;
 
 const BUCKET_COLORS = ['#57c785', '#4d9fec', '#9b6fe0', '#f0924a', '#ec6fb5', '#ef5d68', '#3ab6a6'];
 
@@ -30,6 +31,15 @@ function pegPositions() {
 }
 
 const PEGS = pegPositions();
+const ROW_SPACING = (BOARD_H - TOP_MARGIN - BOTTOM_MARGIN) / (PEG_ROWS + 1);
+
+function rowY(row) {
+  return TOP_MARGIN + ROW_SPACING * (row + 1);
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 // Bounce-probability bias per power-up. Each returns the chance (0-1) the
 // ball steps *away* from board-center on a given row; 0.5 is a neutral
@@ -41,15 +51,33 @@ function pushOutwardChance(bias) {
   return 0.5; // no power-up active -- neutral coin-flip walk; spikes affect step *size* below, not direction
 }
 
+// Precompute the full sequence of row x-positions up front (same random-walk
+// logic as before) so the animation loop only has to interpolate through
+// known points, rather than deciding direction mid-flight.
+function computeDropPath({ startX, dropZoneCount, spikesEnabled, bias }) {
+  const colSpacing = BOARD_W / (PEG_COLS + 1);
+  const outwardChance = pushOutwardChance(bias);
+  const stepSize = bias === 'straight' ? colSpacing * 0.12 : colSpacing * (spikesEnabled ? 0.55 : 0.4);
+  const center = BOARD_W / 2;
+  const xs = [startX];
+  let x = startX;
+  for (let row = 0; row < PEG_ROWS; row++) {
+    const movingOutward = x < center ? Math.random() < outwardChance : Math.random() >= outwardChance;
+    const direction = x < center ? (movingOutward ? -1 : 1) : (movingOutward ? 1 : -1);
+    x = Math.max(colSpacing * 0.4, Math.min(BOARD_W - colSpacing * 0.4, x + direction * stepSize));
+    xs.push(x);
+  }
+  return xs;
+}
+
 export default function PlinkoBoard({ dropZoneCount, buckets, spikesEnabled, activePowerUp, teamColor, onLanded, disabled }) {
   const canvasRef = useRef(null);
   const [phase, setPhase] = useState('idle'); // idle | dropping
-  const [ballX, setBallX] = useState(null);
-  const [ballRow, setBallRow] = useState(0);
   const [landedIndex, setLandedIndex] = useState(null);
-  const dropTimer = useRef(null);
+  const rafRef = useRef(null);
+  const ballPos = useRef({ x: null, y: null, r: 9 });
 
-  const draw = useCallback((animBallX, animBallY) => {
+  const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -73,10 +101,11 @@ export default function PlinkoBoard({ dropZoneCount, buckets, spikesEnabled, act
       ctx.fill();
     });
 
-    if (animBallX != null) {
+    const { x, y, r } = ballPos.current;
+    if (x != null) {
       ctx.beginPath();
       ctx.fillStyle = teamColor || '#f7c948';
-      ctx.arc(animBallX, animBallY, 9, 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgba(0,0,0,0.25)';
@@ -85,48 +114,62 @@ export default function PlinkoBoard({ dropZoneCount, buckets, spikesEnabled, act
   }, [spikesEnabled, teamColor]);
 
   useEffect(() => {
-    draw(ballX, ballRow != null ? TOP_MARGIN + ((BOARD_H - TOP_MARGIN - BOTTOM_MARGIN) / (PEG_ROWS + 1)) * (ballRow + 1) : null);
-  }, [ballX, ballRow, draw]);
+    draw();
+  }, [draw]);
 
-  useEffect(() => () => clearTimeout(dropTimer.current), []);
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
   function pickDropZone(zoneIndex) {
     if (disabled || phase === 'dropping') return;
     setLandedIndex(null);
-    const colSpacing = BOARD_W / (PEG_COLS + 1);
-    let x = BOARD_W * ((zoneIndex + 0.5) / dropZoneCount);
-    setBallX(x);
-    setBallRow(-1);
     setPhase('dropping');
 
-    const bucketWidth = BOARD_W / buckets.length;
+    const startX = BOARD_W * ((zoneIndex + 0.5) / dropZoneCount);
     const bias = activePowerUp ? activePowerUp.bias : null;
-    const outwardChance = pushOutwardChance(bias);
-    const stepSize = bias === 'straight' ? colSpacing * 0.12 : colSpacing * (spikesEnabled ? 0.55 : 0.4);
+    const xs = computeDropPath({ startX, dropZoneCount, spikesEnabled, bias });
+    const startY = TOP_MARGIN - 14;
 
-    let row = -1;
-    function step() {
-      row += 1;
-      setBallRow(row);
-      if (row < PEG_ROWS) {
-        const center = BOARD_W / 2;
-        const movingOutward = x < center ? Math.random() < outwardChance : Math.random() >= outwardChance;
-        const direction = x < center
-          ? (movingOutward ? -1 : 1)
-          : (movingOutward ? 1 : -1);
-        x = Math.max(colSpacing * 0.4, Math.min(BOARD_W - colSpacing * 0.4, x + direction * stepSize));
-        setBallX(x);
-        dropTimer.current = setTimeout(step, ROW_STEP_MS);
+    const totalMs = PEG_ROWS * ROW_DURATION_MS;
+    const startedAt = performance.now();
+
+    function frame(now) {
+      const elapsed = now - startedAt;
+      const rowFloat = Math.min(PEG_ROWS, elapsed / ROW_DURATION_MS);
+      const row = Math.min(PEG_ROWS - 1, Math.floor(rowFloat));
+      const localT = Math.min(1, rowFloat - row);
+      const eased = easeInOutCubic(localT);
+
+      const fromX = xs[row];
+      const toX = xs[row + 1];
+      const fromY = row === 0 ? startY : rowY(row - 1);
+      const toY = rowY(row);
+
+      // A small upward arc between pegs (real bounce), settling flat at
+      // the very end of the drop so it doesn't overshoot into the bucket.
+      const arc = elapsed < totalMs ? Math.sin(Math.PI * eased) * 5 : 0;
+      const squash = elapsed < totalMs ? 1 + Math.sin(Math.PI * eased) * 0.12 : 1;
+
+      ballPos.current = {
+        x: fromX + (toX - fromX) * eased,
+        y: fromY + (toY - fromY) * eased - arc,
+        r: 9 * squash,
+      };
+      draw();
+
+      if (elapsed < totalMs) {
+        rafRef.current = requestAnimationFrame(frame);
       } else {
-        const bucketIndex = Math.max(0, Math.min(buckets.length - 1, Math.floor(x / bucketWidth)));
-        dropTimer.current = setTimeout(() => {
+        const bucketWidth = BOARD_W / buckets.length;
+        const finalX = xs[PEG_ROWS];
+        const bucketIndex = Math.max(0, Math.min(buckets.length - 1, Math.floor(finalX / bucketWidth)));
+        setTimeout(() => {
           setPhase('idle');
           setLandedIndex(bucketIndex);
           onLanded(bucketIndex);
-        }, 250);
+        }, LAND_SETTLE_MS);
       }
     }
-    step();
+    rafRef.current = requestAnimationFrame(frame);
   }
 
   return (
