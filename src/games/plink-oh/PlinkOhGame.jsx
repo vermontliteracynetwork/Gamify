@@ -1,12 +1,15 @@
-import React, { useMemo, useRef, useState } from 'react';
-import PlinkoBoard from './PlinkoBoard';
+import React, { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { playSound } from './sound';
 import {
-  TEAM_COLORS, MIN_TEAMS, MAX_TEAMS, MIN_ROUNDS, MAX_ROUNDS,
-  generateBuckets, shuffle, POWER_UPS, SAMPLE_QUESTIONS,
+  TEAM_COLORS, generateBuckets, shuffle, POWER_UPS, SAMPLE_QUESTIONS,
 } from './data';
-
-const POWER_UPS_BY_ID = Object.fromEntries(POWER_UPS.map((p) => [p.id, p]));
+import { StepHeader } from './components/ui';
+import SetupScreen from './screens/SetupScreen';
+import OptionsScreen from './screens/OptionsScreen';
+import QuestionOptionsScreen from './screens/QuestionOptionsScreen';
+import PlayScreen from './screens/PlayScreen';
+import WinnerScreen from './screens/WinnerScreen';
 
 const DEFAULT_OPTIONS = {
   questionsEnabled: true,
@@ -21,6 +24,8 @@ const DEFAULT_OPTIONS = {
   soundsLevel: 'med', // off | low | med | high
 };
 
+const SETUP_STEPS = ['Setup', 'Options', 'Play'];
+
 function makeDefaultTeams(count) {
   return Array.from({ length: count }).map((_, i) => ({
     id: `team-${i}`,
@@ -29,40 +34,12 @@ function makeDefaultTeams(count) {
   }));
 }
 
-const PANEL = { background: '#16204A', border: '1px solid #2C3E80', borderRadius: 14, padding: 20, color: '#F2F4FA' };
-const BTN = { padding: '10px 20px', borderRadius: 10, border: 'none', fontWeight: 700, cursor: 'pointer' };
-const BTN_PRIMARY = { ...BTN, background: '#F4C542', color: '#16204A' };
-const BTN_GHOST = { ...BTN, background: '#2C3E80', color: '#F2F4FA' };
-const BTN_DANGER = { ...BTN, background: '#E0555F', color: '#fff' };
-
-function Toggle({ label, sub, value, onChange }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-      <div>
-        <div style={{ fontWeight: 600 }}>{label}</div>
-        {sub && <div style={{ fontSize: 12, color: '#9FB3E0' }}>{sub}</div>}
-      </div>
-      <button
-        onClick={() => onChange(!value)}
-        style={{
-          ...BTN, padding: '6px 16px',
-          background: value ? '#5FBF7B' : '#3A4A80',
-          color: '#fff',
-        }}
-      >
-        {value ? 'ON' : 'OFF'}
-      </button>
-    </div>
-  );
-}
-
 export default function PlinkOhGame() {
   const [stage, setStage] = useState('setup'); // setup | options | question-options | playing | winner
   const [teamCount, setTeamCount] = useState(3);
   const [roundCount, setRoundCount] = useState(5);
   const [teams, setTeams] = useState(makeDefaultTeams(3));
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
-  const containerRef = useRef(null);
 
   const [game, setGame] = useState(null);
   /* game = {
@@ -231,6 +208,7 @@ export default function PlinkOhGame() {
     }
     const t = setTimeout(() => setGame((g) => (g ? { ...g, timeLeft: g.timeLeft - 1 } : g)), 1000);
     return () => clearTimeout(t);
+    // eslint-disable-next-line
   }, [game && game.phase, game && game.timeLeft, options.timerEnabled]);
 
   const winners = useMemo(() => {
@@ -239,270 +217,69 @@ export default function PlinkOhGame() {
     return teams.filter((t) => game.scores[t.id] === max);
   }, [game, teams]);
 
+  const stepIndex = { setup: 0, options: 1, 'question-options': 1, playing: 2, winner: 2 }[stage];
+
   return (
-    <div ref={containerRef} style={{ minHeight: '100vh', background: '#0E1638', padding: '24px 16px', fontFamily: 'Nunito, "Segoe UI", sans-serif' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <h1 style={{ color: '#F4C542', fontSize: 32, textAlign: 'center', marginBottom: 4 }}>Plink-oh!</h1>
-        <p style={{ color: '#9FB3E0', textAlign: 'center', marginTop: 0, marginBottom: 20, fontSize: 13 }}>
-          Prototype game module -- rules reconstructed from the Baamboozle "Plink-oh!" walkthrough.
-        </p>
+    <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+      <h1 className="font-display text-3xl font-bold text-center text-text mb-1">Plink-oh!</h1>
+      <p className="text-muted text-center text-xs mb-6 max-w-[46ch] mx-auto">
+        Answer a question, drop a ball, chase the high-value bucket.
+      </p>
 
-        {stage === 'setup' && (
-          <SetupScreen
-            teamCount={teamCount} roundCount={roundCount} teams={teams}
-            onTeamCount={syncTeamCount} onRoundCount={setRoundCount} onTeams={setTeams}
-            onOptions={() => setStage('options')}
-            onStart={startGame}
-          />
-        )}
+      <StepHeader steps={SETUP_STEPS} activeIndex={stepIndex} />
 
-        {stage === 'options' && (
-          <OptionsScreen
-            options={options} onChange={setOptions}
-            onQuestionOptions={() => setStage('question-options')}
-            onBack={() => setStage('setup')}
-            onFullscreen={() => {
-              if (!document.fullscreenElement) containerRef.current?.requestFullscreen?.();
-              else document.exitFullscreen?.();
-            }}
-          />
-        )}
-
-        {stage === 'question-options' && (
-          <QuestionOptionsScreen options={options} onChange={setOptions} onBack={() => setStage('options')} />
-        )}
-
-        {stage === 'playing' && game && (
-          <PlayScreen
-            teams={teams} game={game} options={options} roundCount={roundCount} activeTeam={activeTeam(game)}
-            onReveal={revealQuestion}
-            onAnswer={answerQuestion}
-            onChoosePowerUp={choosePowerUp}
-            onLanded={handleLanded}
-          />
-        )}
-
-        {stage === 'winner' && game && (
-          <WinnerScreen
-            teams={teams} scores={game.scores} winners={winners} history={game.history}
-            onRestart={startGame}
-            onMenu={() => { setGame(null); setStage('setup'); }}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SetupScreen({ teamCount, roundCount, teams, onTeamCount, onRoundCount, onTeams, onOptions, onStart }) {
-  return (
-    <div style={PANEL}>
-      <label style={{ display: 'block', marginBottom: 4, fontWeight: 700 }}>Teams: {teamCount}</label>
-      <input type="range" min={MIN_TEAMS} max={MAX_TEAMS} value={teamCount}
-        onChange={(e) => onTeamCount(Number(e.target.value))} style={{ width: '100%', marginBottom: 16 }} />
-
-      <label style={{ display: 'block', marginBottom: 4, fontWeight: 700 }}>Rounds: {roundCount}</label>
-      <input type="range" min={MIN_ROUNDS} max={MAX_ROUNDS} value={roundCount}
-        onChange={(e) => onRoundCount(Number(e.target.value))} style={{ width: '100%', marginBottom: 20 }} />
-
-      <div style={{ marginBottom: 20 }}>
-        {teams.map((team, i) => (
-          <div key={team.id} style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 8 }}>
-            <input
-              value={team.name}
-              onChange={(e) => {
-                const next = [...teams]; next[i] = { ...team, name: e.target.value }; onTeams(next);
-              }}
-              style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid #2C3E80', background: '#0E1638', color: '#fff' }}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={stage}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {stage === 'setup' && (
+            <SetupScreen
+              teamCount={teamCount} roundCount={roundCount} teams={teams}
+              onTeamCount={syncTeamCount} onRoundCount={setRoundCount} onTeams={setTeams}
+              onOptions={() => setStage('options')}
+              onStart={startGame}
             />
-            <div style={{ display: 'flex', gap: 4 }}>
-              {TEAM_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => { const next = [...teams]; next[i] = { ...team, color: c.hex }; onTeams(next); }}
-                  style={{
-                    width: 22, height: 22, borderRadius: '50%', background: c.hex, cursor: 'pointer',
-                    border: team.color === c.hex ? '2px solid #fff' : '2px solid transparent',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+          )}
 
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-        <button style={BTN_GHOST} onClick={onOptions}>Options</button>
-        <button style={BTN_PRIMARY} onClick={onStart}>Start</button>
-      </div>
-    </div>
-  );
-}
+          {stage === 'options' && (
+            <OptionsScreen
+              options={options} onChange={setOptions}
+              onQuestionOptions={() => setStage('question-options')}
+              onBack={() => setStage('setup')}
+              onFullscreen={() => {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+                else document.exitFullscreen?.();
+              }}
+            />
+          )}
 
-function OptionsScreen({ options, onChange, onQuestionOptions, onBack, onFullscreen }) {
-  const set = (patch) => onChange({ ...options, ...patch });
-  return (
-    <div style={PANEL}>
-      <div onClick={onQuestionOptions} style={{ cursor: 'pointer', padding: '4px 0', borderBottom: '1px solid #2C3E80', marginBottom: 4 }}>
-        <Toggle label="Q. Options ›" sub="Click to open question settings" value={options.questionsEnabled}
-          onChange={(v) => set({ questionsEnabled: v })} />
-      </div>
-      <Toggle label="Power-ups" value={options.powerUpsEnabled} onChange={(v) => set({ powerUpsEnabled: v })} />
-      <Toggle label="Spikes" sub="Extra hazard pegs, higher-variance bounces" value={options.spikesEnabled} onChange={(v) => set({ spikesEnabled: v })} />
-      <Toggle label="Full Screen" value={false} onChange={onFullscreen} />
-      <Toggle label="Music" sub="Background track (not yet implemented)" value={options.musicEnabled} onChange={(v) => set({ musicEnabled: v })} />
-      <div style={{ padding: '8px 0' }}>
-        <div style={{ fontWeight: 600, marginBottom: 6 }}>Sounds</div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {['off', 'low', 'med', 'high'].map((lvl) => (
-            <button key={lvl} onClick={() => set({ soundsLevel: lvl })}
-              style={{ ...BTN, padding: '6px 14px', background: options.soundsLevel === lvl ? '#F4C542' : '#2C3E80', color: options.soundsLevel === lvl ? '#16204A' : '#fff' }}>
-              {lvl.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <button style={BTN_PRIMARY} onClick={onBack}>Okay</button>
-      </div>
-    </div>
-  );
-}
+          {stage === 'question-options' && (
+            <QuestionOptionsScreen options={options} onChange={setOptions} onBack={() => setStage('options')} />
+          )}
 
-function QuestionOptionsScreen({ options, onChange, onBack }) {
-  const set = (patch) => onChange({ ...options, ...patch });
-  return (
-    <div style={PANEL}>
-      <h3 style={{ marginTop: 0 }}>Question Options</h3>
-      <div style={{ padding: '8px 0' }}>
-        <div style={{ fontWeight: 600 }}>Questions per turn</div>
-        <input type="number" min={1} max={5} value={options.questionsPerTurn}
-          onChange={(e) => set({ questionsPerTurn: Math.max(1, Math.min(5, Number(e.target.value))) })}
-          style={{ width: 60, padding: 6, borderRadius: 6, border: '1px solid #2C3E80', background: '#0E1638', color: '#fff' }} />
-      </div>
-      <Toggle label="Manual Deck" sub="Click a card deck to reveal a question, instead of the team name" value={options.manualDeck} onChange={(v) => set({ manualDeck: v })} />
-      <Toggle label="Timer" sub="Seconds per question" value={options.timerEnabled} onChange={(v) => set({ timerEnabled: v })} />
-      {options.timerEnabled && (
-        <input type="number" min={5} max={120} value={options.timerSeconds}
-          onChange={(e) => set({ timerSeconds: Math.max(5, Math.min(120, Number(e.target.value))) })}
-          style={{ width: 70, padding: 6, borderRadius: 6, border: '1px solid #2C3E80', background: '#0E1638', color: '#fff', marginBottom: 8 }} />
-      )}
-      <Toggle label="Random Order" sub="Questions appear in random order" value={options.randomOrder} onChange={(v) => set({ randomOrder: v })} />
-      <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <button style={BTN_PRIMARY} onClick={onBack}>Okay</button>
-      </div>
-    </div>
-  );
-}
+          {stage === 'playing' && game && (
+            <PlayScreen
+              teams={teams} game={game} options={options} roundCount={roundCount} activeTeam={activeTeam(game)}
+              onReveal={revealQuestion}
+              onAnswer={answerQuestion}
+              onChoosePowerUp={choosePowerUp}
+              onLanded={handleLanded}
+            />
+          )}
 
-function PlayScreen({ teams, game, options, roundCount, activeTeam, onReveal, onAnswer, onChoosePowerUp, onLanded }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, color: '#F2F4FA' }}>
-        <div style={{ fontWeight: 700 }}>Round {game.roundIndex}/{roundCount}</div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {teams.map((t) => (
-            <div key={t.id} style={{
-              padding: '4px 10px', borderRadius: 8,
-              background: t.id === activeTeam.id ? '#2C3E80' : 'transparent',
-              border: t.id === activeTeam.id ? '1px solid #F4C542' : '1px solid transparent',
-            }}>
-              <span style={{ color: t.color, fontWeight: 700 }}>{t.name}</span>{' '}
-              <span>{game.scores[t.id]}</span>
-              {game.powerUps[t.id]?.length > 0 && <span style={{ marginLeft: 4 }}>{'★'.repeat(game.powerUps[t.id].length)}</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {options.questionsEnabled && game.phase === 'reveal' && (
-        <div style={{ ...PANEL, textAlign: 'center', cursor: 'pointer' }} onClick={onReveal}>
-          <div style={{ width: 90, height: 90, borderRadius: '50%', background: activeTeam.color, margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#16204A' }}>
-            {activeTeam.name}
-          </div>
-          <p>{options.manualDeck ? 'Click the deck to reveal a question' : `Click ${activeTeam.name}'s name to reveal their question`}</p>
-        </div>
-      )}
-
-      {options.questionsEnabled && game.phase === 'question' && game.currentQuestion && (
-        <div style={{ ...PANEL, textAlign: 'center' }}>
-          <p style={{ whiteSpace: 'pre-line', fontSize: 18 }}>{game.currentQuestion.prompt}</p>
-          <p style={{ color: '#F4C542', fontWeight: 700 }}>{game.currentQuestion.answer}</p>
-          {options.timerEnabled && <p style={{ color: '#9FB3E0' }}>{game.timeLeft}s</p>}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 12 }}>
-            <button style={BTN_DANGER} onClick={() => onAnswer(false)}>✗ Oops</button>
-            <button style={{ ...BTN, background: '#5FBF7B', color: '#fff' }} onClick={() => onAnswer(true)}>✓ Okay</button>
-          </div>
-        </div>
-      )}
-
-      {game.phase === 'power-up' && (
-        <div style={{ ...PANEL, textAlign: 'center' }}>
-          <p>Use a power-up on this turn, or skip. Unused power-ups don't carry over.</p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {game.powerUps[activeTeam.id].map((id) => {
-              const pu = POWER_UPS_BY_ID[id];
-              return (
-                <button key={id} style={BTN_GHOST} onClick={() => onChoosePowerUp(id)} title={pu.description}>
-                  {pu.icon} {pu.name}
-                </button>
-              );
-            })}
-            <button style={BTN_DANGER} onClick={() => onChoosePowerUp(null)}>✗ Skip</button>
-          </div>
-        </div>
-      )}
-
-      {game.phase === 'drop' && (
-        <div style={{ ...PANEL, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {!options.questionsEnabled && <p>{activeTeam.name}: pick a drop zone</p>}
-          <PlinkoBoard
-            dropZoneCount={Math.min(6, game.buckets.length + 1)}
-            buckets={game.buckets}
-            spikesEnabled={options.spikesEnabled}
-            activePowerUp={game.activePowerUp}
-            teamColor={activeTeam.color}
-            onLanded={onLanded}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function WinnerScreen({ teams, scores, winners, history, onRestart, onMenu }) {
-  const [showReview, setShowReview] = useState(false);
-  return (
-    <div style={{ ...PANEL, textAlign: 'center' }}>
-      <h2 style={{ color: '#F4C542' }}>Winner{winners.length > 1 ? 's' : ''}!</h2>
-      {winners.map((w) => (
-        <div key={w.id} style={{ fontSize: 22, fontWeight: 700, color: w.color }}>{w.name} -- {scores[w.id]} pts</div>
-      ))}
-
-      <div style={{ margin: '16px 0', textAlign: 'left' }}>
-        {teams.slice().sort((a, b) => scores[b.id] - scores[a.id]).map((t) => (
-          <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #2C3E80' }}>
-            <span style={{ color: t.color }}>{t.name}</span><span>{scores[t.id]}</span>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-        <button style={BTN_PRIMARY} onClick={onRestart}>Restart</button>
-        <button style={BTN_GHOST} onClick={() => setShowReview((s) => !s)}>Review</button>
-        <button style={BTN_GHOST} onClick={onMenu}>Menu</button>
-      </div>
-
-      {showReview && (
-        <div style={{ marginTop: 16, textAlign: 'left', maxHeight: 320, overflowY: 'auto' }}>
-          {history.map((h, i) => (
-            <div key={i} style={{ padding: '6px 0', borderBottom: '1px solid #2C3E80', fontSize: 13 }}>
-              <div><strong>{h.team}</strong> -- Round {h.round} -- {h.correct ? `+${h.points}` : 'missed'}</div>
-              {h.question && <div style={{ color: '#9FB3E0', whiteSpace: 'pre-line' }}>{h.question.prompt} <em>({h.question.answer})</em></div>}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+          {stage === 'winner' && game && (
+            <WinnerScreen
+              teams={teams} scores={game.scores} winners={winners} history={game.history}
+              onRestart={startGame}
+              onMenu={() => { setGame(null); setStage('setup'); }}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </main>
   );
 }

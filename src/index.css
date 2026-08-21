@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@import "@fontsource/nunito/400.css";
+@import "@fontsource/nunito/600.css";
+@import "@fontsource/nunito/700.css";
+@import "@fontsource/nunito/800.css";
+@import "@fontsource/baloo-2/500.css";
+@import "@fontsource/baloo-2/600.css";
+@import "@fontsource/baloo-2/700.css";
+@import "@fontsource/baloo-2/800.css";
+
+@theme {
+  --color-bg: #0a1029;
+  --color-bg-elevated: #0e1638;
+  --color-surface: #141d47;
+  --color-surface-hover: #1b285c;
+  --color-border: #2a3a72;
+  --color-border-soft: #22305e;
+
+  --color-text: #f4f6fc;
+  --color-muted: #93a6d6;
+  --color-faint: #5f70a3;
+
+  --color-accent: #f7c948;
+  --color-accent-hover: #ffd75f;
+  --color-accent-ink: #201333;
+
+  --color-success: #57c785;
+  --color-danger: #ef5d68;
+
+  --radius-panel: 20px;
+  --radius-pill: 999px;
+  --radius-input: 12px;
+
+  --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+}
+
+/*
+  Design tokens. One dark "arcade at night" theme, locked (Section 4.11) --
+  Gamify doesn't need a light mode toggle for a kid-facing game surface, and
+  a single well-tuned dark theme reads more "game," less "productivity app."
+  One accent (gold), one shape system (pill buttons / 20px panels / 12px
+  inputs), one font pairing. Team colors are semantic (identify a team),
+  not decorative accents, so they're exempt from the one-accent rule.
+*/
+:root {
+  --bg: #0a1029;
+  --bg-elevated: #0e1638;
+  --surface: #141d47;
+  --surface-hover: #1b285c;
+  --border: #2a3a72;
+  --border-soft: #22305e;
+
+  --text: #f4f6fc;
+  --text-muted: #93a6d6;
+  --text-faint: #5f70a3;
+
+  --accent: #f7c948;
+  --accent-hover: #ffd75f;
+  --accent-ink: #201333;
+
+  --success: #57c785;
+  --danger: #ef5d68;
+
+  --radius-panel: 20px;
+  --radius-pill: 999px;
+  --radius-input: 12px;
+
+  --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+
+/* Tactile press feedback (Section 4.5) -- every interactive element gets a
+   physical "push" on press, not just a hover color change. */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
