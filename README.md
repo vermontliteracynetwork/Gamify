@@ -16,6 +16,7 @@ scattered across chats or other repos:
 | [`docs/platform-spec.md`](./docs/platform-spec.md) | Full product spec: vision, differentiators, data model, accessibility requirements, phased roadmap |
 | [`docs/plink-oh-spec.md`](./docs/plink-oh-spec.md) | First game module ("Ohhh...Plink"): confirmed rules, open assumptions, and the pixel-exact size spec for matching art/assets |
 | [`docs/testing-standards.md`](./docs/testing-standards.md) | The Three Lenses in full -- checklists, test methods, the browser-driven testing harness, real case studies, and current known gaps |
+| [`docs/accessibility-research.md`](./docs/accessibility-research.md) | Research findings on gamification effectiveness, UDL 3.0, neurodivergent-friendly design, and assistive tech guidelines, each tied to a specific Gamify implication |
 
 Bookmark this README (or the repo root) and every planning doc is one
 click away.

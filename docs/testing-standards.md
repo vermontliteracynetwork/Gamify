@@ -126,3 +126,11 @@ Honest accounting from applying the three lenses to Plink-oh as it stands:
   replay interest -- resolved once teacher-authored content ships.
 - **Lens 3:** Teacher question authoring doesn't exist yet (platform-level
   work per `platform-spec.md`, not a Plink-oh-specific gap).
+- **Lens 1 & 3 (accessibility toggles):** dyslexia font, screen reader
+  support, and reduced-motion "calm mode" from the original brainstorm are
+  not wired in yet. Research pass in `docs/accessibility-research.md`
+  found the Plinko `<canvas>` is currently invisible to screen readers
+  (needs `aria-label` + live-region announcements for turns/results), and
+  that "dyslexia font" should be redesigned as a spacing/line-height
+  control first, font-swap second -- the evidence for font shape alone is
+  weak.
