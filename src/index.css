@@ -9,67 +9,85 @@
 @import "@fontsource/baloo-2/800.css";
 
 @theme {
-  --color-bg: #0a1029;
-  --color-bg-elevated: #0e1638;
-  --color-surface: #141d47;
-  --color-surface-hover: #1b285c;
-  --color-border: #2a3a72;
-  --color-border-soft: #22305e;
+  --color-bg: #b9a9ec;
+  --color-bg-elevated: #a894e6;
+  --color-surface: #ffffff;
+  --color-surface-2: #efe9fb;
+  --color-surface-hover: #f5f1ff;
+  --color-border: #1c1730;
+  --color-border-soft: #d9d0f5;
 
-  --color-text: #f4f6fc;
-  --color-muted: #93a6d6;
-  --color-faint: #5f70a3;
+  --color-text: #241c3d;
+  --color-muted: #6b6089;
+  --color-faint: #9b90bd;
 
-  --color-accent: #f7c948;
-  --color-accent-hover: #ffd75f;
-  --color-accent-ink: #201333;
+  --color-accent: #fbdb6b;
+  --color-accent-hover: #ffe482;
+  --color-accent-ink: #241c3d;
 
-  --color-success: #57c785;
-  --color-danger: #ef5d68;
+  --color-secondary: #f7ad78;
+  --color-secondary-hover: #ffbd8e;
 
-  --radius-panel: 20px;
+  --color-success: #8fe0a8;
+  --color-danger: #f3808c;
+
+  --color-quiz-yellow: #fbdb6b;
+  --color-quiz-green: #a3e6b8;
+  --color-quiz-blue: #a8d8f0;
+  --color-quiz-orange: #f7ad78;
+
+  --radius-panel: 26px;
   --radius-pill: 999px;
-  --radius-input: 12px;
+  --radius-input: 16px;
 
   --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
 }
 
 /*
-  Design tokens. One dark "arcade at night" theme, locked (Section 4.11) --
-  Gamify doesn't need a light mode toggle for a kid-facing game surface, and
-  a single well-tuned dark theme reads more "game," less "productivity app."
-  One accent (gold), one shape system (pill buttons / 20px panels / 12px
-  inputs), one font pairing. Team colors are semantic (identify a team),
-  not decorative accents, so they're exempt from the one-accent rule.
+  Design tokens, v2 -- "sticker" theme replacing the dark-arcade v1, sourced
+  directly from the user's Canva mockups: light periwinkle/purple ground,
+  white content cards, black (--border) outlines on nearly every shape,
+  offset drop shadows for a pressable-sticker feel, warm pastel accents
+  (gold=primary action, peach=secondary action). One outline weight, one
+  shadow style, one radius scale used everywhere -- see --shadow-sticker
+  and --stroke below, applied via the .sticker utility class.
 */
 :root {
-  --bg: #0a1029;
-  --bg-elevated: #0e1638;
-  --surface: #141d47;
-  --surface-hover: #1b285c;
-  --border: #2a3a72;
-  --border-soft: #22305e;
+  --bg: #b9a9ec;
+  --bg-elevated: #a894e6;
+  --surface: #ffffff;
+  --surface-2: #efe9fb;
+  --surface-hover: #f5f1ff;
+  --border: #1c1730;
+  --border-soft: #d9d0f5;
 
-  --text: #f4f6fc;
-  --text-muted: #93a6d6;
-  --text-faint: #5f70a3;
+  --text: #241c3d;
+  --text-muted: #6b6089;
+  --text-faint: #9b90bd;
 
-  --accent: #f7c948;
-  --accent-hover: #ffd75f;
-  --accent-ink: #201333;
+  --accent: #fbdb6b;
+  --accent-hover: #ffe482;
+  --accent-ink: #241c3d;
 
-  --success: #57c785;
-  --danger: #ef5d68;
+  --secondary: #f7ad78;
+  --secondary-hover: #ffbd8e;
 
-  --radius-panel: 20px;
+  --success: #8fe0a8;
+  --danger: #f3808c;
+
+  --radius-panel: 26px;
   --radius-pill: 999px;
-  --radius-input: 12px;
+  --radius-input: 16px;
+
+  --stroke: 2.5px;
+  --shadow-sticker: 0 4px 0 var(--border);
+  --shadow-sticker-lg: 0 6px 0 var(--border);
 
   --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -92,8 +110,27 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
 
-/* Tactile press feedback (Section 4.5) -- every interactive element gets a
-   physical "push" on press, not just a hover color change. */
+/* The chunky black-outlined bubble title look from the mockups, done with
+   a text-stroke + offset shadow on the existing Baloo 2 face rather than
+   sourcing an exact "outlined" font -- keeps it robust across browsers and
+   doesn't depend on matching an unconfirmed Canva font by name. */
+.title-bubble {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: #fff;
+  -webkit-text-stroke: 2.5px var(--border);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 var(--border);
+}
+
+/* Sticker shadow utility -- the offset black shadow used on every button,
+   card, and avatar circle in the mockups. Never combine with a blurred
+   box-shadow elsewhere; one shadow language for the whole app. */
+.sticker {
+  border: var(--stroke) solid var(--border);
+  box-shadow: var(--shadow-sticker);
+}
+
 button, a, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }

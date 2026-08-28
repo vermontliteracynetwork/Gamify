@@ -27,11 +27,27 @@ function AnimatedRoutes() {
   );
 }
 
-// Fixed, pointer-events-none decorative layer -- a faint peg-dot grid plus
-// two soft glows. Tall/short screens previously left a huge flat black void
-// below short content (setup forms, single-game home), which read as
-// unfinished rather than intentional. Fixed positioning means it never
-// repaints as the page scrolls (Section 6.E DOM-cost guidance).
+// Fixed, pointer-events-none decorative layer -- a soft purple marble/swirl
+// texture behind the whole app, matching the "sticker" style mockups.
+// Procedural (SVG feTurbulence displacement of layered blobs), not
+// hand-authored path data, per the no-hand-rolled-decorative-SVG rule.
+// Fixed positioning means it never repaints as the page scrolls.
+const SWIRL_SVG = encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800">
+  <filter id="marble">
+    <feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="3" seed="7" result="noise" />
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="140" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+  <g filter="url(#marble)">
+    <rect width="800" height="800" fill="#b9a9ec" />
+    <circle cx="150" cy="150" r="180" fill="#cabdf2" />
+    <circle cx="650" cy="220" r="220" fill="#a894e6" />
+    <circle cx="300" cy="600" r="240" fill="#cabdf2" />
+    <circle cx="700" cy="700" r="180" fill="#a894e6" />
+  </g>
+</svg>
+`);
+
 function AmbientBackground() {
   return (
     <div
@@ -39,12 +55,9 @@ function AmbientBackground() {
       className="fixed inset-0 -z-10 pointer-events-none"
       style={{
         backgroundColor: 'var(--color-bg)',
-        backgroundImage: `
-          radial-gradient(circle at 15% 8%, rgba(247,201,72,0.10), transparent 40%),
-          radial-gradient(circle at 85% 92%, rgba(77,159,236,0.10), transparent 42%),
-          radial-gradient(circle at 1px 1px, rgba(147,166,214,0.16) 1px, transparent 0)
-        `,
-        backgroundSize: 'auto, auto, 28px 28px',
+        backgroundImage: `url("data:image/svg+xml,${SWIRL_SVG}")`,
+        backgroundSize: '800px 800px',
+        backgroundRepeat: 'repeat',
       }}
     />
   );

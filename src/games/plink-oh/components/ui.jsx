@@ -4,7 +4,11 @@ import { Check } from '@phosphor-icons/react';
 
 export function Panel({ children, className = '', ...props }) {
   return (
-    <div className={`rounded-panel bg-surface border border-border-soft p-5 sm:p-6 ${className}`} {...props}>
+    <div
+      className={`rounded-panel bg-surface border-[2.5px] border-border p-5 sm:p-6 ${className}`}
+      style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -12,17 +16,19 @@ export function Panel({ children, className = '', ...props }) {
 
 const VARIANTS = {
   primary: 'bg-accent text-accent-ink hover:bg-accent-hover',
-  ghost: 'bg-bg-elevated text-text border border-border-soft hover:bg-surface-hover',
-  success: 'bg-success text-accent-ink hover:brightness-110',
-  danger: 'bg-danger text-white hover:brightness-110',
+  secondary: 'bg-secondary text-accent-ink hover:bg-secondary-hover',
+  ghost: 'bg-surface text-text hover:bg-surface-hover',
+  success: 'bg-success text-accent-ink hover:brightness-105',
+  danger: 'bg-danger text-white hover:brightness-105',
 };
 
-export function Button({ variant = 'ghost', children, className = '', ...props }) {
+export function Button({ variant = 'ghost', children, className = '', style, ...props }) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 rounded-pill px-5 py-2.5 font-bold text-sm
-                  transition-colors active:scale-95 motion-safe:transition-transform disabled:opacity-40 disabled:pointer-events-none
+      className={`inline-flex items-center justify-center gap-1.5 rounded-pill px-5 py-2.5 font-bold text-sm border-[2.5px] border-border
+                  active:scale-95 active:shadow-none motion-safe:transition-transform disabled:opacity-40 disabled:pointer-events-none
                   ${VARIANTS[variant]} ${className}`}
+      style={{ boxShadow: 'var(--shadow-sticker)', ...style }}
       {...props}
     >
       {children}
@@ -41,14 +47,14 @@ export function Toggle({ label, sub, value, onChange }) {
         role="switch"
         aria-checked={value}
         onClick={() => onChange(!value)}
-        className={`relative w-12 h-7 rounded-pill shrink-0 transition-colors active:scale-95 motion-safe:transition-transform
-                    ${value ? 'bg-success' : 'bg-border'}`}
+        className={`relative w-12 h-7 rounded-pill shrink-0 border-[2.5px] border-border active:scale-95 motion-safe:transition-transform
+                    ${value ? 'bg-success' : 'bg-surface-2'}`}
       >
         <motion.span
           layout
           transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-          className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white flex items-center justify-center"
-          style={{ x: value ? 20 : 0 }}
+          className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white border-[1.5px] border-border flex items-center justify-center"
+          style={{ x: value ? 18 : 0 }}
         >
           {value && <Check weight="bold" size={11} className="text-success" />}
         </motion.span>
@@ -64,8 +70,8 @@ export function StepHeader({ steps, activeIndex }) {
         <React.Fragment key={label}>
           <div className="flex items-center gap-2">
             <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                          ${i === activeIndex ? 'bg-accent text-accent-ink' : i < activeIndex ? 'bg-success text-accent-ink' : 'bg-border text-muted'}`}
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border-[2.5px] border-border
+                          ${i === activeIndex ? 'bg-accent text-accent-ink' : i < activeIndex ? 'bg-success text-accent-ink' : 'bg-surface text-muted'}`}
             >
               {i < activeIndex ? <Check weight="bold" size={12} /> : i + 1}
             </div>
@@ -73,7 +79,7 @@ export function StepHeader({ steps, activeIndex }) {
               {label}
             </span>
           </div>
-          {i < steps.length - 1 && <div className="flex-1 h-px bg-border-soft" />}
+          {i < steps.length - 1 && <div className="flex-1 h-[2.5px] bg-surface-2 rounded-full" />}
         </React.Fragment>
       ))}
     </div>

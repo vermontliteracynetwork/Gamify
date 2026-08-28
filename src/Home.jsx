@@ -24,10 +24,10 @@ export default function Home() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="mb-10"
       >
-        <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-text mb-2">
+        <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2">
           Pick a game
         </h1>
-        <p className="text-muted text-base max-w-[50ch]">
+        <p className="text-text font-bold text-base max-w-[50ch]">
           Play on your own, or join a game your teacher is running.
         </p>
       </motion.div>
@@ -44,14 +44,14 @@ export default function Home() {
             >
               <Link
                 to={game.path}
-                className="group relative flex flex-col gap-4 p-6 rounded-panel bg-surface border border-border-soft no-underline overflow-hidden
-                           transition-colors hover:bg-surface-hover hover:border-border
-                           active:scale-[0.98] motion-safe:transition-transform"
+                className="group relative flex flex-col gap-4 p-6 rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden
+                           hover:bg-surface-hover active:scale-[0.98] motion-safe:transition-transform"
+                style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
               >
                 <div
-                  className="w-12 h-12 rounded-input flex items-center justify-center text-accent-ink shrink-0
+                  className="w-12 h-12 rounded-input flex items-center justify-center text-accent-ink shrink-0 border-[2px] border-border
                              transition-transform group-hover:-rotate-6 group-hover:scale-110"
-                  style={{ background: game.color }}
+                  style={{ background: game.color, boxShadow: '0 2px 0 var(--border)' }}
                 >
                   <Icon weight="bold" size={26} />
                 </div>

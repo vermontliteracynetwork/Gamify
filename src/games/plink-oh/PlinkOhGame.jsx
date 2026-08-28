@@ -2,10 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { playSound } from './sound';
 import {
-  TEAM_COLORS, generateBuckets, shuffle, POWER_UPS, SAMPLE_QUESTIONS,
+  TEAM_COLORS, AVATARS, generateBuckets, shuffle, POWER_UPS, SAMPLE_QUESTIONS,
 } from './data';
+import { loadCustomQuestionSets } from '../../lib/questionSets';
 import { StepHeader } from './components/ui';
 import SetupScreen from './screens/SetupScreen';
+import AvatarPickerScreen from './screens/AvatarPickerScreen';
+import ImportQuestionsScreen from './screens/ImportQuestionsScreen';
 import OptionsScreen from './screens/OptionsScreen';
 import QuestionOptionsScreen from './screens/QuestionOptionsScreen';
 import PlayScreen from './screens/PlayScreen';
@@ -31,15 +34,19 @@ function makeDefaultTeams(count) {
     id: `team-${i}`,
     name: `Team ${i + 1}`,
     color: TEAM_COLORS[i % TEAM_COLORS.length].hex,
+    avatarId: AVATARS[i % AVATARS.length].id,
   }));
 }
 
 export default function PlinkOhGame() {
-  const [stage, setStage] = useState('setup'); // setup | options | question-options | playing | winner
+  const [stage, setStage] = useState('setup'); // setup | avatar-picker | import-questions | options | question-options | playing | winner
   const [teamCount, setTeamCount] = useState(3);
   const [roundCount, setRoundCount] = useState(5);
   const [teams, setTeams] = useState(makeDefaultTeams(3));
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
+  const [avatarPickerIndex, setAvatarPickerIndex] = useState(0);
+  const [customSets, setCustomSets] = useState(() => loadCustomQuestionSets());
+  const [selectedSetId, setSelectedSetId] = useState('demo'); // 'demo' | a custom set's id
 
   const [game, setGame] = useState(null);
   /* game = {
@@ -59,8 +66,14 @@ export default function PlinkOhGame() {
     });
   }
 
+  function activeQuestionBank() {
+    if (selectedSetId === 'demo') return SAMPLE_QUESTIONS;
+    return customSets.find((s) => s.id === selectedSetId)?.questions || SAMPLE_QUESTIONS;
+  }
+
   function buildDeck() {
-    return options.randomOrder ? shuffle(SAMPLE_QUESTIONS) : SAMPLE_QUESTIONS;
+    const bank = activeQuestionBank();
+    return options.randomOrder ? shuffle(bank) : bank;
   }
 
   function newRoundBuckets() {
@@ -95,7 +108,8 @@ export default function PlinkOhGame() {
     let pointer = g.deckPointer;
     let deck = g.deck;
     if (pointer >= deck.length) {
-      deck = options.randomOrder ? shuffle(SAMPLE_QUESTIONS) : SAMPLE_QUESTIONS;
+      const bank = activeQuestionBank();
+      deck = options.randomOrder ? shuffle(bank) : bank;
       pointer = 0;
     }
     const q = deck[pointer];
@@ -217,12 +231,12 @@ export default function PlinkOhGame() {
     return teams.filter((t) => game.scores[t.id] === max);
   }, [game, teams]);
 
-  const stepIndex = { setup: 0, options: 1, 'question-options': 1, playing: 2, winner: 2 }[stage];
+  const stepIndex = { setup: 0, 'avatar-picker': 0, 'import-questions': 0, options: 1, 'question-options': 1, playing: 2, winner: 2 }[stage];
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-8 pb-24">
-      <h1 className="font-display text-3xl font-bold text-center text-text mb-1">Ohhh...Plink</h1>
-      <p className="text-muted text-center text-xs mb-6 max-w-[46ch] mx-auto">
+      <h1 className="title-bubble text-3xl text-center mb-1">Ohhh...Plink</h1>
+      <p className="text-text font-bold text-center text-xs mb-6 max-w-[46ch] mx-auto">
         Answer a question, drop a ball, chase the high-value bucket.
       </p>
 
@@ -242,6 +256,32 @@ export default function PlinkOhGame() {
               onTeamCount={syncTeamCount} onRoundCount={setRoundCount} onTeams={setTeams}
               onOptions={() => setStage('options')}
               onStart={startGame}
+              onEditAvatar={(i) => { setAvatarPickerIndex(i); setStage('avatar-picker'); }}
+              customSets={customSets} selectedSetId={selectedSetId} onSelectSet={setSelectedSetId}
+              onImportQuestions={() => setStage('import-questions')}
+            />
+          )}
+
+          {stage === 'import-questions' && (
+            <ImportQuestionsScreen
+              onBack={() => setStage('setup')}
+              onSetsChanged={() => setCustomSets(loadCustomQuestionSets())}
+            />
+          )}
+
+          {stage === 'avatar-picker' && (
+            <AvatarPickerScreen
+              team={teams[avatarPickerIndex]}
+              isLastTeam={avatarPickerIndex >= teams.length - 1}
+              onSelectAvatar={(avatarId) => {
+                const next = [...teams]; next[avatarPickerIndex] = { ...next[avatarPickerIndex], avatarId };
+                setTeams(next);
+              }}
+              onBack={() => setStage('setup')}
+              onNext={() => {
+                if (avatarPickerIndex < teams.length - 1) setAvatarPickerIndex(avatarPickerIndex + 1);
+                else setStage('setup');
+              }}
             />
           )}
 
@@ -268,6 +308,8 @@ export default function PlinkOhGame() {
               onAnswer={answerQuestion}
               onChoosePowerUp={choosePowerUp}
               onLanded={handleLanded}
+              onMenu={() => { setGame(null); setStage('setup'); }}
+              onToggleSound={() => setOptions((o) => ({ ...o, soundsLevel: o.soundsLevel === 'off' ? 'med' : 'off' }))}
             />
           )}
 

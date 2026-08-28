@@ -19,6 +19,24 @@ export const MAX_TEAMS = 6;
 export const MIN_ROUNDS = 1;
 export const MAX_ROUNDS = 10;
 
+// Player avatar roster. `image: null` is a placeholder slot -- the plan is
+// for these to become real exported art from the Canva mockups once
+// licensing on those specific stock assets is confirmed and files are
+// actually delivered (pasted chat images aren't accessible as files). Each
+// entry still needs a fallback color/label so the picker works today.
+export const AVATARS = [
+  { id: 'a1', label: 'Avatar 1', color: '#f7ad78', image: null },
+  { id: 'a2', label: 'Avatar 2', color: '#a3e6b8', image: null },
+  { id: 'a3', label: 'Avatar 3', color: '#a8d8f0', image: null },
+  { id: 'a4', label: 'Avatar 4', color: '#f3808c', image: null },
+  { id: 'a5', label: 'Avatar 5', color: '#fbdb6b', image: null },
+  { id: 'a6', label: 'Avatar 6', color: '#c9a8ec', image: null },
+  { id: 'a7', label: 'Avatar 7', color: '#8fe0a8', image: null },
+  { id: 'a8', label: 'Avatar 8', color: '#f0a8d8', image: null },
+  { id: 'a9', label: 'Avatar 9', color: '#a8b8f0', image: null },
+  { id: 'a10', label: 'Avatar 10', color: '#f0c8a8', image: null },
+];
+
 // Point values a round's buckets are drawn from. Real Plink-oh appears to
 // vary both the bucket count (3-7) and values round to round -- we mirror
 // that by reshuffling a fresh subset every round instead of using one fixed
@@ -78,9 +96,17 @@ export const POWER_UPS = [
 ];
 
 // Demo literacy content so the module is playable out of the box. Real
-// question sets are meant to be authored/imported per the platform spec
-// (docs/gamification-platform-spec.md, section 3.1) -- this bank exists
-// purely to prove the game loop end to end.
+// question sets are meant to be teacher-authored/imported (see
+// docs/platform-spec.md and the CSV importer in questionImport.js) -- this
+// bank exists purely to prove the game loop end to end.
+//
+// Two question types:
+// - 'open' (default when `type` is omitted): prompt + answer shown
+//   together, host judges Oops/Okay -- Plink-oh's original honor-system
+//   mechanic, reconstructed from the Baamboozle walkthrough.
+// - 'multiple-choice': prompt + 4 options, one correct -- self-graded,
+//   matches the Canva quiz-card mockup and is what CSV-imported questions
+//   become (the Blooket-style import schema is inherently multiple choice).
 export const SAMPLE_QUESTIONS = [
   { id: 'q1', prompt: 'What is it?\n\nA spiny, round sea creature that puffs up when threatened.', answer: 'pufferfish' },
   { id: 'q2', prompt: 'What word means "a group of words that expresses a complete thought"?', answer: 'sentence' },
@@ -97,4 +123,9 @@ export const SAMPLE_QUESTIONS = [
   { id: 'q13', prompt: 'What do you call the setting where and when a story takes place?', answer: 'setting' },
   { id: 'q14', prompt: 'What word means "not the same"?', answer: 'different' },
   { id: 'q15', prompt: 'What do you call three or more sentences about one topic?', answer: 'paragraph' },
+  { id: 'q16', type: 'multiple-choice', prompt: 'Fill in the blank: c__t', options: ['oa', 'ai', 'ea', 'a'], correctIndex: 3 },
+  { id: 'q17', type: 'multiple-choice', prompt: 'Fill in the blank: b__t', options: ['oa', 'oo', 'ea', 'a'], correctIndex: 3 },
+  { id: 'q18', type: 'multiple-choice', prompt: 'Fill in the blank: r__d', options: ['ea', 'oo', 'ou', 'ai'], correctIndex: 0 },
+  { id: 'q19', type: 'multiple-choice', prompt: 'Fill in the blank: c__n', options: ['oa', 'ai', 'oi', 'oo'], correctIndex: 0 },
+  { id: 'q20', type: 'multiple-choice', prompt: 'Which word rhymes with "night"?', options: ['light', 'net', 'nut', 'not'], correctIndex: 0 },
 ];
