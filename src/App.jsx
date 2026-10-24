@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './components/NavBar';
 import Home from './Home';
-import PlinkOhGame from './games/plink-oh/PlinkOhGame';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -20,7 +19,6 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
-          <Route path="/games/ohhh-plink" element={<PlinkOhGame />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

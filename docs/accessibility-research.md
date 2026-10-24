@@ -91,6 +91,8 @@ more learners than the dyslexia label implies.
 
 ## 7. Real gap found by this research: the Plinko board is invisible to screen readers
 
+(Found on the removed prototype. Applies to every canvas-based game in the rebuild.)
+
 A `<canvas>` element has no DOM content or accessibility semantics by
 default. Standard fix: `role="img"` plus an `aria-label`/`aria-describedby`
 text alternative, ARIA live regions for state changes, and full keyboard

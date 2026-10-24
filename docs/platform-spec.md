@@ -1,9 +1,14 @@
 # Literacy Gamification Platform — Product Spec (Draft v0.1)
 
+> **2026-10-24:** Gamify is now a commercial product and the Plink-oh
+> prototype has been removed. `docs/product-plan.md` is the newer plan and
+> wins wherever the two disagree (game roster, tiers, themes, accounts,
+> roadmap). Mentions of Plink-oh below are historical.
+
 ## 1. Vision
 
 A standalone, general-purpose educational game engine (K-12) combining:
-- **Baamboozle**: fun board/reveal games (Plink-oh, etc.), fast question-set authoring
+- **Baamboozle**: fun board/reveal games, fast question-set authoring
 - **Blooket**: arcade-style games with power-ups, live join-code sessions, homework/async mode
 - **Wordwall**: game-format variety, quiz mode, theming (fonts, color)
 

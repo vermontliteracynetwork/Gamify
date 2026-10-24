@@ -1,17 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Target } from '@phosphor-icons/react';
+import { ArrowRight, Sparkle } from '@phosphor-icons/react';
 
-const GAMES = [
-  {
-    path: '/games/ohhh-plink',
-    name: 'Ohhh...Plink',
-    description: 'Answer a question, drop a ball, chase the high-value bucket.',
-    icon: Target,
-    color: '#f7c948',
-  },
-];
+// Each entry: { path, name, description, icon, color }. Empty while the
+// first commercial game modules are rebuilt (see docs/product-plan.md).
+const GAMES = [];
 
 export default function Home() {
   const reduce = useReducedMotion();
@@ -31,6 +25,16 @@ export default function Home() {
           Play on your own, or join a game your teacher is running.
         </p>
       </motion.div>
+
+      {GAMES.length === 0 && (
+        <div
+          className="flex flex-col items-center gap-3 p-8 rounded-panel bg-surface border-[2.5px] border-border text-center"
+          style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+        >
+          <Sparkle weight="fill" size={40} className="text-accent" />
+          <h2 className="font-display text-xl font-bold text-text">New games are on the way</h2>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {GAMES.map((game, i) => {

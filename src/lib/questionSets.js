@@ -1,4 +1,4 @@
-// Teacher question-set import/storage. Platform-level (not Plink-oh-specific)
+// Teacher question-set import/storage. Platform-level, shared by every game module,
 // per docs/platform-spec.md's data model -- any future game module can reuse
 // this. No backend yet, so sets persist to localStorage (per browser/device
 // only) -- documented plainly in the import UI, not hidden.

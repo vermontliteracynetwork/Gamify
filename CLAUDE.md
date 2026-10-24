@@ -45,13 +45,29 @@ teacher no control or educational value is not done.
 
 - Standalone app, no auth, no dependency on the VLN literacy-data-plaform
   repo or its Supabase instance.
-- Question sets are meant to be teacher-authored/imported -- the current
-  fixed demo bank in `src/games/plink-oh/data.js` is a placeholder for
-  proving the game loop, not the intended long-term content source.
-- Game rules for licensed-inspiration titles (Plink-oh from Baamboozle,
-  future titles from other references) are reconstructed from screenshots/
-  descriptions and reimplemented from scratch. Never scrape, decompile, or
-  copy another platform's actual source code or assets, reachable or not.
+- Gamify is a commercial product (free tier + subscriptions). See
+  `docs/product-plan.md`. The Ohhh...Plink prototype was removed
+  2026-10-24; game modules are rebuilt from scratch on the shared engine
+  in `docs/question-engine.md` (logic from the Independent Work Dashboard).
+- Question sets are teacher-authored/imported, never a fixed bank.
+- Game rules inspired by other platforms are reconstructed from
+  screenshots/descriptions and reimplemented from scratch. Never scrape,
+  decompile, or copy another platform's actual source code or assets,
+  reachable or not.
 - Dark theme, locked (no light mode). One accent color (gold), one shape
   scale (pill buttons / 20px panels / 12px inputs). See `src/index.css`
-  for the token system before introducing new colors or radii.
+  for the token system before introducing new colors or radii. (Proposed:
+  this governs platform chrome; themed game stages are an open decision in
+  `docs/product-plan.md` section 4.)
+
+## Legal readiness (mandatory, we sell this)
+
+- No other company's brand or trademark in any customer-facing name or
+  text: game names, theme names, UI copy, URLs, marketing. Use the rename
+  list in `docs/product-plan.md` section 3.
+- Every font, icon, image, sound and library needs a commercial-use
+  license recorded in `docs/asset-ledger.md` before it ships. No "found
+  online" assets, nothing resembling a famous character or game's look.
+- Student pages: no ads, no trackers, no upgrade prompts, minimum data
+  (code + nickname, no student accounts). Accessibility features are never
+  paywalled.

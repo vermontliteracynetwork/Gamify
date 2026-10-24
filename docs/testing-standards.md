@@ -95,6 +95,8 @@ tablet viewport (roughly 820x1180), not just desktop.
 
 ## Case studies (why this matters)
 
+From the Ohhh...Plink prototype (removed 2026-10-24). The lessons still apply.
+
 - **The reveal-card click bug.** A shared `Panel` component didn't forward
   `onClick` to its underlying `<div>`, so the question-reveal card was
   completely unclickable -- gameplay was silently stuck on turn one. Found
@@ -114,7 +116,8 @@ tablet viewport (roughly 820x1180), not just desktop.
 
 ## Known gaps flagged under this standard (not yet fixed)
 
-Honest accounting from applying the three lenses to Plink-oh as it stands:
+Recorded against the removed Plink-oh prototype; carry each one into the
+rebuilt engine and games rather than re-discovering it:
 
 - **Lens 1:** No audio narration for question text -- a pre/early reader
   (especially K-1) can't access a text-only question. The drop-zone number
