@@ -1,12 +1,12 @@
-import { bakeryMatchManifest } from './bakery-match/BakeryMatch';
-import { fourInARowManifest } from './four-in-a-row/FourInARow';
-import { gameShowManifest } from './game-show/GameShow';
-import { starQuizManifest } from './practice/StarQuiz';
-import { castCatchManifest } from './cast-catch/CastCatch';
-import { memoryMatchManifest } from './memory-match/MemoryMatch';
-import { flashcardsManifest } from './flashcards/Flashcards';
-import { matchUpManifest } from './match-up/MatchUp';
-import { pegDropManifest } from './peg-drop/PegDrop';
+import { bakeryMatchManifest } from './bakery-match/manifest';
+import { fourInARowManifest } from './four-in-a-row/manifest';
+import { gameShowManifest } from './game-show/manifest';
+import { starQuizManifest } from './practice/manifest';
+import { castCatchManifest } from './cast-catch/manifest';
+import { memoryMatchManifest } from './memory-match/manifest';
+import { flashcardsManifest } from './flashcards/manifest';
+import { matchUpManifest } from './match-up/manifest';
+import { pegDropManifest } from './peg-drop/manifest';
 import type { GameManifest } from './types';
 
 // All games, in the order they show in the Arcade. Games are added here as

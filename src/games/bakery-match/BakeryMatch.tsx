@@ -15,7 +15,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
-import type { GameManifest } from '../types';
+import { bakeryMatchManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -25,23 +25,6 @@ import ThemeScreen from '../ThemeScreen';
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
 import Title from '../../ui/Title';
 
-export const bakeryMatchManifest: GameManifest = {
-  id: 'bakery-match',
-  name: 'Bakery Match',
-  description: 'Swap treats to make rows of 3. Answer questions to keep baking.',
-  modes: ['solo'],
-  questionKinds: ['mc'],
-  themePieces: [
-    { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `tile-${i}`, label: `Treat ${i + 1}`, width: 128, height: 128, hint: 'One of the six treats you match', color: ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'][i] })),
-    { id: 'board', label: 'Board', width: 900, height: 900, hint: 'The tray the treats sit on', color: '#ffffff' },
-    { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-  ],
-  rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
-  questionsPerBreak: { label: 'Questions each time', min: 1, max: 10, default: 2 },
-  hasCpu: false,
-  borrowedFrom: 'Dashboard src/routes/student/BakeryMatch3.tsx and src/lib/matchThree.ts',
-};
 
 // Simple house look: each treat has its own icon AND color (never color
 // alone). Library and class-made themes swap in artwork per tile.

@@ -17,7 +17,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
-import type { GameManifest } from '../types';
+import { fourInARowManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -27,21 +27,6 @@ import ThemeScreen from '../ThemeScreen';
 import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
 import Title from '../../ui/Title';
 
-export const fourInARowManifest: GameManifest = {
-  id: 'four-in-a-row',
-  name: 'Four in a Row',
-  description: 'Answer a question, then drop your piece. Get four in a row to win!',
-  modes: ['versus'],
-  questionKinds: ['mc'],
-  themePieces: [
-    { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'board', label: 'Board', width: 1000, height: 860, hint: 'The frame with holes', color: '#a8d8f0' },
-    { id: 'piece-1', label: 'Player 1 piece', width: 128, height: 128, hint: 'The first player\'s round piece' },
-    { id: 'piece-2', label: 'Player 2 piece', width: 128, height: 128, hint: 'The second player\'s round piece' },
-    { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-  ],
-  hasCpu: true,
-};
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type First = 'p1' | 'p2' | 'random';

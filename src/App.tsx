@@ -1,37 +1,44 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './ui/NavBar';
 import Home from './student/Home';
-import QuestionSetsPage from './teacher/QuestionSetsPage';
-import SetEditorPage from './teacher/SetEditorPage';
-import ImportPage from './teacher/ImportPage';
-import StarQuiz from './games/practice/StarQuiz';
-import GameShow from './games/game-show/GameShow';
-import BakeryMatch from './games/bakery-match/BakeryMatch';
-import FourInARow from './games/four-in-a-row/FourInARow';
-import CastCatch from './games/cast-catch/CastCatch';
-import MemoryMatch from './games/memory-match/MemoryMatch';
-import Flashcards from './games/flashcards/Flashcards';
-import MatchUp from './games/match-up/MatchUp';
-import PegDrop from './games/peg-drop/PegDrop';
 import { SettingsProvider } from './settings/SettingsContext';
-import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
-import TemplatePage from './theme/builder/TemplatePage';
-import OwnerPage from './owner/OwnerPage';
 import PublicHome from './public/PublicHome';
-import FeaturesPage from './public/FeaturesPage';
-import PricingPage from './public/PricingPage';
 import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
-import CodeScreen from './public/CodeScreen';
+
 import { RequireSignIn, RequireTeacher } from './public/SignInGate';
-import ClassesPage from './teacher/ClassesPage';
-import ClassPage from './teacher/ClassPage';
-import ReportsPage from './teacher/ReportsPage';
-import AccountPage from './teacher/AccountPage';
 import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
+
+// Pages load when first opened, so the first screen arrives fast on older
+// iPads and school networks.
+const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
+const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
+const ImportPage = lazy(() => import('./teacher/ImportPage'));
+const StarQuiz = lazy(() => import('./games/practice/StarQuiz'));
+const GameShow = lazy(() => import('./games/game-show/GameShow'));
+const BakeryMatch = lazy(() => import('./games/bakery-match/BakeryMatch'));
+const FourInARow = lazy(() => import('./games/four-in-a-row/FourInARow'));
+const CastCatch = lazy(() => import('./games/cast-catch/CastCatch'));
+const MemoryMatch = lazy(() => import('./games/memory-match/MemoryMatch'));
+const Flashcards = lazy(() => import('./games/flashcards/Flashcards'));
+const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
+const PegDrop = lazy(() => import('./games/peg-drop/PegDrop'));
+const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
+const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
+const OwnerPage = lazy(() => import('./owner/OwnerPage'));
+const FeaturesPage = lazy(() => import('./public/FeaturesPage'));
+const PricingPage = lazy(() => import('./public/PricingPage'));
+const CodeScreen = lazy(() => import('./public/CodeScreen'));
+const ClassesPage = lazy(() => import('./teacher/ClassesPage'));
+const ClassPage = lazy(() => import('./teacher/ClassPage'));
+const ReportsPage = lazy(() => import('./teacher/ReportsPage'));
+const AccountPage = lazy(() => import('./teacher/AccountPage'));
+const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
+const ItPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -46,11 +53,14 @@ function AnimatedRoutes() {
         exit={reduce ? undefined : { opacity: 0, y: -12 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
+        <Suspense fallback={<div className="min-h-[60dvh]" aria-busy="true" />}>
         <Routes location={location}>
           <Route path="/" element={<PublicHome />} />
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/it" element={<ItPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/join" element={<JoinPage />} />
           <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
@@ -82,6 +92,7 @@ function AnimatedRoutes() {
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
         </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );
