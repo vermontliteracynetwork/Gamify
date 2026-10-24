@@ -937,8 +937,8 @@ game only decides *when to ask* and *what a right answer does*.
 
 ## 9. Decisions needed from you
 
-1. **Owner and seller**: you, VLN, or a new company? (blocks pricing,
-   Terms, payments)
+1. ~~Owner and seller~~ DECIDED 2026-10-24: **you, personally.** You'll
+   buy the domain soon.
 2. **Product name and domain**: you want "Gamify." Open .com domains as of
    2026-10-24 (checked, not bought): joingamify.com, heygamify.com,
    gamifyclassroom.com, gamifymyclass.com, gamifyschool.com,

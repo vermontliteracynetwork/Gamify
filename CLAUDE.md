@@ -74,7 +74,12 @@ any time, and their edits win.
   of a session read it for changes; after every item ships, tick it off,
   and add a row to its Progress log (date, what shipped, what's next).
   New ideas, decisions and blockers go in the same turn they come up.
-- Work its stages top to bottom.
+- Work its stages top to bottom, and keep working (direct teacher rule,
+  2026-10-24: "you should always be working on the dev plan. predict my
+  answers based on previous"). Stop only for the doc's "Waiting on you"
+  items (money, accounts, legal, going live); for any other open
+  question, predict the teacher's answer from past decisions, note the
+  guess in the doc's Progress log, and keep building.
 - `docs/development-plan.md` is only a backup snapshot for sessions
   without the docs connector; the doc wins.
 
