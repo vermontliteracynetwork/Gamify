@@ -55,11 +55,15 @@ teacher no control or educational value is not done.
   screenshots/descriptions and reimplemented from scratch. Never scrape,
   decompile, or copy another platform's actual source code or assets,
   reachable or not.
-- Dark theme, locked (no light mode). One accent color (gold), one shape
-  scale (pill buttons / 20px panels / 12px inputs). See `src/index.css`
-  for the token system before introducing new colors or radii. (Proposed:
-  this governs platform chrome; themed game stages are an open decision in
-  `docs/product-plan.md` section 4.)
+- Platform look (menus, teacher pages): the light "sticker" style in
+  `src/index.css` (lavender ground, white panels, dark outlines, gold
+  accent, one shape scale). Use its tokens before adding colors or radii.
+  Game stages wear per-game themes (`src/theme`), designed per game.
+
+## Before every commit
+
+Run `npm run check` (type-check, unit tests, build). For screens, also
+`npm run e2e` (Playwright at iPad portrait and landscape).
 
 ## The development plan is the build bible (a live Claude Doc)
 

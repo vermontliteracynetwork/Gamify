@@ -1,8 +1,7 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import NavBar from './components/NavBar';
-import Home from './Home';
+import NavBar from './ui/NavBar';
+import Home from './student/Home';
 
 function AnimatedRoutes() {
   const location = useLocation();
