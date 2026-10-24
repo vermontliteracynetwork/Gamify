@@ -193,7 +193,7 @@ export default function FourInARow() {
               })}
             </div>
             <div role="grid" aria-label={t('fr.title')} className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
-              {board.map((row, r) => row.map((cell, c) => {
+              {board.map((row, r) => <div key={r} role="row" className="contents">{row.map((cell, c) => {
                 const inLine = line?.some(([lr, lc]) => lr === r && lc === c);
                 const isLast = last?.row === r && last?.col === c;
                 return (
@@ -210,7 +210,7 @@ export default function FourInARow() {
                     )}
                   </div>
                 );
-              }))}
+              })}</div>)}
             </div>
           </div>
 

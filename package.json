@@ -24,6 +24,7 @@
     "react-router-dom": "^6.28.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/canvas-confetti": "^1.6.4",

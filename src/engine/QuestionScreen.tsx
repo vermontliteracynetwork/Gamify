@@ -179,7 +179,6 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 type="button"
                 onClick={() => choose(i)}
                 aria-disabled={locked || picked !== null || triedWrong}
-                aria-label={t('q.answerLabel', { letter: LETTERS[i], text: c })}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
                 className={`relative min-h-20 px-4 py-3 rounded-input border-[2.5px] border-border text-left font-bold text-lg flex items-center gap-3
@@ -187,9 +186,10 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >
-                <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display text-xl" aria-hidden="true">
-                  {right ? <Check weight="bold" size={22} /> : wrong || triedWrong ? <X weight="bold" size={22} /> : LETTERS[i]}
+                <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display text-xl">
+                  {right ? <Check weight="bold" size={22} aria-label={t('q.rightMark')} /> : wrong || triedWrong ? <X weight="bold" size={22} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
+                <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
               </motion.button>
             );

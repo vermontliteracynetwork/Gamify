@@ -28,7 +28,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
     await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 6000 });
     const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
     const right = answers.get(prompt)!;
-    const buttons = dialog.getByRole('button', { name: /^Answer [A-D]:/ });
+    const buttons = dialog.getByRole('button', { name: /^[A-D] / });
     const labels = await buttons.allInnerTexts();
     const rightIdx = labels.findIndex((l) => l.trim().endsWith(right));
     if (!missedOnce) {

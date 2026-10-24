@@ -202,7 +202,7 @@ export default function BakeryMatch() {
         <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
           <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 220px), 640px)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
-              {grid.map((row, r) => row.map((tileItem, c) => {
+              {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
                 const Icon = TILE_ICONS[tileItem.kind];
                 const isSel = selected?.row === r && selected?.col === c;
@@ -214,7 +214,7 @@ export default function BakeryMatch() {
                     type="button"
                     role="gridcell"
                     aria-label={`${t('bm.tile', { kind: kindName, row: r + 1, col: c + 1 })}${isSel ? `, ${t('bm.selected')}` : ''}`}
-                    aria-pressed={isSel}
+                    aria-selected={isSel}
                     disabled={phase !== 'play'}
                     onPointerDown={(e) => { drag.current = { pos: { row: r, col: c }, x: e.clientX, y: e.clientY }; }}
                     onPointerUp={(e) => onPointerUp(e, { row: r, col: c })}
@@ -228,7 +228,7 @@ export default function BakeryMatch() {
                     {!pieceImage(theme, `tile-${tileItem.kind}`) && <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />}
                   </motion.button>
                 );
-              }))}
+              })}</div>)}
             </div>
           </div>
 

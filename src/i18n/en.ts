@@ -144,7 +144,6 @@ export const en = {
   'q.scratchpad': 'Scratchpad',
   'q.highlighter': 'Highlighter',
   'q.clear': 'Clear',
-  'q.answerLabel': 'Answer {letter}: {text}',
   'q.breathTitle': 'Take a breath',
   'q.breathBody': 'Breathe in as the circle grows, and out as it shrinks. Then read each question carefully.',
   'q.breathDone': 'I am ready',
@@ -906,6 +905,8 @@ export const en = {
   'owner.nextMonths': 'Next {count} months',
   'owner.nextMonths.one': 'Next month',
   'owner.incomeNote': 'A what-if calculator from the plan prices. Real numbers from Stripe replace it in Stage 7.',
+  'q.rightMark': 'Right answer',
+  'q.notThisMark': 'Not this one',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

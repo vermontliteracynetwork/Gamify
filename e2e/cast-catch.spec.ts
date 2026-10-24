@@ -21,7 +21,7 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
-  const buttons = dialog.getByRole('button', { name: /^Answer [A-D]:/ });
+  const buttons = dialog.getByRole('button', { name: /^[A-D] / });
   const labels = await buttons.allInnerTexts();
   await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
   await page.getByRole('button', { name: 'Reel it in!' }).click({ timeout: 8000 });
