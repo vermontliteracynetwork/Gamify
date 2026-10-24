@@ -12,6 +12,9 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import type { GameManifest } from '../types';
+import { pieceColor } from '../../theme/library';
+import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+
 
 export const starQuizManifest: GameManifest = {
   id: 'star-quiz',
@@ -33,6 +36,7 @@ type Phase = 'start' | 'play' | 'end';
 // Quiz: every right answer adds a star. Uses only the shared engine.
 export default function StarQuiz() {
   const { settings } = useSettings();
+  const { theme, themes, playable, choose } = useGameTheme('star-quiz');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setId, setSetId] = useState(LIBRARY[0].id);
@@ -61,19 +65,21 @@ export default function StarQuiz() {
   }
 
   return (
+    <ThemedPage theme={theme}>
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-24">
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'start' && (
         <div className="grid gap-4">
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full">
+          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
             {t('practice.set')}
             <select id="practice-set" value={setId} onChange={(e) => setSetId(e.target.value)}
               className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
               {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
             </select>
           </label>
+          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
           <StartCard gameId="star-quiz" title={t('practice.title')} description={t('practice.description')} rounds={starQuizManifest.rounds} onPlay={play} />
         </div>
       )}
@@ -87,7 +93,7 @@ export default function StarQuiz() {
           <div className="flex flex-wrap gap-2 min-h-14" aria-label={t('practice.stars', { count: stars })} role="img">
             {Array.from({ length: total }, (_, i) => (
               <motion.span key={i} initial={false} animate={i < stars ? { scale: [0.4, 1.25, 1] } : { scale: 1 }} transition={{ duration: 0.4 }}>
-                <Star weight={i < stars ? 'fill' : 'regular'} size={44} className={i < stars ? 'text-accent drop-shadow' : 'text-border-soft'} />
+                <Star weight={i < stars ? 'fill' : 'regular'} size={44} className={i < stars ? 'drop-shadow' : 'text-border-soft'} style={i < stars ? { color: pieceColor(theme, 'star', '#f6c544') } : undefined} />
               </motion.span>
             ))}
           </div>
@@ -104,5 +110,6 @@ export default function StarQuiz() {
       {phase === 'end' && <LookBack missed={missed} onDone={() => setPhase('start')} />}
       {element}
     </main>
+    </ThemedPage>
   );
 }

@@ -156,3 +156,6 @@ html[data-dim="on"] body { filter: brightness(0.85); }
 html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-motion="still"] *::after {
   animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important;
 }
+
+/* Plain text sitting on a themed game backdrop (src/theme/useGameTheme). */
+.stage-text { color: var(--stage-bg-text, var(--text)); }

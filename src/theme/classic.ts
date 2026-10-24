@@ -11,6 +11,7 @@ export function classicTheme(gameId: string): GameTheme {
     source: 'house',
     colors: {
       background: '#b9a9ec',
+      backgroundText: '#241c3d',
       surface: '#ffffff',
       text: '#241c3d',
       accent: '#fbdb6b',

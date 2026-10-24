@@ -13,6 +13,9 @@ import type { StringKey } from '../../i18n/en';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import type { GameManifest } from '../types';
+import { pieceColor } from '../../theme/library';
+import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
 
 export const bakeryMatchManifest: GameManifest = {
@@ -44,6 +47,7 @@ type Phase = 'start' | 'play' | 'end';
 
 export default function BakeryMatch() {
   const { settings } = useSettings();
+  const { theme, themes, playable, choose } = useGameTheme('bakery-match');
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const pool = useMemo(() => [...mine, ...LIBRARY].slice(0, 1).map((set) => ({ set, starred: false })), [mine]);
@@ -151,6 +155,7 @@ export default function BakeryMatch() {
   }
 
   return (
+    <ThemedPage theme={theme}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bakery-match" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
@@ -159,12 +164,13 @@ export default function BakeryMatch() {
 
       {phase === 'start' && (
         <div className="grid gap-4">
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full">
+          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
             {t('practice.set')}
             <select id="bm-set" value={setId} onChange={(e) => setSetId(e.target.value)} className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
               {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
             </select>
           </label>
+          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
           <StartCard gameId="bakery-match" title={t('bm.title')} description={t('bm.description')}
             rounds={bakeryMatchManifest.rounds} perBreak={bakeryMatchManifest.questionsPerBreak} onPlay={start} />
         </div>
@@ -172,7 +178,7 @@ export default function BakeryMatch() {
 
       {phase !== 'start' && (
         <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
-          <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, 70dvh, 640px)' }}>
+          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ background: pieceColor(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, 70dvh, 640px)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => row.map((tileItem, c) => {
                 const key = `${r},${c}`;
@@ -195,7 +201,7 @@ export default function BakeryMatch() {
                     animate={popping.has(key) ? { scale: [1, 1.25, 0], opacity: [1, 1, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : { scale: 1, opacity: 1, y: 0, x: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 32, opacity: { duration: 0.2 } }}
                     className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}
-                    style={{ background: TILE_COLORS[tileItem.kind] }}
+                    style={{ background: pieceColor(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind]) }}
                   >
                     <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />
                   </motion.button>
@@ -235,5 +241,6 @@ export default function BakeryMatch() {
       )}
       {element}
     </main>
+    </ThemedPage>
   );
 }

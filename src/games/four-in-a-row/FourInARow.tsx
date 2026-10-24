@@ -14,6 +14,9 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import type { GameManifest } from '../types';
+import { pieceColor } from '../../theme/library';
+import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+
 import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
 
 export const fourInARowManifest: GameManifest = {
@@ -36,6 +39,7 @@ type Phase = 'setup' | 'play' | 'end';
 
 export default function FourInARow() {
   const { settings } = useSettings();
+  const { theme, themes, playable, choose } = useGameTheme('four-in-a-row');
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
@@ -103,13 +107,14 @@ export default function FourInARow() {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
     return (
-      <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, background: TEAM_COLORS[p?.colorIndex ?? 0] }}>
+      <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, background: pieceColor(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
         <Icon weight="fill" className="w-1/2 h-1/2" color="#241c3d" aria-hidden="true" />
       </span>
     );
   };
 
   return (
+    <ThemedPage theme={theme}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
@@ -118,13 +123,14 @@ export default function FourInARow() {
 
       {phase === 'setup' && (
         <div className="grid gap-4">
-          <p className="font-bold text-center">{t('fr.description')}</p>
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full">
+          <p className="font-bold text-center stage-text">{t('fr.description')}</p>
+          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
             {t('practice.set')}
             <select id="fr-set" value={setId} onChange={(e) => setSetId(e.target.value)} className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
               {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
             </select>
           </label>
+          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
           <TeamSetup mode="versus" min={2} max={2} onStart={begin} />
         </div>
       )}
@@ -145,7 +151,7 @@ export default function FourInARow() {
             )}
           </div>
 
-          <div className="bg-quiz-blue border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ maxWidth: 'min(100%, 75dvh, 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ background: pieceColor(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, 75dvh, 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;
@@ -193,5 +199,6 @@ export default function FourInARow() {
       )}
       {element}
     </main>
+    </ThemedPage>
   );
 }

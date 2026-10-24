@@ -13,7 +13,7 @@ describe('themes', () => {
 
   it('flags unreadable colors', () => {
     const t = classicTheme('peg-drop');
-    expect(themeProblems({ ...t, colors: { ...t.colors, text: '#cfc8e8' } })).toHaveLength(2);
+    expect(themeProblems({ ...t, colors: { ...t.colors, text: '#cfc8e8', backgroundText: '#c9c0f0' } })).toHaveLength(2);
   });
 
   it('calm version keeps colors and quiets the backdrop and celebration', () => {

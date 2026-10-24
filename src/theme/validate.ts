@@ -5,7 +5,7 @@ import type { GameTheme } from './types';
 export function themeProblems(theme: GameTheme): string[] {
   const c = theme.colors;
   const pairs: [string, string, string][] = [
-    ['Text on the background', c.text, c.background],
+    ['Text on the background', c.backgroundText, c.background],
     ['Text on panels', c.text, c.surface],
     ['Button text on the main color', c.accentText, c.accent],
   ];
@@ -31,6 +31,7 @@ export function themeStyle(theme: GameTheme): Record<string, string> {
     '--stage-bg': c.background,
     '--stage-surface': c.surface,
     '--stage-text': c.text,
+    '--stage-bg-text': c.backgroundText,
     '--stage-accent': c.accent,
     '--stage-accent-text': c.accentText,
     '--stage-success': c.success,

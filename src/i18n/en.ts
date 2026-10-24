@@ -294,6 +294,11 @@ export const en = {
   'q.tryAgain': 'Not this one. Try again!',
   'q.triesLeft': '{count} tries left',
   'q.triesLeft.one': '1 try left',
+
+  'theme.pick': 'Theme',
+  'theme.locked': '{name} theme (locked)',
+  'theme.preview': 'Preview of the {name} theme',
+  'theme.close': 'Close preview',
 } as const;
 
 export type StringKey = keyof typeof en;

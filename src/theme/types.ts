@@ -3,6 +3,8 @@
 
 export interface ThemeColors {
   background: string;
+  // Text that sits straight on the background (titles, banners).
+  backgroundText: string;
   surface: string;
   text: string;
   accent: string;

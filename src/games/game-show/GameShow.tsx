@@ -18,6 +18,9 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import type { GameManifest } from '../types';
+import { pieceColor } from '../../theme/library';
+import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+
 import { dealCards, GRID_POINTS, type CardKind } from './cards';
 
 export const gameShowManifest: GameManifest = {
@@ -44,6 +47,7 @@ interface Cell { col: number; points: number; used: boolean }
 
 export default function GameShow() {
   const { settings } = useSettings();
+  const { theme, themes, playable, choose } = useGameTheme('game-show');
   const { value: mine = [] } = useMySets();
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -217,6 +221,7 @@ export default function GameShow() {
     k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : k.kind === 'double' ? t('tb.reveal.double') : k.kind === 'swap' ? t('tb.reveal.swap') : t('tb.reveal.steal');
 
   return (
+    <ThemedPage theme={theme}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
@@ -276,6 +281,7 @@ export default function GameShow() {
             </div>
           </div>
 
+          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
           <button type="button" disabled={setIds.length === 0} onClick={() => setPhase('teams')}
             className="justify-self-start min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold disabled:opacity-50">
             {t('tb.next')}
@@ -309,8 +315,8 @@ export default function GameShow() {
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
                     className={`aspect-[4/3] rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
-                      ${c.open ? 'bg-surface text-base sm:text-lg' : 'bg-accent text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
-                    style={{ boxShadow: 'var(--shadow-sticker)' }}
+                      ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
+                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : { background: pieceColor(theme, 'card-back', '#fbdb6b') }) }}
                   >
                     {c.open ? (
                       <span className="grid justify-items-center gap-1">
@@ -336,8 +342,8 @@ export default function GameShow() {
                       <button key={`${col}-${points}`} type="button" onClick={() => pickCell(i)}
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
-                        className={`min-h-16 rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : 'bg-accent'}`}
-                        style={cell?.used ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
+                        className={`min-h-16 rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
+                        style={cell?.used ? undefined : { boxShadow: 'var(--shadow-sticker)', background: pieceColor(theme, 'square', '#fbdb6b') }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
@@ -408,5 +414,6 @@ export default function GameShow() {
         </div>
       )}
     </main>
+    </ThemedPage>
   );
 }
