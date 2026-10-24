@@ -97,6 +97,28 @@ mode: they are games that plug into these same four modes.
   play. Assignment lock rules from `docs/question-engine.md` apply.
 - Also covers single-player activities (flashcards, match up, sort).
 
+**Assigned Solo games** (direct from you, 2026-10-24):
+1. Teacher picks a question set and a game (or "any game"), sets the
+   assignment options (target questions, rounds, due date, which settings
+   are locked) and assigns it to a class or group.
+2. Gamify makes an **assignment code** (a player code, section 4D) and a
+   **direct link** with the code built in (`<domain>.com/join/K7P2QX`).
+   Tapping the link drops the student straight into the game.
+3. Ways to hand it out:
+   - **Share to Google Classroom** button (posts the link as an
+     assignment or announcement), or copy the link anywhere (email, LMS,
+     class website).
+   - **Code screen** for the smart board / Promethean: one tap casts a
+     clean, simple screen with only the big code, the QR code and the
+     `/join` address. Nothing else, no student data.
+   - Students go to `<domain>.com/join` and type the code.
+4. Students pick their name from the class list (or the name option the
+   teacher chose, section 4B), so every answer lands in the right
+   student's report.
+5. While students play, the teacher has the **Live monitor** (section 4E)
+   on their own device, never on the projector, and the **Lock** button
+   for any student.
+
 ### Mode 4: Versus (student vs student, or student vs CPU)
 - **Pass-and-play first:** two players (up to four for some games) on one
   iPad, taking turns. Each turn starts with that player's question.
@@ -405,6 +427,87 @@ on the student's own device.
   so Share Mirror ships with that server (see roadmap). Share itself
   still works with no server.
 
+## 4E. Teacher live monitor and the Lock button (every own-device mode)
+
+Direct from you (2026-10-24), flagged as a must-get-right feature. Applies
+to **every** way students play on their own devices: assigned Solo, Class
+Live, Versus on two devices, and Share Mirror viewers.
+
+### Two teacher screens, kept apart
+- **Code screen** (for the projector): the code, QR and `/join` address
+  only. Safe to cast.
+- **Live monitor** (teacher's device only): never shows on the code
+  screen. If the teacher's device is mirroring, Gamify warns before
+  opening the monitor ("You're casting. Open the monitor anyway?").
+
+### What the live monitor shows (updates as it happens)
+- One tile per student: name, **status** (playing, on a question, idle,
+  left the game, locked, finished), current question, **time on this
+  question** (tile turns amber, then orange, past teacher-set limits),
+  questions answered, right on first try, progress to the assignment
+  target.
+- **Alerts:** stuck on a question too long, guessing check triggered
+  (rapid wrong taps), left the game / switched apps, rejoined, finished.
+- Tap a student: their question-by-question feed as it happens (question,
+  every answer tapped in order, time taken), same columns as the reports
+  (section 4C).
+- Sort and filter tiles (needs help first, slowest, not started,
+  finished), and a class summary bar.
+- Everything shown live is saved to the reports automatically.
+
+### The Lock button
+**What it does to the student's device:**
+- **Stops everything at once:** gameplay, the current question, timers,
+  sound. Nothing counts against the student; timers resume where they
+  stopped.
+- **Freezes the screen completely:** a full-screen lock covers the game;
+  nothing can be tapped, no menus, no gear button, no navigation, no
+  back, no join page. Only the teacher can release it.
+- **Shows the teacher's message**, large and read aloud if read-aloud is
+  on. Default: **"Your teacher has paused your game. Please go see your
+  teacher."**
+- The lock screen is calm (no red, no alarm sound) so it redirects
+  without shaming.
+
+**Teacher controls when locking:**
+- Lock **one student**, **several**, or **everyone** ("Eyes up front"
+  for the whole class).
+- Type a **custom message** before locking, private to that student only
+  (it never appears on the projector or on other students' screens).
+  Use it to discreetly check in ("Are you OK? Come see me when you're
+  ready") or to redirect ("Please use your real name and rejoin").
+- Quick-pick message templates the teacher can edit and save ("Please see
+  me," "Take a break and come back," "Eyes up front," "Great focus, keep
+  going," etc.).
+- **Unlock** one or all; option to send a short message on unlock too
+  ("Thanks, you can keep playing").
+- Optional: lock automatically when a student leaves and comes back too
+  many times, or when the guessing check fires repeatedly.
+
+**Making the lock stick (inside Gamify):**
+- The lock is saved on the server and on the device: reloading the page,
+  closing and reopening the tab, or going back to `/join` brings the
+  student straight back to the lock screen.
+- A locked student cannot rejoin the same game with a new name or code;
+  the teacher sees any attempt as an alert.
+- If the internet drops, the lock stays on and the game stays stopped
+  until the device reconnects and the teacher unlocks.
+
+**The honest limit, and how schools close it:** a website cannot lock the
+whole iPad. A student can still press the Home button and open another
+app. Gamify handles what it can (the game stays frozen, the teacher sees
+"left the game" instantly, and the student returns to the lock). For
+complete device lockdown, schools use the tools built for that: Apple's
+Guided Access on a single iPad, or Apple Classroom / the school's device
+management, which can lock managed iPads to one app or lock the screen.
+Gamify's teacher guide should explain how to pair them. A future installed
+Gamify app could go further on managed devices.
+
+**Reports:** every lock is logged (time, student, message sent, how long)
+in the teacher's reports and student report, so it can be used in
+behavior documentation if needed. The student's game data is never
+deleted by a lock.
+
 ## 5. Free vs paid
 
 ### Principles (proposed)
@@ -432,7 +535,8 @@ on the student's own device.
 | Mode 4 Versus on two devices | No | Yes | Yes |
 | Mode 1 Class Live (join code) | Small class cap | Full class | Full class |
 | Share Mirror (view-only screen for accessibility) | **Yes** | **Yes** | **Yes** |
-| Homework / assignment links | Limited | Unlimited | Unlimited |
+| Live monitor + Lock button | **Yes** | **Yes** | **Yes** |
+| Assignments (code, link, Google Classroom share) | Limited number open at once | Unlimited | Unlimited |
 | Themes | 3 house themes | Full library + Theme Builder | + school brand theme |
 | Reports | **Full report for every game** (all views, filters, CSV, print), kept 30 days | Unlimited history, trends over time, PDF and Sheets export | + school-wide and admin views |
 | Name options, approval, rename, bad-word filter, teams | **All** | **All** | **All** |
@@ -477,6 +581,10 @@ section 6.
   a logo. Have a backup name list ready.
 - Comparison marketing ("works like X, but...") is a lawyer question,
   not a default.
+- Integrations (Share to Google Classroom, Apple Classroom in the teacher
+  guide) may name those products to describe compatibility, following
+  each company's published branding rules (their official button, no
+  implied endorsement).
 
 ### 6.3 Every asset needs a paper trail
 - New file `docs/asset-ledger.md` (to create in Phase 0): every font,
@@ -623,7 +731,8 @@ game only decides *when to ask* and *what a right answer does*.
 - Three-Lens testing on iPad for each
 
 **Phase 2: Teacher accounts + Pro**
-- Teacher sign-in, saved sets in the cloud, homework/assignment links
+- Teacher sign-in, saved sets in the cloud, assignments with code, direct
+  link and Share to Google Classroom
 - Billing and plans, Pro theme library, Theme Builder
 - 4 to 6 more games/activities
 - Privacy policy, Terms, DMCA agent in place **before** launch
@@ -632,6 +741,8 @@ game only decides *when to ask* and *what a right answer does*.
 - The `/join` page and code system (player and viewer codes)
 - Mode 1 Class Live: join codes, host screen, live leaderboard
 - Share Mirror (view-only screen), first feature on the real-time server
+- Live monitor and Lock button for every own-device mode (also needs the
+  real-time server; strong case for Phase 2, see decision 8)
 - Mode 4 Versus on two devices (same real-time server)
 - Reports, per-question logs, export
 - School/district plans, purchase orders, DPA signing, VPAT
@@ -659,8 +770,8 @@ game only decides *when to ask* and *what a right answer does*.
 7. **Report history on Free**: every game always has a full report (your
    rule). Claudia suggests Free keeps 30 days of history and Pro keeps
    everything. OK, or should Free keep everything too?
-8. **Real-time server timing**: Class Live, Versus on two devices and now
-   Share Mirror all need it. Share Mirror is an accessibility feature,
+8. **Real-time server timing**: Class Live, Versus on two devices, Share
+   Mirror and the live monitor + Lock button all need it. Share Mirror is an accessibility feature,
    which is a reason to bring the server forward to Phase 2.
 9. **Free tier generosity**: generous free tier to grow (Claudia's lean),
    or tighter free tier to convert faster?
@@ -698,3 +809,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 20 | **"Every student sees the board."** Share Mirror puts the live game on a visually impaired student's own iPad, view only, with their own zoom and read-aloud. | Real accessibility story; an IEP accommodation built in, free | Teacher, 2026-10-24; section 4D |
 | 21 | **"One link for everything: <domain>.com/join."** | Simple for kids and families; easy to put on a classroom poster | Teacher, 2026-10-24; section 4D |
 | 22 | **"Codes that can't spell bad words."** | Small detail that shows care; teachers notice | Section 4D |
+| 23 | **"Freeze any screen with one tap, and send a private message."** The Lock button stops the game and shows only that student your note. | Classroom management teachers ask for; discreet, not shaming | Teacher, 2026-10-24; section 4E |
+| 24 | **"Watch every answer as it happens."** Live monitor shows who's stuck, who's guessing and how long each question takes. | Real-time formative assessment | Teacher, 2026-10-24; section 4E |
+| 25 | **"Assign in seconds: link, code, or Google Classroom."** | Fits how teachers already hand out work | Teacher, 2026-10-24; Mode 3 |
+| 26 | **"Projector-safe."** The code screen shows only the code; student data stays on your device. | Privacy in front of the class | Section 4E |
