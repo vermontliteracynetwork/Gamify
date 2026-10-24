@@ -663,6 +663,16 @@ in the teacher's reports and student report, so it can be used in
 behavior documentation if needed. The student's game data is never
 deleted by a lock.
 
+## 4G. Owner dashboard (yours only)
+
+Direct from you (2026-10-24): Gamify has four sides: teacher, student, the
+public website, and a private **owner dashboard** for you, kept separate
+from Vermont Literacy Network. It's a widget desktop (drag, reorder,
+collapse, expand) showing active subscriptions, projected income for set
+periods, Stripe charts and CSVs for your bookkeeper, growth suggestions,
+teacher reports, and a support inbox where you answer help and chat
+requests. Build checklist: development plan Stage 7B.
+
 ## 5. Free vs paid
 
 ### Principles (proposed)
