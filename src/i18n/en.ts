@@ -846,6 +846,17 @@ export const en = {
   'fc.practiced': 'You practiced {count} cards until you knew them.',
   'fc.practiced.one': 'You practiced 1 card until you knew it.',
   'fc.allFirst': 'You knew every card the first time!',
+  'mu.how1': 'Tap a question on the left.',
+  'mu.how2': 'Tap its answer on the right to link them.',
+  'mu.how3': 'Match them all as fast as you can!',
+  'mu.pairs': 'Pairs each round',
+  'mu.rounds': 'Rounds',
+  'mu.round': 'Round {n} of {total}',
+  'mu.matched': '{done} of {total} matched',
+  'mu.done': 'All matched in {time}!',
+  'mu.misses': '{count} tries missed. Look back at them below.',
+  'mu.misses.one': '1 try missed. Look back at it below.',
+  'mu.perfect': 'No misses at all!',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

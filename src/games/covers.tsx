@@ -87,6 +87,17 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           ))}
         </div>
       );
+    case 'match-up':
+      return (
+        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #b4c4fb, #ddfcc6)' }} aria-hidden="true">
+          <div className="absolute inset-[10%] grid grid-cols-2 gap-x-[18%] gap-y-[6%]">
+            {['3 + 4', '7', 'cat', 'animal', 'red', 'color'].map((v, i) => (
+              <span key={i} className="rounded-lg border-[2.5px] border-border flex items-center justify-center font-display text-[clamp(8px,5cqw,24px)]" style={{ background: i % 2 ? '#fdfd94' : '#fbfcf8' }}>{v}</span>
+            ))}
+          </div>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
+        </div>
+      );
     case 'sign-in':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
