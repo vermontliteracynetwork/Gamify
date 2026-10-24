@@ -69,6 +69,16 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           ))}
         </div>
       );
+    case 'memory-match':
+      return (
+        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true">
+          <div className="absolute inset-[10%] grid grid-cols-4 gap-[4%]">
+            {['?', '', 'cat', '', '', '2+2', '', '4'].map((v, i) => (
+              <span key={i} className="rounded-lg border-[2.5px] border-border flex items-center justify-center font-display text-[clamp(8px,4cqw,22px)]" style={{ background: v ? (i % 2 ? '#fdfd94' : '#fbfcf8') : '#b4c4fb', transform: `rotate(${(i % 3) - 1}deg)` }}>{v}</span>
+            ))}
+          </div>
+        </div>
+      );
     case 'sign-in':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
