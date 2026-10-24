@@ -1,7 +1,10 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './ui/NavBar';
 import Home from './student/Home';
+import QuestionSetsPage from './teacher/QuestionSetsPage';
+import SetEditorPage from './teacher/SetEditorPage';
+import ImportPage from './teacher/ImportPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -18,6 +21,11 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
+          <Route path="/teacher" element={<Navigate to="/teacher/sets" replace />} />
+          <Route path="/teacher/sets" element={<QuestionSetsPage />} />
+          <Route path="/teacher/sets/import" element={<ImportPage />} />
+          <Route path="/teacher/sets/:id" element={<SetEditorPage />} />
+          <Route path="/teacher/library/:id" element={<SetEditorPage library />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -53,8 +61,8 @@ function AmbientBackground() {
       style={{
         backgroundColor: 'var(--color-bg)',
         backgroundImage: `url("data:image/svg+xml,${SWIRL_SVG}")`,
-        backgroundSize: '800px 800px',
-        backgroundRepeat: 'repeat',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
       }}
     />
   );

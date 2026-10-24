@@ -1142,6 +1142,10 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 34 | **Photo and video idea:** students painting a template page, scanning it, and seeing their art drop onto the board seconds later. | The demo video for the website and conferences (with signed photo releases) | Teacher, 2026-10-24 |
 | 35 | **"Every student gets their own Arcade, filled with exactly what they're working on."** Assign sets to the class or to one student, and every game draws from them. | Differentiation teachers can feel; strong for IEPs and intervention groups | Teacher, 2026-10-24; Mode 3 |
 | 36 | **"Start simple. Make it yours."** Gamify's look is clean on purpose, so your class's own theme is the star. | Frames simple house themes as an invitation to design; drives Theme Builder and gallery use | Teacher, 2026-10-24 |
+| 38 | **"Tell Gamify" button in every game and page:** teachers and students report bugs, glitches, problems and ideas straight to the developer. | Shows a responsive, listening company; builds loyalty | Teacher, 2026-10-24 |
+| 39 | **"You asked, we built it" social series:** whenever a report leads to a change, post a short TikTok or Instagram video: the report (no student names or identifying details), the fix in action, a thank-you. Get the teacher's okay before quoting their words. | Constant, authentic content; proves the product improves weekly; invites more feedback | Teacher, 2026-10-24 |
+| 40 | **Vermont Literacy Network beta code:** your VLN email list gets a code for 3 months of Plus free in exchange for explicit feedback, a few surveys and student feedback. | Warm first users, real feedback, testimonials and early classroom photos for launch | Teacher, 2026-10-24 |
+| 41 | **Founding beta teachers:** a hand-picked group with free access who shape Gamify ("Founding Teacher" badge on their profile, credit on the website with permission). | Credibility and word of mouth; quotes for the website and social posts | Teacher, 2026-10-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HouseSimple } from '@phosphor-icons/react';
+import { ChalkboardTeacher, HouseSimple } from '@phosphor-icons/react';
 import { t } from '../i18n';
 
 // Persistent top nav on every screen, so there's always a way back to the
@@ -11,8 +11,16 @@ export default function NavBar() {
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-9 w-auto" draggable="false" />
       </Link>
       <Link
+        to="/teacher"
+        className="ml-auto mr-2 flex items-center gap-1.5 text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill
+                   border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors"
+      >
+        <ChalkboardTeacher weight="bold" size={16} />
+        {t('nav.teacher')}
+      </Link>
+      <Link
         to="/"
-        className="ml-auto flex items-center gap-1.5 text-sm font-bold text-text hover:text-accent-ink no-underline px-3.5 py-1.5 rounded-pill
+        className="flex items-center gap-1.5 text-sm font-bold text-text hover:text-accent-ink no-underline px-3.5 min-h-11 rounded-pill
                    border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors"
       >
         <HouseSimple weight="bold" size={16} />
