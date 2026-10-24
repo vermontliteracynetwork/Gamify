@@ -1,5 +1,11 @@
 # Gamify Development Plan: Stages to Launch
 
+> **The live plan is the Claude Doc "Gamify Development Plan":
+> https://claude.ai/artifact/P8kwMjDCq1E2yCa8VaMSpj** (moved there
+> 2026-10-24 so the teacher can see and edit it any time). That doc wins
+> over this file. This file is a backup snapshot for sessions without the
+> docs connector; refresh it from the doc now and then.
+
 Written 2026-10-24 by Claudia. **This is the build bible.** It turns
 `docs/product-plan.md` (the *what*) into explicit stages (the *how* and *in
 what order*), so building can continue independently while the teacher is

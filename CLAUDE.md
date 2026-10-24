@@ -61,12 +61,22 @@ teacher no control or educational value is not done.
   this governs platform chrome; themed game stages are an open decision in
   `docs/product-plan.md` section 4.)
 
-## The development plan is the build bible
+## The development plan is the build bible (a live Claude Doc)
 
-`docs/development-plan.md` lays out the stages to launch, the rules for
-building independently, the defaults for open decisions, and the `[!]`
-items only the teacher can do. Work its stages top to bottom, mark each
-item done with the date as it ships, and keep its progress log current.
+The live plan is the Claude Doc **"Gamify Development Plan"**:
+https://claude.ai/artifact/P8kwMjDCq1E2yCa8VaMSpj (doc id
+`b33e558c-1899-46b6-891a-c536fba51844`). It lays out the stages to launch,
+the rules for building independently, the defaults for open decisions, and
+the "Waiting on you" items only the teacher can do. The teacher can edit it
+any time, and their edits win.
+
+- Always keep it updated (direct teacher rule, 2026-10-24): at the start
+  of a session read it for changes; after every item ships, tick it off,
+  and add a row to its Progress log (date, what shipped, what's next).
+  New ideas, decisions and blockers go in the same turn they come up.
+- Work its stages top to bottom.
+- `docs/development-plan.md` is only a backup snapshot for sessions
+  without the docs connector; the doc wins.
 
 ## Marketing ideas list (standing rule, 2026-10-24)
 
