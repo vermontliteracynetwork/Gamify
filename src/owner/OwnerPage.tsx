@@ -1,48 +1,184 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ChartLineUp, ChatCircleDots, CreditCard, PaintBrush, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { data } from '../data';
+import { useAsync } from '../data/hooks';
+import type { FeedbackReport } from '../data/types';
+import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
-import { PageHeader, Panel } from '../ui/kit';
+import { Slider } from '../ui/fields';
+import { PageHeader } from '../ui/kit';
+import Title from '../ui/Title';
+import { monthlyRevenue, project, type Subs } from './income';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
-// The owner's developer view (development plan Stage 7B). Until accounts
-// exist (Stage 5) it opens with its own 4-digit owner PIN. The Theme Builder
-// works now; the other cards fill in as their stages ship.
+// The owner's developer view (development plan Stage 7B): a desktop of
+// cards you can reorder, widen and fold, saved on this device. Until
+// accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
+// that need Stripe or cloud data say so until those connect.
+type CardId = 'feedback' | 'usage' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['feedback', 'usage', 'income', 'themes', 'subs', 'inbox', 'beta'];
+interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
+type Status = 'new' | 'looking' | 'fixed' | 'shipped';
+interface FeedbackMeta { status: Status; social: boolean }
+
 export default function OwnerPage() {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
       <main className="max-w-md mx-auto px-4 pt-10 pb-24">
-        <Panel><p className="font-display text-2xl font-bold text-center mb-2">{t('owner.title')}</p><PinGate pinKey={OWNER_PIN_KEY} createLabel={t('owner.pinCreate')} onUnlock={() => setOpen(true)} /></Panel>
+        <div className="bg-surface border-[2.5px] border-border rounded-panel p-5"><p className="font-display text-2xl text-center mb-2">{t('owner.title')}</p><PinGate pinKey={OWNER_PIN_KEY} createLabel={t('owner.pinCreate')} onUnlock={() => setOpen(true)} /></div>
       </main>
     );
   }
-  const soon = [
-    { icon: CreditCard, title: t('owner.subs'), stage: '7B' },
-    { icon: ChartLineUp, title: t('owner.income'), stage: '7B' },
-    { icon: UsersThree, title: t('owner.teachers'), stage: '7B' },
-    { icon: ChatCircleDots, title: t('owner.inbox'), stage: '7B' },
-    { icon: Ticket, title: t('owner.coupons'), stage: '7' },
-  ];
+  return <Desktop />;
+}
+
+function Desktop() {
+  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['feedback'] });
+  useEffect(() => { void data.getSetting<Layout>('owner-layout').then((l) => { if (l) setLayout({ ...l, order: [...l.order.filter((x) => DEFAULT_ORDER.includes(x)), ...DEFAULT_ORDER.filter((x) => !l.order.includes(x))] }); }); }, []);
+  function save(next: Layout) { setLayout(next); void data.setSetting('owner-layout', next); }
+  function move(id: CardId, by: -1 | 1) {
+    const o = [...layout.order]; const i = o.indexOf(id); const j = i + by;
+    if (j < 0 || j >= o.length) return;
+    [o[i], o[j]] = [o[j], o[i]];
+    save({ ...layout, order: o });
+  }
+  const toggle = (key: 'folded' | 'wide', id: CardId) => save({ ...layout, [key]: layout[key].includes(id) ? layout[key].filter((x) => x !== id) : [...layout[key], id] });
+
+  const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
+    feedback: { title: t('owner.feedback'), icon: ChatCircleDots, body: <FeedbackCard /> },
+    usage: { title: t('owner.usage'), icon: ChartLineUp, body: <UsageCard /> },
+    income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
+    themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
+    subs: { title: t('owner.subs'), icon: CreditCard, body: <p className="font-semibold">{t('owner.needsStripe')}</p> },
+    inbox: { title: t('owner.inbox'), icon: UsersThree, body: <p className="font-semibold">{t('owner.needsCloud')}</p> },
+    beta: { title: t('owner.coupons'), icon: Ticket, body: <p className="font-semibold">{t('owner.betaPlan')}</p> },
+  };
+
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <PageHeader title={t('owner.title')} subtitle={t('owner.subtitle')} />
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Link to="/owner/themes" className="rounded-panel bg-accent border-[2.5px] border-border p-5 grid gap-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <PaintBrush weight="fill" size={36} aria-hidden="true" />
-          <span className="font-display text-2xl font-bold">{t('owner.themes')}</span>
-          <span className="font-bold text-sm">{t('owner.themesHint')}</span>
-        </Link>
-        {soon.map(({ icon: Icon, title, stage }) => (
-          <Panel key={title} className="grid gap-2 opacity-80">
-            <Icon weight="bold" size={32} aria-hidden="true" />
-            <span className="font-display text-xl font-bold">{title}</span>
-            <span className="font-bold text-sm text-muted">{t('owner.comingIn', { stage })}</span>
-          </Panel>
-        ))}
+      <div className="grid md:grid-cols-2 gap-4 items-start">
+        {layout.order.map((id, i) => {
+          const c = cards[id]; const Icon = c.icon;
+          const folded = layout.folded.includes(id);
+          return (
+            <section key={id} aria-label={c.title} className={`bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-3 ${layout.wide.includes(id) ? 'md:col-span-2' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <div className="flex items-center gap-2">
+                <Icon weight="bold" size={24} aria-hidden="true" />
+                <h2 className="font-display text-2xl flex-1"><Title text={c.title} /></h2>
+                <IconBtn label={t('owner.moveEarlier', { card: c.title })} disabled={i === 0} onClick={() => move(id, -1)}><ArrowLeft weight="bold" size={16} /></IconBtn>
+                <IconBtn label={t('owner.moveLater', { card: c.title })} disabled={i === layout.order.length - 1} onClick={() => move(id, 1)}><ArrowRight weight="bold" size={16} /></IconBtn>
+                <IconBtn label={t('owner.widen', { card: c.title })} onClick={() => toggle('wide', id)}>{layout.wide.includes(id) ? <ArrowsInLineHorizontal weight="bold" size={16} /> : <ArrowsOutLineHorizontal weight="bold" size={16} />}</IconBtn>
+                <IconBtn label={folded ? t('owner.unfold', { card: c.title }) : t('owner.fold', { card: c.title })} onClick={() => toggle('folded', id)}>{folded ? <CaretDown weight="bold" size={16} /> : <CaretUp weight="bold" size={16} />}</IconBtn>
+              </div>
+              {!folded && c.body}
+            </section>
+          );
+        })}
       </div>
     </main>
+  );
+}
+
+function IconBtn({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: ReactNode }) {
+  return <button type="button" aria-label={label} title={label} onClick={onClick} disabled={disabled} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-30">{children}</button>;
+}
+
+// Every Tell Gamify report: filter by kind, set a status, star the ones
+// that would make a good social post.
+function FeedbackCard() {
+  const { value: reports = [] } = useAsync(() => data.listFeedback());
+  const { value: savedMeta, reload } = useAsync(() => data.getSetting<Record<string, FeedbackMeta>>('feedback-meta'));
+  const meta = savedMeta ?? {};
+  const [kind, setKind] = useState<FeedbackReport['kind'] | 'all'>('all');
+  const shown = reports.filter((r) => kind === 'all' || r.kind === kind).slice().reverse();
+  async function set(id: string, patch: Partial<FeedbackMeta>) {
+    await data.setSetting('feedback-meta', { ...meta, [id]: { ...(meta[id] ?? { status: 'new' as Status, social: false }), ...patch } });
+    reload();
+  }
+  return (
+    <div className="grid gap-2">
+      <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('owner.kind')}>
+        {(['all', 'bug', 'problem', 'idea'] as const).map((k) => (
+          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)} className={`min-h-10 px-3 rounded-pill border-[2px] font-bold text-sm ${kind === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+            {t(`owner.kind.${k}`)} ({k === 'all' ? reports.length : reports.filter((r) => r.kind === k).length})
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 && <p className="font-semibold">{t('owner.noFeedback')}</p>}
+      <ul className="grid gap-2 list-none p-0 m-0 max-h-96 overflow-y-auto">
+        {shown.map((r) => {
+          const m = meta[r.id] ?? { status: 'new', social: false };
+          return (
+            <li key={r.id} className="rounded-input border-[2px] border-border-soft p-2.5 grid gap-1.5">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
+                <span className="px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t(`owner.kind.${r.kind}`)}</span>
+                <span>{t(`owner.role.${r.role}`)}</span>
+                <span className="text-muted">{r.where} · {new Date(r.at).toLocaleDateString()}</span>
+                <button type="button" aria-pressed={m.social} aria-label={t('owner.social')} onClick={() => void set(r.id, { social: !m.social })} className="ml-auto w-9 h-9 rounded-full border-[2px] border-border flex items-center justify-center" style={{ background: m.social ? '#fdfd94' : undefined }}><Star weight={m.social ? 'fill' : 'bold'} size={16} /></button>
+                <select aria-label={t('owner.status')} value={m.status} onChange={(e) => void set(r.id, { status: e.target.value as Status })} className="min-h-9 px-2 rounded-input border-[2px] border-border font-bold">
+                  {(['new', 'looking', 'fixed', 'shipped'] as const).map((s) => <option key={s} value={s}>{t(`owner.status.${s}`)}</option>)}
+                </select>
+              </div>
+              <p className="font-semibold">{r.details || t('owner.noDetails')}</p>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="text-xs font-bold text-muted">{t('owner.feedbackNote')}</p>
+    </div>
+  );
+}
+
+// Games played and answers on this device (no student tracking).
+function UsageCard() {
+  const { value: log = [] } = useAsync(() => data.listQuestionLog());
+  const { value: classes = [] } = useAsync(() => data.listClassrooms());
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const byGame = useMemo(() => GAMES.map((g) => ({ g, n: log.filter((e) => e.gameId === g.id).length })).sort((a, b) => b.n - a.n), [log]);
+  const max = Math.max(1, ...byGame.map((x) => x.n));
+  return (
+    <div className="grid gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        {[[t('owner.answers'), log.length], [t('owner.thisWeek'), log.filter((e) => e.at >= weekAgo).length], [t('owner.classes'), classes.length]].map(([l, v]) => (
+          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
+        ))}
+      </div>
+      <ul className="grid gap-1 list-none p-0 m-0">
+        {byGame.map(({ g, n }) => (
+          <li key={g.id} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-2 text-sm font-bold">
+            <span className="truncate">{g.name}</span>
+            <span className="h-3 rounded-pill bg-surface-2 border border-border overflow-hidden"><span className="block h-full" style={{ width: `${(n / max) * 100}%`, background: '#b4c4fb' }} /></span>
+            <span className="tabular-nums text-right">{n}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs font-bold text-muted">{t('owner.usageNote')}</p>
+    </div>
+  );
+}
+
+// What-if income from plan counts (real Stripe numbers replace this in 7).
+function IncomeCard() {
+  const [s, setS] = useState<Subs & { growth: number }>({ plus: 20, pro: 5, schoolSeats: 0, growth: 5 });
+  const subs = { plus: s.plus, pro: s.pro, schoolSeats: s.schoolSeats };
+  const money = (n: number) => `$${n.toLocaleString()}`;
+  return (
+    <div className="grid gap-3">
+      <Slider label={t('owner.plusTeachers')} min={0} max={500} value={s.plus} onChange={(v) => setS({ ...s, plus: v })} />
+      <Slider label={t('owner.proTeachers')} min={0} max={500} value={s.pro} onChange={(v) => setS({ ...s, pro: v })} />
+      <Slider label={t('owner.schoolSeats')} min={0} max={500} value={s.schoolSeats} onChange={(v) => setS({ ...s, schoolSeats: v })} />
+      <Slider label={t('owner.growth')} min={0} max={30} value={s.growth} show={(v) => `${v}%`} onChange={(v) => setS({ ...s, growth: v })} />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {[[t('owner.mrr'), monthlyRevenue(subs)], ...[1, 3, 6, 12].map((m) => [t('owner.nextMonths', { count: m }), project(subs, s.growth / 100, m)])].map(([l, v]) => (
+          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-xl tabular-nums">{money(Number(v))}</p></div>
+        ))}
+      </div>
+      <p className="text-xs font-bold text-muted">{t('owner.incomeNote')}</p>
+    </div>
   );
 }

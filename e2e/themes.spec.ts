@@ -94,6 +94,10 @@ test('developer view opens with the owner PIN and links to the Theme Builder', a
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
-  await page.getByRole('link', { name: /Theme Builder/ }).click();
+  await expect(page.getByRole('region', { name: 'Tell Gamify reports' })).toBeVisible();
+  await page.screenshot({ path: `test-results/owner-${test.info().project.name}.png`, fullPage: true });
+  // Cards reorder and the layout is remembered.
+  await page.getByRole('button', { name: 'Move Usage earlier' }).click();
+  await page.getByRole('link', { name: 'Open the Theme Builder' }).click();
   await expect(page.getByRole('heading', { name: 'Library Themes' })).toBeVisible();
 });
