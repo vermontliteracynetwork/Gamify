@@ -15,6 +15,7 @@ scattered across chats or other repos:
 |---|---|
 | [`CLAUDE.md`](./CLAUDE.md) | The binding development standard -- the Three-Lens testing bar every change is held to, plus standing product facts |
 | [`docs/platform-spec.md`](./docs/platform-spec.md) | Full product spec: vision, differentiators, data model, accessibility requirements, phased roadmap |
+| [`docs/development-plan.md`](./docs/development-plan.md) | **The build bible:** explicit stages from foundation to launch, rules for building independently, defaults for open decisions, and the list of things only the teacher can do |
 | [`docs/product-plan.md`](./docs/product-plan.md) | Commercial plan (brainstorm): play shapes, game roster and renames, themes across all games, free vs paid tiers, legal/copyright readiness checklist, roadmap, open decisions |
 | [`docs/gamified-learning-research.md`](./docs/gamified-learning-research.md) | Research brief: the case for and against gamified learning (retrieval practice, spacing, dopamine/curiosity, variety), how Gamify answers each counter-argument, and how Gamify will prove its success |
 | [`docs/settings-equity-research.md`](./docs/settings-equity-research.md) | Research behind the in-game settings (sound levels, haptics, calm mode, gear button) and culturally responsive, equitable design |

@@ -305,6 +305,14 @@ design-thinking a real audience (`docs/junior-designers-plan.md`); and a
 new class theme refreshes every game at once, which fights the novelty
 drop-off in `docs/gamified-learning-research.md` 3.4.
 
+### House themes stay simple (direct from you, 2026-10-24)
+The free/default look is deliberately plain: flat colors, one simple
+pattern, clean shapes, built from code with no purchased illustration.
+That makes the library feel like an upgrade and makes designing your own
+(and using community themes) the exciting part. Bought art goes to Pals,
+avatar items, a few game pieces and library accents. Details:
+`docs/development-plan.md` Part 2.
+
 ### Non-negotiables for every theme
 - Passes contrast checks (builder refuses colors that fail)
 - Has a calm version (reduced motion, softer celebration, quieter sounds)
@@ -877,6 +885,9 @@ game only decides *when to ask* and *what a right answer does*.
 
 ## 8. Roadmap (proposed)
 
+> Superseded in detail by `docs/development-plan.md` (stages 0-9, written
+> 2026-10-24). The phases below are the original outline.
+
 **Phase 0: Clean slate + legal foundation (now)**
 - Remove the prototype game (done 2026-10-24)
 - Product name trademark search, then buy the domain; ownership decision, attorney booked
@@ -1104,3 +1115,4 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 33 | **"One drawing, every game."** A hand-drawn theme skins all of Gamify's games at once. | Shows the platform's scale in one sentence | Section 4 |
 | 34 | **Photo and video idea:** students painting a template page, scanning it, and seeing their art drop onto the board seconds later. | The demo video for the website and conferences (with signed photo releases) | Teacher, 2026-10-24 |
 | 35 | **"Every student gets their own Arcade, filled with exactly what they're working on."** Assign sets to the class or to one student, and every game draws from them. | Differentiation teachers can feel; strong for IEPs and intervention groups | Teacher, 2026-10-24; Mode 3 |
+| 36 | **"Start simple. Make it yours."** Gamify's look is clean on purpose, so your class's own theme is the star. | Frames simple house themes as an invitation to design; drives Theme Builder and gallery use | Teacher, 2026-10-24 |

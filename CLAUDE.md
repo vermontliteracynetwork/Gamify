@@ -61,6 +61,13 @@ teacher no control or educational value is not done.
   this governs platform chrome; themed game stages are an open decision in
   `docs/product-plan.md` section 4.)
 
+## The development plan is the build bible
+
+`docs/development-plan.md` lays out the stages to launch, the rules for
+building independently, the defaults for open decisions, and the `[!]`
+items only the teacher can do. Work its stages top to bottom, mark each
+item done with the date as it ships, and keep its progress log current.
+
 ## Marketing ideas list (standing rule, 2026-10-24)
 
 Whenever a feature, design choice or research finding could be used well
