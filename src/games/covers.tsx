@@ -56,6 +56,19 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <Crown weight="fill" className="absolute right-[3%] top-[2%] w-[14%] h-auto" color="#241c3d" />
         </div>
       );
+    case 'cast-catch':
+      return (
+        <div className={base} style={{ background: 'linear-gradient(180deg, #cfe9ff 0 30%, #5aa9d6 30% 100%)' }} aria-hidden="true">
+          <span className="absolute left-0 bottom-0 w-[26%] h-[40%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={{ background: '#b98552' }} />
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><line x1="14" y1="40" x2="30" y2="10" stroke="#000" strokeWidth="1.4" /><path d="M30 10 Q55 8 66 34" stroke="#000" strokeWidth="0.5" fill="none" /></svg>
+          <span className="absolute w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={{ left: '62%', top: '50%', background: '#e5635f' }} />
+          {[[30, 66, '#f2d16b', '#e07a3a', 1], [72, 72, '#3f6fd6', '#f2d14b', -1], [48, 82, '#f3803a', '#ffffff', 1]].map(([x, y, body, fin, dir], i) => (
+            <svg key={i} className="absolute w-[22%] h-auto" style={{ left: `${x}%`, top: `${y}%`, transform: `scaleX(${dir})` }} viewBox="0 0 100 60">
+              <path d="M78 30 L98 12 L94 30 L98 48 Z" fill={fin as string} stroke="#000" strokeWidth="3" /><ellipse cx="44" cy="30" rx="38" ry="22" fill={body as string} stroke="#000" strokeWidth="3" /><circle cx="20" cy="25" r="4" fill="#000" />
+            </svg>
+          ))}
+        </div>
+      );
     case 'sign-in':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':

@@ -9,6 +9,7 @@ import StarQuiz from './games/practice/StarQuiz';
 import GameShow from './games/game-show/GameShow';
 import BakeryMatch from './games/bakery-match/BakeryMatch';
 import FourInARow from './games/four-in-a-row/FourInARow';
+import CastCatch from './games/cast-catch/CastCatch';
 import { SettingsProvider } from './settings/SettingsContext';
 import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
 import TemplatePage from './theme/builder/TemplatePage';
@@ -51,6 +52,7 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
+          <Route path="/games/cast-catch" element={<RequireSignIn><CastCatch /></RequireSignIn>} />
           <Route path="/games/game-show" element={<RequireSignIn><GameShow /></RequireSignIn>} />
           <Route path="/games/bakery-match" element={<RequireSignIn><BakeryMatch /></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><FourInARow /></RequireSignIn>} />
