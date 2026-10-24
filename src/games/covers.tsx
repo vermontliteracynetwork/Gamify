@@ -98,6 +98,17 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
         </div>
       );
+    case 'bubble-pop':
+      return (
+        <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
+          {[[6, 4, '#fdfd94', Star], [24, 4, '#e5635f', Heart], [42, 4, '#e5635f', Heart], [60, 4, '#8fe3a0', Sparkle], [78, 4, '#8ec5ff', Fish], [15, 30, '#fdfd94', Star], [33, 30, '#8ec5ff', Fish], [51, 30, '#8fe3a0', Sparkle], [69, 30, '#f6a5c0', Heart]].map(([x, y, c, I], i) => {
+            const S = I as Icon;
+            return <span key={i} className="absolute w-[17%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: `${x}%`, top: `${y}%`, background: c as string }}><S weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>;
+          })}
+          <span className="absolute w-[17%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: '41.5%', bottom: '6%', background: '#8fe3a0' }}><Sparkle weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 84 L58 50" stroke="#fff" strokeWidth="2" strokeDasharray="1 4" strokeLinecap="round" /></svg>
+        </div>
+      );
     case 'peg-drop':
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">

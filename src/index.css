@@ -203,3 +203,9 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 @keyframes cc-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(40px); } }
 @keyframes cc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 @keyframes cc-bite { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(14px); } 50% { transform: translateY(4px); } 75% { transform: translateY(16px); } }
+/* Bubble Pop: popped bubbles burst, cut-loose bubbles fall (SVG units). */
+.bp-fx { transform-box: fill-box; transform-origin: center; }
+@keyframes bp-pop { from { transform: scale(1); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes bp-fall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(14px); opacity: 0; } }
+@keyframes bp-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bp-fx { animation: none !important; } }
