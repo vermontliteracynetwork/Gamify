@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Copy, LockSimple, Play, QrCode, UsersThree, X } from '@phosphor-icons/react';
+import { Copy, LockSimple, Play, ProjectorScreen, QrCode, UsersThree, X } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
-import { gameLink, makeGameCode, type GameCode } from '../data/gameCodes';
+import { GAME_CODE_DAYS, gameLink, makeGameCode, type GameCode } from '../data/gameCodes';
 import { useAsync, useTier } from '../data/hooks';
 import { missingDetails } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
@@ -68,6 +68,8 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                     <>
                       <p className="font-display text-4xl tracking-[0.2em]" aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
                       <Button onClick={() => { void navigator.clipboard?.writeText(gameLink(code)).catch(() => undefined); setStatus(t('host.copied')); }}><Copy weight="bold" size={18} />{t('host.copyLink')}</Button>
+                      <Button onClick={() => navigate(`/show/${code.code}`)}><ProjectorScreen weight="bold" size={18} />{t('host.show')}</Button>
+                      <p className="text-xs font-bold text-muted">{t('host.expires', { days: GAME_CODE_DAYS })}</p>
                     </>
                   ) : <Button onClick={async () => setCode(await makeGameCode(game.id, set.id))}><QrCode weight="bold" size={18} />{t('host.makeCode')}</Button>}
                 </div>

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { ChartBar, PaintBrush, Stack, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, PaintBrush, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
 import { t } from '../i18n';
 
 // The teacher pages: question sets and the Theme Builder (more in Stage 4).
@@ -12,6 +12,7 @@ export default function TeacherNav() {
       <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
       <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
       <NavLink to="/teacher/themes" className={link}><PaintBrush weight="bold" size={16} />{t('teacherNav.themes')}</NavLink>
+      <NavLink to="/teacher/account" className={link}><UserCircle weight="bold" size={16} />{t('teacherNav.account')}</NavLink>
     </nav>
   );
 }

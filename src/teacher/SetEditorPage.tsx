@@ -7,6 +7,7 @@ import { getLibrarySet } from '../data/library';
 import type { MultipleChoiceQuestion, QuestionSet } from '../data/types';
 import { blankQuestion, MAX_CHOICES, MIN_CHOICES, questionIssue } from '../engine/questions';
 import { TIERS } from '../config';
+import { readOnlyIds } from '../data/downgrade';
 import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { Button, Panel } from '../ui/kit';
@@ -19,16 +20,21 @@ const LETTERS = ['A', 'B', 'C', 'D'];
 // Question set editor (borrowed from the Dashboard's McTableEditor): one row
 // per question with its answers beside it; tap a letter to mark the right
 // answer. Saves automatically. Ready-made sets open read-only.
-export default function SetEditorPage({ library = false }: { library?: boolean }) {
+export default function SetEditorPage({ library: isLibrary = false }: { library?: boolean }) {
+  let library = isLibrary;
   const { id = '' } = useParams();
   const { value: loaded } = useAsync<QuestionSet | null>(
-    async () => (library ? getLibrarySet(id) ?? null : (await data.getQuestionSet(id)) ?? null), [id, library]);
+    async () => (isLibrary ? getLibrarySet(id) ?? null : (await data.getQuestionSet(id)) ?? null), [id, isLibrary]);
   const [set, setSet] = useState<QuestionSet | null>(null);
   const [status, setStatus] = useState<'saved' | 'saving'>('saved');
   const timer = useRef<number>();
   const navigate = useNavigate();
   const { value: mine = [] } = useMySets();
-  const atLimit = mine.length >= TIERS[useTier()].savedQuestionSets;
+  const tier = useTier();
+  const atLimit = mine.length >= TIERS[tier].savedQuestionSets;
+  // Downgrade rules: sets past the plan limit stay, read-only.
+  const overLimit = !library && readOnlyIds(mine, TIERS[tier].savedQuestionSets).has(id);
+  library = library || overLimit;
 
   useEffect(() => { if (loaded) setSet(loaded); }, [loaded]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -76,7 +82,7 @@ export default function SetEditorPage({ library = false }: { library?: boolean }
 
       {library && (
         <Panel className="mb-5 flex flex-wrap items-center gap-3 bg-surface-2">
-          <p className="font-bold flex-1">{t('editor.readOnly')}</p>
+          <p className="font-bold flex-1">{overLimit ? t('editor.overLimit') : t('editor.readOnly')}</p>
           <Button
             variant="primary"
             disabled={atLimit}

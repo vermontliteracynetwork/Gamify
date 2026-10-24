@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight, DiceFive } from '@phosphor-icons/react';
@@ -19,14 +19,23 @@ export default function JoinPage() {
   const [wrong, setWrong] = useState(false);
   const [game, setGame] = useState<GameCode | null>(null);
   const [name, setName] = useState(() => rollName());
+  // Limits on code guessing: after 5 wrong codes, wait 30 seconds.
+  const misses = useRef(0);
+  const [waitUntil, setWaitUntil] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { if (waitUntil <= Date.now()) return; const id = window.setInterval(() => setNow(Date.now()), 500); return () => window.clearInterval(id); }, [waitUntil]);
+  const waiting = waitUntil > now ? Math.ceil((waitUntil - now) / 1000) : 0;
   const navigate = useNavigate();
 
   async function join(c = code) {
+    if (waitUntil > Date.now()) return;
     const upper = c.trim().toUpperCase();
     const cls = (await data.listClassrooms()).find((x) => x.joinCode === upper);
     if (cls) { navigate(`/arcade/${cls.id}`); return; }
     const g = await findGameCode(upper);
     if (g) { setGame(g); return; }
+    misses.current += 1;
+    if (misses.current >= 5) { misses.current = 0; setWaitUntil(Date.now() + 30000); setNow(Date.now()); }
     setWrong(true); window.setTimeout(() => setWrong(false), 900);
   }
   useEffect(() => { if (fromLink.length === 5) void join(fromLink); }, [fromLink]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -61,8 +70,8 @@ export default function JoinPage() {
         onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && code.length === 5) void join(); }}
         aria-label={t('join.code')} placeholder="BKDFT"
         className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-[3px] border-border bg-surface uppercase" />
-      <p className="min-h-6 font-bold" role="status" aria-live="polite">{wrong ? t('join.wrong') : ''}</p>
-      <button type="button" disabled={code.length !== 5} onClick={() => void join()}
+      <p className="min-h-6 font-bold" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
+      <button type="button" disabled={code.length !== 5 || waiting > 0} onClick={() => void join()}
         className="min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl inline-flex items-center gap-2 disabled:opacity-50" style={{ boxShadow: 'var(--shadow-sticker)' }}>
         {t('join.go')}<ArrowRight weight="bold" size={26} />
       </button>

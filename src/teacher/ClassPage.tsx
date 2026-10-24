@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DeviceTablet, GearSix, Plus, Star, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, DeviceTablet, GearSix, Plus, ProjectorScreen, Star, Trash, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -17,6 +17,7 @@ import { useMadeThemes } from '../theme/made';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import { readOnlyIds } from '../data/downgrade';
 import { newJoinCode } from '../auth/session';
 import Title from '../ui/Title';
 
@@ -33,6 +34,9 @@ export default function ClassPage() {
   const { value: students = [], reload: reloadStudents } = useAsync(() => data.listStudents(id), [id]);
   const { value: assignments = [], reload: reloadAssignments } = useAsync(() => data.listAssignments(id), [id]);
   const classroom = classes.find((c) => c.id === id);
+  const tier = useTier();
+  // Downgrade rules: classes past the plan limit stay, read-only.
+  const frozen = readOnlyIds(classes, TIERS[tier].classrooms).has(id);
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     // Classes made before join codes existed get one now.
@@ -45,10 +49,15 @@ export default function ClassPage() {
       <TeacherNav />
       <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>
       <PageHeader title={classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
-        actions={<Link to={`/arcade/${classroom.id}`} className={buttonClasses('primary')}><DeviceTablet weight="bold" size={18} />{t('class.openSignIn')}</Link>} />
+        actions={<>
+          <Link to={`/show/${classroom.joinCode ?? ''}`} className={buttonClasses('secondary')}><ProjectorScreen weight="bold" size={18} />{t('class.showCode')}</Link>
+          <Link to={`/arcade/${classroom.id}`} className={buttonClasses('primary')}><DeviceTablet weight="bold" size={18} />{t('class.openSignIn')}</Link>
+        </>} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
+      {frozen && <Panel className="mb-4 bg-surface-2"><p className="font-bold">{t('class.frozen')}</p></Panel>}
+      <fieldset disabled={frozen} className="contents">
       {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
       {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} />}
       {tab === 'sets' && <SetsTab classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} />}
@@ -72,6 +81,7 @@ export default function ClassPage() {
           })}
         </Panel>
       )}
+      </fieldset>
       <div className="mt-8">
         {confirmDelete ? (
           <Panel className="grid gap-2">

@@ -79,3 +79,25 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
 });
+
+test('join page: five wrong codes means a short wait; the code screen shows a QR code', async ({ page }, info) => {
+  await page.goto('/join');
+  for (let i = 0; i < 5; i++) {
+    await page.getByLabel('Class code').fill('QQQQQ');
+    await page.getByRole('button', { name: 'Go' }).click();
+    await page.waitForTimeout(150);
+  }
+  await expect(page.getByText(/Too many tries\. Wait \d+ seconds/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Go' })).toBeDisabled();
+});
+
+test.describe('signed in', () => {
+  test.use({ storageState: 'e2e/teacher-session.json' });
+  test('projector code screen', async ({ page }, info) => {
+    await page.goto('/show/BKDFT');
+    await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Read the code aloud: B K D F T/ })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: `test-results/code-screen-${info.project.name}.png` });
+  });
+});

@@ -6,9 +6,13 @@ import { data } from './index';
 // Saved on this device until cloud accounts (Stage 5) share them.
 export interface GameCode { code: string; gameId: string; setId: string; createdAt: string }
 const KEY = 'game-codes';
+// Game codes stop working after two weeks (development plan Stage 5:
+// codes expire), so an old code on a board can't be reused by strangers.
+export const GAME_CODE_DAYS = 14;
+const fresh = (c: GameCode, now = Date.now()) => now - Date.parse(c.createdAt) < GAME_CODE_DAYS * 86400000;
 
 export async function listGameCodes(): Promise<GameCode[]> {
-  return (await data.getSetting<GameCode[]>(KEY)) ?? [];
+  return ((await data.getSetting<GameCode[]>(KEY)) ?? []).filter((c) => fresh(c));
 }
 
 export async function makeGameCode(gameId: string, setId: string): Promise<GameCode> {
