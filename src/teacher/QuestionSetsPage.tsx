@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Copy, Eye, FileArrowUp, PencilSimple, Plus, Trash, WarningCircle } from '@phosphor-icons/react';
 import { TIERS } from '../config';
@@ -9,6 +9,9 @@ import type { QuestionSet } from '../data/types';
 import { blankQuestion, isPlayable } from '../engine/questions';
 import { t } from '../i18n';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
+import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
+import SetCover from '../games/SetCover';
+import SetFilterBar from '../games/SetFilterBar';
 import TeacherNav from '../ui/TeacherNav';
 import Title from '../ui/Title';
 
@@ -65,6 +68,7 @@ export default function QuestionSetsPage() {
                   <p className="text-muted text-sm font-bold">
                     {t('sets.questions', { count: s.questions.length })}
                     {notReady > 0 && <span className="text-text ml-2 inline-flex items-center gap-1"><WarningCircle weight="fill" size={16} />{t('sets.needsWork', { count: notReady })}</span>}
+                    {missingDetails(s).length > 0 && <span className="text-text ml-2 inline-flex items-center gap-1"><WarningCircle weight="fill" size={16} />{t('sets.needsDetails')}</span>}
                   </p>
                 </div>
                 {confirming === s.id ? (
@@ -91,59 +95,37 @@ export default function QuestionSetsPage() {
 }
 
 function Library({ atLimit, onCopied }: { atLimit: boolean; onCopied: (id: string) => void }) {
-  const [query, setQuery] = useState('');
-  const [subject, setSubject] = useState('');
-  const subjects = useMemo(() => [...new Set(LIBRARY.map((s) => s.subject))].sort(), []);
-  const shown = LIBRARY.filter((s) =>
-    (!subject || s.subject === subject) &&
-    (!query.trim() || `${s.name} ${s.subject} ${s.grade}`.toLowerCase().includes(query.trim().toLowerCase())));
+  const [filter, setFilter] = useState<SetFilter>({});
+  const shown = LIBRARY.filter((s) => matchesFilter(s, filter));
 
   return (
     <div className="grid gap-3">
       <p className="font-bold text-text">{t('sets.copyNote')}</p>
-      <div className="flex flex-wrap gap-2">
-        <input
-          id="library-search"
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('sets.search')}
-          aria-label={t('sets.search')}
-          className="min-h-11 flex-1 min-w-48 px-4 rounded-input border-[2px] border-border bg-surface font-bold"
-        />
-        <select
-          id="library-subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          aria-label={t('sets.allSubjects')}
-          className="min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold"
-        >
-          <option value="">{t('sets.allSubjects')}</option>
-          {subjects.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-3">
+      <SetFilterBar value={filter} onChange={setFilter} />
+      {shown.length === 0 && <Panel><p className="font-bold">{t('filter.none')}</p></Panel>}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {shown.map((s) => (
-          <Panel key={s.id} className="flex flex-col gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · Grades {s.grade}</p>
+          <div key={s.id} className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <SetCover set={s} className="aspect-[16/7] border-b-[2.5px] border-border" />
+            <div className="p-4 flex flex-col gap-2 flex-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</p>
               <h2 className="font-display text-xl font-bold"><Title text={s.name} /></h2>
               <p className="text-muted text-sm font-bold">{t('sets.questions', { count: s.questions.length })}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-auto">
-              <Link to={`/teacher/library/${s.id}`} className={buttonClasses()}><Eye weight="bold" size={18} />{t('sets.preview')}</Link>
-              <Button
-                disabled={atLimit}
-                onClick={async () => {
-                  const copy = newSet(s.name, s.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] })));
+              <p className="flex flex-wrap gap-1">
+                {(s.standards ?? []).map((c) => <span key={c} className="text-xs font-bold px-2 py-0.5 rounded-pill border border-border bg-surface-2">{c}</span>)}
+                {(s.tags ?? []).map((tag) => <span key={tag} className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 text-muted">#{tag}</span>)}
+              </p>
+              <div className="flex flex-wrap gap-2 mt-auto pt-1">
+                <Link to={`/teacher/library/${s.id}`} className={buttonClasses()}><Eye weight="bold" size={18} />{t('sets.preview')}</Link>
+                <Button disabled={atLimit} onClick={async () => {
+                  const copy = { ...newSet(s.name, s.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),
+                    subject: s.subject, grades: s.grades, tags: s.tags, standards: s.standards, noStandard: s.noStandard, cover: s.cover };
                   await data.saveQuestionSet(copy);
                   onCopied(copy.id);
-                }}
-              >
-                <Copy weight="bold" size={18} />{t('sets.copy')}
-              </Button>
+                }}><Copy weight="bold" size={18} />{t('sets.copy')}</Button>
+              </div>
             </div>
-          </Panel>
+          </div>
         ))}
       </div>
     </div>

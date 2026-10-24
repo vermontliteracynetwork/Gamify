@@ -1,3 +1,4 @@
+import type { SetDetails } from './setDetails';
 // Gamify's data model (docs/product-plan.md, question engine and reports).
 // Multiple choice only to start (decided 2026-10-24); other question kinds
 // are added to the Question union later without changing existing data.
@@ -14,7 +15,7 @@ export interface MultipleChoiceQuestion {
 
 export type Question = MultipleChoiceQuestion;
 
-export interface QuestionSet {
+export interface QuestionSet extends SetDetails {
   id: string;
   name: string;
   questions: Question[];

@@ -10,6 +10,7 @@ ships without a line here.
 | Fredoka (font) | Display text, standing in for Frankfurter Medium | @fontsource/fredoka (Google Fonts) | SIL Open Font License 1.1 | 2026-10-24 |
 | Frankfurter Medium (font) | Display text (brand font, your choice 2026-10-24) | **Not shipped yet.** A commercial font: needs a web font license bought by you, then the .woff2 file added to `public/fonts/` with an `@font-face` in `src/index.css`. A Canva license does not cover web use. | **Waiting on you** | |
 | Inclusive Sans (font, by Olivia King) | All body text, platform and game stages (your call, 2026-10-24) | @fontsource/inclusive-sans (Google Fonts) | SIL Open Font License 1.1 | 2026-10-24 |
+| Common Core State Standards codes and domain names (no standard text) | Question set details and filters | corestandards.org | Public license from NGA Center and CCSSO: free use with the notice "© Copyright 2010. National Governors Association Center for Best Practices and Council of Chief State School Officers. All rights reserved." Show that notice on the public site footer and the set details help. | 2026-10-24 |
 | Phosphor Icons | UI icons | @phosphor-icons/react | MIT | 2026-10 |
 | React, React DOM, React Router | App framework | npm | MIT | 2026-10 |
 | Motion | Animation | npm `motion` | MIT | 2026-10 |

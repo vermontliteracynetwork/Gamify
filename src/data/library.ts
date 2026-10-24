@@ -1,3 +1,4 @@
+import type { Grade, Subject } from './setDetails';
 import type { MultipleChoiceQuestion, QuestionSet } from './types';
 
 // Public starter library: original question sets written for Gamify so a new
@@ -6,19 +7,45 @@ import type { MultipleChoiceQuestion, QuestionSet } from './types';
 
 type Row = [prompt: string, right: string, ...wrong: string[]];
 
-function makeSet(id: string, name: string, grade: string, subject: string, rows: Row[]): LibrarySet {
+// Each set's details: grades, subject, tags and Common Core standards
+// (null where Common Core doesn't cover the subject).
+type Details = { grades: [Grade, Grade]; subject: Subject; tags: string[]; standards: string[] | null };
+const DETAILS: Record<string, Details> = {
+  'lib-short-vowels': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'vowels'], standards: ['RF.K.3', 'RF.1.3'] },
+  'lib-rhymes': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'rhyming', 'phonological awareness'], standards: ['RF.K.2', 'RF.1.2'] },
+  'lib-sight-words': { grades: ['K', '1'], subject: 'Reading', tags: ['sight words', 'high-frequency words'], standards: ['RF.K.3', 'RF.1.3'] },
+  'lib-capitals-punctuation': { grades: ['1', '2'], subject: 'Writing', tags: ['capital letters', 'punctuation', 'conventions'], standards: ['L.1.2', 'L.2.2'] },
+  'lib-nouns-verbs': { grades: ['2', '3'], subject: 'Language', tags: ['grammar', 'parts of speech'], standards: ['L.2.1', 'L.3.1'] },
+  'lib-synonyms-antonyms': { grades: ['2', '4'], subject: 'Language', tags: ['vocabulary', 'word relationships'], standards: ['L.4.5'] },
+  'lib-add-10': { grades: ['K', '1'], subject: 'Math', tags: ['addition', 'math facts'], standards: ['K.OA.5', '1.OA.6'] },
+  'lib-sub-10': { grades: ['K', '1'], subject: 'Math', tags: ['subtraction', 'math facts'], standards: ['K.OA.5', '1.OA.6'] },
+  'lib-add-sub-20': { grades: ['1', '2'], subject: 'Math', tags: ['addition', 'subtraction', 'fluency'], standards: ['1.OA.6', '2.OA.2'] },
+  'lib-place-value': { grades: ['1', '3'], subject: 'Math', tags: ['place value', 'tens and ones'], standards: ['1.NBT.2', '2.NBT.1'] },
+  'lib-mult-2-5-10': { grades: ['2', '3'], subject: 'Math', tags: ['multiplication', 'math facts'], standards: ['3.OA.7'] },
+  'lib-fractions': { grades: ['3', '4'], subject: 'Math', tags: ['fractions'], standards: ['3.NF.1', '4.NF.1'] },
+  'lib-time': { grades: ['1', '3'], subject: 'Math', tags: ['time', 'clocks'], standards: ['1.MD.3', '2.MD.7', '3.MD.1'] },
+  'lib-shapes': { grades: ['K', '2'], subject: 'Math', tags: ['geometry', 'shapes'], standards: ['K.G.2', '1.G.1', '2.G.1'] },
+  'lib-states-of-matter': { grades: ['2', '4'], subject: 'Science', tags: ['matter', 'physical science'], standards: null },
+  'lib-animals': { grades: ['K', '3'], subject: 'Science', tags: ['animals', 'habitats', 'life science'], standards: null },
+  'lib-literary-terms': { grades: ['6', '12'], subject: 'Reading', tags: ['literature', 'literary terms'], standards: ['RL.6.4', 'RL.9-10.4'] },
+  'lib-algebra-1': { grades: ['8', '10'], subject: 'Math', tags: ['algebra', 'equations'], standards: ['8.EE.7', 'A-REI.3'] },
+  'lib-cell-biology': { grades: ['9', '10'], subject: 'Science', tags: ['cells', 'biology'], standards: null },
+  'lib-civics': { grades: ['7', '12'], subject: 'Social studies', tags: ['civics', 'government'], standards: null },
+  'lib-intro-statistics': { grades: ['College', 'College'], subject: 'Math', tags: ['statistics', 'data'], standards: ['S-ID.2'] },
+};
+
+function makeSet(id: string, name: string, _grade: string, _subject: string, rows: Row[]): QuestionSet {
   const questions: MultipleChoiceQuestion[] = rows.map(([prompt, right, ...wrong], i) => ({
     id: `${id}:${i + 1}`, kind: 'mc', prompt, choices: [right, ...wrong], correctIndex: 0,
   }));
-  return { id, name, questions, ownerId: 'gamify', visibility: 'public', createdAt: '2026-10-24', updatedAt: '2026-10-24', grade, subject };
+  const d = DETAILS[id];
+  return {
+    id, name, questions, ownerId: 'gamify', visibility: 'public', createdAt: '2026-10-24', updatedAt: '2026-10-24',
+    grades: d.grades, subject: d.subject, tags: d.tags, standards: d.standards ?? [], noStandard: d.standards === null,
+  };
 }
 
-export interface LibrarySet extends QuestionSet {
-  grade: string;
-  subject: string;
-}
-
-export const LIBRARY: LibrarySet[] = [
+export const LIBRARY: QuestionSet[] = [
   makeSet('lib-short-vowels', 'Short vowel sounds', 'K-1', 'Reading', [
     ['Which word has the short a sound, like in "cat"?', 'map', 'cake', 'rain', 'saw'],
     ['Which word has the short e sound, like in "bed"?', 'pet', 'feet', 'me', 'her'],
@@ -273,6 +300,6 @@ export const LIBRARY: LibrarySet[] = [
   ]),
 ];
 
-export function getLibrarySet(id: string): LibrarySet | undefined {
+export function getLibrarySet(id: string): QuestionSet | undefined {
   return LIBRARY.find((s) => s.id === id);
 }

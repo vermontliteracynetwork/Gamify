@@ -11,6 +11,7 @@ import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { Button, Panel } from '../ui/kit';
 import { newSet } from './QuestionSetsPage';
+import SetDetailsPanel from './SetDetailsPanel';
 import Title from '../ui/Title';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -80,7 +81,8 @@ export default function SetEditorPage({ library = false }: { library?: boolean }
             variant="primary"
             disabled={atLimit}
             onClick={async () => {
-              const copy = newSet(set.name, set.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] })));
+              const copy = { ...newSet(set.name, set.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),
+                subject: set.subject, grades: set.grades, tags: set.tags, standards: set.standards, noStandard: set.noStandard, cover: set.cover };
               await data.saveQuestionSet(copy);
               navigate(`/teacher/sets/${copy.id}`);
             }}
@@ -89,6 +91,8 @@ export default function SetEditorPage({ library = false }: { library?: boolean }
           </Button>
         </Panel>
       )}
+
+      <SetDetailsPanel set={set} onChange={update} readOnly={library} />
 
       <ol className="grid gap-3 list-none p-0 m-0">
         {set.questions.map((q, i) => (
