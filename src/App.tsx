@@ -21,6 +21,7 @@ import JoinPage from './public/JoinPage';
 import { RequireSignIn, RequireTeacher } from './public/SignInGate';
 import ClassesPage from './teacher/ClassesPage';
 import ClassPage from './teacher/ClassPage';
+import ReportsPage from './teacher/ReportsPage';
 import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
@@ -57,6 +58,7 @@ function AnimatedRoutes() {
           <Route path="/teacher/themes" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
           <Route path="/teacher/themes/:gameId" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
           <Route path="/teacher/themes/:gameId/template" element={<RequireTeacher><TemplatePage /></RequireTeacher>} />
+          <Route path="/teacher/reports" element={<RequireTeacher><ReportsPage /></RequireTeacher>} />
           <Route path="/teacher/classes" element={<RequireTeacher><ClassesPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
           <Route path="/arcade" element={<Arcade />} />
