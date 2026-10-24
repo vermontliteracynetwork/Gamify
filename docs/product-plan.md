@@ -1116,3 +1116,36 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 34 | **Photo and video idea:** students painting a template page, scanning it, and seeing their art drop onto the board seconds later. | The demo video for the website and conferences (with signed photo releases) | Teacher, 2026-10-24 |
 | 35 | **"Every student gets their own Arcade, filled with exactly what they're working on."** Assign sets to the class or to one student, and every game draws from them. | Differentiation teachers can feel; strong for IEPs and intervention groups | Teacher, 2026-10-24; Mode 3 |
 | 36 | **"Start simple. Make it yours."** Gamify's look is clean on purpose, so your class's own theme is the star. | Frames simple house themes as an invitation to design; drives Theme Builder and gallery use | Teacher, 2026-10-24 |
+
+### 10A. Blog post ideas (website "Ways to use Gamify")
+
+Direct from you (2026-10-24): a running list of blog-style articles for the
+website showing teachers ways to use Gamify. Add to it whenever a use idea
+comes up (same standing rule as the marketing list). Each post should show
+real classroom photos (with releases), screenshots, and a step-by-step
+"try it tomorrow" box. No other company names in published posts.
+
+| # | Working title | The idea | Features it shows | Audience |
+|---|---|---|---|---|
+| 1 | **Design a Theme as a Class, Then Play Fractions** | Each student designs one piece of a class theme (the background, a power-up, the player piece, the board) with markers or paint, the class scans them in, and the first game in the new theme is a fractions question set. Art project and math review in one. | Theme Builder, template pages + scan, student design mode, "Designed by" credit | Teacher's idea, 2026-10-24; grades 2-6 |
+| 2 | **Whole Class vs the Computer: A Friday Review Ritual** | One team, one goal: the class beats the CPU on review questions before the weekend. | Share mode, class vs CPU, read-aloud, calm mode | K-8 |
+| 3 | **Can Your Class Beat the Teacher?** | Teacher plays the other side; tips for keeping it close and fun. | Share, class vs teacher | K-8 |
+| 4 | **No Devices? Run a Full Review Game From One Screen** | Up to 10 teams, whiteboards for answers, teacher taps right or not yet. | Share mode, teams, undo | Under-resourced classrooms |
+| 5 | **Every Student Sees the Board: Share Mirror for Students With Visual Impairments** | Set up a view-only mirror on a student's iPad with their own zoom and read-aloud; IEP accommodation tips. | Share Mirror, viewer codes, accessibility settings | Special education, TVIs |
+| 6 | **Sensory-Friendly Game Time** | How to set up calm mode, sound levels and presets for students who are sensitive to sound and motion, and save them as defaults. | Gear settings, presets, teacher defaults | Special education, autism support |
+| 7 | **One Question Set, Five Days, Five Games** | A week of spaced practice: Monday Match Up, Tuesday Peg Drop, and so on, all from the same set. Why spacing works (research brief). | Many games per set, Arcade, reports | All grades |
+| 8 | **Differentiate Without Extra Prep** | Assign the class set to everyone plus an extra or easier set to small groups; the Arcade mixes them automatically. | Assigning sets to class and individuals, Arcade | Intervention, IEP goals |
+| 9 | **Turn Game Data Into Your Next Lesson** | Use the "by question" report to find the most common wrong answer and reteach it. | Reports, item analysis, CSV | All grades, data teams |
+| 10 | **Bring Gamify to Your IEP Meeting** | Pull a student's report across games to show progress and accommodations used. | By-student report, settings logged | Special education |
+| 11 | **Classroom Management in Live Games** | Name dice, name approval, the Lock button with a private message, hiding the leaderboard. | Name options, Lock, live monitor | New teachers, upper elementary/middle |
+| 12 | **Silly Names, Zero Drama** | Why the name dice beats typed names with young kids. | Name dice, bad-word filter | K-3 |
+| 13 | **Homework Kids Actually Do** | Assign through Google Classroom with a direct link; check the live monitor in class, reports at home. | Assignments, Google Classroom share, reports | Grades 3-8 |
+| 14 | **Morning Work That Runs Itself** | Students sign in to their Arcade during arrival and practice the week's sets. | Arcade, picture password sign-in | K-5 |
+| 15 | **Teams Your Way: Breakout-Room Style Grouping** | Random, balanced or hand-picked teams; saving reading groups for reuse. | Team assignment, saved team sets | All grades |
+| 16 | **Student Co-Designers: Kids Shape the Games They Play** | How classes gave feedback and designed features (Junior Designers plan); descriptive writing and design thinking. | Theme Builder, junior designers | Grades 3-6 |
+| 17 | **Collect Pals, Build Habits** | Using XP and the shop for steady practice, daily caps, closing the shop during lessons. | XP, shop, teacher controls | Paid classrooms |
+| 18 | **Bilingual Review Games** | Writing bilingual question sets and switching menus and read-aloud to Spanish. | Language settings, read-aloud | ELL and dual-language classrooms |
+| 19 | **Make a School-Spirit Theme** | School colors and mascot theme for spirit week, shared with the whole school. | Theme Builder, share to school | Schools, admins |
+| 20 | **Why Wrong Answers Cost Nothing in Gamify** | The research on low-stakes practice, feedback and "Let's look back." | Question engine, research brief | Teachers, parents, admins |
+| 21 | **Setting Up Gamify on School iPads and Chromebooks** | IT whitelist, Guided Access and Apple Classroom pairing for full lockdown. | IT page, Lock + device tools | Tech coordinators |
+| 22 | **From Paper to Play: Importing Your Old Question Sets** | CSV import from spreadsheets teachers already have. | CSV import | All teachers |

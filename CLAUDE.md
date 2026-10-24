@@ -72,7 +72,9 @@ item done with the date as it ships, and keep its progress log current.
 
 Whenever a feature, design choice or research finding could be used well
 in marketing, add it to `docs/product-plan.md` section 10 in the same
-change. The teacher adds their own too; never remove theirs.
+change. The teacher adds their own too; never remove theirs. The same goes
+for the blog post ideas list (section 10A): any new way to use Gamify in a
+classroom becomes a post idea there.
 
 ## Legal readiness (mandatory, we sell this)
 

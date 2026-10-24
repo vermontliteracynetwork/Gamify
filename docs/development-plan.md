@@ -313,6 +313,9 @@ limit switches correctly, a class designs and plays its own theme.
       browser.
 - [ ] Public website: landing page (using the marketing list), pricing
       page, demo video plan, help center, contact/support, status page.
+- [ ] Blog ("Ways to use Gamify"): publish the first 5-8 posts from
+      `docs/product-plan.md` section 10A at launch, starting with the
+      class-designed theme + fractions post.
 - [ ] Teacher-side usage analytics (no tracking on student pages).
 
 **Done when:** every `[!]` above is cleared and the teacher approves the
