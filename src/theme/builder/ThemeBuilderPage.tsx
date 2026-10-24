@@ -134,7 +134,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     } finally { setBusy(false); }
   }
   async function save() {
-    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : draft.designedBy };
+    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : draft.designedBy?.trim() || undefined };
     await saveMadeTheme(theme);
     reload();
     setParams({ id: theme.id });
@@ -180,6 +180,14 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               {!isNew && <Button variant="danger" onClick={() => void remove()}><Trash weight="bold" size={18} />{t('builder.delete')}</Button>}
               {!isNew && !owner && game.modes.length > 0 && <Button onClick={() => navigate(`/games/${gameId}`)}>{t('builder.tryIt')}</Button>}
             </div>
+            {!owner && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <label htmlFor="theme-by" className="font-bold">{t('builder.designedBy')}</label>
+                <input id="theme-by" value={draft.designedBy ?? ''} maxLength={30} onChange={(e) => setDraft({ ...draft, designedBy: e.target.value || undefined })} placeholder={t('builder.designedByPlaceholder')}
+                  className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-40 max-w-72" />
+                <span className="text-xs font-semibold text-muted">{t('builder.designedByHint')}</span>
+              </div>
+            )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
               {(['paper', 'pictures', 'colors'] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}

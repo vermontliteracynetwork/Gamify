@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './ui/NavBar';
@@ -12,6 +12,7 @@ import { RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
+import { pageTitle } from './ui/pageTitle';
 
 // Pages load when first opened, so the first screen arrives fast on older
 // iPads and school networks.
@@ -45,6 +46,7 @@ const ItPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m
 function AnimatedRoutes() {
   const location = useLocation();
   const reduce = useReducedMotion();
+  useEffect(() => { document.title = pageTitle(location.pathname); }, [location.pathname]);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
