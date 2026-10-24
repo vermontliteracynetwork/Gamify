@@ -48,7 +48,10 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
       >
         <div className="flex items-center gap-3 flex-wrap">
           <TeamBadge colorIndex={player.colorIndex} size={48} />
-          <span className="font-display text-3xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
+          <span className="grid">
+            <span className="font-display text-3xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
+            {player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
+          </span>
           <span className="flex-1" />
           <button type="button" onClick={() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings)}
             className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2">

@@ -10,6 +10,8 @@ export interface TurnPlayer {
   kind: TurnKind;
   colorIndex: number;
   score: number;
+  // Students on this team, when teams come from the class list.
+  members?: string[];
 }
 
 export interface TurnState {

@@ -751,6 +751,15 @@ export const en = {
   'start.step.students': 'Paste your class list',
   'start.step.assign': 'Assign a question set',
   'start.step.signin': 'Have a student sign in and play',
+  'teams.fromClass': 'Put students on the teams (optional)',
+  'teams.pickClass': 'Class list',
+  'teams.noClass': 'No class list, team names only',
+  'teams.random': 'Random teams',
+  'teams.balanced': 'Balanced teams',
+  'teams.handPick': 'Or hand-pick: tap a student, then tap a team.',
+  'teams.unplaced': 'Not on a team yet',
+  'teams.saveName': 'Name these teams',
+  'teams.save': 'Save teams',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

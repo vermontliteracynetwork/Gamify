@@ -370,7 +370,7 @@ export default function GameShow() {
                 return (
                   <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
                     <TeamBadge colorIndex={p.colorIndex} />
-                    <span className="flex-1 min-w-0 font-bold truncate">{p.name}</span>
+                    <span className="flex-1 min-w-0 grid"><span className="font-bold truncate">{p.name}</span>{p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}</span>
                     {lead && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}
                     <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl font-bold tabular-nums" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>
                   </li>

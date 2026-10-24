@@ -63,3 +63,23 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await expect(page.getByText(/The computer (got it|missed)!/)).toBeVisible({ timeout: 8000 });
   expect(problems).toEqual([]);
 });
+
+test('Game Show: teams from the class list, balanced, and saved', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:classrooms')) return;
+    localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '', joinCode: 'BCDFG' }]));
+    localStorage.setItem('gamify:students', JSON.stringify(['Ava', 'Ben', 'Cal', 'Dee'].map((n, i) => ({ id: `s${i}`, classroomId: 'c1', name: n, picturePassword: ['cat', 'dog'] }))));
+  });
+  await openSetup(page, '/games/game-show');
+  await page.getByRole('radio', { name: 'Surprise cards' }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByLabel('Class list').selectOption('c1');
+  await page.getByRole('button', { name: 'Balanced teams' }).click();
+  await expect(page.getByRole('group').first().getByRole('button')).toHaveCount(2);
+  await page.getByLabel('Name these teams').fill('Reading groups');
+  await page.getByRole('button', { name: 'Save teams' }).click();
+  await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
+  await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
+  await finishSetup(page);
+  await expect(page.getByRole('dialog').getByText(/(Ava|Ben|Cal|Dee), (Ava|Ben|Cal|Dee)/)).toBeVisible();
+});
