@@ -1,8 +1,9 @@
 # Gamify -- Development Standards
 
 Standalone K-12 educational gamification platform (Vermont Literacy
-Network). See `docs/platform-spec.md` for the product spec/roadmap and
-`docs/plink-oh-spec.md` for the first game module's rules.
+Network). See `docs/product-plan.md` for the commercial product plan
+(newest), `docs/platform-spec.md` for the original spec, and
+`docs/question-engine.md` for the shared game engine.
 
 ## The Three-Lens Standard (mandatory)
 
@@ -75,5 +76,5 @@ change. The teacher adds their own too; never remove theirs.
   license recorded in `docs/asset-ledger.md` before it ships. No "found
   online" assets, nothing resembling a famous character or game's look.
 - Student pages: no ads, no trackers, no upgrade prompts, minimum data
-  (code + nickname, no student accounts). Accessibility features are never
+  (code + nickname or a class-list sign-in, no email student accounts). Accessibility features are never
   paywalled.

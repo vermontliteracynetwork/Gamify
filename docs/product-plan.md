@@ -97,6 +97,30 @@ mode: they are games that plug into these same four modes.
   play. Assignment lock rules from `docs/question-engine.md` apply.
 - Also covers single-player activities (flashcards, match up, sort).
 
+**Two ways into a Solo game** (direct from you, 2026-10-24):
+1. **Assignment through the join page:** the teacher assigns a specific
+   question set (and a game, or any game); students enter the code at
+   `<domain>.com/join` or tap the direct link (details below).
+2. **The student's Arcade page** (paid classrooms): the student signs in
+   to their own Arcade, picks any game, and gets **randomized questions
+   from every question set currently assigned to them**: sets assigned to
+   the whole class plus sets assigned to them personally. The focus star
+   still works (starred sets first, `docs/question-engine.md`).
+   - Students in **free** classrooms can **view** the Arcade but not play
+     from it; they play through teacher assignments and live games.
+
+**Assigning question sets (to the class and/or each student):**
+- Assign a set to the **whole class**, to **chosen students**, or both, so
+  one student can work on extra or different sets (an IEP goal, an
+  intervention group, an extension) while the class works on the shared
+  set. Shown as a simple grid: students down the side, sets across the top.
+- Each assigned set can have a start and end date, so the Arcade always
+  draws from what the student is working on now.
+- **Free:** **one** assigned set at a time per student. **Plus:** proposed
+  up to 5 at a time per student. **Pro:** unlimited.
+- Changing an assignment changes the Arcade's question mix immediately;
+  reports show which set each question came from.
+
 **Assigned Solo games** (direct from you, 2026-10-24):
 1. Teacher picks a question set and a game (or "any game"), sets the
    assignment options (target questions, rounds, due date, which settings
@@ -652,6 +676,8 @@ Competitor cross-comparison and the reasoning behind each line:
 | **XP and shop** (section 4F) | **No**, and students never see it | **Yes** | **Yes** | Yes |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
+| Question sets assigned at a time, per student (class and/or individual) | **1** | Proposed 5 | Unlimited | Unlimited |
+| **Student Arcade page** (play any game, questions from all assigned sets) | **View only** | Yes | Yes | Yes |
 | Versus on two devices | No | Yes | Yes | Yes |
 | Reports | Report for every game played (all views, CSV, print), 30 days of history | Full history | Full history, trends, PDF/Sheets export | + school and admin views |
 | Names, approval, rename, remove player, bad-word filter, teams | **All** | All | All | All |
@@ -908,6 +934,14 @@ game only decides *when to ask* and *what a right answer does*.
     suggestion: at least one game in every mode (for example Team Board,
     Match Up, Peg Drop, Four in a Row) so free teachers try all four ways
     to play, with the rest on Plus and Pro.
+11. **What "view only" Arcade looks like for free students.** It sits
+    close to principle 2 (students never see what their class is
+    missing). Claudia's suggestion to keep it on the safe side: the free
+    Arcade shows the games as a gallery with "Your teacher will start a
+    game" and the student's assigned set, with no locks, prices,
+    "upgrade" words or crossed-out games. Teachers see the upgrade
+    options on their own pages. OK?
+12. **Plus limit for assigned sets per student**: Claudia proposes 5.
 
 ## 11. Not yet considered: pre-build checklist (2026-10-24)
 
@@ -924,7 +958,8 @@ start to build?" Claudia's gap review of everything above.
    a multiple-choice question becomes a match pair) or "one set, every
    game" breaks. Also images, audio, math notation and alt text.
 2. **How a student proves who they are** on a shared iPad without an
-   account. XP, reports and the Lock all depend on it. Picking your name
+   account. XP, reports, the Lock and now the **student Arcade sign-in**
+   all depend on it. Picking your name
    from a list lets a student pick a classmate's name. Options: a picture
    password per student, a printed QR login badge, or a short personal
    code. K-1 friendly and quick.
@@ -1055,3 +1090,4 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 32 | **"Designed by Room 12."** Every class-made theme carries its designers' credit. | Pride and ownership; shareable moments for families and school social media | Section 4 Theme Builder |
 | 33 | **"One drawing, every game."** A hand-drawn theme skins all of Gamify's games at once. | Shows the platform's scale in one sentence | Section 4 |
 | 34 | **Photo and video idea:** students painting a template page, scanning it, and seeing their art drop onto the board seconds later. | The demo video for the website and conferences (with signed photo releases) | Teacher, 2026-10-24 |
+| 35 | **"Every student gets their own Arcade, filled with exactly what they're working on."** Assign sets to the class or to one student, and every game draws from them. | Differentiation teachers can feel; strong for IEPs and intervention groups | Teacher, 2026-10-24; Mode 3 |

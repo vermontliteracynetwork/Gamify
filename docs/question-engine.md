@@ -16,6 +16,9 @@ Dashboard that came from a third party still has to pass the asset rules in
   correct index, optional image + alt text) and **typed** (build a
   sentence, fill in blanks). Typed questions show answer boxes instead of
   choice buttons.
+- Pool: in Gamify, the sets **currently assigned to this student** (whole
+  class + their own, product plan Mode 3); an assignment code uses only its
+  own set.
 - Picker: if any set is starred, all questions come from starred sets;
   otherwise every set is equally likely. Random set, then random question,
   avoiding an immediate repeat.
