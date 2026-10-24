@@ -50,6 +50,18 @@ export interface SetAssignment {
   endsOn?: string;
 }
 
+// A "Tell Gamify" report to the developer: bugs, game problems, ideas.
+// Student reports never carry a name.
+export interface FeedbackReport {
+  id: string;
+  at: string;
+  kind: 'bug' | 'problem' | 'idea';
+  details: string;
+  where: string;
+  role: 'teacher' | 'student';
+  device: string;
+}
+
 export type QuestionOutcome = 'right' | 'skipped' | 'left' | 'timeout';
 
 // One row per question shown, in every game and mode (product plan 4C).

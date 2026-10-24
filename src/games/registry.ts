@@ -1,8 +1,9 @@
+import { starQuizManifest } from './practice/StarQuiz';
 import type { GameManifest } from './types';
 
 // All games, in the order they show in the Arcade. Games are added here as
 // they're built (development plan Part 4).
-export const GAMES: GameManifest[] = [];
+export const GAMES: GameManifest[] = [starQuizManifest];
 
 export function getGame(id: string): GameManifest | undefined {
   return GAMES.find((g) => g.id === id);

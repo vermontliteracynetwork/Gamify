@@ -1,5 +1,5 @@
 import type { DataStore } from './store';
-import type { Classroom, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
+import type { Classroom, FeedbackReport, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
 
 // Browser-storage backend. Falls back to memory when localStorage is
 // unavailable (private mode, quota), so the app still works for the session.
@@ -9,11 +9,12 @@ type Tables = {
   students: Student[];
   assignments: SetAssignment[];
   log: QuestionLogEntry[];
+  feedback: FeedbackReport[];
   settings: Record<string, unknown>;
 };
 
 const PREFIX = 'gamify:';
-const empty = (): Tables => ({ sets: [], classrooms: [], students: [], assignments: [], log: [], settings: {} });
+const empty = (): Tables => ({ sets: [], classrooms: [], students: [], assignments: [], log: [], feedback: [], settings: {} });
 
 export function createLocalStore(storage: Storage | null = safeStorage()): DataStore {
   const memory = empty();
@@ -73,6 +74,10 @@ export function createLocalStore(storage: Storage | null = safeStorage()): DataS
         (!filter?.classroomId || e.classroomId === filter.classroomId) &&
         (!filter?.studentId || e.studentId === filter.studentId));
     },
+
+    // Saved locally until the owner inbox exists (Stage 7B), then sent there.
+    async sendFeedback(report) { write('feedback', [...read('feedback'), report]); },
+    async listFeedback() { return read('feedback'); },
 
     async getSetting<T>(key: string) { return read('settings')[key] as T | undefined; },
     async setSetting<T>(key: string, value: T) { write('settings', { ...read('settings'), [key]: value }); },

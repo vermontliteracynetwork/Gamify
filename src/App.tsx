@@ -5,6 +5,8 @@ import Home from './student/Home';
 import QuestionSetsPage from './teacher/QuestionSetsPage';
 import SetEditorPage from './teacher/SetEditorPage';
 import ImportPage from './teacher/ImportPage';
+import StarQuiz from './games/practice/StarQuiz';
+import { SettingsProvider } from './settings/SettingsContext';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -21,6 +23,7 @@ function AnimatedRoutes() {
       >
         <Routes location={location}>
           <Route path="/" element={<Home />} />
+          <Route path="/games/star-quiz" element={<StarQuiz />} />
           <Route path="/teacher" element={<Navigate to="/teacher/sets" replace />} />
           <Route path="/teacher/sets" element={<QuestionSetsPage />} />
           <Route path="/teacher/sets/import" element={<ImportPage />} />
@@ -70,6 +73,7 @@ function AmbientBackground() {
 
 export default function App() {
   return (
+    <SettingsProvider>
     <BrowserRouter>
       <div className="min-h-dvh relative text-text font-body">
         <AmbientBackground />
@@ -77,5 +81,6 @@ export default function App() {
         <AnimatedRoutes />
       </div>
     </BrowserRouter>
+    </SettingsProvider>
   );
 }

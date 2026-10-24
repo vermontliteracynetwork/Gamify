@@ -1,4 +1,4 @@
-import type { Classroom, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
+import type { Classroom, FeedbackReport, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
 
 // Every screen talks to this interface, never to storage directly. Local
 // backend now (src/data/localStore.ts); a Supabase backend with the same
@@ -23,6 +23,9 @@ export interface DataStore {
 
   logQuestion(entry: QuestionLogEntry): Promise<void>;
   listQuestionLog(filter?: { classroomId?: string; studentId?: string }): Promise<QuestionLogEntry[]>;
+
+  sendFeedback(report: FeedbackReport): Promise<void>;
+  listFeedback(): Promise<FeedbackReport[]>;
 
   getSetting<T>(key: string): Promise<T | undefined>;
   setSetting<T>(key: string, value: T): Promise<void>;

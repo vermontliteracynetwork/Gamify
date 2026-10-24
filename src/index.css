@@ -143,3 +143,16 @@ button, a, [role="button"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Player settings (src/settings). Set as data attributes on <html>. */
+html[data-text-size="large"] { font-size: 18px; }
+html[data-text-size="larger"] { font-size: 20px; }
+html[data-comfort="on"] body { letter-spacing: 0.04em; word-spacing: 0.12em; line-height: 1.75; }
+html[data-contrast="high"] {
+  --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #e9e3fb;
+  --text: #000000; --text-muted: #1c1730; --border-soft: #1c1730;
+}
+html[data-dim="on"] body { filter: brightness(0.85); }
+html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-motion="still"] *::after {
+  animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important;
+}
