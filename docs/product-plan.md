@@ -41,7 +41,7 @@ mode: they are games that plug into these same four modes.
 | # | Mode | Who holds a device | Feels like | Needs a server? |
 |---|---|---|---|---|
 | 1 | **Class Live** (whole group, own devices) | Every student + teacher host | Classic Blooket hosting | Yes (real-time) |
-| 2 | **Class Show** (whole group, one screen) | Teacher only, cast or on the board | Baamboozle | No |
+| 2 | **Share** (whole group, one screen; 1 to 10 teams, or the class vs the CPU or the teacher) | Teacher only, cast or on the board | Baamboozle | No |
 | 3 | **Solo** | One student | Dashboard arcade games, homework | No |
 | 4 | **Versus** (student vs student, or vs CPU) | One shared device, later two devices | Board-game night | No (shared device); yes (two devices) |
 
@@ -61,10 +61,10 @@ mode: they are games that plug into these same four modes.
 - End screen: podium (or class-goal celebration), then a teacher report
   of who got which questions right.
 
-### Mode 2: Class Show (whole group, cast from the teacher's device)
+### Mode 2: Share (whole group, cast from the teacher's device)
 - No student devices at all. Teacher puts the game on the board (casting,
   projector, smartboard) and drives it from one device.
-- Teams (2 to 6) take turns. On a team's turn the question shows big,
+- **1 to 10 teams** take turns. On a team's turn the question shows big,
   read aloud if wanted; the class answers out loud or with whiteboards;
   the teacher taps **right** or **not yet** (or the team taps an answer on
   a smartboard).
@@ -75,6 +75,16 @@ mode: they are games that plug into these same four modes.
   "whose turn" banner, undo for teacher mis-taps.
 - Zero setup and works on any school's tech, which makes it the strongest
   free-tier hook.
+- **One team vs a challenger** (direct from you, 2026-10-24): with one
+  team, the other side is played by:
+  - **the CPU**: "The whole class vs the computer." The CPU plays its
+    game moves (Easy / Medium / Hard); the class answers the questions.
+  - **the teacher**: "The whole class vs Ms. ___." The teacher takes the
+    other side's turns on their device (and can quietly make it close).
+  Both turn the whole room into one team with a shared goal, the
+  cooperative structure the research favors over student-vs-student
+  ranking (see `docs/gamified-learning-research.md` 3.5 and
+  `docs/settings-equity-research.md` section 8).
 
 ### Mode 3: Solo
 - One student, one device: the Dashboard arcade model. Game runs, pauses
@@ -99,8 +109,8 @@ mode: they are games that plug into these same four modes.
 - **"Everyone plays their own game" engine** powers Solo (3) and Class
   Live (1). Class Live is Solo plus a host screen that collects scores.
   So every Solo game we build becomes a Class Live game almost for free.
-- **"Take turns" engine** powers Class Show (2) and Versus (4). A turn
-  player can be a team, a student or the CPU. So every turn-based game we
+- **"Take turns" engine** powers Share (2) and Versus (4). A turn
+  player can be a team, a student, the CPU or the teacher. So every turn-based game we
   build works in both modes.
 
 ## 3. Starting game roster (from the Dashboard, renamed)
@@ -196,6 +206,143 @@ students and keeps the brand recognizable. This also resolves the conflict
 with the "dark theme, locked, one accent" rule in `CLAUDE.md`: that rule
 would apply to chrome, not to themed game stages.
 
+## 4A. Settings on every game, on every device (accessibility, free)
+
+Direct from you (2026-10-24): every game has comprehensive settings, usable
+from every device, reachable at any point in the game. Research behind
+every item: `docs/settings-equity-research.md`.
+
+**The gear button.** One gear, same corner, same look in every game and
+every theme. Tapping it pauses the game (solo and versus; in Class Live it
+opens without stopping the class). Works by touch, keyboard and switch
+access, iPad-fingertip size.
+
+**What's inside (every game, all free):**
+
+| Group | Settings |
+|---|---|
+| Sound | All sound off switch; Sound effects (Off + 5 levels); Background music (Off + 5 levels); Voice / read-aloud (Off + 5 levels, speed); every sound has a visual partner so nothing is lost with sound off |
+| Haptics | On / Off (shown only on devices that can vibrate; iPads cannot, Android can); never the only signal |
+| Visual stimulation | One-tap **Calm mode**; Motion (Full / Gentle / Still); Celebrations (Big / Small / Off); Backgrounds (Moving / Still / Plain); Screen shake (off by default); Brightness (Normal / Dim); nothing ever flashes more than 3 times a second |
+| Seeing and reading | Text size (3); reading comfort (spacing, then font); high contrast; color-safe palette (color is never the only cue) |
+| Time and pace | Timers (Off / Relaxed / Normal); game speed (Slow / Normal / Fast); read-first time on questions |
+| Controls | Tap-only play in every game (no required dragging, holding or fast tapping); left-handed layout |
+| Language | Menu and read-aloud language (English, Spanish first, more later) |
+| Presets | Calm, Low vision, Hearing, Quick start: one tap, still adjustable |
+
+**Who controls it.** Students change their own settings any time, and
+settings follow them across all games. Teachers can set class or
+per-student defaults (for example an IEP that calls for no timers) and lock
+specific settings during an assignment. Class Live: teacher can mute every
+student device at once. Share: the teacher device controls the room.
+Starts in reduced motion when the iPad's own Reduce Motion is on.
+
+### Equity and cultural responsiveness (built into every game)
+- **Avatars that are mirrors:** many skin tones, hair textures, head
+  coverings, glasses, hearing aids, wheelchairs and mobility aids,
+  non-gendered options, no single "default" kid.
+- **Many ways to win:** team play, class goal bars and cooperative modes
+  next to competition.
+- **Themes that are windows:** places and settings from many communities,
+  no cultural costumes or stereotypes, holidays and sacred symbols only by
+  teacher choice, community themes in the Theme Builder, reviewed by
+  teachers from different communities before release.
+- **Language:** multilingual menus and read-aloud; bilingual questions.
+- **Money and devices:** every accessibility and equity feature free;
+  Share needs no student devices; runs on older iPads and
+  Chromebooks; low-bandwidth friendly.
+- **Tone:** growth language ("Not yet, try another!"), never a public
+  lowest score.
+
+## 4B. Joining, names and teams (Class Live, Share, Versus)
+
+Direct from you (2026-10-24).
+
+### How students get a name (teacher picks one, per game or as a default)
+1. **Silly name dice** (the default): student taps a dice and gets a random
+   friendly name built from safe word lists, like "Rainbow Unicorn" or
+   "Speedy Pickle." Can re-roll a set number of times. No typing, so
+   nothing inappropriate is possible, and great for pre-readers.
+2. **Type a name:** student types a nickname. Every typed name goes
+   through the bad-word filter first, and the teacher can require
+   approval before it shows.
+3. **Pick from my class list:** teacher's roster (first names or initials),
+   student taps their own. Ties reports to real students without accounts.
+4. **Teacher assigns names:** teacher types or pastes names ahead of time.
+
+### Restrictions the teacher can apply
+- Turn typing off completely (dice or class list only).
+- **Approve names before the game starts**: every name waits in the lobby
+  until the teacher approves it; teacher can **rename** or **remove** any
+  player at any time, including mid-game.
+- **Bad words are always blocked**, no setting turns this off: a
+  maintained filter (multiple languages, common misspellings and
+  letter-swaps, spacing tricks) that blocks before the name ever appears
+  on the big screen. Tuned so real names from every culture are not
+  wrongly blocked; teacher can override a false block.
+- Name length limit, no emojis or symbols option, no duplicate names.
+- Lock the room once everyone is in (no late joiners without approval).
+- Kicked players cannot rejoin the same game with a new name unless the
+  teacher allows it.
+
+### Teams
+- **Random teams:** choose the number of teams (or team size) and shuffle.
+  Re-shuffle until happy.
+- **Teacher assigns teams** (like Zoom breakout rooms): drag or tap each
+  student into a team; move students between teams any time, even
+  mid-game; save team sets to reuse ("Reading groups," "Table groups").
+- **Students choose** (optional, teacher can turn off).
+- **Balanced teams** option: spreads students evenly using past results so
+  one team isn't stacked.
+- Teams get a color **and** an icon and a name (silly-name dice for teams
+  too), so K-3 kids find their team without reading.
+- Share teams work with no devices: teacher just sets team names and
+  who's on each, or plays with "Team 1, Team 2" quick teams.
+
+## 4C. Reports (every game, always)
+
+Direct from you (2026-10-24): every game always produces a report the
+teacher can use as real data, modeled on the Independent Work Dashboard's
+**Question reports** page (`src/routes/teacher/QuestionReports.tsx` and
+the question log in `src/lib/questionLog.ts` in that repo).
+
+### What gets logged (every question, every game, every mode)
+For every question shown: date and time, student (or team), game, mode,
+question set, question, the right answer, **every answer tapped in order**,
+number of tries, right on first try, outcome (right / skipped / left /
+time ran out), seconds taken, support level used (read-aloud, hints,
+typed-answer support), and which settings were on (e.g. timer off).
+
+### Report views
+| View | What it shows |
+|---|---|
+| **Game session report** (whole group) | Everyone who played that game: each student's questions, right, first-try %, time; class totals; hardest questions; who may need help. Opens automatically when a live game ends. |
+| **By student** | One student across every game and day: totals, first-try % over time, every question with every attempt, questions they keep missing |
+| **By question** (item analysis) | Each question: how many saw it, % right on first try, most common wrong answer, average time; flags questions most students miss (reteach) or that may be worded unclearly |
+| **By question set** | How the class is doing on a set or skill over time |
+| **By day** | Every question answered on a day, in order, per student, with totals (same as the Dashboard's "By day") |
+| **By game** | Every question asked in a game with every attempt grouped (same as the Dashboard's "By game") |
+| **By team** | Team totals and each member's contribution (Share and team Live games) |
+
+### Filters, sorting and exports
+- Filter by student (one, several, all), team, game, mode, question set,
+  date range, outcome, first try yes/no, assignment.
+- Sort any column; search by question text.
+- Totals bar on every view (questions, answered right, % first try,
+  answers tapped, total time, time per question), same as the Dashboard.
+- **Download CSV** and **Print** on every view (both exist in the
+  Dashboard); PDF export; later Google Sheets export.
+- Shareable student summary for families or IEP meetings (teacher
+  chooses what's included).
+
+### Rules
+- Reports are teacher-only. Students see their own progress, never other
+  students' data or a class ranking unless the teacher shows the podium.
+- Reports never cost the student anything: wrong answers are data for the
+  teacher, not penalties.
+- Data is kept as long as the teacher's plan allows and can be deleted by
+  the teacher at any time (privacy rules in section 6.6).
+
 ## 5. Free vs paid
 
 ### Principles (proposed)
@@ -217,14 +364,15 @@ would apply to chrome, not to themed game stages.
 | CSV import | Yes | Yes | Yes |
 | Games | Starter set (about 1/3 of games) | All games | All games |
 | Activity templates | Most | All | All |
-| Mode 2 Class Show (one screen) | Yes | Yes | Yes |
+| Mode 2 Share (one screen) | Yes | Yes | Yes |
 | Mode 3 Solo | Yes | Yes | Yes |
 | Mode 4 Versus (shared device, vs CPU) | Yes | Yes | Yes |
 | Mode 4 Versus on two devices | No | Yes | Yes |
 | Mode 1 Class Live (join code) | Small class cap | Full class | Full class |
 | Homework / assignment links | Limited | Unlimited | Unlimited |
 | Themes | 3 house themes | Full library + Theme Builder | + school brand theme |
-| Reports | Last session only | Per-student history, per-question log, export | + admin view |
+| Reports | **Full report for every game** (all views, filters, CSV, print), kept 30 days | Unlimited history, trends over time, PDF and Sheets export | + school-wide and admin views |
+| Name options, approval, rename, bad-word filter, teams | **All** | **All** | **All** |
 | Accessibility features | **All** | **All** | **All** |
 | Billing | none | Card, monthly or yearly | Invoice / purchase order |
 | Privacy paperwork | Standard terms | Standard terms | Signed data privacy agreement |
@@ -366,9 +514,9 @@ Design consequences (cheap now, expensive to retrofit):
         +---------------------+---------------------+
         |                                           |
   "Own game" engine                          "Take turns" engine
-  Mode 3 Solo                                Mode 2 Class Show
+  Mode 3 Solo                                Mode 2 Share
   Mode 1 Class Live (+ host screen)          Mode 4 Versus (teams,
-        |                                     students or CPU)
+        |                                     students, CPU, teacher)
         +---------- Game module contract ----------+
                               |
      Shared question screen + round settings + rewards/report
@@ -380,7 +528,7 @@ Design consequences (cheap now, expensive to retrofit):
 
 **Game module contract** (every game is a plug-in that declares):
 - `id`, display name, icon, short description
-- play modes supported (1 Class Live / 2 Class Show / 3 Solo / 4 Versus)
+- play modes supported (1 Class Live / 2 Share / 3 Solo / 4 Versus)
 - for Versus: whether it has a CPU player and its difficulty levels
 - question types supported
 - settings (rounds, questions per break, anything game-specific)
@@ -401,6 +549,8 @@ game only decides *when to ask* and *what a right answer does*.
 - Decide first three games and theme scope
 
 **Phase 1: The engine + first three games (free, no accounts)**
+- Gear button and full settings panel (section 4A) in every game from day one
+- Question log + reports (section 4C), name dice and teams (section 4B)
 - Question bank editor + CSV import (CSV import already exists)
 - Shared question screen, picker, round settings, results screen
 - Theme engine with 3 house themes and skin slots
@@ -441,5 +591,39 @@ game only decides *when to ask* and *what a right answer does*.
 6. **Class Live timing**: Mode 1 needs a real-time server, so it is
    planned for Phase 3. It is also the Blooket-style headline feature.
    Pull it forward to Phase 2 if it matters most for selling?
-7. **Free tier generosity**: generous free tier to grow (Claudia's lean),
+7. **Report history on Free**: every game always has a full report (your
+   rule). Claudia suggests Free keeps 30 days of history and Pro keeps
+   everything. OK, or should Free keep everything too?
+8. **Free tier generosity**: generous free tier to grow (Claudia's lean),
    or tighter free tier to convert faster?
+
+## 10. Marketing ideas (running list)
+
+Direct from you (2026-10-24): "keep a list going anytime that you know that
+something could be used well in marketing." Claudia adds to this list
+every time a feature or finding would sell Gamify; add your own any time.
+These are raw ideas, not final copy: every line must stay true to what
+ships, use no other company's name (section 6.2), and make no research
+claim beyond what `docs/gamified-learning-research.md` supports.
+
+| # | Idea / line | Why it sells | Source |
+|---|---|---|---|
+| 1 | **"The whole class vs the computer."** One team, one goal, every kid cheering together. | Turns competition into class unity; a vivid demo moment | Teacher, 2026-10-24 |
+| 2 | **"The whole class vs the teacher."** Can your class beat you? | Kids love beating the teacher; instant buy-in, great in a video | Teacher, 2026-10-24 |
+| 3 | **"One question set. Dozens of games. Four ways to play."** | The core promise in one line | Product plan sections 1-2 |
+| 4 | **"No devices? No problem."** Share mode runs from one teacher screen. | Works in every classroom, including under-resourced ones | Mode 2 |
+| 5 | **Up to 10 teams** on one screen | Bigger than typical team-game limits; fits table groups | Mode 2 |
+| 6 | **"Every right answer is a rep."** Built on retrieval practice, one of the best-proven learning techniques. | Research-backed without overclaiming | Research brief 2.2 |
+| 7 | **"Wrong answers never cost a thing."** | Low-stress, growth-minded; reassures teachers and parents | Question engine |
+| 8 | **"Accessibility is never a paid upgrade."** Every sound level, calm mode, read-aloud and text setting is free. | Values statement and a district buying point (ADA Title II) | Sections 4A, 5, 6.7 |
+| 9 | **"A settings button in every game, any time."** Separate sound effects, music and voice levels, calm mode, haptics. | Shows real care for sensory needs; few competitors go this deep | Section 4A |
+| 10 | **"Silly name dice: no typing, no bad names."** Plus teacher approval and an always-on bad-word filter. | Solves a classic live-game headache teachers already complain about | Section 4B |
+| 11 | **"Teams your way: random, balanced, or hand-picked like breakout rooms."** | Teacher control is a top request | Section 4B |
+| 12 | **"Real data, not just a podium."** Every game makes a filterable report by student, question, day and game, with CSV and print. | Turns fun into evidence for grading, IEPs and data meetings | Section 4C |
+| 13 | **"Find the question your class keeps missing."** Item analysis shows the most common wrong answer. | Concrete teacher benefit; reteach targeting | Section 4C |
+| 14 | **"Themes that change every game at once,"** including your school colors and mascot. | Headline Pro feature; personal and school pride | Section 4 |
+| 15 | **"Designed with kids, for kids."** Students co-design themes and features. | Authentic story; ties to the Junior Designers plan | `docs/junior-designers-plan.md` |
+| 16 | **"Kids see themselves."** Avatars with every skin tone, hair texture, head covering, glasses, hearing aids and wheelchairs. | Culturally responsive, inclusive; strong with districts and families | Section 4A equity |
+| 17 | **"Built by a teacher for students with high support needs, so it works for everyone."** | Founder story and credibility | Origin in the Independent Work Dashboard |
+| 18 | **"No student accounts, no ads, no trackers."** | Privacy is the deal-breaker for schools | Section 6.6 |
+| 19 | **"Made for iPad first."** | Matches how many classrooms actually run | Standing product fact |

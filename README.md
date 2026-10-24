@@ -16,6 +16,8 @@ scattered across chats or other repos:
 | [`CLAUDE.md`](./CLAUDE.md) | The binding development standard -- the Three-Lens testing bar every change is held to, plus standing product facts |
 | [`docs/platform-spec.md`](./docs/platform-spec.md) | Full product spec: vision, differentiators, data model, accessibility requirements, phased roadmap |
 | [`docs/product-plan.md`](./docs/product-plan.md) | Commercial plan (brainstorm): play shapes, game roster and renames, themes across all games, free vs paid tiers, legal/copyright readiness checklist, roadmap, open decisions |
+| [`docs/gamified-learning-research.md`](./docs/gamified-learning-research.md) | Research brief: the case for and against gamified learning (retrieval practice, spacing, dopamine/curiosity, variety), how Gamify answers each counter-argument, and how Gamify will prove its success |
+| [`docs/settings-equity-research.md`](./docs/settings-equity-research.md) | Research behind the in-game settings (sound levels, haptics, calm mode, gear button) and culturally responsive, equitable design |
 | [`docs/question-engine.md`](./docs/question-engine.md) | The shared question engine carried over from the Independent Work Dashboard: question picker, question screen rules, rounds/settings, rewards, assignments |
 | [`docs/testing-standards.md`](./docs/testing-standards.md) | The Three Lenses in full -- checklists, test methods, the browser-driven testing harness, real case studies, and current known gaps |
 | [`docs/accessibility-research.md`](./docs/accessibility-research.md) | Research findings on gamification effectiveness, UDL 3.0, neurodivergent-friendly design, and assistive tech guidelines, each tied to a specific Gamify implication |

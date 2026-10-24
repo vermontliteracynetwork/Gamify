@@ -60,6 +60,12 @@ teacher no control or educational value is not done.
   this governs platform chrome; themed game stages are an open decision in
   `docs/product-plan.md` section 4.)
 
+## Marketing ideas list (standing rule, 2026-10-24)
+
+Whenever a feature, design choice or research finding could be used well
+in marketing, add it to `docs/product-plan.md` section 10 in the same
+change. The teacher adds their own too; never remove theirs.
+
 ## Legal readiness (mandatory, we sell this)
 
 - No other company's brand or trademark in any customer-facing name or
