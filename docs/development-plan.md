@@ -109,12 +109,14 @@ library theme accents**. Every purchase gets a line in
       students, assignments, question log, settings).
 - [ ] Translation setup: one English strings file, every screen uses it.
 - [ ] Theme engine: tokens (palette, fonts, backdrop, celebration, sound
-      pack) + the shared **skin slots** (`player`, `goal`, `obstacle`,
-      `collectible`, `projectile`, `card-back`, `celebration`); contrast
-      check built in; calm version generated automatically.
+      pack) + **per-game pieces**: each game declares its own designable
+      pieces (with sizes), and a theme belongs to one game (teacher rule,
+      2026-10-24: themes are designed by game, not shared across games);
+      contrast check built in; calm version generated automatically.
 - [ ] House theme **Classic** (simple, Part 2).
 - [ ] Game module contract (manifest: id, name, modes, question types,
-      settings, skin slots, tier, report format) + game registry.
+      settings, designable theme pieces, tier, report format) + game
+      registry.
 - [ ] Config file: tiers, limits, prices, `APP_DOMAIN`, free games list.
 - [ ] Tests: Vitest set up with first tests; Playwright smoke test at iPad
       size (portrait and landscape); one `npm run check` that runs
@@ -188,12 +190,16 @@ records each question; Three-Lens check passed on iPad.
       shared by Share and Versus.
 - [ ] Silly-name dice (safe word lists) and team setup (random, balanced,
       hand-picked, saved team sets) for Share.
-- [ ] Two simple library themes (Space, Garden), skinning all three games.
+- [ ] A simple house theme for each of the three games, plus two simple
+      library themes per game (Space, Garden), each designed on that
+      game's template.
+- [ ] Theme template for each game: a printable PDF showing every piece
+      to design at the right size (also usable for digital design).
 - [ ] Every sound has a visual partner; no flashing anywhere.
 
 **Done when:** each game plays start to finish in every mode it supports
-at iPad size, frame checks show smooth motion, all three themes look right
-in all three games.
+at iPad size, frame checks show smooth motion, and each game's themes look
+right in that game.
 
 **Art to buy (optional at this stage):** none required. Nice to have: a
 small sound-effect pack with a commercial license.
@@ -278,7 +284,8 @@ lock works through refresh and rejoin, mirror stays in sync.
       history).
 - [ ] Theme library (Plus): the simple library themes playable; previews
       for Free.
-- [ ] **Theme Builder (Pro)**: live preview with game switcher, upload
+- [ ] **Theme Builder (Pro)**, one per game (themes are per game): live
+      preview of that game's screens, downloadable theme template, upload
       cards with checks, printable template pages + scan-and-cut, colors,
       fonts, sounds, cover, teacher approval, student design mode,
       "Designed by Room 12" credit, share to class / school / public

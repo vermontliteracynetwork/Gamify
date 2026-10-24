@@ -28,7 +28,7 @@ What it borrows, by *kind of experience* (never code, art, names or look):
 | Independent Work Dashboard | 20+ arcade games already built around one question screen | Gamify starts from this logic instead of from zero |
 
 The moat is not any single game. It is: **one content source, many game
-modes, one theme system across all of them, and accessibility good enough
+modes, a theme system with a builder for every game, and accessibility good enough
 for students with high support needs.**
 
 ## 2. Four play modes (all powered by question sets)
@@ -216,26 +216,30 @@ modes with the fewest games:
 3. **Match Up** (modes 1, 3: cheapest activity, proves the content
    pipeline)
 
-## 4. Themes across every game (headline paid feature)
+## 4. Themes for every game (headline paid feature)
 
 ### What a theme is
-A theme is a data pack, not code. Every game reads from it, so one theme
-re-skins all games at once:
+**Themes are designed per game** (direct from you, 2026-10-24): each
+theme belongs to one game and is built on that game's own template. A Peg
+Drop theme skins Peg Drop; it is not shared across games. A theme is a
+data pack, not code, made of:
 
 - **Palette tokens** (background, surface, accent, text, success, miss),
   validated for contrast automatically
 - **Font pair** (from an approved, licensed list only)
 - **Backdrop** (stage background art or pattern)
-- **Skin slots**: every game declares the same named slots, and the theme
-  fills them: `player`, `goal`, `obstacle`, `collectible`, `projectile`,
-  `card-back`, `celebration`
+- **The game's own pieces**: each game declares its own list of
+  designable pieces (Peg Drop: background, board, balls, pegs, buckets,
+  power-ups, cover; Team Board: background, card backs, reveal cards,
+  team tokens...). The game's **theme template** is built from that list.
 - **Sound pack** (right, miss, win, tap), procedural or licensed
 - **Celebration style** (confetti, stars, bubbles, fireworks), always with
   a calm-mode version
 
-Example: an "Ocean" theme makes Peg Drop's ball a pearl, Bubble Pop's
-bubbles real bubbles, Road Hop's hopper a crab, Match Up's card backs
-shells. Teacher picks it once.
+Example: an "Ocean" Peg Drop theme makes the ball a pearl, the pegs
+coral and the buckets clam shells. An Ocean look for Bubble Pop is its own
+theme, designed on Bubble Pop's template. The theme picker inside each
+game shows only that game's themes.
 
 ### Theme tiers (matches section 5)
 - **Free:** the house default theme to play; every other theme can be
@@ -275,10 +279,15 @@ in that repo), which was super intuitive.
 - **Cover picture** (1:1) for the theme's card in the theme picker.
 
 **What's new in Gamify:**
-- **One theme, every game.** The builder fills the shared skin slots
-  (player, goal, obstacle, collectible, projectile, card back,
-  celebration), so a class's hand-drawn theme skins *all* games at once.
-  The preview has a game switcher to check how it looks in each.
+- **A builder and a template for every game.** Each game has its own
+  Theme Builder page (like the Dashboard's Plinko builder) and its own
+  downloadable theme template showing every piece to design, with sizes.
+  How a class designs a theme:
+  1. Download the theme template for the game you want.
+  2. Draw, paint or color on the printed template, or design digitally
+     on it.
+  3. Upload everything to that game's Theme Builder (scan the pages or
+     upload the files); the builder cuts out each piece.
 - **Student design mode.** The teacher can open a design project: students
   (in groups or alone) design pieces on their own devices or on paper,
   submit them, and the teacher picks and approves what goes into the
@@ -302,8 +311,8 @@ in that repo), which was super intuitive.
 **Why it drives engagement:** students who designed the theme are invested
 in playing it; it gives art, writing (naming and describing the theme) and
 design-thinking a real audience (`docs/junior-designers-plan.md`); and a
-new class theme refreshes every game at once, which fights the novelty
-drop-off in `docs/gamified-learning-research.md` 3.4.
+new class theme makes a familiar game feel new again, which fights the
+novelty drop-off in `docs/gamified-learning-research.md` 3.4.
 
 ### House themes stay simple (direct from you, 2026-10-24)
 The free/default look is deliberately plain: flat colors, one simple
@@ -864,7 +873,7 @@ Design consequences (cheap now, expensive to retrofit):
                               |
      Shared question screen + round settings + rewards/report
                               |
-                 Theme engine (tokens + skin slots)
+                 Theme engine (tokens + each game's own pieces)
                               |
         Teacher account, plans/billing, reports (later phases)
 ```
@@ -875,7 +884,7 @@ Design consequences (cheap now, expensive to retrofit):
 - for Versus: whether it has a CPU player and its difficulty levels
 - question types supported
 - settings (rounds, questions per break, anything game-specific)
-- skin slots it uses from the theme
+- its designable pieces and theme template (themes are per game)
 - plan tier (free / pro)
 - how it reports results (one common format)
 
@@ -899,7 +908,7 @@ game only decides *when to ask* and *what a right answer does*.
 - Question log + reports (section 4C), name dice and teams (section 4B)
 - Question bank editor + CSV import (CSV import already exists)
 - Shared question screen, picker, round settings, results screen
-- Theme engine with 3 house themes and skin slots
+- Theme engine with simple house themes for each game
 - Modes 2, 3 and 4 (shared device + CPU): none need a server
 - Peg Drop, Team Board, Match Up
 - Accessibility core: read-aloud, calm mode, reading comfort, text size
@@ -1093,7 +1102,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 11 | **"Teams your way: random, balanced, or hand-picked like breakout rooms."** | Teacher control is a top request | Section 4B |
 | 12 | **"Real data, not just a podium."** Every game makes a filterable report by student, question, day and game, with CSV and print. | Turns fun into evidence for grading, IEPs and data meetings | Section 4C |
 | 13 | **"Find the question your class keeps missing."** Item analysis shows the most common wrong answer. | Concrete teacher benefit; reteach targeting | Section 4C |
-| 14 | **"Themes that change every game at once,"** including your school colors and mascot. | Headline Pro feature; personal and school pride | Section 4 |
+| 14 | **"Make any game your own,"** including your school colors and mascot. | Headline Pro feature; personal and school pride | Section 4 |
 | 15 | **"Designed with kids, for kids."** Students co-design themes and features. | Authentic story; ties to the Junior Designers plan | `docs/junior-designers-plan.md` |
 | 16 | **"Kids see themselves."** Avatars with every skin tone, hair texture, head covering, glasses, hearing aids and wheelchairs. | Culturally responsive, inclusive; strong with districts and families | Section 4A equity |
 | 17 | **"Built by a teacher for students with high support needs, so it works for everyone."** | Founder story and credibility | Origin in the Independent Work Dashboard |
@@ -1110,9 +1119,9 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 28 | **"We never advertise to your students."** No upgrade prompts, no locked items, no ads, ever, on any plan. | Trust with teachers, parents and districts; a contrast with criticized competitors (without naming them) | Section 5 principle 2 |
 | 29 | **"Looks, not advantages."** XP buys style, never a better score. | Fairness parents and teachers care about | Section 4F |
 | 30 | **"Free forever: one classroom, every accessibility feature, and up to 10 teams on one screen."** | A generous, honest free tier headline | Section 5 |
-| 31 | **"Your class designs the game."** Draw it with markers and paint, scan it with an iPad, and play it in every game. | Hero feature for marketing: a photo of kids painting next to the same art in the game sells itself | Teacher, 2026-10-24; section 4 Theme Builder |
+| 31 | **"Your class designs the game."** Download the game's template, draw it with markers and paint, scan it with an iPad, and play it. | Hero feature for marketing: a photo of kids painting next to the same art in the game sells itself | Teacher, 2026-10-24; section 4 Theme Builder |
 | 32 | **"Designed by Room 12."** Every class-made theme carries its designers' credit. | Pride and ownership; shareable moments for families and school social media | Section 4 Theme Builder |
-| 33 | **"One drawing, every game."** A hand-drawn theme skins all of Gamify's games at once. | Shows the platform's scale in one sentence | Section 4 |
+| 33 | **"A theme template for every game."** Print it, design it, scan it, play it. | Simple four-step promise that shows how easy designing is | Section 4 |
 | 34 | **Photo and video idea:** students painting a template page, scanning it, and seeing their art drop onto the board seconds later. | The demo video for the website and conferences (with signed photo releases) | Teacher, 2026-10-24 |
 | 35 | **"Every student gets their own Arcade, filled with exactly what they're working on."** Assign sets to the class or to one student, and every game draws from them. | Differentiation teachers can feel; strong for IEPs and intervention groups | Teacher, 2026-10-24; Mode 3 |
 | 36 | **"Start simple. Make it yours."** Gamify's look is clean on purpose, so your class's own theme is the star. | Frames simple house themes as an invitation to design; drives Theme Builder and gallery use | Teacher, 2026-10-24 |
@@ -1149,3 +1158,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 20 | **Why Wrong Answers Cost Nothing in Gamify** | The research on low-stakes practice, feedback and "Let's look back." | Question engine, research brief | Teachers, parents, admins |
 | 21 | **Setting Up Gamify on School iPads and Chromebooks** | IT whitelist, Guided Access and Apple Classroom pairing for full lockdown. | IT page, Lock + device tools | Tech coordinators |
 | 22 | **From Paper to Play: Importing Your Old Question Sets** | CSV import from spreadsheets teachers already have. | CSV import | All teachers |
+| 23 | **Ways to Design a Theme** | Step by step: (1) download the theme template for the game you want (every game has its own; themes are made per game), (2) draw, paint, color or design digitally on the template, (3) upload everything to that game's Theme Builder. Tips for markers vs paint vs digital, splitting pieces across students, and scanning well. | Theme templates, Theme Builder, scan-and-cut, student design mode | Teacher's idea, 2026-10-24; all grades |

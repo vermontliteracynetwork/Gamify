@@ -101,7 +101,7 @@ and product plan 4F):
   free team caps (Baamboozle reportedly 4 free, 8 paid).
 - **Accessibility and Share Mirror free**: nothing comparable in the
   free tiers above.
-- Themes across every game, with a builder: no competitor offers this.
+- A theme builder and printable theme template for every game: no competitor offers this.
 - Reports on every game, modeled on a real teacher's data workflow.
 
 ### Where Gamify's plan is weaker (decisions for you)
