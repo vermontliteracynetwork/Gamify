@@ -742,6 +742,15 @@ export const en = {
   'join.nameSub': 'Roll the dice until you find a name you like.',
   'join.roll': 'Roll a new name',
   'join.play': 'Play',
+  'start.title': 'Get started in five steps',
+  'start.progress': '{done} of {total} done',
+  'start.hide': 'Hide the get started steps',
+  'start.done': 'Done',
+  'start.step.play': 'Try a game: tap Play or share on a ready-made set',
+  'start.step.class': 'Make your class',
+  'start.step.students': 'Paste your class list',
+  'start.step.assign': 'Assign a question set',
+  'start.step.signin': 'Have a student sign in and play',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

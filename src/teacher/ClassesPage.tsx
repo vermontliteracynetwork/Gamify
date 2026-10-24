@@ -8,6 +8,7 @@ import { t } from '../i18n';
 import { newJoinCode } from '../auth/session';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import GetStarted from './GetStarted';
 
 // The teacher's classrooms (development plan Stage 4). Free has one.
 export default function ClassesPage() {
@@ -27,6 +28,7 @@ export default function ClassesPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
+      <GetStarted />
       <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')} />
       <div className="grid gap-3">
         {classes.map((c) => (

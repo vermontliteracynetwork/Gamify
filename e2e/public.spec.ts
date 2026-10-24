@@ -33,11 +33,16 @@ test('the games need sign-in; a student joins with a class code', async ({ page 
   await page.goto('/login');
   await page.getByLabel('Your name (what students see)').fill('Ms. Rivera');
   await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+  await expect(page.getByText('0 of 5 done')).toBeVisible();
   await page.getByLabel('New class name').fill('Room 3');
   await page.getByRole('button', { name: 'Make class' }).click();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Kai');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   const code = (await page.getByText(/Join code [A-Z]{5}/).innerText()).match(/[A-Z]{5}/)![0];
+  await page.goto('/teacher/classes');
+  await expect(page.getByText('2 of 5 done')).toBeVisible();
+  await page.screenshot({ path: `test-results/get-started.png` });
   await page.getByRole('button', { name: 'Log out' }).click();
 
   // Student types the code and reaches the class sign-in.
