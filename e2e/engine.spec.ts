@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
+import { finishSetup, openSetup } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
@@ -9,11 +10,11 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
 
-  await page.goto('/games/star-quiz');
-  await page.getByLabel('Question set').selectOption('lib-animals');
-  for (let i = 0; i < 5; i++) await page.getByRole('button', { name: 'Fewer Questions' }).click();
-  await expect(page.getByText('5', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Play' }).click();
+  await openSetup(page, '/games/star-quiz');
+  await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('slider', { name: 'Questions' }).fill('5');
+  await finishSetup(page);
 
   // Read first: answers can't be tapped yet.
   const dialog = page.getByRole('dialog');

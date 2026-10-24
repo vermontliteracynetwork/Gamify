@@ -48,13 +48,15 @@ function Swatch({ theme, big = false }: { theme: GameTheme; big?: boolean }) {
 
 // Theme cards for a game's start screen. Locked themes show only a lock
 // (no prices or buy words on student screens) and open a preview.
-export function ThemePicker({ current, themes, playable, onChoose }: {
+export function ThemePicker({ current, themes, playable, onChoose, onPanel = false }: {
   current: GameTheme; themes: GameTheme[]; playable: (th: GameTheme) => boolean; onChoose: (id: string) => void;
+  // Inside a white setup page rather than on the game's stage.
+  onPanel?: boolean;
 }) {
   const [preview, setPreview] = useState<GameTheme | null>(null);
   return (
-    <div className="grid gap-2 max-w-lg mx-auto w-full">
-      <span className="font-bold stage-text">{t('theme.pick')}</span>
+    <div className={onPanel ? 'grid gap-2 w-full' : 'grid gap-2 max-w-lg mx-auto w-full'}>
+      <span className={onPanel ? 'font-bold' : 'font-bold stage-text'}>{t('theme.pick')}</span>
       <div role="radiogroup" aria-label={t('theme.pick')} className="grid grid-cols-3 gap-2">
         {themes.map((th) => {
           const open = playable(th);

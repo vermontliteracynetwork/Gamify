@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { finishSetup, openSetup } from './setup';
 
 const KINDS = ['Cookie', 'Cake', 'Ice cream', 'Pizza', 'Popcorn', 'Cocoa'];
 
@@ -38,7 +39,9 @@ test('Bakery Match: swaps make matches, a round ends in a question break', async
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
   await page.goto('/games/bakery-match');
-  await page.getByRole('button', { name: 'Play' }).click();
+  await page.screenshot({ path: `test-results/bakery-welcome-${info.project.name}.png` });
+  await openSetup(page, '/games/bakery-match');
+  await finishSetup(page);
   await expect(page.getByRole('gridcell')).toHaveCount(49);
   await page.screenshot({ path: `test-results/bakery-start-${info.project.name}.png`, fullPage: true });
 

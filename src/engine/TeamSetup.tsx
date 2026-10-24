@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DiceFive, Minus, Play, Plus } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -10,9 +10,12 @@ interface Slot { name: string; kind: 'team' | 'student' | 'cpu' }
 
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
-export default function TeamSetup({ mode, min, max, onStart }: {
+// Used on its own (with a Start button) or as a setup page (onChange only).
+export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false }: {
   mode: 'share' | 'versus'; min: number; max: number;
-  onStart: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
+  onStart?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
+  onChange?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
+  embedded?: boolean;
 }) {
   const human: Slot['kind'] = mode === 'share' ? 'team' : 'student';
   const [slots, setSlots] = useState<Slot[]>(() => {
@@ -31,15 +34,17 @@ export default function TeamSetup({ mode, min, max, onStart }: {
   const solo = mode === 'share' && slots.length === 1;
   const hasCpu = solo ? opponent === 'cpu' : slots.some((s) => s.kind === 'cpu');
 
-  function start() {
+  function build(): TurnPlayer[] {
     const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: i, score: 0 }));
     if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: 9, score: 0 });
-    onStart(players, level);
+    return players;
   }
+  function start() { onStart?.(build(), level); }
+  useEffect(() => { onChange?.(build(), level); }, [slots, opponent, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <section className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      <h1 className="title-bubble text-3xl sm:text-4xl">{mode === 'share' ? t('teams.title') : t('teams.players')}</h1>
+    <section className={embedded ? 'grid gap-5' : 'bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
+      {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl">{mode === 'share' ? t('teams.title') : t('teams.players')}</h1>}
 
       <div className="flex items-center gap-3">
         <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>
@@ -81,11 +86,11 @@ export default function TeamSetup({ mode, min, max, onStart }: {
       )}
       {hasCpu && <Choice label={t('teams.level')} value={level} options={[['easy', 'opt.easy'], ['medium', 'opt.medium'], ['hard', 'opt.hard']]} onChange={setLevel} />}
 
-      <button type="button" onClick={start} disabled={slots.some((s) => s.kind !== 'cpu' && !s.name.trim())}
+      {onStart && <button type="button" onClick={start} disabled={slots.some((s) => s.kind !== 'cpu' && !s.name.trim())}
         className="justify-self-center min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center gap-2 active:scale-95 disabled:opacity-50"
         style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <Play weight="fill" size={28} />{t('teams.start')}
-      </button>
+      </button>}
     </section>
   );
 }

@@ -83,7 +83,7 @@ meta-analysis](https://pubmed.ncbi.nlm.nih.gov/42536336/);
 
 **For Gamify:** don't ship "dyslexia font" as a single font-swap and call
 it solved. Prioritize a **letter/word spacing control** and generous
-line-height on top of the already-legible Nunito body face; offer
+line-height on top of the already-legible Inclusive Sans body face; offer
 OpenDyslexic as an optional choice (some students subjectively prefer it)
 but don't market it as the fix. Reframe internally as "Reading comfort"
 (spacing + size + optional font), which is both more accurate and covers

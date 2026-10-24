@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowCounterClockwise, Crown, Sparkle, SquaresFour } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, CheckCircle, Crown, HandPointing, Question, Sparkle, Trophy, UsersThree } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -13,15 +13,20 @@ import { isPlayable } from '../../engine/questions';
 import ShareQuestion from '../../engine/ShareQuestion';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
+import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, undo, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
+import GameWelcome from '../GameWelcome';
+import SetPicker from '../SetPicker';
+import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
+import { useSavedSetup } from '../useSavedSetup';
 import { pieceColor } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
-import { dealCards, GRID_POINTS, type CardKind } from './cards';
+import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
 
 export const gameShowManifest: GameManifest = {
   id: 'game-show',
@@ -41,7 +46,7 @@ export const gameShowManifest: GameManifest = {
 };
 
 type Board = 'cards' | 'grid';
-type Phase = 'board' | 'teams' | 'play' | 'end';
+type Phase = 'welcome' | 'setup' | 'play' | 'end';
 interface Card { kind: CardKind; open: boolean; by?: number }
 interface Cell { col: number; points: number; used: boolean }
 
@@ -51,10 +56,11 @@ export default function GameShow() {
   const { value: mine = [] } = useMySets();
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [phase, setPhase] = useState<Phase>('board');
-  const [board, setBoard] = useState<Board>('cards');
-  const [setIds, setSetIds] = useState<string[]>([LIBRARY[0].id]);
-  const [cardCount, setCardCount] = useState(12);
+  const [phase, setPhase] = useState<Phase>('welcome');
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, twists: ALL_TWISTS as Twist[] });
+  const { board, cardCount } = setup;
+  const setIds = setup.setIds.filter((id) => allSets.some((s) => s.id === id));
+  const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [turns, setTurns] = useState<TurnState | null>(null);
   const [cpuLevel, setCpuLevel] = useState<CpuLevel>('medium');
   const [cards, setCards] = useState<Card[]>([]);
@@ -84,7 +90,7 @@ export default function GameShow() {
     used.current.clear();
     setMissed([]);
     if (board === 'cards') {
-      setCards(dealCards(cardCount).map((kind) => ({ kind, open: false })));
+      setCards(dealCards(cardCount, Math.random, setup.twists).map((kind) => ({ kind, open: false })));
       startTurn(state, 'cards');
     } else {
       setCells(chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false }))));
@@ -226,7 +232,7 @@ export default function GameShow() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="title-bubble text-3xl sm:text-4xl">{t('tb.title')}</h1>
+          {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('tb.title')}</h1>}
           {phase === 'play' && turns && turns.history.length > 0 && (
             <button type="button" onClick={() => setTurns(undo(turns))} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-1.5">
               <ArrowCounterClockwise weight="bold" size={18} />{t('share.undo')}
@@ -235,70 +241,56 @@ export default function GameShow() {
         </div>
       </GameTopRow>
 
-      {phase === 'board' && (
-        <section className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-3xl mx-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <p className="font-bold text-lg">{t('tb.description')}</p>
-          <div className="grid gap-2">
-            <span className="font-bold">{t('tb.board')}</span>
-            <div role="radiogroup" aria-label={t('tb.board')} className="grid sm:grid-cols-2 gap-3">
-              {([['cards', Sparkle, 'tb.cards', 'tb.cardsHint'], ['grid', SquaresFour, 'tb.grid', 'tb.gridHint']] as const).map(([id, Icon, title, hint]) => (
-                <button key={id} type="button" role="radio" aria-checked={board === id}
-                  onClick={() => { setBoard(id); if (id === 'cards') setSetIds((s) => s.slice(0, 1)); }}
-                  className={`rounded-input border-[2.5px] p-4 text-left grid gap-1 ${board === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                  <Icon weight="fill" size={36} aria-hidden="true" />
-                  <span className="font-display text-xl font-bold">{t(title)}</span>
-                  <span className="font-bold text-sm">{t(hint)}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {board === 'cards' && (
-            <div className="grid gap-2">
-              <span className="font-bold">{t('tb.cardCount')}</span>
-              <div role="radiogroup" aria-label={t('tb.cardCount')} className="flex gap-2">
-                {[12, 16, 20].map((n) => (
-                  <button key={n} type="button" role="radio" aria-checked={cardCount === n} onClick={() => setCardCount(n)}
-                    className={`min-h-12 w-16 rounded-pill border-[2px] font-display text-xl font-bold ${cardCount === n ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{n}</button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="grid gap-2">
-            <span className="font-bold">{board === 'grid' ? t('tb.setsGrid') : t('tb.setOne')}</span>
-            <div className="grid sm:grid-cols-2 gap-2 max-h-80 overflow-y-auto p-1">
-              {allSets.map((s) => {
-                const on = setIds.includes(s.id);
-                return (
-                  <button key={s.id} type="button" role={board === 'grid' ? 'checkbox' : 'radio'} aria-checked={on}
-                    onClick={() => setSetIds((cur) => board === 'cards' ? [s.id] : on ? cur.filter((x) => x !== s.id) : cur.length < 5 ? [...cur, s.id] : cur)}
-                    className={`min-h-12 px-3 rounded-input border-[2px] text-left font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                    {s.name || t('sets.untitled')}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
-          <button type="button" disabled={setIds.length === 0} onClick={() => setPhase('teams')}
-            className="justify-self-start min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold disabled:opacity-50">
-            {t('tb.next')}
-          </button>
-        </section>
+      {phase === 'welcome' && (
+        <GameWelcome game={gameShowManifest} onStart={() => setPhase('setup')} steps={[
+          { icon: <UsersThree weight="fill" size={22} />, text: t('tb.how1') },
+          { icon: <CheckCircle weight="fill" size={22} />, text: t('tb.how2') },
+          { icon: <Trophy weight="fill" size={22} />, text: t('tb.how3') },
+        ]} />
       )}
 
-      {phase === 'teams' && <TeamSetup mode="share" min={1} max={10} onStart={begin} />}
+      {phase === 'setup' && (
+        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+          { id: 'board', title: t('setup.board'), content: (
+            <PictureChoice label={t('tb.board')} value={board}
+              onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
+              options={[
+                { value: 'cards', title: t('tb.cards'), hint: t('tb.cardsHint'), art: <BoardArt kind="cards" /> },
+                { value: 'grid', title: t('tb.grid'), hint: t('tb.gridHint'), art: <BoardArt kind="grid" /> },
+              ]} />
+          ) },
+          { id: 'questions', title: t('setup.questions'), ready: setIds.length > 0, content: (
+            <SetPicker sets={allSets} value={setIds} max={board === 'grid' ? 5 : 1} onChange={(ids) => change({ setIds: ids })} />
+          ) },
+          ...(board === 'cards' ? [{ id: 'options', title: t('setup.options'), content: (
+            <>
+              <ChoiceRow label={t('tb.cardCount')} value={String(cardCount)} onChange={(v) => change({ cardCount: Number(v) })}
+                options={['12', '16', '20'].map((n) => ({ value: n, label: n }))} />
+              <div className="grid gap-2">
+                <span className="font-bold">{t('tb.twists')}</span>
+                {ALL_TWISTS.map((k) => (
+                  <Toggle key={k} label={t(`tb.twist.${k}`)} value={setup.twists.includes(k)}
+                    onChange={(on) => change({ twists: on ? [...setup.twists, k] : setup.twists.filter((x) => x !== k) })} />
+                ))}
+              </div>
+            </>
+          ) }] : []),
+          { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
+            <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
+          ) },
+          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+        ]} />
+      )}
 
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_280px] gap-5 items-start">
           <section className="grid gap-4 min-w-0">
+            {phase === 'play' && player && <StepBanner board={board} step={question ? 'answer' : step === 'pick' ? 'pick' : 'answer'} />}
             {phase === 'play' && player && (
               <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={44} />
                 <span className="font-display text-2xl sm:text-3xl font-bold">
-                  {step === 'pick' ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}
+                  {step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}
                 </span>
               </div>
             )}
@@ -314,7 +306,7 @@ export default function GameShow() {
                     aria-label={c.open ? `${t('tb.card', { n: i + 1 })}: ${revealText(c.kind)}` : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`aspect-[4/3] rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
+                    className={`${cards.length > 12 ? 'aspect-[3/2]' : 'aspect-[4/3]'} rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
                       ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
                     style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : { background: pieceColor(theme, 'card-back', '#fbdb6b') }) }}
                   >
@@ -342,8 +334,8 @@ export default function GameShow() {
                       <button key={`${col}-${points}`} type="button" onClick={() => pickCell(i)}
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
-                        className={`min-h-16 rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
-                        style={cell?.used ? undefined : { boxShadow: 'var(--shadow-sticker)', background: pieceColor(theme, 'square', '#fbdb6b') }}>
+                        className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
+                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', background: pieceColor(theme, 'square', '#fbdb6b') }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
@@ -354,7 +346,7 @@ export default function GameShow() {
 
             {phase === 'end' && (
               <ResultsModal title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
-                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('board')} />
+                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')} />
             )}
           </section>
 
@@ -409,5 +401,52 @@ export default function GameShow() {
       )}
     </main>
     </ThemedPage>
+  );
+}
+
+// Shows where the turn is: for cards, answer, then pick a card, then points;
+// for the grid, pick a square, then answer, then points.
+function StepBanner({ board, step }: { board: Board; step: 'answer' | 'pick' }) {
+  const steps = board === 'cards'
+    ? [{ id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'pick', icon: HandPointing, label: t('tb.step.card') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }]
+    : [{ id: 'pick', icon: HandPointing, label: t('tb.step.square') }, { id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }];
+  return (
+    <ol className="flex gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
+      {steps.map((s, i) => {
+        const on = s.id === step;
+        const Icon = s.icon;
+        return (
+          <li key={s.id} aria-current={on ? 'step' : undefined}
+            className={`flex-1 flex items-center gap-2 rounded-pill border-[2px] px-3 py-1.5 font-bold text-sm sm:text-base ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft opacity-70'}`}>
+            <span className="w-7 h-7 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display">{i + 1}</span>
+            <Icon weight="fill" size={20} aria-hidden="true" className="shrink-0" />
+            <span className="truncate">{s.label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+// Small drawings of the two boards for the board choice.
+function BoardArt({ kind }: { kind: Board }) {
+  if (kind === 'cards') {
+    return (
+      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
+        {Array.from({ length: 8 }, (_, i) => (
+          <span key={i} className="rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fbdb6b', transform: `rotate(${(i % 3) - 1}deg)` }}>
+            {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
+          </span>
+        ))}
+      </span>
+    );
+  }
+  return (
+    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#d9ccf5' }}>
+      {Array.from({ length: 4 }, (_, i) => <span key={`h${i}`} className="rounded-sm border-[2px] border-border bg-surface" />)}
+      {Array.from({ length: 12 }, (_, i) => (
+        <span key={i} className="rounded-sm border-[2px] border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fbdb6b' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+      ))}
+    </span>
   );
 }

@@ -19,7 +19,7 @@ export function classicTheme(gameId: string): GameTheme {
       success: '#1f7a45',
       miss: '#9b2c3a',
     },
-    fonts: { display: 'Baloo 2', body: 'Nunito' },
+    fonts: { display: 'Baloo 2', body: 'Inclusive Sans' },
     backdrop: { kind: 'color' },
     celebration: 'confetti',
     pieces: {},

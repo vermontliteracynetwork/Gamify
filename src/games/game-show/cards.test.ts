@@ -9,4 +9,9 @@ describe('surprise cards', () => {
       expect(deck.some((c) => c.kind !== 'points')).toBe(true);
     }
   });
+
+  it('deals only points when every twist is off', () => {
+    expect(dealCards(12, Math.random, []).every((c) => c.kind === 'points')).toBe(true);
+    expect(dealCards(16, Math.random, ['double']).filter((c) => c.kind !== 'points').every((c) => c.kind === 'double')).toBe(true);
+  });
 });

@@ -5,6 +5,7 @@ import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { TellGamify } from '../ui/TellGamify';
 import PinGate from './PinGate';
+import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
 import { useSettings } from './SettingsContext';
 
@@ -160,48 +161,6 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
   );
 }
 
-function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
-      className="flex items-center justify-between gap-3 min-h-12 px-4 rounded-input border-[2px] border-border-soft bg-surface text-left font-bold">
-      <span>{label}</span>
-      <span className={`relative w-14 h-8 rounded-pill border-[2px] border-border shrink-0 ${value ? 'bg-success' : 'bg-surface-2'}`} aria-hidden="true">
-        <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-[2px] border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
-      </span>
-    </button>
-  );
-}
-
 function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: T[]; onChange: (v: T) => void }) {
-  return (
-    <div className="grid gap-1.5">
-      <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
-        {options.map((o) => (
-          <button key={o} type="button" role="radio" aria-checked={value === o} onClick={() => onChange(o)}
-            className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${value === o ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-            {t(`opt.${o}` as StringKey)}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// A big, touch-friendly slider for anything with a range (sound levels,
-// seconds, tries), with its value shown in words beside it.
-function Slider({ label, min, max, value, disabled, show, onChange }: {
-  label: string; min: number; max: number; value: number; disabled?: boolean; show: (v: number) => string; onChange: (v: number) => void;
-}) {
-  const id = `slider-${label.replace(/\W+/g, '-').toLowerCase()}`;
-  return (
-    <div className={`grid gap-1.5 ${disabled ? 'opacity-50' : ''}`}>
-      <label htmlFor={id} className="flex items-center justify-between font-bold">
-        <span>{label}</span>
-        <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-[2px] border-border tabular-nums">{show(value)}</span>
-      </label>
-      <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled}
-        onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full" />
-    </div>
-  );
+  return <ChoiceRow label={label} value={value} options={options.map((o) => ({ value: o, label: t(`opt.${o}` as StringKey) }))} onChange={onChange} />;
 }

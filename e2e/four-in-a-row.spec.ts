@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
+import { finishSetup, openSetup } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
@@ -8,10 +9,10 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  await page.goto('/games/four-in-a-row');
+  await openSetup(page, '/games/four-in-a-row');
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await page.getByRole('radio', { name: 'Easy' }).click();
-  await page.getByRole('button', { name: 'Start' }).click();
+  await finishSetup(page);
 
   for (let turn = 0; turn < 2; turn++) {
     const dialog = page.getByRole('dialog');

@@ -1,18 +1,22 @@
 import { useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Cake, Coffee, Cookie, IceCream, Pizza, Popcorn, type Icon } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Cake, Coffee, Cookie, IceCream, Pizza, Popcorn, Question, type Icon } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
-import StartCard, { type RoundValues } from '../../engine/StartCard';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
+import { ChoiceRow, Slider } from '../../ui/fields';
+import GameWelcome from '../GameWelcome';
+import SetPicker from '../SetPicker';
+import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
+import { useSavedSetup } from '../useSavedSetup';
 import { pieceColor } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
@@ -40,24 +44,25 @@ export const bakeryMatchManifest: GameManifest = {
 // alone). Library and class-made themes swap in artwork per tile.
 const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
-const ROWS = 7;
-const COLS = 7;
-const MOVES_PER_ROUND = 3;
-type Phase = 'start' | 'play' | 'end';
+type Phase = 'welcome' | 'setup' | 'play' | 'end';
 
 export default function BakeryMatch() {
   const { settings } = useSettings();
   const { theme, themes, playable, choose } = useGameTheme('bakery-match');
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
-  const pool = useMemo(() => [...mine, ...LIBRARY].slice(0, 1).map((set) => ({ set, starred: false })), [mine]);
-  const [setId, setSetId] = useState(LIBRARY[0].id);
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
+  const [setup, change] = useSavedSetup('bakery-match', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7 });
+  const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
-  const { ask, element, missed } = useAsk({ gameId: 'bakery-match', mode: 'solo', pool: chosen.length ? chosen : pool });
+  const { ask, element, missed } = useAsk({ gameId: 'bakery-match', mode: 'solo', pool: chosen });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [phase, setPhase] = useState<Phase>('start');
-  const [grid, setGrid] = useState<Grid>(() => createGrid(ROWS, COLS));
+  const [phase, setPhase] = useState<Phase>('welcome');
+  const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
+  const ROWS = plan.current.size;
+  const COLS = plan.current.size;
+  const MOVES_PER_ROUND = plan.current.moves;
+  const [grid, setGrid] = useState<Grid>(() => createGrid(7, 7));
   const [selected, setSelected] = useState<Pos | null>(null);
   const [popping, setPopping] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
@@ -66,12 +71,12 @@ export default function BakeryMatch() {
   const [moves, setMoves] = useState(MOVES_PER_ROUND);
   const [note, setNote] = useState('');
   const [shake, setShake] = useState<string | null>(null);
-  const plan = useRef<RoundValues>({ rounds: 3, perBreak: 2 });
   const drag = useRef<{ pos: Pos; x: number; y: number } | null>(null);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, still ? Math.min(ms, 80) : ms));
 
-  function start(v: RoundValues) {
-    plan.current = v;
+  function start() {
+    plan.current = { rounds: setup.rounds, perBreak: setup.perBreak, moves: setup.moves, size: setup.size };
+    const ROWS = setup.size, COLS = setup.size, MOVES_PER_ROUND = setup.moves;
     setGrid(createGrid(ROWS, COLS));
     setScore(0); setRound(1); setMoves(MOVES_PER_ROUND); setNote(''); setSelected(null);
     setPhase('play');
@@ -159,24 +164,34 @@ export default function BakeryMatch() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bakery-match" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {phase !== 'start' && <h1 className="title-bubble text-3xl sm:text-4xl">{t('bm.title')}</h1>}
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('bm.title')}</h1>}
       </GameTopRow>
 
-      {phase === 'start' && (
-        <div className="grid gap-4">
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
-            {t('practice.set')}
-            <select id="bm-set" value={setId} onChange={(e) => setSetId(e.target.value)} className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
-              {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
-            </select>
-          </label>
-          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
-          <StartCard gameId="bakery-match" title={t('bm.title')} description={t('bm.description')}
-            rounds={bakeryMatchManifest.rounds} perBreak={bakeryMatchManifest.questionsPerBreak} onPlay={start} />
-        </div>
+      {phase === 'welcome' && (
+        <GameWelcome game={bakeryMatchManifest} onStart={() => setPhase('setup')} steps={[
+          { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
+          { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
+          { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
+        ]} />
       )}
 
-      {phase !== 'start' && (
+      {phase === 'setup' && (
+        <SetupWizard onBack={() => setPhase('welcome')} onPlay={start} pages={[
+          { id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> },
+          { id: 'options', title: t('setup.options'), content: (
+            <>
+              <Slider label={t('bm.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Slider label={t('bm.movesEach')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
+              <Slider label={t('bm.perBreak')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
+              <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
+                options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
+            </>
+          ) },
+          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+        ]} />
+      )}
+
+      {(phase === 'play' || phase === 'end') && (
         <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
           <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ background: pieceColor(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 220px), 640px)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
@@ -230,7 +245,7 @@ export default function BakeryMatch() {
         </div>
       )}
 
-      {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('start')} />}
+      {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')} />}
       {element}
     </main>
     </ThemedPage>

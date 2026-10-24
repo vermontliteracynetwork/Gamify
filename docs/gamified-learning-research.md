@@ -317,3 +317,268 @@ legal open-access copy.)
 studies in sections 2-3 were checked against publisher pages or official
 repositories on 2026-10-24. Before quoting any number in a sales or grant
 document, open the linked paper and quote it directly.
+
+---
+
+## Marketing-ready findings (Beth, 2026-10-24)
+
+Beth's addendum for the marketing home page, features page and blog. It
+builds on sections 1-5 above (it does not repeat them) and turns the
+research into lines a teacher or principal can act on. Each finding gives
+the plain-language claim, the source, the honest caveat, and the Gamify
+feature it supports. Marketing ideas 43-54 and blog ideas 25-34 in
+`docs/product-plan.md` sections 10 and 10A are built from these.
+
+**Wording rule for every line built from this section:** say "studies of
+gamified learning found..." or "research on quiz practice shows...", never
+"Gamify is proven to..." or "Gamify raises scores." Gamify has no outcome
+data of its own yet (section 5). Never use the word "dopamine" in
+customer-facing copy (section 2.3).
+
+**How these were checked:** every source below was confirmed to exist
+(title, venue, year, DOI) and its numbers were matched against the
+published abstract or the publisher's or a university repository's index
+entry, found by web search on 2026-10-24. This session's network blocked
+direct page loads from publisher sites, so full texts were not opened.
+Evidence tier: 1 = meta-analysis or systematic review, 2 =
+quasi-experimental, 3 = survey or correlational. **Before any number goes
+into a sales deck, grant or published post, open the paper and quote it
+directly.**
+
+### F1. Gamified lessons raise achievement, on average, across many studies (tier 1)
+- **Plain claim:** "Studies that compared gamified and regular lessons
+  found students in the gamified lessons learned more, on average."
+- **Sources:**
+  - Huang, R., Ritzhaupt, A. D., Sommer, M., et al. (2020). The impact of
+    gamification in educational settings on student learning outcomes: A
+    meta-analysis. *Educational Technology Research and Development, 68*,
+    1875-1901. https://doi.org/10.1007/s11423-020-09807-z . 30 studies,
+    3,083 participants; overall g = 0.464 (95% CI 0.244 to 0.684), a
+    small-to-medium effect.
+  - Zeng, J., Sun, D., Looi, C.-K., & Fan, A. C. W. (2024). Exploring the
+    impact of gamification on students' academic performance: A
+    comprehensive meta-analysis of studies from the year 2008 to 2023.
+    *British Journal of Educational Technology.*
+    https://doi.org/10.1111/bjet.13471 . 22 experimental studies; overall
+    g = 0.782.
+  - Together with Sailer & Homner (2020, g = 0.49) and Bai et al. (2020,
+    g = 0.504) in section 2.1, four independent meta-analyses agree on a
+    positive average effect.
+- **Caveat:** effects vary a lot between studies; many are college
+  studies; Zeng et al. pooled only 22 studies, so its larger number should
+  not be quoted alone. Use the range "small to medium" in copy, never the
+  biggest number.
+- **Gamify feature:** the whole platform: teacher question sets played as
+  games.
+- *Note on Huang et al. (2020):* this is a different team from Bai, Hew &
+  Huang (2020). The DOI above is the ETR&D record for the Huang,
+  Ritzhaupt and Sommer paper; confirm it resolves before linking it
+  publicly.
+
+### F2. Classroom quizzing is one of the best-supported learning strategies (tier 1)
+- **Plain claim:** "Answering practice questions in class helps students
+  remember more than reviewing alone, from elementary school to college,
+  in every subject studied."
+- **Source:** Yang, C., Luo, L., Vadillo, M. A., Yu, R., & Shanks, D. R.
+  (2021). Testing (quizzing) boosts classroom learning: A systematic and
+  meta-analytic review. *Psychological Bulletin.* https://doi.org/10.1037/bul0000309
+  (volume and pages to confirm on the DOI page) . 222 classroom studies, 48,478
+  students; overall g = 0.499 (medium). Held across elementary, middle,
+  high school and college and 18 subject areas; helped understanding and
+  transfer, not only fact recall. Corrective feedback and more
+  repetitions were among the moderators.
+- **Caveat:** the comparison is quizzing vs. not quizzing (or vs.
+  restudying); it says nothing about games specifically. The game is the
+  delivery system that gets students to do more quizzing willingly.
+- **Gamify feature:** every game in every mode runs on the teacher's
+  question set, so every move is a practice question (Game Show, Bakery
+  Match, Four in a Row, Star Quiz).
+
+### F3. Practice questions work for young children too, best when they are hard but doable (tier 1, narrative review)
+- **Plain claim:** "Research shows even preschool and elementary students
+  learn more by recalling answers, and the benefit is biggest when the
+  question takes effort but the child succeeds."
+- **Source:** Fazio, L. K., & Marsh, E. J. (2019). Retrieval-based learning
+  in children. *Current Directions in Psychological Science, 28*(2),
+  111-116. https://doi.org/10.1177/0963721418806673
+- **Caveat:** a review of a young literature, not a meta-analysis; the
+  authors say little is known about how the effect changes with age.
+- **Gamify feature:** the supports that turn a hard question into a
+  successful one: read-aloud, the read-first pause before answers appear,
+  teacher-set tries (1 to 4), tools (calculator, scratchpad, text size)
+  and typed-answer support levels. These are the "effortful but
+  successful" conditions the review describes.
+
+### F4. Spread-out practice plus recall is the strongest combination (tier 1, review)
+- **Plain claim:** "Learning scientists agree that short practice spread
+  over days, with students recalling answers, beats cramming."
+- **Source:** Carpenter, S. K., Pan, S. C., & Butler, A. C. (2022). The
+  science of effective learning with spacing and retrieval practice.
+  *Nature Reviews Psychology, 1*, 496-511.
+  https://doi.org/10.1038/s44159-022-00089-1
+- **Caveat:** no single best gap between sessions; Gamify spaces within a
+  session today, and across days only once the "review pile" ships
+  (section 4, gap 2). Until then, say "play the same set across the week."
+- **Gamify feature:** one question set feeds every game and mode, so a
+  class can revisit the same content all week in a different game each
+  day.
+
+### F5. Feedback works, and feedback with information works best (tier 1)
+- **Plain claim:** "Research across hundreds of studies shows feedback
+  helps students learn, especially feedback that tells them something
+  about the answer."
+- **Source:** Wisniewski, B., Zierer, K., & Hattie, J. (2020). The power of
+  feedback revisited: A meta-analysis of educational feedback research.
+  *Frontiers in Psychology, 10*, 3087.
+  https://doi.org/10.3389/fpsyg.2019.03087 . 435 studies, more than 61,000
+  students; d = 0.48 (medium). Larger effects on cognitive and motor
+  outcomes than on motivation; more informative feedback had bigger
+  effects.
+- **Caveat:** "right / not yet" alone is low-information feedback. The
+  strongest version of this claim needs the end-of-game "Let's look back"
+  review (section 4, gap 1). Do not claim corrective feedback until it
+  ships.
+- **Gamify feature:** instant right/not-yet feedback in every game; the
+  planned "Let's look back" review; item analysis for teachers (feedback
+  for the teacher, too).
+
+### F6. Low-stakes quizzing, and how students feel about it (tier 3, survey; older landmark)
+- **Plain claim:** "In one large survey, most middle and high school
+  students who had regular low-stakes classroom quizzes said the quizzes
+  made them less nervous for tests."
+- **Source:** Agarwal, P. K., D'Antonio, L., Roediger, H. L., McDermott,
+  K. B., & McDaniel, M. A. (2014). Classroom-based programs of retrieval
+  practice reduce middle school and high school students' test anxiety.
+  *Journal of Applied Research in Memory and Cognition, 3*(3), 131-139.
+  https://doi.org/10.1016/j.jarmac.2014.07.002 . 1,408 students surveyed;
+  72% said retrieval practice made them less nervous for unit tests and
+  exams; 92% said it helped them learn.
+- **Caveat:** self-report, not an experiment, and from 2014 (outside the
+  10-year window, kept as the landmark classroom study). Say "students
+  said", never "reduces anxiety". No data for K-5.
+- **Gamify feature:** wrong answers never cost anything, timers are off or
+  relaxed by default, calm mode, optional leaderboards.
+
+### F7. Gamification lifts motivation a little, mainly through choice and belonging (tier 1)
+- **Plain claim:** "A review of 35 classroom studies found gamified
+  learning gave a small boost to students' own motivation, mostly by
+  helping them feel in control and connected to others."
+- **Source:** Gamification enhances student intrinsic motivation,
+  perceptions of autonomy and relatedness, but minimal impact on
+  competency: A meta-analysis and systematic review (2024). *Educational
+  Technology Research and Development, 72*(2), 765-796.
+  https://doi.org/10.1007/s11423-023-10337-7 . 35 interventions, about
+  2,500 participants, studies from 2011-2022; intrinsic motivation g =
+  0.257 (small), no evidence of publication bias; autonomy and
+  relatedness improved, competence barely moved. *(Author list not
+  confirmed this session: the University of Hong Kong repository record
+  lists J. Du among the authors. Confirm the full list on the DOI page
+  before citing by author.)*
+- **Caveat:** small effect. The "competence" finding is a design warning:
+  points and badges alone do not make students feel more capable. Visible
+  progress on real skills has to.
+- **Gamify feature:** autonomy = students choose the game, and the teacher
+  can offer a choice board; relatedness = Share teams, Class Live, Versus,
+  class-designed themes; competence = assignment progress, "2 of 3" pill,
+  reports that show growth.
+
+### F8. In K-12, gamification's motivation boost is real but smallest for the youngest (tier 1)
+- **Plain claim (for teachers):** "Across K-12 studies, gamified lessons
+  raised motivation moderately; the effect was largest in the middle
+  grades."
+- **Source:** Kurnaz, F. B., & Koçtürk, N. (2025). A meta-analysis of
+  gamification's impact on student motivation in K-12 education.
+  *Psychology in the Schools, 62*(12). https://doi.org/10.1002/pits.70056 .
+  41 effect sizes; overall g = 0.654 (95% CI 0.442 to 0.866), high
+  heterogeneity (I² about 89%). Middle/secondary g = 1.015, high school
+  g = 0.821, **primary g = 0.309**.
+- **Caveat:** for K-3, the motivation lift was the smallest. The primary
+  case for young children should rest on F2-F3 (practice questions) and
+  on access (F10-F11), not on "kids will be wildly motivated."
+- **Correction to section 2.1:** the reference list above names Kurnaz
+  alone; the index record lists Kurnaz & Koçtürk. The abstract located
+  this session reports grade-level and intrinsic/extrinsic moderators; the
+  claim in 2.1 that the effect was "driven by clear goals, timely feedback
+  and difficulty matched to skill" was not found in the abstract and
+  should be checked in the full text before reuse.
+- **Gamify feature:** the K-3 lens (picture-first, read-aloud) and the
+  middle-school pull of Versus and themes.
+
+### F9. Competition is not the magic ingredient (tier 1)
+- **Plain claim:** "Studies found gamified learning helped whether or not
+  students competed with each other, so teachers can choose teams or a
+  class goal without losing the benefit."
+- **Source:** Ho, J. C.-S., Hung, Y.-S., & Kwan, L. Y.-Y. The impact of peer
+  competition and collaboration on gamified learning performance in
+  educational settings: A meta-analytical study. *Education and
+  Information Technologies.* https://doi.org/10.1007/s10639-021-10770-2
+  (volume and year to confirm on the DOI page). 29 studies, 3,515
+  participants; overall g = 0.595. Competitive games did slightly better
+  than non-competitive ones, but the difference was not robust;
+  collaborative and non-collaborative games did not differ; education
+  level made no difference.
+- **Caveat:** Sailer & Homner (2020) found competition combined with
+  collaboration helped behavioral outcomes. Fair summary: the evidence
+  does not require public individual ranking.
+- **Gamify feature:** whole class vs the computer, whole class vs the
+  teacher, Share team scores, optional leaderboards, Versus that rewards
+  both players for right answers.
+
+### F10. Gamification in special education: promising, still early (tier 1, systematic review without effect sizes)
+- **Plain claim:** "A 2023 review found gamified learning helped students
+  with disabilities build skills, most often learning skills, and called
+  for more research."
+- **Source:** Hussein, E., Kan'an, A., Rasheed, A., Alrashed, Y., Jdaitawi,
+  M., Abas, A., Mabrouk, S., & Abdelmoneim, M. (2023). Exploring the
+  impact of gamification on skill development in special education: A
+  systematic review. *Contemporary Educational Technology, 15*(3), ep443.
+  https://doi.org/10.30935/cedtech/13335
+- **Caveat:** no pooled effect size; mostly small studies. Never say
+  "proven for students with disabilities."
+- **Gamify feature:** built first for students with high support needs:
+  read-aloud, tries, tools, calm mode, Share Mirror, settings on every
+  game, all free.
+
+### F11. Universal Design for Learning: the case is access and fairness, not a score bump (tier 1, mixed quality)
+- **Plain claim:** "Gamify follows Universal Design for Learning: many
+  ways to see, hear and answer, built in for every student."
+- **Sources:** Almeqdad, Q. I., Alodat, A. M., Alquraan, M. F., Mohaidat,
+  M. A., & Al-Makhzoomy, A. K. (2023). The effectiveness of universal
+  design for learning: A systematic review of the literature and
+  meta-analysis. *Cogent Education, 10*(1).
+  https://doi.org/10.1080/2331186X.2023.2218191 ; Capp, M. J. (2017). The
+  effectiveness of universal design for learning: A meta-analysis of
+  literature between 2013 and 2016. *International Journal of Inclusive
+  Education, 21*(8), 791-807. https://doi.org/10.1080/13603116.2017.1325074
+- **Caveat:** Almeqdad et al. pooled 13 mostly one-group pre-post studies
+  (a very large, unreliable effect); Capp found UDL improved the learning
+  process but outcome effects were not demonstrated. **Do not quote any
+  UDL effect size in marketing.** Use UDL as a design and equity promise,
+  which districts and ADA Title II already ask for. (Capp pooled 18
+  studies.)
+- **Gamify feature:** settings on every game, accessibility never
+  paywalled, read-aloud, text size, calm mode, Share Mirror.
+
+### F12. ADHD: what NOT to claim (tier 1 systematic review, different kind of game)
+- **Finding:** Peñuelas-Calvo, I., et al. (2022). Video games for the
+  assessment and treatment of attention-deficit/hyperactivity disorder: A
+  systematic review. *European Child & Adolescent Psychiatry, 31*(1),
+  5-20. https://doi.org/10.1007/s00787-020-01557-w . 22 studies;
+  therapeutic games were well accepted and generally improved cognitive
+  areas and symptoms.
+- **Caveat:** these were clinical training games, not classroom quiz
+  games. **Gamify must never be marketed as helping, treating or
+  improving ADHD.** Safe framing: "instant feedback, timers you can turn
+  off, and calm mode give students who need a different pace a way in", described as access features, not treatment.
+- **Gamify feature:** calm mode, timers off, settings on every game.
+
+### Three strongest findings for the home page
+1. **F2 (Yang et al., 2021):** 222 classroom studies, nearly 50,000
+   students, medium effect for practice quizzing across all grade levels
+   and subjects. This is the core "why it works."
+2. **F1 (Huang et al., 2020 and three other meta-analyses):** gamified
+   learning beats regular instruction on average, small-to-medium effect.
+3. **F9 (Ho et al.) with F6 (Agarwal et al., 2014):** the benefit does not
+   depend on kids competing, and students describe low-stakes quizzing as
+   making them less nervous, which supports Gamify's team, class-goal and
+   no-penalty design.

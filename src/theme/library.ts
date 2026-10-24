@@ -25,7 +25,7 @@ export function spaceTheme(gameId: string): GameTheme {
   return {
     id: `${gameId}:space`, gameId, name: 'Space', source: 'library',
     colors: { background: '#15143a', backgroundText: '#ffffff', surface: '#ffffff', text: '#1b1838', accent: '#ffd166', accentText: '#1b1838', success: '#1f7a45', miss: '#9b2c3a' },
-    fonts: { display: 'Baloo 2', body: 'Nunito' },
+    fonts: { display: 'Baloo 2', body: 'Inclusive Sans' },
     backdrop: { kind: 'pattern', pattern: 'dots' },
     celebration: 'stars',
     pieces: asPieces(SPACE_PIECES[gameId]),
@@ -36,7 +36,7 @@ export function gardenTheme(gameId: string): GameTheme {
   return {
     id: `${gameId}:garden`, gameId, name: 'Garden', source: 'library',
     colors: { background: '#cfe9b8', backgroundText: '#22331b', surface: '#ffffff', text: '#22331b', accent: '#f6c445', accentText: '#22331b', success: '#1f7a45', miss: '#9b2c3a' },
-    fonts: { display: 'Baloo 2', body: 'Nunito' },
+    fonts: { display: 'Baloo 2', body: 'Inclusive Sans' },
     backdrop: { kind: 'pattern', pattern: 'checks' },
     celebration: 'bubbles',
     pieces: asPieces(GARDEN_PIECES[gameId]),

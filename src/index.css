@@ -1,8 +1,9 @@
 @import "tailwindcss";
-@import "@fontsource/nunito/400.css";
-@import "@fontsource/nunito/600.css";
-@import "@fontsource/nunito/700.css";
-@import "@fontsource/nunito/800.css";
+@import "@fontsource/inclusive-sans/400.css";
+@import "@fontsource/inclusive-sans/400-italic.css";
+@import "@fontsource/inclusive-sans/500.css";
+@import "@fontsource/inclusive-sans/600.css";
+@import "@fontsource/inclusive-sans/700.css";
 @import "@fontsource/baloo-2/500.css";
 @import "@fontsource/baloo-2/600.css";
 @import "@fontsource/baloo-2/700.css";
@@ -41,7 +42,7 @@
   --radius-input: 16px;
 
   --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
 /*
@@ -85,7 +86,7 @@
   --shadow-sticker-lg: 0 6px 0 var(--border);
 
   --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 
   color-scheme: light;
 }

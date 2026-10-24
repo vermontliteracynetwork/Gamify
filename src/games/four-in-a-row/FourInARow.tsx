@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowFatDown } from '@phosphor-icons/react';
+import { ArrowFatDown, Question, Trophy } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { playEffect } from '../../engine/feedback';
@@ -13,7 +13,12 @@ import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
+import { ChoiceRow, Slider } from '../../ui/fields';
+import GameWelcome from '../GameWelcome';
+import SetPicker from '../SetPicker';
+import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
+import { useSavedSetup } from '../useSavedSetup';
 import { pieceColor } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
@@ -35,7 +40,8 @@ export const fourInARowManifest: GameManifest = {
   hasCpu: true,
 };
 
-type Phase = 'setup' | 'play' | 'end';
+type Phase = 'welcome' | 'setup' | 'play' | 'end';
+type First = 'p1' | 'p2' | 'random';
 
 export default function FourInARow() {
   const { settings } = useSettings();
@@ -43,11 +49,13 @@ export default function FourInARow() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setId, setSetId] = useState(LIBRARY[0].id);
+  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1 });
+  const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
+  const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const { ask, element, missed } = useAsk({ gameId: 'four-in-a-row', mode: 'versus', pool });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [phase, setPhase] = useState<Phase>('setup');
+  const [phase, setPhase] = useState<Phase>('welcome');
   const [players, setPlayers] = useState<TurnPlayer[]>([]);
   const [level, setLevel] = useState<CpuLevel>('medium');
   const [board, setBoard] = useState<Board>(emptyBoard);
@@ -60,7 +68,8 @@ export default function FourInARow() {
   const player = players[turn];
 
   function begin(ps: TurnPlayer[], lvl: CpuLevel) {
-    setPlayers(ps.slice(0, 2)); setLevel(lvl); setBoard(emptyBoard()); setTurn(0); setLast(null); setLine(null); setRights([0, 0]);
+    const first: 0 | 1 = setup.first === 'p2' ? 1 : setup.first === 'random' ? (Math.random() < 0.5 ? 0 : 1) : 0;
+    setPlayers(ps.slice(0, 2)); setLevel(lvl); setBoard(emptyBoard()); setTurn(first); setLast(null); setLine(null); setRights([0, 0]);
     setStep('answer'); setPhase('play');
   }
 
@@ -72,7 +81,7 @@ export default function FourInARow() {
       const timer = window.setTimeout(() => { if (live) place(cpuMove(board, (turn + 1) as 1 | 2, level)); }, 900);
       return () => { live = false; window.clearTimeout(timer); };
     }
-    void ask({ player: player.name }).then((ok) => {
+    void ask({ player: player.name, count: setup.perTurn }).then((ok) => {
       if (!live) return;
       if (!ok) { setPhase('setup'); return; }
       setRights((r) => r.map((n, i) => (i === turn ? n + 1 : n)));
@@ -118,24 +127,35 @@ export default function FourInARow() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        <h1 className="title-bubble text-3xl sm:text-4xl">{t('fr.title')}</h1>
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('fr.title')}</h1>}
       </GameTopRow>
 
-      {phase === 'setup' && (
-        <div className="grid gap-4">
-          <p className="font-bold text-center stage-text">{t('fr.description')}</p>
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
-            {t('practice.set')}
-            <select id="fr-set" value={setId} onChange={(e) => setSetId(e.target.value)} className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
-              {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
-            </select>
-          </label>
-          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
-          <TeamSetup mode="versus" min={2} max={2} onStart={begin} />
-        </div>
+      {phase === 'welcome' && (
+        <GameWelcome game={fourInARowManifest} onStart={() => setPhase('setup')} steps={[
+          { icon: <Question weight="bold" size={22} />, text: t('fr.how1') },
+          { icon: <ArrowFatDown weight="fill" size={22} />, text: t('fr.how2') },
+          { icon: <Trophy weight="fill" size={22} />, text: t('fr.how3') },
+        ]} />
       )}
 
-      {phase !== 'setup' && (
+      {phase === 'setup' && (
+        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+          { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
+            <TeamSetup mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
+          ) },
+          { id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> },
+          { id: 'options', title: t('setup.options'), content: (
+            <>
+              <ChoiceRow label={t('fr.first')} value={setup.first} onChange={(v) => change({ first: v })}
+                options={[{ value: 'p1', label: t('fr.first.p1') }, { value: 'p2', label: t('fr.first.p2') }, { value: 'random', label: t('fr.first.random') }]} />
+              <Slider label={t('fr.perTurn')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
+            </>
+          ) },
+          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+        ]} />
+      )}
+
+      {(phase === 'play' || phase === 'end') && (
         <div className="grid gap-4 justify-items-center">
           <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 w-full max-w-xl" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-live="polite">
             {phase === 'play' && player && (

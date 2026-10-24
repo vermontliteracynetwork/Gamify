@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { finishSetup, openSetup } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -11,10 +12,16 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   test.setTimeout(90_000);
   const problems = watch(page);
   await page.goto('/games/game-show');
-  await page.getByRole('radio', { name: /Surprise cards/ }).click();
+  await page.screenshot({ path: `test-results/gameshow-welcome-${info.project.name}.png` });
+  await openSetup(page, '/games/game-show');
+  await page.getByRole('radio', { name: 'Surprise cards' }).click();
+  await page.screenshot({ path: `test-results/gameshow-setup-board-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.screenshot({ path: `test-results/gameshow-setup-sets-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: '12' }).click();
-  await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('button', { name: 'Start' }).click();
+  await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
+  await finishSetup(page);
 
   // Team 1: right answer, pick card 1.
   const q = page.getByRole('dialog');
@@ -37,14 +44,16 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
 test('Game Show: category grid, class vs the computer', async ({ page }, info) => {
   test.setTimeout(90_000);
   const problems = watch(page);
-  await page.goto('/games/game-show');
-  await page.getByRole('radio', { name: /Category grid/ }).click();
-  await page.getByRole('checkbox', { name: 'Rhyming words' }).click();
-  await page.getByRole('checkbox', { name: 'Shapes' }).click();
-  await page.getByRole('button', { name: 'Next' }).click();
+  await openSetup(page, '/games/game-show');
+  await page.getByRole('radio', { name: 'Category grid' }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('checkbox', { name: /^Rhyming words/ }).click();
+  await page.getByRole('checkbox', { name: /^Shapes/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Fewer teams' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
-  await page.getByRole('button', { name: 'Start' }).click();
+  await page.screenshot({ path: `test-results/gameshow-setup-teams-${info.project.name}.png` });
+  await finishSetup(page);
   await page.getByRole('button', { name: 'Shapes, 300 points' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Right' }).click();
   await expect(page.getByLabel('300 points', { exact: true })).toBeVisible();

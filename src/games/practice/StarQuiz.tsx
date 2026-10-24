@@ -1,17 +1,21 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Star } from '@phosphor-icons/react';
+import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
-import StartCard, { type RoundValues } from '../../engine/StartCard';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
+import { Slider } from '../../ui/fields';
+import GameWelcome from '../GameWelcome';
+import SetPicker from '../SetPicker';
+import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
+import { useSavedSetup } from '../useSavedSetup';
 import { pieceColor } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
@@ -30,7 +34,7 @@ export const starQuizManifest: GameManifest = {
   hasCpu: false,
 };
 
-type Phase = 'start' | 'play' | 'end';
+type Phase = 'welcome' | 'setup' | 'play' | 'end';
 
 // The engine's test game (development plan Stage 2) and the first simple
 // Quiz: every right answer adds a star. Uses only the shared engine.
@@ -39,17 +43,18 @@ export default function StarQuiz() {
   const { theme, themes, playable, choose } = useGameTheme('star-quiz');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setId, setSetId] = useState(LIBRARY[0].id);
+  const [setup, change] = useSavedSetup('star-quiz', { setId: LIBRARY[0].id, rounds: 10 });
+  const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const { ask, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool });
-  const [phase, setPhase] = useState<Phase>('start');
+  const [phase, setPhase] = useState<Phase>('welcome');
   const [stars, setStars] = useState(0);
   const [round, setRound] = useState(0);
   const [total, setTotal] = useState(10);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leftEarly, setLeftEarly] = useState(false);
 
-  async function play(v: RoundValues) {
+  async function play(v: { rounds: number }) {
     setTotal(v.rounds); setStars(0); setRound(0); setLeftEarly(false); setPhase('play');
     for (let r = 0; r < v.rounds; r++) {
       setRound(r + 1);
@@ -70,21 +75,25 @@ export default function StarQuiz() {
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
-      {phase === 'start' && (
-        <div className="grid gap-4">
-          <label className="grid gap-1 font-bold max-w-lg mx-auto w-full stage-text">
-            {t('practice.set')}
-            <select id="practice-set" value={setId} onChange={(e) => setSetId(e.target.value)}
-              className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
-              {sets.map((s) => <option key={s.id} value={s.id}>{s.name || t('sets.untitled')}</option>)}
-            </select>
-          </label>
-          <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} />
-          <StartCard gameId="star-quiz" title={t('practice.title')} description={t('practice.description')} rounds={starQuizManifest.rounds} onPlay={play} />
-        </div>
+      {phase === 'welcome' && (
+        <GameWelcome game={starQuizManifest} onStart={() => setPhase('setup')} steps={[
+          { icon: <Question weight="bold" size={22} />, text: t('practice.how1') },
+          { icon: <Star weight="fill" size={22} />, text: t('practice.how2') },
+          { icon: <Trophy weight="fill" size={22} />, text: t('practice.how3') },
+        ]} />
       )}
 
-      {phase !== 'start' && (
+      {phase === 'setup' && (
+        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
+          { id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> },
+          { id: 'options', title: t('setup.options'), content: (
+            <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+          ) },
+          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+        ]} />
+      )}
+
+      {(phase === 'play' || phase === 'end') && (
         <section className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 mb-6" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <div className="flex items-center justify-between gap-3">
             <h1 className="title-bubble text-3xl">{t('practice.title')}</h1>
@@ -102,7 +111,7 @@ export default function StarQuiz() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={t('practice.done', { count: stars })} missed={missed} againLabel={t('practice.again')} onAgain={() => setPhase('start')}>
+        <ResultsModal title={t('practice.done', { count: stars })} missed={missed} againLabel={t('practice.again')} onAgain={() => setPhase('setup')}>
           {leftEarly && <p className="font-bold">{t('practice.leftEarly')}</p>}
           <p className="font-bold">{t('practice.score', { right: stats.right, asked: stats.asked })}</p>
         </ResultsModal>

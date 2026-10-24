@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Sparkle } from '@phosphor-icons/react';
+import { GameCover } from '../games/covers';
+import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 
@@ -10,7 +12,7 @@ export default function Home() {
   const reduce = useReducedMotion();
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-16 pb-24">
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-16">
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -31,7 +33,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {GAMES.map((game, i) => (
           <motion.div
             key={game.id}
@@ -41,17 +43,19 @@ export default function Home() {
           >
             <Link
               to={`/games/${game.id}`}
-              className="group relative flex flex-col gap-4 p-6 rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden
+              className="group relative flex flex-col rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden h-full
                          hover:bg-surface-hover active:scale-[0.98] motion-safe:transition-transform"
               style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
             >
-              <div>
-                <h2 className="font-display text-xl font-bold text-text mb-1">{game.name}</h2>
+              <GameCover gameId={game.id} className="aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform" />
+              <div className="p-5 flex flex-col gap-3 flex-1">
+                <h2 className="font-display text-2xl font-bold text-text">{game.name}</h2>
+                <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
                 <p className="text-muted text-sm leading-relaxed">{game.description}</p>
-              </div>
-              <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
-                {t('home.play')}
-                <ArrowRight weight="bold" size={16} className="transition-transform group-hover:translate-x-1" />
+                <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
+                  {t('home.play')}
+                  <ArrowRight weight="bold" size={16} className="transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </Link>
           </motion.div>
