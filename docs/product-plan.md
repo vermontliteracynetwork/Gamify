@@ -909,6 +909,107 @@ game only decides *when to ask* and *what a right answer does*.
     Match Up, Peg Drop, Four in a Row) so free teachers try all four ways
     to play, with the rest on Plus and Pro.
 
+## 11. Not yet considered: pre-build checklist (2026-10-24)
+
+Your question: "what hasn't been considered that needs to be before we
+start to build?" Claudia's gap review of everything above.
+
+### A. Decide before writing code (these shape the foundation)
+1. **Content model for every game type.** Question sets today are
+   multiple choice (plus the Dashboard's typed types). Activity games need
+   other shapes: word search and crossword need word + clue lists, Match Up
+   and Memory need pairs, Group Sort needs categories, Category Board needs
+   categories with point values, labelled diagrams need an image with
+   pins. One question set must hold these (or convert between them, e.g.
+   a multiple-choice question becomes a match pair) or "one set, every
+   game" breaks. Also images, audio, math notation and alt text.
+2. **How a student proves who they are** on a shared iPad without an
+   account. XP, reports and the Lock all depend on it. Picking your name
+   from a list lets a student pick a classmate's name. Options: a picture
+   password per student, a printed QR login badge, or a short personal
+   code. K-1 friendly and quick.
+3. **Tech stack and backend.**
+   - Database, teacher sign-in, file storage, real-time server for live
+     games, and hosting: choose and price them. The Dashboard runs on
+     Supabase; Gamify needs its own separate instance or another service
+     (the no-dependency rule in `CLAUDE.md`).
+   - **TypeScript:** Gamify is plain JavaScript while the Dashboard code it
+     reuses is TypeScript. Switch Gamify to TypeScript before building so
+     the Dashboard logic ports cleanly and bugs are caught earlier.
+4. **Cost per teacher.** Hosting, live servers, storage for uploaded art,
+   and especially **human-voice read-aloud** (the Dashboard uses a paid
+   voice service) cost money per use. At $60/yr per paid teacher, and many
+   free teachers costing money too, the numbers need checking now. Free
+   tier read-aloud may need the device voice instead.
+5. **Smallest sellable version (MVP) and a target date.** Back-to-school
+   (August) is when teachers try new tools. Work backward: which games,
+   modes and tiers must exist on day one, and what waits.
+6. **Who builds the art and sound.** 20+ games, house themes, Pals and
+   avatar items need a lot of original art. Decide: commissioned artists
+   (with work-for-hire contracts), a style guide so everything looks like
+   one product, and a budget. Background music needs licensed tracks.
+7. **Owner, seller and name** (decisions 1 and 2) still block Terms,
+   payments, domain and logo.
+
+### B. School realities that can sink adoption
+8. **School web filters.** District filters (GoGuardian, Securly and
+   similar) often block anything categorized as "games." A new domain can
+   be blocked on day one. Plan: get the domain categorized as education,
+   publish an "IT whitelist" page (domains, ports, real-time connections),
+   and test live games on a filtered school network.
+9. **Device and browser matrix.** iPad is first, but many US schools run
+   Chromebooks, and smart boards use their own browsers. Decide the
+   supported list, the oldest iPad and iOS supported, and a performance
+   budget so games run smoothly on old devices.
+10. **Weak or dropped internet.** What happens when Wi-Fi drops mid-game,
+    a student refreshes, or the teacher's laptop sleeps during Class Live.
+11. **Rostering.** Google Classroom roster import for teachers; Clever /
+    ClassLink for districts (most district deals require one).
+12. **Co-teachers, paraprofessionals and substitutes.** Shared access to a
+    classroom, a sub mode with limited controls, para access to the live
+    monitor.
+
+### C. Safety and trust
+13. **No chat, anywhere.** Make it a written rule: students can't message
+    each other or anyone else. Removes a whole category of child-safety
+    risk.
+14. **Moderation of public content.** Public question sets and the public
+    theme gallery need review before listing, a "report this" button, and
+    someone responsible for checking reports.
+15. **Strangers joining live games.** Codes can leak to social media.
+    Needs rate limits on code guessing, code expiry, room lock (4B), and
+    teacher approval.
+16. **Security basics.** Encrypted data, backups, a breach response plan,
+    and a security review before launch. Districts will send security
+    questionnaires.
+
+### D. Business details
+17. **Downgrades and trials.** What happens when a Pro teacher drops to
+    Free with 5 classrooms and 40 sets: Claudia suggests nothing is
+    deleted; extras become read-only until they upgrade or choose which to
+    keep. Free trial length for Plus/Pro.
+18. **Support.** A help center, how teachers contact you, who answers,
+    and a status page when something is down.
+19. **Product analytics without tracking kids.** Teacher-side usage
+    numbers (which games get played) to guide building, with nothing on
+    student pages (section 6.6).
+20. **Gamify vs the Dashboard.** Does the Dashboard keep its games? Is
+    code shared between them, and who owns the shared parts (ties to
+    6.4)?
+
+### E. Quality
+21. **Automated tests and checks.** The repo has none yet. Set up
+    automated tests, a check that runs on every change, and the Three-Lens
+    browser testing from `docs/testing-standards.md` before game code
+    piles up.
+22. **Language-ready from day one.** Spanish is promised, so all text has
+    to be built for translation from the start; retrofitting is painful.
+23. **Accessibility audit** against WCAG 2.1 AA and a VPAT before selling
+    to districts (6.7).
+24. **Pilot teachers.** Line up a few classrooms to test early builds and
+    to supply the outcome data in `docs/gamified-learning-research.md`
+    section 5.
+
 ## 10. Marketing ideas (running list)
 
 Direct from you (2026-10-24): "keep a list going anytime that you know that
