@@ -159,3 +159,9 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 
 /* Plain text sitting on a themed game backdrop (src/theme/useGameTheme). */
 .stage-text { color: var(--stage-bg-text, var(--text)); }
+
+/* Big touch-friendly sliders (settings). */
+.gamify-slider { -webkit-appearance: none; appearance: none; height: 14px; border-radius: 999px; background: var(--surface-2); border: 2px solid var(--border); }
+.gamify-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 36px; height: 36px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
+.gamify-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
+.gamify-slider:focus-visible { outline: 3px solid var(--border); outline-offset: 4px; }

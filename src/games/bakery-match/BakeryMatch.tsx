@@ -5,7 +5,7 @@ import { Cake, Coffee, Cookie, IceCream, Pizza, Popcorn, type Icon } from '@phos
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
-import LookBack from '../../engine/LookBack';
+import ResultsModal from '../../engine/ResultsModal';
 import StartCard, { type RoundValues } from '../../engine/StartCard';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
@@ -156,7 +156,7 @@ export default function BakeryMatch() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bakery-match" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {phase !== 'start' && <h1 className="title-bubble text-3xl sm:text-4xl">{t('bm.title')}</h1>}
@@ -178,7 +178,7 @@ export default function BakeryMatch() {
 
       {phase !== 'start' && (
         <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
-          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ background: pieceColor(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, 70dvh, 640px)' }}>
+          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ background: pieceColor(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 220px), 640px)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => row.map((tileItem, c) => {
                 const key = `${r},${c}`;
@@ -230,15 +230,7 @@ export default function BakeryMatch() {
         </div>
       )}
 
-      {phase === 'end' && (
-        <div className="grid gap-4 mt-5">
-          <p className="font-display text-3xl font-bold text-center">{t('bm.done', { score })}</p>
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setPhase('start')} className="min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold">{t('share.again')}</button>
-          </div>
-          <LookBack missed={missed} onDone={() => setPhase('start')} />
-        </div>
-      )}
+      {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('start')} />}
       {element}
     </main>
     </ThemedPage>

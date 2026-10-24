@@ -299,6 +299,24 @@ export const en = {
   'theme.locked': '{name} theme (locked)',
   'theme.preview': 'Preview of the {name} theme',
   'theme.close': 'Close preview',
+
+  'settings.tab.quick': 'Quick', 'settings.tab.sound': 'Sound', 'settings.tab.calm': 'Calm',
+  'settings.tab.reading': 'Reading', 'settings.tab.play': 'Play', 'settings.tab.teacher': 'Teacher', 'settings.tab.tell': 'Tell us',
+  'settings.seconds': '{count} seconds',
+  'settings.seconds.one': '1 second',
+
+  'pin.enter': 'Teacher PIN',
+  'pin.create': 'Choose a 4-digit teacher PIN',
+  'pin.createNote': 'This PIN keeps students out of the accommodation settings. Pick one students won\'t guess.',
+  'pin.confirm': 'Type the same PIN again',
+  'pin.wrong': 'That PIN is not right. Try again.',
+  'pin.mismatch': 'Those PINs did not match. Choose one again.',
+  'pin.delete': 'Delete the last number',
+  'pin.entered': '{count} of 4 numbers typed',
+  'pin.lock': 'Lock',
+  'q.closeTool': 'Close the {tool}',
+  'look.prev': 'Previous question',
+  'look.next': 'Next question',
 } as const;
 
 export type StringKey = keyof typeof en;

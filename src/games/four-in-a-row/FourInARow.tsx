@@ -5,7 +5,7 @@ import { ArrowFatDown } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { playEffect } from '../../engine/feedback';
-import LookBack from '../../engine/LookBack';
+import ResultsModal from '../../engine/ResultsModal';
 import { TEAM_ICONS } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
 import { TEAM_COLORS, type CpuLevel, type TurnPlayer } from '../../engine/turns';
@@ -115,7 +115,7 @@ export default function FourInARow() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         <h1 className="title-bubble text-3xl sm:text-4xl">{t('fr.title')}</h1>
@@ -151,7 +151,7 @@ export default function FourInARow() {
             )}
           </div>
 
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ background: pieceColor(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, 75dvh, 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ background: pieceColor(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 340px) * 7 / 6), 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;
@@ -188,12 +188,10 @@ export default function FourInARow() {
           </div>
 
           {phase === 'end' && (
-            <div className="grid gap-3 justify-items-center text-center">
-              <p className="font-display text-2xl font-bold">{t('fr.goodGame')}</p>
+            <ResultsModal title={winner ? t('fr.wins', { name: winner.name }) : t('fr.draw')} missed={missed} againLabel={t('fr.rematch')} onAgain={() => begin(players, level)}>
+              <p className="font-display text-xl font-bold">{t('fr.goodGame')}</p>
               <ul className="font-bold">{players.map((p, i) => p.kind !== 'cpu' && <li key={p.id}>{t('fr.rights', { name: p.name, count: rights[i] })}</li>)}</ul>
-              <button type="button" onClick={() => begin(players, level)} className="min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold">{t('fr.rematch')}</button>
-              {missed.length > 0 && <LookBack missed={missed} onDone={() => setPhase('setup')} />}
-            </div>
+            </ResultsModal>
           )}
         </div>
       )}

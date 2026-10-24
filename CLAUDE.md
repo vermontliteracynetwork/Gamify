@@ -39,7 +39,9 @@ teacher no control or educational value is not done.
   "smooth" claim that hasn't been frame-checked is not verified.
 - Check every device: iPad / tablet (portrait and landscape) AND computers
   (laptop screens, mouse and keyboard). We don't know what students and
-  teachers use (teacher, 2026-10-24); Playwright runs all three sizes. Check for dead/empty space on both short and tall screens.
+  teachers use (teacher, 2026-10-24); Playwright runs all three sizes. Check for dead/empty space on both short and tall screens. Game screens
+  must never need scrolling (teacher, 2026-10-24): boards size to the
+  screen and results open in a box over the game.
 - Read every console error/warning from the browser session before calling
   something done.
 

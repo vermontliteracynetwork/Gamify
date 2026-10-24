@@ -1,9 +1,10 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { GearSix, X } from '@phosphor-icons/react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { ChalkboardTeacher, ChatCircleDots, GameController, GearSix, Leaf, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
 import { canVibrate } from '../engine/feedback';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { TellGamify } from '../ui/TellGamify';
+import PinGate from './PinGate';
 import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
 import { useSettings } from './SettingsContext';
 
@@ -35,14 +36,28 @@ export function GameTopRow({ onSettings, children }: { onSettings: () => void; c
   );
 }
 
+type TabId = 'quick' | 'sound' | 'calm' | 'reading' | 'play' | 'teacher' | 'tell';
+const TABS: { id: TabId; icon: Icon; label: StringKey }[] = [
+  { id: 'quick', icon: Sparkle, label: 'settings.tab.quick' },
+  { id: 'sound', icon: SpeakerHigh, label: 'settings.tab.sound' },
+  { id: 'calm', icon: Leaf, label: 'settings.tab.calm' },
+  { id: 'reading', icon: TextAa, label: 'settings.tab.reading' },
+  { id: 'play', icon: GameController, label: 'settings.tab.play' },
+  { id: 'teacher', icon: ChalkboardTeacher, label: 'settings.tab.teacher' }, // behind the teacher PIN
+  { id: 'tell', icon: ChatCircleDots, label: 'settings.tab.tell' },
+];
+
 export function SettingsPanel({ open, onClose, context }: { open: boolean; onClose: () => void; context?: string }) {
   const { settings: s, update } = useSettings();
   const ref = useRef<HTMLDialogElement>(null);
+  const [tab, setTab] = useState<TabId>('quick');
+  const [unlocked, setUnlocked] = useState(false);
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
     if (open && !d.open) d.showModal();
     if (!open && d.open) d.close();
+    if (!open) setUnlocked(false); // the Teacher tab locks again when settings close
   }, [open]);
 
   const set = <K extends keyof PlayerSettings>(k: K, v: PlayerSettings[K]) => update({ ...s, [k]: v });
@@ -61,86 +76,87 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
         </button>
       </div>
 
-      <div className="px-5 py-4 grid gap-6">
-        <Group title={t('settings.presets')}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div role="tablist" aria-label={t('settings.title')} className="flex gap-1.5 overflow-x-auto px-4 py-2 border-b-[2px] border-border-soft bg-surface">
+        {TABS.map(({ id, icon: Icon, label }) => (
+          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
+            className={`shrink-0 min-h-14 min-w-16 px-2.5 rounded-input border-[2px] flex flex-col items-center justify-center gap-0.5 font-bold text-xs
+              ${tab === id ? 'bg-accent border-border' : 'bg-surface border-transparent hover:bg-surface-2'}`}>
+            <Icon weight="bold" size={22} aria-hidden="true" />{t(label)}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-5 py-4 grid gap-4" role="tabpanel">
+        {tab === 'quick' && (
+          <div className="grid grid-cols-2 gap-2">
             {(Object.keys(PRESETS) as PresetId[]).map((id) => (
               <button key={id} type="button" onClick={() => update(PRESETS[id](s))}
-                className="min-h-12 px-3 rounded-input border-[2px] border-border bg-surface-2 font-bold active:scale-95">
+                className="min-h-14 px-3 rounded-input border-[2px] border-border bg-surface-2 font-bold active:scale-95">
                 {t(`preset.${id}` as StringKey)}
               </button>
             ))}
           </div>
-        </Group>
+        )}
 
-        <Group title={t('settings.sound')}>
-          <Toggle label={t('settings.allSoundOff')} value={s.allSoundOff} onChange={(v) => set('allSoundOff', v)} />
-          <LevelPicker label={t('settings.effects')} value={s.effects} disabled={s.allSoundOff} onChange={(v) => set('effects', v)} />
-          <LevelPicker label={t('settings.music')} value={s.music} disabled={s.allSoundOff} onChange={(v) => set('music', v)} />
-          <LevelPicker label={t('settings.voice')} value={s.voice} disabled={s.allSoundOff} onChange={(v) => set('voice', v)} />
-          <Choice label={t('settings.voiceRate')} value={s.voiceRate} options={['slow', 'normal', 'fast']} onChange={(v) => set('voiceRate', v)} />
-          {canVibrate() && <Toggle label={t('settings.haptics')} value={s.haptics} onChange={(v) => set('haptics', v)} />}
-        </Group>
+        {tab === 'sound' && (
+          <>
+            <Toggle label={t('settings.allSoundOff')} value={s.allSoundOff} onChange={(v) => set('allSoundOff', v)} />
+            <Slider label={t('settings.effects')} min={0} max={5} value={s.effects} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('effects', v as Level)} />
+            <Slider label={t('settings.music')} min={0} max={5} value={s.music} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('music', v as Level)} />
+            <Slider label={t('settings.voice')} min={0} max={5} value={s.voice} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('voice', v as Level)} />
+            <Choice label={t('settings.voiceRate')} value={s.voiceRate} options={['slow', 'normal', 'fast']} onChange={(v) => set('voiceRate', v)} />
+            {canVibrate() && <Toggle label={t('settings.haptics')} value={s.haptics} onChange={(v) => set('haptics', v)} />}
+          </>
+        )}
 
-        <Group title={t('settings.look')}>
-          <Toggle label={t('settings.calm')} value={s.calm} onChange={(v) => update(applyCalm(s, v))} />
-          <Choice label={t('settings.motion')} value={s.motion} options={['full', 'gentle', 'still']} onChange={(v) => set('motion', v)} />
-          <Choice label={t('settings.celebrations')} value={s.celebrations} options={['big', 'small', 'off']} onChange={(v) => set('celebrations', v)} />
-          <Choice label={t('settings.backgrounds')} value={s.backgrounds} options={['moving', 'still', 'plain']} onChange={(v) => set('backgrounds', v)} />
-          <Toggle label={t('settings.screenShake')} value={s.screenShake} onChange={(v) => set('screenShake', v)} />
-          <Toggle label={t('settings.dim')} value={s.dim} onChange={(v) => set('dim', v)} />
-        </Group>
+        {tab === 'calm' && (
+          <>
+            <Toggle label={t('settings.calm')} value={s.calm} onChange={(v) => update(applyCalm(s, v))} />
+            <Choice label={t('settings.motion')} value={s.motion} options={['full', 'gentle', 'still']} onChange={(v) => set('motion', v)} />
+            <Choice label={t('settings.celebrations')} value={s.celebrations} options={['big', 'small', 'off']} onChange={(v) => set('celebrations', v)} />
+            <Choice label={t('settings.backgrounds')} value={s.backgrounds} options={['moving', 'still', 'plain']} onChange={(v) => set('backgrounds', v)} />
+            <Toggle label={t('settings.screenShake')} value={s.screenShake} onChange={(v) => set('screenShake', v)} />
+            <Toggle label={t('settings.dim')} value={s.dim} onChange={(v) => set('dim', v)} />
+          </>
+        )}
 
-        <Group title={t('settings.reading')}>
-          <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
-          <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
-          <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />
-          <Toggle label={t('settings.colorSafe')} value={s.colorSafe} onChange={(v) => set('colorSafe', v)} />
-        </Group>
+        {tab === 'reading' && (
+          <>
+            <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
+            <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
+            <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />
+            <Toggle label={t('settings.colorSafe')} value={s.colorSafe} onChange={(v) => set('colorSafe', v)} />
+          </>
+        )}
 
-        <Group title={t('settings.time')}>
-          <Choice label={t('settings.timers')} value={s.timers} options={['off', 'relaxed', 'normal']} onChange={(v) => set('timers', v)} />
-          <Choice label={t('settings.gameSpeed')} value={s.gameSpeed} options={['slow', 'normal', 'fast']} onChange={(v) => set('gameSpeed', v)} />
-        </Group>
+        {tab === 'play' && (
+          <>
+            <Choice label={t('settings.timers')} value={s.timers} options={['off', 'relaxed', 'normal']} onChange={(v) => set('timers', v)} />
+            <Choice label={t('settings.gameSpeed')} value={s.gameSpeed} options={['slow', 'normal', 'fast']} onChange={(v) => set('gameSpeed', v)} />
+            <Toggle label={t('settings.tapOnly')} value={s.tapOnly} onChange={(v) => set('tapOnly', v)} />
+            <Toggle label={t('settings.leftHanded')} value={s.leftHanded} onChange={(v) => set('leftHanded', v)} />
+          </>
+        )}
 
-        <Group title={t('settings.controls')}>
-          <Toggle label={t('settings.tapOnly')} value={s.tapOnly} onChange={(v) => set('tapOnly', v)} />
-          <Toggle label={t('settings.leftHanded')} value={s.leftHanded} onChange={(v) => set('leftHanded', v)} />
-        </Group>
-
-        <details className="rounded-input border-[2px] border-border-soft p-3">
-          <summary className="font-bold cursor-pointer min-h-11 flex items-center">{t('settings.accommodations')}</summary>
-          <div className="grid gap-3 pt-2">
+        {tab === 'teacher' && !unlocked && <PinGate onUnlock={() => setUnlocked(true)} />}
+        {tab === 'teacher' && unlocked && (
+          <>
             <p className="text-sm font-bold">{t('settings.accommodationsNote')}</p>
-            <Choice
-              label={t('settings.readFirst')}
-              value={`${s.readFirstSeconds}s` as '0s' | '3s' | '5s' | '10s'}
-              options={['0s', '3s', '5s', '10s']}
-              onChange={(v) => set('readFirstSeconds', Number(v.replace('s', '')))}
-            />
+            <Slider label={t('settings.readFirst')} min={0} max={10} value={s.readFirstSeconds}
+              show={(v) => (v === 0 ? t('opt.0s') : t('settings.seconds', { count: v }))} onChange={(v) => set('readFirstSeconds', v)} />
             <Toggle label={t('settings.shuffle')} value={s.shuffleAnswers} onChange={(v) => set('shuffleAnswers', v)} />
-            <Choice label={t('settings.tries')} value={String(s.triesPerQuestion) as '1' | '2' | '3' | '4'} options={['1', '2', '3', '4']}
-              onChange={(v) => set('triesPerQuestion', Number(v) as 1 | 2 | 3 | 4)} />
+            <Slider label={t('settings.tries')} min={1} max={4} value={s.triesPerQuestion} show={(v) => String(v)} onChange={(v) => set('triesPerQuestion', v as 1 | 2 | 3 | 4)} />
             <span className="font-bold">{t('settings.toolsAllowed')}</span>
             {(['listen', 'calculator', 'scratchpad', 'highlighter', 'timesTable'] as const).map((tool) => (
               <Toggle key={tool} label={t(tool === 'listen' ? 'q.listenTool' : (`q.${tool}` as StringKey))} value={s.tools[tool]}
                 onChange={(v) => update({ ...s, tools: { ...s.tools, [tool]: v } })} />
             ))}
-          </div>
-        </details>
+          </>
+        )}
 
-        <TellGamify context={context} />
+        {tab === 'tell' && <TellGamify context={context} />}
       </div>
     </dialog>
-  );
-}
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="grid gap-3">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-muted">{title}</h3>
-      {children}
-    </section>
   );
 }
 
@@ -172,30 +188,20 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
   );
 }
 
-// Off plus 5 bars that grow, so young students see "more" without reading.
-function LevelPicker({ label, value, disabled, onChange }: { label: string; value: Level; disabled?: boolean; onChange: (v: Level) => void }) {
-  const levels: Level[] = [0, 1, 2, 3, 4, 5];
+// A big, touch-friendly slider for anything with a range (sound levels,
+// seconds, tries), with its value shown in words beside it.
+function Slider({ label, min, max, value, disabled, show, onChange }: {
+  label: string; min: number; max: number; value: number; disabled?: boolean; show: (v: number) => string; onChange: (v: number) => void;
+}) {
+  const id = `slider-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
     <div className={`grid gap-1.5 ${disabled ? 'opacity-50' : ''}`}>
-      <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex items-end gap-1.5">
-        {levels.map((l) => (
-          <button
-            key={l}
-            type="button"
-            role="radio"
-            disabled={disabled}
-            aria-checked={value === l}
-            aria-label={t('settings.level', { label, value: l === 0 ? t('settings.off') : l })}
-            onClick={() => onChange(l)}
-            className={`w-11 min-h-11 rounded-input border-[2px] flex items-end justify-center pb-1.5 ${value === l ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}
-          >
-            {l === 0 ? <span className="text-xs font-bold self-center">{t('settings.off')}</span> : (
-              <span className={`w-3 rounded-sm ${l <= value ? 'bg-border' : 'bg-border-soft'}`} style={{ height: 6 + l * 5 }} aria-hidden="true" />
-            )}
-          </button>
-        ))}
-      </div>
+      <label htmlFor={id} className="flex items-center justify-between font-bold">
+        <span>{label}</span>
+        <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-[2px] border-border tabular-nums">{show(value)}</span>
+      </label>
+      <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled}
+        onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full" />
     </div>
   );
 }

@@ -56,11 +56,17 @@ test('settings panel opens from the gear and changes text size', async ({ page }
   await page.getByRole('button', { name: 'Settings' }).click();
   const panel = page.getByRole('dialog', { name: 'Settings' });
   await expect(panel).toBeVisible();
+  await panel.getByRole('tab', { name: 'Reading' }).click();
   await panel.getByRole('radiogroup', { name: 'Text size' }).getByRole('radio', { name: 'Larger' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-text-size', 'larger');
+  await panel.getByRole('tab', { name: 'Calm' }).click();
   await panel.getByRole('switch', { name: 'Calm mode' }).click();
+  await panel.getByRole('tab', { name: 'Sound' }).click();
+  await panel.getByLabel('Sound effects').fill('5');
+  await expect(panel.getByText('5', { exact: true })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'still');
   await page.screenshot({ path: `test-results/settings-${info.project.name}.png` });
+  await panel.getByRole('tab', { name: 'Tell us' }).click();
   await panel.getByRole('radio', { name: 'I have an idea' }).click();
   await panel.getByLabel('Tell us more (you can skip this)').fill('More space games please');
   await panel.getByRole('button', { name: 'Send' }).click();

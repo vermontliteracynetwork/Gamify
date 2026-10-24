@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowCounterClockwise, Crown, Sparkle, SquaresFour, Trophy } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, Crown, Sparkle, SquaresFour } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import type { MultipleChoiceQuestion, QuestionSet } from '../../data/types';
 import { playEffect } from '../../engine/feedback';
-import LookBack from '../../engine/LookBack';
+import ResultsModal from '../../engine/ResultsModal';
 import { drawQuestion } from '../../engine/picker';
 import { isPlayable } from '../../engine/questions';
 import ShareQuestion from '../../engine/ShareQuestion';
@@ -222,7 +222,7 @@ export default function GameShow() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         <div className="flex items-center gap-3 flex-wrap">
@@ -353,24 +353,18 @@ export default function GameShow() {
             )}
 
             {phase === 'end' && (
-              <section className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-                <Trophy weight="fill" size={72} className="text-accent" aria-hidden="true" />
-                <h2 className="font-display text-4xl font-bold">
-                  {leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
-                </h2>
-                <button type="button" onClick={() => setPhase('board')} className="min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold">{t('share.again')}</button>
-              </section>
+              <ResultsModal title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
+                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('board')} />
             )}
-            {phase === 'end' && missed.length > 0 && <LookBack missed={missed} onDone={() => setMissed([])} />}
           </section>
 
-          <aside className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('share.scores')}>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('share.scores')}</h2>
-            <ol className="grid grid-cols-2 lg:grid-cols-1 gap-2 list-none p-0 m-0">
+          <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('share.scores')}>
+            <h2 className="hidden lg:block text-xs font-bold uppercase tracking-wider text-muted">{t('share.scores')}</h2>
+            <ol className="flex flex-wrap lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none p-0 m-0">
               {turns.players.map((p) => {
                 const lead = phase === 'end' && leaders(turns).some((l) => l.id === p.id);
                 return (
-                  <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
+                  <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
                     <TeamBadge colorIndex={p.colorIndex} />
                     <span className="flex-1 min-w-0 font-bold truncate">{p.name}</span>
                     {lead && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}

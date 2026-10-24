@@ -5,7 +5,7 @@ import { Star } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { playEffect } from '../../engine/feedback';
-import LookBack from '../../engine/LookBack';
+import ResultsModal from '../../engine/ResultsModal';
 import StartCard, { type RoundValues } from '../../engine/StartCard';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
@@ -66,7 +66,7 @@ export default function StarQuiz() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-24">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
@@ -97,17 +97,16 @@ export default function StarQuiz() {
               </motion.span>
             ))}
           </div>
-          {phase === 'end' && (
-            <>
-              <p className="font-display text-2xl font-bold">{t('practice.done', { count: stars })}</p>
-              {leftEarly && <p className="font-bold">{t('practice.leftEarly')}</p>}
-              <p className="font-bold">{t('practice.score', { right: stats.right, asked: stats.asked })}</p>
-            </>
-          )}
+
         </section>
       )}
 
-      {phase === 'end' && <LookBack missed={missed} onDone={() => setPhase('start')} />}
+      {phase === 'end' && (
+        <ResultsModal title={t('practice.done', { count: stars })} missed={missed} againLabel={t('practice.again')} onAgain={() => setPhase('start')}>
+          {leftEarly && <p className="font-bold">{t('practice.leftEarly')}</p>}
+          <p className="font-bold">{t('practice.score', { right: stats.right, asked: stats.asked })}</p>
+        </ResultsModal>
+      )}
       {element}
     </main>
     </ThemedPage>

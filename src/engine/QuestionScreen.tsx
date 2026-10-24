@@ -8,6 +8,7 @@ import { buzz, playEffect, speak, stopSpeaking } from './feedback';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
+import FloatingCard from '../ui/FloatingCard';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 // Answer tiles get a shape as well as a color, so color is never the only cue.
@@ -33,8 +34,13 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   const [picked, setPicked] = useState<number | null>(null);
   const [wrongTries, setWrongTries] = useState<number[]>([]);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [tool, setTool] = useState<'calculator' | 'scratchpad' | 'highlighter' | 'timesTable' | null>(null);
+  // Tools open as movable cards (several at once); the highlighter is a mode.
+  type CardTool = 'calculator' | 'scratchpad' | 'timesTable';
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [cards, setCards] = useState<CardTool[]>([]);
+  const [highlighting, setHighlighting] = useState(false);
   const toolList = (['calculator', 'scratchpad', 'highlighter', 'timesTable'] as const).filter((x) => settings.tools[x]);
+  const toggleCard = (c: CardTool) => setCards((cs) => (cs.includes(c) ? cs.filter((x) => x !== c) : [...cs, c]));
   const [marked, setMarked] = useState<Set<number>>(new Set());
   const [speaking, setSpeaking] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -98,7 +104,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
             {speaking ? t('q.stop') : t('q.listen')}
           </button>}
-          {toolList.length > 0 && <button type="button" onClick={() => setTool(tool ? null : toolList[0])} aria-label={t('q.tools')} aria-expanded={tool !== null}
+          {toolList.length > 0 && <button type="button" onClick={() => setMenuOpen((m) => !m)} aria-label={t('q.tools')} aria-expanded={menuOpen}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
             <Toolbox weight="bold" size={20} />
           </button>}
@@ -117,24 +123,32 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </div>
         )}
 
-        {tool && (
-          <div className="grid gap-2">
-            <div role="tablist" aria-label={t('q.tools')} className="flex gap-2">
-              {([['calculator', Calculator], ['scratchpad', PencilSimpleLine], ['highlighter', HighlighterCircle], ['timesTable', GridNine]] as const).filter(([id]) => settings.tools[id]).map(([id, Icon]) => (
-                <button key={id} type="button" role="tab" aria-selected={tool === id} onClick={() => setTool(id)}
-                  className={`min-h-11 px-3 rounded-pill border-[2px] font-bold inline-flex items-center gap-1.5 ${tool === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                  <Icon weight="bold" size={18} />{t(`q.${id}`)}
-                </button>
-              ))}
-            </div>
-            {tool === 'calculator' && <CalculatorTool />}
-            {tool === 'scratchpad' && <Scratchpad />}
-            {tool === 'timesTable' && <TimesTable />}
+        {menuOpen && (
+          <div role="group" aria-label={t('q.tools')} className="flex flex-wrap gap-2">
+            {([['calculator', Calculator], ['scratchpad', PencilSimpleLine], ['timesTable', GridNine], ['highlighter', HighlighterCircle]] as const)
+              .filter(([id]) => settings.tools[id]).map(([id, Icon]) => {
+                const on = id === 'highlighter' ? highlighting : cards.includes(id);
+                return (
+                  <button key={id} type="button" aria-pressed={on}
+                    onClick={() => (id === 'highlighter' ? setHighlighting((h) => !h) : toggleCard(id))}
+                    className={`min-h-11 px-3 rounded-pill border-[2px] font-bold inline-flex items-center gap-1.5 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                    <Icon weight="bold" size={18} />{t(`q.${id}`)}
+                  </button>
+                );
+              })}
           </div>
         )}
+        {cards.map((c, i) => (
+          <FloatingCard key={c} title={t(`q.${c}`)} closeLabel={t('q.closeTool', { tool: t(`q.${c}`) })} onClose={() => toggleCard(c)}
+            start={{ x: Math.max(8, window.innerWidth - 380 - i * 28), y: 90 + i * 40 }}>
+            {c === 'calculator' && <CalculatorTool />}
+            {c === 'scratchpad' && <div className="w-[min(520px,85vw)]"><Scratchpad /></div>}
+            {c === 'timesTable' && <TimesTable />}
+          </FloatingCard>
+        ))}
 
         <h2 className="font-display text-2xl sm:text-3xl font-bold leading-snug text-balance">
-          {tool === 'highlighter'
+          {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
                   className={`rounded px-0.5 ${marked.has(i) ? 'bg-accent' : ''}`}>{w}</button>
