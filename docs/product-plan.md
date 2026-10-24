@@ -85,6 +85,10 @@ mode: they are games that plug into these same four modes.
   cooperative structure the research favors over student-vs-student
   ranking (see `docs/gamified-learning-research.md` 3.5 and
   `docs/settings-equity-research.md` section 8).
+- **View-only screen for students with visual impairments** (direct from
+  you, 2026-10-24): see **Share Mirror** in section 4D. Any Share game can
+  be mirrored live to a student's own iPad, view only, so they can see the
+  board up close with their own zoom, contrast and read-aloud.
 
 ### Mode 3: Solo
 - One student, one device: the Dashboard arcade model. Game runs, pauses
@@ -343,6 +347,64 @@ typed-answer support), and which settings were on (e.g. timer off).
 - Data is kept as long as the teacher's plan allows and can be deleted by
   the teacher at any time (privacy rules in section 6.6).
 
+## 4D. One join page and Share Mirror
+
+Direct from you (2026-10-24).
+
+### One join page for everything: `<domain>.com/join`
+Every way into a game goes through the same page, no matter the game or
+mode: **`<domain>.com/join`** (for example `joingamify.com/join` if that
+domain is chosen). The student types the code the teacher shows, or scans
+the QR code, which opens `/join` with the code already filled in. The page
+reads the code and sends the student to the right place.
+
+| Code type | Format | Example | What it opens |
+|---|---|---|---|
+| **Player code** | Letters **and** numbers, 6 characters | `K7P2QX` | Joins as a player: Class Live, Versus on two devices, assignment links |
+| **Viewer code** | Letters **only**, 6 characters | `BRTKMS` | Joins **view only**: Share Mirror (and later any view-only screen) |
+
+Code rules:
+- Leaves out look-alike characters (0/O, 1/I/L, 5/S) so a K-3 student or a
+  student with low vision can't mix them up.
+- Generated codes leave out vowels, so a code can never spell a word
+  (including a bad one).
+- Big, high-contrast code on the teacher screen, read-aloud button for the
+  code, and a QR code next to it.
+- The `/join` page uses large letter tiles, accepts lower or upper case,
+  and tells the student in words and an icon whether they're joining to
+  **play** or to **watch**.
+- Codes stop working when the game ends; the teacher can make a fresh code
+  any time.
+
+### Share Mirror (view-only screen)
+For a student who is visually impaired (or anyone who can't see the board
+well), the teacher turns on a second, view-only copy of the Share screen
+on the student's own device.
+
+- **Where:** a setting in every game that has Share mode: gear button ->
+  **Connect another device**. Shows a viewer code (letters only) and QR.
+- **What the student sees:** the live Share board, updating as the game
+  moves: the question, answers, whose turn, the board, scores.
+- **View only:** nothing on the mirror can change the game. No answering,
+  no tapping turns.
+- **Their own settings on their own device:** zoom and pinch, larger text,
+  high contrast, color-safe palette, calm mode, and **read-aloud through
+  their own headphones** (question, answers and whose turn), plus support
+  for the iPad's own Zoom and VoiceOver: every board state is also
+  described in text so a screen reader can announce it ("Team Rocket's
+  turn. Question: ... Team Rocket drops the ball: 40 points").
+- **Teacher control:** see every connected viewer, name them, remove
+  them, or end all mirrors. Viewer codes are separate from player codes so
+  a viewer can never join as a player by mistake.
+- **More than one viewer** allowed (for example two students with low
+  vision, or a paraprofessional's device).
+- **Also useful for:** a student who needs to sit away from the group, a
+  co-teacher across the room, a student with an IEP accommodation for
+  copies of displayed material.
+- **Tech note:** the mirror needs the same real-time server as Class Live,
+  so Share Mirror ships with that server (see roadmap). Share itself
+  still works with no server.
+
 ## 5. Free vs paid
 
 ### Principles (proposed)
@@ -369,6 +431,7 @@ typed-answer support), and which settings were on (e.g. timer off).
 | Mode 4 Versus (shared device, vs CPU) | Yes | Yes | Yes |
 | Mode 4 Versus on two devices | No | Yes | Yes |
 | Mode 1 Class Live (join code) | Small class cap | Full class | Full class |
+| Share Mirror (view-only screen for accessibility) | **Yes** | **Yes** | **Yes** |
 | Homework / assignment links | Limited | Unlimited | Unlimited |
 | Themes | 3 house themes | Full library + Theme Builder | + school brand theme |
 | Reports | **Full report for every game** (all views, filters, CSV, print), kept 30 days | Unlimited history, trends over time, PDF and Sheets export | + school-wide and admin views |
@@ -566,7 +629,9 @@ game only decides *when to ask* and *what a right answer does*.
 - Privacy policy, Terms, DMCA agent in place **before** launch
 
 **Phase 3: Live + schools**
+- The `/join` page and code system (player and viewer codes)
 - Mode 1 Class Live: join codes, host screen, live leaderboard
+- Share Mirror (view-only screen), first feature on the real-time server
 - Mode 4 Versus on two devices (same real-time server)
 - Reports, per-question logs, export
 - School/district plans, purchase orders, DPA signing, VPAT
@@ -594,7 +659,10 @@ game only decides *when to ask* and *what a right answer does*.
 7. **Report history on Free**: every game always has a full report (your
    rule). Claudia suggests Free keeps 30 days of history and Pro keeps
    everything. OK, or should Free keep everything too?
-8. **Free tier generosity**: generous free tier to grow (Claudia's lean),
+8. **Real-time server timing**: Class Live, Versus on two devices and now
+   Share Mirror all need it. Share Mirror is an accessibility feature,
+   which is a reason to bring the server forward to Phase 2.
+9. **Free tier generosity**: generous free tier to grow (Claudia's lean),
    or tighter free tier to convert faster?
 
 ## 10. Marketing ideas (running list)
@@ -627,3 +695,6 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 17 | **"Built by a teacher for students with high support needs, so it works for everyone."** | Founder story and credibility | Origin in the Independent Work Dashboard |
 | 18 | **"No student accounts, no ads, no trackers."** | Privacy is the deal-breaker for schools | Section 6.6 |
 | 19 | **"Made for iPad first."** | Matches how many classrooms actually run | Standing product fact |
+| 20 | **"Every student sees the board."** Share Mirror puts the live game on a visually impaired student's own iPad, view only, with their own zoom and read-aloud. | Real accessibility story; an IEP accommodation built in, free | Teacher, 2026-10-24; section 4D |
+| 21 | **"One link for everything: <domain>.com/join."** | Simple for kids and families; easy to put on a classroom poster | Teacher, 2026-10-24; section 4D |
+| 22 | **"Codes that can't spell bad words."** | Small detail that shows care; teachers notice | Section 4D |

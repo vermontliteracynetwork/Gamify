@@ -123,6 +123,22 @@ every theme. Tapping it **pauses the game** (in solo and versus; in Class
 Live it opens without pausing the class), works by touch, keyboard and
 switch access, and is at least the size of a fingertip on an iPad.
 
+## 5A. Seeing the shared screen: Share Mirror
+
+Projected and cast screens are the hardest thing in the room for a student
+with low vision: students in Kahoot! research already reported questions
+that were hard to read on a projected screen (Wang & Tahir, 2020), and
+that is for sighted students. Students with visual impairments commonly
+have an IEP accommodation for their own copy of displayed material. WCAG
+also asks that content can be zoomed and resized (1.4.4 Resize Text, 1.4.10
+Reflow) and that changing information is available to screen readers
+(4.1.3 Status Messages).
+
+**Gamify answer:** Share Mirror (product plan section 4D), a live,
+view-only copy of the Share board on the student's own device, with their
+own zoom, contrast, read-aloud through headphones and screen-reader text
+for every board change.
+
 ## 6. Color, text and reading
 
 - Red-green color vision deficiency affects up to about 8% of males and
