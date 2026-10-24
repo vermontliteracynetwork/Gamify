@@ -709,13 +709,13 @@ Competitor cross-comparison and the reasoning behind each line:
 |---|---|---|---|---|
 | Teacher account (log in, saves your work) | Yes | Yes | Yes | Yes |
 | Classrooms | **1** | **3** | **Unlimited** | Unlimited, school-wide |
-| Students per classroom | **Up to 30** (decided 2026-10-24) | Proposed 40 | Proposed 60+ | Proposed 60+ |
+| Students per classroom | **Up to 30** (decided 2026-10-24) | 60 | Unlimited | Unlimited |
 | Own question sets saved | **3** | Unlimited | Unlimited | Unlimited + shared school library |
 | Public question sets (published by others) | Use any | Use any, publish your own | Use any, publish your own | Same |
 | CSV import | Yes (counts toward the 3) | Yes | Yes | Yes |
 | Games | **Free games only** (a set list) | All games | All games | All games |
 | Modes in the games you can use | All four (Class Live up to your 30 students) | All four | All four | All four |
-| Themes | **Preview only**, not playable; house default theme only | Full theme library, playable | Full library + **Theme Builder** | + school brand theme |
+| Themes | Classic only; others preview only; try the Theme Builder on one game (developer's pick) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
 | **XP and shop** (section 4F) | **No**, and students never see it | **Yes** | **Yes** | Yes |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
@@ -725,7 +725,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | Reports | Report for every game played (all views, CSV, print), 30 days of history | Full history | Full history, trends, PDF/Sheets export | + school and admin views |
 | Names, approval, rename, remove player, bad-word filter, teams | **All** | All | All | All |
 | Accessibility settings (4A) and Share Mirror (4D) | **All, free** | All | All | All |
-| Price (proposed, see research) | $0 | About $5/mo billed yearly ($60/yr), more month-to-month | About $9/mo billed yearly ($108/yr), more month-to-month | Quote / purchase order |
+| Price (set by you, 2026-10-24) | $0 | About $8/mo billed yearly ($96/yr) | About $15/mo billed yearly ($180/yr) | Per-teacher seats with volume discounts (see the live plan doc) |
 | Privacy paperwork | Standard terms | Standard terms | Standard terms | Signed data privacy agreement |
 
 Notes:
@@ -981,9 +981,8 @@ game only decides *when to ask* and *what a right answer does*.
    which is a reason to bring the server forward to Phase 2.
 9. **Free tier limits** (your tiers are set; three numbers to confirm):
    - ~~Free classroom size~~ DECIDED 2026-10-24: **30 students**.
-   - Students per classroom on Plus and Pro (Claudia proposes 40 and 60+).
-   - Prices: about $60/yr for Plus and $108/yr for Pro, in line with the
-     market (`docs/competitor-plans-research.md`).
+   - ~~Prices~~ SET 2026-10-24: $96/yr Plus, $180/yr Pro (students per
+     classroom: Plus 60, Pro unlimited), above the market's ~$60 anchor (`docs/competitor-plans-research.md`).
 10. **Which games are free**: a set list of free games. Claudia's
     suggestion: at least one game in every mode (for example Team Board,
     Match Up, Peg Drop, Four in a Row) so free teachers try all four ways
@@ -1023,7 +1022,7 @@ start to build?" Claudia's gap review of everything above.
      the Dashboard logic ports cleanly and bugs are caught earlier.
 4. **Cost per teacher.** Hosting, live servers, storage for uploaded art,
    and especially **human-voice read-aloud** (the Dashboard uses a paid
-   voice service) cost money per use. At $60/yr per paid teacher, and many
+   voice service) cost money per use. At $96/yr per Plus teacher, and many
    free teachers costing money too, the numbers need checking now. Free
    tier read-aloud may need the device voice instead.
 5. **Smallest sellable version (MVP) and a target date.** Back-to-school
