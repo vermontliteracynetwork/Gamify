@@ -265,6 +265,22 @@ export const en = {
   'bm.answerToGo': 'Great round! Answer to keep baking.',
   'bm.done': 'You scored {score} points!',
   'bm.kind.0': 'Cookie', 'bm.kind.1': 'Cake', 'bm.kind.2': 'Ice cream', 'bm.kind.3': 'Pizza', 'bm.kind.4': 'Popcorn', 'bm.kind.5': 'Cocoa',
+
+  'fr.title': 'Four in a Row',
+  'fr.description': 'Answer a question, then drop your piece. Get four in a row to win!',
+  'fr.answerFirst': '{name}, answer to drop a piece!',
+  'fr.pick': '{name}, pick a column!',
+  'fr.column': 'Drop in column {n}',
+  'fr.columnFull': 'Column {n} is full',
+  'fr.cpuThinking': 'The computer is choosing...',
+  'fr.wins': '{name} wins!',
+  'fr.draw': "It's a tie! The board is full.",
+  'fr.goodGame': 'Good game! Rematch?',
+  'fr.rematch': 'Rematch',
+  'fr.rights': '{name}: {count} right answers',
+  'fr.rights.one': '{name}: 1 right answer',
+  'fr.cell': 'Row {row}, column {col}: {who}',
+  'fr.empty': 'empty',
 } as const;
 
 export type StringKey = keyof typeof en;

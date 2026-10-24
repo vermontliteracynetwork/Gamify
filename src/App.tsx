@@ -8,6 +8,7 @@ import ImportPage from './teacher/ImportPage';
 import StarQuiz from './games/practice/StarQuiz';
 import GameShow from './games/game-show/GameShow';
 import BakeryMatch from './games/bakery-match/BakeryMatch';
+import FourInARow from './games/four-in-a-row/FourInARow';
 import { SettingsProvider } from './settings/SettingsContext';
 
 function AnimatedRoutes() {
@@ -28,6 +29,7 @@ function AnimatedRoutes() {
           <Route path="/games/star-quiz" element={<StarQuiz />} />
           <Route path="/games/game-show" element={<GameShow />} />
           <Route path="/games/bakery-match" element={<BakeryMatch />} />
+          <Route path="/games/four-in-a-row" element={<FourInARow />} />
           <Route path="/teacher" element={<Navigate to="/teacher/sets" replace />} />
           <Route path="/teacher/sets" element={<QuestionSetsPage />} />
           <Route path="/teacher/sets/import" element={<ImportPage />} />
