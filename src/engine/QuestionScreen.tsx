@@ -147,7 +147,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </FloatingCard>
         ))}
 
-        <h2 className="font-display text-2xl sm:text-3xl font-bold leading-snug text-balance">
+        <h2 className="font-body text-2xl sm:text-3xl font-bold leading-snug text-balance">
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}

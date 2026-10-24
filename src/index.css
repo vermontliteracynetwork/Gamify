@@ -106,6 +106,9 @@ body {
 h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
+/* Question and answer text reads in the body font, even in a heading
+   (teacher, 2026-10-24: "questions should be in standard font"). */
+h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-synthesis: weight style; letter-spacing: normal; }
 
 /* Display font: Grow Year by Khurasan Studio, the logo's lettering (free
    for personal and commercial use, docs/asset-ledger.md). One weight, so
@@ -209,3 +212,6 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 @keyframes bp-fall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(14px); opacity: 0; } }
 @keyframes bp-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .bp-fx { animation: none !important; } }
+/* Space Bowling: knocked pins tip over and fade. */
+@keyframes sb-fall-l { to { transform: translate(-3px, 1px) rotate(-80deg); opacity: 0; } }
+@keyframes sb-fall-r { to { transform: translate(3px, 1px) rotate(80deg); opacity: 0; } }

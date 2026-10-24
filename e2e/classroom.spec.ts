@@ -36,7 +36,7 @@ test('teacher makes a class, assigns a set, sets supports; a student signs in an
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
   await expect(page.getByText('Whole class').first()).toBeVisible();
   // Free plan: one assigned set.
-  await expect(page.getByText('Your plan includes 1 assigned sets per student.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Assigned sets for each student: up to 1.', { exact: false })).toBeVisible();
   await page.screenshot({ path: `test-results/class-sets-${info.project.name}.png`, fullPage: true });
 
   // Hide Versus for the class.

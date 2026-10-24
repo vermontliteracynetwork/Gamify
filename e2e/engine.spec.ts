@@ -80,3 +80,32 @@ test('settings panel opens from the gear and changes text size', async ({ page }
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-text-size', 'larger');
 });
+
+test('Question Tracker: every star stays in view around the question box', async ({ page }, info) => {
+  test.setTimeout(120_000);
+  await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ readFirstSeconds: 0 })));
+  await openSetup(page, '/games/star-quiz');
+  await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('slider', { name: 'Questions' }).fill('12');
+  await finishSetup(page);
+  const dialog = page.getByRole('dialog');
+  for (let n = 0; n < 11; n++) {
+    await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 6000 });
+    const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
+    const buttons = dialog.getByRole('button', { name: /^[A-D] / });
+    const labels = await buttons.allInnerTexts();
+    await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
+    await expect(dialog.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 6000 });
+  }
+  await expect(dialog.getByRole('heading', { level: 2 })).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `test-results/sky-${info.project.name}.png` });
+  const box = (await dialog.locator('> div').first().boundingBox())!;
+  const stars = await page.locator('[role=img] svg, [role=img] > span > img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));
+  expect(stars.length).toBe(11);
+  for (const s of stars) {
+    const overlap = s.x < box.x + box.width && s.x + s.w > box.x && s.y < box.y + box.height && s.y + s.h > box.y;
+    expect(overlap, JSON.stringify({ s, box })).toBe(false);
+  }
+});

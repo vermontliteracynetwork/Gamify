@@ -310,7 +310,7 @@ export default function BubblePop() {
         </div>
       )}
 
-      {phase === 'end' && <ResultsModal title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')} />}
+      {phase === 'end' && <ResultsModal title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
       {element}
     </main>
     </ThemedPage>

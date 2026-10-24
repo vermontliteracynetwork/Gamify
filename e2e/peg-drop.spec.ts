@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup } from './setup';
 
 test('Peg Drop: a right answer earns a drop; the ball bounces into a bucket and scores', async ({ page }, info) => {
   test.setTimeout(60_000);
@@ -7,7 +7,7 @@ test('Peg Drop: a right answer earns a drop; the ball bounces into a bucket and 
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   await openSetup(page, '/games/peg-drop');
   await finishSetup(page);
-  await page.getByRole('dialog').getByRole('button', { name: 'Right' }).click();
+  await answerShare(page, true);
   await expect(page.getByRole('button', { name: 'Drop the ball in spot 4' })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   await page.getByRole('button', { name: 'Drop the ball in spot 4' }).click();
@@ -15,6 +15,6 @@ test('Peg Drop: a right answer earns a drop; the ball bounces into a bucket and 
   await expect(page.getByText(/^\+(10|20|50|100)$/)).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/peg-landed-${info.project.name}.png` });
   // Next team's question.
-  await expect(page.getByRole('dialog').getByRole('button', { name: 'Right' })).toBeVisible({ timeout: 5000 });
+  await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 5000 });
   expect(problems).toEqual([]);
 });

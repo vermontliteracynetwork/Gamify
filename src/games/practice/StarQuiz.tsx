@@ -62,7 +62,7 @@ export default function StarQuiz() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className={`${phase === 'play' || phase === 'end' ? 'max-w-none' : 'max-w-3xl'} mx-auto px-4 sm:px-6 pt-6 pb-6`}>
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
@@ -96,7 +96,7 @@ export default function StarQuiz() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={t('practice.done', { count: stars })} missed={missed} againLabel={t('practice.again')} onAgain={() => setPhase('setup')}>
+        <ResultsModal title={t('practice.done', { count: stars })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           {leftEarly && <p className="font-bold">{t('practice.leftEarly')}</p>}
           <p className="font-bold">{t('practice.score', { right: stats.right, asked: stats.asked })}</p>
         </ResultsModal>

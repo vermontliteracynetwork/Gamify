@@ -235,7 +235,7 @@ export default function BakeryMatch() {
         </div>
       )}
 
-      {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')} />}
+      {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
       {element}
     </main>
     </ThemedPage>

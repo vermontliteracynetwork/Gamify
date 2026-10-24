@@ -198,7 +198,7 @@ export default function MemoryMatch() {
                   {up ? (
                     <span className="grid gap-1 justify-items-center">
                       {c.image && <img src={c.image} alt={c.alt ?? ''} className="max-h-12 object-contain" />}
-                      <span className={`font-bold leading-tight line-clamp-4 ${c.side === 'a' ? 'font-display text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{c.text}</span>
+                      <span className={`font-bold leading-tight line-clamp-4 ${c.side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{c.text}</span>
                     </span>
                   ) : !pieceImage(theme, 'card-back') && <Cards weight="fill" size={30} aria-hidden="true" />}
                 </motion.button>
@@ -209,7 +209,7 @@ export default function MemoryMatch() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={players.length > 1 ? (winner ? t('mm.wins', { name: winner.name }) : t('mm.tie')) : t('mm.done', { count: moves })} missed={[]} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+        <ResultsModal title={players.length > 1 ? (winner ? t('mm.wins', { name: winner.name }) : t('mm.tie')) : t('mm.done', { count: moves })} missed={[]} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-bold">{t('mm.summary', { pairs: deck.length / 2, moves })}</p>
         </ResultsModal>
       )}

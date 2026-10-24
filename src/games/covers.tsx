@@ -98,6 +98,20 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
         </div>
       );
+    case 'space-bowling':
+      return (
+        <div className={base} style={{ background: 'radial-gradient(circle at 70% 20%, #3b3a8f, #15143a)' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+            {[[8, 10], [30, 6], [86, 12], [62, 18], [14, 30], [92, 40]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={0.9} fill="#fff" />)}
+            <polygon points="20,100 80,100 60,36 40,36" fill="#314677" stroke="#000" strokeWidth="1" />
+            {[[50, 50], [45, 44], [55, 44], [40, 39], [50, 39], [60, 39]].map(([x, y], i) => (
+              <g key={i} transform={`translate(${x} ${y}) scale(0.7)`}><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><rect x="-1.25" y="-7.3" width="2.5" height="0.9" fill="#e5635f" /></g>
+            ))}
+            <circle cx="50" cy="84" r="9" fill="#ed9d75" stroke="#000" strokeWidth="1" />
+            <ellipse cx="50" cy="84" rx="14" ry="3.2" fill="none" stroke="#fdfd94" strokeWidth="1.6" transform="rotate(-14 50 84)" />
+          </svg>
+        </div>
+      );
     case 'bubble-pop':
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">

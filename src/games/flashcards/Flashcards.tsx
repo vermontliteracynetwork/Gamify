@@ -119,7 +119,7 @@ export default function Flashcards() {
               <span className="text-xs font-bold uppercase tracking-wider text-muted">{flipped ? t('mm.answer') : t('mm.question')}</span>
               {!flipped && card.q.imageUrl && <img src={card.q.imageUrl} alt={card.q.imageAlt ?? ''} className="max-h-40 object-contain" />}
               {flipped && <span className="font-semibold text-balance max-w-xl">{card.q.prompt}</span>}
-              <span className={`font-bold text-balance ${flipped ? 'font-display text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>{flipped ? answer : card.q.prompt}</span>
+              <span className={`font-bold text-balance ${flipped ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}>{flipped ? answer : card.q.prompt}</span>
               {!flipped && <span className="text-sm font-bold text-muted">{t('fc.tapToFlip')}</span>}
             </motion.button>
           </AnimatePresence>
@@ -135,7 +135,7 @@ export default function Flashcards() {
         </section>
       )}
       {phase === 'end' && (
-        <ResultsModal title={t('fc.done', { count: total })} missed={again} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+        <ResultsModal title={t('fc.done', { count: total })} missed={again} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-bold">{again.length ? t('fc.practiced', { count: again.length }) : t('fc.allFirst')}</p>
         </ResultsModal>
       )}

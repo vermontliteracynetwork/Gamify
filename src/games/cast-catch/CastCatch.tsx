@@ -230,7 +230,7 @@ export default function CastCatch() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={t('cc.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+        <ResultsModal title={t('cc.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-bold">{t('cc.summary', { count: catches.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
             {catches.slice().sort((a, b) => b.points - a.points).slice(0, 6).map((c, i) => (

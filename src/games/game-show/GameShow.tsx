@@ -56,7 +56,8 @@ export default function GameShow() {
   const [cards, setCards] = useState<Card[]>([]);
   const [cells, setCells] = useState<Cell[]>([]);
   const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; cell?: number } | null>(null);
-  const [step, setStep] = useState<'answer' | 'pick'>('answer');
+  const [step, setStep] = useState<'answer' | 'pick'>('pick');
+  const [chosen, setChosen] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const used = useRef(new Set<string>());
@@ -90,13 +91,11 @@ export default function GameShow() {
   }
 
   function startTurn(_state: TurnState, b: Board = board) {
-    if (b === 'cards') {
-      setStep('answer');
-      setQuestion(draw(chosenSets));
-    } else {
-      setStep('pick');
-      setQuestion(null);
-    }
+    // Pick a card or square first, then answer its question (teacher, 2026-10-24).
+    void b;
+    setStep('pick');
+    setQuestion(null);
+    setChosen(null);
   }
 
   function log(q: MultipleChoiceQuestion, setId: string | undefined, team: string, right: boolean) {
@@ -136,15 +135,26 @@ export default function GameShow() {
       return;
     }
     setQuestion(null);
-    if (right) {
-      setStep('pick');
+    if (right && chosen !== null) {
+      openCard(chosen);
     } else {
+      setChosen(null);
       finishTurn(turns, cards.filter((c) => !c.open).length);
     }
   }
 
+  // A team picks a closed card; its question comes up, and a right answer
+  // turns the card over.
+  function chooseCard(i: number) {
+    if (!turns || step !== 'pick' || cards[i].open || reveal || question) return;
+    playEffect('tap', settings);
+    setChosen(i);
+    setQuestion(draw(chosenSets));
+  }
+
   function openCard(i: number) {
-    if (!turns || step !== 'pick' || cards[i].open || reveal) return;
+    if (!turns) return;
+    setChosen(null);
     playEffect('whoosh', settings);
     setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
     const kind = cards[i].kind;
@@ -204,7 +214,7 @@ export default function GameShow() {
     const timer = window.setTimeout(() => {
       if (board === 'cards') {
         const closed = cards.map((c, i) => (c.open ? -1 : i)).filter((i) => i >= 0);
-        if (closed.length) openCard(closed[Math.floor(Math.random() * closed.length)]);
+        if (closed.length) chooseCard(closed[Math.floor(Math.random() * closed.length)]);
       } else {
         const open = cells.map((c, i) => (c.used ? -1 : i)).filter((i) => i >= 0);
         if (open.length) pickCell(open[Math.floor(Math.random() * open.length)]);
@@ -294,13 +304,13 @@ export default function GameShow() {
                   <motion.button
                     key={i}
                     type="button"
-                    onClick={() => openCard(i)}
-                    disabled={c.open || step !== 'pick' || !!reveal || player?.kind === 'cpu'}
+                    onClick={() => chooseCard(i)}
+                    disabled={c.open || step !== 'pick' || !!reveal || !!question || player?.kind === 'cpu'}
                     aria-label={c.open ? `${t('tb.card', { n: i + 1 })}: ${revealText(c.kind)}` : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
                     className={`${cards.length > 12 ? 'aspect-[3/2]' : 'aspect-[4/3]'} rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
-                      ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
+                      ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
                     style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {c.open ? (
@@ -339,7 +349,7 @@ export default function GameShow() {
 
             {phase === 'end' && (
               <ResultsModal title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
-                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
                 {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt={t('tb.trophy')} className="h-32 object-contain justify-self-center" />}
               </ResultsModal>
             )}
@@ -403,7 +413,7 @@ export default function GameShow() {
 // for the grid, pick a square, then answer, then points.
 function StepBanner({ board, step }: { board: Board; step: 'answer' | 'pick' }) {
   const steps = board === 'cards'
-    ? [{ id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'pick', icon: HandPointing, label: t('tb.step.card') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }]
+    ? [{ id: 'pick', icon: HandPointing, label: t('tb.step.card') }, { id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }]
     : [{ id: 'pick', icon: HandPointing, label: t('tb.step.square') }, { id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }];
   return (
     <ol className="flex gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>

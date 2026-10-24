@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -23,21 +23,22 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
   await finishSetup(page);
 
-  // Team 1: right answer, pick card 1.
-  const q = page.getByRole('dialog');
-  await expect(q.getByRole('button', { name: 'Right' })).toBeVisible();
-  await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
-  await q.getByRole('button', { name: 'Right' }).click();
+  // Team 1: pick card 1, then tap the right answer; the card turns over.
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible();
+  await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
+  await answerShare(page, true);
   const reveal = page.getByRole('dialog');
   await expect(reveal).toBeVisible();
   // Swap/steal with nobody else scoring falls through to OK; points too.
   await reveal.getByRole('button', { name: 'OK' }).click();
   await page.screenshot({ path: `test-results/gameshow-board-${info.project.name}.png`, fullPage: true });
 
-  // Team 2: not yet -> turn passes back to team 1.
-  await page.getByRole('dialog').getByRole('button', { name: 'Not yet' }).click();
-  await expect(page.getByRole('dialog').getByRole('button', { name: 'Right' })).toBeVisible();
+  // Team 2: a wrong tap keeps the card closed and the turn passes back.
+  await page.getByRole('button', { name: 'Card 2', exact: true }).click();
+  await answerShare(page, false);
+  await expect(page.getByRole('button', { name: 'Card 2', exact: true })).toBeEnabled();
   expect(problems).toEqual([]);
 });
 
@@ -55,7 +56,7 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await page.screenshot({ path: `test-results/gameshow-setup-teams-${info.project.name}.png` });
   await finishSetup(page);
   await page.getByRole('button', { name: 'Shapes, 300 points' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Right' }).click();
+  await answerShare(page, true);
   await expect(page.getByLabel('300 points', { exact: true })).toBeVisible();
   // The computer takes its turn on its own.
   await expect(page.getByText('The computer is thinking...')).toBeVisible({ timeout: 8000 });
@@ -81,5 +82,6 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
   await finishSetup(page);
+  await page.getByRole('button', { name: 'Card 1', exact: true }).click();
   await expect(page.getByRole('dialog').getByText(/(Ava|Ben|Cal|Dee), (Ava|Ben|Cal|Dee)/)).toBeVisible();
 });

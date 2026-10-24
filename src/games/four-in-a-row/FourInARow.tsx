@@ -200,7 +200,7 @@ export default function FourInARow() {
           </div>
 
           {phase === 'end' && (
-            <ResultsModal title={winner ? t('fr.wins', { name: winner.name }) : t('fr.draw')} missed={missed} againLabel={t('fr.rematch')} onAgain={() => begin(players, level)}>
+            <ResultsModal title={winner ? t('fr.wins', { name: winner.name }) : t('fr.draw')} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
               <p className="font-display text-xl font-bold">{t('fr.goodGame')}</p>
               <ul className="font-bold">{players.map((p, i) => p.kind !== 'cpu' && <li key={p.id}>{t('fr.rights', { name: p.name, count: rights[i] })}</li>)}</ul>
             </ResultsModal>

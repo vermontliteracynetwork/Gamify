@@ -28,6 +28,7 @@ const Flashcards = lazy(() => import('./games/flashcards/Flashcards'));
 const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
 const PegDrop = lazy(() => import('./games/peg-drop/PegDrop'));
 const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
+const SpaceBowling = lazy(() => import('./games/space-bowling/SpaceBowling'));
 const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazy(() => import('./owner/OwnerPage'));
@@ -68,6 +69,7 @@ function AnimatedRoutes() {
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
           <Route path="/games/peg-drop" element={<RequireSignIn><PegDrop /></RequireSignIn>} />
+          <Route path="/games/space-bowling" element={<RequireSignIn><SpaceBowling /></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><BubblePop /></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><MatchUp /></RequireSignIn>} />
           <Route path="/games/flashcards" element={<RequireSignIn><Flashcards /></RequireSignIn>} />

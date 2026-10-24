@@ -155,7 +155,7 @@ export default function MatchUp() {
             {right.map((tile) => (
               <motion.button key={`r${tile.pair}`} type="button" onClick={() => tap('r', tile)} aria-pressed={pick?.side === 'r' && pick.pair === tile.pair} disabled={done.includes(tile.pair)}
                 animate={wobble === tile.pair + 'r' && !still ? { x: [0, -8, 8, -5, 5, 0] } : done.includes(tile.pair) && !still ? { scale: [1, 1.05, 1] } : {}}
-                className={`${tileClass(pick?.side === 'r' && pick.pair === tile.pair, done.includes(tile.pair))} justify-center text-center font-display text-lg sm:text-2xl`} style={{ boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'answer-tile', '#fdfd94'), ...(done.includes(tile.pair) ? { background: '#ddfcc6' } : {}) }}>
+                className={`${tileClass(pick?.side === 'r' && pick.pair === tile.pair, done.includes(tile.pair))} justify-center text-center font-bold text-lg sm:text-2xl`} style={{ boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'answer-tile', '#fdfd94'), ...(done.includes(tile.pair) ? { background: '#ddfcc6' } : {}) }}>
                 {tile.text}
               </motion.button>
             ))}
@@ -163,7 +163,7 @@ export default function MatchUp() {
         </section>
       )}
       {phase === 'end' && (
-        <ResultsModal title={t('mu.done', { time: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+        <ResultsModal title={t('mu.done', { time: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-bold">{misses ? t('mu.misses', { count: misses }) : t('mu.perfect')}</p>
         </ResultsModal>
       )}
