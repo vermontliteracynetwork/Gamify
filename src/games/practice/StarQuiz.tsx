@@ -20,6 +20,7 @@ import { useGamePool } from '../../student/session';
 import { pieceColor, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
+import Title from '../../ui/Title';
 
 
 export const starQuizManifest: GameManifest = {
@@ -102,7 +103,7 @@ export default function StarQuiz() {
       {(phase === 'play' || phase === 'end') && (
         <section className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 mb-6" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <div className="flex items-center justify-between gap-3">
-            <h1 className="title-bubble text-3xl">{t('practice.title')}</h1>
+            <h1 className="title-bubble text-3xl"><Title text={t('practice.title')} /></h1>
             <span className="font-display text-2xl font-bold tabular-nums">{phase === 'play' ? `${round} / ${total}` : ''}</span>
           </div>
           <div className="flex flex-wrap gap-2 min-h-14" aria-label={t('practice.stars', { count: stars })} role="img">

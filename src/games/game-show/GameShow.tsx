@@ -28,6 +28,7 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
 import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
+import Title from '../../ui/Title';
 
 export const gameShowManifest: GameManifest = {
   id: 'game-show',
@@ -234,7 +235,7 @@ export default function GameShow() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         <div className="flex items-center gap-3 flex-wrap">
-          {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('tb.title')}</h1>}
+          {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('tb.title')} /></h1>}
           {phase === 'play' && turns && turns.history.length > 0 && (
             <button type="button" onClick={() => setTurns(undo(turns))} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-1.5">
               <ArrowCounterClockwise weight="bold" size={18} />{t('share.undo')}

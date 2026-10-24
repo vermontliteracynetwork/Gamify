@@ -5,6 +5,7 @@ import type { StringKey } from '../i18n/en';
 import { rollName } from './nameDice';
 import { TeamBadge } from './TeamBadge';
 import type { CpuLevel, TurnPlayer } from './turns';
+import Title from '../ui/Title';
 
 interface Slot { name: string; kind: 'team' | 'student' | 'cpu' }
 
@@ -44,7 +45,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
 
   return (
     <section className={embedded ? 'grid gap-5' : 'bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
-      {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl">{mode === 'share' ? t('teams.title') : t('teams.players')}</h1>}
+      {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={mode === 'share' ? t('teams.title') : t('teams.players')} /></h1>}
 
       <div className="flex items-center gap-3">
         <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>

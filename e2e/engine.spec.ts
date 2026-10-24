@@ -46,7 +46,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   }
 
   await expect(page.getByText('You caught 5 stars!')).toBeVisible({ timeout: 5000 });
-  await expect(page.getByRole('heading', { name: "Let's look back" })).toBeVisible();
+  await expect(page.getByRole('heading', { name: "Let's Look Back" })).toBeVisible();
   await expect(page.getByText(/^Right answer:/)).toHaveCount(1);
   await page.screenshot({ path: `test-results/lookback-${info.project.name}.png`, fullPage: true });
   expect(problems).toEqual([]);

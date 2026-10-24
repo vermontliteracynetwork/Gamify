@@ -21,12 +21,12 @@ async function png(page: Page, color: string): Promise<Buffer> {
 test('games play Classic only until a theme is made, picked on its own theme screen', async ({ page }, info) => {
   await page.goto('/games/bakery-match');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await expect(page.getByRole('heading', { name: 'Pick a theme' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
   await expect(page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio')).toHaveCount(1);
   await expect(page.getByRole('radio', { name: 'Classic' })).toHaveAttribute('aria-checked', 'true');
   await page.screenshot({ path: `test-results/theme-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByText(/^Step 1 of 2:/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Step 1 of 2:/ })).toBeVisible();
 });
 
 test('Theme Builder: upload a piece, save, and play the game in it', async ({ page }, info) => {
@@ -49,7 +49,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('radio', { name: 'Ocean Party' }).click();
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByText(/^Step 1 of 4:/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Step 1 of 4:/ })).toBeVisible();
   await finishSetup(page);
   await page.getByRole('dialog').getByRole('button', { name: 'Not yet' }).click();
   const bg = await page.getByRole('button', { name: 'Card 1', exact: true }).evaluate((el) => getComputedStyle(el).backgroundImage);
@@ -95,5 +95,5 @@ test('developer view opens with the owner PIN and links to the Theme Builder', a
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await page.getByRole('link', { name: /Theme Builder/ }).click();
-  await expect(page.getByRole('heading', { name: 'Library themes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Library Themes' })).toBeVisible();
 });

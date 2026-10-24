@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
+import Title from '../ui/Title';
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
 
@@ -23,7 +24,7 @@ export default function SetupWizard({ pages, onBack, onPlay }: { pages: SetupPag
             </li>
           ))}
         </ol>
-        <h2 className="font-display text-2xl font-bold">{t('setup.stepTitle', { n: i + 1, total: pages.length, title: page.title })}</h2>
+        <h2 className="font-display text-2xl font-bold"><Title text={t('setup.stepTitle', { n: i + 1, total: pages.length, title: page.title })} /></h2>
       </div>
       <div className="px-5 py-4 grid gap-4 content-start overflow-y-auto min-h-0 flex-1">{page.content}</div>
       <div className="px-5 py-3 border-t-[2px] border-border-soft flex justify-between gap-2">

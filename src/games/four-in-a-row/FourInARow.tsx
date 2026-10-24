@@ -25,6 +25,7 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
 import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
+import Title from '../../ui/Title';
 
 export const fourInARowManifest: GameManifest = {
   id: 'four-in-a-row',
@@ -130,7 +131,7 @@ export default function FourInARow() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('fr.title')}</h1>}
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('fr.title')} /></h1>}
       </GameTopRow>
 
       {phase === 'welcome' && (

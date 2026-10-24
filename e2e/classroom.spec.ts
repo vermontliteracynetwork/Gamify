@@ -56,7 +56,7 @@ test('teacher makes a class, assigns a set, sets supports; a student signs in an
   // Star Quiz uses the assigned set (no question page) and Ava's no-wait support.
   await page.getByRole('link', { name: /Star Quiz/ }).click();
   await openSetup(page, '/games/star-quiz');
-  await expect(page.getByText(/^Step 1 of 1:/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
   await finishSetup(page);
   const q = page.getByRole('dialog');
   await expect(q.getByText('Read the question')).toHaveCount(0);

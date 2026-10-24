@@ -4,6 +4,7 @@ import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { speak } from './feedback';
+import Title from '../ui/Title';
 
 // "Let's look back": after a game, each missed question with its right
 // answer, one at a time so nothing ever needs scrolling. Corrective feedback
@@ -17,7 +18,7 @@ export default function LookBack({ missed }: { missed: MultipleChoiceQuestion[] 
   return (
     <section className="grid gap-3" aria-label={t('look.title')}>
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-display text-2xl font-bold">{t('look.title')}</h3>
+        <h3 className="font-display text-2xl font-bold"><Title text={t('look.title')} /></h3>
         {missed.length > 1 && <span className="font-bold tabular-nums">{t('q.progress', { n: i + 1, total: missed.length })}</span>}
       </div>
       <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-2">

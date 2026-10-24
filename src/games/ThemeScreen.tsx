@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Check, LockSimple, X } from '@phosphor-icons/rea
 import { t } from '../i18n';
 import ThemePreview from '../theme/builder/ThemePreview';
 import type { GameTheme } from '../theme/types';
+import Title from '../ui/Title';
 
 // Its own screen in every game's start-up: big previews of each theme the
 // game can wear. Locked themes show a lock only (no prices or buy words).
@@ -14,7 +15,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   return (
     <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 190px)' }}>
       <section className="bg-surface border-[2.5px] border-border rounded-panel max-w-4xl w-full mx-auto flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 190px)' }}>
-        <h2 className="font-display text-2xl font-bold px-5 pt-4 pb-3 border-b-[2px] border-border-soft">{t('themeScreen.title')}</h2>
+        <h2 className="font-display text-2xl font-bold px-5 pt-4 pb-3 border-b-[2px] border-border-soft"><Title text={t('themeScreen.title')} /></h2>
         <div role="radiogroup" aria-label={t('theme.pick')} className="px-5 py-4 grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto min-h-0 flex-1 content-start">
           {themes.map((th) => {
             const open = playable(th);

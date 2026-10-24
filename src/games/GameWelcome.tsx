@@ -6,6 +6,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { GameCover } from './covers';
 import { ModeBadge } from './ModeBadge';
 import type { GameManifest } from './types';
+import Title from '../ui/Title';
 
 export interface HowStep { icon: ReactNode; text: string }
 
@@ -22,7 +23,7 @@ export default function GameWelcome({ game, steps, cover, onStart }: { game: Gam
         ? <img src={cover} alt="" className="w-full h-full min-h-48 object-cover aspect-[16/10] md:aspect-auto" />
         : <GameCover gameId={game.id} className="min-h-48 md:min-h-full aspect-[16/10] md:aspect-auto" />}
       <div className="p-5 sm:p-6 grid gap-4 content-start">
-        <h1 className="title-bubble text-4xl sm:text-5xl">{game.name}</h1>
+        <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={game.name} /></h1>
         <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
         <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
           {steps.map((s, i) => (

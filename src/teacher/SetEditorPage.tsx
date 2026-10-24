@@ -11,6 +11,7 @@ import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { Button, Panel } from '../ui/kit';
 import { newSet } from './QuestionSetsPage';
+import Title from '../ui/Title';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
@@ -57,7 +58,7 @@ export default function SetEditorPage({ library = false }: { library?: boolean }
 
       <div className="flex flex-wrap items-center gap-3 mb-2">
         {library ? (
-          <h1 className="title-bubble text-3xl sm:text-4xl flex-1 min-w-0">{set.name}</h1>
+          <h1 className="title-bubble text-3xl sm:text-4xl flex-1 min-w-0"><Title text={set.name} /></h1>
         ) : (
           <input
             id="set-name"

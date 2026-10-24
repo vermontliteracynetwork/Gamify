@@ -114,17 +114,27 @@ h1, h2, h3, .font-display {
    file are in (see docs/asset-ledger.md); until then Fredoka (OFL), the
    closest free rounded match, stands in. */
 
-/* The chunky black-outlined bubble title look from the mockups, done with
-   a text-stroke + offset shadow on the display face rather than
-   sourcing an exact "outlined" font -- keeps it robust across browsers and
-   doesn't depend on matching an unconfirmed Canva font by name. */
+/* Page and game titles: solid black display text (teacher rule,
+   2026-10-24). On a game stage they follow the theme's title text color
+   (black in Classic) so they stay readable on any backdrop. */
 .title-bubble {
   font-family: var(--font-display);
-  font-weight: 800;
-  color: #fff;
-  -webkit-text-stroke: 2.5px var(--border);
-  paint-order: stroke fill;
-  text-shadow: 0 3px 0 var(--border);
+  font-weight: 700;
+  color: var(--stage-bg-text, var(--text));
+}
+h1, h2, h3 { color: inherit; }
+
+/* A capital G in a heading is drawn as the G from the Gamify logo, in the
+   heading's own color (src/ui/Title.tsx). */
+.logo-g {
+  display: inline-block;
+  width: 0.8em;
+  height: 0.9em;
+  vertical-align: -0.08em;
+  margin-right: 0.03em;
+  background-color: currentColor;
+  -webkit-mask: url("/brand/gamify-mark.png") center / contain no-repeat;
+  mask: url("/brand/gamify-mark.png") center / contain no-repeat;
 }
 
 /* Sticker shadow utility -- the offset black shadow used on every button,

@@ -10,6 +10,7 @@ import { blankQuestion, isPlayable } from '../engine/questions';
 import { t } from '../i18n';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import Title from '../ui/Title';
 
 type Tab = 'mine' | 'library';
 
@@ -60,7 +61,7 @@ export default function QuestionSetsPage() {
             return (
               <Panel key={s.id} className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-xl font-bold truncate">{s.name || t('sets.untitled')}</h2>
+                  <h2 className="font-display text-xl font-bold truncate"><Title text={s.name || t('sets.untitled')} /></h2>
                   <p className="text-muted text-sm font-bold">
                     {t('sets.questions', { count: s.questions.length })}
                     {notReady > 0 && <span className="text-text ml-2 inline-flex items-center gap-1"><WarningCircle weight="fill" size={16} />{t('sets.needsWork', { count: notReady })}</span>}
@@ -126,7 +127,7 @@ function Library({ atLimit, onCopied }: { atLimit: boolean; onCopied: (id: strin
           <Panel key={s.id} className="flex flex-col gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · Grades {s.grade}</p>
-              <h2 className="font-display text-xl font-bold">{s.name}</h2>
+              <h2 className="font-display text-xl font-bold"><Title text={s.name} /></h2>
               <p className="text-muted text-sm font-bold">{t('sets.questions', { count: s.questions.length })}</p>
             </div>
             <div className="flex flex-wrap gap-2 mt-auto">

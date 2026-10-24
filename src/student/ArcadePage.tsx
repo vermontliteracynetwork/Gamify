@@ -14,6 +14,7 @@ import { PICTURES } from './pictures';
 import PictureBadge from './PictureBadge';
 import { useMadeThemes } from '../theme/made';
 import { setSession, useArcade, useSession } from './session';
+import Title from '../ui/Title';
 
 // Student sign-in on a shared iPad: tap your name, then your two pictures.
 // Then the student Arcade: games the class may play, filled with exactly
@@ -42,7 +43,7 @@ export function ArcadeSignIn() {
 
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-16">
-      <h1 className="title-bubble text-4xl sm:text-5xl text-center mb-6">{who ? t('arcade.hi', { name: who.name }) : classroom?.name ?? t('arcade.title')}</h1>
+      <h1 className="title-bubble text-4xl sm:text-5xl text-center mb-6"><Title text={who ? t('arcade.hi', { name: who.name }) : classroom?.name ?? t('arcade.title')} /></h1>
       {!who && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {students.map((s) => {
@@ -92,7 +93,7 @@ export function Arcade() {
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-16">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h1 className="title-bubble text-4xl sm:text-5xl">{t('arcade.mine', { name: session.name })}</h1>
+        <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('arcade.mine', { name: session.name })} /></h1>
         <button type="button" onClick={() => setSession(null)} className="min-h-12 px-5 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-2"><SignOut weight="bold" size={20} />{t('arcade.signOut')}</button>
       </div>
       {pool.length === 0 && <p className="font-bold mb-4 bg-surface rounded-input border-[2px] border-border p-3">{t('arcade.noSets')}</p>}

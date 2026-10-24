@@ -8,6 +8,7 @@ import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import { useSession } from './session';
 import { t } from '../i18n';
+import Title from '../ui/Title';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -24,7 +25,7 @@ export default function Home() {
         transition={{ duration: 0.5, ease: EASE }}
         className="mb-10"
       >
-        <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2">{t('home.title')}</h1>
+        <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2"><Title text={t('home.title')} /></h1>
         <p className="text-text font-bold text-base max-w-[50ch]">{t('home.subtitle')}</p>
       </motion.div>
 
@@ -44,7 +45,7 @@ export default function Home() {
           style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
         >
           <Sparkle weight="fill" size={40} className="text-accent" />
-          <h2 className="font-display text-xl font-bold text-text">{t('home.comingSoon')}</h2>
+          <h2 className="font-display text-xl font-bold text-text"><Title text={t('home.comingSoon')} /></h2>
         </div>
       )}
 
@@ -64,7 +65,7 @@ export default function Home() {
             >
               <GameCover gameId={game.id} className="aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform" />
               <div className="p-5 flex flex-col gap-3 flex-1">
-                <h2 className="font-display text-2xl font-bold text-text">{game.name}</h2>
+                <h2 className="font-display text-2xl font-bold text-text"><Title text={game.name} /></h2>
                 <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
                 <p className="text-muted text-sm leading-relaxed">{game.description}</p>
                 <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">

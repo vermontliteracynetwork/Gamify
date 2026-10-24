@@ -4,6 +4,7 @@ import { data, newId } from '../data';
 import type { FeedbackReport } from '../data/types';
 import { t } from '../i18n';
 import { Button } from './kit';
+import Title from './Title';
 
 const KINDS: { id: FeedbackReport['kind']; icon: typeof Bug; label: () => string }[] = [
   { id: 'bug', icon: Bug, label: () => t('tell.bug') },
@@ -30,7 +31,7 @@ export function TellGamify({ context, role = 'student' }: { context?: string; ro
 
   return (
     <section className="grid gap-3 rounded-input border-[2px] border-border-soft p-4 bg-surface-2">
-      <h3 className="font-display text-xl font-bold">{t('tell.title')}</h3>
+      <h3 className="font-display text-xl font-bold"><Title text={t('tell.title')} /></h3>
       {sent ? (
         <p className="font-bold" role="status">{t('tell.sent')}</p>
       ) : (

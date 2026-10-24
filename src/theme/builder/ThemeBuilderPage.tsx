@@ -19,6 +19,7 @@ import { themeProblems } from '../validate';
 import { scanTemplatePages } from './scan';
 import { isRound } from './template';
 import ThemePreview from './ThemePreview';
+import Title from '../../ui/Title';
 
 // Everything the builder can design: each game, plus the sign-in pictures.
 export const BUILDER_TARGETS = [...GAMES, signInManifest];
@@ -222,7 +223,7 @@ function Section({ title, hint, children }: { title: string; hint: string; child
   return (
     <Panel className="grid gap-3">
       <div>
-        <h2 className="font-display text-2xl font-bold">{title}</h2>
+        <h2 className="font-display text-2xl font-bold"><Title text={title} /></h2>
         <p className="font-semibold text-muted text-sm">{hint}</p>
       </div>
       {children}

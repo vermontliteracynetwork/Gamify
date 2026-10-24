@@ -7,6 +7,7 @@ import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { makeDeck, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
+import Title from '../ui/Title';
 
 export interface AskOptions { count?: number; player?: string }
 
@@ -106,7 +107,7 @@ function BreathBreak({ onDone }: { onDone: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('q.breathTitle')}>
       <div className="w-full max-w-md bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-        <h2 className="font-display text-3xl font-bold">{t('q.breathTitle')}</h2>
+        <h2 className="font-display text-3xl font-bold"><Title text={t('q.breathTitle')} /></h2>
         <motion.div
           className="w-32 h-32 rounded-full bg-quiz-blue border-[2.5px] border-border"
           animate={still ? undefined : { scale: [0.7, 1.1, 0.7] }}

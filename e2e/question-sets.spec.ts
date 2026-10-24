@@ -20,7 +20,7 @@ test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
   await expect(page.getByText('Saved')).toBeVisible();
   await page.screenshot({ path: `test-results/editor-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: 'Back to question sets' }).click();
-  await expect(page.getByRole('heading', { name: 'Weather words' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Weather Words' })).toBeVisible();
   await expect(page.getByText('1 of 3 sets saved')).toBeVisible();
   await page.screenshot({ path: `test-results/sets-${info.project.name}.png`, fullPage: true });
   expect(problems).toEqual([]);

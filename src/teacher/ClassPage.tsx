@@ -17,6 +17,7 @@ import { useMadeThemes } from '../theme/made';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import Title from '../ui/Title';
 
 type Tab = 'students' | 'sets' | 'modes';
 
@@ -161,7 +162,7 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={title}>
       <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 w-full max-w-lg max-h-[calc(100dvh-32px)] overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
-          <h2 className="font-display text-2xl font-bold">{title}</h2>
+          <h2 className="font-display text-2xl font-bold"><Title text={title} /></h2>
           <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
         </div>
         {children}
@@ -226,7 +227,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
   return (
     <div className="grid gap-4">
       <Panel className="grid gap-2">
-        <h2 className="font-display text-2xl font-bold">{t('class.assigned')}</h2>
+        <h2 className="font-display text-2xl font-bold"><Title text={t('class.assigned')} /></h2>
         {assignments.length === 0 && <p className="font-bold">{t('class.noAssigned')}</p>}
         {assignments.map((a) => (
           <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
@@ -241,7 +242,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
         <p className="text-sm font-bold text-muted">{t('class.focusNote')}</p>
       </Panel>
       <Panel className="grid gap-4">
-        <h2 className="font-display text-2xl font-bold">{t('class.assignNew')}</h2>
+        <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
         <SetPicker sets={sets} value={setId} onChange={setSetId} />
         <ChoiceRow label={t('class.who')} value={who} onChange={setWho} options={[{ value: 'class', label: t('class.wholeClass') }, { value: 'some', label: t('class.someStudents') }]} />
         {who === 'some' && (

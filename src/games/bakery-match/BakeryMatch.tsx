@@ -23,6 +23,7 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
+import Title from '../../ui/Title';
 
 export const bakeryMatchManifest: GameManifest = {
   id: 'bakery-match',
@@ -167,7 +168,7 @@ export default function BakeryMatch() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bakery-match" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl">{t('bm.title')}</h1>}
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('bm.title')} /></h1>}
       </GameTopRow>
 
       {phase === 'welcome' && (

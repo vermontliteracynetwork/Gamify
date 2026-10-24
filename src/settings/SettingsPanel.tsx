@@ -8,6 +8,7 @@ import PinGate from './PinGate';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
 import { useSettings } from './SettingsContext';
+import Title from '../ui/Title';
 
 // The gear button: same corner (top right, top left when left-handed), same
 // look in every game and on the question screen (product plan 4A). It sits
@@ -71,7 +72,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
       className="m-auto w-[min(640px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-[2.5px] border-border bg-surface p-0 backdrop:bg-black/40"
     >
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 bg-surface border-b-[2px] border-border-soft">
-        <h2 className="font-display text-2xl font-bold flex items-center gap-2"><GearSix weight="bold" size={26} />{t('settings.title')}</h2>
+        <h2 className="font-display text-2xl font-bold flex items-center gap-2"><GearSix weight="bold" size={26} /><Title text={t('settings.title')} /></h2>
         <button type="button" onClick={onClose} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-[2px] border-border flex items-center justify-center bg-surface-2">
           <X weight="bold" size={22} />
         </button>
