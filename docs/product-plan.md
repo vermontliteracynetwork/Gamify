@@ -1106,6 +1106,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 39 | **"You asked, we built it" social series:** whenever a report leads to a change, post a short TikTok or Instagram video: the report (no student names or identifying details), the fix in action, a thank-you. Get the teacher's okay before quoting their words. | Constant, authentic content; proves the product improves weekly; invites more feedback | Teacher, 2026-10-24 |
 | 40 | **Vermont Literacy Network beta code:** your VLN email list gets a code for 3 months of Plus free in exchange for explicit feedback, a few surveys and student feedback. | Warm first users, real feedback, testimonials and early classroom photos for launch | Teacher, 2026-10-24 |
 | 41 | **Founding beta teachers:** a hand-picked group with free access who shape Gamify ("Founding Teacher" badge on their profile, credit on the website with permission). | Credibility and word of mouth; quotes for the website and social posts | Teacher, 2026-10-24 |
+| 42 | **"Our students help build Gamify."** Beta classes learn the Tell Gamify button in a short lesson, and their reports shape the games. | Authentic story for social posts and the beta launch | Teacher, 2026-10-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1141,3 +1142,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 22 | **From Paper to Play: Importing Your Old Question Sets** | CSV import from spreadsheets teachers already have. | CSV import | All teachers |
 | 23 | **Ways to Design a Theme** | Step by step: (1) download the theme template for the game you want (every game has its own; themes are made per game), (2) draw, paint, color or design digitally on the template, (3) upload everything to that game's Theme Builder. Tips for markers vs paint vs digital, splitting pieces across students, and scanning well. | Theme templates, Theme Builder, scan-and-cut, student design mode | Teacher's idea, 2026-10-24; all grades |
 | 37 | **"From kindergarten to college."** One platform, any age: themes and question sets make every game fit the class in front of you. | Widens the market to middle school, high school, college and tutoring | Teacher, 2026-10-24 |
+| 24 | **Teach Your Class to Report Bugs and Share Ideas** | A 10-minute lesson on the Tell Gamify button: what makes a helpful report, never typing names, sending one idea together; how student reports turn into real changes. Also posted on social media. | Tell Gamify, beta program | Teacher, 2026-10-24; all grades |
