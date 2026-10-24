@@ -7,6 +7,7 @@ import SetEditorPage from './teacher/SetEditorPage';
 import ImportPage from './teacher/ImportPage';
 import StarQuiz from './games/practice/StarQuiz';
 import GameShow from './games/game-show/GameShow';
+import BakeryMatch from './games/bakery-match/BakeryMatch';
 import { SettingsProvider } from './settings/SettingsContext';
 
 function AnimatedRoutes() {
@@ -26,6 +27,7 @@ function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/games/star-quiz" element={<StarQuiz />} />
           <Route path="/games/game-show" element={<GameShow />} />
+          <Route path="/games/bakery-match" element={<BakeryMatch />} />
           <Route path="/teacher" element={<Navigate to="/teacher/sets" replace />} />
           <Route path="/teacher/sets" element={<QuestionSetsPage />} />
           <Route path="/teacher/sets/import" element={<ImportPage />} />

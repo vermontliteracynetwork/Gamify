@@ -250,6 +250,21 @@ export const en = {
   'tb.ok': 'OK',
   'tb.nobodyToPick': 'No other team has points yet, so nothing happens this time.',
   'tb.gameOver': 'Game over!',
+
+  'bm.title': 'Bakery Match',
+  'bm.description': 'Swap treats to make rows of 3. Answer questions to keep baking.',
+  'bm.rounds': 'Rounds',
+  'bm.perBreak': 'Questions each time',
+  'bm.moves': 'Moves left this round: {count}',
+  'bm.round': 'Round {n} of {total}',
+  'bm.score': 'Score',
+  'bm.tile': '{kind}, row {row}, column {col}',
+  'bm.selected': 'selected',
+  'bm.noMove': 'No match there. Try a different swap!',
+  'bm.shuffle': 'No moves left, shuffling the board!',
+  'bm.answerToGo': 'Great round! Answer to keep baking.',
+  'bm.done': 'You scored {score} points!',
+  'bm.kind.0': 'Cookie', 'bm.kind.1': 'Cake', 'bm.kind.2': 'Ice cream', 'bm.kind.3': 'Pizza', 'bm.kind.4': 'Popcorn', 'bm.kind.5': 'Cocoa',
 } as const;
 
 export type StringKey = keyof typeof en;
