@@ -731,6 +731,13 @@ for the privacy and accessibility paperwork in section 6.
   text, theme name, URL or ad. Internal docs can say "Blooket-style" to
   explain intent; anything a customer sees cannot.
 - Rename list in section 3 must be done before launch.
+- **Logo (2026-10-24):** you designed the Gamify logo (a "G" whose
+  top is an arcade joystick, plus the "Gamify" wordmark) in Canva; it is in
+  the app header and browser/iPad icons, logged in `docs/asset-ledger.md`.
+  Before trademarking it, confirm the Canva elements and font used allow
+  use in a logo/trademark (Canva limits trademarking some stock
+  elements); a designer can redraw it as fully original vector art if
+  needed. Include the logo in the trademark search.
 - **Our own name.** "Gamify" is a common word and other companies very
   likely already use it in software (gamify.com and most gamify___.com
   domains are taken, a sign the name is crowded). **A trademark clearance search is the
