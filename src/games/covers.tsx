@@ -27,10 +27,10 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
   switch (gameId) {
     case 'game-show':
       return (
-        <div className={base} style={{ background: 'repeating-conic-gradient(from 0deg at 50% 110%, #ffcf5c 0deg 10deg, #ff9f68 10deg 20deg)' }} aria-hidden="true">
+        <div className={base} style={{ containerType: 'inline-size', background: 'repeating-conic-gradient(from 0deg at 50% 110%, #ffcf5c 0deg 10deg, #ff9f68 10deg 20deg)' }} aria-hidden="true">
           <div className="absolute inset-x-[14%] bottom-[10%] top-[18%] grid grid-cols-3 gap-[4%]">
             {['100', '200', '300', '★', '?', '+50'].map((v, i) => (
-              <span key={i} className="rounded-xl border-[3px] border-border bg-white flex items-center justify-center font-display font-bold text-[clamp(14px,3vw,30px)]"
+              <span key={i} className="rounded-xl border-[3px] border-border bg-white flex items-center justify-center font-display text-[clamp(9px,8cqw,30px)]"
                 style={{ background: i % 2 ? '#fff4c2' : '#ffffff' }}>{v}</span>
             ))}
           </div>

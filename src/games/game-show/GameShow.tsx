@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
+import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { ArrowCounterClockwise, CheckCircle, Crown, HandPointing, Question, Sparkle, Trophy, UsersThree } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
@@ -62,6 +63,9 @@ export default function GameShow() {
   const [phase, setPhase] = useState<Phase>('welcome');
   const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, twists: ALL_TWISTS as Twist[] });
   const { board, cardCount } = setup;
+  // A set picked with the teacher's Play now button or a game code (?set=).
+  const presetSet = new URLSearchParams(useLocation().search).get('set');
+  useEffect(() => { if (presetSet && allSets.some((s) => s.id === presetSet)) change({ setIds: [presetSet], board: 'cards' }); }, [presetSet, allSets.length]); // eslint-disable-line react-hooks/exhaustive-deps
   const setIds = setup.setIds.filter((id) => allSets.some((s) => s.id === id));
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [turns, setTurns] = useState<TurnState | null>(null);

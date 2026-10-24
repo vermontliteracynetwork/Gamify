@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { data } from '../data';
 import { useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
@@ -62,8 +63,13 @@ export function useArcade(session: ArcadeSession | null) {
 export function useGamePool(picked: PoolSet[]) {
   const session = useSession();
   const { pool } = useArcade(session);
+  const { value: mine = [] } = useMySets();
+  // A set chosen by the teacher's game code or Play now button (?set=).
+  const presetId = new URLSearchParams(useLocation().search).get('set');
+  const preset = presetId ? [...mine, ...LIBRARY].find((s) => s.id === presetId) : undefined;
+  if (preset) return { pool: [{ set: preset, starred: false }], assigned: true, classroomId: session?.classroomId || undefined, studentId: session?.studentId };
   const assigned = !!session && pool.length > 0;
-  return { pool: assigned ? pool : picked, assigned, classroomId: session?.classroomId, studentId: session?.studentId };
+  return { pool: assigned ? pool : picked, assigned, classroomId: session?.classroomId || undefined, studentId: session?.studentId };
 }
 
 // Lays a signed-in student's accommodations over this device's settings.

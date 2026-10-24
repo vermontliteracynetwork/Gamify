@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Copy, Eye, FileArrowUp, PencilSimple, Plus, Trash, WarningCircle } from '@phosphor-icons/react';
+import { Copy, Eye, FileArrowUp, PencilSimple, Plus, Trash, WarningCircle, Play } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { LOCAL_TEACHER_ID, useMySets, useTier } from '../data/hooks';
@@ -13,6 +13,7 @@ import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../da
 import SetCover from '../games/SetCover';
 import SetFilterBar from '../games/SetFilterBar';
 import TeacherNav from '../ui/TeacherNav';
+import HostDialog from './HostDialog';
 import Title from '../ui/Title';
 
 type Tab = 'mine' | 'library';
@@ -30,6 +31,7 @@ export default function QuestionSetsPage() {
   const atLimit = sets.length >= limit;
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [hosting, setHosting] = useState<QuestionSet | null>(null);
 
   async function create() {
     const set = newSet('', [blankQuestion(newId('q'))]);
@@ -79,6 +81,7 @@ export default function QuestionSetsPage() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
+                    <Button variant="primary" onClick={() => setHosting(s)}><Play weight="fill" size={18} />{t('host.open')}</Button>
                     <Button onClick={() => navigate(`/teacher/sets/${s.id}`)}><PencilSimple weight="bold" size={18} />{t('sets.edit')}</Button>
                     <Button variant="ghost" aria-label={`${t('sets.delete')}: ${s.name || t('sets.untitled')}`} onClick={() => setConfirming(s.id)}><Trash weight="bold" size={18} /></Button>
                   </div>
@@ -88,13 +91,14 @@ export default function QuestionSetsPage() {
           })}
         </div>
       ) : (
-        <Library atLimit={atLimit} onCopied={(id) => navigate(`/teacher/sets/${id}`)} />
+        <Library atLimit={atLimit} onCopied={(id) => navigate(`/teacher/sets/${id}`)} onHost={setHosting} />
       )}
+      {hosting && <HostDialog set={hosting} onClose={() => setHosting(null)} />}
     </main>
   );
 }
 
-function Library({ atLimit, onCopied }: { atLimit: boolean; onCopied: (id: string) => void }) {
+function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (id: string) => void; onHost: (s: QuestionSet) => void }) {
   const [filter, setFilter] = useState<SetFilter>({});
   const shown = LIBRARY.filter((s) => matchesFilter(s, filter));
 
@@ -116,6 +120,7 @@ function Library({ atLimit, onCopied }: { atLimit: boolean; onCopied: (id: strin
                 {(s.tags ?? []).map((tag) => <span key={tag} className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 text-muted">#{tag}</span>)}
               </p>
               <div className="flex flex-wrap gap-2 mt-auto pt-1">
+                <Button variant="primary" onClick={() => onHost(s)}><Play weight="fill" size={18} />{t('host.open')}</Button>
                 <Link to={`/teacher/library/${s.id}`} className={buttonClasses()}><Eye weight="bold" size={18} />{t('sets.preview')}</Link>
                 <Button disabled={atLimit} onClick={async () => {
                   const copy = { ...newSet(s.name, s.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),

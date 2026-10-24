@@ -1,23 +1,58 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight } from '@phosphor-icons/react';
-import { data } from '../data';
+import { ArrowRight, DiceFive } from '@phosphor-icons/react';
+import { data, newId } from '../data';
+import { findGameCode, type GameCode } from '../data/gameCodes';
+import { rollName } from '../engine/nameDice';
+import { setSession } from '../student/session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
 
-// The one join page (product plan): students type their class code (letters
-// only) and go to their class sign-in. Live game codes join here in Stage 6.
+// The one join page (product plan): students type a code (letters only).
+// A class code goes to class sign-in; a game code asks for a silly name
+// from the name dice and opens that game with the teacher's set. Codes in
+// a link (/join/CODE) are filled in for them.
 export default function JoinPage() {
-  const [code, setCode] = useState('');
+  const { code: fromLink = '' } = useParams();
+  const [code, setCode] = useState(fromLink.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5));
   const [wrong, setWrong] = useState(false);
+  const [game, setGame] = useState<GameCode | null>(null);
+  const [name, setName] = useState(() => rollName());
   const navigate = useNavigate();
-  async function join() {
-    const c = code.trim().toUpperCase();
-    const found = (await data.listClassrooms()).find((x) => x.joinCode === c);
-    if (found) navigate(`/arcade/${found.id}`);
-    else { setWrong(true); window.setTimeout(() => setWrong(false), 900); }
+
+  async function join(c = code) {
+    const upper = c.trim().toUpperCase();
+    const cls = (await data.listClassrooms()).find((x) => x.joinCode === upper);
+    if (cls) { navigate(`/arcade/${cls.id}`); return; }
+    const g = await findGameCode(upper);
+    if (g) { setGame(g); return; }
+    setWrong(true); window.setTimeout(() => setWrong(false), 900);
   }
+  useEffect(() => { if (fromLink.length === 5) void join(fromLink); }, [fromLink]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function play() {
+    if (!game) return;
+    setSession({ classroomId: '', studentId: newId('guest'), name });
+    navigate(`/games/${game.gameId}?set=${game.setId}`);
+  }
+
+  if (game) {
+    return (
+      <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+        <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
+        <p className="font-bold text-lg">{t('join.nameSub')}</p>
+        <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
+        <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2">
+          <DiceFive weight="fill" size={26} />{t('join.roll')}
+        </button>
+        <button type="button" onClick={play} className="min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          {t('join.play')}<ArrowRight weight="bold" size={26} />
+        </button>
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-5xl"><Title text={t('join.title')} /></h1>

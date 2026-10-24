@@ -49,3 +49,28 @@ test('the games need sign-in; a student joins with a class code', async ({ page 
   await page.getByRole('button', { name: 'Go' }).click();
   await expect(page.getByRole('button', { name: 'Kai', exact: true })).toBeVisible();
 });
+
+test('teacher hosts one set with a game code; a student joins by link and plays that set', async ({ page }, info) => {
+  await page.goto('/login');
+  await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await page.goto('/teacher/sets');
+  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByLabel('Search titles and tags').fill('habitats');
+  await page.getByRole('button', { name: 'Play or share' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('radio', { name: /Question Tracker/ }).click();
+  await dialog.getByRole('button', { name: 'Make a game code' }).click();
+  const code = (await dialog.getByLabel(/^Game code /).innerText()).trim();
+  expect(code).toMatch(/^[A-Z]{5}$/);
+  await page.screenshot({ path: `test-results/host-${info.project.name}.png` });
+  await page.goto('/play');
+  await page.getByRole('button', { name: 'Log out' }).click();
+
+  await page.goto(`/join/${code}`);
+  await expect(page.getByRole('heading', { name: 'Pick Your Game Name' })).toBeVisible();
+  await page.getByRole('button', { name: 'Roll a new name' }).click();
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await page.getByRole('button', { name: 'Set up and play' }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
+});

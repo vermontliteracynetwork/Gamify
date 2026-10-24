@@ -45,6 +45,7 @@ function AnimatedRoutes() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/join" element={<JoinPage />} />
+          <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
           <Route path="/games/game-show" element={<RequireSignIn><GameShow /></RequireSignIn>} />
