@@ -37,8 +37,9 @@ teacher no control or educational value is not done.
 - For animation/motion work specifically: capture multiple frames at short
   intervals during the animation and inspect them for continuity. A
   "smooth" claim that hasn't been frame-checked is not verified.
-- Check the primary device target: iPad / tablet viewport, not just
-  desktop. Check for dead/empty space on both short and tall screens.
+- Check every device: iPad / tablet (portrait and landscape) AND computers
+  (laptop screens, mouse and keyboard). We don't know what students and
+  teachers use (teacher, 2026-10-24); Playwright runs all three sizes. Check for dead/empty space on both short and tall screens.
 - Read every console error/warning from the browser session before calling
   something done.
 

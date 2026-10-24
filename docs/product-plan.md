@@ -923,8 +923,9 @@ game only decides *when to ask* and *what a right answer does*.
    **joingamify.com** (matches the join-a-game moment, reads as the
    brand). Run the trademark search before buying, since the word itself
    is crowded.
-3. **First three games**: Claudia's pick is Team board, Match up, and Peg
-   Drop or Bubble Pop.
+3. ~~First three games~~ DECIDED 2026-10-24: **Game Show** (Share; surprise
+   cards and a category grid), **Bakery Match** (Solo match-3), **Four in a
+   Row** (Versus).
 4. **Themes scope**: game stage only, chrome stays branded? (Claudia: yes)
 5. **Accounts**: teachers log in (all tiers, so free users can save their
    3 sets and 1 classroom). Students have no email accounts: they are

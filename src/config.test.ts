@@ -9,7 +9,7 @@ describe('plans', () => {
     expect(schoolQuote(30)?.perSeat).toBe(126);
   });
   it('free teachers play free games only', () => {
-    expect(canPlayGame('free', 'peg-drop')).toBe(true);
+    expect(canPlayGame('free', 'game-show')).toBe(true);
     expect(canPlayGame('free', 'bubble-pop')).toBe(false);
     expect(canPlayGame('plus', 'bubble-pop')).toBe(true);
   });
