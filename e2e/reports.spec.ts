@@ -27,3 +27,15 @@ test('reports group the question log, show the most common wrong answer, and dow
   expect((await download).suggestedFilename()).toMatch(/^gamify-report-question-/);
   expect(problems).toEqual([]);
 });
+
+test('Get started stays in the teacher menu on every page until done', async ({ page }) => {
+  await page.goto('/teacher/reports');
+  const pill = page.getByRole('button', { name: /^Get started \d\/5$/ });
+  await expect(pill).toBeVisible();
+  await pill.click();
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
+  await page.goto('/teacher/themes');
+  await expect(pill).toBeVisible();
+});

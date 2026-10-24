@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Circle, X } from '@phosphor-icons/react';
 import { data } from '../data';
@@ -10,49 +9,50 @@ import Title from '../ui/Title';
 
 // First-run tour (development plan Stage 4): a checklist that ticks itself
 // as the teacher plays a sample game, makes a class, adds students, assigns a
-// set and opens student sign-in. Hidden for good once dismissed or done.
-const DISMISSED = 'get-started-dismissed';
+// set and opens student sign-in. It sits in the teacher menu on every page
+// until all five are done (teacher, 2026-10-24); the X folds it to a menu pill.
+export const FOLDED = 'get-started-folded';
+type StepKey = 'play' | 'class' | 'students' | 'assign' | 'signin';
+export interface StartSteps { steps: { key: StepKey; to: string; done: boolean }[]; count: number; folded: boolean; reload: () => void }
 
-export default function GetStarted() {
-  const { value } = useAsync(async () => {
-    const [classes, log, dismissed] = await Promise.all([data.listClassrooms(), data.listQuestionLog(), data.getSetting<boolean>(DISMISSED)]);
+export function useStartSteps(): StartSteps | null {
+  const { value, reload } = useAsync(async () => {
+    const [classes, log, folded] = await Promise.all([data.listClassrooms(), data.listQuestionLog(), data.getSetting<boolean>(FOLDED)]);
     const students = (await Promise.all(classes.map((c) => data.listStudents(c.id)))).flat();
     const assignments = (await Promise.all(classes.map((c) => data.listAssignments(c.id)))).flat();
-    const signedIn = log.some((e) => e.studentId && !e.studentId.startsWith('guest'));
-    return { dismissed: !!dismissed, done: { play: log.length > 0, class: classes.length > 0, students: students.length > 0, assign: assignments.length > 0, signin: signedIn }, firstClass: classes[0]?.id };
+    const first = classes[0]?.id;
+    const inClass = first ? `/teacher/classes/${first}` : '/teacher/classes';
+    const steps = [
+      { key: 'play' as const, to: '/teacher/sets', done: log.length > 0 },
+      { key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 },
+      { key: 'students' as const, to: inClass, done: students.length > 0 },
+      { key: 'assign' as const, to: inClass, done: assignments.length > 0 },
+      { key: 'signin' as const, to: first ? `/arcade/${first}` : '/teacher/classes', done: log.some((e) => e.studentId && !e.studentId.startsWith('guest')) },
+    ];
+    return { steps, count: steps.filter((s) => s.done).length, folded: !!folded };
   });
-  const [hidden, setHidden] = useState(false);
-  if (!value || value.dismissed || hidden) return null;
-  const steps: { key: keyof typeof value.done; to: string }[] = [
-    { key: 'play', to: '/teacher/sets' },
-    { key: 'class', to: '/teacher/classes' },
-    { key: 'students', to: value.firstClass ? `/teacher/classes/${value.firstClass}` : '/teacher/classes' },
-    { key: 'assign', to: value.firstClass ? `/teacher/classes/${value.firstClass}` : '/teacher/classes' },
-    { key: 'signin', to: value.firstClass ? `/arcade/${value.firstClass}` : '/teacher/classes' },
-  ];
-  const count = steps.filter((s) => value.done[s.key]).length;
-  if (count === steps.length) return null;
+  return value ? { ...value, reload } : null;
+}
+
+export default function GetStarted({ steps, count, onFold }: { steps: StartSteps['steps']; count: number; onFold: () => void }) {
   return (
-    <Panel className="mb-6 grid gap-3 bg-accent">
+    <Panel className="mb-4 grid gap-3 bg-accent">
       <div className="flex items-start gap-2">
         <div className="flex-1">
           <h2 className="font-display text-2xl"><Title text={t('start.title')} /></h2>
           <p className="font-bold text-sm">{t('start.progress', { done: count, total: steps.length })}</p>
         </div>
-        <button type="button" aria-label={t('start.hide')} onClick={() => { setHidden(true); void data.setSetting(DISMISSED, true); }} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
+        <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
       </div>
       <ol className="grid sm:grid-cols-5 gap-2 list-none p-0 m-0">
-        {steps.map((s, i) => {
-          const done = value.done[s.key];
-          return (
-            <li key={s.key}>
-              <Link to={s.to} className={`h-full rounded-input border-[2px] border-border p-3 grid gap-1 no-underline text-text ${done ? 'bg-surface-2' : 'bg-surface'}`}>
-                <span className="flex items-center gap-1.5 font-bold">{done ? <CheckCircle weight="fill" size={22} color="#1f7a45" aria-label={t('start.done')} /> : <Circle weight="bold" size={22} aria-hidden="true" />}{i + 1}</span>
-                <span className="font-bold text-sm">{t(`start.step.${s.key}` as StringKey)}</span>
-              </Link>
-            </li>
-          );
-        })}
+        {steps.map((s, i) => (
+          <li key={s.key}>
+            <Link to={s.to} className={`h-full rounded-input border-[2px] border-border p-3 grid gap-1 no-underline text-text ${s.done ? 'bg-surface-2' : 'bg-surface'}`}>
+              <span className="flex items-center gap-1.5 font-bold">{s.done ? <CheckCircle weight="fill" size={22} color="#1f7a45" aria-label={t('start.done')} /> : <Circle weight="bold" size={22} aria-hidden="true" />}{i + 1}</span>
+              <span className="font-bold text-sm">{t(`start.step.${s.key}` as StringKey)}</span>
+            </Link>
+          </li>
+        ))}
       </ol>
     </Panel>
   );
