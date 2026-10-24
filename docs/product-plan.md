@@ -443,6 +443,12 @@ Direct from you (2026-10-24).
 - Share teams work with no devices: teacher just sets team names and
   who's on each, or plays with "Team 1, Team 2" quick teams.
 
+### Play mode switches (all plans, direct from you, 2026-10-24)
+Teachers choose which of the four play modes students see: one, a few or
+all, per classroom and optionally per student (a student's setting can only
+narrow the class's). Some teachers need to offer only Solo, or one mode at
+a time. Hidden modes don't appear anywhere on the student side.
+
 ## 4C. Reports (every game, always)
 
 Direct from you (2026-10-24): every game always produces a report the
@@ -678,6 +684,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | Versus on two devices | No | Yes | Yes | Yes |
 | Reports | Report for every game played (all views, CSV, print), 30 days of history | Full history | Full history, trends, PDF/Sheets export | + school and admin views |
 | Names, approval, rename, remove player, bad-word filter, teams | **All** | All | All | All |
+| Choose which play modes students see | **Yes** | Yes | Yes | Yes |
 | Accessibility settings (4A) and Share Mirror (4D) | **All, free** | All | All | All |
 | Price (set by you, 2026-10-24) | $0 | About $8/mo billed yearly ($96/yr) | About $15/mo billed yearly ($180/yr) | Per-teacher Pro seats: 5-9 $162, 10-24 $144, 25+ $126 each; districts quoted; POs yearly, prepaid, net 30, 5-seat minimum |
 | Privacy paperwork | Standard terms | Standard terms | Standard terms | Signed data privacy agreement |

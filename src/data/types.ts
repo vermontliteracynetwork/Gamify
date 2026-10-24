@@ -24,11 +24,16 @@ export interface QuestionSet {
   updatedAt: string;
 }
 
+export type PlayMode = 'live' | 'share' | 'solo' | 'versus';
+export const ALL_MODES: PlayMode[] = ['live', 'share', 'solo', 'versus'];
+
 export interface Classroom {
   id: string;
   name: string;
   ownerId: string;
   createdAt: string;
+  // Play modes students in this class see (all plans). Missing = all four.
+  allowedModes?: PlayMode[];
 }
 
 export interface Student {
@@ -37,6 +42,8 @@ export interface Student {
   name: string;
   // Two picture ids for the K-1 friendly sign-in.
   picturePassword: [string, string];
+  // Narrows the class's modes for this one student (never widens them).
+  allowedModes?: PlayMode[];
 }
 
 // A set assigned to a whole class (studentId absent) or to one student.

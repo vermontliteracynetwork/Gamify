@@ -4,7 +4,9 @@ import type { ThemePieceSpec } from '../theme/types';
 // The game module contract (product plan section 7). Every game is a
 // plug-in that declares these; nothing about questions lives in the game.
 
-export type PlayMode = 'live' | 'share' | 'solo' | 'versus';
+import type { PlayMode } from '../data/types';
+
+export type { PlayMode };
 
 export interface RoundSetting {
   label: string;
