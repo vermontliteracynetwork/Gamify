@@ -14,8 +14,9 @@ with `platform-spec.md`, this doc is the newer thinking.
 ## 1. What Gamify is (one sentence)
 
 **A teacher writes one question set, and Gamify turns it into dozens of
-games and activities, played live as a class or solo as homework, all
-wearing the theme the teacher (or the class) picks.**
+games and activities, played four ways (whole class on their own devices,
+whole class on one shared screen, solo, or head to head), all wearing the
+theme the teacher (or the class) picks.**
 
 What it borrows, by *kind of experience* (never code, art, names or look):
 
@@ -27,52 +28,80 @@ What it borrows, by *kind of experience* (never code, art, names or look):
 | Independent Work Dashboard | 20+ arcade games already built around one question screen | Gamify starts from this logic instead of from zero |
 
 The moat is not any single game. It is: **one content source, many game
-shapes, one theme system across all of them, and accessibility good enough
+modes, one theme system across all of them, and accessibility good enough
 for students with high support needs.**
 
-## 2. Three play shapes
+## 2. Four play modes (all powered by question sets)
 
-Every game module declares which shape(s) it supports.
+Direct from you (2026-10-24): every game is fueled by question sets and
+comes in up to four modes. Every game module declares which modes it
+supports. Activity formats (Wordwall / Flippity-style) are not a separate
+mode: they are games that plug into these same four modes.
 
-### A. Solo arcade (Blooket-style, from the Dashboard)
-The game runs until it needs a question, pauses, shows the shared question
-screen, and a right answer powers the game (a hop, a swing, a served
-order). Rules come straight from the Dashboard engine, see
-`docs/question-engine.md`. Works for homework links and independent
-centers.
+| # | Mode | Who holds a device | Feels like | Needs a server? |
+|---|---|---|---|---|
+| 1 | **Class Live** (whole group, own devices) | Every student + teacher host | Classic Blooket hosting | Yes (real-time) |
+| 2 | **Class Show** (whole group, one screen) | Teacher only, cast or on the board | Baamboozle | No |
+| 3 | **Solo** | One student | Dashboard arcade games, homework | No |
+| 4 | **Versus** (student vs student, or vs CPU) | One shared device, later two devices | Board-game night | No (shared device); yes (two devices) |
 
-### B. Activity templates (Wordwall / Flippity-style)
-Short, generic formats where the content *is* the game. These formats are
-classroom staples nobody owns, which makes them low-risk and cheap to
-build:
+### Mode 1: Class Live (whole group, independent devices)
+- Teacher opens a game + question set and gets a **join code** and QR code
+  on the big screen (or hosts from their own laptop/iPad).
+- Students join on their own iPads with the code and a nickname. Teacher
+  approves or renames nicknames before the game starts (and a built-in
+  word filter blocks bad names).
+- Each student plays **their own copy** of the game: answering powers it,
+  exactly like Solo. The teacher screen shows the **lobby, live
+  leaderboard, timer, and class progress**.
+- Teacher controls: start, pause everyone, add time, end, remove a player.
+  Option to hide the leaderboard (top 5 only, or no ranks, just a class
+  goal bar) so struggling students are not shamed in front of the class.
+- Team option: students are put in teams and the board shows team totals.
+- End screen: podium (or class-goal celebration), then a teacher report
+  of who got which questions right.
 
-- Flashcards (flip, self-check)
-- Match up (term to definition, picture to word)
-- Group sort (drag into buckets)
-- Quiz (plain, with themes)
-- Spinner wheel (random question / random student)
-- Word search
-- Crossword
-- Anagram / unscramble the sentence
-- True or false speed round
-- Find the match (tap-the-pair race)
-- Category board (5 categories x 5 point values, team play)
-- Bingo (teacher calls, students mark)
-- Labelled diagram
-- Random name picker / team maker (teacher tool)
+### Mode 2: Class Show (whole group, cast from the teacher's device)
+- No student devices at all. Teacher puts the game on the board (casting,
+  projector, smartboard) and drives it from one device.
+- Teams (2 to 6) take turns. On a team's turn the question shows big,
+  read aloud if wanted; the class answers out loud or with whiteboards;
+  the teacher taps **right** or **not yet** (or the team taps an answer on
+  a smartboard).
+- A right answer earns the team its game move: pick a surprise card,
+  drop a ball, bowl a frame, claim a square.
+- Built for the room: huge text readable from the back, team colors and
+  icons (not just names) so K-3 kids know whose turn it is, a big
+  "whose turn" banner, undo for teacher mis-taps.
+- Zero setup and works on any school's tech, which makes it the strongest
+  free-tier hook.
 
-### C. Live class games (Baamboozle / Kahoot-style hosting)
-Teacher hosts on the board, students join with a code on their iPads, or
-the whole class plays as teams on one screen with no devices at all.
+### Mode 3: Solo
+- One student, one device: the Dashboard arcade model. Game runs, pauses
+  for the question screen, a right answer powers the game.
+- Entry points: a homework/assignment link, a classroom center, or free
+  play. Assignment lock rules from `docs/question-engine.md` apply.
+- Also covers single-player activities (flashcards, match up, sort).
 
-- **Team board** (one screen, no student devices): pick a card, answer,
-  reveal a surprise (points, swap, steal, double). Zero setup, works in
-  any classroom. Great free-tier hook.
-- **Everyone plays** (join code): each student plays a solo arcade game
-  from shape A, teacher screen shows a live leaderboard and a timer.
+### Mode 4: Versus (student vs student, or student vs CPU)
+- **Pass-and-play first:** two players (up to four for some games) on one
+  iPad, taking turns. Each turn starts with that player's question.
+- **Vs CPU:** a computer player with three levels (Easy, Medium, Hard)
+  that plays the game moves; it never answers questions, the student
+  always does. CPU is a friendly character, never gloats or teases.
+- **Two devices later:** student vs student on separate iPads with a short
+  match code, using the same real-time server as Class Live.
+- Kindness rules: both players earn for every right answer whoever wins,
+  the loser screen says "Good game! Rematch?", and a handicap option lets
+  the teacher give one player a head start or extra support.
 
-Live with join codes needs a real-time server, so it ships after solo and
-team-board (see roadmap).
+### The big build insight: two engines, not four
+- **"Everyone plays their own game" engine** powers Solo (3) and Class
+  Live (1). Class Live is Solo plus a host screen that collects scores.
+  So every Solo game we build becomes a Class Live game almost for free.
+- **"Take turns" engine** powers Class Show (2) and Versus (4). A turn
+  player can be a team, a student or the CPU. So every turn-based game we
+  build works in both modes.
 
 ## 3. Starting game roster (from the Dashboard, renamed)
 
@@ -81,18 +110,18 @@ rebuild; **several current names are other companies' trademarks and must
 change before anything ships.** Proposed working names only, all pending a
 trademark search:
 
-| Dashboard game | Problem with the name | Gamify working name |
-|---|---|---|
-| Plinko | "Plinko" is a registered trademark (game show) | Peg Drop |
-| Crossy Road Hopper | "Crossy Road" is a registered trademark | Road Hop |
-| Diner Dash | "Diner Dash" is a registered trademark | Lunch Rush |
-| Bakery Match (match-3) | Fine, but must not resemble any famous match-3 look | Bakery Match |
-| Bubble Shooter | Generic term, fine | Bubble Pop |
-| Castle Defense | Generic, fine | Castle Guard |
-| Space Bowling | Generic, fine | Space Bowling |
-| Slime Chess | Chess is public domain, fine | Slime Chess |
-| Shape Dash | Close to a famous rhythm-runner name, avoid | Shape Runner |
-| Farm Grow, Memory Match, Pet Show Ring, Quiz Mode, Lighthouse Signal, Gem Mine, Kitchen Cook-Off, Word Search, Cupcake Tycoon, Doc Fishing, Rescue Shelter, Alchemy | Generic, fine (double-check each in the search) | Keep |
+| Dashboard game | Problem with the name | Gamify working name | Modes (1 Live, 2 Show, 3 Solo, 4 Versus) |
+|---|---|---|---|
+| Plinko | "Plinko" is a registered trademark (game show) | Peg Drop | 1 2 3 4 |
+| Crossy Road Hopper | "Crossy Road" is a registered trademark | Road Hop | 1 3 |
+| Diner Dash | "Diner Dash" is a registered trademark | Lunch Rush | 1 3 |
+| Bakery Match (match-3) | Fine, but must not resemble any famous match-3 look | Bakery Match | 1 3 |
+| Bubble Shooter | Generic term, fine | Bubble Pop | 1 3 |
+| Castle Defense | Generic, fine | Castle Guard | 1 3 |
+| Space Bowling | Generic, fine | Space Bowling | 1 2 3 4 |
+| Slime Chess | Chess is public domain, fine | Slime Chess | 2 4 |
+| Shape Dash | Close to a famous rhythm-runner name, avoid | Shape Runner | 1 3 |
+| Farm Grow, Memory Match, Pet Show Ring, Quiz Mode, Lighthouse Signal, Gem Mine, Kitchen Cook-Off, Word Search, Cupcake Tycoon, Doc Fishing, Rescue Shelter, Alchemy | Generic, fine (double-check each in the search) | Keep | Mostly 1 3; Memory Match and Quiz also 2 4 |
 
 Also on the Wordwall/Flippity side, avoid board-game trademarks: no
 "Jeopardy" (use Category Board), no "Connect 4" (Four in a Row), no
@@ -100,11 +129,26 @@ Also on the Wordwall/Flippity side, avoid board-game trademarks: no
 centuries-old public domain game), no "Hangman" (also avoid for tone: use
 a melting snowman or a rocket launch countdown instead).
 
-**DECIDE:** which three games ship first. Claudia's pick, one per shape so
-the engine is proven end to end:
-1. **Team board** (shape C, no devices, the strongest free hook)
-2. **Match up** (shape B, cheapest activity, proves the content pipeline)
-3. **Peg Drop or Bubble Pop** (shape A, proves the arcade question break)
+New games made for the turn-based modes (2 Show, 4 Versus):
+
+| Game | Modes |
+|---|---|
+| Team Board (pick a surprise card) | 2 |
+| Category Board | 2 |
+| Four in a Row | 2 4 |
+| Tic-Tac-Toe | 2 4 |
+| Climb and Slide | 2 4 |
+| Find the Match race | 1 3 4 |
+| Match Up, Group Sort | 1 3 |
+| Flashcards | 3 |
+| Spinner Wheel | 2 |
+
+**DECIDE:** which three games ship first. Claudia's pick covers all four
+modes with the fewest games:
+1. **Peg Drop** (modes 1, 2, 3, 4: one game proves both engines)
+2. **Team Board** (mode 2, no devices, the strongest free hook)
+3. **Match Up** (modes 1, 3: cheapest activity, proves the content
+   pipeline)
 
 ## 4. Themes across every game (headline paid feature)
 
@@ -173,8 +217,11 @@ would apply to chrome, not to themed game stages.
 | CSV import | Yes | Yes | Yes |
 | Games | Starter set (about 1/3 of games) | All games | All games |
 | Activity templates | Most | All | All |
-| Team board (no devices) | Yes | Yes | Yes |
-| Live join-code sessions | Small class cap | Full class | Full class |
+| Mode 2 Class Show (one screen) | Yes | Yes | Yes |
+| Mode 3 Solo | Yes | Yes | Yes |
+| Mode 4 Versus (shared device, vs CPU) | Yes | Yes | Yes |
+| Mode 4 Versus on two devices | No | Yes | Yes |
+| Mode 1 Class Live (join code) | Small class cap | Full class | Full class |
 | Homework / assignment links | Limited | Unlimited | Unlimited |
 | Themes | 3 house themes | Full library + Theme Builder | + school brand theme |
 | Reports | Last session only | Per-student history, per-question log, export | + admin view |
@@ -316,11 +363,13 @@ Design consequences (cheap now, expensive to retrofit):
                               |
                        Question picker
                               |
-   +-----------+--------------+---------------+
-   |           |                              |
- Solo arcade  Activity templates        Live class games
-   |           |                              |
-   +-----------+---- Game module contract ----+
+        +---------------------+---------------------+
+        |                                           |
+  "Own game" engine                          "Take turns" engine
+  Mode 3 Solo                                Mode 2 Class Show
+  Mode 1 Class Live (+ host screen)          Mode 4 Versus (teams,
+        |                                     students or CPU)
+        +---------- Game module contract ----------+
                               |
      Shared question screen + round settings + rewards/report
                               |
@@ -331,7 +380,8 @@ Design consequences (cheap now, expensive to retrofit):
 
 **Game module contract** (every game is a plug-in that declares):
 - `id`, display name, icon, short description
-- play shapes supported (solo / activity / live-team / live-join)
+- play modes supported (1 Class Live / 2 Class Show / 3 Solo / 4 Versus)
+- for Versus: whether it has a CPU player and its difficulty levels
 - question types supported
 - settings (rounds, questions per break, anything game-specific)
 - skin slots it uses from the theme
@@ -354,7 +404,8 @@ game only decides *when to ask* and *what a right answer does*.
 - Question bank editor + CSV import (CSV import already exists)
 - Shared question screen, picker, round settings, results screen
 - Theme engine with 3 house themes and skin slots
-- Team board, Match up, one arcade game
+- Modes 2, 3 and 4 (shared device + CPU): none need a server
+- Peg Drop, Team Board, Match Up
 - Accessibility core: read-aloud, calm mode, reading comfort, text size
 - Three-Lens testing on iPad for each
 
@@ -365,7 +416,8 @@ game only decides *when to ask* and *what a right answer does*.
 - Privacy policy, Terms, DMCA agent in place **before** launch
 
 **Phase 3: Live + schools**
-- Join-code live sessions with teacher leaderboard
+- Mode 1 Class Live: join codes, host screen, live leaderboard
+- Mode 4 Versus on two devices (same real-time server)
 - Reports, per-question logs, export
 - School/district plans, purchase orders, DPA signing, VPAT
 - Class-designed themes, curated VLN content packs
@@ -386,5 +438,8 @@ game only decides *when to ask* and *what a right answer does*.
 4. **Themes scope**: game stage only, chrome stays branded? (Claudia: yes)
 5. **Accounts**: the current rule is "no auth." Selling needs teacher
    accounts in Phase 2. Students stay account-free (code + nickname). OK?
-6. **Free tier generosity**: generous free tier to grow (Claudia's lean),
+6. **Class Live timing**: Mode 1 needs a real-time server, so it is
+   planned for Phase 3. It is also the Blooket-style headline feature.
+   Pull it forward to Phase 2 if it matters most for selling?
+7. **Free tier generosity**: generous free tier to grow (Claudia's lean),
    or tighter free tier to convert faster?
