@@ -642,12 +642,12 @@ Competitor cross-comparison and the reasoning behind each line:
 |---|---|---|---|---|
 | Teacher account (log in, saves your work) | Yes | Yes | Yes | Yes |
 | Classrooms | **1** | **3** | **Unlimited** | Unlimited, school-wide |
-| Students per classroom | **Up to 20** | Proposed 40 | Proposed 60+ | Proposed 60+ |
+| Students per classroom | **Up to 30** (decided 2026-10-24) | Proposed 40 | Proposed 60+ | Proposed 60+ |
 | Own question sets saved | **3** | Unlimited | Unlimited | Unlimited + shared school library |
 | Public question sets (published by others) | Use any | Use any, publish your own | Use any, publish your own | Same |
 | CSV import | Yes (counts toward the 3) | Yes | Yes | Yes |
 | Games | **Free games only** (a set list) | All games | All games | All games |
-| Modes in the games you can use | All four (Class Live up to your 20 students) | All four | All four | All four |
+| Modes in the games you can use | All four (Class Live up to your 30 students) | All four | All four | All four |
 | Themes | **Preview only**, not playable; house default theme only | Full theme library, playable | Full library + **Theme Builder** | + school brand theme |
 | **XP and shop** (section 4F) | **No**, and students never see it | **Yes** | **Yes** | Yes |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
@@ -900,8 +900,7 @@ game only decides *when to ask* and *what a right answer does*.
    Mirror and the live monitor + Lock button all need it. Share Mirror is an accessibility feature,
    which is a reason to bring the server forward to Phase 2.
 9. **Free tier limits** (your tiers are set; three numbers to confirm):
-   - 20 students in the free classroom is below Blooket's 60 free
-     players and below many class sizes. Keep 20, or 30?
+   - ~~Free classroom size~~ DECIDED 2026-10-24: **30 students**.
    - Students per classroom on Plus and Pro (Claudia proposes 40 and 60+).
    - Prices: about $60/yr for Plus and $108/yr for Pro, in line with the
      market (`docs/competitor-plans-research.md`).

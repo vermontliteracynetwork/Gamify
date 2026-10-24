@@ -84,7 +84,7 @@ and product plan 4F):
 | | Gamify Free | Gamify Plus (mid) | Gamify Pro (top) | Typical competitor |
 |---|---|---|---|---|
 | Classrooms | 1 | 3 | Unlimited | Usually not limited |
-| Students | Up to 20 in the classroom | Proposed 40 per classroom | Proposed 60+ per classroom | Free live caps run 10 to 60 |
+| Students | Up to 30 in the classroom | Proposed 40 per classroom | Proposed 60+ per classroom | Free live caps run 10 to 60 |
 | Own question sets saved | 3, plus every public set | Unlimited | Unlimited | Wordwall 3; Wayground 20; others unlimited |
 | Games | Free games only | All games | All games | Free tiers usually get several modes |
 | Themes | Preview only (not playable) | Full library, playable | Full library + **Theme Builder** | Rare in competitors: a Gamify differentiator |
@@ -102,10 +102,9 @@ and product plan 4F):
 - Reports on every game, modeled on a real teacher's data workflow.
 
 ### Where Gamify's plan is weaker (decisions for you)
-- **20 students free** is below Blooket's 60-player free live games, and
-  many US classes run above 20. A teacher with 24 students can't use the
-  free classroom for their whole class. Option: 30 students free, still 1
-  classroom.
+- **Free classroom size: decided at 30 students** (2026-10-24). It
+  was 20, which would have shut out many full classes. 30 covers most
+  classes, though it's still below Blooket's 60-player free live games.
 - **XP paid-only** while Blooket gives collectibles free: students in free
   classes may prefer the competitor. The upside is real: student demand
   for XP pushes teachers to upgrade, which is why it's a strong paid
