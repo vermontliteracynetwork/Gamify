@@ -325,7 +325,7 @@ make or sell on Gamify must be original or licensed (section 6).
 The free/default look is deliberately plain: flat colors, one simple
 pattern, clean shapes, built from code with no purchased illustration.
 That makes the library feel like an upgrade and makes designing your own
-(and using community themes) the exciting part. Bought art goes to Pals,
+(and using community themes) the exciting part. Bought art goes to
 avatar items, a few game pieces and library accents. Details:
 `docs/development-plan.md` Part 2.
 
@@ -343,56 +343,12 @@ students and keeps the brand recognizable. This also resolves the conflict
 with the "dark theme, locked, one accent" rule in `CLAUDE.md`: that rule
 would apply to chrome, not to themed game stages.
 
-## 4F. XP and the shop (paid plans)
+## 4F. XP, shop and Pals: removed (2026-10-24)
 
-Direct from you (2026-10-24): students earn in-game XP over time and spend
-it, the way Blooket students collect "Blooks." **Paid plans only (Plus and
-Pro).** Gamify's collectibles need their own original name and art (never
-"Blooks"); working name: **Gamify Pals**.
-
-### How students earn XP
-- Playing any game in a paid teacher's classroom: XP for right answers and
-  for finishing games and assignments. Wrong answers never take XP away.
-- Daily cap so XP rewards regular practice, not marathon grinding (Blooket
-  reportedly caps daily tokens too).
-- Bonus XP the teacher can give (great effort, kindness, finished
-  assignment) and XP events (double-XP Friday).
-- XP adds up over time and follows the student across every game in that
-  classroom.
-
-### What XP buys (looks, never advantages)
-- **Pals** (collectible characters) to show on the student's profile, in
-  the lobby and as their game piece.
-- Avatar items (outfits, hats, accessories, including culturally diverse
-  options, section 4A equity).
-- Game skins for their player piece in specific games.
-- Titles, badges, name banners, lobby celebrations.
-- **No gameplay advantage**: XP items never make a student score more or
-  win more.
-
-### How the shop works
-- **Shop with fixed prices** as the main way to get items: the student
-  always knows what they're getting.
-- **Optional mystery eggs**, bought only with earned XP, with the odds
-  shown, and a teacher switch to turn them off. Never sold for money.
-  (Surprise is engaging, `docs/gamified-learning-research.md` 2.3, but
-  random paid rewards are banned by principle 3.)
-- New items rotate in weekly and with seasons and themes.
-
-### Teacher controls
-- XP on/off for the classroom, shop open/closed (e.g. closed during
-  lessons), mystery eggs on/off, daily cap.
-- Give or adjust XP, reset a classroom at the end of the year.
-- XP shown in reports (earned per game, per day) as an engagement measure.
-
-### Rules
-- **Students in free classrooms never see XP, the shop, Pals or locked
-  items.** No teasers, no "upgrade" prompts to children.
-- Every student in a paid classroom gets the same access; nobody can buy
-  more.
-- XP needs a lasting student identity (the class list), so XP is stored
-  with the student's roster entry, not an email account; the teacher can
-  delete it any time (privacy, section 6.6).
+Direct from you: "delete xp/shop/pals in general from the game. not doing
+that right now." No XP, shop, Pals or collectibles anywhere. If it comes
+back later, the earlier design (cosmetic only, invisible in free classes,
+never sold to students) is in this file's git history.
 
 ## 4A. Settings on every game, on every device (accessibility, free)
 
@@ -691,13 +647,12 @@ requests. Build checklist: development plan Stage 7B.
    prices or "buy" messages.** All purchasing happens on teacher pages
    only. The one deliberate exception (your decision, 2026-10-24): free
    students see locked game covers in the Arcade, as a quiet lock icon
-   only, so wanting a game becomes a conversation with the teacher. XP,
-   the shop and Pals stay invisible in free classrooms. (Background: the
+   only, so wanting a game becomes a conversation with the teacher.
+   (Background: the
    2021 FTC complaint against a kids' math game, see
    `docs/competitor-plans-research.md` section 3.)
 3. **No real money, loot boxes or random paid rewards anywhere.** In-game
-   rewards (XP) are earned by playing and answering, never bought by
-   students or families. XP is a feature of the teacher's paid plan.
+   rewards are earned by playing and answering, never bought.
 4. **Paywall teacher breadth, customization and insight**: more games,
    themes, reports, bigger live sessions, assignments.
 
@@ -716,7 +671,6 @@ Competitor cross-comparison and the reasoning behind each line:
 | Games | **Free games only** (a set list) | All games | All games | All games |
 | Modes in the games you can use | All four (Class Live up to your 30 students) | All four | All four | All four |
 | Themes | Classic only; others preview only; try the Theme Builder on one game (developer's pick) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
-| **XP and shop** (section 4F) | **No**, and students never see it | **Yes** | **Yes** | Yes |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
 | Question sets assigned at a time, per student (class and/or individual) | **1** | **5** | Unlimited | Unlimited |
@@ -725,14 +679,14 @@ Competitor cross-comparison and the reasoning behind each line:
 | Reports | Report for every game played (all views, CSV, print), 30 days of history | Full history | Full history, trends, PDF/Sheets export | + school and admin views |
 | Names, approval, rename, remove player, bad-word filter, teams | **All** | All | All | All |
 | Accessibility settings (4A) and Share Mirror (4D) | **All, free** | All | All | All |
-| Price (set by you, 2026-10-24) | $0 | About $8/mo billed yearly ($96/yr) | About $15/mo billed yearly ($180/yr) | Per-teacher seats with volume discounts (see the live plan doc) |
+| Price (set by you, 2026-10-24) | $0 | About $8/mo billed yearly ($96/yr) | About $15/mo billed yearly ($180/yr) | Per-teacher Pro seats: 5-9 $162, 10-24 $144, 25+ $126 each; districts quoted; POs yearly, prepaid, net 30, 5-seat minimum |
 | Privacy paperwork | Standard terms | Standard terms | Standard terms | Signed data privacy agreement |
 
 Notes:
 - Removing or renaming a player and the bad-word filter stay free, so a
   free teacher can still handle an inappropriate name without the Lock
   button.
-- In free classrooms the XP shop and themes are not shown to students.
+- In free classrooms themes are not shown to students.
   Paid games appear in the Arcade with a lock on the cover and can't be
   tapped (principle 2's one exception). Teachers see previews and upgrade
   options on their own pages.
@@ -934,7 +888,6 @@ game only decides *when to ask* and *what a right answer does*.
 **Phase 2: Teacher accounts + Plus/Pro**
 - Classrooms and class lists, tier limits (classrooms, students, 3 saved
   sets), public question set library
-- XP and the shop (Pals, avatar items) for paid classrooms
 - Teacher sign-in, saved sets in the cloud, assignments with code, direct
   link and Share to Google Classroom
 - Billing and plans, Pro theme library, Theme Builder
@@ -968,7 +921,7 @@ game only decides *when to ask* and *what a right answer does*.
 4. **Themes scope**: game stage only, chrome stays branded? (Claudia: yes)
 5. **Accounts**: teachers log in (all tiers, so free users can save their
    3 sets and 1 classroom). Students have no email accounts: they are
-   entries on the teacher's class list (needed for XP over time) and join
+   entries on the teacher's class list (needed for reports over time) and join
    by code. OK?
 6. **Class Live timing**: Mode 1 needs a real-time server, so it is
    planned for Phase 3. It is also the Blooket-style headline feature.
@@ -1007,7 +960,7 @@ start to build?" Claudia's gap review of everything above.
    a multiple-choice question becomes a match pair) or "one set, every
    game" breaks. Also images, audio, math notation and alt text.
 2. **How a student proves who they are** on a shared iPad without an
-   account. XP, reports, the Lock and now the **student Arcade sign-in**
+   account. Reports, the Lock and now the **student Arcade sign-in**
    all depend on it. Picking your name
    from a list lets a student pick a classmate's name. Options: a picture
    password per student, a printed QR login badge, or a short personal
@@ -1028,7 +981,7 @@ start to build?" Claudia's gap review of everything above.
 5. **Smallest sellable version (MVP) and a target date.** Back-to-school
    (August) is when teachers try new tools. Work backward: which games,
    modes and tiers must exist on day one, and what waits.
-6. **Who builds the art and sound.** 20+ games, house themes, Pals and
+6. **Who builds the art and sound.** 20+ games, house themes and
    avatar items need a lot of original art. Decide: commissioned artists
    (with work-for-hire contracts), a style guide so everything looks like
    one product, and a budget. Background music needs licensed tracks.
@@ -1131,9 +1084,9 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 24 | **"Watch every answer as it happens."** Live monitor shows who's stuck, who's guessing and how long each question takes. | Real-time formative assessment | Teacher, 2026-10-24; section 4E |
 | 25 | **"Assign in seconds: link, code, or Google Classroom."** | Fits how teachers already hand out work | Teacher, 2026-10-24; Mode 3 |
 | 26 | **"Projector-safe."** The code screen shows only the code; student data stays on your device. | Privacy in front of the class | Section 4E |
-| 27 | **"Collect Pals with every right answer."** | The student-pull feature that gets kids asking their teacher to play | Teacher, 2026-10-24; section 4F |
+| 27 | ~~"Collect Pals with every right answer."~~ (removed with XP, 2026-10-24) | The student-pull feature that gets kids asking their teacher to play | Teacher, 2026-10-24; section 4F |
 | 28 | **"We never advertise to your students."** No upgrade prompts, no locked items, no ads, ever, on any plan. | Trust with teachers, parents and districts; a contrast with criticized competitors (without naming them) | Section 5 principle 2 |
-| 29 | **"Looks, not advantages."** XP buys style, never a better score. | Fairness parents and teachers care about | Section 4F |
+| 29 | ~~"Looks, not advantages."~~ (removed with XP, 2026-10-24) | Fairness parents and teachers care about | Section 4F |
 | 30 | **"Free forever: one classroom, every accessibility feature, and up to 10 teams on one screen."** | A generous, honest free tier headline | Section 5 |
 | 31 | **"Your class designs the game."** Download the game's template, draw it with markers and paint, scan it with an iPad, and play it. | Hero feature for marketing: a photo of kids painting next to the same art in the game sells itself | Teacher, 2026-10-24; section 4 Theme Builder |
 | 32 | **"Designed by Room 12."** Every class-made theme carries its designers' credit. | Pride and ownership; shareable moments for families and school social media | Section 4 Theme Builder |
@@ -1172,7 +1125,7 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 14 | **Morning Work That Runs Itself** | Students sign in to their Arcade during arrival and practice the week's sets. | Arcade, picture password sign-in | K-5 |
 | 15 | **Teams Your Way: Breakout-Room Style Grouping** | Random, balanced or hand-picked teams; saving reading groups for reuse. | Team assignment, saved team sets | All grades |
 | 16 | **Student Co-Designers: Kids Shape the Games They Play** | How classes gave feedback and designed features (Junior Designers plan); descriptive writing and design thinking. | Theme Builder, junior designers | Grades 3-6 |
-| 17 | **Collect Pals, Build Habits** | Using XP and the shop for steady practice, daily caps, closing the shop during lessons. | XP, shop, teacher controls | Paid classrooms |
+| 17 | ~~Collect Pals, Build Habits~~ (removed with XP) | Using XP and the shop for steady practice, daily caps, closing the shop during lessons. | XP, shop, teacher controls | Paid classrooms |
 | 18 | **Bilingual Review Games** | Writing bilingual question sets and switching menus and read-aloud to Spanish. | Language settings, read-aloud | ELL and dual-language classrooms |
 | 19 | **Make a School-Spirit Theme** | School colors and mascot theme for spirit week, shared with the whole school. | Theme Builder, share to school | Schools, admins |
 | 20 | **Why Wrong Answers Cost Nothing in Gamify** | The research on low-stakes practice, feedback and "Let's look back." | Question engine, research brief | Teachers, parents, admins |

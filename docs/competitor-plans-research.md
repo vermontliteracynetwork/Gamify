@@ -67,6 +67,8 @@ Representative Castor asked the FTC to investigate; critics described
 classrooms where "members sail around on a cloud, while non-members
 literally tromp in the dirt."
 
+> **Update 2026-10-24:** XP, the shop and Pals were removed from Gamify for now (teacher decision). The lesson below still applies to the locked game covers and to anything like it later.
+
 **Lesson for Gamify's paid-only XP:** the risk isn't that XP is paid, it's
 *children seeing what they're missing*. Gamify's design (section 4 below
 and product plan 4F):

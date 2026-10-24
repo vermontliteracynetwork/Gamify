@@ -17,7 +17,6 @@ export interface TierLimits {
   // Free: try the builder on one game the developer picks. Plus: one
   // design per game. Pro: unlimited designs (teacher, 2026-10-24).
   themeBuilder: 'trial' | 'one-per-game' | 'unlimited';
-  xp: boolean;
   liveMonitorAndLock: boolean;
   reportHistoryDays: number;
 }
@@ -27,23 +26,39 @@ const UNLIMITED = Number.POSITIVE_INFINITY;
 export const TIERS: Record<Tier, TierLimits> = {
   free: {
     classrooms: 1, studentsPerClassroom: 30, savedQuestionSets: 3, assignedSetsPerStudent: 1,
-    allGames: false, themesPlayable: false, themeBuilder: 'trial', xp: false, liveMonitorAndLock: false,
+    allGames: false, themesPlayable: false, themeBuilder: 'trial', liveMonitorAndLock: false,
     reportHistoryDays: 30,
   },
   plus: {
     classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
-    allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', xp: true, liveMonitorAndLock: true,
+    allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true,
     reportHistoryDays: UNLIMITED,
   },
   pro: {
     classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
-    allGames: true, themesPlayable: true, themeBuilder: 'unlimited', xp: true, liveMonitorAndLock: true,
+    allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true,
     reportHistoryDays: UNLIMITED,
   },
 };
 
 // Placeholders: nothing charges until Stage 7 is approved.
 export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180 };
+
+// School plans: per-teacher Pro seats with volume discounts; purchase
+// orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).
+export const SCHOOL_MIN_SEATS = 5;
+export const SCHOOL_SEAT_DISCOUNTS: { minSeats: number; discount: number }[] = [
+  { minSeats: 25, discount: 0.3 },
+  { minSeats: 10, discount: 0.2 },
+  { minSeats: 5, discount: 0.1 },
+];
+
+export function schoolQuote(seats: number): { perSeat: number; total: number } | null {
+  if (seats < SCHOOL_MIN_SEATS) return null;
+  const { discount } = SCHOOL_SEAT_DISCOUNTS.find((d) => seats >= d.minSeats)!;
+  const perSeat = Math.round(PRICES_USD_PER_YEAR.pro * (1 - discount));
+  return { perSeat, total: perSeat * seats };
+}
 
 // Games playable on the Free plan (game ids from the registry). Not capped
 // at four: new free games are added over time (teacher, 2026-10-24).

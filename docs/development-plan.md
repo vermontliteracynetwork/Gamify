@@ -95,7 +95,7 @@ Rules for house themes:
   not from the house look.
 
 Art the teacher buys (shopping list per stage below) goes to the things
-simple shapes can't do well: **Pals, avatar items, a few game pieces and
+simple shapes can't do well: **avatar items, a few game pieces and
 library theme accents**. Every purchase gets a line in
 `docs/asset-ledger.md` with its license.
 
@@ -277,7 +277,7 @@ own iPads by link and by code, answers land in the teacher's reports.
 **Done when:** a 30-device live game runs with no lag or lost answers,
 lock works through refresh and rejoin, mirror stays in sync.
 
-### Stage 7: Paid plans, themes and XP (start earning)
+### Stage 7: Paid plans and themes (start earning)
 **Goal:** Plus and Pro can be bought and are worth buying.
 
 - [!] **Teacher needed:** Stripe account, final prices, the business
@@ -286,7 +286,7 @@ lock works through refresh and rejoin, mirror stays in sync.
 - [ ] Stripe checkout, monthly and yearly, customer portal, receipts;
       school purchase-order request form.
 - [ ] Tier enforcement everywhere from config (classrooms, students, saved
-      sets, assigned sets, games, themes, XP, monitor/Lock, report
+      sets, assigned sets, games, themes, monitor/Lock, report
       history).
 - [ ] Theme library (Plus): the simple library themes playable; previews
       for Free.
@@ -296,12 +296,9 @@ lock works through refresh and rejoin, mirror stays in sync.
       fonts, sounds, cover, teacher approval, student design mode,
       "Designed by Room 12" credit, share to class / school / public
       gallery (reviewed).
-- [ ] **XP and shop (paid classrooms)**: earning rules and daily cap,
-      shop with fixed prices, optional mystery eggs (XP only, odds shown,
-      teacher switch), teacher controls; invisible in free classrooms.
 - [ ] Remaining games to reach launch roster (Part 4).
 
-**Art to buy:** first set of **Pals** (about 20-30 characters), **avatar
+**Art to buy:** **avatar
 items** (skin tones, hair, head coverings, glasses, hearing aids,
 wheelchairs, outfits), **library theme accent pieces**. Specs (sizes,
 file types) will be written per item before purchase.
