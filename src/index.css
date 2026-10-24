@@ -166,3 +166,15 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 .gamify-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 36px; height: 36px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider:focus-visible { outline: 3px solid var(--border); outline-offset: 4px; }
+
+/* Printable theme templates (src/theme/builder): one sheet per page. */
+@media print {
+  @page { size: letter; margin: 0; }
+  header, .no-print { display: none !important; }
+  body, .min-h-dvh { background: #fff !important; }
+  .template-page { border: 0 !important; border-radius: 0 !important; break-after: page; width: 8.5in; height: 11in; }
+  .template-page:last-child { break-after: auto; }
+  .template-sheet { width: 8.5in; height: 11in; display: block; }
+  main { padding: 0 !important; max-width: none !important; }
+  main > .grid { gap: 0 !important; }
+}

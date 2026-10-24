@@ -33,6 +33,8 @@ export interface ThemePieceSpec {
   height: number;
   // Shown on the template so students know what they're drawing.
   hint: string;
+  // The Classic color a theme can change (pieces without one are art only).
+  color?: string;
 }
 
 // What a theme puts in a piece: a flat color (house themes) or artwork.

@@ -10,6 +10,9 @@ import GameShow from './games/game-show/GameShow';
 import BakeryMatch from './games/bakery-match/BakeryMatch';
 import FourInARow from './games/four-in-a-row/FourInARow';
 import { SettingsProvider } from './settings/SettingsContext';
+import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
+import TemplatePage from './theme/builder/TemplatePage';
+import OwnerPage from './owner/OwnerPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -35,6 +38,12 @@ function AnimatedRoutes() {
           <Route path="/teacher/sets/import" element={<ImportPage />} />
           <Route path="/teacher/sets/:id" element={<SetEditorPage />} />
           <Route path="/teacher/library/:id" element={<SetEditorPage library />} />
+          <Route path="/teacher/themes" element={<ThemeBuilderPage />} />
+          <Route path="/teacher/themes/:gameId" element={<ThemeBuilderPage />} />
+          <Route path="/teacher/themes/:gameId/template" element={<TemplatePage />} />
+          <Route path="/owner" element={<OwnerPage />} />
+          <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
+          <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
@@ -66,7 +75,7 @@ function AmbientBackground() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className="no-print fixed inset-0 -z-10 pointer-events-none"
       style={{
         backgroundColor: 'var(--color-bg)',
         backgroundImage: `url("data:image/svg+xml,${SWIRL_SVG}")`,

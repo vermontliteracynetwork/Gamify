@@ -17,7 +17,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
-import { pieceColor } from '../../theme/library';
+import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
@@ -30,8 +30,8 @@ export const bakeryMatchManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `tile-${i}`, label: `Treat ${i + 1}`, width: 128, height: 128, hint: 'One of the six treats you match' })),
-    { id: 'board', label: 'Board', width: 900, height: 900, hint: 'The tray the treats sit on' },
+    ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `tile-${i}`, label: `Treat ${i + 1}`, width: 128, height: 128, hint: 'One of the six treats you match', color: ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'][i] })),
+    { id: 'board', label: 'Board', width: 900, height: 900, hint: 'The tray the treats sit on', color: '#ffffff' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
@@ -168,7 +168,7 @@ export default function BakeryMatch() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={bakeryMatchManifest} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={bakeryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
@@ -187,13 +187,13 @@ export default function BakeryMatch() {
                 options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
             </>
           ) },
-          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 
       {(phase === 'play' || phase === 'end') && (
         <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
-          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ background: pieceColor(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 220px), 640px)' }}>
+          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 220px), 640px)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => row.map((tileItem, c) => {
                 const key = `${r},${c}`;
@@ -216,9 +216,9 @@ export default function BakeryMatch() {
                     animate={popping.has(key) ? { scale: [1, 1.25, 0], opacity: [1, 1, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : { scale: 1, opacity: 1, y: 0, x: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 32, opacity: { duration: 0.2 } }}
                     className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}
-                    style={{ background: pieceColor(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind]) }}
+                    style={pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])}
                   >
-                    <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />
+                    {!pieceImage(theme, `tile-${tileItem.kind}`) && <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />}
                   </motion.button>
                 );
               }))}

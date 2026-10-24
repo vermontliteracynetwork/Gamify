@@ -7,7 +7,7 @@ import { hashPin, PIN_KEY } from './pin';
 
 // Number pad that asks for the teacher's 4-digit PIN. The first time, the
 // teacher chooses one (typed twice). Unlocks until the settings close.
-export default function PinGate({ onUnlock }: { onUnlock: () => void }) {
+export default function PinGate({ onUnlock, pinKey = PIN_KEY, createLabel }: { onUnlock: () => void; pinKey?: string; createLabel?: string }) {
   const [saved, setSaved] = useState<string | null | undefined>(undefined);
   const [stage, setStage] = useState<'enter' | 'create' | 'confirm'>('enter');
   const [first, setFirst] = useState('');
@@ -15,15 +15,15 @@ export default function PinGate({ onUnlock }: { onUnlock: () => void }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    data.getSetting<string>(PIN_KEY).then((h) => { setSaved(h ?? null); setStage(h ? 'enter' : 'create'); });
-  }, []);
+    data.getSetting<string>(pinKey).then((h) => { setSaved(h ?? null); setStage(h ? 'enter' : 'create'); });
+  }, [pinKey]);
 
   async function complete(pin: string) {
     if (stage === 'create') { setFirst(pin); setDigits(''); setStage('confirm'); setError(''); return; }
     if (stage === 'confirm') {
       if (pin !== first) { setError(t('pin.mismatch')); setDigits(''); setStage('create'); return; }
       const h = await hashPin(pin);
-      await data.setSetting(PIN_KEY, h);
+      await data.setSetting(pinKey, h);
       setSaved(h);
       onUnlock();
       return;
@@ -41,13 +41,13 @@ export default function PinGate({ onUnlock }: { onUnlock: () => void }) {
   }
 
   if (saved === undefined) return null;
-  const title = stage === 'create' ? t('pin.create') : stage === 'confirm' ? t('pin.confirm') : t('pin.enter');
+  const title = stage === 'create' ? createLabel ?? t('pin.create') : stage === 'confirm' ? t('pin.confirm') : t('pin.enter');
 
   return (
     <div className="grid gap-4 justify-items-center py-2">
       <LockSimple weight="fill" size={40} aria-hidden="true" />
       <p className="font-display text-xl font-bold text-center">{title}</p>
-      {stage === 'create' && <p className="text-sm font-bold text-center max-w-xs">{t('pin.createNote')}</p>}
+      {stage === 'create' && !createLabel && <p className="text-sm font-bold text-center max-w-xs">{t('pin.createNote')}</p>}
       <motion.div className="flex gap-3" animate={error ? { x: [0, -8, 8, -5, 5, 0] } : undefined} aria-label={t('pin.entered', { count: digits.length })} role="img">
         {[0, 1, 2, 3].map((i) => (
           <span key={i} className={`w-5 h-5 rounded-full border-[2.5px] border-border ${i < digits.length ? 'bg-border' : 'bg-surface'}`} />

@@ -16,7 +16,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
-import { pieceColor } from '../../theme/library';
+import { pieceColor, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
 
@@ -28,7 +28,7 @@ export const starQuizManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Sky', width: 1600, height: 1000, hint: 'The sky behind the stars' },
-    { id: 'star', label: 'Star', width: 128, height: 128, hint: 'What you collect for each right answer' },
+    { id: 'star', label: 'Star', width: 128, height: 128, hint: 'What you collect for each right answer', color: '#f6c544' },
   ],
   rounds: { label: 'Questions', min: 5, max: 30, default: 10 },
   hasCpu: false,
@@ -76,7 +76,7 @@ export default function StarQuiz() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'welcome' && (
-        <GameWelcome game={starQuizManifest} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('practice.how1') },
           { icon: <Star weight="fill" size={22} />, text: t('practice.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('practice.how3') },
@@ -89,7 +89,7 @@ export default function StarQuiz() {
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
           ) },
-          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 
@@ -102,7 +102,7 @@ export default function StarQuiz() {
           <div className="flex flex-wrap gap-2 min-h-14" aria-label={t('practice.stars', { count: stars })} role="img">
             {Array.from({ length: total }, (_, i) => (
               <motion.span key={i} initial={false} animate={i < stars ? { scale: [0.4, 1.25, 1] } : { scale: 1 }} transition={{ duration: 0.4 }}>
-                <Star weight={i < stars ? 'fill' : 'regular'} size={44} className={i < stars ? 'drop-shadow' : 'text-border-soft'} style={i < stars ? { color: pieceColor(theme, 'star', '#f6c544') } : undefined} />
+                {i < stars && pieceImage(theme, 'star') ? <img src={pieceImage(theme, 'star')} alt="" className="w-11 h-11 object-contain" /> : <Star weight={i < stars ? 'fill' : 'regular'} size={44} className={i < stars ? 'drop-shadow' : 'text-border-soft'} style={i < stars ? { color: pieceColor(theme, 'star', '#f6c544') } : undefined} />}
               </motion.span>
             ))}
           </div>

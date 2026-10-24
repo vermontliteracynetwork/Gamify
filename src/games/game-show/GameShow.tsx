@@ -23,7 +23,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
-import { pieceColor } from '../../theme/library';
+import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
 import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
@@ -36,8 +36,8 @@ export const gameShowManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1920, height: 1080, hint: 'Behind the whole board' },
-    { id: 'card-back', label: 'Card back', width: 300, height: 220, hint: 'The front of each surprise card before it flips' },
-    { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid' },
+    { id: 'card-back', label: 'Card back', width: 300, height: 220, hint: 'The front of each surprise card before it flips', color: '#fbdb6b' },
+    { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid', color: '#fbdb6b' },
     { id: 'trophy', label: 'Winner trophy', width: 400, height: 400, hint: 'Shown on the winner screen' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
@@ -242,7 +242,7 @@ export default function GameShow() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={gameShowManifest} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
           { icon: <UsersThree weight="fill" size={22} />, text: t('tb.how1') },
           { icon: <CheckCircle weight="fill" size={22} />, text: t('tb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('tb.how3') },
@@ -278,7 +278,7 @@ export default function GameShow() {
           { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
-          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 
@@ -308,7 +308,7 @@ export default function GameShow() {
                     transition={{ duration: 0.35 }}
                     className={`${cards.length > 12 ? 'aspect-[3/2]' : 'aspect-[4/3]'} rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
                       ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
-                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : { background: pieceColor(theme, 'card-back', '#fbdb6b') }) }}
+                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fbdb6b')) }}
                   >
                     {c.open ? (
                       <span className="grid justify-items-center gap-1">
@@ -335,7 +335,7 @@ export default function GameShow() {
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
                         className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
-                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', background: pieceColor(theme, 'square', '#fbdb6b') }) }}>
+                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fbdb6b') }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
@@ -346,7 +346,9 @@ export default function GameShow() {
 
             {phase === 'end' && (
               <ResultsModal title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
-                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')} />
+                missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('setup')}>
+                {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt={t('tb.trophy')} className="h-32 object-contain justify-self-center" />}
+              </ResultsModal>
             )}
           </section>
 

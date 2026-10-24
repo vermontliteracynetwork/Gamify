@@ -19,7 +19,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
-import { pieceColor } from '../../theme/library';
+import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
 import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
@@ -32,7 +32,7 @@ export const fourInARowManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'board', label: 'Board', width: 1000, height: 860, hint: 'The frame with holes' },
+    { id: 'board', label: 'Board', width: 1000, height: 860, hint: 'The frame with holes', color: '#a8d8f0' },
     { id: 'piece-1', label: 'Player 1 piece', width: 128, height: 128, hint: 'The first player\'s round piece' },
     { id: 'piece-2', label: 'Player 2 piece', width: 128, height: 128, hint: 'The second player\'s round piece' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
@@ -116,8 +116,8 @@ export default function FourInARow() {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
     return (
-      <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, background: pieceColor(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
-        <Icon weight="fill" className="w-1/2 h-1/2" color="#241c3d" aria-hidden="true" />
+      <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, ...pieceFill(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
+        {!pieceImage(theme, `piece-${who}`) && <Icon weight="fill" className="w-1/2 h-1/2" color="#241c3d" aria-hidden="true" />}
       </span>
     );
   };
@@ -131,7 +131,7 @@ export default function FourInARow() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={fourInARowManifest} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('fr.how1') },
           { icon: <ArrowFatDown weight="fill" size={22} />, text: t('fr.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('fr.how3') },
@@ -151,7 +151,7 @@ export default function FourInARow() {
               <Slider label={t('fr.perTurn')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
             </>
           ) },
-          { id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> },
+          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 
@@ -171,7 +171,7 @@ export default function FourInARow() {
             )}
           </div>
 
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ background: pieceColor(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 340px) * 7 / 6), 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 340px) * 7 / 6), 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;

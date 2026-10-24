@@ -1,54 +1,26 @@
 import { classicTheme } from './classic';
 import type { GameTheme } from './types';
 
-// Simple library themes, built from code (no bought art), one copy per game
-// because themes are per game. Each game reads only the pieces it declares.
-
-type PieceColors = Record<string, string>;
-
-const SPACE_PIECES: Record<string, PieceColors> = {
-  'bakery-match': { board: '#1d1b4f', 'tile-0': '#ffd166', 'tile-1': '#ef7dc4', 'tile-2': '#7ad3f5', 'tile-3': '#f7a072', 'tile-4': '#c3f584', 'tile-5': '#b9a3ff' },
-  'four-in-a-row': { board: '#2b2a6b', 'piece-1': '#ffd166', 'piece-2': '#7ad3f5' },
-  'game-show': { 'card-back': '#7ad3f5', square: '#b9a3ff' },
-  'star-quiz': { star: '#ffd166' },
-};
-const GARDEN_PIECES: Record<string, PieceColors> = {
-  'bakery-match': { board: '#e8f5d8', 'tile-0': '#f6c445', 'tile-1': '#f28fad', 'tile-2': '#8fd3c1', 'tile-3': '#f4a259', 'tile-4': '#b8e08a', 'tile-5': '#c8a2e8' },
-  'four-in-a-row': { board: '#8cc47a', 'piece-1': '#f28fad', 'piece-2': '#f6c445' },
-  'game-show': { 'card-back': '#b8e08a', square: '#f6c445' },
-  'star-quiz': { star: '#f28fad' },
-};
-
-const asPieces = (colors: PieceColors = {}) => Object.fromEntries(Object.entries(colors).map(([k, color]) => [k, { color }]));
-
-export function spaceTheme(gameId: string): GameTheme {
-  return {
-    id: `${gameId}:space`, gameId, name: 'Space', source: 'library',
-    colors: { background: '#15143a', backgroundText: '#ffffff', surface: '#ffffff', text: '#1b1838', accent: '#ffd166', accentText: '#1b1838', success: '#1f7a45', miss: '#9b2c3a' },
-    fonts: { display: 'Baloo 2', body: 'Inclusive Sans' },
-    backdrop: { kind: 'pattern', pattern: 'dots' },
-    celebration: 'stars',
-    pieces: asPieces(SPACE_PIECES[gameId]),
-  };
-}
-
-export function gardenTheme(gameId: string): GameTheme {
-  return {
-    id: `${gameId}:garden`, gameId, name: 'Garden', source: 'library',
-    colors: { background: '#cfe9b8', backgroundText: '#22331b', surface: '#ffffff', text: '#22331b', accent: '#f6c445', accentText: '#22331b', success: '#1f7a45', miss: '#9b2c3a' },
-    fonts: { display: 'Baloo 2', body: 'Inclusive Sans' },
-    backdrop: { kind: 'pattern', pattern: 'checks' },
-    celebration: 'bubbles',
-    pieces: asPieces(GARDEN_PIECES[gameId]),
-  };
-}
-
-export function themesFor(gameId: string): GameTheme[] {
-  return [classicTheme(gameId), spaceTheme(gameId), gardenTheme(gameId)];
+// Every game plays Classic for now (teacher call, 2026-10-24); other themes
+// come only from the Theme Builder: the teacher's own designs and library
+// themes made in the owner's developer view.
+export function themesFor(gameId: string, made: GameTheme[] = []): GameTheme[] {
+  return [classicTheme(gameId), ...made.filter((th) => th.gameId === gameId)];
 }
 
 export function pieceColor(theme: GameTheme | undefined, piece: string, fallback: string): string {
   return theme?.pieces[piece]?.color ?? fallback;
+}
+
+export function pieceImage(theme: GameTheme | undefined, piece: string): string | undefined {
+  return theme?.pieces[piece]?.image;
+}
+
+// Background for a designed piece: its artwork over its color, or the color.
+export function pieceFill(theme: GameTheme | undefined, piece: string, fallback: string): React.CSSProperties {
+  const color = pieceColor(theme, piece, fallback);
+  const image = pieceImage(theme, piece);
+  return { background: image ? `${color} center / cover no-repeat url("${image}")` : color };
 }
 
 // CSS for a theme's backdrop. Patterns are drawn with gradients (no files).

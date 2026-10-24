@@ -9,6 +9,7 @@ import type { QuestionSet } from '../data/types';
 import { blankQuestion, isPlayable } from '../engine/questions';
 import { t } from '../i18n';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
+import TeacherNav from '../ui/TeacherNav';
 
 type Tab = 'mine' | 'library';
 
@@ -33,7 +34,8 @@ export default function QuestionSetsPage() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-24">
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+      <TeacherNav />
       <PageHeader
         title={t('sets.title')}
         subtitle={t('sets.subtitle')}

@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { GAMES } from '../games/registry';
-import { themesFor } from './library';
+import { classicTheme } from './classic';
+import { pieceFill, themesFor } from './library';
 import { themeProblems } from './validate';
 
-describe('library themes', () => {
-  it('every game gets Classic, Space and Garden, and all pass readability checks', () => {
+describe('game themes', () => {
+  it('every game plays only Classic until a theme is made, and Classic passes readability checks', () => {
     for (const g of GAMES) {
       const themes = themesFor(g.id);
-      expect(themes.map((t) => t.name)).toEqual(['Classic', 'Space', 'Garden']);
-      for (const th of themes) {
-        expect(th.gameId).toBe(g.id);
-        expect(themeProblems(th)).toEqual([]);
-      }
+      expect(themes.map((t) => t.name)).toEqual(['Classic']);
+      expect(themeProblems(themes[0])).toEqual([]);
     }
   });
-  it('library themes only color pieces the game declares', () => {
-    for (const g of GAMES) {
-      const declared = new Set(g.themePieces.map((p) => p.id));
-      for (const th of themesFor(g.id)) for (const piece of Object.keys(th.pieces)) expect([g.id, piece, declared.has(piece)]).toEqual([g.id, piece, true]);
-    }
+  it('adds only the made themes for that game', () => {
+    const made = { ...classicTheme('bakery-match'), id: 'x', name: 'Ours', source: 'custom' as const };
+    expect(themesFor('bakery-match', [made]).map((t) => t.name)).toEqual(['Classic', 'Ours']);
+    expect(themesFor('game-show', [made]).map((t) => t.name)).toEqual(['Classic']);
+  });
+  it('fills a piece with its picture over its color', () => {
+    const th = { ...classicTheme('star-quiz'), pieces: { star: { color: '#ff0000', image: 'data:x' } } };
+    expect(pieceFill(th, 'star', '#000').background).toBe('#ff0000 center / cover no-repeat url("data:x")');
+    expect(pieceFill(th, 'other', '#000').background).toBe('#000');
   });
 });
