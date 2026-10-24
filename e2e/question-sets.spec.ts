@@ -9,7 +9,7 @@ function watchConsole(page: Page) {
 
 test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
   const problems = watchConsole(page);
-  await page.goto('/teacher');
+  await page.goto('/teacher/sets');
   await page.getByRole('button', { name: 'New set' }).click();
   await page.getByLabel('Set name').fill('Weather words');
   await page.getByLabel('Question 1', { exact: true }).fill('What falls from clouds?');

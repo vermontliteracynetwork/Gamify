@@ -26,9 +26,10 @@ export default function Title({ text }: { text: string }) {
     <>
       <span className="sr-only">{cased}</span>
       <span aria-hidden="true">
-        {cased.split('G').map((part, i) => (
-          <span key={i}>{i > 0 && <span className="logo-g" />}{part}</span>
-        ))}
+        {cased.split(/(\s+)/).map((word, w) => word.includes('G')
+          // A word with a logo G stays on one line.
+          ? <span key={w} className="whitespace-nowrap">{word.split('G').map((part, i) => <span key={i}>{i > 0 && <span className="logo-g" />}{part}</span>)}</span>
+          : word)}
       </span>
     </>
   );

@@ -13,6 +13,12 @@ import { SettingsProvider } from './settings/SettingsContext';
 import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
 import TemplatePage from './theme/builder/TemplatePage';
 import OwnerPage from './owner/OwnerPage';
+import PublicHome from './public/PublicHome';
+import FeaturesPage from './public/FeaturesPage';
+import PricingPage from './public/PricingPage';
+import LoginPage from './public/LoginPage';
+import JoinPage from './public/JoinPage';
+import { RequireSignIn, RequireTeacher } from './public/SignInGate';
 import ClassesPage from './teacher/ClassesPage';
 import ClassPage from './teacher/ClassPage';
 import { Arcade, ArcadeSignIn } from './student/ArcadePage';
@@ -33,21 +39,26 @@ function AnimatedRoutes() {
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       >
         <Routes location={location}>
-          <Route path="/" element={<Home />} />
-          <Route path="/games/star-quiz" element={<StarQuiz />} />
-          <Route path="/games/game-show" element={<GameShow />} />
-          <Route path="/games/bakery-match" element={<BakeryMatch />} />
-          <Route path="/games/four-in-a-row" element={<FourInARow />} />
-          <Route path="/teacher" element={<Navigate to="/teacher/sets" replace />} />
-          <Route path="/teacher/sets" element={<QuestionSetsPage />} />
-          <Route path="/teacher/sets/import" element={<ImportPage />} />
-          <Route path="/teacher/sets/:id" element={<SetEditorPage />} />
-          <Route path="/teacher/library/:id" element={<SetEditorPage library />} />
-          <Route path="/teacher/themes" element={<ThemeBuilderPage />} />
-          <Route path="/teacher/themes/:gameId" element={<ThemeBuilderPage />} />
-          <Route path="/teacher/themes/:gameId/template" element={<TemplatePage />} />
-          <Route path="/teacher/classes" element={<ClassesPage />} />
-          <Route path="/teacher/classes/:id" element={<ClassPage />} />
+          <Route path="/" element={<PublicHome />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/join" element={<JoinPage />} />
+          <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
+          <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
+          <Route path="/games/game-show" element={<RequireSignIn><GameShow /></RequireSignIn>} />
+          <Route path="/games/bakery-match" element={<RequireSignIn><BakeryMatch /></RequireSignIn>} />
+          <Route path="/games/four-in-a-row" element={<RequireSignIn><FourInARow /></RequireSignIn>} />
+          <Route path="/teacher" element={<RequireTeacher><Navigate to="/teacher/classes" replace /></RequireTeacher>} />
+          <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
+          <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />
+          <Route path="/teacher/sets/:id" element={<RequireTeacher><SetEditorPage /></RequireTeacher>} />
+          <Route path="/teacher/library/:id" element={<RequireTeacher><SetEditorPage library /></RequireTeacher>} />
+          <Route path="/teacher/themes" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
+          <Route path="/teacher/themes/:gameId" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
+          <Route path="/teacher/themes/:gameId/template" element={<RequireTeacher><TemplatePage /></RequireTeacher>} />
+          <Route path="/teacher/classes" element={<RequireTeacher><ClassesPage /></RequireTeacher>} />
+          <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
           <Route path="/arcade" element={<Arcade />} />
           <Route path="/arcade/:classId" element={<ArcadeSignIn />} />
           <Route path="/owner" element={<OwnerPage />} />

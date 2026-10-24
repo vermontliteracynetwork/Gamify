@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, DeviceTablet, GearSix, Plus, Star, Trash, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
@@ -17,6 +17,7 @@ import { useMadeThemes } from '../theme/made';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import { newJoinCode } from '../auth/session';
 import Title from '../ui/Title';
 
 type Tab = 'students' | 'sets' | 'modes';
@@ -33,13 +34,17 @@ export default function ClassPage() {
   const { value: assignments = [], reload: reloadAssignments } = useAsync(() => data.listAssignments(id), [id]);
   const classroom = classes.find((c) => c.id === id);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  useEffect(() => {
+    // Classes made before join codes existed get one now.
+    if (classroom && !classroom.joinCode) void data.saveClassroom({ ...classroom, joinCode: newJoinCode(classes.map((c) => c.joinCode ?? '')) }).then(reloadClass);
+  }, [classroom]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!classroom) return null;
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>
-      <PageHeader title={classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
+      <PageHeader title={classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
         actions={<Link to={`/arcade/${classroom.id}`} className={buttonClasses('primary')}><DeviceTablet weight="bold" size={18} />{t('class.openSignIn')}</Link>} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },

@@ -37,6 +37,8 @@ export interface Classroom {
   allowedModes?: PlayMode[];
   // The Theme Builder design its sign-in pictures use (missing = built-in).
   signInThemeId?: string;
+  // Letters-only code students type on the join page to reach sign-in.
+  joinCode?: string;
 }
 
 export interface Student {

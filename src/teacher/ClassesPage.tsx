@@ -5,6 +5,7 @@ import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { LOCAL_TEACHER_ID, useAsync, useTier } from '../data/hooks';
 import { t } from '../i18n';
+import { newJoinCode } from '../auth/session';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 
@@ -17,7 +18,7 @@ export default function ClassesPage() {
   const navigate = useNavigate();
 
   async function create() {
-    const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString() };
+    const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode(classes.map((x) => x.joinCode ?? '')) };
     await data.saveClassroom(c);
     reload();
     navigate(`/teacher/classes/${c.id}`);

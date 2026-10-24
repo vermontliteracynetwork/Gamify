@@ -85,7 +85,7 @@ export function Arcade() {
   const { pool, modes } = useArcade(session);
   const tier = useTier();
   const navigate = useNavigate();
-  useEffect(() => { if (!session) navigate('/', { replace: true }); }, [session, navigate]);
+  useEffect(() => { if (!session) navigate('/join', { replace: true }); }, [session, navigate]);
   if (!session) return null;
   // Games a student plays on their own device (Share games run on the teacher's screen).
   const games = GAMES.filter((g) => g.modes.some((m) => (m === 'solo' || m === 'versus') && modes.includes(m)));
