@@ -101,18 +101,33 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
         <Group title={t('settings.time')}>
           <Choice label={t('settings.timers')} value={s.timers} options={['off', 'relaxed', 'normal']} onChange={(v) => set('timers', v)} />
           <Choice label={t('settings.gameSpeed')} value={s.gameSpeed} options={['slow', 'normal', 'fast']} onChange={(v) => set('gameSpeed', v)} />
-          <Choice
-            label={t('settings.readFirst')}
-            value={`${s.readFirstSeconds}s` as '0s' | '3s' | '5s'}
-            options={['0s', '3s', '5s']}
-            onChange={(v) => set('readFirstSeconds', Number(v.replace('s', '')) as 0 | 3 | 5)}
-          />
         </Group>
 
         <Group title={t('settings.controls')}>
           <Toggle label={t('settings.tapOnly')} value={s.tapOnly} onChange={(v) => set('tapOnly', v)} />
           <Toggle label={t('settings.leftHanded')} value={s.leftHanded} onChange={(v) => set('leftHanded', v)} />
         </Group>
+
+        <details className="rounded-input border-[2px] border-border-soft p-3">
+          <summary className="font-bold cursor-pointer min-h-11 flex items-center">{t('settings.accommodations')}</summary>
+          <div className="grid gap-3 pt-2">
+            <p className="text-sm font-bold">{t('settings.accommodationsNote')}</p>
+            <Choice
+              label={t('settings.readFirst')}
+              value={`${s.readFirstSeconds}s` as '0s' | '3s' | '5s' | '10s'}
+              options={['0s', '3s', '5s', '10s']}
+              onChange={(v) => set('readFirstSeconds', Number(v.replace('s', '')))}
+            />
+            <Toggle label={t('settings.shuffle')} value={s.shuffleAnswers} onChange={(v) => set('shuffleAnswers', v)} />
+            <Choice label={t('settings.tries')} value={String(s.triesPerQuestion) as '1' | '2' | '3' | '4'} options={['1', '2', '3', '4']}
+              onChange={(v) => set('triesPerQuestion', Number(v) as 1 | 2 | 3 | 4)} />
+            <span className="font-bold">{t('settings.toolsAllowed')}</span>
+            {(['listen', 'calculator', 'scratchpad', 'highlighter', 'timesTable'] as const).map((tool) => (
+              <Toggle key={tool} label={t(tool === 'listen' ? 'q.listenTool' : (`q.${tool}` as StringKey))} value={s.tools[tool]}
+                onChange={(v) => update({ ...s, tools: { ...s.tools, [tool]: v } })} />
+            ))}
+          </div>
+        </details>
 
         <TellGamify context={context} />
       </div>

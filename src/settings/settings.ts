@@ -28,7 +28,12 @@ export interface PlayerSettings {
   colorSafe: boolean;
   timers: Timers;
   gameSpeed: Speed;
-  readFirstSeconds: 0 | 3 | 5;
+  // Question screen accommodations (teacher sets them per student; the
+  // teacher side and locks arrive with classrooms in Stage 4).
+  readFirstSeconds: number; // 0-10, default 3
+  shuffleAnswers: boolean;
+  triesPerQuestion: 1 | 2 | 3 | 4;
+  tools: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
   tapOnly: boolean;
   leftHanded: boolean;
   language: 'en';
@@ -54,6 +59,9 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   timers: 'relaxed',
   gameSpeed: 'normal',
   readFirstSeconds: 3,
+  shuffleAnswers: true,
+  triesPerQuestion: 1,
+  tools: { listen: true, calculator: true, scratchpad: true, highlighter: true, timesTable: false },
   tapOnly: false,
   leftHanded: false,
   language: 'en',
@@ -87,5 +95,5 @@ export function volume(s: PlayerSettings, channel: 'effects' | 'music' | 'voice'
 
 // Settings saved before new fields existed still load with defaults.
 export function withDefaults(saved: Partial<PlayerSettings> | undefined): PlayerSettings {
-  return { ...DEFAULT_SETTINGS, ...(saved ?? {}) };
+  return { ...DEFAULT_SETTINGS, ...(saved ?? {}), tools: { ...DEFAULT_SETTINGS.tools, ...(saved?.tools ?? {}) } };
 }

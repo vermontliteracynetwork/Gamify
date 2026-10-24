@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { Calculator, Check, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
+import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { buzz, playEffect, speak, stopSpeaking } from './feedback';
 import { shuffleChoices } from './questions';
-import { CalculatorTool, Scratchpad } from './tools';
+import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 // Answer tiles get a shape as well as a color, so color is never the only cue.
 const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
 
-export interface AnswerResult { tapped: string; right: boolean; ms: number }
+export interface AnswerResult { tapped: string; tries: string[]; right: boolean; ms: number }
 
 // The one question screen every game uses (question engine section 3):
 // read first, shuffled answers, one try, a short right moment, and after a
@@ -27,12 +27,14 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
 }) {
   const { settings } = useSettings();
   const reduce = useReducedMotion() || settings.motion === 'still';
-  const q = useMemo(() => shuffleChoices(question), [question]);
+  const q = useMemo(() => (settings.shuffleAnswers ? shuffleChoices(question) : question), [question, settings.shuffleAnswers]);
   const shownAt = useRef(Date.now());
   const [locked, setLocked] = useState(settings.readFirstSeconds > 0);
   const [picked, setPicked] = useState<number | null>(null);
+  const [wrongTries, setWrongTries] = useState<number[]>([]);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [tool, setTool] = useState<'calculator' | 'scratchpad' | 'highlighter' | null>(null);
+  const [tool, setTool] = useState<'calculator' | 'scratchpad' | 'highlighter' | 'timesTable' | null>(null);
+  const toolList = (['calculator', 'scratchpad', 'highlighter', 'timesTable'] as const).filter((x) => settings.tools[x]);
   const [marked, setMarked] = useState<Set<number>>(new Set());
   const [speaking, setSpeaking] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -40,6 +42,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   useEffect(() => {
     shownAt.current = Date.now();
     setPicked(null);
+    setWrongTries([]);
     setMarked(new Set());
     setLocked(settings.readFirstSeconds > 0);
     const timer = window.setTimeout(() => setLocked(false), settings.readFirstSeconds * 1000);
@@ -55,13 +58,20 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   }
 
   function choose(i: number) {
-    if (locked || picked !== null) return;
-    setPicked(i);
+    if (locked || picked !== null || wrongTries.includes(i)) return;
     const right = i === q.correctIndex;
     playEffect(right ? 'right' : 'miss', settings);
     buzz(right ? 30 : [20, 60, 20], settings);
+    const tries = [...wrongTries.map((k) => q.choices[k]), q.choices[i]];
+    // Extra tries (a teacher accommodation): a miss with tries left greys
+    // out that answer and lets the student pick again.
+    if (!right && wrongTries.length + 1 < settings.triesPerQuestion) {
+      setWrongTries((w) => [...w, i]);
+      return;
+    }
+    setPicked(i);
     const ms = Date.now() - shownAt.current;
-    window.setTimeout(() => onAnswer({ tapped: q.choices[i], right, ms }), right ? 900 : 1400);
+    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), right ? 900 : 1400);
   }
 
   const words = q.prompt.split(/(\s+)/);
@@ -84,14 +94,14 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           )}
           {player && <span className="font-display font-bold text-lg">{t('q.turn', { name: player })}</span>}
           <span className="flex-1" />
-          <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+          {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
             {speaking ? t('q.stop') : t('q.listen')}
-          </button>
-          <button type="button" onClick={() => setTool(tool ? null : 'calculator')} aria-label={t('q.tools')} aria-expanded={tool !== null}
+          </button>}
+          {toolList.length > 0 && <button type="button" onClick={() => setTool(tool ? null : toolList[0])} aria-label={t('q.tools')} aria-expanded={tool !== null}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
             <Toolbox weight="bold" size={20} />
-          </button>
+          </button>}
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <button type="button" onClick={() => setConfirmLeave(true)} aria-label={t('q.close')}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
@@ -110,7 +120,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         {tool && (
           <div className="grid gap-2">
             <div role="tablist" aria-label={t('q.tools')} className="flex gap-2">
-              {([['calculator', Calculator], ['scratchpad', PencilSimpleLine], ['highlighter', HighlighterCircle]] as const).map(([id, Icon]) => (
+              {([['calculator', Calculator], ['scratchpad', PencilSimpleLine], ['highlighter', HighlighterCircle], ['timesTable', GridNine]] as const).filter(([id]) => settings.tools[id]).map(([id, Icon]) => (
                 <button key={id} type="button" role="tab" aria-selected={tool === id} onClick={() => setTool(id)}
                   className={`min-h-11 px-3 rounded-pill border-[2px] font-bold inline-flex items-center gap-1.5 ${tool === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                   <Icon weight="bold" size={18} />{t(`q.${id}`)}
@@ -119,6 +129,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             </div>
             {tool === 'calculator' && <CalculatorTool />}
             {tool === 'scratchpad' && <Scratchpad />}
+            {tool === 'timesTable' && <TimesTable />}
           </div>
         )}
 
@@ -144,6 +155,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {q.choices.map((c, i) => {
+            const triedWrong = wrongTries.includes(i);
             const isPicked = picked === i;
             const right = isPicked && i === q.correctIndex;
             const wrong = isPicked && i !== q.correctIndex;
@@ -152,17 +164,17 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 key={`${q.id}-${i}`}
                 type="button"
                 onClick={() => choose(i)}
-                aria-disabled={locked || picked !== null}
+                aria-disabled={locked || picked !== null || triedWrong}
                 aria-label={t('q.answerLabel', { letter: LETTERS[i], text: c })}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
                 className={`relative min-h-20 px-4 py-3 rounded-input border-[2.5px] border-border text-left font-bold text-lg flex items-center gap-3
                             ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
-                            ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''}`}
+                            ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >
                 <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display text-xl" aria-hidden="true">
-                  {right ? <Check weight="bold" size={22} /> : wrong ? <X weight="bold" size={22} /> : LETTERS[i]}
+                  {right ? <Check weight="bold" size={22} /> : wrong || triedWrong ? <X weight="bold" size={22} /> : LETTERS[i]}
                 </span>
                 <span className="min-w-0 break-words">{c}</span>
               </motion.button>
@@ -172,7 +184,9 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
 
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         <p className="min-h-7 font-display text-xl font-bold text-center" role="status" aria-live="polite">
-          {picked === null ? '' : picked === q.correctIndex ? t('q.right') : t('q.miss')}
+          {picked === null
+            ? wrongTries.length ? `${t('q.tryAgain')} ${t('q.triesLeft', { count: settings.triesPerQuestion - wrongTries.length })}` : ''
+            : picked === q.correctIndex ? t('q.right') : t('q.miss')}
         </p>
       </motion.div>
     </div>

@@ -59,3 +59,34 @@ export function Scratchpad() {
     </div>
   );
 }
+
+// Times table (a teacher-allowed tool): tap a number to light up its row
+// and column.
+export function TimesTable() {
+  const [pick, setPick] = useState<{ r: number; c: number } | null>(null);
+  const n = Array.from({ length: 12 }, (_, i) => i + 1);
+  return (
+    <div className="overflow-x-auto">
+      <table className="border-collapse text-sm font-bold tabular-nums" aria-label={t('q.timesTable')}>
+        <thead>
+          <tr><th className="w-9 h-9" aria-hidden="true">×</th>{n.map((c) => <th key={c} className={`w-9 h-9 ${pick?.c === c ? 'bg-accent' : 'bg-surface-2'} border border-border-soft`}>{c}</th>)}</tr>
+        </thead>
+        <tbody>
+          {n.map((r) => (
+            <tr key={r}>
+              <th className={`w-9 h-9 ${pick?.r === r ? 'bg-accent' : 'bg-surface-2'} border border-border-soft`}>{r}</th>
+              {n.map((c) => (
+                <td key={c} className="p-0 border border-border-soft">
+                  <button type="button" onClick={() => setPick({ r, c })} aria-label={`${r} × ${c} = ${r * c}`}
+                    className={`w-9 h-9 ${pick && (pick.r === r || pick.c === c) ? (pick.r === r && pick.c === c ? 'bg-accent' : 'bg-accent/30') : 'bg-surface'}`}>
+                    {r * c}
+                  </button>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

@@ -281,6 +281,19 @@ export const en = {
   'fr.rights.one': '{name}: 1 right answer',
   'fr.cell': 'Row {row}, column {col}: {who}',
   'fr.empty': 'empty',
+
+  'settings.accommodations': 'Question accommodations (for teachers)',
+  'settings.accommodationsNote': 'Teachers will set these for each student from the class list. Until then they can be set here.',
+  'settings.shuffle': 'Shuffle the answers',
+  'settings.tries': 'Tries on each question',
+  'settings.toolsAllowed': 'Tools students can use',
+  'opt.1': '1', 'opt.2': '2', 'opt.4': '4',
+  'opt.10s': '10 seconds',
+  'q.timesTable': 'Times table',
+  'q.listenTool': 'Listen',
+  'q.tryAgain': 'Not this one. Try again!',
+  'q.triesLeft': '{count} tries left',
+  'q.triesLeft.one': '1 try left',
 } as const;
 
 export type StringKey = keyof typeof en;

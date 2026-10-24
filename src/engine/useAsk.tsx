@@ -55,7 +55,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
   function log(a: Active, r: AnswerResult | null, outcome: QuestionLogEntry['outcome']) {
     void data.logQuestion({
       id: newId('log'), at: new Date().toISOString(), classroomId, studentId, teamName: a.player, gameId, mode, setId: a.setId,
-      prompt: a.question.prompt, answer: a.question.choices[a.question.correctIndex], tries: r ? [r.tapped] : [], ms: r?.ms ?? 0, outcome,
+      prompt: a.question.prompt, answer: a.question.choices[a.question.correctIndex], tries: r ? r.tries : [], ms: r?.ms ?? 0, outcome,
     });
   }
 
