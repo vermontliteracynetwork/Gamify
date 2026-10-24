@@ -7,7 +7,7 @@ export default function TeacherNav() {
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   return (
-    <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap gap-1 p-1 rounded-pill bg-surface border-[2px] border-border mb-6">
+    <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap gap-1 p-1 rounded-pill bg-surface border-[2px] border-border mb-4">
       <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{t('teacherNav.classes')}</NavLink>
       <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
       <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
