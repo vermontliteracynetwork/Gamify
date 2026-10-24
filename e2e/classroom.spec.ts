@@ -66,3 +66,26 @@ test('teacher makes a class, assigns a set, sets supports; a student signs in an
   expect(log ?? '').not.toContain('"studentId":undefined');
   expect(problems).toEqual([]);
 });
+
+test('a class can sign in with sign-in pictures drawn in the Theme Builder', async ({ page }, info) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
+  const problems = watch(page);
+  await page.goto('/teacher/themes/sign-in');
+  await page.getByLabel('Theme name').fill('Our Animals');
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 120; const x = c.getContext('2d')!; x.fillStyle = '#e85d75'; x.fillRect(0, 0, 120, 120); return c.toDataURL('image/png').split(',')[1]; });
+  await page.getByRole('button', { name: 'Add a picture for Cat picture' }).locator('xpath=following-sibling::input').setInputFiles({ name: 'cat.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await page.getByRole('button', { name: 'Save theme' }).click();
+  await expect(page.getByText('Saved Our Animals.', { exact: false })).toBeVisible();
+
+  await page.goto('/teacher/classes');
+  await page.getByLabel('New class name').fill('Room 5');
+  await page.getByRole('button', { name: 'Make class' }).click();
+  await page.getByRole('radio', { name: 'Our Animals' }).click();
+  await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
+  await page.getByRole('button', { name: 'Add 1 student' }).click();
+  await page.getByRole('link', { name: 'Student sign-in on this device' }).click();
+  await page.getByRole('button', { name: 'Zoe', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'cat', exact: true }).locator('img')).toHaveCount(1);
+  await page.screenshot({ path: `test-results/signin-drawn-${info.project.name}.png` });
+  expect(problems).toEqual([]);
+});

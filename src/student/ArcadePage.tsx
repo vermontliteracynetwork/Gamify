@@ -10,7 +10,9 @@ import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
-import { PICTURES, picture } from './pictures';
+import { PICTURES } from './pictures';
+import PictureBadge from './PictureBadge';
+import { useMadeThemes } from '../theme/made';
 import { setSession, useArcade, useSession } from './session';
 
 // Student sign-in on a shared iPad: tap your name, then your two pictures.
@@ -25,6 +27,8 @@ export function ArcadeSignIn() {
   const [taps, setTaps] = useState<string[]>([]);
   const [wrong, setWrong] = useState(false);
   const classroom = classes.find((c) => c.id === classId);
+  const { themes } = useMadeThemes();
+  const look = themes.find((th) => th.id === classroom?.signInThemeId);
 
   function tap(id: string) {
     const next = [...taps, id];
@@ -42,10 +46,9 @@ export function ArcadeSignIn() {
       {!who && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {students.map((s) => {
-            const P = picture(s.picturePassword[0]); const I = P.icon;
             return (
               <button key={s.id} type="button" onClick={() => setWho(s)} className="min-h-20 rounded-panel border-[2.5px] border-border bg-surface flex items-center gap-3 p-3 text-left active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-12 h-12 rounded-full border-[2px] border-border flex items-center justify-center shrink-0" style={{ background: P.color }}><I weight="fill" size={26} /></span>
+                <PictureBadge id={s.picturePassword[0]} theme={look} size={48} />
                 <span className="font-display text-xl font-bold">{s.name}</span>
               </button>
             );
@@ -57,18 +60,17 @@ export function ArcadeSignIn() {
         <div className="grid gap-5 justify-items-center">
           <p className="font-bold text-lg">{t('arcade.tapPictures')}</p>
           <motion.div className="flex gap-3" animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} role="img" aria-label={t('arcade.tapped', { count: taps.length })}>
-            {[0, 1].map((i) => {
-              const P = taps[i] ? picture(taps[i]) : null; const I = P?.icon;
-              return <span key={i} className="w-20 h-20 rounded-full border-[3px] border-border flex items-center justify-center" style={{ background: P?.color ?? '#fbfcf8' }}>{I && <I weight="fill" size={44} />}</span>;
-            })}
+            {[0, 1].map((i) => taps[i]
+              ? <PictureBadge key={i} id={taps[i]} theme={look} size={80} />
+              : <span key={i} className="w-20 h-20 rounded-full border-[3px] border-border bg-surface" />)}
           </motion.div>
           <div className="grid grid-cols-4 gap-3">
-            {PICTURES.map((p) => { const I = p.icon; return (
+            {PICTURES.map((p) => (
               <button key={p.id} type="button" onClick={() => tap(p.id)} aria-label={p.id} disabled={taps.length >= 2}
-                className="w-20 h-20 rounded-full border-[3px] border-border flex items-center justify-center active:scale-90" style={{ background: p.color, boxShadow: 'var(--shadow-sticker)' }}>
-                <I weight="fill" size={40} />
+                className="rounded-full active:scale-90" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <PictureBadge id={p.id} theme={look} size={80} />
               </button>
-            ); })}
+            ))}
           </div>
           <button type="button" onClick={() => { setWho(null); setTaps([]); }} className="min-h-12 px-5 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2"><ArrowLeft weight="bold" size={20} />{t('arcade.notMe')}</button>
         </div>

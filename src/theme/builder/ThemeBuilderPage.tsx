@@ -6,6 +6,8 @@ import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
 import { GameCover } from '../../games/covers';
 import { GAMES } from '../../games/registry';
+import { signInManifest } from '../../student/pictures';
+
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
 import { Button, buttonClasses, PageHeader, Panel } from '../../ui/kit';
@@ -17,6 +19,9 @@ import { themeProblems } from '../validate';
 import { scanTemplatePages } from './scan';
 import { isRound } from './template';
 import ThemePreview from './ThemePreview';
+
+// Everything the builder can design: each game, plus the sign-in pictures.
+export const BUILDER_TARGETS = [...GAMES, signInManifest];
 
 // The Theme Builder (teacher page, and the owner's developer view): pick a
 // game, then design its theme with a live preview, an upload card per piece
@@ -34,7 +39,7 @@ const HEX = /^#[0-9a-f]{6}$/i;
 
 export default function ThemeBuilderPage({ owner = false }: { owner?: boolean }) {
   const { gameId } = useParams();
-  const game = GAMES.find((g) => g.id === gameId);
+  const game = BUILDER_TARGETS.find((g) => g.id === gameId);
   const base = owner ? '/owner/themes' : '/teacher/themes';
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
@@ -52,7 +57,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
       <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} subtitle={owner ? t('builder.ownerSubtitle') : t('builder.subtitle')} />
       {!owner && TIERS[tier].themeBuilder === 'trial' && <Panel className="bg-surface-2 mb-4"><p className="font-bold">{t('builder.trialNote')}</p></Panel>}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {GAMES.map((g) => {
+        {BUILDER_TARGETS.map((g) => {
           const mine = themes.filter((th) => th.gameId === g.id && (owner ? th.source === 'library' : th.source === 'custom'));
           const locked = !owner && TIERS[tier].themeBuilder === 'trial' && g.id !== THEME_TRIAL_GAME;
           return (
@@ -75,7 +80,7 @@ function blankTheme(gameId: string, owner: boolean): GameTheme {
 }
 
 function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base: string }) {
-  const game = GAMES.find((g) => g.id === gameId)!;
+  const game = BUILDER_TARGETS.find((g) => g.id === gameId)!;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const tier = useTier();
@@ -204,7 +209,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="primary" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
             {!isNew && <Button variant="danger" onClick={() => void remove()}><Trash weight="bold" size={18} />{t('builder.delete')}</Button>}
-            {!isNew && !owner && <Button onClick={() => navigate(`/games/${gameId}`)}>{t('builder.tryIt')}</Button>}
+            {!isNew && !owner && game.modes.length > 0 && <Button onClick={() => navigate(`/games/${gameId}`)}>{t('builder.tryIt')}</Button>}
             <p role="status" aria-live="polite" className="font-bold">{status}</p>
           </div>
         </div>

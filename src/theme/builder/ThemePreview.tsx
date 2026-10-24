@@ -1,5 +1,8 @@
 import { Star } from '@phosphor-icons/react';
 import { backdropStyle, pieceFill, pieceImage } from '../library';
+import { PICTURES } from '../../student/pictures';
+import PictureBadge from '../../student/PictureBadge';
+import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
 import type { GameTheme } from '../types';
 
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
@@ -35,9 +38,14 @@ function board(theme: GameTheme) {
           })}
         </div>
       );
+    case 'sign-in':
+      return <div className="grid grid-cols-4 gap-2">{PICTURES.map((p) => <PictureBadge key={p.id} id={p.id} theme={theme} size={44} />)}</div>;
     case 'game-show':
       return (
         <div className="grid grid-cols-4 gap-1.5 w-full">
+          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image)}>
+            <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
+          </TeamArt.Provider>
           {Array.from({ length: 8 }, (_, i) => (
             <span key={i} className="aspect-[4/3] rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
               {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}

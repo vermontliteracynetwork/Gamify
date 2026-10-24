@@ -496,6 +496,11 @@ export const en = {
   'arcade.locked': '{name} (locked)',
   'home.signIn': 'Sign in: {name}',
   'home.myArcade': "Back to {name}'s Arcade",
+  'themeScreen.title': 'Pick a theme',
+  'themeScreen.by': 'Made by {name}',
+  'class.signInLook': 'Sign-in pictures',
+  'class.signInBuiltIn': 'Built-in pictures',
+  'class.signInDesign': 'Draw your own sign-in pictures in the Theme Builder',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

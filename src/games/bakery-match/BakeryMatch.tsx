@@ -19,7 +19,8 @@ import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
-import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
+import ThemeScreen from '../ThemeScreen';
 
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
 
@@ -45,7 +46,7 @@ export const bakeryMatchManifest: GameManifest = {
 // alone). Library and class-made themes swap in artwork per tile.
 const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
-type Phase = 'welcome' | 'setup' | 'play' | 'end';
+type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 
 export default function BakeryMatch() {
   const { settings } = useSettings();
@@ -170,15 +171,19 @@ export default function BakeryMatch() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={bakeryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={bakeryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
         ]} />
       )}
 
+      {phase === 'theme' && (
+        <ThemeScreen gameName={bakeryMatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
+      )}
+
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('welcome')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -189,7 +194,6 @@ export default function BakeryMatch() {
                 options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
             </>
           ) },
-          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 

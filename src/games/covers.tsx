@@ -1,4 +1,4 @@
-import { Cake, Cookie, Crown, Heart, IceCream, Microphone, Pizza, Popcorn, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
+import { Cake, Cat, Cookie, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Popcorn, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 import { TEAM_COLORS } from '../engine/turns';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
@@ -56,6 +56,8 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <Crown weight="fill" className="absolute right-[3%] top-[2%] w-[14%] h-auto" color="#241c3d" />
         </div>
       );
+    case 'sign-in':
+      return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
     default:
       return (

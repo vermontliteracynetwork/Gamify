@@ -34,6 +34,8 @@ export interface Classroom {
   createdAt: string;
   // Play modes students in this class see (all plans). Missing = all four.
   allowedModes?: PlayMode[];
+  // The Theme Builder design its sign-in pictures use (missing = built-in).
+  signInThemeId?: string;
 }
 
 export interface Student {

@@ -1,3 +1,5 @@
+import type { GameManifest } from '../games/types';
+import type { GameTheme } from '../theme/types';
 import { Bicycle, Cat, Dog, Fish, Flower, Heart, Moon, Rocket, Star, Sun, Tree, Umbrella, type Icon } from '@phosphor-icons/react';
 
 // Picture sign-in for young students: each student has two pictures, tapped
@@ -20,3 +22,17 @@ export function newPicturePassword(taken: [string, string][], rand: () => number
   }
   return [PICTURES[0].id, PICTURES[1].id];
 }
+
+// Sign-in pictures can be redrawn in the Theme Builder like a game theme
+// (teacher request, 2026-10-24); a class picks which design it signs in with.
+export const signInManifest: GameManifest = {
+  id: 'sign-in',
+  name: 'Sign-in pictures',
+  description: 'The pictures students tap to sign in.',
+  modes: [],
+  questionKinds: [],
+  hasCpu: false,
+  themePieces: PICTURES.map((p) => ({ id: `pic-${p.id}`, label: `${p.id[0].toUpperCase()}${p.id.slice(1)} picture`, width: 256, height: 256, hint: `Draw a ${p.id} students will know is theirs`, color: p.color })),
+};
+
+export const pictureArt = (theme: GameTheme | undefined, id: string) => theme?.pieces[`pic-${id}`]?.image;

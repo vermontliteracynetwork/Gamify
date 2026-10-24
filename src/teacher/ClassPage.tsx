@@ -5,13 +5,15 @@ import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
-import { ALL_MODES, type PlayMode, type SetAssignment, type Student } from '../data/types';
+import { ALL_MODES, type Classroom, type PlayMode, type SetAssignment, type Student } from '../data/types';
 import { ModeBadge } from '../games/ModeBadge';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
-import { newPicturePassword, picture } from '../student/pictures';
+import { newPicturePassword } from '../student/pictures';
+import PictureBadge from '../student/PictureBadge';
+import { useMadeThemes } from '../theme/made';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
@@ -41,7 +43,8 @@ export default function ClassPage() {
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
-      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} />}
+      {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
+      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} />}
       {tab === 'sets' && <SetsTab classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} />}
       {tab === 'modes' && (
         <Panel className="grid gap-3">
@@ -78,7 +81,9 @@ export default function ClassPage() {
   );
 }
 
-function StudentsTab({ classroomId, students, reload }: { classroomId: string; students: Student[]; reload: () => void }) {
+function StudentsTab({ classroomId, students, reload, signInThemeId }: { classroomId: string; students: Student[]; reload: () => void; signInThemeId?: string }) {
+  const { themes } = useMadeThemes();
+  const look = themes.find((th) => th.id === signInThemeId);
   const tier = useTier();
   const limit = TIERS[tier].studentsPerClassroom;
   const [names, setNames] = useState('');
@@ -117,7 +122,7 @@ function StudentsTab({ classroomId, students, reload }: { classroomId: string; s
         {students.map((s) => (
           <Panel key={s.id} className="flex items-center gap-3 !p-3">
             <span className="flex gap-1" aria-label={t('class.pictures', { a: s.picturePassword[0], b: s.picturePassword[1] })} role="img">
-              {s.picturePassword.map((p, i) => { const P = picture(p); const I = P.icon; return <span key={i} className="w-10 h-10 rounded-full border-[2px] border-border flex items-center justify-center" style={{ background: P.color }}><I weight="fill" size={22} /></span>; })}
+              {s.picturePassword.map((p, i) => <PictureBadge key={i} id={p} theme={look} size={40} />)}
             </span>
             <span className="font-bold flex-1 min-w-0 truncate">{s.name}</span>
             {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}
@@ -133,6 +138,21 @@ function StudentsTab({ classroomId, students, reload }: { classroomId: string; s
       )}
       {editing && <SupportsDialog student={editing} onClose={() => { setEditing(null); reload(); }} />}
     </div>
+  );
+}
+
+// Which sign-in picture design the class uses (built-in or one made in the
+// Theme Builder).
+function SignInLook({ classroom, onChange }: { classroom: Classroom; onChange: () => void }) {
+  const { themes } = useMadeThemes();
+  const looks = themes.filter((th) => th.gameId === 'sign-in');
+  return (
+    <Panel className="grid gap-2 mb-4">
+      <ChoiceRow label={t('class.signInLook')} value={classroom.signInThemeId ?? 'built-in'}
+        onChange={async (v) => { await data.saveClassroom({ ...classroom, signInThemeId: v === 'built-in' ? undefined : v }); onChange(); }}
+        options={[{ value: 'built-in', label: t('class.signInBuiltIn') }, ...looks.map((th) => ({ value: th.id, label: th.name }))]} />
+      <Link to="/teacher/themes/sign-in" className="font-bold text-sm underline justify-self-start">{t('class.signInDesign')}</Link>
+    </Panel>
   );
 }
 

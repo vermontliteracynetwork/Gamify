@@ -21,7 +21,8 @@ import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
-import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
+import ThemeScreen from '../ThemeScreen';
 
 import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
 
@@ -41,7 +42,7 @@ export const fourInARowManifest: GameManifest = {
   hasCpu: true,
 };
 
-type Phase = 'welcome' | 'setup' | 'play' | 'end';
+type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type First = 'p1' | 'p2' | 'random';
 
 export default function FourInARow() {
@@ -133,15 +134,19 @@ export default function FourInARow() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('fr.how1') },
           { icon: <ArrowFatDown weight="fill" size={22} />, text: t('fr.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('fr.how3') },
         ]} />
       )}
 
+      {phase === 'theme' && (
+        <ThemeScreen gameName={fourInARowManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
+      )}
+
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players, team.level)} pages={[
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
@@ -153,7 +158,6 @@ export default function FourInARow() {
               <Slider label={t('fr.perTurn')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
             </>
           ) },
-          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 

@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer } from '@phosphor-icons/react';
 import { GAMES } from '../../games/registry';
+import { signInManifest } from '../../student/pictures';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
@@ -39,7 +40,7 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
 // Every template page for one game, ready to print (one piece per page).
 export default function TemplatePage() {
   const { gameId } = useParams();
-  const game = GAMES.find((g) => g.id === gameId);
+  const game = [...GAMES, signInManifest].find((g) => g.id === gameId);
   if (!game) return null;
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">

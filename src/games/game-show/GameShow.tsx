@@ -24,7 +24,8 @@ import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
 import { pieceFill, pieceImage } from '../../theme/library';
-import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
+import ThemeScreen from '../ThemeScreen';
 
 import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
 
@@ -38,6 +39,7 @@ export const gameShowManifest: GameManifest = {
     { id: 'background', label: 'Background', width: 1920, height: 1080, hint: 'Behind the whole board' },
     { id: 'card-back', label: 'Card back', width: 300, height: 220, hint: 'The front of each surprise card before it flips', color: '#fdfd94' },
     { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid', color: '#fdfd94' },
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} icon`, width: 256, height: 256, hint: `The round badge for team ${i + 1}` })),
     { id: 'trophy', label: 'Winner trophy', width: 400, height: 400, hint: 'Shown on the winner screen' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
@@ -46,7 +48,7 @@ export const gameShowManifest: GameManifest = {
 };
 
 type Board = 'cards' | 'grid';
-type Phase = 'welcome' | 'setup' | 'play' | 'end';
+type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 interface Card { kind: CardKind; open: boolean; by?: number }
 interface Cell { col: number; points: number; used: boolean }
 
@@ -242,15 +244,19 @@ export default function GameShow() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <UsersThree weight="fill" size={22} />, text: t('tb.how1') },
           { icon: <CheckCircle weight="fill" size={22} />, text: t('tb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('tb.how3') },
         ]} />
       )}
 
+      {phase === 'theme' && (
+        <ThemeScreen gameName={gameShowManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
+      )}
+
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players, team.level)} pages={[
           { id: 'board', title: t('setup.board'), content: (
             <PictureChoice label={t('tb.board')} value={board}
               onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
@@ -278,7 +284,6 @@ export default function GameShow() {
           { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
-          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 

@@ -34,5 +34,5 @@ export function outlineBox(piece: Pick<ThemePieceSpec, 'width' | 'height'>) {
   return { x: AREA.x + (AREA.width - width) / 2, y: AREA.y + (AREA.height - height) / 2, width, height };
 }
 
-// Round pieces (four in a row discs, the star) are drawn in a circle.
-export const isRound = (piece: ThemePieceSpec) => /^piece-|^star$/.test(piece.id);
+// Round pieces (discs, team icons, sign-in pictures, the star) are drawn in a circle.
+export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^star$/.test(piece.id);

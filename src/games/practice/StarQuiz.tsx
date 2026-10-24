@@ -18,7 +18,8 @@ import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceImage } from '../../theme/library';
-import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
+import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
+import ThemeScreen from '../ThemeScreen';
 
 
 export const starQuizManifest: GameManifest = {
@@ -35,7 +36,7 @@ export const starQuizManifest: GameManifest = {
   hasCpu: false,
 };
 
-type Phase = 'welcome' | 'setup' | 'play' | 'end';
+type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 
 // The engine's test game (development plan Stage 2) and the first simple
 // Quiz: every right answer adds a star. Uses only the shared engine.
@@ -78,20 +79,23 @@ export default function StarQuiz() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'welcome' && (
-        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('setup')} steps={[
+        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('practice.how1') },
           { icon: <Star weight="fill" size={22} />, text: t('practice.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('practice.how3') },
         ]} />
       )}
 
+      {phase === 'theme' && (
+        <ThemeScreen gameName={starQuizManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
+      )}
+
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
           ) },
-          ...(themes.length > 1 ? [{ id: 'theme', title: t('setup.theme'), content: <ThemePicker current={theme} themes={themes} playable={playable} onChoose={choose} onPanel /> }] : []),
         ]} />
       )}
 

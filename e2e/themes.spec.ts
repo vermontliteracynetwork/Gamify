@@ -18,12 +18,15 @@ async function png(page: Page, color: string): Promise<Buffer> {
   return Buffer.from(data, 'base64');
 }
 
-test('games play Classic only, with no theme step until a theme is made', async ({ page }) => {
-  await openSetup(page, '/games/bakery-match');
-  await expect(page.getByText(/^Step 1 of 2:/)).toBeVisible();
+test('games play Classic only until a theme is made, picked on its own theme screen', async ({ page }, info) => {
+  await page.goto('/games/bakery-match');
+  await page.getByRole('button', { name: 'Set up and play' }).click();
+  await expect(page.getByRole('heading', { name: 'Pick a theme' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio')).toHaveCount(1);
+  await expect(page.getByRole('radio', { name: 'Classic' })).toHaveAttribute('aria-checked', 'true');
+  await page.screenshot({ path: `test-results/theme-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
-  await expect(page.getByRole('radiogroup', { name: 'Theme' })).toHaveCount(0);
+  await expect(page.getByText(/^Step 1 of 2:/)).toBeVisible();
 });
 
 test('Theme Builder: upload a piece, save, and play the game in it', async ({ page }, info) => {
@@ -41,11 +44,12 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Ocean Party.', { exact: false })).toBeVisible();
 
-  await openSetup(page, '/games/game-show');
-  await expect(page.getByText(/^Step 1 of 5:/)).toBeVisible();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.goto('/games/game-show');
+  await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('radio', { name: 'Ocean Party' }).click();
+  await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByText(/^Step 1 of 4:/)).toBeVisible();
   await finishSetup(page);
   await page.getByRole('dialog').getByRole('button', { name: 'Not yet' }).click();
   const bg = await page.getByRole('button', { name: 'Card 1', exact: true }).evaluate((el) => getComputedStyle(el).backgroundImage);
