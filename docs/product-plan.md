@@ -106,8 +106,14 @@ mode: they are games that plug into these same four modes.
    from every question set currently assigned to them**: sets assigned to
    the whole class plus sets assigned to them personally. The focus star
    still works (starred sets first, `docs/question-engine.md`).
-   - Students in **free** classrooms can **view** the Arcade but not play
-     from it; they play through teacher assignments and live games.
+   - Students in **free** classrooms see the Arcade with **every game**,
+     but games their class doesn't have show a **lock on the cover** and
+     can't be tapped (decided 2026-10-24). They play the free games and
+     teacher assignments. Students wanting a locked game is meant to start
+     the conversation with their teacher.
+   - Locked covers show only the lock: no prices, no "upgrade" or "buy"
+     words, nothing that asks a child or family to pay. The paying is
+     always the teacher's or school's decision.
 
 **Assigning question sets (to the class and/or each student):**
 - Assign a set to the **whole class**, to **chosen students**, or both, so
@@ -116,8 +122,8 @@ mode: they are games that plug into these same four modes.
   set. Shown as a simple grid: students down the side, sets across the top.
 - Each assigned set can have a start and end date, so the Arcade always
   draws from what the student is working on now.
-- **Free:** **one** assigned set at a time per student. **Plus:** proposed
-  up to 5 at a time per student. **Pro:** unlimited.
+- **Free:** **one** assigned set at a time per student. **Plus:** up to
+  5 at a time per student. **Pro:** unlimited. (Decided 2026-10-24.)
 - Changing an assignment changes the Arcade's question mix immediately;
   reports show which set each question came from.
 
@@ -647,10 +653,13 @@ deleted by a lock.
    Read-aloud, calm mode, reading comfort, text size, high contrast and
    core question types are free, always. (Also a legal and reputational
    protection: districts notice when accessibility is upsold.)
-2. **Students never pay, never see ads, never see upgrade prompts, and
-   never see what their class is "missing."** All purchasing and previews
-   happen on teacher pages only. (This is the lesson from the 2021 FTC
-   complaint against a kids' math game; see
+2. **Students never pay, never see ads, and never see upgrade prompts,
+   prices or "buy" messages.** All purchasing happens on teacher pages
+   only. The one deliberate exception (your decision, 2026-10-24): free
+   students see locked game covers in the Arcade, as a quiet lock icon
+   only, so wanting a game becomes a conversation with the teacher. XP,
+   the shop and Pals stay invisible in free classrooms. (Background: the
+   2021 FTC complaint against a kids' math game, see
    `docs/competitor-plans-research.md` section 3.)
 3. **No real money, loot boxes or random paid rewards anywhere.** In-game
    rewards (XP) are earned by playing and answering, never bought by
@@ -676,8 +685,8 @@ Competitor cross-comparison and the reasoning behind each line:
 | **XP and shop** (section 4F) | **No**, and students never see it | **Yes** | **Yes** | Yes |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
-| Question sets assigned at a time, per student (class and/or individual) | **1** | Proposed 5 | Unlimited | Unlimited |
-| **Student Arcade page** (play any game, questions from all assigned sets) | **View only** | Yes | Yes | Yes |
+| Question sets assigned at a time, per student (class and/or individual) | **1** | **5** | Unlimited | Unlimited |
+| **Student Arcade page** (play any game, questions from all assigned sets) | Free games playable; **paid games shown locked** (lock on cover, can't tap) | Yes | Yes | Yes |
 | Versus on two devices | No | Yes | Yes | Yes |
 | Reports | Report for every game played (all views, CSV, print), 30 days of history | Full history | Full history, trends, PDF/Sheets export | + school and admin views |
 | Names, approval, rename, remove player, bad-word filter, teams | **All** | All | All | All |
@@ -689,9 +698,10 @@ Notes:
 - Removing or renaming a player and the bad-word filter stay free, so a
   free teacher can still handle an inappropriate name without the Lock
   button.
-- In free classrooms the XP shop, themes and paid games are simply not
-  shown to students. Teachers see the previews and upgrade options;
-  students never do (section 5 principle 2, research section 3).
+- In free classrooms the XP shop and themes are not shown to students.
+  Paid games appear in the Arcade with a lock on the cover and can't be
+  tapped (principle 2's one exception). Teachers see previews and upgrade
+  options on their own pages.
 
 **School/district plans matter most:** a single district purchase order is
 worth hundreds of individual card subscriptions, and districts are who ask
@@ -934,14 +944,10 @@ game only decides *when to ask* and *what a right answer does*.
     suggestion: at least one game in every mode (for example Team Board,
     Match Up, Peg Drop, Four in a Row) so free teachers try all four ways
     to play, with the rest on Plus and Pro.
-11. **What "view only" Arcade looks like for free students.** It sits
-    close to principle 2 (students never see what their class is
-    missing). Claudia's suggestion to keep it on the safe side: the free
-    Arcade shows the games as a gallery with "Your teacher will start a
-    game" and the student's assigned set, with no locks, prices,
-    "upgrade" words or crossed-out games. Teachers see the upgrade
-    options on their own pages. OK?
-12. **Plus limit for assigned sets per student**: Claudia proposes 5.
+11. ~~Free students' Arcade~~ DECIDED 2026-10-24: every game shown;
+    games the class doesn't have get a lock on the cover and can't be
+    tapped. Kept kid-safe: lock icon only, no prices or "buy" words.
+12. ~~Plus limit for assigned sets per student~~ DECIDED 2026-10-24: 5.
 
 ## 11. Not yet considered: pre-build checklist (2026-10-24)
 

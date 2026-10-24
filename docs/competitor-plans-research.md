@@ -72,9 +72,12 @@ literally tromp in the dirt."
 and product plan 4F):
 - XP belongs to the **teacher's** plan, never sold to students or
   families.
-- In a free classroom, students **see no XP, no shop, no locked items, no
-  upgrade prompts.** Nothing about the game tells a child their class is
-  on a free plan.
+- In a free classroom, students **see no XP, no shop and no upgrade
+  prompts.** One deliberate exception (teacher decision, 2026-10-24):
+  paid games appear in the student Arcade with a lock on the cover, so a
+  student wanting a game starts a conversation with their teacher. To
+  stay clear of what drew the complaint, locked covers carry no prices,
+  no "upgrade" or "buy" words, and nothing aimed at families paying.
 - Within one classroom, every student has the same access: no student is
   ever a "have-not" next to a classmate.
 - XP buys cosmetics only (looks, not advantages): no pay-to-win.

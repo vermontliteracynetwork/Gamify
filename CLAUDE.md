@@ -75,6 +75,8 @@ change. The teacher adds their own too; never remove theirs.
 - Every font, icon, image, sound and library needs a commercial-use
   license recorded in `docs/asset-ledger.md` before it ships. No "found
   online" assets, nothing resembling a famous character or game's look.
-- Student pages: no ads, no trackers, no upgrade prompts, minimum data
+- Student pages: no ads, no trackers, no upgrade prompts, prices or "buy"
+  words (locked game covers in the free Arcade are a lock icon only),
+  minimum data
   (code + nickname or a class-list sign-in, no email student accounts). Accessibility features are never
   paywalled.
