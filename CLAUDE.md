@@ -59,8 +59,10 @@ teacher no control or educational value is not done.
   decompile, or copy another platform's actual source code or assets,
   reachable or not.
 - Platform look (menus, teacher pages): the light "sticker" style in
-  `src/index.css` (lavender ground, white panels, dark outlines, gold
-  accent, one shape scale). Use its tokens before adding colors or radii.
+  `src/index.css` with the brand palette (teacher, 2026-10-24): periwinkle
+  ground, off-white panels, black outlines, pale yellow accent, salmon,
+  coral, navy and mint; Inclusive Sans body, Frankfurter Medium display
+  (Fredoka stands in until its web license is bought); one shape scale. Use its tokens before adding colors or radii.
   Game stages wear per-game themes (`src/theme`), designed per game.
 
 ## Before every commit

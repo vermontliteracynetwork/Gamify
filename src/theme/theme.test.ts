@@ -26,5 +26,5 @@ describe('themes', () => {
 
   it('themes belong to one game', () => expect(classicTheme('match-up').gameId).toBe('match-up'));
 
-  it('exposes stage CSS variables', () => expect(themeStyle(classicTheme('x'))['--stage-accent']).toBe('#fbdb6b'));
+  it('exposes stage CSS variables', () => expect(themeStyle(classicTheme('x'))['--stage-accent']).toBe('#fdfd94'));
 });

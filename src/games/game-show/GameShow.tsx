@@ -36,8 +36,8 @@ export const gameShowManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1920, height: 1080, hint: 'Behind the whole board' },
-    { id: 'card-back', label: 'Card back', width: 300, height: 220, hint: 'The front of each surprise card before it flips', color: '#fbdb6b' },
-    { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid', color: '#fbdb6b' },
+    { id: 'card-back', label: 'Card back', width: 300, height: 220, hint: 'The front of each surprise card before it flips', color: '#fdfd94' },
+    { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid', color: '#fdfd94' },
     { id: 'trophy', label: 'Winner trophy', width: 400, height: 400, hint: 'Shown on the winner screen' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
@@ -308,7 +308,7 @@ export default function GameShow() {
                     transition={{ duration: 0.35 }}
                     className={`${cards.length > 12 ? 'aspect-[3/2]' : 'aspect-[4/3]'} rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
                       ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open ? 'motion-safe:hover:-translate-y-1' : ''}`}
-                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fbdb6b')) }}
+                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {c.open ? (
                       <span className="grid justify-items-center gap-1">
@@ -335,7 +335,7 @@ export default function GameShow() {
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
                         className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
-                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fbdb6b') }) }}>
+                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
@@ -436,7 +436,7 @@ function BoardArt({ kind }: { kind: Board }) {
     return (
       <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
         {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fbdb6b', transform: `rotate(${(i % 3) - 1}deg)` }}>
+          <span key={i} className="rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
             {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
           </span>
         ))}
@@ -444,10 +444,10 @@ function BoardArt({ kind }: { kind: Board }) {
     );
   }
   return (
-    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#d9ccf5' }}>
+    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
       {Array.from({ length: 4 }, (_, i) => <span key={`h${i}`} className="rounded-sm border-[2px] border-border bg-surface" />)}
       {Array.from({ length: 12 }, (_, i) => (
-        <span key={i} className="rounded-sm border-[2px] border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fbdb6b' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+        <span key={i} className="rounded-sm border-[2px] border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}
     </span>
   );

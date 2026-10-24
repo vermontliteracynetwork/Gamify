@@ -4,7 +4,7 @@ import { isPlayable } from '../engine/questions';
 import type { QuestionSet } from '../data/types';
 import { t } from '../i18n';
 
-const BANDS = ['#fbdb6b', '#9fd8f0', '#a3e6b8', '#f6a5c0', '#f7ad78', '#c9b6f2'];
+const BANDS = ['#fdfd94', '#9fd8f0', '#a3e6b8', '#f6a5c0', '#ed9d75', '#b4c4fb'];
 
 // Pick one question set (or up to `max` for games like the category grid),
 // shown as a menu of cards.

@@ -749,7 +749,7 @@ for the privacy and accessibility paperwork in section 6.
 - New file `docs/asset-ledger.md` (to create in Phase 0): every font,
   icon set, image, sound and library, with source and license.
 - Current state is clean:
-  - Fonts: Baloo 2 (display) and Inclusive Sans (body, designed for readability and inclusion), SIL Open Font License (commercial use OK)
+  - Fonts: Frankfurter Medium (display, once its web license is bought; Fredoka stands in) and Inclusive Sans (body, designed for readability and inclusion), SIL Open Font License (commercial use OK)
   - Icons: Phosphor Icons, MIT
   - Libraries: React, React Router, Motion, canvas-confetti, Tailwind,
     Vite: MIT / ISC

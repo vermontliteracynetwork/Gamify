@@ -39,7 +39,7 @@ function board(theme: GameTheme) {
       return (
         <div className="grid grid-cols-4 gap-1.5 w-full">
           {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className="aspect-[4/3] rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fbdb6b')}>
+            <span key={i} className="aspect-[4/3] rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
               {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
             </span>
           ))}

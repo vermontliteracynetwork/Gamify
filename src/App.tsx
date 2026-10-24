@@ -62,11 +62,11 @@ const SWIRL_SVG = encodeURIComponent(`
     <feDisplacementMap in="SourceGraphic" in2="noise" scale="140" xChannelSelector="R" yChannelSelector="G" />
   </filter>
   <g filter="url(#marble)">
-    <rect width="800" height="800" fill="#b9a9ec" />
-    <circle cx="150" cy="150" r="180" fill="#cabdf2" />
-    <circle cx="650" cy="220" r="220" fill="#a894e6" />
-    <circle cx="300" cy="600" r="240" fill="#cabdf2" />
-    <circle cx="700" cy="700" r="180" fill="#a894e6" />
+    <rect width="800" height="800" fill="#b4c4fb" />
+    <circle cx="150" cy="150" r="180" fill="#c8d4fc" />
+    <circle cx="650" cy="220" r="220" fill="#a3b6f7" />
+    <circle cx="300" cy="600" r="240" fill="#c8d4fc" />
+    <circle cx="700" cy="700" r="180" fill="#a3b6f7" />
   </g>
 </svg>
 `);

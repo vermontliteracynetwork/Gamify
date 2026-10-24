@@ -6,7 +6,7 @@ import type { StringKey } from '../i18n/en';
 // Every play mode has a name, an icon and a one-line hint, shown on every
 // game card and welcome screen so it's always clear how a game is played.
 export const MODE_ICONS: Record<PlayMode, Icon> = { live: DeviceTablet, share: ProjectorScreen, solo: User, versus: Users };
-export const MODE_COLORS: Record<PlayMode, string> = { live: '#9fd8f0', share: '#fbdb6b', solo: '#a3e6b8', versus: '#f7ad78' };
+export const MODE_COLORS: Record<PlayMode, string> = { live: '#9fd8f0', share: '#fdfd94', solo: '#a3e6b8', versus: '#ed9d75' };
 
 export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint?: boolean }) {
   const Icon = MODE_ICONS[mode];

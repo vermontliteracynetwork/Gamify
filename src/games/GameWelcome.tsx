@@ -15,6 +15,7 @@ export interface HowStep { icon: ReactNode; text: string }
 export default function GameWelcome({ game, steps, cover, onStart }: { game: GameManifest; steps: HowStep[]; cover?: string; onStart: () => void }) {
   const { settings } = useSettings();
   return (
+    <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 190px)' }}>
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden max-w-3xl mx-auto grid md:grid-cols-[1.1fr_1fr]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       {cover
@@ -38,5 +39,6 @@ export default function GameWelcome({ game, steps, cover, onStart }: { game: Gam
         </button>
       </div>
     </motion.section>
+    </div>
   );
 }

@@ -4,44 +4,43 @@
 @import "@fontsource/inclusive-sans/500.css";
 @import "@fontsource/inclusive-sans/600.css";
 @import "@fontsource/inclusive-sans/700.css";
-@import "@fontsource/baloo-2/500.css";
-@import "@fontsource/baloo-2/600.css";
-@import "@fontsource/baloo-2/700.css";
-@import "@fontsource/baloo-2/800.css";
+@import "@fontsource/fredoka/500.css";
+@import "@fontsource/fredoka/600.css";
+@import "@fontsource/fredoka/700.css";
 
 @theme {
-  --color-bg: #b9a9ec;
-  --color-bg-elevated: #a894e6;
-  --color-surface: #ffffff;
-  --color-surface-2: #efe9fb;
-  --color-surface-hover: #f5f1ff;
-  --color-border: #1c1730;
-  --color-border-soft: #d9d0f5;
+  --color-bg: #b4c4fb;
+  --color-bg-elevated: #9fb2f5;
+  --color-surface: #fbfcf8;
+  --color-surface-2: #e9eefe;
+  --color-surface-hover: #f2f5ff;
+  --color-border: #000000;
+  --color-border-soft: #cdd7fb;
 
-  --color-text: #241c3d;
-  --color-muted: #6b6089;
-  --color-faint: #9b90bd;
+  --color-text: #000000;
+  --color-muted: #314677;
+  --color-faint: #7383ad;
 
-  --color-accent: #fbdb6b;
-  --color-accent-hover: #ffe482;
-  --color-accent-ink: #241c3d;
+  --color-accent: #fdfd94;
+  --color-accent-hover: #ffffb8;
+  --color-accent-ink: #000000;
 
-  --color-secondary: #f7ad78;
-  --color-secondary-hover: #ffbd8e;
+  --color-secondary: #ed9d75;
+  --color-secondary-hover: #f4b291;
 
-  --color-success: #8fe0a8;
-  --color-danger: #f3808c;
+  --color-success: #9fe7a0;
+  --color-danger: #e5635f;
 
-  --color-quiz-yellow: #fbdb6b;
-  --color-quiz-green: #a3e6b8;
-  --color-quiz-blue: #a8d8f0;
-  --color-quiz-orange: #f7ad78;
+  --color-quiz-yellow: #fdfd94;
+  --color-quiz-green: #ddfcc6;
+  --color-quiz-blue: #b4c4fb;
+  --color-quiz-orange: #ed9d75;
 
   --radius-panel: 26px;
   --radius-pill: 999px;
   --radius-input: 16px;
 
-  --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Frankfurter Medium', 'Fredoka', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -55,27 +54,27 @@
   and --stroke below, applied via the .sticker utility class.
 */
 :root {
-  --bg: #b9a9ec;
-  --bg-elevated: #a894e6;
-  --surface: #ffffff;
-  --surface-2: #efe9fb;
-  --surface-hover: #f5f1ff;
-  --border: #1c1730;
-  --border-soft: #d9d0f5;
+  --bg: #b4c4fb;
+  --bg-elevated: #9fb2f5;
+  --surface: #fbfcf8;
+  --surface-2: #e9eefe;
+  --surface-hover: #f2f5ff;
+  --border: #000000;
+  --border-soft: #cdd7fb;
 
-  --text: #241c3d;
-  --text-muted: #6b6089;
-  --text-faint: #9b90bd;
+  --text: #000000;
+  --text-muted: #314677;
+  --text-faint: #7383ad;
 
-  --accent: #fbdb6b;
-  --accent-hover: #ffe482;
-  --accent-ink: #241c3d;
+  --accent: #fdfd94;
+  --accent-hover: #ffffb8;
+  --accent-ink: #000000;
 
-  --secondary: #f7ad78;
-  --secondary-hover: #ffbd8e;
+  --secondary: #ed9d75;
+  --secondary-hover: #f4b291;
 
-  --success: #8fe0a8;
-  --danger: #f3808c;
+  --success: #9fe7a0;
+  --danger: #e5635f;
 
   --radius-panel: 26px;
   --radius-pill: 999px;
@@ -85,7 +84,7 @@
   --shadow-sticker: 0 4px 0 var(--border);
   --shadow-sticker-lg: 0 6px 0 var(--border);
 
-  --font-display: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Frankfurter Medium', 'Fredoka', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 
   color-scheme: light;
@@ -111,8 +110,12 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
 
+/* Display font: the brand's Frankfurter Medium once its web license and
+   file are in (see docs/asset-ledger.md); until then Fredoka (OFL), the
+   closest free rounded match, stands in. */
+
 /* The chunky black-outlined bubble title look from the mockups, done with
-   a text-stroke + offset shadow on the existing Baloo 2 face rather than
+   a text-stroke + offset shadow on the display face rather than
    sourcing an exact "outlined" font -- keeps it robust across browsers and
    doesn't depend on matching an unconfirmed Canva font by name. */
 .title-bubble {
@@ -150,7 +153,7 @@ html[data-text-size="large"] { font-size: 18px; }
 html[data-text-size="larger"] { font-size: 20px; }
 html[data-comfort="on"] body { letter-spacing: 0.04em; word-spacing: 0.12em; line-height: 1.75; }
 html[data-contrast="high"] {
-  --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #e9e3fb;
+  --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #e4eafe;
   --text: #000000; --text-muted: #1c1730; --border-soft: #1c1730;
 }
 html[data-dim="on"] body { filter: brightness(0.85); }

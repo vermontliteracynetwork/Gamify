@@ -14,7 +14,7 @@ export interface ThemeColors {
 }
 
 // Only fonts with a commercial license recorded in docs/asset-ledger.md.
-export const APPROVED_FONTS = ['Baloo 2', 'Inclusive Sans'] as const;
+export const APPROVED_FONTS = ['Fredoka', 'Inclusive Sans'] as const;
 export type FontName = (typeof APPROVED_FONTS)[number];
 
 export type Backdrop =
