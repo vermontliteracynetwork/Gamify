@@ -162,8 +162,8 @@ export const en = {
   'start.more': 'More {label}',
   'start.locked': 'Your teacher set these for your assignment.',
 
-  'practice.title': 'Star Quiz',
-  'practice.description': 'Answer questions to fill the sky with stars.',
+  'practice.title': 'Question Tracker',
+  'practice.description': 'Every right answer adds a star until the whole sky is full.',
   'practice.rounds': 'Questions',
   'practice.set': 'Question set',
   'practice.stars': '{count} stars',
@@ -538,6 +538,7 @@ export const en = {
   'details.badCode': 'That doesn\'t look like a Common Core code yet. Examples: RF.1.3, 2.OA.2, RL.9-10.4, A-REI.3',
   'details.cover': 'Cover picture',
   'details.removeCover': 'Use the subject cover',
+  'practice.progress': 'Question {round} of {total}',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

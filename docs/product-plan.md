@@ -749,7 +749,7 @@ for the privacy and accessibility paperwork in section 6.
 - New file `docs/asset-ledger.md` (to create in Phase 0): every font,
   icon set, image, sound and library, with source and license.
 - Current state is clean:
-  - Fonts: Frankfurter Medium (display, once its web license is bought; Fredoka stands in) and Inclusive Sans (body, designed for readability and inclusion), SIL Open Font License (commercial use OK)
+  - Fonts: Grow Year (headings, the logo lettering; free for commercial use) and Inclusive Sans (body, designed for readability and inclusion), SIL Open Font License (commercial use OK)
   - Icons: Phosphor Icons, MIT
   - Libraries: React, React Router, Motion, canvas-confetti, Tailwind,
     Vite: MIT / ISC
@@ -1120,6 +1120,9 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 52 | **"What the research says" page:** a plain-language page with the findings behind ideas 43-51, each with its honest caveat and a link to the study. | Principals and grant writers need citations; showing caveats builds trust | Beth, 2026-10-24; research brief "Marketing-ready findings" |
 | 53 | **One-page research handout for principals** (PDF from the page above), ending with "How Gamify will measure its own results" (research brief section 5). | Leave-behind for conferences and district meetings; sets up the pilot story | Beth, 2026-10-24 |
 | 54 | **Honesty as a brand line: "We tell you what the research says, and what it doesn't."** | Stands out in a market full of overclaims; teachers distrust hype | Beth, 2026-10-24; research brief wording rule |
+| 55 | **"Find the right set in seconds."** Every set is tagged by subject, grade, tags and Common Core standard, with a cover picture, so teachers filter straight to RF.1.3 or 3.NF.1. | Saves teacher time; standards alignment is what admins ask for | Teacher request, 2026-10-24 |
+| 56 | **"Watch the sky fill up."** Question Tracker turns progress into a picture: every right answer adds a star to a night sky (or a fish to the ocean, an animal to the savanna in class-made themes). | A visual a pre-reader understands; great short video | Teacher request, 2026-10-24 |
+| 57 | **"Sign in with your pictures."** K-1 students tap their name and two pictures, which a class can draw themselves. | No passwords, no email accounts for kids; privacy and ownership | Teacher request, 2026-10-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1165,3 +1168,5 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 32 | **What Gamification Research Gets Wrong, and How We Designed Around It** | The critics' strongest points (rewards, novelty, anxiety, guessing) and the design answer to each. Cites research brief sections 3-4 (Deci et al., 1999; Rodrigues et al., 2022; Mekler et al., 2017). | Many games per set, no prizes, guessing check, optional rankings | Beth, 2026-10-24; skeptical teachers, admins |
 | 33 | **Using Gamify Data in an RTI or MTSS Meeting** | Turn per-question accuracy and item analysis into intervention groups and feedback for students. Cites Wisniewski, Zierer & Hattie (2020) on feedback. | Reports, item analysis, assigning sets to individuals | Beth, 2026-10-24; intervention teams |
 | 34 | **Game Time for Students Who Need a Different Pace** | Short games, timers off, calm mode and the settings menu as access features for students with attention or sensory needs. Explicitly not a treatment claim (research brief F12). Cites Hussein et al. (2023). | Calm mode, timers, settings | Beth, 2026-10-24; special education |
+| 35 | **Themes We're Looking For** | A call for class-made themes for Question Tracker and other games: an underwater scene where sea animals appear as questions are answered, a safari with plants and animals, and more ideas from the theme wish list in the development plan. How to draw one with the template and send it in. | Theme Builder, printable template, Question Tracker | Teacher idea, 2026-10-24; art teachers, classes |
+| 36 | **Standards-First Review: Filter by Common Core Code** | Pick the standard you're teaching this week, filter the set library to it, and run three different games on it. | Set filters, standards, assigning sets | Teacher request, 2026-10-24 |

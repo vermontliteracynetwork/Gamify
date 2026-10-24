@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
@@ -17,21 +16,22 @@ import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
-import { pieceColor, pieceImage } from '../../theme/library';
+import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 import Title from '../../ui/Title';
+import Sky from './Sky';
 
 
 export const starQuizManifest: GameManifest = {
   id: 'star-quiz',
-  name: 'Star Quiz',
-  description: 'Answer questions to fill the sky with stars.',
+  name: 'Question Tracker',
+  description: 'Every right answer adds a star until the whole sky is full.',
   modes: ['solo'],
   questionKinds: ['mc'],
   themePieces: [
-    { id: 'background', label: 'Sky', width: 1600, height: 1000, hint: 'The sky behind the stars' },
-    { id: 'star', label: 'Star', width: 128, height: 128, hint: 'What you collect for each right answer', color: '#f6c544' },
+    { id: 'background', label: 'Background', width: 1600, height: 1000, hint: 'The scene that fills up (a night sky, the ocean, the savanna)' },
+    ...[1, 2, 3, 4, 5, 6].map((n) => ({ id: `item-${n}`, label: `Item ${n}`, width: 256, height: 256, hint: 'Something that appears for each right answer (a star, a fish, a giraffe)', ...(n === 1 ? { color: '#ffd166' } : {}) })),
   ],
   rounds: { label: 'Questions', min: 5, max: 30, default: 10 },
   hasCpu: false,
@@ -101,19 +101,10 @@ export default function StarQuiz() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <section className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 mb-6" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="title-bubble text-3xl"><Title text={t('practice.title')} /></h1>
-            <span className="font-display text-2xl font-bold tabular-nums">{phase === 'play' ? `${round} / ${total}` : ''}</span>
-          </div>
-          <div className="flex flex-wrap gap-2 min-h-14" aria-label={t('practice.stars', { count: stars })} role="img">
-            {Array.from({ length: total }, (_, i) => (
-              <motion.span key={i} initial={false} animate={i < stars ? { scale: [0.4, 1.25, 1] } : { scale: 1 }} transition={{ duration: 0.4 }}>
-                {i < stars && pieceImage(theme, 'star') ? <img src={pieceImage(theme, 'star')} alt="" className="w-11 h-11 object-contain" /> : <Star weight={i < stars ? 'fill' : 'regular'} size={44} className={i < stars ? 'drop-shadow' : 'text-border-soft'} style={i < stars ? { color: pieceColor(theme, 'star', '#f6c544') } : undefined} />}
-              </motion.span>
-            ))}
-          </div>
-
+        <section className="grid gap-2">
+          <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
+          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} />
+          <p className="sr-only" aria-live="polite">{phase === 'play' ? t('practice.progress', { round, total }) : ''}</p>
         </section>
       )}
 

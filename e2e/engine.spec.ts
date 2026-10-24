@@ -42,10 +42,15 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
     await buttons.nth(rightIdx).click();
     await expect(dialog.getByText('You got it!')).toBeVisible();
     rights++;
+    if (rights === 3 && info.project.name === 'ipad-portrait') {
+      // Frame check: the new star pops in and the sky's items slowly turn.
+      for (let f = 0; f < 6; f++) { await page.screenshot({ path: `test-results/sky-frame-${f}.png` }); await page.waitForTimeout(120); }
+    }
     if (rights < 5) await expect(dialog.getByText('You got it!')).toBeHidden({ timeout: 4000 });
   }
 
   await expect(page.getByText('You caught 5 stars!')).toBeVisible({ timeout: 5000 });
+  await page.screenshot({ path: `test-results/sky-end-${info.project.name}.png` });
   await expect(page.getByRole('heading', { name: "Let's Look Back" })).toBeVisible();
   await expect(page.getByText(/^Right answer:/)).toHaveCount(1);
   await page.screenshot({ path: `test-results/lookback-${info.project.name}.png`, fullPage: true });

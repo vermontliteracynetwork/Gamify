@@ -4,9 +4,6 @@
 @import "@fontsource/inclusive-sans/500.css";
 @import "@fontsource/inclusive-sans/600.css";
 @import "@fontsource/inclusive-sans/700.css";
-@import "@fontsource/fredoka/500.css";
-@import "@fontsource/fredoka/600.css";
-@import "@fontsource/fredoka/700.css";
 
 @theme {
   --color-bg: #b4c4fb;
@@ -40,7 +37,7 @@
   --radius-pill: 999px;
   --radius-input: 16px;
 
-  --font-display: 'Frankfurter Medium', 'Fredoka', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -84,7 +81,7 @@
   --shadow-sticker: 0 4px 0 var(--border);
   --shadow-sticker-lg: 0 6px 0 var(--border);
 
-  --font-display: 'Frankfurter Medium', 'Fredoka', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 
   color-scheme: light;
@@ -110,16 +107,24 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display);
 }
 
-/* Display font: the brand's Frankfurter Medium once its web license and
-   file are in (see docs/asset-ledger.md); until then Fredoka (OFL), the
-   closest free rounded match, stands in. */
+/* Display font: Grow Year by Khurasan Studio, the logo's lettering (free
+   for personal and commercial use, docs/asset-ledger.md). One weight, so
+   never let the browser fake a bold. */
+@font-face {
+  font-family: 'Grow Year';
+  src: url('/fonts/grow-year.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+h1, h2, h3, .font-display, .title-bubble { font-synthesis: none; letter-spacing: 0.01em; }
 
 /* Page and game titles: solid black display text (teacher rule,
    2026-10-24). On a game stage they follow the theme's title text color
    (black in Classic) so they stay readable on any backdrop. */
 .title-bubble {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   color: var(--stage-bg-text, var(--text));
 }
 h1, h2, h3 { color: inherit; }
@@ -128,9 +133,9 @@ h1, h2, h3 { color: inherit; }
    heading's own color (src/ui/Title.tsx). */
 .logo-g {
   display: inline-block;
-  width: 0.8em;
-  height: 0.9em;
-  vertical-align: -0.08em;
+  width: 0.68em;
+  height: 0.92em;
+  vertical-align: -0.1em;
   margin-right: 0.03em;
   background-color: currentColor;
   -webkit-mask: url("/brand/gamify-mark.png") center / contain no-repeat;

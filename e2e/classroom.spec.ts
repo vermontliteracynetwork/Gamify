@@ -54,7 +54,7 @@ test('teacher makes a class, assigns a set, sets supports; a student signs in an
   await page.screenshot({ path: `test-results/arcade-${info.project.name}.png` });
 
   // Star Quiz uses the assigned set (no question page) and Ava's no-wait support.
-  await page.getByRole('link', { name: /Star Quiz/ }).click();
+  await page.getByRole('link', { name: /Question Tracker/ }).click();
   await openSetup(page, '/games/star-quiz');
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
   await finishSetup(page);
