@@ -44,6 +44,14 @@ export interface Student {
   picturePassword: [string, string];
   // Narrows the class's modes for this one student (never widens them).
   allowedModes?: PlayMode[];
+  // Question screen accommodations the teacher set (behind the teacher PIN):
+  // read-first seconds, tries, shuffle and tools. Applied while they play.
+  accommodations?: {
+    readFirstSeconds?: number;
+    triesPerQuestion?: 1 | 2 | 3 | 4;
+    shuffleAnswers?: boolean;
+    tools?: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
+  };
 }
 
 // A set assigned to a whole class (studentId absent) or to one student.

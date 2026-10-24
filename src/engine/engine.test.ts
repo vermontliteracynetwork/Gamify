@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MultipleChoiceQuestion, QuestionSet } from '../data/types';
 import { fallbackQuestion } from './fallback';
-import { drawQuestion } from './picker';
+import { drawQuestion, makeDeck } from './picker';
 import { questionIssue, shuffleChoices } from './questions';
 
 const q = (id: string, extra: Partial<MultipleChoiceQuestion> = {}): MultipleChoiceQuestion => ({ id, kind: 'mc', prompt: `Q ${id}`, choices: ['a', 'b', 'c'], correctIndex: 1, ...extra });
@@ -59,5 +59,21 @@ describe('fallbackQuestion', () => {
       expect(new Set(f.choices).size).toBe(4);
       expect(questionIssue(f)).toBeNull();
     }
+  });
+});
+
+describe('even deck across assigned sets', () => {
+  const set = (id: string, n: number) => ({
+    set: { id, name: id, ownerId: 'x', visibility: 'private' as const, createdAt: '', updatedAt: '',
+      questions: Array.from({ length: n }, (_, i) => ({ id: `${id}-${i}`, kind: 'mc' as const, prompt: `${id} ${i}?`, choices: ['a', 'b', 'c', 'd'], correctIndex: 0 })) },
+    starred: false,
+  });
+  it('sets take turns and no question repeats until its set runs out', () => {
+    const deck = makeDeck([set('A', 3), set('B', 5)]);
+    const drawn = Array.from({ length: 6 }, () => deck.next());
+    const fromA = drawn.filter((d) => d.setId === 'A');
+    expect(fromA).toHaveLength(3);
+    expect(new Set(fromA.map((d) => d.question.id)).size).toBe(3);
+    for (let i = 1; i < drawn.length; i++) expect(drawn[i].setId).not.toBe(drawn[i - 1].setId);
   });
 });

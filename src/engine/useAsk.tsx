@@ -1,11 +1,11 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { data, newId } from '../data';
 import type { MultipleChoiceQuestion, QuestionLogEntry } from '../data/types';
 import type { PlayMode } from '../games/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { drawQuestion, type PoolSet } from './picker';
+import { makeDeck, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
 
 export interface AskOptions { count?: number; player?: string }
@@ -40,12 +40,13 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
   const lastId = useRef<string>();
   const missedThis = useRef(false);
 
+  const deck = useMemo(() => makeDeck(pool), [pool]);
   const next = useCallback((avoid?: string) => {
-    const drawn = drawQuestion(pool, avoid);
+    const drawn = deck.next(avoid);
     lastId.current = drawn.question.id;
     missedThis.current = false;
     return drawn;
-  }, [pool]);
+  }, [deck]);
 
   const ask = useCallback((opts: AskOptions = {}) => new Promise<boolean>((resolve) => {
     const drawn = next(lastId.current);

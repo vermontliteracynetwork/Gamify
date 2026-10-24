@@ -17,6 +17,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
+import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
@@ -55,7 +56,8 @@ export default function BakeryMatch() {
   const [setup, change] = useSavedSetup('bakery-match', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7 });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
-  const { ask, element, missed } = useAsk({ gameId: 'bakery-match', mode: 'solo', pool: chosen });
+  const game = useGamePool(chosen);
+  const { ask, element, missed } = useAsk({ gameId: 'bakery-match', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
@@ -177,7 +179,7 @@ export default function BakeryMatch() {
 
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('welcome')} onPlay={start} pages={[
-          { id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> },
+          ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
               <Slider label={t('bm.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />

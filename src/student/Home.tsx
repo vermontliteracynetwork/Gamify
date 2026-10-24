@@ -4,12 +4,17 @@ import { ArrowRight, Sparkle } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
+import { data } from '../data';
+import { useAsync } from '../data/hooks';
+import { useSession } from './session';
 import { t } from '../i18n';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function Home() {
   const reduce = useReducedMotion();
+  const { value: classes = [] } = useAsync(() => data.listClassrooms());
+  const session = useSession();
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-16">
@@ -22,6 +27,16 @@ export default function Home() {
         <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2">{t('home.title')}</h1>
         <p className="text-text font-bold text-base max-w-[50ch]">{t('home.subtitle')}</p>
       </motion.div>
+
+      {(classes.length > 0 || session) && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {session
+            ? <Link to="/arcade" className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.myArcade', { name: session.name })}</Link>
+            : classes.map((c) => (
+              <Link key={c.id} to={`/arcade/${c.id}`} className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.signIn', { name: c.name })}</Link>
+            ))}
+        </div>
+      )}
 
       {GAMES.length === 0 && (
         <div

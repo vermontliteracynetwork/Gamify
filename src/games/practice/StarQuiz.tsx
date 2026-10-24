@@ -16,6 +16,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import type { GameManifest } from '../types';
 import { useSavedSetup } from '../useSavedSetup';
+import { useGamePool } from '../../student/session';
 import { pieceColor, pieceImage } from '../../theme/library';
 import { ThemedPage, ThemePicker, useGameTheme } from '../../theme/useGameTheme';
 
@@ -46,7 +47,8 @@ export default function StarQuiz() {
   const [setup, change] = useSavedSetup('star-quiz', { setId: LIBRARY[0].id, rounds: 10 });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
-  const { ask, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool });
+  const game = useGamePool(pool);
+  const { ask, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stars, setStars] = useState(0);
   const [round, setRound] = useState(0);
@@ -85,7 +87,7 @@ export default function StarQuiz() {
 
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('welcome')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
-          { id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> },
+          ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
           ) },

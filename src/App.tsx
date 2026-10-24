@@ -13,6 +13,11 @@ import { SettingsProvider } from './settings/SettingsContext';
 import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
 import TemplatePage from './theme/builder/TemplatePage';
 import OwnerPage from './owner/OwnerPage';
+import ClassesPage from './teacher/ClassesPage';
+import ClassPage from './teacher/ClassPage';
+import { Arcade, ArcadeSignIn } from './student/ArcadePage';
+import { SessionSupports } from './student/session';
+import { useSettings } from './settings/SettingsContext';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -41,6 +46,10 @@ function AnimatedRoutes() {
           <Route path="/teacher/themes" element={<ThemeBuilderPage />} />
           <Route path="/teacher/themes/:gameId" element={<ThemeBuilderPage />} />
           <Route path="/teacher/themes/:gameId/template" element={<TemplatePage />} />
+          <Route path="/teacher/classes" element={<ClassesPage />} />
+          <Route path="/teacher/classes/:id" element={<ClassPage />} />
+          <Route path="/arcade" element={<Arcade />} />
+          <Route path="/arcade/:classId" element={<ArcadeSignIn />} />
           <Route path="/owner" element={<OwnerPage />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
@@ -86,6 +95,11 @@ function AmbientBackground() {
   );
 }
 
+function Supports() {
+  const { setOverrides } = useSettings();
+  return <SessionSupports setOverrides={setOverrides} />;
+}
+
 export default function App() {
   return (
     <SettingsProvider>
@@ -93,6 +107,7 @@ export default function App() {
       <div className="min-h-dvh relative text-text font-body">
         <AmbientBackground />
         <NavBar />
+        <Supports />
         <AnimatedRoutes />
       </div>
     </BrowserRouter>

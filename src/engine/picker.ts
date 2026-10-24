@@ -35,3 +35,34 @@ export function drawQuestion(pool: PoolSet[], avoidId?: string, rand: () => numb
   }
   throw new Error('unreachable');
 }
+
+// Assigned sets are used evenly (teacher design, development plan Part 3B):
+// sets take turns, and each set deals its questions in a random order with
+// no repeats until it runs out, then reshuffles. Starred sets still win.
+export function makeDeck(pool: PoolSet[], rand: () => number = Math.random) {
+  const sets = pool
+    .map((p) => ({ ...p, questions: p.set.questions.filter(isPlayable) }))
+    .filter((p) => p.questions.length > 0);
+  const starred = sets.filter((s) => s.starred);
+  const from = starred.length > 0 ? starred : sets;
+  const piles = new Map<string, MultipleChoiceQuestion[]>();
+  let turn = Math.floor(rand() * Math.max(1, from.length));
+  const shuffled = (qs: MultipleChoiceQuestion[]) => {
+    const a = [...qs];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  return {
+    next(avoidId?: string): Drawn {
+      if (from.length === 0) return { question: fallbackQuestion(rand) };
+      const pick = from[turn++ % from.length];
+      let pile = piles.get(pick.set.id);
+      if (!pile || pile.length === 0) {
+        pile = shuffled(pick.questions);
+        if (pile.length > 1 && pile[pile.length - 1].id === avoidId) pile.unshift(pile.pop()!);
+        piles.set(pick.set.id, pile);
+      }
+      return { question: pile.pop()!, setId: pick.set.id };
+    },
+  };
+}
