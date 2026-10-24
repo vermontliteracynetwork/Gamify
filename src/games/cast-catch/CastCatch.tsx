@@ -122,6 +122,7 @@ export default function CastCatch() {
     cancelAnimationFrame(raf.current);
     quality.current = castQuality(power);
     setCast(power);
+    setFlying(true);
     setStep('casting');
     playEffect('whoosh', settings);
     await new Promise((r) => window.setTimeout(r, still ? 150 : 750));
@@ -146,6 +147,13 @@ export default function CastCatch() {
 
   const qualityWord = [t('cc.cast.short'), t('cc.cast.good'), t('cc.cast.great'), t('cc.cast.perfect')];
   const bobberLeft = 30 + cast * 58;
+  // The bobber starts at the rod tip, then (next frame) flies to where the cast lands.
+  const [flying, setFlying] = useState(false);
+  useEffect(() => {
+    if (step !== 'casting') return;
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setFlying(false)));
+    return () => cancelAnimationFrame(id);
+  }, [step]);
   const lineOut = step === 'ask' || step === 'wait' || step === 'bite';
 
   return (
@@ -179,19 +187,16 @@ export default function CastCatch() {
 
           <div className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 350px)', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 28%, #5aa9d6 28%, #2f6fb0 100%)' }) }}>
             {!still && [0, 1, 2].map((i) => (
-              <motion.span key={i} className="absolute h-1.5 rounded-pill bg-white/50" style={{ top: `${40 + i * 18}%`, width: '18%' }}
-                initial={{ left: `${-20 + i * 30}%` }} animate={{ left: ['-20%', '110%'] }} transition={{ duration: 9 + i * 3, repeat: Infinity, ease: 'linear', delay: i * 1.5 }} aria-hidden="true" />
+              <span key={i} className="absolute h-1.5 rounded-pill bg-white/50" style={{ top: `${40 + i * 18}%`, width: '18%', animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}
             <span className="absolute right-[8%] top-[4%] w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={{ background: '#fdfd94' }} aria-hidden="true" />
             {[[12, 6, 16], [52, 10, 12]].map(([x, y, w], i) => (
-              <motion.span key={`c${i}`} className="absolute h-[7%] rounded-pill bg-white border-[2px] border-border" style={{ top: `${y}%`, width: `${w}%` }}
-                initial={{ left: `${x}%` }} animate={still ? undefined : { left: [`${x}%`, `${x + 6}%`, `${x}%`] }} transition={{ duration: 18 + i * 6, repeat: Infinity, ease: 'easeInOut' }} aria-hidden="true" />
+              <span key={`c${i}`} className="absolute h-[7%] rounded-pill bg-white border-[2px] border-border" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
             ))}
             {!still && [0, 1, 2].map((i) => (
-              <motion.span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%` }} aria-hidden="true"
-                initial={{ left: i % 2 ? '105%' : '-15%' }} animate={{ left: i % 2 ? ['105%', '-15%'] : ['-15%', '105%'] }} transition={{ duration: 14 + i * 4, repeat: Infinity, ease: 'linear', delay: i * 2 }}>
+              <span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%`, animation: `${i % 2 ? 'cc-swim-left' : 'cc-swim-right'} ${14 + i * 4}s linear ${-i * 5}s infinite` }} aria-hidden="true">
                 <svg width="70" height="34" viewBox="0 0 100 50" style={{ transform: i % 2 ? 'none' : 'scaleX(-1)' }}><path d="M78 25 L98 8 L94 25 L98 42 Z M44 5 a38 20 0 1 0 0.1 0 Z" fill="#0b2a4a" /></svg>
-              </motion.span>
+              </span>
             ))}
             {/* dock and rod */}
             <span className="absolute left-0 bottom-0 w-[22%] h-[38%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={{ background: '#b98552' }} aria-hidden="true" />
@@ -201,11 +206,10 @@ export default function CastCatch() {
               {lineOut && <line x1="24" y1="30" x2={bobberLeft} y2={step === 'bite' ? 52 : 46} stroke="#000" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
             </svg>
             {(step === 'casting' || lineOut) && (
-              <motion.span className="absolute w-9 h-9 -ml-[18px] rounded-full border-[2.5px] border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f') }}
-                initial={step === 'casting' && !still ? { left: '24%', top: '26%' } : false}
-                animate={step === 'bite' ? { left: `${bobberLeft}%`, top: ['46%', '52%', '47%', '53%'] } : { left: `${bobberLeft}%`, top: still ? '44%' : ['44%', '46%', '44%'] }}
-                transition={step === 'casting' ? { duration: 0.7, ease: 'easeOut' } : { duration: step === 'bite' ? 0.5 : 2, repeat: Infinity }}
-                aria-hidden="true" />
+              <span className="absolute w-9 h-9 -ml-[18px] -mt-[18px]" aria-hidden="true"
+                style={{ left: `${flying ? 24 : bobberLeft}%`, top: `${flying ? 30 : 46}%`, transition: still ? 'none' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
+                <span className="block w-full h-full rounded-full border-[2.5px] border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f'), animation: still || step === 'casting' ? undefined : step === 'bite' ? 'cc-bite 0.5s ease-in-out infinite' : 'cc-bob 2s ease-in-out infinite' }} />
+              </span>
             )}
             <AnimatePresence>
               {last && (

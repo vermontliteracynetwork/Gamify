@@ -857,6 +857,16 @@ export const en = {
   'mu.misses': '{count} tries missed. Look back at them below.',
   'mu.misses.one': '1 try missed. Look back at it below.',
   'mu.perfect': 'No misses at all!',
+  'pd.how1': 'Answer the question right.',
+  'pd.how2': 'Pick a spot and drop the ball.',
+  'pd.how3': 'It bounces into a bucket of points. Most points wins!',
+  'pd.teams': 'Teams on one screen',
+  'pd.rounds': 'Drops for each team',
+  'pd.pick': '{name}, pick a spot to drop!',
+  'pd.dropping': 'Here it goes...',
+  'pd.drop': 'Drop {n} of {total}',
+  'pd.zone': 'Drop the ball in spot {n}',
+  'pd.done': 'You scored {count} points!',
   'setup.pickSets': 'Pick up to {max} question sets. Each one becomes a column.',
 } as const;
 

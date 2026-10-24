@@ -13,6 +13,7 @@ import CastCatch from './games/cast-catch/CastCatch';
 import MemoryMatch from './games/memory-match/MemoryMatch';
 import Flashcards from './games/flashcards/Flashcards';
 import MatchUp from './games/match-up/MatchUp';
+import PegDrop from './games/peg-drop/PegDrop';
 import { SettingsProvider } from './settings/SettingsContext';
 import ThemeBuilderPage from './theme/builder/ThemeBuilderPage';
 import TemplatePage from './theme/builder/TemplatePage';
@@ -55,6 +56,7 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
+          <Route path="/games/peg-drop" element={<RequireSignIn><PegDrop /></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><MatchUp /></RequireSignIn>} />
           <Route path="/games/flashcards" element={<RequireSignIn><Flashcards /></RequireSignIn>} />
           <Route path="/games/memory-match" element={<RequireSignIn><MemoryMatch /></RequireSignIn>} />

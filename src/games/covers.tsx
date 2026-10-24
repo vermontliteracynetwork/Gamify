@@ -98,6 +98,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
         </div>
       );
+    case 'peg-drop':
+      return (
+        <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
+          {Array.from({ length: 4 }, (_, r) => Array.from({ length: r % 2 ? 6 : 5 }, (_, k) => (
+            <span key={`${r}-${k}`} className="absolute w-[5%] aspect-square rounded-full bg-[#fbfcf8] border-2 border-border" style={{ left: `${(r % 2 ? k : k + 0.5) * 16 + 6}%`, top: `${14 + r * 16}%` }} />
+          )))}
+          <span className="absolute w-[10%] aspect-square rounded-full border-[3px] border-border" style={{ left: '44%', top: '4%', background: '#fdfd94' }} />
+          <div className="absolute inset-x-0 bottom-0 h-[20%] grid grid-cols-5">
+            {['50', '10', '100', '10', '50'].map((v, i) => <span key={i} className="border-t-[3px] border-x border-border flex items-center justify-center font-display text-[clamp(8px,3vw,20px)]" style={{ background: v === '100' ? '#ed9d75' : v === '50' ? '#ddfcc6' : '#fbfcf8' }}>{v}</span>)}
+          </div>
+        </div>
+      );
     case 'sign-in':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
