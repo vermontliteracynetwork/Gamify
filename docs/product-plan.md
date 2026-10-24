@@ -314,6 +314,13 @@ design-thinking a real audience (`docs/junior-designers-plan.md`); and a
 new class theme makes a familiar game feel new again, which fights the
 novelty drop-off in `docs/gamified-learning-research.md` 3.4.
 
+### Any age, one platform (direct from you, 2026-10-24)
+Themes and question sets let Gamify fit early childhood through college:
+a grown-up theme and an algebra or statistics set for high school and
+college, a playful theme and phonics set for kindergarten, same games
+underneath. The starter library spans K-1 to college. Anything people
+make or sell on Gamify must be original or licensed (section 6).
+
 ### House themes stay simple (direct from you, 2026-10-24)
 The free/default look is deliberately plain: flat colors, one simple
 pattern, clean shapes, built from code with no purchased illustration.
@@ -1169,3 +1176,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 21 | **Setting Up Gamify on School iPads and Chromebooks** | IT whitelist, Guided Access and Apple Classroom pairing for full lockdown. | IT page, Lock + device tools | Tech coordinators |
 | 22 | **From Paper to Play: Importing Your Old Question Sets** | CSV import from spreadsheets teachers already have. | CSV import | All teachers |
 | 23 | **Ways to Design a Theme** | Step by step: (1) download the theme template for the game you want (every game has its own; themes are made per game), (2) draw, paint, color or design digitally on the template, (3) upload everything to that game's Theme Builder. Tips for markers vs paint vs digital, splitting pieces across students, and scanning well. | Theme templates, Theme Builder, scan-and-cut, student design mode | Teacher's idea, 2026-10-24; all grades |
+| 37 | **"From kindergarten to college."** One platform, any age: themes and question sets make every game fit the class in front of you. | Widens the market to middle school, high school, college and tutoring | Teacher, 2026-10-24 |
