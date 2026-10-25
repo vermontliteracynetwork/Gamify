@@ -26,4 +26,11 @@ export function useTier(): Tier {
   return value ?? 'free';
 }
 
+// The plan, or null while it loads (so a gate never flashes a lock).
+export function useTierLoaded(): Tier | null {
+  const [tier, setTier] = useState<Tier | null>(null);
+  useEffect(() => { void data.getSetting<Tier>('tier').then((v) => setTier(v ?? 'free')); }, []);
+  return tier;
+}
+
 export const LOCAL_TEACHER_ID = 'local-teacher';

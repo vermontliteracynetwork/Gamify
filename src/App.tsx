@@ -8,7 +8,7 @@ import PublicHome from './public/PublicHome';
 import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
 
-import { RequireSignIn, RequireTeacher } from './public/SignInGate';
+import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
@@ -71,17 +71,17 @@ function AnimatedRoutes() {
           <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
-          <Route path="/games/star-quiz" element={<RequireSignIn><StarQuiz /></RequireSignIn>} />
-          <Route path="/games/peg-drop" element={<RequireSignIn><PegDrop /></RequireSignIn>} />
-          <Route path="/games/space-bowling" element={<RequireSignIn><SpaceBowling /></RequireSignIn>} />
-          <Route path="/games/bubble-pop" element={<RequireSignIn><BubblePop /></RequireSignIn>} />
-          <Route path="/games/match-up" element={<RequireSignIn><MatchUp /></RequireSignIn>} />
-          <Route path="/games/flashcards" element={<RequireSignIn><Flashcards /></RequireSignIn>} />
-          <Route path="/games/memory-match" element={<RequireSignIn><MemoryMatch /></RequireSignIn>} />
-          <Route path="/games/cast-catch" element={<RequireSignIn><CastCatch /></RequireSignIn>} />
-          <Route path="/games/game-show" element={<RequireSignIn><GameShow /></RequireSignIn>} />
-          <Route path="/games/bakery-match" element={<RequireSignIn><BakeryMatch /></RequireSignIn>} />
-          <Route path="/games/four-in-a-row" element={<RequireSignIn><FourInARow /></RequireSignIn>} />
+          <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
+          <Route path="/games/peg-drop" element={<RequireSignIn><RequireGame id="peg-drop"><PegDrop /></RequireGame></RequireSignIn>} />
+          <Route path="/games/space-bowling" element={<RequireSignIn><RequireGame id="space-bowling"><SpaceBowling /></RequireGame></RequireSignIn>} />
+          <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
+          <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
+          <Route path="/games/flashcards" element={<RequireSignIn><RequireGame id="flashcards"><Flashcards /></RequireGame></RequireSignIn>} />
+          <Route path="/games/memory-match" element={<RequireSignIn><RequireGame id="memory-match"><MemoryMatch /></RequireGame></RequireSignIn>} />
+          <Route path="/games/cast-catch" element={<RequireSignIn><RequireGame id="cast-catch"><CastCatch /></RequireGame></RequireSignIn>} />
+          <Route path="/games/game-show" element={<RequireSignIn><RequireGame id="game-show"><GameShow /></RequireGame></RequireSignIn>} />
+          <Route path="/games/bakery-match" element={<RequireSignIn><RequireGame id="bakery-match"><BakeryMatch /></RequireGame></RequireSignIn>} />
+          <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><Navigate to="/teacher/classes" replace /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />

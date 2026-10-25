@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Sparkle } from '@phosphor-icons/react';
+import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
+import { canPlayGame } from '../config';
+
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { data } from '../data';
-import { useAsync } from '../data/hooks';
+import { useAsync, useTier } from '../data/hooks';
 import { useSession } from './session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
@@ -16,6 +18,7 @@ export default function Home() {
   const reduce = useReducedMotion();
   const { value: classes = [] } = useAsync(() => data.listClassrooms());
   const session = useSession();
+  const tier = useTier();
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-16">
@@ -63,7 +66,10 @@ export default function Home() {
                          hover:bg-surface-hover active:scale-[0.98] motion-safe:transition-transform"
               style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
             >
-              <GameCover gameId={game.id} className="aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform" />
+              <span className="relative block">
+                <GameCover gameId={game.id} className={`aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform ${canPlayGame(tier, game.id) ? '' : 'grayscale opacity-60'}`} />
+                {!canPlayGame(tier, game.id) && <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-surface border-[3px] border-border flex items-center justify-center"><LockSimple weight="fill" size={28} aria-label={t('arcade.locked', { name: game.name })} /></span></span>}
+              </span>
               <div className="p-5 flex flex-col gap-3 flex-1">
                 <h2 className="font-display text-2xl font-bold text-text"><Title text={game.name} /></h2>
                 <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
