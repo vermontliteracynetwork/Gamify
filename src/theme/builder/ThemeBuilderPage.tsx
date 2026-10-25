@@ -375,7 +375,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
   const id = `color-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
     <div className="rounded-input border-[2px] border-border-soft p-2 flex items-center gap-2">
-      <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} className="shrink-0 w-11 h-11 rounded-input border-[2px] border-border bg-surface p-0.5" />
+      <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} className="color-dot shrink-0 w-11 h-11" />
       <div className="min-w-0 flex-1">
         <label htmlFor={id} className="font-bold block">{label}</label>
         <p className="text-xs font-semibold text-muted truncate" title={hint}>{hint}</p>

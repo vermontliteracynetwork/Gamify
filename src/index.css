@@ -243,3 +243,9 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
   .nav-grow::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px; height: 3px; border-radius: 3px; background: var(--border); transform: scaleX(0); transform-origin: left; transition: transform 0.2s ease; }
   .nav-grow:hover::after, .nav-grow[aria-current='page']::after { transform: scaleX(1); }
 }
+
+/* Color pickers show as a filled circle (teacher, 2026-10-25). */
+input[type='color'].color-dot { appearance: none; -webkit-appearance: none; padding: 0; border: 2.5px solid var(--color-border); border-radius: 9999px; overflow: hidden; cursor: pointer; background: none; }
+input[type='color'].color-dot::-webkit-color-swatch-wrapper { padding: 0; }
+input[type='color'].color-dot::-webkit-color-swatch { border: none; border-radius: 9999px; }
+input[type='color'].color-dot::-moz-color-swatch { border: none; border-radius: 9999px; }
