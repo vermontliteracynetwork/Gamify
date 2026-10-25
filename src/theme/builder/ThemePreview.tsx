@@ -3,7 +3,7 @@ import { backdropStyle, pieceFill, pieceImage } from '../library';
 import { PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
-import type { GameTheme } from '../types';
+import { THEME_FONTS, type GameTheme } from '../types';
 
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 
@@ -13,7 +13,7 @@ export default function ThemePreview({ theme, gameName }: { theme: GameTheme; ga
   return (
     <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText }}>{gameName}</span>
+        <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
         <span className="px-3 py-1 rounded-pill border-[2px] border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
       </div>
       <div className="min-h-0 flex items-center justify-center">{board(theme)}</div>

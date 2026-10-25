@@ -13,9 +13,23 @@ export interface ThemeColors {
   miss: string;
 }
 
-// Only fonts with a commercial license recorded in docs/asset-ledger.md.
-export const APPROVED_FONTS = ['Grow Year', 'Inclusive Sans'] as const;
-export type FontName = (typeof APPROVED_FONTS)[number];
+// Title fonts a theme can pick. Grow Year and Inclusive Sans ship with
+// Gamify (licenses in docs/asset-ledger.md); the others are fonts already on
+// the device, so nothing is downloaded or licensed. Question and answer text
+// always stays in Inclusive Sans.
+export const THEME_FONTS = {
+  'Grow Year': "'Grow Year', 'Segoe UI', system-ui, sans-serif",
+  'Inclusive Sans': "'Inclusive Sans', 'Segoe UI', system-ui, sans-serif",
+  Rounded: "ui-rounded, 'Arial Rounded MT Bold', 'Segoe UI', system-ui, sans-serif",
+  Storybook: "Georgia, 'Times New Roman', serif",
+  Typewriter: "ui-monospace, 'Courier New', monospace",
+} as const;
+export type FontName = keyof typeof THEME_FONTS;
+export const APPROVED_FONTS = Object.keys(THEME_FONTS) as FontName[];
+
+// Sound packs a theme can pick; every sound is made in code (no files).
+export const SOUND_PACKS = ['classic', 'soft', 'chimes', 'bloops', 'zaps'] as const;
+export type SoundPack = (typeof SOUND_PACKS)[number];
 
 export type Backdrop =
   | { kind: 'color' }
@@ -56,4 +70,5 @@ export interface GameTheme {
   pieces: Record<string, PieceArt>;
   cover?: string;
   designedBy?: string;
+  sounds?: SoundPack;
 }

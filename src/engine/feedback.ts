@@ -1,4 +1,5 @@
 import { volume, type PlayerSettings } from '../settings/settings';
+import type { SoundPack } from '../theme/types';
 
 // Sound effects (generated in code, so nothing to license), haptics and the
 // read-aloud voice. Every call respects the player's settings.
@@ -12,6 +13,17 @@ const TONES: Record<Effect, { freqs: number[]; type: OscillatorType; step: numbe
   whoosh: { freqs: [400, 300], type: 'sine', step: 0.05, length: 0.12 },
 };
 
+// A theme's sound pack reshapes the same effects (set by the themed page).
+const PACKS: Record<SoundPack, { type?: OscillatorType; freq: number; length: number; gain: number; slide?: number }> = {
+  classic: { freq: 1, length: 1, gain: 1 },
+  soft: { type: 'triangle', freq: 0.8, length: 1.3, gain: 0.6 },
+  chimes: { type: 'sine', freq: 2, length: 2.4, gain: 0.6 },
+  bloops: { type: 'sine', freq: 0.9, length: 1.1, gain: 1, slide: 0.55 },
+  zaps: { type: 'triangle', freq: 1.1, length: 0.9, gain: 0.8, slide: 1.8 },
+};
+let pack: SoundPack = 'classic';
+export function setSoundPack(next: SoundPack | undefined) { pack = next ?? 'classic'; }
+
 let ctx: AudioContext | null = null;
 function audio(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -22,8 +34,9 @@ function audio(): AudioContext | null {
   return ctx;
 }
 
-export function playEffect(name: Effect, s: PlayerSettings): void {
-  const gain = volume(s, 'effects') * 0.25;
+export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack): void {
+  const p = PACKS[with_];
+  const gain = volume(s, 'effects') * 0.25 * p.gain;
   if (gain <= 0) return;
   const ac = audio();
   if (!ac) return;
@@ -31,14 +44,16 @@ export function playEffect(name: Effect, s: PlayerSettings): void {
   tone.freqs.forEach((freq, i) => {
     const osc = ac.createOscillator();
     const g = ac.createGain();
-    osc.type = tone.type;
-    osc.frequency.value = freq;
+    osc.type = p.type ?? tone.type;
     const start = ac.currentTime + i * tone.step;
+    const length = tone.length * p.length;
+    osc.frequency.setValueAtTime(freq * p.freq, start);
+    if (p.slide) osc.frequency.exponentialRampToValueAtTime(freq * p.freq * p.slide, start + length);
     g.gain.setValueAtTime(gain, start);
-    g.gain.exponentialRampToValueAtTime(0.0001, start + tone.length);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + length);
     osc.connect(g).connect(ac.destination);
     osc.start(start);
-    osc.stop(start + tone.length + 0.02);
+    osc.stop(start + length + 0.02);
   });
 }
 

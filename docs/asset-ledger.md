@@ -19,3 +19,17 @@ ships without a line here.
 | canvas-confetti | Celebrations | npm | ISC | 2026-10 |
 | Tailwind CSS, Vite | Styling and build tools | npm | MIT | 2026-10 |
 | Sound effects | None shipping yet (prototype's generated sounds removed with it) | n/a | n/a | n/a |
+
+## Device fonts for theme titles (2026-10-25)
+
+The Theme Builder's Rounded, Storybook and Typewriter title fonts use fonts
+already installed on the student's device (CSS generic families such as
+`ui-rounded`, `Georgia`, `serif`, `ui-monospace`). Gamify ships no font
+files for them, so no license is needed. Font names never appear as brand
+names in the product; the choices are labeled Rounded, Storybook and
+Typewriter.
+
+## Theme sound packs (2026-10-25)
+
+Classic, Soft, Chimes, Bloops and Zaps are synthesized in code with the Web
+Audio API (`src/engine/feedback.ts`). No sound files, nothing to license.

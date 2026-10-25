@@ -14,7 +14,10 @@ import { Button, buttonClasses, PageHeader, Panel } from '../../ui/kit';
 import TeacherNav from '../../ui/TeacherNav';
 import { classicTheme } from '../classic';
 import { deleteMadeTheme, saveMadeTheme, useMadeThemes } from '../made';
-import type { GameTheme, ThemeColors, ThemePieceSpec } from '../types';
+import { APPROVED_FONTS, SOUND_PACKS, THEME_FONTS, type GameTheme, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
+import { playEffect } from '../../engine/feedback';
+import { useSettings } from '../../settings/SettingsContext';
+import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
 import { scanTemplatePages } from './scan';
 import { isRound } from './template';
@@ -91,7 +94,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const scanRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<'paper' | 'pictures' | 'colors'>('pictures');
+  const [tab, setTab] = useState<'paper' | 'pictures' | 'colors' | 'style'>('pictures');
+  const { settings } = useSettings();
 
   useEffect(() => {
     const found = themes.find((th) => th.id === editId);
@@ -189,7 +193,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               </div>
             )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
-              {(['paper', 'pictures', 'colors'] as const).map((k) => (
+              {(['paper', 'pictures', 'colors', 'style'] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 px-4 rounded-pill font-bold text-sm ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
@@ -210,6 +214,31 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                 <>
                   <p className="font-semibold text-muted text-sm">{t('builder.picturesHint')}</p>
                   <Pages key="pictures" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
+                </>
+              )}
+              {tab === 'style' && (
+                <>
+                  <p className="font-semibold text-muted text-sm">{t('builder.styleHint')}</p>
+                  <p className="font-bold">{t('builder.font')}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('builder.font')}>
+                    {APPROVED_FONTS.map((f) => (
+                      <button key={f} type="button" role="radio" aria-checked={draft.fonts.display === f} aria-label={f} onClick={() => setDraft({ ...draft, fonts: { ...draft.fonts, display: f } })}
+                        className={`min-h-14 px-3 rounded-input border-[2px] text-left ${draft.fonts.display === f ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        <span className="block text-xl leading-tight" style={{ fontFamily: THEME_FONTS[f] }}>{game.name}</span>
+                        <span className="block text-xs font-bold text-muted">{f}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="font-bold">{t('builder.sounds')}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label={t('builder.sounds')}>
+                    {SOUND_PACKS.map((p: SoundPack) => (
+                      <button key={p} type="button" role="radio" aria-checked={(draft.sounds ?? 'classic') === p}
+                        onClick={() => { setDraft({ ...draft, sounds: p }); playEffect('right', settings, p); window.setTimeout(() => playEffect('win', settings, p), 450); }}
+                        className={`min-h-12 px-3 rounded-input border-[2px] font-bold ${(draft.sounds ?? 'classic') === p ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        {t(`builder.sound.${p}` as StringKey)}
+                      </button>
+                    ))}
+                  </div>
                 </>
               )}
               {tab === 'colors' && (

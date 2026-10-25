@@ -6,7 +6,8 @@ import { useSettings } from '../settings/SettingsContext';
 import { backdropStyle, themesFor } from './library';
 import { useMadeThemes } from './made';
 import { TeamArt } from '../engine/TeamBadge';
-import type { GameTheme } from './types';
+import { setSoundPack } from '../engine/feedback';
+import { THEME_FONTS, type GameTheme } from './types';
 import { calmVersion } from './validate';
 
 // The theme a game is wearing, remembered per game. A teacher's own designs
@@ -29,8 +30,10 @@ export function useGameTheme(gameId: string) {
 // Full-width page wearing the game's theme backdrop.
 export function ThemedPage({ theme, children }: { theme: GameTheme; children: ReactNode }) {
   const { settings } = useSettings();
+  useEffect(() => { setSoundPack(theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds]);
   return (
     <div className="min-h-[calc(100dvh-4rem)]" style={{
+      ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],
       ...backdropStyle(theme, settings.backgrounds === 'plain'),
       ['--stage-bg-text' as string]: theme.colors.backgroundText,
       ['--color-accent' as string]: theme.colors.accent,
