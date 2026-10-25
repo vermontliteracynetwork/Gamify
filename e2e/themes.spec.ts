@@ -37,7 +37,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('link', { name: /Game Show/ }).click();
   await page.getByLabel('Theme name').fill('Ocean Party');
   await page.getByLabel('Designed by').fill('Room 12');
-  const cardBack = page.locator('input[type=file]').nth(1); // Pictures tab: background, then card back
+  const cardBack = page.locator('input[type=file]').nth(2); // Upload tab: page photos, background, then card back
   await cardBack.setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: await png(page, '#2a9df4') });
   await expect(page.getByLabel('Added')).toHaveCount(1);
   await page.getByRole('tab', { name: 'Colors' }).click();
@@ -83,10 +83,10 @@ test('Theme Builder: a photo of a drawn template page fills its piece', async ({
   await page.addStyleTag({ content: 'header { display: none !important; }' }); // the sticky nav would cover the page top
   const photo = await sheet.screenshot();
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('tab', { name: 'Draw it on paper' }).click();
+  await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByLabel('Add photos of the pages').setInputFiles({ name: 'page1.png', mimeType: 'image/png', buffer: photo });
   await expect(page.getByText('1 piece added.')).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('tab', { name: 'Pictures' }).click();
+  await page.getByRole('tab', { name: 'Upload' }).click();
   await expect(page.getByLabel('Added')).toHaveCount(1);
   await page.screenshot({ path: `test-results/builder-scanned-${info.project.name}.png`, fullPage: true });
   expect(problems).toEqual([]);
@@ -119,7 +119,7 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   await page.reload();
   // The get started steps sit on top until done; fold them to check the builder itself fits.
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
-  await expect(page.getByRole('tab', { name: 'Pictures' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: 'Upload' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText('Page 1 of 3')).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();
   await expect(page.getByText('Page 2 of 3')).toBeVisible();
@@ -128,4 +128,24 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   await page.getByRole('tab', { name: 'Colors' }).click();
   await page.screenshot({ path: `test-results/builder-colors-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+});
+
+test('Download tab: printable pages and exact-size digital files, blank or with the Classic example', async ({ page }, info) => {
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByRole('tab', { name: 'Download' }).click();
+  await page.screenshot({ path: `test-results/builder-download-${info.project.name}.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  const wait = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Classic example (.zip)' }).click();
+  const file = await wait;
+  expect(file.suggestedFilename()).toBe('game-show-theme-classic-example.zip');
+  const zip = (await import('fflate')).unzipSync(new Uint8Array(await (await import('node:fs/promises')).readFile(await file.path())));
+  const names = Object.keys(zip);
+  expect(names).toContain('sizes.txt');
+  expect(names.some((n) => /card-back-300x220\.png$/.test(n) || /card-back-\d+x\d+\.png$/.test(n))).toBe(true);
+  await page.getByRole('link', { name: 'Classic example' }).click();
+  await expect(page.getByText('example pages showing the Classic look', { exact: false })).toBeVisible();
+  await expect(page.getByText('Example: the Classic look of this piece.', { exact: false }).first()).toBeVisible();
+  if (info.project.name === 'ipad-portrait') await page.screenshot({ path: 'test-results/builder-template-example.png' });
 });

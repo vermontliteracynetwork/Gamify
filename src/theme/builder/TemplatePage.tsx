@@ -1,16 +1,17 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Printer } from '@phosphor-icons/react';
 import { GAMES } from '../../games/registry';
 import { signInManifest } from '../../student/pictures';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
+import { ClassicPiece } from './classicArt';
 import { CODE, codeBits, codeX, isRound, MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
 
 // One printed page for one piece: corner squares, page number squares, what
 // to draw, and the outline at the piece's shape. Students draw inside the
 // outline, then the teacher photographs the pages into the Theme Builder.
-export function TemplateSheet({ gameName, piece, page, total }: { gameName: string; piece: ThemePieceSpec; page: number; total: number }) {
+export function TemplateSheet({ gameName, gameId, piece, page, total, example = false }: { gameName: string; gameId?: string; piece: ThemePieceSpec; page: number; total: number; example?: boolean }) {
   const box = outlineBox(piece);
   const ink = '#3a3a3a';
   return (
@@ -28,7 +29,12 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
       ))}
       <text x={PAGE.width / 2} y={240} textAnchor="middle" fontSize={64} fontWeight={700} fill="#000">{piece.label}</text>
       <text x={PAGE.width / 2} y={310} textAnchor="middle" fontSize={38} fill="#333">{piece.hint}</text>
-      <text x={PAGE.width / 2} y={370} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetNote')}</text>
+      <text x={PAGE.width / 2} y={370} textAnchor="middle" fontSize={30} fill="#555">{example ? t('builder.sheetExample') : t('builder.sheetNote')}</text>
+      {example && gameId && (
+        <svg x={box.x} y={box.y} width={box.width} height={box.height} viewBox={`0 0 ${piece.width} ${piece.height}`} preserveAspectRatio="none">
+          <ClassicPiece piece={piece} gameId={gameId} />
+        </svg>
+      )}
       {isRound(piece)
         ? <ellipse cx={box.x + box.width / 2} cy={box.y + box.height / 2} rx={box.width / 2} ry={box.height / 2} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />
         : <rect x={box.x} y={box.y} width={box.width} height={box.height} rx={18} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />}
@@ -40,6 +46,7 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
 // Every template page for one game, ready to print (one piece per page).
 export default function TemplatePage() {
   const { gameId } = useParams();
+  const example = useSearchParams()[0].get('example') === 'classic';
   const game = [...GAMES, signInManifest].find((g) => g.id === gameId);
   if (!game) return null;
   return (
@@ -47,12 +54,12 @@ export default function TemplatePage() {
       <div className="no-print flex flex-wrap items-center gap-3 mb-6">
         <Link to={`/teacher/themes/${game.id}`} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('builder.backToBuilder')}</Link>
         <button type="button" onClick={() => window.print()} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('builder.print')}</button>
-        <p className="font-bold">{t('builder.printNote', { count: game.themePieces.length })}</p>
+        <p className="font-bold">{t(example ? 'builder.printNoteExample' : 'builder.printNote', { count: game.themePieces.length })}</p>
       </div>
       <div className="grid gap-6">
         {game.themePieces.map((p, i) => (
           <div key={p.id} className="template-page bg-white border-[2px] border-border-soft rounded-input overflow-hidden">
-            <TemplateSheet gameName={game.name} piece={p} page={i + 1} total={game.themePieces.length} />
+            <TemplateSheet gameName={game.name} gameId={game.id} piece={p} page={i + 1} total={game.themePieces.length} example={example} />
           </div>
         ))}
       </div>

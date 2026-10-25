@@ -12,6 +12,7 @@ ships without a line here.
 | Grow Year (font, by Khurasan Studio) | Headings and the logo lettering | Sent by the owner (`grow-year.zip`); served from `public/fonts/grow-year.woff2` | The download's More Info file: "This product 100% free for personal use & commercial use." The font's own license link (khurasanstudio.com/license) could not be opened from the build environment: **confirm it allows web embedding before launch.** Keep the original zip on file. | 2026-10-24 |
 | axe-core and @axe-core/playwright | Automated accessibility checks in the test suite only (never shipped to users) | npm | MPL-2.0 (dev tool, unmodified) | 2026-10-24 |
 | qrcode | QR codes on the projector code screen | npm (qrcode 1.5) | MIT | 2026-10-24 |
+| fflate | Zips the Theme Builder digital template files | npm (fflate 0.8.2) | MIT | 2026-10-25 |
 | Common Core State Standards codes and domain names (no standard text) | Question set details and filters | corestandards.org | Public license from NGA Center and CCSSO: free use with the notice "© Copyright 2010. National Governors Association Center for Best Practices and Council of Chief State School Officers. All rights reserved." Show that notice on the public site footer and the set details help. | 2026-10-24 |
 | Phosphor Icons | UI icons | @phosphor-icons/react | MIT | 2026-10 |
 | React, React DOM, React Router | App framework | npm | MIT | 2026-10 |

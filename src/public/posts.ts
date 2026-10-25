@@ -31,7 +31,7 @@ export const POSTS: Post[] = [
     tryIt: [
       'Open Theme Builder, pick Game Show, and print the template.',
       'Give each student one page and 15 minutes to draw inside the outline.',
-      'Photograph the pages and add them on the Draw it on paper tab.',
+      'Photograph the pages and add them on the Upload tab.',
       'Type a theme name and your class name, then save.',
       'Start Game Show with a fractions set and pick your new theme.',
     ],

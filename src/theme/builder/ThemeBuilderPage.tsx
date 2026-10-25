@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Camera, CaretLeft, CaretRight, CheckCircle, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
@@ -149,7 +149,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const scanRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<'paper' | 'pictures' | 'colors' | 'style'>('pictures');
+  const [tab, setTab] = useState<'download' | 'upload' | 'colors' | 'style'>('upload');
+  const [dl, setDl] = useState('');
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -248,27 +249,52 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               </div>
             )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
-              {(['paper', 'pictures', 'colors', 'style'] as const).map((k) => (
+              {(['download', 'upload', 'colors', 'style'] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 px-4 rounded-pill font-bold text-sm ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
             </div>
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="grid gap-3">
-              {tab === 'paper' && (
+              {tab === 'download' && (
                 <>
-                  <p className="font-semibold text-muted text-sm">{t('builder.paperHint')}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('builder.printTemplate')}</Link>
+                  <p className="font-semibold text-muted text-sm">{t('builder.downloadHint')}</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+                      <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
+                      <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}>{t('builder.dl.blank')}</Link>
+                        <Link to={`/teacher/themes/${gameId}/template?example=classic`} className={buttonClasses('secondary', 'hover-pop')}>{t('builder.dl.example')}</Link>
+                      </div>
+                    </div>
+                    <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+                      <p className="font-display text-lg flex items-center gap-2"><DownloadSimple weight="bold" size={22} aria-hidden="true" />{t('builder.dl.digital')}</p>
+                      <p className="text-sm font-semibold">{t('builder.dl.digitalText')}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {([false, true] as const).map((example) => (
+                          <Button key={String(example)} variant={example ? 'secondary' : 'primary'} className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
+                            onClick={async () => {
+                              setDl(t('builder.dl.making'));
+                              const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
+                              saveFile(await digitalZip(game.name, gameId, game.themePieces, example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
+                              setDl(t('builder.dl.ready'));
+                            }}>{example ? t('builder.dl.example') : t('builder.dl.blank')} (.zip)</Button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {dl && <p className="text-sm font-bold" role="status">{dl}</p>}
+                </>
+              )}
+              {tab === 'upload' && (
+                <>
+                  <div className="flex flex-wrap items-center gap-2">
                     <Button disabled={busy} onClick={() => scanRef.current?.click()}><Camera weight="bold" size={18} />{t('builder.scan')}</Button>
                     <input ref={scanRef} type="file" accept="image/*" multiple hidden aria-label={t('builder.scan')}
                       onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ''; if (f.length) void scan(f); }} />
+                    <span className="text-xs font-semibold text-muted flex-1 min-w-40">{t('builder.scanHint')}</span>
                   </div>
-                </>
-              )}
-              {tab === 'pictures' && (
-                <>
-                  <p className="font-semibold text-muted text-sm">{t('builder.picturesHint')}</p>
-                  <Pages key="pictures" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
+                  <Pages key="upload" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
                 </>
               )}
               {tab === 'style' && (
