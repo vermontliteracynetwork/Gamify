@@ -101,3 +101,17 @@ test.describe('signed in', () => {
     await page.screenshot({ path: `test-results/code-screen-${info.project.name}.png` });
   });
 });
+
+test.describe('signed out', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('Ways to use Gamify: idea list and a post with a Try it tomorrow box', async ({ page }, info) => {
+    await page.goto('/');
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Ways to use Gamify' }).click();
+    await expect(page.getByRole('heading', { name: /Ways to use Gamify/i })).toBeVisible();
+    await page.screenshot({ path: `test-results/ways-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('link', { name: /Design a Theme as a Class/ }).click();
+    await expect(page.getByRole('heading', { name: /Try it tomorrow/i })).toBeVisible();
+    await expect(page).toHaveTitle('Ways to use Gamify | Gamify');
+    await page.screenshot({ path: `test-results/ways-post-${info.project.name}.png`, fullPage: true });
+  });
+});

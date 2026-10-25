@@ -42,6 +42,8 @@ const ReportsPage = lazy(() => import('./teacher/ReportsPage'));
 const AccountPage = lazy(() => import('./teacher/AccountPage'));
 const CheckInPage = lazy(() => import('./beta/CheckInPage'));
 const DesignPage = lazy(() => import('./student/DesignPage'));
+const WaysList = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysList })));
+const WaysPost = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -67,6 +69,8 @@ function AnimatedRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/ways" element={<WaysList />} />
+          <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />
           <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
