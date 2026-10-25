@@ -13,6 +13,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { Button, buttonClasses, Panel, Tabs } from '../ui/kit';
 import Title from '../ui/Title';
 import { LimitNote } from '../billing/Upgrade';
+import { logLiveEvent } from './events';
 import { openLink, ranked, reduceHost, type LiveLink, type LivePlayer, type LiveState } from './protocol';
 
 const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl.great'] as const;
@@ -77,6 +78,8 @@ function Room({ game }: { game: GameCode }) {
   const classRight = inRoom.reduce((n, p) => n + p.right, 0);
   const allLocked = state.locks.all !== undefined;
   function lock(pid: string, on: boolean) {
+    const who = pid === 'all' ? t('live.everyone') : state.players.find((p) => p.pid === pid)?.name ?? '';
+    void logLiveEvent({ at: new Date().toISOString(), code: game.code, gameId: game.gameId, kind: on ? 'lock' : 'unlock', who, message: on ? message.trim() || undefined : undefined });
     update((s) => { const locks = { ...s.locks }; if (on) locks[pid] = message.trim(); else delete locks[pid]; if (pid === 'all' && !on) return { ...s, locks: {} }; return { ...s, locks }; });
   }
   function end() {

@@ -50,5 +50,9 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await expect(page.getByRole('heading', { name: 'The Winners' })).toBeVisible();
   await expect(kid.getByRole('dialog', { name: 'Game Over!' })).toBeVisible();
   await kid.screenshot({ path: `test-results/live-podium-kid-${info.project.name}.png` });
+  // The locks are in the reports.
+  await page.goto('/teacher/reports');
+  await page.getByText('Live game locks (2)').click();
+  await expect(page.getByText('Locked Everyone: "Eyes on me, please."', { exact: false })).toBeVisible();
   expect(problems).toEqual([]);
 });

@@ -5,9 +5,11 @@ import { data } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import type { Student } from '../data/types';
-import { GAMES } from '../games/registry';
+import { GAMES, getGame } from '../games/registry';
 import { t } from '../i18n';
 import { PageHeader, Panel, Tabs } from '../ui/kit';
+import { listLiveEvents } from '../live/events';
+
 import TeacherNav from '../ui/TeacherNav';
 import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 import { UpgradeButton } from '../billing/Upgrade';
@@ -123,6 +125,23 @@ export default function ReportsPage() {
           </table>
         </div>
       )}
+      <LiveLog />
     </main>
+  );
+}
+
+// Locks from live games, newest first (Stage 6: Lock is logged in reports).
+function LiveLog() {
+  const { value: events = [] } = useAsync(() => listLiveEvents());
+  if (!events.length) return null;
+  return (
+    <details className="mt-4 bg-surface border-[2.5px] border-border rounded-panel p-4">
+      <summary className="font-display text-2xl cursor-pointer">{t('reports.liveLog', { count: events.length })}</summary>
+      <ul className="grid gap-1 list-none p-0 mt-3 mb-0">
+        {events.slice(0, 50).map((e) => (
+          <li key={e.at + e.who} className="font-semibold text-sm">{new Date(e.at).toLocaleString()} · {getGame(e.gameId)?.name ?? e.gameId} · {t(e.kind === 'lock' ? 'reports.locked' : 'reports.unlocked', { who: e.who })}{e.message ? `: "${e.message}"` : ''}</li>
+        ))}
+      </ul>
+    </details>
   );
 }
