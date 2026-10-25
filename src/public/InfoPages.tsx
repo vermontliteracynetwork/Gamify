@@ -32,6 +32,7 @@ export function ItPage() {
     { h: 'it.allow', items: ['it.allow.1', 'it.allow.2', 'it.allow.3'] },
     { h: 'it.devices', items: ['it.devices.1', 'it.devices.2', 'it.devices.3', 'it.devices.4'] },
     { h: 'it.privacy', items: ['it.privacy.1', 'it.privacy.2', 'it.privacy.3', 'it.privacy.4'] },
+    { h: 'it.rollout', items: ['it.rollout.1', 'it.rollout.2', 'it.rollout.3', 'it.rollout.4'] },
   ]} />;
 }
 
