@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
-import { THEME_TRIAL_GAME, TIERS } from '../../config';
+import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
 import { GameCover } from '../../games/covers';
@@ -149,7 +149,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const scanRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<'download' | 'upload' | 'colors' | 'style'>('upload');
+  const [tab, setTab] = useState<'download' | 'upload' | 'colors' | 'style' | 'share'>('upload');
   const [dl, setDl] = useState('');
   const { settings } = useSettings();
 
@@ -249,7 +249,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               </div>
             )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
-              {(['download', 'upload', 'colors', 'style'] as const).map((k) => (
+              {(['download', 'upload', 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 px-4 rounded-pill font-bold text-sm ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
@@ -296,6 +296,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   </div>
                   <Pages key="upload" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
                 </>
+              )}
+              {tab === 'share' && (
+                <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
               )}
               {tab === 'style' && (
                 <>
@@ -408,6 +411,33 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
       </div>
       <input value={text} aria-label={`${label} hex code`} maxLength={7} onChange={(e) => { setText(e.target.value); if (HEX.test(e.target.value)) onChange(e.target.value.toLowerCase()); }}
         className="shrink-0 min-h-11 w-24 px-2 rounded-input border-[2px] border-border font-mono font-bold uppercase text-sm" />
+    </div>
+  );
+}
+
+// Share a saved class theme in the public gallery (reviewed by the owner
+// before anyone sees it) and, once entries open, enter the challenge
+// (teacher, 2026-10-25). Credit is the class name, never a student's.
+function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
+  const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
+  const ready = saved && !problems && !!theme.designedBy?.trim();
+  const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-[2px] font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
+  return (
+    <div className="grid gap-3">
+      <p className="font-semibold text-muted text-sm">{t('builder.shareHint')}</p>
+      <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.shareTitle')}>
+        <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
+        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-50`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
+      </div>
+      {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
+        : !theme.designedBy?.trim() ? <p className="text-sm font-bold">{t('builder.shareNeedsCredit')}</p>
+        : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p> : null}
+      {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}</p>}
+      <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${CHALLENGE_OPEN && inGallery ? '' : 'opacity-60'}`}>
+        <input type="checkbox" className="w-5 h-5" disabled={!CHALLENGE_OPEN || !inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
+        {t('builder.shareChallenge')}
+      </label>
+      <p className="text-xs font-semibold text-muted">{CHALLENGE_OPEN ? t('builder.shareChallengeOpen') : t('builder.shareChallengeSoon')} <Link to="/challenge">{t('builder.shareChallengeLink')}</Link></p>
     </div>
   );
 }

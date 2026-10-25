@@ -71,4 +71,12 @@ export interface GameTheme {
   cover?: string;
   designedBy?: string;
   sounds?: SoundPack;
+  // Sharing beyond the teacher's own classes (teacher, 2026-10-25): sent to
+  // the public gallery, where the owner reviews it before anyone sees it.
+  gallery?: { status: 'pending' | 'approved' | 'declined'; at: string; reason?: GalleryReason };
+  // Entered in the Theme Building Challenge.
+  challenge?: boolean;
 }
+
+export const GALLERY_REASONS = ['hard-to-read', 'brand', 'unfinished', 'other'] as const;
+export type GalleryReason = (typeof GALLERY_REASONS)[number];

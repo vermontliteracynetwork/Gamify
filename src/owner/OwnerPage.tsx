@@ -8,7 +8,11 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
-import { PageHeader } from '../ui/kit';
+import { Button, PageHeader } from '../ui/kit';
+import type { StringKey } from '../i18n/en';
+import { saveMadeTheme, useMadeThemes } from '../theme/made';
+import ThemePreview from '../theme/builder/ThemePreview';
+import { GALLERY_REASONS, type GalleryReason, type GameTheme } from '../theme/types';
 import Title from '../ui/Title';
 import { monthlyRevenue, project, type Subs } from './income';
 import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
@@ -21,8 +25,8 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 // cards you can reorder, widen and fold, saved on this device. Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'feedback' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['feedback', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
+type CardId = 'feedback' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['feedback', 'gallery', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
 interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
@@ -53,6 +57,7 @@ function Desktop() {
 
   const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
     feedback: { title: t('owner.feedback'), icon: ChatCircleDots, body: <FeedbackCard /> },
+    gallery: { title: t('owner.gallery'), icon: PaintBrush, body: <GalleryCard /> },
     usage: { title: t('owner.usage'), icon: ChartLineUp, body: <UsageCard /> },
     growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
     income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
@@ -229,5 +234,38 @@ function IncomeCard() {
       </div>
       <p className="text-xs font-bold text-muted">{t('owner.incomeNote')}</p>
     </div>
+  );
+}
+
+// Themes teachers sent to the public gallery, waiting for a look before any
+// other teacher sees them (Stage 7B reports card, themes part).
+function GalleryCard() {
+  const { themes, reload } = useMadeThemes();
+  const pending = themes.filter((th) => th.gallery?.status === 'pending');
+  const [why, setWhy] = useState<Record<string, GalleryReason>>({});
+  async function decide(th: GameTheme, status: 'approved' | 'declined') {
+    await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined }, challenge: status === 'declined' ? false : th.challenge });
+    reload();
+  }
+  if (!pending.length) return <p className="font-semibold">{t('owner.galleryNone')}</p>;
+  return (
+    <ul className="grid gap-3 list-none p-0 m-0">
+      {pending.map((th) => (
+        <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-[2px] border-border-soft p-2">
+          <ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} />
+          <div className="grid gap-2 content-start">
+            <p className="font-display text-xl">{th.name}</p>
+            <p className="text-sm font-semibold text-muted">{th.designedBy}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Button variant="primary" onClick={() => void decide(th, 'approved')}>{t('owner.approve')}</Button>
+              <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold text-sm">
+                {GALLERY_REASONS.map((r) => <option key={r} value={r}>{t(`gallery.reason.${r}` as StringKey)}</option>)}
+              </select>
+              <Button variant="danger" onClick={() => void decide(th, 'declined')}>{t('owner.decline')}</Button>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
   );
 }

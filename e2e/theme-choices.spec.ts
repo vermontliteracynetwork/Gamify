@@ -42,3 +42,29 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await expect(page.getByRole('radio', { name: 'Night Arcade' })).toBeVisible();
   await page.screenshot({ path: `test-results/theme-choices-student-${info.project.name}.png` });
 });
+
+test('share a class theme in the gallery: owner approves, and it shows on the Themes page', async ({ page }, info) => {
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByLabel('Theme name').fill('Rainbow Room');
+  await page.getByLabel('Designed by').fill('Room 12');
+  await page.getByRole('button', { name: 'Save theme' }).click();
+  await expect(page.getByText('Saved Rainbow Room.', { exact: false })).toBeVisible();
+  await page.getByRole('tab', { name: 'Share' }).click();
+  await page.getByRole('radio', { name: 'Share in the public gallery' }).click();
+  await expect(page.getByText('Sent to the gallery.', { exact: false })).toBeVisible();
+  await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeDisabled();
+  await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+
+  await page.goto('/owner');
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('button', { name: 'Approve' }).click();
+  await expect(page.getByText('No themes waiting for review.')).toBeVisible();
+
+  await page.goto('/themes');
+  await expect(page.getByRole('heading', { name: 'Rainbow Room' })).toBeVisible();
+  await expect(page.getByText('Made by Room 12')).toBeVisible();
+});

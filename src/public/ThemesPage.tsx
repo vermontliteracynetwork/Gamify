@@ -26,7 +26,10 @@ export default function ThemesPage() {
   const [game, setGame] = useState('');
   const [band, setBand] = useState<Band | ''>('');
   const [onlyFavs, setOnlyFavs] = useState(false);
-  const library: StarterTheme[] = made.filter((th) => th.source === 'library').map((th, i) => ({ id: th.id, name: th.name, gameId: th.gameId, band: 'all', interest: '', order: 100 + i, theme: th }));
+  // Gamify library themes, and class themes approved for the public gallery
+  // (on this device until cloud accounts share them with every teacher).
+  const shared = made.filter((th) => th.source === 'library' || th.gallery?.status === 'approved');
+  const library: StarterTheme[] = shared.map((th, i) => ({ id: th.id, name: th.name, gameId: th.gameId, band: 'all', interest: '', order: -100 + i, theme: th }));
   const all = [...library, ...STARTER_THEMES];
   const shown = all
     .filter((x) => (!game || x.gameId === game) && (!band || x.band === band || x.band === 'all') && (!onlyFavs || favorites.includes(x.theme.id)))
@@ -96,7 +99,7 @@ export default function ThemesPage() {
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[2px] border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : t('themes.byGamify')}</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[2px] border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: x.theme.designedBy ?? '' }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
                   <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>

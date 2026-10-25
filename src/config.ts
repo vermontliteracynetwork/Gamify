@@ -68,6 +68,10 @@ export const FREE_GAMES = ['game-show', 'peg-drop', 'cast-catch', 'match-three',
 // choice; Game Show predicted (the flagship group game).
 export const THEME_TRIAL_GAME = 'game-show';
 
+// The Theme Building Challenge takes entries only once this is on (launch,
+// after the official rules are approved).
+export const CHALLENGE_OPEN = false;
+
 export function canPlayGame(tier: Tier, gameId: string): boolean {
   return TIERS[tier].allGames || FREE_GAMES.includes(gameId);
 }
