@@ -1,4 +1,4 @@
-import { Cake, Cat, Cookie, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Popcorn, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
+import { Hamburger, Cake, Cat, Cookie, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Popcorn, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 import { TEAM_COLORS } from '../engine/turns';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
@@ -124,6 +124,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
             <g transform="translate(50 92) scale(1.1)"><ellipse cx="0" cy="0" rx="9" ry="6.5" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="-4.5" cy="-6.5" r="3.6" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="4.5" cy="-6.5" r="3.6" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="-4.5" cy="-6.5" r="1.9" fill="#fff" /><circle cx="4.5" cy="-6.5" r="1.9" fill="#fff" /><circle cx="-4.2" cy="-6.8" r="1" fill="#241c3d" /><circle cx="4.8" cy="-6.8" r="1" fill="#241c3d" /></g>
             <path d="M50 80 L50 50" stroke="#fdfd94" strokeWidth="2.5" strokeDasharray="2 4" strokeLinecap="round" />
           </svg>
+        </div>
+      );
+    case 'lunch-rush':
+      return (
+        <div className={base} style={{ background: '#fde2c4' }} aria-hidden="true">
+          <div className="absolute inset-x-0 top-0 h-[16%] border-b-[3px] border-border" style={{ background: 'repeating-linear-gradient(90deg, #e5635f 0 10%, #fbfcf8 10% 20%)' }} />
+          <div className="absolute inset-x-0 bottom-0 h-[30%] border-t-[3px] border-border" style={{ background: '#ed9d75' }} />
+          {[[8, Pizza, '#f6c544'], [38, IceCream, '#f6a5c0'], [68, Hamburger, '#f39a6b']].map(([x, I, c], i) => {
+            const S = I as Icon;
+            return <span key={i} className="absolute w-[24%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: `${x}%`, top: '28%', background: c as string }}><S weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>;
+          })}
+          <Heart weight="fill" className="absolute right-[6%] bottom-[8%] w-[14%] h-auto" color="#e5635f" />
         </div>
       );
     case 'bubble-pop':

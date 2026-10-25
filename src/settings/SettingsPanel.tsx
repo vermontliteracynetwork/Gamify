@@ -172,7 +172,7 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
 
 // Share Mirror: a code a student types on their own device to see the big
 // screen's question close up (teacher tab, behind the PIN).
-const SHARE_GAMES = ['game-show', 'peg-drop', 'bowling', 'road-hop'];
+const SHARE_GAMES = ['game-show', 'peg-drop', 'bowling', 'road-hop', 'lunch-rush'];
 function MirrorControl({ gameId }: { gameId: string }) {
   const [code, setCode] = useState(getMirrorCode());
   return (
