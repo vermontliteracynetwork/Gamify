@@ -111,26 +111,30 @@ export const FINDINGS: Finding[] = [
 ];
 
 // What critics of gamified learning found, and how Gamify is designed around it.
-export const CAUTIONS: { risk: string; found: string; answer: string; sources: { cite: string; url: string }[] }[] = [
+export const CAUTIONS: { title: string; risk: string; found: string; answer: string; sources: { cite: string; url: string }[] }[] = [
   {
+    title: 'Play is the reward',
     risk: 'Rewards can crowd out interest',
     found: 'A meta-analysis of 128 experiments found that expected, tangible rewards lowered people\'s interest in a task afterward, while positive feedback raised it.',
     answer: 'There are no prizes, shops or paid rewards. A right answer powers the game you are already playing, and feedback is about the task.',
     sources: [{ cite: 'Deci, Koestner & Ryan (1999). Psychological Bulletin.', url: 'https://depts.washington.edu/techdocs/papers/deciExtrinsicRewardsAndIntrinsicMotivation99.pdf' }],
   },
   {
+    title: 'Everyone can be on the same team',
     risk: 'Public rankings can backfire',
     found: 'In a semester-long college course, required badges and a public leaderboard led to lower motivation and lower exam scores. The authors pointed to social comparison and loss of choice.',
     answer: 'No required badges. Teachers can play as teams or as one class against the computer, and students choose their games.',
     sources: [{ cite: 'Hanus & Fox (2015). Computers & Education.', url: 'https://doi.org/10.1016/j.compedu.2014.08.019' }],
   },
   {
+    title: 'Always something new to play',
     risk: 'The newness wears off',
     found: 'A longitudinal study found gamification\'s boost dropped after about four weeks as the novelty wore off, then partly recovered as students got used to it.',
     answer: 'One question set plays in many different games and modes, and themes change the look, so something new is always one tap away while the content stays the same.',
     sources: [{ cite: 'Rodrigues et al. (2022). International Journal of Educational Technology in Higher Education.', url: 'https://doi.org/10.1186/s41239-021-00314-6' }],
   },
   {
+    title: 'Every move is real practice',
     risk: 'Points can reward doing more, not thinking more',
     found: 'Points and leaderboards made people do more of a task but did not raise their own interest or sense of skill.',
     answer: 'In Gamify the thing that earns the next move is answering a real question, so more play means more practice. A guessing check pauses fast random taps with a calm break.',
@@ -145,9 +149,23 @@ export const WONT_CLAIM = [
   'The biggest number from any single study. We quote the range most studies agree on.',
 ];
 
-export const MEASURE = [
-  { step: 'Now', text: 'A research-based design: practice questions, spread over days, with feedback, wrapped in games students want to play.' },
-  { step: 'Built in', text: 'Reports that show how each question went, how many questions each student practiced, and whether they keep playing after an assignment is done. No student tracking beyond the class.' },
-  { step: 'Pilot', text: 'A few classrooms compare unit quiz results on content practiced in Gamify with content taught the usual way, plus short teacher surveys and picture check-ins for students.' },
-  { step: 'Later', text: 'A comparison study with a university partner once schools are using Gamify widely.' },
+// The beta tab: Gamify's beginning stages, piloting with real classrooms.
+export const BETA_DOING = [
+  { step: 'Building with teachers', text: 'Gamify is brand new. We are building it alongside classroom teachers, and every game, setting and report gets better from what they tell us.' },
+  { step: 'Piloting in classrooms', text: 'A small group of beta classrooms plays Gamify every week. Teachers fill out short surveys, and students give anonymous picture check-ins after games.' },
+  { step: 'Measuring what matters', text: 'Reports already show how each question went and how much students remembered a week later. In the pilot, teachers compare quiz results on content practiced in Gamify with content taught the usual way.' },
+  { step: 'Sharing what we learn', text: 'We will publish what the pilot shows, good and bad, and later work with a university partner on a full comparison study.' },
+];
+export const BETA_GET = [
+  'Gamify Plus free during the beta.',
+  'New games and features before anyone else.',
+  'A direct line to the people building Gamify: your ideas shape what comes next.',
+  'A printable classroom kit to teach students the Tell Gamify button.',
+];
+export const BETA_ASK = [
+  'Set up a class and assign at least one question set.',
+  'Play at least two times a week.',
+  'Teach the Tell Gamify button (a 10-minute lesson from the kit).',
+  'Answer three short surveys: at week 1, month 1 and month 3 (about 5 minutes each).',
+  'Optional: quick picture check-ins with students after games.',
 ];

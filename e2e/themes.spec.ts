@@ -117,6 +117,8 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   await page.goto('/teacher/themes/match-three');
   await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })));
   await page.reload();
+  // The get started steps sit on top until done; fold them to check the builder itself fits.
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await expect(page.getByRole('tab', { name: 'Pictures' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText('Page 1 of 3')).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();

@@ -3,21 +3,20 @@ import { NavLink } from 'react-router-dom';
 import { ChartBar, ChatTeardropText, PaintBrush, RocketLaunch, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
 import TeacherSurvey from '../beta/TeacherSurvey';
 import { surveyDue, type SurveyId } from '../beta/surveys';
-import { data } from '../data';
 import { t } from '../i18n';
-import GetStarted, { FOLDED, useStartSteps } from '../teacher/GetStarted';
+import GetStarted, { useStartSteps } from '../teacher/GetStarted';
 
 // The teacher menu, on every teacher page. Until the five get started steps
-// are done, a Get started pill sits in it; it opens the checklist (open on its
-// own on the Classes page unless the teacher folded it).
-export default function TeacherNav({ startOpen = false }: { startOpen?: boolean }) {
+// are done, the checklist sits at the top of every teacher tab (teacher,
+// 2026-10-25); the X folds it into the Get started pill for this page only.
+export default function TeacherNav(_props: { startOpen?: boolean }) {
   const start = useStartSteps();
   const [open, setOpen] = useState<boolean | null>(null);
   // A beta survey that has come due shows as a pill too.
   const [survey, setSurvey] = useState<SurveyId | null>(null);
   const [surveyOpen, setSurveyOpen] = useState(false);
   useEffect(() => { void surveyDue().then(setSurvey); }, []);
-  const showing = open ?? (startOpen && !start?.folded);
+  const showing = open ?? true;
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   const unfinished = start && start.count < start.steps.length;
@@ -30,7 +29,7 @@ export default function TeacherNav({ startOpen = false }: { startOpen?: boolean 
         <NavLink to="/teacher/themes" className={link}><PaintBrush weight="bold" size={16} />{t('teacherNav.themes')}</NavLink>
         <NavLink to="/teacher/account" className={link}><UserCircle weight="bold" size={16} />{t('teacherNav.account')}</NavLink>
         {unfinished && (
-          <button type="button" aria-expanded={showing} onClick={() => { setOpen(!showing); if (showing) void data.setSetting(FOLDED, true); }}
+          <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)}
             className={`min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 border-[2px] border-border ${showing ? 'bg-surface-2' : 'bg-accent text-accent-ink'}`}>
             <RocketLaunch weight="fill" size={16} />{t('start.pill', { done: start.count, total: start.steps.length })}
           </button>
@@ -43,7 +42,7 @@ export default function TeacherNav({ startOpen = false }: { startOpen?: boolean 
         )}
       </nav>
       {survey && surveyOpen && <TeacherSurvey id={survey} onClose={() => { setSurveyOpen(false); void surveyDue().then(setSurvey); }} />}
-      {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => { setOpen(false); void data.setSetting(FOLDED, true); }} />}
+      {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => setOpen(false)} />}
     </>
   );
 }

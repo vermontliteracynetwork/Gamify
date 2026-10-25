@@ -28,14 +28,13 @@ test('reports group the question log, show the most common wrong answer, and dow
   expect(problems).toEqual([]);
 });
 
-test('Get started stays in the teacher menu on every page until done', async ({ page }) => {
-  await page.goto('/teacher/reports');
-  const pill = page.getByRole('button', { name: /^Get started \d\/5$/ });
-  await expect(pill).toBeVisible();
-  await pill.click();
-  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+test('Get started stays at the top of every teacher tab until done', async ({ page }) => {
+  for (const path of ['/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes', '/teacher/account']) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+  }
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
-  await page.goto('/teacher/themes');
-  await expect(pill).toBeVisible();
+  await page.getByRole('button', { name: /^Get started \d\/5$/ }).click();
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
 });
