@@ -145,6 +145,10 @@ export default function MemoryMatch() {
     return size(c) > size(best) ? c : best;
   }, 4);
   const rows = Math.ceil(deck.length / cols);
+  // Cards stretch taller (down to nearly square) to fill a tall screen.
+  const gap = view.w >= 640 ? 12 : 8;
+  const cardW = (availW - (cols - 1) * gap) / cols, cellH = (availH - (rows - 1) * gap) / rows;
+  const ratio = Math.min(4 / 3, Math.max(0.9, cardW / cellH));
   const winner = scores.length > 1 ? (scores[0] === scores[1] ? null : players[scores[0] > scores[1] ? 0 : 1]) : null;
 
   return (
@@ -185,7 +189,7 @@ export default function MemoryMatch() {
             <span className="inline-flex items-center rounded-pill border-[2.5px] border-border px-4 min-h-11 font-bold bg-surface">{t('mm.moves', { count: moves })}</span>
             {player?.kind === 'cpu' && phase === 'play' && <span className="font-bold stage-text">{t('mm.cpuTurn')}</span>}
           </div>
-          <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 290px) / ${rows} * ${cols} * 4 / 3))` }}>
+          <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 290px) / ${rows} * ${cols} * ${ratio.toFixed(3)}))` }}>
             {deck.map((c, i) => {
               const up = open.includes(i) || found[c.pair] !== undefined;
               const owner = found[c.pair];
@@ -193,8 +197,8 @@ export default function MemoryMatch() {
                 <motion.button type="button" onClick={() => player?.kind !== 'cpu' && flip(i)} disabled={phase !== 'play' || player?.kind === 'cpu'}
                   aria-label={up ? `${c.side === 'q' ? t('mm.question') : t('mm.answer')}: ${c.text}` : t('mm.card', { n: i + 1 })}
                   key={`${c.key}-${up ? 'up' : 'down'}`} initial={still ? false : { scaleX: 0.05 }} animate={{ scaleX: 1 }} transition={{ duration: 0.25 }}
-                  className={`aspect-[4/3] rounded-input border-[2.5px] border-border p-1.5 flex items-center justify-center text-center overflow-hidden ${owner !== undefined ? 'ring-4 ring-[#9fe7a0]' : ''}`}
-                  style={{ boxShadow: 'var(--shadow-sticker)', ...(up ? { background: c.side === 'q' ? '#fbfcf8' : '#fdfd94' } : pieceFill(theme, 'card-back', '#b4c4fb')) }}>
+                  className={`rounded-input border-[2.5px] border-border p-1.5 flex items-center justify-center text-center overflow-hidden ${owner !== undefined ? 'ring-4 ring-[#9fe7a0]' : ''}`}
+                  style={{ aspectRatio: String(ratio), boxShadow: 'var(--shadow-sticker)', ...(up ? { background: c.side === 'q' ? '#fbfcf8' : '#fdfd94' } : pieceFill(theme, 'card-back', '#b4c4fb')) }}>
                   {up ? (
                     <span className="grid gap-1 justify-items-center">
                       {c.image && <img src={c.image} alt={c.alt ?? ''} className="max-h-12 object-contain" />}

@@ -299,7 +299,7 @@ export default function GameShow() {
             )}
 
             {phase === 'play' && board === 'cards' && (
-              <div className={`grid gap-3 ${cards.length > 12 ? 'grid-cols-4 sm:grid-cols-5' : 'grid-cols-3 sm:grid-cols-4'}`}>
+              <div className={`grid gap-3 mx-auto w-full ${cards.length > 12 ? 'grid-cols-4 sm:grid-cols-5' : 'grid-cols-3 sm:grid-cols-4'}`} style={{ maxWidth: 'calc((100dvh - 330px) * 1.75)' }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}

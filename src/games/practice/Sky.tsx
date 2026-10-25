@@ -94,7 +94,7 @@ export default function Sky({ theme, filled, total, still, label }: { theme: Gam
   const dust = skySpots(36, 3, null, aspect);
   return (
     <div ref={ref} className="relative w-full overflow-hidden rounded-panel border-[2.5px] border-border" role="img" aria-label={label}
-      style={{ containerType: 'size', height: 'calc(100dvh - 180px)', background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
+      style={{ containerType: 'size', height: 'calc(100dvh - 190px)', background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />
       ))}
