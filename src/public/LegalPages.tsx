@@ -51,7 +51,7 @@ export function AccessibilityPage() {
 export function CreditsPage() {
   return <LegalPage title={t('legal.credits')} intro={t('legal.creditsIntro')} sections={[
     { h: t('legal.creditsStandards'), items: keys('legal.creditsStandards', 2) },
-    { h: t('legal.creditsFonts'), items: keys('legal.creditsFonts', 2) },
+    { h: t('legal.creditsFonts'), items: keys('legal.creditsFonts', 3) },
     { h: t('legal.creditsCode'), items: keys('legal.creditsCode', 5) },
     { h: t('legal.creditsTrademarks'), items: keys('legal.creditsTrademarks', 1) },
   ]} />;

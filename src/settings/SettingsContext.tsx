@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { setLanguage } from '../i18n';
 import { data } from '../data';
 import { initialSettings, withDefaults, type PlayerSettings } from './settings';
 
@@ -34,6 +35,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.dim = settings.dim ? 'on' : 'off';
     root.hand = settings.leftHanded ? 'left' : 'right';
   }, [settings]);
+  // The chosen language for every menu; the app redraws in it (App keys on it).
+  setLanguage(settings.language);
+  useEffect(() => { document.documentElement.lang = settings.language; }, [settings.language]);
 
   function update(next: PlayerSettings) {
     const own = { ...next };

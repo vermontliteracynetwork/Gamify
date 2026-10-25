@@ -37,4 +37,7 @@ export const WAITING: WaitingItem[] = [
   { id: 'guesses', kind: 'decide', added: '2026-10-25', title: 'Confirm Claudia\'s guesses',
     why: 'Claudia predicted these from your past answers and built them; change any you disagree with.',
     how: 'Homeschool co-ops of 5+ families buy like a school; school plans include a free online kickoff for teachers; we sign district data privacy agreements; school invoices go out within one school day; starter themes play on Plus and Pro; Pro\'s early access means new games open to Pro a few weeks early.' },
+  { id: 'spanish-review', kind: 'people', added: '2026-10-25', title: 'Find a native Spanish speaker to read the Spanish menus',
+    why: 'Spanish menus and read-aloud are built, but the words were drafted by Claudia. A fluent teacher or parent should read them before we say "en español" in marketing.',
+    how: 'Turn on Español in the footer or in Settings, Reading, then click through the site and a few games. Words to check: "grupo de preguntas" for question set, "Maestro" for Teacher, "Mejorar" for Upgrade, and Bowling\'s "Chuza".' },
 ];

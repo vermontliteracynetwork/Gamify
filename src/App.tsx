@@ -33,6 +33,7 @@ const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
 const PegDrop = lazy(() => import('./games/peg-drop/PegDrop'));
 const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
 const Bowling = lazy(() => import('./games/bowling/Bowling'));
+const RoadHop = lazy(() => import('./games/road-hop/RoadHop'));
 const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazy(() => import('./owner/OwnerPage'));
@@ -120,6 +121,7 @@ function AnimatedRoutes() {
           <Route path="/games/bakery-match" element={<Navigate to="/games/match-three" replace />} />
           <Route path="/games/space-bowling" element={<Navigate to="/games/bowling" replace />} />
           <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
+          <Route path="/games/road-hop" element={<RequireSignIn><RequireGame id="road-hop"><RoadHop /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
           <Route path="/games/flashcards" element={<RequireSignIn><RequireGame id="flashcards"><Flashcards /></RequireGame></RequireSignIn>} />
@@ -202,7 +204,7 @@ export default function App() {
   return (
     <SettingsProvider>
     <BrowserRouter>
-      <div className="min-h-dvh relative text-text font-body">
+      <LanguageRoot>
         <AmbientBackground />
         <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
         <NavBar />
@@ -210,7 +212,7 @@ export default function App() {
         <div id="main-content" tabIndex={-1} className="outline-none">
           <AnimatedRoutes />
         </div>
-      </div>
+      </LanguageRoot>
     </BrowserRouter>
     </SettingsProvider>
   );
@@ -224,4 +226,10 @@ function LiveLayer() {
   useEffect(() => { const f = () => setOn(!!getLive()); window.addEventListener('gamify-live', f); return () => window.removeEventListener('gamify-live', f); }, []);
   if (!on || path.startsWith('/live/') || path.startsWith('/teacher')) return null;
   return <Suspense fallback={null}><LiveOverlay /></Suspense>;
+}
+
+// Every menu redraws when the language changes (Stage 9: Spanish).
+function LanguageRoot({ children }: { children: React.ReactNode }) {
+  const { settings } = useSettings();
+  return <div key={settings.language} className="min-h-dvh relative text-text font-body">{children}</div>;
 }

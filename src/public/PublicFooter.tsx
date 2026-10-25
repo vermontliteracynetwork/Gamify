@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { t } from '../i18n';
+import { useSettings } from '../settings/SettingsContext';
 
 // The public footer: site links, legal links and the copyright line.
 // Attributions (Common Core notice, fonts, software) live on /credits.
@@ -27,6 +28,7 @@ export default function PublicFooter() {
           <Link to="/login">{t('public.nav.login')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
+        <LanguagePicker />
         <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm">
           <Link to="/privacy">{t('legal.privacy')}</Link>
           <Link to="/student-data">{t('public.nav.studentData')}</Link>
@@ -36,5 +38,18 @@ export default function PublicFooter() {
         </nav>
       </div>
     </footer>
+  );
+}
+
+// English or Spanish for every menu and read-aloud (Stage 9).
+function LanguagePicker() {
+  const { settings, update } = useSettings();
+  return (
+    <div role="group" aria-label={t('settings.language')} className="flex gap-2">
+      {([['en', 'English'], ['es', 'Español']] as const).map(([code, label]) => (
+        <button key={code} type="button" lang={code} aria-pressed={settings.language === code} onClick={() => update({ ...settings, language: code })}
+          className={`min-h-10 px-3 rounded-pill border-[2px] font-bold text-sm ${settings.language === code ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{label}</button>
+      ))}
+    </div>
   );
 }

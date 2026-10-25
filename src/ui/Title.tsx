@@ -1,7 +1,9 @@
 // Headings (teacher rule, 2026-10-24): Title Case, with small words like
 // "the" and "of" left lowercase unless they come first or last, and every
 // capital G drawn as the G from the Gamify logo. Screen readers get the
-// plain words.
+// plain words. Spanish headings keep sentence case, as Spanish does.
+
+import { language } from '../i18n';
 
 const SMALL = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'nor', 'of', 'on', 'or', 'per', 'so', 'the', 'to', 'up', 'via', 'vs', 'with', 'yet']);
 
@@ -20,7 +22,7 @@ export function titleCase(text: string): string {
 }
 
 export default function Title({ text }: { text: string }) {
-  const cased = titleCase(text);
+  const cased = language() === 'en' ? titleCase(text) : text;
   if (!cased.includes('G')) return <>{cased}</>;
   return (
     <>

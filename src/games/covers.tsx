@@ -112,6 +112,20 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
+    case 'road-hop':
+      return (
+        <div className={base} style={{ background: '#8fe3a0' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+            <rect x="0" y="18" width="100" height="26" fill="#4a4f6a" /><rect x="0" y="56" width="100" height="26" fill="#4a4f6a" />
+            <path d="M0 31 H100 M0 69 H100" stroke="#fff" strokeOpacity="0.6" strokeWidth="1.5" strokeDasharray="6 5" />
+            {[[8, 21, '#e5635f'], [62, 21, '#6aa9e9'], [30, 59, '#f6c544'], [80, 59, '#c58ce8']].map(([x, y, c], i) => (
+              <g key={i} transform={`translate(${x} ${y})`}><rect x="0" y="4" width="18" height="8" rx="3" fill={c as string} stroke="#000" strokeWidth="1" /><circle cx="4" cy="13" r="2.4" fill="#241c3d" /><circle cx="14" cy="13" r="2.4" fill="#241c3d" /></g>
+            ))}
+            <g transform="translate(50 92) scale(1.1)"><ellipse cx="0" cy="0" rx="9" ry="6.5" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="-4.5" cy="-6.5" r="3.6" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="4.5" cy="-6.5" r="3.6" fill="#9bd35a" stroke="#000" strokeWidth="1" /><circle cx="-4.5" cy="-6.5" r="1.9" fill="#fff" /><circle cx="4.5" cy="-6.5" r="1.9" fill="#fff" /><circle cx="-4.2" cy="-6.8" r="1" fill="#241c3d" /><circle cx="4.8" cy="-6.8" r="1" fill="#241c3d" /></g>
+            <path d="M50 80 L50 50" stroke="#fdfd94" strokeWidth="2.5" strokeDasharray="2 4" strokeLinecap="round" />
+          </svg>
+        </div>
+      );
     case 'bubble-pop':
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
