@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 // wide. Menus, teacher pages and public pages must not scroll sideways.
 // (Game boards are two-dimensional content and are exempt, but they still
 // fit because they size to the screen.)
-const PAGES = ['/', '/features', '/pricing', '/ways', '/help', '/it', '/join', '/login', '/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes', '/teacher/account', '/play'];
+const PAGES = ['/', '/features', '/themes', '/challenge', '/pricing', '/ways', '/help', '/it', '/join', '/login', '/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes', '/teacher/account', '/play'];
 
 test.beforeEach(({}, info) => { test.skip(info.project.name !== 'laptop', 'one size is enough'); });
 

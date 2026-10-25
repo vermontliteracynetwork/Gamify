@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DeviceTablet, GearSix, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, DeviceTablet, GearSix, Heart, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -13,7 +13,9 @@ import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
 import { newPicturePassword } from '../student/pictures';
 import PictureBadge from '../student/PictureBadge';
-import { useMadeThemes } from '../theme/made';
+import { useFavoriteThemes, useMadeThemes } from '../theme/made';
+import { themesFor } from '../theme/library';
+import { GAMES } from '../games/registry';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
@@ -234,6 +236,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
   const [chosen, setChosen] = useState<string[]>([]);
   const [startsOn, setStartsOn] = useState('');
   const [endsOn, setEndsOn] = useState('');
+  const [themeIds, setThemeIds] = useState<string[]>([]);
   const name = (sid: string) => sets.find((s) => s.id === sid)?.name ?? t('sets.untitled');
   const countFor = (studentId?: string) => assignments.filter((a) => !a.studentId || !studentId || a.studentId === studentId).length;
   const targets = who === 'class' ? [undefined] : chosen;
@@ -241,9 +244,9 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
 
   async function assign() {
     for (const studentId of targets) {
-      await data.saveAssignment({ id: newId('asg'), classroomId, setId: setId[0], studentId, starred: false, startsOn: startsOn || undefined, endsOn: endsOn || undefined });
+      await data.saveAssignment({ id: newId('asg'), classroomId, setId: setId[0], studentId, starred: false, startsOn: startsOn || undefined, endsOn: endsOn || undefined, themeIds: themeIds.length ? themeIds : undefined });
     }
-    setSetId([]); setChosen([]);
+    setSetId([]); setChosen([]); setThemeIds([]);
     reload();
   }
 
@@ -255,7 +258,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
         {assignments.map((a) => (
           <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
             <span className="font-bold flex-1 min-w-40">{name(a.setId)}</span>
-            <span className="text-sm font-bold text-muted">{a.studentId ? students.find((s) => s.id === a.studentId)?.name : t('class.wholeClass')}{a.startsOn || a.endsOn ? ` · ${a.startsOn ?? ''} to ${a.endsOn ?? ''}` : ''}</span>
+            <span className="text-sm font-bold text-muted">{a.studentId ? students.find((s) => s.id === a.studentId)?.name : t('class.wholeClass')}{a.startsOn || a.endsOn ? ` · ${a.startsOn ?? ''} to ${a.endsOn ?? ''}` : ''}{a.themeIds?.length ? ` · ${t('class.themeCount', { count: a.themeIds.length })}` : ''}</span>
             <button type="button" aria-pressed={a.starred} onClick={async () => { await data.saveAssignment({ ...a, starred: !a.starred }); reload(); }} aria-label={t('class.focus', { name: name(a.setId) })}
               className={`w-11 h-11 rounded-full border-[2px] border-border flex items-center justify-center ${a.starred ? 'bg-accent' : 'bg-surface'}`}><Star weight={a.starred ? 'fill' : 'bold'} size={20} /></button>
             <button type="button" onClick={async () => { await data.deleteAssignment(a.id); reload(); }} aria-label={t('class.unassign', { name: name(a.setId) })}
@@ -267,6 +270,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
       <Panel className="grid gap-4">
         <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
         <SetPicker sets={sets} value={setId} onChange={setSetId} />
+        <ThemeChoices value={themeIds} onChange={setThemeIds} />
         <ChoiceRow label={t('class.who')} value={who} onChange={setWho} options={[{ value: 'class', label: t('class.wholeClass') }, { value: 'some', label: t('class.someStudents') }]} />
         {who === 'some' && (
           <div className="flex flex-wrap gap-2">
@@ -284,5 +288,43 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
         <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
       </Panel>
     </div>
+  );
+}
+
+// Up to 10 themes students choose from when they play the set (teacher,
+// 2026-10-25). Favorites from the Themes page come first. Leave it empty and
+// students see every theme as usual.
+const MAX_THEME_CHOICES = 10;
+function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: string[]) => void }) {
+  const tier = useTier();
+  const { themes: made } = useMadeThemes();
+  const { favorites } = useFavoriteThemes();
+  const options = GAMES.flatMap((g) => themesFor(g.id, made).slice(1).map((th) => ({ th, game: g.name })))
+    .filter(({ th }) => th.source !== 'library' || TIERS[tier].themesPlayable)
+    .sort((a, b) => Number(favorites.includes(b.th.id)) - Number(favorites.includes(a.th.id)));
+  return (
+    <fieldset className="grid gap-2">
+      <legend className="font-bold">{t('class.themes')}</legend>
+      <p className="text-sm font-semibold text-muted">{t('class.themesHint', { max: MAX_THEME_CHOICES })}</p>
+      {options.length === 0 ? (
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.themesNone')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {options.map(({ th, game }) => {
+            const on = value.includes(th.id);
+            return (
+              <button key={th.id} type="button" role="checkbox" aria-checked={on} disabled={!on && value.length >= MAX_THEME_CHOICES}
+                onClick={() => onChange(on ? value.filter((x) => x !== th.id) : [...value, th.id])}
+                className={`min-h-11 pl-1.5 pr-3 rounded-pill border-[2px] font-bold text-sm inline-flex items-center gap-2 disabled:opacity-50 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                <span className="w-7 h-7 rounded-full border-[2px] border-border" style={{ background: th.colors.background }} aria-hidden="true" />
+                {favorites.includes(th.id) && <Heart weight="fill" size={14} color="#d6336c" aria-label={t('class.favorite')} />}
+                {th.name}<span className="font-semibold text-muted">· {game}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {value.length > 0 && <p className="text-sm font-bold" aria-live="polite">{t('class.themesPicked', { count: value.length, max: MAX_THEME_CHOICES })}</p>}
+    </fieldset>
   );
 }

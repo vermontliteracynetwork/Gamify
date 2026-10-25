@@ -6,11 +6,13 @@ import { t } from '../i18n';
 export default function PublicFooter() {
   return (
     <footer className="mt-16 border-t-[2.5px] border-border bg-surface">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-5 lg:grid-cols-[1fr_auto] items-start">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-5 lg:grid-cols-[minmax(12rem,auto)_minmax(0,1fr)] items-start">
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
         <nav aria-label={t('public.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-bold text-sm">
           <Link to="/">{t('public.nav.home')}</Link>
           <Link to="/features">{t('public.nav.features')}</Link>
+          <Link to="/themes">{t('public.nav.themes')}</Link>
+          <Link to="/challenge">{t('challenge.title')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
           <Link to="/research">{t('research.title')}</Link>
           <Link to="/ways">{t('ways.title')}</Link>

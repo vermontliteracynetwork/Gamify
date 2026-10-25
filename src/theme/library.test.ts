@@ -5,17 +5,18 @@ import { pieceFill, themesFor } from './library';
 import { themeProblems } from './validate';
 
 describe('game themes', () => {
-  it('every game plays only Classic until a theme is made, and Classic passes readability checks', () => {
+  it('every game starts on Classic, plus its starter themes, and every one passes readability checks', () => {
     for (const g of GAMES) {
       const themes = themesFor(g.id);
-      expect(themes.map((t) => t.name)).toEqual(['Classic']);
-      expect(themeProblems(themes[0])).toEqual([]);
+      expect(themes[0].name).toBe('Classic');
+      expect(themes.slice(1).every((t) => t.source === 'library' && t.designedBy === 'Gamify')).toBe(true);
+      for (const th of themes) expect([th.name, themeProblems(th)]).toEqual([th.name, []]);
     }
   });
   it('adds only the made themes for that game', () => {
     const made = { ...classicTheme('match-three'), id: 'x', name: 'Ours', source: 'custom' as const };
-    expect(themesFor('match-three', [made]).map((t) => t.name)).toEqual(['Classic', 'Ours']);
-    expect(themesFor('game-show', [made]).map((t) => t.name)).toEqual(['Classic']);
+    expect(themesFor('match-three', [made]).map((t) => t.name).slice(0, 2)).toEqual(['Classic', 'Ours']);
+    expect(themesFor('game-show', [made]).map((t) => t.name)).not.toContain('Ours');
   });
   it('fills a piece with its picture over its color', () => {
     const th = { ...classicTheme('star-quiz'), pieces: { star: { color: '#ff0000', image: 'data:x' } } };

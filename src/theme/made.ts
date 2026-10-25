@@ -26,3 +26,19 @@ export function useMadeThemes() {
   useEffect(reload, [reload]);
   return { themes, reload };
 }
+
+// Themes a teacher has hearted on the Themes page, offered first when they
+// pick themes for students (teacher, 2026-10-25).
+const FAVORITES = 'favorite-themes';
+export function useFavoriteThemes() {
+  const [ids, setIds] = useState<string[]>([]);
+  useEffect(() => { void data.getSetting<string[]>(FAVORITES).then((v) => setIds(v ?? [])); }, []);
+  const toggle = useCallback((id: string) => {
+    setIds((cur) => {
+      const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+      void data.setSetting(FAVORITES, next);
+      return next;
+    });
+  }, []);
+  return { favorites: ids, toggle };
+}

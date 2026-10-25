@@ -9,14 +9,20 @@ import { TeamArt } from '../engine/TeamBadge';
 import { setSoundPack } from '../engine/feedback';
 import { THEME_FONTS, type GameTheme } from './types';
 import { calmVersion } from './validate';
+import { useArcade, useSession } from '../student/session';
 
 // The theme a game is wearing, remembered per game. A teacher's own designs
-// always play; library themes need a paid plan, and Free only previews them
-// (plans table, Part 2A).
+// always play; library and starter themes need a paid plan, and Free only
+// previews them (plans table, Part 2A).
 export function useGameTheme(gameId: string) {
   const tier = useTier();
   const { themes: made } = useMadeThemes();
-  const themes = themesFor(gameId, made);
+  const all = themesFor(gameId, made);
+  // A signed-in student sees Classic plus the themes their teacher offered
+  // with the assigned sets, when the teacher picked some for this game.
+  const { themeIds } = useArcade(useSession());
+  const offered = all.filter((th, i) => i === 0 || themeIds.includes(th.id));
+  const themes = offered.length > 1 ? offered : all;
   const [id, setId] = useState(themes[0].id);
   useEffect(() => { data.getSetting<string>(`theme:${gameId}`).then((v) => { if (v) setId(v); }); }, [gameId]);
   const playable = (th: GameTheme) => th.source !== 'library' || TIERS[tier].themesPlayable;

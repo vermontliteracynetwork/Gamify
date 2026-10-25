@@ -73,6 +73,8 @@ export interface SetAssignment {
   starred: boolean;
   startsOn?: string;
   endsOn?: string;
+  // Themes students pick from when they play this set (up to 10; missing = any).
+  themeIds?: string[];
 }
 
 // A "Tell Gamify" report to the developer: bugs, game problems, ideas.

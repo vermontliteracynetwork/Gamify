@@ -10,9 +10,8 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
-import { classicTheme } from '../theme/classic';
 import ThemePreview from '../theme/builder/ThemePreview';
-import type { GameTheme } from '../theme/types';
+import { STARTER_THEMES } from '../theme/starters';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
@@ -166,34 +165,23 @@ function QuestionDemo() {
   );
 }
 
-// Sample themes (placeholders until classes make real ones) showing one game
-// re-skinned for different ages and interests.
-const SAMPLES: { id: string; name: string; band: string; make: (base: GameTheme) => GameTheme }[] = [
-  { id: 'classic', name: 'Classic', band: 'features.band.all', make: (b) => b },
-  { id: 'ocean', name: 'Ocean Friends', band: 'features.band.k2', make: (b) => ({ ...b, colors: { ...b.colors, background: '#7cc8f0', accent: '#fff3a6' }, backdrop: { kind: 'pattern', pattern: 'waves' }, fonts: { ...b.fonts, display: 'Rounded' }, pieces: { 'card-back': { color: '#fff3a6' }, square: { color: '#c9f0ff' } } }) },
-  { id: 'jungle', name: 'Jungle Quest', band: 'features.band.35', make: (b) => ({ ...b, colors: { ...b.colors, background: '#5fae6e', accent: '#ffd166' }, backdrop: { kind: 'pattern', pattern: 'dots' }, fonts: { ...b.fonts, display: 'Storybook' }, pieces: { 'card-back': { color: '#ffd166' }, square: { color: '#e3f6c8' } } }) },
-  { id: 'arcade', name: 'Night Arcade', band: 'features.band.68', make: (b) => ({ ...b, colors: { ...b.colors, background: '#2b2462', backgroundText: '#ffffff', accent: '#ff7ad9', accentText: '#000000' }, backdrop: { kind: 'pattern', pattern: 'checks' }, fonts: { ...b.fonts, display: 'Typewriter' }, pieces: { 'card-back': { color: '#7af0ff' }, square: { color: '#ff7ad9' } } }) },
-  { id: 'slate', name: 'Clean Slate', band: 'features.band.adult', make: (b) => ({ ...b, colors: { ...b.colors, background: '#e9e6df', accent: '#ffffff' }, backdrop: { kind: 'color' }, fonts: { ...b.fonts, display: 'Inclusive Sans' }, pieces: { 'card-back': { color: '#ffffff' }, square: { color: '#f4f1ea' } } }) },
-];
-
 function ThemeDemo() {
+  const samples = STARTER_THEMES.filter((x) => x.gameId === 'game-show').sort((a, b) => a.order - b.order);
   const [pick, setPick] = useState('ocean');
-  const base = classicTheme('game-show');
-  const sample = SAMPLES.find((s) => s.id === pick)!;
-  const theme = { ...sample.make(base), name: sample.name };
+  const sample = samples.find((s) => s.id === pick)!;
   return (
     <div className="grid gap-3">
-      <ThemePreview theme={theme} gameName={t('features.demo.gameName')} />
+      <ThemePreview theme={sample.theme} gameName={t('features.demo.gameName')} />
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('features.demo.pickTheme')}>
-        {SAMPLES.map((s) => (
+        {samples.map((s) => (
           <button key={s.id} type="button" role="radio" aria-checked={pick === s.id} onClick={() => setPick(s.id)}
             className={`min-h-12 px-3 rounded-input border-[2px] border-border text-left ${pick === s.id ? 'bg-text text-white' : 'bg-surface'}`}>
             <span className="block font-bold text-sm leading-tight">{s.name}</span>
-            <span className="block text-xs font-semibold opacity-80">{t(s.band as StringKey)}</span>
+            <span className="block text-xs font-semibold opacity-80">{t(`features.band.${s.band}` as StringKey)}</span>
           </button>
         ))}
       </div>
-      <p className="text-xs font-bold">{t('features.demo.samples')}</p>
+      <p className="text-xs font-bold">{t('features.demo.samples')} <Link to="/themes">{t('themes.seeAll')}</Link></p>
     </div>
   );
 }

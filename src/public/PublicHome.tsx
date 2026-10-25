@@ -10,6 +10,8 @@ import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import ThemePreview from '../theme/builder/ThemePreview';
+import { STARTER_THEMES } from '../theme/starters';
 
 // The public home page (development plan Part 3A): what Gamify is, the four
 // ways to play, the games, why it works (honest research lines), and the
@@ -57,6 +59,8 @@ export default function PublicHome() {
             ))}
           </div>
         </section>
+
+        <ThemesShowcase />
 
         <section className="mt-16 grid gap-4">
           <h2 className="font-display text-4xl"><Title text={t('public.gamesTitle')} /></h2>
@@ -113,5 +117,37 @@ export default function PublicHome() {
       </main>
       <PublicFooter />
     </>
+  );
+}
+
+// Themes are what make Gamify stand out and what Plus and Pro are built on
+// (teacher, 2026-10-25): a showcase of trending looks (samples until launch)
+// that opens into the full Themes page.
+function ThemesShowcase() {
+  const reduce = useReducedMotion();
+  const top = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 4);
+  return (
+    <section aria-labelledby="home-themes" className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-5 sm:p-8 grid gap-5" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      <div className="grid gap-2 max-w-3xl">
+        <h2 id="home-themes" className="font-display text-4xl flex items-center gap-3"><PaintBrush weight="fill" size={38} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('public.themesTitle')} /></h2>
+        <p className="text-lg font-semibold">{t('public.themesText')}</p>
+      </div>
+      <p className="font-display text-2xl">{t('public.themesTrending')}</p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {top.map((x, i) => (
+          <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
+            <Link to="/themes" className="hover-lift block bg-surface border-[2.5px] border-border rounded-panel p-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <ThemePreview theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
+              <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
+              <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link to="/themes" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
+        <Link to="/challenge" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.themesChallenge')}</Link>
+      </div>
+    </section>
   );
 }

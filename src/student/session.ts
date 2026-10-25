@@ -56,7 +56,9 @@ export function useArcade(session: ArcadeSession | null) {
       .filter((p) => p.set);
   }, [session, assignments, mine]);
   const modes = (student?.allowedModes ?? classModes ?? ['live', 'share', 'solo', 'versus']).filter((m) => !classModes || classModes.includes(m));
-  return { student, pool, modes, canDesign };
+  // Themes the teacher offered with today's sets (empty = any theme).
+  const themeIds = useMemo(() => (session ? [...new Set(activeAssignments(assignments, session.studentId).flatMap((a) => a.themeIds ?? []))] : []), [session, assignments]);
+  return { student, pool, modes, canDesign, themeIds };
 }
 
 // A game's question pool: the signed-in student's assigned sets, or the set

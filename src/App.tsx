@@ -35,6 +35,8 @@ const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazy(() => import('./owner/OwnerPage'));
 const FeaturesPage = lazy(() => import('./public/FeaturesPage'));
+const ThemesPage = lazy(() => import('./public/ThemesPage'));
+const ChallengePage = lazy(() => import('./public/ChallengePage'));
 const PricingPage = lazy(() => import('./public/PricingPage'));
 const CodeScreen = lazy(() => import('./public/CodeScreen'));
 const ClassesPage = lazy(() => import('./teacher/ClassesPage'));
@@ -73,6 +75,8 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<PublicHome />} />
           <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/themes" element={<ThemesPage />} />
+          <Route path="/challenge" element={<ChallengePage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />

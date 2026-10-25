@@ -1,11 +1,12 @@
 import { classicTheme } from './classic';
+import { startersFor } from './starters';
 import type { GameTheme } from './types';
 
-// Every game plays Classic for now (teacher call, 2026-10-24); other themes
-// come only from the Theme Builder: the teacher's own designs and library
-// themes made in the owner's developer view.
+// Every game plays Classic free; other themes come from the Theme Builder
+// (the teacher's own designs and library themes made in the owner's
+// developer view) and Gamify's starter themes (Plus and Pro).
 export function themesFor(gameId: string, made: GameTheme[] = []): GameTheme[] {
-  return [classicTheme(gameId), ...made.filter((th) => th.gameId === gameId)];
+  return [classicTheme(gameId), ...made.filter((th) => th.gameId === gameId), ...startersFor(gameId)];
 }
 
 export function pieceColor(theme: GameTheme | undefined, piece: string, fallback: string): string {
