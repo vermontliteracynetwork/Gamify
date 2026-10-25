@@ -37,6 +37,7 @@ export default function JoinPage() {
     const cls = (await data.listClassrooms()).find((x) => x.joinCode === upper);
     if (cls) { navigate(`/arcade/${cls.id}`); return; }
     const g = await findGameCode(upper);
+    if (g?.mirror) { navigate(`/mirror/${g.code}`); return; }
     if (g) { setGame(g); return; }
     misses.current += 1;
     if (misses.current >= 5) { misses.current = 0; setWaitUntil(Date.now() + 30000); setNow(Date.now()); }

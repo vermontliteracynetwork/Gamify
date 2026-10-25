@@ -4,7 +4,7 @@ import { data } from './index';
 // Game codes (development plan Part 3B, path 2): the teacher picks a set and
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean }
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean }
 const KEY = 'game-codes';
 // Game codes stop working after two weeks (development plan Stage 5:
 // codes expire), so an old code on a board can't be reused by strangers.
@@ -15,14 +15,14 @@ export async function listGameCodes(): Promise<GameCode[]> {
   return ((await data.getSetting<GameCode[]>(KEY)) ?? []).filter((c) => fresh(c));
 }
 
-export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' = 'play'): Promise<GameCode> {
+export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' = 'play'): Promise<GameCode> {
   const all = await listGameCodes();
-  const live = kind === 'live', versus = kind === 'versus';
+  const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror';
   // A two-device game gets a fresh code every time; others reuse theirs.
-  const same = versus ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus);
+  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus);
   if (same) return same;
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }) };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }) };
   await data.setSetting(KEY, [...all, code]);
   return code;
 }

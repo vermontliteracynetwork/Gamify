@@ -9,6 +9,8 @@ import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
 import { useSettings } from './SettingsContext';
 import Title from '../ui/Title';
+import { getMirrorCode, setMirrorCode } from '../live/mirror';
+import { makeGameCode } from '../data/gameCodes';
 
 // The gear button: same corner (top right, top left when left-handed), same
 // look in every game and on the question screen (product plan 4A). It sits
@@ -153,6 +155,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
               <Toggle key={tool} label={t(tool === 'listen' ? 'q.listenTool' : (`q.${tool}` as StringKey))} value={s.tools[tool]}
                 onChange={(v) => update({ ...s, tools: { ...s.tools, [tool]: v } })} />
             ))}
+            {context && SHARE_GAMES.includes(context) && <MirrorControl gameId={context} />}
           </>
         )}
 
@@ -164,4 +167,26 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
 
 function Choice<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: T[]; onChange: (v: T) => void }) {
   return <ChoiceRow label={label} value={value} options={options.map((o) => ({ value: o, label: t(`opt.${o}` as StringKey) }))} onChange={onChange} />;
+}
+
+// Share Mirror: a code a student types on their own device to see the big
+// screen's question close up (teacher tab, behind the PIN).
+const SHARE_GAMES = ['game-show', 'peg-drop', 'bowling'];
+function MirrorControl({ gameId }: { gameId: string }) {
+  const [code, setCode] = useState(getMirrorCode());
+  return (
+    <div className="grid gap-2 rounded-input border-[2px] border-border p-3">
+      <span className="font-bold">{t('mirror.teacherTitle')}</span>
+      <span className="text-sm font-semibold">{t('mirror.teacherHint')}</span>
+      {code ? (
+        <>
+          <span className="font-display text-4xl tracking-[0.15em]" aria-label={t('host.codeIs', { code })}>{code}</span>
+          <span className="text-sm font-semibold">{t('mirror.teacherHow', { host: window.location.host })}</span>
+          <button type="button" onClick={() => { setMirrorCode(''); setCode(''); }} className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold">{t('mirror.stop')}</button>
+        </>
+      ) : (
+        <button type="button" onClick={async () => { const c = (await makeGameCode(gameId, '', 'mirror')).code; setMirrorCode(c); setCode(c); }} className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold">{t('mirror.start')}</button>
+      )}
+    </div>
+  );
 }

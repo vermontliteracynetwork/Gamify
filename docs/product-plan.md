@@ -1085,7 +1085,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 17 | **"Built by a teacher for students with high support needs, so it works for everyone."** | Founder story and credibility | Origin in the Independent Work Dashboard |
 | 18 | **"No student accounts, no ads, no trackers."** | Privacy is the deal-breaker for schools | Section 6.6 |
 | 19 | **"Made for iPad first."** | Matches how many classrooms actually run | Standing product fact |
-| 20 | **"Every student sees the board."** Share Mirror puts the live game on a visually impaired student's own iPad, view only, with their own zoom and read-aloud. | Real accessibility story; an IEP accommodation built in, free | Teacher, 2026-10-24; section 4D |
+| 20 | **"Every student sees the board."** (built 2026-10-25) Share Mirror puts the live game on a visually impaired student's own iPad, view only, with their own zoom and read-aloud. | Real accessibility story; an IEP accommodation built in, free | Teacher, 2026-10-24; section 4D |
 | 21 | **"One link for everything: <domain>.com/join."** | Simple for kids and families; easy to put on a classroom poster | Teacher, 2026-10-24; section 4D |
 | 22 | **"Codes that can't spell bad words."** | Small detail that shows care; teachers notice | Section 4D |
 | 23 | **"Freeze any screen with one tap, and send a private message."** The Lock button stops the game and shows only that student your note. | Classroom management teachers ask for; discreet, not shaming | Teacher, 2026-10-24; section 4E |

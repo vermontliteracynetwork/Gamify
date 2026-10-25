@@ -85,3 +85,30 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
   await expect(page.getByRole('dialog').getByText(/(Ava|Ben|Cal|Dee), (Ava|Ben|Cal|Dee)/)).toBeVisible();
 });
+
+test('Share Mirror: a student sees the big-screen question close up, with their own text size and contrast', async ({ page, context }, info) => {
+  test.setTimeout(90_000);
+  await openSetup(page, '/games/game-show');
+  await page.getByRole('radio', { name: 'Surprise cards' }).click();
+  await finishSetup(page);
+  await page.getByRole('button', { name: /settings/i }).first().click();
+  await page.getByRole('tab', { name: 'Teacher' }).click();
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('button', { name: 'Make a mirror code' }).click();
+  const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.slice(-5);
+  await page.keyboard.press('Escape');
+
+  const kid = await context.newPage();
+  await kid.goto(`/join/${code}`);
+  await expect(kid).toHaveURL(new RegExp(`/mirror/${code}`));
+  await expect(kid.getByRole('heading', { name: 'Waiting for the Next Question' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  const prompt = (await page.getByRole('dialog').getByRole('heading', { level: 2 }).innerText()).trim();
+  await expect(kid.getByRole('heading', { level: 1, name: prompt })).toBeVisible();
+  await kid.getByRole('button', { name: 'Bigger words' }).click();
+  await kid.getByRole('button', { name: 'High contrast' }).click();
+  await kid.screenshot({ path: `test-results/mirror-${info.project.name}.png` });
+});

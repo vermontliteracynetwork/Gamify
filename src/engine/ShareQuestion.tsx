@@ -9,6 +9,7 @@ import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
 import DialogFocus from '../ui/DialogFocus';
+import { mirrorSend } from '../live/mirror';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
@@ -26,6 +27,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
   const [shown, setShown] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   const [cpu, setCpu] = useState<'thinking' | 'right' | 'miss' | null>(player.kind === 'cpu' ? 'thinking' : null);
+
+  // Share Mirror: the student's own copy shows this question.
+  useEffect(() => {
+    mirrorSend({ t: 'q', prompt: q.prompt, choices: q.choices, player: player.name, imageUrl: q.imageUrl, imageAlt: q.imageAlt });
+    return () => mirrorSend({ t: 'clear' });
+  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (shown) mirrorSend({ t: 'result', picked, correct: q.correctIndex, right: picked === q.correctIndex || cpu === 'right' }); }, [shown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (player.kind !== 'cpu') return;
