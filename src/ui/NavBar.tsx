@@ -14,8 +14,8 @@ export default function NavBar() {
   const pill = 'flex items-center gap-1.5 text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
     <header className="no-print sticky top-0 z-50 h-16 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
-      <Link to={any ? '/play' : '/'} className="flex items-center active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
-        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-9 w-auto" draggable="false" />
+      <Link to={any ? '/play' : '/'} className="flex items-center shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-9 w-auto shrink-0" draggable="false" />
       </Link>
       {!any && (
         <nav aria-label={t('public.nav.label')} className="flex items-center gap-1 sm:gap-2">
@@ -32,8 +32,8 @@ export default function NavBar() {
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
             <ChatCircleDots weight="bold" size={22} />
           </button>
-          {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} />{t('nav.teacher')}</Link>}
-          <Link to={student ? '/arcade' : '/play'} className={pill}><HouseSimple weight="bold" size={16} />{student ? t('nav.myArcade') : t('nav.allGames')}</Link>
+          {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
+          <Link to={student ? '/arcade' : '/play'} className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{student ? t('nav.myArcade') : t('nav.allGames')}</span></Link>
           {teacher && !student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden sm:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
         </>
       )}

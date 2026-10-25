@@ -23,7 +23,7 @@ export default function TeacherNav({ startOpen = false }: { startOpen?: boolean 
   const unfinished = start && start.count < start.steps.length;
   return (
     <>
-      <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap gap-1 p-1 rounded-pill bg-surface border-[2px] border-border mb-4">
+      <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-4">
         <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{t('teacherNav.classes')}</NavLink>
         <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
         <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>

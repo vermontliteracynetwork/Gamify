@@ -13,7 +13,7 @@ report is final.
 | Adaptable, info and relationships (1.3) | Supports (automated) | Game boards use grid roles; setup pages use headings and step labels |
 | Use of color (1.4.1) | Supports | Teams and treats always have an icon as well as a color |
 | Contrast (1.4.3, 1.4.11) | Supports (automated) | Theme Builder blocks color pairs that fail AA |
-| Resize and reflow (1.4.4, 1.4.10) | Partially supports | Text size settings to 125 percent; game screens fit without scrolling; to verify at 400 percent zoom |
+| Resize and reflow (1.4.4, 1.4.10) | Supports | Text size settings to 125 percent; game screens fit without scrolling; every menu, teacher and public page checked at 320 px wide (400 percent zoom) with no sideways scrolling (e2e/zoom.spec.ts) |
 | Keyboard (2.1) | Supports | Every control is a real button; checked by keyboard only (e2e/keyboard.spec.ts): game setup, Game Show cards and answers, Bakery Match swaps with Enter, Bubble Pop aims with arrow keys and shoots with Space, a teacher making a class |
 | Timing (2.2) | Supports | Timers can be turned off; read-first time set per student; Cast and Catch time is teacher-chosen |
 | Seizures (2.3) | Supports | Nothing flashes; repeating motion stops in calm mode and Still motion |

@@ -44,7 +44,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function Tabs<T extends string>({ value, options, onChange, label }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string }) {
   return (
-    <div role="tablist" aria-label={label} className="inline-flex gap-1 p-1 rounded-pill bg-surface border-[2px] border-border mb-5">
+    <div role="tablist" aria-label={label} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-5">
       {options.map((o) => (
         <button
           key={o.id}
