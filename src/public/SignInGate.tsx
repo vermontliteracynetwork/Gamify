@@ -8,6 +8,7 @@ import { useSignedIn } from '../auth/session';
 import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
+import { UpgradeButton } from '../billing/Upgrade';
 
 // The games and the Arcade need a signed-in student or teacher.
 export function RequireSignIn({ children }: { children: ReactNode }) {
@@ -45,7 +46,8 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
       <h1 className="title-bubble text-4xl"><Title text={name} /></h1>
       <p className="font-bold text-lg">{teacher ? t('gate.gamePlans', { name }) : t('gate.gameAsk')}</p>
       <div className="flex flex-wrap justify-center gap-2">
-        {teacher && <Link to="/pricing" className={buttonClasses('primary')}>{t('gate.seePlans')}</Link>}
+        {teacher && <UpgradeButton className="min-h-14 px-8 text-lg" />}
+        {teacher && <Link to="/pricing" className={buttonClasses('ghost')}>{t('gate.seePlans')}</Link>}
         <Link to={teacher ? '/play' : '/arcade'} className={buttonClasses('secondary')}>{teacher ? t('nav.allGames') : t('nav.myArcade')}</Link>
       </div>
     </main>

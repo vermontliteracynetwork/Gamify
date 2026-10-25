@@ -94,7 +94,7 @@ test('Theme Builder: a photo of a drawn template page fills its piece', async ({
 
 test('Free plan: the Theme Builder works on Game Show only', async ({ page }) => {
   await page.goto('/teacher/themes/match-three');
-  await expect(page.getByText('Upgrade to Plus or Pro to design this game too.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Designing this game comes with Plus and Pro.', { exact: false })).toBeVisible();
   // Only the note shows: nothing to fill in that couldn't be saved.
   await expect(page.getByLabel('Theme name')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Save theme' })).toHaveCount(0);

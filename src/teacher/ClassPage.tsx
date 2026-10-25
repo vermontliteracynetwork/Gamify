@@ -20,6 +20,7 @@ import TeacherNav from '../ui/TeacherNav';
 import { readOnlyIds } from '../data/downgrade';
 import { newJoinCode } from '../auth/session';
 import Title from '../ui/Title';
+import { LimitNote, UpgradeButton } from '../billing/Upgrade';
 
 type Tab = 'students' | 'sets' | 'modes';
 
@@ -57,7 +58,7 @@ export default function ClassPage() {
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
-      {frozen && <Panel className="mb-4 bg-surface-2"><p className="font-bold">{t('class.frozen')}</p></Panel>}
+      {frozen && <LimitNote className="mb-4">{t('class.frozen')}</LimitNote>}
       <fieldset disabled={frozen} className="contents">
       {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
       {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} />}
@@ -138,7 +139,7 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
           <Button variant="primary" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
           <p className="font-bold text-sm">{Number.isFinite(limit) ? t('class.studentLimit', { count: students.length, limit }) : t('class.studentCount', { count: students.length })}</p>
         </div>
-        {toAdd.length > room && <p className="font-bold text-sm">{t('class.overLimit', { limit })}</p>}
+        {toAdd.length > room && <div className="flex flex-wrap items-center gap-2"><p className="font-bold text-sm">{t('class.overLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
       </Panel>
       {students.length === 0 && <Panel><p className="font-bold">{t('class.noStudents')}</p></Panel>}
       <div className="grid sm:grid-cols-2 gap-3">
@@ -279,7 +280,7 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
           <label className="grid gap-1 font-bold">{t('class.starts')}<input type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
           <label className="grid gap-1 font-bold">{t('class.ends')}<input type="date" value={endsOn} onChange={(e) => setEndsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
         </div>
-        {full && <p className="font-bold">{Number.isFinite(limit) ? t('class.setLimit', { limit }) : ''}</p>}
+        {full && Number.isFinite(limit) && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('class.setLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
         <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
       </Panel>
     </div>

@@ -13,6 +13,7 @@ import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
+import { UpgradeHost } from './billing/Upgrade';
 
 // Pages load when first opened, so the first screen arrives fast on older
 // iPads and school networks.
@@ -59,6 +60,7 @@ function AnimatedRoutes() {
   useEffect(() => { document.title = pageTitle(location.pathname); }, [location.pathname]);
 
   return (
+    <>
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
@@ -124,6 +126,8 @@ function AnimatedRoutes() {
         </Suspense>
       </motion.div>
     </AnimatePresence>
+    <UpgradeHost />
+    </>
   );
 }
 

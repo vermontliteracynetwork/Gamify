@@ -22,14 +22,20 @@ export function useMySets() {
 // The teacher's plan. Local builds default to Free until accounts and
 // billing exist (Stages 5 and 7).
 export function useTier(): Tier {
-  const { value } = useAsync<Tier | undefined>(() => data.getSetting<Tier>('tier'));
+  const { value, reload } = useAsync<Tier | undefined>(() => data.getSetting<Tier>('tier'));
+  useEffect(() => { window.addEventListener('gamify-tier', reload); return () => window.removeEventListener('gamify-tier', reload); }, [reload]);
   return value ?? 'free';
 }
 
 // The plan, or null while it loads (so a gate never flashes a lock).
 export function useTierLoaded(): Tier | null {
   const [tier, setTier] = useState<Tier | null>(null);
-  useEffect(() => { void data.getSetting<Tier>('tier').then((v) => setTier(v ?? 'free')); }, []);
+  useEffect(() => {
+    const load = () => void data.getSetting<Tier>('tier').then((v) => setTier(v ?? 'free'));
+    load();
+    window.addEventListener('gamify-tier', load);
+    return () => window.removeEventListener('gamify-tier', load);
+  }, []);
   return tier;
 }
 

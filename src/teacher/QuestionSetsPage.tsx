@@ -15,6 +15,7 @@ import SetFilterBar from '../games/SetFilterBar';
 import TeacherNav from '../ui/TeacherNav';
 import HostDialog from './HostDialog';
 import Title from '../ui/Title';
+import { LimitNote } from '../billing/Upgrade';
 
 type Tab = 'mine' | 'library';
 
@@ -59,7 +60,7 @@ export default function QuestionSetsPage() {
           <p className="font-bold text-text">
             {Number.isFinite(limit) ? t('sets.count', { count: sets.length, limit }) : t('sets.countUnlimited', { count: sets.length })}
           </p>
-          {atLimit && <Panel className="bg-surface-2"><p className="font-bold">{t('sets.limitReached', { limit })}</p></Panel>}
+          {atLimit && <LimitNote>{t('sets.limitReached', { limit })}</LimitNote>}
           {sets.length === 0 && <Panel><p className="font-bold text-text">{t('sets.emptyMine')}</p></Panel>}
           {sets.map((s) => {
             const notReady = s.questions.filter((q) => !isPlayable(q)).length;

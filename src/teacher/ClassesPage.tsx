@@ -8,6 +8,7 @@ import { t } from '../i18n';
 import { newJoinCode } from '../auth/session';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import { LimitNote } from '../billing/Upgrade';
 
 // The teacher's classrooms (development plan Stage 4). Free has one.
 export default function ClassesPage() {
@@ -48,7 +49,7 @@ export default function ClassesPage() {
             </div>
           </Panel>
         ) : (
-          <Panel className="bg-surface-2"><p className="font-bold">{t('classes.limit', { limit, count: limit })}</p></Panel>
+          <LimitNote>{t('classes.limit', { limit, count: limit })}</LimitNote>
         )}
       </div>
     </main>

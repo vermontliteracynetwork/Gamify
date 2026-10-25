@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import { PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
+import { UpgradeButton } from '../billing/Upgrade';
 
 // Teacher reports over the question log (development plan Stage 4): group
 // by student, question, set, game, day or team; filter, sort, search, see
@@ -67,7 +68,7 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
-        actions={<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button>} />
+        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
       <Tabs label={t('reports.groupBy')} value={by} onChange={setBy} options={(['student', 'question', 'set', 'game', 'day', 'team'] as GroupBy[]).map((g) => ({ id: g, label: t(`reports.by.${g}`) }))} />
       <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4">
         <select aria-label={t('reports.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setFilter({ ...filter, studentId: undefined }); }} className={field}>

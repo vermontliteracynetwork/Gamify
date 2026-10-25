@@ -26,6 +26,7 @@ import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
 import { useAsync } from '../../data/hooks';
+import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
 
 // Everything the builder can design: each game, plus the sign-in pictures.
 export const BUILDER_TARGETS = [...GAMES, signInManifest];
@@ -62,7 +63,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
   return (
     <>
       <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} subtitle={owner ? t('builder.ownerSubtitle') : t('builder.subtitle')} />
-      {!owner && TIERS[tier].themeBuilder === 'trial' && <Panel className="bg-surface-2 mb-4"><p className="font-bold">{t('builder.trialNote')}</p></Panel>}
+      {!owner && TIERS[tier].themeBuilder === 'trial' && <LimitNote className="mb-4">{t('builder.trialNote')}</LimitNote>}
       {!owner && <StudentRequests />}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {BUILDER_TARGETS.map((g) => {
@@ -114,7 +115,7 @@ function StudentRequests() {
             <div key={r.id} className="rounded-input border-[2px] border-border-soft p-2 grid gap-2">
               <ThemePreview theme={r.theme} gameName={r.theme.name} />
               <p className="font-bold text-sm">{t('builder.requestFor', { game: game?.name ?? '', class: room })}</p>
-              {blocked && <p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p>}
+              {blocked && <div className="flex flex-wrap items-center gap-2"><p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
               <div className="flex flex-wrap gap-2">
                 <Button variant="primary" disabled={!!blocked} onClick={async () => {
                   await saveMadeTheme({ ...r.theme, source: 'custom', designedBy: room || undefined });
@@ -225,7 +226,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
         </div>
 
         <div className="grid gap-3">
-          {blocked && <Panel className="bg-surface-2"><p className="font-bold flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</p></Panel>}
+          {blocked && <LimitNote><span className="flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</span></LimitNote>}
           {!blocked && (
           <>
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
