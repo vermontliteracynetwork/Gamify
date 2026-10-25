@@ -43,6 +43,7 @@ const AccountPage = lazy(() => import('./teacher/AccountPage'));
 const CheckInPage = lazy(() => import('./beta/CheckInPage'));
 const DesignPage = lazy(() => import('./student/DesignPage'));
 const ResearchPage = lazy(() => import('./public/ResearchPage'));
+const BetaKitPage = lazy(() => import('./public/BetaKitPage'));
 const WaysList = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysList })));
 const WaysPost = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
@@ -71,6 +72,7 @@ function AnimatedRoutes() {
           <Route path="/it" element={<ItPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/research" element={<ResearchPage />} />
+          <Route path="/beta-kit" element={<BetaKitPage />} />
           <Route path="/ways" element={<WaysList />} />
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />

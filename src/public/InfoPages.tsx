@@ -1,10 +1,13 @@
+import { Link } from 'react-router-dom';
+import { Printer } from '@phosphor-icons/react';
+import { buttonClasses } from '../ui/kit';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 
 // Plain information pages for schools: the IT allow-list and help.
-function InfoPage({ title, sub, sections }: { title: string; sub: string; sections: { h: StringKey; items: StringKey[] }[] }) {
+function InfoPage({ title, sub, sections, extra }: { title: string; sub: string; sections: { h: StringKey; items: StringKey[] }[]; extra?: React.ReactNode }) {
   return (
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
@@ -16,6 +19,7 @@ function InfoPage({ title, sub, sections }: { title: string; sub: string; sectio
             <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{t(k, { host: window.location.host })}</li>)}</ul>
           </section>
         ))}
+        {extra}
       </main>
       <PublicFooter />
     </>
@@ -36,5 +40,5 @@ export function HelpPage() {
     { h: 'help.students', items: ['help.students.1', 'help.students.2', 'help.students.3'] },
     { h: 'help.supports', items: ['help.supports.1', 'help.supports.2', 'help.supports.3'] },
     { h: 'help.trouble', items: ['help.trouble.1', 'help.trouble.2', 'help.trouble.3'] },
-  ]} />;
+  ]} extra={<Link to="/beta-kit" className={buttonClasses('secondary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('help.betaKit')}</Link>} />;
 }

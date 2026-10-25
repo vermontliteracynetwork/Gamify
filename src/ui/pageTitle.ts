@@ -11,6 +11,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/help/, 'Help'],
   [/^\/ways/, 'Ways to use Gamify'],
   [/^\/research/, 'Research'],
+  [/^\/beta-kit/, 'Beta classroom kit'],
   [/^\/join/, 'Join a game'],
   [/^\/show\//, 'Join code'],
   [/^\/play/, 'All games'],

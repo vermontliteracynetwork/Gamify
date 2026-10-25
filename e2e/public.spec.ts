@@ -153,3 +153,18 @@ test.describe('research', () => {
     }
   });
 });
+
+test.describe('beta kit', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('beta classroom kit: lesson and poster, printable', async ({ page }, info) => {
+    await page.goto('/help');
+    await page.getByRole('link', { name: /print the classroom kit/ }).click();
+    await expect(page.getByRole('region', { name: 'Tell Gamify: A 10-Minute Lesson' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Tell Gamify!' })).toBeVisible();
+    if (info.project.name === 'laptop') {
+      await page.emulateMedia({ media: 'print' });
+      await page.setViewportSize({ width: 816, height: 1056 });
+      await page.screenshot({ path: 'test-results/beta-kit-print.png', fullPage: true });
+    }
+  });
+});
