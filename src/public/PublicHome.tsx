@@ -36,7 +36,7 @@ export default function PublicHome() {
             <p className="text-sm font-bold text-muted">{t('public.freeNote')}</p>
           </motion.div>
           <div className="grid grid-cols-2 gap-3" aria-hidden="true">
-            {GAMES.map((g, i) => (
+            {GAMES.slice(0, 6).map((g, i) => (
               <motion.div key={g.id} initial={reduce ? false : { opacity: 0, y: 20, rotate: i % 2 ? 2 : -2 }} animate={{ opacity: 1, y: 0, rotate: i % 2 ? 1.5 : -1.5 }} transition={{ delay: reduce ? 0 : 0.1 * i }}
                 whileHover={reduce ? undefined : { y: -8, rotate: i % 2 ? -2 : 2, scale: 1.04, transition: { type: 'spring', stiffness: 400, damping: 14 } }}
                 className="rounded-panel border-[2.5px] border-border overflow-hidden bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -62,14 +62,15 @@ export default function PublicHome() {
           <h2 className="font-display text-4xl"><Title text={t('public.gamesTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {GAMES.map((g) => (
-              <div key={g.id} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <Link key={g.id} to="/login?mode=signup" className="hover-lift group block bg-surface border-[2.5px] border-border rounded-panel overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={g.id} className="aspect-[16/9] cover-zoom" /></span>
                 <div className="p-4 grid gap-2">
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
                   <div className="flex flex-wrap gap-2">{g.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
                   <p className="text-sm font-bold text-muted">{g.description}</p>
+                  <span className="text-sm font-bold inline-flex items-center gap-1.5">{t('public.tryIt')}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
