@@ -41,11 +41,12 @@ export function useArcade(session: ArcadeSession | null) {
   const [assignments, setAssignments] = useState<SetAssignment[]>([]);
   const [student, setStudent] = useState<Student>();
   const [classModes, setClassModes] = useState<PlayMode[] | undefined>();
+  const [canDesign, setCanDesign] = useState(false);
   useEffect(() => {
     if (!session) return;
     void data.listAssignments(session.classroomId).then(setAssignments);
     void data.listStudents(session.classroomId).then((list) => setStudent(list.find((s) => s.id === session.studentId)));
-    void data.listClassrooms().then((list) => setClassModes(list.find((c) => c.id === session.classroomId)?.allowedModes));
+    void data.listClassrooms().then((list) => { const c = list.find((x) => x.id === session.classroomId); setClassModes(c?.allowedModes); setCanDesign(!!c?.studentDesign); });
   }, [session]);
   const pool = useMemo<PoolSet[]>(() => {
     if (!session) return [];
@@ -55,7 +56,7 @@ export function useArcade(session: ArcadeSession | null) {
       .filter((p) => p.set);
   }, [session, assignments, mine]);
   const modes = (student?.allowedModes ?? classModes ?? ['live', 'share', 'solo', 'versus']).filter((m) => !classModes || classModes.includes(m));
-  return { student, pool, modes };
+  return { student, pool, modes, canDesign };
 }
 
 // A game's question pool: the signed-in student's assigned sets, or the set

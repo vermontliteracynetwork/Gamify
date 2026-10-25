@@ -80,6 +80,12 @@ export default function ClassPage() {
               </div>
             );
           })}
+          <div className="flex flex-wrap items-center gap-3 border-t-[2px] border-border-soft pt-3">
+            <div className="grid"><span className="font-bold">{t('class.studentDesign')}</span><span className="text-sm font-semibold text-muted">{t('class.studentDesignHint')}</span></div>
+            <div className="ml-auto min-w-40">
+              <Toggle label={classroom.studentDesign ? t('class.modeOn') : t('class.modeOff')} value={!!classroom.studentDesign} onChange={async (v) => { await data.saveClassroom({ ...classroom, studentDesign: v }); reloadClass(); }} />
+            </div>
+          </div>
         </Panel>
       )}
       </fieldset>

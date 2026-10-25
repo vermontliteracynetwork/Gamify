@@ -39,6 +39,8 @@ export interface Classroom {
   signInThemeId?: string;
   // Letters-only code students type on the join page to reach sign-in.
   joinCode?: string;
+  // Students can design themes and send them for approval (student design mode).
+  studentDesign?: boolean;
 }
 
 export interface Student {

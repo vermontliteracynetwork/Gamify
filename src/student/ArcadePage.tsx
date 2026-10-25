@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, LockSimple, SignOut } from '@phosphor-icons/react';
+import { ArrowLeft, LockSimple, SignOut, PaintBrush } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
 import { data } from '../data';
 import { useAsync, useTier } from '../data/hooks';
@@ -82,7 +82,7 @@ export function ArcadeSignIn() {
 
 export function Arcade() {
   const session = useSession();
-  const { pool, modes } = useArcade(session);
+  const { pool, modes, canDesign } = useArcade(session);
   const tier = useTier();
   const navigate = useNavigate();
   useEffect(() => { if (!session) navigate('/join', { replace: true }); }, [session, navigate]);
@@ -116,6 +116,12 @@ export function Arcade() {
             ? <Link key={g.id} to={`/games/${g.id}`} className="rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden active:scale-[0.98]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>{card}</Link>
             : <div key={g.id} aria-label={t('arcade.locked', { name: g.name })} className="rounded-panel bg-surface border-[2.5px] border-border overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker)' }}>{card}</div>;
         })}
+        {canDesign && (
+          <Link to="/arcade/design" className="rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden active:scale-[0.98]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+            <span className="aspect-[16/9] border-b-[2.5px] border-border flex items-center justify-center" style={{ background: 'repeating-linear-gradient(45deg, #fdfd94 0 18px, #ddfcc6 18px 36px)' }}><PaintBrush weight="fill" size={64} color="#241c3d" aria-hidden="true" /></span>
+            <span className="p-4 grid gap-1"><span className="font-display text-2xl font-bold text-text">{t('design.title')}</span><span className="font-bold text-sm text-muted">{t('design.card')}</span></span>
+          </Link>
+        )}
       </div>
     </main>
   );

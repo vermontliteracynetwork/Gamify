@@ -22,6 +22,10 @@ import { themeProblems } from '../validate';
 import { scanTemplatePages } from './scan';
 import { isRound } from './template';
 import ThemePreview from './ThemePreview';
+import Title from '../../ui/Title';
+import { listThemeRequests, removeThemeRequest } from '../requests';
+import { data as store } from '../../data';
+import { useAsync } from '../../data/hooks';
 
 // Everything the builder can design: each game, plus the sign-in pictures.
 export const BUILDER_TARGETS = [...GAMES, signInManifest];
@@ -59,6 +63,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
     <>
       <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} subtitle={owner ? t('builder.ownerSubtitle') : t('builder.subtitle')} />
       {!owner && TIERS[tier].themeBuilder === 'trial' && <Panel className="bg-surface-2 mb-4"><p className="font-bold">{t('builder.trialNote')}</p></Panel>}
+      {!owner && <StudentRequests />}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {BUILDER_TARGETS.map((g) => {
           const mine = themes.filter((th) => th.gameId === g.id && (owner ? th.source === 'library' : th.source === 'custom'));
@@ -75,6 +80,55 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
         })}
       </div>
     </>
+  );
+}
+
+// Designs students sent from their Arcade (student design mode). Approving
+// saves it as a class theme credited to the class, within the plan's limits.
+function StudentRequests() {
+  const tier = useTier();
+  const { themes, reload } = useMadeThemes();
+  const { value: requests = [], reload: reloadRequests } = useAsync(() => listThemeRequests());
+  const { value: classes = [] } = useAsync(() => store.listClassrooms());
+  const [status, setStatus] = useState('');
+  if (!requests.length && !status) return null;
+  const plan = TIERS[tier].themeBuilder;
+  const limit = (gameId: string) => {
+    const made = themes.filter((th) => th.source === 'custom');
+    if (plan === 'trial') return gameId !== THEME_TRIAL_GAME ? t('builder.limitTrialGame') : made.length >= 1 ? t('builder.limitTrial') : null;
+    if (plan === 'one-per-game') return made.some((th) => th.gameId === gameId) ? t('builder.limitPlus') : null;
+    return null;
+  };
+  return (
+    <Panel className="mb-4 grid gap-3">
+      <div>
+        <h2 className="font-display text-2xl"><Title text={t('builder.requests')} /></h2>
+        <p className="font-semibold text-sm text-muted">{t('builder.requestsHint')}</p>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {requests.map((r) => {
+          const game = BUILDER_TARGETS.find((g) => g.id === r.theme.gameId);
+          const room = classes.find((c) => c.id === r.classroomId)?.name ?? '';
+          const blocked = limit(r.theme.gameId);
+          return (
+            <div key={r.id} className="rounded-input border-[2px] border-border-soft p-2 grid gap-2">
+              <ThemePreview theme={r.theme} gameName={r.theme.name} />
+              <p className="font-bold text-sm">{t('builder.requestFor', { game: game?.name ?? '', class: room })}</p>
+              {blocked && <p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p>}
+              <div className="flex flex-wrap gap-2">
+                <Button variant="primary" disabled={!!blocked} onClick={async () => {
+                  await saveMadeTheme({ ...r.theme, source: 'custom', designedBy: room || undefined });
+                  await removeThemeRequest(r.id); reload(); reloadRequests();
+                  setStatus(t('builder.approved', { name: r.theme.name }));
+                }}><CheckCircle weight="bold" size={18} />{t('builder.approve')}</Button>
+                <Button onClick={async () => { await removeThemeRequest(r.id); reloadRequests(); }}>{t('builder.decline')}</Button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p role="status" className="font-bold empty:hidden">{status}</p>
+    </Panel>
   );
 }
 

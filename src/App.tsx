@@ -41,6 +41,7 @@ const ClassPage = lazy(() => import('./teacher/ClassPage'));
 const ReportsPage = lazy(() => import('./teacher/ReportsPage'));
 const AccountPage = lazy(() => import('./teacher/AccountPage'));
 const CheckInPage = lazy(() => import('./beta/CheckInPage'));
+const DesignPage = lazy(() => import('./student/DesignPage'));
 const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -95,6 +96,7 @@ function AnimatedRoutes() {
           <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id/check-in" element={<RequireTeacher><CheckInPage /></RequireTeacher>} />
           <Route path="/arcade" element={<Arcade />} />
+          <Route path="/arcade/design" element={<DesignPage />} />
           <Route path="/arcade/:classId" element={<ArcadeSignIn />} />
           <Route path="/owner" element={<OwnerPage />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
