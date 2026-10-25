@@ -13,6 +13,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/show\//, 'Join code'],
   [/^\/play/, 'All games'],
   [/^\/arcade/, 'Arcade'],
+  [/^\/teacher\/classes\/.+\/check-in/, 'Class check-in'],
   [/^\/teacher\/classes\/./, 'Class'],
   [/^\/teacher\/classes/, 'Classes'],
   [/^\/teacher\/sets\/import/, 'Import questions'],

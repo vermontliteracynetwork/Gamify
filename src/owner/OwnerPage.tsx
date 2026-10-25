@@ -11,6 +11,7 @@ import { Slider } from '../ui/fields';
 import { PageHeader } from '../ui/kit';
 import Title from '../ui/Title';
 import { monthlyRevenue, project, type Subs } from './income';
+import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -55,7 +56,7 @@ function Desktop() {
     themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
     subs: { title: t('owner.subs'), icon: CreditCard, body: <p className="font-semibold">{t('owner.needsStripe')}</p> },
     inbox: { title: t('owner.inbox'), icon: UsersThree, body: <p className="font-semibold">{t('owner.needsCloud')}</p> },
-    beta: { title: t('owner.coupons'), icon: Ticket, body: <p className="font-semibold">{t('owner.betaPlan')}</p> },
+    beta: { title: t('owner.beta'), icon: Ticket, body: <BetaCard /> },
   };
 
   return (
@@ -135,6 +136,32 @@ function FeedbackCard() {
 }
 
 // Games played and answers on this device (no student tracking).
+// Beta surveys and class check-ins (development plan Stage 7B, Beta card).
+function BetaCard() {
+  const { value: surveys = [] } = useAsync(() => listSurveys());
+  const { value: checkins = [] } = useAsync(() => listCheckIns());
+  const going = surveys.length ? (surveys.reduce((n, a) => n + a.going, 0) / surveys.length).toFixed(1) : '-';
+  const rec = recommendScore(surveys.map((a) => a.recommend));
+  const feel = checkins.reduce((tl, c) => tl.map((n, i) => n + c.feel[i]), [0, 0, 0]);
+  const kids = feel.reduce((a, b) => a + b, 0);
+  const comments = surveys.filter((a) => a.better).slice(-3).reverse();
+  return (
+    <div className="grid gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        {[[t('owner.surveys'), surveys.length], [t('owner.going'), `${going} / 5`], [t('owner.recommend'), rec === null ? '-' : rec]].map(([l, v]) => (
+          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
+        ))}
+      </div>
+      <p className="font-bold text-sm">{t('owner.checkins')}: {kids ? `${Math.round((feel[0] / kids) * 100)}% ${t('checkin.feel.0')}, ${Math.round((feel[1] / kids) * 100)}% ${t('checkin.feel.1')}, ${Math.round((feel[2] / kids) * 100)}% ${t('checkin.feel.2')} (${t('checkin.count', { count: kids })})` : '-'}</p>
+      {comments.length > 0 && (
+        <div className="grid gap-1"><p className="text-xs font-bold uppercase text-muted">{t('owner.comments')}</p>
+          {comments.map((c) => <p key={c.at} className="text-sm font-semibold rounded-input bg-surface-2 p-2">{c.better}</p>)}</div>
+      )}
+      <p className="text-xs font-bold text-muted">{t('owner.surveyNote')} {t('owner.betaPlan')}</p>
+    </div>
+  );
+}
+
 function UsageCard() {
   const { value: log = [] } = useAsync(() => data.listQuestionLog());
   const { value: classes = [] } = useAsync(() => data.listClassrooms());

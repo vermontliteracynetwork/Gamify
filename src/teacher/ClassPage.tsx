@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DeviceTablet, GearSix, Plus, ProjectorScreen, Star, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, DeviceTablet, GearSix, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -50,6 +50,7 @@ export default function ClassPage() {
       <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>
       <PageHeader title={classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
         actions={<>
+          <Link to={`/teacher/classes/${classroom.id}/check-in`} className={buttonClasses('secondary')}><Smiley weight="bold" size={18} />{t('checkin.open')}</Link>
           <Link to={`/show/${classroom.joinCode ?? ''}`} className={buttonClasses('secondary')}><ProjectorScreen weight="bold" size={18} />{t('class.showCode')}</Link>
           <Link to={`/arcade/${classroom.id}`} className={buttonClasses('primary')}><DeviceTablet weight="bold" size={18} />{t('class.openSignIn')}</Link>
         </>} />

@@ -1126,6 +1126,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 58 | **"Cast, answer, reel it in."** Cast and Catch: time your cast, answer while the bobber floats, and reel in fish with real facts (a 16 cm pufferfish!). Better casts bring rarer fish, so skill and learning both pay off. | A game kids ask for by name; every catch teaches a science fact | Development, 2026-10-24 |
 | 59 | **"Pick a card, tap the answer."** Game Show teams choose a card first, then tap their answer on the board, and it checks itself. No teacher judging, so the teacher can walk the room. | Shows a teacher running a live game without being stuck at the screen. |
 | 60 | **"Never a game over."** Bubble Pop rescues the board when bubbles get close to the bottom, and every bubble has a shape as well as a color. | Kind to young and color-blind players; a calm contrast to games that punish losing. |
+| 61 | **"Ask the class how it went, in pictures."** A one-screen class check-in: each student taps a face and an easy/just right/tricky picture. Anonymous counts only, no names. | Shows student voice without collecting student data; strong for SEL-minded schools and privacy reviews. |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1175,3 +1176,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 36 | **Standards-First Review: Filter by Common Core Code** | Pick the standard you're teaching this week, filter the set library to it, and run three different games on it. | Set filters, standards, assigning sets | Teacher request, 2026-10-24 |
 | 37 | **Fishing for Facts: Cast and Catch as a Timed Review** | Run a 3-minute Cast and Catch on this week's set; students compare their best catches and the fish facts they learned. | Cast and Catch, timer, reports by student | Development, 2026-10-24; K-5 |
 | 38 | **Bubble Pop as a Bell-Ringer** | One right answer loads five bubbles; a 5-minute round of review questions with a game that students beg for, and the board never ends in a loss. | Bubble Pop, question breaks, reports | Development, 2026-10-24; K-8 |
+| 39 | **Two-Tap Exit Tickets for Pre-Readers** | End a game with the class check-in: kids tap how it felt and if it was easy or tricky; the teacher sees the counts and adjusts tomorrow's set. | Class check-in, picture answers | Development, 2026-10-25; K-3 |

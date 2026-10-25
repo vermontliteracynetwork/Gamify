@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { ChartBar, PaintBrush, RocketLaunch, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, ChatTeardropText, PaintBrush, RocketLaunch, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
+import TeacherSurvey from '../beta/TeacherSurvey';
+import { surveyDue, type SurveyId } from '../beta/surveys';
 import { data } from '../data';
 import { t } from '../i18n';
 import GetStarted, { FOLDED, useStartSteps } from '../teacher/GetStarted';
@@ -11,6 +13,10 @@ import GetStarted, { FOLDED, useStartSteps } from '../teacher/GetStarted';
 export default function TeacherNav({ startOpen = false }: { startOpen?: boolean }) {
   const start = useStartSteps();
   const [open, setOpen] = useState<boolean | null>(null);
+  // A beta survey that has come due shows as a pill too.
+  const [survey, setSurvey] = useState<SurveyId | null>(null);
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  useEffect(() => { void surveyDue().then(setSurvey); }, []);
   const showing = open ?? (startOpen && !start?.folded);
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
@@ -29,7 +35,14 @@ export default function TeacherNav({ startOpen = false }: { startOpen?: boolean 
             <RocketLaunch weight="fill" size={16} />{t('start.pill', { done: start.count, total: start.steps.length })}
           </button>
         )}
+        {survey && (
+          <button type="button" onClick={() => setSurveyOpen(true)}
+            className="min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 border-[2px] border-border bg-secondary">
+            <ChatTeardropText weight="fill" size={16} />{t('survey.pill')}
+          </button>
+        )}
       </nav>
+      {survey && surveyOpen && <TeacherSurvey id={survey} onClose={() => { setSurveyOpen(false); void surveyDue().then(setSurvey); }} />}
       {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => { setOpen(false); void data.setSetting(FOLDED, true); }} />}
     </>
   );
