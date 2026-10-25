@@ -5,6 +5,9 @@ import {
   type Grade, type Subject,
 } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
+import { LIBRARY } from '../data/library';
+import { useMySets } from '../data/hooks';
+import { suggestTags, tagCounts } from '../data/tags';
 import SetCover from '../games/SetCover';
 import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
@@ -19,8 +22,13 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
   const req = (key: string) => missing.includes(key) && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-danger border border-border ml-2">{t('details.required')}</span>;
   const grades = set.grades ?? [undefined, undefined];
 
-  function addTag() {
-    const v = tag.trim().toLowerCase().replace(/^#/, '');
+  const { value: mySets = [] } = useMySets();
+  // Tags from sets in the same subject come first.
+  const others = [...mySets.filter((s) => s.id !== set.id), ...LIBRARY];
+  const ranked = [...new Set([...tagCounts(others.filter((s) => set.subject && s.subject === set.subject)), ...tagCounts(others)])];
+  const tagOffers = suggestTags(ranked, tag, set.tags ?? [], 8);
+  function addTag(given?: string) {
+    const v = (given ?? tag).trim().toLowerCase().replace(/^#/, '');
     if (v && !(set.tags ?? []).includes(v)) onChange({ ...set, tags: [...(set.tags ?? []), v] });
     setTag('');
   }
@@ -82,10 +90,18 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
           {!readOnly && (
             <>
               <input value={tag} onChange={(e) => setTag(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); } }} placeholder={t('details.tagPlaceholder')} aria-label={t('details.tags')} className={`${field} w-48`} />
-              <Button onClick={addTag} disabled={!tag.trim()}><Plus weight="bold" size={16} />{t('details.addTag')}</Button>
+              <Button onClick={() => addTag()} disabled={!tag.trim()}><Plus weight="bold" size={16} />{t('details.addTag')}</Button>
             </>
           )}
         </div>
+        {!readOnly && tagOffers.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('details.tagIdeas')}>
+            <span className="text-sm font-bold text-muted">{tag.trim() ? t('details.tagMatches') : t('details.tagPopular')}</span>
+            {tagOffers.map((x) => (
+              <button key={x} type="button" onClick={() => addTag(x)} aria-label={t('details.useTag', { tag: x })} className="inline-flex items-center gap-1 min-h-9 px-3 rounded-pill bg-surface border-[2px] border-border-soft hover:border-border font-bold text-sm"><Plus weight="bold" size={12} aria-hidden="true" />#{x}</button>
+            ))}
+          </div>
+        )}
       </div>
 
       <StandardsField set={set} onChange={onChange} readOnly={readOnly} required={req('standards')} />

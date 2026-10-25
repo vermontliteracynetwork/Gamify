@@ -106,7 +106,7 @@ function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (i
   return (
     <div className="grid gap-3">
       <p className="font-bold text-text">{t('sets.copyNote')}</p>
-      <SetFilterBar value={filter} onChange={setFilter} />
+      <SetFilterBar value={filter} onChange={setFilter} sets={LIBRARY} />
       {shown.length === 0 && <Panel><p className="font-bold">{t('filter.none')}</p></Panel>}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {shown.map((s) => (

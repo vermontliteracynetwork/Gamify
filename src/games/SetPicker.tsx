@@ -20,7 +20,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   return (
     <div className="grid gap-3">
       <p className="font-bold">{max > 1 ? t('setup.pickSets', { max }) : t('tb.setOne')}</p>
-      <SetFilterBar value={filter} onChange={setFilter} />
+      <SetFilterBar value={filter} onChange={setFilter} sets={ready} />
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

@@ -37,7 +37,7 @@ export function missingDetails(set: QuestionSet): string[] {
 export const inGrade = (set: QuestionSet, g: Grade) =>
   !!set.grades && gradeIndex(set.grades[0]) <= gradeIndex(g) && gradeIndex(g) <= gradeIndex(set.grades[1]);
 
-export interface SetFilter { search?: string; subject?: Subject; grade?: Grade; standard?: string }
+export interface SetFilter { search?: string; subject?: Subject; grade?: Grade; standard?: string; tags?: string[] }
 
 export function matchesFilter(set: QuestionSet, f: SetFilter): boolean {
   const q = f.search?.trim().toLowerCase();
@@ -45,7 +45,8 @@ export function matchesFilter(set: QuestionSet, f: SetFilter): boolean {
   return (!q || set.name.toLowerCase().includes(q) || (set.tags ?? []).some((tag) => tag.toLowerCase().includes(q)))
     && (!f.subject || set.subject === f.subject)
     && (!f.grade || inGrade(set, f.grade))
-    && (!std || (set.standards ?? []).some((s) => s.toLowerCase().includes(std)));
+    && (!std || (set.standards ?? []).some((s) => s.toLowerCase().includes(std)))
+    && (f.tags ?? []).every((tag) => (set.tags ?? []).includes(tag));
 }
 
 // Common Core domains (codes and names only), used to build a standard code

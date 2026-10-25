@@ -25,6 +25,11 @@ test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
   await page.getByLabel('To').selectOption('2');
   await page.getByLabel('Tags').fill('weather');
   await page.getByRole('button', { name: 'Add tag' }).click();
+  // Tags already in use are offered, most used first, and add in one tap.
+  await expect(page.getByText('Popular tags:')).toBeVisible();
+  await page.getByLabel('Tags').fill('vow');
+  await page.getByRole('button', { name: 'Add the tag vowels' }).click();
+  await expect(page.getByRole('button', { name: 'Remove the tag vowels' })).toBeVisible();
   await page.getByLabel('No Common Core standard applies', { exact: false }).check();
   await expect(page.getByText('All details added.', { exact: false })).toBeVisible();
   await page.screenshot({ path: `test-results/editor-${info.project.name}.png`, fullPage: true });
@@ -75,6 +80,10 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   await expect(page.getByRole('radio', { name: /Mine, no details/ })).toHaveCount(0);
   await page.getByLabel('Search titles and tags').fill('doubles');
   await expect(page.getByRole('radio')).toHaveCount(1);
+  // A matching tag is offered; picking it filters by that tag.
+  await page.getByRole('button', { name: 'Show sets tagged doubles' }).click();
+  await expect(page.getByRole('radio')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Stop filtering by doubles' }).click();
   await page.getByLabel('Search titles and tags').fill('');
   await page.getByLabel('Standard code').fill('1.OA');
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toBeVisible();
