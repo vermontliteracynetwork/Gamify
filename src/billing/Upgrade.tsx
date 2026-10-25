@@ -10,6 +10,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { buttonClasses, Panel } from '../ui/kit';
 import Title from '../ui/Title';
 import { upgradeTo } from './upgrade';
+import DialogFocus from '../ui/DialogFocus';
 
 type Plan = 'plus' | 'pro';
 
@@ -27,6 +28,7 @@ export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; o
   const plans: Plan[] = ['plus', 'pro'];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+      <DialogFocus onClose={onClose} />
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-2xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 32px)' }}>
         <div className="flex items-start gap-2">

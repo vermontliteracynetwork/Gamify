@@ -30,6 +30,7 @@ import ThemeScreen from '../ThemeScreen';
 
 import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
 import Title from '../../ui/Title';
+import DialogFocus from '../../ui/DialogFocus';
 
 
 type Board = 'cards' | 'grid';
@@ -378,6 +379,7 @@ export default function GameShow() {
 
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
+          <DialogFocus />
           <motion.div initial={settings.motion === 'still' ? false : { scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             className="bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             <Sparkle weight="fill" size={64} className="text-accent" aria-hidden="true" />

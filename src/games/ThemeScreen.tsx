@@ -4,6 +4,7 @@ import { t } from '../i18n';
 import ThemePreview from '../theme/builder/ThemePreview';
 import type { GameTheme } from '../theme/types';
 import Title from '../ui/Title';
+import DialogFocus from '../ui/DialogFocus';
 
 // Its own screen in every game's start-up: big previews of each theme the
 // game can wear. Locked themes show a lock only (no prices or buy words).
@@ -42,6 +43,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
       </section>
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('theme.preview', { name: preview.name })}>
+          <DialogFocus onClose={() => setPreview(null)} />
           <div className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-3 w-full max-w-md" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="flex items-center justify-between">
               <span className="font-display text-2xl font-bold flex items-center gap-2"><LockSimple weight="fill" size={22} aria-hidden="true" />{preview.name}</span>

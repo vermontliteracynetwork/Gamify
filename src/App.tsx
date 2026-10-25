@@ -14,6 +14,7 @@ import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
 import { UpgradeHost } from './billing/Upgrade';
+import { t } from './i18n';
 
 // Pages load when first opened, so the first screen arrives fast on older
 // iPads and school networks.
@@ -182,9 +183,12 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-dvh relative text-text font-body">
         <AmbientBackground />
+        <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
         <NavBar />
         <Supports />
-        <AnimatedRoutes />
+        <div id="main-content" tabIndex={-1} className="outline-none">
+          <AnimatedRoutes />
+        </div>
       </div>
     </BrowserRouter>
     </SettingsProvider>

@@ -9,6 +9,7 @@ import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import FloatingCard from '../ui/FloatingCard';
+import DialogFocus from '../ui/DialogFocus';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 // Answer tiles get a shape as well as a color, so color is never the only cue.
@@ -84,6 +85,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={q.prompt}>
+      <DialogFocus />
       <motion.div
         key={q.id}
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}

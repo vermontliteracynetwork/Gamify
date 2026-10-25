@@ -13,6 +13,7 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { Button } from '../ui/kit';
 import Title from '../ui/Title';
+import DialogFocus from '../ui/DialogFocus';
 
 // Host or assign one set (Part 3B, path 2): pick a game from cover cards,
 // then play it now on this screen, make a game code and link, or assign it.
@@ -36,6 +37,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('host.title', { name: set.name })}>
+      <DialogFocus onClose={onClose} />
       <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 w-full max-w-3xl max-h-[calc(100dvh-32px)] overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-2xl"><Title text={t('host.title', { name: set.name || t('sets.untitled') })} /></h2>

@@ -23,6 +23,7 @@ import { readOnlyIds } from '../data/downgrade';
 import { newJoinCode } from '../auth/session';
 import Title from '../ui/Title';
 import { LimitNote, UpgradeButton } from '../billing/Upgrade';
+import DialogFocus from '../ui/DialogFocus';
 
 type Tab = 'students' | 'sets' | 'modes';
 
@@ -185,6 +186,7 @@ function SignInLook({ classroom, onChange }: { classroom: Classroom; onChange: (
 function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={title}>
+      <DialogFocus onClose={onClose} />
       <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 w-full max-w-lg max-h-[calc(100dvh-32px)] overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-2xl font-bold"><Title text={title} /></h2>

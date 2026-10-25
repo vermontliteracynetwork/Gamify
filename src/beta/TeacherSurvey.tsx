@@ -7,6 +7,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { Button } from '../ui/kit';
 import Title from '../ui/Title';
 import { saveSurvey, snoozeSurvey, type SurveyId } from './surveys';
+import DialogFocus from '../ui/DialogFocus';
 
 const GOING = [SmileyXEyes, SmileySad, SmileyMeh, Smiley, SmileyWink];
 
@@ -26,6 +27,7 @@ export default function TeacherSurvey({ id, onClose }: { id: SurveyId; onClose: 
   async function later() { await snoozeSurvey(); onClose(); }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="survey-title">
+      <DialogFocus onClose={later} />
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 32px)' }}>
         <div className="flex items-start gap-2">

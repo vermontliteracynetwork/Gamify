@@ -8,6 +8,7 @@ import { playEffect, speak } from './feedback';
 import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
+import DialogFocus from '../ui/DialogFocus';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
@@ -44,6 +45,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={q.prompt}>
+      <DialogFocus />
       <motion.div
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}

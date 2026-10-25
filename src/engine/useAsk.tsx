@@ -8,6 +8,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { makeDeck, reviewKeys, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
 import Title from '../ui/Title';
+import DialogFocus from '../ui/DialogFocus';
 
 export interface AskOptions { count?: number; player?: string }
 
@@ -112,6 +113,7 @@ function BreathBreak({ onDone }: { onDone: () => void }) {
   const still = settings.motion === 'still';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('q.breathTitle')}>
+      <DialogFocus />
       <div className="w-full max-w-md bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <h2 className="font-display text-3xl font-bold"><Title text={t('q.breathTitle')} /></h2>
         <motion.div

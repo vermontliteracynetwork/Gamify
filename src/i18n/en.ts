@@ -778,6 +778,7 @@ export const en = {
   'challenge.fine.2': 'Student work is credited to the class (like Room 12), never to a student by name.',
   'challenge.fine.3': 'Entries must be your class\'s own art: no characters, logos or pictures from other games, shows or brands.',
   'challenge.fine.4': 'Every theme is checked for easy reading before it is featured.',
+  'a11y.skip': 'Skip to main content',
   'features.title': 'Features',
   'features.sub': 'Three things make Gamify different: your questions become real practice, your class designs how the games look, and the games fit any way you teach.',
   'features.play': 'Play',

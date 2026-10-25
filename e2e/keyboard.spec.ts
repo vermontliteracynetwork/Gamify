@@ -85,3 +85,33 @@ test('keyboard: Match Three swaps two pieces with Enter', async ({ page }) => {
   // Either the swap made a match (the board moves) or it explains there was no match.
   await expect(page.getByRole('gridcell', { name: /selected$/ })).toHaveCount(0);
 });
+
+test('keyboard: pop-up boxes take focus, keep Tab inside, close with Escape and give focus back', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })));
+  await page.goto('/games/memory-match');
+  const upgrade = page.getByRole('button', { name: 'Upgrade' });
+  await upgrade.focus();
+  await page.keyboard.press('Enter');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  expect(await dialog.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab');
+    expect(await dialog.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press('Shift+Tab');
+  expect(await dialog.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(upgrade).toBeFocused();
+});
+
+test('keyboard: the first Tab shows Skip to main content, which jumps past the menu', async ({ page }) => {
+  await page.goto('/features');
+  await page.keyboard.press('Tab');
+  const skip = page.getByRole('link', { name: 'Skip to main content' });
+  await expect(skip).toBeFocused();
+  await expect(skip).toBeInViewport();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#main-content')).toBeFocused();
+});
