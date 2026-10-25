@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Lightbulb, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -12,6 +12,8 @@ import { PageHeader } from '../ui/kit';
 import Title from '../ui/Title';
 import { monthlyRevenue, project, type Subs } from './income';
 import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
+import { useTier } from '../data/hooks';
+import { growthTips } from './growth';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -19,8 +21,8 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 // cards you can reorder, widen and fold, saved on this device. Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'feedback' | 'usage' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['feedback', 'usage', 'income', 'themes', 'subs', 'inbox', 'beta'];
+type CardId = 'feedback' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['feedback', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
 interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
@@ -52,6 +54,7 @@ function Desktop() {
   const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
     feedback: { title: t('owner.feedback'), icon: ChatCircleDots, body: <FeedbackCard /> },
     usage: { title: t('owner.usage'), icon: ChartLineUp, body: <UsageCard /> },
+    growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
     income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
     themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
     subs: { title: t('owner.subs'), icon: CreditCard, body: <p className="font-semibold">{t('owner.needsStripe')}</p> },
@@ -158,6 +161,25 @@ function BetaCard() {
           {comments.map((c) => <p key={c.at} className="text-sm font-semibold rounded-input bg-surface-2 p-2">{c.better}</p>)}</div>
       )}
       <p className="text-xs font-bold text-muted">{t('owner.surveyNote')} {t('owner.betaPlan')}</p>
+    </div>
+  );
+}
+
+function GrowthCard() {
+  const tier = useTier();
+  const { value } = useAsync(async () => {
+    const [log, classes, sets, surveys] = await Promise.all([data.listQuestionLog(), data.listClassrooms(), data.listQuestionSets(), listSurveys()]);
+    const now = Date.now(), week = 7 * 86400000;
+    const inWeek = (k: number) => log.filter((e) => { const age = now - new Date(e.at).getTime(); return age >= k * week && age < (k + 1) * week; }).length;
+    return { classes: classes.length, sets: sets.length, answersThisWeek: inWeek(0), answersLastWeek: inWeek(1), surveyAverage: surveys.length ? surveys.reduce((n, a) => n + a.going, 0) / surveys.length : null };
+  });
+  if (!value) return null;
+  const tips = growthTips({ tier, ...value });
+  return (
+    <div className="grid gap-2">
+      {tips.length ? <ul className="grid gap-1.5 list-none p-0 m-0">{tips.map((tip) => <li key={tip.id} className="font-semibold text-sm rounded-input bg-surface-2 p-2">{tip.text}</li>)}</ul>
+        : <p className="font-semibold">{t('owner.growthNone')}</p>}
+      <p className="text-xs font-bold text-muted">{t('owner.growthNote')}</p>
     </div>
   );
 }

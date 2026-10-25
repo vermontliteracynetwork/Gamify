@@ -53,3 +53,13 @@ test('the week 1 teacher survey appears in the menu, and its answers reach the o
   await expect(card.getByText('5.0 / 5')).toBeVisible();
   await card.screenshot({ path: `test-results/owner-beta-${info.project.name}.png` });
 });
+
+test('owner dashboard shows growth tips from the numbers', async ({ page }) => {
+  await page.goto('/owner');
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  const card = page.getByRole('region', { name: 'Growth tips' });
+  await expect(card.getByText(/no class or set yet|Nothing to act on/)).toBeVisible();
+  await card.screenshot({ path: `test-results/owner-growth-${test.info().project.name}.png` });
+});
