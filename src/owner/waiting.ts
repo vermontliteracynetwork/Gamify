@@ -24,7 +24,7 @@ export const WAITING: WaitingItem[] = [
     how: 'Search the trademark first, then buy and point it at Vercel.' },
   { id: 'attorney', kind: 'legal', added: '2026-10-25', title: 'Attorney review',
     why: 'We sell to schools, so every public promise needs a lawyer\'s eye.',
-    how: 'Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules, the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Canva), the Common Core text license, DMCA agent registration.' },
+    how: 'Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules, the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Google Classroom, Canva), the Common Core text license, DMCA agent registration.' },
   { id: 'pilots', kind: 'people', added: '2026-10-24', title: 'Line up 2 to 4 beta test classrooms',
     why: 'Real classrooms give the feedback, quotes and the screen reader check on iPads that schools ask for.',
     how: 'Send the Join the beta test page to teachers you trust; the classroom kit is at /beta-kit.' },

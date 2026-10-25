@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowRight, DiceFive } from '@phosphor-icons/react';
+import { ArrowRight, DiceFive, SpeakerHigh } from '@phosphor-icons/react';
+import { speak } from '../engine/feedback';
+import { useSettings } from '../settings/SettingsContext';
 import { data, newId } from '../data';
 import { findGameCode, type GameCode } from '../data/gameCodes';
 import { rollName } from '../engine/nameDice';
@@ -26,6 +28,7 @@ export default function JoinPage() {
   useEffect(() => { if (waitUntil <= Date.now()) return; const id = window.setInterval(() => setNow(Date.now()), 500); return () => window.clearInterval(id); }, [waitUntil]);
   const waiting = waitUntil > now ? Math.ceil((waitUntil - now) / 1000) : 0;
   const navigate = useNavigate();
+  const { settings } = useSettings();
 
   async function join(c = code) {
     if (waitUntil > Date.now()) return;
@@ -66,6 +69,10 @@ export default function JoinPage() {
     <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-5xl"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-lg">{t('join.sub')}</p>
+      <div className="flex flex-wrap justify-center gap-2">
+        <button type="button" onClick={() => speak(t('join.sub'), settings)} className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('q.listen')}</button>
+        {code.length > 0 && <button type="button" onClick={() => speak(code.split('').join(', '), settings)} className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('join.hearCode')}</button>}
+      </div>
       <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoCapitalize="characters" autoComplete="off" spellCheck={false}
         onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && code.length === 5) void join(); }}
         aria-label={t('join.code')} placeholder="BKDFT"

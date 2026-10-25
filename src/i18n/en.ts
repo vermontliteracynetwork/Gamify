@@ -1158,6 +1158,8 @@ export const en = {
   'login.teacher': 'Teacher',
   'login.continue': 'Continue on this device',
   'login.students': 'Students: use the code your teacher gives you.',
+  'join.hearCode': 'Hear my code',
+  'host.classroom': 'Share to Google Classroom',
   'join.title': 'Join your class',
   'join.sub': 'Type the class code or game code your teacher gave you.',
   'join.code': 'Class code',

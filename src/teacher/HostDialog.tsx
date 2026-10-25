@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Copy, LockSimple, Play, ProjectorScreen, QrCode, UsersThree, X } from '@phosphor-icons/react';
+import { Copy, LockSimple, Play, ProjectorScreen, QrCode, ShareNetwork, UsersThree, X } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { GAME_CODE_DAYS, gameLink, makeGameCode, type GameCode } from '../data/gameCodes';
@@ -11,7 +11,8 @@ import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
-import { Button } from '../ui/kit';
+import { Button, buttonClasses } from '../ui/kit';
+import { classroomShare } from '../data/gameCodes';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 
@@ -71,6 +72,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                       <p className="font-display text-4xl tracking-[0.2em]" aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
                       <Button onClick={() => { void navigator.clipboard?.writeText(gameLink(code)).catch(() => undefined); setStatus(t('host.copied')); }}><Copy weight="bold" size={18} />{t('host.copyLink')}</Button>
                       <Button onClick={() => navigate(`/show/${code.code}`)}><ProjectorScreen weight="bold" size={18} />{t('host.show')}</Button>
+                      <a href={classroomShare(gameLink(code), set.name)} target="_blank" rel="noreferrer" className={buttonClasses('secondary')}><ShareNetwork weight="bold" size={18} />{t('host.classroom')}</a>
                       <p className="text-xs font-bold text-muted">{t('host.expires', { days: GAME_CODE_DAYS })}</p>
                     </>
                   ) : <Button onClick={async () => setCode(await makeGameCode(game.id, set.id))}><QrCode weight="bold" size={18} />{t('host.makeCode')}</Button>}

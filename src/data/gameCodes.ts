@@ -30,3 +30,7 @@ export async function findGameCode(code: string): Promise<GameCode | undefined> 
 }
 
 export const gameLink = (c: GameCode) => `${window.location.origin}/join/${c.code}`;
+
+// Share a join link to a class stream in the classroom service many schools
+// use (development plan Stage 5): its public share address, no account link.
+export const classroomShare = (url: string, title: string) => `https://classroom.google.com/share?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;

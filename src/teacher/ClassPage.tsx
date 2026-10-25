@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DeviceTablet, GearSix, Heart, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, DeviceTablet, GearSix, Heart, ShareNetwork, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -16,6 +16,7 @@ import PictureBadge from '../student/PictureBadge';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { themesFor } from '../theme/library';
 import { GAMES } from '../games/registry';
+import { classroomShare } from '../data/gameCodes';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
@@ -56,6 +57,7 @@ export default function ClassPage() {
         actions={<>
           <Link to={`/teacher/classes/${classroom.id}/check-in`} className={buttonClasses('secondary')}><Smiley weight="bold" size={18} />{t('checkin.open')}</Link>
           <Link to={`/show/${classroom.joinCode ?? ''}`} className={buttonClasses('secondary')}><ProjectorScreen weight="bold" size={18} />{t('class.showCode')}</Link>
+          <a href={classroomShare(`${window.location.origin}/join/${classroom.joinCode ?? ''}`, classroom.name)} target="_blank" rel="noreferrer" className={buttonClasses('secondary')}><ShareNetwork weight="bold" size={18} />{t('host.classroom')}</a>
           <Link to={`/arcade/${classroom.id}`} className={buttonClasses('primary')}><DeviceTablet weight="bold" size={18} />{t('class.openSignIn')}</Link>
         </>} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
