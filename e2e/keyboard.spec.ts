@@ -71,8 +71,8 @@ test('keyboard: a teacher makes a class', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Room 9' })).toBeVisible();
 });
 
-test('keyboard: Bakery Match swaps two treats with Enter', async ({ page }) => {
-  await page.goto('/games/bakery-match');
+test('keyboard: Match Three swaps two pieces with Enter', async ({ page }) => {
+  await page.goto('/games/match-three');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Next$/); await page.keyboard.press('Enter');

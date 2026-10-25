@@ -5,10 +5,10 @@ Rule: every sound has a visual partner, and nothing flashes. Checked
 
 | Sound | Where | Visual partner |
 |---|---|---|
-| right | Question screen, Share question, Bakery Match matches | Green answer with a check, "You got it!", treats pop |
-| miss | Question screen, Share question, Bakery Match bad swap | Answer greys out with "Try again" or the right answer shown; the tile shakes and a note explains |
-| tap | Four in a Row drop, Game Show square, Bakery Match select | The piece falls into place; the square opens a question; the treat gets a ring |
-| whoosh | Game Show card, Bakery Match swap | The card flips over; the treats slide |
+| right | Question screen, Share question, Match Three matches | Green answer with a check, "You got it!", treats pop |
+| miss | Question screen, Share question, Match Three bad swap | Answer greys out with "Try again" or the right answer shown; the tile shakes and a note explains |
+| tap | Four in a Row drop, Game Show square, Match Three select | The piece falls into place; the square opens a question; the treat gets a ring |
+| whoosh | Game Show card, Match Three swap | The card flips over; the treats slide |
 | win | Every game's end | The results box opens (with confetti unless celebrations are off) |
 
 Motion that repeats: Four in a Row's column arrows pulse gently (a 2 second

@@ -62,7 +62,7 @@ export function schoolQuote(seats: number): { perSeat: number; total: number } |
 
 // Games playable on the Free plan (game ids from the registry). Not capped
 // at four: new free games are added over time (teacher, 2026-10-24).
-export const FREE_GAMES = ['game-show', 'peg-drop', 'cast-catch', 'bakery-match', 'four-in-a-row', 'star-quiz', 'flashcards'];
+export const FREE_GAMES = ['game-show', 'peg-drop', 'cast-catch', 'match-three', 'four-in-a-row', 'star-quiz', 'flashcards'];
 
 // The one game Free teachers can try the Theme Builder on. Developer's
 // choice; Game Show predicted (the flagship group game).

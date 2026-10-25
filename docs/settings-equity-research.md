@@ -106,7 +106,7 @@ default), Brightness (Normal / Dim). No flashing ever.
   iPad does not support web vibration. Android phones and tablets do.
 - **Gamify settings:** Haptics (On / Off) appears only on devices that
   support it, and never carries information that isn't also shown on
-  screen. Off by default in Class Live (many buzzing devices in one room).
+  screen. Off by default in Live (many buzzing devices in one room).
   If Gamify later ships as an installed iPad/iPhone app, haptics can work
   on iPhones.
 
@@ -214,7 +214,7 @@ for every board change.
 - **Teachers** can set class or per-student defaults (for example, a
   student's IEP calls for no timers and calm mode) and **lock** specific
   settings during an assignment.
-- **Class Live:** teacher can mute all student devices at once.
+- **Live:** teacher can mute all student devices at once.
 - **Share:** the teacher's device controls the room's sound and
   visuals.
 - **Presets** for one-tap setup: Calm, Low vision, Hearing, Quick start,

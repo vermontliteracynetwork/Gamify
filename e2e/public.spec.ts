@@ -168,3 +168,24 @@ test.describe('beta kit', () => {
     }
   });
 });
+
+test.describe('footer and legal pages', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('footer has the copyright and legal links; the Common Core notice is on Credits', async ({ page }, info) => {
+    await page.goto('/');
+    const footer = page.getByRole('contentinfo');
+    await expect(footer.getByText(/© 20\d\d Gamify\. All rights reserved\./)).toBeVisible();
+    await expect(footer.getByText('Common Core', { exact: false })).toHaveCount(0);
+    await footer.screenshot({ path: `test-results/footer-${info.project.name}.png` });
+    for (const [link, heading] of [['Privacy', /^Privacy$/i], ['Terms of Service', /Terms of Service/i], ['Accessibility', /^Accessibility$/i]] as const) {
+      await page.getByRole('contentinfo').getByRole('link', { name: link, exact: true }).click();
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    }
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Credits and Attributions' }).click();
+    await expect(page.getByText('National Governors Association Center', { exact: false })).toBeVisible();
+    if (info.project.name !== 'ipad-portrait') {
+      await page.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Home' }).click();
+      await expect(page).toHaveURL(/\/$/);
+    }
+  });
+});

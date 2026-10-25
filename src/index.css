@@ -220,7 +220,7 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 @keyframes bp-fall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(14px); opacity: 0; } }
 @keyframes bp-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .bp-fx { animation: none !important; } }
-/* Space Bowling: knocked pins tip over and fade. */
+/* Bowling: knocked pins tip over and fade. */
 @keyframes sb-fall-l { to { transform: translate(-3px, 1px) rotate(-80deg); opacity: 0; } }
 @keyframes sb-fall-r { to { transform: translate(3px, 1px) rotate(80deg); opacity: 0; } }
 

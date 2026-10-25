@@ -40,12 +40,12 @@ mode: they are games that plug into these same four modes.
 
 | # | Mode | Who holds a device | Feels like | Needs a server? |
 |---|---|---|---|---|
-| 1 | **Class Live** (whole group, own devices) | Every student + teacher host | Classic Blooket hosting | Yes (real-time) |
+| 1 | **Live** (whole group, own devices) | Every student + teacher host | Classic Blooket hosting | Yes (real-time) |
 | 2 | **Share** (whole group, one screen; 1 to 10 teams, or the class vs the CPU or the teacher) | Teacher only, cast or on the board | Baamboozle | No |
 | 3 | **Solo** | One student | Dashboard arcade games, homework | No |
 | 4 | **Versus** (student vs student, or vs CPU) | One shared device, later two devices | Board-game night | No (shared device); yes (two devices) |
 
-### Mode 1: Class Live (whole group, independent devices)
+### Mode 1: Live (whole group, independent devices)
 - Teacher opens a game + question set and gets a **join code** and QR code
   on the big screen (or hosts from their own laptop/iPad).
 - Students join on their own iPads with the code and a nickname. Teacher
@@ -156,15 +156,15 @@ mode: they are games that plug into these same four modes.
   that plays the game moves; it never answers questions, the student
   always does. CPU is a friendly character, never gloats or teases.
 - **Two devices later:** student vs student on separate iPads with a short
-  match code, using the same real-time server as Class Live.
+  match code, using the same real-time server as Live.
 - Kindness rules: both players earn for every right answer whoever wins,
   the loser screen says "Good game! Rematch?", and a handicap option lets
   the teacher give one player a head start or extra support.
 
 ### The big build insight: two engines, not four
 - **"Everyone plays their own game" engine** powers Solo (3) and Class
-  Live (1). Class Live is Solo plus a host screen that collects scores.
-  So every Solo game we build becomes a Class Live game almost for free.
+  Live (1). Live is Solo plus a host screen that collects scores.
+  So every Solo game we build becomes a Live game almost for free.
 - **"Take turns" engine** powers Share (2) and Versus (4). A turn
   player can be a team, a student, the CPU or the teacher. So every turn-based game we
   build works in both modes.
@@ -181,10 +181,10 @@ trademark search:
 | Plinko | "Plinko" is a registered trademark (game show) | Peg Drop | 1 2 3 4 |
 | Crossy Road Hopper | "Crossy Road" is a registered trademark | Road Hop | 1 3 |
 | Diner Dash | "Diner Dash" is a registered trademark | Lunch Rush | 1 3 |
-| Bakery Match (match-3) | Fine, but must not resemble any famous match-3 look | Bakery Match | 1 3 |
+| Match Three (match-3) | Fine, but must not resemble any famous match-3 look | Match Three | 1 3 |
 | Bubble Shooter | Generic term, fine | Bubble Pop | 1 3 |
 | Castle Defense | Generic, fine | Castle Guard | 1 3 |
-| Space Bowling | Generic, fine | Space Bowling | 1 2 3 4 |
+| Bowling | Generic, fine | Bowling | 1 2 3 4 |
 | Slime Chess | Chess is public domain, fine | Slime Chess | 2 4 |
 | Shape Dash | Close to a famous rhythm-runner name, avoid | Shape Runner | 1 3 |
 | Farm Grow, Memory Match, Pet Show Ring, Quiz Mode, Lighthouse Signal, Gem Mine, Kitchen Cook-Off, Word Search, Cupcake Tycoon, Doc Fishing, Rescue Shelter, Alchemy | Generic, fine (double-check each in the search) | Keep | Mostly 1 3; Memory Match and Quiz also 2 4 |
@@ -357,7 +357,7 @@ from every device, reachable at any point in the game. Research behind
 every item: `docs/settings-equity-research.md`.
 
 **The gear button.** One gear, same corner, same look in every game and
-every theme. Tapping it pauses the game (solo and versus; in Class Live it
+every theme. Tapping it pauses the game (solo and versus; in Live it
 opens without stopping the class). Works by touch, keyboard and switch
 access, iPad-fingertip size.
 
@@ -377,7 +377,7 @@ access, iPad-fingertip size.
 **Who controls it.** Students change their own settings any time, and
 settings follow them across all games. Teachers can set class or
 per-student defaults (for example an IEP that calls for no timers) and lock
-specific settings during an assignment. Class Live: teacher can mute every
+specific settings during an assignment. Live: teacher can mute every
 student device at once. Share: the teacher device controls the room.
 Starts in reduced motion when the iPad's own Reduce Motion is on.
 
@@ -398,7 +398,7 @@ Starts in reduced motion when the iPad's own Reduce Motion is on.
 - **Tone:** growth language ("Not yet, try another!"), never a public
   lowest score.
 
-## 4B. Joining, names and teams (Class Live, Share, Versus)
+## 4B. Joining, names and teams (Live, Share, Versus)
 
 Direct from you (2026-10-24).
 
@@ -506,7 +506,7 @@ reads the code and sends the student to the right place.
 
 | Code type | Format | Example | What it opens |
 |---|---|---|---|
-| **Player code** | Letters **and** numbers, 6 characters | `K7P2QX` | Joins as a player: Class Live, Versus on two devices, assignment links |
+| **Player code** | Letters **and** numbers, 6 characters | `K7P2QX` | Joins as a player: Live, Versus on two devices, assignment links |
 | **Viewer code** | Letters **only**, 6 characters | `BRTKMS` | Joins **view only**: Share Mirror (and later any view-only screen) |
 
 Code rules:
@@ -547,7 +547,7 @@ on the student's own device.
 - **Also useful for:** a student who needs to sit away from the group, a
   co-teacher across the room, a student with an IEP accommodation for
   copies of displayed material.
-- **Tech note:** the mirror needs the same real-time server as Class Live,
+- **Tech note:** the mirror needs the same real-time server as Live,
   so Share Mirror ships with that server (see roadmap). Share itself
   still works with no server.
 
@@ -675,7 +675,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | Public question sets (published by others) | Use any | Use any, publish your own | Use any, publish your own | Same |
 | CSV import | Yes (counts toward the 3) | Yes | Yes | Yes |
 | Games | **Free games only** (a set list) | All games | All games | All games |
-| Modes in the games you can use | All four (Class Live up to your 30 students) | All four | All four | All four |
+| Modes in the games you can use | All four (Live up to your 30 students) | All four | All four | All four |
 | Themes | Classic only; others preview only; try the Theme Builder on one game (developer's pick) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
@@ -845,7 +845,7 @@ Design consequences (cheap now, expensive to retrofit):
         |                                           |
   "Own game" engine                          "Take turns" engine
   Mode 3 Solo                                Mode 2 Share
-  Mode 1 Class Live (+ host screen)          Mode 4 Versus (teams,
+  Mode 1 Live (+ host screen)          Mode 4 Versus (teams,
         |                                     students, CPU, teacher)
         +---------- Game module contract ----------+
                               |
@@ -858,7 +858,7 @@ Design consequences (cheap now, expensive to retrofit):
 
 **Game module contract** (every game is a plug-in that declares):
 - `id`, display name, icon, short description
-- play modes supported (1 Class Live / 2 Share / 3 Solo / 4 Versus)
+- play modes supported (1 Live / 2 Share / 3 Solo / 4 Versus)
 - for Versus: whether it has a CPU player and its difficulty levels
 - question types supported
 - settings (rounds, questions per break, anything game-specific)
@@ -903,7 +903,7 @@ game only decides *when to ask* and *what a right answer does*.
 
 **Phase 3: Live + schools**
 - The `/join` page and code system (player and viewer codes)
-- Mode 1 Class Live: join codes, host screen, live leaderboard
+- Mode 1 Live: join codes, host screen, live leaderboard
 - Share Mirror (view-only screen), first feature on the real-time server
 - Live monitor and Lock button for every own-device mode (also needs the
   real-time server; strong case for Phase 2, see decision 8)
@@ -924,20 +924,20 @@ game only decides *when to ask* and *what a right answer does*.
    brand). Run the trademark search before buying, since the word itself
    is crowded.
 3. ~~First three games~~ DECIDED 2026-10-24: **Game Show** (Share; surprise
-   cards and a category grid), **Bakery Match** (Solo match-3), **Four in a
+   cards and a category grid), **Match Three** (Solo match-3), **Four in a
    Row** (Versus).
 4. **Themes scope**: game stage only, chrome stays branded? (Claudia: yes)
 5. **Accounts**: teachers log in (all tiers, so free users can save their
    3 sets and 1 classroom). Students have no email accounts: they are
    entries on the teacher's class list (needed for reports over time) and join
    by code. OK?
-6. **Class Live timing**: Mode 1 needs a real-time server, so it is
+6. **Live timing**: Mode 1 needs a real-time server, so it is
    planned for Phase 3. It is also the Blooket-style headline feature.
    Pull it forward to Phase 2 if it matters most for selling?
 7. **Report history on Free**: every game always has a full report (your
    rule). Claudia suggests Free keeps 30 days of history and paid keeps
    everything. OK, or should Free keep everything too?
-8. **Real-time server timing**: Class Live, Versus on two devices, Share
+8. **Real-time server timing**: Live, Versus on two devices, Share
    Mirror and the live monitor + Lock button all need it. Share Mirror is an accessibility feature,
    which is a reason to bring the server forward to Phase 2.
 9. **Free tier limits** (your tiers are set; three numbers to confirm):
@@ -1007,7 +1007,7 @@ start to build?" Claudia's gap review of everything above.
    supported list, the oldest iPad and iOS supported, and a performance
    budget so games run smoothly on old devices.
 10. **Weak or dropped internet.** What happens when Wi-Fi drops mid-game,
-    a student refreshes, or the teacher's laptop sleeps during Class Live.
+    a student refreshes, or the teacher's laptop sleeps during Live.
 11. **Rostering.** Google Classroom roster import for teachers; Clever /
     ClassLink for districts (most district deals require one).
 12. **Co-teachers, paraprofessionals and substitutes.** Shared access to a
@@ -1169,7 +1169,7 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 27 | **Do Leaderboards Help? What 29 Studies Say About Competition** | The evidence that competition is not required, plus how to run class-vs-computer, teams, or hidden rankings. Cites Ho, Hung & Kwan; Hanus & Fox (2015); Sailer & Homner (2020). | Share teams, class goal, optional leaderboard, Versus | Beth, 2026-10-24; all grades |
 | 28 | **Low Stakes, Less Stress: Practice Without Penalties** | Why wrong answers cost nothing in Gamify and what students say about low-stakes quizzing (survey, not experiment; say so). Cites Agarwal et al. (2014). Pairs with post 20. | No-penalty engine, timers off, calm mode | Beth, 2026-10-24; teachers, parents |
 | 29 | **Spaced Practice in a Busy Week** | Five-minute daily routines with one set across the week; why spacing beats cramming. Cites Carpenter, Pan & Butler (2022); Cepeda et al. (2006). Companion to post 7. | One set, many games, Arcade, assignments | Beth, 2026-10-24; all grades |
-| 30 | **Choice, Belonging, Growth: Motivation Without Bribes** | Self-determination theory for teachers: letting kids pick the game, playing as a class team, showing real progress, and why points alone do not build confidence. Cites the 2024 ETR&D meta-analysis on intrinsic motivation; Ryan & Deci (2000); Deci et al. (1999). | Game choice, Share, Class Live, progress pill, reports | Beth, 2026-10-24; all grades |
+| 30 | **Choice, Belonging, Growth: Motivation Without Bribes** | Self-determination theory for teachers: letting kids pick the game, playing as a class team, showing real progress, and why points alone do not build confidence. Cites the 2024 ETR&D meta-analysis on intrinsic motivation; Ryan & Deci (2000); Deci et al. (1999). | Game choice, Share, Live, progress pill, reports | Beth, 2026-10-24; all grades |
 | 31 | **Gamify and UDL: Many Ways In, for Every Student** | Map Gamify's settings to UDL engagement, representation and action and expression; honest note that UDL research is promising but mixed. Cites Capp (2017); Almeqdad et al. (2023). | Settings on every game, read-aloud, text size, calm mode, Share Mirror | Beth, 2026-10-24; special education, coaches, admins |
 | 32 | **What Gamification Research Gets Wrong, and How We Designed Around It** | The critics' strongest points (rewards, novelty, anxiety, guessing) and the design answer to each. Cites research brief sections 3-4 (Deci et al., 1999; Rodrigues et al., 2022; Mekler et al., 2017). | Many games per set, no prizes, guessing check, optional rankings | Beth, 2026-10-24; skeptical teachers, admins |
 | 33 | **Using Gamify Data in an RTI or MTSS Meeting** | Turn per-question accuracy and item analysis into intervention groups and feedback for students. Cites Wisniewski, Zierer & Hattie (2020) on feedback. | Reports, item analysis, assigning sets to individuals | Beth, 2026-10-24; intervention teams |

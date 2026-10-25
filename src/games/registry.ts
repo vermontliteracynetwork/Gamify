@@ -1,4 +1,4 @@
-import { bakeryMatchManifest } from './bakery-match/manifest';
+import { matchThreeManifest } from './match-three/manifest';
 import { fourInARowManifest } from './four-in-a-row/manifest';
 import { gameShowManifest } from './game-show/manifest';
 import { starQuizManifest } from './practice/manifest';
@@ -8,12 +8,12 @@ import { flashcardsManifest } from './flashcards/manifest';
 import { matchUpManifest } from './match-up/manifest';
 import { pegDropManifest } from './peg-drop/manifest';
 import { bubblePopManifest } from './bubble-pop/manifest';
-import { spaceBowlingManifest } from './space-bowling/manifest';
+import { bowlingManifest } from './bowling/manifest';
 import type { GameManifest } from './types';
 
 // All games, in the order they show in the Arcade. Games are added here as
 // they're built (development plan Part 4).
-export const GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, bakeryMatchManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, spaceBowlingManifest, starQuizManifest, flashcardsManifest];
+export const GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, starQuizManifest, flashcardsManifest];
 
 export function getGame(id: string): GameManifest | undefined {
   return GAMES.find((g) => g.id === id);

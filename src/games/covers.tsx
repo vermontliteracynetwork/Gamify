@@ -38,7 +38,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <Trophy weight="fill" className="absolute left-[4%] top-[6%] w-[14%] h-auto" color="#241c3d" />
         </div>
       );
-    case 'bakery-match':
+    case 'match-three':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ffe3c2, #f6a5c0)' }} aria-hidden="true"><Scatter icons={[Cookie, Cake, IceCream, Pizza, Popcorn]} colors={['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a']} /></div>;
     case 'four-in-a-row':
       return (
@@ -98,7 +98,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
         </div>
       );
-    case 'space-bowling':
+    case 'bowling':
       return (
         <div className={base} style={{ background: 'radial-gradient(circle at 70% 20%, #3b3a8f, #15143a)' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">

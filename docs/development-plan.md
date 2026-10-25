@@ -65,7 +65,7 @@ Status marks: `[ ]` not started, `[~]` in progress, `[x]` done (with date),
   storage, Stages 0-4, no account needed) and **cloud** (Supabase: a new,
   separate project just for Gamify, Stage 5+). Every screen talks to the
   data layer, never to storage directly, so switching costs nothing.
-- **Real-time** (Class Live, Share Mirror, live monitor, Lock): Supabase
+- **Real-time** (Live, Share Mirror, live monitor, Lock): Supabase
   Realtime channels.
 - **Hosting:** Vercel (`vercel.json` already set up).
 - **Payments:** Stripe (Stage 7).
@@ -260,7 +260,7 @@ own iPads by link and by code, answers land in the teacher's reports.
 ### Stage 6: Live features (real-time)
 **Goal:** the headline classroom features.
 
-- [ ] **Class Live**: lobby, name approval / rename / remove, room lock,
+- [ ] **Live**: lobby, name approval / rename / remove, room lock,
       every student plays their own game, teacher host screen with live
       leaderboard (or class goal bar), pause all, timer, end + podium.
 - [ ] **Share Mirror**: view-only copy of Share on another device via
@@ -346,8 +346,8 @@ production release.
 | Stage | Games |
 |---|---|
 | 3 | Peg Drop, Team Board, Match Up |
-| 7 (before launch) | Four in a Row, Memory Match, Quiz, Category Board, Flashcards, Bubble Pop, Space Bowling |
-| 9 (after launch, rolling) | Road Hop, Lunch Rush, Bakery Match, Castle Guard, Slime Chess, Shape Runner, Farm Grow, Word Search, Crossword, Group Sort, Spinner Wheel, Climb and Slide, Tic-Tac-Toe, and the rest of the product plan roster |
+| 7 (before launch) | Four in a Row, Memory Match, Quiz, Category Board, Flashcards, Bubble Pop, Bowling |
+| 9 (after launch, rolling) | Road Hop, Lunch Rush, Match Three, Castle Guard, Slime Chess, Shape Runner, Farm Grow, Word Search, Crossword, Group Sort, Spinner Wheel, Climb and Slide, Tic-Tac-Toe, and the rest of the product plan roster |
 
 ## Part 5. What the teacher owns (the full `[!]` list in one place)
 1. Business owner of record and seller (VLN, personal, or new company).

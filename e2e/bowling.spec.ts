@@ -5,12 +5,12 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
 });
 
-test('Space Bowling: a right answer earns a roll; tap a lane and pins fall', async ({ page }, info) => {
+test('Bowling: a right answer earns a roll; tap a lane and pins fall', async ({ page }, info) => {
   test.setTimeout(60_000);
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  await openSetup(page, '/games/space-bowling');
+  await openSetup(page, '/games/bowling');
   await finishSetup(page);
   await answerShare(page, true);
   const lane3 = page.getByRole('button', { name: 'Roll down lane 3' });

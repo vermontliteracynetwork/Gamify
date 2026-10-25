@@ -21,7 +21,7 @@ const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazy(() => import('./teacher/ImportPage'));
 const StarQuiz = lazy(() => import('./games/practice/StarQuiz'));
 const GameShow = lazy(() => import('./games/game-show/GameShow'));
-const BakeryMatch = lazy(() => import('./games/bakery-match/BakeryMatch'));
+const MatchThree = lazy(() => import('./games/match-three/MatchThree'));
 const FourInARow = lazy(() => import('./games/four-in-a-row/FourInARow'));
 const CastCatch = lazy(() => import('./games/cast-catch/CastCatch'));
 const MemoryMatch = lazy(() => import('./games/memory-match/MemoryMatch'));
@@ -29,7 +29,7 @@ const Flashcards = lazy(() => import('./games/flashcards/Flashcards'));
 const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
 const PegDrop = lazy(() => import('./games/peg-drop/PegDrop'));
 const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
-const SpaceBowling = lazy(() => import('./games/space-bowling/SpaceBowling'));
+const Bowling = lazy(() => import('./games/bowling/Bowling'));
 const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazy(() => import('./owner/OwnerPage'));
@@ -44,6 +44,10 @@ const CheckInPage = lazy(() => import('./beta/CheckInPage'));
 const DesignPage = lazy(() => import('./student/DesignPage'));
 const ResearchPage = lazy(() => import('./public/ResearchPage'));
 const BetaKitPage = lazy(() => import('./public/BetaKitPage'));
+const PrivacyPage = lazy(() => import('./public/LegalPages').then((m) => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./public/LegalPages').then((m) => ({ default: m.TermsPage })));
+const AccessibilityPage = lazy(() => import('./public/LegalPages').then((m) => ({ default: m.AccessibilityPage })));
+const CreditsPage = lazy(() => import('./public/LegalPages').then((m) => ({ default: m.CreditsPage })));
 const WaysList = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysList })));
 const WaysPost = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
@@ -73,6 +77,10 @@ function AnimatedRoutes() {
           <Route path="/help" element={<HelpPage />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/beta-kit" element={<BetaKitPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/accessibility" element={<AccessibilityPage />} />
+          <Route path="/credits" element={<CreditsPage />} />
           <Route path="/ways" element={<WaysList />} />
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />
@@ -81,14 +89,17 @@ function AnimatedRoutes() {
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
           <Route path="/games/peg-drop" element={<RequireSignIn><RequireGame id="peg-drop"><PegDrop /></RequireGame></RequireSignIn>} />
-          <Route path="/games/space-bowling" element={<RequireSignIn><RequireGame id="space-bowling"><SpaceBowling /></RequireGame></RequireSignIn>} />
+          {/* Old addresses from before the generic game names (2026-10-25). */}
+          <Route path="/games/bakery-match" element={<Navigate to="/games/match-three" replace />} />
+          <Route path="/games/space-bowling" element={<Navigate to="/games/bowling" replace />} />
+          <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
           <Route path="/games/flashcards" element={<RequireSignIn><RequireGame id="flashcards"><Flashcards /></RequireGame></RequireSignIn>} />
           <Route path="/games/memory-match" element={<RequireSignIn><RequireGame id="memory-match"><MemoryMatch /></RequireGame></RequireSignIn>} />
           <Route path="/games/cast-catch" element={<RequireSignIn><RequireGame id="cast-catch"><CastCatch /></RequireGame></RequireSignIn>} />
           <Route path="/games/game-show" element={<RequireSignIn><RequireGame id="game-show"><GameShow /></RequireGame></RequireSignIn>} />
-          <Route path="/games/bakery-match" element={<RequireSignIn><RequireGame id="bakery-match"><BakeryMatch /></RequireGame></RequireSignIn>} />
+          <Route path="/games/match-three" element={<RequireSignIn><RequireGame id="match-three"><MatchThree /></RequireGame></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><Navigate to="/teacher/classes" replace /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />

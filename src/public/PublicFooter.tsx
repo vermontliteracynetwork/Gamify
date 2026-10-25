@@ -1,24 +1,30 @@
 import { Link } from 'react-router-dom';
 import { t } from '../i18n';
 
+// The public footer: site links, legal links and the copyright line.
+// Attributions (Common Core notice, fonts, software) live on /credits.
 export default function PublicFooter() {
   return (
     <footer className="mt-16 border-t-[2.5px] border-border bg-surface">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-4 lg:grid-cols-[1fr_auto] items-start">
-        <div className="grid gap-2">
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
-          <p className="text-sm font-bold text-muted max-w-md">{t('public.footerPromise')}</p>
-          <p className="text-xs text-muted max-w-xl">{t('public.ccss')}</p>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-5 lg:grid-cols-[1fr_auto] items-start">
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
         <nav aria-label={t('public.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-bold text-sm">
+          <Link to="/">{t('public.nav.home')}</Link>
           <Link to="/features">{t('public.nav.features')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
-          <Link to="/join">{t('public.nav.join')}</Link>
           <Link to="/research">{t('research.title')}</Link>
           <Link to="/ways">{t('ways.title')}</Link>
+          <Link to="/join">{t('public.nav.join')}</Link>
           <Link to="/help">{t('public.nav.help')}</Link>
           <Link to="/it">{t('public.nav.it')}</Link>
           <Link to="/login">{t('public.nav.login')}</Link>
+        </nav>
+        <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
+        <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm">
+          <Link to="/privacy">{t('legal.privacy')}</Link>
+          <Link to="/terms">{t('legal.terms')}</Link>
+          <Link to="/accessibility">{t('legal.a11y')}</Link>
+          <Link to="/credits">{t('legal.credits')}</Link>
         </nav>
       </div>
     </footer>

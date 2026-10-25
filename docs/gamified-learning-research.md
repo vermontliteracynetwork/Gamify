@@ -165,7 +165,7 @@ something the student wants to do next.
 |---|---|
 | Competence | Visible progress inside each game, assignment progress, "2 of 3" break pill, support levels that adjust to the student |
 | Autonomy | Students choose the game (or the teacher offers a choice board); every game uses the same question screen, so choice never costs learning |
-| Relatedness | Share (team play on one screen), Class Live (whole class together), Versus (play a friend), class-designed themes |
+| Relatedness | Share (team play on one screen), Live (whole class together), Versus (play a friend), class-designed themes |
 | Different kinds of players | Arcade action, puzzle, strategy (chess, Four in a Row), building/tycoon, calm activities (match, sort, flashcards) |
 
 ---
@@ -481,7 +481,7 @@ directly.**
   points and badges alone do not make students feel more capable. Visible
   progress on real skills has to.
 - **Gamify feature:** autonomy = students choose the game, and the teacher
-  can offer a choice board; relatedness = Share teams, Class Live, Versus,
+  can offer a choice board; relatedness = Share teams, Live, Versus,
   class-designed themes; competence = assignment progress, "2 of 3" pill,
   reports that show growth.
 

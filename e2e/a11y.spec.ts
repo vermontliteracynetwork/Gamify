@@ -38,7 +38,7 @@ test.describe('public pages', () => {
 });
 
 test('no automated accessibility violations on the question screen and a game board', async ({ page }) => {
-  await openSetup(page, '/games/bakery-match');
+  await openSetup(page, '/games/match-three');
   for (;;) { const n = page.getByRole('button', { name: 'Next', exact: true }); if (!(await n.isVisible())) break; await n.click(); }
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('gridcell').first()).toBeVisible();

@@ -15,7 +15,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
-import { bakeryMatchManifest } from './manifest';
+import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -32,17 +32,17 @@ const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 
-export default function BakeryMatch() {
+export default function MatchThree() {
   const { settings } = useSettings();
-  const { theme, themes, playable, choose } = useGameTheme('bakery-match');
+  const { theme, themes, playable, choose } = useGameTheme('match-three');
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bakery-match', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7 });
+  const [setup, change] = useSavedSetup('match-three', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7 });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
-  const { ask, element, missed } = useAsk({ gameId: 'bakery-match', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
@@ -149,13 +149,13 @@ export default function BakeryMatch() {
   return (
     <ThemedPage theme={theme}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
-      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bakery-match" />
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('bm.title')} /></h1>}
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={bakeryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
@@ -163,7 +163,7 @@ export default function BakeryMatch() {
       )}
 
       {phase === 'theme' && (
-        <ThemeScreen gameName={bakeryMatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
+        <ThemeScreen gameName={matchThreeManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
       )}
 
       {phase === 'setup' && (

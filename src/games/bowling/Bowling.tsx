@@ -26,7 +26,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
-import { spaceBowlingManifest } from './manifest';
+import { bowlingManifest } from './manifest';
 import { cpuLane, fullRack, halfWidthAt, knockPins, LANE_X, LANES, PIN_SPOTS, pinDepth, rollPoints, scaleAt, xAt, yAt } from './lane';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
@@ -36,21 +36,21 @@ const ROLL_MS = 1500;
 // Fixed sky dots, so the stars don't jump between turns.
 const DOTS = Array.from({ length: 40 }, (_, i) => ({ x: (i * 37.7) % 100, y: (i * 23.3) % 34, r: 0.25 + (i % 3) * 0.15 }));
 
-// Space Bowling (launch roster, Stage 7): a right answer earns a roll. Tap a
+// Bowling (launch roster, Stage 7): a right answer earns a roll. Tap a
 // lane and the planet ball rolls into ten alien pins. Two rolls a frame;
 // strikes and spares earn a bonus. Teams on one screen or one player.
-export default function SpaceBowling() {
+export default function Bowling() {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
-  const { theme, themes, playable, choose } = useGameTheme('space-bowling');
+  const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('space-bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' });
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
   const solo = setup.who === 'solo';
-  const { ask, element, missed: soloMissed } = useAsk({ gameId: 'space-bowling', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, element, missed: soloMissed } = useAsk({ gameId: 'bowling', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [phase, setPhase] = useState<Phase>('welcome');
@@ -93,7 +93,7 @@ export default function SpaceBowling() {
   function onShareResult(right: boolean) {
     if (!turns || !question || !player) return;
     if (player.kind !== 'cpu' && player.kind !== 'teacher') {
-      void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), teamName: player.name, gameId: 'space-bowling', mode: 'share', setId: question.setId, prompt: question.q.prompt, answer: question.q.choices[question.q.correctIndex], tries: [], ms: 0, outcome: right ? 'right' : 'skipped' });
+      void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), teamName: player.name, gameId: 'bowling', mode: 'share', setId: question.setId, prompt: question.q.prompt, answer: question.q.choices[question.q.correctIndex], tries: [], ms: 0, outcome: right ? 'right' : 'skipped' });
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     setQuestion(null);
@@ -177,16 +177,16 @@ export default function SpaceBowling() {
   return (
     <ThemedPage theme={theme}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
-      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="space-bowling" />
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
-        <GameWelcome game={spaceBowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('sb.how1') },
           { icon: <HandTap weight="fill" size={22} />, text: t('sb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('sb.how3') },
         ]} />
       )}
-      {phase === 'theme' && <ThemeScreen gameName={spaceBowlingManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
+      {phase === 'theme' && <ThemeScreen gameName={bowlingManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),

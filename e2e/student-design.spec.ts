@@ -17,11 +17,11 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   await page.getByRole('switch').last().click();
   await expect(page.getByRole('switch').last()).toHaveAttribute('aria-checked', 'true');
 
-  // A student, signed in on this device, designs a Bakery Match theme.
+  // A student, signed in on this device, designs a Match Three theme.
   await page.evaluate(() => sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava' })));
   await page.goto('/arcade');
   await page.getByRole('link', { name: /Design a Theme/ }).click();
-  await page.getByRole('button', { name: /Bakery Match/ }).click();
+  await page.getByRole('button', { name: /Match Three/ }).click();
   const shot = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 200; c.height = 200; const x = c.getContext('2d')!; x.fillStyle = '#f6a5c0'; x.fillRect(0, 0, 200, 200); return c.toDataURL('image/png').split(',')[1]; });
   await page.getByLabel('Add a picture').setInputFiles({ name: 'drawing.png', mimeType: 'image/png', buffer: Buffer.from(shot, 'base64') });
   await page.screenshot({ path: `test-results/design-piece-${info.project.name}.png` });
@@ -40,7 +40,7 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   await page.getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByText('Approved Pink Party.', { exact: false })).toBeVisible();
 
-  await page.goto('/games/bakery-match');
+  await page.goto('/games/match-three');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('radio', { name: /Pink Party/ })).toBeVisible();
   await expect(page.getByText('Made by Room 7')).toBeVisible();

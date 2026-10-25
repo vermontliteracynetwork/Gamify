@@ -33,14 +33,14 @@ function findSwap(g: number[][]): [[number, number], [number, number]] | null {
   return null;
 }
 
-test('Bakery Match: swaps make matches, a round ends in a question break', async ({ page }, info) => {
+test('Match Three: swaps make matches, a round ends in a question break', async ({ page }, info) => {
   test.setTimeout(90_000);
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  await page.goto('/games/bakery-match');
+  await page.goto('/games/match-three');
   await page.screenshot({ path: `test-results/bakery-welcome-${info.project.name}.png` });
-  await openSetup(page, '/games/bakery-match');
+  await openSetup(page, '/games/match-three');
   await finishSetup(page);
   await expect(page.getByRole('gridcell')).toHaveCount(49);
   await page.screenshot({ path: `test-results/bakery-start-${info.project.name}.png`, fullPage: true });

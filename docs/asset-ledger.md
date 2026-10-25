@@ -18,7 +18,7 @@ ships without a line here.
 | Motion | Animation | npm `motion` | MIT | 2026-10 |
 | canvas-confetti | Celebrations | npm | ISC | 2026-10 |
 | Tailwind CSS, Vite | Styling and build tools | npm | MIT | 2026-10 |
-| Sound effects | None shipping yet (prototype's generated sounds removed with it) | n/a | n/a | n/a |
+| Sound effects | Every game (right, miss, tap, win, whoosh; five theme sound packs) | Generated in code with the Web Audio API (`src/engine/feedback.ts`) | Original, owned; no files | 2026-10-25 |
 
 ## Device fonts for theme titles (2026-10-25)
 
@@ -33,3 +33,9 @@ Typewriter.
 
 Classic, Soft, Chimes, Bloops and Zaps are synthesized in code with the Web
 Audio API (`src/engine/feedback.ts`). No sound files, nothing to license.
+
+## Where attributions show (2026-10-25)
+
+The public Credits and attributions page (`/credits`, linked in every public
+footer) carries the Common Core notice and credits for fonts, icons and
+software. Add a line there whenever a license asks for attribution.

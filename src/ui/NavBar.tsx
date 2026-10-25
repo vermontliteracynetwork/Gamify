@@ -9,7 +9,8 @@ import { TellGamify } from './TellGamify';
 // game list from inside a game.
 export default function NavBar() {
   const [tellOpen, setTellOpen] = useState(false);
-  const role = useLocation().pathname.startsWith('/teacher') ? 'teacher' : 'student';
+  const path = useLocation().pathname;
+  const role = path.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
   const pill = 'hover-pop flex items-center gap-1.5 text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
@@ -19,6 +20,7 @@ export default function NavBar() {
       </Link>
       {!any && (
         <nav aria-label={t('public.nav.label')} className="flex items-center gap-1 sm:gap-2">
+          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
           <Link to="/features" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
           <Link to="/pricing" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
           <Link to="/research" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.research')}</Link>

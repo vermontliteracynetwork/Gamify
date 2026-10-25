@@ -23,7 +23,7 @@ export default function ThemePreview({ theme, gameName }: { theme: GameTheme; ga
 
 function board(theme: GameTheme) {
   switch (theme.gameId) {
-    case 'bakery-match':
+    case 'match-three':
       return (
         <div className="grid grid-cols-5 gap-1 p-2 rounded-input border-[2px] border-border h-full aspect-square" style={pieceFill(theme, 'board', '#ffffff')}>
           {Array.from({ length: 25 }, (_, i) => <span key={i} className="rounded-md border-[1.5px] border-border-soft" style={pieceFill(theme, `tile-${(i * 7) % 6}`, TILE_COLORS[(i * 7) % 6])} />)}

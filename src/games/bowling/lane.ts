@@ -1,4 +1,4 @@
-// Space Bowling lane (rules borrowed from the Dashboard's Space Bowling,
+// Bowling lane (rules borrowed from the Dashboard's Bowling,
 // rebuilt flat for every device). Pure logic, so it can be tested.
 
 export const LANES = 5;

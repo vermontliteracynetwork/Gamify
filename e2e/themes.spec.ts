@@ -19,7 +19,7 @@ async function png(page: Page, color: string): Promise<Buffer> {
 }
 
 test('games play Classic only until a theme is made, picked on its own theme screen', async ({ page }, info) => {
-  await page.goto('/games/bakery-match');
+  await page.goto('/games/match-three');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
   await expect(page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio')).toHaveCount(1);
@@ -93,7 +93,7 @@ test('Theme Builder: a photo of a drawn template page fills its piece', async ({
 });
 
 test('Free plan: the Theme Builder works on Game Show only', async ({ page }) => {
-  await page.goto('/teacher/themes/bakery-match');
+  await page.goto('/teacher/themes/match-three');
   await expect(page.getByText('Upgrade to Plus or Pro to design this game too.', { exact: false })).toBeVisible();
   // Only the note shows: nothing to fill in that couldn't be saved.
   await expect(page.getByLabel('Theme name')).toHaveCount(0);
@@ -114,7 +114,7 @@ test('developer view opens with the owner PIN and links to the Theme Builder', a
 });
 
 test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ page }, info) => {
-  await page.goto('/teacher/themes/bakery-match');
+  await page.goto('/teacher/themes/match-three');
   await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })));
   await page.reload();
   await expect(page.getByRole('tab', { name: 'Pictures' })).toHaveAttribute('aria-selected', 'true');

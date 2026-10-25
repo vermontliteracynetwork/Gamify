@@ -13,8 +13,8 @@ describe('game themes', () => {
     }
   });
   it('adds only the made themes for that game', () => {
-    const made = { ...classicTheme('bakery-match'), id: 'x', name: 'Ours', source: 'custom' as const };
-    expect(themesFor('bakery-match', [made]).map((t) => t.name)).toEqual(['Classic', 'Ours']);
+    const made = { ...classicTheme('match-three'), id: 'x', name: 'Ours', source: 'custom' as const };
+    expect(themesFor('match-three', [made]).map((t) => t.name)).toEqual(['Classic', 'Ours']);
     expect(themesFor('game-show', [made]).map((t) => t.name)).toEqual(['Classic']);
   });
   it('fills a piece with its picture over its color', () => {

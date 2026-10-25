@@ -5,12 +5,12 @@ const noScroll = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
 
 test('game boards fit the screen without scrolling', async ({ page }) => {
-  for (const g of ['game-show', 'bakery-match', 'four-in-a-row', 'star-quiz']) {
+  for (const g of ['game-show', 'match-three', 'four-in-a-row', 'star-quiz']) {
     await page.goto(`/games/${g}`);
     await expect(page.getByRole('button', { name: 'Set up and play' })).toBeInViewport();
     await noScroll(page);
   }
-  await openSetup(page, '/games/bakery-match');
+  await openSetup(page, '/games/match-three');
   await noScroll(page);
   await finishSetup(page);
   await expect(page.getByRole('gridcell')).toHaveCount(49);

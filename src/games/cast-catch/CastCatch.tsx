@@ -41,7 +41,7 @@ export function FishArt({ fish, size }: { fish: FishKind; size: number }) {
   );
 }
 
-// Class Live's first game (development plan Stage 6), playable solo now:
+// Live's first game (development plan Stage 6), playable solo now:
 // tap to start the cast meter, tap to stop it (the middle is best), answer
 // while the bobber floats, then reel in. Better casts bring rarer fish.
 export default function CastCatch() {

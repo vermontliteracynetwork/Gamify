@@ -27,7 +27,7 @@ The test browser is Chromium. Real devices add Safari quirks, slower
 processors and smart board touch. Before launch, on each device:
 
 1. **Oldest iPad still getting updates (iPadOS 17, Safari):** sign in with
-   pictures, play Bubble Pop and Space Bowling for 2 minutes each (smooth
+   pictures, play Bubble Pop and Bowling for 2 minutes each (smooth
    motion, no stutter), Listen read-aloud works, the camera opens in Design
    a Theme.
 2. **A school Chromebook (managed, on the school network):** join with a
