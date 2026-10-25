@@ -9,7 +9,7 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
-import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow } from './reports';
+import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 
 // Teacher reports over the question log (development plan Stage 4): group
 // by student, question, set, game, day or team; filter, sort, search, see
@@ -43,6 +43,7 @@ export default function ReportsPage() {
   }, [log, filter, by, sort, students, sets, since]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const total = rows.grouped.reduce((a, r) => ({ asked: a.asked + r.asked, right: a.right + r.right, firstTry: a.firstTry + r.firstTry }), { asked: 0, right: 0, firstTry: 0 });
+  const kept = useMemo(() => retention(rows.kept), [rows.kept]);
   const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
   const groupLabel = t(`reports.by.${by}`);
 
@@ -85,8 +86,8 @@ export default function ReportsPage() {
         <input type="date" aria-label={t('reports.to')} value={filter.to ?? ''} onChange={(e) => setFilter({ ...filter, to: e.target.value || undefined })} className={field} />
         <input type="search" aria-label={t('reports.search')} placeholder={t('reports.search')} value={filter.search ?? ''} onChange={(e) => setFilter({ ...filter, search: e.target.value })} className={field} />
       </Panel>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        {[[t('reports.questions'), total.asked], [t('reports.right'), `${percent(total.right, total.asked)}%`], [t('reports.firstTry'), `${percent(total.firstTry, total.asked)}%`], [t('reports.rows'), rows.grouped.length]].map(([label, v]) => (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+        {[[t('reports.questions'), total.asked], [t('reports.right'), `${percent(total.right, total.asked)}%`], [t('reports.firstTry'), `${percent(total.firstTry, total.asked)}%`], [t('reports.kept'), kept.checked ? `${percent(kept.kept, kept.checked)}%` : '-'], [t('reports.rows'), rows.grouped.length]].map(([label, v]) => (
           <Panel key={String(label)} className="!p-4"><p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p><p className="font-display text-3xl">{v}</p></Panel>
         ))}
       </div>

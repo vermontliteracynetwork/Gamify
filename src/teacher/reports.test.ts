@@ -34,3 +34,17 @@ describe('reports', () => {
     expect(percent(1, 3)).toBe(33);
   });
 });
+
+describe('remembered a week later', () => {
+  const e = (prompt: string, at: string, outcome: 'right' | 'skipped', studentId = 'st1') =>
+    ({ id: prompt + at + studentId, at, studentId, setId: 's', gameId: 'peg-drop', mode: 'solo' as const, prompt, answer: 'x', tries: [], ms: 0, outcome });
+  it('counts questions asked again 7+ days after a right answer', async () => {
+    const { retention } = await import('./reports');
+    expect(retention([
+      e('A', '2026-10-01T10:00:00Z', 'right'), e('A', '2026-10-09T10:00:00Z', 'right'),
+      e('B', '2026-10-01T10:00:00Z', 'right'), e('B', '2026-10-10T10:00:00Z', 'skipped'),
+      e('C', '2026-10-01T10:00:00Z', 'right'), e('C', '2026-10-03T10:00:00Z', 'skipped'), // too soon
+      e('D', '2026-10-01T10:00:00Z', 'skipped'), e('D', '2026-10-12T10:00:00Z', 'right'), // never right first
+    ])).toEqual({ checked: 2, kept: 1 });
+  });
+});

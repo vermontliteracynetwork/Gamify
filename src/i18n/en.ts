@@ -1018,6 +1018,7 @@ export const en = {
   'owner.growthTips': 'Growth tips',
   'owner.growthNone': 'Nothing to act on right now.',
   'owner.growthNote': 'Tips from this device\'s numbers for now; with cloud accounts they cover every teacher, with names and a contact button.',
+  'reports.kept': 'Remembered a week later',
   'owner.feedback': 'Tell Gamify reports',
   'owner.usage': 'Usage',
   'owner.openThemes': 'Open the Theme Builder',

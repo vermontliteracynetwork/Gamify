@@ -60,3 +60,26 @@ export function toCsv(rows: ReportRow[], groupLabel: string): string {
   const head = [groupLabel, 'Questions', 'Right', 'Right %', 'Right on first try', 'Left early', 'Average seconds', 'Most common wrong answer'];
   return [head, ...rows.map((r) => [r.label, r.asked, r.right, percent(r.right, r.asked), r.firstTry, r.left, r.avgSeconds, r.topWrong ?? ''])].map((l) => l.map(esc).join(',')).join('\n');
 }
+
+// Remembered a week later (Research page, how we will measure): of the
+// questions a student got right and was asked again 7 or more days later,
+// how many they got right again. Keyed by student (or team), set and prompt.
+export function retention(log: QuestionLogEntry[]): { checked: number; kept: number } {
+  const byKey = new Map<string, QuestionLogEntry[]>();
+  for (const e of log) {
+    if (e.outcome === 'left') continue;
+    const k = `${e.studentId ?? e.teamName ?? ''}|${e.setId ?? ''}|${e.prompt}`;
+    byKey.set(k, [...(byKey.get(k) ?? []), e]);
+  }
+  let checked = 0, kept = 0;
+  for (const list of byKey.values()) {
+    const sorted = list.sort((a, b) => a.at.localeCompare(b.at));
+    const first = sorted.find((e) => e.outcome === 'right');
+    if (!first) continue;
+    const later = sorted.find((e) => new Date(e.at).getTime() - new Date(first.at).getTime() >= 7 * 86400000);
+    if (!later) continue;
+    checked += 1;
+    if (later.outcome === 'right') kept += 1;
+  }
+  return { checked, kept };
+}
