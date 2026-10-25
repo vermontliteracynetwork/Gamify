@@ -38,6 +38,11 @@ const OwnerPage = lazy(() => import('./owner/OwnerPage'));
 const FeaturesPage = lazy(() => import('./public/FeaturesPage'));
 const ThemesPage = lazy(() => import('./public/ThemesPage'));
 const ChallengePage = lazy(() => import('./public/ChallengePage'));
+const BetaPage = lazy(() => import('./public/BetaPage'));
+const FaqPage = lazy(() => import('./public/FaqPage'));
+const SchoolsPage = lazy(() => import('./public/AudiencePages').then((m) => ({ default: m.SchoolsPage })));
+const HomeschoolPage = lazy(() => import('./public/AudiencePages').then((m) => ({ default: m.HomeschoolPage })));
+const StudentDataPage = lazy(() => import('./public/AudiencePages').then((m) => ({ default: m.StudentDataPage })));
 const PricingPage = lazy(() => import('./public/PricingPage'));
 const CodeScreen = lazy(() => import('./public/CodeScreen'));
 const ClassesPage = lazy(() => import('./teacher/ClassesPage'));
@@ -78,6 +83,11 @@ function AnimatedRoutes() {
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/challenge" element={<ChallengePage />} />
+          <Route path="/beta" element={<BetaPage />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/schools" element={<SchoolsPage />} />
+          <Route path="/homeschool" element={<HomeschoolPage />} />
+          <Route path="/student-data" element={<StudentDataPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />

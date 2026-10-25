@@ -1,13 +1,11 @@
-import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowSquareOut, CheckCircle, Flask, MagnifyingGlass, Printer, RocketLaunch } from '@phosphor-icons/react';
-import { data, newId } from '../data';
 import { t } from '../i18n';
-import { Button, buttonClasses, Tabs } from '../ui/kit';
+import { buttonClasses, Tabs } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
-import { BETA_ASK, BETA_DOING, BETA_GET, CAUTIONS, FINDINGS, WONT_CLAIM } from './research';
+import { BETA_DOING, CAUTIONS, FINDINGS, WONT_CLAIM } from './research';
 
 type Tab = 'works' | 'beta' | 'sources';
 
@@ -90,27 +88,14 @@ export default function ResearchPage() {
   );
 }
 
-// Gamify's beginning stages: what we're doing, what beta teachers get and
-// do, and a short form to ask to join (it reaches the owner dashboard).
+// Gamify's beginning stages and the pilot; joining happens on the beta test page.
 function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }) {
-  const [form, setForm] = useState({ name: '', email: '', school: '', grades: '' });
-  const [sent, setSent] = useState(false);
-  const ready = form.name.trim() && /\S+@\S+\.\S+/.test(form.email);
-  async function join() {
-    if (!ready) return;
-    await data.sendFeedback({
-      id: newId('fb'), at: new Date().toISOString(), kind: 'beta', role: 'teacher', where: '/research?tab=beta', device: navigator.userAgent,
-      details: `Beta request: ${form.name.trim()} <${form.email.trim()}>, ${form.school.trim() || 'no school given'}, grades ${form.grades.trim() || 'not given'}`,
-    });
-    setSent(true);
-  }
-  const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface';
   return (
     <section aria-label={t('research.tab.beta')} className="grid gap-5">
       <div className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <h2 className="font-display text-4xl flex items-center gap-3"><RocketLaunch weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('beta.title')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('beta.intro')}</p>
-        <a href="#join-beta" className={buttonClasses('secondary', 'justify-self-start min-h-14 px-8 text-lg hover-pop')}>{t('beta.join')}</a>
+        <Link to="/beta" className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop !bg-text !text-white')}>{t('beta.join')}</Link>
       </div>
       <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
         {BETA_DOING.map((m, i) => (
@@ -121,31 +106,7 @@ function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }
           </motion.li>
         ))}
       </ol>
-      <div className="grid md:grid-cols-2 gap-5">
-        <article className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h3 className="font-display text-3xl"><Title text={t('beta.getTitle')} /></h3>
-          <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{BETA_GET.map((x) => <li key={x}>{x}</li>)}</ul>
-        </article>
-        <article className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h3 className="font-display text-3xl"><Title text={t('beta.askTitle')} /></h3>
-          <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{BETA_ASK.map((x) => <li key={x}>{x}</li>)}</ul>
-          <Link to="/beta-kit" className={buttonClasses('secondary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
-        </article>
-      </div>
-      <article id="join-beta" className={`${card} scroll-mt-24`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-        <h3 className="font-display text-3xl"><Title text={t('beta.howTitle')} /></h3>
-        <ol className="grid gap-1 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`beta.how.${n}` as 'beta.how.1')}</li>)}</ol>
-        {sent ? <p className="text-xl font-display" role="status">{t('beta.sent')}</p> : (
-          <div className="grid sm:grid-cols-2 gap-3">
-            <label className="grid gap-1 font-bold">{t('beta.name')}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={80} className={field} /></label>
-            <label className="grid gap-1 font-bold">{t('beta.email')}<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={120} className={field} /></label>
-            <label className="grid gap-1 font-bold">{t('beta.school')}<input value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} maxLength={120} className={field} /></label>
-            <label className="grid gap-1 font-bold">{t('beta.grades')}<input value={form.grades} onChange={(e) => setForm({ ...form, grades: e.target.value })} maxLength={40} className={field} placeholder="K-3" /></label>
-            <p className="text-sm font-semibold text-muted sm:col-span-2">{t('beta.privacy')}</p>
-            <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void join()}>{t('beta.send')}</Button>
-          </div>
-        )}
-      </article>
+      <Link to="/beta-kit" className={buttonClasses('secondary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
     </section>
   );
 }

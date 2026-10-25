@@ -14,6 +14,10 @@ export default function PublicFooter() {
           <Link to="/themes">{t('public.nav.themes')}</Link>
           <Link to="/challenge">{t('challenge.title')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
+          <Link to="/schools">{t('public.nav.schools')}</Link>
+          <Link to="/homeschool">{t('public.nav.homeschool')}</Link>
+          <Link to="/beta">{t('public.nav.beta')}</Link>
+          <Link to="/faq">{t('public.nav.faq')}</Link>
           <Link to="/research">{t('research.title')}</Link>
           <Link to="/ways">{t('ways.title')}</Link>
           <Link to="/join">{t('public.nav.join')}</Link>
@@ -24,6 +28,7 @@ export default function PublicFooter() {
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
         <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm">
           <Link to="/privacy">{t('legal.privacy')}</Link>
+          <Link to="/student-data">{t('public.nav.studentData')}</Link>
           <Link to="/terms">{t('legal.terms')}</Link>
           <Link to="/accessibility">{t('legal.a11y')}</Link>
           <Link to="/credits">{t('legal.credits')}</Link>

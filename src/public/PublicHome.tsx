@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
+import { ArrowRight, Buildings, House, RocketLaunch, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
 import { ALL_MODES } from '../data/types';
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
@@ -47,6 +47,8 @@ export default function PublicHome() {
             ))}
           </div>
         </section>
+
+        <WhoFor />
 
         <section className="mt-16 grid gap-4">
           <h2 className="font-display text-4xl"><Title text={t('public.modesTitle')} /></h2>
@@ -107,6 +109,12 @@ export default function PublicHome() {
           <Link to="/research" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('research.seeAll')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
 
+        <Link to="/beta" className="mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-surface border-[2.5px] border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <span className="w-14 h-14 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><RocketLaunch weight="fill" size={28} aria-hidden="true" /></span>
+          <span className="grid gap-1"><span className="font-display text-2xl">{t('public.betaTitle')}</span><span className="font-semibold">{t('public.betaText')}</span></span>
+          <span className={buttonClasses('primary', '!bg-text !text-white')}>{t('beta.join')}<ArrowRight weight="bold" size={18} /></span>
+        </Link>
+
         <section className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="font-display text-4xl"><Title text={t('public.ctaTitle')} /></h2>
           <div className="flex flex-wrap gap-3 justify-center">
@@ -147,6 +155,30 @@ function ThemesShowcase() {
       <div className="flex flex-wrap items-center gap-3">
         <Link to="/themes" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
         <Link to="/challenge" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.themesChallenge')}</Link>
+      </div>
+    </section>
+  );
+}
+
+// Three front doors, one per buyer (teacher, 2026-10-25).
+function WhoFor() {
+  const doors = [
+    { key: 'teachers', icon: ChalkboardTeacher, to: '/features' },
+    { key: 'schools', icon: Buildings, to: '/schools' },
+    { key: 'homeschool', icon: House, to: '/homeschool' },
+  ] as const;
+  return (
+    <section aria-labelledby="who-for" className="mt-16 grid gap-4">
+      <h2 id="who-for" className="font-display text-4xl"><Title text={t('public.whoTitle')} /></h2>
+      <div className="grid md:grid-cols-3 gap-4">
+        {doors.map(({ key, icon: I, to }) => (
+          <Link key={key} to={to} className="hover-lift group bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <span className="w-12 h-12 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
+            <span className="font-display text-2xl">{t(`public.who.${key}` as StringKey)}</span>
+            <span className="font-semibold">{t(`public.who.${key}.text` as StringKey)}</span>
+            <span className="text-sm font-bold inline-flex items-center gap-1.5">{t(`public.who.${key}.go` as StringKey)}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>
+          </Link>
+        ))}
       </div>
     </section>
   );

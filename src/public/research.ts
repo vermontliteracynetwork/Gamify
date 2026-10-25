@@ -156,16 +156,3 @@ export const BETA_DOING = [
   { step: 'Measuring what matters', text: 'Reports already show how each question went and how much students remembered a week later. In the pilot, teachers compare quiz results on content practiced in Gamify with content taught the usual way.' },
   { step: 'Sharing what we learn', text: 'We will publish what the pilot shows, good and bad, and later work with a university partner on a full comparison study.' },
 ];
-export const BETA_GET = [
-  'Gamify Plus free during the beta.',
-  'New games and features before anyone else.',
-  'A direct line to the people building Gamify: your ideas shape what comes next.',
-  'A printable classroom kit to teach students the Tell Gamify button.',
-];
-export const BETA_ASK = [
-  'Set up a class and assign at least one question set.',
-  'Play at least two times a week.',
-  'Teach the Tell Gamify button (a 10-minute lesson from the kit).',
-  'Answer three short surveys: at week 1, month 1 and month 3 (about 5 minutes each).',
-  'Optional: quick picture check-ins with students after games.',
-];

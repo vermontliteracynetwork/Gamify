@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Lightbulb, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Lightbulb, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -18,6 +18,7 @@ import { monthlyRevenue, project, type Subs } from './income';
 import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
+import { WAITING } from './waiting';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -25,8 +26,8 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 // cards you can reorder, widen and fold, saved on this device. Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'feedback' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['feedback', 'gallery', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
+type CardId = 'waiting' | 'feedback' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'gallery', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
 interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
@@ -44,8 +45,8 @@ export default function OwnerPage() {
 }
 
 function Desktop() {
-  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['feedback'] });
-  useEffect(() => { void data.getSetting<Layout>('owner-layout').then((l) => { if (l) setLayout({ ...l, order: [...l.order.filter((x) => DEFAULT_ORDER.includes(x)), ...DEFAULT_ORDER.filter((x) => !l.order.includes(x))] }); }); }, []);
+  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['waiting', 'feedback'] });
+  useEffect(() => { void data.getSetting<Layout>('owner-layout').then((l) => { if (l) setLayout({ ...l, folded: l.folded.filter((x) => x !== 'waiting'), wide: [...new Set([...l.wide, 'waiting' as CardId])], order: ['waiting', ...l.order.filter((x) => x !== 'waiting' && DEFAULT_ORDER.includes(x)), ...DEFAULT_ORDER.filter((x) => x !== 'waiting' && !l.order.includes(x))] }); }); }, []);
   function save(next: Layout) { setLayout(next); void data.setSetting('owner-layout', next); }
   function move(id: CardId, by: -1 | 1) {
     const o = [...layout.order]; const i = o.indexOf(id); const j = i + by;
@@ -57,6 +58,7 @@ function Desktop() {
 
   const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
     feedback: { title: t('owner.feedback'), icon: ChatCircleDots, body: <FeedbackCard /> },
+    waiting: { title: t('owner.waiting'), icon: ListChecks, body: <WaitingCard /> },
     gallery: { title: t('owner.gallery'), icon: PaintBrush, body: <GalleryCard /> },
     usage: { title: t('owner.usage'), icon: ChartLineUp, body: <UsageCard /> },
     growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
@@ -267,5 +269,38 @@ function GalleryCard() {
         </li>
       ))}
     </ul>
+  );
+}
+
+// Everything only the owner can do, first on the desktop every time it opens.
+function WaitingCard() {
+  const [done, setDone] = useState<string[]>([]);
+  useEffect(() => { void data.getSetting<string[]>('owner-waiting-done').then((v) => setDone(v ?? [])); }, []);
+  function toggle(id: string) {
+    const next = done.includes(id) ? done.filter((x) => x !== id) : [...done, id];
+    setDone(next);
+    void data.setSetting('owner-waiting-done', next);
+  }
+  const open = WAITING.filter((w) => !done.includes(w.id));
+  return (
+    <div className="grid gap-2">
+      <p className="font-bold">{open.length ? t('owner.waitingCount', { count: open.length }) : t('owner.waitingNone')}</p>
+      <ul className="grid gap-2 list-none p-0 m-0">
+        {[...open, ...WAITING.filter((w) => done.includes(w.id))].map((w) => {
+          const ticked = done.includes(w.id);
+          return (
+            <li key={w.id} className={`rounded-input border-[2px] p-3 grid grid-cols-[auto_1fr] gap-3 ${ticked ? 'border-border-soft opacity-60' : 'border-border bg-surface'}`}>
+              <input type="checkbox" checked={ticked} onChange={() => toggle(w.id)} aria-label={t('owner.waitingDone', { title: w.title })} className="w-6 h-6 mt-1" />
+              <div className="grid gap-1">
+                <p className={`font-display text-lg leading-tight ${ticked ? 'line-through' : ''}`}>{w.title}</p>
+                <p className="text-sm font-semibold">{w.why}</p>
+                <p className="text-sm font-semibold text-muted"><span className="font-bold">{t('owner.waitingHow')} </span>{w.how}</p>
+                <p className="text-xs font-bold text-muted">{t(`owner.waitingKind.${w.kind}` as StringKey)} · {t('owner.waitingAdded', { date: w.added })}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

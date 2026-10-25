@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Buildings, Check, Crown, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Sparkle, Star, Trash } from '@phosphor-icons/react';
@@ -21,6 +21,8 @@ const monthly = (x: Exclude<Tier, 'free'>) => (PRICES_USD_PER_YEAR[x] / 12).toFi
 
 export default function PricingPage() {
   const reduce = useReducedMotion();
+  // Links like /pricing#schools land on that section.
+  useEffect(() => { const id = window.location.hash.slice(1); if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 50); }, [reduce]);
   const rows: { label: string; value: (tier: Tier) => string | boolean }[] = [
     { label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
     { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
@@ -170,6 +172,7 @@ function SchoolPlans() {
           </div>
           <p className="text-sm font-bold">{t('pricing.schoolTiers', { tiers: SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => t('pricing.tier', { seats: d.minSeats, off: Math.round(d.discount * 100) })).join(', ') })}</p>
           <p className="text-sm font-bold">{t('pricing.po')}</p>
+          {quote && <PrincipalNote seats={seats} per={quote.perSeat} total={quote.total} off={Math.round(off * 100)} />}
         </div>
         <div className="grid gap-3">
           <h3 className="font-display text-2xl"><Title text={t('pricing.quoteTitle')} /></h3>
@@ -194,5 +197,19 @@ function SchoolPlans() {
         </div>
       </div>
     </section>
+  );
+}
+
+// A note a teacher can copy and send to their principal (the teacher-first,
+// school-second sales play): the value first, then the quote.
+function PrincipalNote({ seats, per, total, off }: { seats: number; per: number; total: number; off: number }) {
+  const [copied, setCopied] = useState(false);
+  const note = t('pricing.note', { seats, per, total: total.toLocaleString(), off });
+  return (
+    <details className="bg-surface border-[2px] border-border rounded-input p-3">
+      <summary className="font-bold cursor-pointer">{t('pricing.noteTitle')}</summary>
+      <p className="font-semibold text-sm mt-2 mb-2 whitespace-pre-line">{note}</p>
+      <Button onClick={async () => { try { await navigator.clipboard.writeText(note); setCopied(true); } catch { setCopied(false); } }}>{copied ? t('pricing.noteCopied') : t('pricing.noteCopy')}</Button>
+    </details>
   );
 }

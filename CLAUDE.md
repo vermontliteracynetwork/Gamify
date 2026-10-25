@@ -92,6 +92,23 @@ any time, and their edits win.
 - `docs/development-plan.md` is only a backup snapshot for sessions
   without the docs connector; the doc wins.
 
+## Waiting on you log (standing rule, 2026-10-25)
+
+Anything only the teacher can do (money, accounts, legal, going live, a
+decision) goes in `src/owner/waiting.ts` the same turn it comes up; it shows
+first on the owner desktop (`/owner`) every time it opens, mirrored in the dev
+plan doc's "Waiting on you" items and `docs/waiting-on-you.md`. Every final
+report starts with the open items. Then keep building everything else.
+
+## Marketing and Sales doc (standing rule, 2026-10-25)
+
+The live Claude Doc **"Gamify Marketing and Sales"**:
+https://claude.ai/artifact/WfqGpNKqwJv1wcP4k4m4by (doc id
+`f0450894-0af1-4260-812f-ee39fed52808`). Tabs: overview (buyers, funnel),
+Counter arguments and sales, Buyers, Sales research (Beth). The goal is
+sales: keep the counter arguments current with every feature, and price talk
+always leads with value. Beth's research only cites pages she opened.
+
 ## Marketing ideas list (standing rule, 2026-10-24)
 
 Whenever a feature, design choice or research finding could be used well

@@ -132,13 +132,9 @@ test.describe('research', () => {
     await page.waitForTimeout(800);
     await page.screenshot({ path: `test-results/research-${info.project.name}.png`, fullPage: true });
     await expect(page.getByRole('heading', { name: /Designed around what works/i })).toBeVisible();
-    await page.getByRole('tab', { name: 'Join the beta' }).click();
+    await page.getByRole('tab', { name: 'The beta test' }).click();
     await expect(page.getByRole('heading', { name: /Gamify is just getting started/i })).toBeVisible();
-    await page.getByLabel('Your name').fill('Ms. Rivera');
-    await page.getByLabel('Your school email').fill('rivera@school.org');
-    await page.getByRole('button', { name: 'Ask to join' }).click();
-    await expect(page.getByText('Thank you! We will be in touch soon.')).toBeVisible();
-    await page.screenshot({ path: `test-results/research-beta-${info.project.name}.png`, fullPage: true });
+    await expect(page.getByRole('link', { name: 'Join the beta test' }).first()).toHaveAttribute('href', '/beta');
     await page.getByRole('tab', { name: 'Sources' }).click();
     expect(await page.getByRole('link', { name: /Psychological Bulletin/ }).count()).toBeGreaterThan(1);
     await expect(page).toHaveTitle('Research | Gamify');
@@ -206,5 +202,42 @@ test.describe('features page', () => {
     await expect(page.getByText('You got it!', { exact: false })).toBeVisible();
     await page.getByRole('tab', { name: 'Live' }).click();
     await expect(page.getByText('lock screens with one tap', { exact: false })).toBeVisible();
+  });
+});
+
+test.describe('buyer pages', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('beta test page says exactly what we ask, and the application needs the agreement', async ({ page }, info) => {
+    await page.goto('/beta');
+    await expect(page.getByRole('heading', { level: 1, name: /Join the Gamify Beta Test/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Play at least twice a week' })).toBeVisible();
+    await page.getByLabel('Your name').fill('Ms. Rivera');
+    await page.getByLabel('Your email').fill('rivera@school.org');
+    const send = page.getByRole('button', { name: 'Apply for the beta test' });
+    await expect(send).toBeDisabled();
+    await page.getByLabel(/I can play Gamify with my students/).check();
+    await send.click();
+    await expect(page.getByText('Your application is in.', { exact: false })).toBeVisible();
+    await page.screenshot({ path: `test-results/beta-page-${info.project.name}.png`, fullPage: true });
+  });
+  test('FAQ: tabs for each buyer and a search across all of them', async ({ page }) => {
+    await page.goto('/faq');
+    await page.getByRole('tab', { name: 'Homeschool families' }).click();
+    await page.getByText('I teach several ages at once. Does that work?').click();
+    await expect(page.getByText('six-year-old practices letters', { exact: false })).toBeVisible();
+    await page.getByLabel('Search every question').fill('purchase order');
+    await expect(page.getByText(/answers? found/)).toBeVisible();
+    await expect(page.getByText('Can we pay with a purchase order?')).toBeVisible();
+  });
+  test('schools, homeschool and student data pages link the way buyers need', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: /Schools and districts/ }).first().click();
+    await expect(page.getByRole('heading', { level: 1, name: /Gamify for Schools and Districts/i })).toBeVisible();
+    await page.getByRole('link', { name: /Student data promise/ }).first().click();
+    await expect(page.getByRole('heading', { level: 1, name: /Our Student Data Promise/i })).toBeVisible();
+    await page.goto('/homeschool');
+    await page.getByRole('link', { name: 'Get a co-op quote' }).click();
+    await expect(page).toHaveURL(/pricing#schools/);
+    await expect(page.locator('#schools')).toBeInViewport();
   });
 });
