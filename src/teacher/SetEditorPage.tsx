@@ -14,6 +14,7 @@ import { Button, Panel } from '../ui/kit';
 import { newSet } from './QuestionSetsPage';
 import SetDetailsPanel from './SetDetailsPanel';
 import Title from '../ui/Title';
+import CaptionedImage from '../ui/CaptionedImage';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
@@ -140,14 +141,26 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
   function removeChoice(k: number) {
     const choices = q.choices.filter((_, j) => j !== k);
     const correctIndex = q.correctIndex === k ? 0 : q.correctIndex > k ? q.correctIndex - 1 : q.correctIndex;
-    onChange({ choices, correctIndex });
+    onChange({ choices, correctIndex, choiceImages: q.choiceImages?.filter((_, j) => j !== k), choiceAlts: q.choiceAlts?.filter((_, j) => j !== k) });
   }
+  function setChoiceImage(k: number, image: string | null, alt: string | null = null) {
+    const at = (list: (string | null)[] | undefined, v: string | null) => { const next = Array.from({ length: q.choices.length }, (_, j): string | null => list?.[j] ?? null); next[k] = v; return next; };
+    onChange({ choiceImages: at(q.choiceImages, image), choiceAlts: at(q.choiceAlts, image ? alt : null) });
+  }
+  const choiceFileRef = useRef<HTMLInputElement>(null);
+  const [choiceForFile, setChoiceForFile] = useState(0);
 
   return (
     <li
       className={`bg-surface border-[2.5px] rounded-panel p-4 grid gap-3 ${issue && started ? 'border-danger' : 'border-border'}`}
       style={{ boxShadow: 'var(--shadow-sticker)' }}
     >
+      {q.imageUrl && (
+        <div className="flex flex-wrap items-start gap-3 sm:pl-11">
+          <CaptionedImage src={q.imageUrl} alt={q.imageAlt ?? ''} onAlt={(imageAlt) => onChange({ imageAlt })} readOnly={readOnly} required className="h-28 w-auto" />
+          {!readOnly && <Button variant="ghost" onClick={() => onChange({ imageUrl: undefined, imageAlt: undefined })}>{t('editor.removePicture')}</Button>}
+        </div>
+      )}
       <div className="flex items-start gap-3">
         <span className="font-display text-xl font-bold w-8 shrink-0 pt-2 text-center" aria-hidden="true">{n}</span>
         <textarea
@@ -184,6 +197,11 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
               >
                 {right ? <Check weight="bold" size={20} /> : LETTERS[k]}
               </button>
+              {q.choiceImages?.[k] && (
+                <div className="relative shrink-0">
+                  <CaptionedImage src={q.choiceImages[k]!} alt={q.choiceAlts?.[k] ?? ''} onAlt={(a) => setChoiceImage(k, q.choiceImages![k]!, a)} readOnly={readOnly} className="h-14 w-14 object-cover" />
+                </div>
+              )}
               <input
                 id={`q-${q.id}-c${k}`}
                 value={c}
@@ -193,6 +211,9 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
                 aria-label={`${t('editor.question')} ${n}, ${t('editor.answer', { letter: LETTERS[k] })}`}
                 className="flex-1 min-w-0 min-h-11 px-2 bg-transparent font-bold"
               />
+              {!readOnly && (q.choiceImages?.[k]
+                ? <button type="button" onClick={() => setChoiceImage(k, null)} aria-label={t('editor.removeAnswerPicture', { letter: LETTERS[k] })} className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-muted hover:bg-surface-2"><ImageIcon weight="bold" size={16} /><X weight="bold" size={10} /></button>
+                : <button type="button" onClick={() => { setChoiceForFile(k); choiceFileRef.current?.click(); }} aria-label={t('editor.addAnswerPicture', { letter: LETTERS[k] })} className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-muted hover:bg-surface-2"><ImageIcon weight="bold" size={18} /></button>)}
               {!readOnly && q.choices.length > MIN_CHOICES && (
                 <button type="button" onClick={() => removeChoice(k)} aria-label={t('editor.removeAnswer', { letter: LETTERS[k] })}
                   className="w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-muted hover:bg-surface-2">
@@ -224,26 +245,19 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
               try { setPictureError(''); onChange({ imageUrl: await imageFileToDataUrl(file) }); } catch (err) { setPictureError((err as Error).message); }
             }}
           />
+          <input
+            ref={choiceFileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (!file) return;
+              try { setPictureError(''); setChoiceImage(choiceForFile, await imageFileToDataUrl(file, 400)); } catch (err) { setPictureError((err as Error).message); }
+            }}
+          />
           {pictureError && <span className="font-bold text-sm">{pictureError}</span>}
-        </div>
-      )}
-
-      {q.imageUrl && (
-        <div className="flex flex-wrap items-center gap-3 sm:pl-11">
-          <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="h-24 w-auto rounded-input border-[2px] border-border-soft" />
-          {!readOnly && (
-            <>
-              <input
-                id={`q-${q.id}-alt`}
-                value={q.imageAlt ?? ''}
-                onChange={(e) => onChange({ imageAlt: e.target.value })}
-                placeholder={t('editor.pictureAlt')}
-                aria-label={t('editor.pictureAlt')}
-                className="flex-1 min-w-48 min-h-11 px-3 rounded-input border-[2px] border-border-soft font-bold"
-              />
-              <Button variant="ghost" onClick={() => onChange({ imageUrl: undefined, imageAlt: undefined })}>{t('editor.removePicture')}</Button>
-            </>
-          )}
         </div>
       )}
 

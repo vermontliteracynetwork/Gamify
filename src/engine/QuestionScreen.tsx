@@ -147,6 +147,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </FloatingCard>
         ))}
 
+        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
         <h2 className="font-body text-2xl sm:text-3xl font-bold leading-snug text-balance">
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
@@ -155,7 +156,6 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
               ))
             : words.map((w, i) => <span key={i} className={marked.has(i) ? 'bg-accent rounded px-0.5' : ''}>{w}</span>)}
         </h2>
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-56 w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
 
         {locked && (
           <div className="grid gap-1" aria-live="polite">
@@ -189,6 +189,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display text-xl">
                   {right ? <Check weight="bold" size={22} aria-label={t('q.rightMark')} /> : wrong || triedWrong ? <X weight="bold" size={22} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
+                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-[2px] border-border bg-surface" />}
                 <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
               </motion.button>

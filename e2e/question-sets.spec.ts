@@ -21,8 +21,8 @@ test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
   // Set details are required before the set can be played.
   await expect(page.getByText('Required')).toHaveCount(4);
   await page.getByLabel('Subject').selectOption('Science');
-  await page.getByLabel('From').selectOption('1');
-  await page.getByLabel('To').selectOption('2');
+  await page.getByLabel('From', { exact: true }).selectOption('1');
+  await page.getByLabel('To', { exact: true }).selectOption('2');
   await page.getByLabel('Tags').fill('weather');
   await page.getByRole('button', { name: 'Add tag' }).click();
   // Tags already in use are offered, most used first, and add in one tap.

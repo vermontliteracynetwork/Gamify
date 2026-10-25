@@ -66,8 +66,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
+        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
         <h2 className="font-body text-4xl sm:text-5xl font-bold leading-tight text-balance">{q.prompt}</h2>
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-64 w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
 
         <div className="grid sm:grid-cols-2 gap-3">
           {q.choices.map((c, i) => {
@@ -83,6 +83,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
                 <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center font-display text-2xl">
                   {isRight ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
+                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-[2px] border-border bg-surface" />}
                 <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
               </motion.button>

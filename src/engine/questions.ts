@@ -31,5 +31,10 @@ export function shuffleChoices(q: MultipleChoiceQuestion, rand: () => number = M
     const j = Math.floor(rand() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }
-  return { ...q, choices: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.correctIndex) };
+  return {
+    ...q, choices: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.correctIndex),
+    // Answer pictures and descriptions move with their answers.
+    ...(q.choiceImages && { choiceImages: order.map((i) => q.choiceImages![i] ?? null) }),
+    ...(q.choiceAlts && { choiceAlts: order.map((i) => q.choiceAlts![i] ?? null) }),
+  };
 }

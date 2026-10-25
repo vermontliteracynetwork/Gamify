@@ -19,6 +19,15 @@ describe('questionIssue', () => {
 });
 
 describe('shuffleChoices', () => {
+  it('moves answer pictures with their answers', () => {
+    for (let s = 0; s < 20; s++) {
+      const shuffled = shuffleChoices(q('p', { choiceImages: ['A', null, 'C'], choiceAlts: ['alt a', null, 'alt c'] }), seq(s / 20, (s * 7 % 20) / 20));
+      shuffled.choices.forEach((c, i) => {
+        expect(shuffled.choiceImages![i]).toBe(c === 'a' ? 'A' : c === 'c' ? 'C' : null);
+        expect(shuffled.choiceAlts![i]).toBe(c === 'a' ? 'alt a' : c === 'c' ? 'alt c' : null);
+      });
+    }
+  });
   it('keeps the right answer right', () => {
     for (let s = 0; s < 20; s++) {
       const shuffled = shuffleChoices(q('1'), seq(s / 20, (s * 7 % 20) / 20));

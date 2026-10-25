@@ -11,6 +11,9 @@ export interface MultipleChoiceQuestion {
   correctIndex: number;
   imageUrl?: string;
   imageAlt?: string;
+  // A picture beside an answer's letter, by answer position (null = none).
+  choiceImages?: (string | null)[];
+  choiceAlts?: (string | null)[];
 }
 
 export type Question = MultipleChoiceQuestion;
