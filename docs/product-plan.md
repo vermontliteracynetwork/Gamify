@@ -1133,6 +1133,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 65 | **Theme Building Challenge at launch.** Classes and teachers design themes; one winner gets lifetime Pro and a featured spot, runners up get a free year of Pro and promotion. Trending and popular themes on the home page. | Fills the theme library before launch, gives teachers a reason to share Gamify, and shows off the feature that drives subscriptions | Teacher, 2026-10-25 |
 | 66 | **"Get your school quote in one minute, no sales call."** Pick the number of teachers, see the savings, print the quote for the business office. | Removes the biggest friction in school buying; fits a one-person company with no sales team | Teacher, 2026-10-25 |
 | 67 | **"One game, every age."** The same Game Show re-skinned live: Ocean Friends for pre-K, Jungle Quest for grades 3-5, Night Arcade for teens, Clean Slate for adult learners. Visitors tap to switch on the Features page. | Shows that Gamify is not "for little kids" and makes the paid Theme Builder tangible in one tap | Teacher, 2026-10-25 |
+| 68 | **"Lock every screen with one tap, and say why."** Live games: the teacher lets names in, starts the game, watches who is stuck on a private monitor, and locks one screen or all with a short message ("Eyes on me, please."). | Classroom control teachers ask for, kept off the projector | Teacher, 2026-10-24; built 2026-10-25 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

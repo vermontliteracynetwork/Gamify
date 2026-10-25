@@ -8,6 +8,7 @@ import { data, newId } from '../data';
 import { findGameCode, type GameCode } from '../data/gameCodes';
 import { rollName } from '../engine/nameDice';
 import { setSession } from '../student/session';
+import { setLive } from '../live/session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
 
@@ -45,7 +46,9 @@ export default function JoinPage() {
 
   function play() {
     if (!game) return;
-    setSession({ classroomId: '', studentId: newId('guest'), name });
+    const studentId = newId('guest');
+    setSession({ classroomId: '', studentId, name });
+    if (game.live) { setLive({ code: game.code, pid: studentId, name }); navigate(`/live/${game.code}`); return; }
     navigate(`/games/${game.gameId}?set=${game.setId}`);
   }
 

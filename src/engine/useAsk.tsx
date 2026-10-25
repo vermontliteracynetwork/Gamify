@@ -9,6 +9,7 @@ import { makeDeck, reviewKeys, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
+import { liveAnswered, liveAsked } from '../live/session';
 
 export interface AskOptions { count?: number; player?: string }
 
@@ -58,6 +59,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
 
   const ask = useCallback((opts: AskOptions = {}) => new Promise<boolean>((resolve) => {
     const drawn = next(lastId.current);
+    liveAsked();
     setActive({ question: drawn.question, setId: drawn.setId, n: 1, total: Math.max(1, opts.count ?? 1), player: opts.player, resolve });
   }), [next]);
 
@@ -71,6 +73,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
   function onAnswer(r: AnswerResult) {
     if (!active) return;
     log(active, r, r.right ? 'right' : 'skipped');
+    liveAnswered(r.right);
     history.current.push({ at: Date.now(), ms: r.ms, right: r.right });
     setStats((s) => ({ asked: s.asked + 1, right: s.right + (r.right ? 1 : 0), firstTry: s.firstTry + (r.right && !missedThis.current ? 1 : 0) }));
 

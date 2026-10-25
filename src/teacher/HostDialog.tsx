@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Copy, LockSimple, Play, ProjectorScreen, QrCode, ShareNetwork, UsersThree, X } from '@phosphor-icons/react';
+import { Broadcast, Copy, LockSimple, Play, ProjectorScreen, QrCode, ShareNetwork, UsersThree, X } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { GAME_CODE_DAYS, gameLink, makeGameCode, type GameCode } from '../data/gameCodes';
@@ -64,6 +64,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-2 content-start">
                   <p className="font-bold">{t('host.now')}</p>
                   <Button variant="primary" onClick={() => navigate(`/games/${game.id}?set=${set.id}`)}><Play weight="fill" size={18} />{t('host.play')}</Button>
+                  {game.modes.includes('live') && <Button onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, true)).code}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>}
                 </div>
                 <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-2 content-start">
                   <p className="font-bold">{t('host.code')}</p>

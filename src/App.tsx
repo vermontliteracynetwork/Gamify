@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './ui/NavBar';
@@ -14,6 +14,7 @@ import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
 import { UpgradeHost } from './billing/Upgrade';
+import { getLive } from './live/session';
 import { t } from './i18n';
 
 // Pages load when first opened, so the first screen arrives fast on older
@@ -39,6 +40,9 @@ const FeaturesPage = lazy(() => import('./public/FeaturesPage'));
 const ThemesPage = lazy(() => import('./public/ThemesPage'));
 const ChallengePage = lazy(() => import('./public/ChallengePage'));
 const BetaPage = lazy(() => import('./public/BetaPage'));
+const LiveHost = lazy(() => import('./live/LiveHost'));
+const LiveLobby = lazy(() => import('./live/LiveStudent'));
+const LiveOverlay = lazy(() => import('./live/LiveStudent').then((m) => ({ default: m.LiveOverlay })));
 const FaqPage = lazy(() => import('./public/FaqPage'));
 const SchoolsPage = lazy(() => import('./public/AudiencePages').then((m) => ({ default: m.SchoolsPage })));
 const HomeschoolPage = lazy(() => import('./public/AudiencePages').then((m) => ({ default: m.HomeschoolPage })));
@@ -84,6 +88,8 @@ function AnimatedRoutes() {
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/challenge" element={<ChallengePage />} />
           <Route path="/beta" element={<BetaPage />} />
+          <Route path="/teacher/live/:code" element={<RequireTeacher><LiveHost /></RequireTeacher>} />
+          <Route path="/live/:code" element={<LiveLobby />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/schools" element={<SchoolsPage />} />
           <Route path="/homeschool" element={<HomeschoolPage />} />
@@ -142,6 +148,7 @@ function AnimatedRoutes() {
       </motion.div>
     </AnimatePresence>
     <UpgradeHost />
+    <LiveLayer />
     </>
   );
 }
@@ -203,4 +210,14 @@ export default function App() {
     </BrowserRouter>
     </SettingsProvider>
   );
+}
+
+// Over every game while this tab is in a live game: the teacher's lock,
+// pause and podium (not on the lobby or teacher pages).
+function LiveLayer() {
+  const path = useLocation().pathname;
+  const [on, setOn] = useState(() => !!getLive());
+  useEffect(() => { const f = () => setOn(!!getLive()); window.addEventListener('gamify-live', f); return () => window.removeEventListener('gamify-live', f); }, []);
+  if (!on || path.startsWith('/live/') || path.startsWith('/teacher')) return null;
+  return <Suspense fallback={null}><LiveOverlay /></Suspense>;
 }
