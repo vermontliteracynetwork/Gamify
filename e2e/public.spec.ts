@@ -241,3 +241,14 @@ test.describe('buyer pages', () => {
     await expect(page.locator('#schools')).toBeInViewport();
   });
 });
+
+test.describe('device check', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('check this device: every check shows a result in plain words', async ({ page }, info) => {
+    await page.goto('/check');
+    await expect(page.getByText(/Everything looks good|Gamify will work, with a note|Something here will stop/)).toBeVisible();
+    await expect(page.getByText('Modern browser', { exact: false })).toBeVisible();
+    await expect(page.getByText('This browser has everything Gamify needs.')).toBeVisible();
+    await page.screenshot({ path: `test-results/device-check-${info.project.name}.png`, fullPage: true });
+  });
+});

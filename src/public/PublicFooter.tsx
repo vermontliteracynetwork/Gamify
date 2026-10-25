@@ -23,6 +23,7 @@ export default function PublicFooter() {
           <Link to="/join">{t('public.nav.join')}</Link>
           <Link to="/help">{t('public.nav.help')}</Link>
           <Link to="/it">{t('public.nav.it')}</Link>
+          <Link to="/check">{t('public.nav.check')}</Link>
           <Link to="/login">{t('public.nav.login')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>

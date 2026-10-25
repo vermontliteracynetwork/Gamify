@@ -28,7 +28,7 @@ test('no automated accessibility violations in a game start-up and setup', async
 
 test.describe('public pages', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  for (const path of ['/', '/features', '/themes', '/challenge', '/beta', '/faq', '/schools', '/homeschool', '/student-data', '/pricing', '/login', '/join', '/it', '/help']) {
+  for (const path of ['/', '/features', '/themes', '/challenge', '/beta', '/check', '/faq', '/schools', '/homeschool', '/student-data', '/pricing', '/login', '/join', '/it', '/help']) {
     test(`no automated accessibility violations on ${path}`, async ({ page }) => {
       await page.goto(path);
       await page.waitForTimeout(400);

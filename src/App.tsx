@@ -40,6 +40,7 @@ const FeaturesPage = lazy(() => import('./public/FeaturesPage'));
 const ThemesPage = lazy(() => import('./public/ThemesPage'));
 const ChallengePage = lazy(() => import('./public/ChallengePage'));
 const BetaPage = lazy(() => import('./public/BetaPage'));
+const DeviceCheckPage = lazy(() => import('./public/DeviceCheckPage'));
 const LiveHost = lazy(() => import('./live/LiveHost'));
 const LiveLobby = lazy(() => import('./live/LiveStudent'));
 const LiveOverlay = lazy(() => import('./live/LiveStudent').then((m) => ({ default: m.LiveOverlay })));
@@ -88,6 +89,7 @@ function AnimatedRoutes() {
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/challenge" element={<ChallengePage />} />
           <Route path="/beta" element={<BetaPage />} />
+          <Route path="/check" element={<DeviceCheckPage />} />
           <Route path="/teacher/live/:code" element={<RequireTeacher><LiveHost /></RequireTeacher>} />
           <Route path="/live/:code" element={<LiveLobby />} />
           <Route path="/faq" element={<FaqPage />} />

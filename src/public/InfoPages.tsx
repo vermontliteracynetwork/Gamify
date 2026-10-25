@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lightbulb, MagnifyingGlass, Printer, Question, WifiHigh } from '@phosphor-icons/react';
+import { DeviceMobile, Lightbulb, MagnifyingGlass, Printer, Question, WifiHigh } from '@phosphor-icons/react';
 import { buttonClasses } from '../ui/kit';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -61,6 +61,7 @@ export function HelpPage() {
         <nav aria-label={t('help.shortcuts')} className="flex flex-wrap gap-2">
           <Link to="/faq" className={buttonClasses('secondary', 'hover-pop')}><Question weight="bold" size={18} />{t('public.nav.faq')}</Link>
           <Link to="/it" className={buttonClasses('secondary', 'hover-pop')}><WifiHigh weight="bold" size={18} />{t('public.nav.it')}</Link>
+          <Link to="/check" className={buttonClasses('secondary', 'hover-pop')}><DeviceMobile weight="bold" size={18} />{t('public.nav.check')}</Link>
           <Link to="/beta-kit" className={buttonClasses('secondary', 'hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
           <Link to="/ways" className={buttonClasses('secondary', 'hover-pop')}><Lightbulb weight="bold" size={18} />{t('ways.title')}</Link>
         </nav>
