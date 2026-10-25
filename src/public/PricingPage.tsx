@@ -152,6 +152,7 @@ function SchoolPlans() {
       <div className="grid gap-2">
         <h2 id="school-title" className="font-display text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('pricing.schoolSub')}</p>
+        <Link to="/schools" className="font-bold justify-self-start">{t('pricing.schoolMore')}</Link>
       </div>
       <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
         {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold bg-surface-2 border-[2px] border-border rounded-input p-3"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.school.${n}` as StringKey)}</li>)}

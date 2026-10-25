@@ -36,5 +36,5 @@ export const WAITING: WaitingItem[] = [
     how: 'Ask your insurer whether the LLC policy covers software, and add cyber and errors-and-omissions cover if not.' },
   { id: 'guesses', kind: 'decide', added: '2026-10-25', title: 'Confirm Claudia\'s guesses',
     why: 'Claudia predicted these from your past answers and built them; change any you disagree with.',
-    how: 'Homeschool co-ops of 5+ families buy like a school; starter themes play on Plus and Pro; school invoices go out within one school day; Pro\'s early access means new games open to Pro a few weeks early.' },
+    how: 'Homeschool co-ops of 5+ families buy like a school; school plans include a free online kickoff for teachers; we sign district data privacy agreements; school invoices go out within one school day; starter themes play on Plus and Pro; Pro\'s early access means new games open to Pro a few weeks early.' },
 ];

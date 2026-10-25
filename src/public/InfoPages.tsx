@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Printer } from '@phosphor-icons/react';
+import { Lightbulb, MagnifyingGlass, Printer, Question, WifiHigh } from '@phosphor-icons/react';
 import { buttonClasses } from '../ui/kit';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -34,11 +35,45 @@ export function ItPage() {
   ]} />;
 }
 
+// The help center (teacher, 2026-10-25: every page at its fullest): every
+// how-to, grouped and searchable, with links to questions, IT and the kit.
+const HELP: { h: string; n: number }[] = [
+  { h: 'help.start', n: 4 }, { h: 'help.students', n: 3 }, { h: 'help.sets', n: 5 }, { h: 'help.playing', n: 4 },
+  { h: 'help.themes', n: 4 }, { h: 'help.reports', n: 3 }, { h: 'help.supports', n: 3 }, { h: 'help.plans', n: 4 },
+  { h: 'help.home', n: 3 }, { h: 'help.trouble', n: 3 },
+];
+
 export function HelpPage() {
-  return <InfoPage title={t('help.title')} sub={t('help.sub')} sections={[
-    { h: 'help.start', items: ['help.start.1', 'help.start.2', 'help.start.3', 'help.start.4'] },
-    { h: 'help.students', items: ['help.students.1', 'help.students.2', 'help.students.3'] },
-    { h: 'help.supports', items: ['help.supports.1', 'help.supports.2', 'help.supports.3'] },
-    { h: 'help.trouble', items: ['help.trouble.1', 'help.trouble.2', 'help.trouble.3'] },
-  ]} extra={<Link to="/beta-kit" className={buttonClasses('secondary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('help.betaKit')}</Link>} />;
+  const [q, setQ] = useState('');
+  const find = q.trim().toLowerCase();
+  const host = { host: window.location.host };
+  const groups = HELP.map((g) => ({ ...g, items: Array.from({ length: g.n }, (_, i) => `${g.h}.${i + 1}` as StringKey).filter((k) => !find || `${t(g.h as StringKey)} ${t(k, host)}`.toLowerCase().includes(find)) })).filter((g) => g.items.length);
+  return (
+    <>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
+        <h1 className="title-bubble text-5xl"><Title text={t('help.title')} /></h1>
+        <p className="text-lg font-bold -mt-2">{t('help.sub')}</p>
+        <label className="relative">
+          <MagnifyingGlass weight="bold" size={22} className="absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('help.search')} aria-label={t('help.search')} className="w-full min-h-14 pl-11 pr-3 rounded-input border-[2.5px] border-border bg-surface font-bold text-lg" />
+        </label>
+        <nav aria-label={t('help.shortcuts')} className="flex flex-wrap gap-2">
+          <Link to="/faq" className={buttonClasses('secondary', 'hover-pop')}><Question weight="bold" size={18} />{t('public.nav.faq')}</Link>
+          <Link to="/it" className={buttonClasses('secondary', 'hover-pop')}><WifiHigh weight="bold" size={18} />{t('public.nav.it')}</Link>
+          <Link to="/beta-kit" className={buttonClasses('secondary', 'hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
+          <Link to="/ways" className={buttonClasses('secondary', 'hover-pop')}><Lightbulb weight="bold" size={18} />{t('ways.title')}</Link>
+        </nav>
+        {find && <p className="font-bold" role="status">{groups.length ? t('help.found', { count: groups.reduce((n, g) => n + g.items.length, 0) }) : t('help.none')}</p>}
+        <div className="grid md:grid-cols-2 gap-4 items-start">
+          {groups.map((g) => (
+            <section key={g.h} className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <h2 className="font-display text-2xl"><Title text={t(g.h as StringKey)} /></h2>
+              <ul className="grid gap-2 list-disc pl-5 m-0">{g.items.map((k) => <li key={k} className="font-semibold">{t(k, host)}</li>)}</ul>
+            </section>
+          ))}
+        </div>
+      </main>
+      <PublicFooter />
+    </>
+  );
 }
