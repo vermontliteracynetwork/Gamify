@@ -191,3 +191,20 @@ test.describe('footer and legal pages', () => {
     }
   });
 });
+
+test.describe('features page', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('three pillars to try: a question with supports, sample themes, and the four ways to play', async ({ page }) => {
+    await page.goto('/features');
+    await page.getByRole('link', { name: /Theme creation/ }).click();
+    await expect(page).toHaveURL(/#themes/);
+    await page.getByRole('radio', { name: /Night Arcade/ }).click();
+    await expect(page.getByRole('radio', { name: /Night Arcade/ })).toHaveAttribute('aria-checked', 'true');
+    await page.getByRole('button', { name: 'Bigger text' }).click();
+    await expect(page.getByRole('button', { name: 'Bigger text' })).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('button', { name: 'A 1/4' }).click();
+    await expect(page.getByText('You got it!', { exact: false })).toBeVisible();
+    await page.getByRole('tab', { name: 'Live' }).click();
+    await expect(page.getByText('lock screens with one tap', { exact: false })).toBeVisible();
+  });
+});
