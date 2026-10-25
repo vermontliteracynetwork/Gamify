@@ -8,6 +8,7 @@ import type { QuestionSet } from '../data/types';
 import { LIBRARY } from '../data/library';
 import { useMySets } from '../data/hooks';
 import { suggestTags, tagCounts } from '../data/tags';
+import { useStandardText } from '../data/standardText';
 import SetCover from '../games/SetCover';
 import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
@@ -120,19 +121,32 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
   const [n, setN] = useState(1);
   const [typed, setTyped] = useState('');
   const d = domains.includes(domain) ? domain : domains[0];
-  const built = hs ? '' : math ? `${grade}.${d}.${n}` : `${d}.${elaGradeCode(grade)}.${n}`;
+  const codeFor = (k: number) => (hs ? '' : math ? `${grade}.${d}.${k}` : `${d}.${elaGradeCode(grade)}.${k}`);
+  const built = codeFor(n);
   const add = (code: string) => { const c = code.trim(); if (c && !(set.standards ?? []).includes(c)) onChange({ ...set, standards: [...(set.standards ?? []), c], noStandard: false }); };
   const names: Record<string, string> = math ? (hs ? HS_MATH : MATH_DOMAINS) : ELA_DOMAINS;
+  const text = useStandardText();
+  const builtText = built ? text(built) : undefined;
+  const typedText = isStandardCode(typed) ? text(typed) : undefined;
 
   return (
     <div className="grid gap-2">
       <span className="font-bold">{t('details.standards')}{required}</span>
       <div className="flex flex-wrap gap-2">
-        {(set.standards ?? []).map((c) => (
-          <span key={c} className="inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface border-[2px] border-border font-bold text-sm">{c}
-            {!readOnly && <button type="button" aria-label={t('details.removeStandard', { code: c })} onClick={() => onChange({ ...set, standards: set.standards!.filter((y) => y !== c) })} className="w-7 h-7 rounded-full flex items-center justify-center"><X weight="bold" size={14} /></button>}
-          </span>
-        ))}
+        {(set.standards ?? []).map((c) => {
+          const about = text(c);
+          return (
+            <span key={c} className="group relative inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface border-[2px] border-border font-bold text-sm">
+              <span tabIndex={about ? 0 : undefined} aria-describedby={about ? `std-${c}` : undefined} className="outline-offset-2">{c}</span>
+              {!readOnly && <button type="button" aria-label={t('details.removeStandard', { code: c })} onClick={() => onChange({ ...set, standards: set.standards!.filter((y) => y !== c) })} className="w-7 h-7 rounded-full flex items-center justify-center"><X weight="bold" size={14} /></button>}
+              {about && (
+                <span id={`std-${c}`} role="tooltip" className="hidden group-hover:block group-focus-within:block absolute left-0 top-full mt-1.5 z-20 w-72 max-w-[80vw] p-3 rounded-input bg-surface border-[2px] border-border text-sm font-semibold leading-snug" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                  <span className="font-bold">{c}: </span>{about}
+                </span>
+              )}
+            </span>
+          );
+        })}
         {set.noStandard && <span className="min-h-9 px-3 rounded-pill bg-surface-2 border-[2px] border-border font-bold text-sm inline-flex items-center">{t('details.noStandard')}</span>}
       </div>
       {!readOnly && (
@@ -140,30 +154,41 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
           {(math || ['Reading', 'Writing', 'Language'].includes(set.subject ?? '')) && (
             <div className="flex flex-wrap items-end gap-2">
               <label className="grid gap-1 text-sm font-bold">{t('filter.grade')}
-                <select value={grade} onChange={(e) => setGrade(e.target.value as Grade)} className={field}>{GRADES.filter((g) => g !== 'College').map((g) => <option key={g} value={g}>{g}</option>)}</select>
+                <select value={grade} onChange={(e) => { setGrade(e.target.value as Grade); setN(1); }} className={field}>{GRADES.filter((g) => g !== 'College').map((g) => <option key={g} value={g}>{g}</option>)}</select>
               </label>
               {!hs && (
                 <>
                   <label className="grid gap-1 text-sm font-bold">{t('details.domain')}
-                    <select value={d} onChange={(e) => setDomain(e.target.value)} className={field}>{domains.map((x) => <option key={x} value={x}>{x}: {names[x]}</option>)}</select>
+                    <select value={d} onChange={(e) => { setDomain(e.target.value); setN(1); }} className={field}>{domains.map((x) => <option key={x} value={x}>{x}: {names[x]}</option>)}</select>
                   </label>
-                  <label className="grid gap-1 text-sm font-bold">{t('details.number')}
-                    <input type="number" min={1} max={12} value={n} onChange={(e) => setN(Math.max(1, Math.min(12, Number(e.target.value) || 1)))} className={`${field} w-20`} />
+                  <label className="grid gap-1 text-sm font-bold min-w-0 flex-1 basis-56">{t('details.number')}
+                    <select value={n} onChange={(e) => setN(Number(e.target.value))} className={`${field} w-full`}>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).filter((k) => !text(codeFor(1)) || text(codeFor(k))).map((k) => {
+                        const about = text(codeFor(k));
+                        return <option key={k} value={k}>{about ? `${k}: ${about.length > 70 ? `${about.slice(0, 68)}...` : about}` : k}</option>;
+                      })}
+                    </select>
                   </label>
-                  <Button onClick={() => add(built)}><Plus weight="bold" size={16} />{t('details.addStandard', { code: built })}</Button>
+                  <Button disabled={!builtText} onClick={() => add(built)}><Plus weight="bold" size={16} />{t('details.addStandard', { code: built })}</Button>
                 </>
               )}
             </div>
+          )}
+          {(math || ['Reading', 'Writing', 'Language'].includes(set.subject ?? '')) && !hs && (
+            <p className="text-sm font-semibold bg-surface-2 border-[2px] border-border-soft rounded-input p-2" aria-live="polite">
+              {builtText ? <><span className="font-bold">{built}: </span>{builtText}</> : t('details.noSuchStandard', { code: built })}
+            </p>
           )}
           <div className="flex flex-wrap items-center gap-2">
             <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t('details.typeStandard')} aria-label={t('details.typeStandard')} className={`${field} w-56`} />
             <Button disabled={!isStandardCode(typed)} onClick={() => { add(typed); setTyped(''); }}><Plus weight="bold" size={16} />{t('details.add')}</Button>
             <label className="inline-flex items-center gap-2 font-bold text-sm min-h-11">
-              <input type="checkbox" checked={!!set.noStandard} onChange={(e) => onChange({ ...set, noStandard: e.target.checked })} className="w-5 h-5" />
+              <input type="checkbox" checked={!!set.noStandard} onChange={(e) => onChange({ ...set, noStandard: e.target.checked, standards: e.target.checked ? [] : set.standards })} className="w-5 h-5" />
               {t('details.noStandardBox')}
             </label>
           </div>
           {typed && !isStandardCode(typed) && <p className="text-sm font-bold">{t('details.badCode')}</p>}
+          {typedText && <p className="text-sm font-semibold bg-surface-2 border-[2px] border-border-soft rounded-input p-2"><span className="font-bold">{typed.trim()}: </span>{typedText}</p>}
         </>
       )}
     </div>

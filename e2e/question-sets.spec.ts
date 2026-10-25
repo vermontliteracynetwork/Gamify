@@ -93,3 +93,22 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toHaveCount(0);
   await page.screenshot({ path: `test-results/set-picker-${info.project.name}.png` });
 });
+
+test('Common Core: descriptions in the menus and on hover; "no standard" clears added standards', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:sets')) return;
+    const q = [{ id: 'q1', kind: 'mc', prompt: 'Count to ten?', choices: ['yes', 'no'], correctIndex: 0 }];
+    localStorage.setItem('gamify:sets', JSON.stringify([{ id: 'cc1', name: 'Counting', questions: q, ownerId: 'local-teacher', visibility: 'private', createdAt: '', updatedAt: '', subject: 'Math', grades: ['K', 'K'], tags: ['counting'] }]));
+  });
+  await page.goto('/teacher/sets/cc1');
+  await expect(page.locator('p', { hasText: 'K.CC.1: Count to 100 by ones and by tens.' })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: /^Number/ })).toContainText('1: Count to 100 by ones and by tens.');
+  await page.getByRole('button', { name: 'Add K.CC.1' }).click();
+  const chip = page.getByText('K.CC.1', { exact: true });
+  // Mouse: hover. iPad: tap the code (it takes focus).
+  if (info.project.name === 'laptop') await chip.hover(); else await chip.click();
+  await expect(page.getByRole('tooltip')).toContainText('Count to 100 by ones and by tens.');
+  await page.screenshot({ path: `test-results/standards-hover-${info.project.name}.png` });
+  await page.getByLabel('No Common Core standard applies', { exact: false }).check();
+  await expect(page.getByRole('button', { name: 'Remove K.CC.1', exact: false })).toHaveCount(0);
+});
