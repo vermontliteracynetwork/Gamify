@@ -107,7 +107,7 @@ function FeedbackCard() {
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('owner.kind')}>
-        {(['all', 'bug', 'problem', 'idea'] as const).map((k) => (
+        {(['all', 'help', 'bug', 'problem', 'idea'] as const).map((k) => (
           <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)} className={`min-h-10 px-3 rounded-pill border-[2px] font-bold text-sm ${kind === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
             {t(`owner.kind.${k}`)} ({k === 'all' ? reports.length : reports.filter((r) => r.kind === k).length})
           </button>

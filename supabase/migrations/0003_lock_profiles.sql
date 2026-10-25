@@ -35,3 +35,7 @@ drop policy if exists "own classrooms" on public.classrooms;
 create policy "own classrooms" on public.classrooms for all
   using (owner_id = auth.uid())
   with check (owner_id = auth.uid() and public.can_use_theme(sign_in_theme_id));
+
+-- 4. Tell Gamify gains a teacher help request kind ('help').
+alter table public.feedback_reports drop constraint if exists feedback_reports_kind_check;
+alter table public.feedback_reports add constraint feedback_reports_kind_check check (kind in ('bug', 'problem', 'idea', 'help'));

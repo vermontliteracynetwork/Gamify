@@ -63,3 +63,19 @@ test('owner dashboard shows growth tips from the numbers', async ({ page }) => {
   await expect(card.getByText(/no class or set yet|Nothing to act on/)).toBeVisible();
   await card.screenshot({ path: `test-results/owner-growth-${test.info().project.name}.png` });
 });
+
+test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboard', async ({ page }) => {
+  await page.goto('/teacher/classes');
+  await page.getByRole('button', { name: 'Tell Gamify about a problem or an idea' }).click();
+  await page.getByRole('radio', { name: 'I need help' }).click();
+  await page.getByLabel('Tell us more (you can skip this)').fill('How do I print the theme template?');
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await expect(page.getByText('Thank you! We read every message.')).toBeVisible();
+  await page.goto('/owner');
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  const card = page.getByRole('region', { name: 'Tell Gamify reports' });
+  await card.getByRole('radio', { name: /Help requests \(1\)/ }).click();
+  await expect(card.getByText('How do I print the theme template?')).toBeVisible();
+});

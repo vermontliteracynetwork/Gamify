@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bug, Lightbulb, SmileySad } from '@phosphor-icons/react';
+import { Bug, Lifebuoy, Lightbulb, SmileySad } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import type { FeedbackReport } from '../data/types';
 import { t } from '../i18n';
@@ -11,6 +11,8 @@ const KINDS: { id: FeedbackReport['kind']; icon: typeof Bug; label: () => string
   { id: 'problem', icon: SmileySad, label: () => t('tell.problem') },
   { id: 'idea', icon: Lightbulb, label: () => t('tell.idea') },
 ];
+// Teachers can also ask for help; it lands in the owner's inbox.
+const HELP = { id: 'help' as const, icon: Lifebuoy, label: () => t('tell.help') };
 
 // "Tell Gamify": report a bug, a game problem or an idea to the developer,
 // from any game or page. Big picture choices first so young students can
@@ -37,8 +39,8 @@ export function TellGamify({ context, role = 'student' }: { context?: string; ro
       ) : (
         <>
           <p className="font-bold text-sm">{t('tell.subtitle')}</p>
-          <div role="radiogroup" aria-label={t('tell.title')} className="grid grid-cols-3 gap-2">
-            {KINDS.map(({ id, icon: Icon, label }) => (
+          <div role="radiogroup" aria-label={t('tell.title')} className={`grid gap-2 ${role === 'teacher' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'}`}>
+            {(role === 'teacher' ? [HELP, ...KINDS] : KINDS).map(({ id, icon: Icon, label }) => (
               <button key={id} type="button" role="radio" aria-checked={kind === id} onClick={() => setKind(id)}
                 className={`min-h-24 rounded-input border-[2px] flex flex-col items-center justify-center gap-1 p-2 font-bold text-sm text-center
                             ${kind === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
@@ -55,6 +57,7 @@ export function TellGamify({ context, role = 'student' }: { context?: string; ro
                   className="px-3 py-2 rounded-input border-[2px] border-border bg-surface font-bold" />
               </label>
               {role === 'student' && <p className="text-sm font-bold">{t('tell.noNames')}</p>}
+              {kind === 'help' && <p className="text-sm font-bold">{t('tell.helpNote')}</p>}
               <Button variant="primary" className="justify-self-start" onClick={send}>{t('tell.send')}</Button>
             </>
           )}
