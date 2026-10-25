@@ -9,10 +9,13 @@ import { newJoinCode } from '../auth/session';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { LimitNote } from '../billing/Upgrade';
+import { GAMES } from '../games/registry';
+import { weekUsage } from './reports';
 
 // The teacher's classrooms (development plan Stage 4). Free has one.
 export default function ClassesPage() {
   const { value: classes = [], reload } = useAsync(() => data.listClassrooms());
+  const { value: log = [] } = useAsync(() => data.listQuestionLog());
   const tier = useTier();
   const limit = TIERS[tier].classrooms;
   const [name, setName] = useState('');
@@ -34,7 +37,10 @@ export default function ClassesPage() {
           <Link key={c.id} to={`/teacher/classes/${c.id}`} className="no-underline text-text">
             <Panel className="flex items-center gap-3 hover:bg-surface-hover">
               <UsersThree weight="fill" size={32} aria-hidden="true" />
-              <span className="font-display text-2xl font-bold flex-1">{c.name}</span>
+              <span className="flex-1 min-w-0 grid">
+                <span className="font-display text-2xl font-bold">{c.name}</span>
+                <WeekLine usage={weekUsage(log, c.id)} />
+              </span>
             </Panel>
           </Link>
         ))}
@@ -53,5 +59,16 @@ export default function ClassesPage() {
         )}
       </div>
     </main>
+  );
+}
+
+// This week at a glance, under each class name (teacher-side usage numbers).
+function WeekLine({ usage }: { usage: ReturnType<typeof weekUsage> }) {
+  if (!usage.answered) return <span className="text-sm font-semibold text-muted">{t('classes.weekNone')}</span>;
+  const game = GAMES.find((g) => g.id === usage.topGame)?.name;
+  return (
+    <span className="text-sm font-semibold text-muted">
+      {t('classes.week', { count: usage.answered, right: usage.rightPct, students: usage.students })}{game ? ` ${t('classes.weekTop', { game })}` : ''}
+    </span>
   );
 }

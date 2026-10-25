@@ -38,3 +38,16 @@ test('Get started stays at the top of every teacher tab until done', async ({ pa
   await page.getByRole('button', { name: /^Get started \d\/5$/ }).click();
   await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
 });
+
+test('classes list shows each class\'s week at a glance', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:seeded-week')) return;
+    localStorage.setItem('gamify:seeded-week', '1');
+    localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'w1', name: 'Room 9', ownerId: 'local-teacher', createdAt: '' }]));
+    const at = new Date().toISOString();
+    const e = (id: string, studentId: string, outcome: string) => ({ id, at, classroomId: 'w1', studentId, gameId: 'game-show', mode: 'solo', prompt: 'p' + id, answer: 'a', tries: [], ms: 900, outcome });
+    localStorage.setItem('gamify:log', JSON.stringify([e('1', 's1', 'right'), e('2', 's2', 'right'), e('3', 's2', 'skipped'), e('4', 's1', 'right')]));
+  });
+  await page.goto('/teacher/classes');
+  await expect(page.getByText('This week: 4 questions answered, 75% right, 2 students played. Most played: Game Show.')).toBeVisible();
+});

@@ -48,3 +48,15 @@ describe('remembered a week later', () => {
     ])).toEqual({ checked: 2, kept: 1 });
   });
 });
+
+describe('weekUsage', () => {
+  it('counts the last 7 days for one class', async () => {
+    const { weekUsage } = await import('./reports');
+    const now = Date.parse('2026-10-25T12:00:00Z');
+    const e = (at: string, extra: object) => ({ id: at, at, gameId: 'game-show', mode: 'solo' as const, prompt: 'p', answer: 'a', tries: [], ms: 1, outcome: 'right' as const, classroomId: 'c1', studentId: 's1', ...extra });
+    const log = [e('2026-10-24T10:00:00Z', {}), e('2026-10-23T10:00:00Z', { outcome: 'skipped', studentId: 's2', gameId: 'bubble-pop' }), e('2026-10-23T11:00:00Z', { gameId: 'game-show' }),
+      e('2026-10-10T10:00:00Z', {}), e('2026-10-24T10:00:00Z', { classroomId: 'c2' }), e('2026-10-24T10:00:00Z', { outcome: 'left' as const })];
+    expect(weekUsage(log, 'c1', now)).toEqual({ answered: 3, rightPct: 67, students: 2, topGame: 'game-show' });
+    expect(weekUsage([], 'c1', now)).toEqual({ answered: 0, rightPct: 0, students: 0, topGame: undefined });
+  });
+});

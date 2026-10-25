@@ -83,3 +83,14 @@ export function retention(log: QuestionLogEntry[]): { checked: number; kept: num
   }
   return { checked, kept };
 }
+
+// A class's week at a glance (teacher-side usage numbers, Stage 8): questions
+// answered, the share right, students who played and the most played game,
+// over the last 7 days. Teacher pages only, never on student pages.
+export function weekUsage(log: QuestionLogEntry[], classroomId?: string, now = Date.now()): { answered: number; rightPct: number; students: number; topGame?: string } {
+  const week = log.filter((e) => (!classroomId || e.classroomId === classroomId) && e.outcome !== 'left' && now - new Date(e.at).getTime() < 7 * 86400000);
+  const games = new Map<string, number>();
+  for (const e of week) games.set(e.gameId, (games.get(e.gameId) ?? 0) + 1);
+  const topGame = [...games.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+  return { answered: week.length, rightPct: percent(week.filter((e) => e.outcome === 'right').length, week.length), students: new Set(week.map((e) => e.studentId).filter(Boolean)).size, topGame };
+}
