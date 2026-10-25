@@ -187,6 +187,14 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 .gamify-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 36px; height: 36px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider:focus-visible { outline: 3px solid var(--border); outline-offset: 4px; }
+/* Keyboard focus is always easy to see (WCAG 2.4.7): a thick black ring with
+   a white halo, so it shows on every background. Mouse and touch taps don't
+   show it. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #fff;
+}
 
 /* Printable theme templates (src/theme/builder): one sheet per page. */
 @media print {
