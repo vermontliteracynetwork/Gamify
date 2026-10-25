@@ -17,6 +17,15 @@ export function generateSampleCsv(): string {
   return rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
 }
 
+// A set's questions in the import columns, so a download opens in any
+// spreadsheet and uploads again unchanged (pictures stay in Gamify).
+export function questionsToRows(questions: MultipleChoiceQuestion[]): string[][] {
+  return [CSV_HEADERS, ...questions.map((q, i) => [String(i + 1), q.prompt, ...[0, 1, 2, 3].map((k) => q.choices[k] ?? ''), String(q.correctIndex + 1)])];
+}
+export const questionsToCsv = (questions: MultipleChoiceQuestion[]) => questionsToRows(questions).map((r) => r.map(csvEscape).join(',')).join('\r\n');
+// Tab-separated for pasting into a spreadsheet (tabs and line breaks inside a cell become spaces).
+export const questionsToTsv = (questions: MultipleChoiceQuestion[]) => questionsToRows(questions).map((r) => r.map((c) => c.replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n');
+
 function csvEscape(field: string): string {
   return /[",\r\n]/.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
 }

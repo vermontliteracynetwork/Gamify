@@ -112,3 +112,25 @@ test('Common Core: descriptions in the menus and on hover; "no standard" clears 
   await page.getByLabel('No Common Core standard applies', { exact: false }).check();
   await expect(page.getByRole('button', { name: 'Remove K.CC.1', exact: false })).toHaveCount(0);
 });
+
+test('set editor: Upload CSV adds questions, Download CSV and Copy to Google Sheets are always there', async ({ page, context }, info) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:sets')) return;
+    localStorage.setItem('gamify:sets', JSON.stringify([{ id: 'csv1', name: 'Spelling', questions: [{ id: 'a', kind: 'mc', prompt: 'Spell cat', choices: ['cat', 'kat'], correctIndex: 0 }], ownerId: 'local-teacher', visibility: 'private', createdAt: '', updatedAt: '' }]));
+  });
+  await page.goto('/teacher/sets/csv1');
+  const csv = 'Question #,Question Text,Answer 1,Answer 2,Answer 3,Answer 4,Correct Answer #\n1,Spell dog,dog,dawg,,,1\n2,,a,b,,,1\n';
+  await page.getByLabel('Upload CSV').setInputFiles({ name: 'more.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await expect(page.getByText('1 question added from the CSV.', { exact: false })).toBeVisible();
+  await expect(page.getByText('row 3', { exact: false })).toBeVisible();
+  await expect(page.getByLabel('Question 2', { exact: true })).toHaveValue('Spell dog');
+  const wait = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download CSV' }).click();
+  expect((await wait).suggestedFilename()).toBe('spelling.csv');
+  const popup = page.context().waitForEvent('page').catch(() => null);
+  await page.getByRole('button', { name: 'Copy to Google Sheets' }).click();
+  await expect(page.getByText(/Copied!|Copying did not work/)).toBeVisible();
+  await (await popup)?.close();
+  await page.screenshot({ path: `test-results/editor-csv-${info.project.name}.png` });
+});

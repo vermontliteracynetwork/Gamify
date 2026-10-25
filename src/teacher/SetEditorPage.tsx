@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, CopySimple, Image as ImageIcon, Plus, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, Check, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, Table, Plus, Trash, X } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { getLibrarySet } from '../data/library';
@@ -8,6 +8,7 @@ import type { MultipleChoiceQuestion, QuestionSet } from '../data/types';
 import { blankQuestion, MAX_CHOICES, MIN_CHOICES, questionIssue } from '../engine/questions';
 import { TIERS } from '../config';
 import { readOnlyIds } from '../data/downgrade';
+import { csvRowsToQuestions, parseCsv, questionsToCsv, questionsToTsv } from '../data/csv';
 import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { Button, Panel } from '../ui/kit';
@@ -79,7 +80,10 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
         )}
         {!library && <span className="text-sm font-bold text-text" aria-live="polite">{status === 'saved' ? t('editor.saved') : t('editor.saving')}</span>}
       </div>
-      <p className="font-bold text-text mb-5">{t('editor.ready', { ready, total: set.questions.length })}</p>
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        <p className="font-bold text-text flex-1 min-w-48">{t('editor.ready', { ready, total: set.questions.length })}</p>
+        <SpreadsheetTools set={set} readOnly={library} onAdd={(qs) => setQuestions([...set.questions.filter((q) => q.prompt.trim() || q.choices.some((c) => c.trim())), ...qs])} />
+      </div>
 
       {library && (
         <Panel className="mb-5 flex flex-wrap items-center gap-3 bg-surface-2">
@@ -266,3 +270,43 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
   );
 }
 
+// Spreadsheet tools, always on hand (teacher, 2026-10-25): add questions from
+// a CSV, download the set as a CSV, or copy it into a new Google Sheet.
+function SpreadsheetTools({ set, readOnly, onAdd }: { set: QuestionSet; readOnly: boolean; onAdd: (qs: MultipleChoiceQuestion[]) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [note, setNote] = useState('');
+  const slug = (set.name || 'question-set').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const pill = 'min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-2 hover-pop';
+  async function upload(file: File) {
+    const { questions, errors } = csvRowsToQuestions(parseCsv(await file.text()), () => newId('q'));
+    if (questions.length) onAdd(questions);
+    setNote([t('editor.csvAdded', { count: questions.length }), errors.length ? t('editor.csvSkipped', { count: errors.length, rows: errors.slice(0, 5).map((e) => e.row).join(', ') }) : ''].filter(Boolean).join(' '));
+  }
+  function download() {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([questionsToCsv(set.questions)], { type: 'text/csv' }));
+    a.download = `${slug}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  async function copyToSheets() {
+    try {
+      await navigator.clipboard.writeText(questionsToTsv(set.questions));
+      setNote(t('editor.sheetsCopied'));
+      window.open('https://sheets.new', '_blank', 'noopener');
+    } catch { setNote(t('editor.sheetsFailed')); }
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {!readOnly && (
+        <>
+          <button type="button" className={pill} onClick={() => fileRef.current?.click()}><FileArrowUp weight="bold" size={18} />{t('editor.uploadCsv')}</button>
+          <input ref={fileRef} type="file" accept=".csv,text/csv" hidden aria-label={t('editor.uploadCsv')} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f); }} />
+        </>
+      )}
+      <button type="button" className={pill} onClick={download} disabled={!set.questions.length}><DownloadSimple weight="bold" size={18} />{t('editor.downloadCsv')}</button>
+      <button type="button" className={pill} onClick={() => void copyToSheets()} disabled={!set.questions.length}><Table weight="bold" size={18} />{t('editor.copySheets')}</button>
+      {note && <p className="basis-full text-sm font-bold" role="status">{note}</p>}
+    </div>
+  );
+}

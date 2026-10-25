@@ -20,3 +20,14 @@ describe('csv', () => {
     expect(questions.map((q) => q.prompt)).toEqual(['Good']);
   });
 });
+
+describe('download and copy', () => {
+  it('a downloaded set uploads again unchanged', async () => {
+    const { questionsToCsv, questionsToTsv } = await import('./csv');
+    const qs = [{ id: 'a', kind: 'mc' as const, prompt: 'Say "hi", please', choices: ['yes', 'no, thanks'], correctIndex: 1 }];
+    const back = csvRowsToQuestions(parseCsv(questionsToCsv(qs)), (i) => `n${i}`).questions;
+    expect(back.map(({ prompt, choices, correctIndex }) => ({ prompt, choices, correctIndex }))).toEqual([{ prompt: 'Say "hi", please', choices: ['yes', 'no, thanks'], correctIndex: 1 }]);
+    expect(questionsToTsv(qs).split('\n')[1]).toBe('1\tSay "hi", please\tyes\tno, thanks\t\t\t2');
+  });
+});
+
