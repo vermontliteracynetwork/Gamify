@@ -1,4 +1,4 @@
-import type { MultipleChoiceQuestion, QuestionSet } from '../data/types';
+import type { MultipleChoiceQuestion, QuestionLogEntry, QuestionSet } from '../data/types';
 import { fallbackQuestion } from './fallback';
 import { isPlayable } from './questions';
 
@@ -36,10 +36,27 @@ export function drawQuestion(pool: PoolSet[], avoidId?: string, rand: () => numb
   throw new Error('unreachable');
 }
 
+// The review pile (research brief, gap 2: spacing across days): questions a
+// student missed on an earlier day and hasn't answered right since. Keyed by
+// set and prompt, the way the question log records them.
+export const reviewKey = (setId: string | undefined, prompt: string) => `${setId ?? ''}|${prompt}`;
+export function reviewKeys(log: QuestionLogEntry[], today = new Date().toISOString().slice(0, 10)): Set<string> {
+  const latest = new Map<string, QuestionLogEntry>();
+  for (const e of [...log].sort((a, b) => a.at.localeCompare(b.at))) {
+    if (e.outcome === 'left') continue;
+    latest.set(reviewKey(e.setId, e.prompt), e);
+  }
+  const keys = new Set<string>();
+  for (const [k, e] of latest) if (e.outcome !== 'right' && e.at.slice(0, 10) < today) keys.add(k);
+  return keys;
+}
+
 // Assigned sets are used evenly (teacher design, development plan Part 3B):
 // sets take turns, and each set deals its questions in a random order with
 // no repeats until it runs out, then reshuffles. Starred sets still win.
-export function makeDeck(pool: PoolSet[], rand: () => number = Math.random) {
+// Questions in the review pile come back first, one in every three draws,
+// each once per game.
+export function makeDeck(pool: PoolSet[], rand: () => number = Math.random, review: Set<string> = new Set()) {
   const sets = pool
     .map((p) => ({ ...p, questions: p.set.questions.filter(isPlayable) }))
     .filter((p) => p.questions.length > 0);
@@ -52,9 +69,16 @@ export function makeDeck(pool: PoolSet[], rand: () => number = Math.random) {
     for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
   };
+  const reviewPile = from.flatMap((p) => p.questions.filter((q) => review.has(reviewKey(p.set.id, q.prompt))).map((question) => ({ question, setId: p.set.id })));
+  let draws = 0;
   return {
     next(avoidId?: string): Drawn {
       if (from.length === 0) return { question: fallbackQuestion(rand) };
+      draws += 1;
+      if (draws % 3 === 1 && reviewPile.length) {
+        const i = reviewPile.findIndex((r) => r.question.id !== avoidId);
+        if (i >= 0) return reviewPile.splice(i, 1)[0];
+      }
       const pick = from[turn++ % from.length];
       let pile = piles.get(pick.set.id);
       if (!pile || pile.length === 0) {

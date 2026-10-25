@@ -247,6 +247,9 @@ attention. Better game design, not just "a game," is what produces gains
 2. **Spacing across days.** Gamify spaces within a session; it should also
    bring back missed and older questions on later days (a simple "review
    pile"), which is where spacing pays off most (Cepeda et al., 2006).
+   *Shipped 2026-10-25:* for a signed-in student, questions missed on an
+   earlier day (and not answered right since) come back first, one in every
+   three draws, each once per game.
 3. **Don't overclaim.** Marketing must stay inside what the research
    supports: no "dopamine" promises, no "proven to raise test scores"
    until Gamify has its own data.

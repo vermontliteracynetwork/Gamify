@@ -1,11 +1,11 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { data, newId } from '../data';
 import type { MultipleChoiceQuestion, QuestionLogEntry } from '../data/types';
 import type { PlayMode } from '../games/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { makeDeck, type PoolSet } from './picker';
+import { makeDeck, reviewKeys, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
 import Title from '../ui/Title';
 
@@ -41,7 +41,13 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
   const lastId = useRef<string>();
   const missedThis = useRef(false);
 
-  const deck = useMemo(() => makeDeck(pool), [pool]);
+  // A signed-in student's missed questions from earlier days come back for review.
+  const [review, setReview] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!studentId) return;
+    void data.listQuestionLog({ studentId }).then((log) => setReview(reviewKeys(log)));
+  }, [studentId]);
+  const deck = useMemo(() => makeDeck(pool, Math.random, review), [pool, review]);
   const next = useCallback((avoid?: string) => {
     const drawn = deck.next(avoid);
     lastId.current = drawn.question.id;

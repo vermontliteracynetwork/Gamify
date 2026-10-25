@@ -48,7 +48,7 @@ export const FINDINGS: Finding[] = [
     title: 'Short practice spread over days beats cramming',
     found: 'Learning scientists agree that recalling answers in short sessions spread over days leads to longer-lasting memory than the same practice crammed together.',
     fair: 'There is no single best gap between sessions.',
-    inGamify: 'One question set feeds every game, so a class can practice the same content all week in a different game each day.',
+    inGamify: 'One question set feeds every game, so a class can practice the same content all week in a different game each day. When a student signs in, questions they missed on an earlier day come back for review.',
     sources: [
       { cite: 'Carpenter, Pan & Butler (2022). The science of effective learning with spacing and retrieval practice. Nature Reviews Psychology.', url: 'https://doi.org/10.1038/s44159-022-00089-1' },
       { cite: 'Cepeda, Pashler, Vul, Wixted & Rohrer (2006). Distributed practice in verbal recall tasks. Psychological Bulletin.', url: 'https://pubmed.ncbi.nlm.nih.gov/16719566/' },

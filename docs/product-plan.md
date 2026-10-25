@@ -1128,6 +1128,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 60 | **"Never a game over."** Bubble Pop rescues the board when bubbles get close to the bottom, and every bubble has a shape as well as a color. | Kind to young and color-blind players; a calm contrast to games that punish losing. |
 | 61 | **"Ask the class how it went, in pictures."** A one-screen class check-in: each student taps a face and an easy/just right/tricky picture. Anonymous counts only, no names. | Shows student voice without collecting student data; strong for SEL-minded schools and privacy reviews. |
 | 62 | **"Your class designs the game."** Students design a theme on their own iPad (photos of their drawings, a color, a name) and send it to the teacher, who approves it before anyone plays. Credited to the class, never a student name. | The class-made-theme story, now without paper; teachers keep control. |
+| 63 | **"Yesterday's misses come back today."** When a student signs in, questions they missed on an earlier day return for review, mixed into any game. Spaced review without a worksheet. | Grounded in the spacing research on the Research page; a concrete answer to "does it actually help them remember?" |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
