@@ -11,7 +11,7 @@ export default function NavBar() {
   const [tellOpen, setTellOpen] = useState(false);
   const role = useLocation().pathname.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
-  const pill = 'flex items-center gap-1.5 text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
+  const pill = 'hover-pop flex items-center gap-1.5 text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
     <header className="no-print sticky top-0 z-50 h-16 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
       <Link to={any ? '/play' : '/'} className="flex items-center shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
@@ -19,9 +19,10 @@ export default function NavBar() {
       </Link>
       {!any && (
         <nav aria-label={t('public.nav.label')} className="flex items-center gap-1 sm:gap-2">
-          <Link to="/features" className="hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
-          <Link to="/pricing" className="hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
-          <Link to="/ways" className="hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
+          <Link to="/features" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
+          <Link to="/pricing" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
+          <Link to="/research" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.research')}</Link>
+          <Link to="/ways" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
           <Link to="/join" className={pill}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>

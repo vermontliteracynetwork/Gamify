@@ -11,7 +11,7 @@ function InfoPage({ title, sub, sections }: { title: string; sub: string; sectio
         <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
         <p className="text-lg font-bold">{sub}</p>
         {sections.map((s) => (
-          <section key={s.h} className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <section key={s.h} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <h2 className="font-display text-3xl"><Title text={t(s.h)} /></h2>
             <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{t(k, { host: window.location.host })}</li>)}</ul>
           </section>

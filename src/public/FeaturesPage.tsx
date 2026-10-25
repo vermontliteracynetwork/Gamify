@@ -20,7 +20,7 @@ export default function FeaturesPage() {
         <p className="text-lg font-bold mb-8 max-w-2xl">{t('features.sub')}</p>
         <div className="grid md:grid-cols-2 gap-5">
           {GROUPS.map((g) => (
-            <section key={g.key} className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <section key={g.key} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <h2 className="font-display text-3xl"><Title text={t(`features.${g.key}` as StringKey)} /></h2>
               <ul className="grid gap-2 list-none p-0 m-0">
                 {Array.from({ length: g.items }, (_, i) => (
@@ -31,8 +31,8 @@ export default function FeaturesPage() {
           ))}
         </div>
         <div className="flex flex-wrap gap-3 mt-8">
-          <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg')}>{t('public.startFree')}</Link>
-          <Link to="/pricing" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg')}>{t('public.seePlans')}</Link>
+          <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.startFree')}</Link>
+          <Link to="/pricing" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.seePlans')}</Link>
         </div>
       </main>
       <PublicFooter />

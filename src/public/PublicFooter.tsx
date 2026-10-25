@@ -14,6 +14,7 @@ export default function PublicFooter() {
           <Link to="/features">{t('public.nav.features')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
           <Link to="/join">{t('public.nav.join')}</Link>
+          <Link to="/research">{t('research.title')}</Link>
           <Link to="/ways">{t('ways.title')}</Link>
           <Link to="/help">{t('public.nav.help')}</Link>
           <Link to="/it">{t('public.nav.it')}</Link>

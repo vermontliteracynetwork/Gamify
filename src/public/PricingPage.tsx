@@ -36,11 +36,11 @@ export default function PricingPage() {
         <p className="text-lg font-bold mb-8 max-w-2xl">{t('pricing.sub')}</p>
         <div className="grid md:grid-cols-3 gap-4 mb-8">
           {tiers.map((x) => (
-            <section key={x} className={`rounded-panel border-[2.5px] border-border p-5 grid gap-3 content-start ${x === 'plus' ? 'bg-accent' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <section key={x} className={`hover-lift rounded-panel border-[2.5px] border-border p-5 grid gap-3 content-start ${x === 'plus' ? 'bg-accent' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <h2 className="font-display text-3xl"><Title text={t(`pricing.${x}`)} /></h2>
               <p className="font-display text-4xl">{price(x)}</p>
               <p className="font-semibold">{t(`pricing.${x}.who`)}</p>
-              <Link to="/login?mode=signup" className={buttonClasses(x === 'plus' ? 'secondary' : 'primary')}>{x === 'free' ? t('public.startFree') : t('pricing.try')}</Link>
+              <Link to="/login?mode=signup" className={buttonClasses(x === 'plus' ? 'secondary' : 'primary', 'hover-pop')}>{x === 'free' ? t('public.startFree') : t('pricing.try')}</Link>
             </section>
           ))}
         </div>

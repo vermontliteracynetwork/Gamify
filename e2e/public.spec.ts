@@ -115,3 +115,37 @@ test.describe('signed out', () => {
     await page.screenshot({ path: `test-results/ways-post-${info.project.name}.png`, fullPage: true });
   });
 });
+
+test.describe('research', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  test('Research tab: findings with caveats, critics and our answers, measuring plan, sources', async ({ page }, info) => {
+    await page.goto('/');
+    if (info.project.name !== 'ipad-portrait') await page.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'Research' }).click();
+    else await page.getByRole('contentinfo').getByRole('link', { name: 'The Research' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: /The Research/i })).toBeVisible();
+    await expect(page.getByText('Fair to know:', { exact: false }).first()).toBeVisible();
+    await expect(page.getByRole('article')).toHaveCount(10);
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `test-results/research-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('tab', { name: 'Fair to know' }).click();
+    await expect(page.getByRole('heading', { name: /What we won't claim/i })).toBeVisible();
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `test-results/research-fair-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('tab', { name: 'How we will measure' }).click();
+    await expect(page.getByText('A comparison study with a university partner', { exact: false })).toBeVisible();
+    await page.getByRole('tab', { name: 'Sources' }).click();
+    expect(await page.getByRole('link', { name: /Psychological Bulletin/ }).count()).toBeGreaterThan(1);
+    await expect(page).toHaveTitle('Research | Gamify');
+    // Hover motion on a laptop: a card lifts (frame-checked).
+    if (info.project.name === 'laptop') {
+      await page.goto('/');
+      const card = page.locator('.hover-lift').first();
+      await card.scrollIntoViewIfNeeded();
+      const before = await card.boundingBox();
+      await card.hover();
+      for (let f = 0; f < 5; f++) { await card.screenshot({ path: `test-results/hover-frame-${f}.png` }); await page.waitForTimeout(50); }
+      const after = await card.boundingBox();
+      expect(after!.y).toBeLessThan(before!.y - 3);
+    }
+  });
+});

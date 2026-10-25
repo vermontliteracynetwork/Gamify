@@ -18,8 +18,8 @@ export function WaysList() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {POSTS.map((p) => (
-            <Link key={p.slug} to={`/ways/${p.slug}`} className="rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <GameCover gameId={p.cover} className="aspect-[16/9] border-b-[2.5px] border-border" />
+            <Link key={p.slug} to={`/ways/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={p.cover} className="aspect-[16/9] cover-zoom" /></span>
               <span className="p-4 grid gap-2">
                 <span className="font-display text-2xl leading-tight">{p.title}</span>
                 <span className="font-semibold text-sm">{p.summary}</span>
@@ -60,7 +60,7 @@ export function WaysPost() {
           <h2 className="font-display text-3xl"><Title text={t('ways.tryIt')} /></h2>
           <ol className="grid gap-2 pl-7 m-0 font-semibold text-lg list-decimal marker:font-bold">{post.tryIt.map((s, i) => <li key={i}>{s}</li>)}</ol>
         </section>
-        <Link to="/login" className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg')}>{t('ways.start')}</Link>
+        <Link to="/login" className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop')}>{t('ways.start')}</Link>
       </main>
       <PublicFooter />
     </>
