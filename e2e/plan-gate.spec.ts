@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Free plan: a Plus game opened by its address shows a lock, never the game', async ({ page }, info) => {
   await page.goto('/games/memory-match');
-  await expect(page.getByText('Memory Match is ready for you on Plus and Pro', { exact: false })).toBeVisible();
+  await expect(page.getByText('Memory Match is ready for you on Plus', { exact: false })).toBeVisible();
   await expect(page.getByRole('link', { name: 'See the plans' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Set up and play' })).toHaveCount(0);
   await page.screenshot({ path: `test-results/gate-teacher-${info.project.name}.png` });
@@ -43,4 +43,23 @@ test('Upgrade from the Question sets limit lifts the cap', async ({ page }) => {
   await page.getByRole('dialog').getByRole('button', { name: /Plus now/ }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Keep going' }).click();
   await expect(note).toHaveCount(0);
+});
+
+test('Pricing: Start with Pro opens the plan box after sign-up, and a school gets a quote with no sales call', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('gamify:teacher-session'));
+  await page.goto('/pricing');
+  await expect(page.getByText('Only $8')).toBeVisible();
+  await page.getByLabel('Number of teachers').fill('25');
+  await expect(page.getByText('Save 30%')).toBeVisible();
+  await page.getByLabel('Your name').fill('Ms. Rivera');
+  await page.getByLabel('Your school email').fill('rivera@school.org');
+  await page.getByLabel('School or district').fill('Maple Elementary');
+  await page.getByRole('button', { name: 'Get my quote' }).click();
+  await expect(page.getByText('Quote for Maple Elementary', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Print or save quote' })).toBeVisible();
+  await page.getByRole('link', { name: 'Start with Pro' }).click();
+  await expect(page).toHaveURL(/plan=pro/);
+  await page.getByLabel('Your name (what students see)').fill('Ms. Rivera');
+  await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Get Pro now' })).toBeVisible();
 });

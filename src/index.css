@@ -249,3 +249,11 @@ input[type='color'].color-dot { appearance: none; -webkit-appearance: none; padd
 input[type='color'].color-dot::-webkit-color-swatch-wrapper { padding: 0; }
 input[type='color'].color-dot::-webkit-color-swatch { border: none; border-radius: 9999px; }
 input[type='color'].color-dot::-moz-color-swatch { border: none; border-radius: 9999px; }
+
+/* A school quote prints on its own for the business office. */
+@media print {
+  body:has(.school-quote.printing) * { visibility: hidden; }
+  .school-quote.printing, .school-quote.printing * { visibility: visible; }
+  .school-quote.printing { position: absolute; inset: 0 auto auto 0; box-shadow: none !important; }
+  .school-quote.printing button { display: none; }
+}

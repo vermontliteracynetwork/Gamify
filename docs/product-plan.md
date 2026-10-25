@@ -1131,6 +1131,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 63 | **"Yesterday's misses come back today."** When a student signs in, questions they missed on an earlier day return for review, mixed into any game. Spaced review without a worksheet. | Grounded in the spacing research on the Research page; a concrete answer to "does it actually help them remember?" |
 | 64 | **"Only $8 a month."** Monthly price big, "billed yearly at $96" small; every benefit concrete ("Create a theme for each game"). Upgrade is one tap from any limit, and the locked thing opens the moment you pick a plan. | Monthly framing feels smaller; concrete outcomes beat feature lists; zero-step upgrade removes friction | Teacher, 2026-10-25 |
 | 65 | **Theme Building Challenge at launch.** Classes and teachers design themes; one winner gets lifetime Pro and a featured spot, runners up get a free year of Pro and promotion. Trending and popular themes on the home page. | Fills the theme library before launch, gives teachers a reason to share Gamify, and shows off the feature that drives subscriptions | Teacher, 2026-10-25 |
+| 66 | **"Get your school quote in one minute, no sales call."** Pick the number of teachers, see the savings, print the quote for the business office. | Removes the biggest friction in school buying; fits a one-person company with no sales team | Teacher, 2026-10-25 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

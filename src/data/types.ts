@@ -77,7 +77,7 @@ export interface SetAssignment {
 export interface FeedbackReport {
   id: string;
   at: string;
-  kind: 'bug' | 'problem' | 'idea' | 'help' | 'beta'; // help: a teacher asking for support; beta: asking to join the beta
+  kind: 'bug' | 'problem' | 'idea' | 'help' | 'beta' | 'quote'; // help: a teacher asking for support; beta: asking to join the beta; quote: a school asking for a quote
   details: string;
   where: string;
   role: 'teacher' | 'student';

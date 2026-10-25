@@ -4,6 +4,7 @@ import { ChalkboardTeacher, Student } from '@phosphor-icons/react';
 import { setTeacher } from '../auth/session';
 import { t } from '../i18n';
 import { Button, Panel, Tabs } from '../ui/kit';
+import { openUpgrade } from '../billing/Upgrade';
 import Title from '../ui/Title';
 
 // Teacher log in and sign up. Cloud accounts arrive in Stage 5; until then
@@ -16,6 +17,9 @@ export default function LoginPage() {
   function go() {
     setTeacher({ name: name.trim() || t('login.teacher'), at: new Date().toISOString() });
     navigate('/teacher');
+    // Picked a paid plan on the pricing page: the plan box opens with it ready.
+    const plan = params.get('plan');
+    if (plan === 'plus' || plan === 'pro') setTimeout(() => openUpgrade(plan), 0);
   }
   return (
     <main className="max-w-xl mx-auto px-4 pt-10 pb-16 grid gap-4">
