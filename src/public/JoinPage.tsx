@@ -49,6 +49,7 @@ export default function JoinPage() {
     const studentId = newId('guest');
     setSession({ classroomId: '', studentId, name });
     if (game.live) { setLive({ code: game.code, pid: studentId, name }); navigate(`/live/${game.code}`); return; }
+    if (game.versus) { navigate(`/games/${game.gameId}?set=${game.setId}&versus=${game.code}`); return; }
     navigate(`/games/${game.gameId}?set=${game.setId}`);
   }
 

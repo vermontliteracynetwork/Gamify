@@ -64,7 +64,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-2 content-start">
                   <p className="font-bold">{t('host.now')}</p>
                   <Button variant="primary" onClick={() => navigate(`/games/${game.id}?set=${set.id}`)}><Play weight="fill" size={18} />{t('host.play')}</Button>
-                  {game.modes.includes('live') && <Button onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, true)).code}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>}
+                  {game.modes.includes('live') && <Button onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>}
                 </div>
                 <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-2 content-start">
                   <p className="font-bold">{t('host.code')}</p>
