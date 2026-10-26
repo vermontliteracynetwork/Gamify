@@ -7,7 +7,7 @@
 
 update public.profiles
 set is_owner = true, tier = 'pro'
-where id = (select id from auth.users where email = 'YOUR-EMAIL');
+where id = (select id from auth.users where email = 'kayden@vermontliteracynetwork.com');
 
 -- Check it worked: you should see one row with is_owner = true and tier = pro.
 select u.email, p.tier, p.is_owner
