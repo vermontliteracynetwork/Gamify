@@ -28,7 +28,7 @@ const PILLARS = [
   { id: 'play', icon: GameController },
 ] as const;
 const MORE: { key: string; items: number }[] = [
-  { key: 'sets', items: 5 }, { key: 'classes', items: 5 }, { key: 'supports', items: 6 }, { key: 'safety', items: 5 },
+  { key: 'sets', items: 5 }, { key: 'classes', items: 7 }, { key: 'supports', items: 6 }, { key: 'safety', items: 5 },
 ];
 const card = 'bg-surface border-[2.5px] border-border rounded-panel';
 
