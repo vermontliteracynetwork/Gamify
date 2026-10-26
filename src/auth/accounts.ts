@@ -7,7 +7,7 @@
 const KEY = 'gamify:accounts';
 
 export interface Account { username: string; email: string; salt: string; hash: string; createdAt: string }
-export type SignUpProblem = 'username' | 'usernameTaken' | 'email' | 'password' | 'confirm';
+export type SignUpProblem = 'username' | 'usernameTaken' | 'email' | 'emailTaken' | 'password' | 'confirm';
 
 export const USERNAME_RULE = /^[a-z0-9._]{3,20}$/;
 export const normalizeUsername = (u: string) => u.trim().toLowerCase();
