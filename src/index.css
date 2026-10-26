@@ -121,16 +121,6 @@ h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-s
   font-display: swap;
 }
 h1, h2, h3, .font-display, .title-bubble { font-synthesis: none; letter-spacing: 0.01em; }
-/* Grow Year has no accented letters, so Spanish headings use Lilita One
-   (SIL Open Font License, docs/asset-ledger.md), served unmodified. */
-@font-face {
-  font-family: 'Lilita One';
-  src: url('/fonts/lilita-one.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-:lang(es) :is(h1, h2, h3, .font-display, .title-bubble):not(.font-body) { font-family: 'Lilita One', var(--font-display); }
 
 /* Page and game titles: solid black display text (teacher rule,
    2026-10-24). On a game stage they follow the theme's title text color

@@ -206,7 +206,7 @@ export default function App() {
   return (
     <SettingsProvider>
     <BrowserRouter>
-      <LanguageRoot>
+      <div className="min-h-dvh relative text-text font-body">
         <AmbientBackground />
         <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
         <NavBar />
@@ -214,7 +214,7 @@ export default function App() {
         <div id="main-content" tabIndex={-1} className="outline-none">
           <AnimatedRoutes />
         </div>
-      </LanguageRoot>
+      </div>
     </BrowserRouter>
     </SettingsProvider>
   );
@@ -228,10 +228,4 @@ function LiveLayer() {
   useEffect(() => { const f = () => setOn(!!getLive()); window.addEventListener('gamify-live', f); return () => window.removeEventListener('gamify-live', f); }, []);
   if (!on || path.startsWith('/live/') || path.startsWith('/teacher')) return null;
   return <Suspense fallback={null}><LiveOverlay /></Suspense>;
-}
-
-// Every menu redraws when the language changes (Stage 9: Spanish).
-function LanguageRoot({ children }: { children: React.ReactNode }) {
-  const { settings } = useSettings();
-  return <div key={settings.language} className="min-h-dvh relative text-text font-body">{children}</div>;
 }

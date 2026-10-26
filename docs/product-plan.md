@@ -1047,8 +1047,9 @@ start to build?" Claudia's gap review of everything above.
     automated tests, a check that runs on every change, and the Three-Lens
     browser testing from `docs/testing-standards.md` before game code
     piles up.
-22. **Language-ready from day one.** Spanish is promised, so all text has
-    to be built for translation from the start; retrofitting is painful.
+22. **Language-ready from day one.** Spanish is on hold until the teacher
+    approves it (2026-10-26); all text still goes through one file so a
+    language can be added later without a retrofit.
 23. **Accessibility audit** against WCAG 2.1 AA and a VPAT before selling
     to districts (6.7).
 24. **Pilot teachers.** Line up a few classrooms to test early builds and
@@ -1134,9 +1135,8 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 66 | **"Get your school quote in one minute, no sales call."** Pick the number of teachers, see the savings, print the quote for the business office. | Removes the biggest friction in school buying; fits a one-person company with no sales team | Teacher, 2026-10-25 |
 | 67 | **"One game, every age."** The same Game Show re-skinned live: Ocean Friends for pre-K, Jungle Quest for grades 3-5, Night Arcade for teens, Clean Slate for adult learners. Visitors tap to switch on the Features page. | Shows that Gamify is not "for little kids" and makes the paid Theme Builder tangible in one tap | Teacher, 2026-10-25 |
 | 68 | **"Lock every screen with one tap, and say why."** Live games: the teacher lets names in, starts the game, watches who is stuck on a private monitor, and locks one screen or all with a short message ("Eyes on me, please."). | Classroom control teachers ask for, kept off the projector | Teacher, 2026-10-24; built 2026-10-25 |
-| 69 | **"Menus and read-aloud in Spanish, one tap."** Español in the footer or Settings switches every menu, button and help line, and read-aloud uses a Spanish voice. Question sets stay in the language the teacher wrote. | Families and multilingual classrooms; districts ask for it. Say "en español" in marketing only after a native speaker's review (Waiting on you) | Development, 2026-10-25 |
-| 70 | **"Look, think, then hop."** Road Hop's cars only move when the hopper hops, so a 6-year-old can plan every hop. A bonk just sends the hopper back to the grass. | A road-crossing game kids love, made fair for young players; nothing is ever shown hurt | Development, 2026-10-25 |
-| 71 | **"Order up, no stopwatch."** Lunch Rush guests wait a few serves, not seconds, so a slow reader is never rushed; match the food picture to the order, and quick serves earn a tip. Guests in six skin tones. | The busy-restaurant fun kids love without timer stress; inclusive art | Development, 2026-10-25 |
+| 69 | **"Look, think, then hop."** Road Hop's cars only move when the hopper hops, so a 6-year-old can plan every hop. A bonk just sends the hopper back to the grass. | A road-crossing game kids love, made fair for young players; nothing is ever shown hurt | Development, 2026-10-25 |
+| 70 | **"Order up, no stopwatch."** Lunch Rush guests wait a few serves, not seconds, so a slow reader is never rushed; match the food picture to the order, and quick serves earn a tip. Guests in six skin tones. | The busy-restaurant fun kids love without timer stress; inclusive art | Development, 2026-10-25 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1194,5 +1194,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 44 | **Let Students Pick the Look: Theme Choice as a Reward** | When you assign a set, offer 3 to 5 themes; students pick one when they join. Choice boosts buy-in, and older students skip the "little kid" look. | Theme choices on assign/host, favorites, Themes page | Teacher's idea, 2026-10-25; K-12 |
 | 45 | **Design a Theme for the Challenge: A Two-Week Class Project** | Plan the Theme Building Challenge as a class: vote on an idea, split the pieces, draw or design digitally, test it in a game, and enter. Art, writing (the theme's description) and collaboration. | Theme Builder Download and Upload tabs, Themes page, the Challenge page | Teacher's idea, 2026-10-25; K-12 |
 | 46 | **Plan Before You Hop: Road Hop as a Thinking Game** | Road Hop's cars move only when you hop, so students say their plan out loud ("wait, then up") before tapping. Pairs well with sequencing and first/next/then language. | Road Hop, teams on one screen | Development, 2026-10-25; K-5 |
-| 47 | **Family Night in Two Languages** | Families switch Gamify to Español at home and play the week's set with their child; menus and read-aloud in Spanish, questions in the class's language. | Spanish menus, homework links, read-aloud | Development, 2026-10-25; K-8 |
-| 48 | **Lunch Rush for Money and Counting** | Put tips on the board: students total each team's tips, or the class sets a goal ("Can we earn 60?"). Use a math set so every serve is a math fact. | Lunch Rush, Share mode, math sets | Development, 2026-10-25; K-4 |
+| 47 | **Lunch Rush for Money and Counting** | Put tips on the board: students total each team's tips, or the class sets a goal ("Can we earn 60?"). Use a math set so every serve is a math fact. | Lunch Rush, Share mode, math sets | Development, 2026-10-25; K-4 |

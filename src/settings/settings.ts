@@ -36,9 +36,7 @@ export interface PlayerSettings {
   tools: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
   tapOnly: boolean;
   leftHanded: boolean;
-  // Menus and read-aloud language (Stage 9: Spanish). Question sets stay in
-  // the language their teacher wrote them in.
-  language: 'en' | 'es';
+  language: 'en';
 }
 
 export const DEFAULT_SETTINGS: PlayerSettings = {

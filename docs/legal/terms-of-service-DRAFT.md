@@ -25,7 +25,7 @@
    become read-only.
 8. **Availability.** We work to keep Gamify running but it is provided "as is"
    **[Attorney: warranty disclaimer, limitation of liability, indemnity]**.
-9. **Trademarks.** Gamify's name and logo are owned by **[owner of record]**.
+9. **Trademarks.** Gamify's name and logo are owned by Vermont Literacy Network LLC.
    Game names are original; other companies' marks are not used.
 10. **Copyright complaints.** **[Attorney: DMCA agent registration and notice
     process]**.

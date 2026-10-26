@@ -75,7 +75,7 @@ do not yet), **Not applicable**, **Not evaluated** (needs the hand passes above)
 | 2.5.2 Pointer cancellation | A | Supports | Actions happen on release, not on press. |
 | 2.5.3 Label in name | A | Supports | Visible labels are part of each control's accessible name (automated check). |
 | 2.5.4 Motion actuation | A | Not applicable | Nothing is controlled by shaking or tilting. |
-| 3.1.1 Language of page | A | Supports | The page language is set (English). Spanish is planned. |
+| 3.1.1 Language of page | A | Supports | The page language is set (English). |
 | 3.1.2 Language of parts | AA | Not applicable | No mixed-language passages yet; teacher-written questions in other languages are the teacher's content. |
 | 3.2.1 On focus | A | Supports | Focus never changes the page by itself. |
 | 3.2.2 On input | A | Supports | Changing a setting never jumps to a new page without a button press. |
@@ -92,4 +92,3 @@ do not yet), **Not applicable**, **Not evaluated** (needs the hand passes above)
 ## Known gaps and plans
 
 - Text spacing check (1.4.12) and the screen reader passes listed above.
-- Spanish menus and read-aloud (planned, Stage 9).

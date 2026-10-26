@@ -58,6 +58,8 @@ teacher no control or educational value is not done.
   screenshots/descriptions and reimplemented from scratch. Never scrape,
   decompile, or copy another platform's actual source code or assets,
   reachable or not.
+- English only for now (teacher, 2026-10-26): no Spanish or other
+  languages until the teacher approves. A plan line is not an approval.
 - Platform look (menus, teacher pages): the light "sticker" style in
   `src/index.css` with the brand palette (teacher, 2026-10-24): periwinkle
   ground, off-white panels, black outlines, pale yellow accent, salmon,

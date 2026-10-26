@@ -7,7 +7,8 @@ need a legal decision.
 
 ## 1. Who we are
 Gamify ("we") is a classroom game platform owned and operated by
-**[Attorney: owner of record and business entity]**, contact
+Vermont Literacy Network LLC (owner's decision, 2026-10-26; **[Attorney: confirm
+the assignment and trade name]**), contact
 **[support email on the bought domain]**.
 
 ## 2. Who uses Gamify

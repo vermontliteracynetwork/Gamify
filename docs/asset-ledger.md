@@ -10,7 +10,6 @@ ships without a line here.
 | Frankfurter Medium (font) | Not used: replaced by Grow Year with the new logo (2026-10-24) | | | |
 | Inclusive Sans (font, by Olivia King) | All body text, platform and game stages (your call, 2026-10-24) | @fontsource/inclusive-sans (Google Fonts) | SIL Open Font License 1.1 | 2026-10-24 |
 | Grow Year (font, by Khurasan Studio) | Headings and the logo lettering | Sent by the owner (`grow-year.zip`); served from `public/fonts/grow-year.woff2` | The download's More Info file: "This product 100% free for personal use & commercial use." The font's own license link (khurasanstudio.com/license) could not be opened from the build environment: **confirm it allows web embedding before launch.** Keep the original zip on file. | 2026-10-24 |
-| Lilita One (font, by Juan Montoreano) | Headings when the page is in Spanish (Grow Year has no accented letters) | github.com/google/fonts `ofl/lilitaone/LilitaOne-Regular.ttf`, served unmodified from `public/fonts/lilita-one.ttf` | SIL Open Font License 1.1 (Reserved Font Name "Lilita": served as-is, never renamed or altered) | 2026-10-25 |
 | axe-core and @axe-core/playwright | Automated accessibility checks in the test suite only (never shipped to users) | npm | MPL-2.0 (dev tool, unmodified) | 2026-10-24 |
 | qrcode | QR codes on the projector code screen | npm (qrcode 1.5) | MIT | 2026-10-24 |
 | fflate | Zips the Theme Builder digital template files | npm (fflate 0.8.2) | MIT | 2026-10-25 |

@@ -126,7 +126,6 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
 
         {tab === 'reading' && (
           <>
-            <ChoiceRow label={t('settings.language')} value={s.language} options={[{ value: 'en', label: 'English' }, { value: 'es', label: 'Español' }]} onChange={(v) => set('language', v)} />
             <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
             <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
             <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />

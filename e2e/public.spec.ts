@@ -252,16 +252,3 @@ test.describe('device check', () => {
     await page.screenshot({ path: `test-results/device-check-${info.project.name}.png`, fullPage: true });
   });
 });
-
-test('Español in the footer switches the menus, page language and back', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Español' }).click();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'es');
-  await expect(page.getByRole('link', { name: 'Precios' }).first()).toBeVisible();
-  await page.screenshot({ path: `test-results/spanish-home-${test.info().project.name}.png` });
-  await page.reload();
-  await expect(page.getByRole('link', { name: 'Precios' }).first()).toBeVisible();
-  await page.getByRole('button', { name: 'English' }).click();
-  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page.getByRole('link', { name: 'Pricing' }).first()).toBeVisible();
-});

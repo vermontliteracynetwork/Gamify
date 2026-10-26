@@ -66,9 +66,9 @@ export function buzz(pattern: number | number[], s: PlayerSettings): void {
 
 // Device voice for now; a human neural voice comes later behind a cost switch.
 const NOVELTY = /bells|boing|bubbles|cellos|zarvox|whisper|trinoids|bahh|albert|jester|organ|superstar|wobble|bad news|good news/i;
-function pickVoice(lang: 'en' | 'es' = 'en'): SpeechSynthesisVoice | undefined {
-  const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith(lang) && !NOVELTY.test(v.name));
-  return voices.find((v) => /premium|enhanced|natural|neural/i.test(v.name)) ?? voices.find((v) => v.lang === (lang === 'es' ? 'es-US' : 'en-US')) ?? voices.find((v) => v.lang === 'es-MX') ?? voices[0];
+function pickVoice(): SpeechSynthesisVoice | undefined {
+  const voices = speechSynthesis.getVoices().filter((v) => v.lang.startsWith('en') && !NOVELTY.test(v.name));
+  return voices.find((v) => /premium|enhanced|natural|neural/i.test(v.name)) ?? voices.find((v) => v.lang === 'en-US') ?? voices[0];
 }
 
 export function speak(text: string, s: PlayerSettings): void {
@@ -77,8 +77,7 @@ export function speak(text: string, s: PlayerSettings): void {
   const v = volume(s, 'voice');
   if (v <= 0 || !text.trim()) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.voice = pickVoice(s.language) ?? null;
-  u.lang = s.language === 'es' ? 'es-US' : 'en-US';
+  u.voice = pickVoice() ?? null;
   u.volume = v;
   u.rate = s.voiceRate === 'slow' ? 0.8 : s.voiceRate === 'fast' ? 1.15 : 0.95;
   speechSynthesis.speak(u);

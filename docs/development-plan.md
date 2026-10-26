@@ -335,9 +335,10 @@ production release.
 - [ ] Launch (merge to `main`, production domain live).
 - [ ] Pilot results write-up (research brief section 5) for marketing and
       district sales.
-- [ ] More games in roster order, Spanish menus and read-aloud, Google
+- [ ] More games in roster order, Google
       Classroom roster import, Clever / ClassLink, school and district
-      plans, human neural read-aloud voice.
+      plans, human neural read-aloud voice. (Spanish menus: on hold until
+      the teacher approves, 2026-10-26.)
 
 ---
 
