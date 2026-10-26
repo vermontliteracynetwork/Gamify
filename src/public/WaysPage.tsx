@@ -19,7 +19,8 @@ export function gradeRange(grades: string): [number, number] {
 export function WaysList() {
   const [params, setParams] = useSearchParams();
   const band = BANDS.find((b) => b.id === params.get('grades')) ?? BANDS[0];
-  const posts = POSTS.filter((p) => { const [lo, hi] = gradeRange(p.grades); return lo <= band.hi && hi >= band.lo; });
+  const tag = params.get('tag');
+  const posts = POSTS.filter((p) => { const [lo, hi] = gradeRange(p.grades); return lo <= band.hi && hi >= band.lo && (!tag || p.tags?.includes(tag)); });
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
@@ -30,12 +31,14 @@ export function WaysList() {
         <div role="group" aria-label={t('ways.filter')} className="flex flex-wrap gap-2">
           {BANDS.map((b) => (
             <button key={b.id} type="button" aria-pressed={band.id === b.id} onClick={() => setParams(b.id === 'all' ? {} : { grades: b.id }, { replace: true })}
-              className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${band.id === b.id ? 'bg-accent' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
+              className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-accent' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
           ))}
+          <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
+            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts.map((p) => (
-            <Link key={p.slug} to={`/ways/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={p.cover} className="aspect-[16/9] cover-zoom" /></span>
               <span className="p-4 grid gap-2">
                 <span className="font-display text-2xl leading-tight">{p.title}</span>
@@ -63,11 +66,11 @@ function Meta({ grades, minutes }: { grades: string; minutes: number }) {
 export function WaysPost() {
   const { slug } = useParams();
   const post = POSTS.find((p) => p.slug === slug);
-  if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/ways" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
+  if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
   return (
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <Link to="/ways" className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('ways.all')}</Link>
+        <Link to="/blog" className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('ways.all')}</Link>
         <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />

@@ -12,9 +12,96 @@ export interface Post {
   minutes: number;
   body: string[];
   tryIt: string[];
+  // Topics a post belongs to, like 'homeschool' (shown on the Homeschool page).
+  tags?: string[];
 }
 
 export const POSTS: Post[] = [
+  {
+    slug: 'one-set-a-whole-week-at-home',
+    title: 'One Question Set, a Whole Week of Games at Home',
+    summary: 'Play the same set in a different game each day. Your children get spaced practice, and it never feels like the same worksheet twice.',
+    cover: 'flashcards',
+    grades: 'K-12',
+    minutes: 15,
+    tags: ['homeschool'],
+    body: [
+      'Learning scientists agree that practice spread over several days beats one long session. The trick at home is keeping it fresh, and that is where a single question set and five different games help.',
+      'Pick or write one set for the week: spelling words, math facts, or vocabulary from a read-aloud. Every Gamify game uses the same set, so you write the questions once and your children meet them in a new game each day.',
+      'A week can look like this. Monday, Flashcards to meet the set together. Tuesday, Question Tracker, where each child fills their own night sky with stars. Wednesday, Game Show as a family against the computer. Thursday, Four in a Row, sibling against sibling. Friday, Bubble Pop, then look at Reports together to see what stuck.',
+      'Because each child signs in with their own picture and PIN, every answer lands under their name, and Let\'s Look Back reviews the questions they missed.',
+    ],
+    tryIt: [
+      'Sign up free and open Question sets.',
+      'Pick a ready-made set, or write 10 questions of your own.',
+      'Add each child on the Students page; each gets a picture and a PIN.',
+      'Play Flashcards today, and a different game each day after.',
+      'On Friday, open Reports and look at each child\'s answers together.',
+    ],
+  },
+  {
+    slug: 'siblings-different-grades-one-game',
+    title: 'Siblings at Different Grades, One Game Night',
+    summary: 'A six-year-old and a ten-year-old can play the same game at the same table, each with questions and supports that fit them.',
+    cover: 'game-show',
+    grades: 'K-8',
+    minutes: 30,
+    tags: ['homeschool'],
+    body: [
+      'Teaching several ages at once is the everyday puzzle of homeschooling. Game night is a good place to solve it, because everyone wants to play anyway.',
+      'Give each child their own set: letter sounds for the younger one, multiplication for the older one. Each child signs in with their own picture and PIN, so the game asks each of them their own questions.',
+      'Supports are free and set per child: read-aloud, a few extra seconds to read first, more tries per question, and calm mode. A younger sibling can play right alongside an older one without anyone waiting or feeling rushed.',
+      'For a whole-family round, put Game Show on the big screen with one shared set and play as a team against the computer.',
+    ],
+    tryIt: [
+      'Add each child on the Students page.',
+      'Make or pick one set for each child.',
+      'Tap the gear beside a child to set their supports.',
+      'Start a game, and let each child sign in with their picture and PIN.',
+      'End with one Game Show round together, family against the computer.',
+    ],
+  },
+  {
+    slug: 'game-time-into-homeschool-records',
+    title: 'Turn Game Time into Your Homeschool Records',
+    summary: 'Reports show what each child practiced, how they did and how long they played, ready to download for a portfolio.',
+    cover: 'star-quiz',
+    grades: 'K-12',
+    minutes: 10,
+    tags: ['homeschool'],
+    body: [
+      'Many families keep a portfolio or a log of learning. Gamify keeps the record for you while your children play.',
+      'Open Reports and group by student. For each child you see the questions they answered, the share they got right, how many they got right on the first try, their average time, the last day they played and the minutes played, plus any supports you set for them.',
+      'Group by question to find the facts that are still tricky, or by day to see a week at a glance. Then download a spreadsheet file for your records.',
+      'On the Free plan, reports keep 30 days. Plus and Pro keep every report, all year and beyond.',
+    ],
+    tryIt: [
+      'Have each child play one game, signed in with their picture and PIN.',
+      'Open Reports and choose Student.',
+      'Tap a column to sort, or group by question to find tricky facts.',
+      'Download the report and save it with your records.',
+    ],
+  },
+  {
+    slug: 'co-op-game-day',
+    title: 'Run a Co-op Game Day on One Big Screen',
+    summary: 'Turn a co-op class into a friendly tournament: teams, one shared set and one big screen.',
+    cover: 'peg-drop',
+    grades: 'K-12',
+    minutes: 45,
+    tags: ['homeschool'],
+    body: [
+      'A co-op class is a great place for a game day. Families bring children of many ages, and a shared screen turns review into a team event.',
+      'Pick one set that fits the group, or one per age group. Put a Share game like Game Show or Peg Drop on the projector or TV, split the children into teams, and let each team answer together. Older children can read questions aloud for younger teammates.',
+      'Co-ops of five or more families can buy like a school, with savings for every family. Each teacher keeps their own students, sets and reports.',
+    ],
+    tryIt: [
+      'Pick one set for the group.',
+      'Open a Share game on the big screen and make teams.',
+      'Let teams take turns answering together.',
+      'Look at Reports after to plan the next co-op day.',
+    ],
+  },
   {
     slug: 'design-a-theme-as-a-class',
     title: 'Design a Theme as a Class, Then Play Fractions',

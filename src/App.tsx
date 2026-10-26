@@ -110,6 +110,8 @@ function AnimatedRoutes() {
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="/credits" element={<CreditsPage />} />
+          <Route path="/blog" element={<WaysList />} />
+          <Route path="/blog/:slug" element={<WaysPost />} />
           <Route path="/ways" element={<WaysList />} />
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />

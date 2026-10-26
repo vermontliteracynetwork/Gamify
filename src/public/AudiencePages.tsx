@@ -8,6 +8,8 @@ import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import { POSTS } from './posts';
+import { GameCover } from '../games/covers';
 import { FAQS } from './faq';
 
 // Pages for each buyer (teacher, 2026-10-25): schools and districts, and
@@ -149,17 +151,26 @@ export function HomeschoolPage() {
           <Pillars items={[{ icon: UsersThree, key: 'hs.p1' }, { icon: Sparkle, key: 'hs.p2' }, { icon: Heart, key: 'hs.p3' }, { icon: FileText, key: 'hs.p4' }]} />
         </section>
 
-        <section aria-labelledby="week" className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 id="week" className="font-display text-3xl"><Title text={t('hs.weekTitle')} /></h2>
-          <p className="font-semibold">{t('hs.weekSub')}</p>
-          <ol className="grid sm:grid-cols-5 gap-2 list-none p-0 m-0">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <li key={n} className="rounded-input border-[2px] border-border bg-surface-2 p-3 grid gap-1 content-start">
-                <span className="font-display text-lg">{t(`hs.day.${n}` as StringKey)}</span>
-                <span className="text-sm font-semibold">{t(`hs.day.${n}.text` as StringKey)}</span>
-              </li>
+        {/* Homeschool-tagged blog posts (teacher, 2026-10-26), in place of the weekly plan. */}
+        <section aria-labelledby="hs-posts" className="grid gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="hs-posts" className="font-display text-4xl"><Title text={t('hs.postsTitle')} /></h2>
+              <p className="font-semibold">{t('hs.postsSub')}</p>
+            </div>
+            <Link to="/blog?tag=homeschool" className={buttonClasses('secondary', 'hover-pop')}>{t('hs.postsAll')}</Link>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {POSTS.filter((p) => p.tags?.includes('homeschool')).map((p) => (
+              <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden grid grid-cols-[8rem_minmax(0,1fr)]" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <GameCover gameId={p.cover} className="h-full min-h-32 border-r-[2.5px] border-border" />
+                <span className="p-4 grid gap-1 content-start">
+                  <span className="font-display text-xl leading-tight">{p.title}</span>
+                  <span className="text-sm font-semibold">{p.summary}</span>
+                </span>
+              </Link>
             ))}
-          </ol>
+          </div>
         </section>
 
         <section aria-labelledby="plans" className="grid gap-4">

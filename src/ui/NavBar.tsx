@@ -22,11 +22,9 @@ export default function NavBar() {
         <nav aria-label={t('public.nav.label')} className="flex items-center gap-1 sm:gap-2">
           <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
           <Link to="/features" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
-          <Link to="/themes" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.themes')}</Link>
           <Link to="/pricing" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
-          <Link to="/schools" className="nav-grow hidden lg:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.schools')}</Link>
           <Link to="/research" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.research')}</Link>
-          <Link to="/ways" className="nav-grow hidden xl:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
+          <Link to="/blog" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
           <Link to="/join" className={pill}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>

@@ -63,7 +63,7 @@ export function HelpPage() {
           <Link to="/it" className={buttonClasses('secondary', 'hover-pop')}><WifiHigh weight="bold" size={18} />{t('public.nav.it')}</Link>
           <Link to="/check" className={buttonClasses('secondary', 'hover-pop')}><DeviceMobile weight="bold" size={18} />{t('public.nav.check')}</Link>
           <Link to="/beta-kit" className={buttonClasses('secondary', 'hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
-          <Link to="/ways" className={buttonClasses('secondary', 'hover-pop')}><Lightbulb weight="bold" size={18} />{t('ways.title')}</Link>
+          <Link to="/blog" className={buttonClasses('secondary', 'hover-pop')}><Lightbulb weight="bold" size={18} />{t('ways.title')}</Link>
         </nav>
         {find && <p className="font-bold" role="status">{groups.length ? t('help.found', { count: groups.reduce((n, g) => n + g.items.length, 0) }) : t('help.none')}</p>}
         <div className="grid md:grid-cols-2 gap-4 items-start">

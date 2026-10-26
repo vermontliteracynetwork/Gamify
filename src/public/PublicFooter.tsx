@@ -9,22 +9,15 @@ export default function PublicFooter() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-5 lg:grid-cols-[minmax(12rem,auto)_minmax(0,1fr)] items-start">
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
         <nav aria-label={t('public.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-bold text-sm">
-          <Link to="/">{t('public.nav.home')}</Link>
           <Link to="/features">{t('public.nav.features')}</Link>
-          <Link to="/themes">{t('public.nav.themes')}</Link>
-          <Link to="/challenge">{t('challenge.title')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
+          <Link to="/themes">{t('public.nav.themes')}</Link>
           <Link to="/schools">{t('public.nav.schools')}</Link>
           <Link to="/homeschool">{t('public.nav.homeschool')}</Link>
-          <Link to="/beta">{t('public.nav.beta')}</Link>
-          <Link to="/faq">{t('public.nav.faq')}</Link>
+          <Link to="/blog">{t('public.nav.ideas')}</Link>
           <Link to="/research">{t('research.title')}</Link>
-          <Link to="/ways">{t('ways.title')}</Link>
-          <Link to="/join">{t('public.nav.join')}</Link>
-          <Link to="/help">{t('public.nav.help')}</Link>
-          <Link to="/it">{t('public.nav.it')}</Link>
-          <Link to="/check">{t('public.nav.check')}</Link>
-          <Link to="/login">{t('public.nav.login')}</Link>
+          <Link to="/faq">{t('public.nav.faq')}</Link>
+          <Link to="/beta">{t('public.nav.beta')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
         <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm">

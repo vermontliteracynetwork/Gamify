@@ -104,18 +104,21 @@ test.describe('signed in', () => {
 
 test.describe('signed out', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  test('Ways to use Gamify: idea list and a post with a Just try it box', async ({ page }, info) => {
+  test('Blog: post list with grade and homeschool filters, and a post with a Just try it box', async ({ page }, info) => {
     await page.goto('/');
-    await page.getByRole('contentinfo').getByRole('link', { name: 'Ways to use Gamify' }).click();
-    await expect(page.getByRole('heading', { name: /Ways to use Gamify/i })).toBeVisible();
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Blog' }).click();
+    await expect(page.getByRole('heading', { name: /The Gamify Blog/i })).toBeVisible();
     await page.getByRole('button', { name: '9-12' }).click();
     await expect(page.getByRole('link', { name: /Unit Review Tournament/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Two-Tap Exit Tickets/ })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Homeschool' }).click();
+    await expect(page.getByRole('link', { name: /Siblings at Different Grades/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Design a Theme as a Class/ })).toHaveCount(0);
     await page.getByRole('button', { name: 'All grades' }).click();
     await page.screenshot({ path: `test-results/ways-${info.project.name}.png`, fullPage: true });
     await page.getByRole('link', { name: /Design a Theme as a Class/ }).click();
     await expect(page.getByRole('heading', { name: /Just try it/i })).toBeVisible();
-    await expect(page).toHaveTitle('Ways to use Gamify | Gamify');
+    await expect(page).toHaveTitle('Blog | Gamify');
     await page.screenshot({ path: `test-results/ways-post-${info.project.name}.png`, fullPage: true });
   });
 });
