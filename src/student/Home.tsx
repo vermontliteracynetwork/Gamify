@@ -6,8 +6,8 @@ import { canPlayGame } from '../config';
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
-import { data } from '../data';
-import { useAsync, useTier } from '../data/hooks';
+import { useTier } from '../data/hooks';
+import { useTeacher } from '../auth/session';
 import { useSession } from './session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
@@ -16,8 +16,10 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function Home() {
   const reduce = useReducedMotion();
-  const { value: classes = [] } = useAsync(() => data.listClassrooms());
+  // Signed in means a teacher, unless a student came in through Join
+  // (teacher, 2026-10-26): no class sign-in buttons here.
   const session = useSession();
+  const teacher = useTeacher();
   const tier = useTier();
 
   return (
@@ -29,16 +31,12 @@ export default function Home() {
         className="mb-10"
       >
         <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2"><Title text={t('home.title')} /></h1>
-        <p className="text-text font-bold text-base max-w-[50ch]">{t('home.subtitle')}</p>
+        <p className="text-text font-bold text-base max-w-[50ch]">{teacher && !session ? t('home.subtitleTeacher') : t('home.subtitle')}</p>
       </motion.div>
 
-      {(classes.length > 0 || session) && (
+      {session && (
         <div className="flex flex-wrap gap-2 mb-6">
-          {session
-            ? <Link to="/arcade" className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.myArcade', { name: session.name })}</Link>
-            : classes.map((c) => (
-              <Link key={c.id} to={`/arcade/${c.id}`} className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.signIn', { name: c.name })}</Link>
-            ))}
+          <Link to="/arcade" className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.myArcade', { name: session.name })}</Link>
         </div>
       )}
 

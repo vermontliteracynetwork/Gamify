@@ -5,6 +5,7 @@ export const en = {
   'nav.allGames': 'All games',
   'home.title': 'Pick a game',
   'home.subtitle': 'Play on your own, or join a game your teacher is running.',
+  'home.subtitleTeacher': 'Try any game yourself, or share one with your class from Question sets.',
   'home.comingSoon': 'New games are on the way',
   'home.play': 'Play',
   'nav.teacher': 'Teacher',
