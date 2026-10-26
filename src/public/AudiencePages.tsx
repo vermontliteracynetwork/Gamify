@@ -137,7 +137,7 @@ export function SchoolsPage() {
 }
 
 export function HomeschoolPage() {
-  const plus = (PRICES_USD_PER_YEAR.plus / 12).toFixed(0);
+  const home = (PRICES_USD_PER_YEAR.homeschool / 12).toFixed(0);
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
@@ -175,14 +175,14 @@ export function HomeschoolPage() {
 
         <section aria-labelledby="plans" className="grid gap-4">
           <h2 id="plans" className="font-display text-4xl"><Title text={t('hs.plansTitle')} /></h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {(['free', 'plus', 'coop'] as const).map((k) => (
-              <div key={k} className={`${card} ${k === 'plus' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          {/* Free and the Homeschool plan (teacher, 2026-10-26: no Plus or co-op cards here). */}
+          <div className="grid md:grid-cols-2 gap-4 items-start">
+            {(['free', 'homeschool'] as const).map((k) => (
+              <div key={k} className={`${card} ${k === 'homeschool' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-2xl">{t(`hs.plan.${k}` as StringKey)}</h3>
-                <ul className="grid gap-1.5 list-none p-0 m-0">{[1, 2, 3].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
-                {k === 'coop'
-                  ? <Link to="/pricing#schools" className="font-display text-2xl mt-1">{t('hs.plan.coop.price')}</Link>
-                  : <p className="font-display text-2xl mt-1">{t(`hs.plan.${k}.price` as StringKey, { m: plus })}</p>}
+                <ul className="grid gap-1.5 list-none p-0 m-0">{(k === 'free' ? [1, 2, 3] : [1, 2, 3, 4, 5, 6]).map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
+                <p className="font-display text-2xl mt-1">{t(`hs.plan.${k}.price` as StringKey, { m: home })}</p>
+                {k === 'homeschool' && <Link to="/login?mode=signup&plan=homeschool" className={buttonClasses('primary', 'justify-self-start min-h-12 px-6 hover-pop !bg-text !text-white')}>{t('hs.plan.homeschool.start')}</Link>}
               </div>
             ))}
           </div>

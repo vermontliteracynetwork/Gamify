@@ -44,7 +44,7 @@ export default function ClassPage() {
   const tier = useTier();
   // Downgrade rules: classes past the plan limit stay, read-only.
   const frozen = readOnlyIds(classes, TIERS[tier].classrooms).has(id);
-  const free = tier === 'free';
+  const free = !TIERS[tier].hasClasses;
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     // Classes made before join codes existed get one now.

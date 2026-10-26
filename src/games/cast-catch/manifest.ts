@@ -28,6 +28,13 @@ export const castCatchManifest: GameManifest = {
       { id: 'double', label: 'Doubles the next catch', hint: 'The next catch is worth twice as much' },
       { id: 'mystery', label: 'Mystery', hint: 'A surprise: lose 50 or win up to 500 points' },
     ],
+    classic: [
+      { id: 'classic-rainbow-fish', name: 'Rainbow Fish', ability: 'points', amount: 500, motion: 'sparkle', often: 1, art: 'rainbow-fish' },
+      { id: 'classic-boot', name: 'Old Boot', ability: 'lose', amount: 50, motion: 'bob', often: 2, art: 'boot' },
+      { id: 'classic-watch', name: 'Pocket Watch', ability: 'time', amount: 15, motion: 'wiggle', often: 1, art: 'watch' },
+      { id: 'classic-golden-hook', name: 'Golden Hook', ability: 'double', motion: 'sparkle', often: 1, art: 'golden-hook' },
+      { id: 'classic-bottle', name: 'Message in a Bottle', ability: 'mystery', motion: 'bob', often: 1, art: 'bottle' },
+    ],
   },
   hasCpu: false,
   borrowedFrom: 'Dashboard src/routes/student/FishingDock.tsx (Doc Fishing)',

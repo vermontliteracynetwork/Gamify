@@ -5,9 +5,14 @@ export const APP_NAME = 'Gamify';
 // Placeholder until the domain is bought (development plan, defaults table).
 export const APP_DOMAIN = 'joingamify.com';
 
-export type Tier = 'free' | 'plus' | 'pro';
+// Homeschool is its own plan (teacher, 2026-10-26), shown on the Homeschool
+// page, not on the main Pricing table.
+export type Tier = 'free' | 'plus' | 'pro' | 'homeschool';
 
 export interface TierLimits {
+  // Grouping students into classes (Plus and Pro). Without it the teacher
+  // has one student list, "My students" (teacher, 2026-10-26).
+  hasClasses: boolean;
   classrooms: number;
   studentsPerClassroom: number;
   savedQuestionSets: number;
@@ -16,33 +21,46 @@ export interface TierLimits {
   themesPlayable: boolean;
   // Free: try the builder on one game the developer picks. Plus: one
   // design per game. Pro: unlimited designs (teacher, 2026-10-24).
-  themeBuilder: 'trial' | 'one-per-game' | 'unlimited';
+  // Homeschool: three designs per game.
+  themeBuilder: 'trial' | 'one-per-game' | 'three-per-game' | 'unlimited';
   liveMonitorAndLock: boolean;
   reportHistoryDays: number;
+  // How far ahead a homework deadline can be set (homework links, coming).
+  homeworkDaysAhead: number;
 }
 
 const UNLIMITED = Number.POSITIVE_INFINITY;
 
 export const TIERS: Record<Tier, TierLimits> = {
   free: {
-    classrooms: 1, studentsPerClassroom: 30, savedQuestionSets: 3, assignedSetsPerStudent: 1,
+    hasClasses: false, classrooms: 1, studentsPerClassroom: 30, savedQuestionSets: 3, assignedSetsPerStudent: 1,
     allGames: false, themesPlayable: false, themeBuilder: 'trial', liveMonitorAndLock: false,
-    reportHistoryDays: 30,
+    reportHistoryDays: 30, homeworkDaysAhead: 14,
   },
   plus: {
-    classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
+    hasClasses: true, classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
     allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true,
-    reportHistoryDays: UNLIMITED,
+    reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
   },
   pro: {
-    classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
+    hasClasses: true, classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
     allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true,
-    reportHistoryDays: UNLIMITED,
+    reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
+  },
+  // Homeschool (teacher, 2026-10-26): every game (no early access), 3 theme
+  // designs per game, library themes, up to 10 students, 5 sets assigned at
+  // a time, homework up to 14 days ahead, all-time reports. Live monitor
+  // and Lock predicted on (guess, noted in the development plan).
+  homeschool: {
+    hasClasses: false, classrooms: 1, studentsPerClassroom: 10, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
+    allGames: true, themesPlayable: true, themeBuilder: 'three-per-game', liveMonitorAndLock: true,
+    reportHistoryDays: UNLIMITED, homeworkDaysAhead: 14,
   },
 };
 
 // Placeholders: nothing charges until Stage 7 is approved.
-export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180 };
+// Homeschool $72 a year is a guess until the teacher sets it (Waiting on you).
+export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 72 };
 
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).

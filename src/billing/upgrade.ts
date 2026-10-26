@@ -6,7 +6,7 @@ import { data } from '../data';
 // this device so everything can be tested; then it opens Stripe Checkout
 // with the plan already chosen, and the customer only confirms payment.
 export const TIER_EVENT = 'gamify-tier';
-export async function upgradeTo(plan: 'plus' | 'pro') {
+export async function upgradeTo(plan: 'plus' | 'pro' | 'homeschool') {
   await data.setSetting('tier', plan);
   window.dispatchEvent(new Event(TIER_EVENT));
 }

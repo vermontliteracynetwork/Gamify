@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import type { ThemeItem } from './types';
+import { ClassicItemSvg } from './classicItems';
 
 // A theme's power-up item: its picture (or a colored circle with its first
 // letter), moving the way the theme chose. Still when motion is off.
@@ -17,6 +18,7 @@ export default function ItemArt({ item, size, still = false }: { item: ThemeItem
     <motion.span className="inline-flex items-center justify-center shrink-0" style={{ width: size, height: size }} animate={move.animate} transition={move.transition} aria-hidden="true">
       {item.image
         ? <img src={item.image} alt="" className="w-full h-full object-contain" />
+        : item.art ? <ClassicItemSvg art={item.art} size={size} />
         : <span className="w-full h-full rounded-full border-[2.5px] border-border flex items-center justify-center font-display" style={{ background: item.color ?? '#fdfd94', fontSize: size * 0.4 }}>{item.name.slice(0, 1).toUpperCase()}</span>}
     </motion.span>
   );

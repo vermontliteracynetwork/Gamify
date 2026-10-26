@@ -5,7 +5,7 @@ import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import type { Tier } from '../config';
+import { TIERS, type Tier } from '../config';
 import { Panel } from '../ui/kit';
 import Title from '../ui/Title';
 
@@ -30,7 +30,7 @@ export function useStartSteps(): StartSteps | null {
     const steps = [
       { key: 'play' as const, to: '/teacher/sets', done: log.length > 0 },
       // Classes are Plus and Pro only; Free goes straight to its student list.
-      ...((tier ?? 'free') === 'free' ? [] : [{ key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 }]),
+      ...(!TIERS[tier ?? 'free'].hasClasses ? [] : [{ key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 }]),
       { key: 'students' as const, to: inClass, done: students.length > 0 },
       { key: 'assign' as const, to: inClass, done: assignments.length > 0 },
       { key: 'signin' as const, to: first ? `/arcade/${first}` : '/teacher/classes', done: log.some((e) => e.studentId && !e.studentId.startsWith('guest')) },

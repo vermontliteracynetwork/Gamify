@@ -130,7 +130,7 @@ export default function CastCatch() {
   }
   function reel() {
     const times = doubleNext.current ? 2 : 1;
-    const item = catchItem(theme.items ?? []);
+    const item = catchItem(theme.items ?? castCatchManifest.items!.classic);
     let c: Catch;
     if (item) {
       const e = itemEffect(item);

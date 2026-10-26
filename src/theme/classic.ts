@@ -1,3 +1,4 @@
+import { getGame } from '../games/registry';
 import type { GameTheme } from './types';
 
 // The free house look: deliberately simple (development plan Part 2). Flat
@@ -25,5 +26,7 @@ export function classicTheme(gameId: string): GameTheme {
     backdrop: { kind: 'color' },
     celebration: 'confetti',
     pieces: {},
+    // Every power-up the game can do, in its Classic look (teacher, 2026-10-26).
+    ...(getGame(gameId)?.items && { items: getGame(gameId)!.items!.classic.map((it) => ({ ...it })) }),
   };
 }

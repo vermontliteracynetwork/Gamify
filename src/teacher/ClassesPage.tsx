@@ -24,7 +24,7 @@ export default function ClassesPage() {
   const navigate = useNavigate();
   const { value: loaded } = useAsync(async () => (await data.listClassrooms()).length, []);
   useEffect(() => {
-    if (tier !== 'free' || loaded === undefined) return;
+    if (TIERS[tier].hasClasses || loaded === undefined) return;
     void (async () => {
       const all = await data.listClassrooms();
       const first = [...all].sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
@@ -34,7 +34,7 @@ export default function ClassesPage() {
       navigate(`/teacher/classes/${c.id}`, { replace: true });
     })();
   }, [tier, loaded, navigate]);
-  if (tier === 'free') return null;
+  if (!TIERS[tier].hasClasses) return null;
 
   async function create() {
     const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode(classes.map((x) => x.joinCode ?? '')) };

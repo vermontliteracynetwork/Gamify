@@ -5,6 +5,7 @@ import { PICTURES } from '../../student/pictures';
 import { classicTheme } from '../classic';
 import type { ThemePieceSpec } from '../types';
 import { isRound } from './template';
+import { CLASSIC_ITEM_ART } from '../classicItems';
 
 // The Classic look of one theme piece as plain SVG shapes, at the piece's own
 // size. It is the example on the "Classic example" template pages and
@@ -45,6 +46,12 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
         })}
       </g>
     );
+  }
+  // A Classic power-up page (id item-<art>), scaled from its 100 x 100 drawing.
+  if (id.startsWith('item-') && CLASSIC_ITEM_ART[id.slice(5)]) {
+    const Art = CLASSIC_ITEM_ART[id.slice(5)];
+    const s = m / 100;
+    return <g transform={`translate(${(w - m) / 2} ${(h - m) / 2}) scale(${s})`}><Art /></g>;
   }
   if (id.startsWith('team-')) {
     const k = Number(id.slice(5)) - 1;

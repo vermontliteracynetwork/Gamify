@@ -73,6 +73,9 @@ export interface ItemSlotsSpec {
   width: number;
   height: number;
   abilities: AbilitySpec[];
+  // One Classic item per ability (Classic mode, the example pack, and the
+  // example shown beside each ability in the Theme Builder).
+  classic: ThemeItem[];
 }
 export interface ThemeItem {
   id: string;
@@ -83,6 +86,9 @@ export interface ThemeItem {
   often: ItemOften;
   image?: string;
   color?: string;
+  // Classic art drawn in code (src/theme/classicItems.tsx), used until a
+  // picture is added.
+  art?: string;
 }
 
 // What a theme puts in a piece: a flat color (house themes) or artwork.

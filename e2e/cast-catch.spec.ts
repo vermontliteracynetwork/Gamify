@@ -25,7 +25,8 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   const labels = await buttons.allInnerTexts();
   await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
   await page.getByRole('button', { name: 'Reel it in!' }).click({ timeout: 8000 });
-  await expect(page.getByRole('status').filter({ hasText: / cm / })).toBeVisible();
+  // A fish, or one of the Classic power-ups (a boot, a rainbow fish...).
+  await expect(page.getByRole('status').filter({ hasText: / cm |You reeled in/ })).toBeVisible();
   await page.screenshot({ path: `test-results/cast-caught-${info.project.name}.png` });
   await expect(page.getByLabel('1 fish caught')).toBeVisible();
   expect(problems).toEqual([]);

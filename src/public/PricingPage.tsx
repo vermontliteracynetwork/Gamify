@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { Buildings, Check, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Trash } from '@phosphor-icons/react';
+import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Trash } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, SCHOOL_SEAT_DISCOUNTS, schoolQuote, TIERS, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
@@ -25,7 +25,7 @@ export default function PricingPage() {
   useEffect(() => { const id = window.location.hash.slice(1); if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 50); }, [reduce]);
   const rows: { label: string; value: (tier: Tier) => string | boolean }[] = [
     { label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
-    { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
+    { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
     { label: t('pricing.row.library'), value: (x) => TIERS[x].themesPlayable },
     { label: t('pricing.row.classes'), value: (x) => (x === 'free' ? false : fmt(TIERS[x].classrooms)) },
     { label: t('pricing.row.students'), value: (x) => fmt(TIERS[x].studentsPerClassroom) },
@@ -80,6 +80,11 @@ export default function PricingPage() {
             );
           })}
         </div>
+        <Link to="/homeschool" className="hover-lift flex flex-wrap items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel p-4 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <House weight="fill" size={30} aria-hidden="true" />
+          <span className="grid flex-1 min-w-60"><span className="font-display text-2xl">{t('pricing.homeschoolLink')}</span><span className="font-semibold">{t('pricing.homeschoolLinkText')}</span></span>
+          <ArrowRight weight="bold" size={24} aria-hidden="true" />
+        </Link>
 
         <section aria-labelledby="themes-value" className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <span className="w-16 h-16 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><PaintBrush weight="fill" size={32} aria-hidden="true" /></span>

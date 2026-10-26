@@ -239,9 +239,11 @@ test.describe('buyer pages', () => {
     await page.getByRole('link', { name: /Student data promise/ }).first().click();
     await expect(page.getByRole('heading', { level: 1, name: /Our Student Data Promise/i })).toBeVisible();
     await page.goto('/homeschool');
-    await page.getByRole('link', { name: 'Get a co-op quote' }).click();
-    await expect(page).toHaveURL(/pricing#schools/);
-    await expect(page.locator('#schools')).toBeInViewport();
+    // The Homeschool plan lives on the Homeschool page, linked from Pricing.
+    await expect(page.getByRole('link', { name: 'Start the Homeschool plan' })).toBeVisible();
+    await page.goto('/pricing');
+    await page.getByRole('link', { name: /Homeschooling\? See the Homeschool plan/ }).click();
+    await expect(page).toHaveURL(/homeschool/);
   });
 });
 

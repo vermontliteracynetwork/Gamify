@@ -100,6 +100,7 @@ function StudentRequests() {
     const made = themes.filter((th) => th.source === 'custom');
     if (plan === 'trial') return gameId !== THEME_TRIAL_GAME ? t('builder.limitTrialGame') : made.length >= 1 ? t('builder.limitTrial') : null;
     if (plan === 'one-per-game') return made.some((th) => th.gameId === gameId) ? t('builder.limitPlus') : null;
+    if (plan === 'three-per-game') return made.filter((th) => th.gameId === gameId).length >= 3 ? t('builder.limitHomeschool') : null;
     return null;
   };
   return (
@@ -167,8 +168,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     : plan === 'trial' && gameId !== THEME_TRIAL_GAME ? t('builder.limitTrialGame')
     : plan === 'trial' && isNew && madeCount >= 1 ? t('builder.limitTrial')
     : plan === 'one-per-game' && isNew && mine.length >= 1 ? t('builder.limitPlus')
+    : plan === 'three-per-game' && isNew && mine.length >= 3 ? t('builder.limitHomeschool')
     : null;
-  const problems = useMemo(() => themeProblems(draft), [draft]);
+  const problems = useMemo(() => [...themeProblems(draft), ...((draft.items ?? []).some((it) => !it.name.trim()) ? [t('builder.items.nameEvery')] : [])], [draft]);
   const filled = game.themePieces.filter((p) => draft.pieces[p.id]?.image).length;
 
   function setPiece(id: string, image: string | undefined) {
@@ -278,7 +280,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                             onClick={async () => {
                               setDl(t('builder.dl.making'));
                               const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
-                              saveFile(await digitalZip(game.name, gameId, [...game.themePieces, ...(game.items ? [{ id: 'item', label: t('builder.items.piece'), width: game.items.width, height: game.items.height, hint: t('builder.items.pieceHint') }] : [])], example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
+                              saveFile(await digitalZip(game.name, gameId, [...game.themePieces, ...itemPages(game.items, example)], example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
                               setDl(t('builder.dl.ready'));
                             }}>{example ? t('builder.dl.example') : t('builder.dl.blank')} (.zip)</Button>
                         ))}
@@ -403,6 +405,14 @@ function PieceCard({ piece, image, onFile, onClear }: { piece: ThemePieceSpec; i
   );
 }
 
+// Template pages for power-ups: one blank page, or (Classic example) a page
+// for each Classic power-up so designers see what each one is.
+export function itemPages(spec: ItemSlotsSpec | undefined, example: boolean): ThemePieceSpec[] {
+  if (!spec) return [];
+  if (!example) return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
+  return spec.classic.map((c) => ({ id: `item-${c.art}`, label: t('builder.items.pieceNamed', { name: c.name }), width: spec.width, height: spec.height, hint: spec.abilities.find((a) => a.id === c.ability)?.label ?? '' }));
+}
+
 // Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns
 // for what it does (only the abilities this game's code can do), how much,
 // how it moves and how often it turns up. Not every ability has to be used.
@@ -411,7 +421,8 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface w-full';
   function add() {
     const a = spec.abilities[0];
-    onChange([...items, { id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }]);
+    // New ones go first, unnamed: every power-up needs its own name.
+    onChange([{ id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }, ...items]);
   }
   return (
     <div className="grid gap-3">
@@ -435,6 +446,12 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
                 {spec.abilities.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
               <span className="text-xs font-semibold text-muted">{ability.hint}</span>
+              {spec.classic.find((c) => c.ability === ability.id) && (
+                <span className="flex items-center gap-2 text-xs font-bold">
+                  <ItemArt item={spec.classic.find((c) => c.ability === ability.id)!} size={32} still />
+                  {t('builder.items.example', { name: spec.classic.find((c) => c.ability === ability.id)!.name })}
+                </span>
+              )}
             </label>
             {ability.amount && (
               <label className="grid gap-1 font-bold text-sm">{ability.amount.label}: {it.amount ?? ability.amount.default}

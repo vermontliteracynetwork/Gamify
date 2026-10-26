@@ -8,6 +8,7 @@ import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Button, Panel, Tabs } from '../ui/kit';
 import { openUpgrade } from '../billing/Upgrade';
+import { upgradeTo } from '../billing/upgrade';
 import Title from '../ui/Title';
 
 // Teacher log in and sign up (teacher, 2026-10-26): sign up with email,
@@ -35,6 +36,8 @@ export default function LoginPage() {
     // Picked a paid plan on the pricing page: the plan box opens with it ready.
     const plan = params.get('plan');
     if (plan === 'plus' || plan === 'pro') setTimeout(() => openUpgrade(plan), 0);
+    // The Homeschool plan is picked on the Homeschool page (no plan box).
+    if (plan === 'homeschool') void upgradeTo('homeschool');
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
