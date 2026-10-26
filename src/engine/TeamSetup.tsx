@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { DiceFive, Minus, Play, Plus } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -24,9 +25,11 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   embedded?: boolean;
 }) {
   const human: Slot['kind'] = mode === 'share' ? 'team' : 'student';
+  // Play or share passes how teams are made (?teams=teacher|random|class).
+  const how = mode === 'share' ? new URLSearchParams(useLocation().search).get('teams') : null;
   const [slots, setSlots] = useState<Slot[]>(() => {
     const first = rollName();
-    return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, Math.max(min, 2));
+    return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
   });
   const [opponent, setOpponent] = useState<'cpu' | 'teacher'>('cpu');
   const [members, setMembers] = useState<string[][]>([]);
@@ -119,7 +122,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
         ))}
       </ol>
 
-      {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} onChange={setMembers} />}
+      {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
 
       {solo && (
         <Choice label={t('teams.opponent')} value={opponent} options={[['cpu', 'teams.vsCpu'], ['teacher', 'teams.vsTeacher']]} onChange={setOpponent} />
@@ -152,7 +155,7 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
 // Optional: put students from a class list on the teams (random, balanced
 // by how often they get questions right, or hand-picked), and save the
 // arrangement to use again.
-function ClassTeams({ teams, names, icons, onChange }: { teams: number; names: string[]; icons: number[]; onChange: (m: string[][]) => void }) {
+function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { teams: number; names: string[]; icons: number[]; autoRandom?: boolean; onChange: (m: string[][]) => void }) {
   const { value: classes = [] } = useAsync(() => data.listClassrooms());
   const [classId, setClassId] = useState('');
   const { value: students = [] } = useAsync<Student[]>(async () => (classId ? data.listStudents(classId) : []), [classId]);
@@ -177,6 +180,9 @@ function ClassTeams({ teams, names, icons, onChange }: { teams: number; names: s
     setHeld(null);
     apply(g);
   }
+  // Random teams: the first student list, mixed as soon as it loads.
+  useEffect(() => { if (autoRandom && !classId && classes.length) setClassId(classes[0].id); }, [autoRandom, classes.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (autoRandom && students.length && groups.length === 0) void make('random'); }, [autoRandom, students.length, teams]); // eslint-disable-line react-hooks/exhaustive-deps
   if (classes.length === 0) return null;
   const unplaced = students.filter((s) => !groups.flat().includes(s.id));
 

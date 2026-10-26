@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
@@ -46,12 +46,14 @@ function Room({ game }: { game: GameCode }) {
   const { settings } = useSettings();
   const [approve, setApprove] = useState(true);
   const [view, setView] = useState<'screen' | 'monitor'>('screen');
-  const [board, setBoard] = useState<'leaders' | 'goal'>('leaders');
+  // Play or share passes compete or together (?mode=).
+  const startMode = new URLSearchParams(useLocation().search).get('mode') === 'together' ? 'together' : 'compete';
+  const [board, setBoard] = useState<'leaders' | 'goal'>(startMode === 'together' ? 'goal' : 'leaders');
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
-  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1 });
+  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode });
   const link = useRef<LiveLink>();
   const approveRef = useRef(approve);
   approveRef.current = approve;

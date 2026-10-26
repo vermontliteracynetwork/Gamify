@@ -7,25 +7,26 @@ import type { QuestionSet } from './types';
 // Game codes (development plan Part 3B, path 2): the teacher picks a set and
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; rosterClass?: string; cloud?: boolean }
+// `due` (YYYY-MM-DD) makes it homework: the code works through that day.
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; rosterClass?: string; cloud?: boolean; due?: string }
 const KEY = 'game-codes';
 // Game codes stop working after two weeks (development plan Stage 5:
 // codes expire), so an old code on a board can't be reused by strangers.
 export const GAME_CODE_DAYS = 14;
-const fresh = (c: GameCode, now = Date.now()) => now - Date.parse(c.createdAt) < GAME_CODE_DAYS * 86400000;
+const fresh = (c: GameCode, now = Date.now()) => (c.due ? now <= Date.parse(`${c.due}T23:59:59`) : now - Date.parse(c.createdAt) < GAME_CODE_DAYS * 86400000);
 
 export async function listGameCodes(): Promise<GameCode[]> {
   return ((await data.getSetting<GameCode[]>(KEY)) ?? []).filter((c) => fresh(c));
 }
 
-export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' = 'play'): Promise<GameCode> {
+export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' = 'play', due?: string): Promise<GameCode> {
   const all = await listGameCodes();
   const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror';
   // A two-device game gets a fresh code every time; others reuse theirs.
-  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus);
+  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && c.due === due);
   if (same) return same;
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }) };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(due && { due }) };
   await data.setSetting(KEY, [...all, code]);
   await shareToCloud(code, kind);
   return code;
@@ -40,6 +41,8 @@ async function shareToCloud(code: GameCode, kind: 'play' | 'live' | 'versus' | '
   await supabase.from('game_codes').upsert({
     code: code.code, game_id: code.gameId, set_id: code.setId, kind,
     set_snapshot: set ?? {}, roster_class: classes[0]?.id ?? null,
+    // Homework due dates need 0009_homework_due.sql.
+    ...(code.due && { due: code.due }),
   });
 }
 
