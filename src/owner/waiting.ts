@@ -7,15 +7,12 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'network', kind: 'setup', added: '2026-10-25', title: 'Widen network access for the Gamify cloud environment',
-    why: 'Beth\'s sales research can search but cannot open web pages, and Supabase is blocked, so research and the cloud database are on hold.',
-    how: 'Environment menu in the session title bar, Edit, Network access: a broader level, or add *.supabase.co and the research sites under Allowed domains. Then start a new session.' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },
-  { id: 'supabase', kind: 'setup', added: '2026-10-24', title: 'Run the database migrations and make yourself owner',
-    why: 'Cloud accounts, school quotes and beta requests need the tables and security rules.',
-    how: 'Supabase SQL Editor: run supabase/migrations 0001 to 0005 in order, then supabase/owner.sql (create your login under Authentication, Users first). Links are on GitHub on the claude/awesome-mccarthy-93hliu branch.' },
+  { id: 'supabase-0006', kind: 'setup', added: '2026-10-26', title: 'Turn on cloud accounts: run 0006 and set the sign-in web address',
+    why: 'Teacher accounts and saved work move to the cloud, and the early-access notice comes off. Migrations 0001 to 0005 and owner.sql are done.',
+    how: 'Supabase SQL Editor: run supabase/migrations/0006_cloud_accounts.sql. Then Authentication, URL Configuration: Site URL https://gamify-nine-inky.vercel.app, and add https://*-vermontliteracynetwork.vercel.app/** under Redirect URLs.' },
   { id: 'stripe', kind: 'money', added: '2026-10-24', title: 'Open a Stripe account',
     why: 'Plus, Pro, school invoices and the Vermont Literacy Network beta code all run through it.',
     how: 'Create the account in the business\'s name, confirm prices ($96 and $180 a year), and add the keys to Vercel.' },
