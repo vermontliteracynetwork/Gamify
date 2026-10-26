@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { signUpTeacher } from './setup';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -31,8 +32,7 @@ test('the games need sign-in; a student joins with a class code', async ({ page 
 
   // Teacher logs in on this device and makes a class with a join code.
   await page.goto('/login');
-  await page.getByLabel('Your name (what students see)').fill('Ms. Rivera');
-  await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await signUpTeacher(page);
   await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
   await expect(page.getByText('0 of 5 done')).toBeVisible();
   await page.getByLabel('New class name').fill('Room 3');
@@ -57,7 +57,7 @@ test('the games need sign-in; a student joins with a class code', async ({ page 
 
 test('teacher hosts one set with a game code; a student joins by link and plays that set', async ({ page }, info) => {
   await page.goto('/login');
-  await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await signUpTeacher(page);
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Ready-made sets' }).click();
   await page.getByLabel('Search titles and tags').fill('habitats');

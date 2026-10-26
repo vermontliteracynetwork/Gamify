@@ -70,6 +70,8 @@ export interface GameTheme {
   pieces: Record<string, PieceArt>;
   cover?: string;
   designedBy?: string;
+  // Optional first name or nickname of the student who designed it.
+  studentDesigner?: string;
   sounds?: SoundPack;
   // Sharing beyond the teacher's own classes (teacher, 2026-10-25): sent to
   // the public gallery, where the owner reviews it before anyone sees it.

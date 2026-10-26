@@ -12,6 +12,7 @@ import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
 import { Button, buttonClasses, PageHeader, Panel } from '../../ui/kit';
 import TeacherNav from '../../ui/TeacherNav';
+import { teacherUsername } from '../credit';
 import { classicTheme } from '../classic';
 import { deleteMadeTheme, saveMadeTheme, useMadeThemes } from '../made';
 import { APPROVED_FONTS, SOUND_PACKS, THEME_FONTS, type GameTheme, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
@@ -118,7 +119,7 @@ function StudentRequests() {
               {blocked && <div className="flex flex-wrap items-center gap-2"><p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
               <div className="flex flex-wrap gap-2">
                 <Button variant="primary" disabled={!!blocked} onClick={async () => {
-                  await saveMadeTheme({ ...r.theme, source: 'custom', designedBy: room || undefined });
+                  await saveMadeTheme({ ...r.theme, source: 'custom', designedBy: teacherUsername() || room || undefined });
                   await removeThemeRequest(r.id); reload(); reloadRequests();
                   setStatus(t('builder.approved', { name: r.theme.name }));
                 }}><CheckCircle weight="bold" size={18} />{t('builder.approve')}</Button>
@@ -194,7 +195,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     } finally { setBusy(false); }
   }
   async function save() {
-    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : draft.designedBy?.trim() || undefined };
+    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
     await saveMadeTheme(theme);
     reload();
     setParams({ id: theme.id });
@@ -242,10 +243,10 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             </div>
             {!owner && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <label htmlFor="theme-by" className="font-bold">{t('builder.designedBy')}</label>
-                <input id="theme-by" value={draft.designedBy ?? ''} maxLength={30} onChange={(e) => setDraft({ ...draft, designedBy: e.target.value || undefined })} placeholder={t('builder.designedByPlaceholder')}
-                  className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-40 max-w-72" />
-                <span className="text-xs font-semibold text-muted">{t('builder.designedByHint')}</span>
+                <p className="font-bold">{t('builder.creditedTo', { name: teacherUsername() })}</p>
+                <label htmlFor="theme-student" className="font-bold">{t('builder.studentDesigner')}</label>
+                <input id="theme-student" value={draft.studentDesigner ?? ''} maxLength={20} onChange={(e) => setDraft({ ...draft, studentDesigner: e.target.value || undefined })} placeholder={t('builder.studentDesignerPlaceholder')}
+                  className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-32 max-w-48" />
               </div>
             )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
@@ -420,7 +421,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 // (teacher, 2026-10-25). Credit is the class name, never a student's.
 function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
   const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
-  const ready = saved && !problems && !!theme.designedBy?.trim();
+  const ready = saved && !problems;
   const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-[2px] font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
   return (
     <div className="grid gap-3">
@@ -430,7 +431,6 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
         <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-50`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
       </div>
       {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
-        : !theme.designedBy?.trim() ? <p className="text-sm font-bold">{t('builder.shareNeedsCredit')}</p>
         : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p> : null}
       {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}</p>}
       <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${CHALLENGE_OPEN && inGallery ? '' : 'opacity-60'}`}>

@@ -28,11 +28,21 @@ test('reports group the question log, show the most common wrong answer, and dow
   expect(problems).toEqual([]);
 });
 
-test('Get started stays at the top of every teacher tab until done', async ({ page }) => {
-  for (const path of ['/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes', '/teacher/account']) {
+test('Get started stays at the top of every teacher tab until done, except Account; it minimizes', async ({ page }) => {
+  for (const path of ['/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes']) {
     await page.goto(path);
     await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
   }
+  await page.getByRole('button', { name: 'Minimize the get started steps' }).click();
+  await expect(page.getByRole('link', { name: /Make your class/ })).toHaveCount(0);
+  await page.goto('/teacher/sets');
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Make your class/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Show the get started steps' }).click();
+  await expect(page.getByRole('link', { name: /Make your class/ })).toBeVisible();
+  await page.goto('/teacher/account');
+  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
+  await page.goto('/teacher/themes');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
   await page.getByRole('button', { name: /^Get started \d\/5$/ }).click();
@@ -50,4 +60,17 @@ test('classes list shows each class\'s week at a glance', async ({ page }) => {
   });
   await page.goto('/teacher/classes');
   await expect(page.getByText('This week: 4 questions answered, 75% right, 2 students played. Most played: Game Show.')).toBeVisible();
+});
+
+test('the example report shows 20 students on every plan, even with no class data', async ({ page }, info) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })); });
+  await page.goto('/teacher/reports');
+  await expect(page.getByText(/This is an example: 20 students/)).toBeVisible();
+  await expect(page.getByRole('rowheader')).toHaveCount(20);
+  await expect(page.getByRole('rowheader', { name: 'Ava' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Question' }).click();
+  await expect(page.getByRole('rowheader', { name: '3 + 6 =' })).toBeVisible();
+  await page.screenshot({ path: `test-results/reports-example-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Back to my reports' }).click();
+  await expect(page.getByText('No answers yet for these filters. Play a game and come back.')).toBeVisible();
 });

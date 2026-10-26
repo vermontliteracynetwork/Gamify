@@ -47,7 +47,7 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByLabel('Theme name').fill('Rainbow Room');
-  await page.getByLabel('Designed by').fill('Room 12');
+  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Rainbow Room.', { exact: false })).toBeVisible();
   await page.getByRole('tab', { name: 'Share' }).click();
@@ -66,5 +66,5 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
 
   await page.goto('/themes');
   await expect(page.getByRole('heading', { name: 'Rainbow Room' })).toBeVisible();
-  await expect(page.getByText('Made by Room 12')).toBeVisible();
+  await expect(page.getByText('Made by Test Teacher, designed by Ava')).toBeVisible();
 });

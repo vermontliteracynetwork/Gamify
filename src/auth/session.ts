@@ -6,7 +6,7 @@ import { useSession as useStudentSession } from '../student/session';
 // a teacher stays signed in on their own computer.
 const KEY = 'gamify:teacher-session';
 const EVENT = 'gamify-teacher-session';
-export interface TeacherSession { name: string; at: string }
+export interface TeacherSession { name: string; at: string; username?: string }
 
 export function getTeacher(): TeacherSession | null {
   try { const raw = localStorage.getItem(KEY); return raw ? (JSON.parse(raw) as TeacherSession) : null; } catch { return null; }

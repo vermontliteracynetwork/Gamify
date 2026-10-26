@@ -11,6 +11,7 @@ type Row = [prompt: string, right: string, ...wrong: string[]];
 // (null where Common Core doesn't cover the subject).
 type Details = { grades: [Grade, Grade]; subject: Subject; tags: string[]; standards: string[] | null };
 const DETAILS: Record<string, Details> = {
+  'lib-example-addition': { grades: ['K', '2'], subject: 'Math', tags: ['addition', 'math facts', 'example'], standards: ['1.OA.6', '2.OA.2'] },
   'lib-short-vowels': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'vowels'], standards: ['RF.K.3', 'RF.1.3'] },
   'lib-rhymes': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'rhyming', 'phonological awareness'], standards: ['RF.K.2', 'RF.1.2'] },
   'lib-sight-words': { grades: ['K', '1'], subject: 'Reading', tags: ['sight words', 'high-frequency words'], standards: ['RF.K.3', 'RF.1.3'] },
@@ -46,6 +47,30 @@ function makeSet(id: string, name: string, _grade: string, _subject: string, row
 }
 
 export const LIBRARY: QuestionSet[] = [
+  // The example set (teacher, 2026-10-26): first in the library, and the
+  // set the example report is built from.
+  makeSet('lib-example-addition', 'Example: Addition facts 0 to 10', 'K-2', 'Math', [
+    ['3 + 6 =', '9', '10', '8', '11'],
+    ['2 + 5 =', '7', '8', '6', '9'],
+    ['4 + 4 =', '8', '9', '7', '10'],
+    ['7 + 1 =', '8', '9', '7', '10'],
+    ['0 + 9 =', '9', '10', '8', '11'],
+    ['5 + 3 =', '8', '9', '7', '10'],
+    ['6 + 6 =', '12', '13', '11', '14'],
+    ['8 + 2 =', '10', '11', '9', '12'],
+    ['1 + 9 =', '10', '11', '9', '12'],
+    ['10 + 0 =', '10', '11', '9', '12'],
+    ['7 + 5 =', '12', '13', '11', '14'],
+    ['9 + 4 =', '13', '14', '12', '15'],
+    ['3 + 8 =', '11', '12', '10', '13'],
+    ['6 + 2 =', '8', '9', '7', '10'],
+    ['5 + 5 =', '10', '11', '9', '12'],
+    ['4 + 7 =', '11', '12', '10', '13'],
+    ['10 + 3 =', '13', '14', '12', '15'],
+    ['8 + 8 =', '16', '17', '15', '18'],
+    ['2 + 9 =', '11', '12', '10', '13'],
+    ['9 + 6 =', '15', '16', '14', '17'],
+  ]),
   makeSet('lib-short-vowels', 'Short vowel sounds', 'K-1', 'Reading', [
     ['Which word has the short a sound, like in "cat"?', 'map', 'cake', 'rain', 'saw'],
     ['Which word has the short e sound, like in "bed"?', 'pet', 'feet', 'me', 'her'],

@@ -15,7 +15,7 @@ export const WAITING: WaitingItem[] = [
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },
   { id: 'supabase', kind: 'setup', added: '2026-10-24', title: 'Run the database migrations and make yourself owner',
     why: 'Cloud accounts, school quotes and beta requests need the tables and security rules.',
-    how: 'Supabase SQL Editor: run supabase/migrations 0001 to 0004 in order, then supabase/owner.sql (create your login under Authentication, Users first). Links are on GitHub on the claude/awesome-mccarthy-93hliu branch.' },
+    how: 'Supabase SQL Editor: run supabase/migrations 0001 to 0005 in order, then supabase/owner.sql (create your login under Authentication, Users first). Links are on GitHub on the claude/awesome-mccarthy-93hliu branch.' },
   { id: 'stripe', kind: 'money', added: '2026-10-24', title: 'Open a Stripe account',
     why: 'Plus, Pro, school invoices and the Vermont Literacy Network beta code all run through it.',
     how: 'Create the account in the business\'s name, confirm prices ($96 and $180 a year), and add the keys to Vercel.' },

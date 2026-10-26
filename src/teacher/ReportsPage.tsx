@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { DownloadSimple, SortAscending, SortDescending } from '@phosphor-icons/react';
+import { DownloadSimple, Eye, SortAscending, SortDescending } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -13,6 +13,7 @@ import { listLiveEvents } from '../live/events';
 import TeacherNav from '../ui/TeacherNav';
 import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 import { UpgradeButton } from '../billing/Upgrade';
+import { EXAMPLE_CLASS, EXAMPLE_STUDENTS, exampleLog } from './exampleReport';
 
 // Teacher reports over the question log (development plan Stage 4): group
 // by student, question, set, game, day or team; filter, sort, search, see
@@ -21,10 +22,19 @@ type SortKey = 'label' | 'asked' | 'pct' | 'firstTry' | 'avgSeconds';
 
 export default function ReportsPage() {
   const tier = useTier();
-  const { value: classes = [] } = useAsync(() => data.listClassrooms());
+  const { value: realClasses = [] } = useAsync(() => data.listClassrooms());
   const [classId, setClassId] = useState('');
-  const { value: log = [] } = useAsync(() => data.listQuestionLog(classId ? { classroomId: classId } : undefined), [classId]);
-  const { value: students = [] } = useAsync<Student[]>(async () => (classId ? data.listStudents(classId) : (await Promise.all((await data.listClassrooms()).map((c) => data.listStudents(c.id)))).flat()), [classId]);
+  const { value: realLog } = useAsync(() => data.listQuestionLog(classId ? { classroomId: classId } : undefined), [classId]);
+  const { value: realStudents = [] } = useAsync<Student[]>(async () => (classId ? data.listStudents(classId) : (await Promise.all((await data.listClassrooms()).map((c) => data.listStudents(c.id)))).flat()), [classId]);
+  // The example report (every plan): shown until the class has played, and
+  // any time after with the "See the example report" button.
+  const [exampleOn, setExampleOn] = useState<boolean | null>(null);
+  const hasReal = (realLog?.length ?? 0) > 0 || (!!classId && classId !== EXAMPLE_CLASS.id);
+  const example = exampleOn ?? (realLog !== undefined && !hasReal);
+  const sample = useMemo(() => exampleLog(), []);
+  const classes = example ? [EXAMPLE_CLASS] : realClasses;
+  const log = example ? sample : realLog ?? [];
+  const students = example ? EXAMPLE_STUDENTS : realStudents;
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [by, setBy] = useState<GroupBy>('student');
@@ -32,7 +42,7 @@ export default function ReportsPage() {
   const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({ key: 'asked', desc: true });
 
   const days = TIERS[tier].reportHistoryDays;
-  const since = Number.isFinite(days) ? new Date(Date.now() - days * 86400000).toISOString().slice(0, 10) : undefined;
+  const since = Number.isFinite(days) && !example ? new Date(Date.now() - days * 86400000).toISOString().slice(0, 10) : undefined;
   const names = {
     student: (id?: string) => students.find((s) => s.id === id)?.name ?? t('reports.noStudent'),
     set: (id?: string) => sets.find((s) => s.id === id)?.name ?? t('reports.noSet'),
@@ -71,6 +81,12 @@ export default function ReportsPage() {
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
         actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
+      <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-accent' : ''}`}>
+        <Eye weight="fill" size={24} aria-hidden="true" />
+        <p className="font-bold flex-1 min-w-60">{example ? t('reports.exampleOn') : t('reports.exampleOff')}</p>
+        <button type="button" onClick={() => { setExampleOn(!example); setClassId(''); setFilter({}); }} aria-pressed={example}
+          className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold">{example ? t('reports.exampleHide') : t('reports.exampleShow')}</button>
+      </Panel>
       <Tabs label={t('reports.groupBy')} value={by} onChange={setBy} options={(['student', 'question', 'set', 'game', 'day', 'team'] as GroupBy[]).map((g) => ({ id: g, label: t(`reports.by.${g}`) }))} />
       <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4">
         <select aria-label={t('reports.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setFilter({ ...filter, studentId: undefined }); }} className={field}>
@@ -125,7 +141,7 @@ export default function ReportsPage() {
           </table>
         </div>
       )}
-      <LiveLog />
+      {!example && <LiveLog />}
     </main>
   );
 }

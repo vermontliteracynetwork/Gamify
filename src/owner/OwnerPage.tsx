@@ -6,6 +6,7 @@ import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
+import { creditLine } from '../theme/credit';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
 import { Button, PageHeader } from '../ui/kit';
@@ -257,7 +258,7 @@ function GalleryCard() {
           <ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} />
           <div className="grid gap-2 content-start">
             <p className="font-display text-xl">{th.name}</p>
-            <p className="text-sm font-semibold text-muted">{th.designedBy}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
+            <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
             <div className="flex flex-wrap gap-2 items-center">
               <Button variant="primary" onClick={() => void decide(th, 'approved')}>{t('owner.approve')}</Button>
               <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold text-sm">

@@ -18,14 +18,7 @@ type Plan = 'plus' | 'pro';
 // student page.
 export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; onClose: () => void }) {
   const { settings } = useSettings();
-  const tier = useTier();
   const [done, setDone] = useState<Plan | null>(null);
-  async function go(plan: Plan) {
-    await upgradeTo(plan);
-    setDone(plan);
-    if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 }, disableForReducedMotion: true });
-  }
-  const plans: Plan[] = ['plus', 'pro'];
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
       <DialogFocus onClose={onClose} />
@@ -42,6 +35,25 @@ export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; o
             <button type="button" onClick={onClose} className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop')}>{t('upgrade.keepGoing')}</button>
           </div>
         ) : (
+          <PlanCards suggest={suggest} onDone={setDone} />
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// The plan cards with their one-tap upgrade buttons, in the upgrade box and
+// on the Account page (teacher, 2026-10-26: make upgrading really easy there).
+export function PlanCards({ suggest = 'plus', onDone }: { suggest?: Plan; onDone: (plan: Plan) => void }) {
+  const { settings } = useSettings();
+  const tier = useTier();
+  async function go(plan: Plan) {
+    await upgradeTo(plan);
+    onDone(plan);
+    if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 80, spread: 80, origin: { y: 0.5 }, disableForReducedMotion: true });
+  }
+  const plans: Plan[] = ['plus', 'pro'];
+  return (
           <div className="grid sm:grid-cols-2 gap-3">
             {plans.map((p) => (
               <div key={p} className={`rounded-panel border-[2.5px] border-border p-4 grid gap-3 content-start ${p === suggest ? 'bg-accent' : 'bg-surface'}`}>
@@ -54,9 +66,6 @@ export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; o
             ))}
             <p className="text-sm font-semibold text-muted sm:col-span-2">{t('upgrade.cancelAnytime')}</p>
           </div>
-        )}
-      </motion.div>
-    </div>
   );
 }
 

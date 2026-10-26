@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DownloadSimple, Trash } from '@phosphor-icons/react';
+import { Crown, DownloadSimple, Trash } from '@phosphor-icons/react';
+import { PlanCards } from '../billing/Upgrade';
 import { setTeacher, useTeacher } from '../auth/session';
 import { TIERS } from '../config';
 import { data } from '../data';
-import { useTier } from '../data/hooks';
+import { useAsync, useTier } from '../data/hooks';
 import { t } from '../i18n';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
@@ -16,6 +17,14 @@ export default function AccountPage() {
   const tier = useTier();
   const navigate = useNavigate();
   const [confirm, setConfirm] = useState('');
+  const [upgraded, setUpgraded] = useState<string | null>(null);
+  // What the class already gets from Gamify, so the plan talk starts from
+  // value (teacher rule: lead with value, never the price).
+  const { value: used } = useAsync(async () => {
+    const classes = await data.listClassrooms();
+    const students = (await Promise.all(classes.map((c) => data.listStudents(c.id)))).flat();
+    return { answers: (await data.listQuestionLog()).length, students: students.length, sets: (await data.listQuestionSets()).length };
+  });
 
   async function exportAll() {
     const classes = await data.listClassrooms();
@@ -48,6 +57,15 @@ export default function AccountPage() {
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
         <p className="font-semibold">{t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) }).replace(/Infinity/g, t('pricing.unlimited'))}</p>
+        <p className="font-bold text-lg">{used && used.answers > 0 ? t('account.value', { answers: used.answers, students: used.students, sets: used.sets }) : t('account.valueNew')}</p>
+        {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : tier === 'pro' ? (
+          <p className="font-bold flex items-center gap-2"><Crown weight="fill" size={22} aria-hidden="true" />{t('account.topPlan')}</p>
+        ) : (
+          <>
+            <p className="font-display text-xl">{tier === 'plus' ? t('account.moreFromPro') : t('account.moreFrom')}</p>
+            <PlanCards suggest={tier === 'plus' ? 'pro' : 'plus'} onDone={(p) => setUpgraded(t(`pricing.${p}`))} />
+          </>
+        )}
         <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
       </Panel>
       <Panel className="grid gap-2">

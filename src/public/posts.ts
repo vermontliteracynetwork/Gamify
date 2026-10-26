@@ -26,7 +26,7 @@ export const POSTS: Post[] = [
       'Kids care about a game more when they made part of it. The Theme Builder turns that into a lesson plan: print the template, hand each student a page, and let them design one piece of the game, like a card back, a team picture or the background.',
       'When the drawings are done, take a photo of each page with an iPad or phone. Gamify finds the outline on every page, straightens it, and cuts out the drawing, so the pieces drop into place without any cropping by hand.',
       'Then play. We like pairing a new theme with a fractions set in Game Show: teams pick a card, tap the right answer, and the card turns over to show points. The art on every card is theirs, and you will hear about it.',
-      'The theme is credited to the class (Made by Room 12), never to a single student, so nobody\'s name appears on screen.',
+      'The theme is credited to your username, and you can add the designer\'s first name or a nickname, never a full name.',
     ],
     tryIt: [
       'Open Theme Builder, pick Game Show, and print the template.',

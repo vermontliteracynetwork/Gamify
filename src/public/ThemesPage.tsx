@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Heart, PaintBrush, Trophy } from '@phosphor-icons/react';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
+import { creditLine } from '../theme/credit';
 import type { StringKey } from '../i18n/en';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
@@ -99,7 +100,7 @@ export default function ThemesPage() {
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[2px] border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: x.theme.designedBy ?? '' }) : t('themes.byGamify')}</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[2px] border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
                   <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>

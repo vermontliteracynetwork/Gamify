@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { ChartBar, ChatTeardropText, PaintBrush, RocketLaunch, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
 import TeacherSurvey from '../beta/TeacherSurvey';
 import { surveyDue, type SurveyId } from '../beta/surveys';
@@ -19,7 +19,9 @@ export default function TeacherNav(_props: { startOpen?: boolean }) {
   const showing = open ?? true;
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
-  const unfinished = start && start.count < start.steps.length;
+  // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.
+  const onAccount = useLocation().pathname.startsWith('/teacher/account');
+  const unfinished = start && start.count < start.steps.length && !onAccount;
   return (
     <>
       <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-4">

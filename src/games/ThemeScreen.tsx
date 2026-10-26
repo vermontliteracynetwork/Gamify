@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, LockSimple, X } from '@phosphor-icons/react';
 import { t } from '../i18n';
+import { creditLine } from '../theme/credit';
 import ThemePreview from '../theme/builder/ThemePreview';
 import type { GameTheme } from '../theme/types';
 import Title from '../ui/Title';
@@ -31,7 +32,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                   <span className="flex-1 truncate">{th.name}</span>
                   {on && <span className="w-7 h-7 rounded-full bg-accent border-[2px] border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
                 </span>
-                {th.designedBy && <span className="text-xs font-bold text-muted px-1">{t('themeScreen.by', { name: th.designedBy })}</span>}
+                {th.designedBy && <span className="text-xs font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
               </button>
             );
           })}

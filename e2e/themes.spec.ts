@@ -37,7 +37,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.screenshot({ path: `test-results/builder-games-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: /Game Show/ }).click();
   await page.getByLabel('Theme name').fill('Ocean Party');
-  await page.getByLabel('Designed by').fill('Room 12');
+  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
   const cardBack = page.locator('input[type=file]').nth(2); // Upload tab: page photos, background, then card back
   await cardBack.setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: await png(page, '#2a9df4') });
   await expect(page.getByLabel('Added')).toHaveCount(1);
@@ -54,7 +54,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('radio', { name: 'Ocean Party' }).click();
-  await expect(page.getByText('Room 12', { exact: false })).toBeVisible();
+  await expect(page.getByText('Made by Test Teacher, designed by Ava')).toBeVisible();
   await expect(page).toHaveTitle('Game Show | Gamify');
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();

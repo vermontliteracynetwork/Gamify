@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signUpTeacher } from './setup';
 
 test('Free plan: a Plus game opened by its address shows a lock, never the game', async ({ page }, info) => {
   await page.goto('/games/memory-match');
@@ -59,7 +60,17 @@ test('Pricing: Start with Pro opens the plan box after sign-up, and a school get
   await expect(page.getByRole('button', { name: 'Print or save quote' })).toBeVisible();
   await page.getByRole('link', { name: 'Start with Pro' }).click();
   await expect(page).toHaveURL(/plan=pro/);
-  await page.getByLabel('Your name (what students see)').fill('Ms. Rivera');
-  await page.getByRole('button', { name: 'Continue on this device' }).click();
+  await signUpTeacher(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Get Pro now' })).toBeVisible();
+});
+
+test('Account: Your plan starts from value and upgrades in one tap', async ({ page }, info) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })); });
+  await page.goto('/teacher/account');
+  await expect(page.getByRole('heading', { name: 'Your Plan: Free' })).toBeVisible();
+  await expect(page.getByText('Get even more from Gamify, in one tap:')).toBeVisible();
+  await page.screenshot({ path: `test-results/account-plan-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Get Plus now' }).click();
+  await expect(page.getByRole('status').filter({ hasText: /Plus/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your Plan: Plus' })).toBeVisible();
 });

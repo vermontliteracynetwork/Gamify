@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Circle, X } from '@phosphor-icons/react';
+import { CaretDown, CheckCircle, Circle, Minus, X } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import { t } from '../i18n';
@@ -11,7 +12,10 @@ import Title from '../ui/Title';
 // as the teacher plays a sample game, makes a class, adds students, assigns a
 // set and opens student sign-in. It sits in the teacher menu on every page
 // until all five are done (teacher, 2026-10-24); the X folds it to a menu pill.
+// The minimize button beside it shrinks it to its title bar, and that
+// choice is remembered on every tab (teacher, 2026-10-26).
 export const FOLDED = 'get-started-folded';
+const MINIMIZED = 'get-started-minimized';
 type StepKey = 'play' | 'class' | 'students' | 'assign' | 'signin';
 export interface StartSteps { steps: { key: StepKey; to: string; done: boolean }[]; count: number; folded: boolean; reload: () => void }
 
@@ -35,6 +39,9 @@ export function useStartSteps(): StartSteps | null {
 }
 
 export default function GetStarted({ steps, count, onFold }: { steps: StartSteps['steps']; count: number; onFold: () => void }) {
+  const [small, setSmall] = useState(false);
+  useEffect(() => { void data.getSetting<boolean>(MINIMIZED).then((v) => setSmall(!!v)); }, []);
+  const toggle = () => { setSmall(!small); void data.setSetting(MINIMIZED, !small); };
   return (
     <Panel className="mb-4 grid gap-2 bg-accent !p-3">
       <div className="flex items-center gap-2">
@@ -42,9 +49,10 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
           <h2 className="font-display text-xl"><Title text={t('start.title')} /></h2>
           <p className="font-bold text-sm">{t('start.progress', { done: count, total: steps.length })}</p>
         </div>
+        <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
         <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
       </div>
-      <ol className="grid grid-cols-2 sm:grid-cols-5 gap-2 list-none p-0 m-0">
+      {!small && <ol className="grid grid-cols-2 sm:grid-cols-5 gap-2 list-none p-0 m-0">
         {steps.map((s, i) => (
           <li key={s.key}>
             <Link to={s.to} className={`hover-pop h-full min-h-11 rounded-input border-[2px] border-border px-2.5 py-1.5 flex items-center gap-1.5 no-underline text-text ${s.done ? 'bg-surface-2' : 'bg-surface'}`}>
@@ -53,7 +61,7 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
             </Link>
           </li>
         ))}
-      </ol>
+      </ol>}
     </Panel>
   );
 }
