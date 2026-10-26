@@ -23,6 +23,18 @@ export interface LiveState {
   // student's group and question set (their own level, same game).
   groups?: { gameId: string }[];
   assign?: Record<string, { group?: number; setId?: string }>;
+  // Compete ends when someone reaches `right`, or `minutes` after the start
+  // (teacher, 2026-10-26); neither means the teacher ends it.
+  endAt?: { right?: number; minutes?: number };
+  startedAt?: number;
+}
+
+// Each student's star color in the class sky (Question Tracker), by the
+// order they came in. Never the only cue: names show beside the colors.
+export const STAR_COLORS = ['#ffd166', '#ff8fab', '#7dd3fc', '#86efac', '#c4b5fd', '#fdba74', '#f9a8d4', '#5eead4', '#fde047', '#a5b4fc', '#fca5a5', '#bef264'];
+export function starColor(players: LivePlayer[], pid: string): string {
+  const i = players.filter((p) => p.status === 'in').findIndex((p) => p.pid === pid);
+  return STAR_COLORS[Math.max(0, i) % STAR_COLORS.length];
 }
 
 // Where one student goes when the game starts: their group's game with their

@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { ArrowLeft, Check, Crown, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -20,7 +20,9 @@ import { Button, buttonClasses, Panel, Tabs } from '../ui/kit';
 import Title from '../ui/Title';
 import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
-import { openLink, ranked, reduceHost, type LiveLink, type LivePlayer, type LiveState } from './protocol';
+import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
+import Sky from '../games/practice/Sky';
+import { useGameTheme } from '../theme/useGameTheme';
 
 const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl.great'] as const;
 const STUCK_MS = 60_000;
@@ -48,7 +50,10 @@ function Room({ game }: { game: GameCode }) {
   const [view, setView] = useState<'screen' | 'monitor'>('screen');
   // Play or share passes compete or together (?mode=).
   const startMode = new URLSearchParams(useLocation().search).get('mode') === 'together' ? 'together' : 'compete';
-  const [board, setBoard] = useState<'leaders' | 'goal'>(startMode === 'together' ? 'goal' : 'leaders');
+  // Question Tracker shows the class sky (teacher, 2026-10-26).
+  const skyGame = game.gameId === 'star-quiz';
+  const [board, setBoard] = useState<'leaders' | 'goal' | 'sky'>(skyGame ? 'sky' : startMode === 'together' ? 'goal' : 'leaders');
+  const { theme: skyTheme } = useGameTheme('star-quiz');
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [qr, setQr] = useState('');
@@ -107,6 +112,28 @@ function Room({ game }: { game: GameCode }) {
     void logLiveEvent({ at: new Date().toISOString(), code: game.code, gameId: game.gameId, kind: on ? 'lock' : 'unlock', who, message: on ? message.trim() || undefined : undefined });
     update((s) => { const locks = { ...s.locks }; if (on) locks[pid] = message.trim(); else delete locks[pid]; if (pid === 'all' && !on) return { ...s, locks: {} }; return { ...s, locks }; });
   }
+  // The class sky's stars in the order they were earned, so a new star
+  // never moves an old one.
+  const seen = useRef<Record<string, number>>({});
+  const [skyOrder, setSkyOrder] = useState<string[]>([]);
+  useEffect(() => {
+    const add: string[] = [];
+    let reset = false;
+    for (const p of state.players) {
+      const was = seen.current[p.pid] ?? 0;
+      if (p.right < was) reset = true;
+      for (let k = was; k < p.right; k++) add.push(p.pid);
+      seen.current[p.pid] = p.right;
+    }
+    if (reset) { setSkyOrder(state.players.flatMap((p) => Array.from({ length: p.right }, () => p.pid))); return; }
+    if (add.length) setSkyOrder((o) => [...o, ...add]);
+  }, [state.players]);
+  // Compete ends on its own at the teacher's number of right answers or time.
+  const timeLeft = state.endAt?.minutes && state.startedAt && state.phase !== 'ended' ? Math.max(0, state.startedAt + state.endAt.minutes * 60000 - now) : null;
+  useEffect(() => {
+    if (state.phase !== 'play' || state.mode === 'together') return;
+    if ((state.endAt?.right && leaders[0]?.right >= state.endAt.right) || timeLeft === 0) end();
+  }); // eslint-disable-line react-hooks/exhaustive-deps
   function end() {
     update((s) => ({ ...s, phase: 'ended', locks: {} }));
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, disableForReducedMotion: true });
@@ -138,12 +165,37 @@ function Room({ game }: { game: GameCode }) {
             <h2 className="font-display text-2xl"><Title text={t('live.howPlay')} /></h2>
             <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
               {(['compete', 'together'] as const).map((m) => (
-                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(m === 'compete' ? 'leaders' : 'goal'); }}
+                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(skyGame ? 'sky' : m === 'compete' ? 'leaders' : 'goal'); }}
                   className={`min-h-16 px-4 rounded-input border-[2px] text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                   <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
                 </button>
               ))}
             </div>
+            {(state.mode ?? 'compete') === 'compete' && (
+              <div className="grid gap-1.5">
+                <span className="font-bold">{t('live.endWhen')}</span>
+                <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t('live.endWhen')}>
+                  {(['teacher', 'right', 'minutes'] as const).map((k) => {
+                    const on = k === 'teacher' ? !state.endAt?.right && !state.endAt?.minutes : !!state.endAt?.[k];
+                    return (
+                      <button key={k} type="button" role="radio" aria-checked={on}
+                        onClick={() => update((s) => ({ ...s, endAt: k === 'teacher' ? undefined : k === 'right' ? { right: 10 } : { minutes: 5 } }))}
+                        className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`live.end.${k}`)}</button>
+                    );
+                  })}
+                  {state.endAt?.right !== undefined && (
+                    <label className="flex items-center gap-2 font-bold">{t('live.end.rightN')}
+                      <input type="number" min={1} max={200} value={state.endAt.right} onChange={(e) => update((s) => ({ ...s, endAt: { right: Math.max(1, Math.min(200, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+                    </label>
+                  )}
+                  {state.endAt?.minutes !== undefined && (
+                    <label className="flex items-center gap-2 font-bold">{t('live.end.minutesN')}
+                      <input type="number" min={1} max={60} value={state.endAt.minutes} onChange={(e) => update((s) => ({ ...s, endAt: { minutes: Math.max(1, Math.min(60, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
             {state.mode === 'together' && (
               <label className="flex flex-wrap items-center gap-2 font-bold">{t('live.goalLabel')}
                 <input type="number" min={5} max={999} value={goal} onChange={(e) => update((s) => ({ ...s, goal: Math.max(5, Math.min(999, Number(e.target.value) || 5)) }))} className="w-24 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
@@ -201,7 +253,7 @@ function Room({ game }: { game: GameCode }) {
               </AnimatePresence>
             </ul>
             {state.players.length === 0 && <p className="font-semibold text-muted">{t('live.empty')}</p>}
-            <Button variant="primary" className="min-h-14 text-lg" disabled={inRoom.length === 0} onClick={() => update((s) => ({ ...s, phase: 'play' }))}><Play weight="fill" size={20} />{t('live.start', { count: inRoom.length })}</Button>
+            <Button variant="primary" className="min-h-14 text-lg" disabled={inRoom.length === 0} onClick={() => update((s) => ({ ...s, phase: 'play', startedAt: Date.now() }))}><Play weight="fill" size={20} />{t('live.start', { count: inRoom.length })}</Button>
           </Panel>
         </div>
       )}
@@ -214,9 +266,29 @@ function Room({ game }: { game: GameCode }) {
             <Panel className="grid gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-bold flex-1">{t('live.screenNote', { code: game.code })}</p>
-                <Tabs label={t('live.boards')} value={board} onChange={setBoard} options={[{ id: 'leaders', label: t('live.board.leaders') }, { id: 'goal', label: t('live.board.goal') }]} />
+                {timeLeft !== null && <p className="font-display text-3xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</p>}
+                <Tabs label={t('live.boards')} value={board} onChange={setBoard} options={[...(skyGame ? [{ id: 'sky' as const, label: t('live.board.sky') }] : []), { id: 'leaders', label: t('live.board.leaders') }, { id: 'goal', label: t('live.board.goal') }]} />
               </div>
-              {board === 'leaders' ? (
+              {board === 'sky' ? (
+                <div className="grid gap-2">
+                  {state.mode === 'together'
+                    ? <p className="font-display text-2xl text-center">{t('live.goalText', { right: classRight, goal })}</p>
+                    : (
+                      <ul className="flex flex-wrap justify-center gap-2 list-none p-0 m-0" aria-label={t('live.starColors')}>
+                        {leaders.map((p) => (
+                          <li key={p.pid} className="flex items-center gap-1.5 rounded-pill border-[2px] border-border bg-surface px-3 py-1 font-bold">
+                            <StarIcon weight="fill" size={22} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />{p.name} <span className="font-display">{p.right}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="max(220px, calc(100dvh - 520px))"
+                    filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
+                    total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
+                    colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
+                    label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
+                </div>
+              ) : board === 'leaders' ? (
                 <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('live.board.leaders')}>
                   {leaders.slice(0, 10).map((p, i) => (
                     <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[2.5rem_minmax(8rem,14rem)_1fr_3rem] items-center gap-2">
@@ -293,3 +365,5 @@ function Room({ game }: { game: GameCode }) {
     </main>
   );
 }
+
+const clock = (ms: number) => { const sec = Math.ceil(ms / 1000); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };

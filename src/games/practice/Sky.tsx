@@ -86,7 +86,9 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
   return { hole, aspect };
 }
 
-export default function Sky({ theme, filled, total, still, label }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string }) {
+// `colors` tints each filled star (a class sky where every student has a
+// color); `height` sizes the sky when it is not the whole game screen.
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 190px)' }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
   const spots = skySpots(total, 7, hole, aspect);
@@ -94,13 +96,13 @@ export default function Sky({ theme, filled, total, still, label }: { theme: Gam
   const dust = skySpots(36, 3, null, aspect);
   return (
     <div ref={ref} className="relative w-full overflow-hidden rounded-panel border-[2.5px] border-border" role="img" aria-label={label}
-      style={{ containerType: 'size', height: 'calc(100dvh - 190px)', background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
+      style={{ containerType: 'size', height, background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />
       ))}
       {spots.map((p, i) => {
         if (i >= filled) return null;
-        const img = items.length ? items[i % items.length] : undefined;
+        const img = items.length && !colors ? items[i % items.length] : undefined;
         return (
           <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size})`, height: `calc(${p.unit} * ${p.size})` }}
             initial={still ? false : { scale: 0, rotate: -90, opacity: 0 }}
@@ -108,7 +110,7 @@ export default function Sky({ theme, filled, total, still, label }: { theme: Gam
             transition={still ? undefined : { scale: { type: 'spring', stiffness: 260, damping: 14 }, opacity: { duration: 0.3 }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
             {img
               ? <img src={img} alt="" className="w-full h-full object-contain" />
-              : <Star weight="fill" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={pieceColor(theme, 'item-1', '#ffd166')} />}
+              : <Star weight="fill" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />}
           </motion.span>
         );
       })}

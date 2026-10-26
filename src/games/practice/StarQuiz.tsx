@@ -21,6 +21,8 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 import Title from '../../ui/Title';
 import Sky from './Sky';
+import { liveStarColor } from '../../live/LiveStudent';
+import { getLive } from '../../live/session';
 
 
 
@@ -44,6 +46,8 @@ export default function StarQuiz() {
   const [total, setTotal] = useState(10);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leftEarly, setLeftEarly] = useState(false);
+  // In a class race, a student's own stars wear their color.
+  const myColor = getLive() ? liveStarColor() : undefined;
 
   async function play(v: { rounds: number }) {
     setTotal(v.rounds); setStars(0); setRound(0); setLeftEarly(false); setPhase('play');
@@ -90,7 +94,7 @@ export default function StarQuiz() {
       {(phase === 'play' || phase === 'end') && (
         <section className="grid gap-2">
           <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
-          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} />
+          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} />
           <p className="sr-only" aria-live="polite">{phase === 'play' ? t('practice.progress', { round, total }) : ''}</p>
         </section>
       )}

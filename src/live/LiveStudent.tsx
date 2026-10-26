@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { CheckCircle, Crown, HourglassMedium, LockSimple, Pause, Prohibit } from '@phosphor-icons/react';
+import { CheckCircle, Crown, HourglassMedium, LockSimple, Pause, Prohibit, Star } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
-import { ranked, routeFor } from './protocol';
+import { ranked, routeFor, starColor, type LiveState } from './protocol';
 import { setLive, useLiveRoom } from './session';
 
 // The student's waiting room for a live game: waiting to be let in, then
@@ -34,6 +34,9 @@ export default function LiveLobby() {
         )}
         <h1 className="font-display text-3xl"><Title text={t(`live.${status}`)} /></h1>
         <p className="font-bold">{t(`live.${status}Text`)}</p>
+        {status === 'in' && state && me && skyColor(state, me.pid) && (
+          <p className="flex items-center gap-2 font-display text-2xl"><Star weight="fill" size={44} color={skyColor(state, me.pid)} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />{t('live.yourColor')}</p>
+        )}
       </div>
     </main>
   );
@@ -47,6 +50,7 @@ export function LiveOverlay() {
   const path = useLocation().pathname;
   // Play again sends everyone back to the waiting room.
   useEffect(() => { if (session && state?.phase === 'lobby' && path.startsWith('/games/')) navigate(`/live/${session.code}`, { replace: true }); }, [state?.phase, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { try { if (state && me) sessionStorage.setItem('gamify:live-color', skyColor(state, me.pid) ?? ''); } catch { /* this tab only */ } }, [state, me]);
   if (!session || !state || !me) return null;
   const lockMsg = state.locks[me.pid] ?? state.locks.all;
   const shell = 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/55';
@@ -81,3 +85,9 @@ export function LiveOverlay() {
   }
   return null;
 }
+
+// In Question Tracker's compete mode every student has a star color.
+function skyColor(state: LiveState, pid: string): string | undefined {
+  return state.gameId === 'star-quiz' && state.mode !== 'together' ? starColor(state.players, pid) : undefined;
+}
+export const liveStarColor = () => { try { return sessionStorage.getItem('gamify:live-color') || undefined; } catch { return undefined; } };
