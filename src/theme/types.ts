@@ -51,6 +51,40 @@ export interface ThemePieceSpec {
   color?: string;
 }
 
+// Power-up items (teacher, 2026-10-26): things a game can make happen, like a
+// boot that takes away 100 points or a rainbow fish worth 1000. Each game
+// declares the abilities its code can do; a theme adds items with its own
+// art and picks each item's ability, amount, motion and how often it shows.
+export interface AbilitySpec {
+  id: string;
+  label: string;
+  hint: string;
+  // Abilities with a number (points, seconds) show a slider.
+  amount?: { label: string; min: number; max: number; step: number; default: number };
+}
+export const ITEM_MOTIONS = ['wiggle', 'bob', 'sparkle', 'spin', 'none'] as const;
+export type ItemMotion = (typeof ITEM_MOTIONS)[number];
+// How often an item turns up: 1 rarely, 2 sometimes, 3 often.
+export type ItemOften = 1 | 2 | 3;
+export interface ItemSlotsSpec {
+  label: string;
+  hint: string;
+  max: number;
+  width: number;
+  height: number;
+  abilities: AbilitySpec[];
+}
+export interface ThemeItem {
+  id: string;
+  name: string;
+  ability: string;
+  amount?: number;
+  motion: ItemMotion;
+  often: ItemOften;
+  image?: string;
+  color?: string;
+}
+
 // What a theme puts in a piece: a flat color (house themes) or artwork.
 export interface PieceArt {
   color?: string;
@@ -68,6 +102,8 @@ export interface GameTheme {
   backdrop: Backdrop;
   celebration: Celebration;
   pieces: Record<string, PieceArt>;
+  // Power-up items this theme adds (games that declare item abilities).
+  items?: ThemeItem[];
   cover?: string;
   designedBy?: string;
   // Optional first name or nickname of the student who designed it.

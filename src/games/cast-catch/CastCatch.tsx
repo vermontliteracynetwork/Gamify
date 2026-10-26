@@ -11,7 +11,9 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceFill, pieceImage } from '../../theme/library';
+import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
+import ItemArt from '../../theme/ItemArt';
+import type { ThemeItem } from '../../theme/types';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -20,15 +22,20 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
-import { castQuality, catchFish, pointsFor, type FishKind } from './fish';
+import { castQuality, catchFish, catchItem, itemEffect, pointsFor, type FishKind } from './fish';
 
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'caught';
-interface Catch { fish: FishKind; cm: number; points: number }
+// A catch is a fish, or one of the theme's power-up items.
+interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean }
 
 // A fish drawn in code: body, tail, fin, optional stripes, an eye.
-export function FishArt({ fish, size }: { fish: FishKind; size: number }) {
+// A theme can draw each rarity's fish (fish-common ... fish-legendary).
+const RARITY_PIECE = ['fish-common', 'fish-uncommon', 'fish-rare', 'fish-legendary'];
+export function FishArt({ fish, size, theme }: { fish: FishKind; size: number; theme?: Parameters<typeof pieceImage>[0] }) {
+  const art = pieceImage(theme, RARITY_PIECE[fish.rarity]);
+  if (art) return <img src={art} alt="" aria-hidden="true" style={{ width: size, height: size * 0.6, objectFit: 'contain' }} />;
   return (
     <svg width={size} height={size * 0.6} viewBox="0 0 100 60" aria-hidden="true">
       <path d="M78 30 L98 12 L94 30 L98 48 Z" fill={fish.fin} stroke="#000" strokeWidth="2.5" strokeLinejoin="round" />
@@ -65,11 +72,12 @@ export default function CastCatch() {
   const [endsAt, setEndsAt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const quality = useRef<0 | 1 | 2 | 3>(0);
+  const doubleNext = useRef(false);
   const raf = useRef(0);
   const started = useRef(0);
 
   const left = Math.max(0, Math.ceil((endsAt - now) / 1000));
-  const score = catches.reduce((s, c) => s + c.points, 0);
+  const score = Math.max(0, catches.reduce((s, c) => s + c.points, 0));
   const timeUp = phase === 'play' && left === 0;
 
   useEffect(() => {
@@ -81,7 +89,7 @@ export default function CastCatch() {
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
   function begin() {
-    setCatches([]); setLast(null); setStep('ready');
+    setCatches([]); setLast(null); setStep('ready'); doubleNext.current = false;
     setEndsAt(Date.now() + setup.minutes * 60000); setNow(Date.now());
     setPhase('play');
   }
@@ -121,12 +129,23 @@ export default function CastCatch() {
     playEffect('tap', settings);
   }
   function reel() {
-    const { fish, cm } = catchFish(quality.current);
-    const c = { fish, cm, points: pointsFor(fish, cm) };
+    const times = doubleNext.current ? 2 : 1;
+    const item = catchItem(theme.items ?? []);
+    let c: Catch;
+    if (item) {
+      const e = itemEffect(item);
+      c = { item, cm: 0, points: e.points > 0 ? e.points * times : e.points, seconds: e.seconds || undefined, double: e.double || undefined };
+      if (e.seconds) setEndsAt((at) => at + e.seconds * 1000);
+      doubleNext.current = e.double ? true : e.points > 0 ? false : doubleNext.current;
+    } else {
+      const { fish, cm } = catchFish(quality.current);
+      c = { fish, cm, points: pointsFor(fish, cm) * times };
+      doubleNext.current = false;
+    }
     setCatches((cs) => [...cs, c]);
     setLast(c);
     setStep('caught');
-    playEffect('right', settings);
+    playEffect(c.points < 0 ? 'miss' : 'right', settings);
     window.setTimeout(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
   }
 
@@ -174,9 +193,9 @@ export default function CastCatch() {
             {!still && [0, 1, 2].map((i) => (
               <span key={i} className="absolute h-1.5 rounded-pill bg-white/50" style={{ top: `${40 + i * 18}%`, width: '18%', animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}
-            <span className="absolute right-[8%] top-[4%] w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={{ background: '#fdfd94' }} aria-hidden="true" />
+            <span className="absolute right-[8%] top-[4%] w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
             {[[12, 6, 16], [52, 10, 12]].map(([x, y, w], i) => (
-              <span key={`c${i}`} className="absolute h-[7%] rounded-pill bg-white border-[2px] border-border" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
+              <span key={`c${i}`} className={`absolute h-[7%] ${pieceImage(theme, 'cloud') ? '' : 'rounded-pill border-[2px] border-border'}`} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ...(pieceImage(theme, 'cloud') ? { background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")` } : { background: pieceColor(theme, 'cloud', '#ffffff') }), animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
             ))}
             {!still && [0, 1, 2].map((i) => (
               <span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%`, animation: `${i % 2 ? 'cc-swim-left' : 'cc-swim-right'} ${14 + i * 4}s linear ${-i * 5}s infinite` }} aria-hidden="true">
@@ -184,12 +203,13 @@ export default function CastCatch() {
               </span>
             ))}
             {/* dock and rod */}
-            <span className="absolute left-0 bottom-0 w-[22%] h-[38%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={{ background: '#b98552' }} aria-hidden="true" />
+            <span className="absolute left-0 bottom-0 w-[22%] h-[38%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={pieceFill(theme, 'dock', '#b98552')} aria-hidden="true" />
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <line x1="12" y1="62" x2="24" y2={step === 'power' ? 28 + power * 6 : 30} stroke="#5b3a1e" strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+              {!pieceImage(theme, 'rod') && <line x1="12" y1="62" x2="24" y2={step === 'power' ? 28 + power * 6 : 30} stroke={pieceColor(theme, 'rod', '#5b3a1e')} strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
               <circle cx="14" cy="57" r="1.6" fill="#314677" stroke="#000" strokeWidth="2" vectorEffect="non-scaling-stroke" />
               {lineOut && <line x1="24" y1="30" x2={bobberLeft} y2={step === 'bite' ? 52 : 46} stroke="#000" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
             </svg>
+            {pieceImage(theme, 'rod') && <img src={pieceImage(theme, 'rod')} alt="" aria-hidden="true" className="absolute pointer-events-none" style={{ left: '10%', top: '28%', width: '16%', height: '36%', objectFit: 'contain', objectPosition: 'left bottom' }} />}
             {(step === 'casting' || lineOut) && (
               <span className="absolute w-9 h-9 -ml-[18px] -mt-[18px]" aria-hidden="true"
                 style={{ left: `${flying ? 24 : bobberLeft}%`, top: `${flying ? 30 : 46}%`, transition: still ? 'none' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
@@ -200,10 +220,20 @@ export default function CastCatch() {
               {last && (
                 <motion.div key={catches.length} className="absolute inset-x-0 top-[8%] mx-auto w-[min(90%,420px)] bg-surface border-[3px] border-border rounded-panel p-4 grid gap-1 justify-items-center text-center"
                   style={{ boxShadow: 'var(--shadow-sticker-lg)' }} initial={still ? false : { y: 120, scale: 0.6, rotate: -8 }} animate={{ y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0 }} role="status">
-                  <FishArt fish={last.fish} size={140} />
-                  <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
-                  <p className="font-bold">+{last.points} {t('cc.pts')} · {t(`cc.rarity.${last.fish.rarity}` as 'cc.rarity.0')}</p>
-                  <p className="text-sm font-semibold">{last.fish.fact}</p>
+                  {last.item ? (
+                    <>
+                      <ItemArt item={last.item} size={140} still={still} />
+                      <p className="font-display text-2xl">{t('cc.youCaughtItem', { name: last.item.name })}</p>
+                      <p className="font-bold">{last.double ? t('cc.effect.double') : last.seconds ? t('cc.effect.time', { s: last.seconds }) : last.points < 0 ? t('cc.effect.lose', { n: -last.points }) : `+${last.points} ${t('cc.pts')}`}</p>
+                    </>
+                  ) : last.fish && (
+                    <>
+                      <FishArt fish={last.fish} size={140} theme={theme} />
+                      <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
+                      <p className="font-bold">+{last.points} {t('cc.pts')} · {t(`cc.rarity.${last.fish.rarity}` as 'cc.rarity.0')}</p>
+                      <p className="text-sm font-semibold">{last.fish.fact}</p>
+                    </>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -234,7 +264,7 @@ export default function CastCatch() {
           <p className="font-bold">{t('cc.summary', { count: catches.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
             {catches.slice().sort((a, b) => b.points - a.points).slice(0, 6).map((c, i) => (
-              <span key={i} className="grid justify-items-center text-xs font-bold"><FishArt fish={c.fish} size={56} />{c.fish.name}</span>
+              <span key={i} className="grid justify-items-center text-xs font-bold">{c.item ? <ItemArt item={c.item} size={56} still /> : c.fish && <FishArt fish={c.fish} size={56} theme={theme} />}{c.item?.name ?? c.fish?.name}</span>
             ))}
           </div>
         </ResultsModal>

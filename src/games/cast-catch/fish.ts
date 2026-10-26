@@ -1,3 +1,5 @@
+import type { ThemeItem } from '../../theme/types';
+
 // The fish in Cast and Catch (logic borrowed from the Dashboard's Doc
 // Fishing: a better cast means rarer fish), drawn in code, each with a
 // true, kid-sized fact. Rarity 0 common, 1 uncommon, 2 rare, 3 legendary.
@@ -40,3 +42,28 @@ export function catchFish(quality: 0 | 1 | 2 | 3, rand: () => number = Math.rand
 }
 
 export const pointsFor = (fish: FishKind, cm: number) => RARITY_POINTS[fish.rarity] + Math.round(cm / 5);
+
+// Power-up catches a theme adds (teacher, 2026-10-26). Each turns up on its
+// own chance (rarely 4%, sometimes 10%, often 20%; all together at most 60%),
+// otherwise the cast catches a fish as usual.
+const ITEM_CHANCE = { 1: 0.04, 2: 0.1, 3: 0.2 } as const;
+export function catchItem(items: ThemeItem[], rand: () => number = Math.random): ThemeItem | null {
+  if (!items.length) return null;
+  const weights = items.map((it) => ITEM_CHANCE[it.often]);
+  const total = weights.reduce((a, b) => a + b, 0);
+  const scale = total > 0.6 ? 0.6 / total : 1;
+  let r = rand(), acc = 0;
+  for (let i = 0; i < items.length; i++) { acc += weights[i] * scale; if (r < acc) return items[i]; }
+  return null;
+}
+
+// What an item does: points (may be negative), extra seconds, or doubling the next catch.
+export function itemEffect(item: ThemeItem, rand: () => number = Math.random): { points: number; seconds: number; double: boolean } {
+  const n = item.amount ?? 0;
+  if (item.ability === 'points') return { points: n, seconds: 0, double: false };
+  if (item.ability === 'lose') return { points: -n, seconds: 0, double: false };
+  if (item.ability === 'time') return { points: 0, seconds: n, double: false };
+  if (item.ability === 'double') return { points: 0, seconds: 0, double: true };
+  const roll = [-50, 50, 100, 250, 500];
+  return { points: roll[Math.floor(rand() * roll.length)], seconds: 0, double: false };
+}

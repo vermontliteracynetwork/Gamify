@@ -15,7 +15,8 @@ import TeacherNav from '../../ui/TeacherNav';
 import { teacherUsername } from '../credit';
 import { classicTheme } from '../classic';
 import { deleteMadeTheme, saveMadeTheme, useMadeThemes } from '../made';
-import { APPROVED_FONTS, SOUND_PACKS, THEME_FONTS, type GameTheme, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
+import { APPROVED_FONTS, ITEM_MOTIONS, SOUND_PACKS, THEME_FONTS, type GameTheme, type ItemSlotsSpec, type ThemeItem, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
+import ItemArt from '../ItemArt';
 import { playEffect } from '../../engine/feedback';
 import { useSettings } from '../../settings/SettingsContext';
 import type { StringKey } from '../../i18n/en';
@@ -150,7 +151,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const scanRef = useRef<HTMLInputElement>(null);
-  const [tab, setTab] = useState<'download' | 'upload' | 'colors' | 'style' | 'share'>('upload');
+  const [tab, setTab] = useState<'download' | 'upload' | 'items' | 'colors' | 'style' | 'share'>('upload');
   const [dl, setDl] = useState('');
   const { settings } = useSettings();
 
@@ -250,7 +251,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               </div>
             )}
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
-              {(['download', 'upload', 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
+              {(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 px-4 rounded-pill font-bold text-sm ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
@@ -277,7 +278,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                             onClick={async () => {
                               setDl(t('builder.dl.making'));
                               const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
-                              saveFile(await digitalZip(game.name, gameId, game.themePieces, example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
+                              saveFile(await digitalZip(game.name, gameId, [...game.themePieces, ...(game.items ? [{ id: 'item', label: t('builder.items.piece'), width: game.items.width, height: game.items.height, hint: t('builder.items.pieceHint') }] : [])], example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
                               setDl(t('builder.dl.ready'));
                             }}>{example ? t('builder.dl.example') : t('builder.dl.blank')} (.zip)</Button>
                         ))}
@@ -297,6 +298,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   </div>
                   <Pages key="upload" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
                 </>
+              )}
+              {tab === 'items' && game.items && (
+                <ItemsTab spec={game.items} items={draft.items ?? []} onChange={(items) => setDraft({ ...draft, items })} onProblem={setStatus} />
               )}
               {tab === 'share' && (
                 <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
@@ -395,6 +399,69 @@ function PieceCard({ piece, image, onFile, onClear }: { piece: ThemePieceSpec; i
         {image ? <button type="button" onClick={onClear} className="font-bold text-xs underline">{t('builder.remove')}</button>
           : <p className="text-xs font-bold text-muted">{t('builder.tapOrDrop')}</p>}
       </div>
+    </div>
+  );
+}
+
+// Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns
+// for what it does (only the abilities this game's code can do), how much,
+// how it moves and how often it turns up. Not every ability has to be used.
+function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
+  const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
+  const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface w-full';
+  function add() {
+    const a = spec.abilities[0];
+    onChange([...items, { id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }]);
+  }
+  return (
+    <div className="grid gap-3">
+      <p className="font-semibold text-muted text-sm">{spec.hint} {t('builder.items.hint', { max: spec.max })}</p>
+      {items.length === 0 && <p className="font-bold">{t('builder.items.none')}</p>}
+      <Pages key={`items-${items.length}`} per={2} items={items.map((it, i) => {
+        const ability = spec.abilities.find((a) => a.id === it.ability) ?? spec.abilities[0];
+        return (
+          <div key={it.id} className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+            <div className="flex items-center gap-3">
+              <label className="shrink-0 cursor-pointer rounded-input border-[2px] border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
+                <ItemArt item={it} size={64} still />
+                <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { put(i, { image: await imageFileToDataUrl(f, Math.max(spec.width, spec.height)) }); } catch (err) { onProblem(err instanceof Error ? err.message : String(err)); } }} />
+              </label>
+              <label className="grid gap-1 font-bold text-sm flex-1">{t('builder.items.name')}
+                <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
+              </label>
+            </div>
+            <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
+              <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
+                {spec.abilities.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              </select>
+              <span className="text-xs font-semibold text-muted">{ability.hint}</span>
+            </label>
+            {ability.amount && (
+              <label className="grid gap-1 font-bold text-sm">{ability.amount.label}: {it.amount ?? ability.amount.default}
+                <input type="range" min={ability.amount.min} max={ability.amount.max} step={ability.amount.step} value={it.amount ?? ability.amount.default} onChange={(e) => put(i, { amount: Number(e.target.value) })} />
+              </label>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <label className="grid gap-1 font-bold text-sm">{t('builder.items.motion')}
+                <select value={it.motion} onChange={(e) => put(i, { motion: e.target.value as ThemeItem['motion'] })} className={field}>
+                  {ITEM_MOTIONS.map((m) => <option key={m} value={m}>{t(`builder.motion.${m}` as StringKey)}</option>)}
+                </select>
+              </label>
+              <label className="grid gap-1 font-bold text-sm">{t('builder.items.often')}
+                <select value={it.often} onChange={(e) => put(i, { often: Number(e.target.value) as ThemeItem['often'] })} className={field}>
+                  {([1, 2, 3] as const).map((n) => <option key={n} value={n}>{t(`builder.often.${n}` as StringKey)}</option>)}
+                </select>
+              </label>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {!it.image && <label className="flex items-center gap-2 font-bold text-sm">{t('builder.items.color')}<input type="color" value={it.color ?? '#fdfd94'} onChange={(e) => put(i, { color: e.target.value })} className="color-dot w-9 h-9" /></label>}
+              {it.image && <button type="button" onClick={() => put(i, { image: undefined })} className="font-bold text-xs underline">{t('builder.items.removePicture')}</button>}
+              <Button variant="ghost" className="ml-auto" onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash weight="bold" size={16} />{t('builder.items.delete')}</Button>
+            </div>
+          </div>
+        );
+      })} />
+      <Button className="justify-self-start" disabled={items.length >= spec.max} onClick={add}><PaintBrush weight="bold" size={18} />{t('builder.items.add')}</Button>
     </div>
   );
 }

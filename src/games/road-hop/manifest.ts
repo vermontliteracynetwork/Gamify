@@ -12,6 +12,7 @@ export const roadHopManifest: GameManifest = {
     { id: 'road', label: 'Road', width: 1000, height: 200, hint: 'The color of the road', color: '#4a4f6a' },
     { id: 'hopper', label: 'Hopper', width: 128, height: 128, hint: 'The one who hops', color: '#9bd35a' },
     { id: 'car', label: 'Car', width: 256, height: 128, hint: 'The color of the first car', color: '#e5635f' },
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} icon`, width: 256, height: 256, hint: `The round badge for team ${i + 1}` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
   rounds: { label: 'Questions', min: 2, max: 15, default: 6 },
