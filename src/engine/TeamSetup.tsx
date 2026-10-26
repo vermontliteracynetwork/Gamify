@@ -7,11 +7,12 @@ import { useAsync } from '../data/hooks';
 import type { Student } from '../data/types';
 import { rollName } from './nameDice';
 import { balancedTeams, randomTeams } from './teamMaker';
-import { TeamBadge } from './TeamBadge';
+import { TEAM_ICONS, TeamBadge } from './TeamBadge';
 import type { CpuLevel, TurnPlayer } from './turns';
 import Title from '../ui/Title';
 
-interface Slot { name: string; kind: 'team' | 'student' | 'cpu' }
+// `icon` is the team picture (and color) picked from the theme's team icons.
+interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number }
 
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
@@ -30,6 +31,16 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const [opponent, setOpponent] = useState<'cpu' | 'teacher'>('cpu');
   const [members, setMembers] = useState<string[][]>([]);
   const [level, setLevel] = useState<CpuLevel>('medium');
+  const [picking, setPicking] = useState<number | null>(null);
+  const iconOf = (i: number) => slots[i]?.icon ?? i;
+  // Picking a picture another team has trades the two.
+  function pickIcon(i: number, icon: number) {
+    setSlots((cur) => {
+      const other = cur.findIndex((x, j) => j !== i && (x.icon ?? j) === icon);
+      return cur.map((x, j) => (j === i ? { ...x, icon } : j === other ? { ...x, icon: cur[i].icon ?? i } : x));
+    });
+    setPicking(null);
+  }
 
   const names = () => slots.map((s) => s.name);
   const resize = (n: number) => setSlots((cur) => {
@@ -41,8 +52,9 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const hasCpu = solo ? opponent === 'cpu' : slots.some((s) => s.kind === 'cpu');
 
   function build(): TurnPlayer[] {
-    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}) }));
-    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: 9, score: 0 });
+    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: s.icon ?? i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}) }));
+    const free = [9, ...TEAM_ICONS.keys()].find((k) => !players.some((p) => p.colorIndex === k)) ?? 9;
+    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: free, score: 0 });
     return players;
   }
   function start() { onStart?.(build(), level); }
@@ -61,10 +73,30 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
           className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
       </div>
 
-      <ol className="grid sm:grid-cols-2 gap-2 list-none p-0 m-0">
+      <ol className="grid sm:grid-cols-2 items-start gap-2 list-none p-0 m-0">
         {slots.map((s, i) => (
-          <li key={i} className="flex items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
-            <TeamBadge colorIndex={i} />
+          <li key={i} className="flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
+            <button type="button" aria-label={t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
+              onClick={() => setPicking(picking === i ? null : i)} className="rounded-full p-0.5 -m-0.5 motion-safe:hover:scale-110 motion-safe:transition-transform">
+              <TeamBadge colorIndex={iconOf(i)} size={44} />
+            </button>
+            {picking === i && (
+              <div role="group" aria-label={t('teams.pickIcon', { name: s.name })}
+                className="order-last basis-full grid grid-cols-5 justify-items-center gap-1 p-2 bg-surface-2 border-[2px] border-border rounded-input"
+                onKeyDown={(e) => { if (e.key === 'Escape') setPicking(null); }}>
+                {TEAM_ICONS.map((_, k) => {
+                  const owner = slots.findIndex((_x, j) => iconOf(j) === k);
+                  return (
+                    <button key={k} type="button" aria-pressed={owner === i}
+                      aria-label={owner >= 0 && owner !== i ? t('teams.iconTaken', { n: k + 1, name: slots[owner].name }) : t('teams.iconN', { n: k + 1 })}
+                      onClick={() => pickIcon(i, k)}
+                      className={`rounded-full p-1 border-[3px] ${owner === i ? 'border-border bg-accent' : 'border-transparent'} ${owner >= 0 && owner !== i ? 'opacity-50' : ''}`}>
+                      <TeamBadge colorIndex={k} size={44} />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             {s.kind === 'cpu' ? (
               <span className="flex-1 font-bold">{t('teams.computer')}</span>
             ) : (
@@ -87,7 +119,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
         ))}
       </ol>
 
-      {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} onChange={setMembers} />}
+      {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} onChange={setMembers} />}
 
       {solo && (
         <Choice label={t('teams.opponent')} value={opponent} options={[['cpu', 'teams.vsCpu'], ['teacher', 'teams.vsTeacher']]} onChange={setOpponent} />
@@ -120,7 +152,7 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
 // Optional: put students from a class list on the teams (random, balanced
 // by how often they get questions right, or hand-picked), and save the
 // arrangement to use again.
-function ClassTeams({ teams, names, onChange }: { teams: number; names: string[]; onChange: (m: string[][]) => void }) {
+function ClassTeams({ teams, names, icons, onChange }: { teams: number; names: string[]; icons: number[]; onChange: (m: string[][]) => void }) {
   const { value: classes = [] } = useAsync(() => data.listClassrooms());
   const [classId, setClassId] = useState('');
   const { value: students = [] } = useAsync<Student[]>(async () => (classId ? data.listStudents(classId) : []), [classId]);
@@ -176,7 +208,7 @@ function ClassTeams({ teams, names, onChange }: { teams: number; names: string[]
           <div className="grid sm:grid-cols-2 gap-2">
             {Array.from({ length: teams }, (_, i) => (
               <div key={i} role="group" aria-label={names[i]} onClick={() => tapTeam(i)} className={`rounded-input border-[2px] p-2 grid gap-1.5 ${held ? 'border-border bg-surface-2 cursor-pointer' : 'border-border-soft'}`}>
-                <span className="flex items-center gap-2 font-bold"><TeamBadge colorIndex={i} size={28} />{names[i]}</span>
+                <span className="flex items-center gap-2 font-bold"><TeamBadge colorIndex={icons[i] ?? i} size={28} />{names[i]}</span>
                 <span className="flex flex-wrap gap-1">
                   {(groups[i] ?? []).map((id) => (
                     <button key={id} type="button" aria-pressed={held === id} onClick={(e) => { e.stopPropagation(); setHeld(held === id ? null : id); }}

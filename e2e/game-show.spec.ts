@@ -113,3 +113,19 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
   await kid.getByRole('button', { name: 'High contrast' }).click();
   await kid.screenshot({ path: `test-results/mirror-${info.project.name}.png` });
 });
+
+test('Game Show: tap a team picture to pick another from the theme', async ({ page }, info) => {
+  await openSetup(page, '/games/game-show');
+  await page.getByRole('radio', { name: 'Surprise cards' }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  const first = page.getByRole('button', { name: /^Pick a team picture for / }).first();
+  await first.click();
+  const menu = page.getByRole('group', { name: /^Pick a team picture for / });
+  await expect(menu.getByRole('button')).toHaveCount(10);
+  await page.screenshot({ path: `test-results/gameshow-team-icons-${info.project.name}.png` });
+  // Picking the second team's picture trades the two.
+  await menu.getByRole('button', { name: /^Team picture 2, .* has it/ }).click();
+  await expect(menu).toHaveCount(0);
+  await page.getByRole('button', { name: /^Pick a team picture for / }).nth(1).click();
+  await expect(page.getByRole('group', { name: /^Pick a team picture for / }).getByRole('button', { name: 'Team picture 1', exact: true })).toHaveAttribute('aria-pressed', 'true');
+});
