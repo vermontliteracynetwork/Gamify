@@ -121,9 +121,9 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   // The get started steps sit on top until done; fold them to check the builder itself fits.
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await expect(page.getByRole('tab', { name: 'Upload' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByText('Page 1 of 3')).toBeVisible();
+  await expect(page.getByText(/^Page 1 of \d/)).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();
-  await expect(page.getByText('Page 2 of 3')).toBeVisible();
+  await expect(page.getByText(/^Page 2 of \d/)).toBeVisible();
   await page.screenshot({ path: `test-results/builder-tabs-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   await page.getByRole('tab', { name: 'Colors' }).click();

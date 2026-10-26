@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
@@ -29,6 +29,8 @@ import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
 import { useAsync } from '../../data/hooks';
 import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
+
+const DrawStudio = lazy(() => import('./DrawStudio'));
 
 // Everything the builder can design: each game, plus the sign-in pictures.
 export const BUILDER_TARGETS = [...GAMES, signInManifest];
@@ -173,6 +175,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const problems = useMemo(() => [...themeProblems(draft), ...((draft.items ?? []).some((it) => !it.name.trim()) ? [t('builder.items.nameEvery')] : [])], [draft]);
   const filled = game.themePieces.filter((p) => draft.pieces[p.id]?.image).length;
 
+  const [drawing, setDrawing] = useState<ThemePieceSpec | null>(null);
+  const [find, setFind] = useState('');
+  const shownPieces = game.themePieces.filter((p) => !find.trim() || `${p.label} ${p.hint}`.toLowerCase().includes(find.trim().toLowerCase()));
   function setPiece(id: string, image: string | undefined) {
     setDraft((d) => {
       const pieces = { ...d.pieces, [id]: { ...d.pieces[id], image } };
@@ -214,6 +219,12 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
 
   return (
     <>
+      {drawing && (
+        <Suspense fallback={null}>
+          <DrawStudio piece={drawing} gameId={gameId} image={draft.pieces[drawing.id]?.image} onClose={() => setDrawing(null)}
+            onSave={(img) => { setPiece(drawing.id, img); setDrawing(null); setStatus(''); }} />
+        </Suspense>
+      )}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <Link to={base} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('builder.allGames')}</Link>
         <span className="font-bold">{t('builder.designsFor', { game: game.name })}</span>
@@ -296,13 +307,16 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                     <Button disabled={busy} onClick={() => scanRef.current?.click()}><Camera weight="bold" size={18} />{t('builder.scan')}</Button>
                     <input ref={scanRef} type="file" accept="image/*" multiple hidden aria-label={t('builder.scan')}
                       onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ''; if (f.length) void scan(f); }} />
-                    <span className="text-xs font-semibold text-muted flex-1 min-w-40">{t('builder.scanHint')}</span>
+                    <input type="search" value={find} onChange={(e) => setFind(e.target.value)} placeholder={t('builder.findPiece')} aria-label={t('builder.findPiece')}
+                      className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-40" />
                   </div>
-                  <Pages key="upload" per={4} items={game.themePieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onClear={() => setPiece(p.id, undefined)} />)} />
+                  <p className="text-xs font-semibold text-muted -mt-1">{t('builder.scanHint')}</p>
+                  {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
+                  <Pages key={`upload-${find}`} per={4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => setPiece(p.id, undefined)} />)} />
                 </>
               )}
               {tab === 'items' && game.items && (
-                <ItemsTab spec={game.items} items={draft.items ?? []} onChange={(items) => setDraft({ ...draft, items })} onProblem={setStatus} />
+                <ItemsTab spec={game.items} gameId={gameId} items={draft.items ?? []} onChange={(items) => setDraft({ ...draft, items })} onProblem={setStatus} />
               )}
               {tab === 'share' && (
                 <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
@@ -383,7 +397,7 @@ function Pages({ items, per }: { items: ReactNode[]; per: number }) {
   );
 }
 
-function PieceCard({ piece, image, onFile, onClear }: { piece: ThemePieceSpec; image?: string; onFile: (f: File | undefined) => void; onClear: () => void }) {
+function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePieceSpec; image?: string; onFile: (f: File | undefined) => void; onDraw: () => void; onClear: () => void }) {
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   return (
@@ -398,9 +412,10 @@ function PieceCard({ piece, image, onFile, onClear }: { piece: ThemePieceSpec; i
       <div className="min-w-0 flex-1">
         <p className="font-bold flex items-center gap-1.5">{piece.label}{image && <CheckCircle weight="fill" size={20} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
         <p className="text-xs font-semibold text-muted line-clamp-2">{piece.hint} · {piece.width} x {piece.height}</p>
-        {image ? <button type="button" onClick={onClear} className="font-bold text-xs underline">{t('builder.remove')}</button>
-          : <p className="text-xs font-bold text-muted">{t('builder.tapOrDrop')}</p>}
+        {image && <button type="button" onClick={onClear} className="font-bold text-xs underline">{t('builder.remove')}</button>}
       </div>
+      <button type="button" onClick={onDraw} aria-label={t('builder.drawPiece', { piece: piece.label })}
+        className="shrink-0 min-h-11 px-3 rounded-pill border-[2px] border-border bg-accent font-bold text-sm inline-flex items-center gap-1.5"><PaintBrush weight="fill" size={18} />{t('builder.draw')}</button>
     </div>
   );
 }
@@ -416,7 +431,11 @@ export function itemPages(spec: ItemSlotsSpec | undefined, example: boolean): Th
 // Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns
 // for what it does (only the abilities this game's code can do), how much,
 // how it moves and how often it turns up. Not every ability has to be used.
-function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
+function ItemsTab({ spec, gameId, items, onChange, onProblem }: { spec: ItemSlotsSpec; gameId: string; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
+  const [drawing, setDrawing] = useState<number | null>(null);
+  const drawn = drawing === null ? undefined : items[drawing];
+  // Start from the Classic art for the same power.
+  const classicArt = drawn && spec.classic.find((c) => c.ability === drawn.ability)?.art;
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface w-full';
   function add() {
@@ -426,6 +445,12 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   }
   return (
     <div className="grid gap-3">
+      {drawn && drawing !== null && (
+        <Suspense fallback={null}>
+          <DrawStudio piece={{ id: classicArt ? `item-${classicArt}` : 'item', label: drawn.name || t('builder.items.piece'), width: spec.width, height: spec.height, hint: '' }}
+            gameId={gameId} image={drawn.image} onClose={() => setDrawing(null)} onSave={(img) => { put(drawing, { image: img }); setDrawing(null); }} />
+        </Suspense>
+      )}
       <p className="font-semibold text-muted text-sm">{spec.hint} {t('builder.items.hint', { max: spec.max })}</p>
       {items.length === 0 && <p className="font-bold">{t('builder.items.none')}</p>}
       <Pages key={`items-${items.length}`} per={2} items={items.map((it, i) => {
@@ -440,6 +465,8 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               <label className="grid gap-1 font-bold text-sm flex-1">{t('builder.items.name')}
                 <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
               </label>
+              <button type="button" onClick={() => setDrawing(i)} aria-label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })}
+                className="shrink-0 self-end min-h-11 px-3 rounded-pill border-[2px] border-border bg-accent font-bold text-sm inline-flex items-center gap-1.5"><PaintBrush weight="fill" size={18} />{t('builder.draw')}</button>
             </div>
             <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>

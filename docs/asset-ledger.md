@@ -15,7 +15,8 @@ ships without a line here.
 | fflate | Zips the Theme Builder digital template files | npm (fflate 0.8.2) | MIT | 2026-10-25 |
 | Common Core State Standards codes and domain names (no standard text) | Question set details and filters | corestandards.org | Public license from NGA Center and CCSSO: free use with the notice "© Copyright 2010. National Governors Association Center for Best Practices and Council of Chief State School Officers. All rights reserved." Show that notice on the public site footer and the set details help. | 2026-10-24 |
 | Common Core State Standards text (1,531 standards, `src/data/ccss-text.json`) | Standard descriptions on hover and in the set details menus | Extracted from github.com/withmarbleapp/os-taxonomy `data/curriculum-standards.json` by `scripts/build-ccss-text.py` (em dashes made commas) | Text: CCSS public license with the NGA/CCSSO notice above. Database: Open Database License 1.0, attribution on the Credits page; our derived list is offered under ODbL (share-alike). Attorney to confirm. | 2026-10-25 |
-| Phosphor Icons | UI icons | @phosphor-icons/react | MIT | 2026-10 |
+| Phosphor Icons | UI icons, and the stickers in the Theme Builder drawing studio (pictures made with them belong to the class) | @phosphor-icons/react | MIT | 2026-10 |
+| Drawing studio brushes, shapes, starter backgrounds, Classic power-up art | Theme Builder drawing studio | Drawn in our own code (src/theme/builder/DrawStudio.tsx, src/theme/classicItems.tsx) | Ours | 2026-10-26 |
 | React, React DOM, React Router | App framework | npm | MIT | 2026-10 |
 | Motion | Animation | npm `motion` | MIT | 2026-10 |
 | canvas-confetti | Celebrations | npm | ISC | 2026-10 |

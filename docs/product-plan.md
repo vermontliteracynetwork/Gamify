@@ -1142,6 +1142,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 73 | **A Homeschool plan built for families.** Every game, up to 10 students, 3 theme designs per game, assignments per child, reports kept forever. | A clear, family-sized offer instead of a classroom plan | Teacher, 2026-10-26 |
 | 74 | **Power-ups your class designs.** In Game Show, every power-up card (Double Star, Swap Spinner, Sneaky Magnet, Prize Bag) can get your students' own art and name, and the board grows from 4 x 3 up to 6 x 6. | Turns review day into a design project kids are proud of | Claudia, 2026-10-26 |
 | 75 | **The class sky.** In Question Tracker every right answer puts a star in one shared sky on the big screen: fill it together, or race with each student's own star color. | A visible, positive class goal no worksheet can match | Teacher, 2026-10-26 |
+| 76 | **Draw it right in Gamify.** A drawing studio built into the Theme Builder: pen, marker, crayon and spray brushes, a fill bucket, shapes, searchable stickers and starter backgrounds. No other app, no account, works with a finger on an iPad. | Removes the "we don't have Canva" barrier; every class can make a theme in one period | Teacher, 2026-10-26 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
