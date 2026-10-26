@@ -24,3 +24,20 @@ describe('live host', () => {
     expect(ranked(s.players).map((p) => p.name)).toEqual(['Ben', 'Ava']);
   });
 });
+
+import { routeFor } from './protocol';
+describe('lobby routes', () => {
+  const p = (pid: string) => ({ pid, name: pid, status: 'in' as const, answered: 0, right: 0, askedAt: null, lastSeen: 0 });
+  const base: LiveState = { code: 'BCDFG', gameId: 'cast-catch', setId: 's1', phase: 'play', players: [p('a'), p('b'), p('c')], locks: {}, roomLocked: false, at: 0, round: 1 };
+  it('sends each student to their group game with their own set', () => {
+    const s = { ...base, groups: [{ gameId: 'cast-catch' }, { gameId: 'flashcards' }], assign: { b: { group: 1, setId: 's2' } } };
+    expect(routeFor(s, 'a')).toEqual({ gameId: 'cast-catch', setId: 's1' });
+    expect(routeFor(s, 'b')).toEqual({ gameId: 'flashcards', setId: 's2' });
+  });
+  it('pairs a two-player group; the odd one out plays the computer', () => {
+    const s = { ...base, groups: [{ gameId: 'four-in-a-row' }] };
+    expect(routeFor(s, 'a').pair).toEqual({ code: 'BCDFG-1-0-0', seat: 0 });
+    expect(routeFor(s, 'b').pair).toEqual({ code: 'BCDFG-1-0-0', seat: 1 });
+    expect(routeFor(s, 'c').pair).toBeUndefined();
+  });
+});

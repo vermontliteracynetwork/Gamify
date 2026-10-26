@@ -45,7 +45,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await page.getByRole('switch').nth(3).click();
 
   // Student sign-in: tap Ava's avatar, then her PIN (a wrong PIN first).
-  await page.getByRole('link', { name: 'Student sign-in on this device' }).click();
+  await page.goto(`/arcade/${page.url().split('/teacher/classes/')[1]}`);
   await page.screenshot({ path: `test-results/arcade-signin-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Ava' }).click();
   const pin = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').pin as string);
@@ -90,7 +90,7 @@ test('a class can sign in with sign-in pictures drawn in the Theme Builder', asy
   await page.getByRole('radio', { name: 'Our Animals' }).click();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
-  await page.getByRole('link', { name: 'Student sign-in on this device' }).click();
+  await page.goto(`/arcade/${page.url().split('/teacher/classes/')[1]}`);
   // Zoe's avatar is the cat picture, drawn in the class's design.
   await expect(page.getByRole('button', { name: 'Zoe', exact: true }).locator('img')).toHaveCount(1);
   await page.screenshot({ path: `test-results/signin-drawn-${info.project.name}.png` });

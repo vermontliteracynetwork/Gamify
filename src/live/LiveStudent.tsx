@@ -6,7 +6,7 @@ import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
-import { ranked } from './protocol';
+import { ranked, routeFor } from './protocol';
 import { setLive, useLiveRoom } from './session';
 
 // The student's waiting room for a live game: waiting to be let in, then
@@ -16,7 +16,11 @@ export default function LiveLobby() {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
   const playing = state && me?.status === 'in' && (state.phase === 'play' || state.phase === 'paused');
-  useEffect(() => { if (playing) navigate(`/games/${state.gameId}?set=${state.setId}`, { replace: true }); }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!playing || !me) return;
+    const r = routeFor(state, me.pid);
+    navigate(`/games/${r.gameId}?set=${r.setId}${r.pair ? `&pair=${r.pair.code}&seat=${r.pair.seat}` : ''}`, { replace: true });
+  }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
   const box = 'max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center';
   if (!session) return <main className={box}><p className="font-bold text-lg">{t('live.noSession')}</p><Link to="/join" className={buttonClasses('primary')}>{t('live.toJoin')}</Link></main>;
   if (closed) return <main className={box}><Prohibit weight="fill" size={64} aria-hidden="true" /><h1 className="title-bubble text-4xl"><Title text={t('live.closed')} /></h1><p className="font-bold">{t('live.closedText')}</p></main>;
@@ -55,8 +59,12 @@ export function LiveOverlay() {
         <DialogFocus />
         <div className={panel} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="font-display text-4xl"><Title text={t('live.endTitle')} /></h2>
+          {state.mode === 'together' ? (
+            <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
+          ) : <>
           <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-[2px] border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
           <p className="font-display text-2xl">{t('live.you', { count: me.right, place: mine })}</p>
+          </>}
           <button type="button" onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', 'min-h-14 px-8 text-lg')}>{t('live.done')}</button>
         </div>
       </div>

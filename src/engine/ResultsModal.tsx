@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { ArrowCounterClockwise, HouseSimple, Trophy } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { ArrowCounterClockwise, Feather, HouseSimple, Mountains, Smiley, SmileyMeh, SmileySad, Target, Trophy } from '@phosphor-icons/react';
+import { useLocation } from 'react-router-dom';
+import { saveCheckIn } from '../beta/surveys';
+import { getSession } from '../student/session';
+import type { StringKey } from '../i18n/en';
 import { useSignedIn } from '../auth/session';
 import { t } from '../i18n';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -9,6 +14,41 @@ import { useSettings } from '../settings/SettingsContext';
 import LookBack from './LookBack';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
+
+// A two-tap review at the end of every game (teacher, 2026-10-26: instead of
+// a class check-in): how it felt, then easy or tricky. Pictures only, read
+// aloud by the device's Listen tools; only counts are kept, never names.
+const FEEL = [Smiley, SmileyMeh, SmileySad];
+const LEVEL = [Feather, Target, Mountains];
+const COLORS = [['#ddfcc6', '#fdfd94', '#ed9d75'], ['#b4c4fb', '#ddfcc6', '#ed9d75']];
+function GameReview() {
+  const [feel, setFeel] = useState<number | null>(null);
+  const [done, setDone] = useState(false);
+  const gameId = useLocation().pathname.split('/')[2];
+  const step = feel === null ? 0 : 1;
+  if (done) return <p className="font-bold text-center" role="status">{t('review.thanks')}</p>;
+  const icons = step === 0 ? FEEL : LEVEL;
+  const key = step === 0 ? 'feel' : 'level';
+  function pick(i: number) {
+    if (step === 0) { setFeel(i); return; }
+    const oneHot = (n: number) => [0, 1, 2].map((k) => (k === n ? 1 : 0)) as [number, number, number];
+    void saveCheckIn({ at: new Date().toISOString(), classroomId: getSession()?.classroomId ?? '', gameId, feel: oneHot(feel!), level: oneHot(i) });
+    setDone(true);
+  }
+  return (
+    <div className="grid gap-2 justify-items-center rounded-input border-[2px] border-border-soft p-3">
+      <p className="font-bold">{t(step === 0 ? 'review.feel' : 'review.level')}</p>
+      <div className="flex gap-2">
+        {icons.map((I, i) => (
+          <button key={i} type="button" onClick={() => pick(i)} aria-label={t(`checkin.${key}.${i}` as StringKey)}
+            className="w-16 h-16 rounded-full border-[2.5px] border-border flex items-center justify-center active:scale-90" style={{ background: COLORS[step][i] }}>
+            <I weight="fill" size={34} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // End-of-game results in a box over the game, so the screen never scrolls:
 // the headline, a few facts, Play again (back to this game's start) or
@@ -38,6 +78,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             <HouseSimple weight="bold" size={22} />{t('results.arcade')}
           </Link>
         </div>
+        <GameReview />
         <LookBack missed={missed} />
       </motion.div>
     </div>

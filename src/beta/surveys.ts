@@ -13,7 +13,8 @@ export const SURVEYS = [
 export type SurveyId = (typeof SURVEYS)[number]['id'];
 
 export interface SurveyAnswer { id: SurveyId; at: string; going: number; recommend: number; better: string }
-export interface CheckIn { at: string; classroomId: string; feel: [number, number, number]; level: [number, number, number] }
+// gameId: a review given at the end of one game (teacher, 2026-10-26).
+export interface CheckIn { at: string; classroomId: string; gameId?: string; feel: [number, number, number]; level: [number, number, number] }
 
 const FIRST_USE = 'beta-first-use';
 const ANSWERS = 'beta-surveys';

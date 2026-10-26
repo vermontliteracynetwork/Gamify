@@ -1,4 +1,5 @@
 import { openChannel } from './channel';
+import type { QuestionSet } from '../data/types';
 
 // Class Live (development plan Stage 6): one host screen, every student on
 // their own device. Messages travel over a LiveLink: across tabs on one
@@ -14,6 +15,30 @@ export interface LiveState {
   players: LivePlayer[]; locks: Record<string, string>; roomLocked: boolean; at: number;
   // A new round (Play again) starts every student's count from zero.
   round: number;
+  // How the class plays (teacher, 2026-10-26): against each other on a
+  // leaderboard, or together toward a class goal of right answers.
+  mode?: 'compete' | 'together';
+  goal?: number;
+  // Groups, each playing its own game (Plus, Homeschool and Pro), and each
+  // student's group and question set (their own level, same game).
+  groups?: { gameId: string }[];
+  assign?: Record<string, { group?: number; setId?: string }>;
+}
+
+// Where one student goes when the game starts: their group's game with their
+// own set. In a two-player game the group plays in pairs (seat 0 hosts); an
+// odd one out plays the computer.
+export function routeFor(s: LiveState, pid: string): { gameId: string; setId: string; pair?: { code: string; seat: 0 | 1 } } {
+  const a = s.assign?.[pid] ?? {};
+  const g = Math.min(a.group ?? 0, (s.groups?.length ?? 1) - 1);
+  const gameId = s.groups?.[g]?.gameId ?? s.gameId;
+  const setId = a.setId ?? s.setId;
+  if (gameId !== 'four-in-a-row') return { gameId, setId };
+  const members = s.players.filter((p) => p.status === 'in' && Math.min(s.assign?.[p.pid]?.group ?? 0, (s.groups?.length ?? 1) - 1) === g).map((p) => p.pid);
+  const i = members.indexOf(pid);
+  const pairIdx = Math.floor(i / 2);
+  if (i < 0 || (i % 2 === 0 && i === members.length - 1)) return { gameId, setId };
+  return { gameId, setId, pair: { code: `${s.code}-${s.round}-${g}-${pairIdx}`, seat: (i % 2) as 0 | 1 } };
 }
 
 export type ToHost =
@@ -21,7 +46,8 @@ export type ToHost =
   | { t: 'join'; pid: string; name: string }
   | { t: 'leave'; pid: string }
   | { t: 'progress'; pid: string; round: number; answered: number; right: number; askedAt: number | null };
-export type ToPlayers = { t: 'state'; state: LiveState } | { t: 'closed'; pid: string };
+// Question sets go out once (not in every state update): each student's own.
+export type ToPlayers = { t: 'state'; state: LiveState } | { t: 'closed'; pid: string } | { t: 'sets'; sets: QuestionSet[] };
 export type LiveMsg = ToHost | ToPlayers;
 
 export interface LiveLink { send(msg: LiveMsg): void; listen(fn: (msg: LiveMsg) => void): () => void; close(): void }

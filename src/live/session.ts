@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { openLink, type LiveLink, type LiveState } from './protocol';
+import { rememberSet } from '../data/gameCodes';
 
 // A student's place in a live game, kept per tab (like the Arcade session).
 export interface LiveSession { code: string; pid: string; name: string }
@@ -50,6 +51,7 @@ export function useLiveRoom() {
     const l = linkFor(session.code);
     const off = l.listen((m) => {
       if (m.t === 'state') { startRound(m.state.round); setState(m.state); }
+      if (m.t === 'sets') m.sets.forEach(rememberSet);
       if (m.t === 'closed' && m.pid === session.pid) setClosed(true);
     });
     l.send({ t: 'join', pid: session.pid, name: session.name });

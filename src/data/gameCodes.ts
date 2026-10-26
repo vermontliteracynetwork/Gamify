@@ -49,7 +49,7 @@ const REMOTE = 'gamify:remote-sets';
 export function remoteSet(id: string): QuestionSet | undefined {
   try { return (JSON.parse(sessionStorage.getItem(REMOTE) ?? '{}') as Record<string, QuestionSet>)[id]; } catch { return undefined; }
 }
-function rememberSet(set: QuestionSet) {
+export function rememberSet(set: QuestionSet) {
   try { const all = JSON.parse(sessionStorage.getItem(REMOTE) ?? '{}') as Record<string, QuestionSet>; sessionStorage.setItem(REMOTE, JSON.stringify({ ...all, [set.id]: set })); } catch { /* this tab only */ }
 }
 

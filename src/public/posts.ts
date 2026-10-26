@@ -131,15 +131,14 @@ export const POSTS: Post[] = [
     grades: 'K-3',
     minutes: 5,
     body: [
-      'Exit tickets are hard when half the class is still learning to read. The class check-in asks two questions with pictures only, and reads them aloud: How did today feel? Was it easy or tricky?',
-      'Students walk up one at a time and tap two big pictures. A star and a thank-you send them back to their seat, and the screen is ready for the next friend.',
-      'Gamify keeps only the counts, never who tapped what. When everyone is done, you see the results as simple bars and can plan tomorrow: more practice on a tricky set, or a harder one if most kids say easy.',
+      'Exit tickets are hard when half the class is still learning to read. Every Gamify game now ends with a two-tap review, pictures only: How did that game feel? Was it easy or tricky?',
+      'Students tap a face, then a feather (easy), a target (just right) or a mountain (tricky). It takes five seconds, right on the results screen, before they play again.',
+      'Gamify keeps only the counts, never who tapped what. Use them to plan tomorrow: more practice on a tricky set, or a harder one if most kids say easy.',
     ],
     tryIt: [
-      'Open your class and tap Class check-in.',
-      'Set the iPad where students line up for the door.',
-      'Each student taps a face, then Easy, Just right or Tricky.',
-      'Tap Finish (teacher) to see the counts.',
+      'Share any game with your class by link, code or QR.',
+      'When a game ends, each student taps a face, then Easy, Just right or Tricky.',
+      'Look at the counts to plan the next lesson.',
     ],
   },
   {

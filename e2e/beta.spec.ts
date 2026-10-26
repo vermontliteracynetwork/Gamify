@@ -7,8 +7,7 @@ test('a class check-in counts picture taps, with no names', async ({ page }, inf
     if (localStorage.getItem('gamify:classrooms')) return;
     localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '', joinCode: 'BCDFG' }]));
   });
-  await page.goto('/teacher/classes/c1');
-  await page.getByRole('link', { name: 'Class check-in' }).click();
+  await page.goto('/teacher/classes/c1/check-in');
   await expect(page.getByRole('heading', { name: /How did today feel/i })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   await page.waitForTimeout(700);

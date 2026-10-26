@@ -5,6 +5,12 @@ import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
 import { ArrowLeft, Check, Crown, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning } from '@phosphor-icons/react';
 import { TIERS } from '../config';
+import { GAMES } from '../games/registry';
+import { LIBRARY } from '../data/library';
+import { useMySets } from '../data/hooks';
+import type { QuestionSet } from '../data/types';
+import { UpgradeButton } from '../billing/Upgrade';
+import { Plus as PlusIcon } from '@phosphor-icons/react';
 import { findGameCode, type GameCode } from '../data/gameCodes';
 import { useTier } from '../data/hooks';
 import { getGame } from '../games/registry';
@@ -57,8 +63,8 @@ function Room({ game }: { game: GameCode }) {
     const l = openLink(game.code);
     link.current = l;
     const off = l.listen((m) => {
-      if (m.t === 'state' || m.t === 'closed') return;
-      if (m.t === 'hello') { setState((s) => { l.send({ t: 'state', state: s }); return s; }); return; }
+      if (m.t === 'state' || m.t === 'closed' || m.t === 'sets') return;
+      if (m.t === 'hello') { setState((s) => { l.send({ t: 'state', state: s }); l.send({ t: 'sets', sets: setsFor(s) }); return s; }); return; }
       setState((s) => {
         if (m.t === 'join' && s.roomLocked && !s.players.some((p) => p.pid === m.pid)) l.send({ t: 'closed', pid: m.pid });
         return reduceHost(s, m, approveRef.current);
@@ -66,15 +72,32 @@ function Room({ game }: { game: GameCode }) {
     });
     return () => { off(); l.close(); };
   }, [game.code]);
-  // Every change goes out to every student at once.
+  // Every change goes out to every student at once; the question sets in use
+  // go out when they change (each student's own set, teacher 2026-10-26).
   useEffect(() => { link.current?.send({ t: 'state', state }); }, [state]);
+  const { value: mine = [] } = useMySets();
+  const allSets = useMemo(() => [...mine, ...LIBRARY], [mine]);
+  const allSetsRef = useRef<QuestionSet[]>(allSets);
+  allSetsRef.current = allSets;
+  function setsFor(s: LiveState): QuestionSet[] {
+    const ids = new Set([s.setId, ...Object.values(s.assign ?? {}).map((a) => a.setId).filter((x): x is string => !!x)]);
+    return allSetsRef.current.filter((x) => ids.has(x.id));
+  }
+  const setKey = [state.setId, ...Object.values(state.assign ?? {}).map((a) => a.setId ?? '')].join('|');
+  useEffect(() => { link.current?.send({ t: 'sets', sets: setsFor(state) }); }, [setKey, allSets]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Groups, a game per group and a set per student: Plus, Homeschool and Pro.
+  const paid = tier !== 'free';
+  const groups = state.groups ?? [{ gameId: state.gameId }];
+  const playable = GAMES.filter((g) => g.modes.some((m) => m === 'solo' || m === 'live' || m === 'versus'));
+  const assignOf = (pid: string) => state.assign?.[pid] ?? {};
+  const setAssign = (pid: string, patch: { group?: number; setId?: string }) => update((s) => ({ ...s, assign: { ...s.assign, [pid]: { ...s.assign?.[pid], ...patch } } }));
 
   const update = (fn: (s: LiveState) => LiveState) => setState((s) => ({ ...fn(s), at: Date.now() }));
   const setPlayer = (pid: string, patch: Partial<LivePlayer>) => update((s) => ({ ...s, players: s.players.map((p) => (p.pid === pid ? { ...p, ...patch } : p)) }));
   const inRoom = state.players.filter((p) => p.status === 'in');
   const pending = state.players.filter((p) => p.status === 'pending');
   const leaders = useMemo(() => ranked(state.players), [state.players]);
-  const goal = Math.max(10, inRoom.length * 10);
+  const goal = state.goal ?? Math.max(10, inRoom.length * 10);
   const classRight = inRoom.reduce((n, p) => n + p.right, 0);
   const allLocked = state.locks.all !== undefined;
   function lock(pid: string, on: boolean) {
@@ -109,6 +132,35 @@ function Room({ game }: { game: GameCode }) {
             {qr && <img src={qr} alt={t('show.qr')} className="w-48 h-48 rounded-input border-[3px] border-border" />}
             <p className="font-bold">{t('live.joined', { count: inRoom.length })}</p>
           </Panel>
+          <Panel className="grid gap-3 lg:col-span-2 lg:order-last">
+            <h2 className="font-display text-2xl"><Title text={t('live.howPlay')} /></h2>
+            <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
+              {(['compete', 'together'] as const).map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(m === 'compete' ? 'leaders' : 'goal'); }}
+                  className={`min-h-16 px-4 rounded-input border-[2px] text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                  <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
+                </button>
+              ))}
+            </div>
+            {state.mode === 'together' && (
+              <label className="flex flex-wrap items-center gap-2 font-bold">{t('live.goalLabel')}
+                <input type="number" min={5} max={999} value={goal} onChange={(e) => update((s) => ({ ...s, goal: Math.max(5, Math.min(999, Number(e.target.value) || 5)) }))} className="w-24 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+              </label>
+            )}
+            <h3 className="font-bold text-lg">{t('live.groups')}</h3>
+            {!paid && <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('live.groupsPlan')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {groups.map((g, i) => (
+                <label key={i} className="grid gap-1 font-bold text-sm rounded-input border-[2px] border-border-soft p-2">{t('live.groupN', { n: i + 1 })}
+                  <select value={g.gameId} disabled={!paid} aria-label={t('live.groupGame', { n: i + 1 })} onChange={(e) => update((s) => ({ ...s, groups: groups.map((x, j) => (j === i ? { gameId: e.target.value } : x)) }))} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface">
+                    {playable.map((x) => <option key={x.id} value={x.id}>{x.name}{x.id === 'four-in-a-row' ? ` (${t('live.pairs')})` : ''}</option>)}
+                  </select>
+                </label>
+              ))}
+            </div>
+            {paid && <Button className="justify-self-start" disabled={groups.length >= 8} onClick={() => update((s) => ({ ...s, groups: [...groups, { gameId: s.gameId }] }))}><PlusIcon weight="bold" size={18} />{t('live.addGroup')}</Button>}
+            <p className="text-sm font-semibold text-muted">{t('live.groupsHint')}</p>
+          </Panel>
           <Panel className="grid gap-3">
             <div className="flex flex-wrap items-center gap-3">
               <label className="inline-flex items-center gap-2 font-bold min-h-11"><input type="checkbox" checked={approve} onChange={(e) => setApprove(e.target.checked)} className="w-5 h-5" />{t('live.approveNames')}</label>
@@ -129,6 +181,16 @@ function Room({ game }: { game: GameCode }) {
                     {editing === p.pid
                       ? <input autoFocus defaultValue={p.name} maxLength={24} aria-label={t('live.renameTo', { name: p.name })} onBlur={(e) => { setPlayer(p.pid, { name: e.target.value.trim() || p.name }); setEditing(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} className="flex-1 min-h-10 px-2 rounded-input border-[2px] border-border font-bold" />
                       : <span className="flex-1 font-bold min-w-32">{p.name}</span>}
+                    {paid && p.status === 'in' && groups.length > 1 && (
+                      <select value={assignOf(p.pid).group ?? 0} aria-label={t('live.groupFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { group: Number(e.target.value) })} className="min-h-10 px-2 rounded-input border-[2px] border-border font-bold bg-surface text-sm">
+                        {groups.map((_, i) => <option key={i} value={i}>{t('live.groupN', { n: i + 1 })}</option>)}
+                      </select>
+                    )}
+                    {paid && p.status === 'in' && (
+                      <select value={assignOf(p.pid).setId ?? state.setId} aria-label={t('live.setFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { setId: e.target.value })} className="min-h-10 px-2 rounded-input border-[2px] border-border font-bold bg-surface text-sm max-w-52">
+                        {allSets.map((x) => <option key={x.id} value={x.id}>{x.name || t('sets.untitled')}</option>)}
+                      </select>
+                    )}
                     {p.status === 'pending' && <Button variant="primary" onClick={() => setPlayer(p.pid, { status: 'in' })}><Check weight="bold" size={16} />{t('live.letIn', { name: p.name })}</Button>}
                     <button type="button" onClick={() => setEditing(p.pid)} aria-label={t('live.rename', { name: p.name })} className="w-10 h-10 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><PencilSimple weight="bold" size={16} /></button>
                     <button type="button" onClick={() => setPlayer(p.pid, { status: 'removed' })} aria-label={t('live.remove', { name: p.name })} className="w-10 h-10 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={16} /></button>
@@ -206,7 +268,8 @@ function Room({ game }: { game: GameCode }) {
 
       {state.phase === 'ended' && (
         <Panel className="grid gap-4 justify-items-center text-center">
-          <h2 className="font-display text-4xl"><Title text={t('live.podium')} /></h2>
+          <h2 className="font-display text-4xl"><Title text={state.mode === 'together' ? t('live.togetherTitle') : t('live.podium')} /></h2>
+          {state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
             {[1, 0, 2].map((i) => leaders.at(i) && (
               <motion.div key={leaders.at(i)!.pid} initial={reduce ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: reduce ? 0 : 0.2 + (2 - i) * 0.25 }} className="flex-1 grid gap-2 justify-items-center">
@@ -217,6 +280,7 @@ function Room({ game }: { game: GameCode }) {
               </motion.div>
             ))}
           </div>
+          )}
           <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t('live.classTotal', { right: classRight, count: inRoom.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="primary" onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}>{t('live.again')}</Button>

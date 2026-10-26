@@ -58,7 +58,10 @@ export default function FourInARow() {
   const [line, setLine] = useState<[number, number][] | null>(null);
   const [rights, setRights] = useState([0, 0]);
   // Two devices: which seat plays on the other device, and the shared code.
-  const guestCode = useSearchParams()[0].get('versus');
+  const [search] = useSearchParams();
+  // A pair from the live lobby: seat 1 joins the pair's code, seat 0 hosts it.
+  const pair = search.get('pair');
+  const guestCode = search.get('versus') ?? (pair && search.get('seat') === '1' ? pair : null);
   const [remoteSeat, setRemoteSeat] = useState<0 | 1 | null>(null);
   const [hostCode, setHostCode] = useState('');
   const link = useRef<VersusLink | null>(null);
@@ -85,8 +88,10 @@ export default function FourInARow() {
     return () => { off(); stop(); window.clearInterval(again); l.close(); };
   }, [guestCode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function hostTwoDevices() {
-    const code = (await makeGameCode('four-in-a-row', setId, 'versus')).code;
+  useEffect(() => { if (pair && search.get('seat') === '0') void hostTwoDevices(pair); }, [pair]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function hostTwoDevices(pairCode?: string) {
+    const code = pairCode ?? (await makeGameCode('four-in-a-row', setId, 'versus')).code;
     setHostCode(code);
     setPhase('waiting');
     link.current?.close();
@@ -96,7 +101,7 @@ export default function FourInARow() {
     l.listen((m) => {
       if (m.t === 'vjoin' && !started) {
         started = true;
-        const host = team.players[0] ?? remotePlayer(t('fr.player1'), 0);
+        const host = pairCode ? remotePlayer(getSession()?.name || t('fr.player1'), 0) : team.players[0] ?? remotePlayer(t('fr.player1'), 0);
         const first: 0 | 1 = setup.first === 'p2' ? 1 : setup.first === 'random' ? (Math.random() < 0.5 ? 0 : 1) : 0;
         l.send({ t: 'vstart', names: [host.name, m.name], first });
         setRemoteSeat(1);

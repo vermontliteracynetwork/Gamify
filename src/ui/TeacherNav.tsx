@@ -21,13 +21,13 @@ export default function TeacherNav(_props: { startOpen?: boolean }) {
   useEffect(() => { void surveyDue().then(setSurvey); }, []);
   const showing = open ?? true;
   const link = ({ isActive }: { isActive: boolean }) =>
-    `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
+    `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.
   const onAccount = useLocation().pathname.startsWith('/teacher/account');
   const unfinished = start && start.count < start.steps.length && !onAccount;
   return (
     <>
-      <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-4">
+      <nav aria-label={t('teacherNav.label')} className="flex flex-wrap w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-4">
         <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{!TIERS[tier].hasClasses ? t('teacherNav.students') : t('teacherNav.classes')}</NavLink>
         <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
         <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
@@ -35,13 +35,13 @@ export default function TeacherNav(_props: { startOpen?: boolean }) {
         <NavLink to="/teacher/account" className={link}><UserCircle weight="bold" size={16} />{t('teacherNav.account')}</NavLink>
         {unfinished && (
           <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)}
-            className={`min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 border-[2px] border-border ${showing ? 'bg-surface-2' : 'bg-accent text-accent-ink'}`}>
+            className={`min-h-11 px-4 rounded-pill font-bold text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 border-[2px] border-border ${showing ? 'bg-surface-2' : 'bg-accent text-accent-ink'}`}>
             <RocketLaunch weight="fill" size={16} />{t('start.pill', { done: start.count, total: start.steps.length })}
           </button>
         )}
         {survey && (
           <button type="button" onClick={() => setSurveyOpen(true)}
-            className="min-h-11 px-4 rounded-pill font-bold text-sm inline-flex items-center gap-1.5 border-[2px] border-border bg-secondary">
+            className="min-h-11 px-4 rounded-pill font-bold text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 border-[2px] border-border bg-secondary">
             <ChatTeardropText weight="fill" size={16} />{t('survey.pill')}
           </button>
         )}
