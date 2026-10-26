@@ -14,6 +14,9 @@ export interface ReportRow {
   left: number;
   avgSeconds: number;
   topWrong?: string;
+  // Last day played and total minutes spent (teacher, 2026-10-26).
+  lastDay: string;
+  minutes: number;
 }
 
 export interface ReportFilter { studentId?: string; gameId?: string; setId?: string; from?: string; to?: string; search?: string }
@@ -49,6 +52,8 @@ export function groupLog(log: QuestionLogEntry[], by: GroupBy, names: { student:
       left: rows.length - answered.length,
       avgSeconds: answered.length ? Math.round(answered.reduce((s, r) => s + r.ms, 0) / answered.length / 100) / 10 : 0,
       topWrong,
+      lastDay: rows.reduce((d, r) => (r.at > d ? r.at : d), '').slice(0, 10),
+      minutes: Math.round(rows.reduce((s, r) => s + r.ms, 0) / 6000) / 10,
     };
   });
 }

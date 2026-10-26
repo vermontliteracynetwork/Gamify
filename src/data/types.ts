@@ -50,8 +50,13 @@ export interface Student {
   id: string;
   classroomId: string;
   name: string;
-  // Two picture ids for the K-1 friendly sign-in.
+  // Two picture ids (the first sign-in design; the first is the default avatar).
   picturePassword: [string, string];
+  // Sign-in (teacher, 2026-10-26): students tap their avatar, then type their
+  // 4-digit PIN. The avatar is a built-in picture id, or (Plus and Pro) an
+  // uploaded picture as a data URL. The teacher sets the PIN or rolls one.
+  avatar?: string;
+  pin?: string;
   // Narrows the class's modes for this one student (never widens them).
   allowedModes?: PlayMode[];
   // Question screen accommodations the teacher set (behind the teacher PIN):

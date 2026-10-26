@@ -27,7 +27,7 @@ export default function PricingPage() {
     { label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
     { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
     { label: t('pricing.row.library'), value: (x) => TIERS[x].themesPlayable },
-    { label: t('pricing.row.classes'), value: (x) => fmt(TIERS[x].classrooms) },
+    { label: t('pricing.row.classes'), value: (x) => (x === 'free' ? false : fmt(TIERS[x].classrooms)) },
     { label: t('pricing.row.students'), value: (x) => fmt(TIERS[x].studentsPerClassroom) },
     { label: t('pricing.row.sets'), value: (x) => fmt(TIERS[x].savedQuestionSets) },
     { label: t('pricing.row.assigned'), value: (x) => fmt(TIERS[x].assignedSetsPerStudent) },

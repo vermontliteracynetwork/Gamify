@@ -5,12 +5,14 @@ import TeacherSurvey from '../beta/TeacherSurvey';
 import { surveyDue, type SurveyId } from '../beta/surveys';
 import { t } from '../i18n';
 import GetStarted, { useStartSteps } from '../teacher/GetStarted';
+import { useTier } from '../data/hooks';
 
 // The teacher menu, on every teacher page. Until the five get started steps
 // are done, the checklist sits at the top of every teacher tab (teacher,
 // 2026-10-25); the X folds it into the Get started pill for this page only.
 export default function TeacherNav(_props: { startOpen?: boolean }) {
   const start = useStartSteps();
+  const tier = useTier();
   const [open, setOpen] = useState<boolean | null>(null);
   // A beta survey that has come due shows as a pill too.
   const [survey, setSurvey] = useState<SurveyId | null>(null);
@@ -25,7 +27,7 @@ export default function TeacherNav(_props: { startOpen?: boolean }) {
   return (
     <>
       <nav aria-label={t('teacherNav.label')} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-4">
-        <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{t('teacherNav.classes')}</NavLink>
+        <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{tier === 'free' ? t('teacherNav.students') : t('teacherNav.classes')}</NavLink>
         <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
         <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
         <NavLink to="/teacher/themes" className={link}><PaintBrush weight="bold" size={16} />{t('teacherNav.themes')}</NavLink>

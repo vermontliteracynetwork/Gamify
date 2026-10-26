@@ -29,7 +29,7 @@ describe('reports', () => {
     expect(filterLog(log, { search: 'q2' })).toHaveLength(2);
   });
   it('makes a CSV with quoted cells', () => {
-    const csv = toCsv([{ key: 'x', label: 'Smith, Jo', asked: 2, right: 1, firstTry: 1, left: 0, avgSeconds: 3, topWrong: 'say "hi"' }], 'Student');
+    const csv = toCsv([{ key: 'x', label: 'Smith, Jo', asked: 2, right: 1, firstTry: 1, left: 0, avgSeconds: 3, topWrong: 'say "hi"', lastDay: '2026-10-26', minutes: 1 }], 'Student');
     expect(csv.split('\n')[1]).toBe('"Smith, Jo",2,1,50,1,0,3,"say ""hi"""');
     expect(percent(1, 3)).toBe(33);
   });

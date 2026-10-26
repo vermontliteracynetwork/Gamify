@@ -8,12 +8,13 @@ function watch(page: Page) {
   return problems;
 }
 
-test('teacher makes a class, assigns a set, sets supports; a student signs in and plays it', async ({ page }, info) => {
+test('Free: the teacher adds students (no class), assigns a set, sets supports; a student signs in with avatar and PIN and plays it', async ({ page }, info) => {
   test.setTimeout(120_000);
   const problems = watch(page);
   await page.goto('/teacher/classes');
-  await page.getByLabel('New class name').fill('Room 12');
-  await page.getByRole('button', { name: 'Make class' }).click();
+  // Classes are Plus and Pro only: Free opens the teacher's student list.
+  await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
+  await expect(page.getByLabel('New class name')).toHaveCount(0);
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Ava\nBen');
   await page.getByRole('button', { name: 'Add 2 students' }).click();
   await expect(page.getByText('2 of 30 students')).toBeVisible();
@@ -43,12 +44,18 @@ test('teacher makes a class, assigns a set, sets supports; a student signs in an
   await page.getByRole('tab', { name: 'Play modes' }).click();
   await page.getByRole('switch').nth(3).click();
 
-  // Student sign-in with Ava's two pictures.
+  // Student sign-in: tap Ava's avatar, then her PIN (a wrong PIN first).
   await page.getByRole('link', { name: 'Student sign-in on this device' }).click();
-  await page.getByRole('button', { name: 'Ava' }).click();
-  const pics = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').picturePassword as string[]);
   await page.screenshot({ path: `test-results/arcade-signin-${info.project.name}.png` });
-  for (const p of pics) await page.getByRole('button', { name: p, exact: true }).click();
+  await page.getByRole('button', { name: 'Ava' }).click();
+  const pin = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').pin as string);
+  expect(pin).toMatch(/^\d{4}$/);
+  const wrong = pin === '1111' ? '2222' : '1111';
+  for (const d of wrong) await page.getByRole('button', { name: d, exact: true }).click();
+  await expect(page.getByText('Not quite. Try your PIN again.')).toBeVisible();
+  await page.screenshot({ path: `test-results/arcade-pin-${info.project.name}.png` });
+  await page.waitForTimeout(800);
+  for (const d of pin) await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByRole('heading', { name: "Ava's Arcade" })).toBeVisible();
   await expect(page.getByRole('link', { name: /Four in a Row/ })).toHaveCount(0); // Versus hidden
   await page.screenshot({ path: `test-results/arcade-${info.project.name}.png` });
@@ -84,8 +91,45 @@ test('a class can sign in with sign-in pictures drawn in the Theme Builder', asy
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   await page.getByRole('link', { name: 'Student sign-in on this device' }).click();
-  await page.getByRole('button', { name: 'Zoe', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'cat', exact: true }).locator('img')).toHaveCount(1);
+  // Zoe's avatar is the cat picture, drawn in the class's design.
+  await expect(page.getByRole('button', { name: 'Zoe', exact: true }).locator('img')).toHaveCount(1);
   await page.screenshot({ path: `test-results/signin-drawn-${info.project.name}.png` });
+  expect(problems).toEqual([]);
+});
+
+test('Plus: upload a student picture and set a PIN; a game link asks students for their avatar and PIN', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:classrooms')) return;
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' }));
+    localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'r1', name: 'Room 1', ownerId: 'local-teacher', createdAt: '2026-10-01', joinCode: 'BCDFG' }]));
+    localStorage.setItem('gamify:students', JSON.stringify([{ id: 's1', classroomId: 'r1', name: 'Mia', picturePassword: ['sun', 'moon'] }]));
+  });
+  const problems = watch(page);
+  await page.goto('/teacher/classes/r1');
+  await page.getByRole('button', { name: 'Picture and PIN for Mia' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Picture and PIN for Mia' });
+  const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d')!; x.fillStyle = '#2a9df4'; x.fillRect(0, 0, 64, 64); return c.toDataURL('image/png').split(',')[1]; });
+  await dialog.locator('input[type=file]').setInputFiles({ name: 'mia.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
+  await dialog.getByLabel('PIN (4 numbers)').fill('4826');
+  await dialog.screenshot({ path: `test-results/avatar-dialog-${info.project.name}.png` });
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('PIN 4826')).toBeVisible();
+
+  // A hosted game code: Mia taps her picture and types her PIN.
+  await page.goto('/teacher/sets');
+  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByLabel('Search titles and tags').fill('habitats');
+  await page.getByRole('button', { name: 'Play or share' }).click();
+  const host = page.getByRole('dialog');
+  await host.getByRole('radio', { name: /Question Tracker/ }).click();
+  await host.getByRole('button', { name: 'Make a game code' }).click();
+  const code = (await host.getByLabel(/^Game code /).innerText()).trim();
+  await page.goto(`/join/${code}`);
+  await expect(page.getByRole('heading', { name: "Who's Playing?" })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Mia' }).locator('img')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Mia' }).click();
+  for (const d of '4826') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('button', { name: 'Set up and play' }).click();
+  expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('gamify:arcade-session')!).name)).toBe('Mia');
   expect(problems).toEqual([]);
 });

@@ -5,6 +5,7 @@ import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
+import type { Tier } from '../config';
 import { Panel } from '../ui/kit';
 import Title from '../ui/Title';
 
@@ -21,14 +22,15 @@ export interface StartSteps { steps: { key: StepKey; to: string; done: boolean }
 
 export function useStartSteps(): StartSteps | null {
   const { value, reload } = useAsync(async () => {
-    const [classes, log, folded] = await Promise.all([data.listClassrooms(), data.listQuestionLog(), data.getSetting<boolean>(FOLDED)]);
+    const [classes, log, folded, tier] = await Promise.all([data.listClassrooms(), data.listQuestionLog(), data.getSetting<boolean>(FOLDED), data.getSetting<Tier>('tier')]);
     const students = (await Promise.all(classes.map((c) => data.listStudents(c.id)))).flat();
     const assignments = (await Promise.all(classes.map((c) => data.listAssignments(c.id)))).flat();
     const first = classes[0]?.id;
     const inClass = first ? `/teacher/classes/${first}` : '/teacher/classes';
     const steps = [
       { key: 'play' as const, to: '/teacher/sets', done: log.length > 0 },
-      { key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 },
+      // Classes are Plus and Pro only; Free goes straight to its student list.
+      ...((tier ?? 'free') === 'free' ? [] : [{ key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 }]),
       { key: 'students' as const, to: inClass, done: students.length > 0 },
       { key: 'assign' as const, to: inClass, done: assignments.length > 0 },
       { key: 'signin' as const, to: first ? `/arcade/${first}` : '/teacher/classes', done: log.some((e) => e.studentId && !e.studentId.startsWith('guest')) },
@@ -52,7 +54,7 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
         <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
         <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
       </div>
-      {!small && <ol className="grid grid-cols-2 sm:grid-cols-5 gap-2 list-none p-0 m-0">
+      {!small && <ol className="grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr gap-2 list-none p-0 m-0">
         {steps.map((s, i) => (
           <li key={s.key}>
             <Link to={s.to} className={`hover-pop h-full min-h-11 rounded-input border-[2px] border-border px-2.5 py-1.5 flex items-center gap-1.5 no-underline text-text ${s.done ? 'bg-surface-2' : 'bg-surface'}`}>
