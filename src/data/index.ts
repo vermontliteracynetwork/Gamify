@@ -1,7 +1,8 @@
 import { createCloudStore } from './cloudStore';
 import { createLocalStore } from './localStore';
 import type { DataStore } from './store';
-import { supabase } from './supabase';
+import { normId, supabase, toUuid } from './supabase';
+import type { QuestionLogEntry } from './types';
 
 // The app's one data store. With cloud accounts on (Supabase keys set), a
 // signed-in teacher's work is saved in the cloud; with nobody signed in (a
@@ -13,8 +14,17 @@ function switching(cloud: DataStore): DataStore {
   const out = {} as Record<string, unknown>;
   for (const key of Object.keys(local) as (keyof DataStore)[]) {
     out[key] = async (...args: unknown[]) => {
+      // A student on their own device, playing a teacher's cloud game code:
+      // the answer goes to that teacher's reports (0008_game_codes.sql).
+      const signed = await signedIn();
+      const code = (() => { try { return sessionStorage.getItem('gamify:cloud-code') ?? ''; } catch { return ''; } })();
+      if (key === 'logQuestion' && !signed && code) {
+        const e = args[0] as QuestionLogEntry;
+        await supabase!.rpc('log_by_code', { c: code, e: { id: toUuid(e.id), student_id: e.studentId ? normId(e.studentId) : null, team_name: e.teamName ?? null, mode: e.mode, prompt: e.prompt, answer: e.answer, tries: e.tries, ms: Math.round(e.ms), outcome: e.outcome } });
+        return local.logQuestion(e);
+      }
       // Tell Gamify reports always go to the cloud (anyone may send one).
-      const store = key === 'sendFeedback' || (await signedIn()) ? cloud : local;
+      const store = key === 'sendFeedback' || signed ? cloud : local;
       try {
         return await (store[key] as (...a: unknown[]) => Promise<unknown>)(...args);
       } catch (e) {

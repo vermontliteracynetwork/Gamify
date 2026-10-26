@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { data } from '../data';
 import { useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
+import { remoteSet } from '../data/gameCodes';
 import type { PlayMode, SetAssignment, Student } from '../data/types';
 import type { PoolSet } from '../engine/picker';
 
@@ -69,7 +70,7 @@ export function useGamePool(picked: PoolSet[]) {
   const { value: mine = [] } = useMySets();
   // A set chosen by the teacher's game code or Play now button (?set=).
   const presetId = new URLSearchParams(useLocation().search).get('set');
-  const preset = presetId ? [...mine, ...LIBRARY].find((s) => s.id === presetId) : undefined;
+  const preset = presetId ? [...mine, ...LIBRARY].find((s) => s.id === presetId) ?? remoteSet(presetId) : undefined;
   if (preset) return { pool: [{ set: preset, starred: false }], assigned: true, classroomId: session?.classroomId || undefined, studentId: session?.studentId };
   const assigned = !!session && pool.length > 0;
   return { pool: assigned ? pool : picked, assigned, classroomId: session?.classroomId || undefined, studentId: session?.studentId };

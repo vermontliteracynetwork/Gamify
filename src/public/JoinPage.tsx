@@ -5,7 +5,7 @@ import { ArrowRight, DiceFive, SpeakerHigh, UserCircle } from '@phosphor-icons/r
 import { speak } from '../engine/feedback';
 import { useSettings } from '../settings/SettingsContext';
 import { data, newId } from '../data';
-import { findGameCode, type GameCode } from '../data/gameCodes';
+import { findClassCode, findGameCode, playCloudCode, type GameCode } from '../data/gameCodes';
 import { rollName } from '../engine/nameDice';
 import { setSession } from '../student/session';
 import StudentPicker from '../student/StudentPicker';
@@ -44,13 +44,17 @@ export default function JoinPage() {
     const upper = c.trim().toUpperCase();
     const cls = (await data.listClassrooms()).find((x) => x.joinCode === upper);
     if (cls) { navigate(`/arcade/${cls.id}`); return; }
+    const cloudClass = await findClassCode(upper);
+    if (cloudClass) { navigate(`/arcade/${cloudClass.id}`); return; }
     const g = await findGameCode(upper);
     if (g?.mirror) { navigate(`/mirror/${g.code}`); return; }
     if (g) {
       const classes = await data.listClassrooms();
       const withStudents = (await Promise.all(classes.map(async (c) => ((await data.listStudents(c.id)).length ? c : null)))).filter((c): c is Classroom => !!c);
-      setRosters(withStudents);
-      setRoster(withStudents.length === 1 ? withStudents[0].id : null);
+      // On a student's own device: the teacher's list from the cloud code.
+      const lists = withStudents.length ? withStudents : g.rosterClass ? [{ id: g.rosterClass, name: '', ownerId: '', createdAt: '' }] : [];
+      setRosters(lists);
+      setRoster(lists.length === 1 ? lists[0].id : null);
       setGame(g);
       return;
     }
@@ -65,6 +69,7 @@ export default function JoinPage() {
     const studentId = student?.id ?? newId('guest');
     const who = student?.name ?? name;
     setSession({ classroomId: student?.classroomId ?? '', studentId, name: who });
+    playCloudCode(game.cloud ? game.code : '');
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }
     if (game.versus) { navigate(`/games/${game.gameId}?set=${game.setId}&versus=${game.code}`); return; }
     navigate(`/games/${game.gameId}?set=${game.setId}`);

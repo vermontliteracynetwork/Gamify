@@ -1,10 +1,13 @@
 import { newJoinCode } from '../auth/session';
 import { data } from './index';
+import { LIBRARY } from './library';
+import { supabase } from './supabase';
+import type { QuestionSet } from './types';
 
 // Game codes (development plan Part 3B, path 2): the teacher picks a set and
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean }
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; rosterClass?: string; cloud?: boolean }
 const KEY = 'game-codes';
 // Game codes stop working after two weeks (development plan Stage 5:
 // codes expire), so an old code on a board can't be reused by strangers.
@@ -24,11 +27,55 @@ export async function makeGameCode(gameId: string, setId: string, kind: 'play' |
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
   const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }) };
   await data.setSetting(KEY, [...all, code]);
+  await shareToCloud(code, kind);
   return code;
 }
 
+// With cloud accounts on, the code, a copy of its set and the teacher's
+// student list reach students' own devices (0008_game_codes.sql).
+async function shareToCloud(code: GameCode, kind: 'play' | 'live' | 'versus' | 'mirror') {
+  if (!supabase || !(await supabase.auth.getSession()).data.session) return;
+  const set = code.setId ? (await data.getQuestionSet(code.setId)) ?? LIBRARY.find((s) => s.id === code.setId) : undefined;
+  const classes = (await data.listClassrooms()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  await supabase.from('game_codes').upsert({
+    code: code.code, game_id: code.gameId, set_id: code.setId, kind,
+    set_snapshot: set ?? {}, roster_class: classes[0]?.id ?? null,
+  });
+}
+
+// Sets that arrived with a cloud game code, kept for this tab so the game
+// can load them (students do not have the teacher's sets).
+const REMOTE = 'gamify:remote-sets';
+export function remoteSet(id: string): QuestionSet | undefined {
+  try { return (JSON.parse(sessionStorage.getItem(REMOTE) ?? '{}') as Record<string, QuestionSet>)[id]; } catch { return undefined; }
+}
+function rememberSet(set: QuestionSet) {
+  try { const all = JSON.parse(sessionStorage.getItem(REMOTE) ?? '{}') as Record<string, QuestionSet>; sessionStorage.setItem(REMOTE, JSON.stringify({ ...all, [set.id]: set })); } catch { /* this tab only */ }
+}
+
+// The game code a student's answers are sent under (cloud codes only).
+const PLAYING = 'gamify:cloud-code';
+export const cloudCodePlaying = () => { try { return sessionStorage.getItem(PLAYING) ?? ''; } catch { return ''; } };
+export function playCloudCode(code: string) { try { if (code) sessionStorage.setItem(PLAYING, code); else sessionStorage.removeItem(PLAYING); } catch { /* this tab only */ } }
+
 export async function findGameCode(code: string): Promise<GameCode | undefined> {
-  return (await listGameCodes()).find((c) => c.code === code.toUpperCase());
+  const mine = (await listGameCodes()).find((c) => c.code === code.toUpperCase());
+  if (mine || !supabase) return mine;
+  const { data: rows } = await supabase.rpc('game_by_code', { c: code });
+  const r = (rows as { code: string; game_id: string; set_id: string; kind: string; set_snapshot: QuestionSet; roster_class: string | null; created_at: string }[] | null)?.[0];
+  if (!r) return undefined;
+  if (r.set_snapshot?.id) rememberSet(r.set_snapshot);
+  return {
+    code: r.code, gameId: r.game_id, setId: r.set_id, createdAt: r.created_at, cloud: true, rosterClass: r.roster_class ?? undefined,
+    ...(r.kind === 'live' && { live: true }), ...(r.kind === 'versus' && { versus: true }), ...(r.kind === 'mirror' && { mirror: true }),
+  };
+}
+
+// A class join code typed on another device.
+export async function findClassCode(code: string): Promise<{ id: string; name: string } | undefined> {
+  if (!supabase) return undefined;
+  const { data: rows } = await supabase.rpc('class_by_code', { c: code });
+  return (rows as { id: string; name: string }[] | null)?.[0];
 }
 
 export const gameLink = (c: GameCode) => `${window.location.origin}/join/${c.code}`;

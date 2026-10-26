@@ -1,3 +1,5 @@
+import { openChannel } from './channel';
+
 // Class Live (development plan Stage 6): one host screen, every student on
 // their own device. Messages travel over a LiveLink: across tabs on one
 // device today (BroadcastChannel), across devices once the cloud connects
@@ -24,16 +26,10 @@ export type LiveMsg = ToHost | ToPlayers;
 
 export interface LiveLink { send(msg: LiveMsg): void; listen(fn: (msg: LiveMsg) => void): () => void; close(): void }
 
-// Same-device link: tabs on one device share a channel per room code.
+// One channel per room code: same-device tabs, and other devices once cloud
+// accounts are on (src/live/channel.ts).
 export function openLink(code: string): LiveLink {
-  const ch = new BroadcastChannel(`gamify-live-${code}`);
-  const fns = new Set<(m: LiveMsg) => void>();
-  ch.onmessage = (e) => fns.forEach((fn) => fn(e.data as LiveMsg));
-  return {
-    send: (msg) => ch.postMessage(msg),
-    listen: (fn) => { fns.add(fn); return () => fns.delete(fn); },
-    close: () => ch.close(),
-  };
+  return openChannel<LiveMsg>(`live-${code}`);
 }
 
 // The leaderboard: most right answers first, then fewest answered (accuracy).

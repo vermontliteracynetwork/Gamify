@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Backspace } from '@phosphor-icons/react';
 import { data } from '../data';
+import { supabase } from '../data/supabase';
 import { useAsync } from '../data/hooks';
 import type { Student } from '../data/types';
 import { t } from '../i18n';
@@ -12,8 +13,19 @@ import { avatarOf } from './pictures';
 // Student sign-in (teacher, 2026-10-26): tap your avatar, then type your
 // 4-digit PIN on big number keys. Used on the class sign-in page and when a
 // student joins a game by link or code.
+// On a student's own device the list comes from the cloud (names and
+// pictures only) and the PIN is checked there (0008_game_codes.sql).
+async function loadStudents(classroomId: string): Promise<{ list: Student[]; remote: boolean }> {
+  const list = await data.listStudents(classroomId);
+  if (list.length || !supabase) return { list, remote: false };
+  const { data: rows } = await supabase.rpc('roster', { cid: classroomId });
+  const remote = ((rows as { id: string; name: string; avatar: string }[] | null) ?? []).map((r): Student => ({ id: r.id, classroomId, name: r.name, avatar: r.avatar, picturePassword: [r.avatar, r.avatar] }));
+  return { list: remote, remote: true };
+}
+
 export default function StudentPicker({ classroomId, onSignIn }: { classroomId: string; onSignIn: (s: Student) => void }) {
-  const { value: students = [] } = useAsync(() => data.listStudents(classroomId), [classroomId]);
+  const { value: loaded } = useAsync(() => loadStudents(classroomId), [classroomId]);
+  const students = loaded?.list ?? [];
   const { value: classes = [] } = useAsync(() => data.listClassrooms());
   const { themes } = useMadeThemes();
   const look = themes.find((th) => th.id === classes.find((c) => c.id === classroomId)?.signInThemeId);
@@ -26,8 +38,11 @@ export default function StudentPicker({ classroomId, onSignIn }: { classroomId: 
     const next = digits + d;
     setDigits(next);
     if (next.length < 4) return;
-    if (next === who.pin) window.setTimeout(() => onSignIn(who), 150);
-    else { setWrong(true); window.setTimeout(() => { setDigits(''); setWrong(false); }, 700); }
+    void (async () => {
+      const ok = loaded?.remote ? !!(await supabase!.rpc('check_pin', { sid: who.id, pin: next })).data : next === who.pin;
+      if (ok) window.setTimeout(() => onSignIn(who), 150);
+      else { setWrong(true); window.setTimeout(() => { setDigits(''); setWrong(false); }, 700); }
+    })();
   }
 
   if (!who) {
