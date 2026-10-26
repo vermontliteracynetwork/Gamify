@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { Buildings, Check, Crown, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Sparkle, Star, Trash } from '@phosphor-icons/react';
+import { Buildings, Check, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Trash } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, SCHOOL_SEAT_DISCOUNTS, schoolQuote, TIERS, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
@@ -43,7 +43,6 @@ export default function PricingPage() {
     { icon: Trash, text: t('pricing.trust.keep') },
     { icon: ShieldCheck, text: t('pricing.trust.access') },
   ];
-  const icon = { free: Star, plus: Sparkle, pro: Crown } as const;
 
   return (
     <>
@@ -58,11 +57,10 @@ export default function PricingPage() {
 
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
           {tiers.map((x, i) => {
-            const I = icon[x];
             return (
               <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-[2.5px] border-border p-5 grid gap-3 content-start relative ${x === 'plus' ? 'bg-accent md:-mt-3 md:mb-3' : 'bg-surface'}`} style={{ boxShadow: x === 'plus' ? 'var(--shadow-sticker-lg)' : 'var(--shadow-sticker)' }}>
                 {x === 'plus' && <span className="absolute -top-4 right-5 bg-text text-white font-display rounded-pill px-3 py-1 text-sm">{t('upgrade.best')}</span>}
-                <h2 id={`plan-${x}`} className="font-display text-3xl flex items-center gap-2"><I weight="fill" size={30} aria-hidden="true" className="wiggle-on-hover" /><Title text={t(`pricing.${x}`)} /></h2>
+                <h2 id={`plan-${x}`} className="font-display text-3xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-bold">{t(`pricing.${x}.who` as StringKey)}</p>
                 <ul className="grid gap-2 list-none p-0 m-0">
                   {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t((x === 'free' ? `pricing.free.${n}` : `upgrade.${x}.${n}`) as StringKey)}</li>)}

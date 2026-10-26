@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Check, Crown, Sparkle, X } from '@phosphor-icons/react';
+import { Check, Sparkle, X } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR } from '../config';
 import { useTier } from '../data/hooks';
 import { t } from '../i18n';
@@ -57,7 +57,7 @@ export function PlanCards({ suggest = 'plus', onDone }: { suggest?: Plan; onDone
           <div className="grid sm:grid-cols-2 gap-3">
             {plans.map((p) => (
               <div key={p} className={`rounded-panel border-[2.5px] border-border p-4 grid gap-3 content-start ${p === suggest ? 'bg-accent' : 'bg-surface'}`}>
-                <p className="font-display text-2xl flex items-center gap-2">{p === 'pro' ? <Crown weight="fill" size={26} aria-hidden="true" /> : <Sparkle weight="fill" size={26} aria-hidden="true" />}{t(`pricing.${p}` as StringKey)}{p === suggest && <span className="text-xs font-bold bg-surface border-[2px] border-border rounded-pill px-2 py-0.5">{t('upgrade.best')}</span>}</p>
+                <p className="font-display text-2xl flex items-center gap-2">{t(`pricing.${p}` as StringKey)}{p === suggest && <span className="text-xs font-bold bg-surface border-[2px] border-border rounded-pill px-2 py-0.5">{t('upgrade.best')}</span>}</p>
                 <div><p className="font-display text-5xl leading-none">{t('upgrade.price', { m: (PRICES_USD_PER_YEAR[p] / 12).toFixed(0) })}</p><p className="font-display text-xl">{t('upgrade.perMonth')}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[p] })}</p></div>
                 <ul className="grid gap-1 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-1.5 font-semibold text-sm"><Check weight="bold" size={18} className="shrink-0" aria-hidden="true" />{t(`upgrade.${p}.${n}` as StringKey)}</li>)}</ul>
                 <button type="button" disabled={tier === p || (tier === 'pro' && p === 'plus')} onClick={() => void go(p)}
