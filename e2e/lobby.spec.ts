@@ -26,7 +26,7 @@ test('lobby: play together toward a goal, a second group with its own game, a se
   await page.getByRole('radio', { name: /^Together/ }).click();
   await page.getByLabel('Class goal (right answers)').fill('25');
   await page.getByRole('button', { name: 'Add a group' }).click();
-  await page.getByLabel('Game for group 2').selectOption({ label: 'Flashcards' });
+  await page.getByLabel('Game for group 2').selectOption({ label: 'Match Three' });
   const name = (await page.getByLabel(/^Question set for /).getAttribute('aria-label'))!.replace('Question set for ', '');
   await page.getByLabel(`Group for ${name}`).selectOption({ label: 'Group 2' });
   const sets = page.getByLabel(`Question set for ${name}`);
@@ -35,7 +35,7 @@ test('lobby: play together toward a goal, a second group with its own game, a se
   await page.screenshot({ path: `test-results/lobby-${info.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: /Start the game/ }).click();
   // The student lands in their group's game with their own set.
-  await expect(kid).toHaveURL(new RegExp(`/games/flashcards\\?set=${other}`));
+  await expect(kid).toHaveURL(new RegExp(`/games/match-three\\?set=${other}`));
   await expect(page.getByText('Together: 0 of 25 right answers')).toBeVisible();
   expect(problems).toEqual([]);
 });

@@ -13,12 +13,18 @@ import { roadHopManifest } from './road-hop/manifest';
 import { lunchRushManifest } from './lunch-rush/manifest';
 import type { GameManifest } from './types';
 
-// All games, in the order they show in the Arcade. Games are added here as
-// they're built (development plan Part 4).
-export const GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, starQuizManifest, flashcardsManifest];
+// Every game built, in Arcade order (development plan Part 4).
+export const ALL_GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, starQuizManifest, flashcardsManifest];
+
+// For now the lineup is only games where multiple-choice questions interrupt
+// play, with an easy re-theme and power-ups (teacher, 2026-10-26). Games where
+// the questions are the game (matching, memory, flashcards) and Road Hop come
+// later; their code and links stay, they are just not listed.
+export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards'];
+export const GAMES: GameManifest[] = ALL_GAMES.filter((g) => !LATER_GAMES.includes(g.id));
 
 export function getGame(id: string): GameManifest | undefined {
-  return GAMES.find((g) => g.id === id);
+  return ALL_GAMES.find((g) => g.id === id);
 }
 
 // Checks every manifest; used by tests and in development.

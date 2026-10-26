@@ -11,7 +11,7 @@ const NAMES = ['Ava', 'Ben', 'Carmen', 'Dev', 'Elle', 'Finn', 'Grace', 'Hugo', '
 // How often each student gets a fact right, from just starting to nearly
 // every time, so the report shows a real spread.
 const SKILL = [0.98, 0.95, 0.93, 0.9, 0.88, 0.86, 0.84, 0.82, 0.8, 0.78, 0.75, 0.72, 0.7, 0.66, 0.62, 0.58, 0.55, 0.5, 0.45, 0.4];
-const GAMES = ['game-show', 'peg-drop', 'road-hop', 'lunch-rush', 'bubble-pop'];
+const GAMES = ['game-show', 'peg-drop', 'bowling', 'lunch-rush', 'bubble-pop'];
 
 export const EXAMPLE_STUDENTS: Student[] = NAMES.map((name, i) => ({ id: `example-${i + 1}`, classroomId: EXAMPLE_CLASS.id, name, picturePassword: ['star', 'moon'] }));
 

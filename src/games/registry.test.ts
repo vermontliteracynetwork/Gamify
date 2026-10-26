@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GAMES, manifestProblems } from './registry';
+import { ALL_GAMES, manifestProblems } from './registry';
 import type { GameManifest } from './types';
 
 const sample: GameManifest = {
@@ -9,7 +9,7 @@ const sample: GameManifest = {
 };
 
 describe('game registry', () => {
-  it('registered games are valid', () => expect(manifestProblems(GAMES)).toEqual([]));
+  it('registered games are valid', () => expect(manifestProblems(ALL_GAMES)).toEqual([]));
   it('catches duplicate ids and bad defaults', () => {
     const bad = { ...sample, rounds: { label: 'Rounds', min: 3, max: 10, default: 12 } };
     expect(manifestProblems([sample, bad])).toEqual(['Duplicate game id: peg-drop', 'peg-drop: Rounds default is outside its range']);

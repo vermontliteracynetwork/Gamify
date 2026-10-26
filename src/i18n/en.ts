@@ -1005,7 +1005,7 @@ export const en = {
   'hs.weekTitle': 'One Question Set, Five Different Days',
   'hs.weekSub': 'Learning scientists agree that practice spread over days beats cramming. Play the same set in a different game each day.',
   'hs.day.1': 'Monday',
-  'hs.day.1.text': 'Flashcards to meet the new set together.',
+  'hs.day.1.text': 'Game Show to meet the new set together.',
   'hs.day.2': 'Tuesday',
   'hs.day.2.text': 'Question Tracker: each child fills their own night sky.',
   'hs.day.3': 'Wednesday',

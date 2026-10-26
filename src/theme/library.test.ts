@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GAMES } from '../games/registry';
+import { ALL_GAMES as GAMES } from '../games/registry';
 import { classicTheme } from './classic';
 import { pieceFill, themesFor } from './library';
 import { themeProblems } from './validate';
