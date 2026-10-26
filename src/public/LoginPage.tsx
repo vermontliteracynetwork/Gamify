@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [f, setF] = useState({ username: '', email: '', password: '', confirm: '' });
   const [problems, setProblems] = useState<SignUpProblem[]>([]);
   const [wrong, setWrong] = useState(false);
-  const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | null>(null);
+  const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | 'setup' | null>(null);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const teacher = useTeacher();
@@ -49,7 +49,7 @@ export default function LoginPage() {
         const res = await cloudLogIn(f.username, f.password);
         if (res === 'ok') enter();
         else if (res === 'wrong') setWrong(true);
-        else setNote(res === 'confirm' ? 'confirmFirst' : 'offline');
+        else setNote(res === 'confirm' ? 'confirmFirst' : res === 'setup' ? 'setup' : 'offline');
       }
       setBusy(false);
       return;
@@ -79,8 +79,8 @@ export default function LoginPage() {
               {problem('email')}{problem('emailTaken')}
             </label>
           )}
-          <label className="grid gap-1 font-bold">{t('login.username')}
-            <input autoComplete="username" autoCapitalize="none" spellCheck={false} value={f.username} onChange={set('username')} maxLength={20} aria-invalid={bad('username', 'usernameTaken')} className={field} />
+          <label className="grid gap-1 font-bold">{cloudOn && mode === 'login' ? t('login.usernameOrEmail') : t('login.username')}
+            <input autoComplete="username" autoCapitalize="none" spellCheck={false} value={f.username} onChange={set('username')} maxLength={cloudOn && mode === 'login' ? 254 : 20} aria-invalid={bad('username', 'usernameTaken')} className={field} />
             {mode === 'signup' && <span className="text-xs font-semibold text-muted">{t('login.usernameHint')}</span>}
             {problem('username')}{problem('usernameTaken')}
           </label>

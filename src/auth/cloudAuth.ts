@@ -9,9 +9,18 @@ import { getTeacher, setTeacher } from './session';
 // back a session. Sign up is Supabase Auth with the username in metadata
 // (0005_usernames.sql copies it onto the profile).
 export const cloudOn = !!supabase;
-export type LogInResult = 'ok' | 'wrong' | 'confirm' | 'offline';
+export type LogInResult = 'ok' | 'wrong' | 'confirm' | 'offline' | 'setup';
 
 export async function cloudLogIn(username: string, password: string): Promise<LogInResult> {
+  // An email works too (accounts made in the Supabase dashboard, like the
+  // owner's, have no username until one is set). Signs in straight from the
+  // browser: the email was typed by the person who owns it.
+  if (username.includes('@')) {
+    const { error } = await supabase!.auth.signInWithPassword({ email: username.trim(), password });
+    if (error) return /confirm/i.test(error.message) ? 'confirm' : error.status === 400 ? 'wrong' : 'offline';
+    await enterCloud();
+    return 'ok';
+  }
   const res = await fetch('/api/login', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: normalizeUsername(username), password }),
@@ -19,6 +28,7 @@ export async function cloudLogIn(username: string, password: string): Promise<Lo
   if (!res) return 'offline';
   if (res.status === 401) return 'wrong';
   if (res.status === 403) return 'confirm';
+  if (res.status === 500) return 'setup';
   if (!res.ok) return 'offline';
   const tokens = (await res.json()) as { access_token: string; refresh_token: string };
   const { error } = await supabase!.auth.setSession(tokens);

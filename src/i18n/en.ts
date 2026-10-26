@@ -1189,6 +1189,8 @@ export const en = {
   'login.checkEmail': 'Almost done! Open the email we just sent and tap the link to confirm your account. Then log in here.',
   'login.confirmFirst': 'Confirm your email first: open the email we sent you and tap the link. Then log in.',
   'login.offline': "Couldn't reach Gamify. Check your internet and try again.",
+  'login.setup': 'Log in by username is not switched on for this copy of Gamify yet. Log in with your email instead, or use the main Gamify site.',
+  'login.usernameOrEmail': 'Username (or email)',
   'login.students': 'Students: use the code your teacher gives you.',
   'join.hearCode': 'Hear my code',
   'host.classroom': 'Share to Google Classroom',
