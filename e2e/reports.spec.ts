@@ -31,28 +31,29 @@ test('reports group the question log, show the most common wrong answer, and dow
 test('Get started stays at the top of every teacher tab until done, except Account; it minimizes', async ({ page }) => {
   for (const path of ['/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes']) {
     await page.goto(path);
-    await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
   }
   await page.getByRole('button', { name: 'Minimize the get started steps' }).click();
-  await expect(page.getByRole('link', { name: /Make your class/ })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /Add your students/ })).toHaveCount(0);
   await page.goto('/teacher/sets');
-  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Make your class/ })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Add your students/ })).toHaveCount(0);
   await page.getByRole('button', { name: 'Show the get started steps' }).click();
-  await expect(page.getByRole('link', { name: /Make your class/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Add your students/ })).toBeVisible();
   await page.goto('/teacher/account');
-  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
   await page.goto('/teacher/themes');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
-  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toHaveCount(0);
-  await page.getByRole('button', { name: /^Get started \d\/5$/ }).click();
-  await expect(page.getByRole('heading', { name: 'Get Started in Five Steps' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
+  await page.getByRole('button', { name: /^Get started \d\/4$/ }).click();
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
 });
 
 test('classes list shows each class\'s week at a glance', async ({ page }) => {
   await page.addInitScript(() => {
     if (localStorage.getItem('gamify:seeded-week')) return;
     localStorage.setItem('gamify:seeded-week', '1');
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' }));
     localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'w1', name: 'Room 9', ownerId: 'local-teacher', createdAt: '' }]));
     const at = new Date().toISOString();
     const e = (id: string, studentId: string, outcome: string) => ({ id, at, classroomId: 'w1', studentId, gameId: 'game-show', mode: 'solo', prompt: 'p' + id, answer: 'a', tries: [], ms: 900, outcome });

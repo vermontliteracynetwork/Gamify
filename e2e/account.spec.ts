@@ -32,7 +32,7 @@ test('teacher accounts: sign up checks every field, then log in with username an
   await page.getByLabel('Confirm password').fill('different');
   await page.getByRole('button', { name: 'Create my free account' }).click();
   await expect(page.getByText('Enter an email like name@school.org.')).toBeVisible();
-  await expect(page.getByText('Use 3 to 20 letters, numbers, dots or underscores.')).toBeVisible();
+  await expect(page.getByText('Use 3 to 20 letters, numbers, periods or underscores.')).toBeVisible();
   await expect(page.getByText('Use at least 8 characters.')).toBeVisible();
   await expect(page.getByText('The two passwords do not match.')).toBeVisible();
   await signUpTeacher(page, 'miss.jen');

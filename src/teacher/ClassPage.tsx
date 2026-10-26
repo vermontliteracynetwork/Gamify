@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DeviceTablet, GearSix, Heart, ShareNetwork, Plus, ProjectorScreen, Smiley, Star, Trash, X } from '@phosphor-icons/react';
+import { ArrowLeft, DeviceTablet, DiceFive, GearSix, Heart, ShareNetwork, Plus, ProjectorScreen, Smiley, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -11,8 +11,9 @@ import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
-import { newPicturePassword } from '../student/pictures';
-import PictureBadge from '../student/PictureBadge';
+import { avatarOf, isUploadedAvatar, newPicturePassword, newPin, PICTURES, PIN_RULE } from '../student/pictures';
+import Avatar from '../student/Avatar';
+import { imageFileToDataUrl } from '../ui/imageFile';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { themesFor } from '../theme/library';
 import { GAMES } from '../games/registry';
@@ -28,9 +29,10 @@ import DialogFocus from '../ui/DialogFocus';
 
 type Tab = 'students' | 'sets' | 'modes';
 
-// One classroom: the class list with picture sign-in and per-student
+// One classroom: the class list with avatar + PIN sign-in and per-student
 // accommodations (behind the teacher PIN), assigned sets, and which play
-// modes students see.
+// modes students see. On Free there are no classes (teacher, 2026-10-26):
+// this page is the teacher's one student list, "My students".
 export default function ClassPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
@@ -42,18 +44,26 @@ export default function ClassPage() {
   const tier = useTier();
   // Downgrade rules: classes past the plan limit stay, read-only.
   const frozen = readOnlyIds(classes, TIERS[tier].classrooms).has(id);
+  const free = tier === 'free';
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     // Classes made before join codes existed get one now.
     if (classroom && !classroom.joinCode) void data.saveClassroom({ ...classroom, joinCode: newJoinCode(classes.map((c) => c.joinCode ?? '')) }).then(reloadClass);
   }, [classroom]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    // Students added before PIN sign-in get a PIN now.
+    const missing = students.filter((s) => !s.pin);
+    if (!missing.length) return;
+    const taken = students.map((s) => s.pin ?? '');
+    void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
+  }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!classroom) return null;
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
-      <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>
-      <PageHeader title={classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
+      {!free && <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>}
+      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
         actions={<>
           <Link to={`/teacher/classes/${classroom.id}/check-in`} className={buttonClasses('secondary')}><Smiley weight="bold" size={18} />{t('checkin.open')}</Link>
           <Link to={`/show/${classroom.joinCode ?? ''}`} className={buttonClasses('secondary')}><ProjectorScreen weight="bold" size={18} />{t('class.showCode')}</Link>
@@ -95,7 +105,7 @@ export default function ClassPage() {
         </Panel>
       )}
       </fieldset>
-      <div className="mt-8">
+      {!free && <div className="mt-8">
         {confirmDelete ? (
           <Panel className="grid gap-2">
             <p className="font-bold">{t('class.deleteConfirm', { name: classroom.name })}</p>
@@ -105,7 +115,7 @@ export default function ClassPage() {
             </div>
           </Panel>
         ) : <Button variant="ghost" onClick={() => setConfirmDelete(true)}><Trash weight="bold" size={18} />{t('class.delete')}</Button>}
-      </div>
+      </div>}
     </main>
   );
 }
@@ -119,15 +129,23 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
   const [unlocked, setUnlocked] = useState(false);
   const [editing, setEditing] = useState<Student | null>(null);
   const [asking, setAsking] = useState<Student | null>(null);
+  const [picking, setPicking] = useState<Student | null>(null);
   const toAdd = names.split('\n').map((n) => n.trim()).filter(Boolean);
   const room = Number.isFinite(limit) ? limit - students.length : Infinity;
 
   async function add() {
     const taken = students.map((s) => s.picturePassword);
+    const pins = students.map((s) => s.pin ?? '');
+    // Each new student gets the built-in picture used least so far.
+    const uses = new Map(PICTURES.map((p) => [p.id, students.filter((s) => avatarOf(s) === p.id).length]));
     for (const name of toAdd.slice(0, room)) {
       const pw = newPicturePassword(taken);
       taken.push(pw);
-      await data.saveStudent({ id: newId('stu'), classroomId, name: name.slice(0, 30), picturePassword: pw });
+      const pin = newPin(pins);
+      pins.push(pin);
+      const avatar = [...uses.entries()].sort((a, b) => a[1] - b[1])[0][0];
+      uses.set(avatar, (uses.get(avatar) ?? 0) + 1);
+      await data.saveStudent({ id: newId('stu'), classroomId, name: name.slice(0, 30), picturePassword: pw, avatar, pin });
     }
     setNames('');
     reload();
@@ -150,10 +168,11 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
       <div className="grid sm:grid-cols-2 gap-3">
         {students.map((s) => (
           <Panel key={s.id} className="flex items-center gap-3 !p-3">
-            <span className="flex gap-1" aria-label={t('class.pictures', { a: s.picturePassword[0], b: s.picturePassword[1] })} role="img">
-              {s.picturePassword.map((p, i) => <PictureBadge key={i} id={p} theme={look} size={40} />)}
+            <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95"><Avatar avatar={avatarOf(s)} theme={look} size={48} /></button>
+            <span className="flex-1 min-w-0 grid">
+              <span className="font-bold truncate">{s.name}</span>
+              <span className="text-sm font-bold text-muted tabular-nums">{t('class.pinIs', { pin: s.pin ?? '' })}</span>
             </span>
-            <span className="font-bold flex-1 min-w-0 truncate">{s.name}</span>
             {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}
             <button type="button" onClick={() => openSettings(s)} aria-label={t('class.supportsFor', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><GearSix weight="bold" size={20} /></button>
             <button type="button" onClick={async () => { await data.deleteStudent(s.id); reload(); }} aria-label={t('class.remove', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={20} /></button>
@@ -166,7 +185,56 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
         </Dialog>
       )}
       {editing && <SupportsDialog student={editing} onClose={() => { setEditing(null); reload(); }} />}
+      {picking && <AvatarDialog student={picking} others={students.filter((x) => x.id !== picking.id)} look={look} onClose={() => { setPicking(null); reload(); }} />}
     </div>
+  );
+}
+
+// A student's avatar and PIN (teacher, 2026-10-26): a built-in picture on
+// every plan, or an uploaded picture on Plus and Pro; a PIN the teacher types
+// or rolls, different from everyone else's on the list.
+function AvatarDialog({ student, others, look, onClose }: { student: Student; others: Student[]; look?: Parameters<typeof Avatar>[0]['theme']; onClose: () => void }) {
+  const tier = useTier();
+  const [avatar, setAvatar] = useState(avatarOf(student));
+  const [pin, setPin] = useState(student.pin ?? '');
+  const [problem, setProblem] = useState('');
+  const taken = others.map((o) => o.pin ?? '');
+  async function upload(file: File) {
+    try { setAvatar(await imageFileToDataUrl(file, 256)); setProblem(''); } catch (e) { setProblem((e as Error).message); }
+  }
+  async function save() {
+    if (!PIN_RULE.test(pin)) { setProblem(t('class.pinRule')); return; }
+    if (taken.includes(pin)) { setProblem(t('class.pinTaken')); return; }
+    await data.saveStudent({ ...student, avatar, pin });
+    onClose();
+  }
+  return (
+    <Dialog title={t('class.avatarFor', { name: student.name })} onClose={onClose}>
+      <div className="flex items-center gap-3"><Avatar avatar={avatar} theme={look} size={80} /><p className="font-bold">{t('class.avatarHint')}</p></div>
+      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" role="radiogroup" aria-label={t('class.avatarPick')}>
+        {PICTURES.map((p) => (
+          <button key={p.id} type="button" role="radio" aria-checked={avatar === p.id} aria-label={p.id} onClick={() => setAvatar(p.id)}
+            className={`rounded-full p-1 ${avatar === p.id ? 'bg-accent ring-[3px] ring-border' : ''}`}><Avatar avatar={p.id} theme={look} size={52} /></button>
+        ))}
+      </div>
+      {tier === 'free' ? (
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.avatarUploadPlus')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>
+      ) : (
+        <label className={buttonClasses('secondary', 'justify-self-start cursor-pointer')}>
+          <UploadSimple weight="bold" size={18} />{isUploadedAvatar(avatar) ? t('class.avatarReplace') : t('class.avatarUpload')}
+          <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }} />
+        </label>
+      )}
+      <label className="grid gap-1 font-bold">{t('class.pin')}
+        <span className="flex gap-2">
+          <input value={pin} inputMode="numeric" maxLength={4} onChange={(e) => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setProblem(''); }}
+            className="w-32 min-h-12 px-3 rounded-input border-[2px] border-border font-display text-2xl tracking-[0.3em] tabular-nums" />
+          <Button onClick={() => { setPin(newPin([...taken, pin])); setProblem(''); }}><DiceFive weight="bold" size={18} />{t('class.pinRoll')}</Button>
+        </span>
+      </label>
+      <p className="min-h-6 font-bold text-[#9b2c3a]" role="alert">{problem}</p>
+      <Button variant="primary" onClick={() => void save()}>{t('class.avatarSave')}</Button>
+    </Dialog>
   );
 }
 

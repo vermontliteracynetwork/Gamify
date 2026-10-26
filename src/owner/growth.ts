@@ -16,7 +16,7 @@ export interface Tip { id: string; text: string }
 export function growthTips(n: GrowthInput): Tip[] {
   const tips: Tip[] = [];
   const lim = TIERS[n.tier];
-  if (n.tier === 'free' && n.classes >= lim.classrooms) tips.push({ id: 'class-limit', text: 'A Free teacher has used every class. A friendly note about Plus (3 classes) fits here.' });
+  if (n.tier === 'free' && n.classes >= lim.classrooms) tips.push({ id: 'class-limit', text: 'A Free teacher is using their student list. A friendly note about Plus (3 classes to group students) fits here.' });
   if (n.tier === 'free' && n.sets >= lim.savedQuestionSets) tips.push({ id: 'set-limit', text: 'A Free teacher has saved all 3 sets. Plus saves as many as they like.' });
   if (n.tier === 'free' && n.answersThisWeek >= 200) tips.push({ id: 'busy-free', text: 'A busy Free classroom (200+ answers this week): a good beta tester or case study.' });
   if (n.answersLastWeek >= 50 && n.answersThisWeek < n.answersLastWeek / 3) tips.push({ id: 'slowing', text: 'Play dropped by more than two thirds this week. A check-in email could catch a problem early.' });

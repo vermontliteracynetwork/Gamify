@@ -52,6 +52,9 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await kid.screenshot({ path: `test-results/live-podium-kid-${info.project.name}.png` });
   // The locks are in the reports.
   await page.goto('/teacher/reports');
+  // With no answers logged yet the example report shows first; go back to the real one.
+  const back = page.getByRole('button', { name: 'Back to my reports' });
+  if (await back.waitFor({ timeout: 3000 }).then(() => true, () => false)) await back.click();
   await page.getByText('Live game locks (2)').click();
   await expect(page.getByText('Locked Everyone: "Eyes on me, please."', { exact: false })).toBeVisible();
   expect(problems).toEqual([]);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, UsersThree } from '@phosphor-icons/react';
 import { TIERS } from '../config';
@@ -12,7 +12,9 @@ import { LimitNote } from '../billing/Upgrade';
 import { GAMES } from '../games/registry';
 import { weekUsage } from './reports';
 
-// The teacher's classrooms (development plan Stage 4). Free has one.
+// The teacher's classrooms (development plan Stage 4). Classes are a Plus
+// and Pro feature (teacher, 2026-10-26); on Free this opens the teacher's one
+// student list, "My students", made the first time.
 export default function ClassesPage() {
   const { value: classes = [], reload } = useAsync(() => data.listClassrooms());
   const { value: log = [] } = useAsync(() => data.listQuestionLog());
@@ -20,6 +22,19 @@ export default function ClassesPage() {
   const limit = TIERS[tier].classrooms;
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const { value: loaded } = useAsync(async () => (await data.listClassrooms()).length, []);
+  useEffect(() => {
+    if (tier !== 'free' || loaded === undefined) return;
+    void (async () => {
+      const all = await data.listClassrooms();
+      const first = [...all].sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+      if (first) { navigate(`/teacher/classes/${first.id}`, { replace: true }); return; }
+      const c = { id: newId('class'), name: t('roster.title'), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode([]) };
+      await data.saveClassroom(c);
+      navigate(`/teacher/classes/${c.id}`, { replace: true });
+    })();
+  }, [tier, loaded, navigate]);
+  if (tier === 'free') return null;
 
   async function create() {
     const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode(classes.map((x) => x.joinCode ?? '')) };

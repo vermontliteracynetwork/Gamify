@@ -23,6 +23,21 @@ export function newPicturePassword(taken: [string, string][], rand: () => number
   return [PICTURES[0].id, PICTURES[1].id];
 }
 
+// A student's avatar: their own (picked or uploaded), else their first picture.
+export const avatarOf = (s: { avatar?: string; picturePassword: [string, string] }) => s.avatar ?? s.picturePassword[0];
+export const isUploadedAvatar = (a: string) => a.startsWith('data:');
+
+// A 4-digit PIN nobody else on the list has (teacher, 2026-10-26).
+export function newPin(taken: string[], rand: () => number = Math.random): string {
+  const used = new Set(taken);
+  for (let tries = 0; tries < 500; tries++) {
+    const pin = String(Math.floor(rand() * 10000)).padStart(4, '0');
+    if (!used.has(pin)) return pin;
+  }
+  return String(Math.floor(rand() * 10000)).padStart(4, '0');
+}
+export const PIN_RULE = /^\d{4}$/;
+
 // Sign-in pictures can be redrawn in the Theme Builder like a game theme
 // (teacher request, 2026-10-24); a class picks which design it signs in with.
 export const signInManifest: GameManifest = {

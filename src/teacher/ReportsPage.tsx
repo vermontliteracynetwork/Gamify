@@ -13,6 +13,7 @@ import { listLiveEvents } from '../live/events';
 import TeacherNav from '../ui/TeacherNav';
 import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 import { UpgradeButton } from '../billing/Upgrade';
+import { DEFAULT_SETTINGS } from '../settings/settings';
 import { EXAMPLE_CLASS, EXAMPLE_STUDENTS, exampleLog } from './exampleReport';
 
 // Teacher reports over the question log (development plan Stage 4): group
@@ -118,6 +119,7 @@ export default function ReportsPage() {
               <Head k="label">{groupLabel}</Head><Head k="asked">{t('reports.questions')}</Head><Head k="pct">{t('reports.right')}</Head>
               <Head k="firstTry">{t('reports.firstTryCount')}</Head><Head k="avgSeconds">{t('reports.avg')}</Head>
               <th scope="col" className="p-2.5 text-left font-bold">{t('reports.topWrong')}</th>
+              {by === 'student' && <><th scope="col" className="p-2.5 text-left font-bold">{t('reports.lastPlayed')}</th><th scope="col" className="p-2.5 text-left font-bold">{t('reports.minutes')}</th><th scope="col" className="p-2.5 text-left font-bold">{t('reports.supports')}</th></>}
             </tr></thead>
             <tbody>
               {rows.grouped.map((r) => {
@@ -134,6 +136,11 @@ export default function ReportsPage() {
                     <td className="p-2.5 font-semibold tabular-nums">{r.firstTry}</td>
                     <td className="p-2.5 font-semibold tabular-nums">{r.avgSeconds}s</td>
                     <td className="p-2.5 font-semibold">{r.topWrong ?? ''}</td>
+                    {by === 'student' && <>
+                      <td className="p-2.5 font-semibold tabular-nums whitespace-nowrap">{r.lastDay}</td>
+                      <td className="p-2.5 font-semibold tabular-nums">{r.minutes}</td>
+                      <td className="p-2.5 font-semibold text-sm">{supportsText(students.find((s) => s.id === r.key))}</td>
+                    </>}
                   </tr>
                 );
               })}
@@ -144,6 +151,19 @@ export default function ReportsPage() {
       {!example && <LiveLog />}
     </main>
   );
+}
+
+// The supports a teacher set for a student, in a few words for the report.
+function supportsText(s?: Student): string {
+  const a = s?.accommodations;
+  if (!a) return '';
+  const parts: string[] = [];
+  if (a.readFirstSeconds !== undefined && a.readFirstSeconds !== DEFAULT_SETTINGS.readFirstSeconds) parts.push(t('reports.sup.read', { n: a.readFirstSeconds }));
+  if (a.triesPerQuestion !== undefined && a.triesPerQuestion !== DEFAULT_SETTINGS.triesPerQuestion) parts.push(t('reports.sup.tries', { n: a.triesPerQuestion }));
+  if (a.shuffleAnswers === false) parts.push(t('reports.sup.noShuffle'));
+  const tools = Object.entries(a.tools ?? {}).filter(([, on]) => on).map(([k]) => t(`tool.${k as 'listen'}`));
+  if (tools.length) parts.push(tools.join(', '));
+  return parts.join('; ');
 }
 
 // Locks from live games, newest first (Stage 6: Lock is logged in reports).
