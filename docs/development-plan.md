@@ -241,7 +241,7 @@ report and downloads CSV.
       trademark search clears.
 - [ ] Cloud backend for the data layer (same interface as local), with
       row-level security so teachers only ever see their own data.
-- [ ] Teacher sign-up / sign-in (email + Google sign-in).
+- [ ] Teacher sign-up / sign-in (email + username; no Google sign-in, teacher 2026-10-26).
 - [ ] `<domain>/join` page: player codes (letters + numbers) and viewer
       codes (letters only), no look-alike characters, no vowels, big
       tiles, QR codes, read-aloud.

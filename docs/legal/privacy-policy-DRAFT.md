@@ -20,7 +20,7 @@ the assignment and trade name]**), contact
 ## 3. What we collect, and why
 | Who | What | Why | Where it lives |
 |---|---|---|---|
-| Teacher | Name shown to students, email (cloud accounts), password or Google sign-in | Sign-in and support | Our database (Supabase, United States) **[Attorney: confirm region and subprocessor terms]** |
+| Teacher | Name shown to students, email (cloud accounts), username and password | Sign-in and support | Our database (Supabase, United States) **[Attorney: confirm region and subprocessor terms]** |
 | Teacher | Question sets, classes, themes, settings | The service itself | Our database |
 | Teacher | Plan and billing status | Paid plans | Stripe (we never see full card numbers) |
 | Student | First name or nickname the teacher types, two sign-in pictures, per-student supports the teacher sets | Sign-in and accommodations | Our database, inside the teacher's class |
