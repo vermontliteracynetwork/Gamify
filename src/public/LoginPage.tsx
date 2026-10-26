@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChalkboardTeacher, Student } from '@phosphor-icons/react';
 import { logIn, signUp, type SignUpProblem } from '../auth/accounts';
-import { setTeacher } from '../auth/session';
+import { setTeacher, useTeacher } from '../auth/session';
+import { cloudLogIn, cloudOn, cloudSignUp } from '../auth/cloudAuth';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Button, Panel, Tabs } from '../ui/kit';
@@ -11,18 +12,25 @@ import Title from '../ui/Title';
 
 // Teacher log in and sign up (teacher, 2026-10-26): sign up with email,
 // password, confirm password and a username; log in with username and
-// password. Until cloud accounts (Stage 5) the account is kept on this device.
+// password. With cloud accounts on (Stage 5) the account is in Supabase;
+// without the keys (local builds) it is kept on this device.
 export default function LoginPage() {
   const [params] = useSearchParams();
   const [mode, setMode] = useState<'login' | 'signup'>(params.get('mode') === 'signup' ? 'signup' : 'login');
   const [f, setF] = useState({ username: '', email: '', password: '', confirm: '' });
   const [problems, setProblems] = useState<SignUpProblem[]>([]);
   const [wrong, setWrong] = useState(false);
+  const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | null>(null);
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => { setF({ ...f, [k]: e.target.value }); setProblems([]); setWrong(false); };
+  const teacher = useTeacher();
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => { setF({ ...f, [k]: e.target.value }); setProblems([]); setWrong(false); setNote(null); };
 
-  function enter(username: string) {
-    setTeacher({ name: username, username, at: new Date().toISOString() });
+  // Signed in by the confirm-your-email link: straight to the teacher area.
+  useEffect(() => { if (cloudOn && teacher && !busy) navigate('/teacher'); }, [teacher, busy, navigate]);
+
+  function enter(username?: string) {
+    if (username) setTeacher({ name: username, username, at: new Date().toISOString() });
     navigate('/teacher');
     // Picked a paid plan on the pricing page: the plan box opens with it ready.
     const plan = params.get('plan');
@@ -30,6 +38,22 @@ export default function LoginPage() {
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (cloudOn) {
+      setBusy(true);
+      if (mode === 'signup') {
+        const res = await cloudSignUp(f);
+        if (Array.isArray(res)) setProblems(res);
+        else if (res === 'ok') enter();
+        else setNote(res);
+      } else {
+        const res = await cloudLogIn(f.username, f.password);
+        if (res === 'ok') enter();
+        else if (res === 'wrong') setWrong(true);
+        else setNote(res === 'confirm' ? 'confirmFirst' : 'offline');
+      }
+      setBusy(false);
+      return;
+    }
     if (mode === 'signup') {
       const res = await signUp(f);
       if (Array.isArray(res)) setProblems(res); else enter(res.username);
@@ -48,11 +72,11 @@ export default function LoginPage() {
       <Panel>
         <form className="grid gap-3" onSubmit={(e) => void submit(e)} noValidate>
           <p className="font-bold flex items-center gap-2"><ChalkboardTeacher weight="bold" size={22} />{t('login.forTeachers')}</p>
-          <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-[2px] border-border-soft">{t('login.localNote')}</p>
+          {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-[2px] border-border-soft">{t('login.localNote')}</p>}
           {mode === 'signup' && (
             <label className="grid gap-1 font-bold">{t('login.email')}
-              <input type="email" autoComplete="email" value={f.email} onChange={set('email')} aria-invalid={bad('email')} className={field} />
-              {problem('email')}
+              <input type="email" autoComplete="email" value={f.email} onChange={set('email')} aria-invalid={bad('email', 'emailTaken')} className={field} />
+              {problem('email')}{problem('emailTaken')}
             </label>
           )}
           <label className="grid gap-1 font-bold">{t('login.username')}
@@ -71,7 +95,8 @@ export default function LoginPage() {
             </label>
           )}
           {wrong && <p className="font-bold text-[#9b2c3a]" role="alert">{t('login.wrong')}</p>}
-          <Button type="submit" variant="primary" className="min-h-14 text-lg">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
+          {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-[#9b2c3a]'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}
+          <Button type="submit" disabled={busy} variant="primary" className="min-h-14 text-lg">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
           {mode === 'login' && <button type="button" onClick={() => setMode('signup')} className="font-bold underline justify-self-center min-h-11">{t('login.noAccount')}</button>}
         </form>
       </Panel>
