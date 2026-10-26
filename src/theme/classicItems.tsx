@@ -50,6 +50,34 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <text x="50" y="72" textAnchor="middle" fontSize="20" fontWeight="bold" fill={INK} transform="rotate(-8 50 65)">?</text>
     </g>
   ),
+  'double-star': () => (
+    <g>
+      <path d="M50 6 L62 36 L94 38 L69 58 L78 90 L50 72 L22 90 L31 58 L6 38 L38 36 Z" fill="#f6c544" {...S} />
+      <text x="50" y="64" textAnchor="middle" fontSize="26" fontWeight="bold" fill={INK}>x2</text>
+    </g>
+  ),
+  'swap-arrows': () => (
+    <g>
+      <circle cx="50" cy="50" r="44" fill="#8ec5ff" {...S} />
+      <path d="M24 40 H70 L60 28 M76 60 H30 L40 72" fill="none" {...S} strokeWidth={7} />
+    </g>
+  ),
+  'prize-bag': () => (
+    <g>
+      <path d="M36 30 Q20 50 18 74 Q18 92 50 92 Q82 92 82 74 Q80 50 64 30 Z" fill="#9fe7a0" {...S} />
+      <path d="M36 30 L30 12 L42 20 L50 8 L58 20 L70 12 L64 30 Z" fill="#9fe7a0" {...S} />
+      <path d="M34 30 H66" {...S} strokeWidth={6} stroke="#f6c544" />
+      <circle cx="50" cy="64" r="15" fill="#f6c544" {...S} />
+      <text x="50" y="71" textAnchor="middle" fontSize="20" fontWeight="bold" fill={INK}>+</text>
+    </g>
+  ),
+  magnet: () => (
+    <g>
+      <path d="M20 14 H40 V54 Q40 66 50 66 Q60 66 60 54 V14 H80 V54 Q80 86 50 86 Q20 86 20 54 Z" fill="#f2735f" {...S} />
+      <rect x="20" y="14" width="20" height="14" fill="#fbf3dc" {...S} /><rect x="60" y="14" width="20" height="14" fill="#fbf3dc" {...S} />
+      <path d="M88 40 L96 34 M88 54 L98 54 M4 34 L12 40 M2 54 L12 54" {...S} />
+    </g>
+  ),
 };
 
 export function ClassicItemSvg({ art, size }: { art: string; size: number }) {

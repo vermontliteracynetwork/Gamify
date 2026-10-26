@@ -59,8 +59,8 @@ export const TIERS: Record<Tier, TierLimits> = {
 };
 
 // Placeholders: nothing charges until Stage 7 is approved.
-// Homeschool $72 a year is a guess until the teacher sets it (Waiting on you).
-export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 72 };
+// Homeschool $8 a month, same as Plus (teacher, 2026-10-26).
+export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 96 };
 
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).

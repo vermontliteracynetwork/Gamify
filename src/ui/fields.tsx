@@ -4,11 +4,13 @@ import { Minus, Plus } from '@phosphor-icons/react';
 // Shared form controls, iPad-sized: switches, choice rows, sliders,
 // steppers and picture cards.
 
-export function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+// `art` and `hint` add a small picture on the left and a line under the label.
+export function Toggle({ label, value, onChange, art, hint }: { label: string; value: boolean; onChange: (v: boolean) => void; art?: ReactNode; hint?: string }) {
   return (
     <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
-      className="flex items-center justify-between gap-3 min-h-12 px-4 rounded-input border-[2px] border-border-soft bg-surface text-left font-bold">
-      <span>{label}</span>
+      className="flex items-center justify-between gap-3 min-h-12 px-4 py-1.5 rounded-input border-[2px] border-border-soft bg-surface text-left font-bold">
+      {art}
+      <span className="flex-1 min-w-0 grid">{label}{hint && <span className="text-sm font-semibold text-muted">{hint}</span>}</span>
       <span className={`relative w-14 h-8 rounded-pill border-[2px] border-border shrink-0 ${value ? 'bg-success' : 'bg-surface-2'}`} aria-hidden="true">
         <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-[2px] border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
       </span>

@@ -28,7 +28,9 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
-import { ALL_TWISTS, dealCards, GRID_POINTS, type CardKind, type Twist } from './cards';
+import { CARD_GRIDS, dealCards, gridFor, GRID_POINTS, type CardKind } from './cards';
+import ItemArt from '../../theme/ItemArt';
+import type { ThemeItem } from '../../theme/types';
 import Title from '../../ui/Title';
 import DialogFocus from '../../ui/DialogFocus';
 
@@ -45,8 +47,12 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, twists: ALL_TWISTS as Twist[] });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[] });
   const { board, cardCount } = setup;
+  const grid = gridFor(cardCount);
+  const gap = grid.rows > 4 ? 8 : 12;
+  // The theme's power-ups (Classic ones until a theme makes its own).
+  const powers = theme.items?.length ? theme.items : gameShowManifest.items!.classic;
   // A set picked with the teacher's Play now button or a game code (?set=).
   const presetSet = new URLSearchParams(useLocation().search).get('set');
   useEffect(() => { if (presetSet && allSets.some((s) => s.id === presetSet)) change({ setIds: [presetSet], board: 'cards' }); }, [presetSet, allSets.length]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -82,7 +88,7 @@ export default function GameShow() {
     used.current.clear();
     setMissed([]);
     if (board === 'cards') {
-      setCards(dealCards(cardCount, Math.random, setup.twists).map((kind) => ({ kind, open: false })));
+      setCards(dealCards(grid.cols * grid.rows, Math.random, powers.filter((p) => !setup.powerOff.includes(p.id))).map((kind) => ({ kind, open: false })));
       startTurn(state, 'cards');
     } else {
       setCells(chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false }))));
@@ -160,9 +166,9 @@ export default function GameShow() {
     setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
     const kind = cards[i].kind;
     const others = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0);
-    const needsTarget = (kind.kind === 'swap' || kind.kind === 'steal') && others.length > 0;
+    const needsTarget = picksTeam(kind) && others.length > 0;
     setReveal({ card: kind, choosing: needsTarget });
-    if (kind.kind === 'points') applyCard(kind);
+    if (!needsTarget && !picksTeam(kind)) applyCard(kind);
   }
 
   function applyCard(kind: CardKind, targetId?: string) {
@@ -170,14 +176,16 @@ export default function GameShow() {
       if (!state) return state;
       const me = current(state);
       let next = state;
+      const ability = kind.kind === 'power' ? kind.item.ability : 'points';
       if (kind.kind === 'points') next = addPoints(state, me.id, kind.points);
-      else if (kind.kind === 'double') next = addPoints(state, me.id, me.score);
-      else if (kind.kind === 'swap' && targetId) {
+      else if (ability === 'bonus') next = addPoints(state, me.id, powerAmount(kind.item));
+      else if (ability === 'double') next = addPoints(state, me.id, me.score);
+      else if (ability === 'swap' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
         next = setScores(state, { [me.id]: other.score, [other.id]: me.score });
-      } else if (kind.kind === 'steal' && targetId) {
+      } else if (ability === 'steal' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
-        const take = Math.min(kind.points, other.score);
+        const take = Math.min(powerAmount(kind.item), other.score);
         next = setScores(state, { [me.id]: me.score + take, [other.id]: other.score - take });
       }
       return next;
@@ -225,7 +233,7 @@ export default function GameShow() {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const revealText = (k: CardKind) =>
-    k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : k.kind === 'double' ? t('tb.reveal.double') : k.kind === 'swap' ? t('tb.reveal.swap') : t('tb.reveal.steal');
+    k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : `${k.item.name}: ${t(`tb.reveal.${k.item.ability}` as 'tb.reveal.steal', { points: powerAmount(k.item) })}`;
 
   return (
     <ThemedPage theme={theme}>
@@ -269,13 +277,15 @@ export default function GameShow() {
           ) },
           ...(board === 'cards' ? [{ id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceRow label={t('tb.cardCount')} value={String(cardCount)} onChange={(v) => change({ cardCount: Number(v) })}
-                options={['12', '16', '20'].map((n) => ({ value: n, label: n }))} />
+              <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
+                options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }) }))} />
               <div className="grid gap-2">
-                <span className="font-bold">{t('tb.twists')}</span>
-                {ALL_TWISTS.map((k) => (
-                  <Toggle key={k} label={t(`tb.twist.${k}`)} value={setup.twists.includes(k)}
-                    onChange={(on) => change({ twists: on ? [...setup.twists, k] : setup.twists.filter((x) => x !== k) })} />
+                <span className="font-bold">{t('tb.powers')}</span>
+                <span className="text-sm font-semibold text-muted -mt-1.5">{t('tb.powersHint')}</span>
+                {powers.map((p) => (
+                  <Toggle key={p.id} label={p.name} hint={t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) })} art={<ItemArt item={p} size={44} still />}
+                    value={!setup.powerOff.includes(p.id)}
+                    onChange={(on) => change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] })} />
                 ))}
               </div>
             </>
@@ -300,7 +310,8 @@ export default function GameShow() {
             )}
 
             {phase === 'play' && board === 'cards' && (
-              <div className={`grid gap-3 mx-auto w-full ${cards.length > 12 ? 'grid-cols-4 sm:grid-cols-5' : 'grid-cols-3 sm:grid-cols-4'}`} style={{ maxWidth: 'calc((100dvh - 330px) * 1.75)' }}>
+              <div className="grid mx-auto w-full"
+                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, maxWidth: `calc((100dvh - 344px - ${(grid.rows - 1) * gap}px) / ${grid.rows} * ${grid.cols} * 4 / 3 + ${(grid.cols - 1) * gap}px)` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
@@ -310,14 +321,14 @@ export default function GameShow() {
                     aria-label={c.open ? `${t('tb.card', { n: i + 1 })}: ${revealText(c.kind)}` : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`${cards.length > 12 ? 'aspect-[3/2]' : 'aspect-[4/3]'} rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
-                      ${c.open ? 'bg-surface text-base sm:text-lg' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
+                    className={`aspect-[4/3] rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
+                      ${c.open ? `bg-surface ${grid.rows > 4 ? 'text-xs sm:text-sm' : 'text-base sm:text-lg'}` : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
                     style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {c.open ? (
-                      <span className="grid justify-items-center gap-1">
-                        {c.by !== undefined && <TeamBadge colorIndex={c.by} size={26} />}
-                        {revealText(c.kind)}
+                      <span className="grid justify-items-center gap-1 min-w-0">
+                        {c.kind.kind === 'power' ? <ItemArt item={c.kind.item} size={grid.rows > 4 ? 28 : 40} still /> : c.by !== undefined && <TeamBadge colorIndex={c.by} size={grid.rows > 4 ? 20 : 26} />}
+                        <span className="leading-tight">{c.kind.kind === 'power' ? c.kind.item.name : t('tb.reveal.points', { points: c.kind.points })}</span>
                       </span>
                     ) : i + 1}
                   </motion.button>
@@ -382,11 +393,11 @@ export default function GameShow() {
           <DialogFocus />
           <motion.div initial={settings.motion === 'still' ? false : { scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             className="bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-            <Sparkle weight="fill" size={64} className="text-accent" aria-hidden="true" />
+            {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : <Sparkle weight="fill" size={64} className="text-accent" aria-hidden="true" />}
             <p className="font-display text-4xl font-bold">{revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
-                <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
+                <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).map((p) => (
                     <button key={p.id} type="button" onClick={() => applyCard(reveal.card, p.id)}
@@ -397,7 +408,7 @@ export default function GameShow() {
                 </div>
               </div>
             )}
-            {(reveal.card.kind === 'swap' || reveal.card.kind === 'steal') && !reveal.choosing && turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).length === 0 && (
+            {picksTeam(reveal.card) && !reveal.choosing && turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).length === 0 && (
               <p className="font-bold">{t('tb.nobodyToPick')}</p>
             )}
             {!reveal.choosing && current(turns).kind !== 'cpu' && (
@@ -410,6 +421,9 @@ export default function GameShow() {
     </ThemedPage>
   );
 }
+
+const picksTeam = (k: CardKind) => k.kind === 'power' && (k.item.ability === 'swap' || k.item.ability === 'steal');
+const powerAmount = (it: ThemeItem) => it.amount ?? (it.ability === 'bonus' ? 100 : 20);
 
 // Shows where the turn is: for cards, answer, then pick a card, then points;
 // for the grid, pick a square, then answer, then points.

@@ -252,10 +252,10 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-32 max-w-48" />
               </div>
             )}
-            <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex flex-wrap gap-1 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start">
+            <div role="tablist" aria-label={t('builder.tabsLabel')} className="flex gap-0.5 p-1 rounded-pill bg-surface-2 border-[2px] border-border justify-self-start max-w-full overflow-x-auto">
               {(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-11 px-4 rounded-pill font-bold text-sm ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
+                  className={`min-h-11 px-3 rounded-pill font-bold text-sm whitespace-nowrap ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
             </div>
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="grid gap-3">

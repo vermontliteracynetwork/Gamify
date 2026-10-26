@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const gameShowManifest: GameManifest = {
   id: 'game-show',
   name: 'Game Show',
-  description: 'Teams take turns on the big screen. Answer right to pick a surprise card or a square.',
+  description: 'Teams take turns on the big screen. Answer right to pick a card (some hold power-ups) or a square.',
   modes: ['share'],
   questionKinds: ['mc'],
   themePieces: [
@@ -15,6 +15,21 @@ export const gameShowManifest: GameManifest = {
     { id: 'trophy', label: 'Winner trophy', width: 400, height: 400, hint: 'Shown on the winner screen' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
+  items: {
+    label: 'Power-ups', hint: 'Cards that do something special when a team turns them over. Give each one art and a power.', max: 6, width: 256, height: 256,
+    abilities: [
+      { id: 'double', label: 'Doubles your points', hint: "The team's score doubles" },
+      { id: 'swap', label: 'Swap points', hint: 'Trade scores with a team you pick' },
+      { id: 'steal', label: 'Steal points', hint: 'Take points from a team you pick', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 20 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'A big prize of points', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 100 } },
+    ],
+    classic: [
+      { id: 'classic-double', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
+      { id: 'classic-swap', name: 'Swap Spinner', ability: 'swap', motion: 'spin', often: 1, art: 'swap-arrows' },
+      { id: 'classic-steal', name: 'Sneaky Magnet', ability: 'steal', amount: 20, motion: 'wiggle', often: 1, art: 'magnet' },
+      { id: 'classic-bonus', name: 'Prize Bag', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+    ],
+  },
   hasCpu: true,
   borrowedFrom: 'Dashboard team games (Plinko turns) and Baamboozle-style rules, rebuilt',
 };

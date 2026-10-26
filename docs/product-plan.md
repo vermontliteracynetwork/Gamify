@@ -1140,6 +1140,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 71 | **"Same game, each child's own questions."** In a multi-device lobby the teacher picks each group's game and a question set for every student. Play competitively (a leaderboard by name or nickname) or together toward a shared goal (the class's total XP or fish). Plus and Homeschool. | An accessibility and differentiation feature everyone can see: every student plays at their own level without being singled out | Teacher, 2026-10-26 (queued to build) |
 | 72 | **"Silly catches, real choices."** In the Theme Builder students give power-ups their own art and powers: a boot takes away 100 points, a rainbow fish is worth 1000. Classic versions of every power-up show what each one does. | Makes theme design feel like game design; students reason about points and chance | Teacher, 2026-10-26 |
 | 73 | **A Homeschool plan built for families.** Every game, up to 10 students, 3 theme designs per game, assignments per child, reports kept forever. | A clear, family-sized offer instead of a classroom plan | Teacher, 2026-10-26 |
+| 74 | **Power-ups your class designs.** In Game Show, every power-up card (Double Star, Swap Spinner, Sneaky Magnet, Prize Bag) can get your students' own art and name, and the board grows from 4 x 3 up to 6 x 6. | Turns review day into a design project kids are proud of | Claudia, 2026-10-26 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

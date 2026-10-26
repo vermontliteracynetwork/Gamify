@@ -19,7 +19,8 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.screenshot({ path: `test-results/gameshow-setup-sets-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('radio', { name: '12' }).click();
+  await page.getByRole('radio', { name: '4 x 3' }).click();
+  await expect(page.getByRole('switch', { name: /Double Star/ })).toBeChecked();
   await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
   await finishSetup(page);
 

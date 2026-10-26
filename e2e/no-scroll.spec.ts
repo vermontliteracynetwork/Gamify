@@ -25,10 +25,11 @@ test('game boards fit the screen without scrolling', async ({ page }) => {
   await openSetup(page, '/games/game-show');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('radiogroup', { name: 'Cards' }).getByRole('radio', { name: '20' }).click();
+  await page.getByRole('radiogroup', { name: 'Card grid' }).getByRole('radio', { name: '6 x 6' }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'More teams' }).click();
   await finishSetup(page);
-  await expect(page.getByRole('button', { name: 'Card 20', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Card 36', exact: true })).toBeVisible();
+  await page.screenshot({ path: `test-results/gameshow-6x6-${test.info().project.name}.png` });
   await noScroll(page);
 });
