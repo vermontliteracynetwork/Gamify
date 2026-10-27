@@ -219,8 +219,8 @@ export default function FarmGrow() {
               {ripe && stage === 'work' && <p className="col-span-4 landscape:col-span-1 text-sm font-bold text-center landscape:w-24">{t('fg.ripe')}</p>}
             </div>
           </div>
-          {/* Portrait screens have room under the seeds: how a crop grows. */}
-          <ol className="hidden portrait:grid grid-cols-4 gap-2 list-none p-0 m-0" aria-label={t('fg.guide')}>
+          {/* Tall portrait screens have room under the seeds: how a crop grows. */}
+          <ol className="hidden [@media(orientation:portrait)_and_(min-height:1100px)]:grid grid-cols-4 gap-2 list-none p-0 m-0" aria-label={t('fg.guide')}>
             {([['plant', <Plant weight="fill" size={30} />], ['water', <Drop weight="fill" size={30} color="#3d7fd0" />], ['night', <Moon weight="fill" size={30} color="#241c3d" />], ['pick', <Shovel weight="fill" size={30} />]] as const).map(([k, icon], i) => (
               <li key={k} className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid justify-items-center gap-1 text-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="font-display text-lg">{i + 1}</span>{icon}
