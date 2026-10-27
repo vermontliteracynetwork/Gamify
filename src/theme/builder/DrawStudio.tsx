@@ -132,6 +132,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
   const stroke = useRef<{ base: ImageData; points: [number, number][] } | null>(null);
   const dragging = useRef<{ id: number; mode: 'move' | 'size' | 'turn'; x: number; y: number; o: Obj } | null>(null);
   const nextId = useRef(1);
+  const [guides, setGuides] = useState<{ x?: number; y?: number }>({});
   const round = isRound(piece);
   const selected = objs.find((o) => o.id === sel) ?? null;
   const base = Math.round(Math.min(W, H) * 0.3);
@@ -245,7 +246,18 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
   function drag(e: React.PointerEvent) {
     const d = dragging.current;
     if (!d) return;
-    if (d.mode === 'move') { update(d.id, { x: d.o.x + (e.clientX - d.x) / fit, y: d.o.y + (e.clientY - d.y) / fit }); return; }
+    if (d.mode === 'move') {
+      // Snap to the middle and the edges of the piece, with guide lines.
+      let x = d.o.x + (e.clientX - d.x) / fit, y = d.o.y + (e.clientY - d.y) / fit;
+      const near = 0.025 * Math.max(W, H), half = d.o.size / 2;
+      const gx = [W / 2, half, W - half].find((v) => Math.abs(v - x) < near);
+      const gy = [H / 2, half, H - half].find((v) => Math.abs(v - y) < near);
+      if (gx !== undefined) x = gx;
+      if (gy !== undefined) y = gy;
+      setGuides({ x: gx, y: gy });
+      update(d.id, { x, y });
+      return;
+    }
     const r = canvas.current!.getBoundingClientRect();
     const cx = r.left + d.o.x * fit, cy = r.top + d.o.y * fit;
     if (d.mode === 'size') {
@@ -255,7 +267,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
       update(d.id, { rot: Math.round((Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI + 90) });
     }
   }
-  function drop() { dragging.current = null; }
+  function drop() { dragging.current = null; setGuides({}); }
   function layer(id: number, to: 'front' | 'back') {
     remember();
     setObjs((list) => { const o = list.find((x) => x.id === id)!; const rest = list.filter((x) => x.id !== id); return to === 'front' ? [...rest, o] : [o, ...rest]; });
@@ -396,6 +408,8 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
               <canvas ref={canvas} width={W} height={H} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
                 aria-label={t('studio.canvas', { piece: piece.label })} className="w-full h-full border-[2.5px] border-border bg-transparent touch-none cursor-crosshair" style={{ borderRadius: round ? '50%' : 12 }} />
               <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: tool === 'move' ? 'auto' : 'none', borderRadius: round ? '50%' : 12 }} onPointerDown={() => setSel(null)} onPointerMove={drag} onPointerUp={drop} onPointerCancel={drop}>
+                {guides.x !== undefined && <span className="absolute top-0 bottom-0 border-l-[2px] border-dashed border-[#e5635f] pointer-events-none" style={{ left: guides.x * fit }} aria-hidden="true" />}
+                {guides.y !== undefined && <span className="absolute left-0 right-0 border-t-[2px] border-dashed border-[#e5635f] pointer-events-none" style={{ top: guides.y * fit }} aria-hidden="true" />}
                 {objs.map((o) => (
                   <div key={o.id} role="button" tabIndex={-1} aria-label={t('studio.piece', { what: o.kind === 'text' ? o.text ?? '' : o.label })} aria-pressed={sel === o.id}
                     onPointerDown={(e) => grab(e, o, 'move')}

@@ -42,6 +42,14 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await page.mouse.up();
   const c1 = (await crown.boundingBox())!;
   expect(c1.x).toBeGreaterThan(c0.x + 20);
+  // Dragged near the middle, it snaps to the exact center.
+  const cv = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  await page.mouse.move(c1.x + c1.width / 2, c1.y + c1.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(cv.x + cv.width / 2 + 3, cv.y + cv.height / 2 - 4, { steps: 6 });
+  await page.mouse.up();
+  const c2 = (await crown.boundingBox())!;
+  expect(Math.abs(c2.x + c2.width / 2 - (cv.x + cv.width / 2))).toBeLessThan(2);
   await studio.getByRole('radio', { name: 'Words' }).click();
   await page.mouse.click(...at(0.5, 0.8));
   await studio.getByLabel('Words', { exact: true }).fill('Champs');
