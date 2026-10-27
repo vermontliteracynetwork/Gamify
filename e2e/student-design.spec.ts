@@ -29,6 +29,7 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Draw it' }).click();
   const studio = page.getByRole('dialog', { name: /^Draw: / });
+  await expect(studio.getByRole('radio', { name: 'Words' })).toHaveCount(0);
   await studio.getByRole('radio', { name: 'Fill' }).click();
   await studio.getByRole('button', { name: '#43a047' }).click();
   const box = (await studio.getByLabel(/^Drawing of the /).boundingBox())!;

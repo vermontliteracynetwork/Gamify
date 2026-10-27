@@ -104,3 +104,26 @@ test('studio: drag a sticker from the shelf onto the picture', async ({ page }, 
   await studio.getByRole('button', { name: 'rocket', exact: true }).dragTo(studio.getByLabel(/^Drawing of the Winner trophy/));
   await expect(studio.getByRole('button', { name: 'Move rocket' })).toBeVisible();
 });
+
+test('studio: flip a piece, and a warning for words that are hard to read', async ({ page }) => {
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByLabel('Find a piece').fill('trophy');
+  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
+  const box = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  // Fill the whole picture yellow, then yellow words on it.
+  await studio.getByRole('button', { name: '#fdd835' }).click();
+  await studio.getByRole('radio', { name: 'Fill' }).click();
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await studio.getByRole('radio', { name: 'Words' }).click();
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await studio.getByRole('button', { name: 'Flip' }).click();
+  expect(await studio.getByRole('button', { name: 'Move Hello!' }).getAttribute('style')).toContain('scaleX(-1)');
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect(studio.getByRole('alert')).toContainText('hard to read');
+  await studio.getByRole('button', { name: '#000000' }).click();
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect(studio).toHaveCount(0);
+});

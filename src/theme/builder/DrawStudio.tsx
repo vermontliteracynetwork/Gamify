@@ -7,7 +7,7 @@ import {
   Lightning, Lighthouse, MagicWand, Magnet, MapPin, Medal, Megaphone, Microphone, Microscope, Moon, Mountains, MusicNote, Orange, PaintBrush, PaintBucket,
   Palette, PawPrint, Pencil, Pepper, PiggyBank, Pizza, Planet, Plant, Popcorn, PuzzlePiece, Rabbit, Rainbow, Robot, Rocket, Sailboat, Scissors, Shapes,
   Shield, Shrimp, Smiley, Snowflake, SoccerBall, Sparkle, Star, StarFour, Sticker, Sun, Television, TennisBall, Tent, Tipi, Tractor, Train, Tree,
-  TreeEvergreen, Trophy, TShirt, Umbrella, Waves, X, HandGrabbing, TextT, ArrowsOutSimple, CopySimple, Trash, type Icon,
+  TreeEvergreen, Trophy, TShirt, Umbrella, Waves, X, HandGrabbing, TextT, ArrowsOutSimple, ArrowsLeftRight, CopySimple, Trash, type Icon,
 } from '@phosphor-icons/react';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
@@ -17,6 +17,8 @@ import { APPROVED_FONTS, THEME_FONTS, type FontName, type ThemePieceSpec } from 
 import { CLASSIC_ITEM_ART, ClassicItemSvg } from '../classicItems';
 import { ClassicPiece } from './classicArt';
 import { isRound } from './template';
+import { useSettings } from '../../settings/SettingsContext';
+import { speak } from '../../engine/feedback';
 
 // Draw a theme piece right in the Theme Builder (teacher, 2026-10-26: "think
 // Canva and Procreate", "simple yet intuitive... menus collapsable, things
@@ -31,7 +33,7 @@ type ShapeKind = 'circle' | 'square' | 'triangle' | 'heart' | 'star';
 // Stickers, shapes and words sit above the paint as pieces you can move,
 // resize, turn and delete (Canva style); brushes paint underneath (Procreate
 // style). Saving flattens both into one picture.
-interface Obj { id: number; kind: 'sticker' | 'shape' | 'text'; x: number; y: number; size: number; rot: number; color: string; svg?: string; recolor?: boolean; shape?: ShapeKind; text?: string; font?: FontName; label: string }
+interface Obj { id: number; kind: 'sticker' | 'shape' | 'text'; x: number; y: number; size: number; rot: number; flip?: boolean; color: string; svg?: string; recolor?: boolean; shape?: ShapeKind; text?: string; font?: FontName; label: string }
 interface Snap { img: ImageData; objs: Obj[] }
 
 const SHAPE_SVG: Record<ShapeKind, (fill: string) => string> = {
@@ -103,9 +105,13 @@ const BACKDROPS: { id: string; stops: string[]; dots?: string }[] = [
 const MAX_SIDE = 1200;
 const MAX_UNDO = 30;
 
-export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
-  piece: ThemePieceSpec; gameId: string; image?: string; onSave: (dataUrl: string) => void; onClose: () => void;
+// `simple`: the student studio (Part 3E): fewer, bigger tools, and each tool
+// says its name and what it does when tapped.
+export default function DrawStudio({ piece, gameId, image, onSave, onClose, simple = false }: {
+  piece: ThemePieceSpec; gameId: string; image?: string; onSave: (dataUrl: string) => void; onClose: () => void; simple?: boolean;
 }) {
+  const { settings } = useSettings();
+  const [warn, setWarn] = useState<string[]>([]);
   const scale = Math.min(1, MAX_SIDE / Math.max(piece.width, piece.height));
   const W = Math.round(piece.width * scale), H = Math.round(piece.height * scale);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -276,7 +282,21 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
     if (kind === 'classic' && classicRef.current) ctx().drawImage(await loadSvg(new XMLSerializer().serializeToString(classicRef.current)), 0, 0, W, H);
   }
   // Paint first, then every piece in order, into one picture.
-  async function save() {
+  // Readability (Part 3E): words must stand out from what is behind them.
+  function hardToRead(): string[] {
+    const c = ctx();
+    return objs.filter((o) => o.kind === 'text' && o.text?.trim()).filter((o) => {
+      const w = Math.max(4, Math.round(o.size * Math.max(1, (o.text?.length ?? 1) * 0.55))), h = Math.max(4, Math.round(o.size));
+      const x0 = Math.max(0, Math.round(o.x - w / 2)), y0 = Math.max(0, Math.round(o.y - h / 2));
+      const px = c.getImageData(x0, y0, Math.max(1, Math.min(w, W - x0)), Math.max(1, Math.min(h, H - y0))).data;
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < px.length; i += 16) { const a = px[i + 3] / 255; r += px[i] * a + 255 * (1 - a); g += px[i + 1] * a + 255 * (1 - a); b += px[i + 2] * a + 255 * (1 - a); n++; }
+      return contrast(o.color, [r / n, g / n, b / n]) < 3;
+    }).map((o) => o.text!.trim());
+  }
+  async function save(anyway = false) {
+    if (!anyway) { const bad = hardToRead(); if (bad.length) { setWarn(bad); return; } }
+    setWarn([]);
     setSaving(true);
     const out = document.createElement('canvas');
     out.width = W; out.height = H;
@@ -286,6 +306,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
       c.save();
       c.translate(o.x, o.y);
       c.rotate((o.rot * Math.PI) / 180);
+      if (o.flip) c.scale(-1, 1);
       if (o.kind === 'text') {
         c.font = `${o.size}px ${THEME_FONTS[o.font ?? 'Grow Year']}`;
         c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = o.color;
@@ -334,7 +355,8 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
     if (selected && (selected.kind !== 'sticker' || selected.recolor)) { remember(); update(selected.id, { color: c }); }
   };
 
-  const TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
+  const ALL_TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
+  const TOOLS = simple ? ALL_TOOLS.filter(([id]) => id !== 'shape' && id !== 'text') : ALL_TOOLS;
   const handle = 'absolute w-9 h-9 rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center touch-none';
 
   return (
@@ -348,14 +370,21 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
           <Button onClick={onClose}><X weight="bold" size={18} />{t('studio.cancel')}</Button>
           <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
         </div>
+        {warn.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-accent border-b-[2px] border-border" role="alert">
+            <span className="font-bold flex-1 min-w-48">{t('studio.hardToRead', { words: warn.join(', ') })}</span>
+            <Button onClick={() => setWarn([])}>{t('studio.fixIt')}</Button>
+            <Button onClick={() => void save(true)}>{t('studio.saveAnyway')}</Button>
+          </div>
+        )}
 
         <div className="grid grid-rows-[auto_minmax(0,1fr)_auto] lg:grid-rows-1 lg:grid-cols-[auto_minmax(0,1fr)_300px] min-h-0">
           {/* Tools */}
           <div role="radiogroup" aria-label={t('studio.tools')} className="flex lg:flex-col gap-1.5 p-2 border-b-[2px] lg:border-b-0 lg:border-r-[2px] border-border-soft overflow-x-auto lg:overflow-y-auto">
             {TOOLS.map(([id, I]) => (
-              <button key={id} type="button" role="radio" aria-checked={tool === id} onClick={() => { setTool(id); if (id !== 'move') setSel(null); }}
-                className={`shrink-0 w-[4.5rem] min-h-14 rounded-input border-[2px] grid justify-items-center content-center gap-0.5 font-bold text-xs ${tool === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                <I weight={tool === id ? 'fill' : 'bold'} size={24} aria-hidden="true" />{t(`studio.tool.${id}`)}
+              <button key={id} type="button" role="radio" aria-checked={tool === id} onClick={() => { setTool(id); if (id !== 'move') setSel(null); if (simple) speak(t(`studio.say.${id}`), settings); }}
+                className={`shrink-0 ${simple ? 'w-24 min-h-20 text-sm' : 'w-[4.5rem] min-h-14 text-xs'} rounded-input border-[2px] grid justify-items-center content-center gap-0.5 font-bold ${tool === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                <I weight={tool === id ? 'fill' : 'bold'} size={simple ? 34 : 24} aria-hidden="true" />{t(`studio.tool.${id}`)}
               </button>
             ))}
             <span className="shrink-0 w-12 h-12 lg:w-[4.5rem] lg:h-10 self-center rounded-input border-[2.5px] border-border" style={{ background: color }} aria-label={t('studio.colorNow', { color })} role="img" />
@@ -371,7 +400,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
                   <div key={o.id} role="button" tabIndex={-1} aria-label={t('studio.piece', { what: o.kind === 'text' ? o.text ?? '' : o.label })} aria-pressed={sel === o.id}
                     onPointerDown={(e) => grab(e, o, 'move')}
                     className={`absolute touch-none select-none ${tool === 'move' ? 'cursor-move' : ''}`}
-                    style={{ left: o.x * fit, top: o.y * fit, transform: `translate(-50%, -50%) rotate(${o.rot}deg)`, ...(o.kind === 'text' ? {} : { width: o.size * fit, height: o.size * fit }) }}>
+                    style={{ left: o.x * fit, top: o.y * fit, transform: `translate(-50%, -50%) rotate(${o.rot}deg)${o.flip ? ' scaleX(-1)' : ''}`, ...(o.kind === 'text' ? {} : { width: o.size * fit, height: o.size * fit }) }}>
                     {o.kind === 'text'
                       ? <span className="block whitespace-nowrap leading-none" style={{ fontSize: o.size * fit, fontFamily: THEME_FONTS[o.font ?? 'Grow Year'], color: o.color }}>{o.text}</span>
                       : <img src={svgUrl(objSvg(o))} alt="" draggable={false} className="w-full h-full pointer-events-none" />}
@@ -412,6 +441,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
                   <input type="range" min={-180} max={180} value={((selected.rot + 180) % 360 + 360) % 360 - 180} onChange={(e) => update(selected.id, { rot: Number(e.target.value) })} />
                 </label>
                 <div className="grid grid-cols-2 gap-1.5">
+                  <Button onClick={() => { remember(); update(selected.id, { flip: !selected.flip }); }}><ArrowsLeftRight weight="bold" size={16} />{t('studio.flip')}</Button>
                   <Button onClick={() => layer(selected.id, 'front')}>{t('studio.front')}</Button>
                   <Button onClick={() => layer(selected.id, 'back')}>{t('studio.back')}</Button>
                   <Button onClick={() => copy(selected)}><CopySimple weight="bold" size={16} />{t('studio.copy')}</Button>
@@ -463,7 +493,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
               {found.length + classicFound.length === 0 && <p className="text-sm font-bold text-muted">{t('studio.noStickers')}</p>}
               <p className="text-xs font-semibold text-muted">{t('studio.stickerHint')}</p>
             </Section>
-            <Section title={t('studio.shapes')} open={tool === 'shape'}>
+            {!simple && <Section title={t('studio.shapes')} open={tool === 'shape'}>
               <div role="radiogroup" aria-label={t('studio.shapes')} className="grid grid-cols-5 gap-1.5">
                 {(Object.keys(SHAPE_SVG) as ShapeKind[]).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={shape === k && tool === 'shape'} aria-label={t(`studio.shape.${k}`)} onClick={() => { setShape(k); setTool('shape'); }}
@@ -473,7 +503,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
                 ))}
               </div>
               <p className="text-xs font-semibold text-muted">{t('studio.shapeHint')}</p>
-            </Section>
+            </Section>}
             <Section title={t('studio.backgrounds')}>
               <div className="grid grid-cols-3 gap-1.5">
                 {BACKDROPS.map((b) => (
@@ -553,4 +583,12 @@ export function floodFill(c: CanvasRenderingContext2D, w: number, h: number, x: 
     }
   }
   c.putImageData(img, 0, 0);
+}
+
+// WCAG contrast ratio between a hex color and an RGB background.
+function contrast(hex: string, bg: number[]): number {
+  const lum = (rgb: number[]) => { const [r, g, b] = rgb.map((v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const fg = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const [a, b] = [lum(fg), lum(bg)];
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }

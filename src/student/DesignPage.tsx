@@ -97,7 +97,7 @@ export default function DesignPage() {
                 </div>
                 {drawing && (
                   <Suspense fallback={null}>
-                    <DrawStudio piece={pieces[piece]} gameId={draft.gameId} image={draft.pieces[pieces[piece].id]?.image} onClose={() => setDrawing(false)} onSave={(img) => { put(img); setDrawing(false); }} />
+                    <DrawStudio simple piece={pieces[piece]} gameId={draft.gameId} image={draft.pieces[pieces[piece].id]?.image} onClose={() => setDrawing(false)} onSave={(img) => { put(img); setDrawing(false); }} />
                   </Suspense>
                 )}
                 <input ref={file} type="file" accept="image/*" capture="environment" hidden aria-label={t('design.addPicture')} onChange={(e) => { void add(e.target.files?.[0]); e.target.value = ''; }} />
