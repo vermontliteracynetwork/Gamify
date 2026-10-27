@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'castle-guard', kind: 'decide', added: '2026-10-27', title: 'Castle Guard: show it, or keep it off?',
+    why: 'You took Castle Guard off the queue on 2026-10-26, but it got built anyway on 2026-10-27 (my mistake). It is hidden from the game list now; the code stays.',
+    how: 'Say "show Castle Guard" to put it in the game list, or "remove Castle Guard" to delete it.' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },

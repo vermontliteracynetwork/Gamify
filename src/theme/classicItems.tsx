@@ -129,6 +129,20 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <text x="50" y="71" textAnchor="middle" fontSize="20" fontWeight="bold" fill={INK}>+</text>
     </g>
   ),
+  'watering-can': () => (
+    <g>
+      <path d="M24 40 H66 V84 Q66 90 60 90 H30 Q24 90 24 84 Z" fill="#8ec5ff" {...S} />
+      <path d="M66 50 L90 30 L94 36 L70 62" fill="#8ec5ff" {...S} />
+      <path d="M30 40 Q45 14 60 40" fill="none" {...S} strokeWidth={5} />
+      <path d="M92 44 V52 M86 50 V58 M98 50 V58" stroke="#6aa9e9" strokeWidth="4" strokeLinecap="round" />
+    </g>
+  ),
+  'rain-cloud': () => (
+    <g>
+      <path d="M22 58 Q8 58 10 46 Q12 34 26 36 Q30 18 50 20 Q68 20 72 36 Q90 34 90 48 Q90 60 76 58 Z" fill="#ffffff" {...S} />
+      <path d="M30 70 L26 82 M50 70 L46 86 M70 70 L66 82" stroke="#6aa9e9" strokeWidth="5" strokeLinecap="round" />
+    </g>
+  ),
   magnet: () => (
     <g>
       <path d="M20 14 H40 V54 Q40 66 50 66 Q60 66 60 54 V14 H80 V54 Q80 86 50 86 Q20 86 20 54 Z" fill="#f2735f" {...S} />

@@ -126,6 +126,19 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
+    case 'farm-grow':
+      return (
+        <div className={base} style={{ background: '#bfe6a0' }} aria-hidden="true">
+          <div className="absolute inset-x-0 top-0 h-[28%] bg-[#bfe8ff] border-b-[3px] border-border" />
+          <svg viewBox="0 0 100 62" className="absolute inset-0 w-full h-full">
+            <circle cx="14" cy="9" r="6" fill="#ffd84d" stroke="#000" strokeWidth="1" />
+            <path d="M70 18 L82 9 L94 18 V34 H70 Z" fill="#e5635f" stroke="#000" strokeWidth="1.2" strokeLinejoin="round" /><rect x="78" y="24" width="8" height="10" fill="#fbfcf8" stroke="#000" strokeWidth="1" />
+            {[[8, 24], [30, 24], [52, 24], [8, 43], [30, 43], [52, 43]].map(([x, y], i) => <rect key={i} x={x} y={y} width="19" height="16" rx="2" fill="#b98a5e" stroke="#000" strokeWidth="1.2" />)}
+            {[[17, 36, '#f6c544'], [39, 36, '#e5635f'], [61, 55, '#f39a6b'], [17, 55, '#ffd84d']].map(([x, y, c], i) => <g key={i}><path d={`M${x} ${y} V${(y as number) - 8}`} stroke="#2f7d32" strokeWidth="1.5" /><circle cx={x as number} cy={(y as number) - 9} r="3.4" fill={c as string} stroke="#000" strokeWidth="1" /></g>)}
+            <path d="M41 52 Q37 48 36 51 M41 52 Q45 48 46 51" fill="#7cc66a" stroke="#000" strokeWidth="0.8" />
+          </svg>
+        </div>
+      );
     case 'castle-guard':
       return (
         <div className={base} style={{ background: '#9fd88a' }} aria-hidden="true">

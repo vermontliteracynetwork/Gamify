@@ -12,16 +12,18 @@ import { bowlingManifest } from './bowling/manifest';
 import { roadHopManifest } from './road-hop/manifest';
 import { lunchRushManifest } from './lunch-rush/manifest';
 import { castleGuardManifest } from './castle-guard/manifest';
+import { farmGrowManifest } from './farm-grow/manifest';
 import type { GameManifest } from './types';
 
 // Every game built, in Arcade order (development plan Part 4).
-export const ALL_GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, castleGuardManifest, starQuizManifest, flashcardsManifest];
+export const ALL_GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, castleGuardManifest, farmGrowManifest, starQuizManifest, flashcardsManifest];
 
 // For now the lineup is only games where multiple-choice questions interrupt
 // play, with an easy re-theme and power-ups (teacher, 2026-10-26). Games where
 // the questions are the game (matching, memory, flashcards) and Road Hop come
-// later; their code and links stay, they are just not listed.
-export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards'];
+// later; their code and links stay, they are just not listed. Castle Guard
+// waits too: the teacher took it off the queue (2026-10-26) before it was built.
+export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'castle-guard'];
 export const GAMES: GameManifest[] = ALL_GAMES.filter((g) => !LATER_GAMES.includes(g.id));
 
 export function getGame(id: string): GameManifest | undefined {

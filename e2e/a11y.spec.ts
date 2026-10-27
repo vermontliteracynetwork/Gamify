@@ -56,7 +56,7 @@ test('no automated accessibility violations on the question screen and a game bo
 // Full sweep for the conformance report (Stage 8): every listed game's start
 // screen, the newer teacher screens and dialogs, and the rest of the site.
 test.describe('full sweep', () => {
-  for (const g of ['peg-drop', 'cast-catch', 'match-three', 'four-in-a-row', 'bubble-pop', 'bowling', 'lunch-rush', 'castle-guard', 'star-quiz']) {
+  for (const g of ['peg-drop', 'cast-catch', 'match-three', 'four-in-a-row', 'bubble-pop', 'bowling', 'lunch-rush', 'castle-guard', 'farm-grow', 'star-quiz']) {
     test(`no automated accessibility violations on the ${g} start screen`, async ({ page }) => {
       await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
       await page.goto(`/games/${g}`);

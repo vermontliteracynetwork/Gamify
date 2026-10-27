@@ -38,6 +38,12 @@ function board(theme: GameTheme) {
           })}
         </div>
       );
+    case 'farm-grow':
+      return (
+        <div className="grid grid-cols-5 gap-2 items-end w-full p-2 rounded-input" style={{ background: pieceColor(theme, 'soil', '#b98a5e') }}>
+          {(['sprout', 'crop-corn', 'crop-pumpkin', 'crop-sunflower', 'crop-tomato'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-14 object-contain justify-self-center" /> : <span key={id} className="h-10 w-10 justify-self-center rounded-full border-[2px] border-border bg-[#7cc66a]" />)}
+        </div>
+      );
     case 'castle-guard':
       return (
         <div className="grid grid-cols-4 gap-2 items-end w-full" style={{ background: pieceColor(theme, 'road', '#e8c48f') }}>
