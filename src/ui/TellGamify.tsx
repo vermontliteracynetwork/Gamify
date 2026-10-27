@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../data/supabase';
 import { Bug, Lifebuoy, Lightbulb, SmileySad } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import type { FeedbackReport } from '../data/types';
@@ -63,6 +64,34 @@ export function TellGamify({ context, role = 'student' }: { context?: string; ro
           )}
         </>
       )}
+      {role === 'teacher' && <Replies />}
     </section>
+  );
+}
+
+// The owner's answers to this teacher's messages (0012), newest first.
+function Replies() {
+  const [list, setList] = useState<{ id: string; details: string; reply: string }[]>([]);
+  useEffect(() => {
+    if (!supabase) return;
+    void (async () => {
+      if (!(await supabase.auth.getSession()).data.session) return;
+      const { data: rows } = await supabase.from('feedback_reports').select('*').order('at', { ascending: false }).limit(20);
+      setList(((rows ?? []) as { id: string; details: string; reply?: string | null }[]).filter((r) => r.reply).map((r) => ({ id: r.id, details: r.details, reply: r.reply! })));
+    })();
+  }, []);
+  if (!list.length) return null;
+  return (
+    <div className="grid gap-2">
+      <h4 className="font-bold">{t('tell.replies')}</h4>
+      <ul className="grid gap-2 list-none p-0 m-0">
+        {list.map((r) => (
+          <li key={r.id} className="rounded-input border-[2px] border-border bg-surface p-2 grid gap-1">
+            {r.details && <p className="text-sm font-semibold text-muted">{t('tell.you', { text: r.details })}</p>}
+            <p className="font-bold">{r.reply}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

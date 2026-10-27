@@ -92,6 +92,9 @@ export interface FeedbackReport {
   where: string;
   role: 'teacher' | 'student';
   device: string;
+  // The owner's answer to a help request (0012), seen by the teacher in Gamify.
+  reply?: string;
+  repliedAt?: string;
 }
 
 export type QuestionOutcome = 'right' | 'skipped' | 'left' | 'timeout';

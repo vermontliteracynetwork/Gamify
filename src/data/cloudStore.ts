@@ -145,7 +145,7 @@ export function createCloudStore(db: SupabaseClient): CloudStore {
     },
     async listFeedback() {
       return rows(await db.from('feedback_reports').select('*').order('at')).map((r: Row): FeedbackReport => ({
-        id: r.id, at: r.at, kind: r.kind, details: r.details, where: r.where_at ?? '', role: r.role, device: r.device ?? '',
+        id: r.id, at: r.at, kind: r.kind, details: r.details, where: r.where_at ?? '', role: r.role, device: r.device ?? '', ...(r.reply ? { reply: r.reply, repliedAt: r.replied_at } : {}),
       }));
     },
 

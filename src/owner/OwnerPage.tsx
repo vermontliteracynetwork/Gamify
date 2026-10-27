@@ -20,6 +20,8 @@ import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
+import OwnerGate from './OwnerGate';
+import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import { AccessCard, GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
@@ -37,6 +39,8 @@ interface FeedbackMeta { status: Status; social: boolean }
 
 export default function OwnerPage() {
   const [open, setOpen] = useState(false);
+  // With cloud accounts on: the owner account plus an authenticator code.
+  if (supabase) return <OwnerGate><Desktop /></OwnerGate>;
   if (!open) {
     return (
       <main className="max-w-md mx-auto px-4 pt-10 pb-24">
@@ -110,7 +114,7 @@ function IconBtn({ label, onClick, disabled, children }: { label: string; onClic
 // Every Tell Gamify report: filter by kind, set a status, star the ones
 // that would make a good social post.
 function FeedbackCard() {
-  const { value: reports = [] } = useAsync(() => data.listFeedback());
+  const { value: reports = [], reload: reload2 } = useAsync(() => data.listFeedback());
   const { value: savedMeta, reload } = useAsync(() => data.getSetting<Record<string, FeedbackMeta>>('feedback-meta'));
   const meta = savedMeta ?? {};
   const [kind, setKind] = useState<FeedbackReport['kind'] | 'all'>('all');
@@ -145,6 +149,7 @@ function FeedbackCard() {
               </div>
               <p className="font-semibold">{r.details || t('owner.noDetails')}</p>
               {r.kind === 'quote' && quoteFrom(r.details) && <Button className="justify-self-start" onClick={() => downloadQuote(quoteFrom(r.details)!)}>{t('owner.quotePdf')}</Button>}
+              {r.role === 'teacher' && <ReplyBox report={r} onSent={reload2} />}
             </li>
           );
         })}
@@ -328,4 +333,27 @@ function downloadQuote(req: QuoteRequest) {
   a.download = `Gamify-quote-${q.number}.pdf`;
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+// Answer a teacher's message; they see it in Tell Gamify (0012).
+function ReplyBox({ report, onSent }: { report: FeedbackReport; onSent: () => void }) {
+  const [text, setText] = useState('');
+  const [problem, setProblem] = useState('');
+  if (report.reply) return <p className="text-sm font-semibold rounded-input bg-surface-2 p-2">{t('owner.replied', { text: report.reply })}</p>;
+  async function send() {
+    if (!supabase) { setProblem(t('owner.replyCloud')); return; }
+    const { error } = await supabase.rpc('owner_reply', { fid: report.id, body: text.trim() });
+    if (error) { setProblem(t('owner.replyCloud')); return; }
+    setText(''); onSent();
+  }
+  return (
+    <details>
+      <summary className="font-bold text-sm cursor-pointer">{t('owner.reply')}</summary>
+      <div className="grid gap-1.5 pt-1.5">
+        <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={3} aria-label={t('owner.replyLabel')} className="px-2 py-1.5 rounded-input border-[2px] border-border font-semibold" />
+        <Button className="justify-self-start" disabled={!text.trim()} onClick={() => void send()}>{t('owner.replySend')}</Button>
+        {problem && <p className="text-sm font-bold" role="status">{problem}</p>}
+      </div>
+    </details>
+  );
 }
