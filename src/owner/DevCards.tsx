@@ -231,3 +231,70 @@ export function PreviewBanner() {
     </div>
   );
 }
+
+// Access codes and beta plans (0011_access_codes.sql): make a code like the
+// Vermont Literacy Network one, and give any teacher a plan by username.
+interface AccessCodeRow { code: string; tier: string; months: number; max_uses: number; uses: number; beta: boolean; note: string | null }
+interface GrantRow { username: string | null; tier: string; plan_until: string | null; plan_note: string | null }
+export function AccessCard() {
+  const [codes, setCodes] = useState<AccessCodeRow[]>([]);
+  const [grants, setGrants] = useState<GrantRow[]>([]);
+  const [problem, setProblem] = useState('');
+  const [msg, setMsg] = useState('');
+  const [code, setCode] = useState({ code: 'VLNPLUS', tier: 'plus', months: 3, max_uses: 200, beta: true, note: 'Vermont Literacy Network list' });
+  const [grant, setGrant] = useState({ username: '', tier: 'plus', months: 0, note: 'beta' });
+  async function load() {
+    if (!supabase) { setProblem(t('owner.statsNoCloud')); return; }
+    if (!(await supabase.auth.getSession()).data.session) { setProblem(t('owner.statsSignIn')); return; }
+    const a = await supabase.from('access_codes').select('*').order('created_at', { ascending: false });
+    const b = await supabase.rpc('owner_grants');
+    if (a.error || b.error) { setProblem(t('owner.access.setup')); return; }
+    setProblem(''); setCodes(a.data as AccessCodeRow[]); setGrants(b.data as GrantRow[]);
+  }
+  useEffect(() => { void load(); }, []);
+  async function makeCode() {
+    const { error } = await supabase!.from('access_codes').upsert({ ...code, code: code.code.toUpperCase() });
+    setMsg(error ? t('owner.access.codeBad') : t('owner.access.codeMade', { code: code.code.toUpperCase() }));
+    void load();
+  }
+  async function give() {
+    const { data: r, error } = await supabase!.rpc('owner_grant', { u: grant.username, t: grant.tier, months: grant.months, note: grant.note || 'beta' });
+    setMsg(error ? t('owner.access.codeBad') : (r as { found: boolean }).found ? t('owner.access.given', { name: grant.username }) : t('owner.access.noUser', { name: grant.username }));
+    void load();
+  }
+  const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface';
+  const plans = ['plus', 'pro', 'homeschool'] as const;
+  if (problem) return <p className="font-semibold">{problem}</p>;
+  return (
+    <div className="grid gap-4">
+      <div className="grid gap-2">
+        <p className="font-bold">{t('owner.access.makeTitle')}</p>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="grid gap-1 text-sm font-bold">{t('code.label')}<input value={code.code} maxLength={20} onChange={(e) => setCode({ ...code, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') })} className={`${field} w-36 tracking-wider`} /></label>
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.plan')}<select value={code.tier} onChange={(e) => setCode({ ...code, tier: e.target.value })} className={field}>{plans.map((p) => <option key={p} value={p}>{t(`owner.plan.${p}`)}</option>)}</select></label>
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.months')}<input type="number" min={1} max={24} value={code.months} onChange={(e) => setCode({ ...code, months: Number(e.target.value) })} className={`${field} w-20`} /></label>
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.uses')}<input type="number" min={1} max={100000} value={code.max_uses} onChange={(e) => setCode({ ...code, max_uses: Number(e.target.value) })} className={`${field} w-24`} /></label>
+          <label className="inline-flex items-center gap-2 text-sm font-bold min-h-11"><input type="checkbox" className="w-5 h-5" checked={code.beta} onChange={(e) => setCode({ ...code, beta: e.target.checked })} />{t('owner.access.beta')}</label>
+          <Button variant="primary" disabled={code.code.length < 4} onClick={() => void makeCode()}>{t('owner.access.make')}</Button>
+        </div>
+        {codes.length > 0 && (
+          <ul className="grid gap-1 list-none p-0 m-0">{codes.map((c) => <li key={c.code} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold tracking-wider">{c.code}</span> · {t(`owner.plan.${c.tier}` as 'owner.plan.plus')} · {t('owner.access.row', { months: c.months, uses: c.uses, max: c.max_uses })}{c.beta ? ` · ${t('owner.access.beta')}` : ''}</li>)}</ul>
+        )}
+      </div>
+      <div className="grid gap-2">
+        <p className="font-bold">{t('owner.access.giveTitle')}</p>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.username')}<input value={grant.username} onChange={(e) => setGrant({ ...grant, username: e.target.value.toLowerCase() })} className={`${field} w-44`} /></label>
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.plan')}<select value={grant.tier} onChange={(e) => setGrant({ ...grant, tier: e.target.value })} className={field}>{[...plans, 'free' as const].map((p) => <option key={p} value={p}>{t(`owner.plan.${p}`)}</option>)}</select></label>
+          <label className="grid gap-1 text-sm font-bold">{t('owner.access.monthsOrForever')}<input type="number" min={0} max={60} value={grant.months} onChange={(e) => setGrant({ ...grant, months: Number(e.target.value) })} className={`${field} w-24`} /></label>
+          <Button variant="primary" disabled={!grant.username.trim()} onClick={() => void give()}>{t('owner.access.give')}</Button>
+        </div>
+        {grants.length > 0 && (
+          <ul className="grid gap-1 list-none p-0 m-0">{grants.map((g, i) => <li key={`${g.username}-${i}`} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold">{g.username ?? '?'}</span> · {t(`owner.plan.${g.tier}` as 'owner.plan.plus')} · {g.plan_until ? t('owner.access.until', { date: new Date(g.plan_until).toLocaleDateString() }) : t('owner.access.forever')} · {g.plan_note}</li>)}</ul>
+        )}
+      </div>
+      {msg && <p className="font-bold" role="status">{msg}</p>}
+      <p className="text-xs font-bold text-muted">{t('owner.access.note')}</p>
+    </div>
+  );
+}

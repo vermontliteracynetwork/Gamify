@@ -47,3 +47,11 @@ test('teacher accounts: sign up checks every field, then log in with username an
   await page.getByRole('button', { name: 'Log in', exact: true }).click();
   await expect(page).toHaveURL(/\/teacher/);
 });
+
+test('Account: a Free teacher sees the access code box; without the cloud it explains', async ({ page }) => {
+  await page.goto('/teacher/account');
+  await page.getByLabel('Access code').fill('vln-plus');
+  await expect(page.getByLabel('Access code')).toHaveValue('VLNPLUS');
+  await page.getByRole('button', { name: 'Use the code' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Access codes work once you are signed in' })).toBeVisible();
+});

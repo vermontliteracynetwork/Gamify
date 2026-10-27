@@ -152,9 +152,13 @@ export function createCloudStore(db: SupabaseClient): CloudStore {
     // The plan comes from the teacher's profile, which only billing (and the
     // owner in the dashboard) can change, never the teacher's own browser.
     async getSetting<T>(key: string) {
-      if (key === 'tier') {
-        const p = ok(await db.from('profiles').select('tier').eq('id', await uid()).maybeSingle());
-        const tier = p?.tier === 'school' ? 'pro' : p?.tier;
+      if (key === 'tier' || key === 'plan-info') {
+        // select('*') so this works before 0011 adds plan_until.
+        const p = ok(await db.from('profiles').select('*').eq('id', await uid()).maybeSingle()) as { tier?: string; plan_until?: string | null; plan_note?: string | null } | null;
+        // A plan from an access code or the owner ends on its date: then Free.
+        const ended = !!p?.plan_until && Date.parse(p.plan_until) < Date.now();
+        const tier = ended ? 'free' : p?.tier === 'school' ? 'pro' : p?.tier;
+        if (key === 'plan-info') return ({ tier, until: ended ? null : p?.plan_until ?? null, note: ended ? null : p?.plan_note ?? null }) as T;
         return (tier as Tier | undefined) as T | undefined;
       }
       return (await settings())[key] as T | undefined;

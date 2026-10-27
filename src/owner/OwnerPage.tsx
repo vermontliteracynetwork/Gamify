@@ -21,7 +21,7 @@ import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
-import { GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
+import { AccessCard, GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -29,8 +29,8 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 // cards you can reorder, widen and fold, saved on this device. Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'waiting' | 'feedback' | 'subs' | 'chart' | 'books' | 'preview' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'subs', 'chart', 'books', 'preview', 'gallery', 'usage', 'growth', 'income', 'themes', 'inbox', 'beta'];
+type CardId = 'waiting' | 'feedback' | 'access' | 'subs' | 'chart' | 'books' | 'preview' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'access', 'subs', 'chart', 'books', 'preview', 'gallery', 'usage', 'growth', 'income', 'themes', 'inbox', 'beta'];
 interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
@@ -68,6 +68,7 @@ function Desktop() {
     growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
     income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
     themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
+    access: { title: t('owner.access'), icon: Ticket, body: <AccessCard /> },
     subs: { title: t('owner.subs'), icon: CreditCard, body: <SubsCard {...owner} /> },
     chart: { title: t('owner.chart'), icon: ChartLineUp, body: <GrowthChartCard {...owner} /> },
     books: { title: t('owner.books'), icon: Notebook, body: <LedgerCard /> },
