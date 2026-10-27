@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, Printer, ShieldCheck, Trash } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, SCHOOL_SEAT_DISCOUNTS, schoolQuote, TIERS, type Tier } from '../config';
+import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
+import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -133,28 +133,28 @@ export default function PricingPage() {
   );
 }
 
-// Schools and districts: the value first, a live price, then a quote request
-// that needs no sales call. The quote shows right away and prints as a PDF
-// for the business office; the request reaches the owner dashboard.
+// Schools and districts: the value first, then a quote request that needs
+// no sales call. The price is not shown here: the quote arrives by email as
+// a PDF (teacher, 2026-10-26), and the request reaches the owner dashboard.
 function SchoolPlans() {
-  const [seats, setSeats] = useState(10);
-  const [form, setForm] = useState({ name: '', email: '', school: '', notes: '' });
-  const [sent, setSent] = useState(false);
-  const quote = schoolQuote(seats);
-  const full = PRICES_USD_PER_YEAR.pro * seats;
-  const off = SCHOOL_SEAT_DISCOUNTS.find((d) => seats >= d.minSeats)?.discount ?? 0;
-  const ready = form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && form.school.trim() && quote;
+  const [form, setForm] = useState({ name: '', email: '', school: '', seats: 10, notes: '' });
+  const [sent, setSent] = useState<'emailed' | 'queued' | null>(null);
+  const [busy, setBusy] = useState(false);
+  const ready = form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && form.school.trim() && form.seats >= 1;
   async function send() {
-    if (!ready || !quote) return;
+    if (!ready) return;
+    setBusy(true);
     await data.sendFeedback({
       id: newId('fb'), at: new Date().toISOString(), kind: 'quote', role: 'teacher', where: '/pricing', device: navigator.userAgent,
-      details: `Quote request: ${form.name.trim()} <${form.email.trim()}>, ${form.school.trim()}, ${seats} teachers, $${quote.perSeat} each, $${quote.total} a year. ${form.notes.trim()}`.slice(0, 1000),
+      details: `Quote request: ${form.name.trim()} <${form.email.trim()}>, ${form.school.trim()}, ${form.seats} teachers. ${form.notes.trim()}`.slice(0, 1000),
     });
-    setSent(true);
+    const res = await fetch('/api/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) }).catch(() => null);
+    setBusy(false);
+    setSent(res?.ok ? 'emailed' : 'queued');
   }
   const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface';
   return (
-    <section id="schools" aria-labelledby="school-title" className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24 school-quote" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <section id="schools" aria-labelledby="school-title" className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <div className="grid gap-2">
         <h2 id="school-title" className="font-display text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('pricing.schoolSub')}</p>
@@ -165,29 +165,15 @@ function SchoolPlans() {
       </ul>
       <div className="grid md:grid-cols-2 gap-5 items-start">
         <div className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-3">
-          <label className="flex flex-wrap items-center gap-3 font-bold text-lg">{t('pricing.seats')}
-            <input type="number" min={1} max={2000} value={seats} onChange={(e) => setSeats(Math.max(1, Number(e.target.value) || 1))} className={`${field} w-28`} />
-          </label>
-          <div aria-live="polite">
-            {quote ? (
-              <>
-                <p className="font-display text-3xl leading-tight">{t('pricing.saveOff', { off: Math.round(off * 100) })}</p>
-                <p className="font-display text-xl">{t('pricing.quote', { per: quote.perSeat, total: quote.total.toLocaleString() })}</p>
-                <p className="text-sm font-semibold"><s>{t('pricing.fullPrice', { total: full.toLocaleString() })}</s></p>
-              </>
-            ) : <p className="font-display text-xl">{t('pricing.minSeats', { min: SCHOOL_MIN_SEATS })}</p>}
-          </div>
-          <p className="text-sm font-bold">{t('pricing.schoolTiers', { tiers: SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => t('pricing.tier', { seats: d.minSeats, off: Math.round(d.discount * 100) })).join(', ') })}</p>
+          <p className="font-display text-2xl leading-tight">{t('pricing.savingsNoPrice', { min: SCHOOL_MIN_SEATS })}</p>
           <p className="text-sm font-bold">{t('pricing.po')}</p>
-          {quote && <PrincipalNote seats={seats} per={quote.perSeat} total={quote.total} off={Math.round(off * 100)} />}
+          <PrincipalNote />
         </div>
         <div className="grid gap-3">
           <h3 className="font-display text-2xl"><Title text={t('pricing.quoteTitle')} /></h3>
           {sent ? (
-            <div className="grid gap-3" role="status">
-              <p className="text-lg font-bold">{t('pricing.quoteSent')}</p>
-              <p className="font-display text-xl">{t('pricing.quoteFor', { school: form.school.trim(), date: new Date().toLocaleDateString(), seats })}</p>
-              <Button variant="primary" className="justify-self-start hover-pop" onClick={() => { const el = document.getElementById('schools'); el?.classList.add('printing'); window.print(); el?.classList.remove('printing'); }}><Printer weight="bold" size={18} />{t('pricing.printQuote')}</Button>
+            <div className="grid gap-2" role="status">
+              <p className="text-lg font-bold">{sent === 'emailed' ? t('pricing.quoteEmailed', { email: form.email.trim() }) : t('pricing.quoteQueued', { email: form.email.trim() })}</p>
             </div>
           ) : (
             <>
@@ -196,9 +182,10 @@ function SchoolPlans() {
                 <label className="grid gap-1 font-bold">{t('beta.name')}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={80} className={field} /></label>
                 <label className="grid gap-1 font-bold">{t('beta.email')}<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={120} className={field} /></label>
                 <label className="grid gap-1 font-bold">{t('pricing.schoolName')}<input value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} maxLength={120} className={field} /></label>
+                <label className="grid gap-1 font-bold">{t('pricing.seats')}<input type="number" min={1} max={5000} value={form.seats} onChange={(e) => setForm({ ...form, seats: Math.max(1, Number(e.target.value) || 1) })} className={`${field} w-32`} /></label>
                 <label className="grid gap-1 font-bold">{t('pricing.quoteNotes')}<textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} maxLength={500} rows={2} className={`${field} py-2`} /></label>
               </div>
-              <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void send()}>{t('pricing.getQuote')}</Button>
+              <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => void send()}>{t('pricing.getQuote')}</Button>
             </>
           )}
         </div>
@@ -209,9 +196,9 @@ function SchoolPlans() {
 
 // A note a teacher can copy and send to their principal (the teacher-first,
 // school-second sales play): the value first, then the quote.
-function PrincipalNote({ seats, per, total, off }: { seats: number; per: number; total: number; off: number }) {
+function PrincipalNote() {
   const [copied, setCopied] = useState(false);
-  const note = t('pricing.note', { seats, per, total: total.toLocaleString(), off });
+  const note = t('pricing.note');
   return (
     <details className="bg-surface border-[2px] border-border rounded-input p-3">
       <summary className="font-bold cursor-pointer">{t('pricing.noteTitle')}</summary>

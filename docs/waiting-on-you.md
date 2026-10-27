@@ -14,3 +14,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Run 0008 so students can join from their own devices (2026-10-26).** How: Supabase SQL Editor, run supabase/migrations/0008_game_codes.sql.
 - **Run 0009 so homework links keep working until their due date (2026-10-26).** How: Supabase SQL Editor, run supabase/migrations/0009_homework_due.sql.
 - **Run 0010 so the developer dashboard shows real numbers (2026-10-27).** How: Supabase SQL Editor, run supabase/migrations/0010_owner_dashboard.sql, then open /owner signed in as vtliteracynetwork.
+- **Turn on quote emails, after the domain (2026-10-27).** Make a free Resend account, verify the domain, add RESEND_API_KEY, QUOTE_FROM (for example Gamify <quotes@learngamify.com>) and QUOTE_BCC (your email) in Vercel, redeploy. Until then, quote requests show on /owner with a Download this quote as a PDF button.

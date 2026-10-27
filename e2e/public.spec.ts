@@ -18,7 +18,9 @@ test('public pages: home, features, pricing, and no horizontal scroll', async ({
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     await page.screenshot({ path: `test-results/public${path.replace('/', '-') || '-home'}-${info.project.name}.png`, fullPage: true });
   }
-  await expect(page.getByText('$144 per teacher a year, $1,440 in all')).toBeVisible();
+  // School prices are not on the page: the quote comes by email.
+  await expect(page.getByText(/per teacher a year/)).toHaveCount(0);
+  await expect(page.getByText('School savings start at 5 teachers', { exact: false })).toBeVisible();
   expect(problems).toEqual([]);
 });
 

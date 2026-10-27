@@ -20,6 +20,7 @@ import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
+import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import { GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
@@ -142,6 +143,7 @@ function FeedbackCard() {
                 </select>
               </div>
               <p className="font-semibold">{r.details || t('owner.noDetails')}</p>
+              {r.kind === 'quote' && quoteFrom(r.details) && <Button className="justify-self-start" onClick={() => downloadQuote(quoteFrom(r.details)!)}>{t('owner.quotePdf')}</Button>}
             </li>
           );
         })}
@@ -309,4 +311,20 @@ function WaitingCard() {
       </ul>
     </div>
   );
+}
+
+// A quote request parsed back from its Tell Gamify line, so the owner can
+// make the same PDF the email sends (if the email service was off).
+function quoteFrom(details: string): QuoteRequest | null {
+  const m = details.match(/^Quote request: (.+?) <(.+?)>, (.+), (\d+) teachers\.\s*(.*)$/s);
+  return m ? { name: m[1], email: m[2], school: m[3], seats: Number(m[4]), notes: m[5] } : null;
+}
+function downloadQuote(req: QuoteRequest) {
+  const q = quoteDetails(req);
+  if (!q) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([quotePdf(req, q)], { type: 'application/pdf' }));
+  a.download = `Gamify-quote-${q.number}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }

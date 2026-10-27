@@ -10,7 +10,7 @@ export const FAQ_GROUPS: FaqGroup[] = ['teachers', 'schools', 'homeschool', 'stu
 
 export const FAQS: Record<FaqGroup, Faq[]> = {
   schools: [
-    { q: 'What does a school plan include, and what does it cost?', a: 'Every teacher gets Pro: all games, unlimited classes and students, unlimited theme creations, full report history and early access to new games. Schools save 10% from 5 teachers, 20% from 10 and 30% from 25. Get a printable quote in about a minute on the Pricing page, no sales call needed.' },
+    { q: 'What does a school plan include, and what does it cost?', a: 'Every teacher gets Pro: all games, unlimited classes and students, unlimited theme creations, full report history and early access to new games. Schools save 10% from 5 teachers, 20% from 10 and 30% from 25. Ask for a quote on the Pricing page and it arrives by email as a PDF, no sales call needed.' },
     { q: 'Can we pay with a purchase order?', a: 'Yes. School plans are yearly and prepaid, and purchase orders are welcome with net 30 terms. Send your quote to your business office and we invoice you.' },
     { q: 'Will you sign our student data privacy agreement?', a: 'Yes. Send your district or state agreement with your quote request or through the Tell Gamify button, and we sign it.' },
     { q: 'What student data does Gamify collect?', a: 'Only what a classroom game needs: a first name or nickname, a sign-in picture and 4-digit PIN, which class the student is in (Plus and Pro), and their answers in games. No student emails, birthdays, addresses, photos or location. No ads, no trackers, and nothing is ever sold.' },

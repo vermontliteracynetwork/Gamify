@@ -62,7 +62,6 @@ function FaqTeaser({ group }: { group: 'schools' | 'homeschool' }) {
 }
 
 export function SchoolsPage() {
-  const pro = PRICES_USD_PER_YEAR.pro;
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
@@ -107,12 +106,11 @@ export function SchoolsPage() {
           <p className="text-lg font-semibold max-w-3xl">{t('schools.valueSub')}</p>
           <div className="grid sm:grid-cols-3 gap-4">
             {SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => {
-              const per = Math.round(pro * (1 - d.discount));
               return (
                 <div key={d.minSeats} className={`${card} text-center justify-items-center ${d.minSeats === 10 ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                   <p className="font-bold">{t('schools.tierTeachers', { n: d.minSeats })}</p>
                   <p className="font-display text-4xl">{t('schools.save', { off: Math.round(d.discount * 100) })}</p>
-                  <p className="font-semibold">{t('schools.perTeacher', { per, month: (per / 12).toFixed(0) })}</p>
+                  <p className="font-semibold">{t('schools.quoteByEmail')}</p>
                 </div>
               );
             })}
