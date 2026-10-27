@@ -270,3 +270,14 @@ test('Theme Building Challenge: two tracks, and a printable permission slip for 
   await expect(page.getByText('Parent or guardian name')).toBeVisible();
   await page.screenshot({ path: `test-results/permission-${info.project.name}.png`, fullPage: true });
 });
+
+test('Status page checks each part; the accessibility report prints as a VPAT-style table', async ({ page }) => {
+  await page.goto('/status');
+  await expect(page.getByRole('heading', { name: 'Is Gamify Working?' })).toBeVisible();
+  await expect(page.getByText('The Gamify app and games')).toBeVisible();
+  await expect(page.getByRole('status').first()).toHaveText('Working');
+  await page.goto('/accessibility/report');
+  await expect(page.getByRole('heading', { name: 'WCAG 2.1 Level A', exact: true })).toBeVisible();
+  await expect(page.getByText(/Of 50 WCAG 2.1 A and AA criteria/)).toBeVisible();
+  await expect(page.getByRole('cell', { name: /^1\.4\.3 Contrast/ })).toBeVisible();
+});

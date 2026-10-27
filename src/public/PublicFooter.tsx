@@ -26,6 +26,8 @@ export default function PublicFooter() {
           <Link to="/terms">{t('legal.terms')}</Link>
           <Link to="/accessibility">{t('legal.a11y')}</Link>
           <Link to="/credits">{t('legal.credits')}</Link>
+          <Link to="/accessibility/report">{t('footer.vpat')}</Link>
+          <Link to="/status">{t('footer.status')}</Link>
         </nav>
       </div>
     </footer>

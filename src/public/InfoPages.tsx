@@ -17,7 +17,7 @@ function InfoPage({ title, sub, sections, extra }: { title: string; sub: string;
         {sections.map((s) => (
           <section key={s.h} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <h2 className="font-display text-3xl"><Title text={t(s.h)} /></h2>
-            <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{t(k, { host: window.location.host })}</li>)}</ul>
+            <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{t(k, { host: window.location.host, cloud: CLOUD_HOST })}</li>)}</ul>
           </section>
         ))}
         {extra}
@@ -26,6 +26,9 @@ function InfoPage({ title, sub, sections, extra }: { title: string; sub: string;
     </>
   );
 }
+
+// The cloud address IT needs to allow (saved work and live games).
+const CLOUD_HOST = (() => { try { return new URL(import.meta.env.VITE_SUPABASE_URL as string).host; } catch { return 'the Gamify cloud address'; } })();
 
 export function ItPage() {
   return <InfoPage title={t('it.title')} sub={t('it.sub')} sections={[

@@ -1145,6 +1145,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 76 | **Draw it right in Gamify.** A drawing studio built into the Theme Builder: pen, marker, crayon and spray brushes, a fill bucket, shapes, searchable stickers and starter backgrounds. No other app, no account, works with a finger on an iPad. | Removes the "we don't have Canva" barrier; every class can make a theme in one period | Teacher, 2026-10-26 |
 | 77 | **Your own big screen.** Design the projector screens too: the lobby picture that waves hello by the join code, the background, and the winner trophy. Pick the look in the lobby. | Every live game feels like the class's own show | Teacher, 2026-10-26 |
 | 78 | **Power-ups in every scoring game.** Right answers sometimes bring a power-up (a Golden Ball, a Pin Magnet, a Tip Jar...) that classes can redesign and rename. They change points or moves, never the rules, and teachers can switch them off. | The "one more question!" pull kids know from their favorite games, earned by learning | Teacher, 2026-10-26 |
+| 79 | **An accessibility conformance report schools can print.** VPAT-style, WCAG 2.1 A and AA, honest about what is still being tested, backed by 170+ automated checks on iPads and laptops; plus a live Status page that also tests the school's own network. | Answers the district accessibility and IT questions before they are asked | Claudia, 2026-10-27 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

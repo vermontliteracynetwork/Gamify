@@ -12,6 +12,7 @@ export default function TeacherFooter() {
           <Link to="/blog">{t('public.nav.ideas')}</Link>
           <Link to="/check">{t('teacherFooter.check')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
+          <Link to="/status">{t('footer.status')}</Link>
         </nav>
         <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-4 gap-y-1.5 font-semibold">
           <Link to="/privacy">{t('legal.privacy')}</Link>
