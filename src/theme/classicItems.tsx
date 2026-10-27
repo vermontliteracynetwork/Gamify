@@ -105,6 +105,21 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <circle cx="42" cy="70" r="9" fill="#f6c544" {...S} strokeWidth={2} /><circle cx="58" cy="78" r="9" fill="#f6c544" {...S} strokeWidth={2} /><circle cx="54" cy="58" r="9" fill="#f6c544" {...S} strokeWidth={2} />
     </g>
   ),
+  'gem-pouch': () => (
+    <g>
+      <path d="M30 34 Q16 54 18 76 Q20 92 50 92 Q80 92 82 76 Q84 54 70 34 Z" fill="#c9a27e" {...S} />
+      <path d="M30 34 H70" {...S} strokeWidth={6} />
+      <path d="M50 14 L64 26 L50 44 L36 26 Z" fill="#8ec5ff" {...S} />
+      <path d="M34 54 L44 62 L34 74 L24 62 Z" fill="#c9b6ff" {...S} strokeWidth={2} /><path d="M66 54 L76 62 L66 74 L56 62 Z" fill="#9fe7a0" {...S} strokeWidth={2} />
+    </g>
+  ),
+  'snow-globe': () => (
+    <g>
+      <rect x="22" y="76" width="56" height="16" rx="4" fill="#9c6b45" {...S} />
+      <circle cx="50" cy="46" r="34" fill="#dff1ff" {...S} />
+      <path d="M50 26 V66 M32 46 H68 M37 33 L63 59 M63 33 L37 59" stroke="#6aa9e9" strokeWidth="4" strokeLinecap="round" />
+    </g>
+  ),
   'prize-bag': () => (
     <g>
       <path d="M36 30 Q20 50 18 74 Q18 92 50 92 Q82 92 82 74 Q80 50 64 30 Z" fill="#9fe7a0" {...S} />

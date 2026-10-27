@@ -14,6 +14,7 @@ pass, and what stays drawn in code on purpose. Listed games only (teacher,
 | Bubble Pop | background, board, bubbles 1-6, cover | none needed | Bubble Bundle (+bubbles), Prize Bag (bonus), Double Star (next pop x2) | Aim line |
 | Bowling | background, lane, ball, pin (now a picture too), team 1-10, cover | pin picture | Golden Pin (roll x2), Prize Bag (bonus), Pin Magnet (one more pin) | Lane lines, strike banner |
 | Lunch Rush | wall, counter, team 1-10, cover | food 1-4, guest 1-3 | Extra Plate (+serves), Tip Jar (bonus tips), Double Star (double tips this turn) | Patience hearts, order bubble |
+| Castle Guard | background, road, castle, bubble, splash and snow towers, critters 1-3, gem, cover | new game (2026-10-27) | Gem Pouch (+gems), Snow Globe (slower wave), Prize Bag (bonus) | Hit bars, bubble trails |
 | Question Tracker | background, items 1-6 (stars), cover | none needed | None: each star is one right answer, so extra stars would mislead the teacher | Twinkle dust |
 | Big screen (share) | background, lobby picture, winner trophy, cover | new design target | n/a | Leaderboard bars |
 

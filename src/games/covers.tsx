@@ -126,6 +126,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
+    case 'castle-guard':
+      return (
+        <div className={base} style={{ background: '#9fd88a' }} aria-hidden="true">
+          <svg viewBox="0 0 100 62" className="absolute inset-0 w-full h-full">
+            <polyline points="-4,14 30,14 30,42 58,42 58,18 84,18 84,50" fill="none" stroke="#000" strokeWidth="9.6" strokeLinejoin="round" />
+            <polyline points="-4,14 30,14 30,42 58,42 58,18 84,18 84,50" fill="none" stroke="#e8c48f" strokeWidth="8" strokeLinejoin="round" />
+            <rect x="72" y="44" width="24" height="16" fill="#ece7da" stroke="#000" strokeWidth="1.2" /><path d="M72 44 V38 H78 V42 H84 V38 H90 V42 H96 V44" fill="#ece7da" stroke="#000" strokeWidth="1.2" />
+            {[[18, 26, '#8ec5ff'], [42, 30, '#9fe7a0'], [70, 30, '#ffffff']].map(([x, y, c], i) => <g key={i}><rect x={(x as number) - 4} y={(y as number) - 2} width="8" height="10" fill="#d9d4c7" stroke="#000" strokeWidth="1" /><circle cx={x as number} cy={(y as number) - 4} r="3.2" fill={c as string} stroke="#000" strokeWidth="1" /></g>)}
+            {[[12, 14, '#c9a3f5'], [30, 30, '#f6a5c0'], [58, 30, '#f6c544']].map(([x, y, c], i) => <g key={i}><circle cx={x as number} cy={y as number} r="3.6" fill={c as string} stroke="#000" strokeWidth="1" /><circle cx={(x as number) - 1.2} cy={(y as number) - 0.6} r="0.7" fill="#000" /><circle cx={(x as number) + 1.2} cy={(y as number) - 0.6} r="0.7" fill="#000" /></g>)}
+          </svg>
+        </div>
+      );
     case 'lunch-rush':
       return (
         <div className={base} style={{ background: '#fde2c4' }} aria-hidden="true">

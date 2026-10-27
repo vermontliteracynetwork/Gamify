@@ -1,5 +1,5 @@
 import { Star } from '@phosphor-icons/react';
-import { backdropStyle, pieceFill, pieceImage } from '../library';
+import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
 import { PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
@@ -36,6 +36,13 @@ function board(theme: GameTheme) {
             const who = [38, 31, 24, 39].includes(i) ? 1 : [37, 40, 32].includes(i) ? 2 : 0;
             return <span key={i} className="rounded-full border-[1.5px] border-border bg-white overflow-hidden">{who > 0 && <span className="block w-full h-full rounded-full" style={pieceFill(theme, `piece-${who}`, who === 1 ? '#f6a5c0' : '#9fd8f0')} />}</span>;
           })}
+        </div>
+      );
+    case 'castle-guard':
+      return (
+        <div className="grid grid-cols-4 gap-2 items-end w-full" style={{ background: pieceColor(theme, 'road', '#e8c48f') }}>
+          {(['tower-bubble', 'tower-splash', 'tower-snow'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-16 object-contain justify-self-center" /> : <span key={id} className="h-14 w-10 justify-self-center rounded-t-md border-[2px] border-border bg-[#d9d4c7]" />)}
+          {pieceImage(theme, 'critter-1') ? <img src={pieceImage(theme, 'critter-1')} alt="" className="h-10 object-contain" /> : <span className="h-9 w-9 rounded-full border-[2px] border-border bg-[#c9a3f5]" />}
         </div>
       );
     case 'big-screen':

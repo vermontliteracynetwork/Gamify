@@ -37,6 +37,7 @@ const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
 const Bowling = lazy(() => import('./games/bowling/Bowling'));
 const RoadHop = lazy(() => import('./games/road-hop/RoadHop'));
 const LunchRush = lazy(() => import('./games/lunch-rush/LunchRush'));
+const CastleGuard = lazy(() => import('./games/castle-guard/CastleGuard'));
 const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazy(() => import('./owner/OwnerPage'));
@@ -134,6 +135,7 @@ function AnimatedRoutes() {
           <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
           <Route path="/games/road-hop" element={<RequireSignIn><RequireGame id="road-hop"><RoadHop /></RequireGame></RequireSignIn>} />
           <Route path="/games/lunch-rush" element={<RequireSignIn><RequireGame id="lunch-rush"><LunchRush /></RequireGame></RequireSignIn>} />
+          <Route path="/games/castle-guard" element={<RequireSignIn><RequireGame id="castle-guard"><CastleGuard /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
           <Route path="/games/flashcards" element={<RequireSignIn><RequireGame id="flashcards"><Flashcards /></RequireGame></RequireSignIn>} />
