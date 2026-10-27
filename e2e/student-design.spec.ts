@@ -25,6 +25,17 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   const shot = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 200; c.height = 200; const x = c.getContext('2d')!; x.fillStyle = '#f6a5c0'; x.fillRect(0, 0, 200, 200); return c.toDataURL('image/png').split(',')[1]; });
   await page.getByLabel('Add a picture').setInputFiles({ name: 'drawing.png', mimeType: 'image/png', buffer: Buffer.from(shot, 'base64') });
   await page.screenshot({ path: `test-results/design-piece-${info.project.name}.png` });
+  // The next piece, drawn right here in the studio.
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: 'Draw it' }).click();
+  const studio = page.getByRole('dialog', { name: /^Draw: / });
+  await studio.getByRole('radio', { name: 'Fill' }).click();
+  await studio.getByRole('button', { name: '#43a047' }).click();
+  const box = (await studio.getByLabel(/^Drawing of the /).boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await page.screenshot({ path: `test-results/design-studio-${info.project.name}.png` });
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect(page.getByText('Done! Draw again or go on.')).toBeVisible();
   while (await page.getByText(/^Picture \d+ of \d+$/).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: '#ddfcc6' }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();

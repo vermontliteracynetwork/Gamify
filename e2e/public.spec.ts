@@ -259,3 +259,14 @@ test.describe('device check', () => {
     await page.screenshot({ path: `test-results/device-check-${info.project.name}.png`, fullPage: true });
   });
 });
+
+test('Theme Building Challenge: two tracks, and a printable permission slip for hand-drawn entries', async ({ page }, info) => {
+  await page.goto('/challenge');
+  await expect(page.getByRole('heading', { name: 'Two Ways to Enter' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Drawn by Hand' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Built in the Theme Builder' })).toBeVisible();
+  await page.getByRole('link', { name: 'Print the permission slip' }).click();
+  await expect(page.getByRole('heading', { name: /Permission Slip/ })).toBeVisible();
+  await expect(page.getByText('Parent or guardian name')).toBeVisible();
+  await page.screenshot({ path: `test-results/permission-${info.project.name}.png`, fullPage: true });
+});

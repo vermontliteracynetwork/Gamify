@@ -33,7 +33,7 @@ export const WAITING: WaitingItem[] = [
     how: 'USPTO Trademark Search (tmsearch.uspto.gov): search "gamify" and "gamif*", then look at live marks in classes 9 (apps), 41 (education) and 42 (software as a service). Also search the Vermont Secretary of State business names and the app stores. Bring what you find to the attorney for a clearance opinion, then buy the domain and point it at Vercel.' },
   { id: 'attorney', kind: 'legal', added: '2026-10-25', title: 'Attorney review',
     why: 'We sell to schools, so every public promise needs a lawyer\'s eye.',
-    how: 'Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules, the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Google Classroom, Canva), the Common Core text license, DMCA agent registration.' },
+    how: 'Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules and its parent permission slip (/challenge/permission), the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Google Classroom, Canva), the Common Core text license, DMCA agent registration.' },
   { id: 'pilots', kind: 'people', added: '2026-10-24', title: 'Line up 2 to 4 beta test classrooms',
     why: 'Real classrooms give the feedback, quotes and the screen reader check on iPads that schools ask for.',
     how: 'Send the Join the beta test page to teachers you trust; the classroom kit is at /beta-kit.' },

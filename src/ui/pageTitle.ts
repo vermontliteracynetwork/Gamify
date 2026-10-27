@@ -12,6 +12,8 @@ const PAGES: [RegExp, string][] = [
   [/^\/faq/, 'Help Center'],
   [/^\/(blog|ways)/, 'Blog'],
   [/^\/research/, 'Research'],
+  [/^\/challenge\/permission/, 'Challenge permission slip'],
+  [/^\/challenge/, 'Theme Building Challenge'],
   [/^\/beta-kit/, 'Beta classroom kit'],
   [/^\/privacy/, 'Privacy'],
   [/^\/terms/, 'Terms of Service'],

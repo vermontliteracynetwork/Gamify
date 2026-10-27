@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Camera, CheckCircle, PaperPlaneTilt, Star } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Camera, CheckCircle, PaintBrush, PaperPlaneTilt, Star } from '@phosphor-icons/react';
 import { THEME_TRIAL_GAME, TIERS } from '../config';
 import { newId } from '../data';
 import { useTier } from '../data/hooks';
@@ -15,6 +15,10 @@ import type { GameTheme } from '../theme/types';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import Title from '../ui/Title';
 import { useSession } from './session';
+
+// The same drawing studio teachers use, so students can draw each piece
+// right here (the Theme Builder track of the challenge).
+const DrawStudio = lazy(() => import('../theme/builder/DrawStudio'));
 
 const SWATCHES = ['#fdfd94', '#ddfcc6', '#b4c4fb', '#ed9d75', '#f6a5c0', '#8ec5ff', '#c9a3f5', '#ffffff'];
 const big = 'min-h-14 px-6 rounded-pill border-[2.5px] border-border font-display text-xl inline-flex items-center gap-2 no-underline text-text';
@@ -31,6 +35,7 @@ export default function DesignPage() {
   const [draft, setDraft] = useState<GameTheme | null>(null);
   const [piece, setPiece] = useState(0);
   const file = useRef<HTMLInputElement>(null);
+  const [drawing, setDrawing] = useState(false);
   if (!session) return <main className="max-w-xl mx-auto p-6"><Link to="/join" className={`${big} bg-accent`}>{t('design.signIn')}</Link></main>;
   const game = draft ? GAMES.find((g) => g.id === draft.gameId)! : null;
   const pieces = game ? game.themePieces.filter((p) => p.id !== 'cover') : [];
@@ -42,7 +47,11 @@ export default function DesignPage() {
   async function add(f: File | undefined) {
     if (!f || !draft || !pieces[piece]) return;
     const p = pieces[piece];
-    const image = await imageFileToDataUrl(f, Math.max(p.width, p.height, 256));
+    put(await imageFileToDataUrl(f, Math.max(p.width, p.height, 256)));
+  }
+  function put(image: string) {
+    if (!draft || !pieces[piece]) return;
+    const p = pieces[piece];
     setDraft({ ...draft, pieces: { ...draft.pieces, [p.id]: { ...draft.pieces[p.id], image } }, ...(p.id === 'background' ? { backdrop: { kind: 'image' as const, src: image, alt: '' } } : {}) });
   }
   async function send() {
@@ -81,9 +90,16 @@ export default function DesignPage() {
                 <p className="font-bold text-sm">{t('design.pieceOf', { n: piece + 1, total: pieces.length })}</p>
                 <p className="font-display text-2xl">{pieces[piece].label}</p>
                 <p className="font-semibold">{pieces[piece].hint}</p>
-                <button type="button" onClick={() => file.current?.click()} className={`${big} bg-accent justify-self-start`}>
-                  {draft.pieces[pieces[piece].id]?.image ? <CheckCircle weight="fill" size={26} color="#1f7a45" /> : <Camera weight="fill" size={26} />}{t('design.addPicture')}
-                </button>
+                {draft.pieces[pieces[piece].id]?.image && <p className="flex items-center gap-2 font-bold"><CheckCircle weight="fill" size={26} color="#1f7a45" aria-hidden="true" />{t('design.done')}</p>}
+                <div className="flex gap-2 flex-wrap">
+                  <button type="button" onClick={() => setDrawing(true)} className={`${big} bg-accent`}><PaintBrush weight="fill" size={26} />{t('design.draw')}</button>
+                  <button type="button" onClick={() => file.current?.click()} className={`${big} bg-surface-2`}><Camera weight="fill" size={26} />{t('design.addPicture')}</button>
+                </div>
+                {drawing && (
+                  <Suspense fallback={null}>
+                    <DrawStudio piece={pieces[piece]} gameId={draft.gameId} image={draft.pieces[pieces[piece].id]?.image} onClose={() => setDrawing(false)} onSave={(img) => { put(img); setDrawing(false); }} />
+                  </Suspense>
+                )}
                 <input ref={file} type="file" accept="image/*" capture="environment" hidden aria-label={t('design.addPicture')} onChange={(e) => { void add(e.target.files?.[0]); e.target.value = ''; }} />
                 <div className="flex gap-2 flex-wrap">
                   <button type="button" disabled={piece === 0} onClick={() => setPiece(piece - 1)} className={`${big} bg-surface-2 !text-base disabled:opacity-40`} aria-label={t('design.prev')}><ArrowLeft weight="bold" size={20} /></button>

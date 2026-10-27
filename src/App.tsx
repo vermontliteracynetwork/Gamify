@@ -45,6 +45,7 @@ const ThemesPage = lazy(() => import('./public/ThemesPage'));
 const ChallengePage = lazy(() => import('./public/ChallengePage'));
 const BetaPage = lazy(() => import('./public/BetaPage'));
 const DeviceCheckPage = lazy(() => import('./public/DeviceCheckPage'));
+const PermissionSlip = lazy(() => import('./public/PermissionSlip'));
 const MirrorPage = lazy(() => import('./live/MirrorPage'));
 const LiveHost = lazy(() => import('./live/LiveHost'));
 const LiveLobby = lazy(() => import('./live/LiveStudent'));
@@ -93,6 +94,7 @@ function AnimatedRoutes() {
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/challenge" element={<ChallengePage />} />
+          <Route path="/challenge/permission" element={<PermissionSlip />} />
           <Route path="/beta" element={<BetaPage />} />
           <Route path="/check" element={<DeviceCheckPage />} />
           <Route path="/mirror/:code" element={<MirrorPage />} />

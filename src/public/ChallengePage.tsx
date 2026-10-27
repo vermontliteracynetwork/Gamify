@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { Crown, Medal, PaintBrush, Trophy } from '@phosphor-icons/react';
+import { Crown, Medal, PaintBrush, PencilSimpleLine, Trophy } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -50,6 +50,20 @@ export default function ChallengePage() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section aria-labelledby="tracks" className="grid gap-4">
+          <h2 id="tracks" className="font-display text-4xl"><Title text={t('challenge.tracks')} /></h2>
+          <p className="text-lg font-semibold">{t('challenge.tracksSub')}</p>
+          <div className="grid md:grid-cols-2 gap-5">
+            {([['hand', PencilSimpleLine, '/challenge/permission', 'challenge.track.hand.slip'], ['studio', PaintBrush, '/teacher/themes', 'challenge.track.studio.go']] as const).map(([k, Icon, to, cta]) => (
+              <article key={k} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <h3 className="font-display text-3xl flex items-center gap-2"><Icon weight="fill" size={32} aria-hidden="true" /><Title text={t(`challenge.track.${k}`)} /></h3>
+                <ol className="grid gap-2 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3, 4].map((n) => <li key={n}>{t(`challenge.track.${k}.${n}` as StringKey)}</li>)}</ol>
+                <Link to={to} className={buttonClasses('primary', 'justify-self-start min-h-12 px-5 hover-pop')}>{t(cta)}</Link>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>

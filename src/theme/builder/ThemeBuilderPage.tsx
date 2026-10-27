@@ -549,6 +549,23 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
         <input type="checkbox" className="w-5 h-5" disabled={!CHALLENGE_OPEN || !inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
         {t('builder.shareChallenge')}
       </label>
+      {theme.challenge && (
+        <div className="grid gap-2 rounded-input border-[2px] border-border-soft p-3">
+          <p className="font-bold">{t('builder.track')}</p>
+          <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.track')}>
+            {(['studio', 'hand'] as const).map((k) => (
+              <button key={k} type="button" role="radio" aria-checked={(theme.challengeTrack ?? 'studio') === k} className={opt((theme.challengeTrack ?? 'studio') === k)}
+                onClick={() => onChange({ ...theme, challengeTrack: k, permissionOnFile: k === 'hand' ? theme.permissionOnFile : undefined })}>{t(`builder.track.${k}`)}</button>
+            ))}
+          </div>
+          {theme.challengeTrack === 'hand' && (
+            <label className="inline-flex items-start gap-2 font-bold text-sm">
+              <input type="checkbox" className="w-5 h-5 mt-0.5" checked={!!theme.permissionOnFile} onChange={(e) => onChange({ ...theme, permissionOnFile: e.target.checked })} />
+              <span>{t('builder.permission')} <Link to="/challenge/permission" target="_blank">{t('builder.permissionLink')}</Link></span>
+            </label>
+          )}
+        </div>
+      )}
       <p className="text-xs font-semibold text-muted">{CHALLENGE_OPEN ? t('builder.shareChallengeOpen') : t('builder.shareChallengeSoon')} <Link to="/challenge">{t('builder.shareChallengeLink')}</Link></p>
     </div>
   );

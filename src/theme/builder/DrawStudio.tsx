@@ -420,7 +420,7 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose }: {
               </Section>
             )}
             <Section title={t('studio.color')} open>
-              <div className="grid grid-cols-8 gap-1.5">
+              <div className="grid grid-cols-8 gap-1.5 max-w-[22rem]">
                 {SWATCHES.map((c) => (
                   <button key={c} type="button" onClick={() => pickColor(c)} aria-label={c} aria-pressed={color === c}
                     className={`aspect-square rounded-full border-[2px] ${color === c ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`} style={{ background: c }} />

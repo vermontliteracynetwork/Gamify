@@ -118,8 +118,12 @@ export interface GameTheme {
   // Sharing beyond the teacher's own classes (teacher, 2026-10-25): sent to
   // the public gallery, where the owner reviews it before anyone sees it.
   gallery?: { status: 'pending' | 'approved' | 'declined'; at: string; reason?: GalleryReason };
-  // Entered in the Theme Building Challenge.
+  // Entered in the Theme Building Challenge, in one of its two tracks
+  // (teacher, 2026-10-26): drawn by hand (needs a signed permission slip for
+  // each student artist) or built in the Theme Builder studio.
   challenge?: boolean;
+  challengeTrack?: 'hand' | 'studio';
+  permissionOnFile?: boolean;
 }
 
 export const GALLERY_REASONS = ['hard-to-read', 'brand', 'unfinished', 'other'] as const;
