@@ -2,6 +2,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Printer } from '@phosphor-icons/react';
 import { GAMES } from '../../games/registry';
 import { signInManifest } from '../../student/pictures';
+import { bigScreenManifest } from '../../live/screenManifest';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
@@ -47,7 +48,7 @@ export function TemplateSheet({ gameName, gameId, piece, page, total, example = 
 export default function TemplatePage() {
   const { gameId } = useParams();
   const example = useSearchParams()[0].get('example') === 'classic';
-  const game = [...GAMES, signInManifest].find((g) => g.id === gameId);
+  const game = [...GAMES, signInManifest, bigScreenManifest].find((g) => g.id === gameId);
   if (!game) return null;
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">

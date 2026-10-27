@@ -17,7 +17,7 @@ test('Memory Match: cards flip, a miss turns them back, and the computer takes i
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 is the computer
   await finishSetup(page);
   await expect(page.getByRole('button', { name: /^Card \d+, face down$/ })).toHaveCount(12);
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
   // Find two cards that don't match (a question card and a different answer).
   await page.getByRole('button', { name: 'Card 1, face down' }).click();

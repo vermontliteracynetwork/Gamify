@@ -14,7 +14,7 @@ test('Lunch Rush: a right answer earns 2 serves; serving a wanted food scores', 
   await finishSetup(page);
   await answerShare(page, true);
   await expect(page.getByLabel('2 serves left')).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.screenshot({ path: `test-results/lunch-rush-ready-${info.project.name}.png` });
   // Serve what the first guest asked for.
   const guest = await page.getByRole('img', { name: /^Guest 1 wants / }).getAttribute('aria-label');

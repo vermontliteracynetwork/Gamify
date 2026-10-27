@@ -12,7 +12,7 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   await openSetup(page, '/games/cast-catch');
   await finishSetup(page);
   await expect(page.getByLabel(/seconds left/)).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.getByRole('button', { name: 'Cast', exact: true }).click();
   await expect(page.getByRole('meter', { name: 'Cast meter' })).toBeVisible();
   await page.waitForTimeout(400);

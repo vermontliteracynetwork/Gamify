@@ -48,7 +48,7 @@ test('Question Tracker class sky: star colors, first to a number right ends it',
   await answerRight(kid);
   await expect(page.getByRole('img', { name: '1 stars in the class sky' })).toBeVisible({ timeout: 8000 });
   await page.screenshot({ path: `test-results/sky-host-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await kid.screenshot({ path: `test-results/sky-kid-${info.project.name}.png` });
   await answerRight(kid);
   await expect(page.getByRole('heading', { name: 'The Winners' })).toBeVisible({ timeout: 8000 });

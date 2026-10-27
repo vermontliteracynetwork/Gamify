@@ -33,7 +33,7 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await studio.getByRole('button', { name: 'crown', exact: true }).click();
   await page.mouse.click(...at(0.5, 0.45));
   await page.screenshot({ path: `test-results/studio-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   // Undo and redo the sticker.
   await studio.getByRole('button', { name: 'Undo' }).click();
   await studio.getByRole('button', { name: 'Redo' }).click();
@@ -41,4 +41,35 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await expect(studio).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Add a picture for Winner trophy' }).locator('img')).toHaveCount(1);
   expect(problems).toEqual([]);
+});
+
+// Share screens wear a Big screen design: draw its lobby picture, save, and
+// the live lobby shows it with a picker for the look.
+test('Big screen design: lobby picture shows in the live lobby; teacher pages have a footer', async ({ page }, info) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/big-screen');
+  await expect(page.getByRole('contentinfo')).toContainText('Help Center');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByLabel('Theme name').fill('Party');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByRole('button', { name: /^Draw the Lobby picture/ }).click();
+  const studio = page.getByRole('dialog');
+  await studio.getByRole('radio', { name: 'Stickers' }).click();
+  await studio.getByLabel('Search stickers').fill('balloon');
+  await studio.getByRole('button', { name: 'balloon', exact: true }).click();
+  const box = (await studio.getByLabel(/^Drawing of the Lobby picture/).boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await page.getByRole('button', { name: 'Save theme' }).click();
+  await expect(page.getByText('Saved Party.', { exact: false })).toBeVisible();
+
+  await page.goto('/teacher/sets');
+  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('button', { name: 'Play or share' }).first().click();
+  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('button', { name: 'Host a live game' }).click();
+  await page.getByLabel('Big screen look').selectOption({ label: 'Party' });
+  await expect(page.locator('main img[src^="data:image"]').first()).toBeVisible();
+  await expect(page.getByRole('contentinfo')).toHaveCount(0);
+  await page.screenshot({ path: `test-results/bigscreen-lobby-${info.project.name}.png` });
 });

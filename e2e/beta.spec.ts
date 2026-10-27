@@ -9,7 +9,7 @@ test('a class check-in counts picture taps, with no names', async ({ page }, inf
   });
   await page.goto('/teacher/classes/c1/check-in');
   await expect(page.getByRole('heading', { name: /How did today feel/i })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.waitForTimeout(700);
   await page.screenshot({ path: `test-results/checkin-${info.project.name}.png` });
   for (const [a, b] of [['Great', 'Just right'], ['Okay', 'Tricky']]) {

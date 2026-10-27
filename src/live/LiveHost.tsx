@@ -22,7 +22,8 @@ import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
 import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
 import Sky from '../games/practice/Sky';
-import { useGameTheme } from '../theme/useGameTheme';
+import { ThemedPage, useGameTheme } from '../theme/useGameTheme';
+import { pieceImage } from '../theme/library';
 
 const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl.great'] as const;
 const STUCK_MS = 60_000;
@@ -54,6 +55,8 @@ function Room({ game }: { game: GameCode }) {
   const skyGame = game.gameId === 'star-quiz';
   const [board, setBoard] = useState<'leaders' | 'goal' | 'sky'>(skyGame ? 'sky' : startMode === 'together' ? 'goal' : 'leaders');
   const { theme: skyTheme } = useGameTheme('star-quiz');
+  // The big-screen look (Theme Builder, Big screen); the teacher picks it here.
+  const screen = useGameTheme('big-screen');
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [qr, setQr] = useState('');
@@ -141,7 +144,8 @@ function Room({ game }: { game: GameCode }) {
   const gameName = getGame(game.gameId)?.name ?? game.gameId;
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24 grid gap-4">
+    <ThemedPage theme={screen.theme}>
+    <main className="stage-text max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24 grid gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <Link to="/teacher/sets" className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('live.back')}</Link>
         <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
@@ -158,7 +162,17 @@ function Room({ game }: { game: GameCode }) {
           <Panel className="grid gap-3 justify-items-center text-center">
             <p className="font-display text-2xl">{t('show.goTo', { host: window.location.host })}</p>
             <p className="font-display text-7xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: game.code })}>{game.code}</p>
-            {qr && <img src={qr} alt={t('show.qr')} className="w-48 h-48 rounded-input border-[3px] border-border" />}
+            <div className="flex items-center justify-center gap-3">
+              {pieceImage(screen.theme, 'mascot') && <img src={pieceImage(screen.theme, 'mascot')} alt="" className="w-32 h-32 object-contain motion-safe:animate-[bounce_2.4s_ease-in-out_infinite]" />}
+              {qr && <img src={qr} alt={t('show.qr')} className="w-48 h-48 rounded-input border-[3px] border-border" />}
+            </div>
+            {screen.themes.length > 1 && (
+              <label className="flex flex-wrap items-center justify-center gap-2 font-bold text-sm">{t('live.screenLook')}
+                <select value={screen.theme.id} onChange={(e) => screen.choose(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface">
+                  {screen.themes.map((th) => <option key={th.id} value={th.id}>{th.name}</option>)}
+                </select>
+              </label>
+            )}
             <p className="font-bold">{t('live.joined', { count: inRoom.length })}</p>
           </Panel>
           <Panel className="grid gap-3 lg:col-span-2 lg:order-last">
@@ -347,7 +361,7 @@ function Room({ game }: { game: GameCode }) {
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
             {[1, 0, 2].map((i) => leaders.at(i) && (
               <motion.div key={leaders.at(i)!.pid} initial={reduce ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: reduce ? 0 : 0.2 + (2 - i) * 0.25 }} className="flex-1 grid gap-2 justify-items-center">
-                {i === 0 && <Crown weight="fill" size={40} color="#c98a00" aria-hidden="true" />}
+                {i === 0 && (pieceImage(screen.theme, 'trophy') ? <img src={pieceImage(screen.theme, 'trophy')} alt="" className="h-20 object-contain" /> : <Crown weight="fill" size={40} color="#c98a00" aria-hidden="true" />)}
                 <span className="font-display text-xl truncate max-w-full">{leaders.at(i)!.name}</span>
                 <span className={`w-full rounded-t-panel border-[3px] border-border flex items-start justify-center pt-2 font-display text-3xl ${i === 0 ? 'h-40 bg-accent' : i === 1 ? 'h-28 bg-[#cfe0ff]' : 'h-20 bg-[#ffd9cf]'}`}>{i + 1}</span>
                 <span className="font-bold">{t('live.rightCount', { count: leaders.at(i)!.right })}</span>
@@ -363,6 +377,7 @@ function Room({ game }: { game: GameCode }) {
         </Panel>
       )}
     </main>
+    </ThemedPage>
   );
 }
 

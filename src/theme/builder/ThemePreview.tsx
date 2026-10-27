@@ -38,6 +38,14 @@ function board(theme: GameTheme) {
           })}
         </div>
       );
+    case 'big-screen':
+      return (
+        <div className="grid grid-cols-[auto_1fr] items-center gap-3 w-full">
+          {pieceImage(theme, 'mascot') ? <img src={pieceImage(theme, 'mascot')} alt="" className="w-16 h-16 object-contain" /> : <Star weight="fill" size={56} color="#f6c544" />}
+          <span className="rounded-input border-[2px] border-border bg-surface p-2 font-display text-2xl tracking-[0.15em] text-center">ABCDE</span>
+          {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt="" className="col-span-2 h-12 justify-self-center object-contain" />}
+        </div>
+      );
     case 'sign-in':
       return <div className="grid grid-cols-4 gap-2">{PICTURES.map((p) => <PictureBadge key={p.id} id={p.id} theme={theme} size={44} />)}</div>;
     case 'game-show':

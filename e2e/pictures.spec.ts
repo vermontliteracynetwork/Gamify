@@ -50,5 +50,5 @@ test('play: the question picture sits above the question and answer pictures bes
   await expect(dialog.getByRole('button', { name: /cat$/ }).getByRole('img', { name: 'an orange cat' })).toBeVisible();
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
   await page.screenshot({ path: `test-results/pictures-play-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 });

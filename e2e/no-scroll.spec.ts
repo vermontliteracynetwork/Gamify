@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { finishSetup, openSetup } from './setup';
 
 const noScroll = async (page: Page) =>
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
 test('game boards fit the screen without scrolling', async ({ page }) => {
   for (const g of ['game-show', 'match-three', 'four-in-a-row', 'star-quiz']) {

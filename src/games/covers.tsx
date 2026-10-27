@@ -161,6 +161,8 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </div>
         </div>
       );
+    case 'big-screen':
+      return <div className={base} style={{ background: 'linear-gradient(160deg, #fdfd94, #ff9a8b)' }} aria-hidden="true"><Scatter icons={[Trophy, Star, Crown, Sparkle, Star, Trophy]} colors={['#fdfd94', '#ffd166', '#fbfcf8', '#b4c4fb', '#ffffff', '#fdfd94']} /></div>;
     case 'sign-in':
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':

@@ -97,7 +97,7 @@ test.describe('signed in', () => {
     await page.goto('/show/BKDFT');
     await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Read the code aloud: B K D F T/ })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
     await page.screenshot({ path: `test-results/code-screen-${info.project.name}.png` });
   });
 });

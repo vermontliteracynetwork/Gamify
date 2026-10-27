@@ -125,10 +125,10 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   await page.getByRole('button', { name: 'Next page' }).click();
   await expect(page.getByText(/^Page 2 of \d/)).toBeVisible();
   await page.screenshot({ path: `test-results/builder-tabs-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.getByRole('tab', { name: 'Colors' }).click();
   await page.screenshot({ path: `test-results/builder-colors-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 });
 
 test('Download tab: printable pages and exact-size digital files, blank or with the Classic example', async ({ page }, info) => {
@@ -136,7 +136,7 @@ test('Download tab: printable pages and exact-size digital files, blank or with 
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Download' }).click();
   await page.screenshot({ path: `test-results/builder-download-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   const wait = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Classic example (.zip)' }).click();
   const file = await wait;

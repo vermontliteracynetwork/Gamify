@@ -55,7 +55,7 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await expect(page.getByText('Sent to the gallery.', { exact: false })).toBeVisible();
   await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeDisabled();
   await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
   await page.goto('/owner');
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();

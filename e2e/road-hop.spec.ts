@@ -16,7 +16,7 @@ test('Road Hop: a right answer earns 3 hops; the hopper hops and the cars move',
   const up = page.getByRole('button', { name: 'Hop up' });
   await expect(up).toBeEnabled();
   await expect(page.getByLabel('3 hops left')).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.screenshot({ path: `test-results/road-hop-ready-${info.project.name}.png` });
   await up.click();
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 5; f++) { await page.screenshot({ path: `test-results/road-hop-frame-${f}.png` }); await page.waitForTimeout(60); }

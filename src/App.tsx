@@ -19,6 +19,7 @@ import { t } from './i18n';
 
 // Pages load when first opened, so the first screen arrives fast on older
 // iPads and school networks.
+import TeacherFooter from './ui/TeacherFooter';
 const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
 const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazy(() => import('./teacher/ImportPage'));
@@ -157,6 +158,7 @@ function AnimatedRoutes() {
         </Suspense>
       </motion.div>
     </AnimatePresence>
+    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && <TeacherFooter />}
     <UpgradeHost />
     <LiveLayer />
     </>

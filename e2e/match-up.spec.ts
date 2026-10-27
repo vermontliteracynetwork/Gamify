@@ -14,7 +14,7 @@ test('Match Up: link questions to answers; a wrong link wobbles; finish with a t
   await page.getByRole('radiogroup', { name: 'Pairs each round' }).getByRole('radio', { name: '4' }).click();
   await page.getByRole('radiogroup', { name: 'Rounds' }).getByRole('radio', { name: '1' }).click();
   await finishSetup(page);
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   const tiles = page.locator('main button[aria-pressed]');
   await expect(tiles).toHaveCount(8);
   await page.screenshot({ path: `test-results/matchup-${info.project.name}.png` });
