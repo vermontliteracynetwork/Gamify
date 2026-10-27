@@ -32,6 +32,24 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await studio.getByLabel('Search stickers').fill('crown');
   await studio.getByRole('button', { name: 'crown', exact: true }).click();
   await page.mouse.click(...at(0.5, 0.45));
+  // The sticker is a piece: chosen, with handles; drag it, then add words.
+  const crown = studio.getByRole('button', { name: 'Move crown' });
+  await expect(crown).toHaveAttribute('aria-pressed', 'true');
+  const c0 = (await crown.boundingBox())!;
+  await page.mouse.move(c0.x + c0.width / 2, c0.y + c0.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(c0.x + c0.width / 2 + 40, c0.y + c0.height / 2 - 30, { steps: 5 });
+  await page.mouse.up();
+  const c1 = (await crown.boundingBox())!;
+  expect(c1.x).toBeGreaterThan(c0.x + 20);
+  await studio.getByRole('radio', { name: 'Words' }).click();
+  await page.mouse.click(...at(0.5, 0.8));
+  await studio.getByLabel('Words', { exact: true }).fill('Champs');
+  await expect(studio.getByRole('button', { name: 'Move Champs' })).toBeVisible();
+  await studio.getByLabel('Search stickers').fill('');
+  await studio.getByRole('radio', { name: 'Animals' }).click();
+  await expect(studio.getByRole('button', { name: 'cat', exact: true })).toBeVisible();
+  await expect(studio.getByRole('button', { name: 'pizza', exact: true })).toHaveCount(0);
   await page.screenshot({ path: `test-results/studio-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   // Undo and redo the sticker.
@@ -72,4 +90,17 @@ test('Big screen design: lobby picture shows in the live lobby; teacher pages ha
   await expect(page.locator('main img[src^="data:image"]').first()).toBeVisible();
   await expect(page.getByRole('contentinfo')).toHaveCount(0);
   await page.screenshot({ path: `test-results/bigscreen-lobby-${info.project.name}.png` });
+});
+
+test('studio: drag a sticker from the shelf onto the picture', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'mouse drag; iPads tap to place');
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByLabel('Find a piece').fill('trophy');
+  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
+  await studio.getByRole('radio', { name: 'Stickers' }).click();
+  await studio.getByRole('button', { name: 'rocket', exact: true }).dragTo(studio.getByLabel(/^Drawing of the Winner trophy/));
+  await expect(studio.getByRole('button', { name: 'Move rocket' })).toBeVisible();
 });
