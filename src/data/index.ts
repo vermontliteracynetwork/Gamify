@@ -36,7 +36,20 @@ function switching(cloud: DataStore): DataStore {
   return out as unknown as DataStore;
 }
 
-export const data: DataStore = supabase ? switching(createCloudStore(supabase)) : local;
+const base: DataStore = supabase ? switching(createCloudStore(supabase)) : local;
+
+// Plan preview from the owner dashboard: this tab acts as if on another plan
+// until the preview stops. Changes nothing saved.
+const PREVIEW = 'gamify:preview-tier';
+export const previewTier = (): string | null => { try { return sessionStorage.getItem(PREVIEW); } catch { return null; } };
+export function setPreviewTier(tier: string | null) {
+  try { if (tier) sessionStorage.setItem(PREVIEW, tier); else sessionStorage.removeItem(PREVIEW); } catch { /* this tab only */ }
+  window.dispatchEvent(new Event('gamify-tier'));
+}
+export const data: DataStore = {
+  ...base,
+  getSetting: (async (key: string) => (key === 'tier' && previewTier() ? previewTier() : base.getSetting(key))) as DataStore['getSetting'],
+};
 
 export function newId(prefix: string): string {
   const rand = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2);

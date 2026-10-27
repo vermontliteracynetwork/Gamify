@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ListChecks, ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Lightbulb, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Eye, Lightbulb, Notebook, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -20,6 +20,7 @@ import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
+import { GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -27,8 +28,8 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 // cards you can reorder, widen and fold, saved on this device. Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'waiting' | 'feedback' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'subs' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'gallery', 'usage', 'growth', 'income', 'themes', 'subs', 'inbox', 'beta'];
+type CardId = 'waiting' | 'feedback' | 'subs' | 'chart' | 'books' | 'preview' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'inbox' | 'beta';
+const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'subs', 'chart', 'books', 'preview', 'gallery', 'usage', 'growth', 'income', 'themes', 'inbox', 'beta'];
 interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
@@ -46,7 +47,7 @@ export default function OwnerPage() {
 }
 
 function Desktop() {
-  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['waiting', 'feedback'] });
+  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['waiting', 'feedback', 'chart', 'books'] });
   useEffect(() => { void data.getSetting<Layout>('owner-layout').then((l) => { if (l) setLayout({ ...l, folded: l.folded.filter((x) => x !== 'waiting'), wide: [...new Set([...l.wide, 'waiting' as CardId])], order: ['waiting', ...l.order.filter((x) => x !== 'waiting' && DEFAULT_ORDER.includes(x)), ...DEFAULT_ORDER.filter((x) => x !== 'waiting' && !l.order.includes(x))] }); }); }, []);
   function save(next: Layout) { setLayout(next); void data.setSetting('owner-layout', next); }
   function move(id: CardId, by: -1 | 1) {
@@ -55,6 +56,7 @@ function Desktop() {
     [o[i], o[j]] = [o[j], o[i]];
     save({ ...layout, order: o });
   }
+  const owner = useOwnerStats();
   const toggle = (key: 'folded' | 'wide', id: CardId) => save({ ...layout, [key]: layout[key].includes(id) ? layout[key].filter((x) => x !== id) : [...layout[key], id] });
 
   const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
@@ -65,7 +67,10 @@ function Desktop() {
     growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
     income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
     themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
-    subs: { title: t('owner.subs'), icon: CreditCard, body: <p className="font-semibold">{t('owner.needsStripe')}</p> },
+    subs: { title: t('owner.subs'), icon: CreditCard, body: <SubsCard {...owner} /> },
+    chart: { title: t('owner.chart'), icon: ChartLineUp, body: <GrowthChartCard {...owner} /> },
+    books: { title: t('owner.books'), icon: Notebook, body: <LedgerCard /> },
+    preview: { title: t('owner.preview'), icon: Eye, body: <PlanPreviewCard /> },
     inbox: { title: t('owner.inbox'), icon: UsersThree, body: <p className="font-semibold">{t('owner.needsCloud')}</p> },
     beta: { title: t('owner.beta'), icon: Ticket, body: <BetaCard /> },
   };

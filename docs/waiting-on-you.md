@@ -13,3 +13,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Run 0007 so accounts can hold the Homeschool plan (2026-10-26).** Price set: $8 a month ($96 a year). Live monitor and Lock are guessed on. How: Supabase SQL Editor, run supabase/migrations/0007_homeschool_plan.sql (skip if already run).
 - **Run 0008 so students can join from their own devices (2026-10-26).** How: Supabase SQL Editor, run supabase/migrations/0008_game_codes.sql.
 - **Run 0009 so homework links keep working until their due date (2026-10-26).** How: Supabase SQL Editor, run supabase/migrations/0009_homework_due.sql.
+- **Run 0010 so the developer dashboard shows real numbers (2026-10-27).** How: Supabase SQL Editor, run supabase/migrations/0010_owner_dashboard.sql, then open /owner signed in as vtliteracynetwork.

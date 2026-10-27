@@ -20,6 +20,7 @@ import { t } from './i18n';
 // Pages load when first opened, so the first screen arrives fast on older
 // iPads and school networks.
 import TeacherFooter from './ui/TeacherFooter';
+import { PreviewBanner } from './owner/DevCards';
 const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
 const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazy(() => import('./teacher/ImportPage'));
@@ -215,6 +216,7 @@ export default function App() {
         <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
         <NavBar />
         <Supports />
+        <PreviewBanner />
         <div id="main-content" tabIndex={-1} className="outline-none">
           <AnimatedRoutes />
         </div>
