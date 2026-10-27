@@ -18,15 +18,16 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceFill, pieceImage } from '../../theme/library';
+import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { ChoiceRow, Slider } from '../../ui/fields';
+import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { pegDropManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
+import { usePowerUps } from '../../engine/usePowerUps';
 import { BUCKETS, bucketOf, dropPath, ROWS, ZONES } from './board';
 
 
@@ -43,7 +44,7 @@ export default function PegDrop() {
   const { theme, themes, playable, choose } = useGameTheme('peg-drop');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('peg-drop', { setId: LIBRARY[0].id, rounds: 3, who: 'teams' as 'teams' | 'solo' });
+  const [setup, change] = useSavedSetup('peg-drop', { setId: LIBRARY[0].id, rounds: 3, who: 'teams' as 'teams' | 'solo', powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -61,6 +62,17 @@ export default function PegDrop() {
   const [drops, setDrops] = useState(0);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const timer = useRef<number[]>([]);
+  // Power-ups a right answer brought: a doubled drop, or one more drop.
+  const powers = usePowerUps(pegDropManifest, theme, setup.powerUps);
+  const boost = useRef({ double: false, extra: false });
+  function earned(state: TurnState): TurnState {
+    const it = powers.grant();
+    if (!it) return state;
+    if (it.ability === 'double') boost.current.double = true;
+    if (it.ability === 'extra') boost.current.extra = true;
+    if (it.ability === 'bonus') { const next = addPoints(state, current(state).id, powers.amount(it)); setTurns(next); return next; }
+    return state;
+  }
   const player = turns ? current(turns) : null;
   const totalTurns = (turns?.players.length ?? 1) * setup.rounds;
 
@@ -70,13 +82,14 @@ export default function PegDrop() {
     const players = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(players);
     setTurns(state); setDrops(0); setMissed([]); setLanded(null); setPath(null);
+    boost.current = { double: false, extra: false };
     setPhase('play');
     startTurn(state);
   }
   function startTurn(state: TurnState) {
     setStep('question'); setLanded(null); setPath(null);
     if (solo) {
-      void ask().then((ok) => { if (!ok) { end(state); return; } setStep('aim'); });
+      void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('aim'); });
     } else {
       const d = deck.next();
       setQuestion({ q: d.question, setId: d.setId });
@@ -89,7 +102,7 @@ export default function PegDrop() {
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     setQuestion(null);
-    if (right) setStep('aim'); else afterTurn(turns);
+    if (right) { earned(turns); setStep('aim'); } else afterTurn(turns);
   }
   function drop(zone: number) {
     if (step !== 'aim' || !turns) return;
@@ -102,8 +115,11 @@ export default function PegDrop() {
       setLanded(b); setStep('landed');
       playEffect(BUCKETS[b] >= 100 ? 'win' : 'right', settings);
       buzz(30, settings);
-      const scored = addPoints(turns, current(turns).id, BUCKETS[b]);
+      const scored = addPoints(turns, current(turns).id, BUCKETS[b] * (boost.current.double ? 2 : 1));
+      boost.current.double = false;
       setTurns(scored);
+      // One more drop: the same player aims again, no question.
+      if (boost.current.extra) { boost.current.extra = false; timer.current.push(window.setTimeout(() => { setLanded(null); setPath(null); setStep('aim'); }, still ? 900 : 1500)); return; }
       timer.current.push(window.setTimeout(() => afterTurn(scored), still ? 900 : 1500));
     }, ms));
   }
@@ -164,6 +180,7 @@ export default function PegDrop() {
             <>
               <ChoiceRow label={t('mm.who')} value={setup.who} onChange={(v) => change({ who: v })} options={[{ value: 'teams', label: t('pd.teams') }, { value: 'solo', label: t('mm.solo') }]} />
               <Slider label={t('pd.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },
           ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
@@ -191,7 +208,8 @@ export default function PegDrop() {
               }))}
               <div className="absolute inset-x-0 bottom-0 h-[16%] grid" style={{ gridTemplateColumns: `repeat(${ZONES}, minmax(0, 1fr))` }}>
                 {BUCKETS.map((v, b) => (
-                  <motion.span key={b} animate={landed === b && !still ? { scale: [1, 1.15, 1] } : {}} className={`border-t-[3px] border-x-[1.5px] border-border flex items-center justify-center font-display text-lg sm:text-2xl ${landed === b ? 'bg-accent' : v >= 100 ? 'bg-[#ed9d75]' : v >= 50 ? 'bg-[#ddfcc6]' : 'bg-surface'}`}>{v}</motion.span>
+                  <motion.span key={b} animate={landed === b && !still ? { scale: [1, 1.15, 1] } : {}} className={`border-t-[3px] border-x-[1.5px] border-border flex items-center justify-center font-display text-lg sm:text-2xl ${landed === b ? '!bg-accent' : ''}`}
+                    style={v >= 100 ? pieceFill(theme, 'bucket-big', '#ed9d75') : pieceImage(theme, 'bucket') ? pieceFill(theme, 'bucket', '#fbfcf8') : { background: v >= 50 ? '#ddfcc6' : pieceColor(theme, 'bucket', '#fbfcf8') }}>{v}</motion.span>
                 ))}
               </div>
               {ball}
@@ -219,6 +237,7 @@ export default function PegDrop() {
       {phase === 'end' && turns && (
         <ResultsModal title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pd.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}
+      {powers.element}
       {element}
     </main>
     </ThemedPage>

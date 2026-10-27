@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, noPowerUps } from './setup';
+
 
 const KINDS = ['Cookie', 'Cake', 'Ice cream', 'Pizza', 'Popcorn', 'Cocoa'];
 
@@ -64,3 +65,6 @@ test('Match Three: swaps make matches, a round ends in a question break', async 
   expect(Number(await page.locator('p.tabular-nums').first().innerText())).toBeGreaterThan(0);
   expect(problems).toEqual([]);
 });
+
+// Last, so a test's own settings (like the plan) are written first.
+test.beforeEach(async ({ page }) => { await noPowerUps(page, 'match-three'); });

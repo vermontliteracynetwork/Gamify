@@ -21,12 +21,14 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { ChoiceRow, Slider } from '../../ui/fields';
+import type { GameTheme } from '../../theme/types';
+import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
+import { usePowerUps } from '../../engine/usePowerUps';
 import { lunchRushManifest } from './manifest';
 import { cpuFood, FOODS, openCounter, PATIENCE, SEATS, serve, type Counter, type Food } from './lunch';
 
@@ -54,7 +56,7 @@ export default function LunchRush() {
   const { theme, themes, playable, choose } = useGameTheme('lunch-rush');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('lunch-rush', { setId: LIBRARY[0].id, turns: 6, who: 'teams' as 'teams' | 'solo' });
+  const [setup, change] = useSavedSetup('lunch-rush', { setId: LIBRARY[0].id, turns: 6, who: 'teams' as 'teams' | 'solo', powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -90,11 +92,20 @@ export default function LunchRush() {
     setPhase('play');
     askNext(state, 0);
   }
+  // Power-ups a right answer brought: more serves, tips now, or double tips this turn.
+  const powers = usePowerUps(lunchRushManifest, theme, setup.powerUps);
+  const doubleTips = useRef(false);
+  function earned(state: TurnState) {
+    const it = powers.grant();
+    setServes(SERVES + (it?.ability === 'serves' ? powers.amount(it) : 0));
+    if (it?.ability === 'bonus') setTurns(addPoints(state, current(state).id, powers.amount(it)));
+    if (it?.ability === 'double') doubleTips.current = true;
+  }
   function askNext(state: TurnState, n: number) {
     if (n >= total) { end(state); return; }
     setAsked(n);
     setStep('question');
-    if (solo) void ask().then((ok) => { if (!ok) { end(state); return; } setServes(SERVES); setStep('serve'); });
+    if (solo) void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('serve'); });
     else { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId }); }
   }
   function onShareResult(right: boolean) {
@@ -104,9 +115,10 @@ export default function LunchRush() {
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     setQuestion(null);
-    if (right) { setServes(SERVES); setStep('serve'); } else endTurn(turns);
+    if (right) { earned(turns); setStep('serve'); } else endTurn(turns);
   }
   function endTurn(state: TurnState) {
+    doubleTips.current = false;
     const n = asked + 1;
     if (n >= total) { end(state); return; }
     const next = solo ? state : nextTurn(state);
@@ -116,7 +128,8 @@ export default function LunchRush() {
 
   function give(food: Food) {
     if (step !== 'serve' || !turns || !player || serves <= 0) return;
-    const res = serve(counter, food);
+    const served0 = serve(counter, food);
+    const res = doubleTips.current ? { ...served0, points: served0.points * 2 } : served0;
     setStep('pause');
     setFlying({ id: Date.now(), food, seat: res.servedSeat });
     playEffect('whoosh', settings);
@@ -155,6 +168,7 @@ export default function LunchRush() {
 
   const canServe = phase === 'play' && step === 'serve' && player?.kind !== 'cpu';
   const counterColor = pieceColor(theme, 'counter', '#ed9d75');
+  const guestPics = [1, 2, 3].map((n) => pieceImage(theme, `guest-${n}`)).filter((x): x is string => !!x);
   // Wider than tall on a landscape screen, square on a portrait one, so the
   // board fills the screen without leaving empty space below.
   const boardWidth = 'min(100%, calc((100dvh - 360px - var(--lr-extra)) * var(--lr-ratio)))';
@@ -180,6 +194,7 @@ export default function LunchRush() {
             <>
               <ChoiceRow label={t('mm.who')} value={setup.who} onChange={(v) => change({ who: v })} options={[{ value: 'teams', label: t('pd.teams') }, { value: 'solo', label: t('mm.solo') }]} />
               <Slider label={solo ? t('rh.turnsSolo') : t('rh.turns')} min={2} max={15} value={setup.turns} onChange={(v) => change({ turns: v })} />
+              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },
           ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
@@ -195,7 +210,7 @@ export default function LunchRush() {
                 <span className="ml-auto font-bold text-sm text-right">
                   {t('rh.turn', { n: Math.min(asked + 1, total), total })}<br />
                   <span className="inline-flex gap-1 align-middle" aria-label={t('lr.serves', { count: serves })}>
-                    {Array.from({ length: SERVES }, (_, i) => <span key={i} className="w-3.5 h-3.5 rounded-full border-2 border-border" style={{ background: i < serves ? '#f6c544' : 'transparent' }} />)}
+                    {Array.from({ length: Math.max(SERVES, serves) }, (_, i) => <span key={i} className="w-3.5 h-3.5 rounded-full border-2 border-border" style={{ background: i < serves ? '#f6c544' : 'transparent' }} />)}
                   </span>
                 </span>
               </div>
@@ -206,7 +221,7 @@ export default function LunchRush() {
               <div className="absolute inset-x-0 bottom-0 h-[26%] border-t-[3px] border-border" style={{ background: counterColor }} aria-hidden="true" />
               {!pieceImage(theme, 'background') && (
                 <div className="hidden portrait:flex absolute left-1/2 -translate-x-1/2 top-[19%] w-[56%] h-[14%] rounded-input border-[3px] border-border bg-[#314677] items-center justify-around px-[3%]" aria-hidden="true">
-                  {FOODS.map((f) => { const F = FOOD_ART[f].icon; return <span key={f} className="h-[70%] aspect-square rounded-full border-2 border-border flex items-center justify-center" style={{ background: FOOD_ART[f].color }}><F weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>; })}
+                  {FOODS.map((f) => { return <span key={f} className="h-[70%] aspect-square rounded-full border-2 border-border flex items-center justify-center" style={foodBg(theme, f)}><FoodFace theme={theme} food={f} /></span>; })}
                 </div>
               )}
               {counter.seats.map((g, i) => g && (
@@ -215,21 +230,20 @@ export default function LunchRush() {
                     <motion.div key={g.id} className="absolute inset-0 flex flex-col items-center justify-end gap-[5%]" role="img" aria-label={t('lr.guest', { n: i + 1, food: foodName(g.food), count: g.patience })}
                       initial={still ? false : { x: '120%', opacity: 0 }} animate={{ x: 0, opacity: 1, y: happy === i && !still ? [0, -14, 0] : 0 }} exit={still ? { opacity: 0 } : { x: '-120%', opacity: 0 }}
                       transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
-                      <OrderBubble food={g.food} patience={g.patience} served={happy === i} />
-                      <GuestArt look={g.look} happy={happy === i} worried={g.patience <= 2} />
+                      <OrderBubble theme={theme} food={g.food} patience={g.patience} served={happy === i} />
+                      {guestPics.length ? <img src={guestPics[g.look % guestPics.length]} alt="" className="w-[78%] h-auto block object-contain" /> : <GuestArt look={g.look} happy={happy === i} worried={g.patience <= 2} />}
                     </motion.div>
                   </AnimatePresence>
                 </div>
               ))}
               <AnimatePresence>
                 {flying && (() => {
-                  const F = FOOD_ART[flying.food].icon;
                   const toX = flying.seat === null ? 50 : ((flying.seat + 0.5) / SEATS) * 100;
                   return (
-                    <motion.span key={flying.id} className="absolute w-[11%] aspect-square -translate-x-1/2 rounded-full border-[3px] border-border flex items-center justify-center pointer-events-none" style={{ background: FOOD_ART[flying.food].color }}
+                    <motion.span key={flying.id} className="absolute w-[11%] aspect-square -translate-x-1/2 rounded-full border-[3px] border-border flex items-center justify-center pointer-events-none" style={foodBg(theme, flying.food)}
                       initial={{ left: '50%', top: '96%', scale: 0.6 }} animate={flying.seat === null ? { left: ['50%', '50%'], top: ['96%', '70%', '96%'], rotate: [0, -12, 12, 0] } : { left: `${toX}%`, top: '44%', scale: 1 }} exit={{ opacity: 0, scale: 0.4 }}
                       transition={{ duration: still ? 0 : FLY_MS / 1000, ease: 'easeOut' }}>
-                      <F weight="fill" className="w-3/5 h-3/5" color="#241c3d" />
+                      <FoodFace theme={theme} food={flying.food} />
                     </motion.span>
                   );
                 })()}
@@ -243,13 +257,12 @@ export default function LunchRush() {
             </div>
             <div className="grid grid-cols-4 gap-2 mx-auto w-full" style={{ maxWidth: boardWidth }}>
               {FOODS.map((f) => {
-                const F = FOOD_ART[f].icon;
                 const wanted = counter.seats.some((g) => g?.food === f);
                 return (
                   <button key={f} type="button" onClick={() => give(f)} disabled={!canServe} aria-label={t('lr.serve', { food: foodName(f) })}
                     className={`min-h-16 rounded-input border-[2.5px] border-border flex flex-col items-center justify-center font-bold text-sm disabled:opacity-50 ${canServe && wanted ? 'motion-safe:animate-pulse' : ''}`}
-                    style={{ background: FOOD_ART[f].color, boxShadow: 'var(--shadow-sticker)' }}>
-                    <F weight="fill" size={34} color="#241c3d" /><span className="hidden sm:inline">{foodName(f)}</span>
+                    style={{ ...foodBg(theme, f), boxShadow: 'var(--shadow-sticker)' }}>
+                    <FoodFace theme={theme} food={f} size={34} /><span className="hidden sm:inline">{foodName(f)}</span>
                   </button>
                 );
               })}
@@ -272,6 +285,7 @@ export default function LunchRush() {
       {phase === 'end' && turns && (
         <ResultsModal title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pd.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}
+      {powers.element}
       {element}
     </main>
     </ThemedPage>
@@ -279,12 +293,11 @@ export default function LunchRush() {
 }
 
 // The guest's order: the food picture, and hearts for how long they'll wait.
-function OrderBubble({ food, patience, served }: { food: Food; patience: number; served: boolean }) {
-  const F = FOOD_ART[food].icon;
+function OrderBubble({ theme, food, patience, served }: { theme: GameTheme; food: Food; patience: number; served: boolean }) {
   return (
     <div className="w-[70%] bg-surface border-[2.5px] border-border rounded-panel p-[4%] grid justify-items-center gap-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <span className="w-[62%] aspect-square rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ background: FOOD_ART[food].color, opacity: served ? 0.4 : 1 }}>
-        <F weight="fill" className="w-3/5 h-3/5" color="#241c3d" />
+      <span className="w-[62%] aspect-square rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ ...foodBg(theme, food), opacity: served ? 0.4 : 1 }}>
+        <FoodFace theme={theme} food={food} />
       </span>
       <span className="flex gap-[3%] w-full justify-center" aria-hidden="true">
         {Array.from({ length: PATIENCE }, (_, i) => <Heart key={i} weight={i < patience ? 'fill' : 'bold'} className="w-[16%] h-auto" color={i < patience ? (patience <= 2 ? '#e5635f' : '#ef7d96') : '#b8b2c8'} />)}
@@ -304,4 +317,13 @@ function GuestArt({ look, happy, worried }: { look: number; happy: boolean; worr
       <circle cx="14" cy="19.5" r="1.4" fill="#f6a5c0" opacity="0.7" /><circle cx="26" cy="19.5" r="1.4" fill="#f6a5c0" opacity="0.7" />
     </svg>
   );
+}
+
+// A food's look: the theme's picture on its color, or the Classic icon.
+const foodBg = (theme: GameTheme, f: Food) => ({ background: pieceColor(theme, `food-${f}`, FOOD_ART[f].color) });
+function FoodFace({ theme, food, size }: { theme: GameTheme; food: Food; size?: number }) {
+  const img = pieceImage(theme, `food-${food}`);
+  if (img) return <img src={img} alt="" className={size ? 'object-contain' : 'w-[85%] h-[85%] object-contain'} style={size ? { width: size + 6, height: size + 6 } : undefined} />;
+  const F = FOOD_ART[food].icon;
+  return size ? <F weight="fill" size={size} color="#241c3d" /> : <F weight="fill" className="w-3/5 h-3/5" color="#241c3d" />;
 }

@@ -11,12 +11,13 @@ import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
-import { ChoiceRow, Slider } from '../../ui/fields';
+import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
+import { usePowerUps } from '../../engine/usePowerUps';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
@@ -38,7 +39,7 @@ export default function MatchThree() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('match-three', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7 });
+  const [setup, change] = useSavedSetup('match-three', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7, powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
@@ -59,6 +60,9 @@ export default function MatchThree() {
   const [note, setNote] = useState('');
   const [shake, setShake] = useState<string | null>(null);
   const drag = useRef<{ pos: Pos; x: number; y: number } | null>(null);
+  // Power-ups after a question break: more moves, bonus points, or a doubled match.
+  const powers = usePowerUps(matchThreeManifest, theme, setup.powerUps);
+  const doubleNext = useRef(false);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, still ? Math.min(ms, 80) : ms));
 
   function start() {
@@ -66,6 +70,7 @@ export default function MatchThree() {
     const ROWS = setup.size, COLS = setup.size, MOVES_PER_ROUND = setup.moves;
     setGrid(createGrid(ROWS, COLS));
     setScore(0); setRound(1); setMoves(MOVES_PER_ROUND); setNote(''); setSelected(null);
+    doubleNext.current = false;
     setPhase('play');
   }
 
@@ -99,6 +104,7 @@ export default function MatchThree() {
       await wait(320);
       cascade++;
     }
+    if (doubleNext.current && gained) { gained *= 2; doubleNext.current = false; }
     setScore((s) => s + gained);
     if (!hasAnyValidMove(g)) {
       setNote(t('bm.shuffle'));
@@ -114,7 +120,10 @@ export default function MatchThree() {
       const done = await ask({ count: plan.current.perBreak });
       if (!done || round >= plan.current.rounds) { finish(); setBusy(false); return; }
       setRound((r) => r + 1);
-      setMoves(MOVES_PER_ROUND);
+      const it = powers.grant();
+      setMoves(MOVES_PER_ROUND + (it?.ability === 'moves' ? powers.amount(it) : 0));
+      if (it?.ability === 'bonus') setScore((s) => s + powers.amount(it));
+      if (it?.ability === 'double') doubleNext.current = true;
       setNote('');
     }
     setBusy(false);
@@ -173,6 +182,7 @@ export default function MatchThree() {
             <>
               <Slider label={t('bm.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
               <Slider label={t('bm.movesEach')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
+              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
               <Slider label={t('bm.perBreak')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
               <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
                 options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
@@ -221,7 +231,7 @@ export default function MatchThree() {
               <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl font-bold tabular-nums">{score}</motion.p>
               <p className="font-bold">{t('bm.round', { n: round, total: plan.current.rounds })}</p>
               <div className="flex gap-1.5" aria-label={t('bm.moves', { count: moves })} role="img">
-                {Array.from({ length: MOVES_PER_ROUND }, (_, i) => (
+                {Array.from({ length: Math.max(MOVES_PER_ROUND, moves) }, (_, i) => (
                   <span key={i} className={`w-6 h-6 rounded-full border-[2px] border-border ${i < moves ? 'bg-accent' : 'bg-surface-2'}`} />
                 ))}
               </div>
@@ -236,6 +246,7 @@ export default function MatchThree() {
       )}
 
       {phase === 'end' && <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
+      {powers.element}
       {element}
     </main>
     </ThemedPage>

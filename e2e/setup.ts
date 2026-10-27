@@ -43,3 +43,12 @@ export async function finishSetup(page: Page) {
   }
   await page.getByRole('button', { name: 'Play', exact: true }).click();
 }
+
+// Power-ups come at random after right answers; tests that count moves,
+// shots or points switch them off (e2e/powerups-games.spec.ts covers them).
+export async function noPowerUps(page: Page, gameId: string) {
+  await page.addInitScript((id) => {
+    const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
+    if (!s[`setup:${id}`]) localStorage.setItem('gamify:settings', JSON.stringify({ ...s, [`setup:${id}`]: { powerUps: false } }));
+  }, gameId);
+}

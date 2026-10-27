@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps } from './setup';
+
 
 test('Peg Drop: a right answer earns a drop; the ball bounces into a bucket and scores', async ({ page }, info) => {
   test.setTimeout(60_000);
@@ -18,3 +19,6 @@ test('Peg Drop: a right answer earns a drop; the ball bounces into a bucket and 
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 5000 });
   expect(problems).toEqual([]);
 });
+
+// Last, so a test's own settings (like the plan) are written first.
+test.beforeEach(async ({ page }) => { await noPowerUps(page, 'peg-drop'); });

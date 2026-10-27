@@ -62,6 +62,49 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <path d="M24 40 H70 L60 28 M76 60 H30 L40 72" fill="none" {...S} strokeWidth={7} />
     </g>
   ),
+  'golden-ball': () => (
+    <g>
+      <circle cx="50" cy="50" r="40" fill="#f6c544" {...S} />
+      <circle cx="36" cy="36" r="9" fill="#fff6c8" />
+      <text x="50" y="62" textAnchor="middle" fontSize="30" fontWeight="bold" fill={INK}>x2</text>
+    </g>
+  ),
+  'extra-ball': () => (
+    <g>
+      <circle cx="38" cy="58" r="28" fill="#8ec5ff" {...S} />
+      <circle cx="64" cy="40" r="28" fill="#fdfd94" {...S} />
+      <path d="M64 28 V52 M52 40 H76" {...S} strokeWidth={6} />
+    </g>
+  ),
+  'golden-pin': () => (
+    <g>
+      <path d="M50 6 C60 6 62 16 59 24 C57 30 56 33 60 40 C68 52 70 64 66 76 C63 86 58 92 50 92 C42 92 37 86 34 76 C30 64 32 52 40 40 C44 33 43 30 41 24 C38 16 40 6 50 6 Z" fill="#f6c544" {...S} />
+      <rect x="40" y="32" width="20" height="6" fill="#e5635f" />
+      <text x="50" y="72" textAnchor="middle" fontSize="20" fontWeight="bold" fill={INK}>x2</text>
+    </g>
+  ),
+  'extra-bubble': () => (
+    <g>
+      <circle cx="50" cy="50" r="40" fill="#c9b6ff" {...S} />
+      <circle cx="36" cy="34" r="8" fill="#ffffff" opacity="0.8" />
+      <path d="M50 32 V68 M32 50 H68" {...S} strokeWidth={8} />
+    </g>
+  ),
+  'extra-plate': () => (
+    <g>
+      <ellipse cx="50" cy="62" rx="42" ry="20" fill="#ffffff" {...S} />
+      <ellipse cx="50" cy="60" rx="26" ry="11" fill="#f4f4f4" stroke={INK} strokeWidth={2} />
+      <circle cx="74" cy="26" r="16" fill="#9fe7a0" {...S} />
+      <path d="M74 17 V35 M65 26 H83" {...S} strokeWidth={5} />
+    </g>
+  ),
+  'tip-jar': () => (
+    <g>
+      <path d="M26 30 H74 V84 Q74 92 66 92 H34 Q26 92 26 84 Z" fill="#bfe8ff" fillOpacity="0.85" {...S} />
+      <rect x="22" y="22" width="56" height="10" rx="3" fill="#9c6b45" {...S} />
+      <circle cx="42" cy="70" r="9" fill="#f6c544" {...S} strokeWidth={2} /><circle cx="58" cy="78" r="9" fill="#f6c544" {...S} strokeWidth={2} /><circle cx="54" cy="58" r="9" fill="#f6c544" {...S} strokeWidth={2} />
+    </g>
+  ),
   'prize-bag': () => (
     <g>
       <path d="M36 30 Q20 50 18 74 Q18 92 50 92 Q82 92 82 74 Q80 50 64 30 Z" fill="#9fe7a0" {...S} />

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps } from './setup';
+
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
@@ -25,3 +26,6 @@ test('Bowling: a right answer earns a roll; tap a lane and pins fall', async ({ 
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
   expect(problems).toEqual([]);
 });
+
+// Last, so a test's own settings (like the plan) are written first.
+test.beforeEach(async ({ page }) => { await noPowerUps(page, 'bowling'); });

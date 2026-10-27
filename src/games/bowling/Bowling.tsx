@@ -20,12 +20,13 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { ChoiceRow, Slider } from '../../ui/fields';
+import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
+import { usePowerUps } from '../../engine/usePowerUps';
 import { bowlingManifest } from './manifest';
 import { cpuLane, fullRack, halfWidthAt, knockPins, LANE_X, LANES, PIN_SPOTS, pinDepth, rollPoints, scaleAt, xAt, yAt } from './lane';
 
@@ -45,7 +46,7 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' });
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo', powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -67,6 +68,16 @@ export default function Bowling() {
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const ballRef = useRef<SVGGElement>(null);
   const timers = useRef<number[]>([]);
+  // Power-ups a right answer brought: a doubled roll, or one more pin.
+  const powers = usePowerUps(bowlingManifest, theme, setup.powerUps);
+  const boost = useRef({ double: false, magnet: false });
+  function earned(state: TurnState) {
+    const it = powers.grant();
+    if (!it) return;
+    if (it.ability === 'double') boost.current.double = true;
+    if (it.ability === 'magnet') boost.current.magnet = true;
+    if (it.ability === 'bonus') setTurns(addPoints(state, current(state).id, powers.amount(it)));
+  }
   const player = turns ? current(turns) : null;
   const totalFrames = (turns?.players.length ?? 1) * setup.frames;
 
@@ -77,6 +88,7 @@ export default function Bowling() {
     const players = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(players);
     setTurns(state); setFrames(0); setMissed([]); setBanner(null);
+    boost.current = { double: false, magnet: false };
     setPhase('play');
     startFrame(state);
   }
@@ -86,7 +98,7 @@ export default function Bowling() {
   }
   function askFor(state: TurnState, r: 0 | 1) {
     setStep('question');
-    if (solo) void ask().then((ok) => { if (!ok) { end(state); return; } setStep('aim'); });
+    if (solo) void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('aim'); });
     else { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId }); }
     void r;
   }
@@ -97,12 +109,18 @@ export default function Bowling() {
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     setQuestion(null);
-    if (right) setStep('aim'); else endFrame(turns);
+    if (right) { earned(turns); setStep('aim'); } else endFrame(turns);
   }
 
   function bowl(l: number) {
     if (step !== 'aim' || !turns) return;
     const res = knockPins(l, standing);
+    // Pin Magnet: one more standing pin goes down too.
+    if (boost.current.magnet) {
+      boost.current.magnet = false;
+      const extra = standing.findIndex((up, i) => up && !res.down.includes(i));
+      if (extra >= 0) { res.down.push(extra); res.gutter = false; }
+    }
     setLane(l); setStep('roll');
     playEffect('whoosh', settings);
     // The ball rolls down the lane (a gutter ball drifts off the side).
@@ -128,7 +146,10 @@ export default function Bowling() {
     if (!turns) return;
     const nextStanding = standing.map((up, i) => up && !down.includes(i));
     const left = nextStanding.filter(Boolean).length;
-    const { points, kind } = rollPoints(down.length, roll, left);
+    const base = rollPoints(down.length, roll, left);
+    const points = base.points * (boost.current.double ? 2 : 1);
+    const kind = base.kind;
+    boost.current.double = false;
     setStanding(nextStanding); setFalling([]); setStep('result');
     const scored = addPoints(turns, current(turns).id, points);
     setTurns(scored);
@@ -166,6 +187,7 @@ export default function Bowling() {
 
   const canAim = phase === 'play' && step === 'aim' && player?.kind !== 'cpu';
   const pinColor = pieceColor(theme, 'pin', '#fbfcf8');
+  const pinArt = pieceImage(theme, 'pin');
   const ballColor = pieceColor(theme, 'ball', '#ed9d75');
   const ballArt = pieceImage(theme, 'ball');
   const laneColor = pieceColor(theme, 'lane', '#314677');
@@ -194,6 +216,7 @@ export default function Bowling() {
             <>
               <ChoiceRow label={t('mm.who')} value={setup.who} onChange={(v) => change({ who: v })} options={[{ value: 'teams', label: t('pd.teams') }, { value: 'solo', label: t('mm.solo') }]} />
               <Slider label={t('sb.frames')} min={1} max={10} value={setup.frames} onChange={(v) => change({ frames: v })} />
+              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },
           ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
@@ -232,9 +255,11 @@ export default function Bowling() {
                   return (
                     <g key={i} transform={`translate(${xAt(px * 1.7, d)} ${yAt(d)}) scale(${s})`}>
                       <g className="bp-fx" style={fall && !still ? { animation: `sb-fall-${i % 2 ? 'l' : 'r'} 0.6s ease-in forwards` } : fall ? { opacity: 0 } : undefined}>
+                        {pinArt ? <image href={pinArt} x={-3.2} y={-11.2} width={6.4} height={11.6} preserveAspectRatio="xMidYMax meet" /> : <>
                         <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
                         <rect x={-1.25} y={-7.3} width={2.5} height={0.9} fill="#e5635f" />
                         <circle cx={-0.6} cy={-9.4} r={0.35} fill="#241c3d" /><circle cx={0.6} cy={-9.4} r={0.35} fill="#241c3d" />
+                        </>}
                       </g>
                     </g>
                   );
@@ -275,6 +300,7 @@ export default function Bowling() {
       {phase === 'end' && turns && (
         <ResultsModal title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pd.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}
+      {powers.element}
       {element}
     </main>
     </ThemedPage>

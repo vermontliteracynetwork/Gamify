@@ -17,6 +17,19 @@ export const bubblePopManifest: GameManifest = {
   ],
   rounds: { label: 'Question breaks', min: 1, max: 10, default: 4 },
   questionsPerBreak: { label: 'Questions each time', min: 1, max: 5, default: 1 },
+  items: {
+    label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
+    abilities: [
+      { id: 'shots', label: 'More bubbles', hint: 'Extra bubbles to shoot', amount: { label: 'Bubbles', min: 1, max: 5, step: 1, default: 2 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 10, max: 300, step: 10, default: 100 } },
+      { id: 'double', label: 'Doubles the next pop', hint: 'The next pop scores twice' },
+    ],
+    classic: [
+      { id: 'classic-bubble-bundle', name: 'Bubble Bundle', ability: 'shots', amount: 2, motion: 'bob', often: 2, art: 'extra-bubble' },
+      { id: 'classic-prize-bag', name: 'Prize Bag', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-double-star', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
+    ],
+  },
   hasCpu: false,
   borrowedFrom: 'Dashboard src/games/bubbleShooter/engine.ts (Bubble Shooter), trimmed and rebuilt',
 };

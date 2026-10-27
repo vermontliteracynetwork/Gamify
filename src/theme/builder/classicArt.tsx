@@ -1,4 +1,4 @@
-import { Question, Sparkle, Star, Trophy } from '@phosphor-icons/react';
+import { Carrot, Hamburger, IceCream, Pizza, Question, Smiley, Sparkle, Star, Trophy } from '@phosphor-icons/react';
 import { TEAM_ICONS } from '../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../engine/turns';
 import { PICTURES } from '../../student/pictures';
@@ -61,6 +61,22 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
     const p = PICTURES.find((x) => `pic-${x.id}` === id);
     return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={p?.color ?? ACCENT} stroke={INK} strokeWidth={line} />{p && icon(p.icon, INK, m * 0.55)}</g>;
   }
+  if (id.startsWith('food-')) {
+    const F = { 'food-pizza': Pizza, 'food-burger': Hamburger, 'food-icecream': IceCream, 'food-carrot': Carrot }[id] ?? Star;
+    return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={piece.color ?? ACCENT} stroke={INK} strokeWidth={line} />{icon(F, '#241c3d', m * 0.6)}</g>;
+  }
+  if (id.startsWith('guest-')) {
+    const k = Number(id.slice(6)) - 1;
+    return (
+      <g>
+        <path d={`M${w * 0.12},${h} Q${w * 0.12},${h * 0.66} ${w / 2},${h * 0.66} Q${w * 0.88},${h * 0.66} ${w * 0.88},${h} Z`} fill={['#6aa9e9', '#c58ce8', '#5cc3a0'][k % 3]} stroke={INK} strokeWidth={line} />
+        <circle cx={w / 2} cy={h * 0.38} r={w * 0.28} fill={['#f5d0b5', '#c68a5e', '#e0ac85'][k % 3]} stroke={INK} strokeWidth={line} />
+        <circle cx={w * 0.41} cy={h * 0.36} r={w * 0.035} fill="#241c3d" /><circle cx={w * 0.59} cy={h * 0.36} r={w * 0.035} fill="#241c3d" />
+        <path d={`M${w * 0.4},${h * 0.45} Q${w / 2},${h * 0.52} ${w * 0.6},${h * 0.45}`} fill="none" stroke="#241c3d" strokeWidth={line} strokeLinecap="round" />
+      </g>
+    );
+  }
+  if (id === 'mascot') return icon(Smiley, '#f6c544', m * 0.9);
   if (id === 'star') return icon(Star, piece.color ?? '#f6c544', m * 0.95);
   if (id === 'trophy') return icon(Trophy, piece.color ?? '#f6c544', m * 0.9);
   if (id === 'cover') return <g><rect width={w} height={h} rx={m * 0.08} fill={ACCENT} stroke={INK} strokeWidth={line} />{icon(Sparkle, INK, m * 0.5)}</g>;

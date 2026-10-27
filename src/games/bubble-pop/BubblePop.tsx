@@ -13,7 +13,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider } from '../../ui/fields';
+import { Slider, Toggle } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
@@ -21,6 +21,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
+import { usePowerUps } from '../../engine/usePowerUps';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
 import {
   center, clampAngle, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, place, pushRow, R, rescue,
@@ -43,7 +44,7 @@ export default function BubblePop() {
   const { theme, themes, playable, choose } = useGameTheme('bubble-pop');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, rounds: 4, shots: 5, perBreak: 1 });
+  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, rounds: 4, shots: 5, perBreak: 1, powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
@@ -63,6 +64,9 @@ export default function BubblePop() {
   const [fx, setFx] = useState<Fx[]>([]);
   const [gain, setGain] = useState<{ id: number; n: number; x: number; y: number } | null>(null);
   const plan = useRef({ rounds: 4, shots: 5, perBreak: 1 });
+  // Power-ups after a question break: more bubbles, bonus points, or a doubled pop.
+  const powers = usePowerUps(bubblePopManifest, theme, setup.powerUps);
+  const doubleNext = useRef(false);
   const svg = useRef<SVGSVGElement>(null);
   const flyer = useRef<SVGGElement>(null);
   const shotCount = useRef(0);
@@ -74,6 +78,7 @@ export default function BubblePop() {
     plan.current = { rounds: setup.rounds, shots: setup.shots, perBreak: setup.perBreak };
     const b = makeBoard(0);
     setBoard(b); setLevel(0); setScore(0); setBreaks(0); setShots(0); setNoPop(0); setNote(''); setFx([]); setGain(null);
+    doubleNext.current = false;
     setShooter({ now: nextColor(b), next: nextColor(b) });
     setAngle(-Math.PI / 2);
     setPhase('play');
@@ -85,7 +90,10 @@ export default function BubblePop() {
     setNote(done === 0 ? '' : t('bp.answer'));
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
-    setShots(plan.current.shots);
+    const it = powers.grant();
+    setShots(plan.current.shots + (it?.ability === 'shots' ? powers.amount(it) : 0));
+    if (it?.ability === 'bonus') setScore((s) => s + powers.amount(it));
+    if (it?.ability === 'double') doubleNext.current = true;
     setNote('');
     setStep('aim');
   }
@@ -156,6 +164,7 @@ export default function BubblePop() {
     if (lowestRow(b) >= DANGER_ROW) {
       const saved = rescue(b); addFx(saved.removed, 'pop', b); b = saved.board; message = t('bp.rescue');
     }
+    if (points && doubleNext.current && res.popped.length) { points *= 2; doubleNext.current = false; }
     if (points) {
       const p = center(board, r, c);
       setGain({ id: shotCount.current + 1000, n: points, x: p.x, y: p.y });
@@ -233,6 +242,7 @@ export default function BubblePop() {
             <>
               <Slider label={t('bp.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
               <Slider label={t('bp.shotsEach')} min={3} max={10} value={setup.shots} onChange={(v) => change({ shots: v })} />
+              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
               <Slider label={t('bp.perBreak')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
             </>
           ) },
@@ -295,7 +305,7 @@ export default function BubblePop() {
               <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-3xl lg:text-4xl tabular-nums">{score}</motion.p>
               <p className="font-bold">{t('bp.board', { n: level + 1 })}</p>
               <div className="flex gap-1.5 flex-wrap" role="img" aria-label={t('bp.shots', { count: shots })}>
-                {Array.from({ length: plan.current.shots }, (_, i) => (
+                {Array.from({ length: Math.max(plan.current.shots, shots) }, (_, i) => (
                   <span key={i} className={`w-5 h-5 rounded-full border-[2px] border-border ${i < shots ? 'bg-accent' : 'bg-surface-2'}`} />
                 ))}
               </div>
@@ -311,6 +321,7 @@ export default function BubblePop() {
       )}
 
       {phase === 'end' && <ResultsModal title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
+      {powers.element}
       {element}
     </main>
     </ThemedPage>

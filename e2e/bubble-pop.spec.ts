@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, noPowerUps } from './setup';
+
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
@@ -38,3 +39,6 @@ test('Bubble Pop: a right answer loads bubbles; aim, shoot, and the bubble lands
   await page.screenshot({ path: `test-results/bubble-shot-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });
+
+// Last, so a test's own settings (like the plan) are written first.
+test.beforeEach(async ({ page }) => { await noPowerUps(page, 'bubble-pop'); });
