@@ -71,11 +71,36 @@ function pickVoice(): SpeechSynthesisVoice | undefined {
   return voices.find((v) => /premium|enhanced|natural|neural/i.test(v.name)) ?? voices.find((v) => v.lang === 'en-US') ?? voices[0];
 }
 
+// The natural voice (api/tts.ts) when the site has one; the device's own
+// voice when it doesn't, when offline, or if the audio fails.
+let natural: 'unknown' | 'on' | 'off' = typeof window !== 'undefined' && /^(localhost|127\.)/.test(window.location.hostname) ? 'off' : 'unknown';
+let playing: HTMLAudioElement | null = null;
+
 export function speak(text: string, s: PlayerSettings): void {
-  if (typeof speechSynthesis === 'undefined') return;
-  speechSynthesis.cancel();
+  stopSpeaking();
   const v = volume(s, 'voice');
   if (v <= 0 || !text.trim()) return;
+  if (natural !== 'off' && typeof Audio !== 'undefined') {
+    const a = new Audio(`/api/tts?t=${encodeURIComponent(text.trim().slice(0, 400))}`);
+    a.volume = v;
+    a.playbackRate = s.voiceRate === 'slow' ? 0.85 : s.voiceRate === 'fast' ? 1.15 : 1;
+    playing = a;
+    a.play().then(() => { natural = 'on'; }, (e: unknown) => {
+      if (playing !== a) return;
+      playing = null;
+      // A blocked autoplay is not a missing voice; anything else is.
+      if (natural === 'unknown' && !(e instanceof DOMException && e.name === 'NotAllowedError')) natural = 'off';
+      deviceSpeak(text, s, v);
+    });
+    a.onerror = () => { if (playing === a) { playing = null; natural = 'off'; deviceSpeak(text, s, v); } };
+    return;
+  }
+  deviceSpeak(text, s, v);
+}
+
+function deviceSpeak(text: string, s: PlayerSettings, v: number): void {
+  if (typeof speechSynthesis === 'undefined') return;
+  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.voice = pickVoice() ?? null;
   u.volume = v;
@@ -84,5 +109,6 @@ export function speak(text: string, s: PlayerSettings): void {
 }
 
 export function stopSpeaking(): void {
+  if (playing) { playing.pause(); playing = null; }
   if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
 }

@@ -2121,6 +2121,7 @@ export const en = {
   'legal.privacyPromise.4': 'Student answers are used only for the teacher\'s reports and to choose review questions.',
   'legal.privacyPromise.5': 'Teachers can download or delete all of their data at any time.',
   'legal.privacyPromise.6': 'Class check-ins are anonymous: only the counts are kept.',
+  'legal.privacyPromise.7': 'Read-aloud may use a natural voice service: only the words on the screen (questions, answers and directions) are sent, never a student\'s name or what they answered, and nothing is kept.',
   'legal.privacyFull': 'Full Privacy Policy',
   'legal.privacyFull.1': 'The full Privacy Policy, reviewed by our attorney, will be posted on this page before Gamify launches.',
   'legal.terms': 'Terms of Service',

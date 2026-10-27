@@ -54,8 +54,12 @@ advertising identifiers, or browsing history.
 - Supabase (database and sign-in) **[Attorney]**
 - Vercel (hosting) **[Attorney]**
 - Stripe (payments, teacher accounts only) **[Attorney]**
-- A text-to-speech service, if a natural voice is turned on later; only the
-  question text is sent, never who is answering **[Attorney, if added]**
+- OpenAI (text-to-speech for the natural read-aloud voice, once its key is
+  added): only the words on the screen are sent (questions, answers,
+  directions), never a student's name or answers; not kept for training
+  **[Attorney: confirm their data terms and zero retention]**
+- Resend (email: school quotes as PDFs, once set up): the school contact's
+  name and email only **[Attorney]**
 We share nothing else except when the law requires it.
 
 ## 7. Keeping, downloading and deleting data

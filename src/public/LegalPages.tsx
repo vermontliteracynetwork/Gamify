@@ -28,7 +28,7 @@ const keys = (prefix: string, n: number) => Array.from({ length: n }, (_, i) => 
 
 export function PrivacyPage() {
   return <LegalPage title={t('legal.privacy')} intro={t('legal.privacyIntro')} sections={[
-    { h: t('legal.privacyPromise'), items: keys('legal.privacyPromise', 6) },
+    { h: t('legal.privacyPromise'), items: keys('legal.privacyPromise', 7) },
     { h: t('legal.privacyFull'), items: keys('legal.privacyFull', 1) },
   ]} />;
 }
