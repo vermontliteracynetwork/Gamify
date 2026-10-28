@@ -66,6 +66,12 @@ teacher no control or educational value is not done.
   coral, navy and mint; Inclusive Sans body, Grow Year headings (the
   logo's lettering); one shape scale. Use its tokens before adding colors or radii.
   Game stages wear per-game themes (`src/theme`), designed per game.
+- Classic is the main design and the default theme for every game
+  (teacher, 2026-10-28). It is seen, never handed out: no Classic art in
+  downloads, Canva files, studio stickers or starting points, and the
+  Classic example pages are look-only (stamped EXAMPLE, nothing to scan
+  back in). So Classic art may come from a licensed pack that forbids
+  redistribution, once it is in `docs/asset-ledger.md`.
 
 ## Before every commit
 

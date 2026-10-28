@@ -222,7 +222,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     <>
       {drawing && (
         <Suspense fallback={null}>
-          <DrawStudio piece={drawing} gameId={gameId} image={draft.pieces[drawing.id]?.image} onClose={() => setDrawing(null)}
+          <DrawStudio piece={drawing} image={draft.pieces[drawing.id]?.image} onClose={() => setDrawing(null)}
             onSave={(img) => { setPiece(drawing.id, img); setDrawing(null); setStatus(''); }} />
         </Suspense>
       )}
@@ -287,15 +287,13 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                       <p className="font-display text-lg flex items-center gap-2"><DownloadSimple weight="bold" size={22} aria-hidden="true" />{t('builder.dl.digital')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.digitalText')}</p>
                       <div className="flex flex-wrap gap-2">
-                        {([false, true] as const).map((example) => (
-                          <Button key={String(example)} variant={example ? 'secondary' : 'primary'} className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
-                            onClick={async () => {
-                              setDl(t('builder.dl.making'));
-                              const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
-                              saveFile(await digitalZip(game.name, gameId, [...game.themePieces, ...itemPages(game.items, example)], example), `${fileSlug(game.name)}-theme-${example ? 'classic-example' : 'blank'}.zip`);
-                              setDl(t('builder.dl.ready'));
-                            }}>{example ? t('builder.dl.example') : t('builder.dl.blank')} (.zip)</Button>
-                        ))}
+                        <Button variant="primary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
+                          onClick={async () => {
+                            setDl(t('builder.dl.making'));
+                            const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
+                            saveFile(await digitalZip(game.name, [...game.themePieces, ...itemPages(game.items)]), `${fileSlug(game.name)}-theme-blank.zip`);
+                            setDl(t('builder.dl.ready'));
+                          }}>{t('builder.dl.blank')} (.zip)</Button>
                       </div>
                     </div>
                   </div>
@@ -317,7 +315,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                 </>
               )}
               {tab === 'items' && game.items && (
-                <ItemsTab spec={game.items} gameId={gameId} items={draft.items ?? []} onChange={(items) => setDraft({ ...draft, items })} onProblem={setStatus} />
+                <ItemsTab spec={game.items} items={draft.items ?? []} onChange={(items) => setDraft({ ...draft, items })} onProblem={setStatus} />
               )}
               {tab === 'share' && (
                 <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
@@ -421,22 +419,18 @@ function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePiec
   );
 }
 
-// Template pages for power-ups: one blank page, or (Classic example) a page
-// for each Classic power-up so designers see what each one is.
-export function itemPages(spec: ItemSlotsSpec | undefined, example: boolean): ThemePieceSpec[] {
+// The template page for power-ups: one blank page.
+export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
   if (!spec) return [];
-  if (!example) return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
-  return spec.classic.map((c) => ({ id: `item-${c.art}`, label: t('builder.items.pieceNamed', { name: c.name }), width: spec.width, height: spec.height, hint: spec.abilities.find((a) => a.id === c.ability)?.label ?? '' }));
+  return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
 }
 
 // Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns
 // for what it does (only the abilities this game's code can do), how much,
 // how it moves and how often it turns up. Not every ability has to be used.
-function ItemsTab({ spec, gameId, items, onChange, onProblem }: { spec: ItemSlotsSpec; gameId: string; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
+function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; items: ThemeItem[]; onChange: (items: ThemeItem[]) => void; onProblem: (msg: string) => void }) {
   const [drawing, setDrawing] = useState<number | null>(null);
   const drawn = drawing === null ? undefined : items[drawing];
-  // Start from the Classic art for the same power.
-  const classicArt = drawn && spec.classic.find((c) => c.ability === drawn.ability)?.art;
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface w-full';
   function add() {
@@ -448,8 +442,8 @@ function ItemsTab({ spec, gameId, items, onChange, onProblem }: { spec: ItemSlot
     <div className="grid gap-3">
       {drawn && drawing !== null && (
         <Suspense fallback={null}>
-          <DrawStudio piece={{ id: classicArt ? `item-${classicArt}` : 'item', label: drawn.name || t('builder.items.piece'), width: spec.width, height: spec.height, hint: '' }}
-            gameId={gameId} image={drawn.image} onClose={() => setDrawing(null)} onSave={(img) => { put(drawing, { image: img }); setDrawing(null); }} />
+          <DrawStudio piece={{ id: 'item', label: drawn.name || t('builder.items.piece'), width: spec.width, height: spec.height, hint: '' }}
+            image={drawn.image} onClose={() => setDrawing(null)} onSave={(img) => { put(drawing, { image: img }); setDrawing(null); }} />
         </Suspense>
       )}
       <p className="font-semibold text-muted text-sm">{spec.hint} {t('builder.items.hint', { max: spec.max })}</p>

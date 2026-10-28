@@ -14,8 +14,6 @@ import type { StringKey } from '../../i18n/en';
 import { Button } from '../../ui/kit';
 import DialogFocus from '../../ui/DialogFocus';
 import { APPROVED_FONTS, THEME_FONTS, type FontName, type ThemePieceSpec } from '../types';
-import { CLASSIC_ITEM_ART, ClassicItemSvg } from '../classicItems';
-import { ClassicPiece } from './classicArt';
 import { isRound } from './template';
 import { useSettings } from '../../settings/SettingsContext';
 import { speak } from '../../engine/feedback';
@@ -107,15 +105,14 @@ const MAX_UNDO = 30;
 
 // `simple`: the student studio (Part 3E): fewer, bigger tools, and each tool
 // says its name and what it does when tapped.
-export default function DrawStudio({ piece, gameId, image, onSave, onClose, simple = false }: {
-  piece: ThemePieceSpec; gameId: string; image?: string; onSave: (dataUrl: string) => void; onClose: () => void; simple?: boolean;
+export default function DrawStudio({ piece, image, onSave, onClose, simple = false }: {
+  piece: ThemePieceSpec; image?: string; onSave: (dataUrl: string) => void; onClose: () => void; simple?: boolean;
 }) {
   const { settings } = useSettings();
   const [warn, setWarn] = useState<string[]>([]);
   const scale = Math.min(1, MAX_SIDE / Math.max(piece.width, piece.height));
   const W = Math.round(piece.width * scale), H = Math.round(piece.height * scale);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const classicRef = useRef<SVGSVGElement>(null);
   const [tool, setTool] = useState<Tool>('brush');
   const [brush, setBrush] = useState<BrushKind>('pen');
   const [shape, setShape] = useState<ShapeKind>('circle');
@@ -287,11 +284,12 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
       c.restore();
     }
   }
-  async function startFrom(kind: 'blank' | 'classic') {
+  // Classic art is never a starting point or a sticker: it is seen, not
+  // handed out (teacher, 2026-10-28).
+  function clearAll() {
     remember();
     setObjs([]); setSel(null);
     ctx().clearRect(0, 0, W, H);
-    if (kind === 'classic' && classicRef.current) ctx().drawImage(await loadSvg(new XMLSerializer().serializeToString(classicRef.current)), 0, 0, W, H);
   }
   // Paint first, then every piece in order, into one picture.
   // Readability (Part 3E): words must stand out from what is behind them.
@@ -336,7 +334,6 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
     const q = query.trim().toLowerCase();
     return STICKERS.filter(([name, , words]) => (!q || name.includes(q) || words.includes(q)) && (shelf === 'all' || shelfOf(words) === shelf));
   }, [query, shelf]);
-  const classicFound = Object.keys(CLASSIC_ITEM_ART).filter((a) => (!query.trim() || a.includes(query.trim().toLowerCase())) && (shelf === 'all' || shelf === 'powers'));
   const pickSticker = (e: React.MouseEvent<HTMLButtonElement>, label: string, recolor: boolean) => {
     const svg = e.currentTarget.querySelector('svg');
     if (!svg) return;
@@ -489,22 +486,18 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
               <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('studio.search')} aria-label={t('studio.search')}
                 className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold" />
               <div role="radiogroup" aria-label={t('studio.shelves')} className="flex flex-wrap gap-1">
-                {['all', ...SHELVES.map(([k]) => k), 'things', 'powers'].map((k) => (
+                {['all', ...SHELVES.map(([k]) => k), 'things'].map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={shelf === k} onClick={() => setShelf(k)}
                     className={`min-h-9 px-2.5 rounded-pill border-[2px] font-bold text-xs ${shelf === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`studio.shelf.${k}` as StringKey)}</button>
                 ))}
               </div>
               <div className="grid grid-cols-6 gap-1">
-                {classicFound.map((a) => (
-                  <button key={a} type="button" draggable aria-label={a.replace(/-/g, ' ')} aria-pressed={sticker?.label === a} onClick={(e) => pickSticker(e, a, false)} onDragStart={(e) => dragOut(e, a, false)}
-                    className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${sticker?.label === a ? 'border-border bg-accent' : 'border-transparent'}`}><ClassicItemSvg art={a} size={32} /></button>
-                ))}
                 {found.map(([name, I]) => (
                   <button key={name} type="button" draggable aria-label={name} aria-pressed={sticker?.label === name} onClick={(e) => pickSticker(e, name, true)} onDragStart={(e) => dragOut(e, name, true)}
                     className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${sticker?.label === name ? 'border-border bg-accent' : 'border-transparent'}`}><I weight="fill" size={28} /></button>
                 ))}
               </div>
-              {found.length + classicFound.length === 0 && <p className="text-sm font-bold text-muted">{t('studio.noStickers')}</p>}
+              {found.length === 0 && <p className="text-sm font-bold text-muted">{t('studio.noStickers')}</p>}
               <p className="text-xs font-semibold text-muted">{t('studio.stickerHint')}</p>
             </Section>
             {!simple && <Section title={t('studio.shapes')} open={tool === 'shape'}>
@@ -529,17 +522,12 @@ export default function DrawStudio({ piece, gameId, image, onSave, onClose, simp
             </Section>
             <Section title={t('studio.startFrom')}>
               <div className="flex flex-wrap gap-1.5">
-                <Button onClick={() => void startFrom('classic')}>{t('studio.fromClassic')}</Button>
-                <Button onClick={() => void startFrom('blank')}>{t('studio.blank')}</Button>
+                <Button onClick={clearAll}>{t('studio.blank')}</Button>
               </div>
             </Section>
           </div>
         </div>
       </div>
-      {/* The Classic look of this piece, drawn off screen for "Start over". */}
-      <svg ref={classicRef} xmlns="http://www.w3.org/2000/svg" width={piece.width} height={piece.height} viewBox={`0 0 ${piece.width} ${piece.height}`} className="absolute -left-[99999px] w-0 h-0" aria-hidden="true">
-        <ClassicPiece piece={piece} gameId={gameId} />
-      </svg>
     </div>
   );
 }
