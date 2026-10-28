@@ -1,11 +1,12 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Clock, GraduationCap } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Clock, GraduationCap, PaintBrush } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { POSTS } from './posts';
+import { guideGames, ThemeGuideCard } from './ThemeGuide';
 import PublicFooter from './PublicFooter';
 
 // Grade bands for the filter; a post shows when its grades overlap the band.
@@ -35,7 +36,16 @@ export function WaysList() {
           ))}
           <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
             className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
+          <button type="button" aria-pressed={tag === 'themes'} onClick={() => setParams(tag === 'themes' ? {} : { tag: 'themes' }, { replace: true })}
+            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
         </div>
+        {!tag && (
+          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-accent border-[2.5px] border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <PaintBrush weight="fill" size={44} aria-hidden="true" />
+            <span className="grid gap-1 flex-1 min-w-60"><span className="font-display text-2xl">{t('guide.listTitle')}</span><span className="font-semibold">{t('guide.listSub')}</span></span>
+            <span className={buttonClasses('secondary')}>{t('guide.listOpen')}<ArrowRight weight="bold" size={18} /></span>
+          </Link>
+        )}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts.map((p) => (
             <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -47,6 +57,7 @@ export function WaysList() {
               </span>
             </Link>
           ))}
+          {tag === 'themes' && guideGames().map((g) => <ThemeGuideCard key={g.id} game={g} />)}
         </div>
       </main>
       <PublicFooter />

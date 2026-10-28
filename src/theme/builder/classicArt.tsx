@@ -13,6 +13,8 @@ import { CLASSIC_ITEM_ART } from '../classicItems';
 // Shapes and icons only, no text, so it turns into a PNG anywhere.
 const INK = '#000000';
 const ACCENT = '#fdfd94';
+// Pieces that look round in the game, though they are drawn in a box.
+export const ROUND_LOOK = /^(ball|peg|bobber|sun)$/;
 
 export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId: string }) {
   const { width: w, height: h, id } = piece;
@@ -94,6 +96,50 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
         <ellipse cx={w / 2} cy={h * 0.68} rx={w * 0.42} ry={h * 0.3} fill="#ffffff" stroke={INK} strokeWidth={line} />
         <ellipse cx={w / 2} cy={h * 0.22} rx={w * 0.26} ry={h * 0.2} fill="#ffffff" stroke={INK} strokeWidth={line} />
         <rect x={w * 0.22} y={h * 0.38} width={w * 0.56} height={h * 0.06} fill="#e5635f" />
+      </g>
+    );
+  }
+  // Round things that are not round template pieces.
+  if (ROUND_LOOK.test(id)) {
+    const fill = piece.color ?? ({ ball: ACCENT, peg: '#ffffff', bobber: '#e5635f', sun: '#ffd84d' } as Record<string, string>)[id] ?? ACCENT;
+    return (
+      <g>
+        {id === 'sun' && Array.from({ length: 8 }, (_, k) => <line key={k} x1={w / 2} y1={h / 2} x2={w / 2 + Math.cos(k * Math.PI / 4) * m * 0.48} y2={h / 2 + Math.sin(k * Math.PI / 4) * m * 0.48} stroke="#f6a623" strokeWidth={line * 1.6} strokeLinecap="round" />)}
+        <circle cx={w / 2} cy={h / 2} r={id === 'sun' ? m * 0.32 : m / 2 - line} fill={fill} stroke={INK} strokeWidth={line} />
+        {id === 'bobber' && <path d={`M${w / 2 - m * 0.46} ${h / 2} H${w / 2 + m * 0.46}`} stroke={INK} strokeWidth={line} />}
+        {id === 'bobber' && <path d={`M${w / 2 - m * 0.45} ${h / 2} A${m * 0.45} ${m * 0.45} 0 0 0 ${w / 2 + m * 0.45} ${h / 2} Z`} fill="#ffffff" stroke={INK} strokeWidth={line} />}
+      </g>
+    );
+  }
+  if (id === 'cloud') {
+    return <path d={`M${w * 0.2} ${h * 0.82} Q${w * 0.02} ${h * 0.8} ${w * 0.06} ${h * 0.58} Q${w * 0.1} ${h * 0.38} ${w * 0.3} ${h * 0.42} Q${w * 0.36} ${h * 0.1} ${w * 0.58} ${h * 0.16} Q${w * 0.78} ${h * 0.2} ${w * 0.78} ${h * 0.42} Q${w * 0.98} ${h * 0.42} ${w * 0.96} ${h * 0.64} Q${w * 0.94} ${h * 0.82} ${w * 0.78} ${h * 0.82} Z`} fill="#ffffff" stroke={INK} strokeWidth={line} strokeLinejoin="round" />;
+  }
+  if (id === 'bucket' || id === 'bucket-big') {
+    return (
+      <g>
+        <path d={`M${w * 0.08} ${h * 0.12} H${w * 0.92} L${w * 0.82} ${h * 0.92} H${w * 0.18} Z`} fill={piece.color ?? (id === 'bucket-big' ? '#ed9d75' : '#ffffff')} stroke={INK} strokeWidth={line} strokeLinejoin="round" />
+        <path d={`M${w * 0.08} ${h * 0.12} H${w * 0.92}`} stroke={INK} strokeWidth={line * 2} />
+      </g>
+    );
+  }
+  if (id === 'rod') return <g><path d={`M${w * 0.15} ${h * 0.95} L${w * 0.75} ${h * 0.05}`} stroke="#9c6b45" strokeWidth={m * 0.08} strokeLinecap="round" /><path d={`M${w * 0.75} ${h * 0.05} Q${w * 0.95} ${h * 0.4} ${w * 0.85} ${h * 0.95}`} fill="none" stroke={INK} strokeWidth={line / 2} /></g>;
+  if (id === 'dock') return <g>{[0, 1, 2, 3, 4].map((k) => <rect key={k} x={line / 2 + k * (w - line) / 5} y={h * 0.2} width={(w - line) / 5} height={h * 0.6} fill={k % 2 ? '#b98a5e' : '#c99a6b'} stroke={INK} strokeWidth={line} />)}</g>;
+  if (id === 'barn') {
+    return (
+      <g>
+        <path d={`M${w * 0.1} ${h * 0.42} L${w / 2} ${h * 0.1} L${w * 0.9} ${h * 0.42} V${h * 0.95} H${w * 0.1} Z`} fill="#e5635f" stroke={INK} strokeWidth={line} strokeLinejoin="round" />
+        <rect x={w * 0.34} y={h * 0.56} width={w * 0.32} height={h * 0.39} fill="#fbfcf8" stroke={INK} strokeWidth={line} />
+        <path d={`M${w * 0.34} ${h * 0.56} L${w * 0.66} ${h * 0.95} M${w * 0.66} ${h * 0.56} L${w * 0.34} ${h * 0.95}`} stroke="#e5635f" strokeWidth={line} />
+      </g>
+    );
+  }
+  if (id === 'sprout' || id.startsWith('crop-')) {
+    const top = ({ 'crop-corn': '#f6c544', 'crop-pumpkin': '#f39a6b', 'crop-sunflower': '#ffd84d', 'crop-tomato': '#e5635f' } as Record<string, string>)[id];
+    return (
+      <g>
+        <path d={`M${w / 2} ${h * 0.95} V${h * 0.4}`} stroke="#2f7d32" strokeWidth={line * 1.5} strokeLinecap="round" />
+        <path d={`M${w / 2} ${h * 0.7} Q${w * 0.2} ${h * 0.6} ${w * 0.18} ${h * 0.42} Q${w * 0.4} ${h * 0.5} ${w / 2} ${h * 0.7} Z M${w / 2} ${h * 0.6} Q${w * 0.8} ${h * 0.5} ${w * 0.82} ${h * 0.32} Q${w * 0.6} ${h * 0.4} ${w / 2} ${h * 0.6} Z`} fill="#7cc66a" stroke={INK} strokeWidth={line / 1.5} />
+        {top && <circle cx={w / 2} cy={h * 0.3} r={m * 0.22} fill={top} stroke={INK} strokeWidth={line} />}
       </g>
     );
   }

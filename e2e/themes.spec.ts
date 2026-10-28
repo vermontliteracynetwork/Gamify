@@ -131,7 +131,7 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 });
 
-test('Download tab: blank printable pages and digital files; the Classic example is look-only', async ({ page }, info) => {
+test('Download tab: blank printable pages and digital files; the Classic look is in the theme guide', async ({ page }, info) => {
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Download' }).click();
@@ -147,11 +147,8 @@ test('Download tab: blank printable pages and digital files; the Classic example
   const names = Object.keys(zip);
   expect(names).toContain('sizes.txt');
   expect(names.some((n) => /card-back-\d+x\d+\.png$/.test(n))).toBe(true);
-  await page.getByRole('link', { name: 'Classic example' }).click();
-  await expect(page.getByText('to look at only. Use the blank pages to draw.', { exact: false })).toBeVisible();
-  // Look-only pages: stamped EXAMPLE, no corner squares or outline to scan back in.
-  const sheet = page.locator('.template-sheet').first();
-  await expect(sheet.locator('text', { hasText: 'EXAMPLE' }).first()).toBeAttached();
-  expect(await sheet.locator('rect[width="90"]').count()).toBe(0);
-  if (info.project.name === 'ipad-portrait') await page.screenshot({ path: 'test-results/builder-template-example.png', fullPage: true });
+  // The Classic look lives in the blog's theme guide, look-only.
+  await expect(page.getByRole('link', { name: 'Classic example' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'See every piece (theme guide)' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: /Theme Guide: Game Show/ })).toBeVisible();
 });

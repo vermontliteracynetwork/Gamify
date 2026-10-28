@@ -84,7 +84,7 @@ test.describe('full sweep', () => {
   });
   test.describe('more public pages', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
-    for (const path of ['/blog', '/research', '/credits', '/privacy', '/terms', '/accessibility', '/challenge/permission', '/owner', '/status', '/accessibility/report']) {
+    for (const path of ['/blog', '/blog?tag=themes', '/blog/themes/game-show', '/blog/themes/peg-drop', '/blog/designing-a-theme-file', '/research', '/credits', '/privacy', '/terms', '/accessibility', '/challenge/permission', '/owner', '/status', '/accessibility/report']) {
       test(`no automated accessibility violations on ${path}`, async ({ page }) => {
         await page.goto(path);
         await page.waitForTimeout(400);

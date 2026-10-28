@@ -18,6 +18,29 @@ export interface Post {
 
 export const POSTS: Post[] = [
   {
+    slug: 'designing-a-theme-file',
+    title: 'Designing a Theme File, Step by Step',
+    summary: 'How a class turns its own drawings into a game theme: pick a game, see every piece in its theme guide, design on blank templates, and add them in the Theme Builder.',
+    cover: 'game-show',
+    grades: 'K-12',
+    minutes: 45,
+    tags: ['themes'],
+    body: [
+      'A theme is the set of pictures a game wears: the background, the board, the pieces, the power-ups and the cover on the game card. Every game has its own list, and each game\'s theme guide in this Blog shows every piece with its exact size and what it needs.',
+      'Start with the guide for the game you want. Each piece shows the Classic look marked Example, so students know what it is and where it goes, and a short list of what makes a good one: see-through backgrounds for things that move, strong contrast for anything with words, and bold shapes for small round pieces.',
+      'Then pick how the class will design. Printable pages work for crayons and markers: one US Letter page per piece with the shape outlined. Print at 100% size, draw inside the dark line, and keep the corner squares clear so the Theme Builder can read the photo. Digital files work for any drawing app: one blank PNG per piece at the exact size, in one zip with a list of sizes.',
+      'When the designs are ready, open the Theme Builder (signed in as a teacher), pick the game, and add them on the Upload tab: photos of the printed pages, or the PNG files. Anything left empty keeps the Classic look, so a class can make one piece a day.',
+      'A few rules keep every theme safe to share: only the class\'s own art or art you have the rights to, no characters or logos from other games, shows or brands, and no photos or names of students.',
+    ],
+    tryIt: [
+      'Open the Blog, tap Theme guides, and pick a game.',
+      'Read the pieces together and split them up: one piece per student or pair.',
+      'Download the printable pages or the digital files from the guide.',
+      'Design each piece, then take photos or save the PNG files.',
+      'Sign in, open the Theme Builder for that game, and add them on the Upload tab.',
+    ],
+  },
+  {
     slug: 'one-set-a-whole-week-at-home',
     title: 'One Question Set, a Whole Week of Games at Home',
     summary: 'Play the same set in a different game each day. Your children get spaced practice, and it never feels like the same worksheet twice.',

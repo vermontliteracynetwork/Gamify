@@ -280,7 +280,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
                       <div className="flex flex-wrap gap-2">
                         <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}>{t('builder.dl.blank')}</Link>
-                        <Link to={`/teacher/themes/${gameId}/template?example=classic`} className={buttonClasses('secondary', 'hover-pop')}>{t('builder.dl.example')}</Link>
+                        {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}>{t('builder.dl.guide')}</Link>}
                       </div>
                     </div>
                     <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
@@ -291,6 +291,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                           onClick={async () => {
                             setDl(t('builder.dl.making'));
                             const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
+                            const { itemPages } = await import('./template');
                             saveFile(await digitalZip(game.name, [...game.themePieces, ...itemPages(game.items)]), `${fileSlug(game.name)}-theme-blank.zip`);
                             setDl(t('builder.dl.ready'));
                           }}>{t('builder.dl.blank')} (.zip)</Button>
@@ -417,12 +418,6 @@ function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePiec
         className="shrink-0 min-h-11 px-3 rounded-pill border-[2px] border-border bg-accent font-bold text-sm inline-flex items-center gap-1.5"><PaintBrush weight="fill" size={18} />{t('builder.draw')}</button>
     </div>
   );
-}
-
-// The template page for power-ups: one blank page.
-export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
-  if (!spec) return [];
-  return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
 }
 
 // Power-up items (teacher, 2026-10-26): each gets art, a name, and dropdowns

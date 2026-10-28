@@ -74,6 +74,7 @@ const AccessibilityPage = lazy(() => import('./public/LegalPages').then((m) => (
 const CreditsPage = lazy(() => import('./public/LegalPages').then((m) => ({ default: m.CreditsPage })));
 const WaysList = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysList })));
 const WaysPost = lazy(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
+const ThemeGuidePage = lazy(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
 const HelpPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazy(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -122,6 +123,8 @@ function AnimatedRoutes() {
           <Route path="/credits" element={<CreditsPage />} />
           <Route path="/blog" element={<WaysList />} />
           <Route path="/blog/:slug" element={<WaysPost />} />
+          <Route path="/blog/themes/:gameId" element={<ThemeGuidePage />} />
+          <Route path="/blog/themes/:gameId/print" element={<TemplatePage guide />} />
           <Route path="/ways" element={<WaysList />} />
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />

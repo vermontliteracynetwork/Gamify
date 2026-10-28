@@ -1,4 +1,5 @@
-import type { ThemePieceSpec } from '../types';
+import { t } from '../../i18n';
+import type { ItemSlotsSpec, ThemePieceSpec } from '../types';
 
 // The printable theme template (one page per designable piece) and where
 // everything sits on it, in px on a 1700 x 2200 page (US Letter at 200 dpi).
@@ -36,3 +37,9 @@ export function outlineBox(piece: Pick<ThemePieceSpec, 'width' | 'height'>) {
 
 // Round pieces (discs, team icons, sign-in pictures, the star) are drawn in a circle.
 export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^star$/.test(piece.id);
+
+// The template page for power-ups: one blank page.
+export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
+  if (!spec) return [];
+  return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
+}
