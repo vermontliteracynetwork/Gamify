@@ -1149,6 +1149,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 80 | **(On hold: Castle Guard is hidden until the teacher decides.) Castle Guard: learning pays for the towers.** Every right answer earns gems; students plan where to build, then watch their towers send friendly critters home. Nobody gets hurt and there is no losing, only more to send home next wave. | A strategy game with zero time pressure on questions, so slower readers win too | Claudia, 2026-10-27 |
 | 81 | **Farm Grow: patience pays.** Right answers earn farm jobs; students plant, water every day, and pick a crop after three nights, with a real plant fact read aloud at every harvest. Growing takes planning, not speed. | A calm game that rewards coming back, with science facts built in | Development, 2026-10-27 |
 | 82 | **A theme guide for every game.** Free, public guides show every piece of every game: what it does, its exact size, and what makes a good one (see-through backgrounds, contrast, bold shapes), with blank printable and digital templates to download. Teachers can plan a theme project before they even sign up. | Search-friendly how-to pages that bring teachers in and make the Theme Builder feel easy | Teacher, 2026-10-28 |
+| 83 | **Made for the smart board.** Every game grows to fill a classroom board or projector, with one tap to full screen, and still fits a laptop or an iPad with nothing to scroll. | Teachers run it live from the front of the room, readable from the back row | Teacher, 2026-10-29 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
