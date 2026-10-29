@@ -2,16 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { ALL_GAMES as GAMES } from '../games/registry';
 import { classicTheme } from './classic';
 import { pieceFill, themesFor } from './library';
+import { STARTER_THEMES } from './starters';
 import { themeProblems } from './validate';
 
 describe('game themes', () => {
-  it('every game starts on Classic, plus its starter themes, and every one passes readability checks', () => {
+  it('every game wears only Classic for now, and it passes readability checks', () => {
     for (const g of GAMES) {
       const themes = themesFor(g.id);
-      expect(themes[0].name).toBe('Classic');
-      expect(themes.slice(1).every((t) => t.source === 'library' && t.designedBy === 'Gamify')).toBe(true);
-      for (const th of themes) expect([th.name, themeProblems(th)]).toEqual([th.name, []]);
+      expect(themes.map((t) => t.name)).toEqual(['Classic']);
+      expect(themeProblems(themes[0])).toEqual([]);
     }
+  });
+  it('the starter samples still pass readability checks, for when they come back', () => {
+    for (const x of STARTER_THEMES) expect([x.name, themeProblems(x.theme)]).toEqual([x.name, []]);
   });
   it('adds only the made themes for that game', () => {
     const made = { ...classicTheme('match-three'), id: 'x', name: 'Ours', source: 'custom' as const };

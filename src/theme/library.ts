@@ -4,7 +4,8 @@ import type { GameTheme } from './types';
 
 // Every game plays Classic free; other themes come from the Theme Builder
 // (the teacher's own designs and library themes made in the owner's
-// developer view) and Gamify's starter themes (Plus and Pro).
+// developer view) and Gamify's starter themes (Plus and Pro; off for now,
+// see STARTERS_IN_GAMES).
 export function themesFor(gameId: string, made: GameTheme[] = []): GameTheme[] {
   return [classicTheme(gameId), ...made.filter((th) => th.gameId === gameId), ...startersFor(gameId)];
 }

@@ -27,5 +27,11 @@ export const STARTER_THEMES: StarterTheme[] = [
 
 export const BANDS: Band[] = ['all', 'k2', '35', '68', 'adult'];
 
+// Games wear only Classic for now (teacher, 2026-10-29: "put only the
+// classic theme on now for every game ... none other have been designed").
+// The starters stay as labeled samples on the public showcase pages; turn
+// this on again once real Gamify themes are designed.
+export const STARTERS_IN_GAMES = false;
+
 // The starter themes a game can wear (Classic is added by themesFor).
-export const startersFor = (gameId: string) => STARTER_THEMES.filter((x) => x.gameId === gameId && x.id !== 'classic').map((x) => x.theme);
+export const startersFor = (gameId: string) => (STARTERS_IN_GAMES ? STARTER_THEMES.filter((x) => x.gameId === gameId && x.id !== 'classic').map((x) => x.theme) : []);

@@ -21,25 +21,30 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(1);
   await page.screenshot({ path: `test-results/themes-favs-${info.project.name}.png` });
 
+  // Games wear only Classic for now; a theme the teacher designs can be offered.
   await page.goto('/teacher/classes/c1');
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
-  const first = page.getByRole('group', { name: /Themes students can pick/ }).getByRole('checkbox').first();
-  await expect(first).toContainText('Night Arcade');
-  await first.click();
-  await page.getByRole('checkbox', { name: /Ocean Friends/ }).click();
-  await expect(page.getByText('2 of 10 themes picked.')).toBeVisible();
+  await expect(page.getByText('Every game plays Classic for now.', { exact: false })).toBeVisible();
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByLabel('Theme name').fill('Room 7 Look');
+  await page.getByRole('button', { name: 'Save theme' }).click();
+  await expect(page.getByText('Saved Room 7 Look.', { exact: false })).toBeVisible();
+  await page.goto('/teacher/classes/c1');
+  await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
+  await page.getByRole('checkbox', { name: /Room 7 Look/ }).click();
+  await expect(page.getByText('1 of 10 themes picked.')).toBeVisible();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
-  await expect(page.getByText('2 themes', { exact: false })).toBeVisible();
 
-  // Ava sees Classic plus the two themes her teacher offered.
+  // Ava sees Classic plus the theme her teacher offered.
   await page.evaluate(() => { localStorage.removeItem('gamify:teacher-session'); sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava' })); });
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   const radios = page.getByRole('radiogroup', { name: /theme/i }).getByRole('radio');
-  await expect(radios).toHaveCount(3);
-  await expect(page.getByRole('radio', { name: 'Ocean Friends' })).toBeVisible();
-  await expect(page.getByRole('radio', { name: 'Night Arcade' })).toBeVisible();
+  await expect(radios).toHaveCount(2);
+  await expect(page.getByRole('radio', { name: /Room 7 Look/ })).toBeVisible();
   await page.screenshot({ path: `test-results/theme-choices-student-${info.project.name}.png` });
 });
 

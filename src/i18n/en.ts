@@ -852,7 +852,7 @@ export const en = {
   'class.ends': 'Ends (optional)',
   'class.themes': 'Themes students can pick (optional)',
   'class.themesHint': 'Choose up to {max}. Students pick one of these when they play this set. Leave empty to let them pick any theme.',
-  'class.themesNone': 'Starter and library themes come with Plus and Pro, and your own designs show here too.',
+  'class.themesNone': 'Every game plays Classic for now. Themes you design in the Theme Builder show up here.',
   'class.themesPicked': '{count} of {max} themes picked.',
   'class.themeCount': '{count} themes',
   'class.themeCount.one': '1 theme',

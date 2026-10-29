@@ -18,12 +18,12 @@ async function png(page: Page, color: string): Promise<Buffer> {
   return Buffer.from(data, 'base64');
 }
 
-test('Free plays Classic; starter themes show locked on the game\'s own theme screen', async ({ page }, info) => {
+test('every game wears only Classic for now (teacher, 2026-10-29)', async ({ page }, info) => {
   await page.goto('/games/match-three');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
-  await expect(page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio')).toHaveCount(2);
-  await expect(page.getByRole('radio', { name: /Candy Shop/ })).toHaveAccessibleName(/locked/i);
+  await expect(page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio')).toHaveCount(1);
+  await expect(page.getByRole('radio', { name: /Candy Shop/ })).toHaveCount(0);
   await expect(page.getByRole('radio', { name: 'Classic' })).toHaveAttribute('aria-checked', 'true');
   await page.screenshot({ path: `test-results/theme-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();

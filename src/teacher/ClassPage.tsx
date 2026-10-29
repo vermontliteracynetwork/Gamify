@@ -377,7 +377,7 @@ function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: st
       <legend className="font-bold">{t('class.themes')}</legend>
       <p className="text-sm font-semibold text-muted">{t('class.themesHint', { max: MAX_THEME_CHOICES })}</p>
       {options.length === 0 ? (
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.themesNone')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.themesNone')}</p>{!TIERS[tier].themesPlayable && <UpgradeButton className="min-h-10 px-3 text-sm" />}</div>
       ) : (
         <div className="flex flex-wrap gap-2">
           {options.map(({ th, game }) => {
