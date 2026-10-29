@@ -198,7 +198,7 @@ export default function Bowling() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+    <main className="landscape:[--wide-save:1.25rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
@@ -233,7 +233,7 @@ export default function Bowling() {
               </div>
             )}
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 19.375rem + var(--chrome-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   <radialGradient id="sb-planet" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
@@ -276,7 +276,7 @@ export default function Bowling() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 19.375rem + var(--chrome-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               {Array.from({ length: LANES }, (_, l) => (
                 <button key={l} type="button" onClick={() => bowl(l)} disabled={!canAim} aria-label={t('sb.lane', { n: l + 1 })}
                   className={`min-h-14 rounded-input border-[2.5px] border-border font-display text-2xl disabled:opacity-60 ${canAim ? 'motion-safe:animate-pulse' : ''}`}

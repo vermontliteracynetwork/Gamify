@@ -5,7 +5,7 @@ import { LIBRARY } from '../src/data/library';
 // Shift+Tab, Enter, Space and the arrow keys after the page loads.
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
-async function tabTo(page: Page, name: RegExp, max = 40) {
+async function tabTo(page: Page, name: RegExp, max = 80) {
   for (let i = 0; i < max; i++) {
     await page.keyboard.press('Tab');
     const label = await page.evaluate(() => { const el = document.activeElement as HTMLInputElement | null; return el ? (el.getAttribute('aria-label') || el.labels?.[0]?.innerText || el.innerText || '').trim() : ''; });

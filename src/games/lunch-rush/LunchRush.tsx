@@ -171,12 +171,12 @@ export default function LunchRush() {
   const guestPics = [1, 2, 3].map((n) => pieceImage(theme, `guest-${n}`)).filter((x): x is string => !!x);
   // Wider than tall on a landscape screen, square on a portrait one, so the
   // board fills the screen without leaving empty space below.
-  const boardWidth = 'min(100%, calc((100dvh - 19.875rem + var(--chrome-save, 0rem) - var(--lr-extra)) * var(--lr-ratio)))';
+  const boardWidth = 'min(100%, calc((100dvh - 22.5rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--lr-extra)) * var(--lr-ratio)))';
   const foodName = (f: Food) => t(`lr.food.${f}` as StringKey);
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+    <main className="landscape:[--wide-save:2.625rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="lunch-rush" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (

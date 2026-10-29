@@ -162,7 +162,7 @@ export default function PegDrop() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className="landscape:[--wide-save:5.75rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="peg-drop" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
@@ -196,7 +196,7 @@ export default function PegDrop() {
                 <span className="ml-auto font-bold text-sm">{t('pd.drop', { n: Math.min(drops + 1, totalTurns), total: totalTurns })}</span>
               </div>
             )}
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 15.5rem + var(--chrome-save, 0rem)) * 7 / 8))' }}>
+            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 21.25rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 7 / 8))' }}>
               {Array.from({ length: ZONES }, (_, z) => (
                 <button key={z} type="button" onClick={() => player?.kind !== 'cpu' && drop(z)} disabled={step !== 'aim' || player?.kind === 'cpu'} aria-label={t('pd.zone', { n: z + 1 })}
                   className={`absolute -translate-x-1/2 top-[1%] w-[11%] aspect-square rounded-full flex items-center justify-center ${step === 'aim' && player?.kind !== 'cpu' ? 'bg-accent border-[2.5px] border-border motion-safe:animate-pulse' : 'opacity-0'}`}

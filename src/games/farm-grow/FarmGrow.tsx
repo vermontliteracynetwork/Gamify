@@ -114,7 +114,7 @@ export default function FarmGrow() {
   const tip = stage === 'gate' ? t('fg.answer') : stage === 'night' ? t('fg.night') : jobs > 0 ? t('fg.work') : t('fg.noJobs');
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className="landscape:[--wide-save:1rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="farm-grow" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={farmGrowManifest.name} /></h1>}
@@ -159,7 +159,7 @@ export default function FarmGrow() {
 
           <div className="grid gap-3 landscape:grid-cols-[1fr_auto] items-start">
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden select-none aspect-[4/3]"
-              style={{ ...pieceFill(theme, 'background', '#bfe6a0'), maxWidth: 'min(100%, calc((100dvh - 15.625rem + var(--chrome-save, 0rem)) * 4 / 3))' }}>
+              style={{ ...pieceFill(theme, 'background', '#bfe6a0'), maxWidth: 'min(100%, calc((100dvh - 17.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 4 / 3))' }}>
               {!pieceImage(theme, 'background') && <div className="absolute inset-x-0 top-0 h-[16%] bg-[#bfe8ff] border-b-[3px] border-border" aria-hidden="true" />}
               <div className="absolute right-[3%] top-[2%] w-[16%] aspect-square" aria-hidden="true">
                 {pieceImage(theme, 'barn') ? <img src={pieceImage(theme, 'barn')} alt="" className="w-full h-full object-contain" /> : <BarnArt />}

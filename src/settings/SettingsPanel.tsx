@@ -28,7 +28,7 @@ export function FullScreenButton() {
   if (typeof document === 'undefined' || !document.fullscreenEnabled) return null;
   const toggle = () => { void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
   return (
-    <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')} aria-pressed={on}
+    <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')}
       className="w-14 h-14 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center active:scale-95 motion-safe:transition"
       style={{ boxShadow: 'var(--shadow-sticker)' }}>
       {on ? <CornersIn weight="bold" size={28} /> : <CornersOut weight="bold" size={28} />}

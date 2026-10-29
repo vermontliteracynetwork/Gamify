@@ -221,7 +221,7 @@ export default function BubblePop() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+    <main className="landscape:[--wide-save:2.875rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bubble-pop" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl hidden lg:block"><Title text={bubblePopManifest.name} /></h1>}
@@ -253,7 +253,7 @@ export default function BubblePop() {
         <div className="grid lg:grid-cols-[1fr_230px] gap-3 lg:gap-5 items-start">
           <section className="grid gap-2 min-w-0">
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
-              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, maxWidth: `min(100%, calc((100dvh - 15.25rem + var(--chrome-save, 0rem) - var(--bp-extra)) * ${W / H}))`, boxShadow: 'var(--shadow-sticker-lg)' }}>
+              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, maxWidth: `min(100%, calc((100dvh - 18.125rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--bp-extra)) * ${W / H}))`, boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
                 onPointerMove={(e) => { if (canAim && (e.pointerType === 'mouse' || pressed.current)) setAngle(toAngle(e)); }}
