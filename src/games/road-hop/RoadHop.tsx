@@ -184,7 +184,7 @@ export default function RoadHop() {
   const hopperArt = pieceImage(theme, 'hopper');
   const carColors = [pieceColor(theme, 'car', CAR_COLORS[0]), ...CAR_COLORS.slice(1)];
   const cell = (r: number) => ({ top: `${((ROWS - 1 - r) / ROWS) * 100}%`, height: `${100 / ROWS}%` });
-  const boardWidth = `min(100%, calc((100dvh - 330px - var(--rh-extra)) * ${COLS} / ${ROWS}))`;
+  const boardWidth = `min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) - var(--rh-extra)) * ${COLS} / ${ROWS}))`;
 
   return (
     <ThemedPage theme={theme}>
@@ -213,7 +213,7 @@ export default function RoadHop() {
       )}
       {(phase === 'play' || phase === 'end') && turns && player && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
-          <section className="grid gap-2 min-w-0 [--rh-extra:70px] lg:[--rh-extra:0px]">
+          <section className="grid gap-2 min-w-0 [--rh-extra:4.375rem] lg:[--rh-extra:0rem]">
             {phase === 'play' && (
               <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={36} />

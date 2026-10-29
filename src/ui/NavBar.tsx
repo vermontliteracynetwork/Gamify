@@ -14,7 +14,7 @@ export default function NavBar() {
   const { teacher, student, any } = useSignedIn();
   const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
-    <header className="no-print sticky top-0 z-50 h-16 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
+    <header className="site-header no-print sticky top-0 z-50 h-16 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
       <Link to={any ? '/play' : '/'} className="flex items-center shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-9 w-auto shrink-0" draggable="false" />
       </Link>

@@ -189,7 +189,7 @@ export default function CastCatch() {
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl" aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={22} />{catches.length}</span>
           </div>
 
-          <div className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 350px)', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 28%, #5aa9d6 28%, #2f6fb0 100%)' }) }}>
+          <div className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 21.875rem + var(--chrome-save, 0rem))', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 28%, #5aa9d6 28%, #2f6fb0 100%)' }) }}>
             {!still && [0, 1, 2].map((i) => (
               <span key={i} className="absolute h-1.5 rounded-pill bg-white/50" style={{ top: `${40 + i * 18}%`, width: '18%', animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}

@@ -224,7 +224,7 @@ export default function Bowling() {
       )}
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
-          <section className="grid gap-2 min-w-0 [--sb-extra:70px] lg:[--sb-extra:0px]">
+          <section className="grid gap-2 min-w-0 [--sb-extra:4.375rem] lg:[--sb-extra:0rem]">
             {phase === 'play' && player && (
               <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={36} />
@@ -233,7 +233,7 @@ export default function Bowling() {
               </div>
             )}
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 330px - var(--sb-extra)) * 100 / 130))' }}>
+              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 19.375rem + var(--chrome-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   <radialGradient id="sb-planet" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
@@ -276,7 +276,7 @@ export default function Bowling() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 330px - var(--sb-extra)) * 100 / 130))' }}>
+            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 19.375rem + var(--chrome-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               {Array.from({ length: LANES }, (_, l) => (
                 <button key={l} type="button" onClick={() => bowl(l)} disabled={!canAim} aria-label={t('sb.lane', { n: l + 1 })}
                   className={`min-h-14 rounded-input border-[2.5px] border-border font-display text-2xl disabled:opacity-60 ${canAim ? 'motion-safe:animate-pulse' : ''}`}

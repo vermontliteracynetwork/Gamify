@@ -88,7 +88,7 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 
 // `colors` tints each filled star (a class sky where every student has a
 // color); `height` sizes the sky when it is not the whole game screen.
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 190px)' }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string }) {
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))' }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
   const spots = skySpots(total, 7, hole, aspect);

@@ -38,6 +38,7 @@
   --radius-input: 16px;
 
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -82,6 +83,7 @@
   --shadow-sticker-lg: 0 6px 0 var(--border);
 
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 
   color-scheme: light;
@@ -103,9 +105,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .font-display {
+/* Fonts (teacher, 2026-10-29: "make title fields the grow year and change
+   most headings to Loyola"). Titles (h1, .title-bubble) wear Grow Year, the
+   logo's lettering; every other heading and display line wears the heading
+   font, Loyola Round Pro, which reads far more easily at small sizes. Until
+   its licensed web file is in public/fonts, Inclusive Sans bold stands in. */
+h1, .title-bubble {
   font-family: var(--font-display);
 }
+h2, h3, .font-display {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+h1.font-display { font-family: var(--font-display); font-weight: 400; }
 /* Question and answer text reads in the body font, even in a heading
    (teacher, 2026-10-24: "questions should be in standard font"). */
 h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-synthesis: weight style; letter-spacing: normal; }
@@ -167,8 +179,28 @@ button, a, [role="button"] {
 }
 
 /* Player settings (src/settings). Set as data attributes on <html>. */
-html[data-text-size="large"] { font-size: 18px; }
-html[data-text-size="larger"] { font-size: 20px; }
+html[data-text-size="large"] { font-size: 18px; --text-scale: 1.125; }
+html[data-text-size="larger"] { font-size: 20px; --text-scale: 1.25; }
+/* Game screens grow with big screens (teacher, 2026-10-29: smart boards,
+   projectors and large desktops, as well as laptops and iPads). Laptops and
+   iPads keep 16px; a 1920 x 1080 board reads at about 21px and a 2560 x
+   1440 screen at 28px, so everything (boards, questions, buttons) scales
+   together and still fits with no scrolling: game layouts size in rem. */
+/* Room for the board: short laptop screens tighten the space above the
+   game, and full screen also hides the site bar. Game boards add
+   --chrome-save back to their height. */
+.game-stage { --chrome-save: calc(var(--short-save, 0rem) + var(--fs-save, 0rem)); }
+@media (max-height: 820px) {
+  .game-stage { --short-save: 2rem; }
+  .game-stage > main { padding-top: 0.5rem; }
+  .game-stage .game-top { margin-bottom: 0.5rem; }
+  .game-stage .game-top > button { width: 3rem; height: 3rem; }
+}
+html:fullscreen:has(.game-stage) .site-header { display: none; }
+html:fullscreen .game-stage { --fs-save: 4rem; min-height: 100dvh; }
+html:has(.game-stage) {
+  font-size: calc(var(--text-scale, 1) * clamp(16px, min(100vw / 90, 100vh / 50), 28px));
+}
 html[data-comfort="on"] body { letter-spacing: 0.04em; word-spacing: 0.12em; line-height: 1.75; }
 html[data-contrast="high"] {
   --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #e4eafe;

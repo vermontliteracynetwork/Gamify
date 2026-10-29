@@ -238,7 +238,7 @@ export default function FourInARow() {
             )}
           </div>
 
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 340px) * 7 / 6), 640px)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 20.5rem + var(--chrome-save, 0rem)) * 7 / 6), 40rem)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;

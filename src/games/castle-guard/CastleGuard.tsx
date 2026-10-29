@@ -184,7 +184,7 @@ export default function CastleGuard() {
           </div>
 
           <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden select-none"
-            style={{ ...pieceFill(theme, 'background', '#9fd88a'), aspectRatio: `${W} / ${H}`, maxWidth: `min(100%, calc((100dvh - 270px) * ${W / H}))` }}>
+            style={{ ...pieceFill(theme, 'background', '#9fd88a'), aspectRatio: `${W} / ${H}`, maxWidth: `min(100%, calc((100dvh - 16.875rem + var(--chrome-save, 0rem)) * ${W / H}))` }}>
             <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('cg.board', { n: wave?.critters.filter((c) => c.delay <= 0).length ?? 0 })}>
               {!pieceImage(theme, 'background') && [[8, 50], [20, 4], [48, 8], [36, 58], [72, 58], [95, 10], [8, 34]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={3.2} fill="#5fae5a" stroke="#000" strokeWidth={0.4} />)}
               <polyline points={PATH.map((p) => p.join(',')).join(' ')} fill="none" stroke="#000" strokeWidth={9.6} strokeLinejoin="round" />

@@ -63,8 +63,10 @@ teacher no control or educational value is not done.
 - Platform look (menus, teacher pages): the light "sticker" style in
   `src/index.css` with the brand palette (teacher, 2026-10-24): periwinkle
   ground, off-white panels, black outlines, pale yellow accent, salmon,
-  coral, navy and mint; Inclusive Sans body, Grow Year headings (the
-  logo's lettering); one shape scale. Use its tokens before adding colors or radii.
+  coral, navy and mint; Inclusive Sans body, Grow Year for titles (h1 and
+  .title-bubble, the logo's lettering) and the heading font (Loyola Round
+  Pro once licensed, Inclusive Sans bold until then) for every other heading
+  (teacher, 2026-10-29); one shape scale. Use its tokens before adding colors or radii.
   Game stages wear per-game themes (`src/theme`), designed per game.
 - Classic is the main design and the default theme for every game
   (teacher, 2026-10-28). It is seen, never handed out: no Classic art in

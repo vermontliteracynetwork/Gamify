@@ -10,6 +10,10 @@ const SIZES = [
   { name: 'old-ipad-landscape', width: 1024, height: 768 },
   { name: 'chromebook', width: 1366, height: 768 },
   { name: 'smart-board', width: 1920, height: 1080 },
+  // A laptop browser with tabs and bookmarks bars (teacher's own, 2026-10-29)
+  // and a big desktop or 4K board at 2560 x 1440 (teacher, 2026-10-29).
+  { name: 'laptop-browser', width: 1480, height: 680 },
+  { name: 'big-desktop', width: 2560, height: 1440 },
 ];
 
 test.beforeEach(async ({ page }, info) => {

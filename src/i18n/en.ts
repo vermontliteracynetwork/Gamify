@@ -84,6 +84,8 @@ export const en = {
   'import.save.one': 'Save 1 question',
   'import.none': 'No questions found in that file.',
 
+  'settings.fullscreen': 'Full screen',
+  'settings.fullscreenOff': 'Leave full screen',
   'settings.open': 'Settings',
   'settings.title': 'Settings',
   'settings.close': 'Close settings',

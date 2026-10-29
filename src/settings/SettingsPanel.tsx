@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ChalkboardTeacher, ChatCircleDots, GameController, GearSix, Leaf, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
+import { ChalkboardTeacher, ChatCircleDots, CornersIn, CornersOut, GameController, GearSix, Leaf, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
 import { canVibrate } from '../engine/feedback';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -15,6 +15,27 @@ import { makeGameCode } from '../data/gameCodes';
 // The gear button: same corner (top right, top left when left-handed), same
 // look in every game and on the question screen (product plan 4A). It sits
 // in the game's own top row so it never covers game content.
+// Full screen for smart boards and projectors (teacher, 2026-10-29): hides
+// the browser's bars so the game fills the board. Hidden where the browser
+// cannot do it (phones).
+export function FullScreenButton() {
+  const [on, setOn] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
+  useEffect(() => {
+    const sync = () => setOn(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+  if (typeof document === 'undefined' || !document.fullscreenEnabled) return null;
+  const toggle = () => { void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
+  return (
+    <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')} aria-pressed={on}
+      className="w-14 h-14 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center active:scale-95 motion-safe:transition"
+      style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      {on ? <CornersIn weight="bold" size={28} /> : <CornersOut weight="bold" size={28} />}
+    </button>
+  );
+}
+
 export function GearButton({ onClick, small = false }: { onClick: () => void; small?: boolean }) {
   return (
     <button
@@ -33,8 +54,9 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
 export function GameTopRow({ onSettings, children }: { onSettings: () => void; children?: ReactNode }) {
   const { settings } = useSettings();
   return (
-    <div className={`flex items-center gap-3 mb-4 ${settings.leftHanded ? 'flex-row' : 'flex-row-reverse'}`}>
+    <div className={`game-top flex items-center gap-3 mb-4 ${settings.leftHanded ? 'flex-row' : 'flex-row-reverse'}`}>
       <GearButton onClick={onSettings} />
+      <FullScreenButton />
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );

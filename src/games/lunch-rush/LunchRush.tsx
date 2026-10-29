@@ -171,7 +171,7 @@ export default function LunchRush() {
   const guestPics = [1, 2, 3].map((n) => pieceImage(theme, `guest-${n}`)).filter((x): x is string => !!x);
   // Wider than tall on a landscape screen, square on a portrait one, so the
   // board fills the screen without leaving empty space below.
-  const boardWidth = 'min(100%, calc((100dvh - 360px - var(--lr-extra)) * var(--lr-ratio)))';
+  const boardWidth = 'min(100%, calc((100dvh - 19.875rem + var(--chrome-save, 0rem) - var(--lr-extra)) * var(--lr-ratio)))';
   const foodName = (f: Food) => t(`lr.food.${f}` as StringKey);
 
   return (
@@ -202,7 +202,7 @@ export default function LunchRush() {
       )}
       {(phase === 'play' || phase === 'end') && turns && player && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
-          <section className="grid gap-2 min-w-0 [--lr-extra:70px] lg:[--lr-extra:0px] [--lr-ratio:1.5] portrait:[--lr-ratio:1.05]">
+          <section className="grid gap-2 min-w-0 [--lr-extra:4.375rem] lg:[--lr-extra:0rem] [--lr-ratio:1.5] portrait:[--lr-ratio:1.05]">
             {phase === 'play' && (
               <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={36} />

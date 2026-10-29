@@ -189,7 +189,7 @@ export default function MemoryMatch() {
             <span className="inline-flex items-center rounded-pill border-[2.5px] border-border px-4 min-h-11 font-bold bg-surface">{t('mm.moves', { count: moves })}</span>
             {player?.kind === 'cpu' && phase === 'play' && <span className="font-bold stage-text">{t('mm.cpuTurn')}</span>}
           </div>
-          <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 290px) / ${rows} * ${cols} * ${ratio.toFixed(3)}))` }}>
+          <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 18.125rem + var(--chrome-save, 0rem)) / ${rows} * ${cols} * ${ratio.toFixed(3)}))` }}>
             {deck.map((c, i) => {
               const up = open.includes(i) || found[c.pair] !== undefined;
               const owner = found[c.pair];

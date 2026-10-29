@@ -23,7 +23,7 @@ export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; o
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
       <DialogFocus onClose={onClose} />
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-2xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 32px)' }}>
+        className="w-full max-w-2xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <div className="flex items-start gap-2">
           <h2 id="upgrade-title" className="font-display text-3xl flex-1"><Title text={done ? t('upgrade.done', { plan: t(`pricing.${done}` as StringKey) }) : t('upgrade.title')} /></h2>
           <button type="button" aria-label={t('upgrade.close')} onClick={onClose} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={18} /></button>

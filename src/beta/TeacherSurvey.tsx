@@ -29,7 +29,7 @@ export default function TeacherSurvey({ id, onClose }: { id: SurveyId; onClose: 
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="survey-title">
       <DialogFocus onClose={later} />
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 32px)' }}>
+        className="w-full max-w-xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <div className="flex items-start gap-2">
           <div className="flex-1">
             <h2 id="survey-title" className="font-display text-2xl"><Title text={t(`survey.title.${id}` as StringKey)} /></h2>

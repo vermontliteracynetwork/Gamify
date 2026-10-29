@@ -62,7 +62,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       <DialogFocus />
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-lg bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 32px)' }}>
+        className="w-full max-w-lg bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <div className="grid justify-items-center gap-1 text-center">
           <Trophy weight="fill" size={52} className="text-accent" aria-hidden="true" />
           <h2 className="font-display text-3xl font-bold text-balance"><Title text={title} /></h2>

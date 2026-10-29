@@ -144,7 +144,7 @@ export default function MatchUp() {
             <span className="inline-flex items-center bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-bold">{t('mu.round', { n: round, total: setup.rounds })}</span>
             <span className="inline-flex items-center bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-bold" aria-live="polite">{t('mu.matched', { done: done.length, total: left.length })}</span>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-6" style={{ gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`, gridAutoFlow: 'column', height: `min(calc(100dvh - 270px), ${rows * 165}px)` }}>
+          <div className="grid grid-cols-2 gap-3 sm:gap-6" style={{ gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`, gridAutoFlow: 'column', height: `min(calc(100dvh - 16.875rem + var(--chrome-save, 0rem)), ${rows * 165}px)` }}>
             {left.map((tile) => (
               <motion.button key={`l${tile.pair}`} type="button" onClick={() => tap('l', tile)} aria-pressed={pick?.side === 'l' && pick.pair === tile.pair} disabled={done.includes(tile.pair)}
                 animate={wobble === tile.pair + 'l' && !still ? { x: [0, -8, 8, -5, 5, 0] } : done.includes(tile.pair) && !still ? { scale: [1, 1.05, 1] } : {}}

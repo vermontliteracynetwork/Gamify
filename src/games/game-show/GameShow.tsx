@@ -311,7 +311,7 @@ export default function GameShow() {
 
             {phase === 'play' && board === 'cards' && (
               <div className="grid mx-auto w-full"
-                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, maxWidth: `calc((100dvh - 344px - ${(grid.rows - 1) * gap}px) / ${grid.rows} * ${grid.cols} * 4 / 3 + ${(grid.cols - 1) * gap}px)` }}>
+                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, maxWidth: `calc((100dvh - 21rem + var(--chrome-save, 0rem) - ${(grid.rows - 1) * gap}px) / ${grid.rows} * ${grid.cols} * 4 / 3 + ${(grid.cols - 1) * gap}px)` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
@@ -350,7 +350,7 @@ export default function GameShow() {
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
                         className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
-                        style={{ minHeight: 'max(4rem, calc((100dvh - 480px) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
+                        style={{ minHeight: 'max(4rem, calc((100dvh - 30rem + var(--chrome-save, 0rem)) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );

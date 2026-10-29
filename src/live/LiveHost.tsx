@@ -296,7 +296,7 @@ function Room({ game }: { game: GameCode }) {
                         ))}
                       </ul>
                     )}
-                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="max(220px, calc(100dvh - 520px))"
+                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="max(220px, calc(100dvh - 32.5rem))"
                     filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
                     total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
                     colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}

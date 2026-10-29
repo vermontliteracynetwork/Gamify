@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'loyola-font', kind: 'money', added: '2026-10-29', title: 'Get a web license and file for Loyola Round Pro',
+    why: 'Most headings now use the heading font slot you asked for (titles stay Grow Year). Your logo PDF uses Loyola Round Pro, but a font inside a PDF or a Canva design cannot be put on a website. Until a licensed web file arrives, headings use Inclusive Sans bold.',
+    how: 'Buy or download Loyola Round Pro from its maker with a web (or app) license that covers a commercial website, and send Claudia the .woff2 or .otf file and the license page. Canva\'s font license does not cover websites.' },
   { id: 'castle-guard', kind: 'decide', added: '2026-10-27', title: 'Castle Guard: show it, or keep it off?',
     why: 'You took Castle Guard off the queue on 2026-10-26, but it got built anyway on 2026-10-27 (my mistake). It is hidden from the game list now; the code stays.',
     how: 'Say "show Castle Guard" to put it in the game list, or "remove Castle Guard" to delete it.' },
