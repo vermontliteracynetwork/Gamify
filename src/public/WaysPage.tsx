@@ -7,6 +7,7 @@ import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { POSTS } from './posts';
 import { guideGames, ThemeGuideCard } from './ThemeGuide';
+import { HowToPlayCard, howToGames } from './HowToPlayPage';
 import PublicFooter from './PublicFooter';
 
 // Grade bands for the filter; a post shows when its grades overlap the band.
@@ -36,6 +37,8 @@ export function WaysList() {
           ))}
           <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
             className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
+          <button type="button" aria-pressed={tag === 'howto'} onClick={() => setParams(tag === 'howto' ? {} : { tag: 'howto' }, { replace: true })}
+            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'howto' ? 'bg-accent' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
           <button type="button" aria-pressed={tag === 'themes'} onClick={() => setParams(tag === 'themes' ? {} : { tag: 'themes' }, { replace: true })}
             className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
         </div>
@@ -58,6 +61,7 @@ export function WaysList() {
             </Link>
           ))}
           {tag === 'themes' && guideGames().map((g) => <ThemeGuideCard key={g.id} game={g} />)}
+          {tag === 'howto' && howToGames().map((g) => <HowToPlayCard key={g.id} game={g} />)}
         </div>
       </main>
       <PublicFooter />
