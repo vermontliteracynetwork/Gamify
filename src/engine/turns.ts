@@ -12,6 +12,8 @@ export interface TurnPlayer {
   score: number;
   // Students on this team, when teams come from the class list.
   members?: string[];
+  // The character this player picked (Board Game animals), when the game has them.
+  art?: string;
 }
 
 export interface TurnState {

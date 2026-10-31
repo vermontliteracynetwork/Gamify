@@ -17,6 +17,7 @@ line that fits, and add each new preference the same turn she says it.
 - Unpredictability and irregularity: varied outcomes, wobble, lucky breaks, comebacks.
 - Power-ups frequent and wacky, each with its own animation, art and plain role ("2x points: Earn double points"); held ones wait for the player's next turn under the scoreboard in a vertical list and vanish after that turn.
 - Negative power-ups land at once, are funny not mean; Steal/Swap style takes start off.
+- Board Game players are the 20 voxel animals; students pick theirs.
 - Turn card before every team question with the player's own icon; tap to start.
 - All cards and tiles the same size; perfect circles stay circles; outlines never cut off.
 - Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, Play another game, Review, Rate; never an "Arcade" button).

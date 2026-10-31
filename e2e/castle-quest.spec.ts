@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup, showSetting } from './setup';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'); localStorage.setItem('gamify:settings', JSON.stringify({ ...s, tier: 'pro' })); });
@@ -12,6 +12,13 @@ test('Board Game: a right answer earns a roll, the die tumbles, the pawn hops al
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
   await openSetup(page, '/games/castle-quest');
+  // Players pick from 20 animals (teacher, 2026-10-31); picking a taken one swaps.
+  await showSetting(page, page.getByRole('button', { name: /^Pick an animal for / }));
+  await page.getByRole('button', { name: /^Pick an animal for / }).first().click();
+  const animals = page.getByRole('dialog').getByRole('group', { name: /^Pick an animal for / });
+  await expect(animals.getByRole('button')).toHaveCount(20);
+  await page.screenshot({ path: `test-results/castle-quest-animals-${info.project.name}.png` });
+  await animals.getByRole('button', { name: 'Unicorn', exact: true }).click();
   await finishSetup(page);
   await expect(page.getByRole('img', { name: 'A winding forest trail of 53 spaces to the castle' })).toBeVisible();
   await page.screenshot({ path: `test-results/castle-quest-board-${info.project.name}.png` });

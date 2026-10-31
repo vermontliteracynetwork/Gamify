@@ -55,7 +55,7 @@ function GameReview({ onDone }: { onDone: () => void }) {
 
 // The winner (or winners, in a tie) floating over a little stage, with a
 // halo around the icon (teacher, 2026-10-31). Solo games float a star.
-function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number }[] }) {
+function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number; art?: string }[] }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   const list = winners?.length ? winners : null;
@@ -72,7 +72,7 @@ function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number
           <motion.div key={i} className="grid justify-items-center gap-1"
             animate={still ? undefined : { y: [0, -8, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 }}>
             <span className="rounded-full" style={{ boxShadow: '0 0 0 5px rgba(253,253,148,0.95), 0 0 22px 12px rgba(253,253,148,0.85), 0 0 46px 18px rgba(255,255,255,0.55)' }}>
-              {w ? <TeamBadge colorIndex={w.colorIndex} size={size} /> : (
+              {w?.art ? <img src={w.art} alt="" className="rounded-full border-[2.5px] border-border bg-surface object-contain p-1" style={{ width: size, height: size }} /> : w ? <TeamBadge colorIndex={w.colorIndex} size={size} /> : (
                 <span className="rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center" style={{ width: size, height: size }}><Star weight="fill" size={size * 0.6} color="#241c3d" /></span>
               )}
             </span>
@@ -154,7 +154,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
 export default function ResultsModal({ title, children, missed, againLabel, onAgain, winners }: {
   title: string; children?: ReactNode; missed: MultipleChoiceQuestion[]; againLabel: string; onAgain: () => void;
   // Share games: the winning team or teams, shown floating over the stage.
-  winners?: { name: string; colorIndex: number }[];
+  winners?: { name: string; colorIndex: number; art?: string }[];
 }) {
   const { settings } = useSettings();
   const { student } = useSignedIn();

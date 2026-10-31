@@ -10,7 +10,7 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import TeamSetup from '../../engine/TeamSetup';
+import TeamSetup, { type Character } from '../../engine/TeamSetup';
 import { current, nextTurn, setScores, startTurns, TEAM_COLORS, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import PowerUpPop from '../../engine/PowerUpPop';
@@ -40,6 +40,10 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'roll' | 'rolling' | 'moving' | 'target';
 type Pt = { x: number; y: number };
 const ART = '/classic/castle-quest';
+// Classic players (teacher, 2026-10-31): 20 voxel animals from SonaSar's
+// Voxel Animals pack, drawn from the 3D models; each player picks one.
+const ANIMALS = ['Axolotl', 'Bear', 'Bunny', 'Cat', 'Chicken', 'Cow', 'Crocodile', 'Dog', 'Elephant', 'Fox', 'Frog', 'Mole', 'Monkey', 'Mouse', 'Panda', 'Parrot', 'Penguin', 'Piglet', 'Turtle', 'Unicorn'];
+const CLASSIC_PLAYERS: Character[] = ANIMALS.map((name) => ({ id: name.toLowerCase(), name, image: `/classic/castle-quest/animals/${name.toLowerCase()}.webp` }));
 const HEROES = ['blue_knight', 'red_mage', 'green_barbarian', 'yellow_rogue', 'red_knight', 'blue_mage', 'yellow_barbarian', 'green_rogue', 'green_knight', 'yellow_mage'];
 const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 const pct = (v: number, total: number) => `${(v / total) * 100}%`;
@@ -102,7 +106,10 @@ export default function CastleQuest() {
   const player = turns ? current(turns) : null;
   const me = turns ? turns.turn : 0;
   const human = player?.kind !== 'cpu';
-  const heroOf = (p: TurnPlayer, i: number) => pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) ?? `${ART}/heroes/${HEROES[p.colorIndex % HEROES.length] ?? HEROES[i % HEROES.length]}.webp`;
+  // A theme's own team pieces win; otherwise each player's picked animal.
+  const themePieces = !!pieceImage(theme, 'team-1');
+  const heroOf = (p: TurnPlayer, i: number) => pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) ?? p.art ?? `${ART}/heroes/${HEROES[p.colorIndex % HEROES.length] ?? HEROES[i % HEROES.length]}.webp`;
+  const figureOf = (p: TurnPlayer) => !pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) && !!p.art;
   const ms = (n: number) => (still ? Math.min(n, 120) : n);
 
   function say(text: string, image?: string, bad = false) { setBanner({ id: Date.now() + Math.random(), text, image, bad }); }
@@ -416,8 +423,8 @@ export default function CastleQuest() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: <Toggle label={t('pu.toggle')} hint={t('cq.powerHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} /> },
           versus
-            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
-            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> },
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
@@ -451,7 +458,7 @@ export default function CastleQuest() {
                       aria-label={t('cq.pieceAt', { name: p.name })}
                       animate={{ left: `calc(${pct(s.x, WORLD_W)} + ${off}%)`, top: pct(s.y, WORLD_H), rotate: flying && !still ? 720 : 0, scale: flying ? 0.7 : 1 }}
                       transition={flying ? { duration: still ? 0.01 : 1.3, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 500) / 1000, ease: 'easeOut' }}>
-                      <Pawn img={heroOf(p, i)} color={TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]} on={on} shield={shield[i] > 0} fast={fast[i] > 0} still={still} hopKey={hop.who === i ? hop.n : 0} hopMs={hop.ms} />
+                      <Pawn img={heroOf(p, i)} figure={figureOf(p)} color={TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]} on={on} shield={shield[i] > 0} fast={fast[i] > 0} still={still} hopKey={hop.who === i ? hop.n : 0} hopMs={hop.ms} />
                     </motion.div>
                   );
                 })}
@@ -660,7 +667,7 @@ function Castle({ stage, theme, still, flag }: { stage: number; theme: GameTheme
 
 // ---- Pieces, the die, and the race panel -----------------------------------
 
-function Pawn({ img, color, on, shield, fast, still, hopKey, hopMs }: { img: string; color: string; on: boolean; shield: boolean; fast: boolean; still: boolean; hopKey: number; hopMs: number }) {
+function Pawn({ img, figure, color, on, shield, fast, still, hopKey, hopMs }: { img: string; figure: boolean; color: string; on: boolean; shield: boolean; fast: boolean; still: boolean; hopKey: number; hopMs: number }) {
   return (
     <div className="relative w-full h-full">
       <span className="absolute left-1/2 bottom-[2%] w-[70%] h-[14%] -translate-x-1/2 rounded-[50%] bg-black/30" />
@@ -670,10 +677,16 @@ function Pawn({ img, color, on, shield, fast, still, hopKey, hopMs }: { img: str
         {on && !still && <motion.span className="absolute left-1/2 -top-[34%] -translate-x-1/2 text-[0]" animate={{ y: [0, -5, 0] }} transition={{ duration: 0.8, repeat: Infinity }}>
           <svg viewBox="0 0 20 14" className="w-[clamp(12px,1.6vw,22px)]"><path d="M2 2 L18 2 L10 12 Z" fill={color} stroke="#241c3d" strokeWidth={2} strokeLinejoin="round" /></svg>
         </motion.span>}
-        {/* The stand. */}
-        <span className="absolute left-1/2 bottom-[6%] w-[64%] h-[26%] -translate-x-1/2 rounded-[45%_45%_40%_40%] border-[2px] border-[#241c3d]" style={{ background: `linear-gradient(${color}, color-mix(in srgb, ${color} 70%, #241c3d))` }} />
-        {/* The hero on top. */}
-        <img src={img} alt="" draggable="false" className={`absolute left-1/2 top-0 w-[86%] aspect-square -translate-x-1/2 rounded-full object-cover border-[3px]`} style={{ borderColor: color, boxShadow: on ? `0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94` : '0 2px 0 rgba(0,0,0,0.35)' }} />
+        {figure ? <>
+          {/* The animal stands on a little disc in its team color. */}
+          <span className="absolute left-1/2 bottom-[2%] w-[92%] h-[24%] -translate-x-1/2 rounded-[50%] border-[2px] border-[#241c3d]" style={{ background: color, boxShadow: on ? '0 0 0 3px #fdfd94, 0 0 14px 5px #fdfd94' : undefined }} />
+          <img src={img} alt="" draggable="false" className="absolute left-1/2 bottom-[10%] w-[112%] max-w-none aspect-square -translate-x-1/2 object-contain drop-shadow-[0_2px_0_rgba(0,0,0,0.3)]" />
+        </> : <>
+          {/* The stand. */}
+          <span className="absolute left-1/2 bottom-[6%] w-[64%] h-[26%] -translate-x-1/2 rounded-[45%_45%_40%_40%] border-[2px] border-[#241c3d]" style={{ background: `linear-gradient(${color}, color-mix(in srgb, ${color} 70%, #241c3d))` }} />
+          {/* The hero on top. */}
+          <img src={img} alt="" draggable="false" className="absolute left-1/2 top-0 w-[86%] aspect-square -translate-x-1/2 rounded-full object-cover border-[3px]" style={{ borderColor: color, boxShadow: on ? `0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94` : '0 2px 0 rgba(0,0,0,0.35)' }} />
+        </>}
         {shield && <span className={`absolute -inset-[16%] rounded-full border-[3px] border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.45))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')}><Shield weight="fill" className="absolute -right-[6%] -top-[6%] w-[34%] h-[34%] text-[#4a90d9] drop-shadow-[0_1px_0_#000]" /></span>}
         {fast && <Timer weight="fill" className="absolute -left-[12%] top-[8%] w-[34%] h-[34%] text-[#ef6f6c] drop-shadow-[0_1px_0_#000]" aria-label={t('cq.fast')} />}
       </motion.div>
@@ -743,7 +756,7 @@ function Race({ turns, pos, playing, heroOf }: { turns: TurnState; pos: number[]
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
               className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2 rounded-input border-[2px] p-1.5 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
-              <img src={heroOf(p, i)} alt="" className="row-span-2 w-10 h-10 rounded-full border-[3px] object-cover" style={{ borderColor: color }} />
+              <img src={heroOf(p, i)} alt="" className="row-span-2 w-10 h-10 rounded-full border-[3px] object-contain bg-surface-2" style={{ borderColor: color }} />
               <span className="font-bold truncate leading-tight">{p.name}</span>
               <span className="relative h-3 rounded-pill bg-surface-2 border-[1.5px] border-border overflow-visible">
                 <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />

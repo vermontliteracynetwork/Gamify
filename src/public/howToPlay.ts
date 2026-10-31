@@ -78,6 +78,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'The trail', what: 'One winding trail of hexagon spaces through meadows, forest and two rivers, from the red Start flag to the castle gate. A dotted line shows the way; no numbers to read.' },
       { name: 'Bridges', what: 'Wooden bridges cross the rivers between bends of the trail and carry you ahead, like ladders.' },
       { name: 'The castle', what: 'It is built layer by layer as the leader gets closer: walls, then towers, then roofs, and flags in the winner\'s color when someone arrives.' },
+      { name: 'Players', what: 'Each team or player picks one of 20 voxel animals (fox, panda, unicorn, axolotl and more). The animal stands on a disc in the team color and hops along the trail.' },
       { name: 'The race panel', what: 'Each player\'s hero with a bar that fills toward the castle. Whose turn it is glows.' },
       { name: 'Power-ups', what: 'Magnet (sticks to the right answer on your next question), Potion (your roll counts 3 times), Stopwatch (hop 5 times faster), Shield (nothing pushes you back for 3 rounds), Lightning (send another player back a roll), Treasure Chest (a surprise, good or not so good) and Tornado (everyone lands somewhere new).' },
     ],

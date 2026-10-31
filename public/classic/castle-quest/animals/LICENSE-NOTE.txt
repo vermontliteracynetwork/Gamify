@@ -1,0 +1,6 @@
+Voxel Animals & Items Pack (Voxel_Animal_Asset_Pack.zip) by SonaSar
+https://sona-sar.itch.io/voxel-animals-items-pack-free-assets
+Supplied by the teacher on 2026-10-31. The pack's itch.io page states it is free
+for both personal and commercial projects; the author asks (informally) for a
+comment or tag when used. No license file came in the zip.
+These pictures are drawn from the pack's 3D models (MagicaVoxel .obj) for Gamify.

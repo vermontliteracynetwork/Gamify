@@ -89,7 +89,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         className="grid justify-items-center gap-4 bg-surface border-[3px] border-border rounded-panel px-10 py-8 max-w-[92vw]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} aria-label={t('share.turnStart')}>
         <motion.span animate={settings.motion === 'still' ? undefined : { y: [0, -10, 0] }} transition={{ duration: 1.2, repeat: Infinity }}
           className="rounded-full ring-8 ring-accent" style={{ boxShadow: '0 0 40px 10px #fdfd94' }}>
-          {avatar ? <img src={avatar} alt="" className="w-[min(12rem,30vh)] h-[min(12rem,30vh)] rounded-full border-[3px] border-border object-cover" /> : <TeamBadge colorIndex={player.colorIndex} size={180} />}
+          {avatar ? <img src={avatar} alt="" className="w-[min(12rem,30vh)] h-[min(12rem,30vh)] rounded-full border-[3px] border-border object-contain bg-surface-2" /> : <TeamBadge colorIndex={player.colorIndex} size={180} />}
         </motion.span>
         <span className="font-display text-4xl sm:text-5xl font-bold text-center">{t('share.turnCard', { name: player.name })}</span>
         {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-[2.5px] border-border bg-[#c8f0dc] px-5 py-1">{t('share.answerer', { name: answerer })}</span>}

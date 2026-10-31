@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DiceFive, Minus, Play, Plus } from '@phosphor-icons/react';
+import { DiceFive, Minus, Play, Plus, X } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { data } from '../data';
@@ -15,13 +15,16 @@ import { useSignedIn } from '../auth/session';
 import { useSession } from '../student/session';
 
 // `icon` is the team picture (and color) picked from the theme's team icons.
-interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number }
+interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number; character?: number }
+export interface Character { id: string; name: string; image: string }
 
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
 // Used on its own (with a Start button) or as a setup page (onChange only).
-export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false }: {
+export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters }: {
   mode: 'share' | 'versus'; min: number; max: number;
+  // Characters to pick from (Board Game animals, teacher 2026-10-31), in place of team icons.
+  characters?: Character[];
   onStart?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   onChange?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   embedded?: boolean;
@@ -44,6 +47,16 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const [level, setLevel] = useState<CpuLevel>('medium');
   const [picking, setPicking] = useState<number | null>(null);
   const iconOf = (i: number) => slots[i]?.icon ?? i;
+  // Each player starts with a different character, picked at random; tap it to choose another.
+  const [deal] = useState(() => (characters ? characters.map((_, k) => k).sort(() => Math.random() - 0.5) : []));
+  const charOf = (i: number) => slots[i]?.character ?? deal[i % Math.max(1, deal.length)] ?? 0;
+  function pickCharacter(i: number, c: number) {
+    setSlots((cur) => {
+      const other = cur.findIndex((_x, j) => j !== i && charOf(j) === c);
+      return cur.map((x, j) => (j === i ? { ...x, character: c } : j === other ? { ...x, character: charOf(i) } : x));
+    });
+    setPicking(null);
+  }
   // Picking a picture another team has trades the two.
   function pickIcon(i: number, icon: number) {
     setSlots((cur) => {
@@ -63,9 +76,10 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const hasCpu = solo ? opponent === 'cpu' : slots.some((s) => s.kind === 'cpu');
 
   function build(): TurnPlayer[] {
-    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: s.icon ?? i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}) }));
+    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: s.icon ?? i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}), ...(characters?.length ? { art: characters[charOf(i)].image } : {}) }));
     const free = [9, ...TEAM_ICONS.keys()].find((k) => !players.some((p) => p.colorIndex === k)) ?? 9;
-    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: free, score: 0 });
+    const freeChar = characters?.length ? characters[deal.find((k) => !slots.some((_s, j) => charOf(j) === k)) ?? 0].image : undefined;
+    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: free, score: 0, ...(freeChar ? { art: freeChar } : {}) });
     return players;
   }
   function start() { onStart?.(build(), level); }
@@ -88,11 +102,39 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       <ol className="grid sm:grid-cols-2 items-start gap-2 list-none p-0 m-0">
         {slots.map((s, i) => (
           <li key={i} className="flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
-            <button type="button" aria-label={t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
+            <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
               onClick={() => setPicking(picking === i ? null : i)} className="rounded-full p-0.5 -m-0.5 motion-safe:hover:scale-110 motion-safe:transition-transform">
-              <TeamBadge colorIndex={iconOf(i)} size={44} />
+              {characters?.length
+                ? <img src={characters[charOf(i)].image} alt="" className="w-14 h-14 rounded-full border-[2.5px] border-border bg-surface-2 object-contain p-0.5" />
+                : <TeamBadge colorIndex={iconOf(i)} size={44} />}
             </button>
-            {picking === i && (
+            {picking === i && characters?.length ? (
+              // A pop-up box of big animal tiles, so the setup page never scrolls (teacher, 2026-10-31).
+              <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={() => setPicking(null)}>
+                <div role="dialog" aria-modal="true" aria-label={t('teams.pickCharacter', { name: s.name })} onClick={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-2xl bg-surface border-[3px] border-border rounded-panel p-4 sm:p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+                  onKeyDown={(e) => { if (e.key === 'Escape') setPicking(null); }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-display text-2xl font-bold">{t('teams.pickCharacter', { name: s.name })}</h3>
+                    <button type="button" autoFocus onClick={() => setPicking(null)} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+                  </div>
+                  <div role="group" aria-label={t('teams.pickCharacter', { name: s.name })} className="grid grid-cols-5 gap-2">
+                    {characters.map((c, k) => {
+                      const owner = slots.findIndex((_x, j) => charOf(j) === k);
+                      return (
+                        <button key={c.id} type="button" aria-pressed={owner === i} title={c.name}
+                          aria-label={owner >= 0 && owner !== i ? t('teams.characterTaken', { animal: c.name, name: slots[owner].name }) : c.name}
+                          onClick={() => pickCharacter(i, k)}
+                          className={`grid justify-items-center rounded-input p-1 border-[3px] ${owner === i ? 'border-border bg-accent' : 'border-transparent bg-surface-2'} ${owner >= 0 && owner !== i ? 'opacity-45' : ''} motion-safe:hover:scale-105 motion-safe:transition-transform`}>
+                          <img src={c.image} alt="" className="w-[min(4.5rem,12vh)] aspect-square object-contain" />
+                          <span className="text-xs font-bold leading-tight">{c.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : picking === i && (
               <div role="group" aria-label={t('teams.pickIcon', { name: s.name })}
                 className="order-last basis-full grid grid-cols-5 justify-items-center gap-1 p-2 bg-surface-2 border-[2px] border-border rounded-input"
                 onKeyDown={(e) => { if (e.key === 'Escape') setPicking(null); }}>
