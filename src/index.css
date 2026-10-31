@@ -393,6 +393,10 @@ html:fullscreen .play-fill { height: 100dvh; }
 .sb-chase { animation: sb-chase 0.9s ease-in-out infinite; }
 @keyframes sb-pop { from { stroke-width: 0; opacity: 0; } to { opacity: 1; } }
 .sb-pop { animation: sb-pop 0.4s ease-out; }
+@keyframes sb-swept { 0%, 30% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-14px); opacity: 0; } }
+.sb-swept { animation: sb-swept 0.85s ease-in forwards; transform-box: fill-box; }
+@keyframes sb-bar { 0% { transform: translateY(-10px); opacity: 0; } 25% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-26px); opacity: 0; } }
+.sb-bar { animation: sb-bar 0.85s ease-in-out forwards; transform-box: fill-box; }
 /* Board Game world (2026-10-31 overhaul). */
 @keyframes cq-shake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-3px, -1px); } 80% { transform: translate(3px, 1px); } }
 .cq-shake { animation: cq-shake 0.35s linear 4; }

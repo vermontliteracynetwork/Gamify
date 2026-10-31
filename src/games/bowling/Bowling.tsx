@@ -209,6 +209,7 @@ export default function Bowling() {
   // The roll as it plays out: ball and pins frame by frame.
   const [sim, setSim] = useState<{ res: SimResult; at: number; zoom: boolean; wobble: boolean } | null>(null);
   const [shake, setShake] = useState(false);
+  const [swept, setSwept] = useState<{ id: number; pins: { i: number; laneX: number; d: number }[] } | null>(null);
   function throwBall(plan: { aim: number; hook: number }) {
     if ((step !== 'aim' && step !== 'spin') || !turnsNow.current || twisting) return;
     const res = simulateRoll(standingRef.current, { ...plan, big: boost.current.mega, magnet: boost.current.magnet, bumpers: boost.current.bumpers });
@@ -254,6 +255,10 @@ export default function Bowling() {
     const kind = base.kind;
     boost.current.double = false;
     setArmed([]);
+    // The pinsetter sweeps the fallen pins away instead of making them vanish.
+    const last = res.frames[res.frames.length - 1];
+    setSwept({ id: Date.now(), pins: down.map((i) => { const v = toView(last.pins[i][0], last.pins[i][1]); return { i, ...v }; }) });
+    later(() => setSwept(null), 900);
     setStanding(nextStanding); setSim(null); setStep('result');
     const scored = addPoints(turns, current(turns).id, points);
     setT(scored);
@@ -406,6 +411,17 @@ export default function Bowling() {
                 <line x1={50 - halfWidthAt(0.005)} y1={yAt(0.005)} x2={50 + halfWidthAt(0.005)} y2={yAt(0.005)} stroke="#241c3d" strokeWidth={0.5} />
                 {[-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9].map((x, i) => { const d = 0.26; const cx = xAt(x, d), cy = yAt(d), w = 1.5 * scaleAt(d); return <path key={i} d={`M${cx} ${cy - 2.4 * w} L${cx + w} ${cy} L${cx - w} ${cy} Z`} fill="#8a5a2b" opacity={0.5} />; })}
                 {canAim && <polyline points={preview} fill="none" stroke={step === 'spin' ? '#ff4fa3' : '#241c3d'} strokeWidth={0.9} strokeDasharray="0.2 2.2" strokeLinecap="round" />}
+                {swept && !still && (
+                  <g key={swept.id}>
+                    {swept.pins.map((p) => (
+                      <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
+                        <g className="sb-swept"><g transform="rotate(85)"><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} /></g></g>
+                      </g>
+                    ))}
+                    {/* The sweep bar drops in front of the pins and pulls them back into the pit. */}
+                    <rect className="sb-bar" x={50 - halfWidthAt(0.6) - 2} y={yAt(0.6) - 3} width={(halfWidthAt(0.6) + 2) * 2} height={3.2} rx={1} fill="#241c3d" stroke="#ff4fa3" strokeWidth={0.6} />
+                  </g>
+                )}
                 {pinsNow.map((p) => {
                   const s = scaleAt(p.d) * 2.6;
                   const fallen = p.tilt >= 1;
