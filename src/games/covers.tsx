@@ -1,3 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { houseFor } from '../theme/house';
+import type { GameTheme } from '../theme/types';
 import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 import { TEAM_COLORS } from '../engine/turns';
 
@@ -255,4 +259,93 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
   }
+}
+
+// Covers for Gamify's designed themes (teacher, 2026-10-31): each shows the
+// theme's own art in a small scene of its game.
+export function ThemeCover({ theme, className = '' }: { theme: GameTheme; className?: string }) {
+  const base = `relative overflow-hidden ${className}`;
+  const bg = theme.colors.background;
+  if (theme.discs?.length) {
+    // Four in a Row pieces: a board with the theme's pieces dropped in.
+    const d = theme.discs;
+    return (
+      <div className={base} style={{ background: bg }} aria-hidden="true">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62">
+          <rect x="18" y="6" width="64" height="44" rx="5" fill={theme.pieces.board?.color ?? '#4f8fd6'} stroke="#000" strokeWidth="1.2" />
+          {Array.from({ length: 15 }, (_, i) => {
+            const cx = 26 + (i % 5) * 12, cy = 15 + Math.floor(i / 5) * 13;
+            const pick = [2, 6, 10, 14].includes(i) ? 0 : [5, 11, 12, 7].includes(i) ? 1 : -1;
+            return pick < 0 ? <circle key={i} cx={cx} cy={cy} r="5" fill="#fff" stroke="#000" strokeWidth="1" /> : <image key={i} href={d[(pick * 3) % d.length].image} x={cx - 5.5} y={cy - 5.5} width="11" height="11" />;
+          })}
+        </svg>
+      </div>
+    );
+  }
+  if (theme.itemImages?.length && theme.pieces.background?.image) {
+    // A room theme (Question Tracker Pet Room): the room with a few pets in it.
+    return (
+      <div className={base} style={{ background: `${bg} center / cover url("${theme.pieces.background.image}")` }} aria-hidden="true">
+        {theme.itemImages.slice(0, 4).map((src, i) => (
+          <img key={src} src={src} alt="" className="absolute w-[17%] object-contain" style={{ left: `${12 + i * 21}%`, bottom: `${8 + (i % 2) * 10}%`, imageRendering: theme.pixelArt ? 'pixelated' : undefined }} />
+        ))}
+      </div>
+    );
+  }
+  const tiles = [0, 1, 2, 3, 4, 5].map((k) => theme.pieces[`tile-${k}`]).filter((p) => p?.image);
+  if (tiles.length) {
+    // Match Three pieces: a board of the theme's pieces with a match lit up.
+    return (
+      <div className={base} style={{ background: bg }} aria-hidden="true">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
+          <g transform="rotate(-6 50 31)">
+            <rect x="16" y="3" width="68" height="56" rx="5" fill={theme.pieces.board?.color ?? '#fff'} stroke="#000" strokeWidth="1.2" />
+            {[[0, 2, 4, 3, 5], [3, 1, 1, 1, 0], [5, 4, 2, 0, 3], [2, 0, 5, 4, 1]].map((row, r) => row.map((k, c) => {
+              const x = 19 + c * 12.8, y = 6 + r * 13, lit = r === 1 && c >= 1 && c <= 3;
+              const p = tiles[k % tiles.length]!;
+              return <g key={`${r}-${c}`}><rect x={x} y={y} width="11.8" height="11.8" rx="2.4" fill={lit ? '#fdfd94' : p.color ?? '#eee'} stroke={lit ? '#000' : 'none'} strokeWidth="0.8" /><image href={p.image} x={x} y={y} width="11.8" height="11.8" /></g>;
+            }))}
+          </g>
+        </svg>
+      </div>
+    );
+  }
+  const cover = theme.pieces.cover?.image;
+  return <div className={base} style={{ background: cover ? `${bg} center / contain no-repeat url("${cover}")` : bg }} aria-hidden="true" />;
+}
+
+// A game card's cover: a game with Gamify's designed themes shows them
+// (teacher, 2026-10-31: "show them instead of the default"), and hovering
+// for 3 seconds moves to the next one, cycling through, then Classic.
+export function CyclingCover({ gameId, className = '' }: { gameId: string; className?: string }) {
+  const looks = houseFor(gameId);
+  const [i, setI] = useState(0);
+  const timer = useRef<number | null>(null);
+  const reduce = useReducedMotion();
+  const box = useRef<HTMLDivElement>(null);
+  const count = looks.length + 1; // the designed themes, then Classic
+  // Hovering anywhere on the card (or focusing it) starts the cycle.
+  useEffect(() => {
+    if (!looks.length) return;
+    const card = box.current?.closest('a, li, article, [data-card]') ?? box.current;
+    if (!card) return;
+    const start = () => { if (!timer.current) timer.current = window.setInterval(() => setI((n) => (n + 1) % count), 3000); };
+    const stop = () => { if (timer.current) { window.clearInterval(timer.current); timer.current = null; } };
+    card.addEventListener('mouseenter', start); card.addEventListener('mouseleave', stop);
+    card.addEventListener('focusin', start); card.addEventListener('focusout', stop);
+    return () => { stop(); card.removeEventListener('mouseenter', start); card.removeEventListener('mouseleave', stop); card.removeEventListener('focusin', start); card.removeEventListener('focusout', stop); };
+  }, [looks.length, count]);
+  if (!looks.length) return <GameCover gameId={gameId} className={className} />;
+  return (
+    <div ref={box} className={`relative overflow-hidden ${className}`}>
+      <AnimatePresence initial={false}>
+        <motion.div key={i} className="absolute inset-0" initial={reduce ? { opacity: 0 } : { opacity: 0, x: '12%' }} animate={{ opacity: 1, x: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, x: '-12%' }} transition={{ duration: 0.45 }}>
+          {i < looks.length ? <ThemeCover theme={looks[i]} className="w-full h-full" /> : <GameCover gameId={gameId} className="w-full h-full" />}
+        </motion.div>
+      </AnimatePresence>
+      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1" aria-hidden="true">
+        {Array.from({ length: count }, (_, k) => <span key={k} className={`w-2 h-2 rounded-full border border-border ${k === i ? 'bg-accent' : 'bg-surface/80'}`} />)}
+      </span>
+    </div>
+  );
 }

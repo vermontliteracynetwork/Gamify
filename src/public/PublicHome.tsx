@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Buildings, House, RocketLaunch, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
-import { GameCover } from '../games/covers';
+import { CyclingCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import FourWays from '../games/FourWays';
 import { GAMES } from '../games/registry';
@@ -42,7 +42,7 @@ export default function PublicHome() {
               <motion.div key={g.id} initial={reduce ? false : { opacity: 0, y: 20, rotate: i % 2 ? 2 : -2 }} animate={{ opacity: 1, y: 0, rotate: i % 2 ? 1.5 : -1.5 }} transition={{ delay: reduce ? 0 : 0.1 * i }}
                 whileHover={reduce ? undefined : { y: -8, rotate: i % 2 ? -2 : 2, scale: 1.04, transition: { type: 'spring', stiffness: 400, damping: 14 } }}
                 className="rounded-panel border-[2.5px] border-border overflow-hidden bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <GameCover gameId={g.id} className="aspect-[4/3] cover-zoom" />
+                <CyclingCover gameId={g.id} className="aspect-[4/3]" />
               </motion.div>
             ))}
           </div>
@@ -62,7 +62,7 @@ export default function PublicHome() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {GAMES.map((g) => (
               <Link key={g.id} to="/login?mode=signup" className="hover-lift group block bg-surface border-[2.5px] border-border rounded-panel overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={g.id} className="aspect-[16/9] cover-zoom" /></span>
+                <span className="block overflow-hidden border-b-[2.5px] border-border"><CyclingCover gameId={g.id} className="aspect-[16/9]" /></span>
                 <div className="p-4 grid gap-2">
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
                   <div className="flex flex-wrap gap-2">{g.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>

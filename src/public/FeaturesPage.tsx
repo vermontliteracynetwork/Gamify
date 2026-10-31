@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Brain, Check, ChalkboardTeacher, GameController, PaintBrush, Sparkle, SpeakerHigh, Star, TextAa, Leaf, X } from '@phosphor-icons/react';
 import { ALL_MODES, type PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';
-import { GameCover } from '../games/covers';
+import { CyclingCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
@@ -226,7 +226,7 @@ function ModesDemo() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {games.map((g) => (
             <Link key={g.id} to="/login?mode=signup" className="hover-lift rounded-input border-[2px] border-border overflow-hidden bg-surface no-underline text-text">
-              <GameCover gameId={g.id} className="aspect-[4/3] cover-zoom" />
+              <CyclingCover gameId={g.id} className="aspect-[4/3]" />
               <span className="block px-2 py-1 font-bold text-sm">{g.name}</span>
             </Link>
           ))}
