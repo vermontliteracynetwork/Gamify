@@ -32,11 +32,18 @@ type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'caught';
 interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean }
 
 // A fish drawn in code: body, tail, fin, optional stripes, an eye.
+const CLASSIC_FISH: Record<string, string> = {
+  perch: 'orange', bluegill: 'blue', sunfish: 'orange', guppy: 'pink', trout: 'grey', brooktrout: 'green', bass: 'green',
+  puffer: 'brown', clown: 'orange', tang: 'blue', swordfish: 'grey-long-a', goldfish: 'red',
+};
 // A theme can draw each rarity's fish (fish-common ... fish-legendary).
 const RARITY_PIECE = ['fish-common', 'fish-uncommon', 'fish-rare', 'fish-legendary'];
 export function FishArt({ fish, size, theme }: { fish: FishKind; size: number; theme?: Parameters<typeof pieceImage>[0] }) {
   const art = pieceImage(theme, RARITY_PIECE[fish.rarity]);
   if (art) return <img src={art} alt="" aria-hidden="true" style={{ width: size, height: size * 0.6, objectFit: 'contain' }} />;
+  // Classic fish (teacher, 2026-10-31): Kenney's Fish Pack (CC0), turned to face left.
+  const classic = CLASSIC_FISH[fish.id];
+  if (classic) return <img src={`/classic/cast-catch/fish-${classic}.svg`} alt="" aria-hidden="true" style={{ width: size, height: size * 0.75, objectFit: 'contain', transform: 'scale(-1.15, 1.15)' }} />;
   return (
     <svg width={size} height={size * 0.6} viewBox="0 0 100 60" aria-hidden="true">
       <path d="M78 30 L98 12 L94 30 L98 48 Z" fill={fish.fin} stroke="#000" strokeWidth="2.5" strokeLinejoin="round" />
@@ -204,6 +211,11 @@ export default function CastCatch() {
               <span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%`, animation: `${i % 2 ? 'cc-swim-left' : 'cc-swim-right'} ${14 + i * 4}s linear ${-i * 5}s infinite` }} aria-hidden="true">
                 <svg width="70" height="34" viewBox="0 0 100 50" style={{ transform: i % 2 ? 'none' : 'scaleX(-1)' }}><path d="M78 25 L98 8 L94 25 L98 42 Z M44 5 a38 20 0 1 0 0.1 0 Z" fill="#0b2a4a" /></svg>
               </span>
+            ))}
+            {/* Classic lake floor (Kenney Fish Pack, CC0): seaweed sways, rocks sit still. */}
+            {!pieceImage(theme, 'background') && ([['seaweed-green-a', 30, 9], ['rock-a', 38, 7], ['seaweed-pink-a', 47, 8], ['seaweed-green-b', 62, 10], ['rock-b', 71, 6], ['seaweed-orange-a', 80, 8], ['seaweed-green-a', 91, 9]] as const).map(([art, x, w], i) => (
+              <img key={`sea${i}`} src={`/classic/cast-catch/${art}.svg`} alt="" aria-hidden="true" className="absolute bottom-0 pointer-events-none origin-bottom"
+                style={{ left: `${x}%`, width: `${w}%`, aspectRatio: '1', objectFit: 'contain', objectPosition: 'bottom', animation: still || art.startsWith('rock') ? undefined : `cc-sway ${4 + (i % 3)}s ease-in-out ${-i}s infinite` }} />
             ))}
             {/* dock and rod */}
             <span className="absolute left-0 bottom-0 w-[22%] h-[38%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={pieceFill(theme, 'dock', '#b98552')} aria-hidden="true" />

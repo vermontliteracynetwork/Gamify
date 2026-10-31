@@ -264,6 +264,7 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 @keyframes cc-swim-right { from { left: -20%; } to { left: 110%; } }
 @keyframes cc-swim-left { from { left: 110%; } to { left: -20%; } }
 @keyframes cc-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(40px); } }
+@keyframes cc-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
 @keyframes cc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 @keyframes cc-bite { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(14px); } 50% { transform: translateY(4px); } 75% { transform: translateY(16px); } }
 /* Bubble Pop: popped bubbles burst, cut-loose bubbles fall (SVG units). */

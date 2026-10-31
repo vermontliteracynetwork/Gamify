@@ -24,6 +24,7 @@ ships without a line here.
 | Tailwind CSS, Vite | Styling and build tools | npm | MIT | 2026-10 |
 | Sound effects | Every game (right, miss, tap, win, whoosh; five theme sound packs) | Generated in code with the Web Audio API (`src/engine/feedback.ts`) | Original, owned; no files | 2026-10-25 |
 | Question Tracker Classic art (night sky background, six stars) | Question Tracker Classic theme; theme guide example | Made by the teacher in Canva from the blank template (`public/classic/star-quiz/`) | Teacher-supplied; confirm any Canva elements used are cleared for commercial use in a product | 2026-10-31 |
+| Kenney Fish Pack 2.0 (fish, seaweed, rocks; outline versions) | Cast and Catch Classic fish and lake floor (`public/classic/cast-catch/`) | kenney.nl, supplied by the teacher | CC0 1.0 (public domain, commercial use OK, credit optional; license copied beside the files) | 2026-10-31 |
 
 ## Device fonts for theme titles (2026-10-25)
 
