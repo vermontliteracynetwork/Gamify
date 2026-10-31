@@ -58,6 +58,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     return () => window.clearTimeout(id);
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Little readers hear every question and its answers once it opens.
+  useEffect(() => {
+    if (!ready || !settings.autoRead) return;
+    const id = window.setTimeout(() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings), 350);
+    return () => window.clearTimeout(id);
+  }, [q, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Share Mirror: the student's own copy shows this question.
   useEffect(() => {
     mirrorSend({ t: 'q', prompt: q.prompt, choices: q.choices, player: player.name, imageUrl: q.imageUrl, imageAlt: q.imageAlt });

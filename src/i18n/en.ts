@@ -94,6 +94,8 @@ export const en = {
   'settings.presets': 'Quick setups',
   'preset.calm': 'Calm',
   'preset.quiet': 'Quiet room',
+  'preset.little-reader': 'Little reader',
+  'settings.autoRead': 'Read every question out loud',
   'preset.low-vision': 'Big and clear',
   'preset.hearing': 'No sound',
   'preset.quick-start': 'Start over',

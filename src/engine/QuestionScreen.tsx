@@ -56,8 +56,10 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     setMarked(new Set());
     setLocked(settings.readFirstSeconds > 0);
     const timer = window.setTimeout(() => setLocked(false), settings.readFirstSeconds * 1000);
-    return () => { window.clearTimeout(timer); stopSpeaking(); };
-  }, [q, settings.readFirstSeconds]);
+    // Little readers hear every question and its answers on their own.
+    const say = settings.autoRead ? window.setTimeout(() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings), 350) : 0;
+    return () => { window.clearTimeout(timer); window.clearTimeout(say); stopSpeaking(); };
+  }, [q, settings.readFirstSeconds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function listen() {
     if (speaking) { stopSpeaking(); setSpeaking(false); return; }

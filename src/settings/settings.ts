@@ -35,6 +35,8 @@ export interface PlayerSettings {
   triesPerQuestion: 1 | 2 | 3 | 4;
   tools: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
   tapOnly: boolean;
+  // Little readers (market research, 2026-10-31): every question and its answers are read aloud on their own.
+  autoRead: boolean;
   leftHanded: boolean;
   language: 'en';
 }
@@ -63,6 +65,7 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   triesPerQuestion: 1,
   tools: { listen: true, calculator: true, scratchpad: true, highlighter: true, timesTable: false },
   tapOnly: false,
+  autoRead: false,
   leftHanded: false,
   language: 'en',
 };
@@ -74,12 +77,14 @@ export function applyCalm(s: PlayerSettings, on: boolean): PlayerSettings {
     : { ...s, calm: false, motion: 'full', celebrations: 'big', backgrounds: 'moving' };
 }
 
-export type PresetId = 'calm' | 'quiet' | 'low-vision' | 'hearing' | 'quick-start';
+export type PresetId = 'calm' | 'quiet' | 'little-reader' | 'low-vision' | 'hearing' | 'quick-start';
 
 export const PRESETS: Record<PresetId, (s: PlayerSettings) => PlayerSettings> = {
   calm: (s) => applyCalm(s, true),
   // Quiet room (market research, 2026-10-31): soft effects, no music and small
   // celebrations, so the class hears the teacher and the read-aloud.
+  // Little reader (K-1): big text, every question read aloud, no read-first wait, no timers.
+  'little-reader': (s) => ({ ...s, autoRead: true, textSize: 'larger', readingComfort: true, voice: Math.max(s.voice, 4) as Level, allSoundOff: false, readFirstSeconds: 0, timers: 'off' }),
   quiet: (s) => ({ ...s, allSoundOff: false, effects: 1, music: 0, celebrations: 'small', voice: Math.max(s.voice, 4) as Level }),
   'low-vision': (s) => ({ ...s, textSize: 'larger', highContrast: true, readingComfort: true, voice: 5, colorSafe: true }),
   hearing: (s) => ({ ...s, allSoundOff: true, haptics: true }),
