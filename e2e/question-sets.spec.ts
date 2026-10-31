@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSetup } from './setup';
 
 function watchConsole(page: Page) {
   const problems: string[] = [];
@@ -73,8 +74,7 @@ test('game set picker: cover cards, filters, and only sets with details', async 
       { id: 's2', name: 'Doubles facts', questions: q, ownerId: 'local-teacher', visibility: 'private', createdAt: '', updatedAt: '', subject: 'Math', grades: ['1', '2'], tags: ['doubles'], standards: ['1.OA.6'] },
     ]));
   });
-  await page.goto('/games/star-quiz');
-  await page.getByRole('button', { name: 'Set up and play' }).click();
+  await openSetup(page, '/games/star-quiz');
   await expect(page.getByText('1 of your sets needs its details', { exact: false })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Mine, no details/ })).toHaveCount(0);
   await page.getByLabel('Search titles and tags').fill('doubles');
