@@ -7,6 +7,7 @@ import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { buzz, playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
+import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
@@ -108,6 +109,10 @@ export default function CastCatch() {
   useEffect(() => { if (timeUp && step === 'ready') finish(); }, [timeUp, step]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
+  // In a live game the teacher already chose everything: students go
+  // straight into play, no welcome or setup (teacher check, 2026-10-31).
+  const liveStart = useRef(false);
+  useEffect(() => { if (getLive() && !liveStart.current && phase === 'welcome' && game.pool.length) { liveStart.current = true; begin(); } }); // eslint-disable-line react-hooks/exhaustive-deps
   function begin() {
     setCatches([]); setLast(null); setStep('ready'); doubleNext.current = false;
     setEndsAt(Date.now() + setup.minutes * 60000); setNow(Date.now());

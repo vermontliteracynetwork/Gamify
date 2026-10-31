@@ -87,7 +87,7 @@ export function LiveOverlay() {
   // everyone fills; Compete shows the student's own place.
   if (state.phase === 'play' && me.status === 'in') {
     const classRight = state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0);
-    const goal = state.goal ?? Math.max(10, state.players.length * 10);
+    const goal = state.goal ?? Math.max(10, state.players.filter((p) => p.status === 'in').length * 10);
     const place = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
     const left = state.endAt?.minutes && state.startedAt ? Math.max(0, Math.ceil((state.startedAt + state.endAt.minutes * 60000 - now) / 1000)) : null;
     const heads = left !== null && ((left <= 180 && left > 174) || (left <= 60 && left > 54)) ? t(left > 60 ? 'clock.three' : 'clock.one') : '';

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
@@ -61,6 +61,9 @@ export default function StarQuiz() {
 
   const timeUp = useRef(false);
   const clock = usePlayClock({ playing: phase === 'play', score: stars, onTimeUp: () => { timeUp.current = true; cancel(); } });
+  // In a live game students go straight into play (teacher check, 2026-10-31).
+  const liveStart = useRef(false);
+  useEffect(() => { if (getLive() && !liveStart.current && phase === 'welcome' && game.pool.length) { liveStart.current = true; void play({ rounds: setup.rounds }); } }); // eslint-disable-line react-hooks/exhaustive-deps
   async function play(v: { rounds: number }) {
     timeUp.current = false;
     setTotal(v.rounds); setStars(0); setRound(0); setLeftEarly(false); setPhase('play');

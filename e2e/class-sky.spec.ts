@@ -38,13 +38,8 @@ test('Question Tracker class sky: star colors, first to a number right ends it',
   await kid.screenshot({ path: `test-results/sky-kid-lobby-${info.project.name}.png` });
   await page.getByRole('button', { name: /Start the game/ }).click();
   await expect(kid).toHaveURL(/\/games\/star-quiz\?set=/);
-  await kid.getByRole('button', { name: 'Set up and play' }).click();
-  for (;;) {
-    const next = kid.getByRole('button', { name: 'Next', exact: true });
-    if (!(await next.isVisible())) break;
-    await next.click();
-  }
-  await kid.getByRole('button', { name: 'Play', exact: true }).click();
+  // Live students go straight into play: no welcome or setup (2026-10-31).
+  await expect(kid.getByRole('button', { name: 'Set up and play' })).toHaveCount(0);
   await answerRight(kid);
   await expect(page.getByRole('img', { name: '1 stars in the class sky' })).toBeVisible({ timeout: 8000 });
   await page.screenshot({ path: `test-results/sky-host-${info.project.name}.png` });

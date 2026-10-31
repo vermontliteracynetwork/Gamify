@@ -277,7 +277,8 @@ function Room({ game }: { game: GameCode }) {
           <Tabs label={t('live.views')} value={view} onChange={setView} options={[{ id: 'screen', label: t('live.view.screen') }, { id: 'monitor', label: t('live.view.monitor') }]} />
           {state.phase === 'paused' && <p className="font-display text-2xl bg-accent border-[2px] border-border rounded-input p-3 text-center" role="status">{t('live.pausedHost')}</p>}
           {view === 'screen' ? (
-            <Panel className="grid gap-3">
+            // The projector view fills the screen (teacher check, 2026-10-31).
+            <Panel className="grid gap-3 grid-rows-[auto_1fr] [@media(min-height:900px)]:min-h-[calc(100dvh-21rem)]">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-bold flex-1">{t('live.screenNote', { code: game.code })}</p>
                 {timeLeft !== null && <p className="font-display text-3xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</p>}
@@ -303,20 +304,20 @@ function Room({ game }: { game: GameCode }) {
                     label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
                 </div>
               ) : board === 'leaders' ? (
-                <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('live.board.leaders')}>
+                <ol className="grid gap-3 content-center list-none p-0 m-0" aria-label={t('live.board.leaders')}>
                   {leaders.slice(0, 10).map((p, i) => (
-                    <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[2.5rem_minmax(8rem,14rem)_1fr_3rem] items-center gap-2">
-                      <span className="font-display text-2xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="#c98a00" aria-label="1" /> : i + 1}</span>
-                      <span className="font-bold text-lg truncate">{p.name}</span>
-                      <span className="h-8 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><motion.span className="block h-full bg-accent" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} transition={{ duration: reduce ? 0 : 0.5 }} /></span>
-                      <span className="font-display text-2xl text-right">{p.right}</span>
+                    <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3">
+                      <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="#c98a00" aria-label="1" /> : i + 1}</span>
+                      <span className="font-bold text-2xl truncate">{p.name}</span>
+                      <span className="h-10 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><motion.span className="block h-full bg-accent" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} transition={{ duration: reduce ? 0 : 0.5 }} /></span>
+                      <span className="font-display text-3xl text-right">{p.right}</span>
                     </motion.li>
                   ))}
                 </ol>
               ) : (
-                <div className="grid gap-3 justify-items-center text-center py-4">
-                  <p className="font-display text-3xl">{t('live.goalText', { right: classRight, goal })}</p>
-                  <div className="w-full h-12 rounded-pill bg-surface-2 border-[3px] border-border overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(classRight, goal)} aria-label={t('live.board.goal')}>
+                <div className="grid gap-6 content-center justify-items-center text-center py-4">
+                  <p className="font-display text-5xl">{t('live.goalText', { right: classRight, goal })}</p>
+                  <div className="w-full h-20 rounded-pill bg-surface-2 border-[3px] border-border overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(classRight, goal)} aria-label={t('live.board.goal')}>
                     <motion.div className="h-full bg-[#7dd3a8]" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (classRight / goal) * 100)}%` }} transition={{ duration: reduce ? 0 : 0.6 }} />
                   </div>
                 </div>
