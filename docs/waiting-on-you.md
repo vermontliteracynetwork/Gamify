@@ -22,3 +22,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Turn on the natural read-aloud voice, optional (2026-10-27).** Make an OpenAI API key and add it in Vercel as OPENAI_API_KEY (Production), then redeploy. Only on-screen words are sent. Without it, read-aloud uses the device voice.
 
 - **Confirm the Puzzle Games Graphics Pack license** (2026-10-31): Match Three gems and Bubble Pop bubbles use it on the work branch. Open ci.itch.io/puzzle-games-graphics-pack and send the license text; it ships once commercial use is confirmed.
+- **Send the Triple Treat SFX license** (2026-10-31): the download has no license file, so those sounds are not used yet.

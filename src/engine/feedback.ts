@@ -1,8 +1,8 @@
 import { volume, type PlayerSettings } from '../settings/settings';
 import type { SoundPack } from '../theme/types';
 
-// Sound effects (generated in code, so nothing to license), haptics and the
-// read-aloud voice. Every call respects the player's settings.
+// Sound effects (recorded for Classic, generated in code for theme packs),
+// haptics and the read-aloud voice. Every call respects the player's settings.
 
 type Effect = 'right' | 'miss' | 'tap' | 'win' | 'whoosh';
 const TONES: Record<Effect, { freqs: number[]; type: OscillatorType; step: number; length: number }> = {
@@ -34,12 +34,41 @@ function audio(): AudioContext | null {
   return ctx;
 }
 
+// The Classic pack plays recorded sounds (teacher, 2026-10-31): Casual
+// SoundFX by Tim Beek (CC BY 4.0) and Kenney Interface Sounds (CC0), trimmed
+// short and quiet in public/sounds. Until a file has loaded (or if it can't),
+// the made-in-code tone plays instead.
+const buffers = new Map<Effect, AudioBuffer | 'loading' | 'failed'>();
+function sample(ac: AudioContext, name: Effect): AudioBuffer | null {
+  const b = buffers.get(name);
+  if (b && b !== 'loading' && b !== 'failed') return b;
+  if (!b) {
+    buffers.set(name, 'loading');
+    void fetch(`/sounds/${name}.mp3`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject())).then((a) => ac.decodeAudioData(a))
+      .then((buf) => { buffers.set(name, buf); }).catch(() => { buffers.set(name, 'failed'); });
+  }
+  return null;
+}
+export function preloadSounds() { const ac = audio(); if (ac) (Object.keys(TONES) as Effect[]).forEach((n) => sample(ac, n)); }
+
 export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack): void {
   const p = PACKS[with_];
   const gain = volume(s, 'effects') * 0.25 * p.gain;
   if (gain <= 0) return;
   const ac = audio();
   if (!ac) return;
+  if (with_ === 'classic') {
+    const buf = sample(ac, name);
+    if (buf) {
+      const src = ac.createBufferSource();
+      const g = ac.createGain();
+      g.gain.value = Math.min(1, gain * 3.2);
+      src.buffer = buf;
+      src.connect(g).connect(ac.destination);
+      src.start();
+      return;
+    }
+  }
   const tone = TONES[name];
   tone.freqs.forEach((freq, i) => {
     const osc = ac.createOscillator();

@@ -230,6 +230,9 @@ function Supports() {
   return <SessionSupports setOverrides={setOverrides} />;
 }
 
+// Recorded sounds load on the first tap (iPads only allow audio after one).
+if (typeof window !== 'undefined') window.addEventListener('pointerdown', () => { void import('./engine/feedback').then((m) => m.preloadSounds()); }, { once: true });
+
 export default function App() {
   return (
     <SettingsProvider>

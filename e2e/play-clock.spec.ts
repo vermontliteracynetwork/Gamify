@@ -20,7 +20,7 @@ test('play clock: warnings, a normal ending, then the look-at-your-teacher scree
   await page.getByRole('button', { name: /Play/ }).click();
   await expect(page).toHaveURL(/\/games\/star-quiz/);
   // Start the game.
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 30; i++) {
     const play = page.getByRole('button', { name: /^(Set up and play|Next|Play)$/ });
     if (await page.getByRole('dialog').isVisible()) break;
     if (await play.first().isVisible()) await play.first().click();
