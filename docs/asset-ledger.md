@@ -27,6 +27,8 @@ ships without a line here.
 | Kenney Fish Pack 2.0 (fish, seaweed, rocks; outline versions) | Cast and Catch Classic fish and lake floor (`public/classic/cast-catch/`) | kenney.nl, supplied by the teacher | CC0 1.0 (public domain, commercial use OK, credit optional; license copied beside the files) | 2026-10-31 |
 | Casual SoundFX by Tim Beek (right, miss, win, whoosh) | Classic sound pack, every game (`public/sounds/`) | Supplied by the teacher with its license PDF (copied beside the files) | CC BY 4.0: commercial use OK, **credit required** (on the Credits page) | 2026-10-31 |
 | Kenney Interface Sounds (click) | Classic tap sound (`public/sounds/tap.mp3`) | kenney.nl, supplied by the teacher | CC0 1.0 | 2026-10-31 |
+| Kenney Background Elements (+ Remastered), Game Icons, UI Pack, Interface Sounds | Library for future scenes, icons and UI (`assets/kenney/`, not shipped until used) | kenney.nl, supplied by the teacher | CC0 1.0 | 2026-10-31 |
+| Casual Game Interface Kit (Free ver) | Not used, not stored | Supplied by the teacher | **No license in the download: not used until the license is confirmed** | 2026-10-31 |
 | Triple Treat SFX | Not used | Supplied by the teacher | **No license file in the download: not used until the license is confirmed** | 2026-10-31 |
 | Puzzle Games Graphics Pack by ci (gems, balls, coins, animals, pipes, blocks) | Match Three gems, Bubble Pop balls (ready behind `PUZZLE_PACK_CLEARED` in `src/config.ts`; files kept in `assets/puzzle-pack/`, not shipped) | ci.itch.io/puzzle-games-graphics-pack, supplied by the teacher | **License not yet confirmed: hold from main until the teacher confirms commercial use** | 2026-10-31 |
 
