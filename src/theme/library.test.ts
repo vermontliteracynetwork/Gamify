@@ -6,11 +6,12 @@ import { STARTER_THEMES } from './starters';
 import { themeProblems } from './validate';
 
 describe('game themes', () => {
-  it('every game wears only Classic for now, and it passes readability checks', () => {
+  it('every game wears Classic first, plus only Gamify\'s own designed themes, and all pass readability checks', () => {
     for (const g of GAMES) {
       const themes = themesFor(g.id);
-      expect(themes.map((t) => t.name)).toEqual(['Classic']);
-      expect(themeProblems(themes[0])).toEqual([]);
+      expect(themes[0].name).toBe('Classic');
+      expect(themes.slice(1).every((t) => t.id.startsWith('house:'))).toBe(true);
+      for (const th of themes) expect([th.name, themeProblems(th)]).toEqual([th.name, []]);
     }
   });
   it('the starter samples still pass readability checks, for when they come back', () => {
