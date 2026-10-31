@@ -9,7 +9,7 @@ export const W = 100, H = 130;
 export const WALL = 5;
 export const ZONES = 5;
 export const LANE_Y = 72; // the numbered lane band across the middle
-export const LANE_H = 10;
+export const LANE_H = 14;
 export const ZONE_X = Array.from({ length: ZONES }, (_, i) => WALL + ((W - 2 * WALL) / ZONES) * (i + 0.5));
 export const LAUNCH = { x: 50, y: 116 };
 export const POCKET_TOP = 6;

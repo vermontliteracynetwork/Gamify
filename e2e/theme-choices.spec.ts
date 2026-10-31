@@ -21,12 +21,13 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(1);
   await page.screenshot({ path: `test-results/themes-favs-${info.project.name}.png` });
 
-  // Games wear only Classic for now; a theme the teacher designs can be offered.
+  // Gamify's designed themes and a theme the teacher designs can be offered.
   await page.goto('/teacher/classes/c1');
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
-  await expect(page.getByText('Every game plays Classic for now.', { exact: false })).toBeVisible();
+  // Gamify's own designed themes (Animal Friends, 2026-10-31) are offered too.
+  await expect(page.getByText('Animal Friends', { exact: false }).first()).toBeVisible();
   await page.goto('/teacher/themes/game-show');
   await page.getByLabel('Theme name').fill('Room 7 Look');
   await page.getByRole('button', { name: 'Save theme' }).click();

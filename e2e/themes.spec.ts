@@ -58,7 +58,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await expect(page).toHaveTitle('Game Show | Gamify');
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /^Step 1 of 4:/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Step 1 of 5:/ })).toBeVisible();
   await finishSetup(page);
   expect(await page.locator('h1, h2').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
   const bg = await page.getByRole('button', { name: 'Card 1', exact: true }).evaluate((el) => getComputedStyle(el).backgroundImage);

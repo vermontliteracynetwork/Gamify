@@ -441,7 +441,7 @@ export default function Pinball() {
                       initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} role="status">{t('pb.close')}</motion.p>
                   )}
                   {banner && (
-                    <motion.p key={banner.id} className="absolute inset-x-0 top-[45%] mx-auto w-max max-w-[90%] text-center font-display text-xl sm:text-2xl bg-surface border-[2.5px] border-border rounded-pill px-4 py-1 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }}
+                    <motion.p key={banner.id} className="absolute inset-x-0 top-[24%] mx-auto w-max max-w-[90%] text-center font-display text-xl sm:text-2xl bg-surface border-[2.5px] border-border rounded-pill px-4 py-1 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }}
                       initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.35 }}
                       onAnimationComplete={() => { const id = banner.id; timers.current.push(window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600)); }}
                       role="status">{banner.text}</motion.p>

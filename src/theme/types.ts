@@ -110,6 +110,8 @@ export interface GameTheme {
   pieces: Record<string, PieceArt>;
   // Power-up items this theme adds (games that declare item abilities).
   items?: ThemeItem[];
+  // Pieces players choose from before play (Four in a Row, teacher 2026-10-31).
+  discs?: { id: string; name: string; image: string }[];
   cover?: string;
   designedBy?: string;
   // Optional first name or nickname of the student who designed it.

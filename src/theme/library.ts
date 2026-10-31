@@ -1,5 +1,6 @@
 import { classicTheme } from './classic';
 import { startersFor } from './starters';
+import { houseFor } from './house';
 import type { GameTheme } from './types';
 
 // Every game plays Classic free; other themes come from the Theme Builder
@@ -7,7 +8,7 @@ import type { GameTheme } from './types';
 // developer view) and Gamify's starter themes (Plus and Pro; off for now,
 // see STARTERS_IN_GAMES).
 export function themesFor(gameId: string, made: GameTheme[] = []): GameTheme[] {
-  return [classicTheme(gameId), ...made.filter((th) => th.gameId === gameId), ...startersFor(gameId)];
+  return [classicTheme(gameId), ...houseFor(gameId), ...made.filter((th) => th.gameId === gameId), ...startersFor(gameId)];
 }
 
 export function pieceColor(theme: GameTheme | undefined, piece: string, fallback: string): string {

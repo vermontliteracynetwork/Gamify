@@ -16,6 +16,8 @@ import TeamSetup from '../../engine/TeamSetup';
 import { TEAM_COLORS, type CpuLevel, type TurnPlayer } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
+import { BALL_PACK, BALL_PACK_CLEARED } from '../../config';
+import type { StringKey } from '../../i18n/en';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
@@ -67,6 +69,14 @@ export default function FourInARow() {
   const [hostCode, setHostCode] = useState('');
   const link = useRef<VersusLink | null>(null);
   const placeRef = useRef<(col: number) => void>(() => undefined);
+  // Pieces players choose before play (teacher, 2026-10-31): a theme's set
+  // (Animal Friends: ten animals), or the Ball Collection in Classic.
+  const discs = theme.discs?.length ? theme.discs : BALL_PACK_CLEARED ? BALL_PACK.map((id) => ({ id, name: t(`fr.ball.${id}` as StringKey), image: `/classic/four-in-a-row/${id}.webp` })) : [];
+  const [picks, setPicks] = useState<[number, number]>([0, 1]);
+  useEffect(() => setPicks([0, 1]), [theme.id]);
+  function pickDisc(seat: 0 | 1, i: number) {
+    setPicks((p) => { const other = p[seat === 0 ? 1 : 0]; const next: [number, number] = [...p]; next[seat] = i; if (other === i) next[seat === 0 ? 1 : 0] = p[seat]; return next; });
+  }
 
   const player = players[turn];
   const remoteTurn = remoteSeat !== null && turn === remoteSeat;
@@ -165,6 +175,11 @@ export default function FourInARow() {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
     return (
+      discs.length >= 2 ? (
+        <span className="rounded-full flex items-center justify-center overflow-hidden" style={{ width: size, height: size }}>
+          <img src={discs[picks[who - 1]]?.image} alt="" className="w-full h-full object-contain" draggable="false" />
+        </span>
+      ) :
       <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, ...pieceFill(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
         {!pieceImage(theme, `piece-${who}`) && <Icon weight="fill" className="w-1/2 h-1/2" color="#241c3d" aria-hidden="true" />}
       </span>
@@ -194,6 +209,23 @@ export default function FourInARow() {
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
+          ...(discs.length >= 2 ? [{ id: 'pieces', title: t('fr.pieces'), content: (
+            <div className="grid gap-4">
+              {([0, 1] as const).map((seat) => (
+                <div key={seat} role="radiogroup" aria-label={t('fr.pieceFor', { name: team.players[seat]?.name ?? t(seat ? 'fr.player2' : 'fr.player1') })} className="grid gap-2">
+                  <span className="font-bold">{t('fr.pieceFor', { name: team.players[seat]?.name ?? t(seat ? 'fr.player2' : 'fr.player1') })}</span>
+                  <div className="flex flex-wrap gap-2">
+                    {discs.map((d, i) => (
+                      <button key={d.id} type="button" role="radio" aria-checked={picks[seat] === i} aria-label={d.name} title={d.name} onClick={() => pickDisc(seat, i)}
+                        className={`w-14 h-14 rounded-full p-1 border-[2.5px] ${picks[seat] === i ? 'border-border ring-4 ring-accent bg-accent' : picks[seat === 0 ? 1 : 0] === i ? 'border-border-soft opacity-40' : 'border-border-soft bg-surface'}`}>
+                        <img src={d.image} alt="" className="w-full h-full object-contain" draggable="false" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) }] : []),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
