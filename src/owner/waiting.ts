@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'puzzle-pack-license', kind: 'legal', added: '2026-10-31', title: 'Confirm the license for the Puzzle Games Graphics Pack (gems and bubbles)',
+    why: 'Match Three gems and Bubble Pop bubbles now use this pack on the work branch. Gamify is sold, so every picture needs a license that allows commercial use before it goes live. The itch.io page could not be opened from the build session.',
+    how: 'Open ci.itch.io/puzzle-games-graphics-pack and tell Claudia what the license says (for example CC0, or "free for commercial use"), or paste it. If it allows commercial use, it ships the same day.' },
   { id: 'loyola-font', kind: 'money', added: '2026-10-29', title: 'Get a web license and file for Loyola Round Pro',
     why: 'Most headings now use the heading font slot you asked for (titles stay Grow Year). Your logo PDF uses Loyola Round Pro, but a font inside a PDF or a Canva design cannot be put on a website. Until a licensed web file arrives, headings use Inclusive Sans bold.',
     how: 'Buy or download Loyola Round Pro from its maker with a web (or app) license that covers a commercial website, and send Claudia the .woff2 or .otf file and the license page. Canva\'s font license does not cover websites.' },

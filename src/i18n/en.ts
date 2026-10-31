@@ -303,7 +303,7 @@ export const en = {
   'bm.shuffle': 'No moves left, shuffling the board!',
   'bm.answerToGo': 'Great round! Answer to keep playing.',
   'bm.done': 'You scored {score} points!',
-  'bm.kind.0': 'Cookie', 'bm.kind.1': 'Cake', 'bm.kind.2': 'Ice cream', 'bm.kind.3': 'Pizza', 'bm.kind.4': 'Popcorn', 'bm.kind.5': 'Cocoa',
+  'bm.kind.0': 'Blue diamond', 'bm.kind.1': 'Red heart', 'bm.kind.2': 'Green gem', 'bm.kind.3': 'Yellow star', 'bm.kind.4': 'Purple drop', 'bm.kind.5': 'Orange moon',
 
   'fr.rightsHint': 'Right answers',
   'fr.title': 'Four in a Row',

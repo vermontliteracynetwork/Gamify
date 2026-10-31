@@ -20,3 +20,5 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Run 0011 to switch on access codes and beta plans (2026-10-27).** Supabase SQL Editor: run supabase/migrations/0011_access_codes.sql (after 0010), then make the code on /owner (Access codes and beta plans) and send it to your list.
 - **Turn on two-step sign-in for /owner, then run 0012 (2026-10-27).** After 0010: log in as vtliteracynetwork, open /owner, scan the QR code with the authenticator app on your phone, type its code. Then run supabase/migrations/0012_owner_two_step_and_replies.sql.
 - **Turn on the natural read-aloud voice, optional (2026-10-27).** Make an OpenAI API key and add it in Vercel as OPENAI_API_KEY (Production), then redeploy. Only on-screen words are sent. Without it, read-aloud uses the device voice.
+
+- **Confirm the Puzzle Games Graphics Pack license** (2026-10-31): Match Three gems and Bubble Pop bubbles use it on the work branch. Open ci.itch.io/puzzle-games-graphics-pack and send the license text; it ships once commercial use is confirmed.

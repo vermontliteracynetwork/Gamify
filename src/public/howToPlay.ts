@@ -91,7 +91,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       'Play the rounds the teacher sets.',
     ],
     pieces: [
-      { name: 'Board', what: 'A grid of treats to swap.' },
+      { name: 'Board', what: 'A grid of gems to swap. Each gem has its own shape and color.' },
       { name: 'Moves and rounds', what: 'Each round has a number of moves; the panel shows the score and round.' },
       { name: 'Power-ups', what: 'Pocket Watch (more moves), Prize Bag (bonus points), Double Star (next match doubles).' },
     ],

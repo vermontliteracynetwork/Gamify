@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsLeftRight, Cake, Coffee, Cookie, IceCream, Pizza, Popcorn, Question, type Icon } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Diamond, Question } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -29,10 +29,12 @@ import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, p
 import Title from '../../ui/Title';
 
 
-// Simple house look: each treat has its own icon AND color (never color
+// Simple house look: each gem has its own shape AND color (never color
 // alone). Library and class-made themes swap in artwork per tile.
-const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
-const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
+// Classic tiles are gems (teacher, 2026-10-31): each a different shape and
+// color, on a soft tile of its own color, so shape alone tells them apart.
+const TILE_COLORS = ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'];
+const CLASSIC_GEM = (k: number) => `/classic/match-three/gem-${k}.webp`;
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 
 export default function MatchThree() {
@@ -148,7 +150,7 @@ export default function MatchThree() {
     else setSelected(pos);
   }
 
-  // Swiping a treat also swaps it (unless the player chose tap only).
+  // Swiping a gem also swaps it (unless the player chose tap only).
   function onPointerUp(e: React.PointerEvent, pos: Pos) {
     const d = drag.current;
     drag.current = null;
@@ -171,7 +173,7 @@ export default function MatchThree() {
       {phase === 'welcome' && (
         <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
-          { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
+          { icon: <Diamond weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
         ]} />
       )}
@@ -202,7 +204,6 @@ export default function MatchThree() {
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
-                const Icon = TILE_ICONS[tileItem.kind];
                 const isSel = selected?.row === r && selected?.col === c;
                 const kindName = t(`bm.kind.${tileItem.kind}` as StringKey);
                 return (
@@ -223,7 +224,7 @@ export default function MatchThree() {
                     className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}
                     style={pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])}
                   >
-                    {!pieceImage(theme, `tile-${tileItem.kind}`) && <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />}
+                    {!pieceImage(theme, `tile-${tileItem.kind}`) && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
                   </motion.button>
                 );
               })}</div>)}
