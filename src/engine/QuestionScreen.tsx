@@ -7,7 +7,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { buzz, playEffect, speak, stopSpeaking } from './feedback';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
-import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
+import { FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import FloatingCard from '../ui/FloatingCard';
 import DialogFocus from '../ui/DialogFocus';
 
@@ -20,8 +20,11 @@ export interface AnswerResult { tapped: string; tries: string[]; right: boolean;
 // The one question screen every game uses (question engine section 3):
 // read first, shuffled answers, one try, a short right moment, and after a
 // miss a new question arrives without showing the answer.
-export default function QuestionScreen({ question, progress, player, onAnswer, onClose }: {
+// `framed` (Question Tracker, teacher 2026-10-31): a smaller card set into
+// the game's scene, with no dark cover, so the background is the frame.
+export default function QuestionScreen({ question, progress, player, onAnswer, onClose, framed = false }: {
   question: MultipleChoiceQuestion;
+  framed?: boolean;
   progress?: { n: number; total: number };
   player?: string;
   onAnswer: (r: AnswerResult) => void;
@@ -84,15 +87,15 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   const words = q.prompt.split(/(\s+)/);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={q.prompt}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${framed ? '' : 'bg-black/45'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-        className="w-full max-w-2xl max-h-full overflow-y-auto bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-4"
-        style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'max-w-2xl border-[2.5px] p-5 sm:p-6 gap-4'}`}
+        style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'var(--shadow-sticker-lg)' }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           {progress && progress.total > 1 && (
@@ -110,6 +113,8 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
             <Toolbox weight="bold" size={20} />
           </button>}
+          {/* Full screen stays in reach while a question is up (teacher, 2026-10-31). */}
+          <FullScreenButton small />
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <button type="button" onClick={() => setConfirmLeave(true)} aria-label={t('q.close')}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
@@ -150,7 +155,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         ))}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className="font-body text-2xl sm:text-3xl font-bold leading-snug text-balance">
+        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
@@ -183,7 +188,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 aria-disabled={locked || picked !== null || triedWrong}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
-                className={`relative min-h-20 px-4 py-3 rounded-input border-[2.5px] border-border text-left font-bold text-lg flex items-center gap-3
+                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-20 px-4 py-3 text-lg'} rounded-input border-[2.5px] border-border text-left font-bold flex items-center gap-3
                             ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}

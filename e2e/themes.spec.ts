@@ -118,8 +118,6 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
   await page.goto('/teacher/themes/match-three');
   await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })));
   await page.reload();
-  // The get started steps sit on top until done; fold them to check the builder itself fits.
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await expect(page.getByRole('tab', { name: 'Upload' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByText(/^Page 1 of \d/)).toBeVisible();
   await page.getByRole('button', { name: 'Next page' }).click();
@@ -133,7 +131,6 @@ test('Theme Builder fits the screen: tabs and pages, no scrolling', async ({ pag
 
 test('Download tab: blank printable pages and digital files; the Classic look is in the theme guide', async ({ page }, info) => {
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Download' }).click();
   await page.screenshot({ path: `test-results/builder-download-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);

@@ -118,6 +118,15 @@ export default function PricingPage() {
 
         <SchoolPlans />
 
+        {/* What is never behind a paywall, in public (teacher research, 2026-10-31). */}
+        <section aria-labelledby="always-free" className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <h2 id="always-free" className="font-display text-3xl flex items-center gap-2"><ShieldCheck weight="fill" size={30} aria-hidden="true" /><Title text={t('pricing.always.title')} /></h2>
+          <p className="font-semibold">{t('pricing.always.text')}</p>
+          <ul className="grid sm:grid-cols-2 gap-2 list-none p-0 m-0">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <li key={n} className="flex gap-2 font-bold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.always.${n}` as StringKey)}</li>)}
+          </ul>
+        </section>
+
         <section aria-labelledby="faq" className="grid gap-3">
           <h2 id="faq" className="font-display text-3xl"><Title text={t('pricing.faqTitle')} /></h2>
           {/* FAQ structured data: search and AI answer tools read these (teacher, 2026-10-31). */}

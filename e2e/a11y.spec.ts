@@ -75,7 +75,6 @@ test.describe('full sweep', () => {
     await page.waitForTimeout(400);
     expect(await scan(page)).toEqual([]);
     await page.goto('/teacher/themes/game-show');
-    await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
     expect(await scan(page)).toEqual([]);
     await page.getByRole('tab', { name: 'Upload' }).click();
     await page.getByRole('button', { name: /^Draw the / }).first().click();

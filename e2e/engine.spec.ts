@@ -11,6 +11,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   page.on('pageerror', (e) => problems.push(e.message));
 
   await openSetup(page, '/games/star-quiz');
+  await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('slider', { name: 'Questions' }).fill('5');
@@ -94,6 +95,7 @@ test('Question Tracker: every star stays in view around the question box', async
   test.setTimeout(120_000);
   await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ readFirstSeconds: 0 })));
   await openSetup(page, '/games/star-quiz');
+  await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('slider', { name: 'Questions' }).fill('12');

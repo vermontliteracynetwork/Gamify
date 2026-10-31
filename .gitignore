@@ -6,3 +6,6 @@ dist
 test-results/
 playwright-report/
 .shots/
+dist2
+test-results-alt
+pw-alt.config.ts

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
+import { noPowerUps } from './setup';
 
 // Hands-on keyboard check (Stage 8 accessibility): these flows use only Tab,
 // Shift+Tab, Enter, Space and the arrow keys after the page loads.
@@ -39,12 +40,14 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
   const dialog = page.getByRole('dialog');
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
   const right = answers.get(prompt)!;
-  await tabTo(page, new RegExp(`${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+  await tabTo(page, new RegExp(`^[A-D]\\s+${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   await page.keyboard.press('Enter');
   await expect(dialog.getByText('You got it!')).toBeVisible();
 });
 
 test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ page }) => {
+  // A random Bubble Bundle power-up would add bubbles; this test counts them.
+  await noPowerUps(page, 'bubble-pop');
   await page.goto('/games/bubble-pop');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
@@ -53,7 +56,7 @@ test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ pag
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
   const right = answers.get(prompt)!;
-  await tabTo(page, new RegExp(`${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+  await tabTo(page, new RegExp(`^[A-D]\\s+${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   await page.keyboard.press('Enter');
   await expect(page.getByRole('img', { name: '5 bubbles left' })).toBeVisible({ timeout: 8000 });
   await page.locator('body').click({ position: { x: 5, y: 5 } }).catch(() => {});

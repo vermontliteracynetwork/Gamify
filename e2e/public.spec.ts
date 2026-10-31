@@ -46,7 +46,8 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   const code = 'BKDFG';
   await seedGameCode(page, code);
   await page.goto('/teacher/classes');
-  await expect(page.getByText('1 of 4 done')).toBeVisible();
+  // Adding Kai and making a game code finish two steps (Create an activity counts codes).
+  await expect(page.getByText('2 of 4 done')).toBeVisible();
   await page.screenshot({ path: `test-results/get-started.png` });
   await page.getByRole('button', { name: 'Log out' }).click();
 

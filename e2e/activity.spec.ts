@@ -61,7 +61,7 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: 'Go' }).click();
   await page.getByRole('button', { name: "I'm not on the list" }).click();
   await page.getByRole('button', { name: /Play/ }).click();
-  await expect(page.getByRole('heading', { level: 1, name: /Pick a game/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Pick a game/i })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Cast and Catch' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Match Three' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Game Show' })).toHaveCount(0);

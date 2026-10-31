@@ -32,8 +32,8 @@ export function isGuessing(history: { at: number; ms: number; right: boolean }[]
 // The one hook games use to ask questions. A game calls `await ask()` (or
 // ask({ count: 3 }) for a 3-question break) and renders `element` once. The
 // promise resolves true after the right answers, false if the student left.
-export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
-  gameId: string; mode: PlayMode; pool: PoolSet[]; classroomId?: string; studentId?: string;
+export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = false }: {
+  gameId: string; mode: PlayMode; pool: PoolSet[]; classroomId?: string; studentId?: string; framed?: boolean;
 }) {
   const [active, setActive] = useState<Active | null>(null);
   const [breathing, setBreathing] = useState(false);
@@ -105,6 +105,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
       player={active.player}
       onAnswer={onAnswer}
       onClose={onClose}
+      framed={framed}
     />
   ) : null;
 

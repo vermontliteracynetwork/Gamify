@@ -24,15 +24,16 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   // Games wear only Classic for now; a theme the teacher designs can be offered.
   await page.goto('/teacher/classes/c1');
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await expect(page.getByText('Every game plays Classic for now.', { exact: false })).toBeVisible();
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByLabel('Theme name').fill('Room 7 Look');
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Room 7 Look.', { exact: false })).toBeVisible();
   await page.goto('/teacher/classes/c1');
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('checkbox', { name: /Room 7 Look/ }).click();
   await expect(page.getByText('1 of 10 themes picked.')).toBeVisible();
@@ -50,7 +51,6 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
 
 test('share a class theme in the gallery: owner approves, and it shows on the Themes page', async ({ page }, info) => {
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByLabel('Theme name').fill('Rainbow Room');
   await page.getByRole('tab', { name: 'Share' }).click();
   await page.getByLabel('Student first name or nickname (optional)').fill('Ava');

@@ -18,7 +18,7 @@ import { makeGameCode } from '../data/gameCodes';
 // Full screen for smart boards and projectors (teacher, 2026-10-29): hides
 // the browser's bars so the game fills the board. Hidden where the browser
 // cannot do it (phones).
-export function FullScreenButton() {
+export function FullScreenButton({ small = false }: { small?: boolean }) {
   const [on, setOn] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
   useEffect(() => {
     const sync = () => setOn(!!document.fullscreenElement);
@@ -29,9 +29,9 @@ export function FullScreenButton() {
   const toggle = () => { void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
   return (
     <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')}
-      className="w-14 h-14 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center active:scale-95 motion-safe:transition"
-      style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      {on ? <CornersIn weight="bold" size={28} /> : <CornersOut weight="bold" size={28} />}
+      className={`${small ? 'w-11 h-11 border-[2px] bg-surface-2' : 'w-14 h-14 border-[2.5px] bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+      style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
+      {on ? <CornersIn weight="bold" size={small ? 20 : 28} /> : <CornersOut weight="bold" size={small ? 20 : 28} />}
     </button>
   );
 }

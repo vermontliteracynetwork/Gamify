@@ -7,7 +7,6 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByLabel('Find a piece').fill('cover');
   await page.getByRole('button', { name: /^Draw the Cover/ }).click();
@@ -73,9 +72,10 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
 // the live lobby shows it with a picker for the look.
 test('Big screen design: lobby picture shows in the live lobby; teacher pages have a footer', async ({ page }, info) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
-  await page.goto('/teacher/themes/big-screen');
+  // Teacher pages have a footer; the full-screen Theme Builder has none (teacher, 2026-10-31).
+  await page.goto('/teacher/sets');
   await expect(page.getByRole('contentinfo')).toContainText('Help Center');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.goto('/teacher/themes/big-screen');
   await page.getByLabel('Theme name').fill('Party');
   await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByRole('button', { name: /^Draw the Lobby picture/ }).click();
@@ -103,7 +103,6 @@ test('Big screen design: lobby picture shows in the live lobby; teacher pages ha
 test('studio: drag a sticker from the shelf onto the picture', async ({ page }, info) => {
   test.skip(info.project.name !== 'laptop', 'mouse drag; iPads tap to place');
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByLabel('Find a piece').fill('cover');
   await page.getByRole('button', { name: /^Draw the Cover/ }).click();
@@ -115,7 +114,6 @@ test('studio: drag a sticker from the shelf onto the picture', async ({ page }, 
 
 test('studio: flip a piece, and a warning for words that are hard to read', async ({ page }) => {
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByLabel('Find a piece').fill('cover');
   await page.getByRole('button', { name: /^Draw the Cover/ }).click();
@@ -141,7 +139,6 @@ test('studio: flip a piece, and a warning for words that are hard to read', asyn
 // the list after the rainbow button.
 test('studio: two colors, shape outlines, and a made color joins the list', async ({ page }, info) => {
   await page.goto('/teacher/themes/game-show');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
   await page.getByLabel('Find a piece').fill('cover');
   await page.getByRole('button', { name: /^Draw the Cover/ }).click();
