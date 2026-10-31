@@ -54,7 +54,7 @@ export default function HowToPlayPage() {
         <div className="grid sm:grid-cols-2 gap-3">
           {SHOTS.map((s) => (
             <figure key={s} className="m-0 grid gap-1">
-              <img src={`/help/${game.id}-${s}.png`} alt={t(`howto.shot.${s}`, { game: game.name })} loading="lazy"
+              <img src={`/help/${game.id}-${s}.png`} onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }} alt={t(`howto.shot.${s}`, { game: game.name })} loading="lazy"
                 className="w-full aspect-[16/10] object-cover object-top rounded-input border-[2.5px] border-border bg-surface" />
               <figcaption className="text-sm font-bold">{t(`howto.shot.${s}`, { game: game.name })}</figcaption>
             </figure>

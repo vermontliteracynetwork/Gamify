@@ -23,7 +23,8 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
     await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
     await page.getByRole('button', { name: 'Drop in column 4' }).click();
     await expect(page.getByText('The computer is choosing...')).toBeVisible();
-    await expect(page.getByText(/answer to drop a piece/)).toBeVisible({ timeout: 8000 });
+    // Back to the player: their next question comes up (no turn bar; the scores glow).
+    await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible({ timeout: 8000 });
   }
   await expect(page.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(4);
   await page.screenshot({ path: `test-results/four-${info.project.name}.png`, fullPage: true });

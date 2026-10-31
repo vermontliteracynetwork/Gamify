@@ -5,6 +5,7 @@ import { ArrowArcLeft, ArrowArcRight, Crosshair, Drop, Flower, Heart, Lightning,
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
+import SoloPanel from '../../engine/SoloPanel';
 import ResultsModal from '../../engine/ResultsModal';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
@@ -300,23 +301,9 @@ export default function BubblePop() {
               <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.right')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a + 0.08))}><ArrowArcRight weight="bold" size={26} /></button>
             </div>
           </section>
-          <aside className="order-first lg:order-none grid gap-2 lg:gap-3">
-            <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-2 lg:p-4 flex lg:grid items-center gap-x-5 gap-y-2 flex-wrap" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-3xl lg:text-4xl tabular-nums">{score}</motion.p>
-              <p className="font-bold">{t('bp.board', { n: level + 1 })}</p>
-              <div className="flex gap-1.5 flex-wrap" role="img" aria-label={t('bp.shots', { count: shots })}>
-                {Array.from({ length: Math.max(plan.current.shots, shots) }, (_, i) => (
-                  <span key={i} className={`w-5 h-5 rounded-full border-[2px] border-border ${i < shots ? 'bg-accent' : 'bg-surface-2'}`} />
-                ))}
-              </div>
-              <p className="font-display text-lg lg:text-xl w-full lg:w-auto" aria-live="polite">{step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')}</p>
-            </div>
-            <AnimatePresence>
-              {note && (
-                <motion.p key={note} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="font-bold bg-surface rounded-input border-[2px] border-border p-3" role="status">{note}</motion.p>
-              )}
-            </AnimatePresence>
-          </aside>
+          <SoloPanel className="order-first lg:order-none" score={score} line={t('bp.board', { n: level + 1 })}
+            dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
+            status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
         </div>
       )}
 

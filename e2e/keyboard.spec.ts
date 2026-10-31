@@ -48,7 +48,6 @@ test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ pag
   await page.goto('/games/bubble-pop');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
-  await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
@@ -76,7 +75,6 @@ test('keyboard: a teacher makes a class', async ({ page }) => {
 test('keyboard: Match Three swaps two pieces with Enter', async ({ page }) => {
   await page.goto('/games/match-three');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
-  await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');
   await tabTo(page, /, row 1, column 1$/);

@@ -11,7 +11,7 @@ test('Free plan: a Plus game opened by its address shows a lock, never the game'
   await page.addInitScript(() => {
     localStorage.removeItem('gamify:teacher-session');
     if (!localStorage.getItem('gamify:classrooms')) localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '' }]));
-    sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava' }));
+    sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava', gameId: 'memory-match' }));
   });
   await page.goto('/games/memory-match');
   await expect(page.getByText('This game is locked. Ask your teacher!')).toBeVisible();

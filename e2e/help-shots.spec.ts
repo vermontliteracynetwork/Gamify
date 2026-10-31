@@ -31,6 +31,8 @@ for (const h of HOW_TO_PLAY) {
       await page.getByRole('button', { name: /^Stop/ }).click().catch(() => {});
     }
     const dialog = page.getByRole('dialog');
+    // Match Three starts on the board; its questions come when moves run out.
+    if (!(await dialog.getByRole('button', { name: /^[A-D] / }).first().isVisible({ timeout: 4000 }).catch(() => false))) { await shot('play'); return; }
     await expect(dialog.getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1800);
     await shot('question');

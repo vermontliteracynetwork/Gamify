@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ArrowsLeftRight, Cake, Coffee, Cookie, IceCream, Pizza, Popcorn, Question, type Icon } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
+import SoloPanel from '../../engine/SoloPanel';
 import ResultsModal from '../../engine/ResultsModal';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
@@ -225,23 +226,8 @@ export default function MatchThree() {
             </div>
           </div>
 
-          <aside className="grid gap-3">
-            <div className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted">{t('bm.score')}</p>
-              <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl font-bold tabular-nums">{score}</motion.p>
-              <p className="font-bold">{t('bm.round', { n: round, total: plan.current.rounds })}</p>
-              <div className="flex gap-1.5" aria-label={t('bm.moves', { count: moves })} role="img">
-                {Array.from({ length: Math.max(MOVES_PER_ROUND, moves) }, (_, i) => (
-                  <span key={i} className={`w-6 h-6 rounded-full border-[2px] border-border ${i < moves ? 'bg-accent' : 'bg-surface-2'}`} />
-                ))}
-              </div>
-            </div>
-            <AnimatePresence>
-              {note && (
-                <motion.p key={note} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="font-bold bg-surface rounded-input border-[2px] border-border p-3" role="status">{note}</motion.p>
-              )}
-            </AnimatePresence>
-          </aside>
+          <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
+            dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
         </div>
       )}
 

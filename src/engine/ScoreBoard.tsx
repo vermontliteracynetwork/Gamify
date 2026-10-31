@@ -39,8 +39,9 @@ export default function ScoreBoard({ turns, playing, round }: { turns: TurnState
             </motion.li>
           );
         })}
+        {/* Small screens: the round sits at the end of the one row, so the board keeps its room. */}
+        {round && <li className="lg:hidden shrink-0 self-center px-2 text-xs font-bold tabular-nums whitespace-nowrap">{round}</li>}
       </ol>
-      {round && <p className="lg:hidden text-xs font-bold text-center tabular-nums">{round}</p>}
       {now && <p className="sr-only" aria-live="polite">{t('share.whoseTurn', { name: now.name })}</p>}
     </aside>
   );

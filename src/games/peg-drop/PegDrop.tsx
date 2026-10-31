@@ -195,7 +195,7 @@ export default function PegDrop() {
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
           <section className="grid gap-2 min-w-0">
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 17.25rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 7 / 8))' }}>
+            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 17.75rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 7 / 8))' }}>
               {Array.from({ length: ZONES }, (_, z) => (
                 <button key={z} type="button" onClick={() => player?.kind !== 'cpu' && drop(z)} disabled={step !== 'aim' || player?.kind === 'cpu'} aria-label={t('pd.zone', { n: z + 1 })}
                   className={`absolute -translate-x-1/2 top-[1%] w-[11%] aspect-square rounded-full flex items-center justify-center ${step === 'aim' && player?.kind !== 'cpu' ? 'bg-accent border-[2.5px] border-border motion-safe:animate-pulse' : 'opacity-0'}`}

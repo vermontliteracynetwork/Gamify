@@ -97,6 +97,25 @@ export default function FeaturesPage() {
           </div>
         </section>
 
+        {/* Plus and Pro, described by what they open up (teacher, 2026-10-31). */}
+        <section aria-labelledby="plans-title" className="grid gap-4">
+          <h2 id="plans-title" className="title-bubble text-4xl"><Title text={t('features.plans.title')} /></h2>
+          <p className="text-lg font-semibold max-w-3xl">{t('features.plans.text')}</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {(['plus', 'pro'] as const).map((plan) => (
+              <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <h3 className="font-display text-3xl">{t(`features.plans.${plan}` as StringKey)}</h3>
+                <p className="font-bold">{t(`pricing.${plan}.who` as StringKey)}</p>
+                <ul className="grid gap-2 list-none p-0 m-0">
+                  {[1, 2, 3, 4].map((i) => <li key={i} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`upgrade.${plan}.${i}` as StringKey)}</li>)}
+                </ul>
+                <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'primary' : 'secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
+              </div>
+            ))}
+          </div>
+          <p className="font-semibold text-sm">{t('features.plans.free')}</p>
+        </section>
+
         <section className={`${card} p-6 sm:p-8 grid gap-4 justify-items-center text-center`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('features.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('features.endText')}</p>
