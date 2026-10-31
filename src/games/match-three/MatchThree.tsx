@@ -7,6 +7,7 @@ import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
 import SoloPanel from '../../engine/SoloPanel';
 import ResultsModal from '../../engine/ResultsModal';
+import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
@@ -44,7 +45,7 @@ export default function MatchThree() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
-  const { ask, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
@@ -134,7 +135,9 @@ export default function MatchThree() {
     setPhase('end');
     playEffect('win', settings);
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 50, spread: 80, origin: { y: 0.6 }, disableForReducedMotion: true });
-  }
+  }  // The teacher's play clock or score goal ends the game the usual way (2026-10-31).
+  const clock = usePlayClock({ playing: phase === 'play', score, onTimeUp: () => { if (asking) cancel(); else finish(); } });
+
 
   function tap(pos: Pos) {
     if (busy || phase !== 'play') return;
@@ -160,6 +163,7 @@ export default function MatchThree() {
     <ThemedPage theme={theme}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
+      {clock.element}
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('bm.title')} /></h1>}
       </GameTopRow>

@@ -7,6 +7,7 @@ import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { buzz, playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
+import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
@@ -69,7 +70,7 @@ export default function CastCatch() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
-  const { ask, element, missed } = useAsk({ gameId: 'cast-catch', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'cast-catch', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [step, setStep] = useState<Step>('ready');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -106,7 +107,9 @@ export default function CastCatch() {
     setPhase('end');
     playEffect('win', settings);
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 50, spread: 80, origin: { y: 0.6 }, disableForReducedMotion: true });
-  }
+  }  // The teacher's play clock or score goal ends the game the usual way (2026-10-31).
+  const clock = usePlayClock({ playing: phase === 'play', score, onTimeUp: () => { if (asking) cancel(); else finish(); } });
+
   // The cast meter swings back and forth until the player taps Stop.
   function startPower() {
     setStep('power');
@@ -172,6 +175,7 @@ export default function CastCatch() {
     <ThemedPage theme={theme}>
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="cast-catch" />
+      {clock.element}
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={castCatchManifest.name} /></h1>}
       </GameTopRow>

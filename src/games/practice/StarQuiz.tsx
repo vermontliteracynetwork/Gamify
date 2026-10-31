@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
+import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
@@ -39,7 +40,7 @@ export default function StarQuiz() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(pool);
-  const { ask, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId, framed: true });
+  const { ask, cancel, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId, framed: true });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stars, setStars] = useState(0);
   const [round, setRound] = useState(0);
@@ -49,11 +50,15 @@ export default function StarQuiz() {
   // In a class race, a student's own stars wear their color.
   const myColor = getLive() ? liveStarColor() : undefined;
 
+  const timeUp = useRef(false);
+  const clock = usePlayClock({ playing: phase === 'play', score: stars, onTimeUp: () => { timeUp.current = true; cancel(); } });
   async function play(v: { rounds: number }) {
+    timeUp.current = false;
     setTotal(v.rounds); setStars(0); setRound(0); setLeftEarly(false); setPhase('play');
     for (let r = 0; r < v.rounds; r++) {
       setRound(r + 1);
       const done = await ask();
+      if (timeUp.current) break;
       if (!done) { setLeftEarly(true); break; }
       setStars((s) => s + 1);
     }
@@ -68,6 +73,7 @@ export default function StarQuiz() {
     <ThemedPage theme={theme}>
     <main className={`${phase === 'play' || phase === 'end' ? 'max-w-none' : 'max-w-3xl'} mx-auto px-4 sm:px-6 pt-6 pb-6`}>
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      {clock.element}
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'welcome' && (

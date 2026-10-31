@@ -73,19 +73,21 @@ export default function JoinPage() {
     if (!game) return;
     const studentId = student?.id ?? newId('guest');
     const who = student?.name ?? name;
+    // The teacher's clock and score goal travel with the student (2026-10-31).
+    const limits = { ...(game.endAt ? { endAt: game.endAt } : game.minutes ? { endAt: Date.now() + game.minutes * 60000 } : {}), ...(game.goal ? { goal: game.goal } : {}) };
     // A class lobby sends each student to their own game or choice board.
     if (game.lobby) {
       const pick = lobbyPickFor(game.lobby, studentId);
       if (pick === 'board' && game.lobby.board) {
-        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, board: game.lobby.board });
+        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, board: game.lobby.board, ...limits });
         navigate('/choose'); return;
       }
       if (pick && pick !== 'board') {
-        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: pick.gameId });
+        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: pick.gameId, ...limits });
         navigate(`/games/${pick.gameId}?set=${pick.setId}`); return;
       }
     }
-    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId });
+    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits });
     playCloudCode(game.cloud ? game.code : '');
     if (game.design) { navigate('/arcade/design'); return; }
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }

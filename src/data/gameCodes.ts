@@ -8,7 +8,10 @@ import type { QuestionSet } from './types';
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
 // `due` (YYYY-MM-DD) makes it homework: the code works through that day.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby }
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby; minutes?: number; endAt?: number; goal?: number }
+// The teacher's clock (2026-10-31): `minutes` each student plays, or
+// `endAt` (ms) when every game ends together; `goal` ends a game at a score.
+export interface PlayLimits { minutes?: number; endAt?: number; goal?: number }
 
 // Pro class lobby (teacher, 2026-10-31): one fresh code for a class; each
 // student (or group) gets their own game and set, or picks from a choice
@@ -28,25 +31,25 @@ export async function listGameCodes(): Promise<GameCode[]> {
 
 // `design`: a code that opens the student theme studio (no Arcade to find it
 // in since 2026-10-31; students get in only with a code).
-export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' | 'design' = 'play', due?: string): Promise<GameCode> {
+export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' | 'design' = 'play', due?: string, limits: PlayLimits = {}): Promise<GameCode> {
   const all = await listGameCodes();
   const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror', design = kind === 'design';
   // A two-device game gets a fresh code every time; others reuse theirs.
-  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && !!c.design === design && c.due === due);
+  const same = versus || mirror || limits.minutes || limits.endAt || limits.goal ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && !!c.design === design && c.due === due);
   if (same) return same;
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }) };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }), ...limits };
   await data.setSetting(KEY, [...all, code]);
   await shareToCloud(code, kind);
   return code;
 }
 
 // A Pro class lobby gets a fresh code every time it opens.
-export async function makeLobbyCode(lobby: ClassLobby): Promise<GameCode> {
+export async function makeLobbyCode(lobby: ClassLobby, limits: PlayLimits = {}): Promise<GameCode> {
   const all = await listGameCodes();
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
   const first = lobby.all ?? Object.values(lobby.plan)[0] ?? { gameId: lobby.board?.gameIds[0] ?? '', setId: lobby.board?.setId ?? '' };
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId: first.gameId, setId: first.setId, createdAt: new Date().toISOString(), rosterClass: lobby.classId, lobby };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId: first.gameId, setId: first.setId, createdAt: new Date().toISOString(), rosterClass: lobby.classId, lobby, ...limits };
   await data.setSetting(KEY, [...all, code]);
   return code;
 }

@@ -97,6 +97,11 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
     active.resolve(false);
     setActive(null);
   }
+  // The teacher's clock ran out (2026-10-31): close any open question
+  // quietly (not logged as leaving) so the game can show its ending.
+  const activeRef = useRef<Active | null>(null);
+  activeRef.current = active;
+  const cancel = useCallback(() => { const a = activeRef.current; if (!a) return; a.resolve(false); setActive(null); setBreathing(false); }, []);
 
   const element: ReactNode = breathing ? <BreathBreak onDone={() => setBreathing(false)} /> : active ? (
     <QuestionScreen
@@ -109,7 +114,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
     />
   ) : null;
 
-  return { ask, element, missed, stats, asking: active !== null };
+  return { ask, cancel, element, missed, stats, asking: active !== null };
 }
 
 function BreathBreak({ onDone }: { onDone: () => void }) {

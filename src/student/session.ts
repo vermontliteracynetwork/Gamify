@@ -11,7 +11,9 @@ import type { PoolSet } from '../engine/picker';
 // (session storage) so a shared iPad forgets the student when the tab
 // closes. Students reach games only through a code or link (teacher,
 // 2026-10-31): `gameId` is the one game that code opened.
-export interface ArcadeSession { classroomId: string; studentId: string; name: string; gameId?: string; board?: { gameIds: string[]; setId: string } }
+// `endAt` (ms) and `goal` (a score) come from the teacher's activity
+// (2026-10-31): the game ends at that time or that score, whichever first.
+export interface ArcadeSession { classroomId: string; studentId: string; name: string; gameId?: string; board?: { gameIds: string[]; setId: string }; endAt?: number; goal?: number }
 const KEY = 'gamify:arcade-session';
 const EVENT = 'gamify-arcade-session';
 

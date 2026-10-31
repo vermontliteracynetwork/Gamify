@@ -21,6 +21,7 @@ import { t } from './i18n';
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
 const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
+const TeacherTimePage = lazy(() => import('./student/TeacherTimePage'));
 const ChoosePage = lazy(() => import('./student/ChoosePage'));
 const ActivityPage = lazy(() => import('./teacher/ActivityPage'));
 const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
@@ -133,6 +134,7 @@ function AnimatedRoutes() {
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />
           <Route path="/choose" element={<ChoosePage />} />
+          <Route path="/look-up" element={<TeacherTimePage />} />
           <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />

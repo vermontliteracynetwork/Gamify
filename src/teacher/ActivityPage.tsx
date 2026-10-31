@@ -50,6 +50,9 @@ export default function ActivityPage() {
   const [together, setTogether] = useState<'compete' | 'together'>('compete');
   const [setId, setSetId] = useState<string[]>([]);
   const [board, setBoard] = useState<string[]>([]);
+  // How long they play, and a score that ends the game (teacher, 2026-10-31).
+  const [minutes, setMinutes] = useState(0);
+  const [goal, setGoal] = useState(0);
   const [plan, setPlan] = useState<Record<string, LobbyPick>>({});
   const [picked, setPicked] = useState<string[]>([]);
   const { value: students = [] } = useAsync(() => (classId ? data.listStudents(classId) : Promise.resolve([])), [classId]);
@@ -69,12 +72,14 @@ export default function ActivityPage() {
 
   async function finish() {
     if ((!game && how !== 'board') || !set) return;
-    if (how === 'board') { setCode(await makeLobbyCode({ classId, plan: {}, board: { gameIds: board, setId: set.id } })); return; }
+    const shared = how === 'each' || how === 'board';
+    const limits = { ...(minutes ? (shared ? { endAt: Date.now() + minutes * 60000 } : { minutes }) : {}), ...(goal ? { goal } : {}) };
+    if (how === 'board') { setCode(await makeLobbyCode({ classId, plan: {}, board: { gameIds: board, setId: set.id } }, limits)); return; }
     if (!game) return;
     if (how === 'screen') { navigate(`/games/${game.id}?set=${set.id}&teams=${teams}`); return; }
-    if (how === 'each') { setCode(await makeLobbyCode({ classId, all: { gameId: game.id, setId: set.id }, plan })); return; }
+    if (how === 'each') { setCode(await makeLobbyCode({ classId, all: { gameId: game.id, setId: set.id }, plan }, limits)); return; }
     if (how === 'lobby') { navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`); return; }
-    const made = await makeGameCode(game.id, set.id, how === 'pairs' ? 'versus' : 'play', how === 'homework' ? due : undefined);
+    const made = await makeGameCode(game.id, set.id, how === 'pairs' ? 'versus' : 'play', how === 'homework' ? due : undefined, limits);
     if (how === 'homework' && classId) {
       await data.saveAssignment({ id: newId('asg'), classroomId: classId, setId: set.id, starred: false, endsOn: due });
     }
@@ -153,6 +158,20 @@ export default function ActivityPage() {
             {(how === 'each' || how === 'board') && !pro && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.proOnly')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'screen' && <Choices label={t('host.teams')} value={teams} onChange={setTeams} options={(['teacher', 'random', 'class'] as const).map((k) => ({ id: k, title: t(`host.teams.${k}`), hint: t(`host.teams.${k}Hint`) }))} />}
             {how === 'lobby' && <Choices label={t('live.howPlay')} value={together} onChange={setTogether} options={(['compete', 'together'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`) }))} />}
+            {(how === 'code' || how === 'homework' || how === 'each' || how === 'board') && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                <label className="grid gap-1 font-bold">{t(how === 'each' || how === 'board' ? 'activity.endsIn' : 'activity.playFor')}
+                  <select value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface">
+                    {[0, 5, 10, 15, 20, 25, 30, 45, 60].map((m) => <option key={m} value={m}>{m ? t('activity.minutes', { count: m }) : t('activity.noLimit')}</option>)}
+                  </select>
+                  <span className="text-sm font-semibold text-muted">{t('activity.clockHint')}</span>
+                </label>
+                <label className="grid gap-1 font-bold">{t('activity.goal')}
+                  <input type="number" min={0} step={10} value={goal || ''} placeholder={t('activity.goalNone')} onChange={(e) => setGoal(Math.max(0, Number(e.target.value) || 0))} className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface" />
+                  <span className="text-sm font-semibold text-muted">{t('activity.goalHint')}</span>
+                </label>
+              </div>
+            )}
             {how === 'homework' && (
               <label className="flex flex-wrap items-center gap-2 font-bold">{t('host.due')}
                 <input type="date" value={due} min={today} max={lastDue} onChange={(e) => setDue(e.target.value)} className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface" />

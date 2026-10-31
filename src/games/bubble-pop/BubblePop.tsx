@@ -7,6 +7,7 @@ import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
 import SoloPanel from '../../engine/SoloPanel';
 import ResultsModal from '../../engine/ResultsModal';
+import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
@@ -49,7 +50,7 @@ export default function BubblePop() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
-  const { ask, element, missed } = useAsk({ gameId: 'bubble-pop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'bubble-pop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const [step, setStep] = useState<Step>('question');
@@ -103,7 +104,9 @@ export default function BubblePop() {
     setPhase('end');
     playEffect('win', settings);
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 60, spread: 80, origin: { y: 0.6 }, disableForReducedMotion: true });
-  }
+  }  // The teacher's play clock or score goal ends the game the usual way (2026-10-31).
+  const clock = usePlayClock({ playing: phase === 'play', score, onTimeUp: () => { if (asking) cancel(); else finish(); } });
+
 
   function addFx(hits: Hit[], kind: Fx['kind'], from: Board) {
     if (!hits.length || still) return;
@@ -224,6 +227,7 @@ export default function BubblePop() {
     <ThemedPage theme={theme}>
     <main className="landscape:[--wide-save:2.875rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bubble-pop" />
+      {clock.element}
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl hidden lg:block"><Title text={bubblePopManifest.name} /></h1>}
       </GameTopRow>
