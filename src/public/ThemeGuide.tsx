@@ -77,8 +77,8 @@ export function ThemeGuidePage() {
   const items = game.items;
   async function zip() {
     setDl(t('builder.dl.making'));
-    const { digitalZip, fileSlug, saveFile } = await import('../theme/builder/digitalPages');
-    saveFile(await digitalZip(game!.name, [...game!.themePieces, ...itemPages(game!.items)]), `${fileSlug(game!.name)}-theme-blank.zip`);
+    const [{ fileSlug, saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
+    saveFile(new Blob([templatePdf([...game!.themePieces, ...itemPages(game!.items)])], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
     setDl(t('builder.dl.ready'));
   }
   return (

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, BookOpen, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
@@ -11,7 +11,7 @@ import { bigScreenManifest } from '../../live/screenManifest';
 
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
-import { Button, buttonClasses, PageHeader, Panel } from '../../ui/kit';
+import { Button, buttonClasses, IconButton, PageHeader, Panel } from '../../ui/kit';
 import TeacherNav from '../../ui/TeacherNav';
 import { teacherUsername } from '../credit';
 import { classicTheme } from '../classic';
@@ -279,8 +279,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                       <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
                       <div className="flex flex-wrap gap-2">
-                        <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}>{t('builder.dl.blank')}</Link>
-                        {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}>{t('builder.dl.guide')}</Link>}
+                        <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}><Printer weight="bold" size={18} />{t('builder.dl.blank')}</Link>
+                        {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}><BookOpen weight="bold" size={18} />{t('builder.dl.guide')}</Link>}
                       </div>
                     </div>
                     <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
@@ -290,11 +290,10 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                         <Button variant="primary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
                           onClick={async () => {
                             setDl(t('builder.dl.making'));
-                            const { digitalZip, fileSlug, saveFile } = await import('./digitalPages');
-                            const { itemPages } = await import('./template');
-                            saveFile(await digitalZip(game.name, [...game.themePieces, ...itemPages(game.items)]), `${fileSlug(game.name)}-theme-blank.zip`);
+                            const [{ fileSlug, saveFile }, { itemPages }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
+                            saveFile(new Blob([templatePdf([...game.themePieces, ...itemPages(game.items)])], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-for-canva.pdf`);
                             setDl(t('builder.dl.ready'));
-                          }}>{t('builder.dl.blank')} (.zip)</Button>
+                          }}><DownloadSimple weight="bold" size={20} />{t('builder.dl.pdf')}</Button>
                       </div>
                     </div>
                   </div>
@@ -412,10 +411,11 @@ function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePiec
       <div className="min-w-0 flex-1">
         <p className="font-bold flex items-center gap-1.5">{piece.label}{image && <CheckCircle weight="fill" size={20} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
         <p className="text-xs font-semibold text-muted line-clamp-2">{piece.hint} · {piece.width} x {piece.height}</p>
-        {image && <button type="button" onClick={onClear} className="font-bold text-xs underline">{t('builder.remove')}</button>}
       </div>
-      <button type="button" onClick={onDraw} aria-label={t('builder.drawPiece', { piece: piece.label })}
-        className="shrink-0 min-h-11 px-3 rounded-pill border-[2px] border-border bg-accent font-bold text-sm inline-flex items-center gap-1.5"><PaintBrush weight="fill" size={18} />{t('builder.draw')}</button>
+      <div className="shrink-0 grid gap-1.5">
+        <IconButton variant="primary" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={20} /></IconButton>
+        {image && <IconButton label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={18} /></IconButton>}
+      </div>
     </div>
   );
 }
@@ -455,8 +455,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               <label className="grid gap-1 font-bold text-sm flex-1">{t('builder.items.name')}
                 <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
               </label>
-              <button type="button" onClick={() => setDrawing(i)} aria-label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })}
-                className="shrink-0 self-end min-h-11 px-3 rounded-pill border-[2px] border-border bg-accent font-bold text-sm inline-flex items-center gap-1.5"><PaintBrush weight="fill" size={18} />{t('builder.draw')}</button>
+              <IconButton variant="primary" className="self-end" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={20} /></IconButton>
             </div>
             <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>

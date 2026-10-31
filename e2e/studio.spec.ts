@@ -135,3 +135,35 @@ test('studio: flip a piece, and a warning for words that are hard to read', asyn
   await studio.getByRole('button', { name: 'Use this picture' }).click();
   await expect(studio).toHaveCount(0);
 });
+
+// Two colors (teacher, 2026-10-31): the main color fills a shape, the second
+// color is its outline; outlines change width or go away; a made color joins
+// the list after the rainbow button.
+test('studio: two colors, shape outlines, and a made color joins the list', async ({ page }, info) => {
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByLabel('Find a piece').fill('trophy');
+  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
+  const box = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  await studio.getByRole('button', { name: '#fdd835' }).click();
+  await studio.getByRole('button', { name: /^Second color/ }).click();
+  await studio.getByRole('button', { name: '#e53935' }).click();
+  await studio.getByRole('button', { name: /^Main color #fdd835/ }).click();
+  await studio.getByRole('radio', { name: 'Shapes' }).click();
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  const shape = studio.getByRole('button', { name: /^Move / }).last();
+  const img = shape.locator('img');
+  expect(decodeURIComponent((await img.getAttribute('src')) ?? '')).toContain('stroke="#e53935"');
+  await studio.getByRole('button', { name: 'Remove the outline' }).click();
+  await expect(studio.getByText('No outline')).toBeVisible();
+  expect(decodeURIComponent((await img.getAttribute('src')) ?? '')).toContain('stroke="none"');
+  await studio.getByRole('button', { name: 'Swap the two colors' }).click();
+  await expect(studio.getByRole('button', { name: /^Main color #e53935/ })).toBeVisible();
+  // A made color: the rainbow button opens the color picker; the new color joins the list.
+  await studio.locator('input[type=color]').evaluate((el: HTMLInputElement) => { el.value = '#123456'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });
+  await expect(studio.getByRole('button', { name: '#123456' })).toBeVisible();
+  await expect(studio.getByRole('button', { name: 'Make a color' })).toBeVisible();
+  if (info.project.name === 'laptop') await page.screenshot({ path: 'test-results/studio-colors.png' });
+});

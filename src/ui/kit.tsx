@@ -22,6 +22,18 @@ export function Button({ variant = 'secondary', className = '', ...props }: Butt
   return <button type="button" {...props} className={buttonClasses(variant, className)} />;
 }
 
+// A round button that shows only its icon; its words show on hover or
+// keyboard focus and are read aloud (teacher, 2026-10-31: "if a button can
+// have an icon, put an icon and do hover text").
+export function IconButton({ label, children, variant = 'secondary', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant; children: ReactNode }) {
+  return (
+    <button type="button" aria-label={label} data-tip={label} {...props}
+      className={`shrink-0 w-11 h-11 rounded-full border-[2px] flex items-center justify-center active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
+      {children}
+    </button>
+  );
+}
+
 export function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <section className={`bg-surface border-[2.5px] border-border rounded-panel p-5 ${className}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>

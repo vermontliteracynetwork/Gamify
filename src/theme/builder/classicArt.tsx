@@ -152,13 +152,3 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
     </g>
   );
 }
-
-// The faint guide on a blank digital page: the piece's shape, so a design
-// made in another app lines up with the game.
-export function BlankGuide({ piece }: { piece: ThemePieceSpec }) {
-  const { width: w, height: h } = piece;
-  const m = Math.min(w, h), line = Math.max(2, m * 0.012);
-  return isRound(piece)
-    ? <circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill="#ffffff" stroke="#b9b9b9" strokeWidth={line} strokeDasharray={`${line * 4} ${line * 3}`} />
-    : <rect x={line / 2} y={line / 2} width={w - line} height={h - line} fill="#ffffff" stroke="#b9b9b9" strokeWidth={line} strokeDasharray={`${line * 4} ${line * 3}`} />;
-}

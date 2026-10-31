@@ -24,9 +24,9 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: /Digital files/ }).click();
+  await page.getByRole('button', { name: /Canva file/ }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('peg-drop-theme-blank.zip');
+  expect(file.suggestedFilename()).toBe('peg-drop-theme-for-canva.pdf');
 
   await page.getByRole('link', { name: /Printable pages/ }).click();
   await expect(page.getByText('pages, one for each piece', { exact: false })).toBeVisible();

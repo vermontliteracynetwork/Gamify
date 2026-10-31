@@ -1,17 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import {
-  Acorn, Airplane, Alien, Anchor, ArrowCounterClockwise, ArrowClockwise, Atom, Avocado, Backpack, Balloon, Baseball, Basketball, Bell, Bicycle, Bird, Boat, Bone, Book,
-  Bread, Brain, Bug, Bus, Butterfly, Cactus, Cake, Camera, Campfire, Car, Carrot, Cat, Cheese, Clock, Cloud, CloudRain, Clover, Coffee, Coin, Compass,
-  Confetti, Cookie, Cow, Crown, Diamond, DiceFive, Dog, Drop, Egg, Eraser, Eyes, Feather, Fire, Fish, Flag, Flask, Flower, FlowerLotus, Football, Footprints,
-  GameController, Ghost, Gift, Globe, Guitar, Hamburger, HandWaving, Headphones, Heart, Horse, Hourglass, House, IceCream, Key, Leaf, Lightbulb,
-  Lightning, Lighthouse, MagicWand, Magnet, MapPin, Medal, Megaphone, Microphone, Microscope, Moon, Mountains, MusicNote, Orange, PaintBrush, PaintBucket,
-  Palette, PawPrint, Pencil, Pepper, PiggyBank, Pizza, Planet, Plant, Popcorn, PuzzlePiece, Rabbit, Rainbow, Robot, Rocket, Sailboat, Scissors, Shapes,
-  Shield, Shrimp, Smiley, Snowflake, SoccerBall, Sparkle, Star, StarFour, Sticker, Sun, Television, TennisBall, Tent, Tipi, Tractor, Train, Tree,
-  TreeEvergreen, Trophy, TShirt, Umbrella, Waves, X, HandGrabbing, TextT, ArrowsOutSimple, ArrowsLeftRight, CopySimple, Trash, type Icon,
-} from '@phosphor-icons/react';
+import { Acorn, Airplane, Alien, Anchor, ArrowClockwise, ArrowCounterClockwise, ArrowFatLinesDown, ArrowFatLinesUp, ArrowsLeftRight, ArrowsOutSimple, Atom, Avocado, Backpack, Balloon, Baseball, Basketball, Bell, Bicycle, Bird, Boat, Bone, Book, Brain, Bread, Bug, Bus, Butterfly, Cactus, Cake, Camera, Campfire, Car, Carrot, Cat, Cheese, Clock, Cloud, CloudRain, Clover, Coffee, Coin, Compass, Confetti, Cookie, CopySimple, Cow, Crown, Diamond, DiceFive, Dog, Drop, Egg, Eraser, Eyes, Feather, Fire, Fish, Flag, Flask, Flower, FlowerLotus, Football, Footprints, GameController, Ghost, Gift, Globe, Guitar, Hamburger, HandGrabbing, HandWaving, Headphones, Heart, Horse, Hourglass, House, IceCream, Key, Leaf, Lightbulb, Lighthouse, Lightning, MagicWand, Magnet, MapPin, Medal, Megaphone, Microphone, Microscope, Moon, Mountains, MusicNote, Orange, PaintBrush, PaintBucket, Palette, PawPrint, Pencil, Pepper, PiggyBank, Pizza, Planet, Plant, Plus, Popcorn, Prohibit, PuzzlePiece, Rabbit, Rainbow, Robot, Rocket, Sailboat, Scissors, Shapes, Shield, Shrimp, Smiley, Snowflake, SoccerBall, Sparkle, Star, StarFour, Sticker, Sun, TShirt, Television, TennisBall, Tent, TextT, Tipi, Tractor, Train, Trash, Tree, TreeEvergreen, Trophy, Umbrella, Waves, X, type Icon } from '@phosphor-icons/react';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
-import { Button } from '../../ui/kit';
+import { Button, IconButton } from '../../ui/kit';
 import DialogFocus from '../../ui/DialogFocus';
 import { APPROVED_FONTS, THEME_FONTS, type FontName, type ThemePieceSpec } from '../types';
 import { isRound } from './template';
@@ -31,20 +22,23 @@ type ShapeKind = 'circle' | 'square' | 'triangle' | 'heart' | 'star';
 // Stickers, shapes and words sit above the paint as pieces you can move,
 // resize, turn and delete (Canva style); brushes paint underneath (Procreate
 // style). Saving flattens both into one picture.
-interface Obj { id: number; kind: 'sticker' | 'shape' | 'text'; x: number; y: number; size: number; rot: number; flip?: boolean; color: string; svg?: string; recolor?: boolean; shape?: ShapeKind; text?: string; font?: FontName; label: string }
+interface Obj { id: number; kind: 'sticker' | 'shape' | 'text'; x: number; y: number; size: number; rot: number; flip?: boolean; color: string;
+  // Shapes: outline color and width (0 = no outline; teacher, 2026-10-31).
+  stroke?: string; strokeW?: number; svg?: string; recolor?: boolean; shape?: ShapeKind; text?: string; font?: FontName; label: string }
 interface Snap { img: ImageData; objs: Obj[] }
 
-const SHAPE_SVG: Record<ShapeKind, (fill: string) => string> = {
-  circle: (f) => `<circle cx="50" cy="50" r="44" fill="${f}" stroke="#000" stroke-width="4"/>`,
-  square: (f) => `<rect x="6" y="6" width="88" height="88" rx="8" fill="${f}" stroke="#000" stroke-width="4"/>`,
-  triangle: (f) => `<path d="M50 6 L94 90 H6 Z" fill="${f}" stroke="#000" stroke-width="4" stroke-linejoin="round"/>`,
-  heart: (f) => `<path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C40 8 46 14 50 22 C54 14 60 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z" fill="${f}" stroke="#000" stroke-width="4" stroke-linejoin="round"/>`,
-  star: (f) => `<path d="M50 5 L62 37 L95 38 L69 58 L78 92 L50 72 L22 92 L31 58 L5 38 L38 37 Z" fill="${f}" stroke="#000" stroke-width="4" stroke-linejoin="round"/>`,
+const line = (s: string, w: number) => (w > 0 ? `stroke="${s}" stroke-width="${w}" stroke-linejoin="round"` : 'stroke="none"');
+const SHAPE_SVG: Record<ShapeKind, (fill: string, stroke?: string, w?: number) => string> = {
+  circle: (f, s = '#000', w = 4) => `<circle cx="50" cy="50" r="${44 - Math.max(0, w - 4) / 2}" fill="${f}" ${line(s, w)}/>`,
+  square: (f, s = '#000', w = 4) => `<rect x="${6 + Math.max(0, w - 4) / 2}" y="${6 + Math.max(0, w - 4) / 2}" width="${88 - Math.max(0, w - 4)}" height="${88 - Math.max(0, w - 4)}" rx="8" fill="${f}" ${line(s, w)}/>`,
+  triangle: (f, s = '#000', w = 4) => `<path d="M50 6 L94 90 H6 Z" fill="${f}" ${line(s, w)}/>`,
+  heart: (f, s = '#000', w = 4) => `<path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C40 8 46 14 50 22 C54 14 60 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z" fill="${f}" ${line(s, w)}/>`,
+  star: (f, s = '#000', w = 4) => `<path d="M50 5 L62 37 L95 38 L69 58 L78 92 L50 72 L22 92 L31 58 L5 38 L38 37 Z" fill="${f}" ${line(s, w)}/>`,
 };
 const svgDoc = (inner: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${inner}</svg>`;
 // What a sticker or shape looks like right now, as an image source.
 function objSvg(o: Obj): string {
-  if (o.kind === 'shape') return svgDoc(SHAPE_SVG[o.shape ?? 'circle'](o.color));
+  if (o.kind === 'shape') return svgDoc(SHAPE_SVG[o.shape ?? 'circle'](o.color, o.stroke ?? '#000000', o.strokeW ?? 4));
   const svg = o.recolor ? (o.svg ?? '').replace(/currentColor/g, o.color) : o.svg ?? '';
   return svg.includes('xmlns=') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
 }
@@ -116,7 +110,15 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
   const [tool, setTool] = useState<Tool>('brush');
   const [brush, setBrush] = useState<BrushKind>('pen');
   const [shape, setShape] = useState<ShapeKind>('circle');
+  // Two colors, like a paint app (teacher, 2026-10-31): the main color
+  // paints, fills and colors pieces; the second color is a shape's outline.
+  // Tap a square to choose which one the swatches change; the arrows swap.
   const [color, setColor] = useState('#000000');
+  const [color2, setColor2] = useState('#000000');
+  const [slot, setSlot] = useState<'main' | 'second'>('main');
+  const [outline, setOutline] = useState(4);
+  const [customs, setCustoms] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('gamify:studio-colors') ?? '[]') as string[]; } catch { return []; } });
+  const picker = useRef<HTMLInputElement>(null);
   const [size, setSize] = useState(Math.max(4, Math.round(Math.min(W, H) * 0.02)));
   const [sticker, setSticker] = useState<{ svg: string; recolor: boolean; label: string } | null>(null);
   const [query, setQuery] = useState('');
@@ -217,7 +219,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
     setSel(null);
     if (tool === 'fill') { remember(); floodFill(ctx(), W, H, Math.round(p[0]), Math.round(p[1]), color); return; }
     if (tool === 'sticker') { if (sticker) add({ kind: 'sticker', x: p[0], y: p[1], size: base, color, svg: sticker.svg, recolor: sticker.recolor, label: sticker.label }); return; }
-    if (tool === 'shape') { add({ kind: 'shape', x: p[0], y: p[1], size: base, color, shape, label: t(`studio.shape.${shape}`) }); return; }
+    if (tool === 'shape') { add({ kind: 'shape', x: p[0], y: p[1], size: base, color, stroke: color2, strokeW: outline, shape, label: t(`studio.shape.${shape}`) }); return; }
     if (tool === 'text') { add({ kind: 'text', x: p[0], y: p[1], size: Math.round(base / 2.5), color, text: t('studio.textDefault'), font: 'Grow Year', label: t('studio.tool.text') }); return; }
     if (tool === 'move') return;
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -359,10 +361,28 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
     carried.current = null;
   }
   const pickColor = (c: string) => {
+    if (slot === 'second') {
+      setColor2(c);
+      if (selected?.kind === 'shape') { remember(); update(selected.id, { stroke: c, strokeW: selected.strokeW || 4 }); if (!outline) setOutline(4); }
+      return;
+    }
     setColor(c);
     if (tool === 'eraser') setTool('brush');
     if (selected && (selected.kind !== 'sticker' || selected.recolor)) { remember(); update(selected.id, { color: c }); }
   };
+  // A custom color joins the list after the rainbow button (saved on this device).
+  useEffect(() => {
+    const el = picker.current;
+    if (!el) return;
+    const done = () => setCustoms((cs) => {
+      const next = [el.value, ...cs.filter((x) => x !== el.value)].slice(0, 16);
+      try { localStorage.setItem('gamify:studio-colors', JSON.stringify(next)); } catch { /* fine without */ }
+      return next;
+    });
+    el.addEventListener('change', done);
+    return () => el.removeEventListener('change', done);
+  }, []);
+  const swap = () => { setColor(color2); setColor2(color); };
 
   const ALL_TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
   const TOOLS = simple ? ALL_TOOLS.filter(([id]) => id !== 'shape' && id !== 'text') : ALL_TOOLS;
@@ -374,9 +394,9 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
       <div className="bg-surface border-[2.5px] border-border rounded-panel w-full max-w-7xl grid grid-rows-[auto_minmax(0,1fr)] overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex flex-wrap items-center gap-2 p-3 border-b-[2px] border-border-soft">
           <h2 className="font-display text-xl sm:text-2xl flex-1 min-w-40">{t('studio.title', { piece: piece.label })}</h2>
-          <Button disabled={!undo.length} onClick={stepBack} aria-label={t('studio.undo')}><ArrowCounterClockwise weight="bold" size={18} /><span className="hidden sm:inline">{t('studio.undo')}</span></Button>
-          <Button disabled={!redo.length} onClick={stepForward} aria-label={t('studio.redo')}><ArrowClockwise weight="bold" size={18} /><span className="hidden sm:inline">{t('studio.redo')}</span></Button>
-          <Button onClick={onClose}><X weight="bold" size={18} />{t('studio.cancel')}</Button>
+          <IconButton label={t('studio.undo')} disabled={!undo.length} onClick={stepBack}><ArrowCounterClockwise weight="bold" size={20} /></IconButton>
+          <IconButton label={t('studio.redo')} disabled={!redo.length} onClick={stepForward}><ArrowClockwise weight="bold" size={20} /></IconButton>
+          <IconButton label={t('studio.cancel')} onClick={onClose}><X weight="bold" size={20} /></IconButton>
           <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
         </div>
         {warn.length > 0 && (
@@ -396,7 +416,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
                 <I weight={tool === id ? 'fill' : 'bold'} size={simple ? 34 : 24} aria-hidden="true" />{t(`studio.tool.${id}`)}
               </button>
             ))}
-            <span className="shrink-0 w-12 h-12 lg:w-[4.5rem] lg:h-10 self-center rounded-input border-[2.5px] border-border" style={{ background: color }} aria-label={t('studio.colorNow', { color })} role="img" />
+            <TwoColors main={color} second={color2} slot={slot} onSlot={setSlot} onSwap={swap} />
           </div>
 
           {/* Canvas, with the pieces on top */}
@@ -445,31 +465,47 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
                     </label>
                   </>
                 )}
+                {selected.kind === 'shape' && (
+                  <div className="grid gap-1">
+                    <label className="grid gap-1 font-bold text-sm">{(selected.strokeW ?? 4) > 0 ? t('studio.outline', { n: selected.strokeW ?? 4 }) : t('studio.noOutline')}
+                      <input type="range" min={0} max={14} value={selected.strokeW ?? 4} onChange={(e) => { const w = Number(e.target.value); setOutline(w); update(selected.id, { strokeW: w }); }} />
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <IconButton label={t('studio.outlineColor')} onClick={() => setSlot('second')}><span className="w-6 h-6 rounded-full border-[4px]" style={{ borderColor: selected.stroke ?? '#000000' }} /></IconButton>
+                      <IconButton label={t('studio.removeOutline')} onClick={() => { remember(); setOutline(0); update(selected.id, { strokeW: 0 }); }}><Prohibit weight="bold" size={20} /></IconButton>
+                    </div>
+                  </div>
+                )}
                 <label className="grid gap-1 font-bold text-sm">{t('studio.pieceSize')}
                   <input type="range" min={12} max={Math.max(W, H)} value={selected.size} onChange={(e) => update(selected.id, { size: Number(e.target.value) })} />
                 </label>
                 <label className="grid gap-1 font-bold text-sm">{t('studio.turnBy', { deg: ((selected.rot % 360) + 360) % 360 })}
                   <input type="range" min={-180} max={180} value={((selected.rot + 180) % 360 + 360) % 360 - 180} onChange={(e) => update(selected.id, { rot: Number(e.target.value) })} />
                 </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <Button onClick={() => { remember(); update(selected.id, { flip: !selected.flip }); }}><ArrowsLeftRight weight="bold" size={16} />{t('studio.flip')}</Button>
-                  <Button onClick={() => layer(selected.id, 'front')}>{t('studio.front')}</Button>
-                  <Button onClick={() => layer(selected.id, 'back')}>{t('studio.back')}</Button>
-                  <Button onClick={() => copy(selected)}><CopySimple weight="bold" size={16} />{t('studio.copy')}</Button>
-                  <Button variant="danger" onClick={() => remove(selected.id)}><Trash weight="bold" size={16} />{t('studio.delete')}</Button>
+                <div className="flex flex-wrap gap-1.5">
+                  <IconButton label={t('studio.flip')} onClick={() => { remember(); update(selected.id, { flip: !selected.flip }); }}><ArrowsLeftRight weight="bold" size={20} /></IconButton>
+                  <IconButton label={t('studio.front')} onClick={() => layer(selected.id, 'front')}><ArrowFatLinesUp weight="bold" size={20} /></IconButton>
+                  <IconButton label={t('studio.back')} onClick={() => layer(selected.id, 'back')}><ArrowFatLinesDown weight="bold" size={20} /></IconButton>
+                  <IconButton label={t('studio.copy')} onClick={() => copy(selected)}><CopySimple weight="bold" size={20} /></IconButton>
+                  <IconButton variant="danger" label={t('studio.delete')} onClick={() => remove(selected.id)}><Trash weight="bold" size={20} /></IconButton>
                 </div>
               </Section>
             )}
             <Section title={t('studio.color')} open>
+              <p className="text-xs font-bold text-muted">{t(slot === 'main' ? 'studio.pickingMain' : 'studio.pickingSecond')}</p>
               <div className="grid grid-cols-8 gap-1.5 max-w-[22rem]">
-                {SWATCHES.map((c) => (
-                  <button key={c} type="button" onClick={() => pickColor(c)} aria-label={c} aria-pressed={color === c}
-                    className={`aspect-square rounded-full border-[2px] ${color === c ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`} style={{ background: c }} />
+                {[...SWATCHES, 'custom', ...customs.filter((c) => !SWATCHES.includes(c))].map((c) => c === 'custom' ? (
+                  // The rainbow button opens any color; the ones made show up after it.
+                  <button key="custom" type="button" onClick={() => picker.current?.click()} aria-label={t('studio.customColor')} data-tip={t('studio.customColor')}
+                    className="aspect-square rounded-full p-[3px]" style={{ background: 'conic-gradient(#ff3b3b, #ffb13b, #f9f33b, #3bd16f, #3bb8ff, #6a5cff, #e23bff, #ff3b3b)' }}>
+                    <span className="w-full h-full rounded-full bg-surface flex items-center justify-center"><Plus weight="bold" size={16} /></span>
+                  </button>
+                ) : (
+                  <button key={c} type="button" onClick={() => pickColor(c)} aria-label={c} aria-pressed={(slot === 'main' ? color : color2) === c}
+                    className={`aspect-square rounded-full border-[2px] ${(slot === 'main' ? color : color2) === c ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`} style={{ background: c }} />
                 ))}
               </div>
-              <label className="flex items-center gap-2 font-bold text-sm">{t('studio.anyColor')}
-                <input type="color" value={color} onChange={(e) => pickColor(e.target.value)} className="w-12 h-10 rounded-input border-[2px] border-border" />
-              </label>
+              <input ref={picker} type="color" value={slot === 'main' ? color : color2} onChange={(e) => pickColor(e.target.value)} className="sr-only" tabIndex={-1} aria-hidden="true" />
             </Section>
             <Section title={t('studio.brush')} open={tool === 'brush' || tool === 'eraser'}>
               <div role="radiogroup" aria-label={t('studio.brushKind')} className="grid grid-cols-2 gap-1.5">
@@ -505,7 +541,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
                 {(Object.keys(SHAPE_SVG) as ShapeKind[]).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={shape === k && tool === 'shape'} aria-label={t(`studio.shape.${k}`)} onClick={() => { setShape(k); setTool('shape'); }}
                     className={`min-h-12 rounded-input border-[2px] flex items-center justify-center ${shape === k && tool === 'shape' ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                    <img src={svgUrl(svgDoc(SHAPE_SVG[k](color)))} alt="" className="w-7 h-7" />
+                    <img src={svgUrl(svgDoc(SHAPE_SVG[k](color, color2, outline)))} alt="" className="w-7 h-7" />
                   </button>
                 ))}
               </div>
@@ -593,4 +629,20 @@ function contrast(hex: string, bg: number[]): number {
   const fg = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
   const [a, b] = [lum(fg), lum(bg)];
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+// Two overlapping squares, like a paint app: the front one is the main color
+// (brush, fill, pieces), the back one the second color (shape outlines).
+function TwoColors({ main, second, slot, onSlot, onSwap }: { main: string; second: string; slot: 'main' | 'second'; onSlot: (s: 'main' | 'second') => void; onSwap: () => void }) {
+  const sq = 'absolute w-9 h-9 rounded-input border-[2.5px] border-border';
+  return (
+    <div className="relative shrink-0 w-[4.5rem] h-16 self-center" role="group" aria-label={t('studio.twoColors')}>
+      <button type="button" onClick={() => onSlot('second')} aria-label={t('studio.secondColor', { color: second })} aria-pressed={slot === 'second'} data-tip={t('studio.secondColorTip')}
+        className={`${sq} right-1 bottom-1 ${slot === 'second' ? 'ring-4 ring-accent' : ''}`} style={{ background: second }} />
+      <button type="button" onClick={() => onSlot('main')} aria-label={t('studio.mainColor', { color: main })} aria-pressed={slot === 'main'} data-tip={t('studio.mainColorTip')}
+        className={`${sq} left-1 top-0 z-10 ${slot === 'main' ? 'ring-4 ring-accent' : ''}`} style={{ background: main }} />
+      <button type="button" onClick={onSwap} aria-label={t('studio.swapColors')} data-tip={t('studio.swapColors')}
+        className="absolute right-0 top-0 w-6 h-6 rounded-full bg-surface border-[2px] border-border flex items-center justify-center"><ArrowsLeftRight weight="bold" size={12} /></button>
+    </div>
+  );
 }

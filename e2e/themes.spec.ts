@@ -140,15 +140,16 @@ test('Download tab: blank printable pages and digital files; the Classic look is
   // Classic is seen, never handed out (teacher, 2026-10-28): no Classic files.
   await expect(page.getByRole('button', { name: 'Classic example (.zip)' })).toHaveCount(0);
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Blank pages (.zip)' }).click();
+  await page.getByRole('button', { name: 'Canva file (.pdf)' }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('game-show-theme-blank.zip');
-  const zip = (await import('fflate')).unzipSync(new Uint8Array(await (await import('node:fs/promises')).readFile(await file.path())));
-  const names = Object.keys(zip);
-  expect(names).toContain('sizes.txt');
-  expect(names.some((n) => /card-back-\d+x\d+\.png$/.test(n))).toBe(true);
+  expect(file.suggestedFilename()).toBe('game-show-theme-for-canva.pdf');
+  // One PDF, a page per piece, each page the piece's own size (Canva reads 96 dpi: 0.75 pt a pixel).
+  const pdf = (await (await import('node:fs/promises')).readFile(await file.path())).toString('latin1');
+  expect(pdf.startsWith('%PDF-')).toBe(true);
+  expect(pdf).toContain('/MediaBox [0 0 1440.00 810.00]');
+  expect((pdf.match(/\/Type \/Page /g) ?? []).length).toBeGreaterThan(5);
   // The Classic look lives in the blog's theme guide, look-only.
   await expect(page.getByRole('link', { name: 'Classic example' })).toHaveCount(0);
-  await page.getByRole('link', { name: 'See every piece (theme guide)' }).click();
+  await page.getByRole('link', { name: 'Theme guide' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Theme Guide: Game Show/ })).toBeVisible();
 });
