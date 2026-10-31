@@ -21,6 +21,7 @@ import SetupWizard from '../SetupWizard';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
@@ -66,7 +67,10 @@ export default function MatchThree() {
   const [shake, setShake] = useState<string | null>(null);
   const drag = useRef<{ pos: Pos; x: number; y: number } | null>(null);
   // Power-ups after a question break: more moves, bonus points, or a doubled match.
+  // Held power-ups (teacher, 2026-10-31): one earned at a question break is
+  // ready for the next round, listed under the score, and gone after it.
   const powers = usePowerUps(matchThreeManifest, theme, setup.powerUps);
+  const held = useHeldPowerUps();
   const doubleNext = useRef(false);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, still ? Math.min(ms, 80) : ms));
 
@@ -76,7 +80,41 @@ export default function MatchThree() {
     setGrid(createGrid(ROWS, COLS));
     setScore(0); setRound(1); setMoves(MOVES_PER_ROUND); setNote(''); setSelected(null);
     doubleNext.current = false;
+    held.reset();
     setPhase('play');
+  }
+
+  // Use a held power-up: its Classic role happens now.
+  async function applyItem(i: number) {
+    if (busy) return;
+    const it = held.use(i);
+    if (!it) return;
+    playEffect('win', settings);
+    if (it.ability === 'moves') setMoves((m) => m + powers.amount(it));
+    if (it.ability === 'bonus') setScore((sc) => sc + powers.amount(it));
+    if (it.ability === 'double') { doubleNext.current = true; setNote(t('bm.doubleReady')); }
+    if (it.ability === 'shuffle') { setGrid(createGrid(ROWS, COLS)); setNote(t('bm.shuffled')); }
+    if (it.ability === 'blast') {
+      // Color blast: every piece of the most common kind pops at once.
+      setBusy(true);
+      const counts = new Map<number, number>();
+      grid.forEach((row) => row.forEach((tl) => counts.set(tl.kind, (counts.get(tl.kind) ?? 0) + 1)));
+      const kind = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      const m = new Set<string>();
+      grid.forEach((row, rr) => row.forEach((tl, cc) => { if (tl.kind === kind) m.add(`${rr},${cc}`); }));
+      setPopping(m); playEffect('right', settings); await wait(320);
+      let g = clearAndRefill(grid, m);
+      setPopping(new Set()); setGrid(g);
+      let gained = pointsFor(m.size, 1);
+      await wait(320);
+      for (let cascade = 2, mm = findMatches(g); mm.size > 0; mm = findMatches(g), cascade++) {
+        setPopping(mm); await wait(260);
+        gained += pointsFor(mm.size, cascade);
+        g = clearAndRefill(g, mm); setPopping(new Set()); setGrid(g); await wait(320);
+      }
+      setScore((sc) => sc + gained);
+      setBusy(false);
+    }
   }
 
   async function trySwap(a: Pos, b: Pos) {
@@ -121,14 +159,15 @@ export default function MatchThree() {
     setMoves(left);
     if (left === 0) {
       setNote(t('bm.answerToGo'));
+      held.endTurn(); // unused power-ups are gone after the round
       await wait(500);
       const done = await ask({ count: plan.current.perBreak });
       if (!done || round >= plan.current.rounds) { finish(); setBusy(false); return; }
       setRound((r) => r + 1);
-      const it = powers.grant();
-      setMoves(MOVES_PER_ROUND + (it?.ability === 'moves' ? powers.amount(it) : 0));
-      if (it?.ability === 'bonus') setScore((s) => s + powers.amount(it));
-      if (it?.ability === 'double') doubleNext.current = true;
+      const it = powers.grant(true);
+      setMoves(MOVES_PER_ROUND);
+      if (it) held.earn('solo', it);
+      held.beginTurn('solo');
       setNote('');
     }
     setBusy(false);
@@ -242,8 +281,13 @@ export default function MatchThree() {
             </div>
           </div>
 
-          <SoloPanel className="md:w-[220px]" score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
-            dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
+          <div className="grid gap-3 content-start md:w-[220px]">
+            <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
+              dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
+            {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
+            <div className="hidden md:block"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
+          </div>
+          <div className="md:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
           </div>
         </div>
       )}

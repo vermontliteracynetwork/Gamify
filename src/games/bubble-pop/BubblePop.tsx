@@ -24,6 +24,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
 import {
   center, clampAngle, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, place, pushRow, R, rescue,
@@ -69,6 +70,18 @@ export default function BubblePop() {
   // Power-ups after a question break: more bubbles, bonus points, or a doubled pop.
   const powers = usePowerUps(bubblePopManifest, theme, setup.powerUps);
   const doubleNext = useRef(false);
+  // Held power-ups (teacher, 2026-10-31): ready for the next turn of shots,
+  // listed under the score, gone after that turn.
+  const held = useHeldPowerUps();
+  function applyItem(i: number) {
+    const it = held.use(i);
+    if (!it) return;
+    playEffect('win', settings);
+    if (it.ability === 'shots') setShots((n) => n + powers.amount(it));
+    if (it.ability === 'bonus') setScore((sc) => sc + powers.amount(it));
+    if (it.ability === 'mystery') setScore((sc) => sc + 10 * (1 + Math.floor(Math.random() * 10)));
+    if (it.ability === 'double') { doubleNext.current = true; setNote(t('bm.doubleReady')); }
+  }
   const svg = useRef<SVGSVGElement>(null);
   const flyer = useRef<SVGGElement>(null);
   const shotCount = useRef(0);
@@ -90,12 +103,13 @@ export default function BubblePop() {
   async function load(done: number) {
     setStep('question');
     setNote(done === 0 ? '' : t('bp.answer'));
+    held.endTurn(); // unused power-ups are gone after the turn
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
-    const it = powers.grant();
-    setShots(plan.current.shots + (it?.ability === 'shots' ? powers.amount(it) : 0));
-    if (it?.ability === 'bonus') setScore((s) => s + powers.amount(it));
-    if (it?.ability === 'double') doubleNext.current = true;
+    const it = powers.grant(true);
+    setShots(plan.current.shots);
+    if (it) held.earn('solo', it);
+    held.beginTurn('solo');
     setNote('');
     setStep('aim');
   }
@@ -316,9 +330,14 @@ export default function BubblePop() {
               <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.right')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a + 0.08))}><ArrowArcRight weight="bold" size={26} /></button>
             </div>
           </section>
-          <SoloPanel className="order-first lg:order-none lg:w-[230px]" score={score} line={t('bp.board', { n: level + 1 })}
-            dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
-            status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
+          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
+            <SoloPanel score={score} line={t('bp.board', { n: level + 1 })}
+              dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
+              status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
+            {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
+            <div className="hidden lg:block"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
+          </div>
+          <div className="lg:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
           </div>
         </div>
       )}
