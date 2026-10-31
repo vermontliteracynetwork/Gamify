@@ -58,7 +58,7 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
     // the preview and the tabs share the space left under the menu.
     <main className={`max-w-6xl mx-auto px-4 sm:px-6 pt-5 ${game ? 'pb-4 h-[calc(100dvh-4rem)] flex flex-col' : 'pb-6'}`}>
-      <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav />}</div>
+      <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} />}</div>
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
   );
@@ -238,10 +238,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
           <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
             className={`min-h-11 px-4 rounded-pill border-[2px] font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
         ))}
-        <Button onClick={() => { setDraft(blankTheme(gameId, owner)); setParams({}); setStatus(''); }}><PaintBrush weight="bold" size={18} />{t('builder.new')}</Button>
       </div>
 
-      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         {/* The preview, as big as the space allows. */}
         <div className="min-h-0 flex flex-col items-center gap-2 [container-type:size]">
           <div className="w-full" style={{ maxWidth: 'calc((100cqh - 2rem) * 4 / 3)' }}><ThemePreview theme={draft} gameName={game.name} /></div>
@@ -252,8 +251,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
           {blocked && <LimitNote><span className="flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</span></LimitNote>}
           {!blocked && (
           <Panel className="flex-1 min-h-0 flex flex-col gap-3 !p-4">
-            <div className="shrink-0 flex items-end gap-2">
-              <label className="grid gap-1 font-bold text-sm flex-1 min-w-0">{t('builder.name')}
+            <div className="shrink-0 flex items-center gap-2">
+              <label className="grid font-bold text-sm flex-1 min-w-0"><span className="sr-only">{t('builder.name')}</span>
                 <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
                   className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold w-full" />
               </label>
@@ -382,14 +381,38 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   );
 }
 
-// A grid that turns pages instead of growing (two columns on wider screens).
+// A grid that turns pages instead of growing (two columns on wider
+// screens). It holds as many rows as fit the space left in the tab, so the
+// builder never scrolls (teacher, 2026-10-31); `per` is the most per page.
 function Pages({ items, per }: { items: ReactNode[]; per: number }) {
   const [page, setPage] = useState(0);
-  const total = Math.max(1, Math.ceil(items.length / per));
+  const ref = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(per);
+  useEffect(() => {
+    const el = ref.current;
+    const panel = el?.closest('[role=tabpanel]') as HTMLElement | null;
+    if (!el || !panel) return;
+    const measure = () => {
+      const grid = el.firstElementChild as HTMLElement;
+      const card = grid.firstElementChild as HTMLElement | null;
+      if (!card) return;
+      const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+      const gap = 12;
+      const pager = items.length > cols ? 56 : 0;
+      const room = panel.getBoundingClientRect().bottom - el.getBoundingClientRect().top - pager;
+      const rows = Math.max(1, Math.floor((room + gap) / (card.getBoundingClientRect().height + gap)));
+      setFit(Math.min(per, rows * cols));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(panel);
+    return () => ro.disconnect();
+  }, [per, items.length]);
+  const total = Math.max(1, Math.ceil(items.length / fit));
   const at = Math.min(page, total - 1);
   return (
-    <div className="grid gap-3">
-      <div className="grid @lg:grid-cols-2 gap-3">{items.slice(at * per, at * per + per)}</div>
+    <div ref={ref} className="grid gap-3">
+      <div className="grid @lg:grid-cols-2 gap-3">{items.slice(at * fit, at * fit + fit)}</div>
       {total > 1 && (
         <div className="flex items-center gap-2">
           <Button aria-label={t('builder.prevPage')} disabled={at === 0} onClick={() => setPage(at - 1)} className="w-11 !px-0"><CaretLeft weight="bold" size={18} /></Button>

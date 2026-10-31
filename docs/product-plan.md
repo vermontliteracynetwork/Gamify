@@ -1151,6 +1151,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 82 | **A theme guide for every game.** Free, public guides show every piece of every game: what it does, its exact size, and what makes a good one (see-through backgrounds, contrast, bold shapes), with blank printable and digital templates to download. Teachers can plan a theme project before they even sign up. | Search-friendly how-to pages that bring teachers in and make the Theme Builder feel easy | Teacher, 2026-10-28 |
 | 83 | **Made for the smart board.** Every game grows to fill a classroom board or projector, with one tap to full screen, and still fits a laptop or an iPad with nothing to scroll. | Teachers run it live from the front of the room, readable from the back row | Teacher, 2026-10-29 |
 | 84 | **A How to Play guide for every game.** Free public articles with real screenshots: the goal, how a turn works, every piece on the screen, the rules and the teacher settings. Teachers can learn a game in two minutes before class. | Search-friendly help pages; lowers the "will this work in my room?" worry | Teacher, 2026-10-31 |
+| 85 | **One place to start: Create an Activity.** Pick who, the game, how they play (big screen, class lobby, a code, pairs or homework) and the questions, then start or share the code. Five taps from idea to playing. | Answers "is it hard to set up?" for busy teachers | Teacher, 2026-10-31 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

@@ -21,6 +21,7 @@ import { t } from './i18n';
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
 const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
+const ActivityPage = lazy(() => import('./teacher/ActivityPage'));
 const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazy(() => import('./teacher/ImportPage'));
 const StarQuiz = lazy(() => import('./games/practice/StarQuiz'));
@@ -151,6 +152,7 @@ function AnimatedRoutes() {
           <Route path="/games/match-three" element={<RequireSignIn><RequireGame id="match-three"><MatchThree /></RequireGame></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><Navigate to="/teacher/classes" replace /></RequireTeacher>} />
+          <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />
           <Route path="/teacher/sets/:id" element={<RequireTeacher><SetEditorPage /></RequireTeacher>} />
@@ -174,7 +176,8 @@ function AnimatedRoutes() {
         </Suspense>
       </motion.div>
     </AnimatePresence>
-    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && <TeacherFooter />}
+    {/* Full-screen tools (live games, a game's Theme Builder) have no footer, so nothing scrolls (teacher, 2026-10-31). */}
+    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && <TeacherFooter />}
     <UpgradeHost />
     <LiveLayer />
     </>

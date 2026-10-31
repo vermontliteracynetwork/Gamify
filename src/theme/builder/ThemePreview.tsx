@@ -1,4 +1,5 @@
 import { Star } from '@phosphor-icons/react';
+import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
 import { PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
@@ -8,10 +9,12 @@ import { THEME_FONTS, type GameTheme } from '../types';
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 
 // A small live copy of the game screen wearing the theme being built.
-export default function ThemePreview({ theme, gameName }: { theme: GameTheme; gameName: string }) {
+export default function ThemePreview({ theme: own, gameName }: { theme: GameTheme; gameName: string }) {
+  const theme = withClassicArt(own);
   const c = theme.colors;
+  const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
   return (
-    <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
+    <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
         <span className="px-3 py-1 rounded-pill border-[2px] border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
@@ -76,11 +79,24 @@ function board(theme: GameTheme) {
       );
     default:
       return (
-        <div className="flex flex-wrap gap-2 justify-center">
-          {Array.from({ length: 6 }, (_, i) => pieceImage(theme, 'star')
-            ? <img key={i} src={pieceImage(theme, 'star')} alt="" className="w-12 h-12 object-contain" />
-            : <Star key={i} weight="fill" size={48} color={theme.pieces.star?.color ?? '#f6c544'} />)}
+        <div className="flex flex-wrap gap-3 justify-center items-center">
+          {Array.from({ length: 6 }, (_, i) => {
+            const img = pieceImage(theme, `item-${i + 1}`);
+            const look = { transform: `rotate(${[-18, 12, -6, 24, -28, 8][i]}deg)`, width: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem`, height: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem` };
+            return img
+              ? <img key={i} src={img} alt="" className="object-contain" style={look} />
+              : <Star key={i} weight="fill" style={look} color={pieceColor(theme, 'item-1', '#f6c544')} />;
+          })}
         </div>
       );
   }
+}
+
+// Pieces a design leaves empty show the Classic look (teacher, 2026-10-31:
+// "anything left empty keeps the Classic look"). The Classic sky only stays
+// while the background color is still Classic's.
+function withClassicArt(theme: GameTheme): GameTheme {
+  const classic = classicTheme(theme.gameId);
+  const keep = Object.entries(classic.pieces).filter(([id]) => !theme.pieces[id]?.image && (id !== 'background' || theme.colors.background === classic.colors.background));
+  return keep.length ? { ...theme, pieces: { ...theme.pieces, ...Object.fromEntries(keep.map(([id, art]) => [id, { ...theme.pieces[id], ...art }])) } } : theme;
 }

@@ -144,7 +144,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
   );
 }
 
-function Choices<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; title: string; hint: string }[]; onChange: (v: T) => void }) {
+export function Choices<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; title: string; hint: string }[]; onChange: (v: T) => void }) {
   return (
     <div className="grid gap-1.5">
       <span className="font-bold">{label}</span>
@@ -160,7 +160,7 @@ function Choices<T extends string>({ label, value, options, onChange }: { label:
   );
 }
 
-function CodeBox({ code, setName, onCopied, onShow }: { code: GameCode; setName: string; onCopied: () => void; onShow?: () => void }) {
+export function CodeBox({ code, setName, onCopied, onShow }: { code: GameCode; setName: string; onCopied: () => void; onShow?: () => void }) {
   return (
     <div className="grid gap-2 justify-items-start">
       <p className="font-display text-4xl tracking-[0.2em]" aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>

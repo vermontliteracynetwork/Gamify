@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Copy, Eye, FileArrowUp, PencilSimple, Plus, Trash, WarningCircle, Play } from '@phosphor-icons/react';
+import { Copy, Eye, FileArrowUp, RocketLaunch, PencilSimple, Plus, Trash, WarningCircle, Play } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { LOCAL_TEACHER_ID, useMySets, useTier } from '../data/hooks';
@@ -48,7 +48,8 @@ export default function QuestionSetsPage() {
         subtitle={t('sets.subtitle')}
         actions={tab === 'mine' && (
           <>
-            <Button variant="primary" onClick={create} disabled={atLimit}><Plus weight="bold" size={18} />{t('sets.new')}</Button>
+            <Button variant="primary" onClick={() => navigate('/teacher/activity')}><RocketLaunch weight="bold" size={18} />{t('activity.title')}</Button>
+            <Button onClick={create} disabled={atLimit}><Plus weight="bold" size={18} />{t('sets.new')}</Button>
             <Button onClick={() => navigate('/teacher/sets/import')} disabled={atLimit}><FileArrowUp weight="bold" size={18} />{t('sets.import')}</Button>
           </>
         )}

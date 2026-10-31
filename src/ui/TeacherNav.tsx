@@ -11,7 +11,9 @@ import { TIERS } from '../config';
 // The teacher menu, on every teacher page. Until the five get started steps
 // are done, the checklist sits at the top of every teacher tab (teacher,
 // 2026-10-25); the X folds it into the Get started pill for this page only.
-export default function TeacherNav(_props: { startOpen?: boolean }) {
+// `startOpen` false: the Get started panel waits behind its pill (full-screen
+// tools like the Theme Builder need the room; teacher, 2026-10-31).
+export default function TeacherNav({ startOpen = true }: { startOpen?: boolean }) {
   const start = useStartSteps();
   const tier = useTier();
   const [open, setOpen] = useState<boolean | null>(null);
@@ -19,7 +21,7 @@ export default function TeacherNav(_props: { startOpen?: boolean }) {
   const [survey, setSurvey] = useState<SurveyId | null>(null);
   const [surveyOpen, setSurveyOpen] = useState(false);
   useEffect(() => { void surveyDue().then(setSurvey); }, []);
-  const showing = open ?? true;
+  const showing = open ?? startOpen;
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-11 px-4 rounded-pill font-bold text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.

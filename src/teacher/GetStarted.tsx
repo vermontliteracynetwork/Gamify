@@ -1,3 +1,4 @@
+import { listGameCodes } from '../data/gameCodes';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CaretDown, CheckCircle, Circle, Minus, X } from '@phosphor-icons/react';
@@ -17,7 +18,7 @@ import Title from '../ui/Title';
 // choice is remembered on every tab (teacher, 2026-10-26).
 export const FOLDED = 'get-started-folded';
 const MINIMIZED = 'get-started-minimized';
-type StepKey = 'play' | 'class' | 'students' | 'assign' | 'signin';
+type StepKey = 'play' | 'class' | 'students' | 'activity' | 'signin';
 export interface StartSteps { steps: { key: StepKey; to: string; done: boolean }[]; count: number; folded: boolean; reload: () => void }
 
 export function useStartSteps(): StartSteps | null {
@@ -25,6 +26,7 @@ export function useStartSteps(): StartSteps | null {
     const [classes, log, folded, tier] = await Promise.all([data.listClassrooms(), data.listQuestionLog(), data.getSetting<boolean>(FOLDED), data.getSetting<Tier>('tier')]);
     const students = (await Promise.all(classes.map((c) => data.listStudents(c.id)))).flat();
     const assignments = (await Promise.all(classes.map((c) => data.listAssignments(c.id)))).flat();
+    const codes = await listGameCodes();
     const first = classes[0]?.id;
     const inClass = first ? `/teacher/classes/${first}` : '/teacher/classes';
     const steps = [
@@ -32,7 +34,8 @@ export function useStartSteps(): StartSteps | null {
       // Classes are Plus and Pro only; Free goes straight to its student list.
       ...(!TIERS[tier ?? 'free'].hasClasses ? [] : [{ key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 }]),
       { key: 'students' as const, to: inClass, done: students.length > 0 },
-      { key: 'assign' as const, to: inClass, done: assignments.length > 0 },
+      // Create an activity replaces Assign a question set (teacher, 2026-10-31).
+      { key: 'activity' as const, to: '/teacher/activity', done: assignments.length > 0 || codes.length > 0 },
       { key: 'signin' as const, to: '/teacher/sets', done: log.some((e) => e.studentId && !e.studentId.startsWith('guest')) },
     ];
     return { steps, count: steps.filter((s) => s.done).length, folded: !!folded };

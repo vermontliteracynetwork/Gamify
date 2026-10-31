@@ -31,6 +31,16 @@ export default function NavBar() {
       )}
       {any && (
         <>
+          {/* Teachers keep a way to the public site: home, features, the blog
+              and help (teacher, 2026-10-31). Students never see these. */}
+          {teacher && !student && (
+            <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1 mr-1">
+              <Link to="/" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
+              <Link to="/features" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
+              <Link to="/blog" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
+              <Link to="/help" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.faq')}</Link>
+            </nav>
+          )}
           <button type="button" onClick={() => setTellOpen(true)} aria-label={t('tell.open')}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
             <ChatCircleDots weight="bold" size={22} />
