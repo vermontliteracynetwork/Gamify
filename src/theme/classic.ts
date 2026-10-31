@@ -25,7 +25,13 @@ export function classicTheme(gameId: string): GameTheme {
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
     backdrop: { kind: 'color' },
     celebration: 'confetti',
-    pieces: {},
+    // Question Tracker's Classic art is the teacher's own (2026-10-31): a
+    // painted night sky and six hand-drawn stars. Seen in the game and the
+    // theme guide only, never handed out.
+    pieces: night ? {
+      background: { image: '/classic/star-quiz/background.webp' },
+      ...Object.fromEntries([1, 2, 3, 4, 5, 6].map((n) => [`item-${n}`, { image: `/classic/star-quiz/item-${n}.webp` }])),
+    } : {},
     // Every power-up the game can do, in its Classic look (teacher, 2026-10-26).
     ...(getGame(gameId)?.items && { items: getGame(gameId)!.items!.classic.map((it) => ({ ...it })) }),
   };

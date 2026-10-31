@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Star } from '@phosphor-icons/react';
 import { pieceColor, pieceImage } from '../../theme/library';
+import { classicTheme } from '../../theme/classic';
 import type { GameTheme } from '../../theme/types';
 
 // Question Tracker's play screen: a sky that fills up, one item (a star by
@@ -46,8 +47,8 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
       spot: {
         x: left + (((c % cols) + 0.4 + rand() * 0.2) / cols) * w,
         y: top + ((Math.floor(c / cols) + 0.4 + rand() * 0.2) / rows) * ht,
-        size: 0.35 + rand() * 0.45, // under a whole cell, so a turning item stays inside it
-        spin: (rand() - 0.5) * 30,
+        size: 0.3 + rand() * 0.55, // small to big, under a whole cell so a turning item stays inside it
+        spin: (rand() - 0.5) * 100, // each one tipped its own way (teacher, 2026-10-31)
         unit,
       },
     }));
@@ -92,7 +93,9 @@ export default function Sky({ theme, filled, total, still, label, colors, height
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
   const spots = skySpots(total, 7, hole, aspect);
-  const items = ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
+  // Items a theme leaves empty keep the Classic look (the teacher's stars).
+  const own = ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
+  const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];
   const dust = skySpots(36, 3, null, aspect);
   return (
     <div ref={ref} className="relative w-full overflow-hidden rounded-panel border-[2.5px] border-border" role="img" aria-label={label}
