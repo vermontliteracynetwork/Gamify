@@ -42,6 +42,17 @@ export const HOUSE_THEMES: GameTheme[] = [
     room: { floor: 57 },
     pixelArt: true,
   })),
+  // Pinball: Beachside, from the teacher's own BeachSide Pinball art (2026-10-31):
+  // sand, umbrellas, shells, coral and lighthouse bumpers.
+  house('pinball', 'beachside', 'Beachside', () => ({
+    colors: { background: '#13658a', backgroundText: '#ffffff' } as GameTheme['colors'],
+    backdrop: { kind: 'pattern', pattern: 'waves' },
+    pieces: {
+      board: { image: '/themes/beachside/table.webp', color: '#1f8fbf' },
+      bumper: { image: '/themes/beachside/bumper.webp', color: '#ffffff' },
+      cover: { image: '/themes/beachside/play.webp', color: '#1f8fbf' },
+    },
+  })),
 ];
 
 export const houseFor = (gameId: string) => HOUSE_THEMES.filter((th) => th.gameId === gameId);

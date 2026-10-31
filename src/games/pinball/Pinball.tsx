@@ -367,8 +367,10 @@ export default function Pinball() {
                     <g key={`b-${i}`}>
                       <circle cx={b.x} cy={b.y} r={6.4} fill="#000" opacity={0.18} />
                       <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={5.2} fill={bumperColor} stroke="#000" strokeWidth={0.6} />
-                      <circle cx={b.x} cy={b.y} r={2.4} fill="#fff" opacity={0.85} />
-                      <Star x={b.x - 1.5} y={b.y - 1.5} size={3} weight="fill" color="#241c3d" />
+                      {pieceImage(theme, 'bumper') ? <image href={pieceImage(theme, 'bumper')} x={b.x - 6} y={b.y - 9} width={12} height={12} /> : <>
+                        <circle cx={b.x} cy={b.y} r={2.4} fill="#fff" opacity={0.85} />
+                        <Star x={b.x - 1.5} y={b.y - 1.5} size={3} weight="fill" color="#241c3d" />
+                      </>}
                     </g>
                   ))}
                   {aiming && (
