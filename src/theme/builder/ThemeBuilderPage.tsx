@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
@@ -31,7 +32,7 @@ import { data as store } from '../../data';
 import { useAsync } from '../../data/hooks';
 import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
 
-const DrawStudio = lazy(() => import('./DrawStudio'));
+const DrawStudio = lazyPage(() => import('./DrawStudio'));
 
 // Everything the builder can design: each game, plus the sign-in pictures.
 export const BUILDER_TARGETS = [...GAMES, signInManifest, bigScreenManifest];

@@ -1,5 +1,6 @@
 import { isSolid } from '../theme/builder/template';
-import { lazy, Suspense, useMemo, useRef, useState } from 'react';
+import { Suspense, useMemo, useRef, useState } from 'react';
+import { lazyPage } from '../lib/lazyPage';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Camera, CheckCircle, PaintBrush, PaperPlaneTilt, Star } from '@phosphor-icons/react';
@@ -19,7 +20,7 @@ import { useSession } from './session';
 
 // The same drawing studio teachers use, so students can draw each piece
 // right here (the Theme Builder track of the challenge).
-const DrawStudio = lazy(() => import('../theme/builder/DrawStudio'));
+const DrawStudio = lazyPage(() => import('../theme/builder/DrawStudio'));
 
 const SWATCHES = ['#fdfd94', '#ddfcc6', '#b4c4fb', '#ed9d75', '#f6a5c0', '#8ec5ff', '#c9a3f5', '#ffffff'];
 const big = 'min-h-14 px-6 rounded-pill border-[2.5px] border-border font-display text-xl inline-flex items-center gap-2 no-underline text-text';
