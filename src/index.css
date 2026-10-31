@@ -173,7 +173,8 @@ h1, h2, h3 { color: inherit; }
 }
 
 /* Hover text for icon buttons (src/ui/kit.tsx IconButton). */
-[data-tip] { position: relative; }
+/* In the base layer, so a button placed with absolute or fixed keeps it. */
+@layer base { [data-tip] { position: relative; } }
 [data-tip]:hover::after, [data-tip]:focus-visible::after {
   content: attr(data-tip);
   position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%);

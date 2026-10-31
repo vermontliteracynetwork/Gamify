@@ -31,7 +31,7 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   const studio = page.getByRole('dialog', { name: /^Draw: / });
   await expect(studio.getByRole('radio', { name: 'Words' })).toHaveCount(0);
   await studio.getByRole('radio', { name: 'Fill' }).click();
-  await studio.getByRole('button', { name: '#43a047' }).click();
+  await studio.getByRole('button', { name: '#43a047', exact: true }).click();
   const box = (await studio.getByLabel(/^Drawing of the /).boundingBox())!;
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await page.screenshot({ path: `test-results/design-studio-${info.project.name}.png` });

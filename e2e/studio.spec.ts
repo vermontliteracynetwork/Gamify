@@ -23,11 +23,11 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await page.mouse.down();
   for (let i = 0; i <= 36; i++) { const a = (i / 36) * Math.PI * 2; await page.mouse.move(...at(0.5 + Math.sin(a) * 0.3, 0.5 - Math.cos(a) * 0.3)); }
   await page.mouse.up();
-  await studio.getByRole('button', { name: '#fdd835' }).click();
+  await studio.getByRole('button', { name: '#fdd835', exact: true }).click();
   await studio.getByRole('radio', { name: 'Fill' }).click();
   await page.mouse.click(...at(0.5, 0.5));
   // A sticker found by search.
-  await studio.getByRole('button', { name: '#000000' }).click();
+  await studio.getByRole('button', { name: '#000000', exact: true }).click();
   await studio.getByRole('radio', { name: 'Stickers' }).click();
   await studio.getByLabel('Search stickers').fill('crown');
   await studio.getByRole('button', { name: 'crown', exact: true }).click();
@@ -122,7 +122,7 @@ test('studio: flip a piece, and a warning for words that are hard to read', asyn
   const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
   const box = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
   // Fill the whole picture yellow, then yellow words on it.
-  await studio.getByRole('button', { name: '#fdd835' }).click();
+  await studio.getByRole('button', { name: '#fdd835', exact: true }).click();
   await studio.getByRole('radio', { name: 'Fill' }).click();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await studio.getByRole('radio', { name: 'Words' }).click();
@@ -131,7 +131,7 @@ test('studio: flip a piece, and a warning for words that are hard to read', asyn
   expect(await studio.getByRole('button', { name: 'Move Hello!' }).getAttribute('style')).toContain('scaleX(-1)');
   await studio.getByRole('button', { name: 'Use this picture' }).click();
   await expect(studio.getByRole('alert')).toContainText('hard to read');
-  await studio.getByRole('button', { name: '#000000' }).click();
+  await studio.getByRole('button', { name: '#000000', exact: true }).click();
   await studio.getByRole('button', { name: 'Use this picture' }).click();
   await expect(studio).toHaveCount(0);
 });
@@ -147,9 +147,9 @@ test('studio: two colors, shape outlines, and a made color joins the list', asyn
   await page.getByRole('button', { name: /^Draw the Cover/ }).click();
   const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
   const box = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
-  await studio.getByRole('button', { name: '#fdd835' }).click();
+  await studio.getByRole('button', { name: '#fdd835', exact: true }).click();
   await studio.getByRole('button', { name: /^Second color/ }).click();
-  await studio.getByRole('button', { name: '#e53935' }).click();
+  await studio.getByRole('button', { name: '#e53935', exact: true }).click();
   await studio.getByRole('button', { name: /^Main color #fdd835/ }).click();
   await studio.getByRole('radio', { name: 'Shapes' }).click();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
@@ -163,7 +163,7 @@ test('studio: two colors, shape outlines, and a made color joins the list', asyn
   await expect(studio.getByRole('button', { name: /^Main color #e53935/ })).toBeVisible();
   // A made color: the rainbow button opens the color picker; the new color joins the list.
   await studio.locator('input[type=color]').evaluate((el: HTMLInputElement) => { el.value = '#123456'; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });
-  await expect(studio.getByRole('button', { name: '#123456' })).toBeVisible();
+  await expect(studio.getByRole('button', { name: '#123456', exact: true })).toBeVisible();
   await expect(studio.getByRole('button', { name: 'Make a color' })).toBeVisible();
   if (info.project.name === 'laptop') await page.screenshot({ path: 'test-results/studio-colors.png' });
 });

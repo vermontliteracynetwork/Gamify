@@ -49,9 +49,10 @@ test('the games need sign-in; a student joins with a class code', async ({ page 
 
   // Student types the code and reaches the class sign-in.
   await page.goto('/join');
+  // A code is checked as it is typed; Go shows only for one that works (teacher, 2026-10-31).
   await page.getByLabel('Class code').fill('ZZZZZ');
-  await page.getByRole('button', { name: 'Go' }).click();
   await expect(page.getByText('That code did not match.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Go' })).toHaveCount(0);
   await page.getByLabel('Class code').fill(code.toLowerCase());
   await page.getByRole('button', { name: 'Go' }).click();
   await expect(page.getByRole('button', { name: 'Kai', exact: true })).toBeVisible();
@@ -84,13 +85,12 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
 
 test('join page: five wrong codes means a short wait; the code screen shows a QR code', async ({ page }, info) => {
   await page.goto('/join');
-  for (let i = 0; i < 5; i++) {
-    await page.getByLabel('Class code').fill('QQQQQ');
-    await page.getByRole('button', { name: 'Go' }).click();
-    await page.waitForTimeout(150);
+  for (const c of ['QQQQQ', 'QQQQW', 'QQQWQ', 'QQWQQ', 'QWQQQ']) {
+    await page.getByLabel('Class code').fill(c);
+    await page.waitForTimeout(250);
   }
   await expect(page.getByText(/Too many tries\. Wait \d+ seconds/)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Go' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Go' })).toHaveCount(0);
 });
 
 test.describe('signed in', () => {

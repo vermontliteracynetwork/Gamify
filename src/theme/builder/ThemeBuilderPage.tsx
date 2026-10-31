@@ -180,6 +180,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
 
   const [drawing, setDrawing] = useState<ThemePieceSpec | null>(null);
   const [find, setFind] = useState('');
+  // Tall screens show more pieces a page, so there is no empty space.
+  const [tall, setTall] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-height: 860px)').matches);
+  useEffect(() => { const m = window.matchMedia('(min-height: 860px)'); const on = () => setTall(m.matches); m.addEventListener('change', on); return () => m.removeEventListener('change', on); }, []);
   const shownPieces = game.themePieces.filter((p) => !find.trim() || `${p.label} ${p.hint}`.toLowerCase().includes(find.trim().toLowerCase()));
   function setPiece(id: string, image: string | undefined) {
     setDraft((d) => {
@@ -262,7 +265,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="shrink-0 grid grid-flow-col auto-cols-fr gap-0.5 p-1 rounded-pill bg-surface-2 border-[2px] border-border">
               {(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-11 px-2 rounded-pill font-bold text-sm whitespace-nowrap truncate ${tab === k ? 'bg-accent text-accent-ink border-[2px] border-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
+                  className={`min-h-11 px-1 rounded-pill font-bold text-sm whitespace-nowrap ${tab === k ? 'bg-accent text-accent-ink ring-2 ring-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
             </div>
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto grid gap-3 content-start pr-1">
@@ -306,7 +309,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   </div>
                   <p className="text-xs font-semibold text-muted -mt-1">{t('builder.scanHint')}</p>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
-                  <Pages key={`upload-${find}`} per={4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => setPiece(p.id, undefined)} />)} />
+                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => setPiece(p.id, undefined)} />)} />
                 </>
               )}
               {tab === 'items' && game.items && (

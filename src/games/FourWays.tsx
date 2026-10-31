@@ -28,7 +28,7 @@ export default function FourWays({ compact = false }: { compact?: boolean }) {
             )}
             <span className={`grid ${compact ? 'gap-0 min-w-0' : 'gap-1.5 p-4 flex-1 content-start'}`}>
               <span className={`title-bubble ${compact ? 'text-xl' : 'text-3xl'} flex items-center gap-2`}>{!compact && <Icon weight="bold" size={26} aria-hidden="true" />}<Title text={t(`mode.${m}` as StringKey)} /></span>
-              <span className={`font-bold ${compact ? 'text-xs text-muted truncate' : 'text-sm'}`}>{t(`mode.${m}.hint` as StringKey)}</span>
+              <span className={`font-bold ${compact ? 'text-xs text-muted line-clamp-2' : 'text-sm'}`}>{t(`mode.${m}.hint` as StringKey)}</span>
               {!compact && <span className="font-semibold text-sm text-muted">{t(`public.mode.${m}` as StringKey)}</span>}
             </span>
           </motion.li>
