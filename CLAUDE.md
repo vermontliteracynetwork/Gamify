@@ -16,6 +16,10 @@ irregularity, juice on every action, special power-ups, a goal that visibly
 builds, learning at the center, teacher-proof on every device, licensed, and
 a Claudia review. One miss means it is not done.
 
+Never make her repeat herself (teacher, 2026-10-31): read
+`docs/teacher-preferences.md` before building and apply her past preferences
+unasked; add every new preference to it the same turn.
+
 ## The Three-Lens Standard (mandatory)
 
 "It technically works" and "good enough" are never the bar here. Before any

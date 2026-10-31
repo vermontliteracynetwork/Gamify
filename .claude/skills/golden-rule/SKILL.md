@@ -11,6 +11,8 @@ not the bar. Built-to-spec-but-dull is a failure. Every property below is a
 MUST HAVE; one miss means the game is not done.
 
 ## Before building: get the brief exactly right
+0. Read docs/teacher-preferences.md and apply every line that fits without
+   being asked. She should never have to repeat a preference.
 1. Find the teacher's ORIGINAL request word for word (session transcript,
    queued messages, dev plan) and every reference image she sent. Save the
    images to the scratchpad and look at them.
