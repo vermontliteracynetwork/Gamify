@@ -479,7 +479,7 @@ export const en = {
   'pu.farm-grow.rain': 'Rain! Every plant is watered.',
   'pu.farm-grow.bonus': '+{n} bonus points!',
   'tb.powers': 'Power-ups',
-  'tb.powersHint': 'Turn off any you do not want on the board.',
+  'tb.powersHint': 'Turn off any you do not want on the board. Power-ups that take or trade points start off; turn them on if your class enjoys them.',
   'tb.power.double': 'Doubles your points',
   'tb.power.swap': 'Trade points with a team you pick',
   'tb.power.steal': 'Take {points} points from a team you pick',

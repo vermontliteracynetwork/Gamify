@@ -24,6 +24,9 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await expect(page.getByRole('radio', { name: 'One try' })).toBeChecked();
   await page.getByRole('radio', { name: '3 tries' }).click();
   await expect(page.getByRole('switch', { name: /Double Star/ })).toBeChecked();
+  // Taking or trading points starts off (market research, 2026-10-31).
+  await expect(page.getByRole('switch', { name: /Sneaky Magnet/ })).not.toBeChecked();
+  await expect(page.getByRole('switch', { name: /Swap Spinner/ })).not.toBeChecked();
   await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
   await finishSetup(page);
 

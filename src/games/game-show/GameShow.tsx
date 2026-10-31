@@ -49,7 +49,7 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'teams' as 'teams' | 'versus' });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'teams' as 'teams' | 'versus' });
   const versus = setup.who === 'versus';
   // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
   const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');
@@ -58,6 +58,10 @@ export default function GameShow() {
   const gap = grid.rows > 4 ? 8 : 12;
   // The theme's power-ups (Classic ones until a theme makes its own).
   const powers = theme.items?.length ? theme.items : gameShowManifest.items!.classic;
+  // Steal and Swap stay off unless the teacher turns them on (market research,
+  // 2026-10-31: teachers say taking points brings out the worst).
+  const takes = (p: { ability: string }) => p.ability === 'steal' || p.ability === 'swap';
+  const powerOn = (p: { id: string; ability: string }) => (takes(p) ? (setup.takeOn ?? []).includes(p.id) : !setup.powerOff.includes(p.id));
   // A set picked with the teacher's Play now button or a game code (?set=).
   const presetSet = new URLSearchParams(useLocation().search).get('set');
   useEffect(() => { if (presetSet && allSets.some((s) => s.id === presetSet)) change({ setIds: [presetSet], board: 'cards' }); }, [presetSet, allSets.length]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -93,7 +97,7 @@ export default function GameShow() {
     used.current.clear();
     setMissed([]);
     if (board === 'cards') {
-      setCards(dealCards(grid.cols * grid.rows, Math.random, powers.filter((p) => !setup.powerOff.includes(p.id))).map((kind) => ({ kind, open: false })));
+      setCards(dealCards(grid.cols * grid.rows, Math.random, powers.filter(powerOn)).map((kind) => ({ kind, open: false })));
       startTurn(state, 'cards');
     } else {
       setCells(chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false }))));
@@ -292,8 +296,10 @@ export default function GameShow() {
                 <span className="text-sm font-semibold text-muted -mt-1.5">{t('tb.powersHint')}</span>
                 {powers.map((p) => (
                   <Toggle key={p.id} label={p.name} hint={t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) })} art={<ItemArt item={p} size={44} still />}
-                    value={!setup.powerOff.includes(p.id)}
-                    onChange={(on) => change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] })} />
+                    value={powerOn(p)}
+                    onChange={(on) => takes(p)
+                      ? change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) })
+                      : change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] })} />
                 ))}
               </div>
               </>}

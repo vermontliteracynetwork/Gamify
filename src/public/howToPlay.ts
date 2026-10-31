@@ -39,7 +39,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'Cards', what: 'Numbered cards in a grid, from 4 x 3 up to 6 x 6. Each hides points or a power-up.' },
       { name: 'Category grid', what: 'A second board: up to five question sets as columns, with 100 to 500 point squares.' },
       { name: 'Scores', what: 'Every team with its icon and points. Whose turn it is glows.' },
-      { name: 'Power-ups', what: 'Double Star doubles a team\'s points, Swap Spinner trades scores with a team, Sneaky Magnet takes points from a team, Prize Bag adds bonus points. Teachers switch any of them off.' },
+      { name: 'Power-ups', what: 'Double Star doubles a team\'s points, Swap Spinner trades scores with a team, Sneaky Magnet takes points from a team, Prize Bag adds bonus points. Swap Spinner and Sneaky Magnet start off, so play stays friendly; teachers turn them on if they like, and switch any power-up off.' },
     ],
     rules: ['Up to 10 teams, or two players in Versus.', 'One question per turn to earn a card (the teacher can allow 3 tries or unlimited).', 'Most points wins; ties share the win.'],
     settings: ['Teams on the big screen, or two players head to head (Versus).', 'Tries for each turn: one (the default), three or unlimited.', 'Surprise cards or category grid.', 'Card grid size.', 'Which power-ups are in play.', 'Teams: you make them, random, the whole class against the computer or against you.'],
