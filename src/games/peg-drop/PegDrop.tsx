@@ -15,6 +15,7 @@ import ScoreBoard from '../../engine/ScoreBoard';
 import { CHANCES } from '../../engine/turns';
 import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
+import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
@@ -55,12 +56,16 @@ export default function PegDrop() {
   // Students who join with a code play on their own device; teachers pick the way.
   const { teacher } = useSignedIn();
   const solo = setup.who === 'solo' || !teacher;
-  const { ask, element, missed: soloMissed } = useAsk({ gameId: 'peg-drop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
+  const { ask, cancel, asking, element, missed: soloMissed } = useAsk({ gameId: 'peg-drop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [turns, setTurns] = useState<TurnState | null>(null);
+  // The teacher's play clock or score goal (2026-10-31) ends a solo game the usual way.
+  const turnsNow = useRef<TurnState | null>(null);
+  turnsNow.current = turns;
+  const clock = usePlayClock({ playing: phase === 'play' && solo, score: turns?.players[0]?.score ?? 0, onTimeUp: () => { if (asking) cancel(); else if (turnsNow.current) end(turnsNow.current); } });
   const [step, setStep] = useState<Step>('question');
   const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; chance: number } | null>(null);
   const [path, setPath] = useState<number[] | null>(null);
@@ -172,6 +177,7 @@ export default function PegDrop() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:5.75rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="peg-drop" />
+      {clock.element}
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={pegDropManifest.name} /></h1>}
       </GameTopRow>
