@@ -21,7 +21,7 @@ import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
-import { Toggle } from '../../ui/fields';
+import { ChoiceRow, Toggle } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
@@ -32,7 +32,7 @@ import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import {
-  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, roll, spotOf,
+  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, roll, SHORT_START, spotOf,
   tileXY, WORLD_H, WORLD_W, type Bridge, type ChestPrize, type Power,
 } from './board';
 
@@ -60,7 +60,10 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'full' as 'full' | 'short' });
+  // Where pieces start: the full trail, or the short one from the second bend.
+  const [start, setStart] = useState(0);
+  const startRef = useRef(0);
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -126,10 +129,12 @@ export default function CastleQuest() {
     const state = startTurns(ps);
     turnsRef.current = state;
     setTurns(state); setMissed([]); setWinner(null); setOverride({}); setAhead([]);
-    place(ps.map(() => 0));
+    const from = setup.trail === 'short' ? SHORT_START : 0;
+    startRef.current = from; setStart(from);
+    place(ps.map(() => from));
     setShield(ps.map(() => 0)); setFast(ps.map(() => 0)); setPotion(false);
     // Lightning needs someone to send it to (Claudia review, 2026-10-31).
-    const placed = setup.powerUps ? placePowers() : new Map<number, Power>();
+    const placed = setup.powerUps ? placePowers(Math.random, from) : new Map<number, Power>();
     if (ps.length < 2) for (const [k, v] of placed) if (v === 'lightning') placed.set(k, 'chest');
     setPowers(placed);
     held.reset();
@@ -260,7 +265,7 @@ export default function CastleQuest() {
     posRef.current.forEach((p, i) => { if (shieldRef.current[i] <= 0 && p < FINISH) lift[i] = { x: WORLD_W * (0.3 + 0.4 * Math.random()), y: WORLD_H * (0.15 + 0.2 * Math.random()), lift: true }; });
     setOverride(lift);
     await sleep(ms(1500));
-    const next = posRef.current.map((p, i) => (lift[i] ? 1 + Math.floor(Math.random() * (FINISH - 6)) : p));
+    const next = posRef.current.map((p, i) => (lift[i] ? startRef.current + 1 + Math.floor(Math.random() * (FINISH - startRef.current - 6)) : p));
     setOverride({});
     place(next);
     buzz(80, settings);
@@ -274,7 +279,7 @@ export default function CastleQuest() {
     const prize: ChestPrize = openChest();
     if (isBad(prize) && shieldRef.current[who] > 0) { say(t('cq.shieldBlocks'), itemFor('shield').image); await sleep(ms(1200)); return; }
     if (prize.kind === 'move') { say(t(prize.n > 0 ? 'cq.chestAhead' : 'cq.chestBack', { n: Math.abs(prize.n) }), undefined, prize.n < 0); await sleep(ms(1000)); await move(who, prize.n, false); return; }
-    if (prize.kind === 'start') { say(t('cq.chestStart'), undefined, true); await sleep(ms(1000)); await walk(who, 0); return; }
+    if (prize.kind === 'start') { say(t('cq.chestStart'), undefined, true); await sleep(ms(1000)); await walk(who, startRef.current); return; }
     if (prize.kind === 'swap') {
       const others = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== who).sort((a, b) => a[0] - b[0]);
       const back = others[0];
@@ -386,8 +391,9 @@ export default function CastleQuest() {
     }
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const best = Math.max(0, ...pos);
-  const stage = castleStage(best);
+  const best = Math.max(start, ...pos);
+  // The castle rises with the share of the trail covered, short or full.
+  const stage = castleStage(Math.round(((best - start) / (FINISH - start)) * FINISH));
   const boardW = `calc((var(--play-h) - 1.5rem - var(--cq-extra)) * ${WORLD_W / WORLD_H})`;
   // A held magnet shows too; it goes on by itself at the next question.
   const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => { if (held.held[i]?.ability !== 'magnet') void applyItem(i); }} disabled={step !== 'roll' || !human} />;
@@ -421,7 +427,13 @@ export default function CastleQuest() {
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players)} pages={[
           { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-          { id: 'options', title: t('setup.options'), content: <Toggle label={t('pu.toggle')} hint={t('cq.powerHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} /> },
+          { id: 'options', title: t('setup.options'), content: (
+            <>
+              <ChoiceRow label={t('cq.trail')} value={setup.trail ?? 'full'} onChange={(v) => change({ trail: v })}
+                options={[{ value: 'full', label: t('cq.trailFull') }, { value: 'short', label: t('cq.trailShort') }]} />
+              <Toggle label={t('pu.toggle')} hint={t('cq.powerHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+            </>
+          ) },
           versus
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> },
@@ -440,7 +452,7 @@ export default function CastleQuest() {
               <div className={`relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none ${tornado && !still && settings.screenShake ? 'cq-shake' : ''}`}
                 style={{ aspectRatio: `${WORLD_W} / ${WORLD_H}`, width: boardW, maxWidth: 'min(100%, calc(100vw - 1.5rem))', background: pieceImage(theme, 'background') ? `center / cover url("${pieceImage(theme, 'background')}")` : 'linear-gradient(#bfe6ff, #8fd0f3 45%, #6fbfe8)', boxShadow: 'var(--shadow-sticker-lg)' }}>
                 <svg viewBox={`0 0 ${WORLD_W} ${WORLD_H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('cq.board', { n: FINISH })}>
-                  <WorldArt theme={theme} still={still} />
+                  <WorldArt theme={theme} still={still} start={start} />
                   <TrailMarks powers={powers} itemFor={itemFor} ahead={ahead} here={phase === 'play' && turns ? (override[me] ? null : pos[me] ?? 0) : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} still={still} />
                   <Castle stage={stage} theme={theme} still={still} flag={winner ? TEAM_COLORS[winner.colorIndex % TEAM_COLORS.length] : '#ef6f6c'} />
                 </svg>
@@ -501,7 +513,7 @@ export default function CastleQuest() {
               <div className="lg:hidden absolute left-2 top-2 w-[min(15rem,45%)] z-20">{tray}</div>
             </section>
             <div className="order-first lg:order-none lg:w-[270px] min-w-0 grid gap-3 pr-[10.5rem] lg:pr-0 lg:pt-14">
-              <Race turns={turns} pos={pos} playing={phase === 'play'} heroOf={heroOf} />
+              <Race turns={turns} pos={pos} playing={phase === 'play'} heroOf={heroOf} start={start} />
               <div className="hidden lg:block">{tray}</div>
               <div className="hidden lg:block">{dieCard}</div>
               {step === 'target' && human && (
@@ -536,7 +548,7 @@ export default function CastleQuest() {
 const WORLD = buildWorld();
 const TILE: Record<string, string> = { grass: 'tileGrass', grassFull: 'tileGrass_full', water: 'tileWater', stone: 'tileStone' };
 
-const WorldArt = memo(function WorldArt({ theme, still }: { theme: GameTheme; still: boolean }) {
+const WorldArt = memo(function WorldArt({ theme, still, start }: { theme: GameTheme; still: boolean; start: number }) {
   const custom = pieceImage(theme, 'tile');
   const rows = useMemo(() => Array.from({ length: 13 }, (_, r) => r), []);
   return (
@@ -552,10 +564,11 @@ const WorldArt = memo(function WorldArt({ theme, still }: { theme: GameTheme; st
           {WORLD.cells.filter((c) => c.r === r).map((c) => {
             const { x, y } = tileXY(c.r, c.c);
             const i = c.i ?? -1;
-            const img = c.ground === 'path' ? (custom ?? `${ART}/world/${i === 0 ? 'tileStone' : i % 2 ? 'tileSand_full' : 'tileSand'}.png`) : `${ART}/world/${TILE[c.ground]}.png`;
+            const img = c.ground === 'path' ? (custom ?? `${ART}/world/${i === start ? 'tileStone' : i % 2 ? 'tileSand_full' : 'tileSand'}.png`) : `${ART}/world/${TILE[c.ground]}.png`;
             return (
               <g key={`${c.r},${c.c}`}>
                 <image href={img} x={x} y={y} width={65} height={89} />
+                {c.ground === 'path' && i < start && <polygon points={hexPoints(x, y, 1)} fill="#3d6b2f" opacity={0.45} />}
                 {c.ground === 'path' && <polygon points={hexPoints(x, y, 0.82)} fill="none" stroke={i % 2 ? '#c9a46a' : '#e9d6ad'} strokeWidth={2} opacity={0.9} />}
                 {c.ground === 'water' && <image href={`${ART}/world/waveWater.png`} x={x + 18 + (c.c % 3) * 4} y={y + 22 + (c.r % 2) * 6} width={26} height={9} className={still ? '' : 'cq-wave'} style={{ animationDelay: `${-((c.r * 7 + c.c * 3) % 10) * 0.3}s` }} />}
               </g>
@@ -566,7 +579,7 @@ const WorldArt = memo(function WorldArt({ theme, still }: { theme: GameTheme; st
       {/* A dotted guide along the trail, so the way through every bend is clear. */}
       <polyline points={[...PATH.map(([r, c]) => centerOf(r, c)), centerOf(1, 13)].map((p) => `${p.x},${p.y + 2}`).join(' ')} fill="none" stroke="#fffdf2" strokeWidth={3.2} strokeDasharray="0.1 11" strokeLinecap="round" strokeLinejoin="round" opacity={0.95} />
       {/* Start: a flag on the first space. */}
-      <StartFlag still={still} />
+      <StartFlag still={still} at={start} />
       {/* Bridges: wooden planks across the water, from one bend to the next. */}
       {BRIDGES.map((b) => <BridgeArt key={b.from} b={b} />)}
       {rows.map((r) => (
@@ -585,8 +598,8 @@ function hexPoints(x: number, y: number, s: number) {
   return [[cx, cy - hh], [cx + hw, cy - hh * 0.45], [cx + hw, cy + hh * 0.45], [cx, cy + hh], [cx - hw, cy + hh * 0.45], [cx - hw, cy - hh * 0.45]].map((p) => p.join(',')).join(' ');
 }
 
-function StartFlag({ still }: { still: boolean }) {
-  const { x, y } = spotOf(0);
+function StartFlag({ still, at }: { still: boolean; at: number }) {
+  const { x, y } = spotOf(at);
   return (
     <g transform={`translate(${x - 24} ${y - 40})`}>
       <rect x={0} y={0} width={3} height={40} rx={1.5} fill="#5b3a1e" />
@@ -740,7 +753,7 @@ function DieToss({ n, mult, still, theme }: { n: number; mult: number; still: bo
 }
 
 // Who is closest to the castle: a little trail per player, no numbers.
-function Race({ turns, pos, playing, heroOf }: { turns: TurnState; pos: number[]; playing: boolean; heroOf: (p: TurnPlayer, i: number) => string }) {
+function Race({ turns, pos, playing, heroOf, start }: { turns: TurnState; pos: number[]; playing: boolean; heroOf: (p: TurnPlayer, i: number) => string; start: number }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   return (
@@ -749,7 +762,7 @@ function Race({ turns, pos, playing, heroOf }: { turns: TurnState; pos: number[]
       <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid gap-1.5 list-none m-0 p-1 lg:p-0">
         {turns.players.map((p, i) => {
           const on = playing && i === turns.turn;
-          const f = Math.min(1, (pos[i] ?? 0) / FINISH);
+          const f = Math.max(0, Math.min(1, ((pos[i] ?? start) - start) / (FINISH - start)));
           const color = TEAM_COLORS[p.colorIndex % TEAM_COLORS.length];
           return (
             <motion.li key={p.id} aria-current={on ? 'true' : undefined} aria-label={t('cq.raceRow', { name: p.name, n: Math.round(f * 100) })}

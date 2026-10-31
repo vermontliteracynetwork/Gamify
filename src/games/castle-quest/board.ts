@@ -56,16 +56,21 @@ function pick<T extends string>(weights: Record<T, number>, rand: () => number):
 
 // Power-up spaces come often (teacher, 2026-10-31): about one space in three,
 // never on Start, a bridge end or the last few spaces, never two in a row.
-export function placePowers(rand: () => number = Math.random): Map<number, Power> {
+// A short trail for big classes (Claudia review, 2026-10-31): everyone starts
+// at the second bend, about a third of the way along.
+export const SHORT_START = 17;
+
+export function placePowers(rand: () => number = Math.random, from = 0): Map<number, Power> {
   const out = new Map<number, Power>();
   const blocked = new Set(BRIDGES.flatMap((b) => [b.from, b.to]));
-  for (let i = 2; i < FINISH - 2; i++) {
+  for (let i = from + 2; i < FINISH - 2; i++) {
     if (blocked.has(i) || out.has(i - 1)) continue;
     if (rand() < 0.4) out.set(i, pick(POWER_WEIGHTS, rand));
   }
   // Never a quiet board: top up to at least 11 power-up spaces.
-  for (let tries = 0; out.size < 11 && tries < 400; tries++) {
-    const i = 2 + Math.floor(rand() * (FINISH - 4));
+  const want = Math.round(11 * ((FINISH - from) / FINISH));
+  for (let tries = 0; out.size < want && tries < 400; tries++) {
+    const i = from + 2 + Math.floor(rand() * (FINISH - from - 4));
     if (blocked.has(i) || out.has(i) || out.has(i - 1) || out.has(i + 1)) continue;
     out.set(i, pick(POWER_WEIGHTS, rand));
   }
