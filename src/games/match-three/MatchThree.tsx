@@ -215,7 +215,7 @@ export default function MatchThree() {
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
                 const isSel = selected?.row === r && selected?.col === c;
-                const kindName = t(`bm.${PUZZLE_PACK_CLEARED ? "gem" : "kind"}.${tileItem.kind}` as StringKey);
+                const kindName = theme.pieces[`tile-${tileItem.kind}`]?.alt ?? t(`bm.${PUZZLE_PACK_CLEARED ? "gem" : "kind"}.${tileItem.kind}` as StringKey);
                 return (
                   <motion.button
                     key={tileItem.id}

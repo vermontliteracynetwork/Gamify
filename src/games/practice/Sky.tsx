@@ -20,12 +20,12 @@ export interface Hole { l: number; t: number; r: number; b: number } // % of the
 export interface SkySpot { x: number; y: number; size: number; spin: number; unit: string }
 const DEFAULT_HOLE: Hole = { l: 15, t: 22, r: 85, b: 68 };
 
-export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HOLE, aspect = 0.7): SkySpot[] {
+export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HOLE, aspect = 0.7, skipTop = false): SkySpot[] {
   let s = seed;
   const rand = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
   // Open strips as [left, top, width, height] in %, kept if big enough to hold an item.
   const h = hole ?? { l: 50, t: 50, r: 50, b: 50 };
-  const strips = (hole ? [[0, 0, 100, h.t], [0, h.b, 100, 100 - h.b], [0, h.t, h.l, h.b - h.t], [h.r, h.t, 100 - h.r, h.b - h.t]] : [[0, 0, 100, 100]])
+  const strips = (hole ? [[0, 0, 100, skipTop ? 0 : h.t], [0, h.b, 100, 100 - h.b], [0, h.t, h.l, h.b - h.t], [h.r, h.t, 100 - h.r, h.b - h.t]] : [[0, 0, 100, 100]])
     .filter(([, , w, ht]) => w * aspect >= 6 && ht >= 6);
   const area = (st: number[]) => st[2] * aspect * st[3];
   const total = strips.reduce((n, st) => n + area(st), 0) || 1;
@@ -95,9 +95,14 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
-  const spots = skySpots(total, 7, hole, aspect);
+  // A room theme: pets stand on the floor, below the wall, upright and evenly
+  // sized; nothing hangs on the wall above the question box.
+  const room = theme.room;
+  const spots = room
+    ? skySpots(total, 7, { l: hole.l, r: hole.r, t: room.floor, b: Math.max(hole.b, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
+    : skySpots(total, 7, hole, aspect);
   // Items a theme leaves empty keep the Classic look (the teacher's stars).
-  const own = ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
+  const own = theme.itemImages?.length ? theme.itemImages : ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
   const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];
   const dust = skySpots(36, 3, null, aspect);
   // Each star's kind differs from its near neighbors (teacher, 2026-10-31).
@@ -113,11 +118,13 @@ export default function Sky({ theme, filled, total, still, label, colors, height
         const img = items.length && !colors ? items[kinds[i] % items.length] : undefined;
         return (
           <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size})`, height: `calc(${p.unit} * ${p.size})` }}
-            initial={still ? false : { scale: 0, rotate: -90, opacity: 0 }}
-            animate={still ? { opacity: 1 } : { scale: 1, opacity: 1, rotate: [p.spin, p.spin + 12, p.spin - 8, p.spin] }}
-            transition={still ? undefined : { scale: { type: 'spring', stiffness: 260, damping: 14 }, opacity: { duration: 0.3 }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
+            initial={still ? false : room ? { y: '-120%', opacity: 0, scale: 0.6 } : { scale: 0, rotate: -90, opacity: 0 }}
+            animate={still ? { opacity: 1 } : room ? { y: ['0%', '-8%', '0%'], opacity: 1, scale: 1 } : { scale: 1, opacity: 1, rotate: [p.spin, p.spin + 12, p.spin - 8, p.spin] }}
+            transition={still ? undefined : room
+              ? { scale: { type: 'spring', stiffness: 300, damping: 12 }, opacity: { duration: 0.25 }, y: { duration: 1.4 + (i % 3) * 0.3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 + (i % 5) * 0.2 } }
+              : { scale: { type: 'spring', stiffness: 260, damping: 14 }, opacity: { duration: 0.3 }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
             {img
-              ? <img src={img} alt="" className="w-full h-full object-contain" />
+              ? <img src={img} alt="" className={`w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={theme.pixelArt ? { imageRendering: 'pixelated' } : undefined} />
               : <Star weight="fill" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />}
           </motion.span>
         );

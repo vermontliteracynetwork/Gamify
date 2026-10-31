@@ -7,6 +7,12 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'ball-collection-license', kind: 'legal', added: '2026-10-31', title: 'Send the license for the Ball Collection (Four in a Row pieces)',
+    why: 'The Ball Collection download has no license file, so the 11 balls you picked (gas tank, spike ball, 8 ball, beach ball, Earth, Mars, Moon, coin, baseball, basketball, soccer ball) are built in but switched off.',
+    how: 'Send Claudia the page or file where you got it. If it allows commercial use, the balls go live in Four in a Row the same day.' },
+  { id: 'beachside-owner', kind: 'legal', added: '2026-10-31', title: 'Confirm BeachSide Pinball is your own art',
+    why: 'It came with its Illustrator source file, so Claudia guessed you drew it. Gamify is sold, so every picture needs an owner or a license on file.',
+    how: 'Say "BeachSide is mine" (or send where it came from and its license).' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },

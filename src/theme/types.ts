@@ -112,6 +112,12 @@ export interface GameTheme {
   items?: ThemeItem[];
   // Pieces players choose from before play (Four in a Row, teacher 2026-10-31).
   discs?: { id: string; name: string; image: string }[];
+  // Question Tracker: more item pictures than the six slots, a room whose
+  // floor starts at this % from the top (items sit on the floor, upright),
+  // and crisp pixel art (teacher, 2026-10-31: a pet room).
+  itemImages?: string[];
+  room?: { floor: number };
+  pixelArt?: boolean;
   cover?: string;
   designedBy?: string;
   // Optional first name or nickname of the student who designed it.
