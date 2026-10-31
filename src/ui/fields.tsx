@@ -35,8 +35,9 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
 }
 
 // A big slider for anything with a range, its value shown beside it.
-export function Slider({ label, min, max, value, disabled, show = String, onChange }: {
-  label: string; min: number; max: number; value: number; disabled?: boolean; show?: (v: number) => string; onChange: (v: number) => void;
+// `hint`: one plain line under the label, like "Default 3" (teacher, 2026-10-31).
+export function Slider({ label, hint, min, max, value, disabled, show = String, onChange }: {
+  label: string; hint?: string; min: number; max: number; value: number; disabled?: boolean; show?: (v: number) => string; onChange: (v: number) => void;
 }) {
   const id = `slider-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
@@ -45,6 +46,7 @@ export function Slider({ label, min, max, value, disabled, show = String, onChan
         <span>{label}</span>
         <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-[2px] border-border tabular-nums">{show(value)}</span>
       </label>
+      {hint && <p className="-mt-1 text-sm font-semibold text-muted">{hint}</p>}
       <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled}
         onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full" />
     </div>

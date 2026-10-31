@@ -189,10 +189,10 @@ export default function MatchThree() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('bm.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
-              <Slider label={t('bm.movesEach')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
+              <Slider label={t('bm.rounds')} hint={t('bm.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Slider label={t('bm.movesEach')} hint={t('bm.movesHint')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
-              <Slider label={t('bm.perBreak')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
+              <Slider label={t('bm.perBreak')} hint={t('bm.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
               <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
                 options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
             </>
@@ -201,8 +201,9 @@ export default function MatchThree() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <div className="grid md:grid-cols-[1fr_220px] gap-5 items-start">
-          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 11.75rem + var(--chrome-save, 0rem)), 40rem)' }}>
+        <div className="grid gap-4 md:flex md:justify-center md:items-start">
+          {/* The board is the star, the score panel right beside it (teacher, 2026-10-31). */}
+          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto md:mx-0 w-full md:w-[min(calc(100dvh-11.75rem+var(--chrome-save,0rem)),calc(100vw-20rem),52rem)]" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 11.75rem + var(--chrome-save, 0rem)), 52rem)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
@@ -234,7 +235,7 @@ export default function MatchThree() {
             </div>
           </div>
 
-          <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
+          <SoloPanel className="md:w-[220px]" score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
             dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
         </div>
       )}

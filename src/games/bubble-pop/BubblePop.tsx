@@ -248,20 +248,22 @@ export default function BubblePop() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('bp.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
-              <Slider label={t('bp.shotsEach')} min={3} max={10} value={setup.shots} onChange={(v) => change({ shots: v })} />
+              <Slider label={t('bp.rounds')} hint={t('bp.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Slider label={t('bp.shotsEach')} hint={t('bp.shotsHint')} min={3} max={10} value={setup.shots} onChange={(v) => change({ shots: v })} />
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
-              <Slider label={t('bp.perBreak')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
+              <Slider label={t('bp.perBreak')} hint={t('bp.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
             </>
           ) },
         ]} />
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <div className="grid lg:grid-cols-[1fr_230px] gap-3 lg:gap-5 items-start">
+        <div className="grid gap-3 lg:flex lg:justify-center lg:items-start lg:gap-4">
+          {/* The board is the star: as big as the screen allows, with the score
+              panel right beside it, not across the page (teacher, 2026-10-31). */}
           <section className="grid gap-2 min-w-0">
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
-              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, maxWidth: `min(100%, calc((100dvh - 18.125rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--bp-extra)) * ${W / H}))`, boxShadow: 'var(--shadow-sticker-lg)' }}>
+            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
+              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `calc((100dvh - 18.125rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--bp-extra)) * ${W / H})`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
                 onPointerMove={(e) => { if (canAim && (e.pointerType === 'mouse' || pressed.current)) setAngle(toAngle(e)); }}
@@ -308,7 +310,7 @@ export default function BubblePop() {
               <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.right')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a + 0.08))}><ArrowArcRight weight="bold" size={26} /></button>
             </div>
           </section>
-          <SoloPanel className="order-first lg:order-none" score={score} line={t('bp.board', { n: level + 1 })}
+          <SoloPanel className="order-first lg:order-none lg:w-[230px]" score={score} line={t('bp.board', { n: level + 1 })}
             dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
             status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
         </div>
