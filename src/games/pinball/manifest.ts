@@ -21,15 +21,24 @@ export const pinballManifest: GameManifest = {
   rounds: { label: 'Rounds', min: 1, max: 10, default: 5 },
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
+    // Classic roles (teacher, 2026-10-31): a theme can redraw and rename each
+    // item, but its role stays. Held for the player's next turn.
     abilities: [
-      { id: 'super', label: 'Super shot', hint: 'The next shot always lands in a pocket' },
-      { id: 'double', label: 'Doubles the next shot', hint: 'The pocket the ball lands in counts twice' },
+      { id: 'double', label: '2x points', hint: 'Earn double points' },
+      { id: 'super', label: 'Sure shot', hint: 'Your ball always reaches a pocket' },
+      { id: 'magnet', label: 'Jackpot magnet', hint: 'Your ball rolls to the biggest pocket' },
+      { id: 'bounce', label: 'Bounce bonus', hint: '10 points for every wall bounce' },
+      { id: 'mystery', label: 'Mystery points', hint: 'Surprise points from 10 to 100' },
+      { id: 'swipe', label: 'Sneaky swipe', hint: 'Take points from the leader', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 30 } },
       { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 50 } },
     ],
     classic: [
+      { id: 'classic-golden-ball', name: 'Golden Ball', ability: 'double', motion: 'sparkle', often: 2, art: 'golden-ball' },
       { id: 'classic-super-shooter', name: 'Super Shooter', ability: 'super', motion: 'sparkle', often: 2, art: 'super-shooter' },
-      { id: 'classic-golden-ball', name: 'Golden Ball', ability: 'double', motion: 'sparkle', often: 1, art: 'golden-ball' },
-      { id: 'classic-prize-bag', name: 'Prize Bag', ability: 'bonus', amount: 50, motion: 'bob', often: 2, art: 'prize-bag' },
+      { id: 'classic-jackpot-magnet', name: 'Jackpot Magnet', ability: 'magnet', motion: 'wiggle', often: 1, art: 'magnet' },
+      { id: 'classic-bouncy-ball', name: 'Bouncy Ball', ability: 'bounce', motion: 'bob', often: 2, art: 'extra-ball' },
+      { id: 'classic-mystery-bottle', name: 'Mystery Bottle', ability: 'mystery', motion: 'bob', often: 1, art: 'bottle' },
+      { id: 'classic-sneaky-swipe', name: 'Sneaky Swipe', ability: 'swipe', amount: 30, motion: 'wiggle', often: 1, art: 'swap-arrows' },
     ],
   },
   hasCpu: true,

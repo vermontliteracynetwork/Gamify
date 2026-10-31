@@ -7,7 +7,7 @@ const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.
 // With luck forced on (every roll low), a right answer brings a power-up
 // and it pops up with its picture, name and what it does.
 for (const g of [
-  { id: 'pinball', name: /(Super Shooter|Golden Ball|Prize Bag)/ },
+  { id: 'pinball', name: /(Golden Ball|Super Shooter|Jackpot Magnet|Bouncy Ball|Mystery Bottle|Sneaky Swipe)/ },
   { id: 'lunch-rush', name: /(Extra Plate|Tip Jar|Double Star)/ },
 ]) {
   test(`${g.id}: a right answer can bring a power-up`, async ({ page }, info) => {
