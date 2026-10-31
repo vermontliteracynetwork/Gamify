@@ -59,7 +59,7 @@ export const FINDINGS: Finding[] = [
     title: 'Feedback helps, and feedback that explains helps most',
     found: 'A meta-analysis of 435 studies with more than 61,000 students found feedback helps learning, with a medium effect. Feedback that told students something about the answer worked best.',
     fair: '"Right" or "not yet" on its own is light feedback. Showing the right answer later is what makes it stronger.',
-    inGamify: 'Students hear right or not yet at once, and Let\'s Look Back shows every missed question with the right answer at the end of each game, read aloud.',
+    inGamify: 'Students hear right or not yet at once, and Review at the end of each game walks the class through every missed question and its right answer, read aloud.',
     sources: [
       { cite: 'Wisniewski, Zierer & Hattie (2020). The power of feedback revisited. Frontiers in Psychology.', url: 'https://doi.org/10.3389/fpsyg.2019.03087' },
       { cite: 'Butler & Roediger (2008). Feedback enhances the positive effects and reduces the negative effects of multiple-choice testing. Memory & Cognition.', url: 'https://doi.org/10.3758/MC.36.3.604' },

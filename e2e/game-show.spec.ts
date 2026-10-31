@@ -36,10 +36,19 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await reveal.getByRole('button', { name: 'OK' }).click();
   await page.screenshot({ path: `test-results/gameshow-board-${info.project.name}.png`, fullPage: true });
 
-  // Team 2: a wrong tap keeps the card closed and the turn passes back.
+  // The turned card shows only the winning team's icon (teacher, 2026-10-31).
+  await expect(page.getByRole('button', { name: /^Card 1: won by / })).toBeVisible();
+  // Team 2: a miss brings a new question; three misses keep the card closed
+  // and pass the turn back (teacher, 2026-10-31).
   await page.getByRole('button', { name: 'Card 2', exact: true }).click();
   await answerShare(page, false);
+  await expect(page.getByRole('dialog').getByText('Try 2 of 3')).toBeVisible();
+  await answerShare(page, false);
+  await expect(page.getByRole('dialog').getByText('Try 3 of 3')).toBeVisible();
+  await answerShare(page, false);
   await expect(page.getByRole('button', { name: 'Card 2', exact: true })).toBeEnabled();
+  // No scrolling, ever.
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   expect(problems).toEqual([]);
 });
 

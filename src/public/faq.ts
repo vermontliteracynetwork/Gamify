@@ -56,7 +56,7 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
     { q: 'Do I need an account or an email?', a: 'No. Your teacher adds you to the class. You tap your name and your two secret pictures to sign in.' },
     { q: 'What if I forget my pictures?', a: 'Ask your teacher. They can see your pictures and change them.' },
     { q: 'Can I play at home?', a: 'Yes, if your teacher shares a game code or a link. Type the code on the join page.' },
-    { q: 'What happens if I get an answer wrong?', a: 'Nothing bad. You try again or see the right answer, and the game keeps going. There is no game over, and Let\'s Look Back helps you learn the ones you missed.' },
+    { q: 'What happens if I get an answer wrong?', a: 'Nothing bad. You try again or see the right answer, and the game keeps going. There is no game over, and Review at the end helps you learn the ones you missed.' },
     { q: 'Can a question be read to me?', a: 'Yes. Tap Listen on any question.' },
     { q: 'Can I make the game look the way I want?', a: 'Yes, with your class. Your teacher can let your class design a theme with your own drawings, and you can pick the theme before each game.' },
     { q: 'Can I change the sound, the colors or the size of the words?', a: 'Yes. Tap the gear in any game for sound, motion, calm mode, text size and more.' },

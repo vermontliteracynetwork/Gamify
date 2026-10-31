@@ -83,7 +83,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId }: {
       setActive({ ...active, question: drawn.question, setId: drawn.setId, n: active.n + 1 });
       return;
     }
-    // A miss never costs anything: note it for "Let's look back", then a new question.
+    // A miss never costs anything: note it for Review at the end, then a new question.
     missedThis.current = true;
     setMissed((m) => (m.some((x) => x.id === active.question.id) ? m : [...m, active.question]));
     if (isGuessing(history.current)) { history.current = []; setBreathing(true); }

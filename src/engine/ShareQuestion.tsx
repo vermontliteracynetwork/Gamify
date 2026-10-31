@@ -19,8 +19,10 @@ const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz
 // Dashboard; teacher, 2026-10-24) and it checks itself: one tap a turn, and
 // a miss shows the right answer. On the computer's turn it "answers" by its
 // level; it never answers for students.
-export default function ShareQuestion({ question, player, cpuLevel, onResult }: {
+export default function ShareQuestion({ question, player, cpuLevel, onResult, chance }: {
   question: MultipleChoiceQuestion; player: TurnPlayer; cpuLevel: CpuLevel; onResult: (right: boolean) => void;
+  // Which try this is, when a game gives more than one (Game Show: 3).
+  chance?: { n: number; total: number };
 }) {
   const { settings } = useSettings();
   const q = useMemo(() => shuffleChoices(question), [question]);
@@ -68,6 +70,12 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
             {player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
+          {chance && chance.total > 1 && (
+            <span className="inline-flex items-center gap-1.5 font-bold" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
+              {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-[2px] border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-accent' : 'bg-surface'}`} />)}
+              <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
+            </span>
+          )}
           <button type="button" onClick={() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings)}
             className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
@@ -107,7 +115,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult }: 
           </p>
         ) : (
           <p className="min-h-10 font-display text-3xl font-bold text-center" role="status" aria-live="polite">
-            {picked === null ? '' : picked === q.correctIndex ? t('share.tapRight') : t('share.tapMiss')}
+            {picked === null ? '' : picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')}
           </p>
         )}
       </motion.div>

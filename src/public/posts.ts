@@ -52,7 +52,7 @@ export const POSTS: Post[] = [
       'Learning scientists agree that practice spread over several days beats one long session. The trick at home is keeping it fresh, and that is where a single question set and five different games help.',
       'Pick or write one set for the week: spelling words, math facts, or vocabulary from a read-aloud. Every Gamify game uses the same set, so you write the questions once and your children meet them in a new game each day.',
       'A week can look like this. Monday, Game Show to meet the set together. Tuesday, Question Tracker, where each child fills their own night sky with stars. Wednesday, Game Show as a family against the computer. Thursday, Four in a Row, sibling against sibling. Friday, Bubble Pop, then look at Reports together to see what stuck.',
-      'Because each child signs in with their own picture and PIN, every answer lands under their name, and Let\'s Look Back reviews the questions they missed.',
+      'Because each child signs in with their own picture and PIN, every answer lands under their name, and Review at the end walks through the questions they missed.',
     ],
     tryIt: [
       'Sign up free and open Question sets.',
@@ -193,7 +193,7 @@ export const POSTS: Post[] = [
     body: [
       'Some students do their best work without a scoreboard or a timer. Question Tracker is for them: a quiet night sky that fills with stars, one for every right answer.',
       'Stars come in different sizes and slowly turn, and they appear around the question box so a student always sees how far they have come.',
-      'A miss is gentle. The question goes away, a new one comes, and the missed one shows up at the end in Let\'s Look Back so students can see the right answer.',
+      'A miss is gentle. The question goes away, a new one comes, and the missed one shows up at the end in Review so the class can talk it over and see the right answer.',
     ],
     tryIt: [
       'Pick a practice set and choose 10 questions.',

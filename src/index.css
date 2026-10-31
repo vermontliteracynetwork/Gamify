@@ -205,6 +205,8 @@ html[data-text-size="larger"] { font-size: 20px; --text-scale: 1.25; }
 }
 html:fullscreen:has(.game-stage) .site-header { display: none; }
 html:fullscreen .game-stage { --fs-save: 4rem; min-height: 100dvh; }
+/* Full screen sits the game in the middle of the board (teacher, 2026-10-31). */
+html:fullscreen .game-stage > main { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
 html:has(.game-stage) {
   font-size: calc(var(--text-scale, 1) * clamp(16px, min(100vw / 90, 100vh / 50), 28px));
 }

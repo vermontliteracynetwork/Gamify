@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { ArrowCounterClockwise, CheckCircle, Crown, HandPointing, Question, Sparkle, Trophy, UsersThree } from '@phosphor-icons/react';
+import { CheckCircle, Crown, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -15,7 +15,7 @@ import ShareQuestion from '../../engine/ShareQuestion';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
-import { addPoints, current, leaders, nextTurn, setScores, startTurns, undo, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
+import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
@@ -36,6 +36,9 @@ import DialogFocus from '../../ui/DialogFocus';
 
 
 type Board = 'cards' | 'grid';
+// A team gets three questions to earn its pick (teacher, 2026-10-31): a miss
+// brings a new question, and three misses pass the turn on.
+const CHANCES = 3;
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 interface Card { kind: CardKind; open: boolean; by?: number }
 interface Cell { col: number; points: number; used: boolean }
@@ -62,7 +65,7 @@ export default function GameShow() {
   const [cpuLevel, setCpuLevel] = useState<CpuLevel>('medium');
   const [cards, setCards] = useState<Card[]>([]);
   const [cells, setCells] = useState<Cell[]>([]);
-  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; cell?: number } | null>(null);
+  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; cell?: number; chance: number } | null>(null);
   const [step, setStep] = useState<'answer' | 'pick'>('pick');
   const [chosen, setChosen] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
@@ -132,9 +135,16 @@ export default function GameShow() {
     if (player.kind !== 'cpu' && player.kind !== 'teacher') log(question.q, question.setId, player.name, right);
     if (!right && player.kind !== 'cpu' && player.kind !== 'teacher') setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
 
+    // A miss brings a new question until the third one.
+    if (!right && question.chance < CHANCES) {
+      const sets = board === 'grid' && question.cell !== undefined ? [chosenSets[cells[question.cell].col]] : chosenSets;
+      setQuestion({ ...draw(sets), cell: question.cell, chance: question.chance + 1 });
+      return;
+    }
     if (board === 'grid' && question.cell !== undefined) {
       const cell = cells[question.cell];
-      const nextCells = cells.map((c, i) => (i === question.cell ? { ...c, used: true } : c));
+      // A square is used up only when it is won; three misses leave it open.
+      const nextCells = right ? cells.map((c, i) => (i === question.cell ? { ...c, used: true } : c)) : cells;
       setCells(nextCells);
       setQuestion(null);
       const scored = right ? addPoints(turns, player.id, cell.points) : turns;
@@ -156,7 +166,7 @@ export default function GameShow() {
     if (!turns || step !== 'pick' || cards[i].open || reveal || question) return;
     playEffect('tap', settings);
     setChosen(i);
-    setQuestion(draw(chosenSets));
+    setQuestion({ ...draw(chosenSets), chance: 1 });
   }
 
   function openCard(i: number) {
@@ -203,7 +213,7 @@ export default function GameShow() {
     const set = chosenSets[cells[i].col];
     playEffect('tap', settings);
     const d = draw([set]);
-    setQuestion({ ...d, cell: i });
+    setQuestion({ ...d, cell: i, chance: 1 });
   }
 
   // The computer's game moves: pick a card or square, pick a team for swap
@@ -237,17 +247,10 @@ export default function GameShow() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--gs-extra:6rem] lg:[--gs-extra:0rem] portrait:[--gs-tall:1.5]">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        <div className="flex items-center gap-3 flex-wrap">
-          {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('tb.title')} /></h1>}
-          {phase === 'play' && turns && turns.history.length > 0 && (
-            <button type="button" onClick={() => setTurns(undo(turns))} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-1.5">
-              <ArrowCounterClockwise weight="bold" size={18} />{t('share.undo')}
-            </button>
-          )}
-        </div>
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('tb.title')} /></h1>}
       </GameTopRow>
 
       {phase === 'welcome' && (
@@ -298,39 +301,33 @@ export default function GameShow() {
 
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_280px] gap-5 items-start">
-          <section className="grid gap-4 min-w-0">
-            {phase === 'play' && player && <StepBanner board={board} step={question ? 'answer' : step === 'pick' ? 'pick' : 'answer'} />}
+          <section className="grid gap-4 min-w-0 @container">
+            {/* Whose turn shows as a glow in the scores (teacher, 2026-10-31); screen readers hear it. */}
             {phase === 'play' && player && (
-              <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-live="polite">
-                <TeamBadge colorIndex={player.colorIndex} size={44} />
-                <span className="font-display text-2xl sm:text-3xl font-bold">
-                  {step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}
-                </span>
-              </div>
+              <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
             )}
 
             {phase === 'play' && board === 'cards' && (
-              <div className="grid mx-auto w-full"
-                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, maxWidth: `calc((100dvh - 21rem + var(--chrome-save, 0rem) - ${(grid.rows - 1) * gap}px) / ${grid.rows} * ${grid.cols} * 4 / 3 + ${(grid.cols - 1) * gap}px)` }}>
+              // The cards fill the space left on screen, all the same size
+              // (teacher, 2026-10-31): as tall as the screen allows, but never
+              // taller than 1.2 times their width (1.5 on tall screens).
+              <div className="grid w-full"
+                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
+                  height: `min(calc(100dvh - 12.5rem + var(--chrome-save, 0rem) - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
                     type="button"
                     onClick={() => chooseCard(i)}
                     disabled={c.open || step !== 'pick' || !!reveal || !!question || player?.kind === 'cpu'}
-                    aria-label={c.open ? `${t('tb.card', { n: i + 1 })}: ${revealText(c.kind)}` : t('tb.card', { n: i + 1 })}
+                    aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`aspect-[4/3] rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
-                      ${c.open ? `bg-surface ${grid.rows > 4 ? 'text-xs sm:text-sm' : 'text-base sm:text-lg'}` : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
+                    className={`w-full h-full min-h-0 overflow-hidden rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
+                      ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
                     style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
-                    {c.open ? (
-                      <span className="grid justify-items-center gap-1 min-w-0">
-                        {c.kind.kind === 'power' ? <ItemArt item={c.kind.item} size={grid.rows > 4 ? 28 : 40} still /> : c.by !== undefined && <TeamBadge colorIndex={c.by} size={grid.rows > 4 ? 20 : 26} />}
-                        <span className="leading-tight">{c.kind.kind === 'power' ? c.kind.item.name : t('tb.reveal.points', { points: c.kind.points })}</span>
-                      </span>
-                    ) : i + 1}
+                    {c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : i + 1}
                   </motion.button>
                 ))}
               </div>
@@ -360,9 +357,8 @@ export default function GameShow() {
             )}
 
             {phase === 'end' && (
-              <ResultsModal title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
+              <ResultsModal winners={leaders(turns)} title={leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })}
                 missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
-                {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt={t('tb.trophy')} className="h-32 object-contain justify-self-center" />}
               </ResultsModal>
             )}
           </section>
@@ -373,12 +369,15 @@ export default function GameShow() {
               {turns.players.map((p) => {
                 const lead = phase === 'end' && leaders(turns).some((l) => l.id === p.id);
                 return (
-                  <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
+                  <motion.li key={p.id} aria-current={player?.id === p.id && phase === 'play' ? 'true' : undefined}
+                    animate={player?.id === p.id && phase === 'play' && settings.motion !== 'still' ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94', '0 0 0 4px #fdfd94, 0 0 26px 10px #fdfd94', '0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94'] } : { boxShadow: player?.id === p.id && phase === 'play' ? '0 0 0 4px #fdfd94, 0 0 20px 6px #fdfd94' : '0 0 0 0 transparent' }}
+                    transition={player?.id === p.id && settings.motion !== 'still' ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
+                    className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-accent' : 'border-border-soft'}`}>
                     <TeamBadge colorIndex={p.colorIndex} />
                     <span className="flex-1 min-w-0 grid"><span className="font-bold truncate">{p.name}</span>{p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}</span>
                     {lead && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}
                     <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl font-bold tabular-nums" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>
-                  </li>
+                  </motion.li>
                 );
               })}
             </ol>
@@ -386,13 +385,17 @@ export default function GameShow() {
         </div>
       )}
 
-      {question && player && phase === 'play' && <ShareQuestion question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} />}
+      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: CHANCES }} />}
 
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
           <DialogFocus />
           <motion.div initial={settings.motion === 'still' ? false : { scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
-            className="bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+            className="relative bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+            {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
+            {current(turns).kind !== 'cpu' && (
+              <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+            )}
             {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : <Sparkle weight="fill" size={64} className="text-accent" aria-hidden="true" />}
             <p className="font-display text-4xl font-bold">{revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
@@ -424,30 +427,6 @@ export default function GameShow() {
 
 const picksTeam = (k: CardKind) => k.kind === 'power' && (k.item.ability === 'swap' || k.item.ability === 'steal');
 const powerAmount = (it: ThemeItem) => it.amount ?? (it.ability === 'bonus' ? 100 : 20);
-
-// Shows where the turn is: for cards, answer, then pick a card, then points;
-// for the grid, pick a square, then answer, then points.
-function StepBanner({ board, step }: { board: Board; step: 'answer' | 'pick' }) {
-  const steps = board === 'cards'
-    ? [{ id: 'pick', icon: HandPointing, label: t('tb.step.card') }, { id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }]
-    : [{ id: 'pick', icon: HandPointing, label: t('tb.step.square') }, { id: 'answer', icon: Question, label: t('tb.step.answer') }, { id: 'score', icon: Trophy, label: t('tb.step.points') }];
-  return (
-    <ol className="flex gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
-      {steps.map((s, i) => {
-        const on = s.id === step;
-        const Icon = s.icon;
-        return (
-          <li key={s.id} aria-current={on ? 'step' : undefined}
-            className={`flex-1 flex items-center gap-2 rounded-pill border-[2px] px-3 py-1.5 font-bold text-sm sm:text-base ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft opacity-70'}`}>
-            <span className="w-7 h-7 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display">{i + 1}</span>
-            <Icon weight="fill" size={20} aria-hidden="true" className="shrink-0" />
-            <span className="truncate">{s.label}</span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 // Small drawings of the two boards for the board choice.
 function BoardArt({ kind }: { kind: Board }) {

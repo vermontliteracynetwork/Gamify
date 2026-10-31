@@ -51,9 +51,18 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
 
   await expect(page.getByText('You caught 5 stars!')).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/sky-end-${info.project.name}.png` });
-  await expect(page.getByRole('heading', { name: "Let's Look Back" })).toBeVisible();
-  await expect(page.getByText(/^Right answer:/)).toHaveCount(1);
-  await page.screenshot({ path: `test-results/lookback-${info.project.name}.png`, fullPage: true });
+  // Results: four buttons; Review walks through the missed question full screen.
+  const results = page.getByRole('dialog', { name: 'You caught 5 stars!' });
+  for (const b of [/^Play again/, /^Arcade/, /Rate game/]) await expect(results.getByRole(b.source.includes('Arcade') ? 'link' : 'button', { name: b })).toBeVisible();
+  await page.screenshot({ path: `test-results/results-${info.project.name}.png` });
+  await results.getByRole('button', { name: 'Review (1 missed)' }).click();
+  const review = page.getByRole('dialog', { name: "Let's Review" });
+  await expect(review.getByText('Read it together.', { exact: false })).toBeVisible();
+  await review.getByRole('button', { name: 'Show the answer' }).click();
+  await expect(review.getByText(/^Right answer:/)).toBeVisible();
+  await page.screenshot({ path: `test-results/review-${info.project.name}.png` });
+  await review.getByRole('button', { name: 'Done' }).click();
+  await expect(review).toHaveCount(0);
   expect(problems).toEqual([]);
 });
 
