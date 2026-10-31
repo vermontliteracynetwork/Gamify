@@ -66,7 +66,8 @@ test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ pag
 test('keyboard: a teacher makes a class', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
   await page.goto('/teacher/classes');
-  await tabTo(page, /^New class name$/);
+  await tabTo(page, /Make class$/);
+  await page.keyboard.press('Enter');
   await page.keyboard.type('Room 9');
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Room 9' })).toBeVisible();

@@ -21,6 +21,7 @@ export default function ClassesPage() {
   const tier = useTier();
   const limit = TIERS[tier].classrooms;
   const [name, setName] = useState('');
+  const [adding, setAdding] = useState(false);
   const navigate = useNavigate();
   const { value: loaded } = useAsync(async () => (await data.listClassrooms()).length, []);
   useEffect(() => {
@@ -46,8 +47,23 @@ export default function ClassesPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav startOpen />
-      <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')} />
+      {/* Make class sits beside the title (teacher, 2026-10-31); its name box opens at the top. */}
+      <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')}
+        actions={classes.length < limit ? <Button variant="primary" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />
       <div className="grid gap-3">
+        {classes.length >= limit && <LimitNote>{t('classes.limit', { limit, count: limit })}</LimitNote>}
+        {adding && classes.length < limit && (
+          <Panel className="grid gap-2">
+            <label htmlFor="class-name" className="font-bold">{t('classes.newName')}</label>
+            <div className="flex flex-wrap gap-2">
+              <input id="class-name" autoFocus value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={t('classes.namePlaceholder')}
+                onKeyDown={(e) => { if (e.key === 'Enter' && name.trim()) { void create(); setAdding(false); } if (e.key === 'Escape') setAdding(false); }}
+                className="flex-1 min-w-48 min-h-12 px-3 rounded-input border-[2px] border-border font-bold" />
+              <Button variant="primary" disabled={!name.trim()} onClick={() => { void create(); setAdding(false); }}><Plus weight="bold" size={18} />{t('classes.create')}</Button>
+              <Button onClick={() => setAdding(false)}>{t('classes.cancel')}</Button>
+            </div>
+          </Panel>
+        )}
         {classes.map((c) => (
           <Link key={c.id} to={`/teacher/classes/${c.id}`} className="no-underline text-text">
             <Panel className="flex items-center gap-3 hover:bg-surface-hover">
@@ -59,19 +75,6 @@ export default function ClassesPage() {
             </Panel>
           </Link>
         ))}
-        {classes.length < limit ? (
-          <Panel className="grid gap-2">
-            <label htmlFor="class-name" className="font-bold">{t('classes.newName')}</label>
-            <div className="flex flex-wrap gap-2">
-              <input id="class-name" value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={t('classes.namePlaceholder')}
-                onKeyDown={(e) => { if (e.key === 'Enter' && name.trim()) void create(); }}
-                className="flex-1 min-w-48 min-h-12 px-3 rounded-input border-[2px] border-border font-bold" />
-              <Button variant="primary" disabled={!name.trim()} onClick={() => void create()}><Plus weight="bold" size={18} />{t('classes.create')}</Button>
-            </div>
-          </Panel>
-        ) : (
-          <LimitNote>{t('classes.limit', { limit, count: limit })}</LimitNote>
-        )}
       </div>
     </main>
   );

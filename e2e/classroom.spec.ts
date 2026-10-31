@@ -85,8 +85,9 @@ test('a class can sign in with sign-in pictures drawn in the Theme Builder', asy
   await expect(page.getByText('Saved Our Animals.', { exact: false })).toBeVisible();
 
   await page.goto('/teacher/classes');
-  await page.getByLabel('New class name').fill('Room 5');
   await page.getByRole('button', { name: 'Make class' }).click();
+  await page.getByLabel('New class name').fill('Room 5');
+  await page.getByRole('button', { name: 'Make class' }).last().click();
   await page.getByRole('radio', { name: 'Our Animals' }).click();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
   await page.getByRole('button', { name: 'Add 1 student' }).click();

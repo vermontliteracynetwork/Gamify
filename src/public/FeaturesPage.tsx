@@ -84,7 +84,8 @@ export default function FeaturesPage() {
 
         <section aria-labelledby="more-title" className="grid gap-4">
           <h2 id="more-title" className="font-display text-3xl"><Title text={t('features.moreTitle')} /></h2>
-          <div className="grid sm:grid-cols-2 gap-3">
+          {/* Each box opens on its own; its neighbor keeps its size (teacher, 2026-10-31). */}
+          <div className="grid sm:grid-cols-2 gap-3 items-start">
             {MORE.map((g) => (
               <details key={g.key} className={`${card} p-4`}>
                 <summary className="font-display text-2xl cursor-pointer">{t(`features.${g.key}` as StringKey)}</summary>

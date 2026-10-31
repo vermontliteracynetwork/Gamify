@@ -120,6 +120,8 @@ export default function PricingPage() {
 
         <section aria-labelledby="faq" className="grid gap-3">
           <h2 id="faq" className="font-display text-3xl"><Title text={t('pricing.faqTitle')} /></h2>
+          {/* FAQ structured data: search and AI answer tools read these (teacher, 2026-10-31). */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [1, 2, 3, 4, 5, 6].map((n) => ({ '@type': 'Question', name: t(`pricing.faq.${n}.q` as StringKey), acceptedAnswer: { '@type': 'Answer', text: t(`pricing.faq.${n}.a` as StringKey) } })) }) }} />
           {[1, 2, 3, 4, 5, 6].map((n) => (
             <details key={n} className="bg-surface border-[2px] border-border rounded-input p-4">
               <summary className="font-display text-xl cursor-pointer">{t(`pricing.faq.${n}.q` as StringKey)}</summary>

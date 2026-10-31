@@ -1,4 +1,6 @@
-// Frequently asked questions (teacher, 2026-10-25): nobody has asked yet, so
+// Frequently asked questions (teacher, 2026-10-25; 2026-10-31: AI search
+// tools read FAQs, so each question is positive and each answer a plain,
+// self-contained fact that names Gamify). Nobody has asked yet, so
 // Claudia wrote the questions each buyer and user would ask, answered the way
 // Kayden answers. Value before price, plain words, no other brand names, no
 // em dashes. Prices appear only on these teacher-facing public pages.
@@ -23,23 +25,23 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
     { q: 'Can we try it before buying for the whole school?', a: 'Yes. Any teacher can start free today, teachers can join the beta test, or you can start with a few teachers and add more when it proves itself. Seats added later get the same discount.' },
     { q: 'How long does it take teachers to learn?', a: 'Most teachers have a class playing within their first ten minutes: five Get Started steps, a ready-made library of question sets, and a Help page. School plans include a free online kickoff for your teachers.' },
     { q: 'Is there research behind it?', a: 'Yes. Every move in Gamify is a practice question, and studies found practice questions help students remember. Our Research page explains what studies found, in plain words, with links to each study and honest notes on what they do not show.' },
-    { q: 'What happens if we stop subscribing?', a: 'Teachers move to the Free plan and nothing is deleted. Classes and sets past the Free limits become read-only until you subscribe again or remove some.' },
+    { q: 'What happens to our work if our subscription changes?', a: 'Everything stays safe. Teachers move to the Gamify Free plan and nothing is deleted; classes and question sets beyond the Free limits stay readable and come back in full with a renewal.' },
   ],
   teachers: [
-    { q: 'Is the Free plan really free?', a: 'Yes, forever. One class of up to 30 students, the free games, every accessibility feature, and you can design your own Game Show theme. No card needed.' },
+    { q: 'What does the Gamify Free plan include?', a: 'The Gamify Free plan is free forever: one class of up to 30 students, the free games, every accessibility feature, and a Game Show theme you design. It needs no credit card.' },
     { q: 'What do Plus and Pro add?', a: 'Plus unlocks every game, a theme your class designs for each game, 3 classes of up to 60 students and unlimited question sets, for only $8 a month, billed yearly. Pro removes every limit and adds early access to new games and unlimited theme creations per game, for only $15 a month.' },
     { q: 'How long does it take to get started?', a: 'About five minutes: make a class, paste your class list, pick a ready-made set or write your own, and show the class code. The Get Started steps walk you through it.' },
     { q: 'Do I have to write my own questions?', a: 'You can, and that is where Gamify shines, but you do not have to. Start from the ready-made library, copy a set and edit it, or upload a spreadsheet.' },
     { q: 'Can I bring questions from a spreadsheet?', a: 'Yes. Upload a CSV with the question, up to four answers and the number of the right answer. You can also download any set as a CSV or copy it into a new Google Sheet.' },
     { q: 'How do my students get in?', a: 'Show your join code; students go to the join page, tap their picture and type their 4-digit PIN. No student emails or passwords. For a single game, share a game code or link: students tap their picture and PIN there too, so every answer lands under their name in your reports.' },
-    { q: 'Do my students each need a device?', a: 'No. Share games like Game Show and Peg Drop run on one projector or smart board, with up to 10 teams, the class against the computer, or the class against you.' },
+    { q: 'Can my class play on one screen?', a: 'Yes. Gamify Share games like Game Show and Peg Drop run on one projector or smart board, with up to 10 teams, the class against the computer, or the class against you.' },
     { q: 'Can my school pay instead of me?', a: 'Yes. Make a school quote on the Pricing page in about a minute and forward it to your principal. Purchase orders are welcome.' },
     { q: 'Does it work for students who cannot read yet?', a: 'Yes. Every question can be read aloud, answers can have pictures, students sign in with pictures, and a read-first pause gives everyone time before answering.' },
-    { q: 'Will older students think it is babyish?', a: 'Not when they choose the look. Themes can be grown-up or playful, the Game Show category grid suits unit reviews, and students can design themes themselves.' },
+    { q: 'Does Gamify work for older students?', a: 'Yes. Gamify works from pre-K to adult learners. Themes can look grown-up or playful, the Game Show category grid suits unit reviews, and older students enjoy designing their own themes.' },
     { q: 'Can my class design a theme?', a: 'Yes. Print the template pages and draw by hand, or design in any drawing app at the exact sizes, then upload. Every theme is credited to your class, never to a student by name.' },
     { q: 'What reports do I get?', a: 'Every answer lands in Reports: by student, question, set, game, day or team, with the most common wrong answer, a review of what students remembered a week later, and a CSV download.' },
     { q: 'Does it support accommodations?', a: 'Yes, per student and behind your 4-digit teacher PIN: read-aloud, read-first time, number of tries, tools such as a calculator and times table, calm mode and text settings.' },
-    { q: 'Can I cancel any time?', a: 'Yes. Your account moves to Free and nothing is ever deleted.' },
+    { q: 'Can I change or cancel my plan at any time?', a: 'Yes. Teachers can change plans at any time; an account that leaves a paid plan moves to Free and keeps everything it made.' },
   ],
   homeschool: [
     { q: 'Can I use Gamify for homeschooling?', a: 'Yes. Your family is your class: add each child, assign their own question sets, and play together on one screen or one at a time.' },
@@ -49,19 +51,19 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
     { q: 'Can it help with my state\'s record keeping?', a: 'Reports show what each child practiced and how they did, by subject, set and day, ready to print or download for a portfolio.' },
     { q: 'Do I need a school email?', a: 'No. Any email works for the parent account, and your children never need one.' },
     { q: 'Our co-op wants to use it. Is there a group price?', a: 'Yes. Five or more families buy like a school: Pro for each parent-teacher with 10 to 30% off. Make a quote on the Pricing page.' },
-    { q: 'I worry about screen time.', a: 'Games are short, every turn is a practice question, and Share games put the whole family around one screen together. Calm mode turns down motion and sound.' },
+    { q: 'How does Gamify keep screen time healthy?', a: 'Gamify games are short, every turn is a practice question, and Share games bring the whole family around one screen together. Calm mode turns down motion and sound.' },
     { q: 'Can adults learn with it too?', a: 'Yes. Gamify works from pre-K to adult learners, and themes can look as grown-up as you like.' },
   ],
   students: [
     { q: 'Do I need an account or an email?', a: 'No. Your teacher adds you to the class. You tap your name and your two secret pictures to sign in.' },
-    { q: 'What if I forget my pictures?', a: 'Ask your teacher. They can see your pictures and change them.' },
+    { q: 'How do I get help signing in?', a: 'Your teacher can see your sign-in pictures and change them any time.' },
     { q: 'Can I play at home?', a: 'Yes, if your teacher shares a game code or a link. Type the code on the join page.' },
-    { q: 'What happens if I get an answer wrong?', a: 'Nothing bad. You try again or see the right answer, and the game keeps going. There is no game over, and Review at the end helps you learn the ones you missed.' },
+    { q: 'What happens when I get an answer wrong?', a: 'You try again or see the right answer, and the game keeps going. Gamify has no game over, and Review at the end helps you learn the ones you missed.' },
     { q: 'Can a question be read to me?', a: 'Yes. Tap Listen on any question.' },
     { q: 'Can I make the game look the way I want?', a: 'Yes, with your class. Your teacher can let your class design a theme with your own drawings, and you can pick the theme before each game.' },
     { q: 'Can I change the sound, the colors or the size of the words?', a: 'Yes. Tap the gear in any game for sound, motion, calm mode, text size and more.' },
     { q: 'Parents: what does Gamify know about my child?', a: 'Only a first name or nickname, sign-in pictures, their class and their answers in games. No emails, no photos, no location, and no one outside the class can see it.' },
-    { q: 'Parents: will my child see ads or be asked to buy things?', a: 'Never. Student screens have no ads, no trackers, no prices and no buying, on every plan.' },
-    { q: 'Parents: can children chat with strangers?', a: 'No. Gamify has no chat. Students only see their own class or the game their teacher shared.' },
+    { q: 'Parents: is Gamify ad-free for children?', a: 'Yes. Gamify student screens are ad-free and tracker-free, with no prices and no buying, on every plan.' },
+    { q: 'Parents: how does Gamify keep children safe?', a: 'Gamify has no chat and no open spaces. Students see only the game their teacher shared with them.' },
   ],
 };
