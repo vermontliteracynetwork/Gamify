@@ -34,7 +34,7 @@ export type SoundPack = (typeof SOUND_PACKS)[number];
 export type Backdrop =
   | { kind: 'color' }
   | { kind: 'pattern'; pattern: 'dots' | 'stripes' | 'waves' | 'checks' }
-  | { kind: 'image'; src: string; alt: string };
+  | { kind: 'image'; src: string; alt: string; tile?: boolean };
 
 export type Celebration = 'confetti' | 'stars' | 'bubbles' | 'gentle';
 

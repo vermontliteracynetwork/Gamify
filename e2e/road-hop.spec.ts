@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup, startTurn } from './setup';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
@@ -27,6 +27,7 @@ test('Road Hop: a right answer earns 3 hops; the hopper hops and the cars move',
   await page.keyboard.press('ArrowUp');
   await page.screenshot({ path: `test-results/road-hop-after-${info.project.name}.png` });
   // Out of hops: the next team gets a question.
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
   expect(problems).toEqual([]);
 });

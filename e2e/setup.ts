@@ -5,6 +5,7 @@ const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.
 
 // Taps an answer on the big team question: the right one, or a wrong one.
 export async function answerShare(page: Page, right = true) {
+  await startTurn(page);
   const dialog = page.getByRole('dialog');
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
   const buttons = dialog.getByRole('button', { name: /^[A-D] / });
@@ -12,6 +13,13 @@ export async function answerShare(page: Page, right = true) {
   const correct = labels.findIndex((l) => l.endsWith(answers.get(prompt)!));
   await buttons.nth(right ? correct : (correct + 1) % labels.length).click();
   await expect(page.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 5000 });
+}
+
+// The turn card (2026-10-31): tap to start the team's question.
+export async function startTurn(page: Page) {
+  const start = page.getByRole('button', { name: 'Tap to start' });
+  await expect(start.or(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first())).toBeVisible({ timeout: 8000 });
+  if (await start.isVisible()) await start.click();
 }
 
 // A teacher creates an account (email, username, password, confirm).

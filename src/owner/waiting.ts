@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'bowling-gui-license', kind: 'legal', added: '2026-10-31', title: 'Send the licenses for BowlingGUI and the two bowling .glb models',
+    why: 'They came with no license files, so they are not used yet. The 80s carpet look is live (drawn by Gamify from your public domain picture).',
+    how: 'Send Claudia where each came from. If they allow commercial use, the strike and spare signs and the 3D pins can go in.' },
   { id: 'ball-collection-license', kind: 'legal', added: '2026-10-31', title: 'Send the license for the Ball Collection (Four in a Row pieces)',
     why: 'The Ball Collection download has no license file, so the 11 balls you picked (gas tank, spike ball, 8 ball, beach ball, Earth, Mars, Moon, coin, baseball, basketball, soccer ball) are built in but switched off.',
     how: 'Send Claudia the page or file where you got it. If it allows commercial use, the balls go live in Four in a Row the same day.' },

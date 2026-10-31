@@ -66,6 +66,25 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     tips: ['Ask the class which zone and how much power, and why: a quick talk about angles and estimating.'],
   },
   {
+    gameId: 'castle-quest',
+    goal: 'Answer right, roll the die and hop along the forest path. Cross bridges, grab power-ups and be the first to reach the castle and build it.',
+    steps: [
+      'A question comes first. A right answer earns a roll of the die.',
+      'Tap Roll the die. Your piece hops that many tiles along the path.',
+      'Land at the bottom of a bridge and you zoom ahead to the other end.',
+      'Land on a power-up tile to collect it. Most power-ups wait for your next turn under the scores.',
+    ],
+    pieces: [
+      { name: 'The path', what: '54 hexagon tiles through the forest, numbered from Go to the castle.' },
+      { name: 'Bridges', what: 'Wooden bridges carry you ahead, like ladders.' },
+      { name: 'The castle', what: 'It grows as the leader gets closer: ruins, a tower, walls, then the full castle when someone arrives.' },
+      { name: 'Power-ups', what: 'Magnet (sticks to the right answer on your next question), Potion (your roll counts 3 times), Stopwatch (hop 5 times faster), Shield (nothing pushes you back for 3 rounds), Lightning (send another player back a roll), Treasure Chest (a surprise, good or not so good) and Tornado (everyone lands somewhere new).' },
+    ],
+    rules: ['Teams take turns on one screen, or two players go head to head (or one against the computer).', 'A wrong answer passes the turn.', 'First to the castle wins.'],
+    settings: ['Teams or Versus.', 'Power-up tiles on or off.'],
+    tips: ['Count the hops out loud together: a quick counting practice for younger players.'],
+  },
+  {
     gameId: 'cast-catch',
     goal: 'Cast your line, answer while the bobber floats, then reel in a fish. Better casts catch rarer fish worth more points.',
     steps: [

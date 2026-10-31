@@ -19,18 +19,18 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
   return (
     <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden max-w-3xl mx-auto grid md:grid-cols-[1.1fr_1fr]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden max-w-5xl w-full mx-auto grid md:grid-cols-[1fr_1fr]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       {/* One standard start screen for every game (teacher, 2026-10-31): the
           Gamify cover, never a theme's, so menus need no custom design. */}
       <GameCover gameId={game.id} className="min-h-48 md:min-h-full aspect-[16/10] md:aspect-auto" />
-      <div className="p-5 sm:p-6 grid gap-4 content-start">
+      <div className="p-6 sm:p-8 grid gap-5 content-start">
         {/* On the white card, not the stage: panel text color, never the night-sky white. */}
         <h1 className="title-bubble text-4xl sm:text-5xl" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-        <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
+        <div className="grid gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
         <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
           {steps.map((s, i) => (
-            <li key={i} className="flex items-center gap-3">
-              <span className="w-11 h-11 shrink-0 rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
+            <li key={i} className="flex items-center gap-3 text-lg leading-snug">
+              <span className="w-12 h-12 shrink-0 rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
               <span className="font-bold">{s.text}</span>
             </li>
           ))}

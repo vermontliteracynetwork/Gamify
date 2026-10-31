@@ -37,6 +37,8 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
   expect(await focusRing(page)).toBe(true);
   await page.screenshot({ path: 'test-results/keyboard-focus.png' });
   await page.keyboard.press('Enter');
+  // The turn card (2026-10-31): Enter starts the team's question.
+  await tabTo(page, /^Tap to start$/); await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
   const right = answers.get(prompt)!;
@@ -78,7 +80,10 @@ test('keyboard: a teacher makes a class', async ({ page }) => {
 test('keyboard: Match Three swaps two pieces with Enter', async ({ page }) => {
   await page.goto('/games/match-three');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
-  await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
+  for (let i = 0; i < 4; i++) {
+    if (await page.getByRole('button', { name: 'Play', exact: true }).isVisible()) break;
+    await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
+  }
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');
   await tabTo(page, /, row 1, column 1$/);
   await page.keyboard.press('Enter');

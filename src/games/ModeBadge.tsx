@@ -11,10 +11,20 @@ export const MODE_COLORS: Record<PlayMode, string> = { live: '#9fd8f0', share: '
 export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint?: boolean }) {
   const Icon = MODE_ICONS[mode];
   return (
-    <span className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
-      <Icon weight="bold" size={18} aria-hidden="true" />
-      <span>{t(`mode.${mode}` as StringKey)}</span>
-      {withHint && <span className="font-semibold">· {t(`mode.${mode}.hint` as StringKey)}</span>}
-    </span>
+    // With its hint (a game's welcome screen), it is a full-width row: icon,
+    // name, then the hint in its own column, so a long hint wraps under
+    // itself instead of under the name (teacher, 2026-10-31: no weird spacing).
+    withHint ? (
+      <span className="grid grid-cols-[auto_5.5rem_1fr] items-center gap-x-3 rounded-input border-[2px] border-border px-4 py-2 text-base leading-snug" style={{ background: MODE_COLORS[mode] }}>
+        <Icon weight="bold" size={22} aria-hidden="true" />
+        <span className="font-display font-bold text-lg">{t(`mode.${mode}` as StringKey)}</span>
+        <span className="font-semibold">{t(`mode.${mode}.hint` as StringKey)}</span>
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
+        <Icon weight="bold" size={18} aria-hidden="true" />
+        <span>{t(`mode.${mode}` as StringKey)}</span>
+      </span>
+    )
   );
 }

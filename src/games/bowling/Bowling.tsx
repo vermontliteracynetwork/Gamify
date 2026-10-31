@@ -215,7 +215,7 @@ export default function Bowling() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       {clock.element}
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
@@ -257,15 +257,15 @@ export default function Bowling() {
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
             <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#f3d9b1'), aspectRatio: '100 / 130', width: 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)', maxWidth: '100%' }}>
+              style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)', maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   <radialGradient id="sb-shine" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
                   {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
                 </defs>
                 {!pieceImage(theme, 'background') && <>
-                  {/* The alley's back wall and the dark pin deck behind the pins. */}
-                  <rect x={0} y={0} width={100} height={yAt(far) - 4} fill="#ed9d75" opacity={0.35} />
+                  {/* 80s carpet all around (the backdrop), a neon strip over the dark pin deck. */}
+                  <rect x={0} y={yAt(far) - 18} width={100} height={3} fill="#ff4fa3" opacity={0.85} />
                   <rect x={50 - halfWidthAt(far) - 6} y={yAt(far) - 14} width={(halfWidthAt(far) + 6) * 2} height={14} rx={1.5} fill="#241c3d" stroke="#000" strokeWidth={0.6} />
                   {[0, 1, 2, 3, 4].map((i) => <circle key={i} cx={22 + i * 14} cy={9} r={2.6} fill={LANE_COLORS[i]} stroke="#000" strokeWidth={0.5} />)}
                 </>}

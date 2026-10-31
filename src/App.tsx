@@ -36,6 +36,7 @@ const MemoryMatch = lazy(() => import('./games/memory-match/MemoryMatch'));
 const Flashcards = lazy(() => import('./games/flashcards/Flashcards'));
 const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
 const Pinball = lazy(() => import('./games/pinball/Pinball'));
+const CastleQuest = lazy(() => import('./games/castle-quest/CastleQuest'));
 const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
 const Bowling = lazy(() => import('./games/bowling/Bowling'));
 const RoadHop = lazy(() => import('./games/road-hop/RoadHop'));
@@ -140,6 +141,7 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
+          <Route path="/games/castle-quest" element={<RequireSignIn><RequireGame id="castle-quest"><CastleQuest /></RequireGame></RequireSignIn>} />
           <Route path="/games/pinball" element={<RequireSignIn><RequireGame id="pinball"><Pinball /></RequireGame></RequireSignIn>} />
           {/* Peg Drop became Pinball (teacher, 2026-10-31). */}
           <Route path="/games/peg-drop" element={<Navigate to="/games/pinball" replace />} />

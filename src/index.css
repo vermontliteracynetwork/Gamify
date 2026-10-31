@@ -380,3 +380,9 @@ html:fullscreen .play-fill { height: 100dvh; }
 .pb-chase { animation: pb-chase 0.5s ease-in-out 3; }
 .pb-aura { animation: pb-aura 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .pb-twinkle { animation: fw-twinkle 2s ease-in-out infinite; }
+
+/* Castle Quest (2026-10-31): power-up tiles bob, the finished castle glows. */
+@keyframes cq-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes cq-castle { 0%, 100% { filter: drop-shadow(0 0 0 #fdfd94); } 50% { filter: drop-shadow(0 0 10px #fdfd94); } }
+.cq-bob { animation: cq-bob 1.8s ease-in-out infinite; transform-box: fill-box; }
+.cq-castle { animation: cq-castle 1.2s ease-in-out infinite; }

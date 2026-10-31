@@ -15,7 +15,7 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
     <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
-    <section className="setup-roomy w-full bg-surface border-[2.5px] border-border rounded-panel max-w-3xl mx-auto flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 11.875rem)', minHeight: 'min(30rem, calc(100dvh - 11.875rem))' }}>
+    <section className="setup-roomy w-full bg-surface border-[2.5px] border-border rounded-panel max-w-4xl mx-auto flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 11.875rem)', minHeight: 'min(30rem, calc(100dvh - 11.875rem))' }}>
       <div className="px-6 sm:px-8 pt-5 pb-4 border-b-[2px] border-border-soft grid gap-3">
         <ol className="flex gap-1.5 list-none p-0 m-0" aria-label={t('setup.steps')}>
           {pages.map((p, k) => (

@@ -20,3 +20,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Turn on the natural read-aloud voice, optional (2026-10-27).** Make an OpenAI API key and add it in Vercel as OPENAI_API_KEY (Production), then redeploy. Only on-screen words are sent. Without it, read-aloud uses the device voice.
 - **Send the Ball Collection license** (2026-10-31): the 11 Four in a Row balls are built in but switched off until commercial use is confirmed.
 - **Confirm BeachSide Pinball is your own art** (2026-10-31): it came with its Illustrator source, so Claudia guessed it is yours.
+- **Send the BowlingGUI and bowling .glb licenses** (2026-10-31): not used until commercial use is confirmed.

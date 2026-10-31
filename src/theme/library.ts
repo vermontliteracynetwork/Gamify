@@ -30,7 +30,7 @@ export function pieceFill(theme: GameTheme | undefined, piece: string, fallback:
 export function backdropStyle(theme: GameTheme, plain: boolean): React.CSSProperties {
   const bg = theme.colors.background;
   if (plain || theme.backdrop.kind === 'color') return { background: bg };
-  if (theme.backdrop.kind === 'image') return { background: `${bg} center / cover no-repeat url("${theme.backdrop.src}")` };
+  if (theme.backdrop.kind === 'image') return { background: theme.backdrop.tile ? `${bg} 0 0 / 240px repeat url("${theme.backdrop.src}")` : `${bg} center / cover no-repeat url("${theme.backdrop.src}")` };
   const ink = theme.backdrop.pattern === 'dots' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.35)';
   switch (theme.backdrop.pattern) {
     case 'dots': return { backgroundColor: bg, backgroundImage: `radial-gradient(${ink} 1.5px, transparent 1.6px), radial-gradient(${ink} 1px, transparent 1.1px)`, backgroundSize: '46px 46px, 23px 23px', backgroundPosition: '0 0, 11px 17px' };

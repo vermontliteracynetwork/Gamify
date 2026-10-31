@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, noPowerUps } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps, startTurn } from './setup';
 
 
 test.beforeEach(async ({ page }) => {
@@ -23,6 +23,7 @@ test('Bowling: a right answer earns a roll; tap a lane and pins fall', async ({ 
   await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|pins?!/ })).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/bowling-result-${info.project.name}.png` });
   // Then the same team's second roll, or the next team's turn: a new question either way.
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
   expect(problems).toEqual([]);
 });

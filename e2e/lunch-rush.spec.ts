@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, noPowerUps } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps, startTurn } from './setup';
 
 
 test.beforeEach(async ({ page }) => {
@@ -25,6 +25,7 @@ test('Lunch Rush: a right answer earns 2 serves; serving a wanted food scores', 
   await expect(page.getByRole('status').filter({ hasText: /Yum! \+\d+/ })).toBeVisible({ timeout: 3000 });
   await expect(page.getByLabel('1 serve left')).toBeVisible({ timeout: 4000 });
   await page.getByRole('button', { name: /^Serve / }).first().click();
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
   expect(problems).toEqual([]);
 });

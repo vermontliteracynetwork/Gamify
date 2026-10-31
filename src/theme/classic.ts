@@ -7,14 +7,16 @@ import type { GameTheme } from './types';
 export function classicTheme(gameId: string): GameTheme {
   // Question Tracker's Classic look is a night sky (teacher, 2026-10-24).
   const night = gameId === 'star-quiz';
+  // Bowling's Classic look is a retro 80s bowling-alley carpet (teacher, 2026-10-31).
+  const alley = gameId === 'bowling';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : '#b4c4fb',
-      backgroundText: night ? '#ffffff' : '#000000',
+      background: night ? '#22336e' : alley ? '#07070f' : '#b4c4fb',
+      backgroundText: night || alley ? '#ffffff' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
       accent: '#fdfd94',
@@ -23,7 +25,7 @@ export function classicTheme(gameId: string): GameTheme {
       miss: '#9b2c3a',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: { kind: 'color' },
+    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the

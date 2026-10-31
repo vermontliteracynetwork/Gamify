@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, startTurn } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.trim(), q.choices[q.correctIndex]] as const)));
 
@@ -18,6 +18,7 @@ for (const g of [
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     await expect(page.getByRole('switch', { name: /Power-ups/ })).toHaveAttribute('aria-checked', 'true');
     await finishSetup(page);
+    await startTurn(page);
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
     const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();

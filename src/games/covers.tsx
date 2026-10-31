@@ -39,16 +39,35 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'match-three':
-      // The Classic gems (Puzzle Games Graphics Pack, cleared 2026-10-31).
+      // A match happening (teacher, 2026-10-31: "more match 3 game related"):
+      // three hearts in a row glow and burst, a gem swaps in with an arrow,
+      // and points pop up.
       return (
-        <div className={base} style={{ background: 'linear-gradient(160deg, #cdd7fb, #9fb3f5)' }} aria-hidden="true">
-          <div className="absolute inset-[8%] rounded-2xl border-[3px] border-border bg-white grid grid-cols-5 grid-rows-3 gap-[3%] p-[3%]">
-            {[0, 1, 2, 3, 4, 5, 0, 5, 3, 1, 2, 1, 4, 0, 3].map((k, i) => (
-              <span key={i} className="rounded-lg border-2 border-border-soft flex items-center justify-center" style={{ background: ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'][k] }}>
-                <img src={`/classic/match-three/gem-${k}.webp`} alt="" className="w-4/5 h-4/5 object-contain" draggable="false" />
-              </span>
+        <div className={base} style={{ background: 'radial-gradient(circle at 50% 40%, #9b7be0, #4b2f8f 75%)' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
+            <g transform="rotate(-8 50 31)">
+              <rect x="14" y="2" width="72" height="58" rx="5" fill="#ffffff" stroke="#000" strokeWidth="1.2" />
+              {[[0, 2, 4, 3, 5], [3, 1, 1, 1, 0], [5, 4, 2, 0, 3], [2, 0, 5, 4, 1]].map((row, r) => row.map((k, c) => {
+                const x = 17 + c * 13.5, y = 5 + r * 13.6;
+                const lit = r === 1 && c >= 1 && c <= 3;
+                return (
+                  <g key={`${r}-${c}`}>
+                    <rect x={x} y={y} width="12.5" height="12.5" rx="2.5" fill={lit ? '#fdfd94' : ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'][k]} stroke={lit ? '#000' : '#c9d3ee'} strokeWidth={lit ? 0.9 : 0.5} />
+                    <image href={`/classic/match-three/gem-${k}.webp`} x={x + 1.5} y={y + 1.5} width="9.5" height="9.5" />
+                  </g>
+                );
+              }))}
+              {/* The swap: an arrow from the gem that just moved in. */}
+              <path d="M 37 47 Q 42 40 44 33" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" />
+              <path d="M 37 47 Q 42 40 44 33" fill="none" stroke="#fdfd94" strokeWidth="1.2" strokeLinecap="round" />
+              <path d="M 41.5 34.5 L 44.5 31.5 L 46 35.5 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.6" />
+            </g>
+            {/* Sparkles bursting from the match, and the points. */}
+            {[[30, 12, 4], [66, 10, 3.4], [76, 24, 2.6], [24, 26, 2.4], [50, 6, 3]].map(([x, y, r], i) => (
+              <path key={i} d={`M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3} Z`} fill="#fdfd94" stroke="#000" strokeWidth="0.5" />
             ))}
-          </div>
+            <text x="82" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#fdfd94" stroke="#000" strokeWidth="1.4" paintOrder="stroke" transform="rotate(10 82 16)">+30</text>
+          </svg>
         </div>
       );
     case 'four-in-a-row':
@@ -185,6 +204,22 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           ))}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 84 L58 50" stroke="#fff" strokeWidth="2" strokeDasharray="1 4" strokeLinecap="round" /></svg>
           <img src="/classic/bubble-pop/ball-2.webp" alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: '41.5%', bottom: '6%' }} draggable="false" />
+        </div>
+      );
+    case 'castle-quest':
+      // Castle Quest: the forest path, a bridge and the castle at the end.
+      return (
+        <div className={base} style={{ background: 'radial-gradient(circle at 30% 20%, #6fbf73, #2f7d4b 70%)' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
+            {[[8, 46, 'tileGrass'], [20, 46, 'tileAutumn'], [32, 46, 'tileGrass'], [44, 46, 'tileDirt'], [56, 46, 'tileGrass'], [62, 37, 'tileAutumn'], [50, 37, 'tileGrass'], [38, 37, 'tileMagic'], [26, 37, 'tileGrass']].map(([x, y, n], i) => (
+              <image key={i} href={`/classic/castle-quest/${n}.png`} x={x as number} y={y as number} width={13} height={17.8} />
+            ))}
+            <line x1="26.5" y1="53" x2="44" y2="43" stroke="#5b3a1e" strokeWidth="4" strokeLinecap="round" /><line x1="26.5" y1="53" x2="44" y2="43" stroke="#c58a4f" strokeWidth="3" strokeDasharray="1.2 0.8" />
+            <image href="/classic/castle-quest/medieval_largeCastle.png" x="66" y="4" width="30" height="35" />
+            {[[4, 10], [12, 6], [20, 12], [50, 8], [58, 12]].map(([x, y], i) => <image key={i} href="/classic/castle-quest/pineGreen_high.png" x={x} y={y} width="6" height="22" />)}
+            <image href="/classic/castle-quest/heroes/blue_knight.webp" x="30" y="30" width="11" height="11" />
+            <image href="/classic/castle-quest/powerups/chest.webp" x="51" y="31" width="9" height="9" />
+          </svg>
         </div>
       );
     case 'pinball':

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { answerShare, finishSetup, openSetup } from './setup';
+import { answerShare, finishSetup, openSetup, startTurn } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -30,6 +30,7 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   // Team 1: pick card 1, then tap the right answer; the card turns over.
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
   await answerShare(page, true);
@@ -102,6 +103,7 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
   await finishSetup(page);
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByText(/(Ava|Ben|Cal|Dee), (Ava|Ben|Cal|Dee)/)).toBeVisible();
 });
 
@@ -125,6 +127,7 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
   await expect(kid.getByRole('heading', { name: 'Waiting for the Next Question' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await startTurn(page);
   const prompt = (await page.getByRole('dialog').getByRole('heading', { level: 2 }).innerText()).trim();
   await expect(kid.getByRole('heading', { level: 1, name: prompt })).toBeVisible();
   await kid.getByRole('button', { name: 'Bigger words' }).click();

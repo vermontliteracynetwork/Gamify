@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, noPowerUps } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps, startTurn } from './setup';
 
 // Pinball replaced Peg Drop (teacher, 2026-10-31).
 test('Pinball: a right answer earns a shot; pick a lane, stop the power bar, and the ball lands in a top pocket or rolls back', async ({ page }, info) => {
@@ -27,6 +27,7 @@ test('Pinball: a right answer earns a shot; pick a lane, stop the power bar, and
   await expect(page.getByText(/^(\+\d+|So close!)$/).first()).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/pinball-landed-${info.project.name}.png` });
   // Next team's question.
+  await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
   expect(problems).toEqual([]);
 });

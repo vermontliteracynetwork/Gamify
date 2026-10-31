@@ -7,6 +7,7 @@ import { memoryMatchManifest } from './memory-match/manifest';
 import { flashcardsManifest } from './flashcards/manifest';
 import { matchUpManifest } from './match-up/manifest';
 import { pinballManifest } from './pinball/manifest';
+import { castleQuestManifest } from './castle-quest/manifest';
 import { bubblePopManifest } from './bubble-pop/manifest';
 import { bowlingManifest } from './bowling/manifest';
 import { roadHopManifest } from './road-hop/manifest';
@@ -15,7 +16,7 @@ import { farmGrowManifest } from './farm-grow/manifest';
 import type { GameManifest } from './types';
 
 // Every game built, in Arcade order (development plan Part 4).
-export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, farmGrowManifest, starQuizManifest, flashcardsManifest];
+export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, castleQuestManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, farmGrowManifest, starQuizManifest, flashcardsManifest];
 
 // For now the lineup is only games where multiple-choice questions interrupt
 // play, with an easy re-theme and power-ups (teacher, 2026-10-26). Games where
