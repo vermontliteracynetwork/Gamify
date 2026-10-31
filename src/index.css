@@ -349,3 +349,14 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
   --color-accent-ink: #000000;
   --stage-bg-text: var(--text);
 }
+
+/* Setup pages: bigger sliders and hint text (teacher, 2026-10-31). */
+.setup-roomy .gamify-slider { height: 18px; margin: 0.75rem 0; }
+.setup-roomy .gamify-slider::-webkit-slider-thumb { width: 44px; height: 44px; }
+.setup-roomy .gamify-slider::-moz-range-thumb { width: 42px; height: 42px; }
+.setup-roomy label { font-size: 1.125rem; }
+
+/* A game that fills the whole space under the menu bar, and the whole
+   screen in full screen: the same view either way (teacher, 2026-10-31). */
+.play-fill { height: calc(100dvh - 4rem); }
+html:fullscreen .play-fill { height: 100dvh; }

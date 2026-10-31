@@ -1,4 +1,3 @@
-import Title from '../../ui/Title';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -11,7 +10,7 @@ import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -78,7 +77,7 @@ export default function CastCatch() {
   async function openLive() { navigate(`/teacher/live/${(await makeGameCode('cast-catch', setId, 'live')).code}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 3 });
+  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 8 });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -203,12 +202,12 @@ export default function CastCatch() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className={(phase === 'play' || phase === 'end') ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="cast-catch" />
       {clock.element}
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={castCatchManifest.name} /></h1>}
-      </GameTopRow>
+      {(phase === 'play' || phase === 'end')
+        ? <h1 className="sr-only">{castCatchManifest.name}</h1>
+        : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -223,26 +222,22 @@ export default function CastCatch() {
           // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-          { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={10} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
+          { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={20} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
         ]} />
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <section className="grid gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl tabular-nums" aria-label={t('cc.timeLeft', { s: left })}><Timer weight="bold" size={22} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl tabular-nums" aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl" aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={22} />{catches.length}</span>
-          </div>
-
-          <div ref={scene} className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 21.875rem + var(--chrome-save, 0rem))', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 20%, #5aa9d6 20%, #2f6fb0 100%)' }) }}>
+        // The game fills the whole space, the same in full screen and not;
+        // small controls sit on top of the scene (teacher, 2026-10-31).
+        <section className="relative play-fill">
+          <div ref={scene} className="relative overflow-hidden select-none h-full" style={{ ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 20%, #5aa9d6 20%, #2f6fb0 100%)' }) }}>
             {/* The water moves a little (teacher, 2026-10-31): soft ripples drift and the shimmer lines glide. */}
             {!theme.pieces.background?.image && <span className="absolute inset-x-0 bottom-0 top-[20%] pointer-events-none cc-water" aria-hidden="true" />}
             {!still && [0, 1, 2, 3].map((i) => (
               <span key={i} className="absolute h-1.5 rounded-pill bg-white/45" style={{ top: `${26 + i * 16}%`, width: `${14 + (i % 2) * 6}%`, animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}
-            <span className="absolute right-[8%] top-[2%] w-[6%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
-            {[[30, 3, 14], [60, 6, 10]].map(([x, y, w], i) => (
+            <span className="absolute right-[16%] top-[3%] w-[5%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
+            {[[22, 10, 12], [62, 11, 9]].map(([x, y, w], i) => (
               <span key={`c${i}`} className={`absolute h-[5%] ${pieceImage(theme, 'cloud') ? '' : 'rounded-pill border-[2px] border-border'}`} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ...(pieceImage(theme, 'cloud') ? { background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")` } : { background: pieceColor(theme, 'cloud', '#ffffff') }), animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
             ))}
             {!still && [0, 1, 2].map((i) => (
@@ -284,7 +279,7 @@ export default function CastCatch() {
             )}
             <AnimatePresence>
               {last && (
-                <motion.div key={catches.length} className="absolute inset-x-0 top-[8%] mx-auto w-[min(90%,420px)] bg-surface border-[3px] border-border rounded-panel p-4 grid gap-1 justify-items-center text-center"
+                <motion.div key={catches.length} className="absolute inset-x-0 top-[14%] mx-auto w-[min(90%,420px)] bg-surface border-[3px] border-border rounded-panel p-4 grid gap-1 justify-items-center text-center"
                   style={{ boxShadow: 'var(--shadow-sticker-lg)' }} initial={still ? false : { y: 120, scale: 0.6, rotate: -8 }} animate={{ y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0 }} role="status">
                   {last.item ? (
                     <>
@@ -305,8 +300,18 @@ export default function CastCatch() {
             </AnimatePresence>
           </div>
 
+          {/* Top: score chips in the middle, full screen and settings on the right. */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.timeLeft', { s: left })}><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
+          </div>
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
           {phase === 'play' && (
-            <div className="grid gap-2 justify-items-center min-h-24">
+            <div className="absolute inset-x-0 bottom-5 grid gap-2 justify-items-center z-10 pointer-events-none [&>*]:pointer-events-auto">
               {step === 'ready' && !timeUp && <BigButton onClick={startPower} label={t('cc.cast')} />}
               {step === 'power' && (
                 <>
@@ -316,10 +321,10 @@ export default function CastCatch() {
                   <BigButton onClick={() => void stopPower()} label={t('cc.stop')} />
                 </>
               )}
-              {step === 'casting' && <p className="font-display text-2xl stage-text" role="status">{qualityWord[quality.current]}</p>}
-              {step === 'wait' && <p className="font-display text-2xl stage-text" role="status">{t('cc.waiting')}</p>}
+              {step === 'casting' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{qualityWord[quality.current]}</p>}
+              {step === 'wait' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{t('cc.waiting')}</p>}
               {step === 'bite' && <BigButton onClick={reel} label={t('cc.reel')} pulse={!still} />}
-              {timeUp && step === 'ready' && <p className="font-display text-2xl stage-text">{t('cc.timeUp')}</p>}
+              {timeUp && step === 'ready' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border">{t('cc.timeUp')}</p>}
             </div>
           )}
         </section>
@@ -344,7 +349,7 @@ export default function CastCatch() {
 function BigButton({ onClick, label, pulse = false }: { onClick: () => void; label: string; pulse?: boolean }) {
   return (
     <motion.button type="button" onClick={onClick} animate={pulse ? { scale: [1, 1.06, 1] } : undefined} transition={{ duration: 0.8, repeat: Infinity }}
-      className="min-h-16 px-12 rounded-pill border-[2.5px] border-border bg-accent font-display text-3xl active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      className="min-h-14 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       {label}
     </motion.button>
   );

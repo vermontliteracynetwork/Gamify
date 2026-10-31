@@ -2038,7 +2038,7 @@ export const en = {
   'cc.how2': 'Answer the question while your bobber floats.',
   'cc.how3': 'Reel in your fish. Better casts catch rarer fish!',
   'cc.minutes': 'Fishing time',
-  'cc.minutesHint': 'How long the fishing trip lasts. Default 3 minutes.',
+  'cc.minutesHint': 'How long the fishing trip lasts, 1 to 20 minutes. Default 8 minutes.',
   'cc.minutesValue': '{count} minutes',
   'cc.minutesValue.one': '1 minute',
   'cc.timeLeft': '{s} seconds left',
