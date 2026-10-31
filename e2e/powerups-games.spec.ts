@@ -9,6 +9,7 @@ const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.
 for (const g of [
   { id: 'pinball', name: /(Golden Ball|Super Shooter|Jackpot Magnet|Bouncy Ball|Mystery Bottle|Sneaky Swipe)/ },
   { id: 'lunch-rush', name: /(Extra Plate|Tip Jar|Double Star)/ },
+  { id: 'bowling', name: /(Golden Pin|Pin Magnet|Bumper Rails|Fireball|Mystery Box|Sneaky Swipe)/ },
 ]) {
   test(`${g.id}: a right answer can bring a power-up`, async ({ page }, info) => {
     await page.addInitScript(() => { Math.random = () => 0.05; if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });

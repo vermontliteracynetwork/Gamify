@@ -32,6 +32,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { bowlingManifest } from './manifest';
 import { cpuLane, fullRack, halfWidthAt, knockPins, LANE_X, LANES, PIN_SPOTS, pinDepth, rollPoints, scaleAt, xAt, yAt } from './lane';
 
@@ -82,15 +83,32 @@ export default function Bowling() {
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const ballRef = useRef<SVGGElement>(null);
   const timers = useRef<number[]>([]);
-  // Power-ups a right answer brought: a doubled roll, or one more pin.
+  // Power-ups (teacher, 2026-10-31): a right answer may bring one; it waits
+  // for this player's next turn under the scores and is gone after that turn.
   const powers = usePowerUps(bowlingManifest, theme, setup.powerUps);
-  const boost = useRef({ double: false, magnet: false });
+  const held = useHeldPowerUps();
+  const boost = useRef({ double: false, magnet: false, bumpers: false, mega: false });
+  const [armed, setArmed] = useState<string[]>([]);
   function earned(state: TurnState) {
-    const it = powers.grant();
-    if (!it) return;
-    if (it.ability === 'double') boost.current.double = true;
-    if (it.ability === 'magnet') boost.current.magnet = true;
-    if (it.ability === 'bonus') setTurns(addPoints(state, current(state).id, powers.amount(it)));
+    const it = powers.grant(true);
+    if (it) held.earn(current(state).id, it);
+  }
+  function applyItem(i: number) {
+    const state = turnsNow.current;
+    const it = held.use(i);
+    if (!it || !state) return;
+    playEffect('win', settings);
+    const me = current(state).id;
+    const ab = it.ability as keyof typeof boost.current | 'mystery' | 'swipe' | 'bonus';
+    if (ab === 'double' || ab === 'magnet' || ab === 'bumpers' || ab === 'mega') { boost.current[ab] = true; setArmed((a) => [...a, ab]); return; }
+    if (ab === 'mystery') setTurns(addPoints(state, me, 1 + Math.floor(Math.random() * 10)));
+    if (ab === 'bonus') setTurns(addPoints(state, me, powers.amount(it)));
+    if (ab === 'swipe') {
+      const n = powers.amount(it);
+      const top = state.players.filter((p) => p.id !== me).sort((a, b) => b.score - a.score)[0];
+      const take = top ? Math.min(n, top.score) : n;
+      setTurns(top ? addPoints(addPoints(state, top.id, -take), me, take) : addPoints(state, me, n));
+    }
   }
   const player = turns ? current(turns) : null;
   const totalFrames = (turns?.players.length ?? 1) * setup.frames;
@@ -102,12 +120,15 @@ export default function Bowling() {
     const players = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(players);
     setTurns(state); setFrames(0); setMissed([]); setBanner(null);
-    boost.current = { double: false, magnet: false };
+    boost.current = { double: false, magnet: false, bumpers: false, mega: false };
+    held.reset();
     setPhase('play');
     startFrame(state);
   }
   function startFrame(state: TurnState) {
-    setStanding(fullRack()); setFalling([]); setRoll(0); setLane(null);
+    setStanding(fullRack()); setFalling([]); setRoll(0); setLane(null); setArmed([]);
+    boost.current = { double: false, magnet: false, bumpers: false, mega: false };
+    held.beginTurn(current(state).id);
     askFor(state, 0);
   }
   function askFor(state: TurnState, r: 0 | 1) {
@@ -130,7 +151,11 @@ export default function Bowling() {
 
   function bowl(l: number) {
     if (step !== 'aim' || !turns) return;
-    const res = knockPins(l, standing);
+    // Bumper rails send it down the middle; a mega ball takes every pin.
+    const res = boost.current.mega ? { down: standing.map((up, i) => (up ? i : -1)).filter((i) => i >= 0), gutter: false } : knockPins(boost.current.bumpers ? 2 : l, standing);
+    if (boost.current.bumpers) res.gutter = false;
+    boost.current.mega = false; boost.current.bumpers = false;
+    setArmed((a) => a.filter((x) => x !== 'mega' && x !== 'bumpers' && x !== 'magnet'));
     // Pin Magnet: one more standing pin goes down too.
     if (boost.current.magnet) {
       boost.current.magnet = false;
@@ -166,6 +191,7 @@ export default function Bowling() {
     const points = base.points * (boost.current.double ? 2 : 1);
     const kind = base.kind;
     boost.current.double = false;
+    setArmed((a) => a.filter((x) => x !== 'double'));
     setStanding(nextStanding); setFalling([]); setStep('result');
     const scored = addPoints(turns, current(turns).id, points);
     setTurns(scored);
@@ -182,6 +208,7 @@ export default function Bowling() {
     }, 1500);
   }
   function endFrame(state: TurnState) {
+    held.endTurn(); // unused power-ups are gone after the turn
     const n = frames + 1;
     setFrames(n);
     if (n >= totalFrames) { end(state); return; }
@@ -197,10 +224,11 @@ export default function Bowling() {
   // The computer bowls on its own after a right answer.
   useEffect(() => {
     if (phase !== 'play' || step !== 'aim' || player?.kind !== 'cpu') return;
-    const id = window.setTimeout(() => bowl(cpuLane()), 900);
+    const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); bowl(cpuLane()); }, 900);
     return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const tray = <PowerUpTray manifest={bowlingManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim' || player?.kind === 'cpu'} />;
   const canAim = phase === 'play' && step === 'aim' && player?.kind !== 'cpu';
   const pinColor = pieceColor(theme, 'pin', '#fbfcf8');
   const pinArt = pieceImage(theme, 'pin');
@@ -255,7 +283,7 @@ export default function Bowling() {
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
-          <section className="grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
+          <section className="relative grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
             <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden"
               style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)', maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
@@ -313,9 +341,17 @@ export default function Bowling() {
                   style={{ background: LANE_COLORS[l], boxShadow: 'var(--shadow-sticker)' }}>{l + 1}</button>
               ))}
             </div>
+            {armed.length > 0 && (
+              <div className="absolute inset-x-0 top-[38%] flex justify-center gap-1.5 flex-wrap pointer-events-none z-10">
+                {armed.map((a, i) => <span key={i} className="rounded-pill border-[2px] border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{bowlingManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
+              </div>
+            )}
+            <div className="lg:hidden absolute left-2 bottom-20 w-[min(15rem,45%)] z-10">{tray}</div>
           </section>
-          <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid">
+          <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid gap-3 content-start">
             <ScoreBoard turns={turns} playing={phase === 'play'} round={`${t('sb.frame', { n: Math.min(frames + 1, totalFrames), total: totalFrames })} · ${t('sb.roll', { n: roll + 1 })}`} />
+            {/* Held power-ups, right under the scores (teacher, 2026-10-31). */}
+            <div className="hidden lg:block">{tray}</div>
           </div>
           </div>
         </div>
