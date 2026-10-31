@@ -26,7 +26,7 @@ export async function signUpTeacher(page: Page, username = 'miss.jen') {
 
 // Every game opens on its cover welcome screen, then the theme screen (when
 // there is more than one theme); this goes past both to the setup pages.
-export async function openSetup(page: Page, path: string) {
+export async function openSetup(page: Page, path: string, way?: RegExp) {
   await page.goto(path);
   await page.getByRole('button', { name: 'Set up and play' }).click();
   // With only Classic to wear, the theme step is skipped (2026-10-31).
@@ -34,6 +34,12 @@ export async function openSetup(page: Page, path: string) {
   await expect(page.getByRole('heading', { name: 'Pick a Theme' }).or(step1)).toBeVisible();
   if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(step1).toBeVisible();
+  // Games with more than one way to play ask that first (2026-10-31); the
+  // default way stays, and the tests start from the next page.
+  if (await page.getByRole('heading', { name: /^Step 1 of \d+: How will you play\?/i }).isVisible()) {
+    if (way) await page.getByRole('radio', { name: way }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+  }
 }
 
 // Next through the remaining setup pages, then Play.

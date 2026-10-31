@@ -14,9 +14,8 @@ for (const g of [
     await page.addInitScript(() => { Math.random = () => 0.05; if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
     const problems: string[] = [];
     page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
-    await openSetup(page, `/games/${g.id}`);
+    await openSetup(page, `/games/${g.id}`, /^Solo/);
     await page.getByRole('button', { name: 'Next', exact: true }).click();
-    await page.getByRole('radio', { name: 'Just me' }).click();
     await expect(page.getByRole('switch', { name: /Power-ups/ })).toHaveAttribute('aria-checked', 'true');
     await finishSetup(page);
     const dialog = page.getByRole('dialog');

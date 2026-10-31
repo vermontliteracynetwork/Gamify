@@ -7,7 +7,7 @@ export interface SetupPage { id: string; title: string; content: ReactNode; read
 
 // Game settings split into short pages (questions, game options, teams,
 // theme...) with a step bar, Back and Next, and Play on the last page.
-export default function SetupWizard({ pages, onBack, onPlay }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void }) {
+export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
   const [i, setI] = useState(0);
   const page = pages[i];
   const last = i === pages.length - 1;
@@ -34,7 +34,7 @@ export default function SetupWizard({ pages, onBack, onPlay }: { pages: SetupPag
         </button>
         <button type="button" disabled={page.ready === false} onClick={() => (last ? onPlay() : setI(i + 1))}
           className="min-h-12 px-6 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold inline-flex items-center gap-2 disabled:opacity-50">
-          {last ? <><Play weight="fill" size={22} />{t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={20} /></>}
+          {last ? <><Play weight="fill" size={22} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={20} /></>}
         </button>
       </div>
     </section>

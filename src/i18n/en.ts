@@ -190,6 +190,12 @@ export const en = {
   'practice.leftEarly': 'You left the game. Your stars are saved here.',
   'tell.open': 'Tell Gamify about a problem or an idea',
 
+  'way.title': 'How will you play?',
+  'way.screens.live': 'Every student on their own device. You open a lobby and share a code.',
+  'way.screens.share': 'One big screen up front. Teams take turns.',
+  'way.screens.solo': 'One device, one player, right here.',
+  'way.screens.versus': 'Two players: one device, two devices, or the computer.',
+  'way.openLobby': 'Open the live lobby',
   'mode.live': 'Live',
   'mode.share': 'Share',
   'mode.solo': 'Solo',

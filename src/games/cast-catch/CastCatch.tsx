@@ -20,6 +20,11 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
+import WayToPlay from '../WayToPlay';
+import { useSignedIn } from '../../auth/session';
+import { makeGameCode } from '../../data/gameCodes';
+import type { PlayMode } from '../../data/types';
+import { useNavigate } from 'react-router-dom';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
@@ -66,6 +71,10 @@ export default function CastCatch() {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   const { theme, themes, playable, choose } = useGameTheme('cast-catch');
+  const { teacher } = useSignedIn();
+  const navigate = useNavigate();
+  const [way, setWay] = useState<PlayMode>('solo');
+  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('cast-catch', setId, 'live')).code}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 3 });
@@ -205,7 +214,9 @@ export default function CastCatch() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={castCatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={way === 'live' ? () => void openLive() : begin} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
+          // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} min={1} max={10} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
         ]} />

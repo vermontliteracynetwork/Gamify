@@ -13,6 +13,11 @@ import { useSettings } from '../../settings/SettingsContext';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
+import WayToPlay from '../WayToPlay';
+import { useSignedIn } from '../../auth/session';
+import { makeGameCode } from '../../data/gameCodes';
+import type { PlayMode } from '../../data/types';
+import { useNavigate } from 'react-router-dom';
 import SetupWizard from '../SetupWizard';
 import { starQuizManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
@@ -34,6 +39,10 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 export default function StarQuiz() {
   const { settings } = useSettings();
   const { theme, themes, playable, choose } = useGameTheme('star-quiz');
+  const { teacher } = useSignedIn();
+  const navigate = useNavigate();
+  const [way, setWay] = useState<PlayMode>('solo');
+  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('star-quiz', setId, 'live')).code}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setup, change] = useSavedSetup('star-quiz', { setId: LIBRARY[0].id, rounds: 10 });
@@ -89,7 +98,9 @@ export default function StarQuiz() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={way === 'live' ? () => void openLive() : () => void play({ rounds: setup.rounds })} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
+          // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />

@@ -22,9 +22,11 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
+import { Slider, Toggle } from '../../ui/fields';
+import { useSignedIn } from '../../auth/session';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
+import WayToPlay from '../WayToPlay';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { pegDropManifest } from './manifest';
@@ -50,7 +52,9 @@ export default function PegDrop() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
-  const solo = setup.who === 'solo';
+  // Students who join with a code play on their own device; teachers pick the way.
+  const { teacher } = useSignedIn();
+  const solo = setup.who === 'solo' || !teacher;
   const { ask, element, missed: soloMissed } = useAsk({ gameId: 'peg-drop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
@@ -181,10 +185,11 @@ export default function PegDrop() {
       {phase === 'theme' && <ThemeScreen gameName={pegDropManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
+          // Pick the way to play first (teacher, 2026-10-31); students arrive with theirs set.
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'solo']} value={solo ? 'solo' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceRow label={t('mm.who')} value={setup.who} onChange={(v) => change({ who: v })} options={[{ value: 'teams', label: t('pd.teams') }, { value: 'solo', label: t('mm.solo') }]} />
               <Slider label={t('pd.rounds')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
