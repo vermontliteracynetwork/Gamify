@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsLeftRight, Diamond, Question } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Cake, Coffee, Cookie, Diamond, IceCream, Pizza, Popcorn, Question, type Icon } from '@phosphor-icons/react';
+import { PUZZLE_PACK_CLEARED } from '../../config';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -33,7 +34,8 @@ import Title from '../../ui/Title';
 // alone). Library and class-made themes swap in artwork per tile.
 // Classic tiles are gems (teacher, 2026-10-31): each a different shape and
 // color, on a soft tile of its own color, so shape alone tells them apart.
-const TILE_COLORS = ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'];
+const TILE_COLORS = PUZZLE_PACK_CLEARED ? ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'] : ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
+const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
 const CLASSIC_GEM = (k: number) => `/classic/match-three/gem-${k}.webp`;
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 
@@ -173,7 +175,7 @@ export default function MatchThree() {
       {phase === 'welcome' && (
         <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
-          { icon: <Diamond weight="fill" size={22} />, text: t('bm.how2') },
+          { icon: PUZZLE_PACK_CLEARED ? <Diamond weight="fill" size={22} /> : <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
         ]} />
       )}
@@ -205,7 +207,7 @@ export default function MatchThree() {
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
                 const isSel = selected?.row === r && selected?.col === c;
-                const kindName = t(`bm.kind.${tileItem.kind}` as StringKey);
+                const kindName = t(`bm.${PUZZLE_PACK_CLEARED ? "gem" : "kind"}.${tileItem.kind}` as StringKey);
                 return (
                   <motion.button
                     key={tileItem.id}
@@ -224,7 +226,8 @@ export default function MatchThree() {
                     className={`aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}
                     style={pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])}
                   >
-                    {!pieceImage(theme, `tile-${tileItem.kind}`) && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
+                    {!pieceImage(theme, `tile-${tileItem.kind}`) && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />; })()}
+                    {!pieceImage(theme, `tile-${tileItem.kind}`) && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
                   </motion.button>
                 );
               })}</div>)}

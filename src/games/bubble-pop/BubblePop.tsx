@@ -13,6 +13,7 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
+import { PUZZLE_PACK_CLEARED } from '../../config';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider, Toggle } from '../../ui/fields';
@@ -211,14 +212,14 @@ export default function BubblePop() {
   const patterns = BUBBLE_COLORS.map((_, i) => pieceImage(theme, `bubble-${i}`));
   // Classic bubbles are shiny balls (teacher, 2026-10-31) with their shape
   // icon kept on top, so color is never the only clue.
-  const fill = (k: number) => `url(#bp-art-${k})`;
+  const fill = (k: number) => (patterns[k] || PUZZLE_PACK_CLEARED ? `url(#bp-art-${k})` : BUBBLE_COLORS[k]);
   const bubble = (k: number, x: number, y: number, key?: string, cls = '', style?: React.CSSProperties) => {
     const S = SHAPES[k];
     return (
       <g key={key} className={cls} style={style}>
-        <circle cx={x} cy={y} r={R * 0.94} fill={fill(k)} stroke={patterns[k] ? '#000' : 'none'} strokeWidth={0.13} />
-        {!patterns[k] && <S x={x - 0.42} y={y - 0.36} size={0.84} weight="fill" color="#241c3d" opacity={0.8} />}
-        {patterns[k] && <ellipse cx={x - 0.35} cy={y - 0.42} rx={0.26} ry={0.15} fill="#fff" opacity={0.7} />}
+        <circle cx={x} cy={y} r={R * 0.94} fill={fill(k)} stroke={PUZZLE_PACK_CLEARED && !patterns[k] ? 'none' : '#000'} strokeWidth={0.13} />
+        {!patterns[k] && (PUZZLE_PACK_CLEARED ? <S x={x - 0.42} y={y - 0.36} size={0.84} weight="fill" color="#241c3d" opacity={0.8} /> : <S x={x - 0.55} y={y - 0.55} size={1.1} weight="fill" color="#241c3d" />)}
+        {(patterns[k] || !PUZZLE_PACK_CLEARED) && <ellipse cx={x - 0.35} cy={y - 0.42} rx={0.26} ry={0.15} fill="#fff" opacity={0.7} />}
       </g>
     );
   };
@@ -268,7 +269,7 @@ export default function BubblePop() {
                 onPointerUp={(e) => { if (!pressed.current) return; pressed.current = false; const a = toAngle(e); setAngle(a); shoot(a); }}
                 onPointerLeave={() => { pressed.current = false; }}>
                 <defs>
-                  {patterns.map((src, i) => (
+                  {patterns.map((src, i) => (src || PUZZLE_PACK_CLEARED) && (
                     <pattern key={i} id={`bp-art-${i}`} patternContentUnits="objectBoundingBox" width="1" height="1"><image href={src ?? `/classic/bubble-pop/ball-${i}.webp`} width="1" height="1" preserveAspectRatio={src ? 'xMidYMid slice' : 'xMidYMid meet'} /></pattern>
                   ))}
                 </defs>

@@ -25,7 +25,7 @@ ships without a line here.
 | Sound effects | Every game (right, miss, tap, win, whoosh; five theme sound packs) | Generated in code with the Web Audio API (`src/engine/feedback.ts`) | Original, owned; no files | 2026-10-25 |
 | Question Tracker Classic art (night sky background, six stars) | Question Tracker Classic theme; theme guide example | Made by the teacher in Canva from the blank template (`public/classic/star-quiz/`) | Teacher-supplied; confirm any Canva elements used are cleared for commercial use in a product | 2026-10-31 |
 | Kenney Fish Pack 2.0 (fish, seaweed, rocks; outline versions) | Cast and Catch Classic fish and lake floor (`public/classic/cast-catch/`) | kenney.nl, supplied by the teacher | CC0 1.0 (public domain, commercial use OK, credit optional; license copied beside the files) | 2026-10-31 |
-| Puzzle Games Graphics Pack by ci (gems, balls, coins, animals, pipes, blocks) | Match Three Classic gems, Bubble Pop Classic balls; library copy in `assets/puzzle-pack/` | ci.itch.io/puzzle-games-graphics-pack, supplied by the teacher | **License not yet confirmed: hold from main until the teacher confirms commercial use** | 2026-10-31 |
+| Puzzle Games Graphics Pack by ci (gems, balls, coins, animals, pipes, blocks) | Match Three gems, Bubble Pop balls (ready behind `PUZZLE_PACK_CLEARED` in `src/config.ts`; files kept in `assets/puzzle-pack/`, not shipped) | ci.itch.io/puzzle-games-graphics-pack, supplied by the teacher | **License not yet confirmed: hold from main until the teacher confirms commercial use** | 2026-10-31 |
 
 ## Device fonts for theme titles (2026-10-25)
 

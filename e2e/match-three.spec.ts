@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { finishSetup, openSetup, noPowerUps } from './setup';
 
 
-const KINDS = ['Blue diamond', 'Red heart', 'Green gem', 'Yellow star', 'Purple drop', 'Orange moon'];
+const KINDS = ['Cookie', 'Cake', 'Ice cream', 'Pizza', 'Popcorn', 'Cocoa'];
 
 async function readGrid(page: Page): Promise<number[][]> {
   const labels = await page.getByRole('gridcell').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label') ?? ''));

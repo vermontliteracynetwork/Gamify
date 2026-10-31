@@ -7,5 +7,7 @@ any game or theme can draw from it.
 
 License: not yet confirmed (the itch.io page could not be opened from the
 build session). Nothing here ships to students until the license is recorded
-in docs/asset-ledger.md. In use on the work branch: Match Three gems
-(public/classic/match-three) and Bubble Pop balls (public/classic/bubble-pop).
+in docs/asset-ledger.md. Ready to switch on: Match Three gems and Bubble Pop
+balls (classic/ here). To ship: set PUZZLE_PACK_CLEARED = true in
+src/config.ts and copy classic/match-three and classic/bubble-pop into
+public/classic/.
