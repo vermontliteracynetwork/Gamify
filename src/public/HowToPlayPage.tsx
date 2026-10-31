@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, CheckCircle, Lightbulb, ListNumbers, PaintBrush, SlidersHorizontal, Sparkle } from '@phosphor-icons/react';
+import { BookOpen, CheckCircle, Lightbulb, ListNumbers, PaintBrush, SlidersHorizontal, Sparkle } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
@@ -45,7 +45,6 @@ export default function HowToPlayPage() {
   return (
     <>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <Link to="/blog?tag=howto" className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('howto.all')}</Link>
         <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('howto.cardTitle', { game: game.name })} /></h1>
         <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>

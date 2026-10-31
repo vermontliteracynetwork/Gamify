@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import NavBar from './ui/NavBar';
+import Breadcrumbs from './ui/Breadcrumbs';
 import Home from './student/Home';
 import { SettingsProvider } from './settings/SettingsContext';
 import PublicHome from './public/PublicHome';
@@ -39,7 +40,6 @@ const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
 const Bowling = lazy(() => import('./games/bowling/Bowling'));
 const RoadHop = lazy(() => import('./games/road-hop/RoadHop'));
 const LunchRush = lazy(() => import('./games/lunch-rush/LunchRush'));
-const CastleGuard = lazy(() => import('./games/castle-guard/CastleGuard'));
 const FarmGrow = lazy(() => import('./games/farm-grow/FarmGrow'));
 const ThemeBuilderPage = lazy(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazy(() => import('./theme/builder/TemplatePage'));
@@ -97,6 +97,7 @@ function AnimatedRoutes() {
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
         className="flex-1"
       >
+        <Breadcrumbs />
         <Suspense fallback={<div className="min-h-[60dvh]" aria-busy="true" />}>
         <Routes location={location}>
           <Route path="/" element={<PublicHome />} />
@@ -146,7 +147,6 @@ function AnimatedRoutes() {
           <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
           <Route path="/games/road-hop" element={<RequireSignIn><RequireGame id="road-hop"><RoadHop /></RequireGame></RequireSignIn>} />
           <Route path="/games/lunch-rush" element={<RequireSignIn><RequireGame id="lunch-rush"><LunchRush /></RequireGame></RequireSignIn>} />
-          <Route path="/games/castle-guard" element={<RequireSignIn><RequireGame id="castle-guard"><CastleGuard /></RequireGame></RequireSignIn>} />
           <Route path="/games/farm-grow" element={<RequireSignIn><RequireGame id="farm-grow"><FarmGrow /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />

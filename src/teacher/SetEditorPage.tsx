@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, Table, Plus, Trash, X } from '@phosphor-icons/react';
+import { useCrumbLabel } from '../ui/Breadcrumbs';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Check, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, Table, Plus, Trash, X } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { getLibrarySet } from '../data/library';
@@ -41,6 +42,7 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
   useEffect(() => { if (loaded) setSet(loaded); }, [loaded]);
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
+  useCrumbLabel(set?.name);
   if (loaded === undefined) return null;
   if (loaded === null || !set) {
     return <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10"><Panel><p className="font-bold">{t('editor.notFound')}</p></Panel></main>;
@@ -61,9 +63,6 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
-      <Link to="/teacher/sets" className="inline-flex items-center gap-1.5 font-bold text-text no-underline mb-4 min-h-11">
-        <ArrowLeft weight="bold" size={18} />{t('editor.back')}
-      </Link>
 
       <div className="flex flex-wrap items-center gap-3 mb-2">
         {library ? (

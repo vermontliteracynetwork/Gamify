@@ -1,4 +1,4 @@
-import { Hamburger, Cake, Cat, Cookie, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Popcorn, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
+import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 import { TEAM_COLORS } from '../engine/turns';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
@@ -39,7 +39,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'match-three':
-      return <div className={base} style={{ background: 'linear-gradient(160deg, #ffe3c2, #f6a5c0)' }} aria-hidden="true"><Scatter icons={[Cookie, Cake, IceCream, Pizza, Popcorn]} colors={['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a']} /></div>;
+      // The Classic gems (Puzzle Games Graphics Pack, cleared 2026-10-31).
+      return (
+        <div className={base} style={{ background: 'linear-gradient(160deg, #cdd7fb, #9fb3f5)' }} aria-hidden="true">
+          <div className="absolute inset-[8%] rounded-2xl border-[3px] border-border bg-white grid grid-cols-5 grid-rows-3 gap-[3%] p-[3%]">
+            {[0, 1, 2, 3, 4, 5, 0, 5, 3, 1, 2, 1, 4, 0, 3].map((k, i) => (
+              <span key={i} className="rounded-lg border-2 border-border-soft flex items-center justify-center" style={{ background: ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'][k] }}>
+                <img src={`/classic/match-three/gem-${k}.webp`} alt="" className="w-4/5 h-4/5 object-contain" draggable="false" />
+              </span>
+            ))}
+          </div>
+        </div>
+      );
     case 'four-in-a-row':
       return (
         <div className={base} style={{ background: 'linear-gradient(160deg, #a8d8f0, #6aa9e9)' }} aria-hidden="true">
@@ -57,15 +68,21 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'cast-catch':
+      // The Classic lake: wooden boat at the top left, Kenney fish and floor.
       return (
-        <div className={base} style={{ background: 'linear-gradient(180deg, #cfe9ff 0 30%, #5aa9d6 30% 100%)' }} aria-hidden="true">
-          <span className="absolute left-0 bottom-0 w-[26%] h-[40%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={{ background: '#b98552' }} />
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><line x1="14" y1="40" x2="30" y2="10" stroke="#000" strokeWidth="1.4" /><path d="M30 10 Q55 8 66 34" stroke="#000" strokeWidth="0.5" fill="none" /></svg>
-          <span className="absolute w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={{ left: '62%', top: '50%', background: '#e5635f' }} />
-          {[[30, 66, '#f2d16b', '#e07a3a', 1], [72, 72, '#3f6fd6', '#f2d14b', -1], [48, 82, '#f3803a', '#ffffff', 1]].map(([x, y, body, fin, dir], i) => (
-            <svg key={i} className="absolute w-[22%] h-auto" style={{ left: `${x}%`, top: `${y}%`, transform: `scaleX(${dir})` }} viewBox="0 0 100 60">
-              <path d="M78 30 L98 12 L94 30 L98 48 Z" fill={fin as string} stroke="#000" strokeWidth="3" /><ellipse cx="44" cy="30" rx="38" ry="22" fill={body as string} stroke="#000" strokeWidth="3" /><circle cx="20" cy="25" r="4" fill="#000" />
-            </svg>
+        <div className={base} style={{ background: 'linear-gradient(180deg, #cfe9ff 0 22%, #6cc0e5 22% 60%, #3f8fc4 100%)' }} aria-hidden="true">
+          <svg className="absolute" style={{ left: '-8%', top: '2%', width: '42%' }} viewBox="0 -60 320 180">
+            <path d="M10 40 L300 40 Q290 90 240 112 L60 112 Q20 90 10 40 Z" fill="#a0683a" stroke="#000" strokeWidth="6" strokeLinejoin="round" />
+            <path d="M6 34 L304 34 L300 44 L10 44 Z" fill="#7a4a24" stroke="#000" strokeWidth="6" strokeLinejoin="round" />
+            <line x1="250" y1="36" x2="330" y2="-50" stroke="#5b3a1e" strokeWidth="8" strokeLinecap="round" />
+          </svg>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M30 6 Q52 4 62 30" stroke="#000" strokeWidth="0.5" fill="none" /></svg>
+          <span className="absolute w-[8%] aspect-square rounded-full border-[2.5px] border-border" style={{ left: '58%', top: '44%', background: '#e5635f' }} />
+          {[['seaweed-green-a', 4, 22], ['rock-a', 22, 16], ['seaweed-pink-a', 74, 20], ['rock-b', 86, 14], ['seaweed-orange-a', 56, 18]].map(([n, x, w]) => (
+            <img key={n as string} src={`/classic/cast-catch/${n}.svg`} alt="" className="absolute bottom-0 h-auto" style={{ left: `${x}%`, width: `${w}%` }} draggable="false" />
+          ))}
+          {[['fish-orange', 12, 58, 22, 1], ['fish-blue', 64, 62, 20, -1], ['fish-pink', 38, 74, 18, 1]].map(([n, x, y, w, d]) => (
+            <img key={n as string} src={`/classic/cast-catch/${n}.svg`} alt="" className="absolute h-auto" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, transform: `scaleX(${d})` }} draggable="false" />
           ))}
         </div>
       );
@@ -99,16 +116,19 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'bowling':
+      // A bowling alley with a real bowling ball (no space look, teacher 2026-10-31).
       return (
-        <div className={base} style={{ background: 'radial-gradient(circle at 70% 20%, #3b3a8f, #15143a)' }} aria-hidden="true">
+        <div className={base} style={{ background: 'linear-gradient(180deg, #f3d9b1, #ed9d75)' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-            {[[8, 10], [30, 6], [86, 12], [62, 18], [14, 30], [92, 40]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={0.9} fill="#fff" />)}
-            <polygon points="20,100 80,100 60,36 40,36" fill="#314677" stroke="#000" strokeWidth="1" />
+            <rect x="30" y="22" width="40" height="14" rx="2" fill="#241c3d" stroke="#000" strokeWidth="1" />
+            <polygon points="14,100 86,100 64,36 36,36" fill="#9aa3b5" stroke="#000" strokeWidth="1" />
+            <polygon points="20,100 80,100 61,36 39,36" fill="#e2b07a" stroke="#000" strokeWidth="1" />
+            {[30, 40, 50, 60, 70].map((x) => <line key={x} x1={x} y1="100" x2={50 + (x - 50) * 0.42} y2="36" stroke="#8a5a2b" strokeOpacity="0.3" strokeWidth="0.6" />)}
             {[[50, 50], [45, 44], [55, 44], [40, 39], [50, 39], [60, 39]].map(([x, y], i) => (
-              <g key={i} transform={`translate(${x} ${y}) scale(0.7)`}><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><rect x="-1.25" y="-7.3" width="2.5" height="0.9" fill="#e5635f" /></g>
+              <g key={i} transform={`translate(${x} ${y}) scale(0.7)`}><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><rect x="-1.25" y="-7.6" width="2.5" height="0.7" fill="#e5635f" /><rect x="-1.4" y="-6.5" width="2.8" height="0.7" fill="#e5635f" /></g>
             ))}
-            <circle cx="50" cy="84" r="9" fill="#ed9d75" stroke="#000" strokeWidth="1" />
-            <ellipse cx="50" cy="84" rx="14" ry="3.2" fill="none" stroke="#fdfd94" strokeWidth="1.6" transform="rotate(-14 50 84)" />
+            <image href="/classic/bowling/ball-3.webp" x="40" y="72" width="20" height="20" />
+            {[[47, 77, 1.4], [51, 76, 1.4], [49.5, 80.5, 1.7]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity="0.85" />)}
           </svg>
         </div>
       );
@@ -139,18 +159,6 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
-    case 'castle-guard':
-      return (
-        <div className={base} style={{ background: '#9fd88a' }} aria-hidden="true">
-          <svg viewBox="0 0 100 62" className="absolute inset-0 w-full h-full">
-            <polyline points="-4,14 30,14 30,42 58,42 58,18 84,18 84,50" fill="none" stroke="#000" strokeWidth="9.6" strokeLinejoin="round" />
-            <polyline points="-4,14 30,14 30,42 58,42 58,18 84,18 84,50" fill="none" stroke="#e8c48f" strokeWidth="8" strokeLinejoin="round" />
-            <rect x="72" y="44" width="24" height="16" fill="#ece7da" stroke="#000" strokeWidth="1.2" /><path d="M72 44 V38 H78 V42 H84 V38 H90 V42 H96 V44" fill="#ece7da" stroke="#000" strokeWidth="1.2" />
-            {[[18, 26, '#8ec5ff'], [42, 30, '#9fe7a0'], [70, 30, '#ffffff']].map(([x, y, c], i) => <g key={i}><rect x={(x as number) - 4} y={(y as number) - 2} width="8" height="10" fill="#d9d4c7" stroke="#000" strokeWidth="1" /><circle cx={x as number} cy={(y as number) - 4} r="3.2" fill={c as string} stroke="#000" strokeWidth="1" /></g>)}
-            {[[12, 14, '#c9a3f5'], [30, 30, '#f6a5c0'], [58, 30, '#f6c544']].map(([x, y, c], i) => <g key={i}><circle cx={x as number} cy={y as number} r="3.6" fill={c as string} stroke="#000" strokeWidth="1" /><circle cx={(x as number) - 1.2} cy={(y as number) - 0.6} r="0.7" fill="#000" /><circle cx={(x as number) + 1.2} cy={(y as number) - 0.6} r="0.7" fill="#000" /></g>)}
-          </svg>
-        </div>
-      );
     case 'lunch-rush':
       return (
         <div className={base} style={{ background: '#fde2c4' }} aria-hidden="true">
@@ -164,14 +172,14 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'bubble-pop':
+      // The Classic bubbles (Puzzle Games Graphics Pack, cleared 2026-10-31).
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
-          {[[6, 4, '#fdfd94', Star], [24, 4, '#e5635f', Heart], [42, 4, '#e5635f', Heart], [60, 4, '#8fe3a0', Sparkle], [78, 4, '#8ec5ff', Fish], [15, 30, '#fdfd94', Star], [33, 30, '#8ec5ff', Fish], [51, 30, '#8fe3a0', Sparkle], [69, 30, '#f6a5c0', Heart]].map(([x, y, c, I], i) => {
-            const S = I as Icon;
-            return <span key={i} className="absolute w-[17%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: `${x}%`, top: `${y}%`, background: c as string }}><S weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>;
-          })}
-          <span className="absolute w-[17%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: '41.5%', bottom: '6%', background: '#8fe3a0' }}><Sparkle weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>
+          {[[6, 4, 0], [24, 4, 1], [42, 4, 1], [60, 4, 2], [78, 4, 3], [15, 30, 0], [33, 30, 3], [51, 30, 2], [69, 30, 4]].map(([x, y, k], i) => (
+            <img key={i} src={`/classic/bubble-pop/ball-${k}.webp`} alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: `${x}%`, top: `${y}%` }} draggable="false" />
+          ))}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 84 L58 50" stroke="#fff" strokeWidth="2" strokeDasharray="1 4" strokeLinecap="round" /></svg>
+          <img src="/classic/bubble-pop/ball-2.webp" alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: '41.5%', bottom: '6%' }} draggable="false" />
         </div>
       );
     case 'peg-drop':
@@ -192,12 +200,12 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
     default:
+      // The teacher's Classic sky for the Question Tracker (2026-10-31).
       return (
-        <div className={base} style={{ background: 'radial-gradient(circle at 30% 20%, #3b3a8f, #15143a)' }} aria-hidden="true">
-          {[[12, 20, 14], [60, 12, 20], [80, 50, 12], [30, 60, 24], [52, 40, 10], [8, 72, 10]].map(([x, y, s], i) => (
-            <Star key={i} weight="fill" className="absolute" style={{ left: `${x}%`, top: `${y}%`, width: `${s}%`, height: 'auto' }} color="#ffd166" />
+        <div className={base} style={{ background: '#2b3a7a url(/classic/star-quiz/background.webp) center / cover' }} aria-hidden="true">
+          {[[8, 14, 22, -12, 1], [62, 8, 26, 10, 2], [80, 52, 16, 18, 3], [30, 50, 30, -6, 4], [52, 34, 14, 24, 5], [6, 66, 18, 8, 6]].map(([x, y, w, r, k], i) => (
+            <img key={i} src={`/classic/star-quiz/item-${k}.webp`} alt="" className="absolute h-auto" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, transform: `rotate(${r}deg)` }} draggable="false" />
           ))}
-          <Sparkle weight="fill" className="absolute right-[8%] bottom-[10%] w-[12%] h-auto" color="#ffffff" />
         </div>
       );
   }

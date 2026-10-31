@@ -7,18 +7,6 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'puzzle-pack-license', kind: 'legal', added: '2026-10-31', title: 'Confirm the license for the Puzzle Games Graphics Pack (gems and bubbles)',
-    why: 'Match Three gems and Bubble Pop bubbles now use this pack on the work branch. Gamify is sold, so every picture needs a license that allows commercial use before it goes live. The itch.io page could not be opened from the build session.',
-    how: 'Open ci.itch.io/puzzle-games-graphics-pack and tell Claudia what the license says (for example CC0, or "free for commercial use"), or paste it. If it allows commercial use, it ships the same day.' },
-  { id: 'triple-treat-license', kind: 'legal', added: '2026-10-31', title: 'Send the license for Triple Treat SFX',
-    why: 'The Triple Treat download has no license file, so those sounds are not used yet. The Tim Beek and Kenney sounds are in (licenses on file).',
-    how: 'Send Claudia the Triple Treat license page or file (where you got it). If it allows commercial use, the sounds go in the same day.' },
-  { id: 'loyola-font', kind: 'money', added: '2026-10-29', title: 'Get a web license and file for Loyola Round Pro',
-    why: 'Most headings now use the heading font slot you asked for (titles stay Grow Year). Your logo PDF uses Loyola Round Pro, but a font inside a PDF or a Canva design cannot be put on a website. Until a licensed web file arrives, headings use Inclusive Sans bold.',
-    how: 'Buy or download Loyola Round Pro from its maker with a web (or app) license that covers a commercial website, and send Claudia the .woff2 or .otf file and the license page. Canva\'s font license does not cover websites.' },
-  { id: 'castle-guard', kind: 'decide', added: '2026-10-27', title: 'Castle Guard: show it, or keep it off?',
-    why: 'You took Castle Guard off the queue on 2026-10-26, but it got built anyway on 2026-10-27 (my mistake). It is hidden from the game list now; the code stays.',
-    how: 'Say "show Castle Guard" to put it in the game list, or "remove Castle Guard" to delete it.' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },

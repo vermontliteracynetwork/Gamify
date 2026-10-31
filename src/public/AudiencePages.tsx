@@ -178,7 +178,7 @@ export function HomeschoolPage() {
             {(['free', 'homeschool'] as const).map((k) => (
               <div key={k} className={`${card} ${k === 'homeschool' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-2xl">{t(`hs.plan.${k}` as StringKey)}</h3>
-                <ul className="grid gap-1.5 list-none p-0 m-0">{(k === 'free' ? [1, 2, 3] : [1, 2, 3, 4, 5, 6]).map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
+                <ul className="grid gap-1.5 list-none p-0 m-0">{(k === 'free' ? [1, 2, 3] : [1, 2, 3, 4, 5, 6, 7, 8]).map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
                 <p className="font-display text-2xl mt-1">{t(`hs.plan.${k}.price` as StringKey, { m: home })}</p>
                 {k === 'homeschool' && <Link to="/login?mode=signup&plan=homeschool" className={buttonClasses('primary', 'justify-self-start min-h-12 px-6 hover-pop !bg-text !text-white')}>{t('hs.plan.homeschool.start')}</Link>}
               </div>

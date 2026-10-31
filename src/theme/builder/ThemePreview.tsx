@@ -47,13 +47,6 @@ function board(theme: GameTheme) {
           {(['sprout', 'crop-corn', 'crop-pumpkin', 'crop-sunflower', 'crop-tomato'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-14 object-contain justify-self-center" /> : <span key={id} className="h-10 w-10 justify-self-center rounded-full border-[2px] border-border bg-[#7cc66a]" />)}
         </div>
       );
-    case 'castle-guard':
-      return (
-        <div className="grid grid-cols-4 gap-2 items-end w-full" style={{ background: pieceColor(theme, 'road', '#e8c48f') }}>
-          {(['tower-bubble', 'tower-splash', 'tower-snow'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-16 object-contain justify-self-center" /> : <span key={id} className="h-14 w-10 justify-self-center rounded-t-md border-[2px] border-border bg-[#d9d4c7]" />)}
-          {pieceImage(theme, 'critter-1') ? <img src={pieceImage(theme, 'critter-1')} alt="" className="h-10 object-contain" /> : <span className="h-9 w-9 rounded-full border-[2px] border-border bg-[#c9a3f5]" />}
-        </div>
-      );
     case 'big-screen':
       return (
         <div className="grid grid-cols-[auto_1fr] items-center gap-3 w-full">

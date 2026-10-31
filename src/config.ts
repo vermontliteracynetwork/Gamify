@@ -94,7 +94,6 @@ export function canPlayGame(tier: Tier, gameId: string): boolean {
   return TIERS[tier].allGames || FREE_GAMES.includes(gameId);
 }
 
-// The Puzzle Games Graphics Pack (Match Three gems, Bubble Pop balls) waits
-// on its license (teacher to confirm, 2026-10-31). When cleared: set true and
-// copy assets/puzzle-pack/classic/* into public/classic/.
-export const PUZZLE_PACK_CLEARED = false;
+// The Puzzle Games Graphics Pack (Match Three gems, Bubble Pop balls): the
+// teacher confirmed full commercial use (2026-10-31); files in public/classic/.
+export const PUZZLE_PACK_CLEARED = true;

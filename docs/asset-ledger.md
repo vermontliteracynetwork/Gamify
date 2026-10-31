@@ -10,7 +10,7 @@ ships without a line here.
 | Frankfurter Medium (font) | Not used: replaced by Grow Year with the new logo (2026-10-24) | | | |
 | Inclusive Sans (font, by Olivia King) | All body text, platform and game stages (your call, 2026-10-24) | @fontsource/inclusive-sans (Google Fonts) | SIL Open Font License 1.1 | 2026-10-24 |
 | Grow Year (font, by Khurasan Studio) | Headings and the logo lettering | Sent by the owner (`grow-year.zip`); served from `public/fonts/grow-year.woff2` | The download's More Info file: "This product 100% free for personal use & commercial use." The font's own license link (khurasanstudio.com/license) could not be opened from the build environment: **confirm it allows web embedding before launch.** Keep the original zip on file. | 2026-10-24 |
-| Loyola Round Pro (font) | Planned: most headings (teacher, 2026-10-29). **Not shipped:** no file in the app; headings fall back to Inclusive Sans bold | Seen in the owner's logo PDF (embedded subset, not usable) | **Needed:** a web license for a commercial site and the font file from its maker. Canva's font license does not cover websites. | 2026-10-29 |
+| Loyola Round Pro (font) | **Not used** (teacher, 2026-10-31: "dont use loyola"). Headings use Inclusive Sans bold | n/a | No file in the app, nothing to license | 2026-10-31 |
 | axe-core and @axe-core/playwright | Automated accessibility checks in the test suite only (never shipped to users) | npm | MPL-2.0 (dev tool, unmodified) | 2026-10-24 |
 | qrcode | QR codes on the projector code screen | npm (qrcode 1.5) | MIT | 2026-10-24 |
 | fflate | Zips the Theme Builder digital template files | npm (fflate 0.8.2) | MIT | 2026-10-25 |
@@ -28,9 +28,9 @@ ships without a line here.
 | Casual SoundFX by Tim Beek (right, miss, win, whoosh) | Classic sound pack, every game (`public/sounds/`) | Supplied by the teacher with its license PDF (copied beside the files) | CC BY 4.0: commercial use OK, **credit required** (on the Credits page) | 2026-10-31 |
 | Kenney Interface Sounds (click) | Classic tap sound (`public/sounds/tap.mp3`) | kenney.nl, supplied by the teacher | CC0 1.0 | 2026-10-31 |
 | Kenney Background Elements (+ Remastered), Game Icons, UI Pack, Interface Sounds | Library for future scenes, icons and UI (`assets/kenney/`, not shipped until used) | kenney.nl, supplied by the teacher | CC0 1.0 | 2026-10-31 |
-| Casual Game Interface Kit (Free ver) | Not used, not stored | Supplied by the teacher | **No license in the download: not used until the license is confirmed** | 2026-10-31 |
-| Triple Treat SFX | Not used | Supplied by the teacher | **No license file in the download: not used until the license is confirmed** | 2026-10-31 |
-| Puzzle Games Graphics Pack by ci (gems, balls, coins, animals, pipes, blocks) | Match Three gems, Bubble Pop balls (ready behind `PUZZLE_PACK_CLEARED` in `src/config.ts`; files kept in `assets/puzzle-pack/`, not shipped) | ci.itch.io/puzzle-games-graphics-pack, supplied by the teacher | **License not yet confirmed: hold from main until the teacher confirms commercial use** | 2026-10-31 |
+| Casual Game Interface Kit (Free ver) | Library only for now (`assets/casual-ui-kit/`, 1080p screens and icon collection as WebP); not on any page yet | Supplied by the teacher (itch.io) | **Cleared by the teacher for full commercial use (2026-10-31)** | 2026-10-31 |
+| Triple Treat SFX | Library only for now (`assets/triple-treat/`, 61 sounds as MP3: match, pop, success, fail, transition, percussion, mysterious) | Supplied by the teacher (itch.io) | **Cleared by the teacher for full commercial use (2026-10-31)** | 2026-10-31 |
+| Puzzle Games Graphics Pack by ci (gems, balls, coins, animals, pipes, blocks) | Match Three gems, Bubble Pop balls, Bowling balls, their game covers (`public/classic/{match-three,bubble-pop,bowling}`); full pack kept in `assets/puzzle-pack/` | ci.itch.io/puzzle-games-graphics-pack, supplied by the teacher | **Cleared by the teacher for full commercial use (2026-10-31)** | 2026-10-31 |
 
 ## Device fonts for theme titles (2026-10-25)
 

@@ -265,6 +265,7 @@ export default function BubblePop() {
 
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
+          <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="grid gap-2 min-w-0">
             <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
               style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H})`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
@@ -317,6 +318,7 @@ export default function BubblePop() {
           <SoloPanel className="order-first lg:order-none lg:w-[230px]" score={score} line={t('bp.board', { n: level + 1 })}
             dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
             status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
+          </div>
         </div>
       )}
 

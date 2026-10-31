@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, DownloadSimple, FileArrowUp } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { DownloadSimple, FileArrowUp } from '@phosphor-icons/react';
 import { csvRowsToQuestions, generateSampleCsv, parseCsv, type CsvRowError } from '../data/csv';
 import { data, newId } from '../data';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -22,9 +22,6 @@ export default function ImportPage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24">
-      <Link to="/teacher/sets" className="inline-flex items-center gap-1.5 font-bold text-text no-underline mb-4 min-h-11">
-        <ArrowLeft weight="bold" size={18} />{t('editor.back')}
-      </Link>
       <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
 
       <Panel className="grid gap-4">

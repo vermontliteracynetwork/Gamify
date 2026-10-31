@@ -35,11 +35,21 @@ const PAGES: [RegExp, string][] = [
   [/^\/teacher\/reports/, 'Reports'],
   [/^\/teacher\/themes/, 'Theme Builder'],
   [/^\/teacher\/account/, 'Account'],
+  [/^\/teacher\/activity/, 'Create an Activity'],
+  [/^\/schools/, 'For schools'],
+  [/^\/homeschool/, 'For homeschool'],
+  [/^\/student-data/, 'Student data promise'],
+  [/^\/themes/, 'Themes'],
+  [/^\/beta$/, 'Join the beta test'],
   [/^\/owner/, 'Owner'],
 ];
 
+export function pageName(path: string): string | undefined {
+  return PAGES.find(([re]) => re.test(path))?.[1];
+}
+
 export function pageTitle(path: string): string {
   const game = path.match(/^\/games\/([a-z0-9-]+)/);
-  const name = game ? getGame(game[1])?.name : PAGES.find(([re]) => re.test(path))?.[1];
+  const name = game ? getGame(game[1])?.name : pageName(path);
   return name ? `${name} | Gamify` : 'Gamify';
 }

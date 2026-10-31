@@ -38,7 +38,7 @@
   --radius-input: 16px;
 
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
-  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -83,7 +83,7 @@
   --shadow-sticker-lg: 0 6px 0 var(--border);
 
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
-  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
 
   color-scheme: light;
@@ -105,11 +105,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Fonts (teacher, 2026-10-29: "make title fields the grow year and change
-   most headings to Loyola"). Titles (h1, .title-bubble) wear Grow Year, the
-   logo's lettering; every other heading and display line wears the heading
-   font, Loyola Round Pro, which reads far more easily at small sizes. Until
-   its licensed web file is in public/fonts, Inclusive Sans bold stands in. */
+/* Fonts: titles (h1, .title-bubble) wear Grow Year, the logo's lettering
+   (teacher, 2026-10-29); every other heading and display line wears the
+   heading font, Inclusive Sans bold (teacher, 2026-10-31: "dont use loyola"). */
 h1, .title-bubble {
   font-family: var(--font-display);
 }
@@ -344,7 +342,7 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
    (teacher, 2026-10-31): brand fonts and colors, whatever the game's theme. */
 .brand-menu {
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
-  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --color-accent: #fdfd94;
   --color-accent-ink: #000000;
   --stage-bg-text: var(--text);

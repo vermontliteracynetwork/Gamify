@@ -9,6 +9,7 @@ import type { StringKey } from '../i18n/en';
 import { Button, buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import PlanFeatures from '../billing/PlanFeatures';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets
 // comes before what it costs, the monthly price is the big number with the
@@ -35,6 +36,11 @@ export default function PricingPage() {
     { label: t('pricing.row.groups'), value: (x) => x !== 'free' },
     { label: t('pricing.row.assigned'), value: (x) => fmt(TIERS[x].assignedSetsPerStudent) },
     { label: t('pricing.row.live'), value: (x) => TIERS[x].liveMonitorAndLock },
+    { label: t('pricing.row.lobbyGoal'), value: (x) => x !== 'free' },
+    { label: t('pricing.row.guides'), value: (x) => x !== 'free' },
+    { label: t('pricing.row.each'), value: (x) => x === 'pro' },
+    { label: t('pricing.row.board'), value: (x) => x === 'pro' },
+    { label: t('pricing.row.early'), value: (x) => x === 'pro' },
     { label: t('pricing.row.reports'), value: (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('pricing.days', { n: TIERS[x].reportHistoryDays }) : t('pricing.allTime')) },
     { label: t('pricing.row.access'), value: () => true },
   ];
@@ -65,9 +71,9 @@ export default function PricingPage() {
                 {x === 'plus' && <span className="absolute -top-4 right-5 bg-text text-white font-display rounded-pill px-3 py-1 text-sm">{t('upgrade.best')}</span>}
                 <h2 id={`plan-${x}`} className="font-display text-3xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-bold">{t(`pricing.${x}.who` as StringKey)}</p>
-                <ul className="grid gap-2 list-none p-0 m-0">
-                  {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t((x === 'free' ? `pricing.free.${n}` : `upgrade.${x}.${n}`) as StringKey)}</li>)}
-                </ul>
+                {x === 'free'
+                  ? <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.free.${n}` as StringKey)}</li>)}</ul>
+                  : <PlanFeatures plan={x as 'plus' | 'pro'} />}
                 <div className="mt-1">
                   {x === 'free'
                     ? <><p className="font-display text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>

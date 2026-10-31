@@ -1,5 +1,6 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Clock, GraduationCap, PaintBrush } from '@phosphor-icons/react';
+import { useCrumbLabel } from '../ui/Breadcrumbs';
+import { ArrowRight, Clock, GraduationCap, PaintBrush } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -81,11 +82,11 @@ function Meta({ grades, minutes }: { grades: string; minutes: number }) {
 export function WaysPost() {
   const { slug } = useParams();
   const post = POSTS.find((p) => p.slug === slug);
+  useCrumbLabel(post?.title);
   if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
   return (
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <Link to="/blog" className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('ways.all')}</Link>
         <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />

@@ -200,6 +200,9 @@ export default function MatchThree() {
       {(phase === 'play' || phase === 'end') && (
         // The board fills the play space like the reference games (teacher, 2026-10-31).
         <div className="relative play-fill grid content-center gap-4 px-3 py-3 md:flex md:justify-center md:items-center">
+          {/* Board and score panel share one row, the panel top aligned with the
+              board (teacher, 2026-10-31). */}
+          <div className="contents md:flex md:items-start md:gap-4">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
@@ -240,6 +243,7 @@ export default function MatchThree() {
 
           <SoloPanel className="md:w-[220px]" score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
             dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
+          </div>
         </div>
       )}
 

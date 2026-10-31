@@ -39,11 +39,14 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'roll' | 'result';
 const LANE_COLORS = ['#c9a3f5', '#8ec5ff', '#8fe3a0', '#fdfd94', '#f6a5c0'];
 const ROLL_MS = 1500;
-// Fixed sky dots, so the stars don't jump between turns.
-const DOTS = Array.from({ length: 40 }, (_, i) => ({ x: (i * 37.7) % 100, y: (i * 23.3) % 34, r: 0.25 + (i % 3) * 0.15 }));
+// Classic: a bowling alley, no space look (teacher, 2026-10-31), and real
+// bowling balls from the Puzzle Games Graphics Pack, one color per player.
+const CLASSIC_BALLS = 8;
+// Wood boards down the lane, fixed so they never jump between turns.
+const BOARDS = Array.from({ length: 9 }, (_, i) => -1.2 + (i + 1) * 0.24);
 
 // Bowling (launch roster, Stage 7): a right answer earns a roll. Tap a
-// lane and the planet ball rolls into ten alien pins. Two rolls a frame;
+// lane and the ball rolls into ten pins. Two rolls a frame;
 // strikes and spares earn a bonus. Teams on one screen or one player.
 export default function Bowling() {
   const { settings } = useSettings();
@@ -203,7 +206,8 @@ export default function Bowling() {
   const pinArt = pieceImage(theme, 'pin');
   const ballColor = pieceColor(theme, 'ball', '#ed9d75');
   const ballArt = pieceImage(theme, 'ball');
-  const laneColor = pieceColor(theme, 'lane', '#314677');
+  const laneColor = pieceColor(theme, 'lane', '#e2b07a');
+  const classicBall = `/classic/bowling/ball-${(turns?.turn ?? 0) % CLASSIC_BALLS}.webp`;
   // Pins draw far to near so near pins sit in front.
   const order = PIN_SPOTS.map((_, i) => i).sort((a, b) => PIN_SPOTS[b][1] - PIN_SPOTS[a][1]);
   const near = 0, far = 1;
@@ -243,18 +247,24 @@ export default function Bowling() {
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
           <section className="grid gap-2 min-w-0 [--sb-extra:4.375rem] lg:[--sb-extra:0rem]">
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 17.5rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+              style={{ ...pieceFill(theme, 'background', '#f3d9b1'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 17.5rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
-                  <radialGradient id="sb-planet" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
+                  <radialGradient id="sb-shine" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
                   {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
                 </defs>
-                {!pieceImage(theme, 'background') && DOTS.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={d.r} fill="#fff" opacity={0.6} />)}
+                {!pieceImage(theme, 'background') && <>
+                  {/* The alley's back wall and the dark pin deck behind the pins. */}
+                  <rect x={0} y={0} width={100} height={yAt(far) - 4} fill="#ed9d75" opacity={0.35} />
+                  <rect x={50 - halfWidthAt(far) - 6} y={yAt(far) - 14} width={(halfWidthAt(far) + 6) * 2} height={14} rx={1.5} fill="#241c3d" stroke="#000" strokeWidth={0.6} />
+                  {[0, 1, 2, 3, 4].map((i) => <circle key={i} cx={22 + i * 14} cy={9} r={2.6} fill={LANE_COLORS[i]} stroke="#000" strokeWidth={0.5} />)}
+                </>}
+                {/* Gutters either side, then the wooden lane. */}
+                <polygon points={`${50 - halfWidthAt(near) - 5},${yAt(near)} ${50 + halfWidthAt(near) + 5},${yAt(near)} ${50 + halfWidthAt(far) + 5 * scaleAt(far)},${yAt(far)} ${50 - halfWidthAt(far) - 5 * scaleAt(far)},${yAt(far)}`} fill="#9aa3b5" stroke="#000" strokeWidth={0.6} />
                 <polygon points={lanePoly} fill={laneColor} stroke="#000" strokeWidth={0.6} />
-                {LANE_X.slice(0, -1).map((x, i) => {
-                  const mid = (x + LANE_X[i + 1]) / 2;
-                  return <line key={i} x1={xAt(mid, near)} y1={yAt(near)} x2={xAt(mid, far)} y2={yAt(far)} stroke="#fff" strokeOpacity={0.18} strokeWidth={0.3} />;
-                })}
+                {BOARDS.map((x, i) => <line key={i} x1={xAt(x, near)} y1={yAt(near)} x2={xAt(x, far)} y2={yAt(far)} stroke="#8a5a2b" strokeOpacity={0.28} strokeWidth={0.25} />)}
+                {/* Aiming arrows on the lane, like a real alley. */}
+                {LANE_X.map((x, i) => { const d = 0.28; const cx = xAt(x, d), cy = yAt(d), w = 1.6 * scaleAt(d); return <path key={i} d={`M${cx} ${cy - 2.4 * w} L${cx + w} ${cy} L${cx - w} ${cy} Z`} fill="#8a5a2b" opacity={0.55} />; })}
                 {lane !== null && <line x1={xAt(LANE_X[lane], near)} y1={yAt(near)} x2={xAt(LANE_X[lane], pinDepth(0))} y2={yAt(pinDepth(0))} stroke={LANE_COLORS[lane]} strokeWidth={1.2} strokeDasharray="1 2" strokeLinecap="round" />}
                 {order.map((i) => {
                   if (!standing[i]) return null;
@@ -267,16 +277,16 @@ export default function Bowling() {
                       <g className="bp-fx" style={fall && !still ? { animation: `sb-fall-${i % 2 ? 'l' : 'r'} 0.6s ease-in forwards` } : fall ? { opacity: 0 } : undefined}>
                         {pinArt ? <image href={pinArt} x={-3.2} y={-11.2} width={6.4} height={11.6} preserveAspectRatio="xMidYMax meet" /> : <>
                         <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
-                        <rect x={-1.25} y={-7.3} width={2.5} height={0.9} fill="#e5635f" />
-                        <circle cx={-0.6} cy={-9.4} r={0.35} fill="#241c3d" /><circle cx={0.6} cy={-9.4} r={0.35} fill="#241c3d" />
+                        <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
                         </>}
                       </g>
                     </g>
                   );
                 })}
                 <g ref={ballRef} transform={`translate(${xAt(LANE_X[lane ?? 2], 0)} ${yAt(0) - 6}) scale(1)`} opacity={step === 'roll' || step === 'aim' || step === 'question' ? 1 : 0}>
-                  <circle r={6} fill={ballArt ? 'url(#sb-ball-art)' : 'url(#sb-planet)'} stroke="#000" strokeWidth={0.6} />
-                  <ellipse rx={9} ry={2.1} fill="none" stroke="#fdfd94" strokeWidth={0.9} transform="rotate(-14)" />
+                  {ballArt ? <circle r={6} fill="url(#sb-ball-art)" stroke="#000" strokeWidth={0.6} /> : pieceColor(theme, 'ball', '') ? <circle r={6} fill="url(#sb-shine)" stroke="#000" strokeWidth={0.6} /> : <image href={classicBall} x={-6.3} y={-6.3} width={12.6} height={12.6} />}
+                  {/* Three finger holes make it a bowling ball. */}
+                  {[[-1.6, -2.4, 0.9], [0.6, -3, 0.9], [-0.2, -0.4, 1.1]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity={0.85} />)}
                 </g>
               </svg>
               <AnimatePresence>

@@ -8,9 +8,9 @@ export const bowlingManifest: GameManifest = {
   modes: ['share', 'solo'],
   questionKinds: ['mc'],
   themePieces: [
-    { id: 'background', label: 'Background', width: 1000, height: 1300, hint: 'The sky behind the lane' },
-    { id: 'lane', label: 'Lane', width: 800, height: 1000, hint: 'The color of the lane', color: '#314677' },
-    { id: 'ball', label: 'Ball', width: 128, height: 128, hint: 'The ball you roll', color: '#ed9d75' },
+    { id: 'background', label: 'Background', width: 1000, height: 1300, hint: 'The alley wall behind the lane' },
+    { id: 'lane', label: 'Lane', width: 800, height: 1000, hint: 'The color of the lane', color: '#e2b07a' },
+    { id: 'ball', label: 'Ball', width: 128, height: 128, hint: 'The ball you roll (Classic: a ball in each player\'s own color)' },
     { id: 'pin', label: 'Pin', width: 64, height: 128, hint: 'One pin (a picture, or just its color)', color: '#fbfcf8' },
     ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} icon`, width: 256, height: 256, hint: `The round badge for team ${i + 1}` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },

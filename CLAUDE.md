@@ -72,9 +72,8 @@ teacher no control or educational value is not done.
   `src/index.css` with the brand palette (teacher, 2026-10-24): periwinkle
   ground, off-white panels, black outlines, pale yellow accent, salmon,
   coral, navy and mint; Inclusive Sans body, Grow Year for titles (h1 and
-  .title-bubble, the logo's lettering) and the heading font (Loyola Round
-  Pro once licensed, Inclusive Sans bold until then) for every other heading
-  (teacher, 2026-10-29); one shape scale. Use its tokens before adding colors or radii.
+  .title-bubble, the logo's lettering) and the heading font, Inclusive Sans
+  bold, for every other heading (teacher, 2026-10-29; no Loyola, 2026-10-31); one shape scale. Use its tokens before adding colors or radii.
   Game stages wear per-game themes (`src/theme`), designed per game. A
   game's start menus (welcome, theme, setup) and its results box always wear
   the standard Gamify look, never a theme's (teacher, 2026-10-31): they are

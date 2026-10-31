@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PlanFeatures from '../billing/PlanFeatures';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Brain, Check, ChalkboardTeacher, GameController, PaintBrush, Sparkle, SpeakerHigh, Star, TextAa, Leaf, X } from '@phosphor-icons/react';
@@ -106,9 +107,7 @@ export default function FeaturesPage() {
               <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-3xl">{t(`features.plans.${plan}` as StringKey)}</h3>
                 <p className="font-bold">{t(`pricing.${plan}.who` as StringKey)}</p>
-                <ul className="grid gap-2 list-none p-0 m-0">
-                  {[1, 2, 3, 4].map((i) => <li key={i} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`upgrade.${plan}.${i}` as StringKey)}</li>)}
-                </ul>
+                <PlanFeatures plan={plan} />
                 <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'primary' : 'secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
               </div>
             ))}

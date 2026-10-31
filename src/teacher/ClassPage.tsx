@@ -1,7 +1,8 @@
 import { makeGameCode } from '../data/gameCodes';
+import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DiceFive, GearSix, Heart, Plus, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
+import { DiceFive, GearSix, Heart, Plus, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -56,12 +57,12 @@ export default function ClassPage() {
     const taken = students.map((s) => s.pin ?? '');
     void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
   }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
+  useCrumbLabel(classroom?.name);
   if (!classroom) return null;
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
-      {!free && <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>}
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
       <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[

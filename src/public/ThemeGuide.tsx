@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, DownloadSimple, PaintBrush, Printer } from '@phosphor-icons/react';
+import { DownloadSimple, PaintBrush, Printer } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
 import { GAMES } from '../games/registry';
 import type { GameManifest } from '../games/types';
@@ -85,7 +85,6 @@ export function ThemeGuidePage() {
   return (
     <>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <Link to="/blog?tag=themes" className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('guide.all')}</Link>
         <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('guide.cardTitle', { game: game.name })} /></h1>
         <p className="text-xl font-bold">{t('guide.intro', { game: game.name })}</p>
