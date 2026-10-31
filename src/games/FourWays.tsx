@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { DeviceTablet, Lightning, ProjectorScreen, Robot, Star, User, Users } from '@phosphor-icons/react';
+import { ArrowArcLeft, ArrowArcRight, Check, DeviceTablet, Lightning, ProjectorScreen, Robot, Star, User, Users } from '@phosphor-icons/react';
 import { ALL_MODES, type PlayMode } from '../data/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -14,28 +15,77 @@ export default function FourWays({ compact = false }: { compact?: boolean }) {
   const reduce = useReducedMotion();
   return (
     <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-2 lg:grid-cols-4 gap-2' : 'sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
-      {ALL_MODES.map((m, i) => {
-        const Icon = MODE_ICONS[m];
-        return (
-          <motion.li key={m} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-            whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 0.6 : -0.6 }}
-            className={`bg-surface border-[2.5px] border-border rounded-panel overflow-hidden flex ${compact ? 'items-center gap-3 p-2 pr-3' : 'flex-col'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            {compact ? (
-              <span className="shrink-0 w-12 h-12 rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
-            ) : (
-              <span className="relative h-32 border-b-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }} aria-hidden="true">
-                <Scene mode={m} />
-              </span>
-            )}
-            <span className={`grid ${compact ? 'gap-0 min-w-0' : 'gap-1.5 p-4 flex-1 content-start'}`}>
-              <span className={`font-display font-bold leading-tight ${compact ? 'text-lg' : 'text-2xl'} flex items-center gap-2`}>{!compact && <Icon weight="bold" size={26} aria-hidden="true" />}<Title text={t(`mode.${m}` as StringKey)} /></span>
-              <span className={`font-bold ${compact ? 'text-xs text-muted line-clamp-2' : 'text-sm'}`}>{t(`mode.${m}.hint` as StringKey)}</span>
-              {!compact && <span className="font-semibold text-sm text-muted">{t(`public.mode.${m}` as StringKey)}</span>}
-            </span>
-          </motion.li>
-        );
-      })}
+      {ALL_MODES.map((m, i) => (
+        <motion.li key={m} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.08 }}
+          whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 0.6 : -0.6 }} className={compact ? '' : 'grid'}>
+          {compact ? <Compact mode={m} /> : <FlipCard mode={m} />}
+        </motion.li>
+      ))}
     </ul>
+  );
+}
+
+const card = 'bg-surface border-[2.5px] border-border rounded-panel overflow-hidden';
+
+function Compact({ mode: m }: { mode: PlayMode }) {
+  const Icon = MODE_ICONS[m];
+  return (
+    <span className={`${card} flex items-center gap-3 p-2 pr-3 h-full`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <span className="shrink-0 w-12 h-12 rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
+      <span className="grid gap-0 min-w-0">
+        <span className="font-display font-bold leading-tight text-lg"><Title text={t(`mode.${m}` as StringKey)} /></span>
+        <span className="font-bold text-xs text-muted line-clamp-2">{t(`mode.${m}.hint` as StringKey)}</span>
+      </span>
+    </span>
+  );
+}
+
+// Each card flips over (teacher, 2026-10-31): hovering shows a "Ways to play"
+// arrow at the bottom; it turns the card to the class setups that way suits.
+// Touch screens always show the arrow. Reduced motion swaps without turning.
+function FlipCard({ mode: m }: { mode: PlayMode }) {
+  const reduce = useReducedMotion();
+  const [back, setBack] = useState(false);
+  const Icon = MODE_ICONS[m];
+  const face = `${card} [grid-area:1/1] flex flex-col [backface-visibility:hidden] ${reduce ? '' : 'transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]'}`;
+  const turn = (b: boolean) => ({ transform: reduce ? undefined : `rotateY(${b ? 180 : 0}deg)`, visibility: reduce ? (b ? 'hidden' : 'visible') : undefined, boxShadow: 'var(--shadow-sticker)' } as const);
+  const flipBtn = 'mt-auto self-start inline-flex items-center gap-1.5 min-h-11 px-3 -ml-1 rounded-pill border-[2px] border-border font-bold text-sm hover-pop';
+  return (
+    <div className="group grid [perspective:1200px]">
+      <div className={face} style={turn(back)} aria-hidden={back} {...((back ? { inert: "" } : {}) as object)}>
+        <span className="relative h-32 border-b-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }} aria-hidden="true"><Scene mode={m} /></span>
+        <span className="grid gap-1.5 p-4 pb-3 flex-1 content-start">
+          <span className="font-display font-bold leading-tight text-2xl flex items-center gap-2"><Icon weight="bold" size={26} aria-hidden="true" /><Title text={t(`mode.${m}` as StringKey)} /></span>
+          <span className="font-bold text-sm">{t(`mode.${m}.hint` as StringKey)}</span>
+          <span className="font-semibold text-sm text-muted">{t(`public.mode.${m}` as StringKey)}</span>
+        </span>
+        <span className="px-4 pb-4 flex">
+          <button type="button" onClick={() => setBack(true)} aria-label={t('ways.flipFor', { mode: t(`mode.${m}` as StringKey) })}
+            className={`${flipBtn} bg-accent transition-opacity opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100`}>
+            {t('ways.flip')}<ArrowArcRight weight="bold" size={18} aria-hidden="true" />
+          </button>
+        </span>
+      </div>
+      <div className={face} style={{ ...turn(!back), transform: reduce ? undefined : `rotateY(${back ? 0 : -180}deg)` }} aria-hidden={!back} {...((!back ? { inert: "" } : {}) as object)}>
+        <span className="px-4 py-3 border-b-[2.5px] border-border flex items-center gap-2" style={{ background: MODE_COLORS[m] }}>
+          <Icon weight="fill" size={26} aria-hidden="true" />
+          <span className="font-display font-bold text-2xl leading-tight"><Title text={t('ways.flip')} /></span>
+        </span>
+        <span className="grid gap-2 p-4 pb-3 flex-1 content-start">
+          <span className="font-display font-bold text-lg leading-tight">{t(`mode.${m}` as StringKey)}</span>
+          <ul className="grid gap-2 list-none p-0 m-0">
+            {[1, 2, 3].map((n) => (
+              <li key={n} className="flex gap-2 text-sm font-semibold"><Check weight="bold" size={18} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`ways.back.${m}.${n}` as StringKey)}</li>
+            ))}
+          </ul>
+        </span>
+        <span className="px-4 pb-4 flex">
+          <button type="button" onClick={() => setBack(false)} className={`${flipBtn} bg-surface-2`}>
+            <ArrowArcLeft weight="bold" size={18} aria-hidden="true" />{t('ways.flipBack')}
+          </button>
+        </span>
+      </div>
+    </div>
   );
 }
 
