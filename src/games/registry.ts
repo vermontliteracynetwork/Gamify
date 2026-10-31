@@ -23,7 +23,8 @@ export const ALL_GAMES: GameManifest[] = [gameShowManifest, pegDropManifest, cas
 // the questions are the game (matching, memory, flashcards) and Road Hop come
 // later; their code and links stay, they are just not listed. Castle Guard
 // waits too: the teacher took it off the queue (2026-10-26) before it was built.
-export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'castle-guard'];
+// Lunch Rush and Farm Grow are kept but not listed for now (teacher, 2026-10-31).
+export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'castle-guard', 'lunch-rush', 'farm-grow'];
 export const GAMES: GameManifest[] = ALL_GAMES.filter((g) => !LATER_GAMES.includes(g.id));
 
 export function getGame(id: string): GameManifest | undefined {

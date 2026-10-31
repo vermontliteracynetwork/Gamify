@@ -145,7 +145,14 @@ h1, h2, h3, .font-display, .title-bubble { font-synthesis: none; letter-spacing:
 h1, h2, h3 { color: inherit; }
 
 /* A capital G in a heading is drawn as the G from the Gamify logo, in the
-   heading's own color (src/ui/Title.tsx). */
+   heading's own color (src/ui/Title.tsx), but only in the Gamify font,
+   Grow Year (teacher, 2026-10-31): headings in the heading font, and game
+   stages whose theme picks another display font, show a plain G. */
+.logo-g-text { display: none; }
+:is(h2, h3, .font-display):not(.title-bubble, h1) .logo-g,
+[data-plain-g] .logo-g { display: none; }
+:is(h2, h3, .font-display):not(.title-bubble, h1) .logo-g-text,
+[data-plain-g] .logo-g-text { display: inline; }
 .logo-g {
   display: inline-block;
   width: 0.68em;

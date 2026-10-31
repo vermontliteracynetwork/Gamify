@@ -38,7 +38,7 @@ export function ThemedPage({ theme, children }: { theme: GameTheme; children: Re
   const { settings } = useSettings();
   useEffect(() => { setSoundPack(theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds]);
   return (
-    <div className="game-stage min-h-[calc(100dvh-4rem)]" style={{
+    <div className="game-stage min-h-[calc(100dvh-4rem)]" data-plain-g={theme.fonts.display !== 'Grow Year' ? '' : undefined} style={{
       ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],
       // A theme that picks its own display font wears it on every heading.
       ...(theme.fonts.display !== 'Grow Year' && THEME_FONTS[theme.fonts.display] ? { ['--font-heading' as string]: THEME_FONTS[theme.fonts.display] } : {}),
