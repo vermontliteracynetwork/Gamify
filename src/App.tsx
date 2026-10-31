@@ -35,7 +35,7 @@ const CastCatch = lazy(() => import('./games/cast-catch/CastCatch'));
 const MemoryMatch = lazy(() => import('./games/memory-match/MemoryMatch'));
 const Flashcards = lazy(() => import('./games/flashcards/Flashcards'));
 const MatchUp = lazy(() => import('./games/match-up/MatchUp'));
-const PegDrop = lazy(() => import('./games/peg-drop/PegDrop'));
+const Pinball = lazy(() => import('./games/pinball/Pinball'));
 const BubblePop = lazy(() => import('./games/bubble-pop/BubblePop'));
 const Bowling = lazy(() => import('./games/bowling/Bowling'));
 const RoadHop = lazy(() => import('./games/road-hop/RoadHop'));
@@ -140,7 +140,9 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
-          <Route path="/games/peg-drop" element={<RequireSignIn><RequireGame id="peg-drop"><PegDrop /></RequireGame></RequireSignIn>} />
+          <Route path="/games/pinball" element={<RequireSignIn><RequireGame id="pinball"><Pinball /></RequireGame></RequireSignIn>} />
+          {/* Peg Drop became Pinball (teacher, 2026-10-31). */}
+          <Route path="/games/peg-drop" element={<Navigate to="/games/pinball" replace />} />
           {/* Old addresses from before the generic game names (2026-10-25). */}
           <Route path="/games/bakery-match" element={<Navigate to="/games/match-three" replace />} />
           <Route path="/games/space-bowling" element={<Navigate to="/games/bowling" replace />} />

@@ -360,3 +360,18 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
 html:fullscreen { --play-h: 100dvh; }
 .play-fill { height: var(--play-h); }
 html:fullscreen .play-fill { height: 100dvh; }
+
+/* Pinball (2026-10-31): pockets pop in each round, the landed pocket glows,
+   bumpers flash and flippers flick on a launch, sparks where the ball bounces. */
+@keyframes pb-pocket { from { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } to { transform: scale(1); } }
+@keyframes pb-glow { 0%, 100% { filter: drop-shadow(0 0 0 #fdfd94); } 50% { filter: drop-shadow(0 0 3px #fdfd94); } }
+@keyframes pb-bump { 0%, 100% { transform: scale(1); fill-opacity: 1; } 40% { transform: scale(1.25); fill: #fdfd94; } }
+@keyframes pb-flip-l { 0%, 100% { transform: translate(26px, 118px) rotate(18deg); } 30% { transform: translate(26px, 118px) rotate(-22deg); } }
+@keyframes pb-flip-r { 0%, 100% { transform: translate(74px, 118px) rotate(-18deg); } 30% { transform: translate(74px, 118px) rotate(22deg); } }
+@keyframes pb-spark { 0% { transform: scale(0.3); opacity: 0; } 10% { opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+.pb-pocket { animation: pb-pocket 0.45s ease-out both; }
+.pb-glow { animation: pb-glow 0.6s ease-in-out 3; }
+.pb-bump { animation: pb-bump 0.5s ease-out; }
+.pb-flip-l { animation: pb-flip-l 0.35s ease-out; }
+.pb-flip-r { animation: pb-flip-r 0.35s ease-out; }
+.pb-spark { opacity: 0; animation: pb-spark 0.5s ease-out both; }

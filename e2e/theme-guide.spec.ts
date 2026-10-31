@@ -14,8 +14,8 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   await expect(page.getByRole('link', { name: /Designing a Theme File, Step by Step/ })).toBeVisible();
   await page.screenshot({ path: `test-results/guide-list-${info.project.name}.png` });
 
-  await page.getByRole('link', { name: /Theme Guide: Peg Drop/ }).click();
-  const peg = GAMES.find((g) => g.id === 'peg-drop')!;
+  await page.getByRole('link', { name: /Theme Guide: Pinball/ }).click();
+  const peg = GAMES.find((g) => g.id === 'pinball')!;
   for (const p of peg.themePieces) await expect(page.getByRole('heading', { level: 3, name: new RegExp(p.label) }).first()).toBeVisible();
   await expect(page.getByText(`${peg.themePieces[0].width} x ${peg.themePieces[0].height} px`).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Power-ups' })).toBeVisible();
@@ -23,22 +23,22 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   await page.screenshot({ path: `test-results/guide-peg-${info.project.name}.png`, fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 
-  // Free plan: Peg Drop templates are locked behind Plus (teacher, 2026-10-31).
+  // Free plan: Pinball templates are locked behind Plus (teacher, 2026-10-31).
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: /Canva file/ })).toHaveCount(0);
-  await page.goto('/blog/themes/peg-drop/print');
+  await page.goto('/blog/themes/pinball/print');
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
   await page.evaluate(() => localStorage.setItem('gamify:settings', JSON.stringify({ ...JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'), tier: 'plus' })));
-  await page.goto('/blog/themes/peg-drop');
+  await page.goto('/blog/themes/pinball');
   const wait = page.waitForEvent('download');
   await page.getByRole('button', { name: /Canva file/ }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('peg-drop-theme-for-canva.pdf');
+  expect(file.suggestedFilename()).toBe('pinball-theme-for-canva.pdf');
 
   await page.getByRole('link', { name: /Printable pages/ }).click();
   await expect(page.getByText('pages, one for each piece', { exact: false })).toBeVisible();
   await expect(page.getByText('EXAMPLE')).toHaveCount(0);
   await page.getByRole('link', { name: 'Back to the theme guide' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: /Theme Guide: Peg Drop/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Theme Guide: Pinball/ })).toBeVisible();
   expect(problems).toEqual([]);
 });

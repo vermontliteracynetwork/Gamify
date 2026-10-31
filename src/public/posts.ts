@@ -109,13 +109,13 @@ export const POSTS: Post[] = [
     slug: 'co-op-game-day',
     title: 'Run a Co-op Game Day on One Big Screen',
     summary: 'Turn a co-op class into a friendly tournament: teams, one shared set and one big screen.',
-    cover: 'peg-drop',
+    cover: 'pinball',
     grades: 'K-12',
     minutes: 45,
     tags: ['homeschool'],
     body: [
       'A co-op class is a great place for a game day. Families bring children of many ages, and a shared screen turns review into a team event.',
-      'Pick one set that fits the group, or one per age group. Put a Share game like Game Show or Peg Drop on the projector or TV, split the children into teams, and let each team answer together. Older children can read questions aloud for younger teammates.',
+      'Pick one set that fits the group, or one per age group. Put a Share game like Game Show or Pinball on the projector or TV, split the children into teams, and let each team answer together. Older children can read questions aloud for younger teammates.',
       'Co-ops of five or more families can buy like a school, with savings for every family. Each teacher keeps their own students, sets and reports.',
     ],
     tryIt: [
@@ -211,7 +211,7 @@ export const POSTS: Post[] = [
     minutes: 20,
     body: [
       'Team games are fun until one team pulls ahead. Playing as one class against the computer fixes that: everyone is on the same side.',
-      'In Game Show or Peg Drop, set the class as one team and the computer as the other. The class picks a card or a drop spot, taps its answer, and the computer takes its turn on its own.',
+      'In Game Show or Pinball, set the class as one team and the computer as the other. The class picks a card or a shot, taps its answer, and the computer takes its turn on its own.',
       'Choose Easy, Medium or Hard for the computer. Start on Easy early in the year, and let the class vote to raise it once they win a few Fridays in a row.',
     ],
     tryIt: [
@@ -283,7 +283,7 @@ export const POSTS: Post[] = [
     slug: 'standards-first-review',
     title: 'Standards-First Review: Filter by Common Core Code',
     summary: 'Pick the standard you are teaching this week, filter the sets, and play in two taps.',
-    cover: 'peg-drop',
+    cover: 'pinball',
     grades: 'K-8',
     minutes: 10,
     body: [

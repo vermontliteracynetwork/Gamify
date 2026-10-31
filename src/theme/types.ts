@@ -38,7 +38,7 @@ export type Backdrop =
 
 export type Celebration = 'confetti' | 'stars' | 'bubbles' | 'gentle';
 
-// A designable piece a game declares, e.g. Peg Drop's "ball" at 96x96.
+// A designable piece a game declares, e.g. Pinball's "ball" at 128x128.
 // Sizes drive the printable theme template and the Theme Builder cards.
 export interface ThemePieceSpec {
   id: string;

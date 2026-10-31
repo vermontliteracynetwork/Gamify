@@ -9,15 +9,15 @@ describe('contrast', () => {
 });
 
 describe('themes', () => {
-  it('Classic passes every readability check', () => expect(themeProblems(classicTheme('peg-drop'))).toEqual([]));
+  it('Classic passes every readability check', () => expect(themeProblems(classicTheme('pinball'))).toEqual([]));
 
   it('flags unreadable colors', () => {
-    const t = classicTheme('peg-drop');
+    const t = classicTheme('pinball');
     expect(themeProblems({ ...t, colors: { ...t.colors, text: '#cfc8e8', backgroundText: '#c9c0f0' } })).toHaveLength(2);
   });
 
   it('calm version keeps colors and quiets the backdrop and celebration', () => {
-    const t = { ...classicTheme('peg-drop'), backdrop: { kind: 'pattern' as const, pattern: 'dots' as const } };
+    const t = { ...classicTheme('pinball'), backdrop: { kind: 'pattern' as const, pattern: 'dots' as const } };
     const calm = calmVersion(t);
     expect(calm.backdrop).toEqual({ kind: 'color' });
     expect(calm.celebration).toBe('gentle');

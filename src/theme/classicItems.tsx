@@ -120,6 +120,14 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <path d="M50 26 V66 M32 46 H68 M37 33 L63 59 M63 33 L37 59" stroke="#6aa9e9" strokeWidth="4" strokeLinecap="round" />
     </g>
   ),
+  'super-shooter': () => (
+    <g>
+      <path d="M8 70 H40 M14 54 H40 M20 86 H44" stroke="#6aa9e9" strokeWidth="6" strokeLinecap="round" />
+      <circle cx="64" cy="62" r="26" fill="#e7ecf5" {...S} />
+      <circle cx="56" cy="54" r="7" fill="#fff" />
+      <path d="M70 6 L56 34 H70 L60 54 L86 24 H72 L80 6 Z" fill="#f6c544" {...S} />
+    </g>
+  ),
   'prize-bag': () => (
     <g>
       <path d="M36 30 Q20 50 18 74 Q18 92 50 92 Q82 92 82 74 Q80 50 64 30 Z" fill="#9fe7a0" {...S} />

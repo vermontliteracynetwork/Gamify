@@ -52,18 +52,23 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'four-in-a-row':
+      // Drawn in one SVG so the holes stay perfect circles at any card shape (teacher, 2026-10-31).
       return (
         <div className={base} style={{ background: 'linear-gradient(160deg, #a8d8f0, #6aa9e9)' }} aria-hidden="true">
-          <div className="absolute inset-[10%] rounded-2xl border-[3px] border-border grid grid-cols-5 gap-[4%] p-[4%]" style={{ background: '#4f8fd6' }}>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62">
+            <rect x="18" y="6" width="64" height="44" rx="5" fill="#4f8fd6" stroke="#000" strokeWidth="1.2" />
             {Array.from({ length: 15 }, (_, i) => {
               const diag = [2, 6, 10, 14].includes(i) ? 1 : [5, 11, 12].includes(i) ? 2 : 0;
-              return <span key={i} className="rounded-full border-[2.5px] border-border flex items-center justify-center"
-                style={{ background: diag === 1 ? TEAM_COLORS[0] : diag === 2 ? TEAM_COLORS[1] : '#ffffff' }}>
-                {diag === 1 && <Star weight="fill" className="w-1/2 h-1/2" color="#241c3d" />}
-                {diag === 2 && <Heart weight="fill" className="w-1/2 h-1/2" color="#241c3d" />}
-              </span>;
+              const cx = 26 + (i % 5) * 12, cy = 15 + Math.floor(i / 5) * 13;
+              return (
+                <g key={i}>
+                  <circle cx={cx} cy={cy} r="5" fill={diag === 1 ? TEAM_COLORS[0] : diag === 2 ? TEAM_COLORS[1] : '#ffffff'} stroke="#000" strokeWidth="1" />
+                  {diag === 1 && <path d={`M${cx} ${cy - 2.6} L${cx + 0.8} ${cy - 0.8} L${cx + 2.6} ${cy - 0.6} L${cx + 1.2} ${cy + 0.7} L${cx + 1.6} ${cy + 2.6} L${cx} ${cy + 1.6} L${cx - 1.6} ${cy + 2.6} L${cx - 1.2} ${cy + 0.7} L${cx - 2.6} ${cy - 0.6} L${cx - 0.8} ${cy - 0.8} Z`} fill="#241c3d" />}
+                  {diag === 2 && <path d={`M${cx} ${cy + 2.2} C${cx - 3.4} ${cy - 0.4} ${cx - 1.8} ${cy - 3.2} ${cx} ${cy - 1.2} C${cx + 1.8} ${cy - 3.2} ${cx + 3.4} ${cy - 0.4} ${cx} ${cy + 2.2} Z`} fill="#241c3d" />}
+                </g>
+              );
             })}
-          </div>
+          </svg>
           <Crown weight="fill" className="absolute right-[3%] top-[2%] w-[14%] h-auto" color="#241c3d" />
         </div>
       );
@@ -182,16 +187,22 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <img src="/classic/bubble-pop/ball-2.webp" alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: '41.5%', bottom: '6%' }} draggable="false" />
         </div>
       );
-    case 'peg-drop':
+    case 'pinball':
+      // Pinball (teacher design, 2026-10-31): pockets of points, five zones, the ball at the launcher.
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
-          {Array.from({ length: 4 }, (_, r) => Array.from({ length: r % 2 ? 6 : 5 }, (_, k) => (
-            <span key={`${r}-${k}`} className="absolute w-[5%] aspect-square rounded-full bg-[#fbfcf8] border-2 border-border" style={{ left: `${(r % 2 ? k : k + 0.5) * 16 + 6}%`, top: `${14 + r * 16}%` }} />
-          )))}
-          <span className="absolute w-[10%] aspect-square rounded-full border-[3px] border-border" style={{ left: '44%', top: '4%', background: '#fdfd94' }} />
-          <div className="absolute inset-x-0 bottom-0 h-[20%] grid grid-cols-5">
-            {['50', '10', '100', '10', '50'].map((v, i) => <span key={i} className="border-t-[3px] border-x border-border flex items-center justify-center font-display text-[clamp(8px,3vw,20px)]" style={{ background: v === '100' ? '#ed9d75' : v === '50' ? '#ddfcc6' : '#fbfcf8' }}>{v}</span>)}
-          </div>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
+            {[[22, 12, 30], [50, 9, 100], [78, 14, 60], [36, 24, 10], [66, 25, 40]].map(([x, y, v]) => (
+              <g key={x}><circle cx={x} cy={y} r="6.4" fill="#fdfd94" stroke="#000" strokeWidth="0.6" /><circle cx={x} cy={y} r="5" fill="#1b2550" /><text x={x} y={y + 1.6} textAnchor="middle" fontSize="4.4" fontWeight="800" fill="#fff">{v}</text></g>
+            ))}
+            {['#c9a3f5', '#8ec5ff', '#8fe3a0', '#fdfd94', '#f6a5c0'].map((c, i) => (
+              <g key={c}><rect x={8 + i * 18} y="35" width="12" height="6" rx="3" fill={c} stroke="#000" strokeWidth="0.7" /><text x={14 + i * 18} y="39.8" textAnchor="middle" fontSize="4.4" fontWeight="800" fill="#241c3d">{i + 1}</text></g>
+            ))}
+            <path d="M50 55 L62 41" stroke="#fff" strokeWidth="1" strokeDasharray="0.1 2.2" strokeLinecap="round" />
+            <path d="M33 54 L45 57 L45 58 L33 56 Z M67 54 L55 57 L55 58 L67 56 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.6" />
+            <circle cx="50" cy="55" r="3.2" fill="#e7ecf5" stroke="#000" strokeWidth="0.6" /><circle cx="49" cy="54" r="1" fill="#fff" />
+            <circle cx="12" cy="50" r="4" fill="#f2735f" stroke="#000" strokeWidth="0.6" /><circle cx="88" cy="50" r="4" fill="#f2735f" stroke="#000" strokeWidth="0.6" />
+          </svg>
         </div>
       );
     case 'big-screen':
