@@ -41,6 +41,15 @@ export function winningLine(b: Board): [number, number][] | null {
 }
 
 export const isFull = (b: Board) => b[0].every((c) => c !== 0);
+
+// Pop out: the bottom piece of a column comes out and the rest fall one row.
+export function popBottom(b: Board, col: number): Board | null {
+  if (b[ROWS - 1][col] === 0) return null;
+  const board = b.map((r) => [...r]);
+  for (let r = ROWS - 1; r > 0; r--) board[r][col] = board[r - 1][col];
+  board[0][col] = 0;
+  return board;
+}
 export const openColumns = (b: Board) => Array.from({ length: COLS }, (_, c) => c).filter((c) => b[0][c] === 0);
 
 // Simple position score for the computer: center control and open threes.

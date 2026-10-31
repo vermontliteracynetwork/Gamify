@@ -31,7 +31,9 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
-import { COLS, cpuMove, drop, emptyBoard, isFull, winningLine, type Board } from './board';
+import { COLS, cpuMove, drop, emptyBoard, isFull, popBottom, ROWS, winningLine, type Board } from './board';
+import { usePowerUps } from '../../engine/usePowerUps';
+import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import Title from '../../ui/Title';
 
 
@@ -56,7 +58,12 @@ export default function FourInARow() {
   const [level, setLevel] = useState<CpuLevel>('medium');
   const [board, setBoard] = useState<Board>(emptyBoard);
   const [turn, setTurn] = useState<0 | 1>(0);
-  const [step, setStep] = useState<'answer' | 'pick' | 'dropping'>('answer');
+  const [step, setStep] = useState<'answer' | 'pick' | 'dropping' | 'pop'>('answer');
+  // Power-ups on one device (two devices keep the plain game, so moves stay in step).
+  const powers = usePowerUps(fourInARowManifest, theme, true);
+  const held = useHeldPowerUps();
+  const extraDrop = useRef(false);
+  const [popped, setPopped] = useState<{ col: number; id: number } | null>(null);
   const [last, setLast] = useState<{ row: number; col: number } | null>(null);
   const [line, setLine] = useState<[number, number][] | null>(null);
   const [rights, setRights] = useState([0, 0]);
@@ -125,13 +132,14 @@ export default function FourInARow() {
 
   function begin(ps: TurnPlayer[], lvl: CpuLevel, forced?: 0 | 1) {
     const first: 0 | 1 = forced ?? (setup.first === 'p2' ? 1 : setup.first === 'random' ? (Math.random() < 0.5 ? 0 : 1) : 0);
-    setPlayers(ps.slice(0, 2)); setLevel(lvl); setBoard(emptyBoard()); setTurn(first); setLast(null); setLine(null); setRights([0, 0]);
+    held.reset(); extraDrop.current = false; setPlayers(ps.slice(0, 2)); setLevel(lvl); setBoard(emptyBoard()); setTurn(first); setLast(null); setLine(null); setRights([0, 0]);
     setStep('answer'); setPhase('play');
   }
 
   // Each human turn starts with that player's question; the computer just moves.
   useEffect(() => {
     if (phase !== 'play' || step !== 'answer' || !player) return;
+    held.beginTurn(player.id);
     if (remoteTurn) return; // the other device asks its own player
     let live = true;
     if (player.kind === 'cpu') {
@@ -142,19 +150,39 @@ export default function FourInARow() {
       if (!live) return;
       if (!ok) { setPhase('setup'); return; }
       setRights((r) => r.map((n, i) => (i === turn ? n + 1 : n)));
+      if (remoteSeat === null) { const it = powers.grant(true); if (it) held.earn(player.id, it); }
       setStep('pick');
     });
     return () => { live = false; };
   }, [phase, step, turn]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function useItem(i: number) {
+    const it = held.use(i);
+    if (!it) return;
+    playEffect('win', settings);
+    if (it.ability === 'double') extraDrop.current = true;
+    if (it.ability === 'pop') setStep('pop');
+  }
+  function popOut(col: number) {
+    const next = popBottom(board, col);
+    if (!next) return;
+    setBoard(next); setLast(null); setPopped({ col, id: Date.now() });
+    playEffect('whoosh', settings);
+    const win = winningLine(next);
+    if (win) { setLine(win); setPhase('end'); playEffect('win', settings); return; }
+    setStep('pick');
+  }
+
   function place(col: number) {
+    if (step === 'pop') { popOut(col); return; }
     const res = drop(board, col, (turn + 1) as 1 | 2);
     if (!res) return;
     if (remoteSeat !== null && !remoteTurn) link.current?.send({ t: 'vmove', seat: turn, col });
     setStep('dropping');
     setBoard(res.board);
     setLast({ row: res.row, col });
-    playEffect('tap', settings);
+    // The clack when it lands at the bottom of its drop.
+    window.setTimeout(() => { playEffect('tap', settings); if (!still) navigator.vibrate?.(15); }, still ? 0 : (0.32 + res.row * 0.06) * 580);
     window.setTimeout(() => {
       const win = winningLine(res.board);
       if (win || isFull(res.board)) {
@@ -164,12 +192,17 @@ export default function FourInARow() {
         if (win && settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 50, spread: 80, origin: { y: 0.5 }, disableForReducedMotion: true });
         return;
       }
+      // Double drop: the same player drops again right away.
+      if (extraDrop.current) { extraDrop.current = false; setStep('pick'); return; }
+      held.endTurn();
       setTurn((t0) => (t0 === 0 ? 1 : 0));
       setStep('answer');
     }, still ? 150 : 650);
   }
 
   placeRef.current = place;
+  // The front plate's color (a theme can change it).
+  const plate = pieceImage(theme, 'board') ? 'rgba(255,255,255,0.12)' : (pieceFill(theme, 'board', '#4f8fe0').background as string) ?? '#4f8fe0';
   const winner = line ? players[board[line[0][0]][line[0][1]] - 1] : null;
   const Disc = ({ who, size = '82%' }: { who: 1 | 2; size?: string }) => {
     const p = players[who - 1];
@@ -266,46 +299,75 @@ export default function FourInARow() {
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
-          <div className="grid gap-2 min-w-0 justify-items-center">
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
-                const full = board[0][c] !== 0;
-                const canPick = phase === 'play' && step === 'pick' && player?.kind !== 'cpu' && !remoteTurn && !full;
+                const popping = step === 'pop';
+                const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
+                const canPick = phase === 'play' && (step === 'pick' || popping) && player?.kind !== 'cpu' && !remoteTurn && !full;
                 return (
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
-                    aria-label={full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
+                    aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
                     className={`min-h-11 rounded-input flex items-center justify-center gap-0.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent motion-safe:animate-pulse' : 'bg-surface/60 opacity-70'}`}>
                     {/* Numbered columns, 1 to 7 (teacher, 2026-10-31). */}
-                    {c + 1}<ArrowFatDown weight="fill" size={16} aria-hidden="true" />
+                    {c + 1}{canPick && player ? <span className="w-5 h-5 inline-flex"><Disc who={(turn + 1) as 1 | 2} size="100%" /></span> : <ArrowFatDown weight="fill" size={16} aria-hidden="true" />}
                   </button>
                 );
               })}
             </div>
-            <div role="grid" aria-label={t('fr.title')} className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
-              {board.map((row, r) => <div key={r} role="row" className="contents">{row.map((cell, c) => {
-                const inLine = line?.some(([lr, lc]) => lr === r && lc === c);
-                const isLast = last?.row === r && last?.col === c;
-                return (
+            {/* The board (Golden Rule pass, 2026-10-31): discs sit behind a front
+                plate with round holes, drop with gravity and a bounce, and land
+                with a clack. The winning four glow and a light sweeps across them. */}
+            <div className="relative w-full" style={{ aspectRatio: `${COLS} / ${ROWS}` }}>
+              <div role="grid" aria-label={t('fr.title')} className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }}>
+                {board.map((row, r) => <div key={r} role="row" className="contents">{row.map((cell, c) => (
                   <div key={`${r}-${c}`} role="gridcell"
                     aria-label={t('fr.cell', { row: r + 1, col: c + 1, who: cell ? players[cell - 1]?.name ?? '' : t('fr.empty') })}
                     onClick={() => phase === 'play' && step === 'pick' && player?.kind !== 'cpu' && !remoteTurn && board[0][c] === 0 && place(c)}
-                    className={`aspect-square rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center overflow-hidden ${inLine ? 'ring-4 ring-accent' : ''}`}>
-                    {cell !== 0 && (
-                      <motion.span key={`${r}-${c}-${cell}`} className="w-full h-full flex items-center justify-center"
-                        initial={isLast && !still ? { y: `-${(r + 1) * 115}%` } : false} animate={{ y: 0 }}
-                        transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
-                        <Disc who={cell} />
-                      </motion.span>
-                    )}
+                    className="flex items-center justify-center">
+                    <span className="w-[84%] h-[84%] rounded-full" style={{ background: 'radial-gradient(circle at 50% 35%, #f4f7ff, #dfe6f7 70%, #c3cde6)' }} />
                   </div>
-                );
-              })}</div>)}
+                ))}</div>)}
+              </div>
+              <div className="absolute inset-0 grid overflow-hidden pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
+                {board.flatMap((row, r) => row.map((cell, c) => {
+                  const isLast = last?.row === r && last?.col === c;
+                  const k = line ? line.findIndex(([lr, lc]) => lr === r && lc === c) : -1;
+                  return (
+                    <div key={`${r}-${c}`} className="flex items-center justify-center" style={{ gridRow: r + 1, gridColumn: c + 1 }}>
+                      {cell !== 0 && (
+                        <motion.span key={`${r}-${c}-${cell}-${popped?.col === c ? popped.id : 0}`} className={`w-[84%] h-[84%] flex items-center justify-center ${k >= 0 && !still ? 'fr-win' : ''}`} style={k >= 0 ? { animationDelay: `${k * 0.12}s` } : undefined}
+                          initial={isLast && !still ? { y: `-${(r + 1) * 119}%` } : popped?.col === c && !still ? { y: '-119%' } : false}
+                          animate={isLast && !still ? { y: ['-' + (r + 1) * 119 + '%', '0%', '-13%', '0%', '-4%', '0%'] } : { y: '0%' }}
+                          transition={{ duration: 0.32 + r * 0.06, times: [0, 0.58, 0.72, 0.84, 0.93, 1], ease: 'easeIn' }}>
+                          <Disc who={cell} size="100%" />
+                        </motion.span>
+                      )}
+                    </div>
+                  );
+                }))}
+              </div>
+              {/* The front plate: color with a hole cut for every slot, and a rim. */}
+              <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
+                {Array.from({ length: COLS * ROWS }, (_, k) => (
+                  <span key={k} className="relative" style={{ background: plate, WebkitMaskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)', maskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)' }}>
+                    <span className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 41.5%, rgba(36,28,61,0.55) 42.5%, rgba(36,28,61,0.15) 46%, transparent 49%)' }} />
+                  </span>
+                ))}
+              </div>
+              {line && (
+                <svg viewBox={`0 0 ${COLS} ${ROWS}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+                  <line x1={line[0][1] + 0.5} y1={line[0][0] + 0.5} x2={line[3][1] + 0.5} y2={line[3][0] + 0.5} stroke="#fdfd94" strokeWidth={0.22} strokeLinecap="round" opacity={0.9} className={still ? '' : 'fr-sweep'} />
+                </svg>
+              )}
             </div>
           </div>
           </div>
           <div className="order-first lg:order-none lg:w-[260px] grid gap-2 min-w-0">
             <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} round={t('fr.rightsHint')} />
+            <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />
+            {step === 'pop' && <p className="bg-accent border-[2px] border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
             {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
               <p className="bg-surface border-[2px] border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
             )}
@@ -321,6 +383,7 @@ export default function FourInARow() {
         </div>
       )}
       {element}
+      {powers.element}
     </main>
     </ThemedPage>
   );
