@@ -7,6 +7,10 @@ Network). See `docs/product-plan.md` for the commercial product plan
 
 ## GOLDEN RULE: must-have properties (teacher, 2026-10-31)
 
+The Golden Rule governs ALL game design in Gamify (teacher, 2026-10-31):
+every new game, redesign, theme, board, animation, power-up and fix, and
+every review of an existing game. It outranks speed and "good enough".
+
 Every game, board, animation and power-up must pass the golden-rule skill
 (`.claude/skills/golden-rule/SKILL.md`) before work starts and before it is
 called done: find her original request and reference images word for word,

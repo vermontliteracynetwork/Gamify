@@ -5,6 +5,9 @@ description: Gamify's GOLDEN RULE quality gate. MUST be used before building, re
 
 # The Golden Rule (teacher, 2026-10-31)
 
+It governs ALL game design: every new game, redesign, theme, board,
+animation, power-up and fix, and every review of a game already shipped.
+
 A Gamify game ships only when a kid would pick it over a popular classroom
 game and a teacher would run it live without a second thought. "It works" is
 not the bar. Built-to-spec-but-dull is a failure. Every property below is a

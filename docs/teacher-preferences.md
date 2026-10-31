@@ -6,6 +6,7 @@ based on my past requests." Read this before building anything, apply every
 line that fits, and add each new preference the same turn she says it.
 
 ## Games: look and feel
+- The Golden Rule (.claude/skills/golden-rule) governs all game design.
 - Video-game quality, held to popular classroom games and mobile hits; never "it works, ship it".
 - Match her reference images and her exact words; use the assets she uploads first.
 - Boards fill the whole purple area; small round controls (Full screen, Accessibility tools, Settings) overlap at the top right; full screen looks the same.
