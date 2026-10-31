@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { CheckCircle, Crown, HourglassMedium, LockSimple, Pause, Prohibit, Star } from '@phosphor-icons/react';
+import { CheckCircle, Crown, HourglassMedium, LockSimple, Pause, Prohibit, Star, Timer } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
@@ -46,6 +46,9 @@ export default function LiveLobby() {
 // its message, pause, being taken out, and the podium at the end.
 export function LiveOverlay() {
   const { session, state, me } = useLiveRoom();
+  // The class clock ticks on every device (teacher, 2026-10-31).
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { if (!state?.endAt?.minutes || state.phase !== 'play') return; const id = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(id); }, [state?.endAt?.minutes, state?.phase]);
   const navigate = useNavigate();
   const path = useLocation().pathname;
   // Play again sends everyone back to the waiting room.
@@ -86,18 +89,22 @@ export function LiveOverlay() {
     const classRight = state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0);
     const goal = state.goal ?? Math.max(10, state.players.length * 10);
     const place = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
+    const left = state.endAt?.minutes && state.startedAt ? Math.max(0, Math.ceil((state.startedAt + state.endAt.minutes * 60000 - now) / 1000)) : null;
+    const heads = left !== null && ((left <= 180 && left > 174) || (left <= 60 && left > 54)) ? t(left > 60 ? 'clock.three' : 'clock.one') : '';
+    const clock = left !== null && <span className={`inline-flex items-center gap-1 font-display tabular-nums ${left <= 60 ? 'text-danger' : ''}`}><Timer weight="bold" size={18} aria-hidden="true" />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>;
     return (
       <div className="fixed top-[4.5rem] left-1/2 -translate-x-1/2 z-[55] pointer-events-none" role="status" aria-live="polite">
         {state.mode === 'together' ? (
           <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-[2.5px] border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <span className="font-bold text-sm text-center">{t('live.goalText', { right: Math.min(classRight, goal), goal })}</span>
+            <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>
             <span className="h-3 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
           </div>
         ) : (
           <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-[2.5px] border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <Crown weight="fill" size={18} color="#c98a00" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}
+            <Crown weight="fill" size={18} color="#c98a00" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}{clock}
           </span>
         )}
+        {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-accent border-[2.5px] border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}
       </div>
     );
   }
