@@ -15,6 +15,9 @@ import { mirrorSend } from '../live/mirror';
 const LETTERS = ['A', 'B', 'C', 'D'];
 const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
 
+// How many turns each team has had, to rotate who answers.
+const ANSWERED = new Map<string, number>();
+
 // The Share-mode question: big enough to read from the back of the room.
 // The team taps its answer (multiple choice, like the Independent Work
 // Dashboard; teacher, 2026-10-24) and it checks itself: one tap a turn, and
@@ -24,13 +27,23 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   question: MultipleChoiceQuestion; player: TurnPlayer; cpuLevel: CpuLevel; onResult: (right: boolean) => void;
   // Which try this is, when a game gives more than one (Game Show: 3).
   chance?: { n: number; total: number };
-  // A magnet power-up (Castle Quest, teacher 2026-10-31): a magnet flies in and sticks to the right answer.
+  // A magnet power-up (Board Game, teacher 2026-10-31): a magnet flies in and sticks to the right answer.
   magnet?: string;
-  // The player's own piece picture for the turn card (Castle Quest heroes).
+  // The player's own piece picture for the turn card (Board Game heroes).
   avatar?: string;
 }) {
   const { settings } = useSettings();
   const q = useMemo(() => shuffleChoices(question), [question]);
+  // Rotating answerer (market research, 2026-10-31): on a team made from the
+  // class list, a different student answers each turn, so one loud voice
+  // cannot take over. Retries in the same turn keep the same student.
+  const answerer = useMemo(() => {
+    const m = player.members;
+    if (!m || m.length < 2) return null;
+    const k = ANSWERED.get(player.id) ?? 0;
+    if (!chance || chance.n <= 1) { ANSWERED.set(player.id, k + 1); return m[k % m.length]; }
+    return m[Math.max(0, k - 1) % m.length];
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [shown, setShown] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   const [cpu, setCpu] = useState<'thinking' | 'right' | 'miss' | null>(player.kind === 'cpu' ? 'thinking' : null);
@@ -79,6 +92,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           {avatar ? <img src={avatar} alt="" className="w-[min(12rem,30vh)] h-[min(12rem,30vh)] rounded-full border-[3px] border-border object-cover" /> : <TeamBadge colorIndex={player.colorIndex} size={180} />}
         </motion.span>
         <span className="font-display text-4xl sm:text-5xl font-bold text-center">{t('share.turnCard', { name: player.name })}</span>
+        {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-[2.5px] border-border bg-[#c8f0dc] px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
         {player.kind === 'cpu'
           ? <span className="font-bold text-xl">{t('share.cpuThinking')}</span>
           : <span className={`min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center ${settings.motion === 'still' ? '' : 'motion-safe:animate-pulse'}`}>{t('share.turnStart')}</span>}
@@ -100,7 +114,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           <TeamBadge colorIndex={player.colorIndex} size={48} />
           <span className="grid">
             <span className="font-display text-3xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
-            {player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
+            {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
           {chance && chance.total === Infinity && <span className="font-bold">{t('share.chanceOpen', { n: chance.n })}</span>}

@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const bowlingManifest: GameManifest = {
   id: 'bowling',
   name: 'Bowling',
-  description: 'Answer right to roll the ball down the lane and knock over the pins.',
+  description: 'Answer right, aim, put some spin on it and send the ball crashing into the pins. Every roll is different!',
   modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [
@@ -17,14 +17,15 @@ export const bowlingManifest: GameManifest = {
   ],
   rounds: { label: 'Frames', min: 1, max: 10, default: 3 },
   items: {
-    label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
+    label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 7, width: 256, height: 256,
     // Classic roles (teacher, 2026-10-31): held for the player's next turn,
     // shown under the scores, gone after that turn. Themes can redraw them.
     abilities: [
       { id: 'double', label: '2x points', hint: 'Earn double points' },
-      { id: 'magnet', label: 'Pin magnet', hint: 'One more pin falls on your next roll' },
-      { id: 'bumpers', label: 'Bumper rails', hint: 'Your next roll goes right down the middle' },
-      { id: 'mega', label: 'Mega ball', hint: 'Your next roll knocks down every pin' },
+      { id: 'magnet', label: 'Pin magnet', hint: 'Your next ball pulls pins toward it' },
+      { id: 'twister', label: 'Pin twister', hint: 'The pins shake and wobble; some fall over' },
+      { id: 'bumpers', label: 'Bumper rails', hint: 'Rails pop up so your next roll cannot fall in the gutter' },
+      { id: 'mega', label: 'Mega ball', hint: 'Your next ball is giant' },
       { id: 'mystery', label: 'Mystery points', hint: 'Surprise points from 1 to 10' },
       { id: 'swipe', label: 'Sneaky swipe', hint: 'Take points from the leader', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
       { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
@@ -34,6 +35,7 @@ export const bowlingManifest: GameManifest = {
       { id: 'classic-pin-magnet', name: 'Pin Magnet', ability: 'magnet', motion: 'wiggle', often: 2, image: '/classic/powerups/magnet.webp' },
       { id: 'classic-bumper-rails', name: 'Bumper Rails', ability: 'bumpers', motion: 'bob', often: 2, image: '/classic/powerups/shield.webp' },
       { id: 'classic-fireball', name: 'Fireball', ability: 'mega', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
+      { id: 'classic-pin-twister', name: 'Pin Twister', ability: 'twister', motion: 'spin', often: 2, image: '/classic/powerups/tornado.webp' },
       { id: 'classic-mystery-box', name: 'Mystery Box', ability: 'mystery', motion: 'bob', often: 2, image: '/classic/powerups/mystery.webp' },
       { id: 'classic-sneaky-swipe', name: 'Sneaky Swipe', ability: 'swipe', amount: 5, motion: 'wiggle', often: 1, image: '/classic/powerups/lightning.webp' },
     ],

@@ -281,8 +281,6 @@ html[data-motion="still"] .cc-water { animation: none; }
 @keyframes bp-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .bp-fx { animation: none !important; } }
 /* Bowling: knocked pins tip over and fade. */
-@keyframes sb-fall-l { to { transform: translate(-3px, 1px) rotate(-80deg); opacity: 0; } }
-@keyframes sb-fall-r { to { transform: translate(3px, 1px) rotate(80deg); opacity: 0; } }
 
 /* Promotional site hover motion (teacher, 2026-10-25): cards lift and tilt a
    little, buttons pop, game covers zoom, icons wiggle, menu links grow an
@@ -386,3 +384,32 @@ html:fullscreen .play-fill { height: 100dvh; }
 @keyframes cq-castle { 0%, 100% { filter: drop-shadow(0 0 0 #fdfd94); } 50% { filter: drop-shadow(0 0 10px #fdfd94); } }
 .cq-bob { animation: cq-bob 1.8s ease-in-out infinite; transform-box: fill-box; }
 .cq-castle { animation: cq-castle 1.2s ease-in-out infinite; }
+/* Bowling pin action (2026-10-31 overhaul). */
+@keyframes sb-wobble { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-14deg); } 45% { transform: rotate(11deg); } 70% { transform: rotate(-6deg); } }
+.sb-wobble { animation: sb-wobble 0.9s ease-in-out; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes sb-topple { 0% { transform: rotate(0deg); } 25% { transform: rotate(-14deg); } 50% { transform: rotate(12deg); } 100% { transform: rotate(88deg); opacity: 0.9; } }
+.sb-topple { animation: sb-topple 1s ease-in forwards; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes sb-chase { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.sb-chase { animation: sb-chase 0.9s ease-in-out infinite; }
+@keyframes sb-pop { from { stroke-width: 0; opacity: 0; } to { opacity: 1; } }
+.sb-pop { animation: sb-pop 0.4s ease-out; }
+/* Board Game world (2026-10-31 overhaul). */
+@keyframes cq-shake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-3px, -1px); } 80% { transform: translate(3px, 1px); } }
+.cq-shake { animation: cq-shake 0.35s linear 4; }
+@keyframes cq-cloud { from { transform: translateX(-180px); } to { transform: translateX(1200px); } }
+.cq-cloud { animation: cq-cloud 70s linear infinite; }
+@keyframes cq-wave { 0%, 100% { transform: translate(0, 0); opacity: 0.9; } 50% { transform: translate(5px, 1px); opacity: 0.5; } }
+.cq-wave { animation: cq-wave 3.2s ease-in-out infinite; transform-box: fill-box; }
+@keyframes cq-sway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(2.2deg); } }
+.cq-sway { animation: cq-sway 4.5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes cq-flag { 0%, 100% { transform: skewY(0deg) scaleX(1); } 50% { transform: skewY(5deg) scaleX(0.9); } }
+.cq-flag { animation: cq-flag 1.1s ease-in-out infinite; transform-box: fill-box; transform-origin: 0 50%; }
+@keyframes cq-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.85; } }
+.cq-blink { animation: cq-blink 0.7s ease-in-out infinite; }
+@keyframes cq-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.cq-glow { animation: cq-glow 1.2s ease-in-out infinite; }
+@keyframes cq-drop { 0% { transform: translateY(-90px); opacity: 0; } 60% { transform: translateY(4px); opacity: 1; } 80% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+.cq-drop { animation: cq-drop 0.7s cubic-bezier(.3,1.3,.5,1) both; transform-box: fill-box; }
+@keyframes cq-tumble { from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } to { transform: rotateX(720deg) rotateY(540deg) rotateZ(180deg); } }
+.cq-tumble { animation: cq-tumble 0.55s linear infinite; }
+

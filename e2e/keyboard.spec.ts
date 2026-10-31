@@ -60,11 +60,11 @@ test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ pag
   const right = answers.get(prompt)!;
   await tabTo(page, new RegExp(`^[A-D]\\s+${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('img', { name: '5 bubbles left' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('img', { name: '3 bubbles left' })).toBeVisible({ timeout: 8000 });
   await page.locator('body').click({ position: { x: 5, y: 5 } }).catch(() => {});
   await page.keyboard.press('ArrowLeft'); await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('Space');
-  await expect(page.getByRole('img', { name: '4 bubbles left' })).toBeVisible({ timeout: 5000 });
+  await expect(page.getByRole('img', { name: '2 bubbles left' })).toBeVisible({ timeout: 5000 });
 });
 
 test('keyboard: a teacher makes a class', async ({ page }) => {

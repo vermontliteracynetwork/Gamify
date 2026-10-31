@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, startTurn } from './setup';
+import { answerShare, finishSetup, openSetup, showSetting, startTurn } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -19,10 +19,13 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.screenshot({ path: `test-results/gameshow-setup-sets-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('radio', { name: '4 x 3' }).click();
   // One try is the default; this game turns on three (teacher, 2026-10-31).
+  await showSetting(page, page.getByRole('radio', { name: 'One try' }));
   await expect(page.getByRole('radio', { name: 'One try' })).toBeChecked();
   await page.getByRole('radio', { name: '3 tries' }).click();
+  await showSetting(page, page.getByRole('radio', { name: '4 x 3' }));
+  await page.getByRole('radio', { name: '4 x 3' }).click();
+  await showSetting(page, page.getByRole('switch', { name: /Double Star/ }));
   await expect(page.getByRole('switch', { name: /Double Star/ })).toBeChecked();
   // Taking or trading points starts off (market research, 2026-10-31).
   await expect(page.getByRole('switch', { name: /Sneaky Magnet/ })).not.toBeChecked();
@@ -96,7 +99,7 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   });
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Surprise cards' }).click();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await showSetting(page, page.getByLabel('Class list'));
   await page.getByLabel('Class list').selectOption('c1');
   await page.getByRole('button', { name: 'Balanced teams' }).click();
   await expect(page.getByRole('group').first().getByRole('button')).toHaveCount(2);
@@ -107,7 +110,8 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await finishSetup(page);
   await page.getByRole('button', { name: 'Card 1', exact: true }).click();
   await startTurn(page);
-  await expect(page.getByRole('dialog').getByText(/(Ava|Ben|Cal|Dee), (Ava|Ben|Cal|Dee)/)).toBeVisible();
+  // A different student answers each turn (market research, 2026-10-31).
+  await expect(page.getByRole('dialog').getByText(/^(Ava|Ben|Cal|Dee) answers this one$/)).toBeVisible();
 });
 
 test('Share Mirror: a student sees the big-screen question close up, with their own text size and contrast', async ({ page, context }, info) => {
@@ -141,7 +145,7 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
 test('Game Show: tap a team picture to pick another from the theme', async ({ page }, info) => {
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Surprise cards' }).click();
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await showSetting(page, page.getByRole('button', { name: /^Pick a team picture for / }));
   const first = page.getByRole('button', { name: /^Pick a team picture for / }).first();
   await first.click();
   const menu = page.getByRole('group', { name: /^Pick a team picture for / });

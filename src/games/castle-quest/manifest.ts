@@ -1,16 +1,17 @@
 import type { GameManifest } from '../types';
 
 // Kept apart from the game so the game list loads without loading every game.
-// Castle Quest (teacher design, 2026-10-31): a hexagon board race to the castle.
+// Board Game (teacher design, 2026-10-31; named "Board game" by the teacher):
+// a hexagon trail race to the castle.
 export const castleQuestManifest: GameManifest = {
   id: 'castle-quest',
-  name: 'Castle Quest',
-  description: 'Answer right, roll the die and hop along the forest path. Cross bridges, grab power-ups and reach the castle first!',
+  name: 'Board Game',
+  description: 'Answer right, roll the die and hop along the winding forest trail. Cross bridges, grab power-ups and reach the castle first to build it!',
   modes: ['share', 'versus'],
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'tile', label: 'Path tile', width: 65, height: 89, hint: 'One hexagon tile on the path' },
+    { id: 'tile', label: 'Trail space', width: 65, height: 89, hint: 'One hexagon space on the trail' },
     { id: 'castle', label: 'Castle', width: 240, height: 280, hint: 'The castle at the end of the path' },
     { id: 'die', label: 'Die', width: 128, height: 128, hint: 'The die you roll', color: '#fbfcf8' },
     ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The piece for team ${i + 1}` })),

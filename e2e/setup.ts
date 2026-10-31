@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.trim(), q.choices[q.correctIndex]] as const)));
@@ -84,4 +84,16 @@ export async function joinWithCode(page: Page, code: string) {
   await page.goto('/join');
   await page.getByLabel('Game code').fill(code);
   await page.getByRole('button', { name: 'Go' }).click();
+}
+
+// Setup menus never scroll (teacher, 2026-10-31): settings that do not fit
+// flow onto the next page, so Next until this one shows.
+export async function showSetting(page: Page, target: Locator) {
+  for (let k = 0; k < 8; k++) {
+    if (await target.first().isVisible()) return;
+    const next = page.getByRole('button', { name: 'Next', exact: true });
+    if (!(await next.isVisible())) break;
+    await next.click();
+  }
+  await expect(target.first()).toBeVisible();
 }

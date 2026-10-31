@@ -19,9 +19,12 @@ line that fits, and add each new preference the same turn she says it.
 - Negative power-ups land at once, are funny not mean; Steal/Swap style takes start off.
 - Turn card before every team question with the player's own icon; tap to start.
 - All cards and tiles the same size; perfect circles stay circles; outlines never cut off.
-- Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, Arcade, Review, Rate).
+- Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, Play another game, Review, Rate; never an "Arcade" button).
 - Classic is the default theme of every game and is never handed out; designed themes come from her packs.
 - Start menus (welcome, theme, setup) and results always wear the standard Gamify look.
+- Setup menus NEVER scroll: settings that do not fit flow onto another page (teacher, 2026-10-31).
+- Say "rounds" (not "question breaks"); Bubble Pop: 10 rounds by default (3 to 20), 3 shots each round (1 to 5).
+- Games must have skill plus surprise: aim, spin or timing the player controls, and physics or chance that makes every turn different.
 - Setup in plain words with defaults ("Moves before a question break, default 3"); every step and setting clearly shown.
 - Every Share game also plays Versus (one device, two players or the computer).
 

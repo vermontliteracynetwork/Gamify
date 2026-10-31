@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, showSetting } from './setup';
 
 const noScroll = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
@@ -25,8 +25,9 @@ test('game boards fit the screen without scrolling', async ({ page }) => {
   await openSetup(page, '/games/game-show');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await showSetting(page, page.getByRole('radiogroup', { name: 'Card grid' }));
   await page.getByRole('radiogroup', { name: 'Card grid' }).getByRole('radio', { name: '6 x 6' }).click();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await showSetting(page, page.getByRole('button', { name: 'More teams' }));
   for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'More teams' }).click();
   await finishSetup(page);
   await expect(page.getByRole('button', { name: 'Card 36', exact: true })).toBeVisible();

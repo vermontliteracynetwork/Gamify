@@ -47,7 +47,7 @@ export default function BubblePop() {
   const { theme, themes, playable, choose } = useGameTheme('bubble-pop');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, rounds: 4, shots: 5, perBreak: 1, powerUps: true });
+  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, roundCount: 10, shotsPerRound: 3, perBreak: 1, powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
@@ -66,7 +66,7 @@ export default function BubblePop() {
   const [note, setNote] = useState('');
   const [fx, setFx] = useState<Fx[]>([]);
   const [gain, setGain] = useState<{ id: number; n: number; x: number; y: number } | null>(null);
-  const plan = useRef({ rounds: 4, shots: 5, perBreak: 1 });
+  const plan = useRef({ rounds: 10, shots: 3, perBreak: 1 });
   // Power-ups after a question break: more bubbles, bonus points, or a doubled pop.
   const powers = usePowerUps(bubblePopManifest, theme, setup.powerUps);
   const doubleNext = useRef(false);
@@ -90,7 +90,7 @@ export default function BubblePop() {
   const aim = useMemo(() => traceShot(board, angle), [board, angle]);
 
   function start() {
-    plan.current = { rounds: setup.rounds, shots: setup.shots, perBreak: setup.perBreak };
+    plan.current = { rounds: setup.roundCount, shots: setup.shotsPerRound, perBreak: setup.perBreak };
     const b = makeBoard(0);
     setBoard(b); setLevel(0); setScore(0); setBreaks(0); setShots(0); setNoPop(0); setNote(''); setFx([]); setGain(null);
     doubleNext.current = false;
@@ -259,8 +259,8 @@ export default function BubblePop() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('bp.rounds')} hint={t('bp.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
-              <Slider label={t('bp.shotsEach')} hint={t('bp.shotsHint')} min={3} max={10} value={setup.shots} onChange={(v) => change({ shots: v })} />
+              <Slider label={t('bp.rounds')} hint={t('bp.roundsHint')} min={3} max={20} value={setup.roundCount} onChange={(v) => change({ roundCount: v })} />
+              <Slider label={t('bp.shotsEach')} hint={t('bp.shotsHint')} min={1} max={5} value={setup.shotsPerRound} onChange={(v) => change({ shotsPerRound: v })} />
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
               <Slider label={t('bp.perBreak')} hint={t('bp.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
             </>

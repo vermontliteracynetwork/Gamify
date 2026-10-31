@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Feather, HouseSimple, Mountains, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, X } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Feather, Mountains, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, X } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 import { saveCheckIn } from '../beta/surveys';
 import { getSession } from '../student/session';
@@ -149,7 +149,8 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
 
 // End-of-game results in a box over the game, so the screen never scrolls
 // (teacher, 2026-10-31): the winner on a stage, the headline in the Gamify
-// font, and four buttons: Play again, Arcade, Review and Rate game.
+// font, and four buttons: Play again, Play another game, Review and Rate game
+// (teacher, 2026-10-31: no "Arcade" button).
 export default function ResultsModal({ title, children, missed, againLabel, onAgain, winners }: {
   title: string; children?: ReactNode; missed: MultipleChoiceQuestion[]; againLabel: string; onAgain: () => void;
   // Share games: the winning team or teams, shown floating over the stage.
@@ -177,7 +178,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             </button>
             {/* Students reach games only with a code (teacher, 2026-10-31). */}
             <Link to={student ? '/join' : '/play'} className={`${btn} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <HouseSimple weight="bold" size={24} />{student ? t('results.newCode') : t('results.arcadeShort')}
+              <SquaresFour weight="bold" size={24} />{student ? t('results.newCode') : t('results.arcadeShort')}
             </Link>
             <button type="button" onClick={() => setReviewing(true)} disabled={missed.length === 0}
               aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
