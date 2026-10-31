@@ -58,6 +58,10 @@ teacher no control or educational value is not done.
   (teacher, 2026-10-31): no open student Arcade, no fixed class join codes,
   nowhere for a student to wander. A code opens one game (or the design
   studio); class students tap their name, then play or wait in the lobby.
+- "Activity" is the word for a game + question set + who plays it
+  (teacher, 2026-10-31). Teachers start one from Create an Activity
+  (`/teacher/activity`): who, how, game, questions, then start, a code or
+  homework. Pro adds a game for each student and choice boards.
 - Game rules inspired by other platforms are reconstructed from
   screenshots/descriptions and reimplemented from scratch. Never scrape,
   decompile, or copy another platform's actual source code or assets,

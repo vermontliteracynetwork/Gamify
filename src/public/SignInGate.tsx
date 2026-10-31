@@ -52,7 +52,7 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
   const session = useSession();
   if (!tier) return null;
   // A student plays only the game their code opened (teacher, 2026-10-31).
-  if (!teacher && session && session.gameId !== id) return <AskForCode />;
+  if (!teacher && session && session.gameId !== id && !session.board?.gameIds.includes(id)) return <AskForCode />;
   if (canPlayGame(tier, id)) return <>{children}</>;
   const name = getGame(id)?.name ?? '';
   return (

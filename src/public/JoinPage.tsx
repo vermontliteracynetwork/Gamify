@@ -1,3 +1,4 @@
+import { lobbyPickFor } from '../data/gameCodes';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
@@ -72,6 +73,18 @@ export default function JoinPage() {
     if (!game) return;
     const studentId = student?.id ?? newId('guest');
     const who = student?.name ?? name;
+    // A class lobby sends each student to their own game or choice board.
+    if (game.lobby) {
+      const pick = lobbyPickFor(game.lobby, studentId);
+      if (pick === 'board' && game.lobby.board) {
+        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, board: game.lobby.board });
+        navigate('/choose'); return;
+      }
+      if (pick && pick !== 'board') {
+        setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: pick.gameId });
+        navigate(`/games/${pick.gameId}?set=${pick.setId}`); return;
+      }
+    }
     setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId });
     playCloudCode(game.cloud ? game.code : '');
     if (game.design) { navigate('/arcade/design'); return; }

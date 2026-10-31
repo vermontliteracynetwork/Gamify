@@ -21,6 +21,7 @@ import { t } from './i18n';
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
 const QuestionSetsPage = lazy(() => import('./teacher/QuestionSetsPage'));
+const ChoosePage = lazy(() => import('./student/ChoosePage'));
 const ActivityPage = lazy(() => import('./teacher/ActivityPage'));
 const SetEditorPage = lazy(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazy(() => import('./teacher/ImportPage'));
@@ -93,6 +94,7 @@ function AnimatedRoutes() {
         animate={{ opacity: 1, y: 0 }}
         exit={reduce ? undefined : { opacity: 0, y: -12 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        className="flex-1"
       >
         <Suspense fallback={<div className="min-h-[60dvh]" aria-busy="true" />}>
         <Routes location={location}>
@@ -130,6 +132,7 @@ function AnimatedRoutes() {
           <Route path="/ways" element={<WaysList />} />
           <Route path="/ways/:slug" element={<WaysPost />} />
           <Route path="/join" element={<JoinPage />} />
+          <Route path="/choose" element={<ChoosePage />} />
           <Route path="/join/:code" element={<JoinPage />} />
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
@@ -229,13 +232,13 @@ export default function App() {
   return (
     <SettingsProvider>
     <BrowserRouter>
-      <div className="min-h-dvh relative text-text font-body">
+      <div className="min-h-dvh relative text-text font-body flex flex-col">
         <AmbientBackground />
         <a href="#main-content" className="skip-link">{t('a11y.skip')}</a>
         <NavBar />
         <Supports />
         <PreviewBanner />
-        <div id="main-content" tabIndex={-1} className="outline-none">
+        <div id="main-content" tabIndex={-1} className="outline-none flex-1 flex flex-col">
           <AnimatedRoutes />
         </div>
       </div>

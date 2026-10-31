@@ -8,7 +8,14 @@ import type { QuestionSet } from './types';
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
 // `due` (YYYY-MM-DD) makes it homework: the code works through that day.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string }
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby }
+
+// Pro class lobby (teacher, 2026-10-31): one fresh code for a class; each
+// student (or group) gets their own game and set, or picks from a choice
+// board. `plan` maps a student id to what they play; anyone not in it gets
+// `all` (the whole-class pick).
+export interface LobbyPick { gameId: string; setId: string }
+export interface ClassLobby { classId: string; all?: LobbyPick; plan: Record<string, LobbyPick>; board?: { gameIds: string[]; setId: string } }
 const KEY = 'game-codes';
 // Game codes stop working after two weeks (development plan Stage 5:
 // codes expire), so an old code on a board can't be reused by strangers.
@@ -32,6 +39,22 @@ export async function makeGameCode(gameId: string, setId: string, kind: 'play' |
   await data.setSetting(KEY, [...all, code]);
   await shareToCloud(code, kind);
   return code;
+}
+
+// A Pro class lobby gets a fresh code every time it opens.
+export async function makeLobbyCode(lobby: ClassLobby): Promise<GameCode> {
+  const all = await listGameCodes();
+  const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
+  const first = lobby.all ?? Object.values(lobby.plan)[0] ?? { gameId: lobby.board?.gameIds[0] ?? '', setId: lobby.board?.setId ?? '' };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId: first.gameId, setId: first.setId, createdAt: new Date().toISOString(), rosterClass: lobby.classId, lobby };
+  await data.setSetting(KEY, [...all, code]);
+  return code;
+}
+
+// What one student plays from a class lobby: their own pick, the class
+// pick, or the choice board.
+export function lobbyPickFor(lobby: ClassLobby, studentId: string): LobbyPick | 'board' | null {
+  return lobby.plan[studentId] ?? lobby.all ?? (lobby.board?.gameIds.length ? 'board' : null);
 }
 
 // With cloud accounts on, the code, a copy of its set and the teacher's
