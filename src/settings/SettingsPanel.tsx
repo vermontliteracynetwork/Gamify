@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ChalkboardTeacher, ChatCircleDots, CornersIn, CornersOut, GameController, GearSix, Leaf, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
+import { ChalkboardTeacher, ChatCircleDots, CornersIn, CornersOut, GameController, GearSix, Leaf, PersonArmsSpread, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
 import { canVibrate } from '../engine/feedback';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -50,12 +50,63 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
   );
 }
 
+// Accessibility tools (teacher, 2026-10-31): a button between Full screen
+// and Settings on every game, and on every question, that opens the reading,
+// sound and calm tools in one short panel. Never behind a PIN or a plan.
+export function AccessButton({ small = false }: { small?: boolean }) {
+  const { settings: s, update } = useSettings();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    if (!open && d.open) d.close();
+  }, [open]);
+  const set = <K extends keyof PlayerSettings>(k: K, v: PlayerSettings[K]) => update({ ...s, [k]: v });
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} aria-label={t('access.open')} title={t('access.open')}
+        className={`${small ? 'w-11 h-11 border-[2px] bg-surface-2' : 'w-14 h-14 border-[2.5px] bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+        style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
+        <PersonArmsSpread weight="bold" size={small ? 22 : 30} />
+      </button>
+      <dialog ref={ref} onClose={() => setOpen(false)} aria-label={t('access.title')}
+        className="m-auto w-[min(720px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-[2.5px] border-border bg-surface p-0 backdrop:bg-black/40 brand-menu">
+        {open && (
+          <>
+            <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-[2px] border-border-soft">
+              <h2 className="font-display text-2xl font-bold flex items-center gap-2"><PersonArmsSpread weight="bold" size={26} /><Title text={t('access.title')} /></h2>
+              <button type="button" onClick={() => setOpen(false)} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-[2px] border-border flex items-center justify-center bg-surface-2"><X weight="bold" size={22} /></button>
+            </div>
+            <div className="px-5 py-4 grid sm:grid-cols-2 gap-3 items-start">
+              <div className="grid gap-3">
+                <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
+                <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
+                <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />
+                <Toggle label={t('settings.colorSafe')} value={s.colorSafe} onChange={(v) => set('colorSafe', v)} />
+              </div>
+              <div className="grid gap-3">
+                <Slider label={t('settings.voice')} min={0} max={5} value={s.voice} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('voice', v as Level)} />
+                <Choice label={t('settings.voiceRate')} value={s.voiceRate} options={['slow', 'normal', 'fast']} onChange={(v) => set('voiceRate', v)} />
+                <Toggle label={t('settings.calm')} value={s.calm} onChange={(v) => update(applyCalm(s, v))} />
+                <Toggle label={t('settings.dim')} value={s.dim} onChange={(v) => set('dim', v)} />
+              </div>
+            </div>
+          </>
+        )}
+      </dialog>
+    </>
+  );
+}
+
 // A game's top row: gear in the player's corner, anything else beside it.
 export function GameTopRow({ onSettings, children }: { onSettings: () => void; children?: ReactNode }) {
   const { settings } = useSettings();
   return (
     <div className={`game-top flex items-center gap-3 mb-4 ${settings.leftHanded ? 'flex-row' : 'flex-row-reverse'}`}>
       <GearButton onClick={onSettings} />
+      <AccessButton />
       <FullScreenButton />
       <div className="flex-1 min-w-0">{children}</div>
     </div>

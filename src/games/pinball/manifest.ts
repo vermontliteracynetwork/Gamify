@@ -6,7 +6,7 @@ export const pinballManifest: GameManifest = {
   id: 'pinball',
   name: 'Pinball',
   description: 'Answer right, aim through a zone, fill the power bar and shoot the ball into a pocket of points.',
-  modes: ['share', 'solo'],
+  modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the table' },

@@ -16,7 +16,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { TEAM_COLORS, type CpuLevel, type TurnPlayer } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -226,15 +226,16 @@ export default function FourInARow() {
         // the players beside it with a glow on whose turn it is.
         // The board fills the play space and never scrolls (teacher, 2026-10-31);
         // small controls on top, the players right beside it, top aligned.
-        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid gap-2 min-w-0 justify-items-center">
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;

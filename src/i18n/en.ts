@@ -87,6 +87,8 @@ export const en = {
   'settings.fullscreen': 'Full screen',
   'settings.fullscreenOff': 'Leave full screen',
   'settings.open': 'Settings',
+  'access.open': 'Accessibility tools',
+  'access.title': 'Accessibility Tools',
   'settings.title': 'Settings',
   'settings.close': 'Close settings',
   'settings.presets': 'Quick setups',

@@ -18,11 +18,12 @@ import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
+import WayToPlay from '../WayToPlay';
 import { gameShowManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -48,7 +49,8 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], tries: '1' as '1' | '3' | 'all' });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'teams' as 'teams' | 'versus' });
+  const versus = setup.who === 'versus';
   // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
   const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');
   const { board, cardCount } = setup;
@@ -247,11 +249,9 @@ export default function GameShow() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--gs-extra:6rem] lg:[--gs-extra:0rem] portrait:[--gs-tall:1.5]">
+    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--gs-extra:6rem] lg:[--gs-extra:0rem] portrait:[--gs-tall:1.5]' : 'max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('tb.title')} /></h1>}
-      </GameTopRow>
+      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -267,6 +267,8 @@ export default function GameShow() {
 
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+          // Teams on the big screen, or two players head to head (teacher, 2026-10-31).
+          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
           { id: 'board', title: t('setup.board'), content: (
             <PictureChoice label={t('tb.board')} value={board}
               onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
@@ -297,14 +299,26 @@ export default function GameShow() {
               </>}
             </>
           ) },
-          { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
-            <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
-          ) },
+          versus
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
+              <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
+            ) }
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
+              <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
+            ) },
         ]} />
       )}
 
       {(phase === 'play' || phase === 'end') && turns && (
-        <div className="grid lg:grid-cols-[1fr_280px] gap-5 items-start">
+        // The board fills the play space, the same in full screen; small controls
+        // on top, the scores right beside it (teacher, 2026-10-31).
+        <div className="relative play-fill px-3 sm:px-4 py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-start max-w-[110rem] mx-auto">
+          <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <AccessButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
           <section className="grid gap-4 min-w-0 @container">
             {/* Whose turn shows as a glow in the scores (teacher, 2026-10-31); screen readers hear it. */}
             {phase === 'play' && player && (
@@ -317,7 +331,7 @@ export default function GameShow() {
               // taller than 1.2 times their width (1.5 on tall screens).
               <div className="grid w-full"
                 style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-                  height: `min(calc(100dvh - 12.5rem + var(--chrome-save, 0rem) - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
+                  height: `min(calc(var(--play-h) - 1.5rem - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
@@ -353,7 +367,7 @@ export default function GameShow() {
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
                         className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
-                        style={{ minHeight: 'max(4rem, calc((100dvh - 30rem + var(--chrome-save, 0rem)) / 6))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
+                        style={{ minHeight: 'max(3rem, calc((var(--play-h) - 1.5rem - var(--gs-extra, 0rem) - 9rem) / 5))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
@@ -369,7 +383,9 @@ export default function GameShow() {
             )}
           </section>
 
+          <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14">
           <ScoreBoard turns={turns} playing={phase === 'play'} round={t('tb.cardsLeft', { n: board === 'cards' ? cards.filter((c) => !c.open).length : cells.filter((c) => !c.used).length })} />
+          </div>
         </div>
       )}
 

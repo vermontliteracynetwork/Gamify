@@ -18,7 +18,7 @@ import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type 
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -54,7 +54,7 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo', powerUps: true });
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -215,12 +215,10 @@ export default function Bowling() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="landscape:[--wide-save:1.25rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       {clock.element}
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={bowlingManifest.name} /></h1>}
-      </GameTopRow>
+      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
         <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('sb.how1') },
@@ -232,7 +230,7 @@ export default function Bowling() {
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           // Pick the way to play first (teacher, 2026-10-31); students arrive with theirs set.
-          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'solo']} value={solo ? 'solo' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : 'teams' })} /> }]),
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -240,14 +238,26 @@ export default function Bowling() {
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },
-          ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
+          ...(solo ? [] : [setup.who === 'versus'
+            // Every Share game can also be played Versus: two players head to head, or one against the computer (teacher, 2026-10-31).
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players: players, level })} /> }
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players: players, level })} /> }]),
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
-          <section className="grid gap-2 min-w-0 [--sb-extra:4.375rem] lg:[--sb-extra:0rem]">
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#f3d9b1'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 17.5rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+        // The lane fills the play space, the same in full screen; small controls
+        // on top, the scores right beside it, top aligned (teacher, 2026-10-31).
+        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+          <h1 className="sr-only"><Title text={bowlingManifest.name} /></h1>
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <AccessButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
+          <div className="contents lg:flex lg:items-start lg:gap-4">
+          <section className="grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
+            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden"
+              style={{ ...pieceFill(theme, 'background', '#f3d9b1'), aspectRatio: '100 / 130', width: 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)', maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   <radialGradient id="sb-shine" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
@@ -296,7 +306,7 @@ export default function Bowling() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 17.5rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ width: 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)', maxWidth: '100%' }}>
               {Array.from({ length: LANES }, (_, l) => (
                 <button key={l} type="button" onClick={() => bowl(l)} disabled={!canAim} aria-label={t('sb.lane', { n: l + 1 })}
                   className={`min-h-14 rounded-input border-[2.5px] border-border font-display text-2xl disabled:opacity-60 ${canAim ? 'motion-safe:animate-pulse' : ''}`}
@@ -304,7 +314,10 @@ export default function Bowling() {
               ))}
             </div>
           </section>
-          <ScoreBoard turns={turns} playing={phase === 'play'} round={`${t('sb.frame', { n: Math.min(frames + 1, totalFrames), total: totalFrames })} · ${t('sb.roll', { n: roll + 1 })}`} />
+          <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid">
+            <ScoreBoard turns={turns} playing={phase === 'play'} round={`${t('sb.frame', { n: Math.min(frames + 1, totalFrames), total: totalFrames })} · ${t('sb.roll', { n: roll + 1 })}`} />
+          </div>
+          </div>
         </div>
       )}
       {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}

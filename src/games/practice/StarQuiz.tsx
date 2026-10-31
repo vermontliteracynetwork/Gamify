@@ -8,7 +8,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -119,6 +119,7 @@ export default function StarQuiz() {
           <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed />
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <p className="sr-only" aria-live="polite">{phase === 'play' ? t('practice.progress', { round, total }) : ''}</p>

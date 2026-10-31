@@ -17,7 +17,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { usePowerUps } from '../../engine/usePowerUps';
 import { t } from '../../i18n';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -54,7 +54,7 @@ export default function Pinball() {
   const { theme, themes, playable, choose } = useGameTheme('pinball');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 5, who: 'teams' as 'teams' | 'solo', powerUps: true });
+  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -271,7 +271,7 @@ export default function Pinball() {
       {phase === 'theme' && <ThemeScreen gameName={pinballManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
-          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'solo']} value={solo ? 'solo' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : 'teams' })} /> }]),
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -279,16 +279,20 @@ export default function Pinball() {
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },
-          ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }]),
+          ...(solo ? [] : [setup.who === 'versus'
+            // Every Share game can also be played Versus: two players head to head, or one against the computer (teacher, 2026-10-31).
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }]),
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
         // The table fills the play space, the same in full screen; small
         // controls sit on top and the scores sit right beside it, top aligned.
-        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={pinballManifest.name} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">

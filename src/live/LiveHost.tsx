@@ -98,7 +98,8 @@ function Room({ game }: { game: GameCode }) {
   // Groups, a game per group and a set per student: Plus, Homeschool and Pro.
   const paid = tier !== 'free';
   const groups = state.groups ?? [{ gameId: state.gameId }];
-  const playable = GAMES.filter((g) => g.modes.some((m) => m === 'solo' || m === 'live' || m === 'versus'));
+  // Games a student plays on their own device: solo, live, or a versus game made for two devices (a Share game's Versus is one screen).
+  const playable = GAMES.filter((g) => g.modes.some((m) => m === 'solo' || m === 'live' || (m === 'versus' && !g.modes.includes('share'))));
   const assignOf = (pid: string) => state.assign?.[pid] ?? {};
   const setAssign = (pid: string, patch: { group?: number; setId?: string }) => update((s) => ({ ...s, assign: { ...s.assign, [pid]: { ...s.assign?.[pid], ...patch } } }));
 

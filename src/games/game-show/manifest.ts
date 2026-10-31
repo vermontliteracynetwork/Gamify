@@ -5,7 +5,7 @@ export const gameShowManifest: GameManifest = {
   id: 'game-show',
   name: 'Game Show',
   description: 'Teams take turns on the big screen. Answer right to pick a card (some hold power-ups) or a square.',
-  modes: ['share'],
+  modes: ['share', 'versus'],
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1920, height: 1080, hint: 'Behind the whole board' },

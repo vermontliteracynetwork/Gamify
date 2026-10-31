@@ -7,7 +7,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { buzz, playEffect, speak, stopSpeaking } from './feedback';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
-import { FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import FloatingCard from '../ui/FloatingCard';
 import DialogFocus from '../ui/DialogFocus';
 
@@ -115,6 +115,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </button>}
           {/* Full screen stays in reach while a question is up (teacher, 2026-10-31). */}
           <FullScreenButton small />
+            <AccessButton small />
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <button type="button" onClick={() => setConfirmLeave(true)} aria-label={t('q.close')}
             className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">

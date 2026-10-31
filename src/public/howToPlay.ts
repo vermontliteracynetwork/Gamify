@@ -19,7 +19,7 @@ export const SHOTS = ['welcome', 'setup', 'question', 'play'] as const;
 // Rules every game shares, shown in each article.
 export const SHARED_RULES = [
   'Every question can be read aloud: tap Listen, or turn on read-aloud in the gear.',
-  'A wrong answer never ends the game. In team games a team gets three questions to earn its move; in solo games a new question comes until one is right.',
+  'A wrong answer never ends the game. In most team games a team gets three questions to earn its move (Game Show lets the teacher pick one try, three or unlimited); in solo games a new question comes until one is right.',
   'Missed questions come back in Review at the end, where the teacher can walk the class through each one.',
   'The gear opens sound, motion, calm mode, text size and more. Full screen fills a smart board.',
 ];
@@ -41,8 +41,8 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'Scores', what: 'Every team with its icon and points. Whose turn it is glows.' },
       { name: 'Power-ups', what: 'Double Star doubles a team\'s points, Swap Spinner trades scores with a team, Sneaky Magnet takes points from a team, Prize Bag adds bonus points. Teachers switch any of them off.' },
     ],
-    rules: ['Up to 10 teams.', 'Three questions per turn to earn a card.', 'Most points wins; ties share the win.'],
-    settings: ['Surprise cards or category grid.', 'Card grid size.', 'Which power-ups are in play.', 'Teams: you make them, random, the whole class against the computer or against you.'],
+    rules: ['Up to 10 teams, or two players in Versus.', 'One question per turn to earn a card (the teacher can allow 3 tries or unlimited).', 'Most points wins; ties share the win.'],
+    settings: ['Teams on the big screen, or two players head to head (Versus).', 'Tries for each turn: one (the default), three or unlimited.', 'Surprise cards or category grid.', 'Card grid size.', 'Which power-ups are in play.', 'Teams: you make them, random, the whole class against the computer or against you.'],
     tips: ['Use the category grid for a unit review across several sets.', 'Turn on Full screen on the smart board.'],
   },
   {
@@ -62,7 +62,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'Power-ups', what: 'Super Shooter makes the next shot land in a pocket, Golden Ball doubles the next shot, Prize Bag adds bonus points.' },
     ],
     rules: ['Each round, every team takes one shot after its question.', 'Share: three questions to earn each shot.', 'Solo: rounds are your number of shots.', 'Most points wins.'],
-    settings: ['Teams or solo.', 'Rounds.', 'Power-ups on or off.'],
+    settings: ['Teams, two players head to head (Versus), or solo.', 'Rounds.', 'Power-ups on or off.'],
     tips: ['Ask the class which zone and how much power, and why: a quick talk about angles and estimating.'],
   },
   {
@@ -151,7 +151,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'Power-ups', what: 'Golden Pin (next roll doubles), Prize Bag (bonus points), Pin Magnet (one more pin falls).' },
     ],
     rules: ['Share: teams take turns, three questions to earn each roll.', 'Solo: answer, then roll.'],
-    settings: ['Teams or solo.', 'Frames.', 'Power-ups on or off.'],
+    settings: ['Teams, two players head to head (Versus), or solo.', 'Frames.', 'Power-ups on or off.'],
     tips: ['Count the fallen pins together with younger classes.'],
   },
   {

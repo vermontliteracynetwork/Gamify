@@ -10,7 +10,7 @@ import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -308,6 +308,7 @@ export default function CastCatch() {
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           {phase === 'play' && (

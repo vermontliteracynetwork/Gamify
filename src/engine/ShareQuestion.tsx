@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -81,6 +82,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
+          <AccessButton small />
         </div>
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}

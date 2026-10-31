@@ -10,7 +10,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { PUZZLE_PACK_CLEARED } from '../../config';
@@ -260,6 +260,7 @@ export default function BubblePop() {
         <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center lg:gap-4">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 

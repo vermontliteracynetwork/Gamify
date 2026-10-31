@@ -12,7 +12,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
-import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -205,6 +205,7 @@ export default function MatchThree() {
           <div className="contents md:flex md:items-start md:gap-4">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
+            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 
