@@ -80,6 +80,27 @@ export function LiveOverlay() {
   if (lockMsg !== undefined) {
     return <div className={shell} role="dialog" aria-modal="true" aria-label={t('live.locked')}><DialogFocus /><div className={panel} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}><LockSimple weight="fill" size={64} aria-hidden="true" /><h2 className="font-display text-3xl"><Title text={t('live.locked')} /></h2>{lockMsg && <p className="font-display text-2xl" role="status">{lockMsg}</p>}</div></div>;
   }
+  // While playing (teacher, 2026-10-31): Together shows the class goal
+  // everyone fills; Compete shows the student's own place.
+  if (state.phase === 'play' && me.status === 'in') {
+    const classRight = state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0);
+    const goal = state.goal ?? Math.max(10, state.players.length * 10);
+    const place = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
+    return (
+      <div className="fixed top-[4.5rem] left-1/2 -translate-x-1/2 z-[55] pointer-events-none" role="status" aria-live="polite">
+        {state.mode === 'together' ? (
+          <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-[2.5px] border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <span className="font-bold text-sm text-center">{t('live.goalText', { right: Math.min(classRight, goal), goal })}</span>
+            <span className="h-3 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
+          </div>
+        ) : (
+          <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-[2.5px] border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Crown weight="fill" size={18} color="#c98a00" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}
+          </span>
+        )}
+      </div>
+    );
+  }
   if (state.phase === 'paused') {
     return <div className={shell} role="dialog" aria-modal="true" aria-label={t('live.paused')}><DialogFocus /><div className={panel} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}><Pause weight="fill" size={64} aria-hidden="true" /><h2 className="font-display text-3xl"><Title text={t('live.paused')} /></h2><p className="font-bold">{t('live.pausedText')}</p></div></div>;
   }

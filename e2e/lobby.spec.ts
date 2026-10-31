@@ -24,7 +24,7 @@ test('lobby: play together toward a goal, a second group with its own game, a se
   await expect(kid.getByRole('heading', { name: 'You Are In!' })).toBeVisible();
 
   await page.getByRole('radio', { name: /^Together/ }).click();
-  await page.getByLabel('Class goal (right answers)').fill('25');
+  await page.getByLabel('Class goal (right answers together)').fill('25');
   await page.getByRole('button', { name: 'Add a group' }).click();
   await page.getByLabel('Game for group 2').selectOption({ label: 'Match Three' });
   const name = (await page.getByLabel(/^Question set for /).getAttribute('aria-label'))!.replace('Question set for ', '');
