@@ -1,3 +1,4 @@
+import { isSolid } from '../theme/builder/template';
 import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -47,7 +48,7 @@ export default function DesignPage() {
   async function add(f: File | undefined) {
     if (!f || !draft || !pieces[piece]) return;
     const p = pieces[piece];
-    put(await imageFileToDataUrl(f, Math.max(p.width, p.height, 256)));
+    put(await imageFileToDataUrl(f, Math.max(p.width, p.height, 256), !isSolid(p)));
   }
   function put(image: string) {
     if (!draft || !pieces[piece]) return;

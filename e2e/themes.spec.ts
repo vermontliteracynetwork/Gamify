@@ -37,13 +37,14 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.screenshot({ path: `test-results/builder-games-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: /Game Show/ }).click();
   await page.getByLabel('Theme name').fill('Ocean Party');
-  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
   const cardBack = page.locator('input[type=file]').nth(2); // Upload tab: page photos, background, then card back
   await cardBack.setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: await png(page, '#2a9df4') });
   await expect(page.getByLabel('Added')).toHaveCount(1);
   await page.getByRole('tab', { name: 'Colors' }).click();
   await page.getByLabel('Main color hex code').fill('#7ad3f5');
-  await page.getByRole('tab', { name: 'Font and sound' }).click();
+  await page.getByRole('tab', { name: 'Share' }).click();
+  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
+  await page.getByRole('tab', { name: 'Style' }).click();
   await page.getByRole('radio', { name: 'Storybook' }).click();
   await page.getByRole('radio', { name: 'Chimes' }).click();
   await page.screenshot({ path: `test-results/builder-style-${info.project.name}.png` });

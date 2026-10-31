@@ -71,7 +71,7 @@ export function SchoolsPage() {
         </Hero>
 
         <section aria-labelledby="why" className="grid gap-4">
-          <h2 id="why" className="font-display text-4xl"><Title text={t('schools.whyTitle')} /></h2>
+          <h2 id="why" className="title-bubble text-4xl"><Title text={t('schools.whyTitle')} /></h2>
           <Pillars items={[{ icon: Brain, key: 'schools.p1' }, { icon: Heart, key: 'schools.p2' }, { icon: ShieldCheck, key: 'schools.p3' }, { icon: Rocket, key: 'schools.p4' }]} />
         </section>
 
@@ -89,7 +89,7 @@ export function SchoolsPage() {
         </section>
 
         <section aria-labelledby="rollout" className="grid gap-4">
-          <h2 id="rollout" className="font-display text-4xl"><Title text={t('schools.rolloutTitle')} /></h2>
+          <h2 id="rollout" className="title-bubble text-4xl"><Title text={t('schools.rolloutTitle')} /></h2>
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -102,7 +102,7 @@ export function SchoolsPage() {
         </section>
 
         <section aria-labelledby="value" className="grid gap-4">
-          <h2 id="value" className="font-display text-4xl"><Title text={t('schools.valueTitle')} /></h2>
+          <h2 id="value" className="title-bubble text-4xl"><Title text={t('schools.valueTitle')} /></h2>
           <p className="text-lg font-semibold max-w-3xl">{t('schools.valueSub')}</p>
           <div className="grid sm:grid-cols-3 gap-4">
             {SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => {
@@ -121,7 +121,7 @@ export function SchoolsPage() {
         <FaqTeaser group="schools" />
 
         <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <h2 className="font-display text-4xl"><Title text={t('schools.endTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('schools.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('schools.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/pricing#schools" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('schools.quote')}</Link>
@@ -145,7 +145,7 @@ export function HomeschoolPage() {
         </Hero>
 
         <section aria-labelledby="fit" className="grid gap-4">
-          <h2 id="fit" className="font-display text-4xl"><Title text={t('hs.fitTitle')} /></h2>
+          <h2 id="fit" className="title-bubble text-4xl"><Title text={t('hs.fitTitle')} /></h2>
           <Pillars items={[{ icon: UsersThree, key: 'hs.p1' }, { icon: Sparkle, key: 'hs.p2' }, { icon: Heart, key: 'hs.p3' }, { icon: FileText, key: 'hs.p4' }]} />
         </section>
 
@@ -153,7 +153,7 @@ export function HomeschoolPage() {
         <section aria-labelledby="hs-posts" className="grid gap-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 id="hs-posts" className="font-display text-4xl"><Title text={t('hs.postsTitle')} /></h2>
+              <h2 id="hs-posts" className="title-bubble text-4xl"><Title text={t('hs.postsTitle')} /></h2>
               <p className="font-semibold">{t('hs.postsSub')}</p>
             </div>
             <Link to="/blog?tag=homeschool" className={buttonClasses('secondary', 'hover-pop')}>{t('hs.postsAll')}</Link>
@@ -172,7 +172,7 @@ export function HomeschoolPage() {
         </section>
 
         <section aria-labelledby="plans" className="grid gap-4">
-          <h2 id="plans" className="font-display text-4xl"><Title text={t('hs.plansTitle')} /></h2>
+          <h2 id="plans" className="title-bubble text-4xl"><Title text={t('hs.plansTitle')} /></h2>
           {/* Free and the Homeschool plan (teacher, 2026-10-26: no Plus or co-op cards here). */}
           <div className="grid md:grid-cols-2 gap-4 items-start">
             {(['free', 'homeschool'] as const).map((k) => (
@@ -195,7 +195,7 @@ export function HomeschoolPage() {
         <FaqTeaser group="homeschool" />
 
         <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <h2 className="font-display text-4xl"><Title text={t('hs.endTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('hs.endTitle')} /></h2>
           <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('hs.start')}</Link>
         </section>
       </main>

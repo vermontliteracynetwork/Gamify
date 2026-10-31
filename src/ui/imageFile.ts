@@ -1,7 +1,9 @@
 // Turns a picked image file into a small data URL (longest side <= max px)
 // so question pictures stay light in browser storage. Cloud uploads replace
 // this in Stage 5.
-export async function imageFileToDataUrl(file: File, max = 800): Promise<string> {
+// `keepClear`: keep see-through parts (a PNG); otherwise white goes behind
+// them and it is saved as a smaller JPEG (never a black background).
+export async function imageFileToDataUrl(file: File, max = 800, keepClear = false): Promise<string> {
   if (!file.type.startsWith('image/')) throw new Error('Pick a picture file (PNG, JPG, GIF or WebP).');
   const url = URL.createObjectURL(file);
   try {
@@ -15,8 +17,10 @@ export async function imageFileToDataUrl(file: File, max = 800): Promise<string>
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(img.naturalWidth * scale);
     canvas.height = Math.round(img.naturalHeight * scale);
-    canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', 0.85);
+    const c = canvas.getContext('2d')!;
+    if (!keepClear) { c.fillStyle = '#ffffff'; c.fillRect(0, 0, canvas.width, canvas.height); }
+    c.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return keepClear ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.85);
   } finally {
     URL.revokeObjectURL(url);
   }

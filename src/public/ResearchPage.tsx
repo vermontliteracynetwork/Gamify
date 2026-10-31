@@ -52,7 +52,7 @@ export default function ResearchPage() {
               ))}
             </div>
 
-            <h2 className="font-display text-4xl mt-4"><Title text={t('research.designedTitle')} /></h2>
+            <h2 className="title-bubble text-4xl mt-4"><Title text={t('research.designedTitle')} /></h2>
             <p className="text-lg font-bold max-w-3xl -mt-2">{t('research.designedIntro')}</p>
             <div className="grid md:grid-cols-2 gap-5">
               {CAUTIONS.map((c, i) => (
@@ -93,7 +93,7 @@ function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }
   return (
     <section aria-label={t('research.tab.beta')} className="grid gap-5">
       <div className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-        <h2 className="font-display text-4xl flex items-center gap-3"><RocketLaunch weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('beta.title')} /></h2>
+        <h2 className="title-bubble text-4xl flex items-center gap-3"><RocketLaunch weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('beta.title')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('beta.intro')}</p>
         <Link to="/beta" className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop !bg-text !text-white')}>{t('beta.join')}</Link>
       </div>

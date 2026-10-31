@@ -56,7 +56,7 @@ export default function FeaturesPage() {
         <motion.section id="learning" {...enter} aria-labelledby="learning-title" className="grid lg:grid-cols-2 gap-6 items-center scroll-mt-24">
           <div className="grid gap-4">
             <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.learning')}</p>
-            <h2 id="learning-title" className="font-display text-4xl sm:text-5xl leading-tight"><Title text={t('features.learn.title')} /></h2>
+            <h2 id="learning-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.learn.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.learn.text')}</p>
             <Points prefix="features.learn" n={4} />
           </div>
@@ -67,7 +67,7 @@ export default function FeaturesPage() {
           <ThemeDemo />
           <div className="grid gap-4">
             <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.themes')}</p>
-            <h2 id="themes-title" className="font-display text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
+            <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
             <p className="font-bold bg-surface border-[2px] border-border rounded-input p-3 flex gap-2"><Sparkle weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('features.theme.challenge')}</p>
@@ -77,7 +77,7 @@ export default function FeaturesPage() {
 
         <motion.section id="play" {...enter} aria-labelledby="play-title" className="grid gap-5 scroll-mt-24">
           <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.play')}</p>
-          <h2 id="play-title" className="font-display text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
+          <h2 id="play-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
           <p className="text-lg font-semibold max-w-3xl">{t('features.play.text')}</p>
           <ModesDemo />
         </motion.section>
@@ -97,7 +97,7 @@ export default function FeaturesPage() {
         </section>
 
         <section className={`${card} p-6 sm:p-8 grid gap-4 justify-items-center text-center`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 className="font-display text-4xl"><Title text={t('features.endTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('features.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('features.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>

@@ -36,7 +36,7 @@ export default function BetaPage() {
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">
           <div className="grid gap-3">
-            <h2 id="what-is" className="font-display text-4xl"><Title text={t('betaPage.whatTitle')} /></h2>
+            <h2 id="what-is" className="title-bubble text-4xl"><Title text={t('betaPage.whatTitle')} /></h2>
             <p className="text-lg font-semibold">{t('betaPage.what')}</p>
             <p className="text-lg font-semibold">{t('betaPage.goal')}</p>
           </div>
@@ -47,7 +47,7 @@ export default function BetaPage() {
         </section>
 
         <section aria-labelledby="asks" className="grid gap-4">
-          <h2 id="asks" className="font-display text-4xl"><Title text={t('betaPage.askTitle')} /></h2>
+          <h2 id="asks" className="title-bubble text-4xl"><Title text={t('betaPage.askTitle')} /></h2>
           <p className="text-lg font-semibold max-w-3xl">{t('betaPage.askSub')}</p>
           <ol className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
             {ASKS.map((a, i) => (
@@ -76,7 +76,7 @@ export default function BetaPage() {
         </section>
 
         <section aria-labelledby="timeline" className="grid gap-4">
-          <h2 id="timeline" className="font-display text-4xl flex items-center gap-3"><CalendarCheck weight="fill" size={36} aria-hidden="true" /><Title text={t('betaPage.whenTitle')} /></h2>
+          <h2 id="timeline" className="title-bubble text-4xl flex items-center gap-3"><CalendarCheck weight="fill" size={36} aria-hidden="true" /><Title text={t('betaPage.whenTitle')} /></h2>
           <ol className="grid sm:grid-cols-4 gap-3 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className="bg-surface border-[2px] border-border rounded-input p-4 grid gap-1 content-start">
@@ -120,7 +120,7 @@ function ApplyForm() {
   const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface w-full';
   return (
     <section id="apply" aria-labelledby="apply-title" className={`${card} scroll-mt-24 !p-6`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      <h2 id="apply-title" className="font-display text-4xl"><Title text={t('betaPage.applyTitle')} /></h2>
+      <h2 id="apply-title" className="title-bubble text-4xl"><Title text={t('betaPage.applyTitle')} /></h2>
       <ol className="grid gap-1 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`betaPage.how.${n}` as StringKey)}</li>)}</ol>
       {sent ? <p className="text-xl font-display" role="status">{t('betaPage.sent')}</p> : (
         <div className="grid sm:grid-cols-2 gap-3">

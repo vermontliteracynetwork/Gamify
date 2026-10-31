@@ -27,7 +27,7 @@ export default function ChallengePage() {
         </section>
 
         <section aria-labelledby="prizes" className="grid gap-4">
-          <h2 id="prizes" className="font-display text-4xl"><Title text={t('challenge.prizes')} /></h2>
+          <h2 id="prizes" className="title-bubble text-4xl"><Title text={t('challenge.prizes')} /></h2>
           <div className="grid md:grid-cols-2 gap-5">
             {(['winner', 'runner'] as const).map((k, i) => (
               <motion.article key={k} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
@@ -40,7 +40,7 @@ export default function ChallengePage() {
         </section>
 
         <section aria-labelledby="how" className="grid gap-4">
-          <h2 id="how" className="font-display text-4xl"><Title text={t('challenge.how')} /></h2>
+          <h2 id="how" className="title-bubble text-4xl"><Title text={t('challenge.how')} /></h2>
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -53,7 +53,7 @@ export default function ChallengePage() {
         </section>
 
         <section aria-labelledby="tracks" className="grid gap-4">
-          <h2 id="tracks" className="font-display text-4xl"><Title text={t('challenge.tracks')} /></h2>
+          <h2 id="tracks" className="title-bubble text-4xl"><Title text={t('challenge.tracks')} /></h2>
           <p className="text-lg font-semibold">{t('challenge.tracksSub')}</p>
           <div className="grid md:grid-cols-2 gap-5">
             {([['hand', PencilSimpleLine, '/challenge/permission', 'challenge.track.hand.slip'], ['studio', PaintBrush, '/teacher/themes', 'challenge.track.studio.go']] as const).map(([k, Icon, to, cta]) => (

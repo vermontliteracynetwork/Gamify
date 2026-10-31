@@ -3,6 +3,7 @@ import { Acorn, Airplane, Alien, Anchor, ArrowClockwise, ArrowCounterClockwise, 
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { Button, IconButton } from '../../ui/kit';
+import { isSolid } from './template';
 import DialogFocus from '../../ui/DialogFocus';
 import { APPROVED_FONTS, THEME_FONTS, type FontName, type ThemePieceSpec } from '../types';
 import { isRound } from './template';
@@ -85,6 +86,11 @@ const shelfOf = (words: string) => SHELVES.find(([, keys]) => keys.some((k) => w
 const SWATCHES = ['#000000', '#ffffff', '#fdfd94', '#f2735f', '#ff9a8b', '#1f2a5a', '#9fe7a0', '#b4c1fb', '#e53935', '#fb8c00', '#fdd835', '#43a047', '#1e88e5', '#8e24aa', '#6d4c41', '#9e9e9e'];
 
 // Starter backgrounds, drawn in code.
+// Textures (teacher, 2026-10-31: "add patterns to backgrounds and change
+// backgrounds to be called Textures; allow custom gradients"). Patterns are
+// drawn in the main color over the second color.
+type Pattern = 'dots' | 'stripes' | 'checks' | 'waves' | 'grid' | 'confetti';
+const PATTERNS: Pattern[] = ['dots', 'stripes', 'checks', 'waves', 'grid', 'confetti'];
 const BACKDROPS: { id: string; stops: string[]; dots?: string }[] = [
   { id: 'night', stops: ['#0d1638', '#2c3a7a'], dots: '#ffffff' },
   { id: 'day', stops: ['#8ec5ff', '#e8f4ff'] },
@@ -286,6 +292,33 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
       c.restore();
     }
   }
+  // A pattern in the main color over the second color, behind the drawing.
+  function pattern(kind: Pattern) {
+    remember();
+    const tile = document.createElement('canvas');
+    const s = Math.max(24, Math.round(Math.min(W, H) / 10));
+    tile.width = tile.height = s;
+    const t2 = tile.getContext('2d')!;
+    t2.fillStyle = color2; t2.fillRect(0, 0, s, s);
+    t2.fillStyle = t2.strokeStyle = color; t2.lineWidth = s / 8; t2.lineCap = 'round';
+    if (kind === 'dots') { t2.beginPath(); t2.arc(s / 2, s / 2, s / 6, 0, Math.PI * 2); t2.fill(); }
+    if (kind === 'stripes') { t2.beginPath(); t2.moveTo(-s / 2, s / 2); t2.lineTo(s / 2, -s / 2); t2.moveTo(0, s); t2.lineTo(s, 0); t2.moveTo(s / 2, s * 1.5); t2.lineTo(s * 1.5, s / 2); t2.stroke(); }
+    if (kind === 'checks') { t2.fillRect(0, 0, s / 2, s / 2); t2.fillRect(s / 2, s / 2, s / 2, s / 2); }
+    if (kind === 'waves') { t2.beginPath(); t2.moveTo(0, s / 2); t2.quadraticCurveTo(s / 4, s / 4, s / 2, s / 2); t2.quadraticCurveTo((s * 3) / 4, (s * 3) / 4, s, s / 2); t2.stroke(); }
+    if (kind === 'grid') { t2.lineWidth = s / 14; t2.strokeRect(0, 0, s, s); }
+    if (kind === 'confetti') { [[0.2, 0.3], [0.7, 0.2], [0.5, 0.7], [0.15, 0.8]].forEach(([x, y], k) => { t2.save(); t2.translate(x * s, y * s); t2.rotate(k); t2.fillRect(-s / 14, -s / 6, s / 7, s / 3); t2.restore(); }); }
+    const c = ctx();
+    c.save(); c.globalCompositeOperation = 'destination-over'; c.fillStyle = c.createPattern(tile, 'repeat')!; c.fillRect(0, 0, W, H); c.restore();
+  }
+  // A gradient from the main color to the second color, top to bottom or across.
+  function gradient(across: boolean) {
+    remember();
+    const c = ctx();
+    const g = across ? c.createLinearGradient(0, 0, W, 0) : c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, color); g.addColorStop(1, color2);
+    c.save(); c.globalCompositeOperation = 'destination-over'; c.fillStyle = g; c.fillRect(0, 0, W, H); c.restore();
+  }
+  const [confirmClear, setConfirmClear] = useState(false);
   // Classic art is never a starting point or a sticker: it is seen, not
   // handed out (teacher, 2026-10-28).
   function clearAll() {
@@ -328,8 +361,17 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
       }
       c.restore();
     }
-    const opaque = piece.id === 'background';
-    onSave(out.toDataURL(opaque ? 'image/jpeg' : 'image/png', 0.88));
+    // Solid pieces (a cover, a background, a board) are never see-through:
+    // white goes behind anything left clear (teacher, 2026-10-31).
+    if (isSolid(piece)) {
+      const flat = document.createElement('canvas');
+      flat.width = out.width; flat.height = out.height;
+      const f = flat.getContext('2d')!;
+      f.fillStyle = '#ffffff'; f.fillRect(0, 0, flat.width, flat.height); f.drawImage(out, 0, 0);
+      onSave(flat.toDataURL('image/jpeg', 0.88));
+      return;
+    }
+    onSave(out.toDataURL('image/png'));
   }
 
   const found = useMemo(() => {
@@ -396,9 +438,23 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
           <h2 className="font-display text-xl sm:text-2xl flex-1 min-w-40">{t('studio.title', { piece: piece.label })}</h2>
           <IconButton label={t('studio.undo')} disabled={!undo.length} onClick={stepBack}><ArrowCounterClockwise weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.redo')} disabled={!redo.length} onClick={stepForward}><ArrowClockwise weight="bold" size={20} /></IconButton>
+          <IconButton variant="danger" label={t('studio.clearAll')} onClick={() => setConfirmClear(true)}><Trash weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.cancel')} onClick={onClose}><X weight="bold" size={20} /></IconButton>
           <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
         </div>
+        {confirmClear && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/45" role="alertdialog" aria-modal="true" aria-label={t('studio.clearAsk')}>
+            <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 max-w-sm w-full text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+              <Trash weight="fill" size={40} className="justify-self-center" aria-hidden="true" />
+              <p className="font-display text-2xl">{t('studio.clearAsk')}</p>
+              <p className="font-semibold text-sm">{t('studio.clearHint')}</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button onClick={() => setConfirmClear(false)}>{t('studio.keep')}</Button>
+                <Button variant="danger" onClick={() => { clearAll(); setConfirmClear(false); }}><Trash weight="bold" size={18} />{t('studio.clearYes')}</Button>
+              </div>
+            </div>
+          </div>
+        )}
         {warn.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-accent border-b-[2px] border-border" role="alert">
             <span className="font-bold flex-1 min-w-48">{t('studio.hardToRead', { words: warn.join(', ') })}</span>
@@ -547,19 +603,28 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
               </div>
               <p className="text-xs font-semibold text-muted">{t('studio.shapeHint')}</p>
             </Section>}
-            <Section title={t('studio.backgrounds')}>
+            <Section title={t('studio.textures')}>
               <div className="grid grid-cols-3 gap-1.5">
                 {BACKDROPS.map((b) => (
                   <button key={b.id} type="button" onClick={() => backdrop(b)} className="min-h-14 rounded-input border-[2px] border-border font-bold text-xs text-left p-1.5 flex items-end"
                     style={{ background: `linear-gradient(180deg, ${b.stops.join(', ')})`, color: b.id === 'night' || b.id === 'ocean' ? '#ffffff' : '#000000' }}>{t(`studio.bg.${b.id}` as StringKey)}</button>
                 ))}
               </div>
-              <p className="text-xs font-semibold text-muted">{t('studio.bgHint')}</p>
-            </Section>
-            <Section title={t('studio.startFrom')}>
-              <div className="flex flex-wrap gap-1.5">
-                <Button onClick={clearAll}>{t('studio.blank')}</Button>
+              <p className="text-xs font-bold">{t('studio.patterns')}</p>
+              <div className="grid grid-cols-6 gap-1.5">
+                {PATTERNS.map((p) => (
+                  <button key={p} type="button" onClick={() => pattern(p)} aria-label={t(`studio.pattern.${p}` as StringKey)} data-tip={t(`studio.pattern.${p}` as StringKey)}
+                    className="aspect-square rounded-input border-[2px] border-border overflow-hidden" style={{ background: color2 }}>
+                    <PatternSwatch kind={p} ink={color} />
+                  </button>
+                ))}
               </div>
+              <p className="text-xs font-bold">{t('studio.myGradient')}</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button type="button" onClick={() => gradient(false)} aria-label={t('studio.gradientDown')} data-tip={t('studio.gradientDown')} className="min-h-12 rounded-input border-[2px] border-border" style={{ background: `linear-gradient(180deg, ${color}, ${color2})` }} />
+                <button type="button" onClick={() => gradient(true)} aria-label={t('studio.gradientAcross')} data-tip={t('studio.gradientAcross')} className="min-h-12 rounded-input border-[2px] border-border" style={{ background: `linear-gradient(90deg, ${color}, ${color2})` }} />
+              </div>
+              <p className="text-xs font-semibold text-muted">{t('studio.texturesHint')}</p>
             </Section>
           </div>
         </div>
@@ -644,5 +709,20 @@ function TwoColors({ main, second, slot, onSlot, onSwap }: { main: string; secon
       <button type="button" onClick={onSwap} aria-label={t('studio.swapColors')} data-tip={t('studio.swapColors')}
         className="absolute right-0 top-0 w-6 h-6 rounded-full bg-surface border-[2px] border-border flex items-center justify-center"><ArrowsLeftRight weight="bold" size={12} /></button>
     </div>
+  );
+}
+
+// A small picture of a pattern for its button.
+function PatternSwatch({ kind, ink }: { kind: Pattern; ink: string }) {
+  const p = { stroke: ink, strokeWidth: 3, strokeLinecap: 'round' as const, fill: 'none' };
+  return (
+    <svg viewBox="0 0 24 24" className="w-full h-full" aria-hidden="true">
+      {kind === 'dots' && [6, 18].flatMap((x) => [6, 18].map((y) => <circle key={`${x}${y}`} cx={x} cy={y} r={2.6} fill={ink} />))}
+      {kind === 'stripes' && <path d="M-4 12 L12 -4 M0 24 L24 0 M12 28 L28 12" {...p} />}
+      {kind === 'checks' && <path d="M0 0h12v12H0zM12 12h12v12H12z" fill={ink} />}
+      {kind === 'waves' && <path d="M0 8 Q6 2 12 8 T24 8 M0 18 Q6 12 12 18 T24 18" {...p} />}
+      {kind === 'grid' && <path d="M8 0V24M16 0V24M0 8H24M0 16H24" {...p} strokeWidth={1.6} />}
+      {kind === 'confetti' && <path d="M4 6l3 4M16 4l-2 4M10 15l4 2M19 16l2 4M5 19l3-2" {...p} />}
+    </svg>
   );
 }

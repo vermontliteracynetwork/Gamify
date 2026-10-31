@@ -156,7 +156,7 @@ function SchoolPlans() {
   return (
     <section id="schools" aria-labelledby="school-title" className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <div className="grid gap-2">
-        <h2 id="school-title" className="font-display text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
+        <h2 id="school-title" className="title-bubble text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('pricing.schoolSub')}</p>
         <Link to="/schools" className="font-bold justify-self-start">{t('pricing.schoolMore')}</Link>
       </div>

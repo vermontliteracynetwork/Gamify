@@ -23,7 +23,7 @@ export default function BetaKitPage() {
       </div>
 
       <section className="template-page bg-white border-[2.5px] border-border rounded-panel p-10 grid gap-4 content-start" aria-label={t('kit.lessonTitle')}>
-        <h2 className="font-display text-4xl"><Title text={t('kit.lessonTitle')} /></h2>
+        <h2 className="title-bubble text-4xl"><Title text={t('kit.lessonTitle')} /></h2>
         <p className="font-bold text-lg">{t('kit.lessonGoal')}</p>
         <ol className="grid gap-3 pl-7 m-0 list-decimal text-lg font-semibold">
           {[1, 2, 3, 4, 5].map((n) => <li key={n}>{t(`kit.step.${n}` as StringKey)}</li>)}

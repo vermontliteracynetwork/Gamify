@@ -6,7 +6,7 @@ import { GAMES } from '../games/registry';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import { ClassicPiece, ROUND_LOOK } from '../theme/builder/classicArt';
-import { isRound, itemPages } from '../theme/builder/template';
+import { isRound, isSolid, itemPages } from '../theme/builder/template';
 import { ClassicItemSvg } from '../theme/classicItems';
 import type { ThemePieceSpec } from '../theme/types';
 import { Button, buttonClasses } from '../ui/kit';
@@ -18,15 +18,13 @@ import PublicFooter from './PublicFooter';
 // size and what it needs, plus the blank templates to download. The Classic
 // art is only shown, never handed out: no Classic files anywhere.
 
-// Pieces that fill their whole shape (no see-through parts).
-const SOLID = /^(background|board|road|soil|lane|square|card-back|card-front|question-tile|answer-tile|counter|cover)$/;
 
 export type PieceKind = 'background' | 'cover' | 'round' | 'surface' | 'object';
 export function pieceKind(p: ThemePieceSpec): PieceKind {
   if (p.id === 'background') return 'background';
   if (p.id === 'cover') return 'cover';
   if (isRound(p)) return 'round';
-  if (SOLID.test(p.id)) return 'surface';
+  if (isSolid(p)) return 'surface';
   return 'object';
 }
 

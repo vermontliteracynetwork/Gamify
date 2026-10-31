@@ -9,11 +9,11 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByLabel('Find a piece').fill('trophy');
-  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
-  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
+  await page.getByLabel('Find a piece').fill('cover');
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
   await expect(studio).toBeVisible();
-  const canvas = studio.getByLabel(/^Drawing of the Winner trophy/);
+  const canvas = studio.getByLabel(/^Drawing of the Cover/);
   const box = (await canvas.boundingBox())!;
   const at = (fx: number, fy: number) => [box.x + box.width * fx, box.y + box.height * fy] as const;
 
@@ -43,7 +43,7 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   const c1 = (await crown.boundingBox())!;
   expect(c1.x).toBeGreaterThan(c0.x + 20);
   // Dragged near the middle, it snaps to the exact center.
-  const cv = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  const cv = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
   await page.mouse.move(c1.x + c1.width / 2, c1.y + c1.height / 2);
   await page.mouse.down();
   await page.mouse.move(cv.x + cv.width / 2 + 3, cv.y + cv.height / 2 - 4, { steps: 6 });
@@ -65,7 +65,7 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   await studio.getByRole('button', { name: 'Redo' }).click();
   await studio.getByRole('button', { name: 'Use this picture' }).click();
   await expect(studio).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Add a picture for Winner trophy' }).locator('img')).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Add a picture for Cover' }).locator('img')).toHaveCount(1);
   expect(problems).toEqual([]);
 });
 
@@ -105,11 +105,11 @@ test('studio: drag a sticker from the shelf onto the picture', async ({ page }, 
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByLabel('Find a piece').fill('trophy');
-  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
-  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
+  await page.getByLabel('Find a piece').fill('cover');
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
   await studio.getByRole('radio', { name: 'Stickers' }).click();
-  await studio.getByRole('button', { name: 'rocket', exact: true }).dragTo(studio.getByLabel(/^Drawing of the Winner trophy/));
+  await studio.getByRole('button', { name: 'rocket', exact: true }).dragTo(studio.getByLabel(/^Drawing of the Cover/));
   await expect(studio.getByRole('button', { name: 'Move rocket' })).toBeVisible();
 });
 
@@ -117,10 +117,10 @@ test('studio: flip a piece, and a warning for words that are hard to read', asyn
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByLabel('Find a piece').fill('trophy');
-  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
-  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
-  const box = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  await page.getByLabel('Find a piece').fill('cover');
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
+  const box = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
   // Fill the whole picture yellow, then yellow words on it.
   await studio.getByRole('button', { name: '#fdd835' }).click();
   await studio.getByRole('radio', { name: 'Fill' }).click();
@@ -143,10 +143,10 @@ test('studio: two colors, shape outlines, and a made color joins the list', asyn
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
   await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByLabel('Find a piece').fill('trophy');
-  await page.getByRole('button', { name: /^Draw the Winner trophy/ }).click();
-  const studio = page.getByRole('dialog', { name: 'Draw: Winner trophy' });
-  const box = (await studio.getByLabel(/^Drawing of the Winner trophy/).boundingBox())!;
+  await page.getByLabel('Find a piece').fill('cover');
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
+  const box = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
   await studio.getByRole('button', { name: '#fdd835' }).click();
   await studio.getByRole('button', { name: /^Second color/ }).click();
   await studio.getByRole('button', { name: '#e53935' }).click();

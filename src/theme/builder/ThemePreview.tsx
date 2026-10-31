@@ -72,7 +72,6 @@ function board(theme: GameTheme) {
               {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
             </span>
           ))}
-          {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt="" className="col-span-4 h-12 justify-self-center object-contain" />}
         </div>
       );
     default:

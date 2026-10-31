@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Buildings, House, RocketLaunch, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
-import { ALL_MODES } from '../data/types';
 import { GameCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';
+import FourWays from '../games/FourWays';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -51,21 +51,14 @@ export default function PublicHome() {
         <WhoFor />
 
         <section className="mt-16 grid gap-4">
-          <h2 className="font-display text-4xl"><Title text={t('public.modesTitle')} /></h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {ALL_MODES.map((m) => (
-              <div key={m} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <ModeBadge mode={m} />
-                <p className="font-bold">{t(`public.mode.${m}` as StringKey)}</p>
-              </div>
-            ))}
-          </div>
+          <h2 className="title-bubble text-4xl"><Title text={t('public.modesTitle')} /></h2>
+          <FourWays />
         </section>
 
         <ThemesShowcase />
 
         <section className="mt-16 grid gap-4">
-          <h2 className="font-display text-4xl"><Title text={t('public.gamesTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('public.gamesTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {GAMES.map((g) => (
               <Link key={g.id} to="/login?mode=signup" className="hover-lift group block bg-surface border-[2.5px] border-border rounded-panel overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -82,7 +75,7 @@ export default function PublicHome() {
         </section>
 
         <section className="mt-16 grid gap-4">
-          <h2 className="font-display text-4xl"><Title text={t('public.featuresTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('public.featuresTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(({ icon: Icon, key }) => (
               <div key={key} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -96,7 +89,7 @@ export default function PublicHome() {
         </section>
 
         <section className="mt-16 grid gap-4">
-          <h2 className="font-display text-4xl flex items-center gap-3"><Brain weight="bold" size={36} aria-hidden="true" /><Title text={t('public.whyTitle')} /></h2>
+          <h2 className="title-bubble text-4xl flex items-center gap-3"><Brain weight="bold" size={36} aria-hidden="true" /><Title text={t('public.whyTitle')} /></h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {WHY.map((k) => (
               <div key={k} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -116,7 +109,7 @@ export default function PublicHome() {
         </Link>
 
         <section className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <h2 className="font-display text-4xl"><Title text={t('public.ctaTitle')} /></h2>
+          <h2 className="title-bubble text-4xl"><Title text={t('public.ctaTitle')} /></h2>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link to="/login?mode=signup" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('ghost', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.seePlans')}</Link>
@@ -137,7 +130,7 @@ function ThemesShowcase() {
   return (
     <section aria-labelledby="home-themes" className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-5 sm:p-8 grid gap-5" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <div className="grid gap-2 max-w-3xl">
-        <h2 id="home-themes" className="font-display text-4xl flex items-center gap-3"><PaintBrush weight="fill" size={38} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('public.themesTitle')} /></h2>
+        <h2 id="home-themes" className="title-bubble text-4xl flex items-center gap-3"><PaintBrush weight="fill" size={38} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('public.themesTitle')} /></h2>
         <p className="text-lg font-semibold">{t('public.themesText')}</p>
       </div>
       <p className="font-display text-2xl">{t('public.themesTrending')}</p>
@@ -169,7 +162,7 @@ function WhoFor() {
   ] as const;
   return (
     <section aria-labelledby="who-for" className="mt-16 grid gap-4">
-      <h2 id="who-for" className="font-display text-4xl"><Title text={t('public.whoTitle')} /></h2>
+      <h2 id="who-for" className="title-bubble text-4xl"><Title text={t('public.whoTitle')} /></h2>
       <div className="grid md:grid-cols-3 gap-4">
         {doors.map(({ key, icon: I, to }) => (
           <Link key={key} to={to} className="hover-lift group bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>

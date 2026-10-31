@@ -1,3 +1,4 @@
+import FourWays from '../games/FourWays';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
@@ -32,6 +33,8 @@ export default function Home() {
       >
         <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2"><Title text={t('home.title')} /></h1>
         <p className="text-text font-bold text-base max-w-[50ch]">{teacher && !session ? t('home.subtitleTeacher') : t('home.subtitle')}</p>
+        {/* A reminder of the four ways every game can be played (teacher, 2026-10-31). */}
+        {teacher && !session && <div className="mt-5"><FourWays compact /></div>}
       </motion.div>
 
       {session && (
