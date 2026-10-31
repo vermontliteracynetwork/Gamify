@@ -6,6 +6,7 @@ import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect, speak } from './feedback';
+import { setAnswerer } from './answerer';
 import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
@@ -39,10 +40,12 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   // cannot take over. Retries in the same turn keep the same student.
   const answerer = useMemo(() => {
     const m = player.members;
-    if (!m || m.length < 2) return null;
+    if (!m || m.length < 2) { setAnswerer(player.name, null); return null; }
     const k = ANSWERED.get(player.id) ?? 0;
-    if (!chance || chance.n <= 1) { ANSWERED.set(player.id, k + 1); return m[k % m.length]; }
-    return m[Math.max(0, k - 1) % m.length];
+    const who = !chance || chance.n <= 1 ? m[k % m.length] : m[Math.max(0, k - 1) % m.length];
+    if (!chance || chance.n <= 1) ANSWERED.set(player.id, k + 1);
+    setAnswerer(player.name, who);
+    return who;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [shown, setShown] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);

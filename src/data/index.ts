@@ -3,6 +3,7 @@ import { createLocalStore } from './localStore';
 import type { DataStore } from './store';
 import { normId, supabase, toUuid } from './supabase';
 import type { QuestionLogEntry } from './types';
+import { answererFor } from '../engine/answerer';
 
 // The app's one data store. With cloud accounts on (Supabase keys set), a
 // signed-in teacher's work is saved in the cloud; with nobody signed in (a
@@ -48,6 +49,12 @@ export function setPreviewTier(tier: string | null) {
 }
 export const data: DataStore = {
   ...base,
+  // Share teams from the class list: the log names the student who answered
+  // ("Owls: Maya"), so reports show each student, not only the team.
+  logQuestion: (async (e: QuestionLogEntry) => {
+    const who = e.mode === 'share' && e.teamName ? answererFor(e.teamName) : undefined;
+    return base.logQuestion(who ? { ...e, teamName: `${e.teamName}: ${who}` } : e);
+  }) as DataStore['logQuestion'],
   getSetting: (async (key: string) => (key === 'tier' && previewTier() ? previewTier() : base.getSetting(key))) as DataStore['getSetting'],
 };
 
