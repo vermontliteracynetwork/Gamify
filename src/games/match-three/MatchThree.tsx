@@ -164,7 +164,7 @@ export default function MatchThree() {
   }
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
       {clock.element}

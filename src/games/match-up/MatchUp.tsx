@@ -114,7 +114,7 @@ export default function MatchUp() {
   const rows = Math.max(left.length, 1);
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-up" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />

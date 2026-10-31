@@ -175,7 +175,7 @@ export default function LunchRush() {
   const foodName = (f: Food) => t(`lr.food.${f}` as StringKey);
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:2.625rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="lunch-rush" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />

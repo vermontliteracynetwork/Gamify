@@ -13,15 +13,16 @@ export interface HowStep { icon: ReactNode; text: string }
 // The cover welcome screen every game opens on: the cover picture, the
 // game's name, how it's played (mode), three picture steps, and one big
 // button into the setup pages.
-export default function GameWelcome({ game, steps, cover, onStart }: { game: GameManifest; steps: HowStep[]; cover?: string; onStart: () => void }) {
+// `cover` is no longer shown (kept so callers need no change).
+export default function GameWelcome({ game, steps, onStart }: { game: GameManifest; steps: HowStep[]; cover?: string; onStart: () => void }) {
   const { settings } = useSettings();
   return (
     <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden max-w-3xl mx-auto grid md:grid-cols-[1.1fr_1fr]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      {cover
-        ? <img src={cover} alt="" className="w-full h-full min-h-48 object-cover aspect-[16/10] md:aspect-auto" />
-        : <GameCover gameId={game.id} className="min-h-48 md:min-h-full aspect-[16/10] md:aspect-auto" />}
+      {/* One standard start screen for every game (teacher, 2026-10-31): the
+          Gamify cover, never a theme's, so menus need no custom design. */}
+      <GameCover gameId={game.id} className="min-h-48 md:min-h-full aspect-[16/10] md:aspect-auto" />
       <div className="p-5 sm:p-6 grid gap-4 content-start">
         {/* On the white card, not the stage: panel text color, never the night-sky white. */}
         <h1 className="title-bubble text-4xl sm:text-5xl" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>

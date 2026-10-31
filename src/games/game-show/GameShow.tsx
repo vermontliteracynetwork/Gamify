@@ -244,7 +244,7 @@ export default function GameShow() {
     k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : `${k.item.name}: ${t(`tb.reveal.${k.item.ability}` as 'tb.reveal.steal', { points: powerAmount(k.item) })}`;
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--gs-extra:6rem] lg:[--gs-extra:0rem] portrait:[--gs-tall:1.5]">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>

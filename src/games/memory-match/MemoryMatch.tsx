@@ -152,7 +152,7 @@ export default function MemoryMatch() {
   const winner = scores.length > 1 ? (scores[0] === scores[1] ? null : players[scores[0] > scores[1] ? 0 : 1]) : null;
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="memory-match" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />

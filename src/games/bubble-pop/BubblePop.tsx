@@ -227,7 +227,7 @@ export default function BubblePop() {
   const dangerY = R + DANGER_ROW * Math.sqrt(3) - R;
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:2.875rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bubble-pop" />
       {clock.element}

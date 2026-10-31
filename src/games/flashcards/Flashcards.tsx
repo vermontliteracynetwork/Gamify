@@ -84,7 +84,7 @@ export default function Flashcards() {
   const answer = card ? card.q.choices[card.q.correctIndex] : '';
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="flashcards" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />

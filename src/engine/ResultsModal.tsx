@@ -94,7 +94,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
   const answer = q.choices[q.correctIndex];
   const go = (n: number) => { setI(n); setShown(false); };
   return (
-    <div className="fixed inset-0 z-[60] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label={t('rv.title')}>
+    <div className="brand-menu fixed inset-0 z-[60] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label={t('rv.title')}>
       <DialogFocus onClose={onClose} />
       <div className="flex items-center gap-3 px-4 sm:px-8 py-3 border-b-[2.5px] border-border bg-surface">
         <ChalkboardTeacher weight="fill" size={30} aria-hidden="true" />
@@ -161,7 +161,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const [reviewing, setReviewing] = useState(false);
   const btn = 'min-h-16 px-4 rounded-input border-[2.5px] border-border font-display text-xl font-bold inline-flex items-center justify-center gap-2 no-underline text-text disabled:opacity-40';
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-lg bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>

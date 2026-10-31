@@ -165,7 +165,7 @@ export default function PegDrop() {
   );
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:5.75rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="peg-drop" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>

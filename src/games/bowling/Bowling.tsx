@@ -201,7 +201,7 @@ export default function Bowling() {
   const lanePoly = `${50 - halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(far)},${yAt(far)} ${50 - halfWidthAt(far)},${yAt(far)}`;
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:1.25rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>

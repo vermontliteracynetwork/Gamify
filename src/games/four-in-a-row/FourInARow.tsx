@@ -172,7 +172,7 @@ export default function FourInARow() {
   };
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--fr-extra:4.5rem] lg:[--fr-extra:0rem]">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>

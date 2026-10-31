@@ -34,9 +34,12 @@ export function useGameTheme(gameId: string) {
 }
 
 // Full-width page wearing the game's theme backdrop.
-export function ThemedPage({ theme, children }: { theme: GameTheme; children: ReactNode }) {
+// `menu`: the start screens (welcome, theme, setup) wear the one standard
+// Gamify look on every game, not the game's theme (teacher, 2026-10-31).
+export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme; children: ReactNode; menu?: boolean }) {
   const { settings } = useSettings();
-  useEffect(() => { setSoundPack(theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds]);
+  useEffect(() => { setSoundPack(menu ? 'classic' : theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds, menu]);
+  if (menu) return <div className="game-stage brand-menu min-h-[calc(100dvh-4rem)]">{children}</div>;
   return (
     <div className="game-stage min-h-[calc(100dvh-4rem)]" data-plain-g={theme.fonts.display !== 'Grow Year' ? '' : undefined} style={{
       ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],

@@ -75,7 +75,10 @@ teacher no control or educational value is not done.
   .title-bubble, the logo's lettering) and the heading font (Loyola Round
   Pro once licensed, Inclusive Sans bold until then) for every other heading
   (teacher, 2026-10-29); one shape scale. Use its tokens before adding colors or radii.
-  Game stages wear per-game themes (`src/theme`), designed per game.
+  Game stages wear per-game themes (`src/theme`), designed per game. A
+  game's start menus (welcome, theme, setup) and its results box always wear
+  the standard Gamify look, never a theme's (teacher, 2026-10-31): they are
+  not part of custom design (`ThemedPage menu`, `.brand-menu`).
 - Classic is the main design and the default theme for every game
   (teacher, 2026-10-28). It is seen, never handed out: no Classic art in
   downloads, Canva files, studio stickers or starting points. The Classic

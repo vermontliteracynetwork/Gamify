@@ -113,7 +113,7 @@ export default function FarmGrow() {
   const ripe = field.some((p) => p.stage === 3);
   const tip = stage === 'gate' ? t('fg.answer') : stage === 'night' ? t('fg.night') : jobs > 0 ? t('fg.work') : t('fg.noJobs');
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:1rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="farm-grow" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>

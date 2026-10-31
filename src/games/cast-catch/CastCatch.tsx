@@ -172,7 +172,7 @@ export default function CastCatch() {
   const lineOut = step === 'ask' || step === 'wait' || step === 'bite';
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="cast-catch" />
       {clock.element}

@@ -187,7 +187,7 @@ export default function RoadHop() {
   const boardWidth = `min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) - var(--rh-extra)) * ${COLS} / ${ROWS}))`;
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="road-hop" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />

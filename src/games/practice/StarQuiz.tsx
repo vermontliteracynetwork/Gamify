@@ -70,7 +70,7 @@ export default function StarQuiz() {
   }
 
   return (
-    <ThemedPage theme={theme}>
+    <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={`${phase === 'play' || phase === 'end' ? 'max-w-none' : 'max-w-3xl'} mx-auto px-4 sm:px-6 pt-6 pb-6`}>
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {clock.element}

@@ -150,9 +150,9 @@ h1, h2, h3 { color: inherit; }
    stages whose theme picks another display font, show a plain G. */
 .logo-g-text { display: none; }
 :is(h2, h3, .font-display):not(.title-bubble, h1) .logo-g,
-[data-plain-g] .logo-g { display: none; }
+[data-plain-g] :not(.brand-menu *).logo-g { display: none; }
 :is(h2, h3, .font-display):not(.title-bubble, h1) .logo-g-text,
-[data-plain-g] .logo-g-text { display: inline; }
+[data-plain-g] :not(.brand-menu *).logo-g-text { display: inline; }
 .logo-g {
   display: inline-block;
   width: 0.68em;
@@ -330,3 +330,13 @@ input[type='color'].color-dot::-moz-color-swatch { border: none; border-radius: 
 .fw-nudge-l { animation: fw-nudge-l 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudge, .fw-nudge-l { animation: none; } }
 html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudge, .fw-nudge-l) { animation: none; }
+
+/* The standard Gamify look for every game's start menus and results box
+   (teacher, 2026-10-31): brand fonts and colors, whatever the game's theme. */
+.brand-menu {
+  --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Loyola Round Pro', 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
+  --color-accent: #fdfd94;
+  --color-accent-ink: #000000;
+  --stage-bg-text: var(--text);
+}
