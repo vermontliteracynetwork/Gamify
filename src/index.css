@@ -358,5 +358,7 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
 
 /* A game that fills the whole space under the menu bar, and the whole
    screen in full screen: the same view either way (teacher, 2026-10-31). */
-.play-fill { height: calc(100dvh - 4rem); }
+:root { --play-h: calc(100dvh - 4rem); }
+html:fullscreen { --play-h: 100dvh; }
+.play-fill { height: var(--play-h); }
 html:fullscreen .play-fill { height: 100dvh; }

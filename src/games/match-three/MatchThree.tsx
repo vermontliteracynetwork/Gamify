@@ -12,7 +12,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -27,7 +27,6 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
 import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, swapTiles, wouldMatch, type Grid, type Pos } from './matchThree';
-import Title from '../../ui/Title';
 
 
 // Simple house look: each gem has its own shape AND color (never color
@@ -165,12 +164,10 @@ export default function MatchThree() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
       {clock.element}
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('bm.title')} /></h1>}
-      </GameTopRow>
+      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{t('bm.title')}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -201,9 +198,15 @@ export default function MatchThree() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <div className="grid gap-4 md:flex md:justify-center md:items-start">
+        // The board fills the play space like the reference games (teacher, 2026-10-31).
+        <div className="relative play-fill grid content-center gap-4 px-3 py-3 md:flex md:justify-center md:items-center">
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
+
           {/* The board is the star, the score panel right beside it (teacher, 2026-10-31). */}
-          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto md:mx-0 w-full md:w-[min(calc(100dvh-11.75rem+var(--chrome-save,0rem)),calc(100vw-20rem),52rem)]" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(100dvh - 11.75rem + var(--chrome-save, 0rem)), 52rem)' }}>
+          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto md:mx-0 w-full md:w-[min(calc(var(--play-h)-2rem),calc(100vw-19rem),64rem)]" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(var(--play-h) - 2rem), 64rem)' }}>
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;

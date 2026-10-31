@@ -10,7 +10,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { PUZZLE_PACK_CLEARED } from '../../config';
@@ -18,7 +18,6 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider, Toggle } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
-import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
@@ -228,12 +227,10 @@ export default function BubblePop() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="landscape:[--wide-save:2.875rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-4'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bubble-pop" />
       {clock.element}
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl hidden lg:block"><Title text={bubblePopManifest.name} /></h1>}
-      </GameTopRow>
+      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{bubblePopManifest.name}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -258,12 +255,19 @@ export default function BubblePop() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <div className="grid gap-3 lg:flex lg:justify-center lg:items-start lg:gap-4">
+        // The board fills the play space like the reference games, the same in
+        // full screen; small controls sit on top (teacher, 2026-10-31).
+        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center lg:gap-4">
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
+
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <section className="grid gap-2 min-w-0">
             <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
-              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `calc((100dvh - 18.125rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--bp-extra)) * ${W / H})`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
+              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H})`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
                 onPointerMove={(e) => { if (canAim && (e.pointerType === 'mouse' || pressed.current)) setAngle(toAngle(e)); }}
