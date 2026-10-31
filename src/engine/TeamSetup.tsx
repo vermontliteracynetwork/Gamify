@@ -11,6 +11,8 @@ import { balancedTeams, randomTeams } from './teamMaker';
 import { TEAM_ICONS, TeamBadge } from './TeamBadge';
 import type { CpuLevel, TurnPlayer } from './turns';
 import Title from '../ui/Title';
+import { useSignedIn } from '../auth/session';
+import { useSession } from '../student/session';
 
 // `icon` is the team picture (and color) picked from the theme's team icons.
 interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number }
@@ -27,7 +29,13 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const human: Slot['kind'] = mode === 'share' ? 'team' : 'student';
   // Play or share passes how teams are made (?teams=teacher|random|class).
   const how = mode === 'share' ? new URLSearchParams(useLocation().search).get('teams') : null;
+  // A student alone on their own device (a class lobby or choice board)
+  // plays as themself against the computer (teacher, 2026-10-31).
+  const session = useSession();
+  const { teacher } = useSignedIn();
+  const alone = mode === 'versus' && !!session && !teacher;
   const [slots, setSlots] = useState<Slot[]>(() => {
+    if (alone) return [{ name: session.name, kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
     const first = rollName();
     return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
   });

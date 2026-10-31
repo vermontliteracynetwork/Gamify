@@ -47,6 +47,8 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('checkbox', { name: /Cast and Catch/ }).click();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.getByRole('checkbox', { name: /Match Three/ }).click();
+  // Two-player games join the board, played against the computer.
+  await page.getByRole('checkbox', { name: /Four in a Row/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
@@ -69,5 +71,13 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('link', { name: 'Match Three' }).click();
   await expect(page).toHaveURL(/\/games\/match-three/);
   await expect(page.getByRole('heading', { name: 'Ask for a Code' })).toHaveCount(0);
+  await page.goto('/choose');
+  await page.getByRole('link', { name: 'Four in a Row' }).click();
+  await page.getByRole('button', { name: 'Set up and play' }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByRole('heading', { name: /^Step 1 of/ })).toBeVisible();
+  // Alone on their device, the student plays the computer.
+  await expect(page.getByText('Computer level')).toBeVisible();
+  await page.screenshot({ path: `test-results/choose-vs-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });

@@ -66,7 +66,10 @@ export default function ActivityPage() {
   const set = sets.find((s) => s.id === setId[0]);
   const pro = tier === 'pro';
   const hows = HOWS.filter((h) => (h.id === 'each' || h.id === 'board' ? !!classId : true) && GAMES.some((g) => g.modes.includes(h.mode!)));
-  const fits = (g: (typeof GAMES)[number]) => !how || g.modes.includes(HOWS.find((h) => h.id === how)!.mode!);
+  // A game for each student and the choice board take solo games and
+  // two-player games played against the computer (teacher, 2026-10-31).
+  const ownDevice = (g: (typeof GAMES)[number]) => g.modes.includes('solo') || g.modes.includes('versus');
+  const fits = (g: (typeof GAMES)[number]) => !how || (how === 'each' || how === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === how)!.mode!));
   const ready = [true, !!how && (how !== 'each' && how !== 'board' || pro), how === 'board' ? board.length > 1 : !!game, !!set, true][step];
   const showClasses = TIERS[tier].hasClasses && classes.length > 0;
 
@@ -195,7 +198,7 @@ export default function ActivityPage() {
                 <p className="font-bold">{t('activity.eachPlan')}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <select aria-label={t('activity.groupGame')} id="group-game" className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface" defaultValue={game.id}>
-                    {GAMES.filter((g) => g.modes.includes('solo') && canPlayGame(tier, g.id)).map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    {GAMES.filter((g) => ownDevice(g) && canPlayGame(tier, g.id)).map((g) => <option key={g.id} value={g.id}>{g.name}{g.modes.includes('solo') ? '' : ` (${t('activity.vsComputer')})`}</option>)}
                   </select>
                   <select aria-label={t('activity.groupSet')} id="group-set" className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface max-w-64" defaultValue={set.id}>
                     {sets.map((x) => <option key={x.id} value={x.id}>{x.name || t('sets.untitled')}</option>)}
