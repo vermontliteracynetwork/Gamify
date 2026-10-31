@@ -33,6 +33,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
 
   // Assign Animals and habitats to the whole class.
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
   await expect(page.getByText('Whole class').first()).toBeVisible();

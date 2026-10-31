@@ -12,6 +12,7 @@ import type { ThemePieceSpec } from '../theme/types';
 import { Button, buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import { TemplateLock, useTemplateAccess } from '../theme/builder/templateAccess';
 
 // Theme guides in the blog (teacher, 2026-10-28): one article per game that
 // shows every piece of the Classic look on screen, with what it is, its exact
@@ -71,9 +72,11 @@ export function ThemeGuidePage() {
   const { gameId } = useParams();
   const game = guideGames().find((g) => g.id === gameId);
   const [dl, setDl] = useState('');
+  const access = useTemplateAccess(gameId ?? '');
   if (!game) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog?tag=themes" className={buttonClasses('secondary')}>{t('guide.all')}</Link></main>;
   const items = game.items;
   async function zip() {
+    if (access !== 'ok') return;
     setDl(t('builder.dl.making'));
     const [{ fileSlug, saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
     saveFile(new Blob([templatePdf([...game!.themePieces, ...itemPages(game!.items)])], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
@@ -91,10 +94,11 @@ export function ThemeGuidePage() {
         <section className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
           <h2 id="guide-dl" className="font-display text-3xl"><Title text={t('guide.dlTitle')} /></h2>
           <p className="font-bold">{t('guide.dlSub')}</p>
-          <div className="flex flex-wrap gap-2">
+          <TemplateLock access={access} />
+          {access === 'ok' && <div className="flex flex-wrap gap-2">
             <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'min-h-14 px-6 hover-pop')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
             <Button variant="secondary" className="min-h-14 px-6 hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => void zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
-          </div>
+          </div>}
           {dl && <p className="font-bold" role="status">{dl}</p>}
           <p className="text-sm font-semibold">{t('guide.dlThen')}</p>
         </section>

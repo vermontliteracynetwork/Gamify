@@ -343,11 +343,25 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
         ))}
         <p className="text-sm font-bold text-muted">{t('class.focusNote')}</p>
       </Panel>
+      {/* Everything to choose and save sits at the top, by the title; the
+          sets come below in pages (teacher, 2026-10-31). */}
       <Panel className="grid gap-4">
-        <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
-        <SetPicker sets={sets} value={setId} onChange={setSetId} />
-        <ThemeChoices value={themeIds} onChange={setThemeIds} />
-        <ChoiceRow label={t('class.who')} value={who} onChange={setWho} options={[{ value: 'class', label: t('class.wholeClass') }, { value: 'some', label: t('class.someStudents') }]} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
+          <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
+        </div>
+        <p className="font-bold -mt-2" aria-live="polite">{setId.length ? t('class.picked', { name: name(setId[0]) }) : t('class.pickBelow')}</p>
+        {full && Number.isFinite(limit) && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('class.setLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
+        <div className="grid md:grid-cols-[auto_1fr] gap-x-8 gap-y-4 items-start">
+          <div className="grid gap-3">
+            <ChoiceRow label={t('class.who')} value={who} onChange={setWho} options={[{ value: 'class', label: t('class.wholeClass') }, { value: 'some', label: t('class.someStudents') }]} />
+            <div className="flex flex-wrap gap-3">
+              <label className="grid gap-1 font-bold">{t('class.starts')}<input type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
+              <label className="grid gap-1 font-bold">{t('class.ends')}<input type="date" value={endsOn} onChange={(e) => setEndsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
+            </div>
+          </div>
+          <ThemeChoices value={themeIds} onChange={setThemeIds} />
+        </div>
         {who === 'some' && (
           <div className="flex flex-wrap gap-2">
             {students.map((s) => (
@@ -356,12 +370,9 @@ function SetsTab({ classroomId, students, assignments, reload }: { classroomId: 
             ))}
           </div>
         )}
-        <div className="flex flex-wrap gap-3">
-          <label className="grid gap-1 font-bold">{t('class.starts')}<input type="date" value={startsOn} onChange={(e) => setStartsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
-          <label className="grid gap-1 font-bold">{t('class.ends')}<input type="date" value={endsOn} onChange={(e) => setEndsOn(e.target.value)} className="min-h-11 px-2 rounded-input border-[2px] border-border" /></label>
+        <div className="border-t-[2px] border-border-soft pt-4">
+          <SetPicker sets={sets} value={setId} onChange={setSetId} />
         </div>
-        {full && Number.isFinite(limit) && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('class.setLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
-        <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
       </Panel>
     </div>
   );

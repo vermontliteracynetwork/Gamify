@@ -58,7 +58,10 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Category grid' }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+  const search = page.getByRole('searchbox', { name: 'Search titles and tags' });
+  await search.fill('Rhyming');
   await page.getByRole('checkbox', { name: /^Rhyming words/ }).click();
+  await search.fill('Shapes');
   await page.getByRole('checkbox', { name: /^Shapes/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Fewer teams' }).click();

@@ -23,6 +23,13 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   await page.screenshot({ path: `test-results/guide-peg-${info.project.name}.png`, fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 
+  // Free plan: Peg Drop templates are locked behind Plus (teacher, 2026-10-31).
+  await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Canva file/ })).toHaveCount(0);
+  await page.goto('/blog/themes/peg-drop/print');
+  await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
+  await page.evaluate(() => localStorage.setItem('gamify:settings', JSON.stringify({ ...JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'), tier: 'plus' })));
+  await page.goto('/blog/themes/peg-drop');
   const wait = page.waitForEvent('download');
   await page.getByRole('button', { name: /Canva file/ }).click();
   const file = await wait;

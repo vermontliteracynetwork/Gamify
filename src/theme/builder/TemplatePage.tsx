@@ -1,3 +1,4 @@
+import { TemplateLock, useTemplateAccess } from './templateAccess';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer } from '@phosphor-icons/react';
 import { GAMES } from '../../games/registry';
@@ -44,7 +45,17 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
 export default function TemplatePage({ guide = false }: { guide?: boolean }) {
   const { gameId } = useParams();
   const game = [...GAMES, signInManifest, bigScreenManifest].find((g) => g.id === gameId);
+  const access = useTemplateAccess(gameId ?? '');
   if (!game) return null;
+  const back = guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`;
+  if (access !== 'ok') {
+    return (
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-4">
+        <Link to={back} className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t(guide ? 'guide.back' : 'builder.backToBuilder')}</Link>
+        <TemplateLock access={access} />
+      </main>
+    );
+  }
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">
       <div className="no-print flex flex-wrap items-center gap-3 mb-6">
