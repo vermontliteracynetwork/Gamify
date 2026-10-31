@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Star } from '@phosphor-icons/react';
 import { pieceColor, pieceImage } from '../../theme/library';
@@ -42,7 +42,7 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
     const unit = `min(${(w / cols).toFixed(2)}cqw, ${(ht / rows).toFixed(2)}cqh)`;
     const cells = Array.from({ length: cols * rows }, (_, i) => i);
     for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cells[i], cells[j]] = [cells[j], cells[i]]; }
-    cells.slice(0, n).forEach((c) => { const spin = (rand() - 0.5) * 100; const size = 0.3 + rand() * 0.55; out.push({
+    cells.slice(0, n).forEach((c) => { const spin = (rand() - 0.5) * 100; const size = 0.2 + rand() * 0.75; out.push({
       order: rand(),
       spot: {
         x: left + (((c % cols) + 0.4 + rand() * 0.2) / cols) * w,
@@ -91,7 +91,8 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 
 // `colors` tints each filled star (a class sky where every student has a
 // color); `height` sizes the sky when it is not the whole game screen.
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))' }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string }) {
+// `bleed`: edge to edge, no rounded frame (the sky is the whole game space).
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
   const spots = skySpots(total, 7, hole, aspect);
@@ -99,15 +100,17 @@ export default function Sky({ theme, filled, total, still, label, colors, height
   const own = ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
   const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];
   const dust = skySpots(36, 3, null, aspect);
+  // Each star's kind differs from its near neighbors (teacher, 2026-10-31).
+  const kinds = useMemo(() => pickKinds(spots, Math.max(1, items.length), aspect), [spots, items.length, aspect]);
   return (
-    <div ref={ref} className="relative w-full overflow-hidden rounded-panel border-[2.5px] border-border" role="img" aria-label={label}
+    <div ref={ref} className={`relative w-full overflow-hidden ${bleed ? '' : 'rounded-panel border-[2.5px] border-border'}`} role="img" aria-label={label}
       style={{ containerType: 'size', height, background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />
       ))}
       {spots.map((p, i) => {
         if (i >= filled) return null;
-        const img = items.length && !colors ? items[i % items.length] : undefined;
+        const img = items.length && !colors ? items[kinds[i] % items.length] : undefined;
         return (
           <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size})`, height: `calc(${p.unit} * ${p.size})` }}
             initial={still ? false : { scale: 0, rotate: -90, opacity: 0 }}
@@ -121,4 +124,19 @@ export default function Sky({ theme, filled, total, still, label, colors, height
       })}
     </div>
   );
+}
+
+// Gives each spot a kind so no two close stars match: the kind least used
+// that no nearby spot already has (in screen distance, using the sky's shape).
+export function pickKinds(spots: SkySpot[], n: number, aspect = 1): number[] {
+  const out: number[] = [];
+  const used = Array.from({ length: n }, () => 0);
+  spots.forEach((p, i) => {
+    const near = new Set<number>();
+    spots.slice(0, i).forEach((q, j) => { const dx = (p.x - q.x) * aspect, dy = p.y - q.y; if (Math.hypot(dx, dy) < 28) near.add(out[j]); });
+    const order = Array.from({ length: n }, (_, k) => (k + i) % n).sort((a, b) => used[a] - used[b]);
+    const k = order.find((c) => !near.has(c)) ?? order[0];
+    out.push(k); used[k] += 1;
+  });
+  return out;
 }

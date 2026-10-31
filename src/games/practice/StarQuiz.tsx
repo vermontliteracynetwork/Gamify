@@ -8,7 +8,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -83,8 +83,8 @@ export default function StarQuiz() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={`${phase === 'play' || phase === 'end' ? 'max-w-none' : 'max-w-3xl'} mx-auto px-4 sm:px-6 pt-6 pb-6`}>
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
+      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {clock.element}
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
@@ -112,9 +112,15 @@ export default function StarQuiz() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <section className="grid gap-2">
+        // The sky fills the whole space, the same in full screen; small controls
+        // sit on top (teacher, 2026-10-31).
+        <section className="relative play-fill">
           <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
-          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} />
+          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed />
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
           <p className="sr-only" aria-live="polite">{phase === 'play' ? t('practice.progress', { round, total }) : ''}</p>
         </section>
       )}
