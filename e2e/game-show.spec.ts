@@ -20,6 +20,9 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.screenshot({ path: `test-results/gameshow-setup-sets-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: '4 x 3' }).click();
+  // One try is the default; this game turns on three (teacher, 2026-10-31).
+  await expect(page.getByRole('radio', { name: 'One try' })).toBeChecked();
+  await page.getByRole('radio', { name: '3 tries' }).click();
   await expect(page.getByRole('switch', { name: /Double Star/ })).toBeChecked();
   await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
   await finishSetup(page);
@@ -63,6 +66,9 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await page.getByRole('checkbox', { name: /^Rhyming words/ }).click();
   await search.fill('Shapes');
   await page.getByRole('checkbox', { name: /^Shapes/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  // Options: tries for each turn (teacher, 2026-10-31).
+  await expect(page.getByRole('radiogroup', { name: 'Tries for each turn' })).toBeVisible();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Fewer teams' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();

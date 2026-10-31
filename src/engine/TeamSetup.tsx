@@ -67,14 +67,15 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
     <section className={embedded ? 'grid gap-5' : 'bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
       {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={mode === 'share' ? t('teams.title') : t('teams.players')} /></h1>}
 
-      <div className="flex items-center gap-3">
+      {/* A game with a fixed number of players (Four in a Row: always 2) shows no count (teacher, 2026-10-31). */}
+      {min !== max && <div className="flex items-center gap-3">
         <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>
         <button type="button" aria-label={t('teams.less')} disabled={slots.length <= min} onClick={() => resize(slots.length - 1)}
           className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={22} /></button>
         <span className="font-display text-3xl font-bold w-10 text-center tabular-nums" aria-live="polite">{slots.length}</span>
         <button type="button" aria-label={t('teams.more')} disabled={slots.length >= max} onClick={() => resize(slots.length + 1)}
           className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
-      </div>
+      </div>}
 
       <ol className="grid sm:grid-cols-2 items-start gap-2 list-none p-0 m-0">
         {slots.map((s, i) => (

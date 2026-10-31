@@ -16,7 +16,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { TEAM_COLORS, type CpuLevel, type TurnPlayer } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -173,11 +173,9 @@ export default function FourInARow() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--fr-extra:4.5rem] lg:[--fr-extra:0rem]">
+    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--fr-extra:8rem] lg:[--fr-extra:0rem]' : 'max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
-        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('fr.title')} /></h1>}
-      </GameTopRow>
+      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -226,9 +224,17 @@ export default function FourInARow() {
       {(phase === 'play' || phase === 'end') && (
         // Same layout as every team game (teacher, 2026-10-31): the board, and
         // the players beside it with a glow on whose turn it is.
-        <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
+        // The board fills the play space and never scrolls (teacher, 2026-10-31);
+        // small controls on top, the players right beside it, top aligned.
+        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+          <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
+          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+            <FullScreenButton small />
+            <GearButton small onClick={() => setSettingsOpen(true)} />
+          </div>
+          <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid gap-2 min-w-0 justify-items-center">
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 17.25rem + var(--chrome-save, 0rem) - var(--fr-extra, 0rem)) * 7 / 6), 40rem)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;
@@ -236,8 +242,9 @@ export default function FourInARow() {
                 return (
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
                     aria-label={full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`min-h-11 rounded-input flex items-center justify-center ${canPick ? 'bg-accent border-[2px] border-border motion-safe:animate-pulse' : 'opacity-0'}`}>
-                    <ArrowFatDown weight="fill" size={22} aria-hidden="true" />
+                    className={`min-h-11 rounded-input flex items-center justify-center gap-0.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent motion-safe:animate-pulse' : 'bg-surface/60 opacity-70'}`}>
+                    {/* Numbered columns, 1 to 7 (teacher, 2026-10-31). */}
+                    {c + 1}<ArrowFatDown weight="fill" size={16} aria-hidden="true" />
                   </button>
                 );
               })}
@@ -264,11 +271,12 @@ export default function FourInARow() {
             </div>
           </div>
           </div>
-          <div className="grid gap-2 min-w-0">
+          <div className="order-first lg:order-none lg:w-[260px] grid gap-2 min-w-0">
             <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} round={t('fr.rightsHint')} />
             {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
-              <p className="bg-surface border-[2px] border-border rounded-input px-3 py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
+              <p className="bg-surface border-[2px] border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
             )}
+          </div>
           </div>
 
           {phase === 'end' && (

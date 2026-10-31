@@ -16,7 +16,7 @@ import ScoreBoard from '../../engine/ScoreBoard';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
-import { addPoints, CHANCES, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
+import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
@@ -48,7 +48,9 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], tries: '1' as '1' | '3' | 'all' });
+  // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
+  const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');
   const { board, cardCount } = setup;
   const grid = gridFor(cardCount);
   const gap = grid.rows > 4 ? 8 : 12;
@@ -133,8 +135,8 @@ export default function GameShow() {
     if (player.kind !== 'cpu' && player.kind !== 'teacher') log(question.q, question.setId, player.name, right);
     if (!right && player.kind !== 'cpu' && player.kind !== 'teacher') setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
 
-    // A miss brings a new question until the third one.
-    if (!right && question.chance < CHANCES) {
+    // A miss brings a new question while tries are left.
+    if (!right && question.chance < tries) {
       const sets = board === 'grid' && question.cell !== undefined ? [chosenSets[cells[question.cell].col]] : chosenSets;
       setQuestion({ ...draw(sets), cell: question.cell, chance: question.chance + 1 });
       return;
@@ -276,8 +278,11 @@ export default function GameShow() {
           { id: 'questions', title: t('setup.questions'), ready: setIds.length > 0, content: (
             <SetPicker sets={allSets} value={setIds} max={board === 'grid' ? 5 : 1} onChange={(ids) => change({ setIds: ids })} />
           ) },
-          ...(board === 'cards' ? [{ id: 'options', title: t('setup.options'), content: (
+          { id: 'options', title: t('setup.options'), content: (
             <>
+              <ChoiceRow label={t('tb.tries')} value={setup.tries ?? '1'} onChange={(v) => change({ tries: v })}
+                options={[{ value: '1', label: t('tb.tries.1') }, { value: '3', label: t('tb.tries.3') }, { value: 'all', label: t('tb.tries.all') }]} />
+              {board === 'cards' && <>
               <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
                 options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }) }))} />
               <div className="grid gap-2">
@@ -289,8 +294,9 @@ export default function GameShow() {
                     onChange={(on) => change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] })} />
                 ))}
               </div>
+              </>}
             </>
-          ) }] : []),
+          ) },
           { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
@@ -332,7 +338,9 @@ export default function GameShow() {
             )}
 
             {phase === 'play' && board === 'grid' && (
-              <div className="overflow-x-auto">
+              // Room inside the scroll box for the bottom row's outline and shadow
+              // (teacher, 2026-10-31: never cut off).
+              <div className="overflow-x-auto pb-2 pr-2 -mb-2">
                 <div className="grid gap-2 min-w-[560px]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
                     <div key={s.id} className="min-h-16 rounded-input border-[2.5px] border-border bg-surface-2 font-display font-bold text-center flex items-center justify-center p-2 text-sm sm:text-base">{s.name}</div>
@@ -365,7 +373,7 @@ export default function GameShow() {
         </div>
       )}
 
-      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: CHANCES }} />}
+      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} />}
 
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>

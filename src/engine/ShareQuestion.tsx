@@ -70,7 +70,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             {player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
-          {chance && chance.total > 1 && (
+          {chance && chance.total === Infinity && <span className="font-bold">{t('share.chanceOpen', { n: chance.n })}</span>}
+          {chance && chance.total > 1 && chance.total !== Infinity && (
             <span className="inline-flex items-center gap-1.5 font-bold" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
               {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-[2px] border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-accent' : 'bg-surface'}`} />)}
               <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
