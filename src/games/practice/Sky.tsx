@@ -42,16 +42,18 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
     const unit = `min(${(w / cols).toFixed(2)}cqw, ${(ht / rows).toFixed(2)}cqh)`;
     const cells = Array.from({ length: cols * rows }, (_, i) => i);
     for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [cells[i], cells[j]] = [cells[j], cells[i]]; }
-    cells.slice(0, n).forEach((c) => out.push({
+    cells.slice(0, n).forEach((c) => { const spin = (rand() - 0.5) * 100; const size = 0.3 + rand() * 0.55; out.push({
       order: rand(),
       spot: {
         x: left + (((c % cols) + 0.4 + rand() * 0.2) / cols) * w,
         y: top + ((Math.floor(c / cols) + 0.4 + rand() * 0.2) / rows) * ht,
-        size: 0.3 + rand() * 0.55, // small to big, under a whole cell so a turning item stays inside it
-        spin: (rand() - 0.5) * 100, // each one tipped its own way (teacher, 2026-10-31)
+        // Small to big, each tipped its own way (teacher, 2026-10-31); a tipped
+        // item stays inside its cell (and so never under the question box).
+        size: Math.min(size, 0.9 / (Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180)))),
+        spin,
         unit,
       },
-    }));
+    }); });
   });
   // Mix the strips so items appear all around in turn.
   return out.sort((x, y) => x.order - y.order).map((o) => o.spot);
