@@ -5,7 +5,7 @@ import { ArrowRight, DiceFive, SpeakerHigh, UserCircle } from '@phosphor-icons/r
 import { speak } from '../engine/feedback';
 import { useSettings } from '../settings/SettingsContext';
 import { data, newId } from '../data';
-import { findClassCode, findGameCode, playCloudCode, type GameCode } from '../data/gameCodes';
+import { findGameCode, playCloudCode, type GameCode } from '../data/gameCodes';
 import { rollName } from '../engine/nameDice';
 import { setSession } from '../student/session';
 import StudentPicker from '../student/StudentPicker';
@@ -46,10 +46,6 @@ export default function JoinPage() {
   async function check(c: string) {
     if (waitUntil > Date.now()) return;
     const upper = c.trim().toUpperCase();
-    const cls = (await data.listClassrooms()).find((x) => x.joinCode === upper);
-    if (cls) { setReady({ code: upper, go: async () => navigate(`/arcade/${cls.id}`) }); return; }
-    const cloudClass = await findClassCode(upper);
-    if (cloudClass) { setReady({ code: upper, go: async () => navigate(`/arcade/${cloudClass.id}`) }); return; }
     const g = await findGameCode(upper);
     if (g) { setReady({ code: upper, go: () => openGame(g) }); return; }
     misses.current += 1;
@@ -76,8 +72,9 @@ export default function JoinPage() {
     if (!game) return;
     const studentId = student?.id ?? newId('guest');
     const who = student?.name ?? name;
-    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who });
+    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId });
     playCloudCode(game.cloud ? game.code : '');
+    if (game.design) { navigate('/arcade/design'); return; }
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }
     if (game.versus) { navigate(`/games/${game.gameId}?set=${game.setId}&versus=${game.code}`); return; }
     navigate(`/games/${game.gameId}?set=${game.setId}`);

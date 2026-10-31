@@ -36,7 +36,7 @@ export default function NavBar() {
             <ChatCircleDots weight="bold" size={22} />
           </button>
           {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
-          <Link to={student ? '/arcade' : '/play'} className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{student ? t('nav.myArcade') : t('nav.allGames')}</span></Link>
+          {!student && <Link to="/play" className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.allGames')}</span></Link>}
           {teacher && !student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden sm:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
         </>
       )}

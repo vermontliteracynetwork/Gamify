@@ -9,6 +9,7 @@ import { ArrowFatDown, Question, Trophy } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { playEffect } from '../../engine/feedback';
+import ScoreBoard from '../../engine/ScoreBoard';
 import ResultsModal from '../../engine/ResultsModal';
 import { TEAM_ICONS } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
@@ -172,14 +173,14 @@ export default function FourInARow() {
 
   return (
     <ThemedPage theme={theme}>
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6 [--fr-extra:4.5rem] lg:[--fr-extra:0rem]">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
       <GameTopRow onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('fr.title')} /></h1>}
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('fr.how1') },
           { icon: <ArrowFatDown weight="fill" size={22} />, text: t('fr.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('fr.how3') },
@@ -191,7 +192,7 @@ export default function FourInARow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => (setup.where === 'other' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.where === 'other' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             <TeamSetup mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
           ) },
@@ -223,22 +224,11 @@ export default function FourInARow() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        <div className="grid gap-4 justify-items-center">
-          <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 w-full max-w-xl" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-live="polite">
-            {phase === 'play' && player && (
-              <>
-                <Disc who={(turn + 1) as 1 | 2} size="44px" />
-                <span className="font-display text-xl sm:text-2xl font-bold">
-                  {remoteTurn ? t('fr.waitingFor', { name: player.name }) : player.kind === 'cpu' ? t('fr.cpuThinking') : step === 'pick' ? t('fr.pick', { name: player.name }) : t('fr.answerFirst', { name: player.name })}
-                </span>
-              </>
-            )}
-            {phase === 'end' && (
-              <span className="font-display text-2xl font-bold">{winner ? t('fr.wins', { name: winner.name }) : t('fr.draw')}</span>
-            )}
-          </div>
-
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 21.25rem + var(--chrome-save, 0rem)) * 7 / 6), 40rem)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+        // Same layout as every team game (teacher, 2026-10-31): the board, and
+        // the players beside it with a glow on whose turn it is.
+        <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
+          <div className="grid gap-2 min-w-0 justify-items-center">
+          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#a8d8f0'), maxWidth: 'min(100%, calc((100dvh - 17.25rem + var(--chrome-save, 0rem) - var(--fr-extra, 0rem)) * 7 / 6), 40rem)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const full = board[0][c] !== 0;
@@ -272,6 +262,13 @@ export default function FourInARow() {
                 );
               })}</div>)}
             </div>
+          </div>
+          </div>
+          <div className="grid gap-2 min-w-0">
+            <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} round={t('fr.rightsHint')} />
+            {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
+              <p className="bg-surface border-[2px] border-border rounded-input px-3 py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
+            )}
           </div>
 
           {phase === 'end' && (

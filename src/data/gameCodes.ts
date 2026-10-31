@@ -8,7 +8,7 @@ import type { QuestionSet } from './types';
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
 // `due` (YYYY-MM-DD) makes it homework: the code works through that day.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; rosterClass?: string; cloud?: boolean; due?: string }
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string }
 const KEY = 'game-codes';
 // Game codes stop working after two weeks (development plan Stage 5:
 // codes expire), so an old code on a board can't be reused by strangers.
@@ -19,14 +19,16 @@ export async function listGameCodes(): Promise<GameCode[]> {
   return ((await data.getSetting<GameCode[]>(KEY)) ?? []).filter((c) => fresh(c));
 }
 
-export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' = 'play', due?: string): Promise<GameCode> {
+// `design`: a code that opens the student theme studio (no Arcade to find it
+// in since 2026-10-31; students get in only with a code).
+export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' | 'design' = 'play', due?: string): Promise<GameCode> {
   const all = await listGameCodes();
-  const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror';
+  const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror', design = kind === 'design';
   // A two-device game gets a fresh code every time; others reuse theirs.
-  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && c.due === due);
+  const same = versus || mirror ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && !!c.design === design && c.due === due);
   if (same) return same;
   const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(due && { due }) };
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }) };
   await data.setSetting(KEY, [...all, code]);
   await shareToCloud(code, kind);
   return code;
@@ -34,7 +36,7 @@ export async function makeGameCode(gameId: string, setId: string, kind: 'play' |
 
 // With cloud accounts on, the code, a copy of its set and the teacher's
 // student list reach students' own devices (0008_game_codes.sql).
-async function shareToCloud(code: GameCode, kind: 'play' | 'live' | 'versus' | 'mirror') {
+async function shareToCloud(code: GameCode, kind: 'play' | 'live' | 'versus' | 'mirror' | 'design') {
   if (!supabase || !(await supabase.auth.getSession()).data.session) return;
   const set = code.setId ? (await data.getQuestionSet(code.setId)) ?? LIBRARY.find((s) => s.id === code.setId) : undefined;
   const classes = (await data.listClassrooms()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));

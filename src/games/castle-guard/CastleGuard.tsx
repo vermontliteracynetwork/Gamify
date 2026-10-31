@@ -151,7 +151,7 @@ export default function CastleGuard() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={castleGuardManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={castleGuardManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('cg.how1') },
           { icon: <Castle weight="fill" size={22} />, text: t('cg.how2') },
           { icon: <Play weight="fill" size={22} />, text: t('cg.how3') },
@@ -161,7 +161,7 @@ export default function CastleGuard() {
         <ThemeScreen gameName={castleGuardManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />
       )}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

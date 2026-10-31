@@ -1,6 +1,7 @@
+import { makeGameCode } from '../data/gameCodes';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, DiceFive, GearSix, Heart, ShareNetwork, Plus, ProjectorScreen, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
+import { ArrowLeft, DiceFive, GearSix, Heart, Plus, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -17,12 +18,10 @@ import { imageFileToDataUrl } from '../ui/imageFile';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { themesFor } from '../theme/library';
 import { GAMES } from '../games/registry';
-import { classroomShare } from '../data/gameCodes';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { readOnlyIds } from '../data/downgrade';
-import { newJoinCode } from '../auth/session';
 import Title from '../ui/Title';
 import { LimitNote, UpgradeButton } from '../billing/Upgrade';
 import DialogFocus from '../ui/DialogFocus';
@@ -38,6 +37,7 @@ export default function ClassPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('students');
   const { value: classes = [], reload: reloadClass } = useAsync(() => data.listClassrooms());
+  const [designCode, setDesignCode] = useState('');
   const { value: students = [], reload: reloadStudents } = useAsync(() => data.listStudents(id), [id]);
   const { value: assignments = [], reload: reloadAssignments } = useAsync(() => data.listAssignments(id), [id]);
   const classroom = classes.find((c) => c.id === id);
@@ -48,7 +48,6 @@ export default function ClassPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     // Classes made before join codes existed get one now.
-    if (classroom && !classroom.joinCode) void data.saveClassroom({ ...classroom, joinCode: newJoinCode(classes.map((c) => c.joinCode ?? '')) }).then(reloadClass);
   }, [classroom]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Students added before PIN sign-in get a PIN now.
@@ -63,11 +62,8 @@ export default function ClassPage() {
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       {!free && <Link to="/teacher/classes" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('classes.all')}</Link>}
-      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={`${t('class.counts', { students: students.length, sets: assignments.length })} · ${t('class.joinCode', { code: classroom.joinCode ?? '' })}`}
-        actions={<>
-          <Link to={`/show/${classroom.joinCode ?? ''}`} className={buttonClasses('secondary')}><ProjectorScreen weight="bold" size={18} />{t('class.showCode')}</Link>
-          <a href={classroomShare(`${window.location.origin}/join/${classroom.joinCode ?? ''}`, classroom.name)} target="_blank" rel="noreferrer" className={buttonClasses('secondary')}><ShareNetwork weight="bold" size={18} />{t('host.classroom')}</a>
-        </>} />
+      {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
+      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
@@ -99,6 +95,16 @@ export default function ClassPage() {
             <div className="ml-auto min-w-40">
               <Toggle label={classroom.studentDesign ? t('class.modeOn') : t('class.modeOff')} value={!!classroom.studentDesign} onChange={async (v) => { await data.saveClassroom({ ...classroom, studentDesign: v }); reloadClass(); }} />
             </div>
+            {/* Students reach the design studio with a code, like a game (teacher, 2026-10-31). */}
+            {classroom.studentDesign && (
+              <div className="basis-full flex flex-wrap items-center gap-2">
+                <Button variant="primary" onClick={async () => setDesignCode((await makeGameCode('design', '', 'design')).code)}>{t('class.designCode')}</Button>
+                {designCode && <>
+                  <span className="font-display text-2xl tracking-[0.2em]" aria-label={t('class.designCodeIs', { code: designCode })}>{designCode}</span>
+                  <Link to={`/show/${designCode}`} className={buttonClasses('secondary')}>{t('class.showCode')}</Link>
+                </>}
+              </div>
+            )}
           </div>
         </Panel>
       )}

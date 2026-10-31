@@ -1,3 +1,4 @@
+import Title from '../../ui/Title';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -10,7 +11,8 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import { TeamBadge } from '../../engine/TeamBadge';
+import ScoreBoard from '../../engine/ScoreBoard';
+import { CHANCES } from '../../engine/turns';
 import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
@@ -56,7 +58,7 @@ export default function PegDrop() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [turns, setTurns] = useState<TurnState | null>(null);
   const [step, setStep] = useState<Step>('question');
-  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string } | null>(null);
+  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; chance: number } | null>(null);
   const [path, setPath] = useState<number[] | null>(null);
   const [landed, setLanded] = useState<number | null>(null);
   const [drops, setDrops] = useState(0);
@@ -92,7 +94,7 @@ export default function PegDrop() {
       void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('aim'); });
     } else {
       const d = deck.next();
-      setQuestion({ q: d.question, setId: d.setId });
+      setQuestion({ q: d.question, setId: d.setId, chance: 1 });
     }
   }
   function onShareResult(right: boolean) {
@@ -101,6 +103,8 @@ export default function PegDrop() {
       void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), teamName: player.name, gameId: 'peg-drop', mode: 'share', setId: question.setId, prompt: question.q.prompt, answer: question.q.choices[question.q.correctIndex], tries: [], ms: 0, outcome: right ? 'right' : 'skipped' });
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
+    // Three tries, a new question each time (teacher, 2026-10-31, as in Game Show).
+    if (!right && question.chance < CHANCES) { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: question.chance + 1 }); return; }
     setQuestion(null);
     if (right) { earned(turns); setStep('aim'); } else afterTurn(turns);
   }
@@ -164,9 +168,11 @@ export default function PegDrop() {
     <ThemedPage theme={theme}>
     <main className="landscape:[--wide-save:5.75rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="peg-drop" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow onSettings={() => setSettingsOpen(true)}>
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={pegDropManifest.name} /></h1>}
+      </GameTopRow>
       {phase === 'welcome' && (
-        <GameWelcome game={pegDropManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={pegDropManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('pd.how1') },
           { icon: <ArrowFatDown weight="fill" size={22} />, text: t('pd.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('pd.how3') },
@@ -174,7 +180,7 @@ export default function PegDrop() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={pegDropManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -189,14 +195,7 @@ export default function PegDrop() {
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-4 items-start">
           <section className="grid gap-2 min-w-0">
-            {phase === 'play' && player && (
-              <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
-                <TeamBadge colorIndex={player.colorIndex} size={36} />
-                <span className="font-display text-xl sm:text-2xl">{step === 'aim' ? (player.kind === 'cpu' ? t('fr.cpuThinking') : t('pd.pick', { name: player.name })) : step === 'question' ? t('share.whoseTurn', { name: player.name }) : t('pd.dropping')}</span>
-                <span className="ml-auto font-bold text-sm">{t('pd.drop', { n: Math.min(drops + 1, totalTurns), total: totalTurns })}</span>
-              </div>
-            )}
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 21.25rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 7 / 8))' }}>
+            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: '7 / 8', maxWidth: 'min(100%, calc((100dvh - 17.25rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 7 / 8))' }}>
               {Array.from({ length: ZONES }, (_, z) => (
                 <button key={z} type="button" onClick={() => player?.kind !== 'cpu' && drop(z)} disabled={step !== 'aim' || player?.kind === 'cpu'} aria-label={t('pd.zone', { n: z + 1 })}
                   className={`absolute -translate-x-1/2 top-[1%] w-[11%] aspect-square rounded-full flex items-center justify-center ${step === 'aim' && player?.kind !== 'cpu' ? 'bg-accent border-[2.5px] border-border motion-safe:animate-pulse' : 'opacity-0'}`}
@@ -221,19 +220,10 @@ export default function PegDrop() {
               </AnimatePresence>
             </div>
           </section>
-          <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4" aria-label={t('share.scores')}>
-            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-0 m-0">
-              {turns.players.map((p) => (
-                <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
-                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 truncate">{p.name}</span>
-                  <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{p.score}</motion.span>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={t('pd.drop', { n: Math.min(drops + 1, totalTurns), total: totalTurns })} />
         </div>
       )}
-      {question && player && phase === 'play' && !solo && <ShareQuestion question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} />}
+      {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}
       {phase === 'end' && turns && (
         <ResultsModal winners={turns.players.length > 1 ? leaders(turns) : undefined} title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pd.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}

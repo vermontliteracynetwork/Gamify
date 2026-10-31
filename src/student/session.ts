@@ -7,9 +7,11 @@ import { remoteSet } from '../data/gameCodes';
 import type { PlayMode, SetAssignment, Student } from '../data/types';
 import type { PoolSet } from '../engine/picker';
 
-// Who is signed in to the student Arcade on this tab. Kept per tab (session
-// storage) so a shared iPad forgets the student when the tab closes.
-export interface ArcadeSession { classroomId: string; studentId: string; name: string }
+// Who is playing on this tab, after joining with a code. Kept per tab
+// (session storage) so a shared iPad forgets the student when the tab
+// closes. Students reach games only through a code or link (teacher,
+// 2026-10-31): `gameId` is the one game that code opened.
+export interface ArcadeSession { classroomId: string; studentId: string; name: string; gameId?: string }
 const KEY = 'gamify:arcade-session';
 const EVENT = 'gamify-arcade-session';
 

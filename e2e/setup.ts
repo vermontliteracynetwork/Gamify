@@ -24,14 +24,16 @@ export async function signUpTeacher(page: Page, username = 'miss.jen') {
   await page.getByRole('button', { name: 'Create my free account' }).click();
 }
 
-// Every game opens on its cover welcome screen, then the theme screen; this
-// goes past both to the setup pages.
+// Every game opens on its cover welcome screen, then the theme screen (when
+// there is more than one theme); this goes past both to the setup pages.
 export async function openSetup(page: Page, path: string) {
   await page.goto(path);
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
+  // With only Classic to wear, the theme step is skipped (2026-10-31).
+  const step1 = page.getByRole('heading', { name: /^Step 1 of \d+:/ });
+  await expect(page.getByRole('heading', { name: 'Pick a Theme' }).or(step1)).toBeVisible();
+  if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(step1).toBeVisible();
 }
 
 // Next through the remaining setup pages, then Play.
@@ -51,4 +53,21 @@ export async function noPowerUps(page: Page, gameId: string) {
     const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
     if (!s[`setup:${id}`]) localStorage.setItem('gamify:settings', JSON.stringify({ ...s, [`setup:${id}`]: { powerUps: false } }));
   }, gameId);
+}
+
+// A game code made on this device (students join only with codes, teacher
+// 2026-10-31): saved the way the Play or share dialog saves it.
+export async function seedGameCode(page: Page, code: string, gameId = 'star-quiz', setId = LIBRARY[0].id) {
+  await page.evaluate(({ code, gameId, setId }) => {
+    const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
+    s['game-codes'] = [...(s['game-codes'] ?? []), { code, gameId, setId, createdAt: new Date().toISOString() }];
+    localStorage.setItem('gamify:settings', JSON.stringify(s));
+  }, { code, gameId, setId });
+}
+
+// A student types a game code on the join page and taps Go.
+export async function joinWithCode(page: Page, code: string) {
+  await page.goto('/join');
+  await page.getByLabel('Game code').fill(code);
+  await page.getByRole('button', { name: 'Go' }).click();
 }

@@ -1,5 +1,5 @@
 import FourWays from '../games/FourWays';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
@@ -22,6 +22,8 @@ export default function Home() {
   const session = useSession();
   const teacher = useTeacher();
   const tier = useTier();
+  // Students never browse games; their code opens the one game (teacher, 2026-10-31).
+  if (session && !teacher) return <Navigate to="/join" replace />;
 
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-16">
@@ -37,11 +39,6 @@ export default function Home() {
         {teacher && !session && <div className="mt-5"><FourWays compact /></div>}
       </motion.div>
 
-      {session && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Link to="/arcade" className="min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold no-underline text-text inline-flex items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('home.myArcade', { name: session.name })}</Link>
-        </div>
-      )}
 
       {GAMES.length === 0 && (
         <div

@@ -89,7 +89,7 @@ export default function Flashcards() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="flashcards" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
-        <GameWelcome game={flashcardsManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={flashcardsManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <HandTap weight="fill" size={22} />, text: t('fc.how1') },
           { icon: <CheckCircle weight="fill" size={22} />, text: t('fc.how2') },
           { icon: <Stack weight="fill" size={22} />, text: t('fc.how3') },
@@ -97,7 +97,7 @@ export default function Flashcards() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={flashcardsManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: <Slider label={t('fc.cards')} min={5} max={30} value={setup.cards} onChange={(v) => change({ cards: v })} /> },
         ]} />

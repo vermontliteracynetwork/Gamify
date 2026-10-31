@@ -71,7 +71,7 @@ export default function StarQuiz() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'welcome' && (
-        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('practice.how1') },
           { icon: <Star weight="fill" size={22} />, text: t('practice.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('practice.how3') },
@@ -83,7 +83,7 @@ export default function StarQuiz() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => void play({ rounds: setup.rounds })} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />

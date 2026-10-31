@@ -39,7 +39,7 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
 
   // Ava sees Classic plus the theme her teacher offered.
-  await page.evaluate(() => { localStorage.removeItem('gamify:teacher-session'); sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava' })); });
+  await page.evaluate(() => { localStorage.removeItem('gamify:teacher-session'); sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava', gameId: 'game-show' })); });
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   const radios = page.getByRole('radiogroup', { name: /theme/i }).getByRole('radio');

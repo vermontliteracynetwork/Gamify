@@ -37,7 +37,7 @@ export default function DesignPage() {
   const [piece, setPiece] = useState(0);
   const file = useRef<HTMLInputElement>(null);
   const [drawing, setDrawing] = useState(false);
-  if (!session) return <main className="max-w-xl mx-auto p-6"><Link to="/join" className={`${big} bg-accent`}>{t('design.signIn')}</Link></main>;
+  if (!session || session.gameId !== 'design') return <main className="max-w-xl mx-auto p-6"><Link to="/join" className={`${big} bg-accent`}>{t('design.signIn')}</Link></main>;
   const game = draft ? GAMES.find((g) => g.id === draft.gameId)! : null;
   const pieces = game ? game.themePieces.filter((p) => p.id !== 'cover') : [];
 
@@ -64,7 +64,7 @@ export default function DesignPage() {
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6 grid gap-4">
       <div className="flex items-center gap-3 flex-wrap">
-        <Link to="/arcade" className={`${big} bg-surface !text-base !min-h-12`}><ArrowLeft weight="bold" size={20} />{t('design.back')}</Link>
+        <Link to="/join" className={`${big} bg-surface !text-base !min-h-12`}><ArrowLeft weight="bold" size={20} />{t('design.back')}</Link>
         <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('design.title')} /></h1>
       </div>
 
@@ -136,7 +136,7 @@ export default function DesignPage() {
         <motion.section initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="grid justify-items-center gap-3 py-10 text-center" role="status">
           <Star weight="fill" size={110} color="#ffd166" aria-hidden="true" />
           <p className="font-display text-3xl sm:text-4xl">{t('design.sent')}</p>
-          <button type="button" onClick={() => navigate('/arcade')} className={`${big} bg-accent`}>{t('design.back')}</button>
+          <button type="button" onClick={() => navigate('/join')} className={`${big} bg-accent`}>{t('design.back')}</button>
         </motion.section>
       )}
     </main>

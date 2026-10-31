@@ -9,7 +9,6 @@ import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
 
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
-import { Arcade, ArcadeSignIn } from './student/ArcadePage';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
@@ -162,9 +161,10 @@ function AnimatedRoutes() {
           <Route path="/teacher/classes" element={<RequireTeacher><ClassesPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id/check-in" element={<RequireTeacher><CheckInPage /></RequireTeacher>} />
-          <Route path="/arcade" element={<Arcade />} />
+          {/* No open Arcade: students reach games only with a code (teacher, 2026-10-31). */}
+          <Route path="/arcade" element={<Navigate to="/join" replace />} />
           <Route path="/arcade/design" element={<DesignPage />} />
-          <Route path="/arcade/:classId" element={<ArcadeSignIn />} />
+          <Route path="/arcade/:classId" element={<Navigate to="/join" replace />} />
           <Route path="/owner" element={<OwnerPage />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />

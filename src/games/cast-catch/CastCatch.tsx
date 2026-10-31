@@ -1,3 +1,4 @@
+import Title from '../../ui/Title';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -164,10 +165,12 @@ export default function CastCatch() {
     <ThemedPage theme={theme}>
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="cast-catch" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow onSettings={() => setSettingsOpen(true)}>
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={castCatchManifest.name} /></h1>}
+      </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <HandGrabbing weight="fill" size={22} />, text: t('cc.how1') },
           { icon: <Question weight="bold" size={22} />, text: t('cc.how2') },
           { icon: <FishIcon weight="fill" size={22} />, text: t('cc.how3') },
@@ -175,7 +178,7 @@ export default function CastCatch() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={castCatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} min={1} max={10} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
         ]} />

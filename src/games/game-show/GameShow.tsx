@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Crown, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
+import { CheckCircle, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -12,10 +12,11 @@ import ResultsModal from '../../engine/ResultsModal';
 import { drawQuestion } from '../../engine/picker';
 import { isPlayable } from '../../engine/questions';
 import ShareQuestion from '../../engine/ShareQuestion';
+import ScoreBoard from '../../engine/ScoreBoard';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
-import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
+import { addPoints, CHANCES, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
@@ -36,9 +37,6 @@ import DialogFocus from '../../ui/DialogFocus';
 
 
 type Board = 'cards' | 'grid';
-// A team gets three questions to earn its pick (teacher, 2026-10-31): a miss
-// brings a new question, and three misses pass the turn on.
-const CHANCES = 3;
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 interface Card { kind: CardKind; open: boolean; by?: number }
 interface Cell { col: number; points: number; used: boolean }
@@ -254,7 +252,7 @@ export default function GameShow() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <UsersThree weight="fill" size={22} />, text: t('tb.how1') },
           { icon: <CheckCircle weight="fill" size={22} />, text: t('tb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('tb.how3') },
@@ -266,7 +264,7 @@ export default function GameShow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players, team.level)} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players, team.level)} pages={[
           { id: 'board', title: t('setup.board'), content: (
             <PictureChoice label={t('tb.board')} value={board}
               onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
@@ -363,25 +361,7 @@ export default function GameShow() {
             )}
           </section>
 
-          <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('share.scores')}>
-            <h2 className="hidden lg:block text-xs font-bold uppercase tracking-wider text-muted">{t('share.scores')}</h2>
-            <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none m-0 p-1 lg:p-0">
-              {turns.players.map((p) => {
-                const lead = phase === 'end' && leaders(turns).some((l) => l.id === p.id);
-                return (
-                  <motion.li key={p.id} aria-current={player?.id === p.id && phase === 'play' ? 'true' : undefined}
-                    animate={player?.id === p.id && phase === 'play' && settings.motion !== 'still' ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94', '0 0 0 4px #fdfd94, 0 0 26px 10px #fdfd94', '0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94'] } : { boxShadow: player?.id === p.id && phase === 'play' ? '0 0 0 4px #fdfd94, 0 0 20px 6px #fdfd94' : '0 0 0 0 transparent' }}
-                    transition={player?.id === p.id && settings.motion !== 'still' ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
-                    className={`shrink-0 lg:shrink flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${player?.id === p.id && phase === 'play' ? 'border-border bg-accent' : 'border-border-soft'}`}>
-                    <TeamBadge colorIndex={p.colorIndex} />
-                    <span className="flex-1 min-w-0 grid"><span className="font-bold truncate">{p.name}</span>{p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}</span>
-                    {lead && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}
-                    <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl font-bold tabular-nums" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>
-                  </motion.li>
-                );
-              })}
-            </ol>
-          </aside>
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={t('tb.cardsLeft', { n: board === 'cards' ? cards.filter((c) => !c.open).length : cells.filter((c) => !c.used).length })} />
         </div>
       )}
 

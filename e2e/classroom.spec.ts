@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, joinWithCode, openSetup, seedGameCode } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -44,8 +44,11 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await page.getByRole('tab', { name: 'Play modes' }).click();
   await page.getByRole('switch').nth(3).click();
 
-  // Student sign-in: tap Ava's avatar, then her PIN (a wrong PIN first).
-  await page.goto(`/arcade/${page.url().split('/teacher/classes/')[1]}`);
+  // Student sign-in through a game code (no class codes or Arcade, teacher
+  // 2026-10-31): tap Ava's avatar, then her PIN (a wrong PIN first).
+  await seedGameCode(page, 'BKDFG');
+  await page.evaluate(() => localStorage.removeItem('gamify:teacher-session')); // the student's own turn on this device
+  await joinWithCode(page, 'BKDFG');
   await page.screenshot({ path: `test-results/arcade-signin-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Ava' }).click();
   const pin = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').pin as string);
@@ -56,12 +59,12 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await page.screenshot({ path: `test-results/arcade-pin-${info.project.name}.png` });
   await page.waitForTimeout(800);
   for (const d of pin) await page.getByRole('button', { name: d, exact: true }).click();
-  await expect(page.getByRole('heading', { name: "Ava's Arcade" })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Four in a Row/ })).toHaveCount(0); // Versus hidden
-  await page.screenshot({ path: `test-results/arcade-${info.project.name}.png` });
+  // The code opens its game for Ava, and no other.
+  await expect(page).toHaveURL(/\/games\/star-quiz/);
+  await page.goto('/games/game-show');
+  await expect(page.getByRole('heading', { name: 'Ask for a Code' })).toBeVisible();
 
-  // Star Quiz uses the assigned set (no question page) and Ava's no-wait support.
-  await page.getByRole('link', { name: /Question Tracker/ }).click();
+  // Star Quiz uses the code's set (no question page) and Ava's no-wait support.
   await openSetup(page, '/games/star-quiz');
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
   await finishSetup(page);
@@ -91,7 +94,8 @@ test('a class can sign in with sign-in pictures drawn in the Theme Builder', asy
   await page.getByRole('radio', { name: 'Our Animals' }).click();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
-  await page.goto(`/arcade/${page.url().split('/teacher/classes/')[1]}`);
+  await seedGameCode(page, 'BKDFG');
+  await joinWithCode(page, 'BKDFG');
   // Zoe's avatar is the cat picture, drawn in the class's design.
   await expect(page.getByRole('button', { name: 'Zoe', exact: true }).locator('img')).toHaveCount(1);
   await page.screenshot({ path: `test-results/signin-drawn-${info.project.name}.png` });

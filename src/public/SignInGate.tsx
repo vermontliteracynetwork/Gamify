@@ -1,3 +1,4 @@
+import { useSession } from '../student/session';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ChalkboardTeacher, LockSimple, Student } from '@phosphor-icons/react';
@@ -34,10 +35,24 @@ export function RequireSignIn({ children }: { children: ReactNode }) {
 // A game outside the plan (reached by its web address). Students see only a
 // lock and "ask your teacher" (no prices or buy words on student pages);
 // teachers see which plans include it.
+// A student who reached a game without its code: back to the join page.
+function AskForCode() {
+  return (
+    <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+      <h1 className="title-bubble text-4xl"><Title text={t('gate.askTitle')} /></h1>
+      <p className="font-bold text-lg">{t('gate.askCode')}</p>
+      <Link to="/join" className={buttonClasses('primary', 'min-h-14 px-8 text-lg')}>{t('results.newCode')}</Link>
+    </main>
+  );
+}
+
 export function RequireGame({ id, children }: { id: string; children: ReactNode }) {
   const tier = useTierLoaded();
   const { teacher } = useSignedIn();
+  const session = useSession();
   if (!tier) return null;
+  // A student plays only the game their code opened (teacher, 2026-10-31).
+  if (!teacher && session && session.gameId !== id) return <AskForCode />;
   if (canPlayGame(tier, id)) return <>{children}</>;
   const name = getGame(id)?.name ?? '';
   return (
@@ -48,7 +63,7 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
       <div className="flex flex-wrap justify-center gap-2">
         {teacher && <UpgradeButton className="min-h-14 px-8 text-lg" />}
         {teacher && <Link to="/pricing" className={buttonClasses('ghost')}>{t('gate.seePlans')}</Link>}
-        <Link to={teacher ? '/play' : '/arcade'} className={buttonClasses('secondary')}>{teacher ? t('nav.allGames') : t('nav.myArcade')}</Link>
+        <Link to={teacher ? '/play' : '/join'} className={buttonClasses('secondary')}>{teacher ? t('nav.allGames') : t('results.newCode')}</Link>
       </div>
     </main>
   );

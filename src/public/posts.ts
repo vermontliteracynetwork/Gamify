@@ -178,7 +178,7 @@ export const POSTS: Post[] = [
     ],
     tryIt: [
       'Assign this week\'s review set to your class.',
-      'Students sign in and open Bubble Pop from their Arcade.',
+      'Share a Bubble Pop game code; students type it on the join page and tap their name.',
       'Set 2 question breaks and 5 bubbles for each right answer.',
       'Check Reports afterward to see which questions were missed.',
     ],
@@ -289,12 +289,12 @@ export const POSTS: Post[] = [
     body: [
       'Every question set in Gamify carries its subject, grades, tags and standard codes. That means you can start from the standard instead of hunting through folders.',
       'Type a code like 3.NF in the set picker and only the sets aligned to it stay on screen, each with a cover picture so you can tell them apart at a glance.',
-      'Pick one, then Host it with a join code or Assign it to your class. Reports later show how students did on that set, question by question.',
+      'Pick one, then share it with a game code. Reports later show how students did on that set, question by question.',
     ],
     tryIt: [
       'Open Question sets and type your standard code in the filter.',
       'Pick a set, then tap Play or share.',
-      'Host it with a join code, or assign it to the class.',
+      'Share it with a game code or link.',
       'Check Reports by set at the end of the week.',
     ],
   },

@@ -75,7 +75,6 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   });
   await page.goto('/games/star-quiz');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByText('1 of your sets needs its details', { exact: false })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Mine, no details/ })).toHaveCount(0);
   await page.getByLabel('Search titles and tags').fill('doubles');

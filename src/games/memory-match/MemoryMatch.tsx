@@ -158,7 +158,7 @@ export default function MemoryMatch() {
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
 
       {phase === 'welcome' && (
-        <GameWelcome game={memoryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={memoryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <HandTap weight="fill" size={22} />, text: t('mm.how1') },
           { icon: <Cards weight="fill" size={22} />, text: t('mm.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('mm.how3') },
@@ -166,7 +166,7 @@ export default function MemoryMatch() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={memoryMatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

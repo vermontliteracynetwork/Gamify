@@ -228,7 +228,7 @@ export default function BubblePop() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('bp.how1') },
           { icon: <Crosshair weight="bold" size={22} />, text: t('bp.how2') },
           { icon: <Star weight="fill" size={22} />, text: t('bp.how3') },
@@ -236,7 +236,7 @@ export default function BubblePop() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={bubblePopManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

@@ -175,8 +175,9 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             <button type="button" onClick={onAgain} className={`${btn} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <ArrowCounterClockwise weight="bold" size={24} />{againLabel}
             </button>
-            <Link to={student ? '/arcade' : '/play'} className={`${btn} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <HouseSimple weight="bold" size={24} />{t('results.arcadeShort')}
+            {/* Students reach games only with a code (teacher, 2026-10-31). */}
+            <Link to={student ? '/join' : '/play'} className={`${btn} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <HouseSimple weight="bold" size={24} />{student ? t('results.newCode') : t('results.arcadeShort')}
             </Link>
             <button type="button" onClick={() => setReviewing(true)} disabled={missed.length === 0}
               aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}>

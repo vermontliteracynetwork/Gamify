@@ -192,7 +192,7 @@ export default function RoadHop() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="road-hop" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
-        <GameWelcome game={roadHopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={roadHopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('rh.how1') },
           { icon: <ArrowFatUp weight="fill" size={22} />, text: t('rh.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('rh.how3') },
@@ -200,7 +200,7 @@ export default function RoadHop() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={roadHopManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

@@ -31,7 +31,7 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
   await dialog.getByRole('button', { name: 'Play now' }).click();
   await expect(page).toHaveURL(/teams=class/);
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
   expect(problems).toEqual([]);
 });

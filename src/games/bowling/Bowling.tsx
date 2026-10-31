@@ -1,3 +1,4 @@
+import Title from '../../ui/Title';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -10,7 +11,8 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import { TeamBadge } from '../../engine/TeamBadge';
+import ScoreBoard from '../../engine/ScoreBoard';
+import { CHANCES } from '../../engine/turns';
 import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
@@ -58,7 +60,7 @@ export default function Bowling() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [turns, setTurns] = useState<TurnState | null>(null);
   const [step, setStep] = useState<Step>('question');
-  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string } | null>(null);
+  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; chance: number } | null>(null);
   const [standing, setStanding] = useState<boolean[]>(fullRack);
   const [falling, setFalling] = useState<number[]>([]);
   const [roll, setRoll] = useState<0 | 1>(0);
@@ -99,7 +101,7 @@ export default function Bowling() {
   function askFor(state: TurnState, r: 0 | 1) {
     setStep('question');
     if (solo) void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('aim'); });
-    else { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId }); }
+    else { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: 1 }); }
     void r;
   }
   function onShareResult(right: boolean) {
@@ -108,6 +110,8 @@ export default function Bowling() {
       void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), teamName: player.name, gameId: 'bowling', mode: 'share', setId: question.setId, prompt: question.q.prompt, answer: question.q.choices[question.q.correctIndex], tries: [], ms: 0, outcome: right ? 'right' : 'skipped' });
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
+    // Three tries, a new question each time (teacher, 2026-10-31, as in Game Show).
+    if (!right && question.chance < CHANCES) { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: question.chance + 1 }); return; }
     setQuestion(null);
     if (right) { earned(turns); setStep('aim'); } else endFrame(turns);
   }
@@ -200,9 +204,11 @@ export default function Bowling() {
     <ThemedPage theme={theme}>
     <main className="landscape:[--wide-save:1.25rem] max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow onSettings={() => setSettingsOpen(true)}>
+        {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={bowlingManifest.name} /></h1>}
+      </GameTopRow>
       {phase === 'welcome' && (
-        <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('sb.how1') },
           { icon: <HandTap weight="fill" size={22} />, text: t('sb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('sb.how3') },
@@ -210,7 +216,7 @@ export default function Bowling() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={bowlingManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -225,15 +231,8 @@ export default function Bowling() {
       {(phase === 'play' || phase === 'end') && turns && (
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
           <section className="grid gap-2 min-w-0 [--sb-extra:4.375rem] lg:[--sb-extra:0rem]">
-            {phase === 'play' && player && (
-              <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
-                <TeamBadge colorIndex={player.colorIndex} size={36} />
-                <span className="font-display text-xl sm:text-2xl">{step === 'aim' ? (player.kind === 'cpu' ? t('fr.cpuThinking') : t('sb.pick', { name: player.name })) : step === 'question' ? t('share.whoseTurn', { name: player.name }) : t('sb.rolling')}</span>
-                <span className="ml-auto font-bold text-sm text-right">{t('sb.frame', { n: Math.min(frames + 1, totalFrames), total: totalFrames })}<br />{t('sb.roll', { n: roll + 1 })}</span>
-              </div>
-            )}
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden"
-              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+              style={{ ...pieceFill(theme, 'background', '#15143a'), aspectRatio: '100 / 130', maxWidth: 'min(100%, calc((100dvh - 16.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   <radialGradient id="sb-planet" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
@@ -276,7 +275,7 @@ export default function Bowling() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
+            <div className="grid grid-cols-5 gap-2 mx-auto w-full" style={{ maxWidth: 'min(100%, calc((100dvh - 16.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem) - var(--sb-extra)) * 100 / 130))' }}>
               {Array.from({ length: LANES }, (_, l) => (
                 <button key={l} type="button" onClick={() => bowl(l)} disabled={!canAim} aria-label={t('sb.lane', { n: l + 1 })}
                   className={`min-h-14 rounded-input border-[2.5px] border-border font-display text-2xl disabled:opacity-60 ${canAim ? 'motion-safe:animate-pulse' : ''}`}
@@ -284,19 +283,10 @@ export default function Bowling() {
               ))}
             </div>
           </section>
-          <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4" aria-label={t('share.scores')}>
-            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-0 m-0">
-              {turns.players.map((p) => (
-                <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player?.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
-                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 truncate">{p.name}</span>
-                  <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{p.score}</motion.span>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={`${t('sb.frame', { n: Math.min(frames + 1, totalFrames), total: totalFrames })} · ${t('sb.roll', { n: roll + 1 })}`} />
         </div>
       )}
-      {question && player && phase === 'play' && !solo && <ShareQuestion question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} />}
+      {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}
       {phase === 'end' && turns && (
         <ResultsModal winners={turns.players.length > 1 ? leaders(turns) : undefined} title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pd.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}

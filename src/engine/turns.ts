@@ -29,6 +29,10 @@ export function startTurns(players: TurnPlayer[]): TurnState {
   return { players, turn: 0, round: 1, history: [] };
 }
 
+// A team gets three questions to earn its move (teacher, 2026-10-31): a miss
+// brings a new question, and three misses pass the turn on.
+export const CHANCES = 3;
+
 export function current(s: TurnState): TurnPlayer {
   return s.players[s.turn];
 }

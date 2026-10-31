@@ -164,7 +164,7 @@ export default function MatchThree() {
       </GameTopRow>
 
       {phase === 'welcome' && (
-        <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
+        <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
@@ -176,7 +176,7 @@ export default function MatchThree() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

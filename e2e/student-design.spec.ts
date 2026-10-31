@@ -16,11 +16,13 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   await page.getByRole('tab', { name: 'Play modes' }).click();
   await page.getByRole('switch').last().click();
   await expect(page.getByRole('switch').last()).toHaveAttribute('aria-checked', 'true');
+  // Students reach the studio only with a design code (teacher, 2026-10-31).
+  await page.getByRole('button', { name: 'Make a design code' }).click();
+  await expect(page.getByLabel(/^Design code [A-Z]{5}$/)).toBeVisible();
 
-  // A student, signed in on this device, designs a Match Three theme.
-  await page.evaluate(() => sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava' })));
-  await page.goto('/arcade');
-  await page.getByRole('link', { name: /Design a Theme/ }).click();
+  // A student who joined with that code designs a Match Three theme.
+  await page.evaluate(() => sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava', gameId: 'design' })));
+  await page.goto('/arcade/design');
   await page.getByRole('button', { name: /Match Three/ }).click();
   const shot = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 200; c.height = 200; const x = c.getContext('2d')!; x.fillStyle = '#f6a5c0'; x.fillRect(0, 0, 200, 200); return c.toDataURL('image/png').split(',')[1]; });
   await page.getByLabel('Add a picture').setInputFiles({ name: 'drawing.png', mimeType: 'image/png', buffer: Buffer.from(shot, 'base64') });

@@ -54,6 +54,10 @@ teacher no control or educational value is not done.
   2026-10-24; game modules are rebuilt from scratch on the shared engine
   in `docs/question-engine.md` (logic from the Independent Work Dashboard).
 - Question sets are teacher-authored/imported, never a fixed bank.
+- Students reach games only through a code or a link from their teacher
+  (teacher, 2026-10-31): no open student Arcade, no fixed class join codes,
+  nowhere for a student to wander. A code opens one game (or the design
+  studio); class students tap their name, then play or wait in the lobby.
 - Game rules inspired by other platforms are reconstructed from
   screenshots/descriptions and reimplemented from scratch. Never scrape,
   decompile, or copy another platform's actual source code or assets,
