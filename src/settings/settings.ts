@@ -74,10 +74,13 @@ export function applyCalm(s: PlayerSettings, on: boolean): PlayerSettings {
     : { ...s, calm: false, motion: 'full', celebrations: 'big', backgrounds: 'moving' };
 }
 
-export type PresetId = 'calm' | 'low-vision' | 'hearing' | 'quick-start';
+export type PresetId = 'calm' | 'quiet' | 'low-vision' | 'hearing' | 'quick-start';
 
 export const PRESETS: Record<PresetId, (s: PlayerSettings) => PlayerSettings> = {
   calm: (s) => applyCalm(s, true),
+  // Quiet room (market research, 2026-10-31): soft effects, no music and small
+  // celebrations, so the class hears the teacher and the read-aloud.
+  quiet: (s) => ({ ...s, allSoundOff: false, effects: 1, music: 0, celebrations: 'small', voice: Math.max(s.voice, 4) as Level }),
   'low-vision': (s) => ({ ...s, textSize: 'larger', highContrast: true, readingComfort: true, voice: 5, colorSafe: true }),
   hearing: (s) => ({ ...s, allSoundOff: true, haptics: true }),
   'quick-start': () => ({ ...DEFAULT_SETTINGS }),

@@ -93,6 +93,7 @@ export const en = {
   'settings.close': 'Close settings',
   'settings.presets': 'Quick setups',
   'preset.calm': 'Calm',
+  'preset.quiet': 'Quiet room',
   'preset.low-vision': 'Big and clear',
   'preset.hearing': 'No sound',
   'preset.quick-start': 'Start over',

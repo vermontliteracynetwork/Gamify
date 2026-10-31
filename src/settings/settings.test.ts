@@ -14,6 +14,7 @@ describe('settings', () => {
   });
   it('levels map to 0..1', () => expect(volume({ ...DEFAULT_SETTINGS, effects: 5 }, 'effects')).toBe(1));
   it('low vision preset enlarges text and raises contrast', () => expect(PRESETS['low-vision'](DEFAULT_SETTINGS)).toMatchObject({ textSize: 'larger', highContrast: true }));
+  it('quiet room keeps sound on but soft, with no music', () => expect(PRESETS.quiet({ ...DEFAULT_SETTINGS, allSoundOff: true })).toMatchObject({ allSoundOff: false, effects: 1, music: 0, celebrations: 'small' }));
   it('old saved settings get new defaults', () => expect(withDefaults({ effects: 1 })).toEqual({ ...DEFAULT_SETTINGS, effects: 1 }));
   it('saved tools merge with new tool defaults', () => expect(withDefaults({ tools: { calculator: false } as never }).tools).toMatchObject({ calculator: false, listen: true, timesTable: false }));
 });

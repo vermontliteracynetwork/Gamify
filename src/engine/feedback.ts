@@ -53,7 +53,8 @@ export function preloadSounds() { const ac = audio(); if (ac) (Object.keys(TONES
 
 export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack): void {
   const p = PACKS[with_];
-  const gain = volume(s, 'effects') * 0.25 * p.gain;
+  // Effects dip while the read-aloud talks, so the words come through.
+  const gain = volume(s, 'effects') * 0.25 * p.gain * (isSpeaking() ? 0.3 : 1);
   if (gain <= 0) return;
   const ac = audio();
   if (!ac) return;
@@ -135,6 +136,10 @@ function deviceSpeak(text: string, s: PlayerSettings, v: number): void {
   u.volume = v;
   u.rate = s.voiceRate === 'slow' ? 0.8 : s.voiceRate === 'fast' ? 1.15 : 0.95;
   speechSynthesis.speak(u);
+}
+
+function isSpeaking(): boolean {
+  return (!!playing && !playing.paused && !playing.ended) || (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking);
 }
 
 export function stopSpeaking(): void {

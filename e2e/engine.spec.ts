@@ -82,6 +82,11 @@ test('settings panel opens from the gear and changes text size', async ({ page }
   await expect(panel.getByText('5', { exact: true })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'still');
   await page.screenshot({ path: `test-results/settings-${info.project.name}.png` });
+  // Quiet room: one tap for soft effects so the class hears the teacher.
+  await panel.getByRole('tab', { name: 'Quick' }).click();
+  await panel.getByRole('button', { name: 'Quiet room' }).click();
+  await panel.getByRole('tab', { name: 'Sound' }).click();
+  await expect(panel.getByLabel('Sound effects')).toHaveValue('1');
   await panel.getByRole('tab', { name: 'Tell us' }).click();
   await panel.getByRole('radio', { name: 'I have an idea' }).click();
   await panel.getByLabel('Tell us more (you can skip this)').fill('More space games please');
