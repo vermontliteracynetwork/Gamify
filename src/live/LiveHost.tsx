@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { readClassPlay } from './ClassPlay';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import QRCode from 'qrcode';
@@ -50,7 +51,10 @@ function Room({ game }: { game: GameCode }) {
   const [approve, setApprove] = useState(true);
   const [view, setView] = useState<'screen' | 'monitor'>('screen');
   // Play or share passes compete or together (?mode=).
-  const startMode = new URLSearchParams(useLocation().search).get('mode') === 'together' ? 'together' : 'compete';
+  const search = useLocation().search;
+  const startMode = new URLSearchParams(search).get('mode') === 'together' ? 'together' : 'compete';
+  // The setup menus pass when it ends and the class goal too (2026-10-31).
+  const startPlay = readClassPlay(search);
   // Question Tracker shows the class sky (teacher, 2026-10-26).
   const skyGame = game.gameId === 'star-quiz';
   const [board, setBoard] = useState<'leaders' | 'goal' | 'sky'>(skyGame ? 'sky' : startMode === 'together' ? 'goal' : 'leaders');
@@ -61,7 +65,7 @@ function Room({ game }: { game: GameCode }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
-  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode });
+  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}) });
   const link = useRef<LiveLink>();
   const approveRef = useRef(approve);
   approveRef.current = approve;

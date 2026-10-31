@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import ClassPlayOptions, { classPlayQuery, DEFAULT_CLASS_PLAY, type ClassPlay } from '../../live/ClassPlay';
 import confetti from 'canvas-confetti';
 import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
@@ -42,7 +43,8 @@ export default function StarQuiz() {
   const { teacher } = useSignedIn();
   const navigate = useNavigate();
   const [way, setWay] = useState<PlayMode>('solo');
-  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('star-quiz', setId, 'live')).code}`); }
+  const [classPlay, setClassPlay] = useState<ClassPlay>(DEFAULT_CLASS_PLAY);
+  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('star-quiz', setId, 'live')).code}?${classPlayQuery(classPlay)}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setup, change] = useSavedSetup('star-quiz', { setId: LIBRARY[0].id, rounds: 10 });
@@ -104,6 +106,7 @@ export default function StarQuiz() {
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={way === 'live' ? () => void openLive() : () => void play({ rounds: setup.rounds })} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
           // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
+          ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} hint={t('practice.roundsHint')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
