@@ -226,7 +226,7 @@ export default function Bowling() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('sb.frames')} min={1} max={10} value={setup.frames} onChange={(v) => change({ frames: v })} />
+              <Slider label={t('sb.frames')} hint={t('sb.framesHint')} min={1} max={10} value={setup.frames} onChange={(v) => change({ frames: v })} />
               <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
             </>
           ) },

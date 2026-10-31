@@ -218,7 +218,7 @@ export default function CastCatch() {
           // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-          { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} min={1} max={10} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
+          { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={10} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
         ]} />
       )}
 

@@ -203,7 +203,7 @@ export default function FourInARow() {
                 options={[{ value: 'here', label: t('fr.where.here') }, { value: 'other', label: t('fr.where.other') }]} />
               <ChoiceRow label={t('fr.first')} value={setup.first} onChange={(v) => change({ first: v })}
                 options={[{ value: 'p1', label: t('fr.first.p1') }, { value: 'p2', label: t('fr.first.p2') }, { value: 'random', label: t('fr.first.random') }]} />
-              <Slider label={t('fr.perTurn')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
+              <Slider label={t('fr.perTurn')} hint={t('fr.perTurnHint')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
             </>
           ) },
         ]} />
