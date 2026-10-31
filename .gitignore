@@ -9,3 +9,4 @@ playwright-report/
 dist2
 test-results-alt
 pw-alt.config.ts
+pw-board.config.ts

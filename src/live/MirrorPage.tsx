@@ -30,7 +30,9 @@ export default function MirrorPage() {
   const ink = contrast ? 'bg-black text-white border-white' : 'bg-surface text-text border-border';
   const tool = `min-h-12 px-4 rounded-pill border-[2px] font-bold inline-flex items-center gap-2 ${contrast ? 'bg-black text-white border-white' : 'bg-surface-2 border-border'}`;
   return (
-    <main className={`min-h-[calc(100dvh-4rem)] px-4 py-4 grid gap-4 content-start ${contrast ? 'bg-black' : ''}`}>
+    // Readable on any screen (teacher check, 2026-10-31): a centered column that
+    // grows with big screens (game-stage scales the text), never stretched thin.
+    <main className={`game-stage min-h-[calc(100dvh-4rem)] px-4 py-4 grid gap-4 content-start justify-items-stretch [&>*]:w-full [&>*]:max-w-4xl [&>*]:mx-auto ${contrast ? 'bg-black' : ''}`}>
       <div className="flex flex-wrap items-center gap-2" role="toolbar" aria-label={t('mirror.tools')}>
         <span className={`font-display text-xl flex-1 ${contrast ? 'text-white' : ''}`}>{t('mirror.title')}</span>
         <button type="button" className={tool} disabled={size === 0} onClick={() => setSize(size - 1)} aria-label={t('mirror.smaller')}><MagnifyingGlassMinus weight="bold" size={22} /></button>
@@ -46,7 +48,7 @@ export default function MirrorPage() {
           <p className="font-bold text-lg">{t('share.whoseTurn', { name: q.player })}</p>
           {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[30dvh] w-auto mx-auto rounded-input" />}
           <h1 className={`font-body font-bold leading-snug ${SIZES[size]}`}>{q.prompt}</h1>
-          <ul className="grid gap-3 list-none p-0 m-0">
+          <ul className="grid md:grid-cols-2 gap-3 list-none p-0 m-0">
             {q.choices.map((c, i) => {
               const right = result && i === result.correct;
               const wrong = result && result.picked === i && !result.right;
