@@ -5,6 +5,17 @@ Network). See `docs/product-plan.md` for the commercial product plan
 (newest), `docs/platform-spec.md` for the original spec, and
 `docs/question-engine.md` for the shared game engine.
 
+## GOLDEN RULE: must-have properties (teacher, 2026-10-31)
+
+Every game, board, animation and power-up must pass the golden-rule skill
+(`.claude/skills/golden-rule/SKILL.md`) before work starts and before it is
+called done: find her original request and reference images word for word,
+use her assets first, match the references, read at a glance (no numbers on
+spaces unless asked), a real themed world, motion with weight, surprise and
+irregularity, juice on every action, special power-ups, a goal that visibly
+builds, learning at the center, teacher-proof on every device, licensed, and
+a Claudia review. One miss means it is not done.
+
 ## The Three-Lens Standard (mandatory)
 
 "It technically works" and "good enough" are never the bar here. Before any
