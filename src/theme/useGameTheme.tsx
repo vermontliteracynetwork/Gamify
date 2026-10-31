@@ -10,6 +10,7 @@ import { setSoundPack } from '../engine/feedback';
 import { THEME_FONTS, type GameTheme } from './types';
 import { calmVersion } from './validate';
 import { useArcade, useSession } from '../student/session';
+import { useSignedIn } from '../auth/session';
 
 // The theme a game is wearing, remembered per game. A teacher's own designs
 // always play; library and starter themes need a paid plan, and Free only
@@ -22,10 +23,14 @@ export function useGameTheme(gameId: string) {
   // with the assigned sets, when the teacher picked some for this game.
   const { themeIds } = useArcade(useSession());
   const offered = all.filter((th, i) => i === 0 || themeIds.includes(th.id));
-  const themes = offered.length > 1 ? offered : all;
+  const playable = (th: GameTheme) => th.source !== 'library' || TIERS[tier].themesPlayable;
+  // Students never see a locked theme (no upgrade prompts on student pages);
+  // a teacher sees them, locked, on Free.
+  const { teacher } = useSignedIn();
+  const listed = offered.length > 1 ? offered : all;
+  const themes = teacher ? listed : listed.filter(playable);
   const [id, setId] = useState(themes[0].id);
   useEffect(() => { data.getSetting<string>(`theme:${gameId}`).then((v) => { if (v) setId(v); }); }, [gameId]);
-  const playable = (th: GameTheme) => th.source !== 'library' || TIERS[tier].themesPlayable;
   const chosen = themes.find((th) => th.id === id && playable(th)) ?? themes[0];
   const { settings } = useSettings();
   const theme = settings.calm ? calmVersion(chosen) : chosen;
