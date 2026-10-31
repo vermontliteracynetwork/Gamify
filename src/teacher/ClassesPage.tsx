@@ -5,7 +5,6 @@ import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { LOCAL_TEACHER_ID, useAsync, useTier } from '../data/hooks';
 import { t } from '../i18n';
-import { newJoinCode } from '../auth/session';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { LimitNote } from '../billing/Upgrade';
@@ -30,7 +29,7 @@ export default function ClassesPage() {
       const all = await data.listClassrooms();
       const first = [...all].sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
       if (first) { navigate(`/teacher/classes/${first.id}`, { replace: true }); return; }
-      const c = { id: newId('class'), name: t('roster.title'), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode([]) };
+      const c = { id: newId('class'), name: t('roster.title'), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString() };
       await data.saveClassroom(c);
       navigate(`/teacher/classes/${c.id}`, { replace: true });
     })();
@@ -38,7 +37,7 @@ export default function ClassesPage() {
   if (!TIERS[tier].hasClasses) return null;
 
   async function create() {
-    const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString(), joinCode: newJoinCode(classes.map((x) => x.joinCode ?? '')) };
+    const c = { id: newId('class'), name: name.trim(), ownerId: LOCAL_TEACHER_ID, createdAt: new Date().toISOString() };
     await data.saveClassroom(c);
     reload();
     navigate(`/teacher/classes/${c.id}`);

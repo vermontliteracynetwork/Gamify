@@ -86,6 +86,11 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
+  // The code opens one game only: no game list, no other games (teacher, 2026-10-31).
+  await page.goto('/play');
+  await expect(page).toHaveURL(/\/join$/);
+  await page.goto('/games/bowling');
+  await expect(page.getByRole('heading', { name: 'Ask for a Code' })).toBeVisible();
 });
 
 test('join page: five wrong codes means a short wait; the code screen shows a QR code', async ({ page }, info) => {

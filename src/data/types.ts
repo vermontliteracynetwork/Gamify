@@ -40,7 +40,8 @@ export interface Classroom {
   allowedModes?: PlayMode[];
   // The Theme Builder design its sign-in pictures use (missing = built-in).
   signInThemeId?: string;
-  // Letters-only code students type on the join page to reach sign-in.
+  // Old classes kept a fixed join code; codes now come from each activity
+  // (teacher, 2026-10-31), so new classes leave this empty.
   joinCode?: string;
   // Students can design themes and send them for approval (student design mode).
   studentDesign?: boolean;

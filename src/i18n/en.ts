@@ -1012,7 +1012,6 @@ export const en = {
   'practice.progress': 'Question {round} of {total}',
   'nav.myArcade': 'My Arcade',
   'nav.logOut': 'Log out',
-  'class.joinCode': 'Join code {code}',
   'public.nav.label': 'Site',
   'public.nav.home': 'Home',
   'public.nav.features': 'Features',
