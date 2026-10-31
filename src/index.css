@@ -265,6 +265,15 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 @keyframes cc-swim-left { from { left: 110%; } to { left: -20%; } }
 @keyframes cc-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(40px); } }
 @keyframes cc-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes cc-rock { 0%, 100% { transform: rotate(-1.5deg) translateY(0); } 50% { transform: rotate(1.5deg) translateY(3px); } }
+@keyframes cc-water { from { background-position: 0 0, 0 0; } to { background-position: 240px 0, -180px 0; } }
+.cc-water {
+  background-image: radial-gradient(ellipse 60px 6px at 50% 50%, rgba(255,255,255,0.18), transparent 70%), radial-gradient(ellipse 40px 4px at 50% 50%, rgba(255,255,255,0.12), transparent 70%);
+  background-size: 240px 70px, 180px 50px;
+  animation: cc-water 14s linear infinite;
+}
+html[data-motion="still"] .cc-water { animation: none; }
+@media (prefers-reduced-motion: reduce) { .cc-water { animation: none; } }
 @keyframes cc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 @keyframes cc-bite { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(14px); } 50% { transform: translateY(4px); } 75% { transform: translateY(16px); } }
 /* Bubble Pop: popped bubbles burst, cut-loose bubbles fall (SVG units). */

@@ -33,6 +33,8 @@ type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'caught';
 interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean }
 
 // A fish drawn in code: body, tail, fin, optional stripes, an eye.
+// The waterline sits at 20% of the scene; the boat's deck rests on it.
+const BOAT_TOP = 20;
 const CLASSIC_FISH: Record<string, string> = {
   perch: 'orange', bluegill: 'blue', sunfish: 'orange', guppy: 'pink', trout: 'grey', brooktrout: 'green', bass: 'green',
   puffer: 'brown', clown: 'orange', tang: 'blue', swordfish: 'grey-long-a', goldfish: 'red',
@@ -161,7 +163,21 @@ export default function CastCatch() {
   }
 
   const qualityWord = [t('cc.cast.short'), t('cc.cast.good'), t('cc.cast.great'), t('cc.cast.perfect')];
-  const bobberLeft = 30 + cast * 58;
+  const bobberLeft = 36 + cast * 54;
+  // The boat and rod are drawn in one picture sized to the scene's width
+  // (viewBox 0 -60 320 180 at 26% wide, from -8%); the rod tip, in scene %,
+  // is where the line and the flying bobber start.
+  const scene = useRef<HTMLDivElement>(null);
+  const [aspect, setAspect] = useState(1.6);
+  useEffect(() => {
+    const el = scene.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => { const r = el.getBoundingClientRect(); if (r.height) setAspect(r.width / r.height); });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [phase]);
+  const tip = step === 'power' ? { x: 300 - power * 40, y: -50 + power * 6 } : { x: 316, y: -52 };
+  const tipAt = { x: -8 + (tip.x * 26) / 320, y: BOAT_TOP - 9.1 * aspect + ((tip.y + 60) * 26 * aspect) / 320 };
   // The bobber starts at the rod tip, then (next frame) flies to where the cast lands.
   const [flying, setFlying] = useState(false);
   useEffect(() => {
@@ -203,13 +219,15 @@ export default function CastCatch() {
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl" aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={22} />{catches.length}</span>
           </div>
 
-          <div className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 21.875rem + var(--chrome-save, 0rem))', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 28%, #5aa9d6 28%, #2f6fb0 100%)' }) }}>
-            {!still && [0, 1, 2].map((i) => (
-              <span key={i} className="absolute h-1.5 rounded-pill bg-white/50" style={{ top: `${40 + i * 18}%`, width: '18%', animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
+          <div ref={scene} className="relative overflow-hidden rounded-panel border-[2.5px] border-border select-none" style={{ height: 'calc(100dvh - 21.875rem + var(--chrome-save, 0rem))', minHeight: 220, ...(theme.pieces.background?.image ? pieceFill(theme, 'background', '#5aa9d6') : { background: 'linear-gradient(180deg, #cfe9ff 0%, #cfe9ff 20%, #5aa9d6 20%, #2f6fb0 100%)' }) }}>
+            {/* The water moves a little (teacher, 2026-10-31): soft ripples drift and the shimmer lines glide. */}
+            {!theme.pieces.background?.image && <span className="absolute inset-x-0 bottom-0 top-[20%] pointer-events-none cc-water" aria-hidden="true" />}
+            {!still && [0, 1, 2, 3].map((i) => (
+              <span key={i} className="absolute h-1.5 rounded-pill bg-white/45" style={{ top: `${26 + i * 16}%`, width: `${14 + (i % 2) * 6}%`, animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}
-            <span className="absolute right-[8%] top-[4%] w-[9%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
-            {[[12, 6, 16], [52, 10, 12]].map(([x, y, w], i) => (
-              <span key={`c${i}`} className={`absolute h-[7%] ${pieceImage(theme, 'cloud') ? '' : 'rounded-pill border-[2px] border-border'}`} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ...(pieceImage(theme, 'cloud') ? { background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")` } : { background: pieceColor(theme, 'cloud', '#ffffff') }), animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
+            <span className="absolute right-[8%] top-[2%] w-[6%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
+            {[[30, 3, 14], [60, 6, 10]].map(([x, y, w], i) => (
+              <span key={`c${i}`} className={`absolute h-[5%] ${pieceImage(theme, 'cloud') ? '' : 'rounded-pill border-[2px] border-border'}`} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ...(pieceImage(theme, 'cloud') ? { background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")` } : { background: pieceColor(theme, 'cloud', '#ffffff') }), animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
             ))}
             {!still && [0, 1, 2].map((i) => (
               <span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%`, animation: `${i % 2 ? 'cc-swim-left' : 'cc-swim-right'} ${14 + i * 4}s linear ${-i * 5}s infinite` }} aria-hidden="true">
@@ -221,17 +239,30 @@ export default function CastCatch() {
               <img key={`sea${i}`} src={`/classic/cast-catch/${art}.svg`} alt="" aria-hidden="true" className="absolute bottom-0 pointer-events-none origin-bottom"
                 style={{ left: `${x}%`, width: `${w}%`, aspectRatio: '1', objectFit: 'contain', objectPosition: 'bottom', animation: still || art.startsWith('rock') ? undefined : `cc-sway ${4 + (i % 3)}s ease-in-out ${-i}s infinite` }} />
             ))}
-            {/* dock and rod */}
-            <span className="absolute left-0 bottom-0 w-[22%] h-[38%] border-t-[3px] border-r-[3px] border-border rounded-tr-xl" style={pieceFill(theme, 'dock', '#b98552')} aria-hidden="true" />
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              {!pieceImage(theme, 'rod') && <line x1="12" y1="62" x2="24" y2={step === 'power' ? 28 + power * 6 : 30} stroke={pieceColor(theme, 'rod', '#5b3a1e')} strokeWidth="6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />}
-              <circle cx="14" cy="57" r="1.6" fill="#314677" stroke="#000" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-              {lineOut && <line x1="24" y1="30" x2={bobberLeft} y2={step === 'bite' ? 52 : 46} stroke="#000" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+            {/* A wooden boat at the top left, half showing, with the rod off its bow
+                (teacher, 2026-10-31). Boat and rod share one drawing, sized to the
+                scene's width, so the rod always sits on the boat. A theme's "dock"
+                and "rod" pictures stand in for them. */}
+            <svg className="absolute pointer-events-none" style={{ left: '-8%', top: `${BOAT_TOP - 9.1 * aspect}%`, width: '26%', aspectRatio: '320 / 180', overflow: 'visible', animation: still ? undefined : 'cc-rock 4s ease-in-out infinite', transformOrigin: '70% 70%' }} viewBox="0 -60 320 180" aria-hidden="true">
+              {pieceImage(theme, 'dock')
+                ? <image href={pieceImage(theme, 'dock')} x="0" y="20" width="320" height="100" preserveAspectRatio="xMaxYMax meet" />
+                : <>
+                    <path d="M10 40 L300 40 Q290 90 240 112 L60 112 Q20 90 10 40 Z" fill={pieceColor(theme, 'dock', '#a0683a')} stroke="#000" strokeWidth="5" strokeLinejoin="round" />
+                    <path d="M18 62 L292 62 M30 86 L278 86" stroke="#000" strokeOpacity="0.35" strokeWidth="4" />
+                    <path d="M6 34 L304 34 L300 44 L10 44 Z" fill="#7a4a24" stroke="#000" strokeWidth="5" strokeLinejoin="round" />
+                    <rect x="150" y="18" width="40" height="18" rx="3" fill="#7a4a24" stroke="#000" strokeWidth="4" />
+                  </>}
+              {pieceImage(theme, 'rod')
+                ? <image href={pieceImage(theme, 'rod')} x="240" y="-60" width="90" height="100" preserveAspectRatio="xMinYMax meet" />
+                : <line x1="250" y1="36" x2={tip.x} y2={tip.y} stroke={pieceColor(theme, 'rod', '#5b3a1e')} strokeWidth="7" strokeLinecap="round" />}
+              <circle cx="262" cy="20" r="9" fill="#314677" stroke="#000" strokeWidth="4" />
             </svg>
-            {pieceImage(theme, 'rod') && <img src={pieceImage(theme, 'rod')} alt="" aria-hidden="true" className="absolute pointer-events-none" style={{ left: '10%', top: '28%', width: '16%', height: '36%', objectFit: 'contain', objectPosition: 'left bottom' }} />}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              {lineOut && <line x1={tipAt.x} y1={tipAt.y} x2={bobberLeft} y2={step === 'bite' ? 40 : 34} stroke="#000" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+            </svg>
             {(step === 'casting' || lineOut) && (
               <span className="absolute w-9 h-9 -ml-[18px] -mt-[18px]" aria-hidden="true"
-                style={{ left: `${flying ? 24 : bobberLeft}%`, top: `${flying ? 30 : 46}%`, transition: still ? 'none' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
+                style={{ left: `${flying ? tipAt.x : bobberLeft}%`, top: `${flying ? tipAt.y : 34}%`, transition: still ? 'none' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
                 <span className="block w-full h-full rounded-full border-[2.5px] border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f'), animation: still || step === 'casting' ? undefined : step === 'bite' ? 'cc-bite 0.5s ease-in-out infinite' : 'cc-bob 2s ease-in-out infinite' }} />
               </span>
             )}

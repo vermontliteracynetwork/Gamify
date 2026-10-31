@@ -123,7 +123,8 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
     );
   }
   if (id === 'rod') return <g><path d={`M${w * 0.15} ${h * 0.95} L${w * 0.75} ${h * 0.05}`} stroke="#9c6b45" strokeWidth={m * 0.08} strokeLinecap="round" /><path d={`M${w * 0.75} ${h * 0.05} Q${w * 0.95} ${h * 0.4} ${w * 0.85} ${h * 0.95}`} fill="none" stroke={INK} strokeWidth={line / 2} /></g>;
-  if (id === 'dock') return <g>{[0, 1, 2, 3, 4].map((k) => <rect key={k} x={line / 2 + k * (w - line) / 5} y={h * 0.2} width={(w - line) / 5} height={h * 0.6} fill={k % 2 ? '#b98a5e' : '#c99a6b'} stroke={INK} strokeWidth={line} />)}</g>;
+  // Cast and Catch's boat (teacher, 2026-10-31): a wooden hull facing right.
+  if (id === 'dock') return <g><path d={`M${w * 0.03} ${h * 0.3} L${w * 0.97} ${h * 0.3} Q${w * 0.93} ${h * 0.75} ${w * 0.75} ${h * 0.93} L${w * 0.2} ${h * 0.93} Q${w * 0.07} ${h * 0.75} ${w * 0.03} ${h * 0.3} Z`} fill="#a0683a" stroke={INK} strokeWidth={line} strokeLinejoin="round" /><path d={`M${w * 0.06} ${h * 0.52} L${w * 0.94} ${h * 0.52} M${w * 0.1} ${h * 0.72} L${w * 0.9} ${h * 0.72}`} stroke={INK} strokeOpacity={0.35} strokeWidth={line} /></g>;
   if (id === 'barn') {
     return (
       <g>

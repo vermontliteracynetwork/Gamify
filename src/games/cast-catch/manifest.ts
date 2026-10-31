@@ -10,7 +10,7 @@ export const castCatchManifest: GameManifest = {
   themePieces: [
     { id: 'background', label: 'Water', width: 1600, height: 1000, hint: 'The lake or sea you fish in' },
     { id: 'bobber', label: 'Bobber', width: 128, height: 128, hint: 'The float on the end of the line', color: '#e5635f' },
-    { id: 'dock', label: 'Dock', width: 400, height: 380, hint: 'Where you stand to fish', color: '#b98552' },
+    { id: 'dock', label: 'Boat', width: 480, height: 180, hint: 'The boat you fish from, facing right; only its front half shows', color: '#a0683a' },
     { id: 'rod', label: 'Fishing rod', width: 300, height: 300, hint: 'The rod, drawn from the handle (bottom left) to the tip (top right)', color: '#5b3a1e' },
     { id: 'sun', label: 'Sun', width: 160, height: 160, hint: 'The sun in the sky', color: '#fdfd94' },
     { id: 'cloud', label: 'Cloud', width: 320, height: 110, hint: 'A cloud that drifts across the sky', color: '#ffffff' },
