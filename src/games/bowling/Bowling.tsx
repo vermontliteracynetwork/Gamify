@@ -82,7 +82,9 @@ export default function Bowling() {
   const alive = useRef(false);
   const [roll, setRoll] = useState<0 | 1>(0);
   const [frames, setFrames] = useState(0);
-  const [banner, setBanner] = useState<{ id: number; text: string; kind?: 'strike' | 'spare' | 'miss' | 'split' | null } | null>(null);
+  const [banner, setBanner] = useState<{ id: number; text: string; kind?: 'strike' | 'spare' | 'miss' | 'split' | null; sign?: string } | null>(null);
+  // Strikes in a row for each player: two is a Double, three a Turkey.
+  const streak = useRef<Record<string, number>>({});
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const timers = useRef<number[]>([]);
   // Power-ups (teacher, 2026-10-31): a right answer may bring one; it waits
@@ -264,7 +266,13 @@ export default function Bowling() {
     setT(scored);
     const split = !kind && roll === 0 && isSplit(nextStanding);
     const text = kind === 'strike' ? t('sb.strike') : kind === 'spare' ? t('sb.spare') : res.gutter ? t('sb.gutter') : split ? t('sb.split') : down.length === 0 ? t('sb.miss') : t('sb.pins', { count: down.length });
-    setBanner({ id: Date.now(), text: points ? `${text} +${points}` : text, kind: kind ?? (res.gutter || down.length === 0 ? 'miss' : split ? 'split' : null) });
+    const me = current(turns).id;
+    if (roll === 0) streak.current[me] = kind === 'strike' ? (streak.current[me] ?? 0) + 1 : 0;
+    const run = streak.current[me] ?? 0;
+    // Classic shows the alley's glowing signs (BowlingGUI, cleared 2026-11-01).
+    const sign = !theme.id.endsWith(':classic') ? undefined : kind === 'strike' ? (run >= 3 ? 'turkey' : run === 2 ? 'double' : 'strike') : kind === 'spare' ? 'spare' : undefined;
+    const label = kind === 'strike' && run >= 3 ? t('sb.turkey') : kind === 'strike' && run === 2 ? t('sb.double') : text;
+    setBanner({ id: Date.now(), text: points ? `${label} +${points}` : label, kind: kind ?? (res.gutter || down.length === 0 ? 'miss' : split ? 'split' : null), sign });
     if (kind) {
       playEffect('win', settings);
       if (settings.celebrations !== 'off' && !still) {
@@ -471,7 +479,14 @@ export default function Bowling() {
                 {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 top-[22%] w-[34%] -translate-x-1/2 pointer-events-none" initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
                 {banner && (
                   <motion.p key={banner.id} className={`absolute inset-x-0 top-[34%] text-center font-display ${banner.kind === 'strike' ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl'} text-white`} style={{ WebkitTextStroke: '2px #000', textShadow: banner.kind === 'strike' ? '0 0 18px #ff4fa3, 0 0 30px #fdfd94' : undefined }}
-                    initial={{ scale: 0.4, opacity: 0, rotate: banner.kind === 'strike' ? -8 : 0 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 1.2 }} transition={{ type: 'spring', stiffness: 320, damping: 14 }} role="status">{banner.text}</motion.p>
+                    initial={{ scale: 0.4, opacity: 0, rotate: banner.kind === 'strike' ? -8 : 0 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 1.2 }} transition={{ type: 'spring', stiffness: 320, damping: 14 }} role="status">
+                    {banner.sign ? (
+                      <span className="grid justify-items-center gap-1">
+                        <img src={`/classic/bowling/signs/${banner.sign}.webp`} alt={banner.text} className={`w-[78%] max-w-[560px] drop-shadow-[0_0_14px_rgba(255,200,80,0.8)] ${still ? '' : 'sb-sign'}`} />
+                        <span className="text-3xl sm:text-4xl" aria-hidden="true">{banner.text.replace(/^[^+]*/, '').trim()}</span>
+                      </span>
+                    ) : banner.text}
+                  </motion.p>
                 )}
               </AnimatePresence>
             </div>

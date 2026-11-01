@@ -2172,6 +2172,8 @@ export const en = {
   'bp.newRow': 'A new row slid in!',
   'bp.rescue': 'Close call! The bottom rows puffed away.',
   'bp.done': 'You scored {count} points!',
+  'sb.double': 'Double! Two strikes in a row!',
+  'sb.turkey': 'Turkey! Three strikes in a row!',
   'sb.how1': 'Answer the question right.',
   'sb.how2': 'Tap to aim, tap again to add spin, and watch the pins fly.',
   'sb.how3': 'Knock over the pins. Most points wins!',

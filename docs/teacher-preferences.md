@@ -29,6 +29,14 @@ line that fits, and add each new preference the same turn she says it.
 - Setup in plain words with defaults ("Moves before a question break, default 3"); every step and setting clearly shown.
 - Every Share game also plays Versus (one device, two players or the computer).
 
+- Game Show cards are always horizontal (wider than tall), whatever the grid size (2026-11-01).
+- A game's cover image always mirrors how the game and its theme really look (2026-11-01).
+- Every game uses the same question set picker: square cards in rows of 4, no cover pictures, no "Pick a question set" line (2026-11-01).
+- Every game lets the teacher switch each power-up on or off, like Game Show's list (2026-11-01).
+- A game's background color can be changed per game; Game Show's default is red (2026-11-01).
+- A power-up that takes, steals or swaps points never comes up when the players it would hit have no points (all games, 2026-11-01).
+- Everything moves slowly enough to follow: computer turns, menus, pop-ups and play (2026-11-01).
+
 ## Platform
 - Brand look: periwinkle ground, off-white panels, black outlines, pale yellow accent, salmon, coral, navy, mint; Grow Year for titles, Inclusive Sans for everything else (no Loyola).
 - Students reach games only by a code or link; class students tap their name.

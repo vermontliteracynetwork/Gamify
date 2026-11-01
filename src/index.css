@@ -388,6 +388,8 @@ html:fullscreen .play-fill { height: 100dvh; }
 @keyframes m3-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .m3-pulse { animation: m3-pulse 1s ease-in-out infinite; }
 @keyframes m3-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.7; } 50% { transform: scale(1.04); opacity: 1; } }
+.sb-sign { animation: sb-sign 0.9s ease-in-out 2; }
+@keyframes sb-sign { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.35); } }
 .bp-ring { animation: bp-ring 1s ease-in-out infinite; }
 @keyframes bp-ring { 0%, 100% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .bp-ring { animation: none; } }
