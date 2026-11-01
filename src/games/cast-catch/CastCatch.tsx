@@ -30,11 +30,11 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
-import { castQuality, catchFish, catchItem, itemEffect, pointsFor, type FishKind } from './fish';
+import { castQuality, catchFish, catchItem, FISH, itemEffect, pointsFor, type FishKind } from './fish';
 
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
-type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'caught';
+type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'reeling' | 'caught';
 // A catch is a fish, or one of the theme's power-up items.
 interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean }
 
@@ -150,13 +150,26 @@ export default function CastCatch() {
     setStep('ask');
     const ok = await ask();
     if (!ok) { finish(); return; }
+    // A fish shadow swims up to the bobber (bigger for a better cast), then bites.
+    const swim = still ? 500 : 1300 + Math.random() * 1000;
+    setApproach({ id: Date.now(), from: Math.random() < 0.5 ? -1 : 1, ms: swim });
     setStep('wait');
-    await new Promise((r) => window.setTimeout(r, 500 + Math.random() * 900));
+    await new Promise((r) => window.setTimeout(r, swim));
     setStep('bite');
     buzz(40, settings);
     playEffect('tap', settings);
   }
+  // Reel in: the line pulls tight, the rod bends and the bobber is tugged
+  // back in jerks with splashes, then the catch comes up (Golden Rule pass).
   function reel() {
+    if (step !== 'bite') return;
+    setStep('reeling');
+    buzz(30, settings);
+    if (still) { land(); return; }
+    [0, 280, 560].forEach((ms) => window.setTimeout(() => playEffect('tap', settings), ms));
+    window.setTimeout(land, 850);
+  }
+  function land() {
     const times = doubleNext.current ? 2 : 1;
     const item = catchItem(theme.items ?? castCatchManifest.items!.classic);
     let c: Catch;
@@ -172,6 +185,7 @@ export default function CastCatch() {
     }
     setCatches((cs) => [...cs, c]);
     setLast(c);
+    setApproach(null);
     setStep('caught');
     playEffect(c.points < 0 ? 'miss' : 'right', settings);
     window.setTimeout(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
@@ -195,12 +209,19 @@ export default function CastCatch() {
   const tipAt = { x: -8 + (tip.x * 26) / 320, y: BOAT_TOP - 9.1 * aspect + ((tip.y + 60) * 26 * aspect) / 320 };
   // The bobber starts at the rod tip, then (next frame) flies to where the cast lands.
   const [flying, setFlying] = useState(false);
+  const [approach, setApproach] = useState<{ id: number; from: -1 | 1; ms: number } | null>(null);
   useEffect(() => {
     if (step !== 'casting') return;
     const id = requestAnimationFrame(() => requestAnimationFrame(() => setFlying(false)));
     return () => cancelAnimationFrame(id);
   }, [step]);
-  const lineOut = step === 'ask' || step === 'wait' || step === 'bite';
+  const lineOut = step === 'ask' || step === 'wait' || step === 'bite' || step === 'reeling';
+  const reeling = step === 'reeling';
+  // Where the bobber sits: out on the water, or pulled back toward the rod while reeling.
+  const bob = reeling ? { x: bobberLeft + (tipAt.x - bobberLeft) * 0.55, y: 30 } : { x: bobberLeft, y: step === 'bite' ? 40 : 34 };
+  // The fish book: kinds caught this game; a first catch of a kind says New!
+  const caughtKinds = new Set(catches.filter((c) => c.fish).map((c) => c.fish!.id));
+  const firstOfKind = !!last?.fish && catches.filter((c) => c.fish?.id === last.fish!.id).length === 1;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -272,11 +293,24 @@ export default function CastCatch() {
               <circle cx="262" cy="20" r="9" fill="#314677" stroke="#000" strokeWidth="4" />
             </svg>
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              {lineOut && <line x1={tipAt.x} y1={tipAt.y} x2={bobberLeft} y2={step === 'bite' ? 40 : 34} stroke="#000" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />}
+              {lineOut && <motion.line x1={tipAt.x} y1={tipAt.y + (reeling ? 2 : 0)} initial={false} animate={{ x2: bob.x, y2: bob.y }} transition={{ duration: still || !reeling ? 0 : 0.8, ease: [0.5, 0, 0.3, 1] }} stroke={reeling ? '#3b2a1a' : '#000'} strokeWidth={reeling ? 2.6 : 1.5} vectorEffect="non-scaling-stroke" className={reeling && !still ? 'cc-tense' : ''} />}
             </svg>
+            {/* The fish shadow swims in under the bobber, then tugs it. */}
+            {approach && (step === 'wait' || step === 'bite' || reeling) && (
+              <motion.span key={approach.id} aria-hidden="true" className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ width: `${7 + quality.current * 2.2}%`, opacity: 0.45 }}
+                initial={{ left: `${bobberLeft + approach.from * 24}%`, top: '66%' }}
+                animate={reeling ? { left: `${bob.x}%`, top: `${bob.y + 6}%` } : step === 'bite' ? { left: `${bobberLeft}%`, top: '45%', rotate: [0, -8, 8, 0] } : { left: `${bobberLeft}%`, top: '46%' }}
+                transition={reeling ? { duration: 0.8, ease: 'easeIn' } : step === 'bite' ? { rotate: { duration: 0.4, repeat: Infinity } } : { duration: still ? 0 : approach.ms / 1000, ease: 'easeOut' }}>
+                <svg viewBox="0 0 100 50" className="w-full" style={{ transform: approach.from > 0 ? 'none' : 'scaleX(-1)' }}><path d="M78 25 L98 8 L94 25 L98 42 Z M44 5 a38 20 0 1 0 0.1 0 Z" fill="#0b2a4a" /></svg>
+              </motion.span>
+            )}
+            {(step === 'bite' || reeling) && !still && [0, 1].map((k) => (
+              <span key={`sp${k}-${step}`} aria-hidden="true" className="absolute w-14 h-5 -ml-7 -mt-1 rounded-[50%] border-[2px] border-white/80 pointer-events-none cc-splash" style={{ left: `${bobberLeft}%`, top: '42%', animationDelay: `${k * 0.3}s` }} />
+            ))}
             {(step === 'casting' || lineOut) && (
               <span className="absolute w-9 h-9 -ml-[18px] -mt-[18px]" aria-hidden="true"
-                style={{ left: `${flying ? tipAt.x : bobberLeft}%`, top: `${flying ? tipAt.y : 34}%`, transition: still ? 'none' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
+                style={{ left: `${flying ? tipAt.x : bob.x}%`, top: `${flying ? tipAt.y : bob.y}%`, transition: still ? 'none' : reeling ? 'left 0.8s cubic-bezier(0.5, 0, 0.3, 1), top 0.8s cubic-bezier(0.5, 0, 0.3, 1)' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
                 <span className="block w-full h-full rounded-full border-[2.5px] border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f'), animation: still || step === 'casting' ? undefined : step === 'bite' ? 'cc-bite 0.5s ease-in-out infinite' : 'cc-bob 2s ease-in-out infinite' }} />
               </span>
             )}
@@ -292,6 +326,7 @@ export default function CastCatch() {
                     </>
                   ) : last.fish && (
                     <>
+                      {firstOfKind && <span className="absolute top-3 left-3 rotate-[-8deg] font-display text-lg bg-accent border-[2px] border-border rounded-pill px-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('cc.new')}</span>}
                       <FishArt fish={last.fish} size={140} theme={theme} />
                       <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
                       <p className="font-bold">+{last.points} {t('cc.pts')} · {t(`cc.rarity.${last.fish.rarity}` as 'cc.rarity.0')}</p>
@@ -340,6 +375,15 @@ export default function CastCatch() {
           <div className="flex flex-wrap justify-center gap-2">
             {catches.slice().sort((a, b) => b.points - a.points).slice(0, 6).map((c, i) => (
               <span key={i} className="grid justify-items-center text-xs font-bold">{c.item ? <ItemArt item={c.item} size={56} still /> : c.fish && <FishArt fish={c.fish} size={56} theme={theme} />}{c.item?.name ?? c.fish?.name}</span>
+            ))}
+          </div>
+          {/* The fish book: every kind of fish, the ones caught in color. */}
+          <p className="font-display text-xl">{t('cc.book', { n: caughtKinds.size, total: FISH.length })}</p>
+          <div className="grid grid-cols-6 gap-1.5 justify-items-center" aria-label={t('cc.book', { n: caughtKinds.size, total: FISH.length })}>
+            {FISH.map((f) => (
+              <span key={f.id} title={caughtKinds.has(f.id) ? f.name : '?'} className={`w-12 h-10 rounded-input border-[2px] border-border flex items-center justify-center ${caughtKinds.has(f.id) ? 'bg-surface' : 'bg-surface-2'}`} aria-hidden="true">
+                <span style={caughtKinds.has(f.id) ? undefined : { filter: 'brightness(0) opacity(0.3)' }}><FishArt fish={f} size={36} theme={theme} /></span>
+              </span>
             ))}
           </div>
         </ResultsModal>

@@ -126,6 +126,12 @@ export function place(b0: Board, r: number, c: number, color: number): { board: 
   const g = group(b, r, c, color);
   if (g.length < 3) return { board: b, popped, dropped };
   for (const [gr, gc] of g) { popped.push([gr, gc, color]); b.rows[gr][gc] = null; }
+  dropFloating(b, dropped);
+  return { board: b, popped, dropped };
+}
+
+// Every bubble no longer hanging from the top falls.
+function dropFloating(b: Board, dropped: Hit[]) {
   const anchored = new Set<string>();
   const stack: [number, number][] = [];
   for (let cc = 0; cc < rowLen(b, 0); cc++) if (get(b, 0, cc) !== null) { anchored.add(`0,${cc}`); stack.push([0, cc]); }
@@ -137,8 +143,40 @@ export function place(b0: Board, r: number, c: number, color: number): { board: 
     const k = get(b, rr, cc);
     if (k !== null && !anchored.has(`${rr},${cc}`)) { dropped.push([rr, cc, k]); b.rows[rr][cc] = null; }
   }
+}
+
+// Special shots (Golden Rule pass, 2026-10-31): a rainbow bubble takes the
+// color that pops the most where it lands; a star burst pops every bubble
+// within two steps of where it lands.
+export type Shot = number | 'rainbow' | 'burst';
+export function placeShot(b0: Board, r: number, c: number, shot: Shot): { board: Board; popped: Hit[]; dropped: Hit[] } {
+  if (typeof shot === 'number') return place(b0, r, c, shot);
+  if (shot === 'rainbow') {
+    const near = [...new Set(neighbors(b0, r, c).map(([nr, nc]) => get(b0, nr, nc)).filter((x): x is number => x !== null))];
+    let best = place(b0, r, c, near[0] ?? 0);
+    for (const col of near.slice(1)) {
+      const res = place(b0, r, c, col);
+      if (res.popped.length + res.dropped.length > best.popped.length + best.dropped.length) best = res;
+    }
+    return best;
+  }
+  const b = copy(b0);
+  const popped: Hit[] = [];
+  const dropped: Hit[] = [];
+  const seen = new Set([`${r},${c}`]);
+  let ring: [number, number][] = [[r, c]];
+  for (let step = 0; step < 2; step++) {
+    const next: [number, number][] = [];
+    for (const [rr, cc] of ring) for (const [nr, nc] of neighbors(b, rr, cc)) if (!seen.has(`${nr},${nc}`)) { seen.add(`${nr},${nc}`); next.push([nr, nc]); }
+    ring = next;
+  }
+  for (const k of seen) { const [rr, cc] = k.split(',').map(Number); const v = get(b, rr, cc); if (v !== null) { popped.push([rr, cc, v]); b.rows[rr][cc] = null; } }
+  dropFloating(b, dropped);
   return { board: b, popped, dropped };
 }
+
+// The next shot: usually a color on the board, sometimes a special.
+export const nextShot = (b: Board, rng: Rng = Math.random): Shot => { const x = rng(); return x < 0.07 ? 'burst' : x < 0.16 ? 'rainbow' : nextColor(b, rng); };
 
 // 10 points a pop, 20 a fall.
 export const shotPoints = (res: { popped: Hit[]; dropped: Hit[] }) => res.popped.length * 10 + res.dropped.length * 20;

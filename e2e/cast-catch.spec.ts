@@ -24,7 +24,10 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   const buttons = dialog.getByRole('button', { name: /^[A-D] / });
   const labels = await buttons.allInnerTexts();
   await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
+  // Frame check: a fish shadow swims to the bobber; reeling pulls it in.
+  if (info.project.name === 'ipad-landscape') for (let f = 0; f < 4; f++) { await page.screenshot({ path: `test-results/cast-swim-${f}.png` }); await page.waitForTimeout(350); }
   await page.getByRole('button', { name: 'Reel it in!' }).click({ timeout: 8000 });
+  if (info.project.name === 'ipad-landscape') for (let f = 0; f < 3; f++) { await page.screenshot({ path: `test-results/cast-reel-${f}.png` }); await page.waitForTimeout(250); }
   // A fish, or one of the Classic power-ups (a boot, a rainbow fish...).
   await expect(page.getByRole('status').filter({ hasText: / cm |You reeled in/ })).toBeVisible();
   await page.screenshot({ path: `test-results/cast-caught-${info.project.name}.png` });

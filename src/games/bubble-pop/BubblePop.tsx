@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowArcLeft, ArrowArcRight, Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Star, type Icon } from '@phosphor-icons/react';
+import { ArrowArcLeft, ArrowArcRight, Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -27,8 +27,8 @@ import { usePowerUps } from '../../engine/usePowerUps';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
 import {
-  center, clampAngle, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, place, pushRow, R, rescue,
-  rowLen, SHOOTER, shotPoints, traceShot, W, type Board, type Hit,
+  center, clampAngle, colorsLeft, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, nextShot, placeShot, pushRow, R, rescue,
+  rowLen, SHOOTER, shotPoints, traceShot, W, type Board, type Hit, type Shot,
 } from './board';
 
 // Every bubble has its own shape AND color (never color alone).
@@ -57,7 +57,11 @@ export default function BubblePop() {
   const [step, setStep] = useState<Step>('question');
   const [board, setBoard] = useState<Board>(() => makeBoard(0));
   const [level, setLevel] = useState(0);
-  const [shooter, setShooter] = useState({ now: 0, next: 1 });
+  const [shooter, setShooter] = useState<{ now: Shot; next: Shot }>({ now: 0, next: 1 });
+  // Combo: shots in a row that pop; a callout over the board (Golden Rule pass, 2026-10-31).
+  const combo = useRef(0);
+  const [callout, setCallout] = useState<{ id: number; text: string } | null>(null);
+  const [blast, setBlast] = useState<{ id: number; x: number; y: number; kind: 'rainbow' | 'burst' } | null>(null);
   const [angle, setAngle] = useState(-Math.PI / 2);
   const [shots, setShots] = useState(0);
   const [breaks, setBreaks] = useState(0);
@@ -92,9 +96,9 @@ export default function BubblePop() {
   function start() {
     plan.current = { rounds: setup.roundCount, shots: setup.shotsPerRound, perBreak: setup.perBreak };
     const b = makeBoard(0);
-    setBoard(b); setLevel(0); setScore(0); setBreaks(0); setShots(0); setNoPop(0); setNote(''); setFx([]); setGain(null);
+    setBoard(b); setLevel(0); setScore(0); setBreaks(0); setShots(0); setNoPop(0); setNote(''); setFx([]); setGain(null); combo.current = 0;
     doubleNext.current = false;
-    setShooter({ now: nextColor(b), next: nextColor(b) });
+    setShooter({ now: nextColor(b), next: nextShot(b) });
     setAngle(-Math.PI / 2);
     setPhase('play');
     void load(0);
@@ -158,16 +162,26 @@ export default function BubblePop() {
 
   function settle([r, c]: [number, number]) {
     flyer.current?.setAttribute('transform', '');
-    const res = place(board, r, c, shooter.now);
+    const res = placeShot(board, r, c, shooter.now);
     let b = res.board;
     let points = shotPoints(res);
     let message = '';
     let misses = noPop;
+    const at = center(board, r, c);
+    if (typeof shooter.now !== 'number') {
+      // A special shot: a burst ring where it lands and its name over the board.
+      if (!still) setBlast({ id: Date.now(), x: at.x, y: at.y, kind: shooter.now });
+      setCallout({ id: Date.now(), text: t(shooter.now === 'burst' ? 'bp.burst' : 'bp.rainbow') });
+      buzz(45, settings);
+    }
     if (res.popped.length) {
-      playEffect('right', settings); buzz(25, settings);
+      playEffect(res.popped.length + res.dropped.length >= 6 ? 'win' : 'right', settings); buzz(25, settings);
       addFx(res.popped, 'pop', board); addFx(res.dropped, 'fall', board);
       misses = 0;
+      combo.current += 1;
+      if (combo.current >= 2) { points += combo.current * 10; if (typeof shooter.now === 'number') setCallout({ id: Date.now(), text: t('bp.combo', { n: combo.current }) }); }
     } else {
+      combo.current = 0;
       playEffect('tap', settings);
       misses += 1;
     }
@@ -189,7 +203,10 @@ export default function BubblePop() {
       setScore((s) => s + points);
     }
     setBoard(b); setNoPop(misses); setNote(message);
-    setShooter({ now: shooter.next, next: nextColor(b) });
+    // The next shot stays one that can pop: a color still on the board, or a special.
+    const left0 = colorsLeft(b);
+    const now = typeof shooter.next === 'number' && !left0.includes(shooter.next) ? nextColor(b) : shooter.next;
+    setShooter({ now, next: nextShot(b) });
     const left = shots - 1;
     setShots(left);
     if (left > 0) { setStep('aim'); return; }
@@ -233,6 +250,25 @@ export default function BubblePop() {
         <circle cx={x} cy={y} r={R * 0.94} fill={fill(k)} stroke={PUZZLE_PACK_CLEARED && !patterns[k] ? 'none' : '#000'} strokeWidth={0.13} />
         {!patterns[k] && (PUZZLE_PACK_CLEARED ? <S x={x - 0.42} y={y - 0.36} size={0.84} weight="fill" color="#241c3d" opacity={0.8} /> : <S x={x - 0.55} y={y - 0.55} size={1.1} weight="fill" color="#241c3d" />)}
         {(patterns[k] || !PUZZLE_PACK_CLEARED) && <ellipse cx={x - 0.35} cy={y - 0.42} rx={0.26} ry={0.15} fill="#fff" opacity={0.7} />}
+      </g>
+    );
+  };
+  // Special shots: a rainbow bubble (wedges of every color, a white star) and
+  // a star burst (dark with a glowing ring and a sparkle).
+  const shotBubble = (shot: Shot, x: number, y: number) => {
+    if (typeof shot === 'number') return bubble(shot, x, y);
+    if (shot === 'rainbow') return (
+      <g>
+        {BUBBLE_COLORS.map((col, i) => { const a0 = (i / 6) * Math.PI * 2, a1 = ((i + 1) / 6) * Math.PI * 2, rr = R * 0.94; return <path key={i} d={`M${x} ${y} L${x + Math.cos(a0) * rr} ${y + Math.sin(a0) * rr} A${rr} ${rr} 0 0 1 ${x + Math.cos(a1) * rr} ${y + Math.sin(a1) * rr} Z`} fill={col} />; })}
+        <circle cx={x} cy={y} r={R * 0.94} fill="none" stroke="#000" strokeWidth={0.13} />
+        <Star x={x - 0.5} y={y - 0.5} size={1} weight="fill" color="#fff" />
+      </g>
+    );
+    return (
+      <g>
+        <circle cx={x} cy={y} r={R * 1.25} fill="none" stroke="#fdfd94" strokeWidth={0.18} opacity={0.8} className={still ? '' : 'bp-ring'} style={{ transformOrigin: `${x}px ${y}px`, transformBox: 'view-box' }} />
+        <circle cx={x} cy={y} r={R * 0.94} fill="#241c3d" stroke="#fdfd94" strokeWidth={0.16} />
+        <Sparkle x={x - 0.55} y={y - 0.55} size={1.1} weight="fill" color="#fdfd94" />
       </g>
     );
   };
@@ -313,8 +349,12 @@ export default function BubblePop() {
                 )}
                 {/* Launcher: the current bubble and, beside it, the next one. */}
                 <circle cx={SHOOTER.x} cy={SHOOTER.y} r={R * 1.5} fill="#000" opacity={0.25} />
-                <g ref={flyer}>{phase === 'play' && step !== 'question' && bubble(shooter.now, SHOOTER.x, SHOOTER.y)}</g>
-                <g transform={`translate(${SHOOTER.x + 3.4} ${SHOOTER.y + 0.4}) scale(0.7) translate(${-SHOOTER.x - 3.4} ${-SHOOTER.y - 0.4})`} opacity={0.9}>{bubble(shooter.next, SHOOTER.x + 3.4, SHOOTER.y + 0.4)}</g>
+                <g ref={flyer}>{phase === 'play' && step !== 'question' && shotBubble(shooter.now, SHOOTER.x, SHOOTER.y)}</g>
+                <g transform={`translate(${SHOOTER.x + 3.4} ${SHOOTER.y + 0.4}) scale(0.7) translate(${-SHOOTER.x - 3.4} ${-SHOOTER.y - 0.4})`} opacity={0.9}>{shotBubble(shooter.next, SHOOTER.x + 3.4, SHOOTER.y + 0.4)}</g>
+                {blast && (
+                  <motion.circle key={blast.id} cx={blast.x} cy={blast.y} fill="none" stroke={blast.kind === 'burst' ? '#fdfd94' : '#ffffff'} strokeWidth={0.35}
+                    initial={{ r: 0.5, opacity: 1 }} animate={{ r: blast.kind === 'burst' ? 5.5 : 3.5, opacity: 0 }} transition={{ duration: 0.5, ease: 'easeOut' }} onAnimationComplete={() => setBlast(null)} />
+                )}
                 <AnimatePresence>
                   {gain && (
                     <motion.text key={gain.id} x={gain.x} textAnchor="middle" fontSize={1.6} fontWeight={800} fill="#fff" stroke="#000" strokeWidth={0.12} paintOrder="stroke"
@@ -323,6 +363,14 @@ export default function BubblePop() {
                   )}
                 </AnimatePresence>
               </svg>
+              {/* Special shots and combos call out over the board. */}
+              <AnimatePresence>
+                {callout && (
+                  <motion.p key={callout.id} className="absolute inset-x-0 top-[38%] text-center font-display text-4xl sm:text-5xl text-[#fdfd94] pointer-events-none" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
+                    initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, y: -16 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }}
+                    onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 700); }}>{callout.text}</motion.p>
+                )}
+              </AnimatePresence>
             </div>
             <div className="flex items-center justify-center gap-3">
               <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.left')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a - 0.08))}><ArrowArcLeft weight="bold" size={26} /></button>
@@ -333,7 +381,7 @@ export default function BubblePop() {
           <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
             <SoloPanel score={score} line={t('bp.board', { n: level + 1 })}
               dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
-              status={step === 'aim' ? t('bp.aim') : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
+              status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : t('bp.aim')) : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
             <div className="hidden lg:block"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
           </div>

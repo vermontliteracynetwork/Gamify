@@ -272,6 +272,11 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 }
 html[data-motion="still"] .cc-water { animation: none; }
 @media (prefers-reduced-motion: reduce) { .cc-water { animation: none; } }
+@keyframes cc-splash { 0% { transform: scale(0.3); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+.cc-splash { animation: cc-splash 0.8s ease-out infinite; }
+@keyframes cc-tense { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(0.4px); } }
+.cc-tense { animation: cc-tense 0.12s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .cc-splash, .cc-tense { animation: none; } }
 @keyframes cc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 @keyframes cc-bite { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(14px); } 50% { transform: translateY(4px); } 75% { transform: translateY(16px); } }
 /* Bubble Pop: popped bubbles burst, cut-loose bubbles fall (SVG units). */
@@ -383,6 +388,9 @@ html:fullscreen .play-fill { height: 100dvh; }
 @keyframes m3-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .m3-pulse { animation: m3-pulse 1s ease-in-out infinite; }
 @keyframes m3-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.7; } 50% { transform: scale(1.04); opacity: 1; } }
+.bp-ring { animation: bp-ring 1s ease-in-out infinite; }
+@keyframes bp-ring { 0%, 100% { transform: scale(0.9); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bp-ring { animation: none; } }
 .qt-gold { animation: qt-gold 1.6s ease-in-out infinite; }
 @keyframes qt-gold { 0%, 100% { opacity: 0.6; transform: scale(0.92); } 50% { opacity: 1; transform: scale(1.06); } }
 @media (prefers-reduced-motion: reduce) { .qt-gold { animation: none; } }
