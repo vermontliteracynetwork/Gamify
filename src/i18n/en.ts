@@ -308,6 +308,7 @@ export const en = {
   'tb.cellUsed': '{set}, {points} points, used',
   'tb.reveal.points': '+{points} points!',
   'tb.pointsWord': 'points!',
+  'tb.pointsBig': 'points! Wow!',
   'tb.reveal.double': 'Double your points!',
   'tb.reveal.swap': 'Swap points with another team!',
   'tb.reveal.steal': 'Steal {points} points from another team!',

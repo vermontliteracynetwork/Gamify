@@ -203,7 +203,8 @@ export default function GameShow() {
     if (!turns) return;
     const tier = prizeTier(kind);
     playEffect(tier > 1 ? 'win' : 'right', settings);
-    if (tier === 3 && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: settings.celebrations === 'big' ? 120 : 60, spread: 80, origin: { y: 0.45 }, disableForReducedMotion: true });
+    // Every prize gets a burst of confetti; bigger prizes get more (teacher, 2026-11-01).
+    if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: (settings.celebrations === 'big' ? 40 : 25) * tier, spread: 60 + tier * 15, origin: { y: 0.45 }, disableForReducedMotion: true });
     setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
     const others = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0);
     const needsTarget = picksTeam(kind) && others.length > 0;
@@ -442,7 +443,7 @@ export default function GameShow() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
           <DialogFocus />
           {/* Bigger prizes, bigger show: sun rays behind the box for big ones. */}
-          {prizeTier(reveal.card) > 1 && (
+          {(reveal.card.kind === 'points' || prizeTier(reveal.card) > 1) && (
             <motion.div aria-hidden="true" className="absolute w-[min(90vw,44rem)] aspect-square pointer-events-none"
               initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}>
               {/* The spin lives on an inner layer so the grow-in still shows. */}
@@ -452,18 +453,27 @@ export default function GameShow() {
           )}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
-            className="relative bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+            className="relative border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', background: reveal.card.kind === 'points' ? 'radial-gradient(circle at 50% 35%, #fffbd1, #fdfd94 45%, #f7b267 100%)' : 'var(--color-surface, #fbfcf8)' }}>
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
             {current(turns).kind !== 'cpu' && (
               <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
             )}
             {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : (
               // The points count up, bigger for bigger prizes.
-              <p className="font-display font-bold leading-none flex items-center gap-2" style={{ fontSize: `${3 + prizeTier(reveal.card)}rem` }} aria-hidden="true">
-                <Sparkle weight="fill" size={40 + prizeTier(reveal.card) * 8} className="text-accent drop-shadow-[0_0_1px_#000]" />+<CountUp to={reveal.card.points} still={settings.motion === 'still'} />
-              </p>
+              // A big bouncing number with streamers flying out of the box (teacher, 2026-11-01:
+              // no star, more celebratory).
+              <>
+                {settings.motion !== 'still' && Array.from({ length: 14 }, (_, k) => (
+                  <motion.span key={k} aria-hidden="true" className="absolute w-2.5 h-4 rounded-sm pointer-events-none" style={{ left: '50%', top: '38%', background: ['#e5635f', '#4fb6d8', '#9b7be0', '#4fc77a', '#f6c544', '#ef5d7a'][k % 6] }}
+                    initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }} animate={{ x: Math.cos((k / 14) * Math.PI * 2) * 190, y: Math.sin((k / 14) * Math.PI * 2) * 120 + 40, rotate: 360 + k * 40, opacity: 0 }} transition={{ duration: 1.4, ease: 'easeOut', delay: 0.15 }} />
+                ))}
+                <motion.p className="relative font-display font-bold leading-none text-white" style={{ fontSize: `${4 + prizeTier(reveal.card)}rem`, WebkitTextStroke: '3px #000', paintOrder: 'stroke', textShadow: '0 5px 0 #000' }} aria-hidden="true"
+                  initial={settings.motion === 'still' ? false : { scale: 0.3, rotate: -10 }} animate={{ scale: [0.3, 1.25, 1], rotate: [-10, 6, 0] }} transition={{ duration: 0.8, ease: 'easeOut' }}>
+                  +<CountUp to={reveal.card.points} still={settings.motion === 'still'} />
+                </motion.p>
+              </>
             )}
-            <p className="font-display text-4xl font-bold">{reveal.card.kind === 'points' ? t('tb.pointsWord') : revealText(reveal.card)}</p>
+            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord') : revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
                 <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
