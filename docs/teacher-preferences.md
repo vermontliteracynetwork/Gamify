@@ -59,3 +59,7 @@ line that fits, and add each new preference the same turn she says it.
 - Every upload is cut to the piece's exact size; the system tells a hand-drawn template photo (corner squares) from digital art (2026-11-01).
 - The Theme Builder preview is a game preview with tabs for each screen the pieces show on (Bowling: Lane, Pick a ball, Power-ups) (2026-11-01).
 - Predicted (2026-11-01, market gaps): question sets get true or false in one tap, the teacher's own recorded voice for a question, and an optional teach card read aloud before play; all free on every plan.
+- Board Game: the whole stage is the board (countryside all around); panels float over the countryside, never over the trail; power-up spaces are hidden and random; no blank tiles (2026-11-01).
+- Turn cards: just the player's picture, no circle, no box, no hand; a soft glow and a bob (2026-11-01).
+- Players with characters (Board Game animals) show as player cards with the animal big and no circle; the question header shows the player's animal (2026-11-01).
+- Teacher-supplied sounds: right and wrong answers everywhere; dice shake for every roll; jump on every hop; magnet, tornado, chest power-ups; Pinball bumper, score bell and flipper sounds; Cast and Catch cast, splash and bells (2026-11-01).

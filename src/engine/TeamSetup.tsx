@@ -99,13 +99,18 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
           className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
       </div>}
 
-      <ol className="grid sm:grid-cols-2 items-start gap-2 list-none p-0 m-0">
+      {/* Characters (Board Game animals) show as player cards: the animal big,
+          no circle around it, the name under it (teacher, 2026-11-01). */}
+      <ol className={`grid items-start gap-2 list-none p-0 m-0 ${characters?.length ? 'grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'}`}>
         {slots.map((s, i) => (
-          <li key={i} className="flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2">
+          <li key={i} className={characters?.length
+            ? 'flex flex-wrap items-center justify-center gap-2 rounded-panel border-[2.5px] border-border bg-surface p-3'
+            : 'flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2'}
+            style={characters?.length ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
             <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
-              onClick={() => setPicking(picking === i ? null : i)} className="rounded-full p-0.5 -m-0.5 motion-safe:hover:scale-110 motion-safe:transition-transform">
+              onClick={() => setPicking(picking === i ? null : i)} className={`${characters?.length ? 'basis-full flex justify-center' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:transition-transform`}>
               {characters?.length
-                ? <img src={characters[charOf(i)].image} alt="" className="w-14 h-14 rounded-full border-[2.5px] border-border bg-surface-2 object-contain p-0.5" />
+                ? <img src={characters[charOf(i)].image} alt="" className="w-[min(6.5rem,14vh)] aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
                 : <TeamBadge colorIndex={iconOf(i)} size={44} />}
             </button>
             {picking === i && characters?.length ? (

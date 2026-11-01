@@ -204,3 +204,84 @@ export function castleBlocks(): Block[] {
 }
 // The castle rises as the leader nears it.
 export const castleStage = (best: number) => (best >= FINISH ? 5 : Math.min(4, Math.floor((best / FINISH) * 5)));
+
+// ---- The countryside around the board (teacher, 2026-11-01) ---------------
+// "Make the whole purple view the board game": the world goes on past the
+// trail in every direction (lakes, forests, a little village, farms, hills),
+// so the board fills the whole screen and the menus float over countryside,
+// never over the trail. Irregular on purpose: clumps, lakes and villages land
+// where a seeded roll puts them, not in rows.
+export const MARGIN = { top: 5, bottom: 4, left: 9, right: 9 };
+export const COUNTRY = {
+  x: LEFT - MARGIN.left * W - 40,
+  y: TOP - MARGIN.top * STEP - 60,
+  w: (COLS + MARGIN.left + MARGIN.right) * W + 120,
+  h: (ROWS + MARGIN.top + MARGIN.bottom) * STEP + 200,
+};
+const VSIZE: Record<string, [number, number]> = {
+  windmill_complete: [52, 66], house: [88, 70], house_small: [52, 56], tavern: [82, 76], well: [24, 30], hay: [32, 30], campingTent: [38, 42],
+  logPile: [36, 32], treeRound_large: [20, 46], treeRound_small: [14, 32], rockGrey_large: [74, 92], rockBrown_large: [30, 44], tinyBuilding: [24, 26],
+  fountain: [46, 46], farmland: [56, 49], sign: [14, 38], fence: [22, 32],
+};
+export interface CountryCell { r: number; c: number; ground: Ground | 'dirt' | 'magic' | 'sand'; lift: number }
+export interface CountryProp extends Prop { village?: boolean }
+
+export function buildCountry() {
+  const rand = seeded(29);
+  const one = <T,>(xs: T[]) => xs[Math.floor(rand() * xs.length)];
+  const cells: CountryCell[] = [];
+  const props: CountryProp[] = [];
+  // Blobs: lakes, forests and villages scattered around the board.
+  const blobs: { r: number; c: number; rad: number; kind: 'lake' | 'forest' | 'village' | 'farm' | 'hills' | 'magic' }[] = [];
+  const kinds = ['lake', 'forest', 'forest', 'village', 'farm', 'hills', 'forest', 'lake', 'magic', 'village', 'forest', 'farm'] as const;
+  for (let k = 0; k < 22; k++) {
+    const side = k % 4;
+    const r = side === 0 ? -MARGIN.top + rand() * (MARGIN.top - 0.5) : side === 1 ? ROWS + rand() * MARGIN.bottom : -MARGIN.top + rand() * (ROWS + MARGIN.top + MARGIN.bottom);
+    const c = side === 2 ? -MARGIN.left + rand() * (MARGIN.left - 0.5) : side === 3 ? COLS + rand() * MARGIN.right : -MARGIN.left + rand() * (COLS + MARGIN.left + MARGIN.right);
+    blobs.push({ r, c, rad: 1.2 + rand() * 1.8, kind: kinds[k % kinds.length] });
+  }
+  const put = (img: string, cx: number, base: number, row: number, scale: number, sway = false, village = false) => {
+    const [w, h] = VSIZE[img] ?? SIZES[img];
+    const dir = VSIZE[img] ? 'village' : 'world';
+    props.push({ img: `${dir}/${img}`, x: cx - (w * scale) / 2, y: base - h * scale, w: w * scale, h: h * scale, row, sway, village });
+  };
+  for (let r = -MARGIN.top; r < ROWS + MARGIN.bottom; r++) {
+    for (let c = -MARGIN.left; c < COLS + MARGIN.right; c++) {
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) continue; // the board itself
+      const near = blobs.map((b) => ({ b, d: Math.hypot((b.r - r) * 0.87, b.c - c) / b.rad })).sort((a, z) => a.d - z.d)[0];
+      const kind = near && near.d < 1 ? near.b.kind : null;
+      const { x: cx, y: cy } = centerOf(r, c);
+      // Hills lift a few tiles, so the land is not flat everywhere.
+      const lift = kind === 'hills' ? Math.round((1 - near.d) * 2) : rand() < 0.06 ? 1 : 0;
+      const ground = kind === 'lake' ? 'water' : kind === 'magic' ? (rand() < 0.5 ? 'magic' : 'grassFull') : kind === 'farm' && rand() < 0.4 ? 'dirt' : rand() < 0.3 ? 'grassFull' : 'grass';
+      cells.push({ r, c, ground, lift });
+      const base = cy + 10 - lift * SIDE;
+      if (ground === 'water') continue;
+      if (kind === 'forest') {
+        const trees = ['pineGreen_high', 'treeGreen_high', 'pineGreen_mid', 'treeGreen_mid', 'pineBlue_high', 'treeAutumn_mid', 'pineAutumn_mid'];
+        const n = 2 + Math.floor(rand() * 3);
+        const spots = [[-14, -8], [12, -10], [-2, 4], [16, 8], [-16, 10]].slice(0, n).sort((a, z) => a[1] - z[1]);
+        spots.forEach(([dx, dy]) => put(one(trees), cx + dx + (rand() - 0.5) * 6, base + dy, r, 0.58 + rand() * 0.16, true));
+      } else if (kind === 'village') {
+        const roll = rand();
+        if (roll < 0.22) put(one(['house', 'tavern']), cx, base + 6, r, 0.62, false, true);
+        else if (roll < 0.36) put('windmill_complete', cx, base + 4, r, 1.05, false, true);
+        else if (roll < 0.5) put(one(['house_small', 'tinyBuilding']), cx + (rand() - 0.5) * 10, base + 4, r, 0.95, false, true);
+        else if (roll < 0.62) put(one(['well', 'hay', 'logPile', 'campingTent', 'fountain']), cx + (rand() - 0.5) * 16, base + 4, r, 0.9, false, true);
+        else put(one(['flowerRed', 'flowerYellow', 'flowerBlue']), cx + (rand() - 0.5) * 24, base, r, 1);
+      } else if (kind === 'farm') {
+        put(one(['hay', 'hay', 'fence', 'logPile', 'treeRound_small', 'house_small']), cx + (rand() - 0.5) * 14, base + 4, r, 0.9, false, true);
+      } else if (kind === 'hills') {
+        if (rand() < 0.4) put(one(['rockGrey_large', 'rockBrown_large']), cx, base + 6, r, 0.42, false, true);
+        else if (rand() < 0.5) put(one(['pineGreen_mid', 'pineGreen_low']), cx + (rand() - 0.5) * 14, base, r, 0.6, true);
+      } else {
+        const roll = rand();
+        if (roll < 0.28) for (let k = 0; k < 3; k++) put(one(['flowerRed', 'flowerYellow', 'flowerWhite', 'flowerBlue']), cx - 16 + rand() * 32, base - 14 + rand() * 18, r, 1);
+        else if (roll < 0.44) put(one(['bushGrass', 'bushAutumn', 'bushMagic']), cx + (rand() - 0.5) * 16, base, r, 0.9);
+        else if (roll < 0.58) put(one(['treeRound_large', 'treeRound_small', 'pineGreen_low']), cx + (rand() - 0.5) * 18, base + 2, r, 0.75, true);
+        else if (roll < 0.64) put(one(['smallRockGrass', 'smallRockStone']), cx + (rand() - 0.5) * 16, base - 2, r, 1);
+      }
+    }
+  }
+  return { cells, props };
+}

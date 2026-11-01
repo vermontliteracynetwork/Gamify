@@ -3,7 +3,7 @@ import { ANSWER_SOUNDS, playClip } from './music';
 import { pace, POP_IN } from './pace';
 import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
-import { Check, HandTap, SpeakerHigh, X } from '@phosphor-icons/react';
+import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
@@ -111,7 +111,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
       >
         <div className="flex items-center gap-3 flex-wrap">
-          <TeamBadge colorIndex={player.colorIndex} size={48} />
+          {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
+          {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
             <span className="font-display text-3xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
             {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
@@ -178,28 +179,29 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 }
 
 // The turn card (teacher, 2026-11-01): it comes before the player's move and
-// shows only their icon, big and glowing, with a tapping hand; no words like
-// "it's your turn". Tap it and it goes away. The computer's turn card goes
-// away on its own. On a class-list team, the student answering is named.
+// shows only their picture, no words and no box: the animal or team icon
+// floats big in the middle with a soft glow, bobbing and wiggling. Tap it and
+// it goes away. The computer's goes away on its own. On a class-list team,
+// the student answering is named.
 export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPlayer; avatar?: string; answerer?: string | null; onStart: () => void }) {
   const { settings } = useSettings();
+  const still = settings.motion === 'still';
   useEffect(() => {
     if (player.kind !== 'cpu') return;
-    const id = window.setTimeout(onStart, (settings.motion === 'still' ? 400 : 1200) * pace(settings));
+    const id = window.setTimeout(onStart, (still ? 400 : 1200) * pace(settings));
     return () => window.clearTimeout(id);
   }, [player.id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('share.turnCard', { name: player.name })}>
       <DialogFocus />
       <motion.button type="button" onClick={() => { playEffect('tap', settings); onStart(); }} disabled={player.kind === 'cpu'}
-        initial={settings.motion === 'still' ? false : { scale: 0.4, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}
-        className="relative grid justify-items-center gap-4 bg-surface border-[3px] border-border rounded-panel px-12 py-10 max-w-[92vw]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} aria-label={t('share.turnStart')}>
-        <motion.span animate={settings.motion === 'still' ? undefined : { y: [0, -10, 0] }} transition={{ duration: 1.2, repeat: Infinity }}
-          className="rounded-full ring-8 ring-accent" style={{ boxShadow: '0 0 40px 10px #fdfd94' }}>
-          {avatar ? <img src={avatar} alt="" className="w-[min(14rem,34vh)] h-[min(14rem,34vh)] rounded-full border-[3px] border-border object-contain bg-surface-2" /> : <TeamBadge colorIndex={player.colorIndex} size={210} />}
+        initial={still ? false : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}
+        className="relative grid justify-items-center gap-4 p-6 rounded-full" aria-label={t('share.turnStart')}>
+        <motion.span animate={still ? undefined : { y: [0, -14, 0], rotate: [-3, 3, -3] }} transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
+          {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}
         </motion.span>
         {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-[2.5px] border-border bg-[#c8f0dc] px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
-        {player.kind !== 'cpu' && <HandTap weight="fill" size={56} aria-hidden="true" className={`absolute -bottom-5 -right-5 drop-shadow-[0_2px_0_#000] text-accent ${settings.motion === 'still' ? '' : 'motion-safe:animate-bounce'}`} />}
       </motion.button>
     </div>
   );

@@ -1,5 +1,5 @@
 import { playClip, POWER_SOUNDS } from '../../engine/music';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -36,7 +36,7 @@ import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import {
   BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, POWERS, roll, spotOf, dieSides, trailOf, trailStart, TRAILS,
-  tileXY, WORLD_H, WORLD_W, type Bridge, type ChestPrize, type Power,
+  tileXY, WORLD_H, WORLD_W, buildCountry, COUNTRY, MARGIN, ROWS, SIDE, type Bridge, type ChestPrize, type Power,
 } from './board';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
@@ -51,7 +51,6 @@ const ANIMALS = ['Axolotl', 'Bear', 'Bunny', 'Cat', 'Chicken', 'Cow', 'Crocodile
 const CLASSIC_PLAYERS: Character[] = ANIMALS.map((name) => ({ id: name.toLowerCase(), name, image: `/classic/castle-quest/animals/${name.toLowerCase()}.webp` }));
 const HEROES = ['blue_knight', 'red_mage', 'green_barbarian', 'yellow_rogue', 'red_knight', 'blue_mage', 'yellow_barbarian', 'green_rogue', 'green_knight', 'yellow_mage'];
 const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
-const pct = (v: number, total: number) => `${(v / total) * 100}%`;
 
 // Board Game (teacher design, 2026-10-31; rebuilt after her review the same
 // day): one winding trail through a hexagon wilderness to a castle that rises
@@ -88,6 +87,37 @@ export default function CastleQuest() {
   const [powers, setPowers] = useState<Map<number, Power>>(new Map());
   const [die, setDie] = useState(1);
   const [toss, setToss] = useState<{ id: number; n: number; mult: number } | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const sideRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const [vb, setVb] = useState({ x: 0, y: 0, w: WORLD_W, h: WORLD_H });
+  useLayoutEffect(() => {
+    const fit = () => {
+      const el = stageRef.current;
+      if (!el) return;
+      const R = el.getBoundingClientRect();
+      if (!R.width || !R.height) return;
+      const lg = window.matchMedia('(min-width: 1024px)').matches;
+      const side = sideRef.current?.getBoundingClientRect();
+      const bot = bottomRef.current?.getBoundingClientRect();
+      const L = 8;
+      let T = 8, Rt = 8, B = 8;
+      if (lg && side) Rt = R.right - side.left + 10;
+      else {
+        if (side) T = side.bottom - R.top + 6;
+        if (bot && bot.height) B = R.bottom - bot.top + 6;
+      }
+      const sw = Math.max(80, R.width - L - Rt), sh = Math.max(80, R.height - T - B);
+      const k = Math.min(sw / WORLD_W, sh / WORLD_H);
+      const next = { x: WORLD_W / 2 - (L + sw / 2) / k, y: WORLD_H / 2 - (T + sh / 2) / k, w: R.width / k, h: R.height / k };
+      setVb((v) => (Math.abs(v.x - next.x) + Math.abs(v.y - next.y) + Math.abs(v.w - next.w) + Math.abs(v.h - next.h) < 0.5 ? v : next));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    [stageRef.current, sideRef.current, bottomRef.current].forEach((e) => e && ro.observe(e));
+    window.addEventListener('resize', fit);
+    return () => { ro.disconnect(); window.removeEventListener('resize', fit); };
+  });
   // Every roll of the die shakes in a hand first (teacher's sound, 2026-11-01).
   useEffect(() => { if (toss) playClip(DICE, settings, 0.8); }, [toss?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ahead, setAhead] = useState<number[]>([]);
@@ -406,7 +436,10 @@ export default function CastleQuest() {
   const best = Math.max(start, ...pos);
   // The castle rises with the share of the trail covered, short or full.
   const stage = castleStage(Math.round(((best - start) / (FINISH - start)) * FINISH));
-  const boardW = `calc((var(--play-h) - 1.5rem - var(--cq-extra)) * ${WORLD_W / WORLD_H})`;
+  // Fit the trail into the space the panels leave; the countryside fills the rest.
+  const px = (x: number) => `${((x - vb.x) / vb.w) * 100}%`;
+  const py = (y: number) => `${((y - vb.y) / vb.h) * 100}%`;
+  const ks = WORLD_W / vb.w; // board width units to stage percent
   // A held magnet shows too; it goes on by itself at the next question.
   const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => { if (held.held[i]?.ability !== 'magnet') void applyItem(i); }} disabled={step !== 'roll' || !human} />;
   const rollButton = step === 'roll' && human && phase === 'play' && (
@@ -414,6 +447,17 @@ export default function CastleQuest() {
       animate={still ? undefined : { scale: [1, 1.05, 1] }} transition={{ duration: 1.1, repeat: Infinity }}>
       <DiceFive weight="fill" size={28} />{potion ? t('cq.rollPotion') : t('cq.roll')}
     </motion.button>
+  );
+  const targetPicker = turns && (
+    <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="group" aria-label={t('cq.pickTarget')}>
+      <p className="font-bold flex items-center gap-2"><Lightning weight="fill" size={20} className="text-[#e8b400]" />{t('cq.pickTarget')}</p>
+      <button type="button" onClick={() => setStep('roll')} className={buttonClasses('ghost', 'justify-start !min-h-10')}>{t('cq.keepIt')}</button>
+      {turns.players.map((p, i) => i !== me && (
+        <button key={p.id} type="button" onClick={() => void strike(i)} className={buttonClasses('secondary', 'justify-start')}>
+          <img src={heroOf(p, i)} alt="" className="w-8 h-8 object-contain" />{p.name}
+        </button>
+      ))}
+    </div>
   );
   const dieCard = (
     <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-3 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -424,7 +468,7 @@ export default function CastleQuest() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--cq-extra:9rem] lg:[--cq-extra:0rem]' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="castle-quest" />
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
@@ -452,94 +496,87 @@ export default function CastleQuest() {
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-2 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+        // The whole stage is the board (teacher, 2026-11-01): the world fills
+        // the screen, and the panels float over the countryside, never over
+        // the trail (the trail is fitted into the space the panels leave).
+        <div ref={stageRef} className="relative play-fill overflow-hidden">
           <h1 className="sr-only"><Title text={castleQuestManifest.name} /></h1>
+          <div className={`absolute inset-0 select-none ${tornado && !still && settings.screenShake ? 'cq-shake' : ''}`}>
+            <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" role="img" aria-label={t('cq.board', { n: FINISH })}>
+              <WorldArt theme={theme} still={still} start={start} />
+              <TrailMarks ahead={ahead} here={phase === 'play' && turns ? (override[me] ? null : pos[me] ?? 0) : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} still={still} />
+              <Castle stage={stage} theme={theme} still={still} flag={winner ? TEAM_COLORS[winner.colorIndex % TEAM_COLORS.length] : '#ef6f6c'} />
+            </svg>
+            {/* Pieces: the players' animals hop space to space. */}
+            {turns.players.map((p, i) => {
+              const here = pos[i] ?? 0;
+              const o = override[i];
+              const sp = o ?? spotOf(here);
+              const same = turns.players.map((_, k) => k).filter((k) => !override[k] && (pos[k] ?? 0) === here);
+              const off = !o && same.length > 1 ? (same.indexOf(i) - (same.length - 1) / 2) * 2.4 * ks : 0;
+              const on = i === turns.turn && phase === 'play';
+              const flying = !!o?.lift;
+              return (
+                <motion.div key={p.id} className="absolute aspect-[4/5] pointer-events-none" style={{ width: `${6.4 * ks}%`, zIndex: on ? 15 : 10, translateX: '-50%', translateY: '-92%' }}
+                  aria-label={t('cq.pieceAt', { name: p.name })}
+                  animate={{ left: `calc(${px(sp.x)} + ${off}%)`, top: py(sp.y), rotate: flying && !still ? 720 : 0, scale: flying ? 0.7 : 1 }}
+                  transition={flying ? { duration: still ? 0.01 : 1.3, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 500) / 1000, ease: 'easeOut' }}>
+                  <Pawn img={heroOf(p, i)} figure={figureOf(p)} color={TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]} on={on} shield={shield[i] > 0} fast={fast[i] > 0} still={still} hopKey={hop.who === i ? hop.n : 0} hopMs={hop.ms} />
+                </motion.div>
+              );
+            })}
+            <AnimatePresence>
+              {puffs.map((pf) => (
+                <motion.span key={pf.id} className="absolute aspect-[2/1] rounded-[50%] bg-white/70 pointer-events-none z-[9]" style={{ width: `${5 * ks}%`, left: px(pf.at.x), top: py(pf.at.y), translateX: '-50%', translateY: '-30%' }}
+                  initial={{ scale: 0.3, opacity: 0.9 }} animate={{ scale: 1.6, opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
+              ))}
+              {tornado && (
+                <motion.img key="tornado" src={itemFor('tornado').image} alt="" className="absolute pointer-events-none z-20 drop-shadow-[0_8px_10px_rgba(0,0,0,0.35)]" style={{ width: `${30 * ks}%`, top: py(WORLD_H * 0.12) }}
+                  initial={{ left: '-30%', opacity: 0 }} animate={still ? { left: '35%', opacity: 1 } : { left: ['-30%', '20%', '45%', '75%', '110%'], opacity: [0, 1, 1, 1, 0], rotate: [0, -10, 10, -8, 0], scale: [0.7, 1.1, 1.2, 1.05, 0.8] }}
+                  exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 2.2, ease: 'easeInOut' }} />
+              )}
+              {bolt && (
+                <motion.div key={bolt.id} className="absolute inset-0 pointer-events-none z-20" initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  {!still && settings.screenShake && <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 0 }} animate={{ opacity: [0, 0.85, 0, 0.6, 0] }} transition={{ duration: 0.6 }} />}
+                  <motion.img src={itemFor('lightning').image} alt="" className="absolute drop-shadow-[0_0_16px_#fff7a1]" style={{ width: `${13 * ks}%`, left: px(bolt.at.x), translateX: '-50%', translateY: '-100%' }}
+                    initial={{ top: '-15%', scale: 0.6 }} animate={{ top: py(bolt.at.y), scale: [0.6, 1.3, 1] }} transition={{ duration: still ? 0.01 : 0.35, ease: 'easeIn' }} />
+                </motion.div>
+              )}
+              {sip && (
+                <motion.img key={sip.id} src={sip.img} alt="" className="absolute pointer-events-none z-20" style={{ width: `${7 * ks}%`, left: px(sip.at.x), top: py(sip.at.y), translateX: '-20%', translateY: '-210%' }}
+                  initial={{ scale: 0, rotate: 0 }} animate={still ? { scale: 1 } : { scale: [0, 1.2, 1, 1], rotate: [0, 0, -70, -70], y: [0, -6, 0, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 1 }} />
+              )}
+              {toss && <DieToss key={toss.id} n={toss.n} mult={toss.mult} still={still} theme={theme} />}
+              {banner && (
+                <motion.p key={banner.id} className={`absolute -translate-x-1/2 w-max max-w-[80%] flex items-center gap-2 font-display text-xl sm:text-2xl border-[2.5px] border-border rounded-pill pl-2 pr-5 py-1 pointer-events-none z-20 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)', left: px(WORLD_W / 2), top: py(WORLD_H * 0.86) }}
+                  initial={{ y: 30, opacity: 0, scale: 0.8 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 22, duration: still ? 0.01 : undefined }}
+                  onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
+                  {banner.image && <img src={banner.image} alt="" className="w-9 h-9 object-contain" />}{banner.text}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-30 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
-          <div className="contents lg:flex lg:items-start lg:gap-4">
-            <section className="relative grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0">
-              <div className={`relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none ${tornado && !still && settings.screenShake ? 'cq-shake' : ''}`}
-                style={{ aspectRatio: `${WORLD_W} / ${WORLD_H}`, width: boardW, maxWidth: 'min(100%, calc(100vw - 1.5rem))', background: pieceImage(theme, 'background') ? `center / cover url("${pieceImage(theme, 'background')}")` : 'linear-gradient(#bfe6ff, #8fd0f3 45%, #6fbfe8)', boxShadow: 'var(--shadow-sticker-lg)' }}>
-                <svg viewBox={`0 0 ${WORLD_W} ${WORLD_H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('cq.board', { n: FINISH })}>
-                  <WorldArt theme={theme} still={still} start={start} />
-                  <TrailMarks powers={powers} itemFor={itemFor} ahead={ahead} here={phase === 'play' && turns ? (override[me] ? null : pos[me] ?? 0) : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} still={still} />
-                  <Castle stage={stage} theme={theme} still={still} flag={winner ? TEAM_COLORS[winner.colorIndex % TEAM_COLORS.length] : '#ef6f6c'} />
-                </svg>
-                {/* Pieces: little pawns that hop space to space. */}
-                {turns.players.map((p, i) => {
-                  const here = pos[i] ?? 0;
-                  const o = override[i];
-                  const s = o ?? spotOf(here);
-                  const same = turns.players.map((_, k) => k).filter((k) => !override[k] && (pos[k] ?? 0) === here);
-                  const off = !o && same.length > 1 ? (same.indexOf(i) - (same.length - 1) / 2) * 2.4 : 0;
-                  const on = i === turns.turn && phase === 'play';
-                  const flying = !!o?.lift;
-                  return (
-                    <motion.div key={p.id} className="absolute w-[6.4%] aspect-[4/5] pointer-events-none" style={{ zIndex: on ? 15 : 10, translateX: '-50%', translateY: '-92%' }}
-                      aria-label={t('cq.pieceAt', { name: p.name })}
-                      animate={{ left: `calc(${pct(s.x, WORLD_W)} + ${off}%)`, top: pct(s.y, WORLD_H), rotate: flying && !still ? 720 : 0, scale: flying ? 0.7 : 1 }}
-                      transition={flying ? { duration: still ? 0.01 : 1.3, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 500) / 1000, ease: 'easeOut' }}>
-                      <Pawn img={heroOf(p, i)} figure={figureOf(p)} color={TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]} on={on} shield={shield[i] > 0} fast={fast[i] > 0} still={still} hopKey={hop.who === i ? hop.n : 0} hopMs={hop.ms} />
-                    </motion.div>
-                  );
-                })}
-                <AnimatePresence>
-                  {puffs.map((pf) => (
-                    <motion.span key={pf.id} className="absolute w-[5%] aspect-[2/1] rounded-[50%] bg-white/70 pointer-events-none z-[9]" style={{ left: pct(pf.at.x, WORLD_W), top: pct(pf.at.y, WORLD_H), translateX: '-50%', translateY: '-30%' }}
-                      initial={{ scale: 0.3, opacity: 0.9 }} animate={{ scale: 1.6, opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
-                  ))}
-                  {tornado && (
-                    <motion.img key="tornado" src={itemFor('tornado').image} alt="" className="absolute top-[10%] w-[30%] pointer-events-none z-20 drop-shadow-[0_8px_10px_rgba(0,0,0,0.35)]"
-                      initial={{ left: '-30%', opacity: 0 }} animate={still ? { left: '35%', opacity: 1 } : { left: ['-30%', '20%', '45%', '75%', '110%'], opacity: [0, 1, 1, 1, 0], rotate: [0, -10, 10, -8, 0], scale: [0.7, 1.1, 1.2, 1.05, 0.8] }}
-                      exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 2.2, ease: 'easeInOut' }} />
-                  )}
-                  {bolt && (
-                    <motion.div key={bolt.id} className="absolute inset-0 pointer-events-none z-20" initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      {!still && settings.screenShake && <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 0 }} animate={{ opacity: [0, 0.85, 0, 0.6, 0] }} transition={{ duration: 0.6 }} />}
-                      <motion.img src={itemFor('lightning').image} alt="" className="absolute w-[13%] drop-shadow-[0_0_16px_#fff7a1]" style={{ left: pct(bolt.at.x, WORLD_W), translateX: '-50%', translateY: '-100%' }}
-                        initial={{ top: '-15%', scale: 0.6 }} animate={{ top: pct(bolt.at.y, WORLD_H), scale: [0.6, 1.3, 1] }} transition={{ duration: still ? 0.01 : 0.35, ease: 'easeIn' }} />
-                    </motion.div>
-                  )}
-                  {sip && (
-                    <motion.img key={sip.id} src={sip.img} alt="" className="absolute w-[7%] pointer-events-none z-20" style={{ left: pct(sip.at.x, WORLD_W), top: pct(sip.at.y, WORLD_H), translateX: '-20%', translateY: '-210%' }}
-                      initial={{ scale: 0, rotate: 0 }} animate={still ? { scale: 1 } : { scale: [0, 1.2, 1, 1], rotate: [0, 0, -70, -70], y: [0, -6, 0, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 1 }} />
-                  )}
-                  {toss && <DieToss key={toss.id} n={toss.n} mult={toss.mult} still={still} theme={theme} />}
-                  {banner && (
-                    <motion.p key={banner.id} className={`absolute inset-x-0 bottom-[6%] mx-auto w-max max-w-[92%] flex items-center gap-2 font-display text-xl sm:text-2xl border-[2.5px] border-border rounded-pill pl-2 pr-5 py-1 pointer-events-none z-20 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}
-                      initial={{ y: 30, opacity: 0, scale: 0.8 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 22, duration: still ? 0.01 : undefined }}
-                      onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
-                      {banner.image && <img src={banner.image} alt="" className="w-9 h-9 object-contain" />}{banner.text}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+          {/* The panels float over the countryside. Big screens: a column on the right. */}
+          <div ref={sideRef} className="absolute z-20 top-2 left-2 right-[10.5rem] lg:left-auto lg:right-3 lg:top-16 lg:w-[270px] grid gap-3 min-w-0">
+            <Race turns={turns} pos={pos} playing={phase === 'play'} heroOf={heroOf} start={start} />
+            <div className="hidden lg:block">{tray}</div>
+            <div className="hidden lg:block">{dieCard}</div>
+            {step === 'target' && human && <div className="hidden lg:block">{targetPicker}</div>}
+          </div>
+          {/* Small screens: the die, roll button and held power-ups along the bottom. */}
+          <div ref={bottomRef} className="lg:hidden absolute z-20 bottom-2 inset-x-2 flex items-end justify-center gap-3 flex-wrap">
+            {held.held.length > 0 && <div className="w-[min(15rem,45%)]">{tray}</div>}
+            {step === 'target' && human ? <div className="w-[min(22rem,90%)]">{targetPicker}</div> : (
+              <div className="bg-surface/95 border-[2.5px] border-border rounded-panel px-3 py-2 flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <Die3D value={die} size={48} spinning={step === 'rolling' && !still} theme={theme} />
+                {rollButton && <div className="w-56">{rollButton}</div>}
               </div>
-              {/* Small screens: the die and roll button under the board; held power-ups over the board's corner. */}
-              <div className="lg:hidden flex items-center justify-center gap-3 min-h-16">
-                <Die3D value={die} size={52} spinning={step === 'rolling' && !still} theme={theme} />
-                {rollButton && <div className="w-64">{rollButton}</div>}
-              </div>
-              <div className="lg:hidden absolute left-2 top-2 w-[min(15rem,45%)] z-20">{tray}</div>
-            </section>
-            <div className="order-first lg:order-none lg:w-[270px] min-w-0 grid gap-3 pr-[10.5rem] lg:pr-0 lg:pt-14">
-              <Race turns={turns} pos={pos} playing={phase === 'play'} heroOf={heroOf} start={start} />
-              <div className="hidden lg:block">{tray}</div>
-              <div className="hidden lg:block">{dieCard}</div>
-              {step === 'target' && human && (
-                <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="group" aria-label={t('cq.pickTarget')}>
-                  <p className="font-bold flex items-center gap-2"><Lightning weight="fill" size={20} className="text-[#e8b400]" />{t('cq.pickTarget')}</p>
-                  <button type="button" onClick={() => setStep('roll')} className={buttonClasses('ghost', 'justify-start !min-h-10')}>{t('cq.keepIt')}</button>
-                  {turns.players.map((p, i) => i !== me && (
-                    <button key={p.id} type="button" onClick={() => void strike(i)} className={buttonClasses('secondary', 'justify-start')}>
-                      <img src={heroOf(p, i)} alt="" className="w-8 h-8 rounded-full" />{p.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       )}
@@ -558,21 +595,31 @@ export default function CastleQuest() {
 // ---- The world: ground, water, trees, bridges (drawn once) -----------------
 
 const WORLD = buildWorld();
-const TILE: Record<string, string> = { grass: 'tileGrass', grassFull: 'tileGrass_full', water: 'tileWater', stone: 'tileStone' };
+const LAND = buildCountry();
+const TILE: Record<string, string> = { grass: 'tileGrass', grassFull: 'tileGrass_full', water: 'tileWater', stone: 'tileStone', dirt: 'tileDirt', magic: 'tileMagic_full', sand: 'tileSand' };
+const ROW_LIST = Array.from({ length: ROWS + MARGIN.top + MARGIN.bottom }, (_, k) => k - MARGIN.top);
 
 const WorldArt = memo(function WorldArt({ theme, still, start }: { theme: GameTheme; still: boolean; start: number }) {
   const custom = pieceImage(theme, 'tile');
-  const rows = useMemo(() => Array.from({ length: 13 }, (_, r) => r), []);
+  const ground = pieceImage(theme, 'background');
   return (
     <g>
-      {/* Soft clouds drifting over the sky. */}
-      {[[120, 40, 1], [520, 24, 0.8], [860, 60, 0.9]].map(([x, y, s], k) => (
-        <g key={k} className={still ? '' : 'cq-cloud'} style={{ animationDelay: `${-k * 9}s` }} opacity={0.85}>
-          <ellipse cx={x} cy={y} rx={46 * s} ry={14 * s} fill="#fff" /><ellipse cx={x - 22 * s} cy={y + 4} rx={24 * s} ry={11 * s} fill="#fff" /><ellipse cx={x + 24 * s} cy={y + 3} rx={28 * s} ry={12 * s} fill="#fff" />
-        </g>
-      ))}
-      {rows.map((r) => (
+      {/* Under everything, in case the screen is wider than the countryside. */}
+      <rect x={COUNTRY.x - 4000} y={COUNTRY.y - 4000} width={COUNTRY.w + 8000} height={COUNTRY.h + 8000} fill="#7cc35b" />
+      {ground && <image href={ground} x={COUNTRY.x} y={COUNTRY.y} width={COUNTRY.w} height={COUNTRY.h} preserveAspectRatio="xMidYMid slice" />}
+      {ROW_LIST.map((r) => (
         <g key={r}>
+          {/* The countryside around the board: hills lift some tiles up. */}
+          {!ground && LAND.cells.filter((c) => c.r === r).map((c) => {
+            const { x, y } = tileXY(c.r, c.c);
+            const img = `${ART}/world/${TILE[c.ground]}.png`;
+            return (
+              <g key={`l${c.r},${c.c}`}>
+                {Array.from({ length: c.lift + 1 }, (_, k) => <image key={k} href={img} x={x} y={y - k * SIDE} width={65} height={89} />)}
+                {c.ground === 'water' && <image href={`${ART}/world/waveWater.png`} x={x + 18 + (((c.c % 3) + 3) % 3) * 4} y={y + 22} width={26} height={9} className={still ? '' : 'cq-wave'} style={{ animationDelay: `${-(((c.r * 7 + c.c * 3) % 10) + 10) * 0.3}s` }} />}
+              </g>
+            );
+          })}
           {WORLD.cells.filter((c) => c.r === r).map((c) => {
             const { x, y } = tileXY(c.r, c.c);
             const i = c.i ?? -1;
@@ -594,11 +641,20 @@ const WorldArt = memo(function WorldArt({ theme, still, start }: { theme: GameTh
       <StartFlag still={still} at={start} />
       {/* Bridges: wooden planks across the water, from one bend to the next. */}
       {BRIDGES.map((b) => <BridgeArt key={b.from} b={b} />)}
-      {rows.map((r) => (
+      {ROW_LIST.map((r) => (
         <g key={`p${r}`}>
+          {!ground && LAND.props.filter((p) => p.row === r).map((p, k) => (
+            <image key={`l${k}`} href={`${ART}/${p.img}.png`} x={p.x} y={p.y} width={p.w} height={p.h} className={p.sway && !still ? 'cq-sway' : ''} style={p.sway ? { animationDelay: `${-((Math.abs(p.x) * 13) % 40) / 10}s` } : undefined} />
+          ))}
           {WORLD.props.filter((p) => p.row === r).map((p, k) => (
             <image key={k} href={`${ART}/world/${p.img}.png`} x={p.x} y={p.y} width={p.w} height={p.h} className={p.sway && !still ? 'cq-sway' : ''} style={p.sway ? { animationDelay: `${-((p.x * 13) % 40) / 10}s` } : undefined} />
           ))}
+        </g>
+      ))}
+      {/* Soft clouds drifting over the land, their shadows on the ground. */}
+      {[[COUNTRY.x + 300, COUNTRY.y + 120, 1], [520, 40, 0.8], [1150, 300, 0.9], [COUNTRY.x + 200, 700, 1.1], [1350, 900, 0.9]].map(([x, y, s], k) => (
+        <g key={k} className={still ? '' : 'cq-cloud'} style={{ animationDelay: `${-k * 9}s` }} opacity={0.75}>
+          <ellipse cx={x} cy={y} rx={46 * s} ry={14 * s} fill="#fff" /><ellipse cx={x - 22 * s} cy={y + 4} rx={24 * s} ry={11 * s} fill="#fff" /><ellipse cx={x + 24 * s} cy={y + 3} rx={28 * s} ry={12 * s} fill="#fff" />
         </g>
       ))}
     </g>
@@ -637,9 +693,12 @@ function BridgeArt({ b }: { b: Bridge }) {
   );
 }
 
-// Power-up spaces glow; the spaces you will hop on light up after a roll; the
-// space of the player whose turn it is pulses in their color.
-function TrailMarks({ powers, itemFor, ahead, here, color, still }: { powers: Map<number, Power>; itemFor: (p: Power) => ThemeItem; ahead: number[]; here: number | null; color: string; still: boolean }) {
+// The spaces you will hop on light up after a roll; the space of the player
+// whose turn it is pulses in their color. Power-up spaces look like every
+// other space (teacher, 2026-11-01: "hide power ups and randomize. there
+// should be no indication to the player that they will earn a power up until
+// they do"): they are placed at random each game and found by landing.
+function TrailMarks({ ahead, here, color, still }: { ahead: number[]; here: number | null; color: string; still: boolean }) {
   return (
     <g>
       {ahead.map((i, k) => {
@@ -649,17 +708,6 @@ function TrailMarks({ powers, itemFor, ahead, here, color, still }: { powers: Ma
         return <polygon key={`a${i}`} points={hexPoints(x, y, 0.9)} fill={last ? color : '#fffbe0'} opacity={last ? 0.75 : 0.55} stroke={last ? '#241c3d' : 'none'} strokeWidth={2.5} className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />;
       })}
       {here !== null && here < FINISH && (() => { const [r, c] = PATH[here]; const { x, y } = tileXY(r, c); return <polygon points={hexPoints(x, y, 0.92)} fill="none" stroke={color} strokeWidth={5} className={still ? '' : 'cq-glow'} />; })()}
-      {[...powers.entries()].map(([i, p]) => {
-        const [r, c] = PATH[i]; const { x, y } = tileXY(r, c);
-        const it = itemFor(p);
-        return (
-          <g key={`p${i}`}>
-            <polygon points={hexPoints(x, y, 0.78)} fill="#b98be0" opacity={0.55} />
-            <ellipse cx={x + 32.5} cy={y + 38} rx={13} ry={5} fill="rgba(0,0,0,0.22)" />
-            <image href={it.image} x={x + 15} y={y + 4} width={35} height={35} className={still ? '' : 'cq-bob'} style={{ animationDelay: `${(i % 7) * 0.2}s` }} />
-          </g>
-        );
-      })}
     </g>
   );
 }
@@ -672,7 +720,9 @@ function Castle({ stage, theme, still, flag }: { stage: number; theme: GameTheme
     const { x, y } = tileXY(0, 12);
     return <image href={custom} x={x - 10} y={y - 130} width={230} height={260} opacity={0.35 + stage * 0.13} className={!still && stage === 5 ? 'cq-castle' : ''} />;
   }
-  const shown = blocks.filter((b) => b.stage <= stage).sort((a, b) => a.r - b.r || a.order - b.order);
+  // The first layer of stone stands from the start, so there are never empty
+  // tiles where the castle goes (teacher, 2026-11-01: no blank tiles).
+  const shown = blocks.filter((b) => b.stage <= Math.max(1, stage)).sort((a, b) => a.r - b.r || a.order - b.order);
   return (
     <g className={!still && stage === 5 ? 'cq-castle' : ''}>
       {shown.map((b) => b.img === 'banner'
@@ -682,10 +732,6 @@ function Castle({ stage, theme, still, flag }: { stage: number; theme: GameTheme
             <path d={`M${b.x + 10.4} ${b.y - 3} L${b.x + 30} ${b.y + 3} L${b.x + 10.4} ${b.y + 10} Z`} fill={flag} stroke="#241c3d" strokeWidth={1} className={still ? '' : 'cq-flag'} />
           </g>
         : <image key={b.order} href={`${ART}/castle/${b.img}.png`} x={b.x} y={b.y} width={b.w} height={b.h} className={still ? '' : 'cq-drop'} style={{ animationDelay: `${(b.order % 6) * 0.07}s` }} />)}
-      {stage < 1 && Object.keys(blocks.reduce((m, b) => ({ ...m, [`${b.r},${b.c}`]: 1 }), {} as Record<string, number>)).map((k) => {
-        const [r, c] = k.split(',').map(Number); const { x, y } = tileXY(r, c);
-        return <polygon key={k} points={hexPoints(x, y, 0.8)} fill="none" stroke="#7d8a8f" strokeWidth={2} strokeDasharray="5 4" />;
-      })}
     </g>
   );
 }
@@ -811,7 +857,7 @@ function Race({ turns, pos, playing, heroOf, start }: { turns: TurnState; pos: n
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
               className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2 rounded-input border-[2px] p-1.5 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
-              <img src={heroOf(p, i)} alt="" className="row-span-2 w-10 h-10 rounded-full border-[3px] object-contain bg-surface-2" style={{ borderColor: color }} />
+              <img src={heroOf(p, i)} alt="" className="row-span-2 w-11 h-11 object-contain drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]" />
               <span className="font-bold truncate leading-tight">{p.name}</span>
               <span className="relative h-3 rounded-pill bg-surface-2 border-[1.5px] border-border overflow-visible">
                 <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />

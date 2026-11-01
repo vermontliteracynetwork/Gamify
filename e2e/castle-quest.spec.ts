@@ -18,7 +18,7 @@ test('Board Game: a right answer earns a roll, the die tumbles, the pawn hops al
   const animals = page.getByRole('dialog').getByRole('group', { name: /^Pick an animal for / });
   await expect(animals.getByRole('button')).toHaveCount(20);
   await page.screenshot({ path: `test-results/castle-quest-animals-${info.project.name}.png` });
-  await animals.getByRole('button', { name: 'Unicorn', exact: true }).click();
+  await animals.getByRole('button', { name: /^Unicorn/ }).click(); // a taken animal swaps
   await finishSetup(page);
   await expect(page.getByRole('img', { name: 'A winding forest trail of 53 spaces to the castle' })).toBeVisible();
   await page.screenshot({ path: `test-results/castle-quest-board-${info.project.name}.png` });
