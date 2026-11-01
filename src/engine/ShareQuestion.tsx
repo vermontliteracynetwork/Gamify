@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { pace, POP_IN } from './pace';
 import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
@@ -57,7 +58,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   const [ready, setReady] = useState(!!chance && chance.n > 1);
   useEffect(() => {
     if (player.kind !== 'cpu') return;
-    const id = window.setTimeout(() => setReady(true), settings.motion === 'still' ? 400 : 1200);
+    const id = window.setTimeout(() => setReady(true), (settings.motion === 'still' ? 400 : 1200) * pace(settings));
     return () => window.clearTimeout(id);
   }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -78,8 +79,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   useEffect(() => {
     if (player.kind !== 'cpu' || !ready) return;
     const right = Math.random() < CPU_ACCURACY[cpuLevel];
-    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); playEffect(right ? 'right' : 'miss', settings); }, 1800);
-    const b = window.setTimeout(() => onResult(right), 3600);
+    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); playEffect(right ? 'right' : 'miss', settings); }, 1800 * pace(settings));
+    const b = window.setTimeout(() => onResult(right), 3600 * pace(settings));
     return () => { window.clearTimeout(a); window.clearTimeout(b); };
   }, [q, ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -95,7 +96,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('share.turnCard', { name: player.name })}>
       <DialogFocus />
       <motion.button type="button" onClick={() => { playEffect('tap', settings); setReady(true); }} disabled={player.kind === 'cpu'}
-        initial={settings.motion === 'still' ? false : { scale: 0.4, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 15 }}
+        initial={settings.motion === 'still' ? false : { scale: 0.4, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}
         className="grid justify-items-center gap-4 bg-surface border-[3px] border-border rounded-panel px-10 py-8 max-w-[92vw]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} aria-label={t('share.turnStart')}>
         <motion.span animate={settings.motion === 'still' ? undefined : { y: [0, -10, 0] }} transition={{ duration: 1.2, repeat: Infinity }}
           className="rounded-full ring-8 ring-accent" style={{ boxShadow: '0 0 40px 10px #fdfd94' }}>
@@ -116,7 +117,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
       <motion.div
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
         className="w-full max-w-5xl max-h-full overflow-y-auto bg-surface border-[3px] border-border rounded-panel p-6 grid gap-5"
         style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
       >

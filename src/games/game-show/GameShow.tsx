@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { pace, POP_IN } from '../../engine/pace';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -196,7 +197,7 @@ export default function GameShow() {
     }
     if (settings.motion === 'still') { showPrize(i, kind); return; }
     setFlipping(i);
-    flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i, kind); }, 900);
+    flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i, kind); }, 900 * pace(settings));
   }
   function showPrize(i: number, kind: CardKind) {
     if (!turns) return;
@@ -256,7 +257,7 @@ export default function GameShow() {
           const target = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).sort((a, b) => b.score - a.score)[0];
           applyCard(reveal.card, target?.id);
         } else closeReveal();
-      }, 1600);
+      }, 2000 * pace(settings));
       return () => window.clearTimeout(timer);
     }
     const timer = window.setTimeout(() => {
@@ -267,7 +268,7 @@ export default function GameShow() {
         const open = cells.map((c, i) => (c.used ? -1 : i)).filter((i) => i >= 0);
         if (open.length) pickCell(open[Math.floor(Math.random() * open.length)]);
       }
-    }, 1200);
+    }, 1200 * pace(settings));
     return () => window.clearTimeout(timer);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -383,7 +384,7 @@ export default function GameShow() {
                   >
                     {flipping === i ? (
                       <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
-                        <motion.span className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }} initial={{ rotateY: 0, scale: 1 }} animate={{ rotateY: 180, scale: [1, 1.18, 1.08] }} transition={{ duration: 0.65, ease: 'easeInOut' }}>
+                        <motion.span className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }} initial={{ rotateY: 0, scale: 1 }} animate={{ rotateY: 180, scale: [1, 1.18, 1.08] }} transition={{ duration: 0.65 * pace(settings), ease: 'easeInOut' }}>
                           <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center" style={{ backfaceVisibility: 'hidden', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{i + 1}</span>
                           <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center bg-surface overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: '0 0 24px 6px #fdfd94' }}>
                             {c.kind.kind === 'power' ? <span className="h-[70%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><ItemArt item={c.kind.item} size={96} still /></span> : <span className="text-[clamp(1.5rem,6cqw,4rem)]">+{c.kind.points}</span>}
@@ -450,7 +451,7 @@ export default function GameShow() {
             </motion.div>
           )}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
-            transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 260, damping: 12 } : { type: 'spring', stiffness: 300, damping: 20 }}
+            transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
             className="relative bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
             {current(turns).kind !== 'cpu' && (

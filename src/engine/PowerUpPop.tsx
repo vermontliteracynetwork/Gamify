@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { pace, POP_IN } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import { X } from '@phosphor-icons/react';
 import { t } from '../i18n';
@@ -16,7 +17,7 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
   useEffect(() => {
     if (!pop) return;
     playEffect('win', settings);
-    const id = window.setTimeout(onDone, still ? 2600 : 2200);
+    const id = window.setTimeout(onDone, (still ? 2600 : 2200) * pace(settings));
     return () => window.clearTimeout(id);
   }, [pop?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
@@ -26,7 +27,7 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
           className="fixed left-1/2 top-[22%] z-40 -translate-x-1/2 pointer-events-none bg-surface border-[3px] border-border rounded-panel px-5 py-3 flex items-center gap-3 max-w-[92vw]"
           style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
           initial={still ? { opacity: 0 } : { scale: 0.4, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 18 }}>
+          transition={POP_IN}>
           <ItemArt item={pop.item} size={72} still={still} />
           <span className="grid">
             <span className="font-display text-2xl leading-tight">{pop.item.name}</span>

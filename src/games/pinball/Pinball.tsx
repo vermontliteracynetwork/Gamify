@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { CheckCircle, Crosshair, RocketLaunch, Star, Trophy } from '@phosphor-icons/react';
@@ -297,7 +298,7 @@ export default function Pinball() {
       playEffect('miss', settings);
     }
     setStep('result');
-    timers.current.push(window.setTimeout(() => afterTurn(next), still ? 1000 : 1800));
+    timers.current.push(window.setTimeout(() => afterTurn(next), (still ? 1000 : 1800) * pace(settings)));
   }
   function afterTurn(state: TurnState) {
     if (phaseNow.current !== 'play') return;
@@ -329,12 +330,12 @@ export default function Pinball() {
   useEffect(() => {
     if (phase !== 'play' || player?.kind !== 'cpu') return;
     if (step === 'aim') {
-      const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); pickLane(Math.floor(Math.random() * ZONES)); }, 900);
+      const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); pickLane(Math.floor(Math.random() * ZONES)); }, 900 * pace(settings));
       return () => window.clearTimeout(id);
     }
     if (step === 'power') {
       const [lo, hi] = team.level === 'easy' ? [0.15, 0.7] : team.level === 'hard' ? [0.55, 1] : [0.3, 0.9];
-      const id = window.setTimeout(() => { powerAt.current = lo + Math.random() * (hi - lo); shootNow.current(); }, 700 + Math.random() * 700);
+      const id = window.setTimeout(() => { powerAt.current = lo + Math.random() * (hi - lo); shootNow.current(); }, (700 + Math.random() * 700) * pace(settings));
       return () => window.clearTimeout(id);
     }
   }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps

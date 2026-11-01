@@ -1,4 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { CastleTurret, CheckCircle, DiceFive, Lightning, Shield, Timer, Trophy } from '@phosphor-icons/react';
@@ -114,7 +115,7 @@ export default function CastleQuest() {
   const themePieces = !!pieceImage(theme, 'team-1');
   const heroOf = (p: TurnPlayer, i: number) => pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) ?? p.art ?? `${ART}/heroes/${HEROES[p.colorIndex % HEROES.length] ?? HEROES[i % HEROES.length]}.webp`;
   const figureOf = (p: TurnPlayer) => !pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) && !!p.art;
-  const ms = (n: number) => (still ? Math.min(n, 120) : n);
+  const ms = (n: number) => (still ? Math.min(n, 120) : n * pace(settings));
 
   function say(text: string, image?: string, bad = false) { setBanner({ id: Date.now() + Math.random(), text, image, bad }); }
   function puff(at: Pt) { if (still) return; const id = Date.now() + Math.random(); setPuffs((p) => [...p.slice(-6), { id, at }]); window.setTimeout(() => setPuffs((p) => p.filter((x) => x.id !== id)), 700); }
@@ -385,14 +386,14 @@ export default function CastleQuest() {
         const l = held.held.findIndex((it) => it.ability === 'lightning');
         if (l >= 0) { void applyItem(l); return; }
         void rollDie();
-      }, 900);
+      }, 900 * pace(settings));
       return () => window.clearTimeout(id);
     }
     if (step === 'target') {
       const id = window.setTimeout(() => {
         const lead = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== me).sort((a, b) => b[0] - a[0])[0];
         if (lead) void strike(lead[1]);
-      }, 800);
+      }, 800 * pace(settings));
       return () => window.clearTimeout(id);
     }
   }); // eslint-disable-line react-hooks/exhaustive-deps

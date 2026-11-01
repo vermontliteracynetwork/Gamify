@@ -1,4 +1,5 @@
 import Title from '../../ui/Title';
+import { pace } from '../../engine/pace';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -318,7 +319,7 @@ export default function Bowling() {
       const tw = held.held.findIndex((it) => it.ability === 'twister');
       for (let k = held.held.length - 1; k >= 0; k--) if (k !== tw) applyItem(k);
       if (tw >= 0) { applyItem(tw); later(() => throwBall(cpuPlan()), 1400); } else throwBall(cpuPlan());
-    }, 1200);
+    }, 1200 * pace(settings));
     return () => window.clearTimeout(id);
   }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 

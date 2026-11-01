@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { POP_IN } from './pace';
 import { motion, useReducedMotion } from 'motion/react';
 import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -95,7 +96,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         key={q.id}
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+        transition={POP_IN}
         className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'max-w-2xl border-[2.5px] p-5 sm:p-6 gap-4'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'var(--shadow-sticker-lg)' }}
       >

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { pace } from '../../engine/pace';
 import { useSearchParams } from 'react-router-dom';
 import { makeGameCode } from '../../data/gameCodes';
 import { openVersus, type VersusLink } from '../../live/versus';
@@ -144,7 +145,7 @@ export default function FourInARow() {
     if (remoteTurn) return; // the other device asks its own player
     let live = true;
     if (player.kind === 'cpu') {
-      const timer = window.setTimeout(() => { if (live) place(cpuMove(board, (turn + 1) as 1 | 2, level)); }, 900);
+      const timer = window.setTimeout(() => { if (live) place(cpuMove(board, (turn + 1) as 1 | 2, level)); }, 900 * pace(settings));
       return () => { live = false; window.clearTimeout(timer); };
     }
     void ask({ player: player.name, count: setup.perTurn }).then((ok) => {
