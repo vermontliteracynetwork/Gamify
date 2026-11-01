@@ -186,7 +186,8 @@ export default function CastCatch() {
   function land() {
     const times = doubleNext.current ? 2 : 1;
     // Only the power-up catches the teacher left on (2026-11-01).
-    const item = setup.powerUps ? catchItem((theme.items?.length ? theme.items : castCatchManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id))) : null;
+    // No catch that costs points while there are none to lose (teacher, 2026-11-01).
+    const item = setup.powerUps ? catchItem((theme.items?.length ? theme.items : castCatchManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id) && (score > 0 || (it.ability !== 'lose' && it.ability !== 'mystery')))) : null;
     let c: Catch;
     if (item) {
       const e = itemEffect(item);

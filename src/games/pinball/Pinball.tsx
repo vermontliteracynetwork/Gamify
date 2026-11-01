@@ -153,7 +153,8 @@ export default function Pinball() {
     }
   }
   function earned(state: TurnState) {
-    const it = powers.grant(true);
+    const me = current(state).id;
+    const it = powers.grant(true, (x) => x.ability !== 'swipe' || state.players.some((p) => p.id !== me && p.score > 0));
     if (it) held.earn(current(state).id, it);
   }
   function onShareResult(right: boolean) {

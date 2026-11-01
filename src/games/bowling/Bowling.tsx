@@ -95,7 +95,9 @@ export default function Bowling() {
   const boost = useRef({ double: false, magnet: false, bumpers: false, mega: false });
   const [armed, setArmed] = useState<string[]>([]);
   function earned(state: TurnState) {
-    const it = powers.grant(true);
+    // Sneaky Swipe only comes up when another player has points to take.
+    const me = current(state).id;
+    const it = powers.grant(true, (x) => x.ability !== 'swipe' || state.players.some((p) => p.id !== me && p.score > 0));
     if (it) held.earn(current(state).id, it);
   }
   function applyItem(i: number) {

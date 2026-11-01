@@ -251,6 +251,9 @@ export default function CastleQuest() {
   }
   async function gotPower(who: number, power: Power) {
     const s = turnsRef.current!;
+    // Lightning sends someone back; with nobody else off the start yet it
+    // would do nothing, so it comes up as a treasure chest (teacher, 2026-11-01).
+    if (power === 'lightning' && !posRef.current.some((p, i) => i !== who && p > startRef.current)) power = 'chest';
     const it = itemFor(power);
     if (power === 'tornado') { setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) }); await sleep(ms(1300)); await blowAway(); return; }
     if (power === 'chest') { setPop({ id: Date.now(), item: it, text: t('cq.chestOpen') }); await sleep(ms(1500)); await openTheChest(who); return; }

@@ -186,17 +186,24 @@ export default function GameShow() {
     if (!turns) return;
     setChosen(null);
     playEffect('whoosh', settings);
-    if (settings.motion === 'still') { showPrize(i); return; }
+    // A card that takes or trades points never comes up when no other team
+    // has points yet (teacher, 2026-11-01): it turns over as points instead.
+    let kind = cards[i].kind;
+    if (picksTeam(kind) && !turns.players.some((p) => p.id !== current(turns).id && p.score > 0)) {
+      kind = { kind: 'points', points: [10, 20, 30, 40, 50][Math.floor(Math.random() * 5)] };
+      const swapped = kind;
+      setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: swapped } : c)));
+    }
+    if (settings.motion === 'still') { showPrize(i, kind); return; }
     setFlipping(i);
-    flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i); }, 900);
+    flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i, kind); }, 900);
   }
-  function showPrize(i: number) {
+  function showPrize(i: number, kind: CardKind) {
     if (!turns) return;
-    const tier = prizeTier(cards[i].kind);
+    const tier = prizeTier(kind);
     playEffect(tier > 1 ? 'win' : 'right', settings);
     if (tier === 3 && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: settings.celebrations === 'big' ? 120 : 60, spread: 80, origin: { y: 0.45 }, disableForReducedMotion: true });
     setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
-    const kind = cards[i].kind;
     const others = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0);
     const needsTarget = picksTeam(kind) && others.length > 0;
     setReveal({ card: kind, choosing: needsTarget });

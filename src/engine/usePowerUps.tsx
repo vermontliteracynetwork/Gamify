@@ -17,9 +17,11 @@ export function usePowerUps(manifest: GameManifest, theme: GameTheme, on: boolea
   const amount = (it: ThemeItem) => amountOf(it, manifest.items?.abilities.find((a) => a.id === it.ability)?.amount?.default ?? 0);
   // `later`: the item waits for the player's next turn (held power-ups,
   // teacher 2026-10-31), so the pop says when it will be ready.
-  function grant(later = false): ThemeItem | null {
+  // `allow`: skip items that make no sense right now, like one that takes
+  // points when nobody it would hit has any (teacher, 2026-11-01).
+  function grant(later = false, allow?: (it: ThemeItem) => boolean): ThemeItem | null {
     if (!on) return null;
-    const it = rollPowerUp(items);
+    const it = rollPowerUp(allow ? items.filter(allow) : items);
     if (it) setPop({ id: Date.now(), item: it, text: later ? t('pu.later', { role: roleOf(manifest, it) }) : t(`pu.${manifest.id}.${it.ability}` as StringKey, { n: amount(it) }) });
     return it;
   }
