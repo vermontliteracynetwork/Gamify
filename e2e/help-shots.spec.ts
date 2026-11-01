@@ -24,7 +24,9 @@ for (const h of HOW_TO_PLAY) {
     if (h.gameId === 'four-in-a-row') await page.getByRole('button', { name: 'Person' }).click().catch(() => {});
     await finishSetup(page);
     await page.waitForTimeout(800);
-    if (h.gameId === 'game-show') await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
+    // The turn card (icon only) comes first in team games; tap it away.
+    const start = page.getByRole('button', { name: 'Tap to start' });
+    if (await start.waitFor({ timeout: 3000 }).then(() => true, () => false)) { await start.click(); await page.waitForTimeout(500); }
     if (h.gameId === 'cast-catch') {
       await page.getByRole('button', { name: /^Cast/ }).click();
       await page.waitForTimeout(700);
@@ -41,6 +43,8 @@ for (const h of HOW_TO_PLAY) {
     const labels = (await buttons.allInnerTexts()).map((l) => l.trim());
     await buttons.nth(Math.max(0, labels.findIndex((l) => l.endsWith(answers.get(prompt) ?? '\u0000')))).click();
     await page.waitForTimeout(2500);
+    // Game Show: a right answer picks a card to turn over.
+    if (h.gameId === 'game-show') { await page.getByRole('button', { name: /^Card 1(,|$)/ }).click(); await page.waitForTimeout(2500); }
     if (await page.getByRole('dialog').getByRole('button', { name: 'OK' }).isVisible()) await page.getByRole('dialog').getByRole('button', { name: 'OK' }).click();
     await page.waitForTimeout(600);
     await shot('play');

@@ -7,11 +7,15 @@ import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { makeDeck, reviewKeys, type PoolSet } from './picker';
 import QuestionScreen, { type AnswerResult } from './QuestionScreen';
+import { TurnCard } from './ShareQuestion';
+import type { TurnPlayer } from './turns';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 import { liveAnswered, liveAsked } from '../live/session';
 
-export interface AskOptions { count?: number; player?: string }
+// `turn`: the player whose turn it is on a shared device; their icon-only
+// turn card comes first (teacher, 2026-11-01), then the question.
+export interface AskOptions { count?: number; player?: string; turn?: { player: TurnPlayer; avatar?: string } }
 
 interface Active {
   question: MultipleChoiceQuestion;
@@ -19,6 +23,7 @@ interface Active {
   n: number;
   total: number;
   player?: string;
+  turn?: AskOptions['turn'];
   resolve: (completed: boolean) => void;
 }
 
@@ -37,6 +42,8 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
 }) {
   const [active, setActive] = useState<Active | null>(null);
   const [breathing, setBreathing] = useState(false);
+  // Whether this question's turn card has been tapped away.
+  const [turnShown, setTurnShown] = useState(false);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const [stats, setStats] = useState({ asked: 0, right: 0, firstTry: 0 });
   const history = useRef<{ at: number; ms: number; right: boolean }[]>([]);
@@ -62,7 +69,8 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
   const ask = useCallback((opts: AskOptions = {}) => new Promise<boolean>((resolve) => {
     const drawn = next(lastId.current);
     liveAsked();
-    setActive({ question: drawn.question, setId: drawn.setId, n: 1, total: Math.max(1, opts.count ?? 1), player: opts.player, resolve });
+    setTurnShown(false);
+    setActive({ question: drawn.question, setId: drawn.setId, n: 1, total: Math.max(1, opts.count ?? 1), player: opts.player, turn: opts.turn, resolve });
   }), [next]);
 
   function log(a: Active, r: AnswerResult | null, outcome: QuestionLogEntry['outcome']) {
@@ -107,6 +115,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
   const cancel = useCallback(() => { const a = activeRef.current; if (!a) return; a.resolve(false); setActive(null); setBreathing(false); }, []);
 
   const element: ReactNode = breathing ? <BreathBreak onDone={() => setBreathing(false)} /> : active ? (
+    active.turn && active.n === 1 && !turnShown ? <TurnCard player={active.turn.player} avatar={active.turn.avatar} onStart={() => setTurnShown(true)} /> :
     <QuestionScreen
       question={active.question}
       progress={{ n: active.n, total: active.total }}

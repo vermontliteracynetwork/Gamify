@@ -148,7 +148,7 @@ export default function FourInARow() {
       const timer = window.setTimeout(() => { if (live) place(cpuMove(board, (turn + 1) as 1 | 2, level)); }, 900 * pace(settings));
       return () => { live = false; window.clearTimeout(timer); };
     }
-    void ask({ player: player.name, count: setup.perTurn }).then((ok) => {
+    void ask({ player: player.name, count: setup.perTurn, turn: { player, avatar: discs.length >= 2 ? discs[picks[turn]]?.image : pieceImage(theme, `piece-${turn + 1}`) } }).then((ok) => {
       if (!live) return;
       if (!ok) { setPhase('setup'); return; }
       setRights((r) => r.map((n, i) => (i === turn ? n + 1 : n)));

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, startTurn } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
@@ -16,6 +16,7 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
 
   for (let turn = 0; turn < 2; turn++) {
     const dialog = page.getByRole('dialog');
+    await startTurn(page); // the player's turn card (icon only), then the question
     await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
     const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
     const buttons = dialog.getByRole('button', { name: /^[A-D] / });
@@ -24,8 +25,8 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
     await page.getByRole('button', { name: 'Drop in column 4' }).click();
     if (turn === 1 && info.project.name === 'ipad-landscape') for (let f = 0; f < 6; f++) { await page.screenshot({ path: `test-results/four-drop-${f}.png` }); await page.waitForTimeout(70); }
     await expect(page.getByText('The computer is choosing...')).toBeVisible();
-    // Back to the player: their next question comes up (no turn bar; the scores glow).
-    await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible({ timeout: 8000 });
+    // Back to the player: their turn card comes up (no turn bar; the scores glow).
+    await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 8000 });
   }
   await expect(page.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(4);
   await page.screenshot({ path: `test-results/four-${info.project.name}.png`, fullPage: true });
@@ -55,6 +56,7 @@ test('Four in a Row on two devices: the friend joins with the code and moves sho
 
   // Player 1 (this device) answers and drops; the friend sees the piece land.
   const dialog = page.getByRole('dialog');
+  await startTurn(page);
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
   const buttons = dialog.getByRole('button', { name: /^[A-D] / });
@@ -63,7 +65,7 @@ test('Four in a Row on two devices: the friend joins with the code and moves sho
   await page.getByRole('button', { name: 'Drop in column 3' }).click();
   await expect(friend.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(1);
   await expect(page.getByText(/is playing on their device/)).toBeVisible();
-  await expect(friend.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible({ timeout: 8000 });
+  await expect(friend.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 8000 });
   await friend.screenshot({ path: `test-results/four-two-friend-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });
@@ -80,6 +82,7 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   await finishSetup(page);
   const answer = async () => {
     const dialog = page.getByRole('dialog');
+    await startTurn(page); // the player's turn card (icon only), then the question
     await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
     const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
     const buttons = dialog.getByRole('button', { name: /^[A-D] / });
@@ -91,7 +94,7 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   // Held power-ups show on the player's next turn.
   await page.getByRole('button', { name: 'Drop in column 4' }).click();
   await expect(page.getByText('The computer is choosing...')).toBeVisible();
-  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 8000 });
   await answer();
   const use = page.getByRole('button', { name: /^Use Double Drop/ });
   await expect(use).toBeEnabled({ timeout: 8000 });
