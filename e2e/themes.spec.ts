@@ -138,6 +138,69 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   expect(problems).toEqual([]);
 });
 
+// Hand-drawn pages photographed in a real room (teacher, 2026-11-01): a
+// page full of dark marker, on a dark table, tilted or sideways, in uneven
+// light. Each is found by its corner squares and cut to the piece's size.
+for (const shot of [{ name: 'tilted', turn: 6, w: 1500, h: 2000 }, { name: 'sideways', turn: 88, w: 2000, h: 1500 }]) {
+  test(`Bowling Lane: a ${shot.name} photo of a drawn template page is cut to the lane's size`, async ({ page }, info) => {
+    test.skip(info.project.name !== 'laptop', 'image processing; one size is enough');
+    test.setTimeout(90_000);
+    const problems = watch(page);
+    await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+    await page.goto('/teacher/themes/bowling/template');
+    const sheet = page.locator('.template-sheet').nth(1); // page 2: the lane
+    await expect(sheet).toBeVisible();
+    // The student colors the whole lane outline in dark brown stripes.
+    const box = await sheet.evaluate((svg) => {
+      const ns = 'http://www.w3.org/2000/svg';
+      const rects = [...svg.querySelectorAll('rect')].filter((r) => Number(r.getAttribute('width')) > 600);
+      const o = rects[rects.length - 1];
+      const x = Number(o.getAttribute('x')), y = Number(o.getAttribute('y')), w = Number(o.getAttribute('width')), h = Number(o.getAttribute('height'));
+      for (let k = 0; k < 12; k++) {
+        const r = document.createElementNS(ns, 'rect');
+        r.setAttribute('x', String(x + (k * w) / 12)); r.setAttribute('y', String(y)); r.setAttribute('width', String(w / 12)); r.setAttribute('height', String(h));
+        r.setAttribute('fill', k % 2 ? '#5a3214' : '#b5651d');
+        svg.appendChild(r);
+      }
+      return { x, y, w, h };
+    });
+    expect(box.w).toBeGreaterThan(600);
+    await page.addStyleTag({ content: 'header { display: none !important; }' });
+    const scan = (await sheet.screenshot({ scale: 'css' })).toString('base64');
+    // The "photo": the page on a dark wood table, turned, in uneven light.
+    const photo = await page.evaluate(async ({ scan, shot }) => {
+      const img = new Image(); img.src = `data:image/png;base64,${scan}`; await img.decode();
+      const c = document.createElement('canvas'); c.width = shot.w; c.height = shot.h;
+      const x = c.getContext('2d')!;
+      x.fillStyle = '#3b2a1e'; x.fillRect(0, 0, c.width, c.height);
+      x.save(); x.translate(c.width / 2, c.height / 2); x.rotate((shot.turn * Math.PI) / 180);
+      const sc = (Math.min(c.width, c.height) * 0.86) / img.width;
+      x.drawImage(img, (-img.width * sc) / 2, (-img.height * sc) / 2, img.width * sc, img.height * sc);
+      x.restore();
+      const g = x.createLinearGradient(0, 0, c.width, c.height); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.3)');
+      x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+      return c.toDataURL('image/jpeg', 0.9).split(',')[1];
+    }, { scan, shot });
+    await page.goto('/teacher/themes/bowling');
+    await page.getByRole('tab', { name: 'Upload' }).click();
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Add a picture for Lane' }).click();
+    await (await chooser).setFiles({ name: 'lane.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(photo, 'base64') });
+    await expect(page.getByLabel('Added')).toHaveCount(1, { timeout: 30_000 });
+    const cut = await page.locator('img[src^="data:image"]').first().evaluate(async (img: HTMLImageElement) => {
+      await img.decode();
+      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+      const at = (u: number, v: number) => Array.from(x.getImageData(Math.round(u * (c.width - 1)), Math.round(v * (c.height - 1)), 1, 1).data);
+      return { w: c.width, h: c.height, corners: [at(0.02, 0.02), at(0.98, 0.02), at(0.98, 0.98), at(0.02, 0.98)] };
+    });
+    // The lane's own shape (800 x 1000), filled edge to edge with the drawing: no table, no page margin.
+    expect(Math.abs(cut.w / cut.h - 0.8)).toBeLessThan(0.02);
+    for (const [r, g, b] of cut.corners) expect(r > 70 && r > b + 25 && !(r > 225 && g > 225 && b > 225)).toBe(true);
+    expect(problems).toEqual([]);
+  });
+}
+
 test('Free plan: the Theme Builder works on Game Show only', async ({ page }) => {
   await page.goto('/teacher/themes/match-three');
   await expect(page.getByText('Designing this game comes with Plus and Pro.', { exact: false })).toBeVisible();

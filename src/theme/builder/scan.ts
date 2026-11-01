@@ -10,9 +10,14 @@ type Pt = [number, number];
 const canvas = (w: number, h: number) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 const ctx2d = (c: HTMLCanvasElement) => c.getContext('2d', { willReadFrequently: true })!;
 
-// Corner squares: dark, roughly square, solid blobs nearest each corner.
+// Corner squares: dark, roughly square, solid blobs at the page's corners.
+// Photos vary (shadows, colored paper, a page small in the frame, drawings
+// full of dark marker), so several ways of telling "dark" are tried, and of
+// every square-ish blob the four that make a page-shaped corner frame win
+// (teacher, 2026-11-01: every hand-drawn page must be found and cut).
+interface Blob { x: number; y: number; size: number; hollow: boolean }
 export function findMarkers(img: CanvasImageSource & { width: number; height: number }): Pt[] | null {
-  const s = Math.min(1, 900 / Math.max(img.width, img.height));
+  const s = Math.min(1, 1100 / Math.max(img.width, img.height));
   const w = Math.round(img.width * s), h = Math.round(img.height * s);
   const c = canvas(w, h), ctx = ctx2d(c);
   ctx.drawImage(img, 0, 0, w, h);
@@ -20,31 +25,98 @@ export function findMarkers(img: CanvasImageSource & { width: number; height: nu
   const lum = new Float32Array(w * h);
   let sum = 0;
   for (let i = 0; i < w * h; i++) { lum[i] = 0.3 * d[i * 4] + 0.59 * d[i * 4 + 1] + 0.11 * d[i * 4 + 2]; sum += lum[i]; }
-  const dark = Math.min(100, (sum / (w * h)) * 0.45);
-  const seen = new Uint8Array(w * h);
-  const found: { x: number; y: number; hollow: boolean }[] = [];
-  const stack: number[] = [];
+  // Local brightness (a box blur from a summed table) for the adaptive test.
+  const integ = new Float64Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) { let row = 0; for (let x = 0; x < w; x++) { row += lum[y * w + x]; integ[(y + 1) * (w + 1) + x + 1] = integ[y * (w + 1) + x + 1] + row; } }
+  const r = Math.round(Math.max(w, h) / 12);
+  const local = (x: number, y: number) => {
+    const xa = Math.max(0, x - r), ya = Math.max(0, y - r), xb = Math.min(w, x + r + 1), yb = Math.min(h, y + r + 1);
+    return (integ[yb * (w + 1) + xb] - integ[ya * (w + 1) + xb] - integ[yb * (w + 1) + xa] + integ[ya * (w + 1) + xa]) / ((xb - xa) * (yb - ya));
+  };
+  const mean = sum / (w * h);
+  const tests: ((i: number) => boolean)[] = [
+    (i) => lum[i] < 150 && lum[i] < 0.6 * local(i % w, (i / w) | 0),
+    (i) => lum[i] <= Math.min(100, mean * 0.45),
+    (i) => lum[i] <= 70,
+    (i) => lum[i] <= 110,
+  ];
+  let near = false;
+  for (const dark of tests) {
+    const mask = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) mask[i] = dark(i) ? 1 : 0;
+    const blobs = blobsOf(mask, w, h);
+    const corners = cornerFrame(blobs, w, h);
+    if (corners) return corners.map(([x, y]) => [x / s, y / s] as Pt);
+    // Square blobs near two or more corners: a template page we could not read.
+    const zone = (b: Blob) => (b.x < w * 0.25 || b.x > w * 0.75) && (b.y < h * 0.25 || b.y > h * 0.75);
+    if (blobs.filter(zone).length >= 2) near = true;
+  }
+  if (near) throw new MarkersMissing();
+  return null;
+}
+
+// A template page whose four corner squares did not all show or read.
+export class MarkersMissing extends Error {
+  constructor() { super('This looks like a template page, but all four black corner squares could not be found. Take the photo again with the whole page showing, flat and in good light.'); }
+}
+
+function blobsOf(mask: Uint8Array, w: number, h: number): Blob[] {
+  const seen = new Uint8Array(w * h), stack: number[] = [], out: Blob[] = [];
   for (let i = 0; i < w * h; i++) {
-    if (seen[i] || lum[i] > dark) continue;
+    if (seen[i] || !mask[i]) continue;
     let x0 = w, y0 = h, x1 = 0, y1 = 0, n = 0;
     stack.push(i); seen[i] = 1;
     while (stack.length) {
       const k = stack.pop()!, x = k % w, y = (k / w) | 0; n++;
       if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
-      const near = [x > 0 ? k - 1 : -1, x < w - 1 ? k + 1 : -1, k - w, k + w];
-      for (const nb of near) if (nb >= 0 && nb < w * h && !seen[nb] && lum[nb] <= dark) { seen[nb] = 1; stack.push(nb); }
+      if (x > 0 && !seen[k - 1] && mask[k - 1]) { seen[k - 1] = 1; stack.push(k - 1); }
+      if (x < w - 1 && !seen[k + 1] && mask[k + 1]) { seen[k + 1] = 1; stack.push(k + 1); }
+      if (k >= w && !seen[k - w] && mask[k - w]) { seen[k - w] = 1; stack.push(k - w); }
+      if (k < w * (h - 1) && !seen[k + w] && mask[k + w]) { seen[k + w] = 1; stack.push(k + w); }
     }
-    const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
-    if (bw < w * 0.015 || bw > w * 0.15 || bw / bh < 0.6 || bw / bh > 1.6 || n / (bw * bh) < 0.55) continue;
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1, big = Math.max(w, h);
+    if (bw < big * 0.012 || bw > big * 0.12 || bw / bh < 0.6 || bw / bh > 1.6 || n / (bw * bh) < 0.55) continue;
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    found.push({ x: cx / s, y: cy / s, hollow: lum[Math.round(cy) * w + Math.round(cx)] > dark });
+    out.push({ x: cx, y: cy, size: Math.sqrt(bw * bh), hollow: !mask[Math.round(cy) * w + Math.round(cx)] });
   }
-  if (found.length < 4) return null;
-  const corners: Pt[] = [[0, 0], [img.width, 0], [img.width, img.height], [0, img.height]];
-  const picked = corners.map(([X, Y]) => found.reduce((b, m) => ((m.x - X) ** 2 + (m.y - Y) ** 2 < (b.x - X) ** 2 + (b.y - Y) ** 2 ? m : b)));
-  if (new Set(picked).size < 4) return null;
-  const turn = Math.max(0, picked.findIndex((m) => m.hollow));
-  return [0, 1, 2, 3].map((i) => { const m = picked[(i + turn) % 4]; return [m.x, m.y] as Pt; });
+  return out;
+}
+
+// The four blobs that frame a page: the most outlying ones in each corner
+// direction, of like size, making a convex shape with the page's proportions
+// (upright or sideways). The hollow square marks the page's top left.
+function cornerFrame(blobs: Blob[], w: number, h: number): Pt[] | null {
+  if (blobs.length < 4) return null;
+  const dirs: ((b: Blob) => number)[] = [(b) => -(b.x + b.y), (b) => b.x - b.y, (b) => b.x + b.y, (b) => b.y - b.x];
+  const pools = dirs.map((f) => [...blobs].sort((a, b) => f(b) - f(a)).slice(0, 5));
+  const want = (PAGE.width - 2 * (MARKER.inset + MARKER.size / 2)) / (PAGE.height - 2 * (MARKER.inset + MARKER.size / 2));
+  let best: Blob[] | null = null, bestArea = 0;
+  const dist = (a: Blob, b: Blob) => Math.hypot(a.x - b.x, a.y - b.y);
+  for (const a of pools[0]) for (const b of pools[1]) for (const c of pools[2]) for (const d of pools[3]) {
+    const q = [a, b, c, d];
+    if (new Set(q).size < 4) continue;
+    const sizes = q.map((m) => m.size);
+    if (Math.max(...sizes) > Math.min(...sizes) * 2.2) continue;
+    // Convex, going around in order.
+    let sign = 0, ok = true;
+    for (let i = 0; i < 4; i++) {
+      const p0 = q[i], p1 = q[(i + 1) % 4], p2 = q[(i + 2) % 4];
+      const cr = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);
+      if (!sign) sign = Math.sign(cr); else if (Math.sign(cr) !== sign) { ok = false; break; }
+    }
+    if (!ok) continue;
+    const top = dist(a, b), bottom = dist(d, c), left = dist(a, d), right = dist(b, c);
+    if (Math.min(top, bottom) / Math.max(top, bottom) < 0.65 || Math.min(left, right) / Math.max(left, right) < 0.65) continue;
+    const ratio = (top + bottom) / (left + right);
+    if (Math.abs(ratio - want) > 0.16 && Math.abs(ratio - 1 / want) > 0.27) continue;
+    // Corner squares are small next to the page they frame.
+    if (Math.max(...sizes) > Math.min(top, left) * 0.2) continue;
+    const area = Math.abs((a.x * b.y - b.x * a.y) + (b.x * c.y - c.x * b.y) + (c.x * d.y - d.x * c.y) + (d.x * a.y - a.x * d.y)) / 2;
+    if (area > bestArea && area > w * h * 0.08) { best = q; bestArea = area; }
+  }
+  if (!best) return null;
+  const turn = Math.max(0, best.findIndex((m) => m.hollow));
+  return [0, 1, 2, 3].map((i) => { const m = best![(i + turn) % 4]; return [m.x, m.y] as Pt; });
 }
 
 // The 3x3 perspective transform taking page points to photo points.
@@ -107,12 +179,17 @@ function paperShare(d: Uint8ClampedArray) {
 function cutPiece(page: HTMLCanvasElement, piece: ThemePieceSpec, round: boolean): string | null {
   const box = outlineBox(piece);
   const inset = OUTLINE_STROKE * 1.5 + 8;
-  const w = Math.round(box.width - inset * 2), h = Math.round(box.height - inset * 2);
-  const crop = canvas(w, h), cctx = ctx2d(crop);
-  cctx.drawImage(page, box.x + inset, box.y + inset, w, h, 0, 0, w, h);
-  if (paperShare(cctx.getImageData(0, 0, w, h).data) > 0.97) return null; // left empty
-  const scale = Math.min(1, Math.max(piece.width, piece.height, 256) / Math.max(w, h));
-  const out = canvas(Math.round(w * scale), Math.round(h * scale)), octx = ctx2d(out);
+  // Just inside the outline, trimmed evenly to the piece's own proportions,
+  // so the art comes out at exactly the piece's size (teacher, 2026-11-01).
+  const ratio = piece.width / piece.height;
+  let w = box.width - inset * 2, h = box.height - inset * 2;
+  if (w / h > ratio) w = h * ratio; else h = w / ratio;
+  const x = box.x + (box.width - w) / 2, y = box.y + (box.height - h) / 2;
+  const crop = canvas(Math.round(w), Math.round(h)), cctx = ctx2d(crop);
+  cctx.drawImage(page, x, y, w, h, 0, 0, crop.width, crop.height);
+  if (paperShare(cctx.getImageData(0, 0, crop.width, crop.height).data) > 0.97) return null; // left empty
+  const k = Math.max(piece.width, piece.height, 256) / Math.max(piece.width, piece.height);
+  const out = canvas(Math.round(piece.width * k), Math.round(piece.height * k)), octx = ctx2d(out);
   if (round) { octx.beginPath(); octx.ellipse(out.width / 2, out.height / 2, out.width / 2, out.height / 2, 0, 0, Math.PI * 2); octx.clip(); }
   octx.drawImage(crop, 0, 0, out.width, out.height);
   return round || piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
