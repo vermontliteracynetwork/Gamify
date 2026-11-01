@@ -6,6 +6,9 @@ import { Fish as FishIcon, HandGrabbing, Question, Timer } from '@phosphor-icons
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { buzz, playEffect } from '../../engine/feedback';
+import { playClip } from '../../engine/music';
+// The teacher's Cast and Catch sounds (2026-11-01).
+const SND = '/sounds/cast-catch/';
 import ResultsModal from '../../engine/ResultsModal';
 import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
@@ -157,9 +160,10 @@ export default function CastCatch() {
     setCast(power);
     setFlying(true);
     setStep('casting');
-    playEffect('whoosh', settings);
+    playClip(`${SND}cast.mp3`, settings);
     await pause(still ? 150 : 750);
     if (phaseNow.current !== 'play') return;
+    playClip(`${SND}splash.mp3`, settings, 0.7); // the bobber lands in the water
     setStep('ask');
     const ok = await ask();
     if (!ok) { finish(); return; }
@@ -171,7 +175,7 @@ export default function CastCatch() {
     if (phaseNow.current !== 'play') return;
     setStep('bite');
     buzz(40, settings);
-    playEffect('tap', settings);
+    playClip(`${SND}bite-bell.mp3`, settings); // a bell rings: a fish is biting
   }
   // Reel in: the line pulls tight, the rod bends and the bobber is tugged
   // back in jerks with splashes, then the catch comes up (Golden Rule pass).
@@ -180,7 +184,7 @@ export default function CastCatch() {
     setStep('reeling');
     buzz(30, settings);
     if (still) { land(); return; }
-    [0, 280, 560].forEach((ms) => later(() => playEffect(ms ? 'tap' : 'whoosh', settings), ms));
+    [0, 280, 560].forEach((ms) => later(() => playClip(`${SND}splash.mp3`, settings, ms ? 0.35 : 0.55), ms));
     later(land, 850);
   }
   function land() {
@@ -206,7 +210,7 @@ export default function CastCatch() {
     setLast(c);
     setApproach(null);
     setStep('caught');
-    playEffect(c.points < 0 ? 'miss' : 'right', settings);
+    if (c.points < 0) playEffect('miss', settings); else playClip(`${SND}catch-bell.mp3`, settings); // ding! a catch
     later(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
   }
 
