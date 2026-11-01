@@ -183,6 +183,7 @@ export const en = {
   'start.more': 'More {label}',
   'start.locked': 'Your teacher set these for your assignment.',
 
+  'practice.streak': '{n} in a row! Golden star!',
   'practice.title': 'Question Tracker',
   'practice.description': 'Every right answer adds a star until the whole sky is full.',
   'practice.rounds': 'Number of questions',
@@ -301,6 +302,7 @@ export const en = {
   'tb.cell': '{set}, {points} points',
   'tb.cellUsed': '{set}, {points} points, used',
   'tb.reveal.points': '+{points} points!',
+  'tb.pointsWord': 'points!',
   'tb.reveal.double': 'Double your points!',
   'tb.reveal.swap': 'Swap points with another team!',
   'tb.reveal.steal': 'Steal {points} points from another team!',

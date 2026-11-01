@@ -92,40 +92,79 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 // `colors` tints each filled star (a class sky where every student has a
 // color); `height` sizes the sky when it is not the whole game screen.
 // `bleed`: edge to edge, no rounded frame (the sky is the whole game space).
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean }) {
+// `seed`: a new sky layout each game. `golden`: stars earned on a streak of
+// first-try answers shine gold (Golden Rule pass, 2026-10-31).
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, golden }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; golden?: boolean[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const { hole, aspect } = useHole(ref);
   // A room theme: pets stand on the floor, below the wall, upright and evenly
   // sized; nothing hangs on the wall above the question box.
   const room = theme.room;
   const spots = room
-    ? skySpots(total, 7, { l: hole.l, r: hole.r, t: room.floor, b: Math.max(hole.b, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
-    : skySpots(total, 7, hole, aspect);
+    ? skySpots(total, seed, { l: hole.l, r: hole.r, t: room.floor, b: Math.max(hole.b, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
+    : skySpots(total, seed, hole, aspect);
   // Items a theme leaves empty keep the Classic look (the teacher's stars).
   const own = theme.itemImages?.length ? theme.itemImages : ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
   const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];
   const dust = skySpots(36, 3, null, aspect);
   // Each star's kind differs from its near neighbors (teacher, 2026-10-31).
   const kinds = useMemo(() => pickKinds(spots, Math.max(1, items.length), aspect), [spots, items.length, aspect]);
+  // Each new star arrives as a shooting star from a corner of the sky.
+  const flying = !still && !room;
+  const [comet, setComet] = useState<{ id: number; i: number; fromLeft: boolean } | null>(null);
+  const prev = useRef(filled);
+  useEffect(() => {
+    if (filled > prev.current && flying) setComet({ id: Date.now(), i: filled - 1, fromLeft: Math.random() < 0.5 });
+    prev.current = filled;
+  }, [filled, flying]);
+  // Now and then a shooting star crosses the sky on its own.
+  const [streak, setStreak] = useState<{ id: number; y: number; ltr: boolean } | null>(null);
+  useEffect(() => {
+    if (!flying) return;
+    let id = 0;
+    const next = () => { id = window.setTimeout(() => { setStreak({ id: Date.now(), y: 5 + Math.random() * 25, ltr: Math.random() < 0.5 }); next(); }, 5000 + Math.random() * 5000); };
+    next();
+    return () => window.clearTimeout(id);
+  }, [flying]);
   return (
     <div ref={ref} className={`relative w-full overflow-hidden ${bleed ? '' : 'rounded-panel border-[2.5px] border-border'}`} role="img" aria-label={label}
       style={{ containerType: 'size', height, background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />
       ))}
+      {streak && (
+        <motion.span key={streak.id} aria-hidden="true" className="absolute h-[2px] w-[14cqw] rounded-full pointer-events-none"
+          style={{ top: `${streak.y}%`, background: `linear-gradient(${streak.ltr ? '90deg' : '270deg'}, transparent, #fff)`, rotate: streak.ltr ? 12 : -12 }}
+          initial={{ left: streak.ltr ? '-15%' : '100%', opacity: 0 }} animate={{ left: streak.ltr ? '100%' : '-15%', opacity: [0, 1, 1, 0] }} transition={{ duration: 1.1, ease: 'easeIn' }} />
+      )}
+      {comet && spots[comet.i] && (() => {
+        const to = spots[comet.i];
+        const from = { x: comet.fromLeft ? -5 : 105, y: -5 };
+        const ang = (Math.atan2((to.y - from.y) / Math.max(0.3, aspect), to.x - from.x) * 180) / Math.PI;
+        return (
+          <motion.span key={comet.id} aria-hidden="true" className="absolute pointer-events-none" style={{ width: 0, height: 0 }}
+            initial={{ left: `${from.x}%`, top: `${from.y}%`, opacity: 1 }} animate={{ left: `${to.x}%`, top: `${to.y}%`, opacity: [1, 1, 0] }} transition={{ duration: 0.6, ease: 'easeIn', opacity: { duration: 0.75, times: [0, 0.8, 1] } }}>
+            <span className="absolute right-0 top-0 h-[4px] w-[18cqw] -translate-y-1/2 rounded-full origin-right" style={{ transform: `rotate(${ang}deg)`, background: 'linear-gradient(90deg, transparent, rgba(255,240,180,0.9))' }} />
+            <span className="absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" style={{ boxShadow: '0 0 12px 4px #ffe9a0' }} />
+          </motion.span>
+        );
+      })()}
       {spots.map((p, i) => {
         if (i >= filled) return null;
         const img = items.length && !colors ? items[kinds[i] % items.length] : undefined;
+        const gold = golden?.[i];
+        const late = comet?.i === i ? 0.55 : 0; // pops in when its shooting star lands
         return (
           <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size})`, height: `calc(${p.unit} * ${p.size})` }}
             initial={still ? false : room ? { y: '-120%', opacity: 0, scale: 0.6 } : { scale: 0, rotate: -90, opacity: 0 }}
             animate={still ? { opacity: 1 } : room ? { y: ['0%', '-8%', '0%'], opacity: 1, scale: 1 } : { scale: 1, opacity: 1, rotate: [p.spin, p.spin + 12, p.spin - 8, p.spin] }}
             transition={still ? undefined : room
               ? { scale: { type: 'spring', stiffness: 300, damping: 12 }, opacity: { duration: 0.25 }, y: { duration: 1.4 + (i % 3) * 0.3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 + (i % 5) * 0.2 } }
-              : { scale: { type: 'spring', stiffness: 260, damping: 14 }, opacity: { duration: 0.3 }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
+              : { scale: { type: 'spring', stiffness: 260, damping: 14, delay: late }, opacity: { duration: 0.3, delay: late }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
+            {gold && <span aria-hidden="true" className={`absolute -inset-[18%] rounded-full ${still ? '' : 'qt-gold'}`} style={{ background: 'radial-gradient(circle, rgba(255,215,90,0.75) 0%, rgba(255,200,60,0.35) 45%, transparent 70%)' }} />}
             {img
-              ? <img src={img} alt="" className={`w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={theme.pixelArt ? { imageRendering: 'pixelated' } : undefined} />
-              : <Star weight="fill" className="w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />}
+              ? <img src={img} alt="" className={`relative w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={{ ...(theme.pixelArt ? { imageRendering: 'pixelated' as const } : {}), ...(gold ? { filter: 'drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 2px #fff6c2)' } : {}) }} />
+              : <Star weight="fill" className="relative w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={gold ? '#ffc93c' : colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />}
           </motion.span>
         );
       })}

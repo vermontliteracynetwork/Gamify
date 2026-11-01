@@ -75,6 +75,10 @@ export default function GameShow() {
   const [step, setStep] = useState<'answer' | 'pick'>('pick');
   const [chosen, setChosen] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
+  // The card being turned over in 3D before its prize box opens.
+  const [flipping, setFlipping] = useState<number | null>(null);
+  const flipTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(flipTimer.current), []);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const used = useRef(new Set<string>());
 
@@ -169,16 +173,27 @@ export default function GameShow() {
   // A team picks a closed card; its question comes up, and a right answer
   // turns the card over.
   function chooseCard(i: number) {
-    if (!turns || step !== 'pick' || cards[i].open || reveal || question) return;
+    if (!turns || step !== 'pick' || cards[i].open || reveal || question || flipping !== null) return;
     playEffect('tap', settings);
     setChosen(i);
     setQuestion({ ...draw(chosenSets), chance: 1 });
   }
 
+  // A right answer turns the card over in place (a real 3D flip showing the
+  // prize), then the prize box opens, bigger and louder for bigger prizes.
   function openCard(i: number) {
     if (!turns) return;
     setChosen(null);
     playEffect('whoosh', settings);
+    if (settings.motion === 'still') { showPrize(i); return; }
+    setFlipping(i);
+    flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i); }, 900);
+  }
+  function showPrize(i: number) {
+    if (!turns) return;
+    const tier = prizeTier(cards[i].kind);
+    playEffect(tier > 1 ? 'win' : 'right', settings);
+    if (tier === 3 && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: settings.celebrations === 'big' ? 120 : 60, spread: 80, origin: { y: 0.45 }, disableForReducedMotion: true });
     setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
     const kind = cards[i].kind;
     const others = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0);
@@ -226,7 +241,7 @@ export default function GameShow() {
   // or steal (the leader), and close its own reveal.
   const cpuTurn = phase === 'play' && player?.kind === 'cpu';
   useEffect(() => {
-    if (!cpuTurn || step !== 'pick' || question) return;
+    if (!cpuTurn || step !== 'pick' || question || flipping !== null) return;
     if (reveal) {
       const timer = window.setTimeout(() => {
         if (reveal.choosing && turns) {
@@ -335,9 +350,15 @@ export default function GameShow() {
               // The cards fill the space left on screen, all the same size
               // (teacher, 2026-10-31): as tall as the screen allows, but never
               // taller than 1.2 times their width (1.5 on tall screens).
+              // A studio stage: marquee lights chase around the board.
+              <div className="relative rounded-panel p-[14px]" style={{ background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' }}>
+              {(['top', 'bottom', 'left', 'right'] as const).map((side) => (
+                <span key={side} aria-hidden="true" className={`absolute pointer-events-none ${side === 'top' ? 'top-0 inset-x-3 h-[14px]' : side === 'bottom' ? 'bottom-0 inset-x-3 h-[14px]' : side === 'left' ? 'left-0 inset-y-3 w-[14px]' : 'right-0 inset-y-3 w-[14px]'} ${settings.motion === 'full' ? (side === 'top' || side === 'bottom' ? 'gs-bulbs-x' : 'gs-bulbs-y') : ''}`}
+                  style={{ backgroundImage: 'radial-gradient(circle, #fff6b0 0 2.5px, #f6c544 3px, rgba(246,197,68,0.25) 4.5px, transparent 5.5px)', backgroundSize: side === 'top' || side === 'bottom' ? '20px 14px' : '14px 20px', backgroundRepeat: side === 'top' || side === 'bottom' ? 'repeat-x' : 'repeat-y' }} />
+              ))}
               <div className="grid w-full"
                 style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-                  height: `min(calc(var(--play-h) - 1.5rem - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
+                  height: `min(calc(var(--play-h) - 1.5rem - 28px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - 28px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
@@ -347,13 +368,23 @@ export default function GameShow() {
                     aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`w-full h-full min-h-0 overflow-hidden rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2
+                    className={`relative w-full h-full min-h-0 rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
                       ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={{ boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
+                    style={flipping === i ? {} : { boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
-                    {c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : i + 1}
+                    {flipping === i ? (
+                      <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
+                        <motion.span className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }} initial={{ rotateY: 0, scale: 1 }} animate={{ rotateY: 180, scale: [1, 1.18, 1.08] }} transition={{ duration: 0.65, ease: 'easeInOut' }}>
+                          <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center" style={{ backfaceVisibility: 'hidden', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{i + 1}</span>
+                          <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center bg-surface overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: '0 0 24px 6px #fdfd94' }}>
+                            {c.kind.kind === 'power' ? <span className="h-[70%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><ItemArt item={c.kind.item} size={96} still /></span> : <span className="text-[clamp(1.5rem,6cqw,4rem)]">+{c.kind.points}</span>}
+                          </span>
+                        </motion.span>
+                      </span>
+                    ) : c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : i + 1}
                   </motion.button>
                 ))}
+              </div>
               </div>
             )}
 
@@ -400,14 +431,26 @@ export default function GameShow() {
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
           <DialogFocus />
-          <motion.div initial={settings.motion === 'still' ? false : { scale: 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
+          {/* Bigger prizes, bigger show: sun rays behind the box for big ones. */}
+          {prizeTier(reveal.card) > 1 && (
+            <motion.div aria-hidden="true" className={`absolute w-[min(90vw,44rem)] aspect-square rounded-full pointer-events-none ${settings.motion === 'full' ? 'gs-rays' : ''}`}
+              initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}
+              style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
+          )}
+          <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
+            transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 260, damping: 12 } : { type: 'spring', stiffness: 300, damping: 20 }}
             className="relative bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
             {current(turns).kind !== 'cpu' && (
               <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
             )}
-            {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : <Sparkle weight="fill" size={64} className="text-accent" aria-hidden="true" />}
-            <p className="font-display text-4xl font-bold">{revealText(reveal.card)}</p>
+            {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : (
+              // The points count up, bigger for bigger prizes.
+              <p className="font-display font-bold leading-none flex items-center gap-2" style={{ fontSize: `${3 + prizeTier(reveal.card)}rem` }} aria-hidden="true">
+                <Sparkle weight="fill" size={40 + prizeTier(reveal.card) * 8} className="text-accent drop-shadow-[0_0_1px_#000]" />+<CountUp to={reveal.card.points} still={settings.motion === 'still'} />
+              </p>
+            )}
+            <p className="font-display text-4xl font-bold">{reveal.card.kind === 'points' ? t('tb.pointsWord') : revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
                 <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
@@ -433,6 +476,22 @@ export default function GameShow() {
     </main>
     </ThemedPage>
   );
+}
+
+// How big a prize is: 1 small, 2 medium, 3 big (40 or more, or a power-up).
+const prizeTier = (k: CardKind) => (k.kind === 'power' ? 3 : k.points >= 40 ? 3 : k.points >= 30 ? 2 : 1);
+
+function CountUp({ to, still }: { to: number; still: boolean }) {
+  const [n, setN] = useState(still ? to : 0);
+  useEffect(() => {
+    if (still) { setN(to); return; }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (ts: number) => { const f = Math.min(1, (ts - t0) / 650); setN(Math.round(to * (1 - (1 - f) ** 3))); if (f < 1) raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to, still]);
+  return <span className="tabular-nums">{n}</span>;
 }
 
 const picksTeam = (k: CardKind) => k.kind === 'power' && (k.item.ability === 'swap' || k.item.ability === 'steal');

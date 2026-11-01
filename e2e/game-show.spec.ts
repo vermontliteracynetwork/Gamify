@@ -40,8 +40,11 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
   await answerShare(page, true);
+  // Frame check: the card turns over in 3D, then the prize box opens.
+  if (info.project.name === 'ipad-landscape') for (let f = 0; f < 7; f++) { await page.screenshot({ path: `test-results/gameshow-flip-${f}.png` }); await page.waitForTimeout(150); }
   const reveal = page.getByRole('dialog');
   await expect(reveal).toBeVisible();
+  await page.screenshot({ path: `test-results/gameshow-reveal-${info.project.name}.png` });
   // Swap/steal with nobody else scoring falls through to OK; points too.
   await reveal.getByRole('button', { name: 'OK' }).click();
   await page.screenshot({ path: `test-results/gameshow-board-${info.project.name}.png`, fullPage: true });

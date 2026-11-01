@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ClassPlayOptions, { classPlayQuery, DEFAULT_CLASS_PLAY, type ClassPlay } from '../../live/ClassPlay';
 import confetti from 'canvas-confetti';
+import { AnimatePresence, motion } from 'motion/react';
 import { Question, Star, Trophy } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -58,6 +59,12 @@ export default function StarQuiz() {
   const [total, setTotal] = useState(10);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [leftEarly, setLeftEarly] = useState(false);
+  // A fresh sky each game, and golden stars for a streak of first-try answers.
+  const [seed, setSeed] = useState(7);
+  const [golden, setGolden] = useState<boolean[]>([]);
+  const [streakNote, setStreakNote] = useState<{ id: number; n: number } | null>(null);
+  const statsNow = useRef(stats);
+  statsNow.current = stats;
   // In a class race, a student's own stars wear their color.
   const myColor = getLive() ? liveStarColor() : undefined;
 
@@ -69,11 +76,19 @@ export default function StarQuiz() {
   async function play(v: { rounds: number }) {
     timeUp.current = false;
     setTotal(v.rounds); setStars(0); setRound(0); setLeftEarly(false); setPhase('play');
+    setSeed(1 + Math.floor(Math.random() * 100000)); setGolden([]);
+    let run = 0;
     for (let r = 0; r < v.rounds; r++) {
       setRound(r + 1);
+      const before = statsNow.current.firstTry;
       const done = await ask();
       if (timeUp.current) break;
       if (!done) { setLeftEarly(true); break; }
+      await new Promise((ok) => window.setTimeout(ok, 0)); // let the answer's stats land
+      run = statsNow.current.firstTry > before ? run + 1 : 0;
+      const gold = run >= 3;
+      setGolden((g) => { const n = [...g]; n[r] = gold; return n; });
+      if (gold) { setStreakNote({ id: Date.now(), n: run }); playEffect('win', settings); }
       setStars((s) => s + 1);
     }
     playEffect('win', settings);
@@ -119,7 +134,17 @@ export default function StarQuiz() {
         // sit on top (teacher, 2026-10-31).
         <section className="relative play-fill">
           <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
-          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed />
+          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed seed={seed} golden={myColor ? undefined : golden} />
+          {/* A streak of first-try answers: the stars turn gold. */}
+          <AnimatePresence>
+            {streakNote && phase === 'play' && (
+              <motion.p key={streakNote.id} role="status" className="absolute left-1/2 top-4 -translate-x-1/2 z-10 font-display text-2xl sm:text-3xl bg-[#ffc93c] border-[2.5px] border-border rounded-pill px-5 py-1.5 flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}
+                initial={settings.motion === 'still' ? false : { y: -30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                onAnimationComplete={() => { const id = streakNote.id; window.setTimeout(() => setStreakNote((x) => (x?.id === id ? null : x)), 1800); }}>
+                <Star weight="fill" size={26} aria-hidden="true" />{t('practice.streak', { n: streakNote.n })}
+              </motion.p>
+            )}
+          </AnimatePresence>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
