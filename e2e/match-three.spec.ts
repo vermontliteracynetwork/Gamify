@@ -9,7 +9,7 @@ async function readGrid(page: Page): Promise<number[][]> {
   const grid: number[][] = [];
   for (const l of labels) {
     const m = /^(.+), row (\d+), column (\d+)/.exec(l)!;
-    (grid[+m[2] - 1] ??= [])[+m[3] - 1] = KINDS.indexOf(m[1]);
+    (grid[+m[2] - 1] ??= [])[+m[3] - 1] = KINDS.indexOf(m[1].split(', ')[0]);
   }
   return grid;
 }

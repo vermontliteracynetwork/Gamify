@@ -70,3 +70,29 @@ test('Pinball: a power-up waits for your next turn under the scores', async ({ p
   await expect(page.getByText('2x points', { exact: true })).toBeVisible();
   expect(problems).toEqual([]);
 });
+
+// The computer takes real shots (Claudia, 2026-10-31: its timer used to reset
+// every frame of the power bar, so it never shot).
+test('Pinball Versus: the computer shoots and play comes back to the player', async ({ page }, info) => {
+  test.setTimeout(90_000);
+  const problems: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
+  page.on('pageerror', (e) => problems.push(e.message));
+  await openSetup(page, '/games/pinball', /^Versus/);
+  for (;;) {
+    if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+  }
+  await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await answerShare(page, true);
+  await page.getByRole('button', { name: 'Shoot up lane 2' }).click();
+  await page.waitForTimeout(500);
+  await page.getByRole('button', { name: 'Shoot!' }).click();
+  // The computer's turn: its question, its lane, its shot, then back to us.
+  await expect(page.getByText('Round 2 of 5').locator('visible=true').first()).toBeVisible({ timeout: 40_000 });
+  await answerShare(page, true);
+  await expect(page.getByRole('button', { name: 'Shoot up lane 2' })).toBeEnabled({ timeout: 10_000 });
+  await page.screenshot({ path: `test-results/pinball-cpu-${info.project.name}.png` });
+  expect(problems).toEqual([]);
+});
