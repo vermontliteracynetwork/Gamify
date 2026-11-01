@@ -383,7 +383,6 @@ html:fullscreen .play-fill { height: 100dvh; }
 @keyframes m3-glow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 .m3-pulse { animation: m3-pulse 1s ease-in-out infinite; }
 @keyframes m3-pulse { 0%, 100% { transform: scale(0.92); opacity: 0.7; } 50% { transform: scale(1.04); opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chase-on { animation: none; } }
 .pb-hit { animation: pb-hit 0.32s ease-out; }
 @keyframes pb-hit { 0% { transform: scale(1); } 35% { transform: scale(1.22); } 100% { transform: scale(1); } }
 .pb-shake { animation: pb-shake 0.22s ease-out; }
@@ -394,6 +393,7 @@ html:fullscreen .play-fill { height: 100dvh; }
 @keyframes pb-chase-on { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 .pb-blink { animation: pb-blink 1.4s ease-in-out infinite; }
 @keyframes pb-blink { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.9; } }
+@media (prefers-reduced-motion: reduce) { .m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chase-on { animation: none; } }
 .pb-twinkle { animation: fw-twinkle 2s ease-in-out infinite; }
 
 /* Castle Quest (2026-10-31): power-up tiles bob, the finished castle glows. */

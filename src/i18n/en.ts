@@ -505,6 +505,7 @@ export const en = {
   'bm.how1': 'Swap two pieces that sit side by side.',
   'bm.how2': 'Make a row of 3 or more of the same piece.',
   'bm.how3': 'Out of moves? Answer questions to keep playing.',
+  'bm.how4': 'Make 4 in a row, an L shape, or 5 in a row for a special piece!',
   'bm.movesEach': 'Moves each round',
   'bm.movesHint': 'How many swaps a player makes each round. Default 3.',
   'bm.size': 'Board size',

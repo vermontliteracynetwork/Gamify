@@ -27,7 +27,7 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
-import { clearAndRefill, createGrid, findMatches, hasAnyValidMove, isAdjacent, pointsFor, rainbowSwap, resolveMatches, swapTiles, wouldMatch, type Clear, type Grid, type Pos, type Special } from './matchThree';
+import { clearAndRefill, createGrid, findMatches, fire, hasAnyValidMove, isAdjacent, pointsFor, rainbowSwap, resolveMatches, swapTiles, wouldMatch, type Clear, type Grid, type Pos, type Special } from './matchThree';
 
 
 // Simple house look: each gem has its own shape AND color (never color
@@ -41,8 +41,11 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 // Combo words grow with the chain (Golden Rule pass, 2026-10-31).
 const CALLOUTS = ['m3.nice', 'm3.great', 'm3.amazing', 'm3.incredible'] as const;
 const RAINBOW_BG = 'conic-gradient(from 0deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)';
-// The star goal: points for 1, 2 and 3 stars, from the moves in the game.
-const starGoals = (totalMoves: number) => [25, 45, 70].map((k) => Math.round((totalMoves * k) / 10) * 10);
+// The star goal: points for 1, 2 and 3 stars, from the moves in the game
+// and the board size (bigger boards chain more). Tuned so a careful player
+// earns 3 and most players earn 1 or 2 (Claudia's simulation, 2026-10-31).
+const starGoals = (totalMoves: number, size: number) => [40, 80, 125].map((k) => Math.round((totalMoves * k * (size / 7) ** 1.5) / 10) * 10);
+const METER = 1.08; // the bar runs a little past the third star
 const SPECIAL_KEY: Record<Special, StringKey> = { row: 'm3.special.row', col: 'm3.special.col', burst: 'm3.special.burst', rainbow: 'm3.special.rainbow' };
 
 export default function MatchThree() {
@@ -77,8 +80,20 @@ export default function MatchThree() {
   const [fx, setFx] = useState<{ id: number; special: Special; row: number; col: number }[]>([]);
   const [sparks, setSparks] = useState<{ id: number; row: number; col: number; color: string }[]>([]);
   const [callout, setCallout] = useState<{ id: number; text: string } | null>(null);
-  const goals = starGoals(plan.current.rounds * plan.current.moves);
+  const goals = starGoals(plan.current.rounds * plan.current.moves, plan.current.size);
   const stars = goals.filter((g) => score >= g).length;
+  // Points land as each clear pops; a star pops when a goal line is passed.
+  const scoreNow = useRef(0);
+  scoreNow.current = score;
+  function addScore(n: number) {
+    if (!n) return;
+    const before = goals.filter((x) => scoreNow.current >= x).length;
+    scoreNow.current += n;
+    setScore(scoreNow.current);
+    if (goals.filter((x) => scoreNow.current >= x).length > before) { playEffect('win', settings); if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: 40, spread: 60, origin: { x: 0.85, y: 0.3 }, disableForReducedMotion: true }); }
+  }
+  // Calm motion: the special pieces stop their endless spin and glow.
+  const loop = settings.motion === 'full';
   // Power-ups after a question break: more moves, bonus points, or a doubled match.
   // Held power-ups (teacher, 2026-10-31): one earned at a question break is
   // ready for the next round, listed under the score, and gone after it.
@@ -104,7 +119,7 @@ export default function MatchThree() {
     if (!it) return;
     playEffect('win', settings);
     if (it.ability === 'moves') setMoves((m) => m + powers.amount(it));
-    if (it.ability === 'bonus') setScore((sc) => sc + powers.amount(it));
+    if (it.ability === 'bonus') addScore(powers.amount(it));
     if (it.ability === 'double') { doubleNext.current = true; setNote(t('bm.doubleReady')); }
     if (it.ability === 'shuffle') { setGrid(createGrid(ROWS, COLS)); setNote(t('bm.shuffled')); }
     if (it.ability === 'blast') {
@@ -115,23 +130,27 @@ export default function MatchThree() {
       const kind = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
       const m = new Set<string>();
       grid.forEach((row, rr) => row.forEach((tl, cc) => { if (tl.kind === kind) m.add(`${rr},${cc}`); }));
-      const run = await runClears(grid, { cleared: m, made: [], fired: [] }, []);
-      setScore((sc) => sc + run.gained);
+      // Special pieces caught in the blast go off too.
+      const fired = fire(grid, m, new Set());
+      const run = await runClears(grid, { cleared: m, made: [], fired }, [], 1);
+      await reshuffleIfStuck(run.g);
       setBusy(false);
     }
   }
 
   // Pop a clear, then keep going while new matches form (a cascade). Special
   // pieces fire beams and bursts; each link in the chain scores more.
-  async function runClears(start: Grid, first: Clear | null, swapped: Pos[]): Promise<{ g: Grid; gained: number }> {
+  async function runClears(start: Grid, first: Clear | null, swapped: Pos[], mult: number): Promise<{ g: Grid; gained: number }> {
     let g = start;
     let gained = 0;
-    for (let cascade = 1; ; cascade++) {
+    for (let cascade = 1; cascade <= 12; cascade++) {
       const res = first ?? (findMatches(g).size ? resolveMatches(g, cascade === 1 ? swapped : []) : null);
       first = null;
       if (!res) break;
       const id = Date.now() + cascade;
-      setPopping(res.cleared);
+      // The spot where a special piece is born does not pop: it turns into it.
+      const born = new Set(res.made.map((m) => `${m.pos.row},${m.pos.col}`));
+      setPopping(new Set([...res.cleared].filter((k) => !born.has(k))));
       if (!still) {
         setFx(res.fired.map((f, k) => ({ id: id + k / 100, special: f.special, row: f.pos.row, col: f.pos.col })));
         setSparks([...res.cleared].slice(0, 40).map((k, n) => { const [row, col] = k.split(',').map(Number); const kind = g[row][col].kind; return { id: id + n / 1000, row, col, color: kind < 0 ? '#fdfd94' : TILE_COLORS[kind] }; }));
@@ -141,7 +160,9 @@ export default function MatchThree() {
       playEffect(res.fired.length || cascade >= 3 ? 'win' : 'right', settings);
       buzz(res.fired.length ? 40 : 20, settings);
       await wait(res.fired.length ? 420 : 260);
-      gained += pointsFor(res.cleared.size, cascade) + res.fired.length * 20;
+      const pts = (pointsFor(res.cleared.size, cascade) + res.fired.length * 20) * mult;
+      gained += pts;
+      addScore(pts);
       g = clearAndRefill(g, res.cleared, Math.random, res.made);
       setPopping(new Set());
       setGrid(g);
@@ -150,6 +171,13 @@ export default function MatchThree() {
     }
     setFx([]); setSparks([]);
     return { g, gained };
+  }
+
+  async function reshuffleIfStuck(g: Grid) {
+    if (hasAnyValidMove(g)) return;
+    setNote(t('bm.shuffle'));
+    await wait(700);
+    setGrid(createGrid(ROWS, COLS));
   }
 
   async function trySwap(a: Pos, b: Pos) {
@@ -168,20 +196,11 @@ export default function MatchThree() {
     setGrid(g);
     playEffect('whoosh', settings);
     await wait(220);
-    const run = await runClears(g, rainbowSwap(g, a, b), [a, b]);
+    const mult = doubleNext.current ? 2 : 1;
+    doubleNext.current = false;
+    const run = await runClears(g, rainbowSwap(g, a, b), [a, b], mult);
     g = run.g;
-    let gained = run.gained;
-    if (doubleNext.current && gained) { gained *= 2; doubleNext.current = false; }
-    // A star pops each time the score passes a goal line (nothing else
-    // changes the score while a swap plays out).
-    if (goals.filter((x) => score + gained >= x).length > stars) { playEffect('win', settings); if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: 40, spread: 60, origin: { x: 0.85, y: 0.3 }, disableForReducedMotion: true }); }
-    setScore((s) => s + gained);
-    if (!hasAnyValidMove(g)) {
-      setNote(t('bm.shuffle'));
-      await wait(700);
-      g = createGrid(ROWS, COLS);
-      setGrid(g);
-    }
+    await reshuffleIfStuck(g);
     const left = moves - 1;
     setMoves(left);
     if (left === 0) {
@@ -239,6 +258,7 @@ export default function MatchThree() {
         <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: PUZZLE_PACK_CLEARED ? <Diamond weight="fill" size={22} /> : <Cookie weight="fill" size={22} />, text: t('bm.how2') },
+          { icon: <Sparkle weight="fill" size={22} />, text: t('bm.how4') },
           { icon: <Question weight="bold" size={22} />, text: t('bm.how3') },
         ]} />
       )}
@@ -265,7 +285,7 @@ export default function MatchThree() {
 
       {(phase === 'play' || phase === 'end') && (
         // The board fills the play space like the reference games (teacher, 2026-10-31).
-        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center [--m3-extra:7rem] lg:[--m3-extra:0rem]">
+        <div className={`relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center ${held.held.length ? '[--m3-extra:15rem]' : '[--m3-extra:7rem]'} lg:[--m3-extra:0rem]`}>
           {/* Board and score panel share one row, the panel top aligned with the
               board (teacher, 2026-10-31). */}
           <div className="contents lg:flex lg:items-start lg:gap-4">
@@ -296,25 +316,25 @@ export default function MatchThree() {
                     onPointerDown={(e) => { drag.current = { pos: { row: r, col: c }, x: e.clientX, y: e.clientY }; }}
                     onPointerUp={(e) => onPointerUp(e, { row: r, col: c })}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap({ row: r, col: c }); } }}
-                    initial={still ? false : { y: -40, opacity: 0 }}
+                    initial={still ? false : sp ? { scale: 1.8, opacity: 0 } : { y: -40, opacity: 0 }}
                     animate={popping.has(key) ? { scale: [1, 1.25, 0], opacity: [1, 1, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : { scale: 1, opacity: 1, y: 0, x: 0 }}
                     // Pieces fall with a little bounce, one column just after the
                     // next, so a refill ripples across the board.
                     transition={{ type: 'spring', stiffness: 520, damping: 24, delay: still ? 0 : c * 0.025, opacity: { duration: 0.2 } }}
                     className={`relative aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : sp ? 'border-border' : 'border-border-soft'}`}
-                    style={{ ...(sp === 'rainbow' ? { background: RAINBOW_BG } : pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])), ...(sp ? { boxShadow: '0 0 0 3px #fdfd94, 0 0 14px 2px #fdfd94' } : {}) }}
+                    style={{ ...(sp === 'rainbow' ? { background: RAINBOW_BG } : pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])), ...(sp ? { boxShadow: '0 0 0 2.5px #241c3d, 0 0 0 5px #fdfd94, 0 0 16px 4px #fdfd94' } : {}) }}
                   >
-                    {sp === 'rainbow' && <Star weight="fill" className={`w-3/5 h-3/5 drop-shadow-[0_0_2px_#000] ${still ? '' : 'm3-spin'}`} color="#fff" aria-hidden="true" />}
-                    {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className={`absolute inset-[6%] rounded-[inherit] pointer-events-none ${still ? '' : 'm3-glow'}`} style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.9) 0 10%, transparent 10% 24%)` }} />}
-                    {sp === 'burst' && <span aria-hidden="true" className={`absolute inset-[4%] rounded-full border-[3px] border-[#fdfd94] pointer-events-none ${still ? '' : 'm3-pulse'}`} style={{ boxShadow: '0 0 10px #fdfd94, inset 0 0 8px #fdfd94' }} />}
+                    {sp === 'rainbow' && <Star weight="fill" className={`w-3/5 h-3/5 drop-shadow-[0_0_2px_#000] ${loop ? 'm3-spin' : ''}`} color="#fff" aria-hidden="true" />}
+                    {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className={`absolute inset-[6%] rounded-[inherit] pointer-events-none ${loop ? 'm3-glow' : ''}`} style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.85) 0 10%, transparent 10% 24%)` }} />}
+                    {sp === 'burst' && <span aria-hidden="true" className={`absolute inset-[4%] rounded-full border-[3px] border-[#fdfd94] pointer-events-none ${loop ? 'm3-pulse' : ''}`} style={{ boxShadow: '0 0 10px #fdfd94, inset 0 0 8px #fdfd94' }} />}
                     {/* A badge says what the special piece does, by picture. */}
                     {(sp === 'row' || sp === 'col' || sp === 'burst') && (
                       <span aria-hidden="true" className="absolute -top-1.5 -right-1.5 w-[42%] aspect-square rounded-full bg-[#241c3d] border-[2px] border-white flex items-center justify-center z-[1]">
                         {sp === 'row' ? <ArrowsLeftRight weight="bold" className="w-3/4 h-3/4" color="#fdfd94" /> : sp === 'col' ? <ArrowsDownUp weight="bold" className="w-3/4 h-3/4" color="#fdfd94" /> : <Sparkle weight="fill" className="w-3/4 h-3/4" color="#fdfd94" />}
                       </span>
                     )}
-                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />; })()}
-                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
+                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="relative w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />; })()}
+                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="relative w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
                   </motion.button>
                 );
               })}</div>)}
@@ -349,25 +369,25 @@ export default function MatchThree() {
             {/* The star goal fills as points come in (a goal that visibly builds). */}
             <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
               <div className="relative h-5 rounded-pill border-[2px] border-border bg-surface-2 overflow-visible">
-                <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: 'linear-gradient(90deg, #fdfd94, #f7b267)' }} initial={false} animate={{ width: `${Math.min(100, (score / goals[2]) * 100)}%` }} transition={{ duration: still ? 0 : 0.5 }} />
+                <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: 'linear-gradient(90deg, #fdfd94, #f7b267)' }} initial={false} animate={{ width: `${Math.min(100, (score / (goals[2] * METER)) * 100)}%` }} transition={{ duration: still ? 0 : 0.5 }} />
                 {goals.map((g, i) => (
-                  <motion.span key={g} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2" style={{ left: `${(g / goals[2]) * 100 - (i === 2 ? 4 : 0)}%` }} animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-                    <Star weight="fill" size={26} color={stars > i ? '#f6c544' : '#d5d9e6'} className="drop-shadow-[0_0_1px_#000]" />
+                  <motion.span key={g} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2" style={{ left: `${(g / (goals[2] * METER)) * 100}%` }} animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
+                    <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
                   </motion.span>
                 ))}
               </div>
             </div>
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
-            <div className="hidden lg:block"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
+            <div className="hidden sm:block sm:col-span-2 lg:col-span-1"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
           </div>
-          <div className="lg:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
+          <div className="sm:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
           </div>
         </div>
       )}
 
       {phase === 'end' && (
         <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
-          <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Star key={i} weight="fill" size={40} color={stars > i ? '#f6c544' : '#d5d9e6'} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />)}</p>
+          <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Star key={i} weight={stars > i ? 'fill' : 'bold'} size={40} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} aria-hidden="true" />)}</p>
         </ResultsModal>
       )}
       {powers.element}

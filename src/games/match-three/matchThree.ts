@@ -107,10 +107,14 @@ export function resolveMatches(grid: Grid, swapped: Pos[] = []): Clear {
   runs.filter((r) => r.cells.length >= 5).forEach((r) => make(spot(r.cells), 'rainbow', RAINBOW));
   // A cell in both a row run and a column run (an L or T): a star burst.
   const h = new Set(runs.filter((r) => r.dir === 'h').flatMap((r) => r.cells.map(key)));
-  runs.filter((r) => r.dir === 'v').forEach((r) => r.cells.forEach((p) => { if (h.has(key(p))) make(p, 'burst', grid[p.row][p.col].kind); }));
+  // Only one per clear: a solid block of one kind would otherwise turn every
+  // cell into a burst and nothing would pop (Claudia, 2026-10-31).
+  const corner = runs.filter((r) => r.dir === 'v').flatMap((r) => r.cells).find((p) => h.has(key(p)) && !taken.has(key(p)));
+  if (corner) make(corner, 'burst', grid[corner.row][corner.col].kind);
   // Four in a row: a line piece that clears the way it was made.
   runs.filter((r) => r.cells.length === 4).forEach((r) => make(spot(r.cells), r.dir === 'h' ? 'row' : 'col', grid[r.cells[0].row][r.cells[0].col].kind));
-  const fired = fire(grid, cleared, taken);
+  // A special already sitting where a new one is made still goes off.
+  const fired = fire(grid, cleared, new Set());
   return { cleared, made, fired };
 }
 
@@ -129,7 +133,7 @@ export function rainbowSwap(grid: Grid, a: Pos, b: Pos): Clear | null {
 }
 
 // Specials inside the cleared cells go off, adding their cells, in a chain.
-function fire(grid: Grid, cleared: Set<string>, skip: Set<string>): Clear['fired'] {
+export function fire(grid: Grid, cleared: Set<string>, skip: Set<string>): Clear['fired'] {
   const rows = grid.length, cols = grid[0]?.length ?? 0;
   const fired: Clear['fired'] = [];
   const done = new Set<string>(skip);

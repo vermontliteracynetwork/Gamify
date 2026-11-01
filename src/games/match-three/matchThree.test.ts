@@ -61,4 +61,17 @@ describe('match three', () => {
     const res = rainbowSwap(grid, { row: 0, col: 1 }, { row: 0, col: 0 })!;
     expect([...res.cleared].sort()).toEqual(['0,0', '0,1', '0,2', '1,1', '2,0'].sort());
   });
+  it('a solid 3 by 3 block makes one burst and the rest pop (never freezes)', () => {
+    const grid = g([[2, 2, 2, 0], [2, 2, 2, 1], [2, 2, 2, 3], [4, 5, 0, 1]]);
+    const res = resolveMatches(grid);
+    expect(res.made).toHaveLength(1);
+    expect(res.cleared.size - res.made.length).toBeGreaterThan(0);
+  });
+  it('a special where a new one is made still goes off', () => {
+    const grid = g([[1, 1, 1, 1, 2], [3, 4, 5, 0, 2], [0, 5, 4, 3, 5]]);
+    grid[0][2].special = 'col';
+    const res = resolveMatches(grid, [{ row: 0, col: 2 }]);
+    expect(res.fired.map((f) => f.special)).toEqual(['col']);
+    expect(res.cleared.has('2,2')).toBe(true);
+  });
 });
