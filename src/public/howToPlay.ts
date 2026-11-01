@@ -59,6 +59,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       'The ball drops into the pocket it reaches and its points go to the team (or to you in Solo). Sometimes a falling ball gets a lucky flip back up.',
     ],
     pieces: [
+      { name: 'Bumpers', what: 'Three colored bumpers: red is worth 10 points, blue 20 and green 15 every time the ball hits it, each with its own sound. Bumper points count even if the ball goes down the drain.' },
       { name: 'Launcher', what: 'The ball always starts at the bottom center, between the flippers.' },
       { name: 'Lanes 1 to 5', what: 'Five numbered lanes across the middle of the table. The aim arrow points through the lane you pick.' },
       { name: 'Pop bumpers', what: 'Three round bumpers that flash and kick the ball away, usually back up.' },

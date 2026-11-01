@@ -51,6 +51,14 @@ const LIGHT_STAR = 79;
 // The bonus lights fill with every bumper and wall hit; all lit, the next
 // pocket pays a bonus (a goal the whole class watches build).
 const LIGHT_BONUS = 50;
+// Each colored bumper is worth points and has its own sound (teacher,
+// 2026-11-01, with her uploaded sounds): left red, middle blue, right green.
+const SND = '/sounds/pinball/';
+const BUMP = [
+  { color: '#f2735f', points: 10, sound: `${SND}bell.mp3` },
+  { color: '#6aa9e9', points: 20, sound: `${SND}button.mp3` },
+  { color: '#5cc3a0', points: 15, sound: `${SND}collision.mp3` },
+];
 const MAX_SHOT = 4.5; // seconds: longer runs play a little faster
 
 // Pinball (teacher design, 2026-10-31; replaces Peg Drop). A right answer
@@ -92,6 +100,9 @@ export default function Pinball() {
   const [values, setValues] = useState<number[]>([]);
   const [hit, setHit] = useState<{ id: number; pocket: number | null; points: number; jackpot: boolean; bonus: number } | null>(null);
   const [sparks, setSparks] = useState<{ id: number; x: number; y: number; big: boolean }[]>([]);
+  // Points from bumpers this shot, shown floating up from each bumper hit.
+  const bumpPoints = useRef(0);
+  const [floats, setFloats] = useState<{ id: number; x: number; y: number; n: number; color: string }[]>([]);
   const [lights, setLights] = useState(0);
   const lightsNow = useRef(0);
   // Each player fills their own lights (no one cashes in another's hits).
@@ -230,27 +241,31 @@ export default function Pinball() {
   function onEvent(e: ShotEvent) {
     if (e.kind === 'bumper' && e.i !== undefined) {
       const c = bumperRefs.current[e.i];
+      const kind = BUMP[e.i % BUMP.length];
       c?.setAttribute('fill', '#fdfd94');
-      timers.current.push(window.setTimeout(() => c?.setAttribute('fill', pieceColor(theme, 'bumper', '#f2735f')), 170));
+      timers.current.push(window.setTimeout(() => c?.setAttribute('fill', bumperFill(e.i!)), 170));
+      bumpPoints.current += kind.points;
+      setFloats((f) => [...f.slice(-8), { id: Date.now() + Math.random(), x: e.x, y: e.y - 6, n: kind.points, color: kind.color }]);
+      playClip(kind.sound, settings, 0.75);
       replay(bumperGroups.current[e.i], 'pb-hit');
       if (settings.screenShake && !still) replay(boardRef.current, 'pb-shake');
-      playEffect('tap', settings); buzz(12, settings);
+      buzz(12, settings);
       setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: true }]);
       addLight();
     }
     if (e.kind === 'wall') { playEffect('tap', settings); setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: false }]); addLight(); }
     if (e.kind === 'rattle') playEffect('tap', settings);
-    if (e.kind === 'flip') { setFlip((f) => f + 1); playEffect('whoosh', settings); setBanner({ id: Date.now(), text: t('pb.luckyFlip') }); }
+    if (e.kind === 'flip') { setFlip((f) => f + 1); playClip(`${SND}flippers.mp3`, settings); setBanner({ id: Date.now(), text: t('pb.luckyFlip') }); }
   }
   function shoot() {
     if (step !== 'power' || zone === null || !turns) return;
     cancelAnimationFrame(raf.current);
     const b = boost.current;
     const shot = simulateShot(zone, powerAt.current, { count: values.length, rails: plainTable, sure: b.has('super') || b.has('magnet'), magnetTo: b.has('magnet') ? values.indexOf(best) : undefined });
-    setStep('shot'); setSparks([]);
+    setStep('shot'); setSparks([]); setFloats([]); bumpPoints.current = 0;
     playEffect('whoosh', settings);
     if (still) {
-      shot.events.forEach((e) => { if (e.kind === 'bumper' || e.kind === 'wall') addLight(); });
+      shot.events.forEach((e) => { if (e.kind === 'bumper' || e.kind === 'wall') addLight(); if (e.kind === 'bumper' && e.i !== undefined) bumpPoints.current += BUMP[e.i % BUMP.length].points; });
       if (shot.flipped) { playEffect('whoosh', settings); setBanner({ id: Date.now(), text: t('pb.luckyFlip') }); }
       const end = shot.frames[shot.frames.length - 1];
       ballRef.current?.setAttribute('transform', `translate(${end.x} ${end.y})`);
@@ -286,17 +301,20 @@ export default function Pinball() {
       const bonus = lightsNow.current >= LIGHTS.length ? LIGHT_BONUS : 0;
       if (bonus) { lightsNow.current = 0; lightsBy.current[current(state).id] = 0; setLights(0); }
       // Bounce bonus: 10 a hit, up to 8 hits.
-      const points = values[pocket] * (b.has('double') ? 2 : 1) + (b.has('bounce') ? Math.min(8, shot.bounces + shot.bumps) * 10 : 0) + bonus;
+      const points = values[pocket] * (b.has('double') ? 2 : 1) + (b.has('bounce') ? Math.min(8, shot.bounces + shot.bumps) * 10 : 0) + bonus + bumpPoints.current;
       const jackpot = values[pocket] === best;
       next = addPoints(state, current(state).id, points);
       setTurns(next);
       setHit({ id: Date.now(), pocket, points, jackpot, bonus });
-      playEffect(jackpot || bonus ? 'win' : 'right', settings);
+      if (jackpot || bonus) playEffect('win', settings);
+      playClip(`${SND}score-bell.mp3`, settings); // the score bell rings for every pocket
       buzz(30, settings);
       if ((jackpot || bonus) && settings.celebrations !== 'off' && !still) void confetti({ particleCount: bonus ? 90 : 60, spread: 70, origin: { y: 0.25 }, disableForReducedMotion: true });
       ballRef.current?.setAttribute('opacity', '0');
     } else {
-      setHit({ id: Date.now(), pocket: null, points: 0, jackpot: false, bonus: 0 });
+      // A drained ball still keeps what the bumpers earned.
+      if (bumpPoints.current) { next = addPoints(state, current(state).id, bumpPoints.current); setTurns(next); }
+      setHit({ id: Date.now(), pocket: null, points: bumpPoints.current, jackpot: false, bonus: 0 });
       playEffect('miss', settings);
     }
     setStep('result');
@@ -356,7 +374,9 @@ export default function Pinball() {
 
   const canAim = phase === 'play' && step === 'aim' && human;
   const ballArt = pieceImage(theme, 'ball');
-  const bumperColor = pieceColor(theme, 'bumper', '#f2735f');
+  // A theme's own bumper color paints all three; Classic gives each its color.
+  const themedBumper = pieceColor(theme, 'bumper', '') && pieceColor(theme, 'bumper', '').toLowerCase() !== '#f2735f';
+  const bumperFill = (i: number) => (themedBumper ? pieceColor(theme, 'bumper', '#f2735f') : BUMP[i % BUMP.length].color);
   const flipperColor = pieceColor(theme, 'flipper', '#fdfd94');
   const aiming = phase === 'play' && step === 'power' && zone !== null;
   const plainTable = !pieceImage(theme, 'board');
@@ -462,7 +482,7 @@ export default function Pinball() {
                     <g key={`b-${i}`} ref={(el) => { bumperGroups.current[i] = el; }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
                       <circle cx={b.x} cy={b.y + 0.9} r={BUMPER_R + 1.2} fill="#000" opacity={0.25} />
                       <circle cx={b.x} cy={b.y} r={BUMPER_R + 0.9} fill="#fff" stroke="#000" strokeWidth={0.5} />
-                      <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={BUMPER_R} fill={bumperColor} stroke="#000" strokeWidth={0.6} />
+                      <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={BUMPER_R} fill={bumperFill(i)} stroke="#000" strokeWidth={0.6} />
                       {pieceImage(theme, 'bumper') ? <image href={pieceImage(theme, 'bumper')} x={b.x - 6} y={b.y - 9} width={12} height={12} /> : <>
                         <circle cx={b.x} cy={b.y} r={2.6} fill="#fff" opacity={0.9} />
                         <Star x={b.x - 1.6} y={b.y - 1.6} size={3.2} weight="fill" color="#241c3d" />
@@ -481,6 +501,9 @@ export default function Pinball() {
                   </g>
                   {/* The plunger pulls back as the power bar fills. */}
                   <rect x={LAUNCH.x - 3} y={LAUNCH.y + 3.6 + (step === 'power' ? power * 4 : 0)} width={6} height={6} rx={1} fill="#9aa3b5" stroke="#000" strokeWidth={0.5} />
+                  {floats.map((f) => (
+                    <text key={f.id} x={f.x} y={f.y} textAnchor="middle" fontSize={5.5} fontWeight={800} fill={f.color} stroke="#000" strokeWidth={0.7} paintOrder="stroke" fontFamily="var(--font-display, sans-serif)" className={still ? '' : 'pb-float'}>+{f.n}</text>
+                  ))}
                   {sparks.map((sp) => (
                     <circle key={sp.id} cx={sp.x} cy={sp.y} r={sp.big ? 4 : 2.5} fill="none" stroke="#fdfd94" strokeWidth={sp.big ? 1.1 : 0.8} className="pb-spark" style={{ transformOrigin: `${sp.x}px ${sp.y}px`, transformBox: 'view-box' as const }} />
                   ))}
