@@ -482,7 +482,8 @@ export default function Bowling() {
                     initial={{ scale: 0.4, opacity: 0, rotate: banner.kind === 'strike' ? -8 : 0 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 1.2 }} transition={{ type: 'spring', stiffness: 320, damping: 14 }} role="status">
                     {banner.sign ? (
                       <span className="grid justify-items-center gap-1">
-                        <img src={`/classic/bowling/signs/${banner.sign}.webp`} alt={banner.text} className={`w-[78%] max-w-[560px] drop-shadow-[0_0_14px_rgba(255,200,80,0.8)] ${still ? '' : 'sb-sign'}`} />
+                        <span className="sr-only">{banner.text}</span>
+                        <img src={`/classic/bowling/signs/${banner.sign}.webp`} alt="" aria-hidden="true" className={`w-[78%] max-w-[560px] drop-shadow-[0_0_14px_rgba(255,200,80,0.8)] ${still ? '' : 'sb-sign'}`} />
                         <span className="text-3xl sm:text-4xl" aria-hidden="true">{banner.text.replace(/^[^+]*/, '').trim()}</span>
                       </span>
                     ) : banner.text}
