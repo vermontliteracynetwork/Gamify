@@ -4,7 +4,7 @@ import type { QuestionSet } from '../data/types';
 
 // A question set's cover: the teacher's picture, or one drawn for its
 // subject (brand colors and a subject icon pattern, no bought art).
-const ART: Record<Subject, { icon: Icon; bg: string; ink: string }> = {
+export const ART: Record<Subject, { icon: Icon; bg: string; ink: string }> = {
   Reading: { icon: BookOpen, bg: '#fdfd94', ink: '#314677' },
   Writing: { icon: PencilLine, bg: '#ed9d75', ink: '#000000' },
   Language: { icon: ChatText, bg: '#ddfcc6', ink: '#314677' },

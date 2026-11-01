@@ -20,7 +20,7 @@ line that fits, and add each new preference the same turn she says it.
 - Board Game players are the 20 voxel animals; students pick theirs.
 - Turn card before every team question with the player's own icon; tap to start.
 - All cards and tiles the same size; perfect circles stay circles; outlines never cut off.
-- Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, Play another game, Review, Rate; never an "Arcade" button).
+- Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, New game (teacher, 2026-11-01), Review, Rate; never an "Arcade" button).
 - Classic is the default theme of every game and is never handed out; designed themes come from her packs.
 - Start menus (welcome, theme, setup) and results always wear the standard Gamify look.
 - Setup menus NEVER scroll: settings that do not fit flow onto another page (teacher, 2026-10-31).

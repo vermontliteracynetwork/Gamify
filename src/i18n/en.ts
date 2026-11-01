@@ -262,7 +262,7 @@ export const en = {
   'share.winner': '{name} wins!',
   'share.tie': "It's a tie!",
   'results.arcade': 'Back to the Arcade',
-  'results.arcadeShort': 'Play another game',
+  'results.arcadeShort': 'New game',
   'results.newCode': 'New code',
   'gate.askTitle': 'Ask for a Code',
   'gate.askCode': 'Your teacher shares a code or a link for each game. Type the code on the join page.',

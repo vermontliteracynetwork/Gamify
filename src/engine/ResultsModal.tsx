@@ -149,7 +149,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
 
 // End-of-game results in a box over the game, so the screen never scrolls
 // (teacher, 2026-10-31): the winner on a stage, the headline in the Gamify
-// font, and four buttons: Play again, Play another game, Review and Rate game
+// font, and four buttons: Play again, New game, Review and Rate game
 // (teacher, 2026-10-31: no "Arcade" button).
 export default function ResultsModal({ title, children, missed, againLabel, onAgain, winners }: {
   title: string; children?: ReactNode; missed: MultipleChoiceQuestion[]; againLabel: string; onAgain: () => void;

@@ -54,7 +54,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   await page.screenshot({ path: `test-results/sky-end-${info.project.name}.png` });
   // Results: four buttons; Review walks through the missed question full screen.
   const results = page.getByRole('dialog', { name: 'You caught 5 stars!' });
-  for (const b of [/^Play again/, /^Play another game/, /Rate game/]) await expect(results.getByRole(b.source.includes('another') ? 'link' : 'button', { name: b })).toBeVisible();
+  for (const b of [/^Play again/, /^New game/, /Rate game/]) await expect(results.getByRole(b.source.includes('New') ? 'link' : 'button', { name: b })).toBeVisible();
   await page.screenshot({ path: `test-results/results-${info.project.name}.png` });
   await results.getByRole('button', { name: 'Review (1 missed)' }).click();
   const review = page.getByRole('dialog', { name: "Let's Review" });

@@ -396,7 +396,7 @@ export default function GameShow() {
               <div className="overflow-x-auto pb-2 pr-2 -mb-2">
                 <div className="grid gap-2 min-w-[560px]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
-                    <div key={s.id} className="min-h-16 rounded-input border-[2.5px] border-border bg-surface-2 font-display font-bold text-center flex items-center justify-center p-2 text-sm sm:text-base">{s.name}</div>
+                    <div key={s.id} className="min-h-16 rounded-input border-[2.5px] border-border bg-surface-2 font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]">{s.name}</div>
                   ))}
                   {GRID_POINTS.map((points) => chosenSets.slice(0, 5).map((s, col) => {
                     const i = cells.findIndex((c) => c.col === col && c.points === points);
