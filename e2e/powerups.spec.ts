@@ -7,7 +7,7 @@ test('Theme Builder: a Cast and Catch theme gets power-up catches with art, a po
   page.on('pageerror', (e) => problems.push(e.message));
   await page.goto('/teacher/themes/cast-catch');
   await page.getByLabel('Theme name').fill('Silly Lake');
-  await page.getByRole('tab', { name: 'Power-ups' }).click();
+  await page.getByRole('tablist', { name: 'Ways to design' }).getByRole('tab', { name: 'Power-ups' }).click();
   // Every theme starts with the Classic power-ups, one per ability.
   await expect(page.getByLabel('Name', { exact: true }).first()).toHaveValue('Rainbow Fish');
   await page.getByRole('button', { name: 'Add a power-up' }).click();
