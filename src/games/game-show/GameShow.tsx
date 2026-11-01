@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pace, POP_IN } from '../../engine/pace';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { CheckCircle, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
@@ -31,7 +31,7 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 
-import { CARD_GRIDS, dealCards, gridFor, GRID_POINTS, type CardKind } from './cards';
+import { CARD_GRIDS, dealCards, gridFor, GRID_POINTS, linesFilled, type CardKind } from './cards';
 import ItemArt from '../../theme/ItemArt';
 import type { ThemeItem } from '../../theme/types';
 import Title from '../../ui/Title';
@@ -71,6 +71,8 @@ export default function GameShow() {
   const [turns, setTurns] = useState<TurnState | null>(null);
   const [cpuLevel, setCpuLevel] = useState<CpuLevel>('medium');
   const [cards, setCards] = useState<Card[]>([]);
+  const cardsNow = useRef<Card[]>([]);
+  cardsNow.current = cards;
   const [cells, setCells] = useState<Cell[]>([]);
   const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; cell?: number; chance: number } | null>(null);
   const [step, setStep] = useState<'answer' | 'pick'>('pick');
@@ -78,6 +80,17 @@ export default function GameShow() {
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
   // The card being turned over in 3D before its prize box opens.
   const [flipping, setFlipping] = useState<number | null>(null);
+  // More to play for on the cards board (teacher, 2026-11-01): a lucky card
+  // that changes every turn and doubles its points, +10 for a full row or
+  // column of your own cards, and +10 for three right answers in a row.
+  const [lucky, setLucky] = useState<number | null>(null);
+  const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
+  const streak = useRef<Record<string, number>>({});
+  function toast(text: string) {
+    const id = Date.now() + Math.random();
+    setToasts((x) => [...x, { id, text }]);
+    window.setTimeout(() => setToasts((x) => x.filter((y) => y.id !== id)), 2600 * pace(settings));
+  }
   const marquee = theme.id.endsWith(':classic');
   const flipTimer = useRef(0);
   useEffect(() => () => window.clearTimeout(flipTimer.current), []);
@@ -103,7 +116,10 @@ export default function GameShow() {
     used.current.clear();
     setMissed([]);
     if (board === 'cards') {
-      setCards(dealCards(grid.cols * grid.rows, Math.random, powers.filter(powerOn)).map((kind) => ({ kind, open: false })));
+      const deck = dealCards(grid.cols * grid.rows, Math.random, powers.filter(powerOn)).map((kind) => ({ kind, open: false }));
+      setCards(deck);
+      streak.current = {};
+      setLucky(Math.floor(Math.random() * deck.length));
       startTurn(state, 'cards');
     } else {
       setCells(chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false }))));
@@ -112,12 +128,14 @@ export default function GameShow() {
     setPhase('play');
   }
 
-  function startTurn(_state: TurnState, b: Board = board) {
+  function startTurn(_state: TurnState, b: Board = board, deck: Card[] = cards) {
     // Pick a card or square first, then answer its question (teacher, 2026-10-24).
-    void b;
     setStep('pick');
     setQuestion(null);
     setChosen(null);
+    // A new lucky card each turn, among the cards still closed.
+    const closed = deck.map((c, i) => (c.open ? -1 : i)).filter((i) => i >= 0);
+    setLucky(b === 'cards' && closed.length > 1 ? closed[Math.floor(Math.random() * closed.length)] : null);
   }
 
   function log(q: MultipleChoiceQuestion, setId: string | undefined, team: string, right: boolean) {
@@ -131,7 +149,7 @@ export default function GameShow() {
     if (cardsLeft === 0) { end(state); return; }
     const next = nextTurn(state);
     setTurns(next);
-    startTurn(next);
+    startTurn(next, board, cardsNow.current);
   }
 
   function end(state: TurnState) {
@@ -164,6 +182,14 @@ export default function GameShow() {
       return;
     }
     setQuestion(null);
+    // Three right answers in a row for a team: a hot streak bonus.
+    streak.current[player.id] = right ? (streak.current[player.id] ?? 0) + 1 : 0;
+    if (right && streak.current[player.id] >= 3) {
+      streak.current[player.id] = 0;
+      const me = player.id;
+      setTurns((s0) => (s0 ? addPoints(s0, me, 10) : s0));
+      toast(t('tb.hotStreak', { name: player.name }));
+    }
     if (right && chosen !== null) {
       openCard(chosen);
     } else {
@@ -195,6 +221,12 @@ export default function GameShow() {
       const swapped = kind;
       setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: swapped } : c)));
     }
+    // The lucky card doubles its points.
+    if (i === lucky && kind.kind === 'points') {
+      kind = { ...kind, points: kind.points * 2, lucky: true };
+      const doubled = kind;
+      setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: doubled } : c)));
+    }
     if (settings.motion === 'still') { showPrize(i, kind); return; }
     setFlipping(i);
     flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i, kind); }, 900 * pace(settings));
@@ -205,7 +237,15 @@ export default function GameShow() {
     playEffect(tier > 1 ? 'win' : 'right', settings);
     // Every prize gets a burst of confetti; bigger prizes get more (teacher, 2026-11-01).
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: (settings.celebrations === 'big' ? 40 : 25) * tier, spread: 60 + tier * 15, origin: { y: 0.45 }, disableForReducedMotion: true });
-    setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: current(turns).colorIndex } : c)));
+    const me = current(turns);
+    const opened = cards.map((c, j) => (j === i ? { ...c, open: true, by: me.colorIndex } : c));
+    setCards((cs) => cs.map((c, j) => (j === i ? { ...c, open: true, by: me.colorIndex } : c)));
+    // A full row or column of your own cards: +10 each.
+    const lines = linesFilled(opened, grid.cols, i);
+    if (lines) {
+      setTurns((s0) => (s0 ? addPoints(s0, me.id, 10 * lines) : s0));
+      toast(t('tb.lineBonus', { name: me.name, n: 10 * lines }));
+    }
     const others = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0);
     const needsTarget = picksTeam(kind) && others.length > 0;
     setReveal({ card: kind, choosing: needsTarget });
@@ -350,7 +390,16 @@ export default function GameShow() {
             <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
-          <section className="grid gap-4 min-w-0 @container">
+          <section className="relative grid gap-4 min-w-0 @container">
+            {/* Bonus toasts: full row or column, hot streak. */}
+            <div className="absolute inset-x-0 top-2 z-20 grid justify-items-center gap-2 pointer-events-none" role="status">
+              <AnimatePresence>
+                {toasts.map((x) => (
+                  <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-accent border-[3px] border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+                    initial={settings.motion === 'still' ? false : { y: -40, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} transition={POP_IN}>{x.text}</motion.p>
+                ))}
+              </AnimatePresence>
+            </div>
             {/* Whose turn shows as a glow in the scores (teacher, 2026-10-31); screen readers hear it. */}
             {phase === 'play' && player && (
               <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
@@ -376,12 +425,12 @@ export default function GameShow() {
                     type="button"
                     onClick={() => chooseCard(i)}
                     disabled={c.open || step !== 'pick' || !!reveal || !!question || player?.kind === 'cpu'}
-                    aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
+                    aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : lucky === i ? t('tb.cardLucky', { n: i + 1 }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
                     className={`relative w-full h-full min-h-0 rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
                       ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={flipping === i ? {} : { boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
+                    style={flipping === i ? {} : { boxShadow: lucky === i && !c.open ? '0 0 0 4px #ff6fb5, 0 0 22px 6px rgba(255,111,181,0.7)' : 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {flipping === i ? (
                       <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
@@ -392,7 +441,14 @@ export default function GameShow() {
                           </span>
                         </motion.span>
                       </span>
-                    ) : c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : i + 1}
+                    ) : c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : (
+                      <>
+                        {i + 1}
+                        {lucky === i && (
+                          <span aria-hidden="true" className={`absolute top-1.5 right-1.5 rounded-pill border-[2px] border-border bg-[#ff6fb5] text-white px-3 py-0.5 text-[clamp(1.1rem,2.6cqw,2rem)] leading-tight ${settings.motion === 'full' ? 'gs-lucky' : ''}`} style={{ WebkitTextStroke: '0.5px #000' }}>x2</span>
+                        )}
+                      </>
+                    )}
                   </motion.button>
                 ))}
               </div>
@@ -473,7 +529,7 @@ export default function GameShow() {
                 </motion.p>
               </>
             )}
-            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord') : revealText(reveal.card)}</p>
+            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? (reveal.card.lucky ? t('tb.pointsLucky') : t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord')) : revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
                 <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>

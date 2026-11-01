@@ -37,6 +37,8 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     ],
     pieces: [
       { name: 'Cards', what: 'Numbered cards in a grid, from 4 x 3 up to 6 x 6, inside a frame of marquee lights. Each hides points or a power-up.' },
+      { name: 'Lucky card', what: 'Each turn one closed card glows pink with an x2 badge. Win it for double points.' },
+      { name: 'Bonuses', what: 'Fill a whole row or column with your own cards for +10, and get three right in a row for +10 more.' },
       { name: 'Category grid', what: 'A second board: up to five question sets as columns, with 100 to 500 point squares.' },
       { name: 'Scores', what: 'Every team with its icon and points. Whose turn it is glows.' },
       { name: 'Power-ups', what: 'Double Star doubles a team\'s points, Swap Spinner trades scores with a team, Sneaky Magnet takes points from a team, Prize Bag adds bonus points. Swap Spinner and Sneaky Magnet start off, so play stays friendly; teachers turn them on if they like, and switch any power-up off.' },

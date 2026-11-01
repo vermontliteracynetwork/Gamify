@@ -2,7 +2,21 @@ import type { ThemeItem } from '../../theme/types';
 
 // Surprise cards for Game Show: mostly points, some power-ups (the theme's
 // items: double, swap, steal). No card ever takes a team below zero.
-export type CardKind = { kind: 'points'; points: number } | { kind: 'power'; item: ThemeItem };
+export type CardKind = { kind: 'points'; points: number; lucky?: boolean } | { kind: 'power'; item: ThemeItem };
+
+// Lines a team just filled (teacher, 2026-11-01: "fill a whole row or column,
+// you get 10 bonus points"): how many full rows and columns through card `i`
+// are all turned over and all won by the team that won card `i`.
+export function linesFilled(cards: { open: boolean; by?: number }[], cols: number, i: number): number {
+  const rows = Math.ceil(cards.length / cols);
+  const mine = cards[i]?.by;
+  if (mine === undefined || !cards[i].open) return 0;
+  const r = Math.floor(i / cols), c = i % cols;
+  const owned = (k: number) => cards[k]?.open && cards[k].by === mine;
+  const row = Array.from({ length: cols }, (_, k) => r * cols + k).every(owned);
+  const col = Array.from({ length: rows }, (_, k) => k * cols + c).every(owned);
+  return (row ? 1 : 0) + (col ? 1 : 0);
+}
 
 // Card boards come as grids (teacher, 2026-10-26: "show the number of cards
 // as a grid size").
