@@ -269,7 +269,7 @@ export default function GameShow() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--gs-extra:6rem] lg:[--gs-extra:0rem] portrait:[--gs-tall:1.5]' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
+    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--gs-extra:6rem] lg:[--gs-extra:0rem]' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
@@ -334,7 +334,7 @@ export default function GameShow() {
       {(phase === 'play' || phase === 'end') && turns && (
         // The board fills the play space, the same in full screen; small controls
         // on top, the scores right beside it (teacher, 2026-10-31).
-        <div className="relative play-fill px-3 sm:px-4 py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-start max-w-[110rem] mx-auto">
+        <div className="relative play-fill px-3 sm:px-4 py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
@@ -349,8 +349,8 @@ export default function GameShow() {
 
             {phase === 'play' && board === 'cards' && (
               // The cards fill the space left on screen, all the same size
-              // (teacher, 2026-10-31): as tall as the screen allows, but never
-              // taller than 1.2 times their width (1.5 on tall screens).
+              // (teacher, 2026-10-31), and are always horizontal: never taller
+              // than 0.75 times their width, at any grid size (teacher, 2026-11-01).
               // A studio stage: marquee lights chase around the board.
               // (Classic only: a theme's own world sets its own stage.)
               <div className={`relative rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
@@ -360,7 +360,7 @@ export default function GameShow() {
               ))}
               <div className="grid w-full"
                 style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-                  height: `min(calc(var(--play-h) - 1.5rem - ${marquee ? 28 : 0}px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${marquee ? 28 : 0}px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
+                  height: `min(calc(var(--play-h) - 1.5rem - ${marquee ? 28 : 0}px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${marquee ? 28 : 0}px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * 0.75 + ${(grid.rows - 1) * gap}px))` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}

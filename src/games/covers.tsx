@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { houseFor } from '../theme/house';
 import type { GameTheme } from '../theme/types';
-import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Microphone, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
-import { TEAM_COLORS } from '../engine/turns';
+import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
 // and welcome screen has a picture a pre-reader recognizes. Class-made and
@@ -30,16 +29,28 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
   const base = `relative overflow-hidden ${className}`;
   switch (gameId) {
     case 'game-show':
+      // Mirrors the game (teacher, 2026-11-01): the red Classic stage, the
+      // marquee-light frame and horizontal numbered cards, one turned over.
       return (
-        <div className={base} style={{ containerType: 'inline-size', background: 'repeating-conic-gradient(from 0deg at 50% 110%, #ffcf5c 0deg 10deg, #ff9f68 10deg 20deg)' }} aria-hidden="true">
-          <div className="absolute inset-x-[14%] bottom-[10%] top-[18%] grid grid-cols-3 gap-[4%]">
-            {['100', '200', '300', '★', '?', '+50'].map((v, i) => (
-              <span key={i} className="rounded-xl border-[3px] border-border bg-white flex items-center justify-center font-display text-[clamp(9px,8cqw,30px)]"
-                style={{ background: i % 2 ? '#fff4c2' : '#ffffff' }}>{v}</span>
-            ))}
-          </div>
-          <Microphone weight="fill" className="absolute right-[4%] top-[6%] w-[18%] h-auto drop-shadow" color="#241c3d" />
-          <Trophy weight="fill" className="absolute left-[4%] top-[6%] w-[14%] h-auto" color="#241c3d" />
+        <div className={base} style={{ background: 'radial-gradient(circle at 50% 30%, #f05a4f, #b8232b 75%)' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
+            <rect x="9" y="6" width="82" height="50" rx="4" fill="#241c3d" stroke="#000" strokeWidth="1" />
+            {Array.from({ length: 26 }, (_, k) => <circle key={`t${k}`} cx={11.5 + k * 3.1} cy="8" r="0.8" fill="#fff6b0" />)}
+            {Array.from({ length: 26 }, (_, k) => <circle key={`b${k}`} cx={11.5 + k * 3.1} cy="54" r="0.8" fill="#fff6b0" />)}
+            {Array.from({ length: 14 }, (_, k) => <circle key={`l${k}`} cx="11" cy={11 + k * 3.1} r="0.8" fill="#fff6b0" />)}
+            {Array.from({ length: 14 }, (_, k) => <circle key={`r${k}`} cx="89" cy={11 + k * 3.1} r="0.8" fill="#fff6b0" />)}
+            {Array.from({ length: 9 }, (_, k) => {
+              const c = k % 3, r = Math.floor(k / 3), x = 15 + c * 24, y = 12 + r * 13.6;
+              const open = k === 4;
+              return (
+                <g key={k}>
+                  <rect x={x} y={y} width="22" height="12" rx="1.8" fill={open ? '#ffffff' : '#fdfd94'} stroke="#000" strokeWidth="0.7" />
+                  <text x={x + 11} y={y + 8.4} textAnchor="middle" fontSize="7" fontWeight="900" fill="#241c3d">{open ? '+30' : k + 1}</text>
+                </g>
+              );
+            })}
+            <rect x="38.6" y="25.2" width="22.8" height="12.8" rx="2" fill="none" stroke="#fdfd94" strokeWidth="1.2" opacity="0.9" />
+          </svg>
         </div>
       );
     case 'match-three':
@@ -75,24 +86,24 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'four-in-a-row':
-      // Drawn in one SVG so the holes stay perfect circles at any card shape (teacher, 2026-10-31).
+      // Mirrors the game: the blue board with round holes and the Classic
+      // Ball Collection pieces (teacher, 2026-11-01).
       return (
         <div className={base} style={{ background: 'linear-gradient(160deg, #a8d8f0, #6aa9e9)' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62">
-            <rect x="18" y="6" width="64" height="44" rx="5" fill="#4f8fd6" stroke="#000" strokeWidth="1.2" />
+            <rect x="18" y="6" width="64" height="48" rx="5" fill="#4f8fe0" stroke="#000" strokeWidth="1.2" />
             {Array.from({ length: 15 }, (_, i) => {
-              const diag = [2, 6, 10, 14].includes(i) ? 1 : [5, 11, 12].includes(i) ? 2 : 0;
-              const cx = 26 + (i % 5) * 12, cy = 15 + Math.floor(i / 5) * 13;
+              const a = [10, 11, 6, 2].includes(i), b = [12, 7, 13, 14].includes(i);
+              const cx = 26 + (i % 5) * 12, cy = 17 + Math.floor(i / 5) * 14;
               return (
                 <g key={i}>
-                  <circle cx={cx} cy={cy} r="5" fill={diag === 1 ? TEAM_COLORS[0] : diag === 2 ? TEAM_COLORS[1] : '#ffffff'} stroke="#000" strokeWidth="1" />
-                  {diag === 1 && <path d={`M${cx} ${cy - 2.6} L${cx + 0.8} ${cy - 0.8} L${cx + 2.6} ${cy - 0.6} L${cx + 1.2} ${cy + 0.7} L${cx + 1.6} ${cy + 2.6} L${cx} ${cy + 1.6} L${cx - 1.6} ${cy + 2.6} L${cx - 1.2} ${cy + 0.7} L${cx - 2.6} ${cy - 0.6} L${cx - 0.8} ${cy - 0.8} Z`} fill="#241c3d" />}
-                  {diag === 2 && <path d={`M${cx} ${cy + 2.2} C${cx - 3.4} ${cy - 0.4} ${cx - 1.8} ${cy - 3.2} ${cx} ${cy - 1.2} C${cx + 1.8} ${cy - 3.2} ${cx + 3.4} ${cy - 0.4} ${cx} ${cy + 2.2} Z`} fill="#241c3d" />}
+                  <circle cx={cx} cy={cy} r="5.2" fill="#e8eef9" stroke="#2c3e66" strokeWidth="0.8" />
+                  {(a || b) && <image href={`/classic/four-in-a-row/${a ? '8-billiard-ball' : 'basket-ball'}.webp`} x={cx - 5} y={cy - 5} width="10" height="10" />}
                 </g>
               );
             })}
+            <line x1="26" y1="45" x2="62" y2="17" stroke="#fdfd94" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
           </svg>
-          <Crown weight="fill" className="absolute right-[3%] top-[2%] w-[14%] h-auto" color="#241c3d" />
         </div>
       );
     case 'cast-catch':
@@ -144,19 +155,20 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'bowling':
-      // A bowling alley with a real bowling ball (no space look, teacher 2026-10-31).
+      // Mirrors the game: the retro carpet, the wooden lane, pins and a Classic ball.
       return (
-        <div className={base} style={{ background: 'linear-gradient(180deg, #f3d9b1, #ed9d75)' }} aria-hidden="true">
+        <div className={base} style={{ background: '#0b0b12 url(/classic/bowling/carpet.svg) center / 60% repeat' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-            <rect x="30" y="22" width="40" height="14" rx="2" fill="#241c3d" stroke="#000" strokeWidth="1" />
-            <polygon points="14,100 86,100 64,36 36,36" fill="#9aa3b5" stroke="#000" strokeWidth="1" />
-            <polygon points="20,100 80,100 61,36 39,36" fill="#e2b07a" stroke="#000" strokeWidth="1" />
-            {[30, 40, 50, 60, 70].map((x) => <line key={x} x1={x} y1="100" x2={50 + (x - 50) * 0.42} y2="36" stroke="#8a5a2b" strokeOpacity="0.3" strokeWidth="0.6" />)}
-            {[[50, 50], [45, 44], [55, 44], [40, 39], [50, 39], [60, 39]].map(([x, y], i) => (
-              <g key={i} transform={`translate(${x} ${y}) scale(0.7)`}><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><rect x="-1.25" y="-7.6" width="2.5" height="0.7" fill="#e5635f" /><rect x="-1.4" y="-6.5" width="2.8" height="0.7" fill="#e5635f" /></g>
+            <rect x="32" y="8" width="36" height="10" rx="2" fill="#241c3d" stroke="#ff4fa3" strokeWidth="1.2" />
+            {[0, 1, 2, 3, 4, 5, 6].map((k) => <circle key={k} cx={37 + k * 4.4} cy="13" r="0.9" fill={['#fdfd94', '#6aa9e9', '#ff4fa3'][k % 3]} />)}
+            <polygon points="12,100 88,100 66,22 34,22" fill="#7f8aa3" stroke="#000" strokeWidth="1" />
+            <polygon points="18,100 82,100 64,22 36,22" fill="#e9c08f" stroke="#000" strokeWidth="1" />
+            {[30, 40, 50, 60, 70].map((x) => <line key={x} x1={x} y1="100" x2={50 + (x - 50) * 0.42} y2="22" stroke="#8a5a2b" strokeOpacity="0.3" strokeWidth="0.6" />)}
+            {[[50, 40], [45, 34], [55, 34], [40, 29], [50, 29], [60, 29]].map(([x, y], i) => (
+              <g key={i} transform={`translate(${x} ${y}) scale(0.75)`}><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><rect x="-1.25" y="-7.6" width="2.5" height="0.7" fill="#e5635f" /><rect x="-1.4" y="-6.5" width="2.8" height="0.7" fill="#e5635f" /></g>
             ))}
-            <image href="/classic/bowling/ball-3.webp" x="40" y="72" width="20" height="20" />
-            {[[47, 77, 1.4], [51, 76, 1.4], [49.5, 80.5, 1.7]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity="0.85" />)}
+            <path d="M50 84 L50 46" stroke="#241c3d" strokeWidth="1" strokeDasharray="0.1 2.4" strokeLinecap="round" />
+            <image href="/classic/bowling/ball-3.webp" x="40" y="74" width="20" height="20" />
           </svg>
         </div>
       );
@@ -241,20 +253,25 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       );
     }
     case 'pinball':
-      // Pinball (teacher design, 2026-10-31): pockets of points, five zones, the ball at the launcher.
+      // Mirrors the game: pockets in a line across the top, bonus lights,
+      // three pop bumpers, the numbered lanes, rails, flippers and the ball.
       return (
-        <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
+        <div className={base} style={{ background: 'linear-gradient(180deg, #3a528c, #22336e)' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
-            {[[22, 12, 30], [50, 9, 100], [78, 14, 60], [36, 24, 10], [66, 25, 40]].map(([x, y, v]) => (
-              <g key={x}><circle cx={x} cy={y} r="6.4" fill="#fdfd94" stroke="#000" strokeWidth="0.6" /><circle cx={x} cy={y} r="5" fill="#1b2550" /><text x={x} y={y + 1.6} textAnchor="middle" fontSize="4.4" fontWeight="800" fill="#fff">{v}</text></g>
+            {[['#ff9b54', 60], ['#fbc94a', 100], ['#f2735f', 30], ['#8fe3a0', 80]].map(([c, v], i) => (
+              <g key={i}><rect x={12 + i * 19} y="2" width="19" height="10" fill={c as string} stroke="#000" strokeWidth="0.6" /><text x={21.5 + i * 19} y="9.6" textAnchor="middle" fontSize="5" fontWeight="900" fill="#fff" stroke="#000" strokeWidth="0.6" paintOrder="stroke">{v}</text></g>
             ))}
-            {['#c9a3f5', '#8ec5ff', '#8fe3a0', '#fdfd94', '#f6a5c0'].map((c, i) => (
-              <g key={c}><rect x={8 + i * 18} y="35" width="12" height="6" rx="3" fill={c} stroke="#000" strokeWidth="0.7" /><text x={14 + i * 18} y="39.8" textAnchor="middle" fontSize="4.4" fontWeight="800" fill="#241c3d">{i + 1}</text></g>
+            <rect x="16" y="13.5" width="68" height="3.6" rx="1.8" fill="#000" opacity="0.4" />
+            {[0, 1, 2, 3, 4, 5].map((k) => <circle key={k} cx={21 + k * 9} cy="15.3" r="1.3" fill={k < 3 ? '#fdfd94' : '#1d2440'} stroke={k < 3 ? '#000' : '#fff'} strokeWidth="0.3" />)}
+            {[[30, 24], [50, 30], [70, 24]].map(([x, y]) => (
+              <g key={x}><circle cx={x} cy={y} r="4.4" fill="#fff" stroke="#000" strokeWidth="0.4" /><circle cx={x} cy={y} r="3.6" fill="#f2735f" stroke="#000" strokeWidth="0.4" /><circle cx={x} cy={y} r="1.5" fill="#fff" /></g>
             ))}
-            <path d="M50 55 L62 41" stroke="#fff" strokeWidth="1" strokeDasharray="0.1 2.2" strokeLinecap="round" />
-            <path d="M33 54 L45 57 L45 58 L33 56 Z M67 54 L55 57 L55 58 L67 56 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.6" />
-            <circle cx="50" cy="55" r="3.2" fill="#e7ecf5" stroke="#000" strokeWidth="0.6" /><circle cx="49" cy="54" r="1" fill="#fff" />
-            <circle cx="12" cy="50" r="4" fill="#f2735f" stroke="#000" strokeWidth="0.6" /><circle cx="88" cy="50" r="4" fill="#f2735f" stroke="#000" strokeWidth="0.6" />
+            {['#f6c544', '#9b7be0', '#ef5d7a', '#4fb6d8', '#f39ac0'].map((c, i) => (
+              <g key={c}><rect x={16 + i * 13.6} y="37" width="13.6" height="6.4" fill={c} stroke="#000" strokeWidth="0.5" /><text x={22.8 + i * 13.6} y="42.3" textAnchor="middle" fontSize="4.6" fontWeight="900" fill="#fff" stroke="#000" strokeWidth="0.6" paintOrder="stroke">{i + 1}</text></g>
+            ))}
+            <path d="M14 46 L30 58 M86 46 L70 58" stroke="#c9d3ea" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M33 56 L45 59 L45 60 L33 58 Z M67 56 L55 59 L55 60 L67 58 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.5" />
+            <circle cx="50" cy="56" r="2.6" fill="#e7ecf5" stroke="#000" strokeWidth="0.5" /><circle cx="49.2" cy="55.2" r="0.8" fill="#fff" />
           </svg>
         </div>
       );
