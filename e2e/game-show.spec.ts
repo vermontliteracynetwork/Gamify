@@ -33,13 +33,15 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.screenshot({ path: `test-results/gameshow-setup-options-${info.project.name}.png` });
   await finishSetup(page);
 
-  // Team 1: pick card 1, then tap the right answer; the card turns over.
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
+  // Team 1: the turn card (icon only) comes first, then the question; a
+  // right answer picks card 1 and it turns over (teacher, 2026-11-01).
+  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible();
+  await page.screenshot({ path: `test-results/gameshow-turncard-${info.project.name}.png` });
   await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
   await answerShare(page, true);
+  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
   // Frame check: the card turns over in 3D, then the prize box opens.
   if (info.project.name === 'ipad-landscape') for (let f = 0; f < 7; f++) { await page.screenshot({ path: `test-results/gameshow-flip-${f}.png` }); await page.waitForTimeout(150); }
   const reveal = page.getByRole('dialog');
@@ -53,13 +55,14 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await expect(page.getByRole('button', { name: /^Card 1: won by / })).toBeVisible();
   // Team 2: a miss brings a new question; three misses keep the card closed
   // and pass the turn back (teacher, 2026-10-31).
-  await page.getByRole('button', { name: /^Card 2(,|$)/ }).click();
   await answerShare(page, false);
   await expect(page.getByRole('dialog').getByText('Try 2 of 3')).toBeVisible();
   await answerShare(page, false);
   await expect(page.getByRole('dialog').getByText('Try 3 of 3')).toBeVisible();
   await answerShare(page, false);
-  await expect(page.getByRole('button', { name: /^Card 2(,|$)/ })).toBeEnabled();
+  // No card turns over; Team 1's turn card is back.
+  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /won by/ })).toHaveCount(1);
   // No scrolling, ever.
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   expect(problems).toEqual([]);
@@ -84,6 +87,7 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-setup-teams-${info.project.name}.png` });
   await finishSetup(page);
+  await startTurn(page);
   await page.getByRole('button', { name: 'Shapes, 300 points' }).click();
   await answerShare(page, true);
   await expect(page.getByLabel('300 points', { exact: true })).toBeVisible();
@@ -111,7 +115,6 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
   await finishSetup(page);
-  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
   await startTurn(page);
   // A different student answers each turn (market research, 2026-10-31).
   await expect(page.getByRole('dialog').getByText(/^(Ava|Ben|Cal|Dee) answers this one$/)).toBeVisible();
@@ -120,8 +123,10 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
 test('Share Mirror: a student sees the big-screen question close up, with their own text size and contrast', async ({ page, context }, info) => {
   test.setTimeout(90_000);
   await openSetup(page, '/games/game-show');
-  await page.getByRole('radio', { name: 'Surprise cards' }).click();
+  await page.getByRole('radio', { name: 'Category grid' }).click();
   await finishSetup(page);
+  // The turn card first; then the board is open to pick a square.
+  await startTurn(page);
   await page.getByRole('button', { name: /settings/i }).first().click();
   await page.getByRole('tab', { name: 'Teacher' }).click();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
@@ -136,8 +141,7 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
   await expect(kid).toHaveURL(new RegExp(`/mirror/${code}`));
   await expect(kid.getByRole('heading', { name: 'Waiting for the Next Question' })).toBeVisible();
 
-  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
-  await startTurn(page);
+  await page.getByRole('button', { name: /, 100 points$/ }).first().click();
   const prompt = (await page.getByRole('dialog').getByRole('heading', { level: 2 }).innerText()).trim();
   await expect(kid.getByRole('heading', { level: 1, name: prompt })).toBeVisible();
   await kid.getByRole('button', { name: 'Bigger words' }).click();

@@ -30,9 +30,10 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     goal: 'Teams take turns picking cards on the big screen. A right answer turns the card over for points or a power-up. The team with the most points when every card is gone wins.',
     steps: [
       'The teacher makes teams (or the class plays against the computer or the teacher) and picks a question set and a card grid.',
-      'The team whose turn it is glows in the scores. They pick a card.',
-      'The question appears for everyone. The team taps an answer. A miss brings a new question, up to three.',
-      'A right answer turns the card over in place to show the prize: points, or a power-up. Bigger prizes get a bigger show. The card then shows that team\'s icon.',
+      'Each turn opens with the team\'s icon, big and glowing. The team taps it to begin, and their row glows in the scores.',
+      'Surprise cards: the question comes first. A right answer lets the team pick a card, and it turns over in place to show the prize: points, or a power-up. Bigger prizes get a bigger show. The card then shows that team\'s icon.',
+      'Category grid: the team picks a square, then answers its question for those points.',
+      'A miss brings a new question when the teacher allows more tries.',
       'Play passes to the next team until every card is turned.',
     ],
     pieces: [

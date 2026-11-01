@@ -33,11 +33,7 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
     await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   }
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');
-  await tabTo(page, /^Card 1$/);
-  expect(await focusRing(page)).toBe(true);
-  await page.screenshot({ path: 'test-results/keyboard-focus.png' });
-  await page.keyboard.press('Enter');
-  // The turn card (2026-10-31): Enter starts the team's question.
+  // The turn card comes first (teacher, 2026-11-01): Enter starts the question.
   await tabTo(page, /^Tap to start$/); await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
   const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
@@ -45,6 +41,13 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
   await tabTo(page, new RegExp(`^[A-D]\\s+${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   await page.keyboard.press('Enter');
   await expect(dialog.getByText('You got it!')).toBeVisible();
+  // A right answer picks a card to turn over.
+  await expect(dialog).toHaveCount(0, { timeout: 5000 });
+  await tabTo(page, /^Card 1(,|$)/);
+  expect(await focusRing(page)).toBe(true);
+  await page.screenshot({ path: 'test-results/keyboard-focus.png' });
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
 });
 
 test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ page }) => {
@@ -52,7 +55,10 @@ test('keyboard: Bubble Pop aims with arrows and shoots with Space', async ({ pag
   await noPowerUps(page, 'bubble-pop');
   await page.goto('/games/bubble-pop');
   await tabTo(page, /^Set up and play$/); await page.keyboard.press('Enter');
-  await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
+  for (let i = 0; i < 6; i++) {
+    if (await page.getByRole('button', { name: 'Play', exact: true }).isVisible()) break;
+    await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
+  }
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });

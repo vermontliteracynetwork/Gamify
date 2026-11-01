@@ -17,7 +17,7 @@ import { playEffect } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
 import { drawQuestion } from '../../engine/picker';
 import { isPlayable } from '../../engine/questions';
-import ShareQuestion from '../../engine/ShareQuestion';
+import ShareQuestion, { TurnCard } from '../../engine/ShareQuestion';
 import ScoreBoard from '../../engine/ScoreBoard';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
@@ -80,7 +80,7 @@ export default function GameShow() {
   cardsNow.current = cards;
   const [cells, setCells] = useState<Cell[]>([]);
   const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; cell?: number; chance: number } | null>(null);
-  const [step, setStep] = useState<'answer' | 'pick'>('pick');
+  const [step, setStep] = useState<'turn' | 'answer' | 'pick'>('turn');
   const [chosen, setChosen] = useState<number | null>(null);
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
   // The card being turned over in 3D before its prize box opens.
@@ -137,8 +137,10 @@ export default function GameShow() {
   }
 
   function startTurn(_state: TurnState, b: Board = board, deck: Card[] = cards) {
-    // Pick a card or square first, then answer its question (teacher, 2026-10-24).
-    setStep('pick');
+    // Every turn opens with the turn card, before the move (teacher,
+    // 2026-11-01). Cards: answer first, then a right answer picks a card to
+    // turn over. Category grid: pick a square, then answer its question.
+    setStep('turn');
     setQuestion(null);
     setChosen(null);
     // A new lucky card each turn, among the cards still closed.
@@ -198,21 +200,27 @@ export default function GameShow() {
       setTurns((s0) => (s0 ? addPoints(s0, me, 10) : s0));
       toast(t('tb.hotStreak', { name: player.name }));
     }
-    if (right && chosen !== null) {
-      openCard(chosen);
+    if (right) {
+      setStep('pick'); // now pick a card to turn over
     } else {
       setChosen(null);
       finishTurn(turns, cards.filter((c) => !c.open).length);
     }
   }
+  // The turn card was tapped (or the computer's went away).
+  function turnStarted() {
+    if (board === 'cards') { setStep('answer'); setQuestion({ ...draw(chosenSets), chance: 1 }); }
+    else setStep('pick');
+  }
 
   // A team picks a closed card; its question comes up, and a right answer
   // turns the card over.
+  // After a right answer, the team picks a closed card and it turns over.
   function chooseCard(i: number) {
     if (!turns || step !== 'pick' || cards[i].open || reveal || question || flipping !== null) return;
-    playEffect('tap', settings);
     setChosen(i);
-    setQuestion({ ...draw(chosenSets), chance: 1 });
+    setStep('answer');
+    openCard(i);
   }
 
   // A right answer turns the card over in place (a real 3D flip showing the
@@ -291,7 +299,8 @@ export default function GameShow() {
   }
 
   function pickCell(i: number) {
-    if (!turns || cells[i]?.used || question) return;
+    if (!turns || step !== 'pick' || cells[i]?.used || question) return;
+    setStep('answer');
     const set = chosenSets[cells[i].col];
     playClip(`${GS}page-turn.mp3`, settings);
     const d = draw([set]);
@@ -504,7 +513,8 @@ export default function GameShow() {
         </div>
       )}
 
-      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} sounds={GS_SOUNDS} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} />}
+      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} sounds={GS_SOUNDS} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} turnCard={false} />}
+      {phase === 'play' && step === 'turn' && player && !reveal && <TurnCard key={player.id} player={player} onStart={turnStarted} />}
 
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
