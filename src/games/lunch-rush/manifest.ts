@@ -22,9 +22,9 @@ export const lunchRushManifest: GameManifest = {
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
     abilities: [
-      { id: 'serves', label: 'More serves', hint: 'Extra serves this turn', amount: { label: 'Serves', min: 1, max: 3, step: 1, default: 1 } },
-      { id: 'bonus', label: 'Bonus tips', hint: 'Points right away', amount: { label: 'Points', min: 1, max: 20, step: 1, default: 5 } },
-      { id: 'double', label: 'Double tips', hint: 'Every serve this turn scores twice' },
+      { id: 'serves', label: 'More serves', hint: 'Gives you extra serves this turn.', amount: { label: 'Serves', min: 1, max: 3, step: 1, default: 1 } },
+      { id: 'bonus', label: 'Bonus tips', hint: 'Adds tip points to your score right away.', amount: { label: 'Points', min: 1, max: 20, step: 1, default: 5 } },
+      { id: 'double', label: 'Double tips', hint: 'Every food you serve this turn earns twice the tips.' },
     ],
     classic: [
       { id: 'classic-extra-plate', name: 'Extra Plate', ability: 'serves', amount: 1, motion: 'bob', often: 2, art: 'extra-plate' },

@@ -22,6 +22,7 @@ import { t } from './i18n';
 // iPads and school networks.
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
+import HoverTips from './ui/HoverTips';
 const QuestionSetsPage = lazyPage(() => import('./teacher/QuestionSetsPage'));
 const TeacherTimePage = lazyPage(() => import('./student/TeacherTimePage'));
 const ChoosePage = lazyPage(() => import('./student/ChoosePage'));
@@ -248,6 +249,7 @@ export default function App() {
         <NavBar />
         <Supports />
         <PreviewBanner />
+        <HoverTips />
         <div id="main-content" tabIndex={-1} className="outline-none flex-1 flex flex-col">
           <AnimatedRoutes />
         </div>

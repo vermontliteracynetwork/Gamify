@@ -21,13 +21,13 @@ export const castleQuestManifest: GameManifest = {
   items: {
     label: 'Power-ups', hint: 'Found on the board. Give each one art and a power.', max: 7, width: 256, height: 256,
     abilities: [
-      { id: 'magnet', label: 'Magnet', hint: 'On your next question, a magnet sticks to the right answer' },
-      { id: 'tornado', label: 'Tornado', hint: 'Whoosh! Every player lands on a new random tile' },
-      { id: 'time', label: 'Time', hint: 'Your piece hops 5 times faster for 3 turns' },
-      { id: 'potion', label: 'Potion', hint: 'Your next roll moves 3 times as far' },
-      { id: 'chest', label: 'Treasure chest', hint: 'A surprise: good or not so good!' },
-      { id: 'shield', label: 'Shield', hint: 'Nothing can push you back for 3 rounds' },
-      { id: 'lightning', label: 'Lightning', hint: 'Send another player back a roll of the die' },
+      { id: 'magnet', label: 'Magnet', hint: 'On your next question, a magnet sticks to the right answer to help you.' },
+      { id: 'tornado', label: 'Tornado', hint: 'Whoosh! Every player is blown to a new random space on the trail.' },
+      { id: 'time', label: 'Stopwatch', hint: 'Your piece hops five times faster for your next 3 turns.' },
+      { id: 'potion', label: 'Potion', hint: 'Your next roll of the die moves you three times as far.' },
+      { id: 'chest', label: 'Treasure chest', hint: 'A surprise: it might move you ahead, give a roll again, or send you back a little.' },
+      { id: 'shield', label: 'Shield', hint: 'For the next 3 rounds, nothing can push your piece back.' },
+      { id: 'lightning', label: 'Lightning', hint: 'Pick another player: they roll the die and move back that many spaces.' },
     ],
     classic: [
       { id: 'classic-magnet', name: 'Magnet', ability: 'magnet', motion: 'wiggle', often: 1, image: '/classic/castle-quest/powerups/magnet.webp' },

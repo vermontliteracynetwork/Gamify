@@ -1,3 +1,4 @@
+import { Check } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { Minus, Plus } from '@phosphor-icons/react';
 
@@ -15,6 +16,34 @@ export function Toggle({ label, value, onChange, art, hint }: { label: string; v
         <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-[2px] border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
       </span>
     </button>
+  );
+}
+
+// Choices shown like a question's answer tiles (teacher, 2026-11-01): big
+// colored tiles in a grid, the picked one ringed and checked. Each can have
+// hover text (`tip`); on touch screens the tip shows on the tile instead.
+const TILE_BG = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
+export function ChoiceTiles<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; tip?: string }[]; onChange: (v: T) => void }) {
+  return (
+    <div className="grid gap-1.5">
+      <span className="font-bold">{label}</span>
+      <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-3">
+        {options.map((o, i) => {
+          const on = value === o.value;
+          return (
+            <button key={o.value} type="button" role="radio" aria-checked={on} aria-description={o.tip} data-tip={o.tip} onClick={() => onChange(o.value)}
+              className={`min-h-16 px-4 py-2 rounded-input border-[2.5px] border-border flex items-center gap-3 text-left font-bold text-xl ${TILE_BG[i % TILE_BG.length]} ${on ? 'ring-4 ring-border' : 'opacity-85'}`}
+              style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <span className={`w-10 h-10 shrink-0 rounded-full border-[2px] border-border flex items-center justify-center ${on ? 'bg-success' : 'bg-surface'}`} aria-hidden="true">{on && <Check weight="bold" size={20} />}</span>
+              <span className="grid">
+                {o.label}
+                {o.tip && <span className="hidden [@media(hover:none)]:block text-sm font-semibold">{o.tip}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

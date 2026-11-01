@@ -20,11 +20,11 @@ export const matchThreeManifest: GameManifest = {
     // Classic roles (teacher, 2026-10-31): held for the next round, listed
     // under the score, gone after it. Themes can redraw and rename them.
     abilities: [
-      { id: 'moves', label: 'More moves', hint: 'Extra moves this round', amount: { label: 'Moves', min: 1, max: 5, step: 1, default: 2 } },
-      { id: 'double', label: '2x points', hint: 'Your next match scores double' },
-      { id: 'blast', label: 'Color blast', hint: 'Pop every piece of one kind' },
-      { id: 'shuffle', label: 'Shake up', hint: 'A brand new board' },
-      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 10, max: 300, step: 10, default: 100 } },
+      { id: 'moves', label: 'More moves', hint: 'Gives you extra moves this round.', amount: { label: 'Moves', min: 1, max: 5, step: 1, default: 2 } },
+      { id: 'double', label: 'Double points', hint: 'Your next match scores twice the points.' },
+      { id: 'blast', label: 'Color blast', hint: 'Pops every piece of one kind on the board at once.' },
+      { id: 'shuffle', label: 'Shake up', hint: 'Mixes the board into a brand new one when you are stuck.' },
+      { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 10, max: 300, step: 10, default: 100 } },
     ],
     classic: [
       { id: 'classic-pocket-watch', name: 'Pocket Watch', ability: 'moves', amount: 2, motion: 'wiggle', often: 2, image: '/classic/powerups/time.webp' },

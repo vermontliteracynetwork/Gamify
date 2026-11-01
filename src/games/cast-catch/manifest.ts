@@ -22,11 +22,11 @@ export const castCatchManifest: GameManifest = {
   items: {
     label: 'Catches and power-ups', hint: 'Things you can reel in besides the fish. Give each one art and a power.', max: 8, width: 256, height: 256,
     abilities: [
-      { id: 'points', label: 'Gives points', hint: 'Adds points to the score', amount: { label: 'Points', min: 10, max: 1000, step: 10, default: 100 } },
-      { id: 'lose', label: 'Takes away points', hint: 'A silly catch that costs points', amount: { label: 'Points', min: 10, max: 500, step: 10, default: 100 } },
-      { id: 'time', label: 'Adds time', hint: 'More seconds on the clock', amount: { label: 'Seconds', min: 5, max: 60, step: 5, default: 15 } },
-      { id: 'double', label: 'Doubles the next catch', hint: 'The next catch is worth twice as much' },
-      { id: 'mystery', label: 'Mystery', hint: 'A surprise: lose 50 or win up to 500 points' },
+      { id: 'points', label: 'Gives points', hint: 'A great catch: adds points to the score.', amount: { label: 'Points', min: 10, max: 1000, step: 10, default: 100 } },
+      { id: 'lose', label: 'Takes away points', hint: 'A silly catch, like an old boot: takes points off the score.', amount: { label: 'Points', min: 10, max: 500, step: 10, default: 100 } },
+      { id: 'time', label: 'Adds time', hint: 'Puts more seconds on the fishing clock.', amount: { label: 'Seconds', min: 5, max: 60, step: 5, default: 15 } },
+      { id: 'double', label: 'Doubles the next catch', hint: 'The next fish you reel in is worth twice its points.' },
+      { id: 'mystery', label: 'Mystery', hint: 'A surprise catch: it could take away 50 points or give up to 500.' },
     ],
     classic: [
       { id: 'classic-rainbow-fish', name: 'Rainbow Fish', ability: 'points', amount: 500, motion: 'sparkle', often: 1, art: 'rainbow-fish' },

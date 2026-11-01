@@ -41,8 +41,10 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
         room = maxH - head - foot - 48 - 6;
       }
       // Outside the setup box (class and activity pages): two rows.
-      const high = card ? room - (g.offsetTop - w.offsetTop) - 56 - 4 : MAX * 2 + GAP;
-      const width = w.clientWidth;
+      // The page arrows sit beside the cards, not under them, so the cards
+      // get all the height (teacher, 2026-11-01: "the cards are the priority").
+      const high = card ? room - (g.offsetTop - w.offsetTop) - 4 : MAX * 2 + GAP;
+      const width = w.clientWidth - 2 * (ARROW + GAP);
       const next = layout(width, high);
       setFit((f) => (f.cols === next.cols && f.rows === next.rows && Math.abs(f.size - next.size) < 1 ? f : next));
     };
@@ -70,7 +72,9 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
       <SetFilterBar value={filter} onChange={(f) => { setFilter(f); setPage(0); }} sets={ready} />
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
-      <div ref={gridEl} className="grid mx-auto" style={{ gap: GAP, gridTemplateColumns: `repeat(${fit.cols}, ${fit.size}px)`, gridAutoRows: `${fit.size}px` }}>
+      <div className="flex items-center justify-center gap-2.5">
+      <PageArrow side="prev" show={pages > 1} disabled={page === 0} onClick={() => setPage(page - 1)} />
+      <div ref={gridEl} className="grid" style={{ gap: GAP, gridTemplateColumns: `repeat(${fit.cols}, ${fit.size}px)`, gridAutoRows: `${fit.size}px` }}>
         {onPage.map((s) => {
           const on = value.includes(s.id);
           const art = ART[s.subject ?? 'Other'];
@@ -94,22 +98,31 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
           );
         })}
       </div>
-      {pages > 1 && (
-        <nav className="flex items-center justify-center gap-3" aria-label={t('sets.pages')}>
-          <button type="button" data-tip={t('sets.prevPage')} aria-label={t('sets.prevPage')} disabled={page === 0} onClick={() => setPage(page - 1)}
-            className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center disabled:opacity-40"><CaretLeft weight="bold" size={20} /></button>
-          <span className="font-bold tabular-nums" aria-live="polite">{t('sets.pageOf', { n: page + 1, total: pages })}</span>
-          <button type="button" data-tip={t('sets.nextPage')} aria-label={t('sets.nextPage')} disabled={page >= pages - 1} onClick={() => setPage(page + 1)}
-            className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center disabled:opacity-40"><CaretRight weight="bold" size={20} /></button>
-        </nav>
-      )}
+      <span className="grid justify-items-center gap-1">
+        <PageArrow side="next" show={pages > 1} disabled={page >= pages - 1} onClick={() => setPage(page + 1)} />
+        {pages > 1 && <span className="text-xs font-bold tabular-nums whitespace-nowrap" aria-live="polite" aria-label={t('sets.pageOf', { n: page + 1, total: pages })}>{page + 1} / {pages}</span>}
+      </span>
+      </div>
     </div>
   );
 }
 
 const GAP = 10;
+const ARROW = 44;
 const MIN = 104; // the smallest card that still reads (name and details)
-const MAX = 168;
+const MAX = 180;
+
+// A page arrow beside the cards (space kept even when there is one page).
+function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; show: boolean; disabled: boolean; onClick: () => void }) {
+  const label = t(side === 'prev' ? 'sets.prevPage' : 'sets.nextPage');
+  if (!show) return <span className="w-11 shrink-0" aria-hidden="true" />;
+  return (
+    <button type="button" data-tip={label} aria-label={label} disabled={disabled} onClick={onClick}
+      className="w-11 h-11 shrink-0 rounded-full border-[2px] border-border bg-surface flex items-center justify-center disabled:opacity-40">
+      {side === 'prev' ? <CaretLeft weight="bold" size={20} /> : <CaretRight weight="bold" size={20} />}
+    </button>
+  );
+}
 
 // The most cards across (6, 5, 4...) that keep each square readable, in as
 // many rows (3, 2, then 1) as the height holds, so rows are always full and
@@ -124,5 +137,7 @@ export function layout(width: number, high: number) {
       }
     }
   }
-  return { cols: 2, rows: 1, size: Math.max(80, Math.floor(Math.min((width - GAP) / 2, high))) };
+  // A short screen: one full row of the biggest cards the height allows.
+  const size = Math.max(84, Math.floor(Math.min(MAX, high)));
+  return { cols: Math.max(1, Math.min(6, Math.floor((width + GAP) / (size + GAP)))), rows: 1, size };
 }

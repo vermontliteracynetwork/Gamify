@@ -20,10 +20,10 @@ export const bubblePopManifest: GameManifest = {
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
     abilities: [
-      { id: 'shots', label: 'More bubbles', hint: 'Extra bubbles to shoot', amount: { label: 'Bubbles', min: 1, max: 5, step: 1, default: 2 } },
-      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 10, max: 300, step: 10, default: 100 } },
-      { id: 'double', label: '2x points', hint: 'Your next pop scores double' },
-      { id: 'mystery', label: 'Mystery points', hint: 'Surprise points from 10 to 100' },
+      { id: 'shots', label: 'More bubbles', hint: 'Gives you extra bubbles to shoot this round.', amount: { label: 'Bubbles', min: 1, max: 5, step: 1, default: 2 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 10, max: 300, step: 10, default: 100 } },
+      { id: 'double', label: 'Double points', hint: 'Every bubble you pop with your next shot counts double.' },
+      { id: 'mystery', label: 'Mystery points', hint: 'A surprise: you get from 10 to 100 points right away.' },
     ],
     classic: [
       { id: 'classic-bubble-bundle', name: 'Bubble Bundle', ability: 'shots', amount: 2, motion: 'bob', often: 2, art: 'extra-bubble' },

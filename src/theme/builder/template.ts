@@ -44,8 +44,16 @@ export const isSolid = (piece: Pick<ThemePieceSpec, 'id'>) => SOLID.test(piece.i
 // balls) are drawn in a circle.
 export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^ball-|^star$/.test(piece.id);
 
-// The template page for power-ups: one blank page.
+// The template pages for power-ups (teacher, 2026-11-01: "power ups need to
+// be included in all download files for all games, printable and sized"):
+// one page for every power-up a theme can have, at the power-up's own size,
+// after the game's pieces.
 export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
   if (!spec) return [];
-  return [{ id: 'item', label: t('builder.items.piece'), width: spec.width, height: spec.height, hint: t('builder.items.pieceHint') }];
+  return Array.from({ length: spec.max }, (_, k) => ({
+    id: `power-${k + 1}`, label: t('builder.items.pageLabel', { n: k + 1 }), width: spec.width, height: spec.height, hint: t('builder.items.pageHint'),
+  }));
 }
+
+// Every page a game's template has: its pieces, then its power-ups.
+export const templatePieces = (game: { themePieces: ThemePieceSpec[]; items?: ItemSlotsSpec }) => [...game.themePieces, ...itemPages(game.items)];

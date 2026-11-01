@@ -24,13 +24,13 @@ export const pinballManifest: GameManifest = {
     // Classic roles (teacher, 2026-10-31): a theme can redraw and rename each
     // item, but its role stays. Held for the player's next turn.
     abilities: [
-      { id: 'double', label: '2x points', hint: 'Earn double points' },
-      { id: 'super', label: 'Sure shot', hint: 'Your ball always reaches a pocket' },
-      { id: 'magnet', label: 'Jackpot magnet', hint: 'Your ball rolls to the biggest pocket' },
-      { id: 'bounce', label: 'Bounce bonus', hint: '10 points for every wall bounce' },
-      { id: 'mystery', label: 'Mystery points', hint: 'Surprise points from 10 to 100' },
-      { id: 'swipe', label: 'Sneaky swipe', hint: 'Take points from the leader', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 30 } },
-      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 50 } },
+      { id: 'double', label: 'Double points', hint: 'The pocket your next ball lands in scores double.' },
+      { id: 'super', label: 'Sure shot', hint: 'Your next ball always lands in a scoring pocket, never down the drain.' },
+      { id: 'magnet', label: 'Jackpot magnet', hint: 'Your next ball rolls straight to the biggest pocket.' },
+      { id: 'bounce', label: 'Bounce bonus', hint: 'Your next ball earns 10 extra points for every bumper or wall it bounces off.' },
+      { id: 'mystery', label: 'Mystery points', hint: 'A surprise: you get from 10 to 100 points right away.' },
+      { id: 'swipe', label: 'Sneaky swipe', hint: 'Takes points from the player in first place and gives them to you.', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 30 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 50 } },
     ],
     classic: [
       { id: 'classic-golden-ball', name: 'Golden Ball', ability: 'double', motion: 'sparkle', often: 2, art: 'golden-ball' },

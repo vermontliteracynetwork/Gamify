@@ -7,7 +7,7 @@ import { bigScreenManifest } from '../../live/screenManifest';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
-import { CODE, codeBits, codeX, isRound, MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
+import { CODE, codeBits, codeX, isRound, MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE, templatePieces } from './template';
 
 // One printed page for one piece: corner squares, page number squares, what
 // to draw, and the outline at the piece's shape. Students draw inside the
@@ -47,6 +47,7 @@ export default function TemplatePage({ guide = false }: { guide?: boolean }) {
   const game = [...GAMES, signInManifest, bigScreenManifest].find((g) => g.id === gameId);
   const access = useTemplateAccess(gameId ?? '');
   if (!game) return null;
+  const pages = templatePieces(game);
   const back = guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`;
   if (access !== 'ok') {
     return (
@@ -61,12 +62,12 @@ export default function TemplatePage({ guide = false }: { guide?: boolean }) {
       <div className="no-print flex flex-wrap items-center gap-3 mb-6">
         <Link to={guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t(guide ? 'guide.back' : 'builder.backToBuilder')}</Link>
         <button type="button" onClick={() => window.print()} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('builder.print')}</button>
-        <p className="font-bold">{t('builder.printNote', { count: game.themePieces.length })}</p>
+        <p className="font-bold">{t('builder.printNote', { count: pages.length })}</p>
       </div>
       <div className="grid gap-6">
-        {game.themePieces.map((p, i) => (
+        {pages.map((p, i) => (
           <div key={p.id} className="template-page bg-white border-[2px] border-border-soft rounded-input overflow-hidden">
-            <TemplateSheet gameName={game.name} piece={p} page={i + 1} total={game.themePieces.length} />
+            <TemplateSheet gameName={game.name} piece={p} page={i + 1} total={pages.length} />
           </div>
         ))}
       </div>

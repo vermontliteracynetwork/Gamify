@@ -23,7 +23,7 @@ import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
-import { ChoiceRow } from '../../ui/fields';
+import { ChoiceTiles } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
@@ -34,7 +34,7 @@ import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import {
-  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, POWERS, roll, SHORT_START, spotOf,
+  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, POWERS, roll, spotOf, dieSides, trailOf, trailStart, TRAILS,
   tileXY, WORLD_H, WORLD_W, type Bridge, type ChestPrize, type Power,
 } from './board';
 
@@ -62,7 +62,7 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'full' as 'full' | 'short', powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[] });
   // Where pieces start: the full trail, or the short one from the second bend.
   const [start, setStart] = useState(0);
   const startRef = useRef(0);
@@ -71,6 +71,7 @@ export default function CastleQuest() {
   const game = useGamePool(picked);
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const versus = setup.who === 'versus';
+  const sides = dieSides(trailOf(setup.trail));
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -131,7 +132,7 @@ export default function CastleQuest() {
     const state = startTurns(ps);
     turnsRef.current = state;
     setTurns(state); setMissed([]); setWinner(null); setOverride({}); setAhead([]);
-    const from = setup.trail === 'short' ? SHORT_START : 0;
+    const from = trailStart(trailOf(setup.trail));
     startRef.current = from; setStart(from);
     place(ps.map(() => from));
     setShield(ps.map(() => 0)); setFast(ps.map(() => 0)); setPotion(false);
@@ -217,7 +218,7 @@ export default function CastleQuest() {
   }
   async function rollAndMove() {
     setStep('rolling');
-    const n = roll();
+    const n = roll(Math.random, sides);
     const mult = potion ? 3 : 1;
     setPotion(false);
     playEffect('whoosh', settings);
@@ -298,10 +299,10 @@ export default function CastleQuest() {
       setOverride({});
       const next = [...posRef.current]; [next[who], next[back[1]]] = [next[back[1]], next[who]]; place(next); await sleep(ms(500)); return;
     }
-    if (prize.kind === 'potion') { const n = roll(); await drink(who); say(t('cq.potionRoll', { n, total: n * 3 }), itemFor('potion').image); await sleep(ms(1000)); await move(who, n * 3, false); return; }
-    if (prize.kind === 'reroll') { const n = roll(); setToss({ id: Date.now(), n, mult: 1 }); await sleep(ms(1500)); setToss(null); setDie(n); say(t('cq.chestReroll', { n })); await sleep(ms(800)); await move(who, n, false); return; }
+    if (prize.kind === 'potion') { const n = roll(Math.random, sides); await drink(who); say(t('cq.potionRoll', { n, total: n * 3 }), itemFor('potion').image); await sleep(ms(1000)); await move(who, n * 3, false); return; }
+    if (prize.kind === 'reroll') { const n = roll(Math.random, sides); setToss({ id: Date.now(), n, mult: 1 }); await sleep(ms(1500)); setToss(null); setDie(n); say(t('cq.chestReroll', { n })); await sleep(ms(800)); await move(who, n, false); return; }
     // Mystery box: a roll that could double, go backward, or bring a power-up.
-    const n = roll();
+    const n = roll(Math.random, sides);
     setToss({ id: Date.now(), n, mult: 1 }); await sleep(ms(1500)); setToss(null);
     const twist = Math.random();
     if (twist < 0.2 && shieldRef.current[who] <= 0) { say(t('cq.mysteryBack', { n }), `${ART}/powerups/mystery.webp`, true); await sleep(ms(900)); await move(who, -n, false); return; }
@@ -346,7 +347,7 @@ export default function CastleQuest() {
     await sleep(ms(900));
     setBolt(null);
     if (shieldRef.current[target] > 0) { say(t('cq.shieldBlocks'), itemFor('shield').image); await sleep(ms(1100)); setStep('roll'); return; }
-    const n = roll();
+    const n = roll(Math.random, sides);
     setDie(n);
     say(t('cq.lightning', { name: turnsRef.current!.players[target].name, n }), it.image, true);
     await sleep(ms(800));
@@ -436,8 +437,8 @@ export default function CastleQuest() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceRow label={t('cq.trail')} value={setup.trail ?? 'full'} onChange={(v) => change({ trail: v })}
-                options={[{ value: 'full', label: t('cq.trailFull') }, { value: 'short', label: t('cq.trailShort') }]} />
+              <ChoiceTiles label={t('cq.trail')} value={trailOf(setup.trail)} onChange={(v) => change({ trail: v })}
+                options={TRAILS.map((tr) => ({ value: tr, label: t(`cq.trail.${tr}` as 'cq.trail.short'), tip: t(`cq.trailTip.${tr}` as 'cq.trailTip.short') }))} />
               {powerUpSwitches({ manifest: castleQuestManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },

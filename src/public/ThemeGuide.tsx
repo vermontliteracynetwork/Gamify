@@ -6,7 +6,7 @@ import { GAMES } from '../games/registry';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import { ClassicPiece, ROUND_LOOK } from '../theme/builder/classicArt';
-import { isRound, isSolid, itemPages } from '../theme/builder/template';
+import { isRound, isSolid, templatePieces } from '../theme/builder/template';
 import { ClassicItemSvg } from '../theme/classicItems';
 import type { ThemePieceSpec } from '../theme/types';
 import { Button, buttonClasses } from '../ui/kit';
@@ -79,7 +79,7 @@ export function ThemeGuidePage() {
     if (access !== 'ok') return;
     setDl(t('builder.dl.making'));
     const [{ fileSlug, saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
-    saveFile(new Blob([templatePdf([...game!.themePieces, ...itemPages(game!.items)])], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
+    saveFile(new Blob([templatePdf(templatePieces(game!))], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
     setDl(t('builder.dl.ready'));
   }
   return (

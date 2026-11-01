@@ -54,8 +54,8 @@ test('Board Game Versus: one player against the computer', async ({ page }) => {
 test('Board Game short trail: pieces start at the second bend, the skipped part fades', async ({ page }, info) => {
   test.setTimeout(60_000);
   await openSetup(page, '/games/castle-quest');
-  await showSetting(page, page.getByRole('radio', { name: /^Short trail/ }));
-  await page.getByRole('radio', { name: /^Short trail/ }).click();
+  await showSetting(page, page.getByRole('radio', { name: /^Short/ }));
+  await page.getByRole('radio', { name: /^Short/ }).click();
   await finishSetup(page);
   await expect(page.getByRole('img', { name: 'A winding forest trail of 53 spaces to the castle' })).toBeVisible();
   await page.screenshot({ path: `test-results/castle-quest-short-${info.project.name}.png` });

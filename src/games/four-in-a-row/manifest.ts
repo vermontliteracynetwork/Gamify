@@ -20,8 +20,8 @@ export const fourInARowManifest: GameManifest = {
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 4, width: 256, height: 256,
     abilities: [
-      { id: 'double', label: 'Double drop', hint: 'Drop two pieces this turn' },
-      { id: 'pop', label: 'Pop out', hint: 'Pull the bottom piece out of any column; the rest fall down' },
+      { id: 'double', label: 'Double drop', hint: 'This turn you drop two pieces instead of one.' },
+      { id: 'pop', label: 'Pop out', hint: 'Pull the bottom piece out of any column; the pieces above it fall down one space.' },
     ],
     classic: [
       { id: 'classic-double-drop', name: 'Double Drop', ability: 'double', motion: 'bob', often: 2, image: '/classic/powerups/gem.webp' },

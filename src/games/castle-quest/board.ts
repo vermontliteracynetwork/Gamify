@@ -94,7 +94,16 @@ export function openChest(rand: () => number = Math.random): ChestPrize {
 }
 export const isBad = (p: ChestPrize) => p.kind === 'start' || (p.kind === 'move' && p.n < 0);
 
-export const roll = (rand: () => number = Math.random) => 1 + Math.floor(rand() * 6);
+export const roll = (rand: () => number = Math.random, sides = 6) => 1 + Math.floor(rand() * sides);
+
+// Trail lengths (teacher, 2026-11-01): about 10, 15, 20 or 25 rounds for
+// each player. Short starts at the second bend; long and extra long use a
+// smaller die (1 to 4, 1 to 3), so the walk to the castle takes longer.
+export type TrailLength = 'short' | 'medium' | 'long' | 'xlong';
+export const TRAILS: TrailLength[] = ['short', 'medium', 'long', 'xlong'];
+export const trailOf = (v: string | undefined): TrailLength => (v === 'full' || !v ? 'medium' : (TRAILS as string[]).includes(v) ? v as TrailLength : 'medium');
+export const trailStart = (tr: TrailLength) => (tr === 'short' ? SHORT_START : 0);
+export const dieSides = (tr: TrailLength) => (tr === 'long' ? 4 : tr === 'xlong' ? 3 : 6);
 export const clampPos = (n: number) => Math.max(0, Math.min(FINISH, n));
 
 // ---- The world around the trail -------------------------------------------

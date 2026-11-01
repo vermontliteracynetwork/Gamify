@@ -21,9 +21,9 @@ export const farmGrowManifest: GameManifest = {
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
     abilities: [
-      { id: 'jobs', label: 'Extra jobs', hint: 'More farm jobs today', amount: { label: 'Jobs', min: 1, max: 6, step: 1, default: 2 } },
-      { id: 'rain', label: 'Rain', hint: 'Waters every planted plot' },
-      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 1, max: 20, step: 1, default: 5 } },
+      { id: 'jobs', label: 'Extra jobs', hint: 'Gives you more farm jobs to do today.', amount: { label: 'Jobs', min: 1, max: 6, step: 1, default: 2 } },
+      { id: 'rain', label: 'Rain', hint: 'A rain cloud waters every planted plot at once.' },
+      { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 1, max: 20, step: 1, default: 5 } },
     ],
     classic: [
       { id: 'classic-watering-can', name: 'Watering Can', ability: 'jobs', amount: 2, motion: 'bob', often: 2, art: 'watering-can' },

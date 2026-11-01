@@ -24,6 +24,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
 import { cutPhotoForPiece } from './scan';
+import { loadDraft, saveDraft } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
 import Title from '../../ui/Title';
@@ -161,9 +162,28 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const [dl, setDl] = useState('');
   const { settings } = useSettings();
 
+  // Work in progress is kept on this device as it changes, and comes back
+  // when the builder opens again (teacher, 2026-11-01).
+  const restored = useRef(false);
+  useEffect(() => {
+    let live = true;
+    void loadDraft(gameId).then((kept) => {
+      if (!live) return;
+      if (kept && (!editId || kept.id === editId)) { setDraft(kept); setStatus(t('builder.draftBack')); }
+      restored.current = true;
+    });
+    return () => { live = false; };
+  }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!restored.current) return;
+    const id = window.setTimeout(() => void saveDraft(gameId, draft), 400);
+    return () => window.clearTimeout(id);
+  }, [draft, gameId]);
+  // Opening a saved design loads it, but a reload of the list never wipes
+  // changes made to the design already open.
   useEffect(() => {
     const found = themes.find((th) => th.id === editId);
-    if (found) setDraft(found);
+    if (found) setDraft((d) => (d.id === found.id ? d : found));
   }, [editId, themes]);
 
   const plan = TIERS[tier].themeBuilder;
@@ -216,6 +236,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   }
   async function remove() {
     await deleteMadeTheme(draft.id);
+    void saveDraft(gameId, null);
     reload();
     setDraft(blankTheme(gameId, owner));
     setParams({});
@@ -295,8 +316,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                         <Button variant="primary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
                           onClick={async () => {
                             setDl(t('builder.dl.making'));
-                            const [{ fileSlug, saveFile }, { itemPages }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
-                            saveFile(new Blob([templatePdf([...game.themePieces, ...itemPages(game.items)])], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-for-canva.pdf`);
+                            const [{ fileSlug, saveFile }, { templatePieces }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
+                            saveFile(new Blob([templatePdf(templatePieces(game))], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-for-canva.pdf`);
                             setDl(t('builder.dl.ready'));
                           }}><DownloadSimple weight="bold" size={20} />{t('builder.dl.pdf')}</Button>
                       </div>
@@ -495,7 +516,8 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
                 {spec.abilities.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
-              <span className="text-xs font-semibold text-muted">{ability.hint}</span>
+              {/* What the power does, in full (teacher, 2026-11-01: clear and explanatory). */}
+              <span className="text-sm font-semibold leading-snug">{ability.hint}{ability.amount ? ` ${t('builder.items.amountNote', { what: ability.amount.label.toLowerCase() })}` : ''}</span>
               {spec.classic.find((c) => c.ability === ability.id) && (
                 <span className="flex items-center gap-2 text-xs font-bold">
                   <ItemArt item={spec.classic.find((c) => c.ability === ability.id)!} size={32} still />

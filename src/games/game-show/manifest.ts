@@ -18,9 +18,9 @@ export const gameShowManifest: GameManifest = {
     label: 'Power-ups', hint: 'Cards that do something special when a team turns them over. Give each one art and a power.', max: 6, width: 256, height: 256,
     abilities: [
       { id: 'double', label: 'Doubles your points', hint: "The team's score doubles" },
-      { id: 'swap', label: 'Swap points', hint: 'Trade scores with a team you pick' },
-      { id: 'steal', label: 'Steal points', hint: 'Take points from a team you pick', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 20 } },
-      { id: 'bonus', label: 'Bonus points', hint: 'A big prize of points', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 100 } },
+      { id: 'swap', label: 'Swap points', hint: 'Your team trades its whole score with a team you pick.' },
+      { id: 'steal', label: 'Steal points', hint: 'Takes points from a team you pick and adds them to yours.', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 20 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'A big prize: adds points to your score right away.', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 100 } },
     ],
     classic: [
       { id: 'classic-double', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },

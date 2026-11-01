@@ -22,14 +22,14 @@ export const bowlingManifest: GameManifest = {
     // Classic roles (teacher, 2026-10-31): held for the player's next turn,
     // shown under the scores, gone after that turn. Themes can redraw them.
     abilities: [
-      { id: 'double', label: '2x points', hint: 'Earn double points' },
-      { id: 'magnet', label: 'Pin magnet', hint: 'Your next ball pulls pins toward it' },
-      { id: 'twister', label: 'Pin twister', hint: 'The pins shake and wobble; some fall over' },
-      { id: 'bumpers', label: 'Bumper rails', hint: 'Rails pop up so your next roll cannot fall in the gutter' },
-      { id: 'mega', label: 'Mega ball', hint: 'Your next ball is giant' },
-      { id: 'mystery', label: 'Mystery points', hint: 'Surprise points from 1 to 10' },
-      { id: 'swipe', label: 'Sneaky swipe', hint: 'Take points from the leader', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
-      { id: 'bonus', label: 'Bonus points', hint: 'Points right away', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
+      { id: 'double', label: 'Double points', hint: 'The pins you knock down on your next roll count double.' },
+      { id: 'magnet', label: 'Pin magnet', hint: 'Your next ball pulls nearby pins toward it, so more of them fall.' },
+      { id: 'twister', label: 'Pin twister', hint: 'The pins shake and wobble right away; any that tip over count as your points.' },
+      { id: 'bumpers', label: 'Bumper rails', hint: 'Rails pop up along both gutters, so your next roll cannot be a gutter ball.' },
+      { id: 'mega', label: 'Mega ball', hint: 'Your next ball is twice as big, so it is much easier to hit lots of pins.' },
+      { id: 'mystery', label: 'Mystery points', hint: 'A surprise: you get from 1 to 10 points right away.' },
+      { id: 'swipe', label: 'Sneaky swipe', hint: 'Takes points from the team in first place and gives them to you.', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
+      { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
     ],
     classic: [
       { id: 'classic-golden-pin', name: 'Golden Pin', ability: 'double', motion: 'sparkle', often: 2, art: 'golden-pin' },
