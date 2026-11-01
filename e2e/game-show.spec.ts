@@ -35,7 +35,7 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
 
   // Team 1: pick card 1, then tap the right answer; the card turns over.
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
   await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-question-${info.project.name}.png` });
@@ -53,13 +53,13 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await expect(page.getByRole('button', { name: /^Card 1: won by / })).toBeVisible();
   // Team 2: a miss brings a new question; three misses keep the card closed
   // and pass the turn back (teacher, 2026-10-31).
-  await page.getByRole('button', { name: 'Card 2', exact: true }).click();
+  await page.getByRole('button', { name: /^Card 2(,|$)/ }).click();
   await answerShare(page, false);
   await expect(page.getByRole('dialog').getByText('Try 2 of 3')).toBeVisible();
   await answerShare(page, false);
   await expect(page.getByRole('dialog').getByText('Try 3 of 3')).toBeVisible();
   await answerShare(page, false);
-  await expect(page.getByRole('button', { name: 'Card 2', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: /^Card 2(,|$)/ })).toBeEnabled();
   // No scrolling, ever.
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   expect(problems).toEqual([]);
@@ -111,7 +111,7 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
   await finishSetup(page);
-  await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
   await startTurn(page);
   // A different student answers each turn (market research, 2026-10-31).
   await expect(page.getByRole('dialog').getByText(/^(Ava|Ben|Cal|Dee) answers this one$/)).toBeVisible();
@@ -136,7 +136,7 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
   await expect(kid).toHaveURL(new RegExp(`/mirror/${code}`));
   await expect(kid.getByRole('heading', { name: 'Waiting for the Next Question' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+  await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
   await startTurn(page);
   const prompt = (await page.getByRole('dialog').getByRole('heading', { level: 2 }).innerText()).trim();
   await expect(kid.getByRole('heading', { level: 1, name: prompt })).toBeVisible();

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { playClip } from './music';
 import { pace, POP_IN } from './pace';
 import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
@@ -25,7 +26,7 @@ const ANSWERED = new Map<string, number>();
 // Dashboard; teacher, 2026-10-24) and it checks itself: one tap a turn, and
 // a miss shows the right answer. On the computer's turn it "answers" by its
 // level; it never answers for students.
-export default function ShareQuestion({ question, player, cpuLevel, onResult, chance, magnet, avatar }: {
+export default function ShareQuestion({ question, player, cpuLevel, onResult, chance, magnet, avatar, sounds }: {
   question: MultipleChoiceQuestion; player: TurnPlayer; cpuLevel: CpuLevel; onResult: (right: boolean) => void;
   // Which try this is, when a game gives more than one (Game Show: 3).
   chance?: { n: number; total: number };
@@ -33,7 +34,10 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   magnet?: string;
   // The player's own piece picture for the turn card (Board Game heroes).
   avatar?: string;
+  // A game's own right and wrong answer sounds (Game Show, teacher 2026-11-01).
+  sounds?: { right: string; wrong: string };
 }) {
+  const answerSound = (right: boolean) => (sounds ? playClip(right ? sounds.right : sounds.wrong, settings) : playEffect(right ? 'right' : 'miss', settings));
   const { settings } = useSettings();
   const q = useMemo(() => shuffleChoices(question), [question]);
   // Rotating answerer (market research, 2026-10-31): on a team made from the
@@ -79,7 +83,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   useEffect(() => {
     if (player.kind !== 'cpu' || !ready) return;
     const right = Math.random() < CPU_ACCURACY[cpuLevel];
-    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); playEffect(right ? 'right' : 'miss', settings); }, 1800 * pace(settings));
+    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); answerSound(right); }, 1800 * pace(settings));
     const b = window.setTimeout(() => onResult(right), 3600 * pace(settings));
     return () => { window.clearTimeout(a); window.clearTimeout(b); };
   }, [q, ready]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -88,7 +92,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     if (picked !== null || cpu) return;
     const right = i === q.correctIndex;
     setPicked(i); setShown(true);
-    playEffect(right ? 'right' : 'miss', settings);
+    answerSound(right);
     window.setTimeout(() => onResult(right), settings.motion === 'still' ? 900 : right ? 1300 : 2200);
   }
 

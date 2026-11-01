@@ -138,7 +138,7 @@ function deviceSpeak(text: string, s: PlayerSettings, v: number): void {
   speechSynthesis.speak(u);
 }
 
-function isSpeaking(): boolean {
+export function isSpeaking(): boolean {
   return (!!playing && !playing.paused && !playing.ended) || (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking);
 }
 

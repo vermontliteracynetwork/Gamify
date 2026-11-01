@@ -24,7 +24,7 @@ for (const h of HOW_TO_PLAY) {
     if (h.gameId === 'four-in-a-row') await page.getByRole('button', { name: 'Person' }).click().catch(() => {});
     await finishSetup(page);
     await page.waitForTimeout(800);
-    if (h.gameId === 'game-show') await page.getByRole('button', { name: 'Card 1', exact: true }).click();
+    if (h.gameId === 'game-show') await page.getByRole('button', { name: /^Card 1(,|$)/ }).click();
     if (h.gameId === 'cast-catch') {
       await page.getByRole('button', { name: /^Cast/ }).click();
       await page.waitForTimeout(700);

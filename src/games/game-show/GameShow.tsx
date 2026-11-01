@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pace, POP_IN } from '../../engine/pace';
+import { playClip, useGameMusic } from '../../engine/music';
+
+// Game Show's own sounds (teacher uploads, 2026-11-01; ledger: Pixabay).
+const GS = '/sounds/game-show/';
+const GS_SOUNDS = { right: `${GS}correct.mp3`, wrong: `${GS}wrong.mp3` };
 import { AnimatePresence, motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -92,6 +97,9 @@ export default function GameShow() {
     window.setTimeout(() => setToasts((x) => x.filter((y) => y.id !== id)), 2600 * pace(settings));
   }
   const marquee = theme.id.endsWith(':classic');
+  // The brass intro when play starts, then the music fades in: one track for
+  // the cards board, another for the category grid (teacher, 2026-11-01).
+  useGameMusic(phase === 'play', board === 'grid' ? `${GS}music-categories.mp3` : `${GS}music-cards.mp3`, settings, `${GS}intro.mp3`);
   const flipTimer = useRef(0);
   useEffect(() => () => window.clearTimeout(flipTimer.current), []);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
@@ -227,6 +235,7 @@ export default function GameShow() {
       const doubled = kind;
       setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: doubled } : c)));
     }
+    playClip(`${GS}page-turn.mp3`, settings);
     if (settings.motion === 'still') { showPrize(i, kind); return; }
     setFlipping(i);
     flipTimer.current = window.setTimeout(() => { setFlipping(null); showPrize(i, kind); }, 900 * pace(settings));
@@ -234,7 +243,7 @@ export default function GameShow() {
   function showPrize(i: number, kind: CardKind) {
     if (!turns) return;
     const tier = prizeTier(kind);
-    playEffect(tier > 1 ? 'win' : 'right', settings);
+    if (tier > 1) playEffect('win', settings); // the correct sound already played
     // Every prize gets a burst of confetti; bigger prizes get more (teacher, 2026-11-01).
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: (settings.celebrations === 'big' ? 40 : 25) * tier, spread: 60 + tier * 15, origin: { y: 0.45 }, disableForReducedMotion: true });
     const me = current(turns);
@@ -263,9 +272,11 @@ export default function GameShow() {
       else if (ability === 'double') next = addPoints(state, me.id, me.score);
       else if (ability === 'swap' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
+        if (other.score !== me.score) playClip(`${GS}fail.mp3`, settings); // someone loses points
         next = setScores(state, { [me.id]: other.score, [other.id]: me.score });
       } else if (ability === 'steal' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
+        if (other.score > 0) playClip(`${GS}fail.mp3`, settings);
         const take = Math.min(powerAmount(kind.item), other.score);
         next = setScores(state, { [me.id]: me.score + take, [other.id]: other.score - take });
       }
@@ -282,7 +293,7 @@ export default function GameShow() {
   function pickCell(i: number) {
     if (!turns || cells[i]?.used || question) return;
     const set = chosenSets[cells[i].col];
-    playEffect('tap', settings);
+    playClip(`${GS}page-turn.mp3`, settings);
     const d = draw([set]);
     setQuestion({ ...d, cell: i, chance: 1 });
   }
@@ -493,7 +504,7 @@ export default function GameShow() {
         </div>
       )}
 
-      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} />}
+      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} sounds={GS_SOUNDS} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} />}
 
       {reveal && turns && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={revealText(reveal.card)}>
