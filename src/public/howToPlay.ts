@@ -177,6 +177,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     gameId: 'bowling',
     goal: 'Answer right to roll the ball down the lane and knock over the pins. Most points after the last frame wins.',
     steps: [
+      'Each player or team picks a bowling ball on the Teams page. That ball is their icon and the ball they roll.',
       'A question comes first. A right answer earns a roll.',
       'Tap to aim: an arrow sweeps across the lane; tap when it points where you want.',
       'Tap to spin: a meter swings left and right; tap to put a curve on the ball and throw.',
@@ -187,6 +188,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       { name: 'Lane and pins', what: 'A glossy wooden lane with gutters on both sides and ten pins under the neon sign. Every roll plays out with real pin action, so no two are the same.' },
       { name: 'Aim and spin meter', what: 'Under the lane. Calm motion swaps it for two sliders and a Throw button.' },
       { name: 'Frames', what: 'Each frame has two rolls.' },
+      { name: 'Balls', what: 'Ten bowling balls to pick from, one for each player or team. A theme can draw all ten.' },
       { name: 'Power-ups', what: 'Golden Pin (2x points), Pin Magnet (the ball pulls pins toward it), Pin Twister (the pins shake and some fall), Bumper Rails (no gutter ball), Fireball (a giant ball), Mystery Box (surprise points) and Sneaky Swipe (take points from the leader).' },
     ],
     rules: ['Share: teams take turns, three questions to earn each roll.', 'Solo: answer, then roll.'],

@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Camera, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, BookOpen, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
@@ -23,7 +23,7 @@ import { playEffect } from '../../engine/feedback';
 import { useSettings } from '../../settings/SettingsContext';
 import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
-import { scanTemplatePages } from './scan';
+import { cutPhotoForPiece } from './scan';
 import { isRound, isSolid } from './template';
 import ThemePreview from './ThemePreview';
 import Title from '../../ui/Title';
@@ -156,8 +156,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const editId = params.get('id');
   const [draft, setDraft] = useState<GameTheme>(() => blankTheme(gameId, owner));
   const [status, setStatus] = useState('');
-  const [busy, setBusy] = useState(false);
-  const scanRef = useRef<HTMLInputElement>(null);
+  const [, setBusy] = useState(false);
   const [tab, setTab] = useState<'download' | 'upload' | 'items' | 'colors' | 'style' | 'share'>('upload');
   const [dl, setDl] = useState('');
   const { settings } = useSettings();
@@ -195,19 +194,16 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
       return next;
     });
   }
+  // Every picture is cut out for its piece (teacher, 2026-11-01): a photo
+  // of a template page (any version) or of a drawing on paper.
   async function upload(piece: ThemePieceSpec, file: File | undefined) {
     if (!file) return;
-    try { setPiece(piece.id, await imageFileToDataUrl(file, Math.max(piece.width, piece.height, 256), !isSolid(piece))); setStatus(''); }
-    catch (e) { setStatus(e instanceof Error ? e.message : String(e)); }
-  }
-  async function scan(files: File[]) {
-    setBusy(true); setStatus(t('builder.scanning'));
+    setBusy(true); setStatus(t('builder.cutting'));
     try {
-      const res = await scanTemplatePages(files, game.themePieces, isRound);
-      Object.entries(res.pieces).forEach(([id, img]) => setPiece(id, img));
-      const got = Object.keys(res.pieces).length;
-      setStatus([t('builder.scanGot', { count: got }), res.unread ? t('builder.scanUnread', { count: res.unread }) : '', res.empty.length ? t('builder.scanEmpty', { count: res.empty.length }) : ''].filter(Boolean).join(' '));
-    } finally { setBusy(false); }
+      const art = await cutPhotoForPiece(file, piece, isRound(piece), isSolid(piece));
+      if (art) { setPiece(piece.id, art); setStatus(''); } else setStatus(t('builder.cutEmpty'));
+    } catch (e) { setStatus(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
   }
   async function save() {
     const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
@@ -301,9 +297,6 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               {tab === 'upload' && (
                 <>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button disabled={busy} onClick={() => scanRef.current?.click()}><Camera weight="bold" size={18} />{t('builder.scan')}</Button>
-                    <input ref={scanRef} type="file" accept="image/*" multiple hidden aria-label={t('builder.scan')}
-                      onChange={(e) => { const f = Array.from(e.target.files ?? []); e.target.value = ''; if (f.length) void scan(f); }} />
                     <input type="search" value={find} onChange={(e) => setFind(e.target.value)} placeholder={t('builder.findPiece')} aria-label={t('builder.findPiece')}
                       className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-40" />
                   </div>

@@ -40,8 +40,9 @@ export function outlineBox(piece: Pick<ThemePieceSpec, 'width' | 'height'>) {
 const SOLID = /^(background|board|road|soil|lane|square|card-back|card-front|question-tile|answer-tile|counter|cover)$/;
 export const isSolid = (piece: Pick<ThemePieceSpec, 'id'>) => SOLID.test(piece.id);
 
-// Round pieces (discs, team icons, sign-in pictures, the star) are drawn in a circle.
-export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^star$/.test(piece.id);
+// Round pieces (discs, team icons, sign-in pictures, the star, Bowling's
+// balls) are drawn in a circle.
+export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^ball-|^star$/.test(piece.id);
 
 // The template page for power-ups: one blank page.
 export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {

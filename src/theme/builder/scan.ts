@@ -1,9 +1,9 @@
 import type { ThemePieceSpec } from '../types';
-import { CODE, codeX, MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
+import { MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
 
 // Reads photos (or scans) of printed theme template pages and cuts out the
 // art inside each piece's outline. Steps: find the four corner squares,
-// straighten the page, read its page number, crop just inside the outline,
+// straighten the page, crop just inside the piece's outline,
 // skip spaces left empty. Rebuilt from the Dashboard's scanner idea.
 
 type Pt = [number, number];
@@ -97,18 +97,6 @@ function straighten(img: CanvasImageSource & { width: number; height: number }, 
   return out;
 }
 
-function readPageNumber(page: HTMLCanvasElement): number {
-  const ctx = ctx2d(page);
-  let n = 0;
-  for (let b = 0; b < CODE.bits; b++) {
-    const q = CODE.size * 0.25, d = ctx.getImageData(Math.round(codeX(b) + q), Math.round(CODE.y + q), CODE.size / 2, CODE.size / 2).data;
-    let sum = 0;
-    for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2];
-    n = n * 2 + (sum / (d.length / 4) / 3 < 110 ? 1 : 0);
-  }
-  return n;
-}
-
 // Share of a crop that is still plain paper.
 function paperShare(d: Uint8ClampedArray) {
   let white = 0, n = 0;
@@ -130,23 +118,85 @@ function cutPiece(page: HTMLCanvasElement, piece: ThemePieceSpec, round: boolean
   return round || piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
 }
 
-export interface ScanResult { pieces: Record<string, string>; empty: string[]; unread: number }
+export const MARKER_SIZE = MARKER.size;
 
-// `pieces` is the game's piece list in template page order (page 1 first).
-export async function scanTemplatePages(files: File[], pieces: ThemePieceSpec[], isRoundPiece: (p: ThemePieceSpec) => boolean): Promise<ScanResult> {
-  const result: ScanResult = { pieces: {}, empty: [], unread: 0 };
-  for (const file of files) {
-    let bmp: ImageBitmap;
-    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { result.unread++; continue; }
-    const corners = findMarkers(bmp);
-    if (!corners) { result.unread++; continue; }
-    const page = straighten(bmp, corners);
-    const piece = pieces[readPageNumber(page) - 1];
-    if (!piece) { result.unread++; continue; }
-    const art = cutPiece(page, piece, isRoundPiece(piece));
-    if (art) result.pieces[piece.id] = art; else result.empty.push(piece.id);
-  }
-  return result;
+// One photo for one piece (teacher, 2026-11-01: no separate "add photos of
+// the pages"; every upload is cut out). A photo of a printed template page is
+// straightened and cut to this piece's outline, whatever page it was, so an
+// older template's page works too. Any other picture is cut out as a drawing:
+// paper around it turns see-through (for pieces that may be see-through), it
+// is trimmed to the drawing, and round pieces are cut in a circle. Solid
+// pieces (backgrounds, covers) fill their whole shape.
+export async function cutPhotoForPiece(file: File, piece: ThemePieceSpec, round: boolean, solid: boolean): Promise<string | null> {
+  if (!file.type.startsWith('image/')) throw new Error('Pick a picture file (PNG, JPG, GIF or WebP).');
+  let bmp: ImageBitmap;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { throw new Error('That picture could not be opened.'); }
+  const corners = findMarkers(bmp);
+  if (corners) return cutPiece(straighten(bmp, corners), piece, round);
+  return cutDrawing(bmp, piece, round, solid);
 }
 
-export const MARKER_SIZE = MARKER.size;
+function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, solid: boolean): string {
+  const sc = Math.min(1, 1400 / Math.max(img.width, img.height));
+  const W = Math.round(img.width * sc), H = Math.round(img.height * sc);
+  const src = canvas(W, H), sctx = ctx2d(src);
+  sctx.drawImage(img, 0, 0, W, H);
+  const id = sctx.getImageData(0, 0, W, H), d = id.data;
+  // A picture with its own see-through parts is digital art: keep it as is.
+  let clear = 0;
+  for (let i = 3; i < d.length; i += 16) if (d[i] < 250) clear++;
+  const digital = clear > d.length / 16 * 0.01;
+  let x0 = 0, y0 = 0, x1 = W, y1 = H;
+  if (!digital) {
+    // Whiten gray paper, like a template page.
+    const hist = [new Uint32Array(256), new Uint32Array(256), new Uint32Array(256)];
+    for (let i = 0; i < d.length; i += 16) { hist[0][d[i]]++; hist[1][d[i + 1]]++; hist[2][d[i + 2]]++; }
+    const total = d.length / 16;
+    const paper = hist.map((hh) => { let acc = 0; for (let v = 255; v >= 0; v--) { acc += hh[v]; if (acc > total * 0.03) return Math.max(v, 60); } return 255; });
+    if (paper.some((v) => v < 245)) for (let i = 0; i < d.length; i += 4) for (let ch = 0; ch < 3; ch++) d[i + ch] = Math.min(255, (d[i + ch] * 255) / paper[ch]);
+    if (!solid) {
+      // Paper reached from the edges turns see-through; white inside the
+      // drawing (a white eye, a shine) stays.
+      const light = (p: number) => d[p * 4] > 215 && d[p * 4 + 1] > 215 && d[p * 4 + 2] > 215;
+      const seen = new Uint8Array(W * H), stack: number[] = [];
+      const push = (p: number) => { if (!seen[p] && light(p)) { seen[p] = 1; stack.push(p); } };
+      for (let x = 0; x < W; x++) { push(x); push((H - 1) * W + x); }
+      for (let y = 0; y < H; y++) { push(y * W); push(y * W + W - 1); }
+      while (stack.length) {
+        const p = stack.pop()!, x = p % W;
+        d[p * 4 + 3] = 0;
+        if (x > 0) push(p - 1);
+        if (x < W - 1) push(p + 1);
+        if (p >= W) push(p - W);
+        if (p < W * (H - 1)) push(p + W);
+      }
+    }
+  }
+  if (!solid) {
+    // Trim to the drawing, with a little room around it.
+    x0 = W; y0 = H; x1 = 0; y1 = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 20) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 <= x0 || y1 <= y0) { x0 = 0; y0 = 0; x1 = W; y1 = H; }
+    const pad = Math.round(Math.max(x1 - x0, y1 - y0) * 0.03);
+    x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(W, x1 + pad); y1 = Math.min(H, y1 + pad);
+  }
+  sctx.putImageData(id, 0, 0);
+  // Fit the piece's shape: a solid piece is cropped to it (like a cover
+  // photo); a see-through piece sits whole and centered inside it.
+  const ratio = piece.width / piece.height;
+  const bw = x1 - x0, bh = y1 - y0;
+  const max = Math.max(piece.width, piece.height, 256);
+  const ow = ratio >= 1 ? max : Math.round(max * ratio), oh = ratio >= 1 ? Math.round(max / ratio) : max;
+  const out = canvas(ow, oh), octx = ctx2d(out);
+  if (solid) {
+    const s = Math.max(ow / bw, oh / bh);
+    octx.drawImage(src, x0 + (bw - ow / s) / 2, y0 + (bh - oh / s) / 2, ow / s, oh / s, 0, 0, ow, oh);
+    return piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
+  }
+  if (round) { octx.beginPath(); octx.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); octx.clip(); }
+  // Round pieces fill their circle (the drawing's own circle edge); others fit inside.
+  const s = round ? Math.max(ow / bw, oh / bh) : Math.min(ow / bw, oh / bh);
+  const dw = bw * s, dh = bh * s;
+  octx.drawImage(src, x0, y0, bw, bh, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
+  return out.toDataURL('image/png');
+}

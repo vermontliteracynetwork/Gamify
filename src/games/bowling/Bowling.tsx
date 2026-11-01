@@ -15,6 +15,7 @@ import ShareQuestion from '../../engine/ShareQuestion';
 import ScoreBoard from '../../engine/ScoreBoard';
 import { CHANCES } from '../../engine/turns';
 import TeamSetup from '../../engine/TeamSetup';
+import { TeamArt } from '../../engine/TeamBadge';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
@@ -42,7 +43,11 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'spin' | 'roll' | 'result';
 // Classic: a bowling alley, no space look (teacher, 2026-10-31), and real
 // bowling balls from the Puzzle Games Graphics Pack, one color per player.
-const CLASSIC_BALLS = 8;
+// Each player's ball is their icon too (teacher, 2026-11-01): the ball they
+// pick on the Teams page is the one they roll. A theme draws up to 10 balls
+// (pieces ball-1 to ball-10); any it leaves out stay Classic.
+const BALLS = 10;
+const classicBallArt = (k: number) => `/classic/bowling/ball-${k % BALLS}.webp`;
 // Wood boards down the lane, fixed so they never jump between turns.
 const BOARDS = Array.from({ length: 9 }, (_, i) => -1.2 + (i + 1) * 0.24);
 
@@ -323,14 +328,18 @@ export default function Bowling() {
     return () => window.clearTimeout(id);
   }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A theme's own ball for player icon k (an older design's team icon or its
+  // one Ball piece stand in).
+  const drawnBall = (k: number) => pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? pieceImage(theme, 'ball');
+  const ballIcons = Array.from({ length: BALLS }, (_, k) => drawnBall(k) ?? (pieceColor(theme, 'ball', '') ? undefined : classicBallArt(k)));
   const tray = <PowerUpTray manifest={bowlingManifest} items={held.held} onUse={applyItem} disabled={(step !== 'aim' && step !== 'spin') || player?.kind === 'cpu' || twisting} />;
   const canAim = phase === 'play' && (step === 'aim' || step === 'spin') && player?.kind !== 'cpu' && !twisting;
   const pinColor = pieceColor(theme, 'pin', '#fbfcf8');
   const pinArt = pieceImage(theme, 'pin');
   const ballColor = pieceColor(theme, 'ball', '#ed9d75');
-  const ballArt = pieceImage(theme, 'ball');
   const laneColor = pieceColor(theme, 'lane', '#e2b07a');
-  const classicBall = `/classic/bowling/ball-${(turns?.turn ?? 0) % CLASSIC_BALLS}.webp`;
+  const ballK = (player?.colorIndex ?? 0) % BALLS;
+  const ballArt = drawnBall(ballK);
   const near = 0, far = 1;
   const lanePoly = `${50 - halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(far)},${yAt(far)} ${50 - halfWidthAt(far)},${yAt(far)}`;
   // Where each pin is drawn: from the roll in progress, or its spot.
@@ -352,6 +361,7 @@ export default function Bowling() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
+    <TeamArt.Provider value={ballIcons}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       {clock.element}
@@ -462,8 +472,9 @@ export default function Bowling() {
                       <ellipse cx={0} cy={6} rx={5.4} ry={1.4} fill="rgba(0,0,0,0.3)" />
                       {(armed.includes('double') || armed.includes('magnet') || big) && <circle r={8.5} fill="none" stroke={armed.includes('magnet') ? '#ef6f6c' : '#fdfd94'} strokeWidth={1.4} opacity={0.85} className={still ? '' : 'cq-glow'} />}
                       <g transform={`rotate(${rot})`}>
-                        {ballArt ? <circle r={6} fill="url(#sb-ball-art)" stroke="#000" strokeWidth={0.6} /> : pieceColor(theme, 'ball', '') ? <circle r={6} fill="url(#sb-shine)" stroke="#000" strokeWidth={0.6} /> : <image href={classicBall} x={-6.3} y={-6.3} width={12.6} height={12.6} />}
-                        {[[-1.6, -2.4, 0.9], [0.6, -3, 0.9], [-0.2, -0.4, 1.1]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity={0.85} />)}
+                        {ballArt ? <circle r={6} fill="url(#sb-ball-art)" stroke="#000" strokeWidth={0.6} /> : pieceColor(theme, 'ball', '') ? <circle r={6} fill="url(#sb-shine)" stroke="#000" strokeWidth={0.6} /> : <image href={classicBallArt(ballK)} x={-6.3} y={-6.3} width={12.6} height={12.6} />}
+                        {/* Finger holes, except on a ball a theme drew itself. */}
+                        {!ballArt && [[-1.6, -2.4, 0.9], [0.6, -3, 0.9], [-0.2, -0.4, 1.1]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity={0.85} />)}
                       </g>
                     </g>
                   );
@@ -534,6 +545,7 @@ export default function Bowling() {
       {powers.element}
       {element}
     </main>
+    </TeamArt.Provider>
     </ThemedPage>
   );
 }

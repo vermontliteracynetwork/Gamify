@@ -40,7 +40,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.screenshot({ path: `test-results/builder-games-${info.project.name}.png`, fullPage: true });
   await page.getByRole('link', { name: /Game Show/ }).click();
   await page.getByLabel('Theme name').fill('Ocean Party');
-  const cardBack = page.locator('input[type=file]').nth(2); // Upload tab: page photos, background, then card back
+  const cardBack = page.locator('input[type=file]').nth(1); // Upload tab: background, then card back
   await cardBack.setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: await png(page, '#2a9df4') });
   await expect(page.getByLabel('Added')).toHaveCount(1);
   await page.getByRole('tab', { name: 'Colors' }).click();
@@ -71,7 +71,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   expect(problems).toEqual([]);
 });
 
-test('Theme Builder: a photo of a drawn template page fills its piece', async ({ page }, info) => {
+test('Theme Builder: a photo of a drawn template page, uploaded on its card, is cut out', async ({ page }, info) => {
   test.setTimeout(90_000);
   const problems = watch(page);
   await page.goto('/teacher/themes/game-show/template');
@@ -89,11 +89,52 @@ test('Theme Builder: a photo of a drawn template page fills its piece', async ({
   const photo = await sheet.screenshot();
   await page.goto('/teacher/themes/game-show');
   await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByLabel('Add photos of the pages').setInputFiles({ name: 'page1.png', mimeType: 'image/png', buffer: photo });
-  await expect(page.getByText('1 piece added.')).toBeVisible({ timeout: 20_000 });
-  await page.getByRole('tab', { name: 'Upload' }).click();
-  await expect(page.getByLabel('Added')).toHaveCount(1);
+  // No separate photos button (teacher, 2026-11-01): the piece's own upload
+  // takes the photo of its page and cuts the piece out.
+  await expect(page.getByRole('button', { name: 'Add photos of the pages' })).toHaveCount(0);
+  await page.locator('input[type=file]').first().setInputFiles({ name: 'page1.png', mimeType: 'image/png', buffer: photo });
+  await expect(page.getByLabel('Added')).toHaveCount(1, { timeout: 20_000 });
   await page.screenshot({ path: `test-results/builder-scanned-${info.project.name}.png`, fullPage: true });
+  expect(problems).toEqual([]);
+});
+
+test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players pick a ball as their icon', async ({ page }, info) => {
+  test.setTimeout(90_000);
+  const problems = watch(page);
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/bowling');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByPlaceholder('Find a piece').fill('Ball 1');
+  await expect(page.getByText('Team 1 icon')).toHaveCount(0);
+  // A drawing photographed on gray paper, no template: a red ball.
+  const photo = await page.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 600; c.height = 500;
+    const x = c.getContext('2d')!;
+    x.fillStyle = '#d9d6cf'; x.fillRect(0, 0, 600, 500);
+    x.fillStyle = '#d0302a'; x.beginPath(); x.arc(330, 240, 140, 0, Math.PI * 2); x.fill();
+    return c.toDataURL('image/png').split(',')[1];
+  });
+  await page.locator('input[type=file]').first().setInputFiles({ name: 'ball.png', mimeType: 'image/png', buffer: Buffer.from(photo, 'base64') });
+  await expect(page.getByLabel('Added')).toHaveCount(1, { timeout: 20_000 });
+  // The cut ball is round with see-through corners, centered on the drawing.
+  const px = await page.locator('img[src^="data:image/png"]').first().evaluate(async (img: HTMLImageElement) => {
+    await img.decode();
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+    return { corner: x.getImageData(2, 2, 1, 1).data[3], middle: Array.from(x.getImageData(c.width / 2, c.height / 2, 1, 1).data) };
+  });
+  expect(px.corner).toBe(0);
+  expect(px.middle[0]).toBeGreaterThan(150);
+  expect(px.middle[1]).toBeLessThan(100);
+  if (info.project.name === 'ipad-landscape') await page.screenshot({ path: 'test-results/bowling-ball-cut.png' });
+  // Players pick a ball as their icon.
+  await openSetup(page, '/games/bowling');
+  for (let k = 0; k < 6 && !(await page.getByRole('button', { name: /^Pick a team picture for / }).first().isVisible()); k++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: /^Pick a team picture for / }).first().click();
+  const balls = page.getByRole('group', { name: /^Pick a team picture for / }).locator('img');
+  await expect(balls).toHaveCount(10);
+  expect(await balls.first().getAttribute('src')).toContain('/classic/bowling/ball-0.webp');
+  await page.screenshot({ path: `test-results/bowling-ball-icons-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });
 

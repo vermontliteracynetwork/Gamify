@@ -54,3 +54,5 @@ line that fits, and add each new preference the same turn she says it.
 - Quiet build: no narration; short final report starting with Waiting on you.
 - Test in a real browser at every size before calling anything done; read console errors.
 - Run the golden-rule skill and a Claudia review on every game change.
+- Bowling balls: each ball is a round template piece; up to 10 can be drawn; a player's icon is the ball they pick (2026-11-01).
+- Uploading pieces: no separate "add photos of the pages" button; every piece's upload takes a photo of its page or of a drawing and cuts the piece out (2026-11-01).

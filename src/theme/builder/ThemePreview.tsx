@@ -60,7 +60,7 @@ function board(theme: GameTheme) {
     case 'game-show':
       return (
         <div className="grid grid-cols-4 gap-1.5 w-full">
-          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image)}>
+          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image ?? (theme.gameId === 'bowling' ? theme.pieces[`ball-${k + 1}`]?.image : undefined))}>
             <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
           </TeamArt.Provider>
           {Array.from({ length: 8 }, (_, i) => (

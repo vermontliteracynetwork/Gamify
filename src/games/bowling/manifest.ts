@@ -10,9 +10,10 @@ export const bowlingManifest: GameManifest = {
   themePieces: [
     { id: 'background', label: 'Background', width: 1000, height: 1300, hint: 'The alley wall behind the lane' },
     { id: 'lane', label: 'Lane', width: 800, height: 1000, hint: 'The color of the lane', color: '#e2b07a' },
-    { id: 'ball', label: 'Ball', width: 128, height: 128, hint: 'The ball you roll (Classic: a ball in each player\'s own color)' },
     { id: 'pin', label: 'Pin', width: 64, height: 128, hint: 'One pin (a picture, or just its color)', color: '#fbfcf8' },
-    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} icon`, width: 256, height: 256, hint: `The round badge for team ${i + 1}` })),
+    // Up to 10 balls, each in a round frame; a player's ball is their icon
+    // too (teacher, 2026-11-01). Balls left blank stay Classic.
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `ball-${i + 1}`, label: `Ball ${i + 1}`, width: 256, height: 256, hint: i === 0 ? 'A bowling ball. Each player picks a ball; it is the ball they roll and their icon' : `Bowling ball ${i + 1} (leave it blank to keep a Classic ball)` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
   rounds: { label: 'Frames', min: 1, max: 10, default: 3 },

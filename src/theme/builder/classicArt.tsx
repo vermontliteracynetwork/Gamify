@@ -59,6 +59,16 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
     const k = Number(id.slice(5)) - 1;
     return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={TEAM_COLORS[k % TEAM_COLORS.length]} stroke={INK} strokeWidth={line} />{icon(TEAM_ICONS[k % TEAM_ICONS.length], '#241c3d', m * 0.55)}</g>;
   }
+  // A Bowling ball: a round ball in the player's color with finger holes.
+  if (id.startsWith('ball-')) {
+    const k = Number(id.slice(5)) - 1;
+    return (
+      <g>
+        <circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={TEAM_COLORS[k % TEAM_COLORS.length]} stroke={INK} strokeWidth={line} />
+        {[[-0.14, -0.2, 0.07], [0.06, -0.26, 0.07], [-0.02, -0.04, 0.085]].map(([x, y, r], i) => <circle key={i} cx={w / 2 + x * m} cy={h / 2 + y * m} r={r * m} fill="#241c3d" />)}
+      </g>
+    );
+  }
   if (id.startsWith('pic-')) {
     const p = PICTURES.find((x) => `pic-${x.id}` === id);
     return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={p?.color ?? ACCENT} stroke={INK} strokeWidth={line} />{p && icon(p.icon, INK, m * 0.55)}</g>;

@@ -8,7 +8,20 @@ import type { GameTheme } from './types';
 const KEY = 'made-themes';
 
 export async function loadMadeThemes(): Promise<GameTheme[]> {
-  return (await data.getSetting<GameTheme[]>(KEY)) ?? [];
+  return ((await data.getSetting<GameTheme[]>(KEY)) ?? []).map(upgradeTheme);
+}
+
+// Older designs carried forward. Bowling (teacher, 2026-11-01): each player's
+// icon is now their ball, so team icons drawn on the older template become
+// balls 1 to 10.
+export function upgradeTheme(theme: GameTheme): GameTheme {
+  if (theme.gameId !== 'bowling' || !Object.keys(theme.pieces).some((k) => k.startsWith('team-'))) return theme;
+  const pieces = { ...theme.pieces };
+  for (let k = 1; k <= 10; k++) {
+    if (pieces[`team-${k}`] && !pieces[`ball-${k}`]) pieces[`ball-${k}`] = pieces[`team-${k}`];
+    delete pieces[`team-${k}`];
+  }
+  return { ...theme, pieces };
 }
 
 export async function saveMadeTheme(theme: GameTheme): Promise<void> {
