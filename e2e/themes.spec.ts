@@ -127,6 +127,14 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   expect(px.middle[0]).toBeGreaterThan(150);
   expect(px.middle[1]).toBeLessThan(100);
   if (info.project.name === 'ipad-landscape') await page.screenshot({ path: 'test-results/bowling-ball-cut.png' });
+  // The preview shows each screen the pieces appear on (teacher, 2026-11-01).
+  const views = page.getByRole('tablist', { name: 'Preview screens' });
+  await expect(views.getByRole('tab')).toHaveText(['Lane', 'Pick a ball', 'Power-ups']);
+  await views.getByRole('tab', { name: 'Pick a ball' }).click();
+  await expect(page.getByRole('img', { name: 'Preview: each team picks its ball' }).locator('img[src^="data:image"]').first()).toBeVisible();
+  await views.getByRole('tab', { name: 'Power-ups' }).click();
+  await expect(page.getByRole('img', { name: /^Preview of / })).toBeVisible();
+  await views.getByRole('tab', { name: 'Lane' }).click();
   // Players pick a ball as their icon.
   await openSetup(page, '/games/bowling');
   for (let k = 0; k < 6 && !(await page.getByRole('button', { name: /^Pick a team picture for / }).first().isVisible()); k++) await page.getByRole('button', { name: 'Next', exact: true }).click();

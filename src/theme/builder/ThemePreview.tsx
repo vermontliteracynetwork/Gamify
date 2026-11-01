@@ -1,31 +1,140 @@
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
 import { PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
-import { THEME_FONTS, type GameTheme } from '../types';
+import { THEME_FONTS, type GameTheme, type ThemeItem } from '../types';
+import ItemArt from '../ItemArt';
+import { GAMES } from '../../games/registry';
+import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
 
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 
+// The views a game's preview can show (teacher, 2026-11-01: "tabs can be
+// toggled through to see the different views where your items will be
+// shown"), each a screen of the game where the theme's pieces appear.
+export type PreviewView = 'game' | 'pick' | 'powers';
+export function previewViews(gameId: string, hasItems: boolean): { id: PreviewView; label: string }[] {
+  const views: { id: PreviewView; label: string }[] = [{ id: 'game', label: gameId === 'bowling' ? 'Lane' : 'Game' }];
+  if (gameId === 'bowling') views.push({ id: 'pick', label: 'Pick a ball' });
+  else if (gameId === 'game-show') views.push({ id: 'pick', label: 'Team icons' });
+  if (hasItems) views.push({ id: 'powers', label: 'Power-ups' });
+  return views;
+}
+
 // A small live copy of the game screen wearing the theme being built.
-export default function ThemePreview({ theme: own, gameName }: { theme: GameTheme; gameName: string }) {
+export default function ThemePreview({ theme: own, gameName, view = 'game' }: { theme: GameTheme; gameName: string; view?: PreviewView }) {
   const theme = withClassicArt(own);
   const c = theme.colors;
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
+  // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
+  if (view === 'pick') return <PickView theme={theme} />;
   return (
     <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
         <span className="px-3 py-1 rounded-pill border-[2px] border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
       </div>
-      <div className="min-h-0 flex items-center justify-center">{board(theme)}</div>
+      <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme)}</div>
     </div>
+  );
+}
+
+// Each team's picture as the game shows it: Bowling's balls, else team icons.
+const teamArt = (theme: GameTheme) => Array.from({ length: 10 }, (_, k) => theme.gameId === 'bowling'
+  ? pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? `/classic/bowling/ball-${k}.webp`
+  : pieceImage(theme, `team-${k + 1}`));
+
+// The Teams page picker, where each team taps its picture (Bowling: its ball).
+function PickView({ theme }: { theme: GameTheme }) {
+  const names = ['Glowing Pickle', 'Magic Falcon'];
+  return (
+    <div className="brand-menu rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="img" aria-label={theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : 'Preview: each team picks its icon'}>
+      <TeamArt.Provider value={teamArt(theme)}>
+        <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <span className="font-bold text-lg">Teams</span>
+          {names.map((n, i) => (
+            <span key={n} className="flex items-center gap-2 rounded-input border-[2px] border-border-soft p-1.5"><TeamBadge colorIndex={i} size={30} /><span className="font-bold text-sm truncate">{n}</span></span>
+          ))}
+          <div className="grid grid-cols-5 gap-1.5 rounded-input border-[2px] border-border p-2 bg-[#e6ebff] justify-items-center">
+            {Array.from({ length: 10 }, (_, k) => <span key={k} className={`rounded-full ${k === 0 ? 'ring-4 ring-accent' : ''}`}><TeamBadge colorIndex={k} size={34} /></span>)}
+          </div>
+        </div>
+      </TeamArt.Provider>
+    </div>
+  );
+}
+
+// The power-ups as they pop up in play: the theme's own, else Classic's,
+// sized to fill the preview without spilling out of it.
+function PowersView({ theme }: { theme: GameTheme }) {
+  const items: ThemeItem[] = (theme.items?.length ? theme.items : GAMES.find((g) => g.id === theme.gameId)?.items?.classic ?? []).slice(0, 8);
+  const box = useRef<HTMLDivElement>(null);
+  const [room, setRoom] = useState({ w: 300, h: 200 });
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setRoom({ w: el.clientWidth, h: el.clientHeight }));
+    setRoom({ w: el.clientWidth, h: el.clientHeight });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const n = Math.max(1, items.length);
+  let best = { cols: n, cell: 0 };
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols), cell = Math.min((room.w - 8 * (cols - 1)) / cols, (room.h - 8 * (rows - 1)) / rows);
+    if (cell > best.cell) best = { cols, cell };
+  }
+  const art = Math.max(16, Math.floor(best.cell * 0.62));
+  return (
+    <div ref={box} className="w-full h-full grid place-content-center gap-2" style={{ gridTemplateColumns: `repeat(${best.cols}, ${Math.floor(best.cell)}px)`, gridAutoRows: `${Math.floor(best.cell)}px` }}>
+      {items.map((it) => (
+        <span key={it.id} className="grid place-items-center content-center gap-0.5 rounded-input border-[2px] border-border bg-surface overflow-hidden" style={{ boxShadow: '0 3px 0 #000' }} title={it.name}>
+          <ItemArt item={it} size={art} still />
+          {best.cell > 70 && <span className="text-[11px] leading-tight font-bold max-w-full px-1 truncate">{it.name}</span>}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// Bowling's lane as the game draws it: the lane in perspective, ten pins, a ball.
+function BowlingLane({ theme }: { theme: GameTheme }) {
+  const laneColor = pieceColor(theme, 'lane', '#e2b07a'), laneArt = pieceImage(theme, 'lane');
+  const pinColor = pieceColor(theme, 'pin', '#fbfcf8'), pinArt = pieceImage(theme, 'pin');
+  const ball = teamArt(theme)[0]!;
+  const lane = `${50 - halfWidthAt(0)},${yAt(0)} ${50 + halfWidthAt(0)},${yAt(0)} ${50 + halfWidthAt(1)},${yAt(1)} ${50 - halfWidthAt(1)},${yAt(1)}`;
+  const pins = PIN_XY.map(([x, y]) => toView(x, y)).sort((a, b) => b.d - a.d);
+  return (
+    <svg viewBox="0 18 100 112" className="h-full max-w-full" aria-hidden="true">
+      <defs>
+        {laneArt && <pattern id="pv-lane" patternUnits="userSpaceOnUse" x={50 - halfWidthAt(0)} y={yAt(1)} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)}><image href={laneArt} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)} preserveAspectRatio="xMidYMid slice" /></pattern>}
+        <clipPath id="pv-ball"><circle r={6} /></clipPath>
+      </defs>
+      <polygon points={`${50 - halfWidthAt(0) - 5},${yAt(0)} ${50 + halfWidthAt(0) + 5},${yAt(0)} ${50 + halfWidthAt(1) + 5 * scaleAt(1)},${yAt(1)} ${50 - halfWidthAt(1) - 5 * scaleAt(1)},${yAt(1)}`} fill="#7d8597" stroke="#000" strokeWidth={0.6} />
+      <polygon points={lane} fill={laneArt ? 'url(#pv-lane)' : laneColor} stroke="#000" strokeWidth={0.6} />
+      {pins.map((p, i) => (
+        <g key={i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
+          {pinArt ? <image href={pinArt} x={-3.2} y={-11.2} width={6.4} height={11.6} preserveAspectRatio="xMidYMax meet" /> : <>
+            <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
+            <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
+          </>}
+        </g>
+      ))}
+      <g transform={`translate(50 ${yAt(0.04) - 6})`}>
+        <image href={ball} x={-6.3} y={-6.3} width={12.6} height={12.6} clipPath="url(#pv-ball)" preserveAspectRatio="xMidYMid slice" />
+        <circle r={6} fill="none" stroke="#000" strokeWidth={0.6} />
+      </g>
+    </svg>
   );
 }
 
 function board(theme: GameTheme) {
   switch (theme.gameId) {
+    case 'bowling':
+      return <BowlingLane theme={theme} />;
     case 'match-three':
       return (
         <div className="grid grid-cols-5 gap-1 p-2 rounded-input border-[2px] border-border h-full aspect-square" style={pieceFill(theme, 'board', '#ffffff')}>

@@ -650,6 +650,7 @@ export const en = {
   'builder.dl.making': 'Making your files...',
   'builder.dl.ready': 'Your file is downloading.',
   'builder.scanHint': 'Drew on paper? Tap a card and add a photo of its page or drawing; it is cut out for you. Or Draw it here.',
+  'builder.previewViews': 'Preview screens',
   'builder.cutting': 'Cutting out your picture...',
   'builder.cutEmpty': 'That page looks blank. Draw inside the outline, then take the photo again.',
   'builder.uploadTitle': 'Upload',

@@ -25,7 +25,7 @@ import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
 import { cutPhotoForPiece } from './scan';
 import { isRound, isSolid } from './template';
-import ThemePreview from './ThemePreview';
+import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
 import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
@@ -179,6 +179,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const filled = game.themePieces.filter((p) => draft.pieces[p.id]?.image).length;
 
   const [drawing, setDrawing] = useState<ThemePieceSpec | null>(null);
+  const views = previewViews(gameId, !!game.items);
+  const [view, setView] = useState<PreviewView>('game');
   const [find, setFind] = useState('');
   // Tall screens show more pieces a page, so there is no empty space.
   const [tall, setTall] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-height: 860px)').matches);
@@ -240,7 +242,16 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
       <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         {/* The preview, as big as the space allows. */}
         <div className="min-h-0 flex flex-col items-center gap-2 [container-type:size]">
-          <div className="w-full" style={{ maxWidth: 'calc((100cqh - 2rem) * 4 / 3)' }}><ThemePreview theme={draft} gameName={game.name} /></div>
+          {/* Tabs for each screen the pieces show up on (teacher, 2026-11-01). */}
+          {views.length > 1 && (
+            <div role="tablist" aria-label={t('builder.previewViews')} className="flex gap-1.5 flex-wrap justify-center">
+              {views.map((v) => (
+                <button key={v.id} type="button" role="tab" aria-selected={view === v.id} onClick={() => setView(v.id)}
+                  className={`min-h-10 px-4 rounded-pill border-[2px] font-bold text-sm ${view === v.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{v.label}</button>
+              ))}
+            </div>
+          )}
+          <div className="w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 5 : 2}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} /></div>
           <p className="font-bold text-sm text-center">{t('builder.filled', { filled, total: game.themePieces.length })}</p>
         </div>
 

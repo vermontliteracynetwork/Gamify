@@ -56,3 +56,5 @@ line that fits, and add each new preference the same turn she says it.
 - Run the golden-rule skill and a Claudia review on every game change.
 - Bowling balls: each ball is a round template piece; up to 10 can be drawn; a player's icon is the ball they pick (2026-11-01).
 - Uploading pieces: no separate "add photos of the pages" button; every piece's upload takes a photo of its page or of a drawing and cuts the piece out (2026-11-01).
+- Every upload is cut to the piece's exact size; the system tells a hand-drawn template photo (corner squares) from digital art (2026-11-01).
+- The Theme Builder preview is a game preview with tabs for each screen the pieces show on (Bowling: Lane, Pick a ball, Power-ups) (2026-11-01).
