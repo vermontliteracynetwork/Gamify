@@ -108,7 +108,16 @@ export default function CastCatch() {
     return () => window.clearInterval(id);
   }, [phase]);
   useEffect(() => { if (timeUp && step === 'ready') finish(); }, [timeUp, step]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+  // Every pending timer, so none fire after the game ends (Claudia, 2026-11-01).
+  const timers = useRef<number[]>([]);
+  const phaseNow = useRef<Phase>('welcome');
+  phaseNow.current = phase;
+  const later = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(() => { if (phaseNow.current === 'play') fn(); }, ms)); };
+  const pause = (ms: number) => new Promise<void>((r) => { timers.current.push(window.setTimeout(r, ms)); });
+  useEffect(() => () => { cancelAnimationFrame(raf.current); timers.current.forEach((id) => window.clearTimeout(id)); }, []);
+  // The fish book lasts from game to game on this device (per student).
+  const bookKey = `gamify:fishbook:${game.studentId ?? 'me'}`;
+  const [book, setBook] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(bookKey) ?? '[]'); } catch { return []; } });
 
   // In a live game the teacher already chose everything: students go
   // straight into play, no welcome or setup (teacher check, 2026-10-31).
@@ -121,6 +130,8 @@ export default function CastCatch() {
   }
   function finish() {
     cancelAnimationFrame(raf.current);
+    timers.current.forEach((id) => window.clearTimeout(id)); timers.current = [];
+    phaseNow.current = 'end';
     setPhase('end');
     playEffect('win', settings);
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 50, spread: 80, origin: { y: 0.6 }, disableForReducedMotion: true });
@@ -146,7 +157,8 @@ export default function CastCatch() {
     setFlying(true);
     setStep('casting');
     playEffect('whoosh', settings);
-    await new Promise((r) => window.setTimeout(r, still ? 150 : 750));
+    await pause(still ? 150 : 750);
+    if (phaseNow.current !== 'play') return;
     setStep('ask');
     const ok = await ask();
     if (!ok) { finish(); return; }
@@ -154,7 +166,8 @@ export default function CastCatch() {
     const swim = still ? 500 : 1300 + Math.random() * 1000;
     setApproach({ id: Date.now(), from: Math.random() < 0.5 ? -1 : 1, ms: swim });
     setStep('wait');
-    await new Promise((r) => window.setTimeout(r, swim));
+    await pause(swim);
+    if (phaseNow.current !== 'play') return;
     setStep('bite');
     buzz(40, settings);
     playEffect('tap', settings);
@@ -166,8 +179,8 @@ export default function CastCatch() {
     setStep('reeling');
     buzz(30, settings);
     if (still) { land(); return; }
-    [0, 280, 560].forEach((ms) => window.setTimeout(() => playEffect('tap', settings), ms));
-    window.setTimeout(land, 850);
+    [0, 280, 560].forEach((ms) => later(() => playEffect(ms ? 'tap' : 'whoosh', settings), ms));
+    later(land, 850);
   }
   function land() {
     const times = doubleNext.current ? 2 : 1;
@@ -184,11 +197,14 @@ export default function CastCatch() {
       doubleNext.current = false;
     }
     setCatches((cs) => [...cs, c]);
+    // A kind never caught before on this device goes in the fish book: New!
+    newKind.current = c.fish && !book.includes(c.fish.id) ? c.fish.id : null;
+    if (newKind.current) { const nb = [...book, newKind.current]; setBook(nb); try { localStorage.setItem(bookKey, JSON.stringify(nb)); } catch { /* private window */ } }
     setLast(c);
     setApproach(null);
     setStep('caught');
     playEffect(c.points < 0 ? 'miss' : 'right', settings);
-    window.setTimeout(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
+    later(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
   }
 
   const qualityWord = [t('cc.cast.short'), t('cc.cast.good'), t('cc.cast.great'), t('cc.cast.perfect')];
@@ -209,6 +225,7 @@ export default function CastCatch() {
   const tipAt = { x: -8 + (tip.x * 26) / 320, y: BOAT_TOP - 9.1 * aspect + ((tip.y + 60) * 26 * aspect) / 320 };
   // The bobber starts at the rod tip, then (next frame) flies to where the cast lands.
   const [flying, setFlying] = useState(false);
+  const newKind = useRef<string | null>(null);
   const [approach, setApproach] = useState<{ id: number; from: -1 | 1; ms: number } | null>(null);
   useEffect(() => {
     if (step !== 'casting') return;
@@ -220,8 +237,8 @@ export default function CastCatch() {
   // Where the bobber sits: out on the water, or pulled back toward the rod while reeling.
   const bob = reeling ? { x: bobberLeft + (tipAt.x - bobberLeft) * 0.55, y: 30 } : { x: bobberLeft, y: step === 'bite' ? 40 : 34 };
   // The fish book: kinds caught this game; a first catch of a kind says New!
-  const caughtKinds = new Set(catches.filter((c) => c.fish).map((c) => c.fish!.id));
-  const firstOfKind = !!last?.fish && catches.filter((c) => c.fish?.id === last.fish!.id).length === 1;
+  const caughtKinds = new Set(book);
+  const firstOfKind = !!last?.fish && newKind.current === last.fish.id;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -379,10 +396,10 @@ export default function CastCatch() {
           </div>
           {/* The fish book: every kind of fish, the ones caught in color. */}
           <p className="font-display text-xl">{t('cc.book', { n: caughtKinds.size, total: FISH.length })}</p>
-          <div className="grid grid-cols-6 gap-1.5 justify-items-center" aria-label={t('cc.book', { n: caughtKinds.size, total: FISH.length })}>
+          <div className="grid grid-cols-6 gap-1.5 justify-items-center" role="img" aria-label={t('cc.book', { n: caughtKinds.size, total: FISH.length })}>
             {FISH.map((f) => (
-              <span key={f.id} title={caughtKinds.has(f.id) ? f.name : '?'} className={`w-12 h-10 rounded-input border-[2px] border-border flex items-center justify-center ${caughtKinds.has(f.id) ? 'bg-surface' : 'bg-surface-2'}`} aria-hidden="true">
-                <span style={caughtKinds.has(f.id) ? undefined : { filter: 'brightness(0) opacity(0.3)' }}><FishArt fish={f} size={36} theme={theme} /></span>
+              <span key={f.id} title={caughtKinds.has(f.id) ? f.name : '?'} className={`w-11 h-9 rounded-input border-[2px] border-border flex items-center justify-center ${caughtKinds.has(f.id) ? 'bg-surface' : 'bg-surface-2'}`} aria-hidden="true">
+                <span style={caughtKinds.has(f.id) ? undefined : { filter: 'brightness(0) opacity(0.3)' }}><FishArt fish={f} size={30} theme={theme} /></span>
               </span>
             ))}
           </div>

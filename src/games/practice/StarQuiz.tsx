@@ -52,7 +52,7 @@ export default function StarQuiz() {
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(pool);
-  const { ask, cancel, element, missed, stats } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId, framed: true });
+  const { ask, cancel, element, missed, stats, lastRight } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId, framed: true });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stars, setStars] = useState(0);
   const [round, setRound] = useState(0);
@@ -62,9 +62,9 @@ export default function StarQuiz() {
   // A fresh sky each game, and golden stars for a streak of first-try answers.
   const [seed, setSeed] = useState(7);
   const [golden, setGolden] = useState<boolean[]>([]);
-  const [streakNote, setStreakNote] = useState<{ id: number; n: number } | null>(null);
-  const statsNow = useRef(stats);
-  statsNow.current = stats;
+  const [streakNote, setStreakNote] = useState<{ id: number; text: string; gold: boolean } | null>(null);
+  // The note clears on its own (also in still motion, where no animation ends).
+  useEffect(() => { if (!streakNote) return; const id = window.setTimeout(() => setStreakNote(null), 2400); return () => window.clearTimeout(id); }, [streakNote]);
   // In a class race, a student's own stars wear their color.
   const myColor = getLive() ? liveStarColor() : undefined;
 
@@ -80,15 +80,18 @@ export default function StarQuiz() {
     let run = 0;
     for (let r = 0; r < v.rounds; r++) {
       setRound(r + 1);
-      const before = statsNow.current.firstTry;
+      lastRight.current = null;
       const done = await ask();
       if (timeUp.current) break;
       if (!done) { setLeftEarly(true); break; }
-      await new Promise((ok) => window.setTimeout(ok, 0)); // let the answer's stats land
-      run = statsNow.current.firstTry > before ? run + 1 : 0;
+      // Three or more first-try answers in a row: a golden star. Getting one
+      // right after a miss earns a cheer too (growth counts, not only speed).
+      const first = lastRight.current === 'first';
+      run = first ? run + 1 : 0;
       const gold = run >= 3;
       setGolden((g) => { const n = [...g]; n[r] = gold; return n; });
-      if (gold) { setStreakNote({ id: Date.now(), n: run }); playEffect('win', settings); }
+      if (gold) { setStreakNote({ id: Date.now(), text: t('practice.streak', { n: run }), gold: true }); playEffect('win', settings); }
+      else if (lastRight.current === 'retry') setStreakNote({ id: Date.now(), text: t('practice.keptGoing'), gold: false });
       setStars((s) => s + 1);
     }
     playEffect('win', settings);
@@ -138,10 +141,10 @@ export default function StarQuiz() {
           {/* A streak of first-try answers: the stars turn gold. */}
           <AnimatePresence>
             {streakNote && phase === 'play' && (
-              <motion.p key={streakNote.id} role="status" className="absolute left-1/2 top-4 -translate-x-1/2 z-10 font-display text-2xl sm:text-3xl bg-[#ffc93c] border-[2.5px] border-border rounded-pill px-5 py-1.5 flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}
+              <motion.p key={streakNote.id} role="status" className={`absolute left-1/2 top-4 -translate-x-1/2 z-10 font-display text-2xl sm:text-3xl ${streakNote.gold ? 'bg-[#ffc93c]' : 'bg-[#9fe7a0]'} border-[2.5px] border-border rounded-pill px-5 py-1.5 flex items-center gap-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}
                 initial={settings.motion === 'still' ? false : { y: -30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-                onAnimationComplete={() => { const id = streakNote.id; window.setTimeout(() => setStreakNote((x) => (x?.id === id ? null : x)), 1800); }}>
-                <Star weight="fill" size={26} aria-hidden="true" />{t('practice.streak', { n: streakNote.n })}
+              >
+                <Star weight="fill" size={26} aria-hidden="true" />{streakNote.text}
               </motion.p>
             )}
           </AnimatePresence>

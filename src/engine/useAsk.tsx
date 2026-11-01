@@ -42,6 +42,8 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
   const history = useRef<{ at: number; ms: number; right: boolean }[]>([]);
   const lastId = useRef<string>();
   const missedThis = useRef(false);
+  // How the last question was won: on the first try, or after a miss.
+  const lastRight = useRef<'first' | 'retry' | null>(null);
 
   // A signed-in student's missed questions from earlier days come back for review.
   const [review, setReview] = useState<Set<string>>(new Set());
@@ -78,6 +80,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
     setStats((s) => ({ asked: s.asked + 1, right: s.right + (r.right ? 1 : 0), firstTry: s.firstTry + (r.right && !missedThis.current ? 1 : 0) }));
 
     if (r.right) {
+      lastRight.current = missedThis.current ? 'retry' : 'first';
       if (active.n >= active.total) { active.resolve(true); setActive(null); return; }
       const drawn = next(active.question.id);
       setActive({ ...active, question: drawn.question, setId: drawn.setId, n: active.n + 1 });
@@ -114,7 +117,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
     />
   ) : null;
 
-  return { ask, cancel, element, missed, stats, asking: active !== null };
+  return { ask, cancel, element, missed, stats, lastRight, asking: active !== null };
 }
 
 function BreathBreak({ onDone }: { onDone: () => void }) {

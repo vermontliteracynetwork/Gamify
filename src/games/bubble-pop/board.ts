@@ -176,7 +176,8 @@ export function placeShot(b0: Board, r: number, c: number, shot: Shot): { board:
 }
 
 // The next shot: usually a color on the board, sometimes a special.
-export const nextShot = (b: Board, rng: Rng = Math.random): Shot => { const x = rng(); return x < 0.07 ? 'burst' : x < 0.16 ? 'rainbow' : nextColor(b, rng); };
+// Never two specials in a row, so every player gets about the same share.
+export const nextShot = (b: Board, rng: Rng = Math.random, after?: Shot): Shot => { if (after !== undefined && typeof after !== 'number') return nextColor(b, rng); const x = rng(); return x < 0.07 ? 'burst' : x < 0.16 ? 'rainbow' : nextColor(b, rng); };
 
 // 10 points a pop, 20 a fall.
 export const shotPoints = (res: { popped: Hit[]; dropped: Hit[] }) => res.popped.length * 10 + res.dropped.length * 20;

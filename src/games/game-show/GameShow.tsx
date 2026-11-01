@@ -77,6 +77,7 @@ export default function GameShow() {
   const [reveal, setReveal] = useState<{ card: CardKind; choosing: boolean } | null>(null);
   // The card being turned over in 3D before its prize box opens.
   const [flipping, setFlipping] = useState<number | null>(null);
+  const marquee = theme.id.endsWith(':classic');
   const flipTimer = useRef(0);
   useEffect(() => () => window.clearTimeout(flipTimer.current), []);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
@@ -351,14 +352,15 @@ export default function GameShow() {
               // (teacher, 2026-10-31): as tall as the screen allows, but never
               // taller than 1.2 times their width (1.5 on tall screens).
               // A studio stage: marquee lights chase around the board.
-              <div className="relative rounded-panel p-[14px]" style={{ background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' }}>
-              {(['top', 'bottom', 'left', 'right'] as const).map((side) => (
+              // (Classic only: a theme's own world sets its own stage.)
+              <div className={`relative rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
+              {marquee && (['top', 'bottom', 'left', 'right'] as const).map((side) => (
                 <span key={side} aria-hidden="true" className={`absolute pointer-events-none ${side === 'top' ? 'top-0 inset-x-3 h-[14px]' : side === 'bottom' ? 'bottom-0 inset-x-3 h-[14px]' : side === 'left' ? 'left-0 inset-y-3 w-[14px]' : 'right-0 inset-y-3 w-[14px]'} ${settings.motion === 'full' ? (side === 'top' || side === 'bottom' ? 'gs-bulbs-x' : 'gs-bulbs-y') : ''}`}
                   style={{ backgroundImage: 'radial-gradient(circle, #fff6b0 0 2.5px, #f6c544 3px, rgba(246,197,68,0.25) 4.5px, transparent 5.5px)', backgroundSize: side === 'top' || side === 'bottom' ? '20px 14px' : '14px 20px', backgroundRepeat: side === 'top' || side === 'bottom' ? 'repeat-x' : 'repeat-y' }} />
               ))}
               <div className="grid w-full"
                 style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-                  height: `min(calc(var(--play-h) - 1.5rem - 28px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - 28px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
+                  height: `min(calc(var(--play-h) - 1.5rem - ${marquee ? 28 : 0}px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${marquee ? 28 : 0}px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * var(--gs-tall, 1.2) + ${(grid.rows - 1) * gap}px))` }}>
                 {cards.map((c, i) => (
                   <motion.button
                     key={i}
@@ -433,9 +435,12 @@ export default function GameShow() {
           <DialogFocus />
           {/* Bigger prizes, bigger show: sun rays behind the box for big ones. */}
           {prizeTier(reveal.card) > 1 && (
-            <motion.div aria-hidden="true" className={`absolute w-[min(90vw,44rem)] aspect-square rounded-full pointer-events-none ${settings.motion === 'full' ? 'gs-rays' : ''}`}
-              initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}
-              style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
+            <motion.div aria-hidden="true" className="absolute w-[min(90vw,44rem)] aspect-square pointer-events-none"
+              initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}>
+              {/* The spin lives on an inner layer so the grow-in still shows. */}
+              <div className={`w-full h-full rounded-full ${settings.motion === 'full' ? 'gs-rays' : ''}`}
+                style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
+            </motion.div>
           )}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 260, damping: 12 } : { type: 'spring', stiffness: 300, damping: 20 }}

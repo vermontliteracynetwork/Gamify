@@ -184,6 +184,7 @@ export const en = {
   'start.locked': 'Your teacher set these for your assignment.',
 
   'practice.streak': '{n} in a row! Golden star!',
+  'practice.keptGoing': 'You kept going! Great job!',
   'practice.title': 'Question Tracker',
   'practice.description': 'Every right answer adds a star until the whole sky is full.',
   'practice.rounds': 'Number of questions',
@@ -2146,8 +2147,8 @@ export const en = {
   'bp.rainbow': 'Rainbow!',
   'bp.burst': 'Star burst!',
   'bp.combo': 'Combo x{n}!',
-  'bp.rainbowReady': 'Rainbow bubble: it matches any color!',
-  'bp.burstReady': 'Star burst: it pops everything near it!',
+  'bp.rainbowReady': 'Rainbow bubble!',
+  'bp.burstReady': 'Star burst bubble!',
   'bp.how1': 'Answer a question to load your bubbles.',
   'bp.how2': 'Aim with your finger and let go to shoot.',
   'bp.how3': 'Match 3 of the same bubble to pop them!',

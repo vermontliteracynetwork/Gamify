@@ -101,7 +101,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     pieces: [
       { name: 'Fish', what: 'Common fish are worth 10, uncommon 25, rare 50 and super rare 100 points.' },
       { name: 'Clock', what: 'The game lasts the minutes the teacher sets.' },
-      { name: 'Fish book', what: 'Twelve kinds of fish to find. A first catch of a kind says New!, and the results show every kind caught, with the rest as shadows.' },
+      { name: 'Fish book', what: 'Twelve kinds of fish to find. The first time a kind is caught on this device it says New!, and the book is kept from game to game. The results show every kind caught, with the rest as shadows.' },
       { name: 'Power-ups', what: 'Rainbow Fish (big points), Old Boot (a silly catch), Pocket Watch (more time), Golden Hook (next catch doubles), Message in a Bottle (a surprise).' },
     ],
     rules: ['A better cast means rarer fish.', 'Highest score when time is up.'],

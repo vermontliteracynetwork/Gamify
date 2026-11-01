@@ -117,26 +117,12 @@ export default function Sky({ theme, filled, total, still, label, colors, height
     if (filled > prev.current && flying) setComet({ id: Date.now(), i: filled - 1, fromLeft: Math.random() < 0.5 });
     prev.current = filled;
   }, [filled, flying]);
-  // Now and then a shooting star crosses the sky on its own.
-  const [streak, setStreak] = useState<{ id: number; y: number; ltr: boolean } | null>(null);
-  useEffect(() => {
-    if (!flying) return;
-    let id = 0;
-    const next = () => { id = window.setTimeout(() => { setStreak({ id: Date.now(), y: 5 + Math.random() * 25, ltr: Math.random() < 0.5 }); next(); }, 5000 + Math.random() * 5000); };
-    next();
-    return () => window.clearTimeout(id);
-  }, [flying]);
   return (
     <div ref={ref} className={`relative w-full overflow-hidden ${bleed ? '' : 'rounded-panel border-[2.5px] border-border'}`} role="img" aria-label={label}
       style={{ containerType: 'size', height, background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />
       ))}
-      {streak && (
-        <motion.span key={streak.id} aria-hidden="true" className="absolute h-[2px] w-[14cqw] rounded-full pointer-events-none"
-          style={{ top: `${streak.y}%`, background: `linear-gradient(${streak.ltr ? '90deg' : '270deg'}, transparent, #fff)`, rotate: streak.ltr ? 12 : -12 }}
-          initial={{ left: streak.ltr ? '-15%' : '100%', opacity: 0 }} animate={{ left: streak.ltr ? '100%' : '-15%', opacity: [0, 1, 1, 0] }} transition={{ duration: 1.1, ease: 'easeIn' }} />
-      )}
       {comet && spots[comet.i] && (() => {
         const to = spots[comet.i];
         const from = { x: comet.fromLeft ? -5 : 105, y: -5 };

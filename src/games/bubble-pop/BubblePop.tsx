@@ -168,10 +168,13 @@ export default function BubblePop() {
     let message = '';
     let misses = noPop;
     const at = center(board, r, c);
-    if (typeof shooter.now !== 'number') {
-      // A special shot: a burst ring where it lands and its name over the board.
-      if (!still) setBlast({ id: Date.now(), x: at.x, y: at.y, kind: shooter.now });
-      setCallout({ id: Date.now(), text: t(shooter.now === 'burst' ? 'bp.burst' : 'bp.rainbow') });
+    const special = typeof shooter.now !== 'number' ? shooter.now : null;
+    // A star burst counts at most 8 pops, so one lucky shot can't run away with a race.
+    if (special === 'burst') points = Math.min(8, res.popped.length) * 10 + res.dropped.length * 20;
+    if (special) {
+      // A special shot: a ring where it lands, its own sound, and its name (only when it popped something).
+      if (!still) setBlast({ id: Date.now(), x: at.x, y: at.y, kind: special });
+      playEffect('whoosh', settings);
       buzz(45, settings);
     }
     if (res.popped.length) {
@@ -179,7 +182,11 @@ export default function BubblePop() {
       addFx(res.popped, 'pop', board); addFx(res.dropped, 'fall', board);
       misses = 0;
       combo.current += 1;
-      if (combo.current >= 2) { points += combo.current * 10; if (typeof shooter.now === 'number') setCallout({ id: Date.now(), text: t('bp.combo', { n: combo.current }) }); }
+      // Combo bonus, capped at x5.
+      if (combo.current >= 2) points += Math.min(5, combo.current) * 10;
+      const name = special ? t(special === 'burst' ? 'bp.burst' : 'bp.rainbow') : '';
+      const comboText = combo.current >= 2 ? t('bp.combo', { n: combo.current }) : '';
+      if (name || comboText) setCallout({ id: Date.now(), text: [name, comboText].filter(Boolean).join(' ') });
     } else {
       combo.current = 0;
       playEffect('tap', settings);
@@ -206,7 +213,7 @@ export default function BubblePop() {
     // The next shot stays one that can pop: a color still on the board, or a special.
     const left0 = colorsLeft(b);
     const now = typeof shooter.next === 'number' && !left0.includes(shooter.next) ? nextColor(b) : shooter.next;
-    setShooter({ now, next: nextShot(b) });
+    setShooter({ now, next: nextShot(b, Math.random, now) });
     const left = shots - 1;
     setShots(left);
     if (left > 0) { setStep('aim'); return; }
