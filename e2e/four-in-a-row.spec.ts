@@ -38,9 +38,11 @@ test('Four in a Row on two devices: the friend joins with the code and moves sho
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await openSetup(page, '/games/four-in-a-row');
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  if (await page.getByRole('heading', { name: /Questions/ }).isVisible().catch(() => false)) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  // Next until the "On another device" choice shows (the Ball Collection
+  // pieces page may come first, 2026-11-01).
+  for (let i = 0; i < 4 && !(await page.getByRole('radio', { name: 'On another device' }).isVisible()); i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: 'On another device' }).click();
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await finishSetup(page);
   await expect(page.getByRole('heading', { name: 'Waiting for Your Friend' })).toBeVisible();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.slice(-5);
   await page.screenshot({ path: `test-results/four-two-waiting-${info.project.name}.png` });

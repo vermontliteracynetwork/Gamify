@@ -37,6 +37,9 @@ line that fits, and add each new preference the same turn she says it.
 - Every page opens at the top; breadcrumbs to go back.
 - Every asset licensed and in docs/asset-ledger.md before it ships.
 
+## Assets she sends
+- Packs she uploads from itch.io come with commercial licenses (teacher, 2026-11-01: "all found on itch.io with commercial licensing"). Record them in the asset ledger as confirmed by her and use them; don't hold them in Waiting on you. Still ask for the license line when a pack needs credit (CC BY) or forbids something.
+
 ## Working style
 - Keep the queue running; predict her answers from past decisions and log the guess.
 - Quiet build: no narration; short final report starting with Waiting on you.

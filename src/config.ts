@@ -99,9 +99,8 @@ export function canPlayGame(tier: Tier, gameId: string): boolean {
 export const PUZZLE_PACK_CLEARED = true;
 
 // The Ball Collection (Four in a Row pieces: gas tank, spike ball, 8 ball,
-// beach ball, Earth, Mars, Moon, coin, baseball, basketball, soccer ball)
-// came with no license file (teacher upload, 2026-10-31). When its
-// commercial license is confirmed: set true and copy assets/ball-collection
-// into public/classic/four-in-a-row/.
-export const BALL_PACK_CLEARED = false;
+// beach ball, Earth, Mars, Moon, coin, baseball, basketball, soccer ball):
+// from itch.io under a commercial license, confirmed by the teacher
+// (2026-11-01). Files in public/classic/four-in-a-row/.
+export const BALL_PACK_CLEARED = true;
 export const BALL_PACK = ['gas', 'spike-ball', '8-billiard-ball', 'beach-ball', 'earth-africa', 'mars', 'moon', 'coin', 'baseball-ball', 'basket-ball', 'white-soccer-ball'];
