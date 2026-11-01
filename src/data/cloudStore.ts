@@ -15,12 +15,14 @@ const setRow = (s: QuestionSet): Row => ({
   id: toUuid(s.id), name: s.name, visibility: s.visibility, questions: s.questions, created_at: s.createdAt,
   subject: s.subject ?? null, grade_from: s.grades?.[0] ?? null, grade_to: s.grades?.[1] ?? null,
   tags: s.tags ?? [], standards: s.standards ?? [], no_standard: !!s.noStandard, cover: s.cover ?? null,
+  ...(s.teachCard ? { teach_card: s.teachCard } : {}),
 });
 const fromSet = (r: Row): QuestionSet => ({
   id: r.id, name: r.name, questions: r.questions ?? [], ownerId: r.owner_id, visibility: r.visibility,
   createdAt: r.created_at, updatedAt: r.updated_at, subject: (r.subject ?? undefined) as Subject | undefined,
   grades: r.grade_from && r.grade_to ? [r.grade_from as Grade, r.grade_to as Grade] : undefined,
   tags: r.tags ?? [], standards: r.standards ?? [], noStandard: r.no_standard || undefined, cover: r.cover ?? undefined,
+  teachCard: r.teach_card ?? undefined,
 });
 
 const classRow = (c: Classroom): Row => ({
@@ -91,7 +93,12 @@ export function createCloudStore(db: SupabaseClient): CloudStore {
       const row = ok(await db.from('question_sets').select('*').eq('id', toUuid(id)).maybeSingle());
       return row ? fromSet(row) : undefined;
     },
-    async saveQuestionSet(set) { ok(await db.from('question_sets').upsert(setRow(set))); },
+    async saveQuestionSet(set) {
+      // Until 0013 adds the teach card column, save the set without it.
+      const res = await db.from('question_sets').upsert(setRow(set));
+      if (res.error && /teach_card/.test(res.error.message)) { const { teach_card: _skip, ...row } = setRow(set); void _skip; ok(await db.from('question_sets').upsert(row)); return; }
+      ok(res);
+    },
     async deleteQuestionSet(id) {
       ok(await db.from('set_assignments').delete().eq('set_id', normId(id)));
       ok(await db.from('question_sets').delete().eq('id', toUuid(id)));

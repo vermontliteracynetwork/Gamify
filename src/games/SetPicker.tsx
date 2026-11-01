@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { TeachCards } from './TeachCard';
 import { CaretLeft, CaretRight, CheckCircle } from '@phosphor-icons/react';
 import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
@@ -17,6 +18,11 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   sets: QuestionSet[]; value: string[]; onChange: (ids: string[]) => void; max?: number;
 }) {
   const [filter, setFilter] = useState<SetFilter>({});
+  // The picked sets' teach cards, shown before play.
+  const teach = useContext(TeachCards);
+  useEffect(() => {
+    teach?.(value.map((id) => sets.find((s) => s.id === id)).filter((s): s is QuestionSet => !!s?.teachCard?.text.trim()).map((s) => ({ name: s.name, card: s.teachCard! })));
+  }, [value.join(','), sets]); // eslint-disable-line react-hooks/exhaustive-deps
   const wrap = useRef<HTMLDivElement>(null);
   const gridEl = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState({ cols: 4, rows: 2, size: 140 });

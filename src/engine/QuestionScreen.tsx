@@ -5,7 +5,7 @@ import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, Speak
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { buzz, playEffect, speak, stopSpeaking } from './feedback';
+import { buzz, playEffect, speakQuestion, stopSpeaking } from './feedback';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { AccessButton, FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
@@ -58,14 +58,14 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     setLocked(settings.readFirstSeconds > 0);
     const timer = window.setTimeout(() => setLocked(false), settings.readFirstSeconds * 1000);
     // Little readers hear every question and its answers on their own.
-    const say = settings.autoRead ? window.setTimeout(() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings), 350) : 0;
+    const say = settings.autoRead ? window.setTimeout(() => speakQuestion(q, settings), 350) : 0;
     return () => { window.clearTimeout(timer); window.clearTimeout(say); stopSpeaking(); };
   }, [q, settings.readFirstSeconds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function listen() {
     if (speaking) { stopSpeaking(); setSpeaking(false); return; }
     const text = `${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`;
-    speak(text, settings);
+    speakQuestion(q, settings);
     setSpeaking(true);
     window.setTimeout(() => setSpeaking(false), Math.min(15000, text.length * 90));
   }

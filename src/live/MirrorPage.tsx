@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Check, CircleHalf, MagnifyingGlassMinus, MagnifyingGlassPlus, SpeakerHigh, X } from '@phosphor-icons/react';
-import { speak } from '../engine/feedback';
+import { speakQuestion } from '../engine/feedback';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import Title from '../ui/Title';
@@ -25,7 +25,7 @@ export default function MirrorPage() {
     if (m.t === 'result') setResult(m);
     if (m.t === 'clear') { setQ(null); setResult(null); }
   }), [code]);
-  const read = (m: typeof q) => m && speak(`${m.prompt}. ${m.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings);
+  const read = (m: typeof q) => m && speakQuestion(m, settings);
   useEffect(() => { if (q && autoRead) read(q); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
   const ink = contrast ? 'bg-black text-white border-white' : 'bg-surface text-text border-border';
   const tool = `min-h-12 px-4 rounded-pill border-[2px] font-bold inline-flex items-center gap-2 ${contrast ? 'bg-black text-white border-white' : 'bg-surface-2 border-border'}`;

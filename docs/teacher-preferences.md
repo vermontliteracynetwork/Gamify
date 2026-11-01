@@ -58,3 +58,4 @@ line that fits, and add each new preference the same turn she says it.
 - Uploading pieces: no separate "add photos of the pages" button; every piece's upload takes a photo of its page or of a drawing and cuts the piece out (2026-11-01).
 - Every upload is cut to the piece's exact size; the system tells a hand-drawn template photo (corner squares) from digital art (2026-11-01).
 - The Theme Builder preview is a game preview with tabs for each screen the pieces show on (Bowling: Lane, Pick a ball, Power-ups) (2026-11-01).
+- Predicted (2026-11-01, market gaps): question sets get true or false in one tap, the teacher's own recorded voice for a question, and an optional teach card read aloud before play; all free on every plan.

@@ -138,6 +138,21 @@ function deviceSpeak(text: string, s: PlayerSettings, v: number): void {
   speechSynthesis.speak(u);
 }
 
+// A question read aloud (teacher's own recording first, when the set has
+// one: market gaps, 2026-11-01), then its answers in the reading voice.
+export function speakQuestion(q: { prompt: string; choices: string[]; audioUrl?: string }, s: PlayerSettings): void {
+  const answers = q.choices.map((c, i) => `${'ABCD'[i]}: ${c}`).join('. ');
+  if (!q.audioUrl || typeof Audio === 'undefined') { speak(`${q.prompt}. ${answers}`, s); return; }
+  stopSpeaking();
+  const v = volume(s, 'voice');
+  if (v <= 0) return;
+  const a = new Audio(q.audioUrl);
+  a.volume = v;
+  playing = a;
+  a.onended = () => { if (playing === a) { playing = null; speak(answers, s); } };
+  a.play().catch(() => { if (playing === a) { playing = null; speak(`${q.prompt}. ${answers}`, s); } });
+}
+
 export function isSpeaking(): boolean {
   return (!!playing && !playing.paused && !playing.ended) || (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking);
 }

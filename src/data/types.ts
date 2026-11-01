@@ -14,13 +14,21 @@ export interface MultipleChoiceQuestion {
   // A picture beside an answer's letter, by answer position (null = none).
   choiceImages?: (string | null)[];
   choiceAlts?: (string | null)[];
+  // The teacher's own voice reading the question (a short recording), played
+  // in place of the reading voice (market gaps, 2026-11-01).
+  audioUrl?: string;
 }
 
 export type Question = MultipleChoiceQuestion;
 
+// A short teach card shown before play (market gaps, 2026-11-01): a
+// reminder of the skill, with an optional picture, read aloud.
+export interface TeachCard { text: string; imageUrl?: string; imageAlt?: string }
+
 export interface QuestionSet extends SetDetails {
   id: string;
   name: string;
+  teachCard?: TeachCard;
   questions: Question[];
   ownerId: string;
   visibility: 'private' | 'public';

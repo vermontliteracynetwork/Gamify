@@ -7,7 +7,7 @@ import { Check, HandTap, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { playEffect, speak } from './feedback';
+import { playEffect, speakQuestion } from './feedback';
 import { setAnswerer } from './answerer';
 import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
@@ -71,7 +71,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   // Little readers hear every question and its answers once it opens.
   useEffect(() => {
     if (!ready || !settings.autoRead) return;
-    const id = window.setTimeout(() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings), 350);
+    const id = window.setTimeout(() => speakQuestion(q, settings), 350);
     return () => window.clearTimeout(id);
   }, [q, ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -124,7 +124,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
               <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
             </span>
           )}
-          <button type="button" onClick={() => speak(`${q.prompt}. ${q.choices.map((c, i) => `${LETTERS[i]}: ${c}`).join('. ')}`, settings)}
+          <button type="button" onClick={() => speakQuestion(q, settings)}
             className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
