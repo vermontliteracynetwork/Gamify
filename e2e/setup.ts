@@ -90,7 +90,8 @@ export async function joinWithCode(page: Page, code: string) {
 // flow onto the next page, so Next until this one shows.
 export async function showSetting(page: Page, target: Locator) {
   for (let k = 0; k < 8; k++) {
-    if (await target.first().isVisible()) return;
+    // A page can take a moment to lay out after Next; give it that moment.
+    if (await target.first().waitFor({ state: 'visible', timeout: 700 }).then(() => true, () => false)) return;
     const next = page.getByRole('button', { name: 'Next', exact: true });
     if (!(await next.isVisible())) break;
     await next.click();
