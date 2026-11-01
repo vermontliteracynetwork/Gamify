@@ -1168,6 +1168,8 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 98 | **Four in a Row that feels like the real thing.** Pieces fall behind the front of the board, bounce and clack; the winning four light up; power-ups like Pop Out add a twist. | A familiar strategy game turned into question practice | Golden Rule pass, 2026-10-31 |
 | 99 | **Every reward is a show.** Game Show cards turn over in 3D with prizes that grow with their value, Question Tracker stars streak across the sky and turn gold on a streak, Bubble Pop has rainbow and star burst bubbles, and Cast and Catch fish swim up to the bobber before the tug. | The polish kids expect from the games they play at home, on every right answer | Golden Rule pass, 2026-11-01 |
 | 100 | **A fish book to fill.** Twelve kinds of fish to find in Cast and Catch, each with a true fact; the results show the ones still hiding. | A reason to play again, and a science moment every catch | Golden Rule pass, 2026-11-01 |
+| 101 | **Game Show, game show sounds.** A brass fanfare opens every game, then the music fades in; right answers ding, misses buzz, a stolen prize gets a sad trombone, and every card turns with a page flip. Lucky x2 cards, +10 for a full row or column and a hot streak bonus keep every turn a surprise. | The sound and surprise of a TV game show, with a question on every turn | Teacher, 2026-11-01 |
+| 102 | **The teacher picks every power-up.** Every game shows its power-ups as picture cards on one page; tap one to turn it off. Power-ups that take points never show up when the other team has none. | Teacher control without a settings maze, and no mean surprises for a team at zero | Teacher, 2026-11-01 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

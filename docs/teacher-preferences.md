@@ -18,7 +18,7 @@ line that fits, and add each new preference the same turn she says it.
 - Power-ups frequent and wacky, each with its own animation, art and plain role ("2x points: Earn double points"); held ones wait for the player's next turn under the scoreboard in a vertical list and vanish after that turn.
 - Negative power-ups land at once, are funny not mean; Steal/Swap style takes start off.
 - Board Game players are the 20 voxel animals; students pick theirs.
-- Turn card before every team question with the player's own icon; tap to start.
+- Turn card before every team question with the player's own icon; tap to start. Only the icon, no "it's your turn" words, and it comes before the move: tap it, answer, then move if right, following the tries setting (2026-11-01).
 - All cards and tiles the same size; perfect circles stay circles; outlines never cut off.
 - Every pop-up has an X; results open in a box over the game (winner on a stage with a halo, Grow Year title, Play again, New game (teacher, 2026-11-01), Review, Rate; never an "Arcade" button).
 - Classic is the default theme of every game and is never handed out; designed themes come from her packs.
@@ -31,7 +31,8 @@ line that fits, and add each new preference the same turn she says it.
 
 - Game Show cards are always horizontal (wider than tall), whatever the grid size (2026-11-01).
 - A game's cover image always mirrors how the game and its theme really look (2026-11-01).
-- Every game uses the same question set picker: square cards in rows of 4, no cover pictures, no "Pick a question set" line (2026-11-01).
+- Every game uses the same question set picker: square cards that fill whole rows (4, 5 or 6 across, whatever fits) and never cut off a row, no cover pictures, no "Pick a question set" line (2026-11-01).
+- Power-up choices: every power-up on one page as small square cards; tap a card to turn it on or off (2026-11-01).
 - Every game lets the teacher switch each power-up on or off, like Game Show's list (2026-11-01).
 - A game's background color can be changed per game; Game Show's default is red (2026-11-01).
 - A power-up that takes, steals or swaps points never comes up when the players it would hit have no points (all games, 2026-11-01).

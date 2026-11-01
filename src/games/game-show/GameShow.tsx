@@ -18,10 +18,11 @@ import ResultsModal from '../../engine/ResultsModal';
 import { drawQuestion } from '../../engine/picker';
 import { isPlayable } from '../../engine/questions';
 import ShareQuestion, { TurnCard } from '../../engine/ShareQuestion';
+import { PowerUpCards } from '../../engine/PowerUpSwitches';
 import ScoreBoard from '../../engine/ScoreBoard';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
-import { ChoiceRow, PictureChoice, Toggle } from '../../ui/fields';
+import { ChoiceRow, PictureChoice } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
@@ -376,17 +377,9 @@ export default function GameShow() {
               {board === 'cards' && <>
               <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
                 options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }) }))} />
-              <div className="grid gap-2">
-                <span className="font-bold">{t('tb.powers')}</span>
-                <span className="text-sm font-semibold text-muted -mt-1.5">{t('tb.powersHint')}</span>
-                {powers.map((p) => (
-                  <Toggle key={p.id} label={p.name} hint={t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) })} art={<ItemArt item={p} size={44} still />}
-                    value={powerOn(p)}
-                    onChange={(on) => takes(p)
-                      ? change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) })
-                      : change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] })} />
-                ))}
-              </div>
+              <PowerUpCards hint={t('tb.powersHint')}
+                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) }), art: <ItemArt item={p} size={40} still />, on: powerOn(p) }))}
+                onChange={(id, on) => { const p = powers.find((x) => x.id === id)!; if (takes(p)) change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) }); else change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] }); }} />
               </>}
             </>
           ) },
