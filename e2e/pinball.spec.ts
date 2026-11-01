@@ -62,12 +62,12 @@ test('Pinball: a power-up waits for your next turn under the scores', async ({ p
   await page.waitForTimeout(400);
   await page.getByRole('button', { name: 'Shoot!' }).click();
   await answer();
-  const use = page.getByRole('button', { name: 'Use Golden Ball: 2x points: Earn double points' });
+  const use = page.getByRole('button', { name: /^Use Golden Ball: Double points: / });
   await expect(use).toBeVisible({ timeout: 8000 });
   await page.screenshot({ path: `test-results/pinball-held-${info.project.name}.png` });
   await use.click();
   await expect(use).toHaveCount(0);
-  await expect(page.getByText('2x points', { exact: true })).toBeVisible();
+  await expect(page.getByText('Double points', { exact: true })).toBeVisible();
   expect(problems).toEqual([]);
 });
 
