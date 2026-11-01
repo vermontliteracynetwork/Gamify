@@ -14,13 +14,14 @@ import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
-import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
+import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -54,7 +55,7 @@ export default function MatchThree() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('match-three', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7, powerUps: true });
+  const [setup, change] = useSavedSetup('match-three', { setId: LIBRARY[0].id, rounds: 3, perBreak: 2, moves: 3, size: 7, powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
@@ -97,7 +98,7 @@ export default function MatchThree() {
   // Power-ups after a question break: more moves, bonus points, or a doubled match.
   // Held power-ups (teacher, 2026-10-31): one earned at a question break is
   // ready for the next round, listed under the score, and gone after it.
-  const powers = usePowerUps(matchThreeManifest, theme, setup.powerUps);
+  const powers = usePowerUps(matchThreeManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const held = useHeldPowerUps();
   const doubleNext = useRef(false);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, still ? Math.min(ms, 80) : ms));
@@ -274,7 +275,7 @@ export default function MatchThree() {
             <>
               <Slider label={t('bm.rounds')} hint={t('bm.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
               <Slider label={t('bm.movesEach')} hint={t('bm.movesHint')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: matchThreeManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
               <Slider label={t('bm.perBreak')} hint={t('bm.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
               <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
                 options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />

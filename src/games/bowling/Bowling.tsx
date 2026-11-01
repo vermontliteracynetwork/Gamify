@@ -23,7 +23,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider, Toggle } from '../../ui/fields';
+import { Slider } from '../../ui/fields';
 import { useSignedIn } from '../../auth/session';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -32,6 +32,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { bowlingManifest } from './manifest';
 import { cpuPlan, fullRack, halfWidthAt, PIN_SPOTS, PIN_XY, rollPoints, scaleAt, shakePins, simulateRoll, toView, xAt, yAt, type SimResult } from './lane';
@@ -53,7 +54,7 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true });
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -89,7 +90,7 @@ export default function Bowling() {
   const timers = useRef<number[]>([]);
   // Power-ups (teacher, 2026-10-31): a right answer may bring one; it waits
   // for this player's next turn under the scores and is gone after that turn.
-  const powers = usePowerUps(bowlingManifest, theme, setup.powerUps);
+  const powers = usePowerUps(bowlingManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const held = useHeldPowerUps();
   const boost = useRef({ double: false, magnet: false, bumpers: false, mega: false });
   const [armed, setArmed] = useState<string[]>([]);
@@ -368,7 +369,7 @@ export default function Bowling() {
           { id: 'options', title: t('setup.options'), content: (
             <>
               <Slider label={t('sb.frames')} hint={t('sb.framesHint')} min={1} max={10} value={setup.frames} onChange={(v) => change({ frames: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: bowlingManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
           ...(solo ? [] : [setup.who === 'versus'

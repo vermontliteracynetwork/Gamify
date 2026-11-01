@@ -22,13 +22,14 @@ import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme } from '../../theme/types';
-import { ChoiceRow, Slider, Toggle } from '../../ui/fields';
+import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { lunchRushManifest } from './manifest';
 import { cpuFood, FOODS, openCounter, PATIENCE, SEATS, serve, type Counter, type Food } from './lunch';
 
@@ -56,7 +57,7 @@ export default function LunchRush() {
   const { theme, themes, playable, choose } = useGameTheme('lunch-rush');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('lunch-rush', { setId: LIBRARY[0].id, turns: 6, who: 'teams' as 'teams' | 'solo', powerUps: true });
+  const [setup, change] = useSavedSetup('lunch-rush', { setId: LIBRARY[0].id, turns: 6, who: 'teams' as 'teams' | 'solo', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -93,7 +94,7 @@ export default function LunchRush() {
     askNext(state, 0);
   }
   // Power-ups a right answer brought: more serves, tips now, or double tips this turn.
-  const powers = usePowerUps(lunchRushManifest, theme, setup.powerUps);
+  const powers = usePowerUps(lunchRushManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const doubleTips = useRef(false);
   function earned(state: TurnState) {
     const it = powers.grant();
@@ -194,7 +195,7 @@ export default function LunchRush() {
             <>
               <ChoiceRow label={t('mm.who')} value={setup.who} onChange={(v) => change({ who: v })} options={[{ value: 'teams', label: t('pd.teams') }, { value: 'solo', label: t('mm.solo') }]} />
               <Slider label={solo ? t('rh.turnsSolo') : t('rh.turns')} min={2} max={15} value={setup.turns} onChange={(v) => change({ turns: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: lunchRushManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
           ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),

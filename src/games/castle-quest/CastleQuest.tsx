@@ -13,6 +13,7 @@ import ShareQuestion from '../../engine/ShareQuestion';
 import TeamSetup, { type Character } from '../../engine/TeamSetup';
 import { current, nextTurn, setScores, startTurns, TEAM_COLORS, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import PowerUpPop from '../../engine/PowerUpPop';
 import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
@@ -21,7 +22,7 @@ import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
-import { ChoiceRow, Toggle } from '../../ui/fields';
+import { ChoiceRow } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
@@ -32,7 +33,7 @@ import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import {
-  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, roll, SHORT_START, spotOf,
+  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, POWERS, roll, SHORT_START, spotOf,
   tileXY, WORLD_H, WORLD_W, type Bridge, type ChestPrize, type Power,
 } from './board';
 
@@ -60,7 +61,7 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'full' as 'full' | 'short' });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'full' as 'full' | 'short', powerOff: [] as string[] });
   // Where pieces start: the full trail, or the short one from the second bend.
   const [start, setStart] = useState(0);
   const startRef = useRef(0);
@@ -134,7 +135,9 @@ export default function CastleQuest() {
     place(ps.map(() => from));
     setShield(ps.map(() => 0)); setFast(ps.map(() => 0)); setPotion(false);
     // Lightning needs someone to send it to (Claudia review, 2026-10-31).
-    const placed = setup.powerUps ? placePowers(Math.random, from) : new Map<number, Power>();
+    // Only the power-ups the teacher left on land on the trail.
+    const allowed = POWERS.filter((p) => !(setup.powerOff ?? []).includes(itemFor(p).id));
+    const placed = setup.powerUps ? placePowers(Math.random, from, allowed) : new Map<number, Power>();
     if (ps.length < 2) for (const [k, v] of placed) if (v === 'lightning') placed.set(k, 'chest');
     setPowers(placed);
     held.reset();
@@ -431,7 +434,7 @@ export default function CastleQuest() {
             <>
               <ChoiceRow label={t('cq.trail')} value={setup.trail ?? 'full'} onChange={(v) => change({ trail: v })}
                 options={[{ value: 'full', label: t('cq.trailFull') }, { value: 'short', label: t('cq.trailShort') }]} />
-              <Toggle label={t('pu.toggle')} hint={t('cq.powerHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: castleQuestManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
           versus

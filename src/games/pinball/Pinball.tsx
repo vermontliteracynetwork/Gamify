@@ -16,6 +16,7 @@ import { addPoints, CHANCES, current, leaders, nextTurn, startTurns, type CpuLev
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
@@ -23,7 +24,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider, Toggle } from '../../ui/fields';
+import { Slider } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import { useSignedIn } from '../../auth/session';
@@ -64,7 +65,7 @@ export default function Pinball() {
   const { theme, themes, playable, choose } = useGameTheme('pinball');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true });
+  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -108,7 +109,7 @@ export default function Pinball() {
 
   // Power-ups: a right answer may bring one; it waits for this player's next
   // turn, under the scoreboard, and is gone after that turn (teacher, 2026-10-31).
-  const powers = usePowerUps(pinballManifest, theme, setup.powerUps);
+  const powers = usePowerUps(pinballManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const held = useHeldPowerUps();
   const boost = useRef<Set<Boost>>(new Set());
   const player = turns ? current(turns) : null;
@@ -384,7 +385,7 @@ export default function Pinball() {
           { id: 'options', title: t('setup.options'), content: (
             <>
               <Slider label={t('pb.rounds')} hint={solo ? t('pb.roundsHintSolo') : t('pb.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: pinballManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
           ...(solo ? [] : [setup.who === 'versus'

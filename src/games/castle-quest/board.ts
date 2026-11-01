@@ -60,19 +60,22 @@ function pick<T extends string>(weights: Record<T, number>, rand: () => number):
 // at the second bend, about a third of the way along.
 export const SHORT_START = 17;
 
-export function placePowers(rand: () => number = Math.random, from = 0): Map<number, Power> {
+// `allowed`: the power-ups the teacher left on (2026-11-01); none means none.
+export function placePowers(rand: () => number = Math.random, from = 0, allowed: Power[] = POWERS): Map<number, Power> {
   const out = new Map<number, Power>();
+  if (!allowed.length) return out;
+  const weights = Object.fromEntries(allowed.map((p) => [p, POWER_WEIGHTS[p]])) as Record<Power, number>;
   const blocked = new Set(BRIDGES.flatMap((b) => [b.from, b.to]));
   for (let i = from + 2; i < FINISH - 2; i++) {
     if (blocked.has(i) || out.has(i - 1)) continue;
-    if (rand() < 0.4) out.set(i, pick(POWER_WEIGHTS, rand));
+    if (rand() < 0.4) out.set(i, pick(weights, rand));
   }
   // Never a quiet board: top up to at least 11 power-up spaces.
   const want = Math.round(11 * ((FINISH - from) / FINISH));
   for (let tries = 0; out.size < want && tries < 400; tries++) {
     const i = from + 2 + Math.floor(rand() * (FINISH - from - 4));
     if (blocked.has(i) || out.has(i) || out.has(i - 1) || out.has(i + 1)) continue;
-    out.set(i, pick(POWER_WEIGHTS, rand));
+    out.set(i, pick(weights, rand));
   }
   return out;
 }

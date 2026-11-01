@@ -8,6 +8,7 @@ import { buzz, playEffect, speak } from '../../engine/feedback';
 import ResultsModal from '../../engine/ResultsModal';
 import { useAsk } from '../../engine/useAsk';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
@@ -15,7 +16,7 @@ import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import type { GameTheme } from '../../theme/types';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider, Toggle } from '../../ui/fields';
+import { Slider } from '../../ui/fields';
 import Title from '../../ui/Title';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -37,12 +38,12 @@ export default function FarmGrow() {
   const { theme, themes, playable, choose } = useGameTheme('farm-grow');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('farm-grow', { setId: LIBRARY[0].id, days: 6, perBreak: 2, powerUps: true });
+  const [setup, change] = useSavedSetup('farm-grow', { setId: LIBRARY[0].id, days: 6, perBreak: 2, powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
   const { ask, element, missed } = useAsk({ gameId: 'farm-grow', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
-  const powers = usePowerUps(farmGrowManifest, theme, setup.powerUps);
+  const powers = usePowerUps(farmGrowManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stage, setStage] = useState<Stage>('gate');
@@ -137,7 +138,7 @@ export default function FarmGrow() {
             <>
               <Slider label={t('fg.days')} min={4} max={10} value={setup.days} onChange={(v) => change({ days: v })} />
               <Slider label={t('fg.perBreak')} min={1} max={4} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: farmGrowManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
         ]} />

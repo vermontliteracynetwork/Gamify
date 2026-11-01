@@ -16,7 +16,7 @@ import { useGamePool } from '../../student/session';
 import { PUZZLE_PACK_CLEARED } from '../../config';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider, Toggle } from '../../ui/fields';
+import { Slider } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -24,6 +24,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
 import {
@@ -47,7 +48,7 @@ export default function BubblePop() {
   const { theme, themes, playable, choose } = useGameTheme('bubble-pop');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, roundCount: 10, shotsPerRound: 3, perBreak: 1, powerUps: true });
+  const [setup, change] = useSavedSetup('bubble-pop', { setId: LIBRARY[0].id, roundCount: 10, shotsPerRound: 3, perBreak: 1, powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const chosen = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(chosen);
@@ -72,7 +73,7 @@ export default function BubblePop() {
   const [gain, setGain] = useState<{ id: number; n: number; x: number; y: number } | null>(null);
   const plan = useRef({ rounds: 10, shots: 3, perBreak: 1 });
   // Power-ups after a question break: more bubbles, bonus points, or a doubled pop.
-  const powers = usePowerUps(bubblePopManifest, theme, setup.powerUps);
+  const powers = usePowerUps(bubblePopManifest, theme, setup.powerUps, setup.powerOff ?? []);
   const doubleNext = useRef(false);
   // Held power-ups (teacher, 2026-10-31): ready for the next turn of shots,
   // listed under the score, gone after that turn.
@@ -304,7 +305,7 @@ export default function BubblePop() {
             <>
               <Slider label={t('bp.rounds')} hint={t('bp.roundsHint')} min={3} max={20} value={setup.roundCount} onChange={(v) => change({ roundCount: v })} />
               <Slider label={t('bp.shotsEach')} hint={t('bp.shotsHint')} min={1} max={5} value={setup.shotsPerRound} onChange={(v) => change({ shotsPerRound: v })} />
-              <Toggle label={t('pu.toggle')} hint={t('pu.toggleHint')} value={setup.powerUps} onChange={(v) => change({ powerUps: v })} />
+              {powerUpSwitches({ manifest: bubblePopManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
               <Slider label={t('bp.perBreak')} hint={t('bp.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
             </>
           ) },

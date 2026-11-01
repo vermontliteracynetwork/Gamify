@@ -19,6 +19,7 @@ import ItemArt from '../../theme/ItemArt';
 import type { ThemeItem } from '../../theme/types';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
+import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import WayToPlay from '../WayToPlay';
@@ -79,7 +80,7 @@ export default function CastCatch() {
   async function openLive() { navigate(`/teacher/live/${(await makeGameCode('cast-catch', setId, 'live')).code}?${classPlayQuery(classPlay)}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 8 });
+  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 8, powerUps: true, powerOff: [] as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -184,7 +185,8 @@ export default function CastCatch() {
   }
   function land() {
     const times = doubleNext.current ? 2 : 1;
-    const item = catchItem(theme.items ?? castCatchManifest.items!.classic);
+    // Only the power-up catches the teacher left on (2026-11-01).
+    const item = setup.powerUps ? catchItem((theme.items?.length ? theme.items : castCatchManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id))) : null;
     let c: Catch;
     if (item) {
       const e = itemEffect(item);
@@ -263,7 +265,12 @@ export default function CastCatch() {
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-          { id: 'options', title: t('setup.options'), content: <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={20} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} /> },
+          { id: 'options', title: t('setup.options'), content: (
+            <>
+              <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={20} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} />
+              {powerUpSwitches({ manifest: castCatchManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
+            </>
+          ) },
         ]} />
       )}
 

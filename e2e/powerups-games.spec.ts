@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup, openSetup, startTurn } from './setup';
+import { finishSetup, openSetup, showSetting, startTurn } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.trim(), q.choices[q.correctIndex]] as const)));
 
 // With luck forced on (every roll low), a right answer brings a power-up
 // and it pops up with its picture, name and what it does.
 for (const g of [
-  { id: 'pinball', name: /(Golden Ball|Super Shooter|Jackpot Magnet|Bouncy Ball|Mystery Bottle|Sneaky Swipe)/ },
-  { id: 'lunch-rush', name: /(Extra Plate|Tip Jar|Double Star)/ },
-  { id: 'bowling', name: /(Golden Pin|Pin Magnet|Pin Twister|Bumper Rails|Fireball|Mystery Box|Sneaky Swipe)/ },
+  { id: 'pinball', first: 'Golden Ball', name: /(Golden Ball|Super Shooter|Jackpot Magnet|Bouncy Ball|Mystery Bottle|Sneaky Swipe)/ },
+  { id: 'lunch-rush', first: 'Extra Plate', name: /(Extra Plate|Tip Jar|Double Star)/ },
+  { id: 'bowling', first: 'Golden Pin', name: /(Golden Pin|Pin Magnet|Pin Twister|Bumper Rails|Fireball|Mystery Box|Sneaky Swipe)/ },
 ]) {
   test(`${g.id}: a right answer can bring a power-up`, async ({ page }, info) => {
     await page.addInitScript(() => { Math.random = () => 0.05; if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
@@ -17,7 +17,10 @@ for (const g of [
     page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
     await openSetup(page, `/games/${g.id}`, /^Solo/);
     await page.getByRole('button', { name: 'Next', exact: true }).click();
-    await expect(page.getByRole('switch', { name: /Power-ups/ })).toHaveAttribute('aria-checked', 'true');
+    // Each power-up has its own switch (teacher, 2026-11-01); the first starts on.
+    const first = page.getByRole('switch', { name: new RegExp(g.first) });
+    await showSetting(page, first);
+    await expect(first).toHaveAttribute('aria-checked', 'true');
     await finishSetup(page);
     await startTurn(page);
     const dialog = page.getByRole('dialog');

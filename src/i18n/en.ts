@@ -422,6 +422,7 @@ export const en = {
   'tb.how2': 'Pick a card, then tap the right answer.',
   'tb.how3': 'Right answers win cards or squares. Most points wins!',
   'pu.toggle': 'Power-ups',
+  'pu.switchHint': 'Turn each power-up on or off for your class.',
   'pu.toggleHint': 'Right answers sometimes bring a power-up.',
   'pu.tray': 'Power-ups',
   'pu.bubble-pop.mystery': 'Mystery points!',
