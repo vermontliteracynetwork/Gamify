@@ -1,3 +1,4 @@
+import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
@@ -178,6 +179,7 @@ export default function Pinball() {
     playEffect('win', settings);
     const me = current(state).id;
     const ab = it.ability;
+    if (ab === 'magnet') playClip(POWER_SOUNDS.magnet, settings);
     if (ab === 'double' || ab === 'super' || ab === 'magnet' || ab === 'bounce') { boost.current.add(ab); setArmed((a) => [...a, ab]); return; }
     let next = state;
     if (ab === 'mystery') next = addPoints(state, me, 10 * (1 + Math.floor(Math.random() * 10)));

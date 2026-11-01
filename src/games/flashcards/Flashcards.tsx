@@ -1,3 +1,4 @@
+import { ANSWER_SOUNDS, playClip } from '../../engine/music';
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -63,7 +64,7 @@ export default function Flashcards() {
     log(card, knewIt);
     setFlipped(false);
     if (knewIt) {
-      playEffect('right', settings);
+      playClip(ANSWER_SOUNDS.right, settings);
       const rest = pile.slice(1);
       setKnown((k) => k + 1);
       setPile(rest);

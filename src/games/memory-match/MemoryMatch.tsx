@@ -1,3 +1,4 @@
+import { ANSWER_SOUNDS, playClip } from '../../engine/music';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -95,14 +96,14 @@ export default function MemoryMatch() {
       setOpen([]);
       busy.current = false;
       if (match) {
-        playEffect('right', settings);
+        playClip(ANSWER_SOUNDS.right, settings);
         const q = game.pool.flatMap((p) => p.set.questions.map((x) => ({ x, setId: p.set.id }))).find((e) => e.x.id === a.pair);
         if (q) void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), classroomId: game.classroomId, studentId: game.studentId, teamName: players.length > 1 ? players[turnRef.current]?.name : undefined, gameId: 'memory-match', mode: players.length > 1 ? 'versus' : 'solo', setId: q.setId, prompt: q.x.prompt, answer: q.x.choices[q.x.correctIndex], tries: [...Array.from({ length: misses.current.get(a.pair) ?? 0 }, () => '(miss)'), q.x.choices[q.x.correctIndex]], ms: 0, outcome: 'right' });
         foundRef.current = { ...foundRef.current, [a.pair]: turnRef.current };
         setFound(foundRef.current);
         if (Object.keys(foundRef.current).length * 2 === deck.length) finish();
       } else {
-        playEffect('miss', settings);
+        playClip(ANSWER_SOUNDS.wrong, settings);
         for (const c of [a, b]) misses.current.set(c.pair, (misses.current.get(c.pair) ?? 0) + 1);
         if (players.length > 1) { turnRef.current = (turnRef.current + 1) % players.length; setTurn(turnRef.current); }
       }

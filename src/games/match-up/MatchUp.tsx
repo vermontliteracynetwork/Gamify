@@ -1,3 +1,4 @@
+import { ANSWER_SOUNDS, playClip } from '../../engine/music';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -80,7 +81,7 @@ export default function MatchUp() {
     const match = pick.pair === tile.pair;
     const entry = questions.find((e) => e.q.id === (side === 'r' ? pick.pair : tile.pair));
     if (match) {
-      playEffect('right', settings);
+      playClip(ANSWER_SOUNDS.right, settings);
       const next = [...done, tile.pair];
       setDone(next); setPick(null);
       if (entry) void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), classroomId: game.classroomId, studentId: game.studentId, gameId: 'match-up', mode: 'solo', setId: entry.setId, prompt: entry.q.prompt, answer: entry.q.choices[entry.q.correctIndex], tries: [...(wrongs.current.get(entry.q.id) ?? []), entry.q.choices[entry.q.correctIndex]], ms: 0, outcome: 'right' });
@@ -91,7 +92,7 @@ export default function MatchUp() {
         }, still ? 200 : 700);
       }
     } else {
-      playEffect('miss', settings);
+      playClip(ANSWER_SOUNDS.wrong, settings);
       setMisses((m) => m + 1);
       const qId = side === 'r' ? pick.pair : tile.pair;
       const wrongText = (side === 'r' ? tile : right.find((x) => x.pair === pick.pair))?.text ?? '';

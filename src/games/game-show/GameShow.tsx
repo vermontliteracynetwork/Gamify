@@ -4,7 +4,6 @@ import { playClip, useGameMusic } from '../../engine/music';
 
 // Game Show's own sounds (teacher uploads, 2026-11-01; ledger: Pixabay).
 const GS = '/sounds/game-show/';
-const GS_SOUNDS = { right: `${GS}correct.mp3`, wrong: `${GS}wrong.mp3` };
 import { AnimatePresence, motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
@@ -506,7 +505,7 @@ export default function GameShow() {
         </div>
       )}
 
-      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} sounds={GS_SOUNDS} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} turnCard={false} />}
+      {question && player && phase === 'play' && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={cpuLevel} onResult={onResult} chance={{ n: question.chance, total: tries }} turnCard={false} />}
       {phase === 'play' && step === 'turn' && player && !reveal && <TurnCard key={player.id} player={player} onStart={turnStarted} />}
 
       {reveal && turns && (

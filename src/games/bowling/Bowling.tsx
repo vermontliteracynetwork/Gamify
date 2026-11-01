@@ -1,3 +1,4 @@
+import { playClip, POWER_SOUNDS } from '../../engine/music';
 import Title from '../../ui/Title';
 import { pace } from '../../engine/pace';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -113,6 +114,7 @@ export default function Bowling() {
     playEffect('win', settings);
     const me = current(state).id;
     const ab = it.ability as keyof typeof boost.current | 'mystery' | 'swipe' | 'bonus' | 'twister';
+    if (ab === 'magnet') playClip(POWER_SOUNDS.magnet, settings);
     if (ab === 'double' || ab === 'magnet' || ab === 'bumpers' || ab === 'mega') { boost.current[ab] = true; setArmed((a) => [...a, ab]); return; }
     if ((ab as string) === 'twister') { twist(); return; }
     if (ab === 'mystery') setT(addPoints(state, me, 1 + Math.floor(Math.random() * 10)));

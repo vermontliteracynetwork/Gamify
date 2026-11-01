@@ -1,3 +1,4 @@
+import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
@@ -42,6 +43,8 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'roll' | 'rolling' | 'moving' | 'target';
 type Pt = { x: number; y: number };
 const ART = '/classic/castle-quest';
+const JUMP = '/sounds/board/jump.mp3';
+const DICE = '/sounds/board/dice.mp3';
 // Classic players (teacher, 2026-10-31): 20 voxel animals from SonaSar's
 // Voxel Animals pack, drawn from the 3D models; each player picks one.
 const ANIMALS = ['Axolotl', 'Bear', 'Bunny', 'Cat', 'Chicken', 'Cow', 'Crocodile', 'Dog', 'Elephant', 'Fox', 'Frog', 'Mole', 'Monkey', 'Mouse', 'Panda', 'Parrot', 'Penguin', 'Piglet', 'Turtle', 'Unicorn'];
@@ -85,6 +88,8 @@ export default function CastleQuest() {
   const [powers, setPowers] = useState<Map<number, Power>>(new Map());
   const [die, setDie] = useState(1);
   const [toss, setToss] = useState<{ id: number; n: number; mult: number } | null>(null);
+  // Every roll of the die shakes in a hand first (teacher's sound, 2026-11-01).
+  useEffect(() => { if (toss) playClip(DICE, settings, 0.8); }, [toss?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ahead, setAhead] = useState<number[]>([]);
   const [shield, setShield] = useState<number[]>([]);
   const [fast, setFast] = useState<number[]>([]);
@@ -161,7 +166,7 @@ export default function CastleQuest() {
   useEffect(() => {
     if (step !== 'question' || !question) return;
     const i = held.held.findIndex((it) => it.ability === 'magnet');
-    if (i >= 0) { held.use(i); setMagnetOn(true); }
+    if (i >= 0) { held.use(i); setMagnetOn(true); playClip(POWER_SOUNDS.magnet, settings); }
   }, [question, held.held]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function onResult(right: boolean) {
@@ -173,7 +178,7 @@ export default function CastleQuest() {
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     setQuestion(null); setMagnetOn(false);
-    if (right) { setStep('roll'); playEffect('right', settings); }
+    if (right) setStep('roll'); // the question already played the right-answer sound
     else { say(t('cq.nextTime'), `${ART}/world/bushGrass.png`); void endTurn(); }
   }
 
@@ -188,7 +193,7 @@ export default function CastleQuest() {
       if (!live.current) return;
       const next = [...posRef.current]; next[who] = n + dir; place(next);
       setHop((h) => ({ who, n: h.n + 1, ms: speed }));
-      playEffect('tap', settings);
+      playClip(JUMP, settings, 0.7); // the teacher's jump sound on every hop (2026-11-01)
       await sleep(speed);
       puff(spotOf(n + dir));
     }
@@ -202,7 +207,7 @@ export default function CastleQuest() {
       const at = centerOf(r, c);
       setOverride((o) => ({ ...o, [who]: { x: at.x, y: at.y - 6 } }));
       setHop((h) => ({ who, n: h.n + 1, ms: speed }));
-      playEffect('tap', settings);
+      playClip(JUMP, settings, 0.7);
       await sleep(speed);
     }
     setOverride((o) => { const { [who]: _, ...rest } = o; return rest; });
@@ -221,7 +226,6 @@ export default function CastleQuest() {
     const n = roll(Math.random, sides);
     const mult = potion ? 3 : 1;
     setPotion(false);
-    playEffect('whoosh', settings);
     setToss({ id: Date.now(), n, mult });
     await sleep(still ? 350 : 1500);
     setDie(n);
@@ -257,8 +261,8 @@ export default function CastleQuest() {
     // would do nothing, so it comes up as a treasure chest (teacher, 2026-11-01).
     if (power === 'lightning' && !posRef.current.some((p, i) => i !== who && p > startRef.current)) power = 'chest';
     const it = itemFor(power);
-    if (power === 'tornado') { setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) }); await sleep(ms(1300)); await blowAway(); return; }
-    if (power === 'chest') { setPop({ id: Date.now(), item: it, text: t('cq.chestOpen') }); await sleep(ms(1500)); await openTheChest(who); return; }
+    if (power === 'tornado') { playClip(POWER_SOUNDS.tornado, settings); setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) }); await sleep(ms(1300)); await blowAway(); return; }
+    if (power === 'chest') { playClip(POWER_SOUNDS.chest, settings); setPop({ id: Date.now(), item: it, text: t('cq.chestOpen') }); await sleep(ms(1500)); await openTheChest(who); return; }
     held.earn(s.players[who].id, it);
     setPop({ id: Date.now(), item: it, text: t('pu.later', { role: roleOf(castleQuestManifest, it) }) });
     playEffect('win', settings);
@@ -717,9 +721,39 @@ function Pawn({ img, figure, color, on, shield, fast, still, hopKey, hopMs }: { 
 
 // A real cube with pips that tumbles; it settles on the number rolled.
 const FACE_TURN: Record<number, [number, number]> = { 1: [0, 0], 6: [0, 180], 3: [0, -90], 4: [0, 90], 2: [-90, 0], 5: [90, 0] };
+// Classic: the low-poly 3D die (smolware, free for any project), rendered to
+// pictures of each face and of the tumble (teacher, 2026-11-01).
+const DIE_ART = '/classic/castle-quest/die';
+let dieLoaded = false;
+function loadDieArt() {
+  if (dieLoaded || typeof Image === 'undefined') return;
+  dieLoaded = true;
+  for (let n = 1; n <= 6; n++) new Image().src = `${DIE_ART}/face-${n}.webp`;
+  for (let n = 0; n < 8; n++) new Image().src = `${DIE_ART}/roll-${n}.webp`;
+}
+function ModelDie({ value, size, spinning }: { value: number; size: number; spinning: boolean }) {
+  const [frame, setFrame] = useState(0);
+  useEffect(loadDieArt, []);
+  useEffect(() => {
+    if (!spinning) return;
+    const id = window.setInterval(() => setFrame((f) => (f + 1) % 8), 75);
+    return () => window.clearInterval(id);
+  }, [spinning]);
+  return (
+    <div style={{ width: size * 1.25, height: size * 1.25 }} className="relative" role="img" aria-label={t('cq.dieShows', { n: value })}>
+      {spinning
+        ? <img src={`${DIE_ART}/roll-${frame}.webp`} alt="" draggable="false" className="absolute inset-0 w-full h-full object-contain" style={{ transform: `rotate(${frame * 45}deg)` }} />
+        : <motion.img key={value} src={`${DIE_ART}/face-${value}.webp`} alt="" draggable="false" className="absolute inset-0 w-full h-full object-contain"
+            initial={{ scale: 1.15, rotate: -12 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 14 }} />}
+    </div>
+  );
+}
+
 function Die3D({ value, size, spinning, theme, spins = 0 }: { value: number; size: number; spinning: boolean; theme: GameTheme; spins?: number }) {
   const [rx, ry] = FACE_TURN[value];
   const face = pieceImage(theme, 'die');
+  // A theme that draws its own die face keeps the cube; Classic uses the model.
+  if (!face && (!theme.pieces.die?.color || theme.pieces.die.color.toLowerCase() === '#fbfcf8')) return <ModelDie value={value} size={size} spinning={spinning} />;
   const extra = spinning ? 2 : spins;
   return (
     <div style={{ width: size, height: size, perspective: size * 5 }} role="img" aria-label={t('cq.dieShows', { n: value })}>

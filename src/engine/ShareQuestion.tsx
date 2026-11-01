@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { playClip } from './music';
+import { ANSWER_SOUNDS, playClip } from './music';
 import { pace, POP_IN } from './pace';
 import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
@@ -39,7 +39,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   // False when the game already showed the turn card before the move (Game Show).
   turnCard?: boolean;
 }) {
-  const answerSound = (right: boolean) => (sounds ? playClip(right ? sounds.right : sounds.wrong, settings) : playEffect(right ? 'right' : 'miss', settings));
+  const answerSound = (right: boolean) => { const set = sounds ?? ANSWER_SOUNDS; playClip(right ? set.right : set.wrong, settings); };
   const { settings } = useSettings();
   const q = useMemo(() => shuffleChoices(question), [question]);
   // Rotating answerer (market research, 2026-10-31): on a team made from the

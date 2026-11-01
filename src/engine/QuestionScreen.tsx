@@ -5,7 +5,8 @@ import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, Speak
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { buzz, playEffect, speakQuestion, stopSpeaking } from './feedback';
+import { buzz, speakQuestion, stopSpeaking } from './feedback';
+import { ANSWER_SOUNDS, playClip } from './music';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { AccessButton, FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
@@ -73,7 +74,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   function choose(i: number) {
     if (locked || picked !== null || wrongTries.includes(i)) return;
     const right = i === q.correctIndex;
-    playEffect(right ? 'right' : 'miss', settings);
+    playClip(right ? ANSWER_SOUNDS.right : ANSWER_SOUNDS.wrong, settings);
     buzz(right ? 30 : [20, 60, 20], settings);
     const tries = [...wrongTries.map((k) => q.choices[k]), q.choices[i]];
     // Extra tries (a teacher accommodation): a miss with tries left greys
