@@ -9,14 +9,16 @@ export function classicTheme(gameId: string): GameTheme {
   const night = gameId === 'star-quiz';
   // Bowling's Classic look is a retro 80s bowling-alley carpet (teacher, 2026-10-31).
   const alley = gameId === 'bowling';
+  // Game Show's Classic stage is red (teacher, 2026-11-01).
+  const show = gameId === 'game-show';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#07070f' : '#b4c4fb',
-      backgroundText: night || alley ? '#ffffff' : '#000000',
+      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : '#b4c4fb',
+      backgroundText: night || alley || show ? '#ffffff' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
       accent: '#fdfd94',

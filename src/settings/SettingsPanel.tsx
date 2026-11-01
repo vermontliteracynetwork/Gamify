@@ -11,6 +11,8 @@ import { useSettings } from './SettingsContext';
 import Title from '../ui/Title';
 import { getMirrorCode, setMirrorCode } from '../live/mirror';
 import { makeGameCode } from '../data/gameCodes';
+import { getGame } from '../games/registry';
+import { setStageColor, STAGE_SWATCHES, useStageColor } from '../theme/stageColor';
 
 // The gear button: same corner (top right, top left when left-handed), same
 // look in every game and on the question screen (product plan 4A). It sits
@@ -213,6 +215,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
             <Choice label={t('settings.gameSpeed')} value={s.gameSpeed} options={['slow', 'normal', 'fast']} onChange={(v) => set('gameSpeed', v)} />
             <Toggle label={t('settings.tapOnly')} value={s.tapOnly} onChange={(v) => set('tapOnly', v)} />
             <Toggle label={t('settings.leftHanded')} value={s.leftHanded} onChange={(v) => set('leftHanded', v)} />
+            {context && getGame(context) && <StageColorPicker gameId={context} />}
           </>
         )}
 
@@ -261,6 +264,31 @@ function MirrorControl({ gameId }: { gameId: string }) {
       ) : (
         <button type="button" onClick={async () => { const c = (await makeGameCode(gameId, '', 'mirror')).code; setMirrorCode(c); setCode(c); }} className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold">{t('mirror.start')}</button>
       )}
+    </div>
+  );
+}
+
+// The background color behind this game (teacher, 2026-11-01): the theme's
+// own, a brand color, or any color.
+function StageColorPicker({ gameId }: { gameId: string }) {
+  const color = useStageColor(gameId);
+  const swatch = (c: string | null, label: string) => (
+    <button key={label} type="button" role="radio" aria-checked={(color ?? null) === c} aria-label={label} data-tip={label} onClick={() => setStageColor(gameId, c)}
+      className={`w-11 h-11 rounded-full border-[2.5px] border-border flex items-center justify-center font-bold text-xs ${(color ?? null) === c ? 'ring-4 ring-accent' : ''}`}
+      style={c ? { background: c } : { background: 'linear-gradient(135deg, #fbfcf8 50%, #b4c4fb 50%)' }}>{c ? '' : 'A'}</button>
+  );
+  return (
+    <div className="grid gap-2">
+      <span className="font-bold">{t('settings.stageColor')}</span>
+      <span className="text-sm font-semibold text-muted -mt-1">{t('settings.stageColorHint')}</span>
+      <div className="flex flex-wrap gap-2 items-center" role="radiogroup" aria-label={t('settings.stageColor')}>
+        {swatch(null, t('settings.stageColorTheme'))}
+        {STAGE_SWATCHES.map((c) => swatch(c, c))}
+        <label className="w-11 h-11 rounded-full border-[2.5px] border-border overflow-hidden relative cursor-pointer" data-tip={t('settings.stageColorCustom')} style={{ background: 'conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)' }}>
+          <span className="sr-only">{t('settings.stageColorCustom')}</span>
+          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={color ?? '#b4c4fb'} onChange={(e) => setStageColor(gameId, e.target.value)} />
+        </label>
+      </div>
     </div>
   );
 }

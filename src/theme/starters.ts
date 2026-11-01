@@ -1,4 +1,5 @@
 import { classicTheme } from './classic';
+import { inkFor } from './stageColor';
 import type { GameTheme } from './types';
 
 // Starter themes by Gamify (teacher, 2026-10-25): simple looks that show how
@@ -11,7 +12,7 @@ export interface StarterTheme { id: string; name: string; gameId: string; band: 
 function sample(id: string, name: string, gameId: string, band: Band, interest: string, order: number, change: (b: GameTheme) => Partial<GameTheme>): StarterTheme {
   const base = classicTheme(gameId);
   const extra = change(base);
-  return { id, name, gameId, band, interest, order, theme: { ...base, ...extra, colors: { ...base.colors, ...extra.colors }, fonts: { ...base.fonts, ...extra.fonts }, id: `starter:${id}`, name, source: 'library', designedBy: 'Gamify' } };
+  return { id, name, gameId, band, interest, order, theme: { ...base, ...extra, colors: { ...base.colors, ...(extra.colors?.background ? { backgroundText: inkFor(extra.colors.background) } : {}), ...extra.colors }, fonts: { ...base.fonts, ...extra.fonts }, id: `starter:${id}`, name, source: 'library', designedBy: 'Gamify' } };
 }
 
 export const STARTER_THEMES: StarterTheme[] = [

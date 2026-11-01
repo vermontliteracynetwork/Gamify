@@ -1,3 +1,4 @@
+import { inkFor, useStageColor } from './stageColor';
 import { useEffect, useState, type ReactNode } from 'react';
 import { TIERS } from '../config';
 import { data } from '../data';
@@ -43,15 +44,18 @@ export function useGameTheme(gameId: string) {
 // Gamify look on every game, not the game's theme (teacher, 2026-10-31).
 export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme; children: ReactNode; menu?: boolean }) {
   const { settings } = useSettings();
+  const stageColor = useStageColor(theme.gameId);
   useEffect(() => { setSoundPack(menu ? 'classic' : theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds, menu]);
   if (menu) return <div className="game-stage brand-menu min-h-[calc(100dvh-4rem)]">{children}</div>;
+  // The teacher's own background color for this game, if picked (2026-11-01).
+  const stage = stageColor;
   return (
     <div className="game-stage min-h-[calc(100dvh-4rem)]" data-plain-g={theme.fonts.display !== 'Grow Year' ? '' : undefined} style={{
       ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],
       // A theme that picks its own display font wears it on every heading.
       ...(theme.fonts.display !== 'Grow Year' && THEME_FONTS[theme.fonts.display] ? { ['--font-heading' as string]: THEME_FONTS[theme.fonts.display] } : {}),
-      ...backdropStyle(theme, settings.backgrounds === 'plain'),
-      ['--stage-bg-text' as string]: theme.colors.backgroundText,
+      ...(stage ? { background: stage } : backdropStyle(theme, settings.backgrounds === 'plain')),
+      ['--stage-bg-text' as string]: stage ? inkFor(stage) : theme.colors.backgroundText,
       ['--color-accent' as string]: theme.colors.accent,
       ['--color-accent-ink' as string]: theme.colors.accentText,
     }}>
