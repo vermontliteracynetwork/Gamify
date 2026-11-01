@@ -230,6 +230,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   async function save() {
     const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
     await saveMadeTheme(theme);
+    setDraft(theme); // keep what was saved (credit names) in the open design
     reload();
     setParams({ id: theme.id });
     setStatus(t('builder.saved', { name: theme.name }));
