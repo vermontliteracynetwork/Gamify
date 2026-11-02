@@ -24,7 +24,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
 import { cutPhotoForPiece } from './scan';
-import { loadDraft, saveDraft } from './draftStore';
+import { loadDraft, loadOriginal, saveDraft, saveOriginal } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
 import Title from '../../ui/Title';
@@ -201,7 +201,15 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   const problems = useMemo(() => [...themeProblems(draft), ...((draft.items ?? []).some((it) => !it.name.trim()) ? [t('builder.items.nameEvery')] : [])], [draft]);
   const filled = game.themePieces.filter((p) => draft.pieces[p.id]?.image).length;
 
-  const [drawing, setDrawing] = useState<ThemePieceSpec | null>(null);
+  const [drawing, setDrawingPiece] = useState<ThemePieceSpec | null>(null);
+  // The piece's last upload, so the studio's Restore and Start over bring it
+  // back, and a new upload always replaces it (teacher, 2026-11-02).
+  const [original, setOriginal] = useState<string | undefined>();
+  function setDrawing(p: ThemePieceSpec | null) {
+    setOriginal(undefined);
+    setDrawingPiece(p);
+    if (p) void loadOriginal(draft.id, p.id).then((o) => setOriginal(o && draft.pieces[p.id]?.image ? o : undefined));
+  }
   const views = previewViews(gameId, !!game.items);
   const [view, setView] = useState<PreviewView>('game');
   const [find, setFind] = useState('');
@@ -227,7 +235,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     setBusy(true); setStatus(t('builder.cutting'));
     try {
       const art = await cutPhotoForPiece(file, piece, isRound(piece), isSolid(piece));
-      if (art) { setPiece(piece.id, art); setStatus(''); } else setStatus(t('builder.cutEmpty'));
+      if (art) { setPiece(piece.id, art); void saveOriginal(draft.id, piece.id, art); setStatus(''); } else setStatus(t('builder.cutEmpty'));
     } catch (e) { setStatus(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   }
@@ -252,7 +260,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     <>
       {drawing && (
         <Suspense fallback={null}>
-          <DrawStudio piece={drawing} image={draft.pieces[drawing.id]?.image} onClose={() => setDrawing(null)}
+          <DrawStudio piece={drawing} image={draft.pieces[drawing.id]?.image} original={original} onClose={() => setDrawing(null)}
             onSave={(img) => { setPiece(drawing.id, img); setDrawing(null); setStatus(''); }} />
         </Suspense>
       )}
@@ -339,7 +347,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   </div>
                   <p className="text-xs font-semibold text-muted -mt-1">{t('builder.scanHint')}</p>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
-                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => setPiece(p.id, undefined)} />)} />
+                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
                 </>
               )}
               {tab === 'items' && game.items && (

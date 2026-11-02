@@ -236,7 +236,10 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
     for (let i = 0; i < d.length; i += 16) { hist[0][d[i]]++; hist[1][d[i + 1]]++; hist[2][d[i + 2]]++; }
     const total = d.length / 16;
     const paper = hist.map((hh) => { let acc = 0; for (let v = 255; v >= 0; v--) { acc += hh[v]; if (acc > total * 0.03) return Math.max(v, 60); } return 255; });
-    if (paper.some((v) => v < 245)) for (let i = 0; i < d.length; i += 4) for (let ch = 0; ch < 3; ch++) d[i + ch] = Math.min(255, (d[i + ch] * 255) / paper[ch]);
+    // Only when the lightest part looks like paper (light and gray): a
+    // colorful digital picture with no white keeps its colors.
+    const papery = paper.every((v) => v >= 150) && Math.max(...paper) - Math.min(...paper) < 50;
+    if (papery && paper.some((v) => v < 245)) for (let i = 0; i < d.length; i += 4) for (let ch = 0; ch < 3; ch++) d[i + ch] = Math.min(255, (d[i + ch] * 255) / paper[ch]);
     if (!solid) {
       // Paper reached from the edges turns see-through; white inside the
       // drawing (a white eye, a shine) stays.

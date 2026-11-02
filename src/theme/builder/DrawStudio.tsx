@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Acorn, Airplane, Alien, Anchor, ArrowClockwise, ArrowCounterClockwise, ArrowFatLinesDown, ArrowFatLinesUp, ArrowsLeftRight, ArrowsOutSimple, Atom, Avocado, Backpack, Balloon, Baseball, Basketball, Bell, Bicycle, Bird, Boat, Bone, Book, Brain, Bread, Bug, Bus, Butterfly, Cactus, Cake, Camera, Campfire, Car, Carrot, Cat, Cheese, Clock, Cloud, CloudRain, Clover, Coffee, Coin, Compass, Confetti, Cookie, CopySimple, Cow, Crown, Diamond, DiceFive, Dog, Drop, Egg, Eraser, Eyes, Feather, Fire, Fish, Flag, Flask, Flower, FlowerLotus, Football, Footprints, GameController, Ghost, Gift, Globe, Guitar, Hamburger, HandGrabbing, HandWaving, Headphones, Heart, Horse, Hourglass, House, IceCream, Key, Leaf, Lightbulb, Lighthouse, Lightning, MagicWand, Magnet, MapPin, Medal, Megaphone, Microphone, Microscope, Moon, Mountains, MusicNote, Orange, PaintBrush, PaintBucket, Palette, PawPrint, Pencil, Pepper, PiggyBank, Pizza, Planet, Plant, Plus, Popcorn, Prohibit, PuzzlePiece, Rabbit, Rainbow, Robot, Rocket, Sailboat, Scissors, Shapes, Shield, Shrimp, Smiley, Snowflake, SoccerBall, Sparkle, Star, StarFour, Sticker, Sun, TShirt, Television, TennisBall, Tent, TextT, Tipi, Tractor, Train, Trash, Tree, TreeEvergreen, Trophy, Umbrella, Waves, X, type Icon } from '@phosphor-icons/react';
+import { Acorn, Airplane, Alien, Anchor, ArrowClockwise, ArrowCounterClockwise, ArrowFatLinesDown, ArrowFatLinesUp, ArrowsLeftRight, ArrowsOutSimple, Atom, ClockCounterClockwise, Avocado, Backpack, Balloon, Baseball, Basketball, Bell, Bicycle, Bird, Boat, Bone, Book, Brain, Bread, Bug, Bus, Butterfly, Cactus, Cake, Camera, Campfire, Car, Carrot, Cat, Cheese, Clock, Cloud, CloudRain, Clover, Coffee, Coin, Compass, Confetti, Cookie, CopySimple, Cow, Crown, Diamond, DiceFive, Dog, Drop, Egg, Eraser, Eyes, Feather, Fire, Fish, Flag, Flask, Flower, FlowerLotus, Football, Footprints, GameController, Ghost, Gift, Globe, Guitar, Hamburger, HandGrabbing, HandWaving, Headphones, Heart, Horse, Hourglass, House, IceCream, Key, Leaf, Lightbulb, Lighthouse, Lightning, MagicWand, Magnet, MapPin, Medal, Megaphone, Microphone, Microscope, Moon, Mountains, MusicNote, Orange, PaintBrush, PaintBucket, Palette, PawPrint, Pencil, Pepper, PiggyBank, Pizza, Planet, Plant, Plus, Popcorn, Prohibit, PuzzlePiece, Rabbit, Rainbow, Robot, Rocket, Sailboat, Scissors, Shapes, Shield, Shrimp, Smiley, Snowflake, SoccerBall, Sparkle, Star, StarFour, Sticker, Sun, TShirt, Television, TennisBall, Tent, TextT, Tipi, Tractor, Train, Trash, Tree, TreeEvergreen, Trophy, Umbrella, Waves, X, type Icon } from '@phosphor-icons/react';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { Button, IconButton } from '../../ui/kit';
@@ -16,7 +16,7 @@ import { speak } from '../../engine/feedback';
 // Everything here is ours or MIT (Phosphor icons, docs/asset-ledger.md), so
 // whatever a class draws is theirs to use.
 
-type Tool = 'move' | 'brush' | 'eraser' | 'fill' | 'sticker' | 'shape' | 'text';
+type Tool = 'move' | 'brush' | 'eraser' | 'restore' | 'fill' | 'sticker' | 'shape' | 'text';
 type BrushKind = 'pen' | 'marker' | 'crayon' | 'spray';
 type ShapeKind = 'circle' | 'square' | 'triangle' | 'heart' | 'star';
 
@@ -105,8 +105,10 @@ const MAX_UNDO = 30;
 
 // `simple`: the student studio (Part 3E): fewer, bigger tools, and each tool
 // says its name and what it does when tapped.
-export default function DrawStudio({ piece, image, onSave, onClose, simple = false }: {
-  piece: ThemePieceSpec; image?: string; onSave: (dataUrl: string) => void; onClose: () => void; simple?: boolean;
+export default function DrawStudio({ piece, image, original, onSave, onClose, simple = false }: {
+  // original: the piece's last upload, before any drawing on it, so Restore
+  // and Start over bring back that picture (teacher, 2026-11-02).
+  piece: ThemePieceSpec; image?: string; original?: string; onSave: (dataUrl: string) => void; onClose: () => void; simple?: boolean;
 }) {
   const { settings } = useSettings();
   const [warn, setWarn] = useState<string[]>([]);
@@ -169,6 +171,32 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
     img.src = image;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Restore paints back the picture underneath (teacher, 2026-11-02: "add a
+  // restore for eraser"): the last upload when there is one, else the
+  // picture the studio opened with.
+  const source = useRef<HTMLCanvasElement | null>(null);
+  const restoreFrom = original ?? image;
+  useEffect(() => {
+    source.current = null;
+    if (!restoreFrom) return;
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      c.getContext('2d')!.drawImage(img, 0, 0, W, H);
+      source.current = c;
+    };
+    img.src = restoreFrom;
+  }, [restoreFrom, W, H]);
+  function startOver() {
+    if (!source.current) return;
+    remember();
+    setObjs([]); setSel(null);
+    const c = ctx();
+    c.clearRect(0, 0, W, H);
+    c.drawImage(source.current, 0, 0);
+  }
+
   const at = (e: React.PointerEvent): [number, number] => {
     const r = canvas.current!.getBoundingClientRect();
     return [((e.clientX - r.left) / r.width) * W, ((e.clientY - r.top) / r.height) * H];
@@ -181,8 +209,14 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
     c.lineCap = 'round'; c.lineJoin = 'round'; c.lineWidth = size;
     c.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
     c.strokeStyle = c.fillStyle = color;
-    if (tool === 'eraser' || brush === 'pen' || brush === 'marker') {
-      if (tool !== 'eraser' && brush === 'marker') { c.globalAlpha = 0.45; c.lineWidth = size * 1.6; c.lineCap = 'square'; }
+    const rub = tool === 'eraser' || tool === 'restore';
+    if (tool === 'restore') {
+      if (!source.current) { c.restore(); return; }
+      // The stroke is painted with the original picture, lined up pixel for pixel.
+      c.strokeStyle = c.createPattern(source.current, 'no-repeat')!;
+    }
+    if (rub || brush === 'pen' || brush === 'marker') {
+      if (!rub && brush === 'marker') { c.globalAlpha = 0.45; c.lineWidth = size * 1.6; c.lineCap = 'square'; }
       c.beginPath();
       points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
       if (points.length === 1) c.lineTo(points[0][0] + 0.1, points[0][1]);
@@ -409,7 +443,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
       return;
     }
     setColor(c);
-    if (tool === 'eraser') setTool('brush');
+    if (tool === 'eraser' || tool === 'restore') setTool('brush');
     if (selected && (selected.kind !== 'sticker' || selected.recolor)) { remember(); update(selected.id, { color: c }); }
   };
   // A custom color joins the list after the rainbow button (saved on this device).
@@ -426,8 +460,8 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
   }, []);
   const swap = () => { setColor(color2); setColor2(color); };
 
-  const ALL_TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
-  const TOOLS = simple ? ALL_TOOLS.filter(([id]) => id !== 'shape' && id !== 'text') : ALL_TOOLS;
+  const ALL_TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['restore', MagicWand], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
+  const TOOLS = ALL_TOOLS.filter(([id]) => (!simple || (id !== 'shape' && id !== 'text')) && (id !== 'restore' || !!restoreFrom));
   const handle = 'absolute w-9 h-9 rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center touch-none';
 
   return (
@@ -438,6 +472,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
           <h2 className="font-display text-xl sm:text-2xl flex-1 min-w-40">{t('studio.title', { piece: piece.label })}</h2>
           <IconButton label={t('studio.undo')} disabled={!undo.length} onClick={stepBack}><ArrowCounterClockwise weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.redo')} disabled={!redo.length} onClick={stepForward}><ArrowClockwise weight="bold" size={20} /></IconButton>
+          {restoreFrom && <IconButton label={t(original ? 'studio.startOverUpload' : 'studio.startOver')} onClick={startOver}><ClockCounterClockwise weight="bold" size={20} /></IconButton>}
           <IconButton variant="danger" label={t('studio.clearAll')} onClick={() => setConfirmClear(true)}><Trash weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.cancel')} onClick={onClose}><X weight="bold" size={20} /></IconButton>
           <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
@@ -563,7 +598,7 @@ export default function DrawStudio({ piece, image, onSave, onClose, simple = fal
               </div>
               <input ref={picker} type="color" value={slot === 'main' ? color : color2} onChange={(e) => pickColor(e.target.value)} className="sr-only" tabIndex={-1} aria-hidden="true" />
             </Section>
-            <Section title={t('studio.brush')} open={tool === 'brush' || tool === 'eraser'}>
+            <Section title={t('studio.brush')} open={tool === 'brush' || tool === 'eraser' || tool === 'restore'}>
               <div role="radiogroup" aria-label={t('studio.brushKind')} className="grid grid-cols-2 gap-1.5">
                 {(['pen', 'marker', 'crayon', 'spray'] as const).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={brush === k} onClick={() => { setBrush(k); setTool('brush'); }}

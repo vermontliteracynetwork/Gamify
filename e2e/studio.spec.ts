@@ -164,3 +164,75 @@ test('studio: two colors, shape outlines, and a made color joins the list', asyn
   await expect(studio.getByRole('button', { name: 'Make a color' })).toBeVisible();
   if (info.project.name === 'laptop') await page.screenshot({ path: 'test-results/studio-colors.png' });
 });
+
+// Restore brings back what the eraser took off the last upload, Start over
+// returns to that upload, and a new upload is what the studio opens with
+// (teacher, 2026-11-02).
+test('Theme Builder studio: Restore brush and Start over use the last upload', async ({ page }, info) => {
+  test.skip(info.project.name === 'ipad-portrait', 'canvas pixel check; two sizes are enough');
+  const problems: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
+  page.on('pageerror', (e) => problems.push(e.message));
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  await page.getByLabel('Find a piece').fill('cover');
+  const png = async (color: string, plain = false) => Buffer.from(await page.evaluate(([c, flat]) => {
+    const k = document.createElement('canvas'); k.width = 800; k.height = 600;
+    const x = k.getContext('2d')!; x.fillStyle = '#ffffff'; x.fillRect(0, 0, 800, 600);
+    if (flat) { x.fillStyle = c; x.fillRect(0, 0, 800, 600); } else { x.fillStyle = c; x.strokeStyle = '#111111'; x.lineWidth = 12; x.fillRect(60, 60, 680, 480); x.strokeRect(60, 60, 680, 480); }
+    return k.toDataURL('image/png').split(',')[1];
+  }, [color, plain] as const), 'base64');
+  const upload = async (color: string, plain = false) => {
+    const chooser = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Add a picture for Cover' }).click();
+    await (await chooser).setFiles({ name: `${color.slice(1)}.png`, mimeType: 'image/png', buffer: await png(color, plain) });
+  };
+  const thumb = page.getByRole('button', { name: 'Add a picture for Cover' }).locator('img');
+  const center = () => thumb.evaluate(async (img: HTMLImageElement) => {
+    await img.decode();
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+    return Array.from(x.getImageData(c.width >> 1, c.height >> 1, 1, 1).data.slice(0, 3));
+  });
+  const studio = page.getByRole('dialog', { name: 'Draw: Cover' });
+  const rub = async (tool: string) => {
+    await studio.getByRole('radio', { name: tool }).click();
+    const box = (await studio.getByLabel(/^Drawing of the Cover/).boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.5);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.5, { steps: 8 });
+    await page.mouse.up();
+  };
+  const isRed = (p: number[]) => p[0] > 200 && p[1] < 60 && p[2] < 60;
+  const isWhite = (p: number[]) => p.every((v) => v > 230);
+
+  await upload('#e53935');
+  await expect.poll(async () => isRed(await center())).toBe(true);
+  // Erase across the middle: the cover is solid, so the hole turns white.
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  await rub('Eraser');
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect.poll(async () => isWhite(await center())).toBe(true);
+  // Reopen: Restore paints the upload back.
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  await rub('Restore');
+  await page.screenshot({ path: `test-results/studio-restore-${info.project.name}.png` });
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect.poll(async () => isRed(await center())).toBe(true);
+  // Erase again, then Start over from my upload.
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  await rub('Eraser');
+  await studio.getByRole('button', { name: 'Start over from my upload' }).click();
+  await studio.getByRole('button', { name: 'Use this picture' }).click();
+  await expect.poll(async () => isRed(await center())).toBe(true);
+  // A new upload replaces everything: the studio opens with it. A digital
+  // picture with no white at all keeps its colors.
+  await upload('#1e88e5', true);
+  await expect.poll(async () => { const p = await center(); return p[2] > 200 && p[0] < 80; }).toBe(true);
+  await page.getByRole('button', { name: /^Draw the Cover/ }).click();
+  const shown = await studio.getByLabel(/^Drawing of the Cover/).evaluate((c: HTMLCanvasElement) => Array.from(c.getContext('2d')!.getImageData(c.width >> 1, c.height >> 1, 1, 1).data.slice(0, 3)));
+  expect(shown[2]).toBeGreaterThan(200);
+  expect(shown[0]).toBeLessThan(80);
+  await studio.getByRole('button', { name: 'Cancel' }).click();
+  expect(problems).toEqual([]);
+});
