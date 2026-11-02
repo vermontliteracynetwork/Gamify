@@ -131,7 +131,14 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   const views = page.getByRole('tablist', { name: 'Preview screens' });
   await expect(views.getByRole('tab')).toHaveText(['Lane', 'Pick a ball', 'Power-ups']);
   await views.getByRole('tab', { name: 'Pick a ball' }).click();
-  await expect(page.getByRole('img', { name: 'Preview: each team picks its ball' }).locator('img[src^="data:image"]').first()).toBeVisible();
+  const picker = page.getByRole('group', { name: 'Preview: each team picks its ball' });
+  await expect(picker.locator('img[src^="data:image"]').first()).toBeVisible();
+  // Tap a ball: it shows big on white; tap again: back to the list (teacher, 2026-11-02).
+  await picker.getByRole('button', { name: 'See picture 1 big' }).click();
+  await expect(picker.getByRole('img', { name: 'Picture 1' })).toBeVisible();
+  if (info.project.name === 'laptop') await page.screenshot({ path: 'test-results/preview-ball-big.png' });
+  await picker.getByRole('button', { name: 'Back to the list' }).click();
+  await expect(picker.getByRole('button', { name: 'Back to the list' })).toHaveCount(0);
   await views.getByRole('tab', { name: 'Power-ups' }).click();
   await expect(page.getByRole('img', { name: /^Preview of / })).toBeVisible();
   await views.getByRole('tab', { name: 'Lane' }).click();
@@ -208,6 +215,46 @@ for (const shot of [{ name: 'tilted', turn: 6, w: 1500, h: 2000 }, { name: 'side
     expect(problems).toEqual([]);
   });
 }
+
+// The pin page is a pin-shaped outline, and a drawn pin is cut out along it
+// (teacher, 2026-11-02): even if the student colors past the outline.
+test('Bowling Pin: the template page is pin-shaped and the cut follows the pin outline', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'image processing; one size is enough');
+  test.setTimeout(90_000);
+  const problems = watch(page);
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/bowling/template');
+  const sheet = page.locator('.template-sheet').nth(2); // page 3: the pin
+  await expect(sheet.locator('path[fill="none"]')).toHaveCount(1);
+  // The student colors the whole pin area red, even past the outline.
+  await sheet.evaluate((svg) => {
+    const ns = 'http://www.w3.org/2000/svg';
+    const r = document.createElementNS(ns, 'rect');
+    r.setAttribute('x', '450'); r.setAttribute('y', '440'); r.setAttribute('width', '800'); r.setAttribute('height', '1540'); r.setAttribute('fill', '#d0302a');
+    svg.insertBefore(r, svg.querySelector('path[fill="none"]'));
+  });
+  await page.addStyleTag({ content: 'header { display: none !important; }' });
+  const shot = await sheet.screenshot({ scale: 'css' });
+  await page.goto('/teacher/themes/bowling');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Add a picture for Pin' }).click();
+  await (await chooser).setFiles({ name: 'pin.png', mimeType: 'image/png', buffer: shot });
+  await expect(page.getByLabel('Added')).toHaveCount(1, { timeout: 30_000 });
+  const px = await page.locator('img[src^="data:image/png"]').first().evaluate(async (img: HTMLImageElement) => {
+    await img.decode();
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+    const a = (u: number, v: number) => x.getImageData(Math.round(u * (c.width - 1)), Math.round(v * (c.height - 1)), 1, 1).data[3];
+    return { corner: a(0.03, 0.03), neck: a(0.15, 0.3), belly: a(0.5, 0.75), w: c.width, h: c.height };
+  });
+  // Outside the pin is see-through; the pin's body keeps the drawing.
+  expect(px.corner).toBe(0);
+  expect(px.neck).toBe(0);
+  expect(px.belly).toBe(255);
+  expect(px.w / px.h).toBeCloseTo(0.5, 1);
+  expect(problems).toEqual([]);
+});
 
 test('Free plan: the Theme Builder works on Game Show only', async ({ page }) => {
   await page.goto('/teacher/themes/match-three');

@@ -1,4 +1,5 @@
 import type { ThemePieceSpec } from '../types';
+import { clipToShape, hasShape } from './shapes';
 import { MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
 
 // Reads photos (or scans) of printed theme template pages and cuts out the
@@ -190,9 +191,10 @@ function cutPiece(page: HTMLCanvasElement, piece: ThemePieceSpec, round: boolean
   if (paperShare(cctx.getImageData(0, 0, crop.width, crop.height).data) > 0.97) return null; // left empty
   const k = Math.max(piece.width, piece.height, 256) / Math.max(piece.width, piece.height);
   const out = canvas(Math.round(piece.width * k), Math.round(piece.height * k)), octx = ctx2d(out);
-  if (round) { octx.beginPath(); octx.ellipse(out.width / 2, out.height / 2, out.width / 2, out.height / 2, 0, 0, Math.PI * 2); octx.clip(); }
+  // Shaped pieces (a bowling pin) are cut along their outline, round ones in a circle.
+  if (!clipToShape(octx, piece.id, out.width, out.height) && round) { octx.beginPath(); octx.ellipse(out.width / 2, out.height / 2, out.width / 2, out.height / 2, 0, 0, Math.PI * 2); octx.clip(); }
   octx.drawImage(crop, 0, 0, out.width, out.height);
-  return round || piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
+  return round || hasShape(piece.id) || piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
 }
 
 export const MARKER_SIZE = MARKER.size;

@@ -38,6 +38,7 @@ import { usePowerUps } from '../../engine/usePowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { bowlingManifest } from './manifest';
+import { PIN_OUTLINE } from '../../theme/builder/shapes';
 import { cpuPlan, fullRack, halfWidthAt, PIN_SPOTS, PIN_XY, rollPoints, scaleAt, shakePins, simulateRoll, toView, xAt, yAt, type SimResult } from './lane';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
@@ -409,6 +410,8 @@ export default function Bowling() {
               style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
+                  {/* A drawn pin always shows inside the pin's outline (teacher, 2026-11-02). */}
+                  <clipPath id="sb-pin-shape"><path d={PIN_OUTLINE} /></clipPath>
                   <radialGradient id="sb-shine" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
                   <linearGradient id="sb-wood" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stopColor={laneColor} /><stop offset="70%" stopColor={laneColor} /><stop offset="100%" stopColor="#8a5a2b" stopOpacity="0.9" /></linearGradient>
                   <linearGradient id="sb-gloss" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#fff" stopOpacity="0" /><stop offset="45%" stopColor="#fff" stopOpacity="0.28" /><stop offset="55%" stopColor="#fff" stopOpacity="0.28" /><stop offset="100%" stopColor="#fff" stopOpacity="0" /></linearGradient>
@@ -456,7 +459,7 @@ export default function Bowling() {
                     <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${s})`} opacity={fallen ? 0.9 : 1}>
                       <g transform={`rotate(${lean})`}><g className={wob && !still ? (toppling ? 'sb-topple' : 'sb-wobble') : ''}>
                         <ellipse cx={0} cy={0.1} rx={2.4} ry={0.7} fill="rgba(0,0,0,0.25)" />
-                        {pinArt ? <image href={pinArt} x={-3.2} y={-11.2} width={6.4} height={11.6} preserveAspectRatio="xMidYMax meet" /> : <>
+                        {pinArt ? <image href={pinArt} x={-3.2} y={-11} width={6.4} height={11.3} preserveAspectRatio="none" clipPath="url(#sb-pin-shape)" /> : <>
                         <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
                         <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
                         <path d="M-0.9,-10.4 C-1.2,-9.4 -1,-8.6 -0.8,-8" stroke="#fff" strokeWidth={0.45} fill="none" opacity={0.8} />

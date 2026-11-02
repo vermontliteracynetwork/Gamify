@@ -1,5 +1,6 @@
 import type { ThemePieceSpec } from '../types';
 import { isRound } from './template';
+import { hasShape, shapePdf } from './shapes';
 
 // The digital template as one PDF (teacher, 2026-10-31): a page per piece at
 // the piece's exact size, so Canva opens the upload as one project with every
@@ -15,7 +16,9 @@ function pageStream(p: ThemePieceSpec, n: number): string {
   const w = p.width * PT, h = p.height * PT;
   const m = Math.min(w, h), line = Math.max(1, m * 0.01), inset = line * 2;
   const ops = ['q', '0.72 0.72 0.72 RG', `${line.toFixed(2)} w`, `[${(line * 4).toFixed(2)} ${(line * 3).toFixed(2)}] 0 d`];
-  if (isRound(p)) {
+  if (hasShape(p.id)) {
+    ops.push(...shapePdf(p.id, inset, inset, w - inset * 2, h - inset * 2, h), 'S');
+  } else if (isRound(p)) {
     const r = m / 2 - inset, cx = w / 2, cy = h / 2, k = 0.5523 * r;
     const f = (x: number) => x.toFixed(2);
     ops.push(`${f(cx + r)} ${f(cy)} m`,

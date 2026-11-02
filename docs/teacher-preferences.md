@@ -63,3 +63,5 @@ line that fits, and add each new preference the same turn she says it.
 - Turn cards: just the player's picture, no circle, no box, no hand; a soft glow and a bob (2026-11-01).
 - Players with characters (Board Game animals) show as player cards with the animal big and no circle; the question header shows the player's animal (2026-11-01).
 - Teacher-supplied sounds: right and wrong answers everywhere; dice shake for every roll; jump on every hop; magnet, tornado, chest power-ups; Pinball bumper, score bell and flipper sounds; Cast and Catch cast, splash and bells (2026-11-01).
+- Shaped pieces get shaped template outlines and cut along them (Bowling pin first); drawn pins always show inside the pin outline in the game (2026-11-02).
+- Theme Builder preview, Pick a ball: tap a ball to see it big on white; tap again to go back (2026-11-02).

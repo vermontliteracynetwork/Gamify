@@ -7,6 +7,7 @@ import { bigScreenManifest } from '../../live/screenManifest';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
+import { hasShape, shapePath } from './shapes';
 import { CODE, codeBits, codeX, isRound, MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE, templatePieces } from './template';
 
 // One printed page for one piece: corner squares, page number squares, what
@@ -31,7 +32,9 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
       <text x={PAGE.width / 2} y={240} textAnchor="middle" fontSize={64} fontWeight={700} fill="#000">{piece.label}</text>
       <text x={PAGE.width / 2} y={310} textAnchor="middle" fontSize={38} fill="#333">{piece.hint}</text>
       <text x={PAGE.width / 2} y={370} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetNote')}</text>
-      {isRound(piece)
+      {hasShape(piece.id)
+        ? <path d={shapePath(piece.id, box.x, box.y, box.width, box.height)!} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} strokeLinejoin="round" />
+        : isRound(piece)
         ? <ellipse cx={box.x + box.width / 2} cy={box.y + box.height / 2} rx={box.width / 2} ry={box.height / 2} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />
         : <rect x={box.x} y={box.y} width={box.width} height={box.height} rx={18} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />}
       <text x={PAGE.width / 2} y={2080} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetFooter', { game: gameName, n: page, total })}</text>

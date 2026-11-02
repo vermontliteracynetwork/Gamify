@@ -7,6 +7,7 @@ import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
 import { THEME_FONTS, type GameTheme, type ThemeItem } from '../types';
 import ItemArt from '../ItemArt';
+import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
 
@@ -48,21 +49,37 @@ const teamArt = (theme: GameTheme) => Array.from({ length: 10 }, (_, k) => theme
   : pieceImage(theme, `team-${k + 1}`));
 
 // The Teams page picker, where each team taps its picture (Bowling: its ball).
+// Tap a ball to see it big on white in the preview; tap again to go back
+// (teacher, 2026-11-02).
 function PickView({ theme }: { theme: GameTheme }) {
   const names = ['Glowing Pickle', 'Magic Falcon'];
+  const art = teamArt(theme);
+  const [big, setBig] = useState<number | null>(null);
+  const label = theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : 'Preview: each team picks its icon';
   return (
-    <div className="brand-menu rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="img" aria-label={theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : 'Preview: each team picks its icon'}>
-      <TeamArt.Provider value={teamArt(theme)}>
+    <div className="relative brand-menu rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="group" aria-label={label}>
+      <TeamArt.Provider value={art}>
         <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <span className="font-bold text-lg">Teams</span>
           {names.map((n, i) => (
             <span key={n} className="flex items-center gap-2 rounded-input border-[2px] border-border-soft p-1.5"><TeamBadge colorIndex={i} size={30} /><span className="font-bold text-sm truncate">{n}</span></span>
           ))}
           <div className="grid grid-cols-5 gap-1.5 rounded-input border-[2px] border-border p-2 bg-[#e6ebff] justify-items-center">
-            {Array.from({ length: 10 }, (_, k) => <span key={k} className={`rounded-full ${k === 0 ? 'ring-4 ring-accent' : ''}`}><TeamBadge colorIndex={k} size={34} /></span>)}
+            {Array.from({ length: 10 }, (_, k) => (
+              <button key={k} type="button" onClick={() => setBig(k)} aria-label={`See picture ${k + 1} big`} className={`rounded-full motion-safe:hover:scale-110 motion-safe:transition-transform ${k === 0 ? 'ring-4 ring-accent' : ''}`}>
+                <TeamBadge colorIndex={k} size={34} />
+              </button>
+            ))}
           </div>
         </div>
       </TeamArt.Provider>
+      {big !== null && (
+        <button type="button" onClick={() => setBig(null)} aria-label="Back to the list" className="absolute inset-0 z-10 bg-white grid place-items-center p-6">
+          {art[big]
+            ? <img src={art[big]} alt={`Picture ${big + 1}`} className="max-w-full max-h-full aspect-square object-contain rounded-full" />
+            : <TeamArt.Provider value={art}><TeamBadge colorIndex={big} size={220} /></TeamArt.Provider>}
+        </button>
+      )}
     </div>
   );
 }
@@ -110,6 +127,8 @@ function BowlingLane({ theme }: { theme: GameTheme }) {
   return (
     <svg viewBox="0 18 100 112" className="h-full max-w-full" aria-hidden="true">
       <defs>
+                  {/* A drawn pin always shows inside the pin's outline (teacher, 2026-11-02). */}
+                  <clipPath id="pv-pin-shape"><path d={PIN_OUTLINE} /></clipPath>
         {laneArt && <pattern id="pv-lane" patternUnits="userSpaceOnUse" x={50 - halfWidthAt(0)} y={yAt(1)} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)}><image href={laneArt} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)} preserveAspectRatio="xMidYMid slice" /></pattern>}
         <clipPath id="pv-ball"><circle r={6} /></clipPath>
       </defs>
@@ -117,7 +136,7 @@ function BowlingLane({ theme }: { theme: GameTheme }) {
       <polygon points={lane} fill={laneArt ? 'url(#pv-lane)' : laneColor} stroke="#000" strokeWidth={0.6} />
       {pins.map((p, i) => (
         <g key={i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
-          {pinArt ? <image href={pinArt} x={-3.2} y={-11.2} width={6.4} height={11.6} preserveAspectRatio="xMidYMax meet" /> : <>
+          {pinArt ? <image href={pinArt} x={-3.2} y={-11} width={6.4} height={11.3} preserveAspectRatio="none" clipPath="url(#pv-pin-shape)" /> : <>
             <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
             <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
           </>}
