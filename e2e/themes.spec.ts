@@ -256,6 +256,40 @@ test('Bowling Pin: the template page is pin-shaped and the cut follows the pin o
   expect(problems).toEqual([]);
 });
 
+test('Bowling Pin: paper around a drawn pin outline is cut away, the white inside stays', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'image processing; one size is enough');
+  test.setTimeout(90_000);
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/bowling/template');
+  const sheet = page.locator('.template-sheet').nth(2);
+  // A student's own narrower pin: a white body inside a thick black line, with a gray smudge beside it.
+  await sheet.evaluate((svg) => {
+    const ns = 'http://www.w3.org/2000/svg';
+    const e = document.createElementNS(ns, 'ellipse');
+    e.setAttribute('cx', '850'); e.setAttribute('cy', '1350'); e.setAttribute('rx', '200'); e.setAttribute('ry', '520'); e.setAttribute('fill', '#ffffff'); e.setAttribute('stroke', '#111111'); e.setAttribute('stroke-width', '18');
+    const smudge = document.createElementNS(ns, 'circle');
+    smudge.setAttribute('cx', '590'); smudge.setAttribute('cy', '1500'); smudge.setAttribute('r', '40'); smudge.setAttribute('fill', '#d2d2d2');
+    svg.appendChild(smudge); svg.appendChild(e);
+  });
+  await page.addStyleTag({ content: 'header { display: none !important; }' });
+  const shot = await sheet.screenshot({ scale: 'css' });
+  await page.goto('/teacher/themes/bowling');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Add a picture for Pin' }).click();
+  await (await chooser).setFiles({ name: 'pin.png', mimeType: 'image/png', buffer: shot });
+  await expect(page.getByLabel('Added')).toHaveCount(1, { timeout: 30_000 });
+  const px = await page.locator('img[src^="data:image/png"]').first().evaluate(async (img: HTMLImageElement) => {
+    await img.decode();
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+    const a = (u: number, v: number) => x.getImageData(Math.round(u * (c.width - 1)), Math.round(v * (c.height - 1)), 1, 1).data[3];
+    return { beside: a(0.18, 0.72), middle: a(0.5, 0.6) };
+  });
+  expect(px.beside).toBe(0); // paper between the pin outline and the student's line is gone
+  expect(px.middle).toBe(255); // the white pin body stays
+});
+
 test('Free plan: the Theme Builder works on Game Show only', async ({ page }) => {
   await page.goto('/teacher/themes/match-three');
   await expect(page.getByText('Designing this game comes with Plus and Pro.', { exact: false })).toBeVisible();

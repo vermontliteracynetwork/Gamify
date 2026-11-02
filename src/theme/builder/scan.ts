@@ -189,6 +189,10 @@ function cutPiece(page: HTMLCanvasElement, piece: ThemePieceSpec, round: boolean
   const crop = canvas(Math.round(w), Math.round(h)), cctx = ctx2d(crop);
   cctx.drawImage(page, x, y, w, h, 0, 0, crop.width, crop.height);
   if (paperShare(cctx.getImageData(0, 0, crop.width, crop.height).data) > 0.97) return null; // left empty
+  // A shaped piece (a bowling pin) is cut right down to the student's own
+  // outline: paper and pencil smudges around it turn see-through
+  // (teacher, 2026-11-02: "cut this down to the outline of the bowling pin").
+  if (hasShape(piece.id)) clearPaperFromEdges(cctx, crop.width, crop.height);
   const k = Math.max(piece.width, piece.height, 256) / Math.max(piece.width, piece.height);
   const out = canvas(Math.round(piece.width * k), Math.round(piece.height * k)), octx = ctx2d(out);
   // Shaped pieces (a bowling pin) are cut along their outline, round ones in a circle.
@@ -278,4 +282,32 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   const dw = bw * s, dh = bh * s;
   octx.drawImage(src, x0, y0, bw, bh, (ow - dw) / 2, (oh - dh) / 2, dw, dh);
   return out.toDataURL('image/png');
+}
+
+// Paper reached from the edges turns see-through: light, grayish pixels (white
+// paper, pencil smudges) up to the first real line or color. If the outline
+// has a gap and the fill would wash away almost everything, nothing changes.
+function clearPaperFromEdges(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const id = ctx.getImageData(0, 0, w, h), d = id.data;
+  const paper = (p: number) => {
+    const r = d[p * 4], g = d[p * 4 + 1], b = d[p * 4 + 2];
+    const hi = Math.max(r, g, b), lo = Math.min(r, g, b);
+    return d[p * 4 + 3] > 0 && 0.3 * r + 0.59 * g + 0.11 * b > 165 && hi - lo < 40;
+  };
+  const seen = new Uint8Array(w * h), stack: number[] = [];
+  const push = (p: number) => { if (!seen[p] && paper(p)) { seen[p] = 1; stack.push(p); } };
+  for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
+  let cleared = 0;
+  while (stack.length) {
+    const p = stack.pop()!, x = p % w;
+    cleared++;
+    if (x > 0) push(p - 1);
+    if (x < w - 1) push(p + 1);
+    if (p >= w) push(p - w);
+    if (p < w * (h - 1)) push(p + w);
+  }
+  if (cleared > w * h * 0.88) return; // a gap in the outline: keep the drawing whole
+  for (let p = 0; p < w * h; p++) if (seen[p]) d[p * 4 + 3] = 0;
+  ctx.putImageData(id, 0, 0);
 }

@@ -165,11 +165,14 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   // Work in progress is kept on this device as it changes, and comes back
   // when the builder opens again (teacher, 2026-11-01).
   const restored = useRef(false);
+  // Anything added since the page opened wins over an older kept draft, so an
+  // upload is never replaced by earlier drawing (teacher, 2026-11-02).
+  const touched = useRef(false);
   useEffect(() => {
     let live = true;
     void loadDraft(gameId).then((kept) => {
       if (!live) return;
-      if (kept && (!editId || kept.id === editId)) { setDraft(kept); setStatus(t('builder.draftBack')); }
+      if (kept && !touched.current && (!editId || kept.id === editId)) { setDraft(kept); setStatus(t('builder.draftBack')); }
       restored.current = true;
     });
     return () => { live = false; };
@@ -207,6 +210,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   useEffect(() => { const m = window.matchMedia('(min-height: 860px)'); const on = () => setTall(m.matches); m.addEventListener('change', on); return () => m.removeEventListener('change', on); }, []);
   const shownPieces = game.themePieces.filter((p) => !find.trim() || `${p.label} ${p.hint}`.toLowerCase().includes(find.trim().toLowerCase()));
   function setPiece(id: string, image: string | undefined) {
+    touched.current = true;
     setDraft((d) => {
       const pieces = { ...d.pieces, [id]: { ...d.pieces[id], image } };
       if (!image) delete pieces[id].image;
