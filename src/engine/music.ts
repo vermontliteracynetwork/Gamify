@@ -11,8 +11,7 @@ import { isSpeaking } from './feedback';
 const clips = new Map<string, HTMLAudioElement>();
 // The right and wrong answer sounds (teacher's uploads, 2026-11-01), used by
 // every game that asks questions.
-// Up chime for right, boing for wrong or try again (teacher, 2026-11-05).
-export const ANSWER_SOUNDS = { right: '/sounds/answers/chime.mp3', wrong: '/sounds/answers/boing.mp3' };
+export const ANSWER_SOUNDS = { right: '/sounds/answers/correct.mp3', wrong: '/sounds/answers/wrong.mp3' };
 
 // Power-up sounds (teacher's uploads, 2026-11-01): a zap for magnets, wind
 // for the tornado, an 8-bit chest opening for treasure chests.

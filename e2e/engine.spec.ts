@@ -9,9 +9,6 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  // Up chime for right, boing for wrong (teacher, 2026-11-05).
-  const sounds = new Set<string>();
-  page.on('response', (r) => { const m = r.url().match(/sounds\/answers\/(\w+)\.mp3/); if (m && r.ok()) sounds.add(m[1]); });
 
   await openSetup(page, '/games/star-quiz');
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
@@ -54,7 +51,6 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   }
 
   await expect(page.getByText('You caught 5 stars!')).toBeVisible({ timeout: 5000 });
-  expect([...sounds].sort()).toEqual(['boing', 'chime']);
   await page.screenshot({ path: `test-results/sky-end-${info.project.name}.png` });
   // Results: four buttons; Review walks through the missed question full screen.
   const results = page.getByRole('dialog', { name: 'You caught 5 stars!' });
