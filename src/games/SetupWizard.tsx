@@ -76,9 +76,11 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
     <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
-      <div className="px-6 sm:px-8 pt-1 pb-3 grid gap-2">
-        <h2 className="font-display text-xl font-bold min-h-11 flex items-center pr-40"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
-        <ol className="flex gap-1 list-none p-0 m-0 max-w-md" aria-label={t('setup.steps')}>
+      {/* The step title and its progress line sit on one row, centered
+          with the corner buttons (teacher, 2026-11-06). */}
+      <div className="px-6 sm:px-8 pt-0 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
+        <h2 className="font-display text-xl font-bold"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
+        <ol className="flex gap-1 list-none p-0 m-0 w-56 max-w-full" aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (
@@ -94,7 +96,8 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
       <div ref={body} className={`relative px-6 sm:px-8 py-4 grid gap-5 content-center min-h-0 flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
-          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0' : 'grid gap-6 absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
+          // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
+          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0 w-full max-w-4xl mx-auto' : 'grid gap-6 absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
       <div className="px-6 sm:px-8 py-3 flex justify-between gap-2">

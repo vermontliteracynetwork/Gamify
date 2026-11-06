@@ -21,7 +21,7 @@ import { PowerUpCards } from '../../engine/PowerUpSwitches';
 import ScoreBoard from '../../engine/ScoreBoard';
 import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
-import { ChoiceRow, PictureChoice } from '../../ui/fields';
+import { ChoiceRow, PictureChoice, Slider } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
@@ -371,13 +371,13 @@ export default function GameShow() {
           ) },
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceRow label={t('tb.tries')} value={setup.tries ?? '1'} onChange={(v) => change({ tries: v })}
-                options={[{ value: '1', label: t('tb.tries.1') }, { value: '3', label: t('tb.tries.3') }, { value: 'all', label: t('tb.tries.all') }]} />
+              <Slider label={t('tb.tries')} min={0} max={2} value={['1', '3', 'all'].indexOf(setup.tries ?? '1')}
+                show={(v) => t((['tb.tries.1', 'tb.tries.3', 'tb.tries.all'] as const)[v])} onChange={(v) => change({ tries: (['1', '3', 'all'] as const)[v] })} />
               {board === 'cards' && <>
               <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
                 options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }), art: <GridPreview cols={g.cols} rows={g.rows} /> }))} />
               <PowerUpCards hint={t('tb.powersHint')}
-                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) }), art: <ItemArt item={p} size={40} still />, on: powerOn(p) }))}
+                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) }), art: <ItemArt item={p} size={64} still />, on: powerOn(p) }))}
                 onChange={(id, on) => { const p = powers.find((x) => x.id === id)!; if (takes(p)) change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) }); else change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] }); }} />
               </>}
             </>

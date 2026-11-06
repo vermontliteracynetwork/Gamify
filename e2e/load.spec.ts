@@ -10,7 +10,7 @@ test('live load: 30 students join and answer; the host keeps up', async ({ page,
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   await page.getByRole('radio', { name: /Cast and Catch/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();

@@ -21,7 +21,7 @@ test('Question Tracker class sky: star colors, first to a number right ends it',
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();

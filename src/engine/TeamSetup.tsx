@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DiceFive, Minus, Play, Plus, X } from '@phosphor-icons/react';
+import { DiceFive, Minus, Play, Plus, UsersThree, X } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { data } from '../data';
@@ -97,6 +97,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
         <span className="font-display text-2xl font-bold w-8 text-center tabular-nums" aria-live="polite">{slots.length}</span>
         <button type="button" aria-label={t('teams.more')} disabled={slots.length >= max} onClick={() => resize(slots.length + 1)}
           className="w-10 h-10 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={18} /></button>
+        {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
       </div>}
 
       {/* Characters (Board Game animals) show as player cards: the animal big,
@@ -188,7 +189,6 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
         ))}
       </ol>
 
-      {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
 
       {solo && (
         <Choice label={t('teams.opponent')} value={opponent} options={[['cpu', 'teams.vsCpu'], ['teacher', 'teams.vsTeacher']]} onChange={setOpponent} />
@@ -228,6 +228,7 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
   const { value: saved = [], reload } = useAsync(async () => (classId ? (await data.getSetting<SavedTeams[]>(`team-sets:${classId}`)) ?? [] : []), [classId]);
   const [groups, setGroups] = useState<string[][]>([]);
   const [held, setHeld] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
   const nameOf = (id: string) => students.find((s) => s.id === id)?.name ?? '';
   function apply(g: string[][]) { setGroups(g); onChange(g.map((ids) => ids.map(nameOf).filter(Boolean))); }
@@ -252,9 +253,20 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
   if (classes.length === 0) return null;
   const unplaced = students.filter((s) => !groups.flat().includes(s.id));
 
+  // A small button by the team count opens a full page for putting students
+  // on teams, by hand or automatically (teacher, 2026-11-06). The page stays
+  // mounted while closed, so picks are kept.
   return (
-    <div className="grid gap-3 rounded-input border-[2px] border-border-soft p-3">
-      <span className="font-bold">{t('teams.fromClass')}</span>
+    <>
+    <button type="button" onClick={() => setOpen(true)} className="ml-auto min-h-9 px-3 rounded-pill border-[2px] border-border bg-surface font-bold text-sm inline-flex items-center gap-1.5 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform">
+      <UsersThree weight="bold" size={16} aria-hidden="true" />{t('teams.fromClassBtn')}{groups.flat().length > 0 && <span className="rounded-pill bg-accent border border-border px-1.5 text-xs">{groups.flat().length}</span>}
+    </button>
+    <div className={open ? 'fixed inset-0 z-50 bg-surface overflow-y-auto' : 'hidden'} role="dialog" aria-modal="true" aria-label={t('teams.fromClass')}>
+    <div className="max-w-5xl mx-auto px-6 py-6 grid gap-4">
+      <div className="flex items-center gap-3">
+        <h2 className="font-display text-xl font-bold flex-1">{t('teams.fromClass')}</h2>
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 px-6 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold" style={{ boxShadow: '0 3px 0 #000' }}>{t('teams.done')}</button>
+      </div>
       <select aria-label={t('teams.pickClass')} value={classId} onChange={(e) => { setClassId(e.target.value); apply([]); }} className="min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold">
         <option value="">{t('teams.noClass')}</option>
         {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -302,6 +314,8 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
         </>
       )}
     </div>
+    </div>
+    </>
   );
 }
 

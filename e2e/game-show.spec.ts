@@ -20,9 +20,12 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   await page.screenshot({ path: `test-results/gameshow-setup-sets-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   // One try is the default; this game turns on three (teacher, 2026-10-31).
-  await showSetting(page, page.getByRole('radio', { name: 'One try' }));
-  await expect(page.getByRole('radio', { name: 'One try' })).toBeChecked();
-  await page.getByRole('radio', { name: '3 tries' }).click();
+  // Tries is a slider now (teacher, 2026-11-06): One try, 3 tries, Unlimited.
+  const tries = page.getByRole('slider', { name: /Tries for each turn/ });
+  await showSetting(page, tries);
+  await expect(tries).toHaveAttribute('aria-valuetext', 'One try');
+  await tries.fill('1');
+  await expect(tries).toHaveAttribute('aria-valuetext', '3 tries');
   await showSetting(page, page.getByRole('radio', { name: '4 x 3' }));
   await page.getByRole('radio', { name: '4 x 3' }).click();
   await showSetting(page, page.getByRole('switch', { name: /Double Star/ }));
@@ -81,7 +84,7 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await page.getByRole('checkbox', { name: /^Shapes/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   // Options: tries for each turn (teacher, 2026-10-31).
-  await expect(page.getByRole('radiogroup', { name: 'Tries for each turn' })).toBeVisible();
+  await expect(page.getByRole('slider', { name: /Tries for each turn/ })).toBeVisible();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Fewer teams' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
@@ -106,7 +109,9 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   });
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Surprise cards' }).click();
-  await showSetting(page, page.getByLabel('Class list'));
+  // Students go on teams in a full page opened by a small button (teacher, 2026-11-06).
+  await showSetting(page, page.getByRole('button', { name: 'Students on teams' }));
+  await page.getByRole('button', { name: 'Students on teams' }).click();
   await page.getByLabel('Class list').selectOption('c1');
   await page.getByRole('button', { name: 'Balanced teams' }).click();
   await expect(page.getByRole('group').first().getByRole('button')).toHaveCount(2);
@@ -114,6 +119,7 @@ test('Game Show: teams from the class list, balanced, and saved', async ({ page 
   await page.getByRole('button', { name: 'Save teams' }).click();
   await expect(page.getByRole('button', { name: 'Reading groups' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-class-teams-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await finishSetup(page);
   await startTurn(page);
   // A different student answers each turn (market research, 2026-10-31).

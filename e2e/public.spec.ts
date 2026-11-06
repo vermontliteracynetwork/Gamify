@@ -68,7 +68,7 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.goto('/login');
   await signUpTeacher(page);
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByLabel('Search titles and tags').fill('habitats');
   await page.getByRole('button', { name: 'Play or share' }).click();
   const dialog = page.getByRole('dialog');

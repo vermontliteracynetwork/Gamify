@@ -55,6 +55,25 @@ export function ChoiceTiles<T extends string>({ label, value, options, onChange 
 export function ChoiceRow<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; art?: ReactNode }[]; onChange: (v: T) => void }) {
   const id = useId();
   const still = useSettings().settings.motion === 'still';
+  // Pictured choices (like card grid sizes) are separate white cards that
+  // get a black border on hover (teacher, 2026-11-06).
+  if (options.some((o) => o.art)) return (
+    <div className="grid gap-1.5">
+      <span className="font-bold">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-3">
+        {options.map((o) => {
+          const on = value === o.value;
+          return (
+            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)}
+              className={`min-w-24 px-4 py-3 rounded-input border-[2.5px] bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
+              style={{ boxShadow: on ? '0 4px 0 #000' : undefined }}>
+              {o.art}<span>{o.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
   return (
     <div className="grid gap-1.5">
       <span className="font-bold">{label}</span>

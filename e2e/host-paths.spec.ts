@@ -6,7 +6,7 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('radio', { name: /Game Show/ }).click();
@@ -43,7 +43,7 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
 test('Play or share: together on own devices opens the lobby on Together', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   await page.getByRole('radio', { name: /Cast and Catch/ }).click();
   await page.getByRole('radio', { name: /^Together/ }).click();

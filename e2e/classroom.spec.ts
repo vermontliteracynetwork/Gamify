@@ -123,7 +123,7 @@ test('Plus: upload a student picture and set a PIN; a game link asks students fo
 
   // A hosted game code: Mia taps her picture and types her PIN.
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByLabel('Search titles and tags').fill('habitats');
   await page.getByRole('button', { name: 'Play or share' }).click();
   const host = page.getByRole('dialog');

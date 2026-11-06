@@ -85,3 +85,7 @@ line that fits, and add each new preference the same turn she says it.
 - Design rule: visuals first. Small titles (about text-xl), slim progress lines, compact buttons (about 44px tall); picture choices (ways to play, boards, themes, games) are big with small text under them, a lift and a little motion on hover (2026-11-06).
 - Game welcome: cover big on the left; on the right the title at the top (level with the cover's top and the corner buttons), ways to play and steps in the middle, and a big full-width start button whose bottom lines up with the cover's bottom (2026-11-06).
 - Theme picker: big theme previews fill the screen, small title and buttons (2026-11-06). Teacher pages: wider (laptop first), smaller page titles (2026-11-06).
+- Setup steps (2026-11-06): the step title and a thin progress line sit on one row, centered with the corner buttons; settings are centered with wide side margins (like a game-show settings page); "Public sets", never "Ready-made sets"; tabs, search and filters all the same small size.
+- Pictured choices (grid sizes) are separate white cards with a black border on hover; "Tries for each turn" is a slider on every screen (2026-11-06).
+- Power-up cards: centered, bigger pictures, never crossed out when off (2026-11-06).
+- Putting students on teams: a small "Students on teams" button beside the team count opens a full page (class list, random, balanced or by hand, save) with Done to go back (2026-11-06).

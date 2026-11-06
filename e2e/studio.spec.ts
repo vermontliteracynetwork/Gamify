@@ -90,7 +90,7 @@ test('Big screen design: lobby picture shows in the live lobby; teacher pages ha
   await expect(page.getByText('Saved Party.', { exact: false })).toBeVisible();
 
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   await page.getByRole('radio', { name: /Cast and Catch/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();

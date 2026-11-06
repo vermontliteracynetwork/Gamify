@@ -67,7 +67,7 @@ test.describe('full sweep', () => {
   test('no automated accessibility violations in Play or share, the live lobby, the Theme Builder and its studio', async ({ page }) => {
     await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
     await page.goto('/teacher/sets');
-    await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+    await page.getByRole('tab', { name: 'Public sets' }).click();
     await page.getByRole('button', { name: 'Play or share' }).first().click();
     await page.getByRole('radio', { name: /Cast and Catch/ }).click();
     expect(await scan(page)).toEqual([]);

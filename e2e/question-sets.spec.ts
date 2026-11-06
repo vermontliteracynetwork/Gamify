@@ -44,7 +44,7 @@ test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
 test('teacher copies a ready-made set and imports a CSV', async ({ page }, info) => {
   const problems = watchConsole(page);
   await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Ready-made sets' }).click();
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByLabel('Search titles and tags').fill('fractions');
   await page.getByLabel('Subject').selectOption('Math');
   await page.getByLabel('Grade', { exact: true }).selectOption('3');

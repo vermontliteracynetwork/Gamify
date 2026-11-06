@@ -8,7 +8,6 @@ import { t } from '../i18n';
 import { ART } from './SetCover';
 import SetFilterBar from './SetFilterBar';
 import { LIBRARY } from '../data/library';
-import { Tabs } from '../ui/kit';
 
 const LIBRARY_IDS = new Set(LIBRARY.map((s) => s.id));
 
@@ -78,7 +77,12 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     <div ref={wrap} className="grid gap-3">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
-        <Tabs label={t('sets.tabs')} value={tab} onChange={(v) => { setTab(v); setPage(0); }} options={[{ id: 'mine', label: t('sets.mine') }, { id: 'library', label: t('sets.library') }]} />
+        <div role="tablist" aria-label={t('sets.tabs')} className="inline-flex shrink-0 p-0.5 rounded-pill border-[2px] border-border bg-surface">
+          {(['mine', 'library'] as const).map((v) => (
+            <button key={v} type="button" role="tab" aria-selected={tab === v} onClick={() => { setTab(v); setPage(0); }}
+              className={`min-h-8 px-3 rounded-pill text-sm font-bold motion-safe:transition-colors ${tab === v ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(v === 'mine' ? 'sets.mine' : 'sets.library')}</button>
+          ))}
+        </div>
         <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={(f) => { setFilter(f); setPage(0); }} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
