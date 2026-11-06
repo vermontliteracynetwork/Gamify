@@ -21,7 +21,7 @@ export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint
         <span className="font-semibold">{t(`mode.${mode}.hint` as StringKey)}</span>
       </span>
     ) : (
-      <span className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
+      <span data-tip={t(`mode.${mode}.hint` as StringKey)} data-tip-bg={MODE_COLORS[mode]} className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
         <Icon weight="bold" size={18} aria-hidden="true" />
         <span>{t(`mode.${mode}` as StringKey)}</span>
       </span>

@@ -82,3 +82,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game start menus (welcome, theme, setup) have no card and no purple: the menu is the whole area under the top bar, never scrolls, content centered with wide side margins; the corner buttons sit level with the title on the right (2026-11-06).
 - Question set cards look like library cards: a colored picture band with the subject icon, the name, and grade and question-count chips (2026-11-06).
 - No Christmas theme in Match Three (2026-11-06).
+- Design rule: visuals first. Small titles (about text-xl), slim progress lines, compact buttons (about 44px tall); picture choices (ways to play, boards, themes, games) are big with small text under them, a lift and a little motion on hover (2026-11-06).

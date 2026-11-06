@@ -76,35 +76,35 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
     <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
-      <div className="px-6 sm:px-8 pt-1 pb-4 border-b-[2px] border-border-soft grid gap-3">
-        <h2 className="font-display text-3xl font-bold min-h-14 flex items-center md:pr-48"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
-        <ol className="flex gap-1.5 list-none p-0 m-0" aria-label={t('setup.steps')}>
+      <div className="px-6 sm:px-8 pt-1 pb-3 grid gap-2">
+        <h2 className="font-display text-xl font-bold min-h-11 flex items-center pr-40"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
+        <ol className="flex gap-1 list-none p-0 m-0 max-w-md" aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (
               <li key={`${p.id}-${q}`} className="flex-1">
                 <button type="button" onClick={() => goTo(k, q)} disabled={k > i && pages.slice(i, k).some((x) => x.ready === false)}
                   aria-current={n === stepNo ? 'step' : undefined} aria-label={t('setup.stepOf', { n, total, title: p.title })}
-                  className={`w-full h-3 rounded-pill border border-border ${n <= stepNo ? 'bg-accent' : 'bg-surface-2'}`} />
+                  className={`w-full h-1.5 rounded-pill ${n <= stepNo ? 'bg-border' : 'bg-border-soft/50'} motion-safe:transition-colors`} />
               </li>
             );
           }))}
         </ol>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 py-6 grid gap-6 content-center min-h-0 flex-1 text-lg ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} className={`relative px-6 sm:px-8 py-4 grid gap-5 content-center min-h-0 flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0' : 'grid gap-6 absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
-      <div className="px-6 sm:px-8 py-4 border-t-[2px] border-border-soft flex justify-between gap-2">
+      <div className="px-6 sm:px-8 py-3 flex justify-between gap-2">
         <button type="button" onClick={back}
-          className="min-h-14 px-6 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2">
-          <ArrowLeft weight="bold" size={20} />{t('setup.back')}
+          className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-base inline-flex items-center gap-1.5 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
+          <ArrowLeft weight="bold" size={16} />{t('setup.back')}
         </button>
         <button type="button" disabled={page.ready === false} onClick={() => (last ? (teach.length ? setTeaching(true) : onPlay()) : next())}
-          className="min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center gap-2 disabled:opacity-50">
-          {last ? <><Play weight="fill" size={22} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={20} /></>}
+          className="min-h-11 px-6 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 disabled:opacity-50 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}>
+          {last ? <><Play weight="fill" size={18} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={16} /></>}
         </button>
       </div>
     </section>
