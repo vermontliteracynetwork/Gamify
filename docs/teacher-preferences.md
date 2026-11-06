@@ -66,3 +66,4 @@ line that fits, and add each new preference the same turn she says it.
 - Shaped pieces get shaped template outlines and cut along them (Bowling pin first); drawn pins always show inside the pin outline in the game (2026-11-02).
 - Theme Builder preview, Pick a ball: tap a ball to see it big on white; tap again to go back (2026-11-02).
 - Draw studio: Restore (magic wand) rubs back what the eraser took off the last upload; Start over returns to that upload; a new upload always replaces old drawing (2026-11-02).
+- Answer sounds everywhere: an up chime for right, a boing for wrong or try again; never a harsh buzzer (2026-11-05).
