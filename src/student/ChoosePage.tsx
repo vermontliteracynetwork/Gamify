@@ -1,5 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { GameCover } from '../games/covers';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';

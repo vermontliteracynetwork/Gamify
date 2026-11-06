@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowSquareOut, CheckCircle, Flask, MagnifyingGlass, Printer, RocketLaunch } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { buttonClasses, Tabs } from '../ui/kit';

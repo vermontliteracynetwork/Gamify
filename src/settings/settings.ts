@@ -93,7 +93,9 @@ export const PRESETS: Record<PresetId, (s: PlayerSettings) => PlayerSettings> = 
 
 // Starting settings for a new player: respects the iPad's own Reduce Motion.
 export function initialSettings(prefersReducedMotion: boolean): PlayerSettings {
-  return prefersReducedMotion ? applyCalm(DEFAULT_SETTINGS, true) : { ...DEFAULT_SETTINGS };
+  // A device set to reduce motion starts in Gentle, not Still: movement is
+  // core to every game (teacher, 2026-11-06). Still stays one tap away.
+  return prefersReducedMotion ? { ...DEFAULT_SETTINGS, motion: 'gentle' } : { ...DEFAULT_SETTINGS };
 }
 
 // Loudness 0..1 for a sound channel, after the all-off switch.

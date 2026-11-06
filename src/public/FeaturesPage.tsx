@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import PlanFeatures from '../billing/PlanFeatures';
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Brain, Check, ChalkboardTeacher, GameController, PaintBrush, Sparkle, SpeakerHigh, Star, TextAa, Leaf, X } from '@phosphor-icons/react';
 import { ALL_MODES, type PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';

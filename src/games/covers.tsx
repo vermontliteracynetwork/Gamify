@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { houseFor } from '../theme/house';
 import type { GameTheme } from '../theme/types';
 import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';

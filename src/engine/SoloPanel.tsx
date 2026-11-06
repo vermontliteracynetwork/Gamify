@@ -20,7 +20,7 @@ export default function SoloPanel({ score, line, dots, status, note, className =
     <aside className={`grid gap-2 lg:gap-3 content-start min-w-0 ${className}`} aria-label={t('bm.score')}>
       <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-2 lg:p-4 flex lg:grid items-center gap-x-5 gap-y-2 flex-wrap" style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <p className="hidden lg:block text-xs font-bold uppercase tracking-wider text-muted">{t('bm.score')}</p>
-        <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-3xl lg:text-4xl tabular-nums">{score}</motion.p>
+        <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl lg:text-6xl tabular-nums leading-none">{score}</motion.p>
         <p className="font-bold">{line}</p>
         {dots && (
           <div className="flex gap-1.5 flex-wrap" role="img" aria-label={dots.label}>

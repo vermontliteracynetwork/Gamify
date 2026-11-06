@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { POP_IN } from './pace';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';

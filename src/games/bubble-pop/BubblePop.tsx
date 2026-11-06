@@ -146,7 +146,8 @@ export default function BubblePop() {
     const lens = [0];
     for (let i = 1; i < path.length; i++) lens.push(lens[i - 1] + Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y));
     const total = lens[lens.length - 1];
-    const ms = Math.max(220, (total / 45) * 1000);
+    // A moderate pace along the aim line, so every shot can be followed (teacher, 2026-11-06).
+    const ms = Math.max(500, (total / 24) * 1000);
     const t0 = performance.now();
     const frame = (now: number) => {
       const d = Math.min(1, (now - t0) / ms) * total;
@@ -305,8 +306,8 @@ export default function BubblePop() {
             <>
               <Slider label={t('bp.rounds')} hint={t('bp.roundsHint')} min={3} max={20} value={setup.roundCount} onChange={(v) => change({ roundCount: v })} />
               <Slider label={t('bp.shotsEach')} hint={t('bp.shotsHint')} min={1} max={5} value={setup.shotsPerRound} onChange={(v) => change({ shotsPerRound: v })} />
-              {powerUpSwitches({ manifest: bubblePopManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
               <Slider label={t('bp.perBreak')} hint={t('bp.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
+              {powerUpSwitches({ manifest: bubblePopManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
         ]} />
@@ -386,10 +387,10 @@ export default function BubblePop() {
               <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.right')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a + 0.08))}><ArrowArcRight weight="bold" size={26} /></button>
             </div>
           </section>
-          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
-            <SoloPanel score={score} line={t('bp.board', { n: level + 1 })}
+          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start lg:pt-14">
+            <SoloPanel score={score} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })}
               dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
-              status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : t('bp.aim')) : step === 'fly' ? t('bp.flying') : t('bp.answer')} note={note} />
+              status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : step === 'question' ? t('bp.answer') : undefined} note={note} />
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
             <div className="hidden lg:block"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
           </div>

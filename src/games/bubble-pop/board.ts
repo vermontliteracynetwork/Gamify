@@ -5,7 +5,8 @@
 // is 11 wide, and every other row is shifted half a bubble. "parity" flips
 // when a new row is pushed in from the top.
 
-export const COLS = 11;
+// Wide board, almost double (teacher, 2026-11-06).
+export const COLS = 19;
 export const R = 1;
 export const ROW_H = Math.sqrt(3);
 export const W = COLS * 2;

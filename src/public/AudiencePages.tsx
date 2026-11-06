@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Brain, Buildings, ChalkboardTeacher, Check, FileText, Heart, House, LockKey, Rocket, ShieldCheck, Sparkle, UsersThree, X } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS } from '../config';

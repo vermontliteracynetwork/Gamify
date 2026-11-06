@@ -2221,6 +2221,7 @@ export const en = {
   'bp.shots': '{count} bubbles left',
   'bp.shots.one': '1 bubble left',
   'bp.board': 'Board {n}',
+  'bp.roundOf': 'Round {n} of {total}',
   'bp.shoot': 'Shoot the bubble',
   'bp.left': 'Aim left',
   'bp.right': 'Aim right',

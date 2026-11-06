@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ChalkboardTeacher } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import Title from '../ui/Title';

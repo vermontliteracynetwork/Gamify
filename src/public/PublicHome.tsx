@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Buildings, House, RocketLaunch, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
 import { CyclingCover } from '../games/covers';
 import { ModeBadge } from '../games/ModeBadge';

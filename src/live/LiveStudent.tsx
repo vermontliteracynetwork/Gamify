@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { CheckCircle, Crown, HourglassMedium, LockSimple, Pause, Prohibit, Star, Timer } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';

@@ -203,12 +203,27 @@ export default function FourInARow() {
   // The front plate's color (a theme can change it).
   const plate = pieceImage(theme, 'board') ? 'rgba(255,255,255,0.12)' : (pieceFill(theme, 'board', '#4f8fe0').background as string) ?? '#4f8fe0';
   const winner = line ? players[board[line[0][0]][line[0][1]] - 1] : null;
+  // The held piece wanders across the columns until the player points at
+  // one, as if moving it along before choosing (teacher, 2026-11-06).
+  const anyPick = phase === 'play' && (step === 'pick' || step === 'pop') && player?.kind !== 'cpu' && !remoteTurn;
+  const [heldCol, setHeldCol] = useState(3);
+  const pointedAt = useRef(0);
+  const hoverCol = (c: number) => { pointedAt.current = Date.now(); setHeldCol(c); };
+  useEffect(() => {
+    if (!anyPick || settings.motion === 'still') return;
+    const id = window.setInterval(() => {
+      if (Date.now() - pointedAt.current < 2500) return;
+      setHeldCol((c) => Math.max(0, Math.min(COLS - 1, c + (Math.random() < 0.5 ? -1 : 1) * (c === 0 ? -1 : c === COLS - 1 ? -1 : 1))));
+    }, 650);
+    return () => window.clearInterval(id);
+  }, [anyPick, settings.motion]);
   const Disc = ({ who, size = '82%' }: { who: 1 | 2; size?: string }) => {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
     return (
       discs.length >= 2 ? (
-        <span className="rounded-full flex items-center justify-center overflow-hidden" style={{ width: size, height: size }}>
+        // The whole piece shows, never cropped to a circle (teacher, 2026-11-06).
+        <span className="flex items-center justify-center" style={{ width: size, height: size }}>
           <img src={discs[picks[who - 1]]?.image} alt="" className="w-full h-full object-contain" draggable="false" />
         </span>
       ) :
@@ -293,17 +308,26 @@ export default function FourInARow() {
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
           <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
-            <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
+            <div className="grid gap-1.5 mb-1.5 mt-[min(4.5vw,2.6rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const popping = step === 'pop';
                 const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
                 const canPick = phase === 'play' && (step === 'pick' || popping) && player?.kind !== 'cpu' && !remoteTurn && !full;
+                const holding = anyPick && heldCol === c;
                 return (
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
+                    onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
                     aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`min-h-11 rounded-input flex items-center justify-center gap-0.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent motion-safe:animate-pulse' : 'bg-surface/60 opacity-70'}`}>
-                    {/* Numbered columns, 1 to 7 (teacher, 2026-10-31). */}
-                    {c + 1}{canPick && player ? <span className="w-5 h-5 inline-flex"><Disc who={(turn + 1) as 1 | 2} size="100%" /></span> : <ArrowFatDown weight="fill" size={16} aria-hidden="true" />}
+                    className={`relative isolate min-h-11 rounded-input flex items-center justify-center gap-0.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent' : 'bg-surface/60 opacity-70'}`}>
+                    {/* The player's piece peeks out above the numbers and slides
+                        across the columns, then drops (teacher, 2026-11-06). */}
+                    {holding && player && (
+                      <motion.span layoutId="fr-held" transition={{ type: 'spring', stiffness: 420, damping: 30 }} aria-hidden="true"
+                        className="absolute left-1/2 -translate-x-1/2 bottom-[45%] w-[78%] aspect-square -z-10 flex items-end justify-center pointer-events-none">
+                        <Disc who={(turn + 1) as 1 | 2} size="100%" />
+                      </motion.span>
+                    )}
+                    <span className="relative">{c + 1}</span>
                   </button>
                 );
               })}
@@ -322,6 +346,15 @@ export default function FourInARow() {
                   </div>
                 ))}</div>)}
               </div>
+              {/* The plate: color with a hole cut for every slot, and a rim. Placed
+                  pieces sit in front of it so no piece is ever cropped (teacher, 2026-11-06). */}
+              <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
+                {Array.from({ length: COLS * ROWS }, (_, k) => (
+                  <span key={k} className="relative" style={{ background: plate, WebkitMaskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)', maskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)' }}>
+                    <span className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 41.5%, rgba(36,28,61,0.55) 42.5%, rgba(36,28,61,0.15) 46%, transparent 49%)' }} />
+                  </span>
+                ))}
+              </div>
               <div className="absolute inset-0 grid overflow-hidden pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
                 {board.flatMap((row, r) => row.map((cell, c) => {
                   const isLast = last?.row === r && last?.col === c;
@@ -339,14 +372,6 @@ export default function FourInARow() {
                     </div>
                   );
                 }))}
-              </div>
-              {/* The front plate: color with a hole cut for every slot, and a rim. */}
-              <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
-                {Array.from({ length: COLS * ROWS }, (_, k) => (
-                  <span key={k} className="relative" style={{ background: plate, WebkitMaskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)', maskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)' }}>
-                    <span className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 41.5%, rgba(36,28,61,0.55) 42.5%, rgba(36,28,61,0.15) 46%, transparent 49%)' }} />
-                  </span>
-                ))}
               </div>
               {line && (
                 <svg viewBox={`0 0 ${COLS} ${ROWS}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">

@@ -7,7 +7,7 @@ describe('settings', () => {
     expect(calm).toMatchObject({ calm: true, motion: 'still', celebrations: 'small', backgrounds: 'plain', music: 0, timers: 'off' });
     expect(calm.effects).toBeLessThanOrEqual(2);
   });
-  it('starts calm when the device asks for reduced motion', () => expect(initialSettings(true).calm).toBe(true));
+  it('starts gentle (not still) when the device asks for reduced motion', () => expect(initialSettings(true).motion).toBe('gentle'));
   it('all sound off silences every channel', () => {
     const s = { ...DEFAULT_SETTINGS, allSoundOff: true };
     expect([volume(s, 'effects'), volume(s, 'music'), volume(s, 'voice')]).toEqual([0, 0, 0]);

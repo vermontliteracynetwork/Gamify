@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowArcLeft, ArrowArcRight, Check, DeviceTablet, Lightning, ProjectorScreen, Robot, Star, User, Users } from '@phosphor-icons/react';
 import { ALL_MODES, type PlayMode } from '../data/types';
 import { t } from '../i18n';

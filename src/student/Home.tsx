@@ -2,7 +2,8 @@ import { useState } from 'react';
 import FourWays from '../games/FourWays';
 import type { PlayMode } from '../data/types';
 import { Link, Navigate } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
 

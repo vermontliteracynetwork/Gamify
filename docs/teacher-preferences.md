@@ -114,3 +114,6 @@ line that fits, and add each new preference the same turn she says it.
 - Live games: when the teacher ends (with a confirm) or closes the game, every student sees a message and a button back to the join screen.
 - A player's team picture IS their game piece in piece games (Four in a Row, Board Game): one picture, picked on the player card, the same on the board. Never two different things.
 - Hover animations, slight movement and power-up randomness are VERY important to the game's success and go everywhere (2026-11-06).
+- Four in a Row (2026-11-06): the player's piece peeks out above the column numbers and wanders across the columns (follows the pointer), then drops; no arrows on the other player's turn; placed pieces are never cropped.
+- Bubble Pop (2026-11-06): board almost twice as wide; the shot visibly flies along the aim line at a moderate pace and pops on impact; score panel says "Round n of N" with a big score and no "Aim and shoot" text; Questions each round sits on step 2.
+- Motion (2026-11-06): Gamify's own Motion setting decides movement; a device's Reduce Motion only starts Gamify in Gentle (not Still).

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, Printer, RocketLaunch, ShieldCheck } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { t } from '../i18n';

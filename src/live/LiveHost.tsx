@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { readClassPlay } from './ClassPlay';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
 import { Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix, SlidersHorizontal } from '@phosphor-icons/react';

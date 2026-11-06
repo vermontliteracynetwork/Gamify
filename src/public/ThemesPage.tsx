@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Heart, PaintBrush, Trophy } from '@phosphor-icons/react';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';

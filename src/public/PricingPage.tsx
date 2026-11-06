@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, type Tier } from '../config';
 import { data, newId } from '../data';
