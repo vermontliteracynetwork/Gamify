@@ -327,8 +327,8 @@ export default function BubblePop() {
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="grid gap-2 min-w-0">
-            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem]"
-              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H})`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
+            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem] [--bp-side:1.5rem] lg:[--bp-side:300px]"
+              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `min(calc(100vw - var(--bp-side)), calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H}))`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
                 onPointerMove={(e) => { if (canAim && (e.pointerType === 'mouse' || pressed.current)) setAngle(toAngle(e)); }}

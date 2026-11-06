@@ -158,7 +158,7 @@ export default function Sky({ theme, filled, total, still, label, colors, height
         const f = fx?.[i];
         const glow = f === 'glow' || f === 'mega' || f === 'pulse' || f === 'shoot';
         const late = comet?.i === i ? 0.55 : 0; // pops in when its shooting star lands
-        const grow = f === 'mega' ? 1.5 : f === 'rainbow' ? 1.3 : 1;
+        const grow = f === 'mega' ? 1.3 : f === 'rainbow' ? 1.2 : 1;
         const body = f === 'rainbow'
           ? <RainbowStar />
           : img
