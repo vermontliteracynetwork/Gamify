@@ -62,7 +62,7 @@ function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number
   const list = winners?.length ? winners : null;
   const size = list && list.length > 2 ? 64 : 84;
   return (
-    <div className="relative w-full max-w-sm mx-auto h-48 select-none" aria-hidden="true">
+    <div className="relative w-full max-w-md mx-auto h-56 select-none" aria-hidden="true">
       {/* Stage lights */}
       <span className="absolute inset-x-[18%] bottom-8 top-0 rounded-t-full opacity-60" style={{ background: 'radial-gradient(ellipse at 50% 100%, #fdfd94 0%, rgba(253,253,148,0.35) 45%, transparent 72%)' }} />
       {/* The stage: a round top and a front */}
@@ -99,7 +99,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
       <DialogFocus onClose={onClose} />
       <div className="flex items-center gap-3 px-4 sm:px-8 py-3 border-b-[2.5px] border-border bg-surface">
         <ChalkboardTeacher weight="fill" size={30} aria-hidden="true" />
-        <h2 className="title-bubble text-3xl flex-1" style={{ color: 'var(--text)' }}><Title text={t('rv.title')} /></h2>
+        <h2 className="title-bubble text-2xl flex-1" style={{ color: 'var(--text)' }}><Title text={t('rv.title')} /></h2>
         <span className="font-bold tabular-nums">{t('q.progress', { n: i + 1, total: missed.length })}</span>
         <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
       </div>
@@ -136,12 +136,12 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 px-4 sm:px-8 py-3 border-t-[2.5px] border-border bg-surface">
-        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-14 px-5 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold inline-flex items-center gap-2 disabled:opacity-30"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
+        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-11 px-5 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold inline-flex items-center gap-2 disabled:opacity-30"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
         {!shown
-          ? <button type="button" onClick={() => setShown(true)} className="min-h-14 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
+          ? <button type="button" onClick={() => setShown(true)} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
           : i < missed.length - 1
-            ? <button type="button" onClick={() => go(i + 1)} className="min-h-14 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
-            : <button type="button" onClick={onClose} className="min-h-14 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('rv.done')}</button>}
+            ? <button type="button" onClick={() => go(i + 1)} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
+            : <button type="button" onClick={onClose} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('rv.done')}</button>}
         <span className="w-24" aria-hidden="true" />
       </div>
     </div>
@@ -161,7 +161,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const { student } = useSignedIn();
   const [view, setView] = useState<'main' | 'rate'>('main');
   const [reviewing, setReviewing] = useState(false);
-  const btn = 'min-h-16 px-4 rounded-input border-[2.5px] border-border font-display text-xl font-bold inline-flex items-center justify-center gap-2 no-underline text-text disabled:opacity-40';
+  const btn = 'min-h-12 px-3 rounded-input border-[2.5px] border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform';
   return (
     <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
@@ -169,21 +169,21 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
         className="w-full max-w-lg bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <WinnerStage winners={winners} />
         <div className="grid justify-items-center gap-1 text-center">
-          <h2 className="title-bubble text-4xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
+          <h2 className="title-bubble text-3xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
           {children}
         </div>
         {view === 'main' ? (
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={onAgain} className={`${btn} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ArrowCounterClockwise weight="bold" size={24} />{againLabel}
+              <ArrowCounterClockwise weight="bold" size={18} />{againLabel}
             </button>
             {/* Students reach games only with a code (teacher, 2026-10-31). */}
             <Link to={student ? '/join' : '/play'} className={`${btn} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <SquaresFour weight="bold" size={24} />{student ? t('results.newCode') : t('results.arcadeShort')}
+              <SquaresFour weight="bold" size={18} />{student ? t('results.newCode') : t('results.arcadeShort')}
             </Link>
             <button type="button" onClick={() => setReviewing(true)} disabled={missed.length === 0}
               aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ChalkboardTeacher weight="bold" size={24} />{t('rv.short')}{missed.length > 0 && <span className="ml-1 min-w-7 h-7 px-1.5 rounded-full bg-surface border-[2px] border-border text-base flex items-center justify-center">{missed.length}</span>}
+              <ChalkboardTeacher weight="bold" size={18} />{t('rv.short')}{missed.length > 0 && <span className="ml-1 min-w-7 h-7 px-1.5 rounded-full bg-surface border-[2px] border-border text-base flex items-center justify-center">{missed.length}</span>}
             </button>
             <button type="button" onClick={() => setView('rate')} className={`${btn} bg-quiz-green`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <Smiley weight="bold" size={24} />{t('rv.rate')}

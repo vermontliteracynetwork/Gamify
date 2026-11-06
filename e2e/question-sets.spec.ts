@@ -88,6 +88,8 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toBeVisible();
   await page.getByLabel('Standard code').fill('');
   await page.getByLabel('Subject').selectOption('Science');
+  // Ready-made sets live on the Public sets tab (teacher, 2026-11-06).
+  await page.getByRole('tab', { name: 'Public sets' }).click();
   await expect(page.getByRole('radio', { name: /Animals and habitats/ })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toHaveCount(0);
   await page.screenshot({ path: `test-results/set-picker-${info.project.name}.png` });

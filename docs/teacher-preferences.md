@@ -89,3 +89,4 @@ line that fits, and add each new preference the same turn she says it.
 - Pictured choices (grid sizes) are separate white cards with a black border on hover; "Tries for each turn" is a slider on every screen (2026-11-06).
 - Power-up cards: centered, bigger pictures, never crossed out when off (2026-11-06).
 - Putting students on teams: a small "Students on teams" button beside the team count opens a full page (class list, random, balanced or by hand, save) with Done to go back (2026-11-06).
+- Results box: compact title and buttons, bigger winner stage, always see-through over the game (2026-11-06). Set pickers open on My sets when the teacher has sets, else Public sets.

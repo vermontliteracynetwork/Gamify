@@ -340,7 +340,6 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
 .brand-menu {
   /* The start menus are the whole area under the top bar: no purple, no
      card, the corner buttons level with the title (teacher, 2026-11-06). */
-  background: var(--surface);
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
   --font-heading: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --color-accent: #fdfd94;
@@ -469,6 +468,7 @@ html:fullscreen .play-fill { height: 100dvh; }
 .cq-tumble { animation: cq-tumble 0.55s linear infinite; }
 
 
+.game-stage.brand-menu { background: var(--surface); }
 .brand-menu > main { position: relative; }
 .brand-menu .game-top { position: absolute; top: 1.5rem; right: 1.5rem; margin: 0; z-index: 5; }
 .brand-menu .menu-panel { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }

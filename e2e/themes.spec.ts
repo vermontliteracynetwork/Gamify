@@ -19,10 +19,10 @@ async function png(page: Page, color: string): Promise<Buffer> {
 }
 
 test('Classic first, plus Gamify\'s designed themes; a game with only Classic skips the theme step', async ({ page }, info) => {
-  await page.goto('/games/match-three');
+  await page.goto('/games/four-in-a-row');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
-  await expect(page.getByRole('radio', { name: /Christmas Treats/ })).toBeVisible();
+  await expect(page.getByRole('radio', { name: /Animal Friends/ })).toBeVisible();
   await page.screenshot({ path: `test-results/theme-screen-${info.project.name}.png` });
   // Cast and Catch wears only Classic, so the theme step is skipped and Back returns to the start.
   await page.goto('/games/cast-catch');

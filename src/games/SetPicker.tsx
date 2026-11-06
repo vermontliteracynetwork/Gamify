@@ -62,7 +62,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   // My sets and public (ready-made) sets on their own tabs (teacher, 2026-11-06).
   const ready = sets.filter((s) => missingDetails(s).length === 0);
   const mineReady = ready.filter((s) => !LIBRARY_IDS.has(s.id));
-  const [tab, setTab] = useState<'mine' | 'library'>(() => (value.some((id) => LIBRARY_IDS.has(id)) || mineReady.length === 0 ? 'library' : 'mine'));
+  const [tab, setTab] = useState<'mine' | 'library'>(() => (mineReady.length > 0 || sets.some((x) => !LIBRARY_IDS.has(x.id)) ? 'mine' : 'library'));
   const inTab = tab === 'mine' ? mineReady : ready.filter((s) => LIBRARY_IDS.has(s.id));
   const shown = inTab.filter((s) => matchesFilter(s, filter));
   const hidden = tab === 'mine' ? sets.filter((s) => !LIBRARY_IDS.has(s.id)).length - mineReady.length : 0;
