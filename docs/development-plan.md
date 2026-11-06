@@ -363,3 +363,8 @@ production release.
 ## Progress log
 - 2026-10-24: Plan written. Prototype removed; product plan, research
   briefs, logo and asset ledger in place. Next: Stage 0.
+- 2026-11-06: Added helper agents (accessibility-specialist, economy-designer,
+  sound-designer, qa-tester) and skills (balance-check, playtest-report,
+  scope-check, asset-audit, bug-report) in `.claude/`, adapted from Claude
+  Code Game Studios (MIT). They draft and check; Claudia and the Golden Rule
+  still decide. Next: continue the current stage.
