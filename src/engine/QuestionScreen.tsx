@@ -98,7 +98,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={POP_IN}
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'max-w-4xl border-[3px] p-5 sm:p-6 gap-4'}`}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'h-full border-[3px] p-6 sm:p-10 gap-6 content-center'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'var(--shadow-sticker-lg)' }}
       >
         <div className="flex items-center gap-2 flex-wrap">
@@ -107,7 +107,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
               {t('q.progress', progress)}
             </span>
           )}
-          {player && <span className={`font-display font-bold ${framed ? 'text-lg' : 'text-2xl sm:text-3xl'}`}>{t('q.turn', { name: player })}</span>}
+          {player && <span className={`font-display font-bold ${framed ? 'text-lg' : 'text-3xl sm:text-4xl'}`}>{t('q.turn', { name: player })}</span>}
           <span className="flex-1" />
           {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
@@ -160,7 +160,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         ))}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-3xl sm:text-4xl'}`}>
+        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-4xl sm:text-5xl lg:text-6xl'}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
@@ -193,7 +193,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 aria-disabled={locked || picked !== null || triedWrong}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
-                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-20 px-4 py-3 text-xl sm:text-2xl'} rounded-input border-[2.5px] border-border text-left font-bold flex items-center gap-3
+                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-24 sm:min-h-32 px-5 py-4 text-2xl sm:text-3xl'} rounded-input border-[2.5px] border-border text-left font-bold flex items-center gap-3
                             ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}

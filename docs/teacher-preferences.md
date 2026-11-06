@@ -73,3 +73,9 @@ line that fits, and add each new preference the same turn she says it.
 - Set pickers: small search and filters, cards are the main view; My sets and Ready-made sets tabs (2026-11-06).
 - Options are playful: a highlight that slides to the pick with a little bounce; grid sizes show a tiny grid picture; power-up cards show their description on the card, not in hover text (2026-11-06).
 - Versus players are big tall cards with the icon large (2026-11-06).
+- Team setup: big tall team cards; tapping a picture opens every team picture in a full view (2026-11-06).
+- Questions fill the whole game screen; the header shows only the icon and the name, never "'s turn" (2026-11-06).
+- Turn card: the glow spins clockwise and the icon bobs and gently grows and shrinks (2026-11-06).
+- Power-ups and bonuses (like x2) are never shown before a pick, in any game; they are a surprise after a right answer (2026-11-06).
+- Progress (like 2/20 cards) sits big and centered under the scoreboard, level with the board's bottom (2026-11-06).
+- More animation everywhere: marquee lights twinkle, tiles wiggle on hover (2026-11-06).

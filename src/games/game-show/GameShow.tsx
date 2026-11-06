@@ -425,7 +425,7 @@ export default function GameShow() {
               // (Classic only: a theme's own world sets its own stage.)
               <div className={`relative rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
               {marquee && (['top', 'bottom', 'left', 'right'] as const).map((side) => (
-                <span key={side} aria-hidden="true" className={`absolute pointer-events-none ${side === 'top' ? 'top-0 inset-x-3 h-[14px]' : side === 'bottom' ? 'bottom-0 inset-x-3 h-[14px]' : side === 'left' ? 'left-0 inset-y-3 w-[14px]' : 'right-0 inset-y-3 w-[14px]'} ${settings.motion === 'full' ? (side === 'top' || side === 'bottom' ? 'gs-bulbs-x' : 'gs-bulbs-y') : ''}`}
+                <span key={side} aria-hidden="true" className={`absolute pointer-events-none ${side === 'top' ? 'top-0 inset-x-3 h-[14px]' : side === 'bottom' ? 'bottom-0 inset-x-3 h-[14px]' : side === 'left' ? 'left-0 inset-y-3 w-[14px]' : 'right-0 inset-y-3 w-[14px]'} ${settings.motion === 'full' ? (side === 'top' || side === 'bottom' ? 'gs-bulbs-x gs-twinkle' : 'gs-bulbs-y gs-twinkle') : ''}`}
                   style={{ backgroundImage: 'radial-gradient(circle, #fff6b0 0 2.5px, #f6c544 3px, rgba(246,197,68,0.25) 4.5px, transparent 5.5px)', backgroundSize: side === 'top' || side === 'bottom' ? '20px 14px' : '14px 20px', backgroundRepeat: side === 'top' || side === 'bottom' ? 'repeat-x' : 'repeat-y' }} />
               ))}
               <div className="grid w-full"
@@ -437,12 +437,12 @@ export default function GameShow() {
                     type="button"
                     onClick={() => chooseCard(i)}
                     disabled={c.open || step !== 'pick' || !!reveal || !!question || player?.kind === 'cpu'}
-                    aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : lucky === i ? t('tb.cardLucky', { n: i + 1 }) : t('tb.card', { n: i + 1 })}
+                    aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
                     className={`relative w-full h-full min-h-0 rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
-                      ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'motion-safe:hover:-translate-y-1' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={flipping === i ? {} : { boxShadow: lucky === i && !c.open ? '0 0 0 4px #ff6fb5, 0 0 22px 6px rgba(255,111,181,0.7)' : 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
+                      ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${step === 'pick' && !c.open && !question ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
+                    style={flipping === i ? {} : { boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {flipping === i ? (
                       <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
@@ -456,9 +456,7 @@ export default function GameShow() {
                     ) : c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : (
                       <>
                         {i + 1}
-                        {lucky === i && (
-                          <span aria-hidden="true" className={`absolute top-1.5 right-1.5 rounded-pill border-[2px] border-border bg-[#ff6fb5] text-white px-3 py-0.5 text-[clamp(1.1rem,2.6cqw,2rem)] leading-tight ${settings.motion === 'full' ? 'gs-lucky' : ''}`} style={{ WebkitTextStroke: '0.5px #000' }}>x2</span>
-                        )}
+                        {/* The lucky card stays a secret until it is won (teacher, 2026-11-06). */}
                       </>
                     )}
                   </motion.button>
@@ -482,7 +480,7 @@ export default function GameShow() {
                       <button key={`${col}-${points}`} type="button" onClick={() => pickCell(i)}
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
-                        className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : ''}`}
+                        className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : 'tile-wiggle'}`}
                         style={{ minHeight: 'max(3rem, calc((var(--play-h) - 1.5rem - var(--gs-extra, 0rem) - 9rem) / 5))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
                         {cell?.used ? '' : points}
                       </button>
@@ -499,8 +497,8 @@ export default function GameShow() {
             )}
           </section>
 
-          <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14">
-          <ScoreBoard turns={turns} playing={phase === 'play'} round={t('tb.cardsLeft', { n: board === 'cards' ? cards.filter((c) => !c.open).length : cells.filter((c) => !c.used).length })} />
+          <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14 lg:self-stretch">
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : `${cells.filter((c) => c.used).length}/${cells.length}`} />
           </div>
         </div>
       )}

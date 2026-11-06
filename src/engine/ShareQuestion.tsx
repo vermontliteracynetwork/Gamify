@@ -107,14 +107,14 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="w-full max-w-5xl max-h-full overflow-y-auto bg-surface border-[3px] border-border rounded-panel p-6 grid gap-5"
+        className="w-full h-full overflow-y-auto bg-surface border-[3px] border-border rounded-panel p-6 sm:p-10 grid gap-6 content-center"
         style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
       >
         <div className="flex items-center gap-3 flex-wrap">
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
           {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
-            <span className="font-display text-3xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
+            <span className="font-display text-3xl sm:text-4xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
             {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
@@ -135,7 +135,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className="font-body text-4xl sm:text-5xl font-bold leading-tight text-balance">{q.prompt}</h2>
+        <h2 className="font-body text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-balance">{q.prompt}</h2>
 
         <div className="grid sm:grid-cols-2 gap-3">
           {q.choices.map((c, i) => {
@@ -145,7 +145,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
               <motion.button key={i} type="button" onClick={() => choose(i)} disabled={picked !== null || !!cpu} data-magnet={magnet && i === q.correctIndex ? 'true' : undefined}
                 animate={isWrong && settings.motion !== 'still' ? { x: [0, -8, 8, -5, 5, 0] } : isRight && picked === i && settings.motion !== 'still' ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.4 }}
-                className={`min-h-20 px-4 py-3 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl text-left active:scale-[0.98] disabled:cursor-default
+                className={`min-h-24 sm:min-h-32 px-5 py-4 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl text-left active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center font-display text-2xl">
@@ -197,7 +197,12 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
       <motion.button type="button" onClick={() => { playEffect('tap', settings); onStart(); }} disabled={player.kind === 'cpu'}
         initial={still ? false : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}
         className="relative grid justify-items-center gap-4 p-6 rounded-full" aria-label={t('share.turnStart')}>
-        <motion.span animate={still ? undefined : { y: [0, -14, 0], rotate: [-3, 3, -3] }} transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+        {/* A glow that spins clockwise behind the icon, which bobs and
+            gently grows and shrinks (teacher, 2026-11-06). */}
+        {!still && <motion.span aria-hidden="true" className="absolute left-1/2 top-1/2 w-[min(24rem,56vh)] h-[min(24rem,56vh)] -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+          style={{ background: 'conic-gradient(from 0deg, rgba(253,253,148,0.95), rgba(253,253,148,0) 25%, rgba(253,253,148,0.95) 50%, rgba(253,253,148,0) 75%, rgba(253,253,148,0.95))', filter: 'blur(18px)' }}
+          animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }} />}
+        <motion.span className="relative" animate={still ? undefined : { y: [0, -12, 0], rotate: [-3, 3, -3], scale: [1, 1.06, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}
         </motion.span>

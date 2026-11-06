@@ -16,10 +16,12 @@ export default function ScoreBoard({ turns, playing, round }: { turns: TurnState
   const top = !playing ? leaders(turns) : [];
   const glow = '0 0 0 4px #fdfd94, 0 0 20px 6px #fdfd94';
   return (
-    <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4 grid gap-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('share.scores')}>
+    // On big screens the round or progress sits big and centered under the
+    // scores, level with the bottom of the board (teacher, 2026-11-06).
+    <div className="order-first lg:order-none min-w-0 lg:h-full lg:flex lg:flex-col lg:gap-3">
+    <aside className="bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4 grid gap-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('share.scores')}>
       <div className="hidden lg:flex items-baseline justify-between gap-2">
         <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('share.scores')}</h2>
-        {round && <span className="text-xs font-bold tabular-nums">{round}</span>}
       </div>
       <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none m-0 p-1 lg:p-0">
         {turns.players.map((p) => {
@@ -44,5 +46,11 @@ export default function ScoreBoard({ turns, playing, round }: { turns: TurnState
       </ol>
       {now && <p className="sr-only" aria-live="polite">{t('share.whoseTurn', { name: now.name })}</p>}
     </aside>
+    {round && (
+      <motion.p key={round} initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}
+        className="hidden lg:block mt-auto self-center font-display text-5xl font-bold tabular-nums text-center rounded-panel border-[2.5px] border-border bg-surface px-6 py-2"
+        style={{ boxShadow: 'var(--shadow-sticker)' }}>{round}</motion.p>
+    )}
+    </div>
   );
 }
