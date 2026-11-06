@@ -24,6 +24,14 @@ Never make her repeat herself (teacher, 2026-10-31): read
 `docs/teacher-preferences.md` before building and apply her past preferences
 unasked; add every new preference to it the same turn.
 
+## Helper agents and skills
+
+`.claude/agents/` (accessibility-specialist, economy-designer, sound-designer,
+qa-tester) and `.claude/skills/` (balance-check, playtest-report, scope-check,
+asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
+`.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
+Golden Rule, the three lenses or Claudia.
+
 ## The Three-Lens Standard (mandatory)
 
 "It technically works" and "good enough" are never the bar here. Before any
