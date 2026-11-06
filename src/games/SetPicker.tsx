@@ -7,6 +7,10 @@ import { isPlayable } from '../engine/questions';
 import { t } from '../i18n';
 import { ART } from './SetCover';
 import SetFilterBar from './SetFilterBar';
+import { LIBRARY } from '../data/library';
+import { Tabs } from '../ui/kit';
+
+const LIBRARY_IDS = new Set(LIBRARY.map((s) => s.id));
 
 // Pick one question set (or up to `max` for games like the category grid)
 // from square cards, the same menu in every game (teacher, 2026-11-01: no
@@ -56,9 +60,13 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   }, []);
   const PAGE = fit.cols * fit.rows;
   const compact = fit.size < 140;
+  // My sets and public (ready-made) sets on their own tabs (teacher, 2026-11-06).
   const ready = sets.filter((s) => missingDetails(s).length === 0);
-  const shown = ready.filter((s) => matchesFilter(s, filter));
-  const hidden = sets.length - ready.length;
+  const mineReady = ready.filter((s) => !LIBRARY_IDS.has(s.id));
+  const [tab, setTab] = useState<'mine' | 'library'>(() => (value.some((id) => LIBRARY_IDS.has(id)) || mineReady.length === 0 ? 'library' : 'mine'));
+  const inTab = tab === 'mine' ? mineReady : ready.filter((s) => LIBRARY_IDS.has(s.id));
+  const shown = inTab.filter((s) => matchesFilter(s, filter));
+  const hidden = tab === 'mine' ? sets.filter((s) => !LIBRARY_IDS.has(s.id)).length - mineReady.length : 0;
   // Sets come in pages (teacher, 2026-10-31), opening on the page with the pick.
   const pages = Math.max(1, Math.ceil(shown.length / PAGE));
   const [page, setPage] = useState(() => Math.max(0, Math.floor(shown.findIndex((s) => value.includes(s.id)) / PAGE)));
@@ -68,8 +76,11 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   const onPage = shown.slice(page * PAGE, page * PAGE + PAGE);
   return (
     <div ref={wrap} className="grid gap-3">
-      {max > 1 && <p className="font-bold">{t('setup.pickSets', { max })}</p>}
-      <SetFilterBar value={filter} onChange={(f) => { setFilter(f); setPage(0); }} sets={ready} />
+      {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
+      <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
+        <Tabs label={t('sets.tabs')} value={tab} onChange={(v) => { setTab(v); setPage(0); }} options={[{ id: 'mine', label: t('sets.mine') }, { id: 'library', label: t('sets.library') }]} />
+        <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={(f) => { setFilter(f); setPage(0); }} sets={inTab} /></div>
+      </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
       <div className="flex items-center justify-center gap-2.5">
@@ -110,7 +121,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
 const GAP = 10;
 const ARROW = 44;
 const MIN = 104; // the smallest card that still reads (name and details)
-const MAX = 180;
+const MAX = 220;
 
 // A page arrow beside the cards (space kept even when there is one page).
 function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; show: boolean; disabled: boolean; onClick: () => void }) {
@@ -128,16 +139,18 @@ function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; s
 // many rows (3, 2, then 1) as the height holds, so rows are always full and
 // tall screens have no empty space.
 export function layout(width: number, high: number) {
+  // The shape that gives the cards the most room in all (teacher, 2026-11-06:
+  // the cards are the main view), with full rows of 2 to 8 across.
+  let best: { cols: number; rows: number; size: number } | null = null, score = 0;
   for (const rows of [3, 2, 1]) {
     const tall = (high - GAP * (rows - 1)) / rows;
-    for (const least of [120, MIN]) {
-      for (const cols of [6, 5, 4, 3, 2]) {
-        const size = Math.min(MAX, (width - GAP * (cols - 1)) / cols, tall);
-        if (size >= least) return { cols, rows, size: Math.floor(size) };
-      }
+    for (const cols of [8, 7, 6, 5, 4, 3, 2]) {
+      const size = Math.floor(Math.min(MAX, (width - GAP * (cols - 1)) / cols, tall));
+      const sc = rows * cols * size * size;
+      if (size >= MIN && sc > score) { score = sc; best = { cols, rows, size }; }
     }
   }
-  // A short screen: one full row of the biggest cards the height allows.
+  if (best) return best;
   const size = Math.max(84, Math.floor(Math.min(MAX, high)));
   return { cols: Math.max(1, Math.min(6, Math.floor((width + GAP) / (size + GAP)))), rows: 1, size };
 }

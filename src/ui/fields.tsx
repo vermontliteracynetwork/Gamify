@@ -1,5 +1,7 @@
 import { Check } from '@phosphor-icons/react';
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
+import { motion } from 'motion/react';
+import { useSettings } from '../settings/SettingsContext';
 import { Minus, Plus } from '@phosphor-icons/react';
 
 // Shared form controls, iPad-sized: switches, choice rows, sliders,
@@ -47,17 +49,28 @@ export function ChoiceTiles<T extends string>({ label, value, options, onChange 
   );
 }
 
-export function ChoiceRow<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
+// A row of choices with a highlight that slides to the pick with a little
+// bounce (teacher, 2026-11-06: "make it amusing. slight animations").
+// `art` puts a small picture above a choice's label (like a grid preview).
+export function ChoiceRow<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; art?: ReactNode }[]; onChange: (v: T) => void }) {
+  const id = useId();
+  const still = useSettings().settings.motion === 'still';
   return (
     <div className="grid gap-1.5">
       <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
-        {options.map((o) => (
-          <button key={o.value} type="button" role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)}
-            className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${value === o.value ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-            {o.label}
-          </button>
-        ))}
+      <div role="radiogroup" aria-label={label} className={`inline-flex flex-wrap justify-self-start gap-1 p-1 ${options.some((o) => o.art) ? 'rounded-panel' : 'rounded-[1.6rem]'} border-[2px] border-border bg-surface-2`}>
+        {options.map((o) => {
+          const on = value === o.value;
+          return (
+            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)}
+              className={`relative min-h-11 px-4 ${o.art ? 'rounded-input' : 'rounded-pill'} font-bold motion-safe:active:scale-95 motion-safe:transition-transform ${o.art ? 'py-2 grid justify-items-center gap-1' : ''}`}>
+              {on && <motion.span layoutId={still ? undefined : `pick-${id}`} transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+                className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-accent border-[2px] border-border`} style={{ boxShadow: '0 2px 0 #000' }} aria-hidden="true" />}
+              {o.art && <span className="relative">{o.art}</span>}
+              <span className="relative">{o.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

@@ -26,22 +26,24 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
   const n = Math.max(1, cards.length);
   const across = (cols: number) => (width - 10 * (cols - 1)) / cols;
   let cols = n;
-  for (let rows = 1; rows <= n && across(cols) < 96; rows++) cols = Math.ceil(n / rows);
-  const size = Math.max(80, Math.min(128, Math.floor(across(cols))));
+  for (let rows = 1; rows <= n && across(cols) < 136; rows++) cols = Math.ceil(n / rows);
+  // Each card shows its short description (teacher, 2026-11-06), so they are a little wider.
+  const size = Math.max(120, Math.min(190, Math.floor(across(cols))));
   return (
     <div ref={box} className="grid gap-2 min-w-0 w-full">
       <div className="grid gap-0.5">
         <span className="font-bold">{t('tb.powers')}</span>
         <span className="text-sm font-semibold text-muted">{hint}</span>
       </div>
-      <div className="grid gap-2.5 justify-start" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `${size}px` }}>
+      <div className="grid gap-2.5 justify-start" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `minmax(${Math.round(size * 0.95)}px, auto)` }}>
         {cards.map((c) => (
-          <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)} data-tip={c.hint}
+          <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)}
             aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name}
-            className={`relative rounded-input border-[2.5px] p-2 pt-3 grid grid-rows-[auto_1fr] justify-items-center content-start gap-1.5 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
+            className={`relative rounded-input border-[2.5px] p-2 pt-3 grid grid-rows-[auto_auto_1fr] justify-items-center content-start gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
             style={c.on ? { boxShadow: '0 3px 0 #000' } : undefined}>
             <span className={c.on ? '' : 'grayscale opacity-45'}>{c.art}</span>
-            <span className={`font-bold text-[13px] leading-tight line-clamp-2 self-start ${c.on ? '' : 'text-muted line-through decoration-2'}`}>{c.name}</span>
+            <span className={`font-bold text-[13px] leading-tight line-clamp-2 ${c.on ? '' : 'text-muted line-through decoration-2'}`}>{c.name}</span>
+            {c.hint && <span className={`text-xs font-semibold leading-snug ${c.on ? 'text-text/80' : 'text-muted'}`}>{c.hint}</span>}
             {/* On: a mint check in the corner. Off: a faded X. */}
             <span className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-[2px] flex items-center justify-center ${c.on ? 'bg-success border-border' : 'bg-surface border-border-soft text-muted'}`} aria-hidden="true">
               {c.on ? <Check weight="bold" size={15} /> : <X weight="bold" size={13} />}

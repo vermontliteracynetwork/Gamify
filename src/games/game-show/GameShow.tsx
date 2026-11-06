@@ -375,7 +375,7 @@ export default function GameShow() {
                 options={[{ value: '1', label: t('tb.tries.1') }, { value: '3', label: t('tb.tries.3') }, { value: 'all', label: t('tb.tries.all') }]} />
               {board === 'cards' && <>
               <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
-                options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }) }))} />
+                options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }), art: <GridPreview cols={g.cols} rows={g.rows} /> }))} />
               <PowerUpCards hint={t('tb.powersHint')}
                 cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) }), art: <ItemArt item={p} size={40} still />, on: powerOn(p) }))}
                 onChange={(id, on) => { const p = powers.find((x) => x.id === id)!; if (takes(p)) change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) }); else change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] }); }} />
@@ -590,6 +590,15 @@ const picksTeam = (k: CardKind) => k.kind === 'power' && (k.item.ability === 'sw
 const powerAmount = (it: ThemeItem) => it.amount ?? (it.ability === 'bonus' ? 100 : 20);
 
 // Small drawings of the two boards for the board choice.
+// A tiny picture of a card grid's shape (teacher, 2026-11-06).
+function GridPreview({ cols, rows }: { cols: number; rows: number }) {
+  return (
+    <span className="grid gap-[2px]" style={{ gridTemplateColumns: `repeat(${cols}, 9px)`, gridAutoRows: '6px' }} aria-hidden="true">
+      {Array.from({ length: cols * rows }, (_, i) => <span key={i} className="rounded-[1.5px] border border-border" style={{ background: '#fdfd94' }} />)}
+    </span>
+  );
+}
+
 function BoardArt({ kind }: { kind: Board }) {
   if (kind === 'cards') {
     return (

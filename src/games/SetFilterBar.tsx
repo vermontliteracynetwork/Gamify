@@ -7,8 +7,9 @@ import { t } from '../i18n';
 // Filters for question sets: search titles and tags, subject, grade, and a
 // Common Core standard code. Typing in search offers matching tags from the
 // sets on hand; a picked tag becomes a filter chip (teacher, 2026-10-25).
-export default function SetFilterBar({ value, onChange, sets = [] }: { value: SetFilter; onChange: (f: SetFilter) => void; sets?: Pick<QuestionSet, 'tags'>[] }) {
-  const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+export default function SetFilterBar({ value, onChange, sets = [], compact = false }: { value: SetFilter; onChange: (f: SetFilter) => void; sets?: Pick<QuestionSet, 'tags'>[]; compact?: boolean }) {
+  // compact: small fields so the cards stay the main view (teacher, 2026-11-06).
+  const field = compact ? 'min-h-9 px-2.5 rounded-input border-[2px] border-border bg-surface font-bold text-sm' : 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
   const chosen = value.tags ?? [];
   const typed = value.search?.trim() ?? '';
   const offers = typed ? suggestTags(tagCounts(sets), typed, chosen, 6) : [];
@@ -17,9 +18,9 @@ export default function SetFilterBar({ value, onChange, sets = [] }: { value: Se
     <div className="grid gap-2">
     <div className="grid gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
       <label className="relative">
-        <MagnifyingGlass weight="bold" size={20} className="absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
+        <MagnifyingGlass weight="bold" size={compact ? 16 : 20} className="absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
         <input type="search" value={value.search ?? ''} onChange={(e) => onChange({ ...value, search: e.target.value })} placeholder={t('filter.search')} aria-label={t('filter.search')}
-          className={`w-full pl-10 ${field}`} />
+          className={`w-full ${compact ? 'pl-8' : 'pl-10'} ${field}`} />
       </label>
       <select value={value.subject ?? ''} onChange={(e) => onChange({ ...value, subject: (e.target.value || undefined) as Subject | undefined })} aria-label={t('filter.subject')} className={field}>
         <option value="">{t('filter.allSubjects')}</option>

@@ -70,3 +70,6 @@ line that fits, and add each new preference the same turn she says it.
 - Menus are full views, never small cards (2026-11-06): game welcome, setup steps and Play or share fill the whole space; covers always show whole, never cropped.
 - Ways to play show as just an icon in a colored circle; the hover text names it in the same color (2026-11-06).
 - Game Show category grid: show example category names and explain it as a classic TV quiz-show board, without naming any show (2026-11-06).
+- Set pickers: small search and filters, cards are the main view; My sets and Ready-made sets tabs (2026-11-06).
+- Options are playful: a highlight that slides to the pick with a little bounce; grid sizes show a tiny grid picture; power-up cards show their description on the card, not in hover text (2026-11-06).
+- Versus players are big tall cards with the icon large (2026-11-06).

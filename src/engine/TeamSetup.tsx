@@ -101,17 +101,18 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
 
       {/* Characters (Board Game animals) show as player cards: the animal big,
           no circle around it, the name under it (teacher, 2026-11-01). */}
-      <ol className={`grid items-start gap-2 list-none p-0 m-0 ${characters?.length ? 'grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'}`}>
+      {/* Versus players are big cards too (teacher, 2026-11-06). */}
+      <ol className={`grid items-start list-none p-0 m-0 ${characters?.length ? 'gap-2 grid-cols-2 lg:grid-cols-3' : mode === 'versus' ? 'gap-5 grid-cols-2 w-full max-w-3xl mx-auto' : 'gap-2 sm:grid-cols-2'}`}>
         {slots.map((s, i) => (
-          <li key={i} className={characters?.length
-            ? 'flex flex-wrap items-center justify-center gap-2 rounded-panel border-[2.5px] border-border bg-surface p-3'
+          <li key={i} className={characters?.length || mode === 'versus'
+            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-[2.5px] border-border bg-surface p-3 ${mode === 'versus' ? 'min-h-[min(18rem,40vh)] content-center p-5' : ''}`
             : 'flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2'}
-            style={characters?.length ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
+            style={characters?.length || mode === 'versus' ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
             <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
-              onClick={() => setPicking(picking === i ? null : i)} className={`${characters?.length ? 'basis-full flex justify-center' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:transition-transform`}>
+              onClick={() => setPicking(picking === i ? null : i)} className={`${characters?.length || mode === 'versus' ? 'basis-full flex justify-center' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:transition-transform`}>
               {characters?.length
                 ? <img src={characters[charOf(i)].image} alt="" className="w-[min(6.5rem,14vh)] aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
-                : <TeamBadge colorIndex={iconOf(i)} size={44} />}
+                : <TeamBadge colorIndex={iconOf(i)} size={mode === 'versus' ? 128 : 44} />}
             </button>
             {picking === i && characters?.length ? (
               // A pop-up box of big animal tiles, so the setup page never scrolls (teacher, 2026-10-31).
