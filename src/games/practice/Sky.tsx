@@ -94,15 +94,20 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 // `bleed`: edge to edge, no rounded frame (the sky is the whole game space).
 // `seed`: a new sky layout each game. `golden`: stars earned on a streak of
 // first-try answers shine gold (Golden Rule pass, 2026-10-31).
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, golden }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; golden?: boolean[] }) {
+// `hole` overrides the measured question box (the live big screen keeps a
+// corner free for its leaderboard); `bottomGap` keeps a strip at the bottom
+// (in % of the height) free for the goal bar (teacher, 2026-11-06).
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, golden, hole: holeProp, bottomGap = 0 }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; golden?: boolean[]; hole?: Hole | null; bottomGap?: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { hole, aspect } = useHole(ref);
+  const measured = useHole(ref);
+  const aspect = measured.aspect;
+  const hole = holeProp !== undefined ? holeProp : measured.hole;
   // A room theme: pets stand on the floor, below the wall, upright and evenly
   // sized; nothing hangs on the wall above the question box.
   const room = theme.room;
   const spots = room
-    ? skySpots(total, seed, { l: hole.l, r: hole.r, t: room.floor, b: Math.max(hole.b, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
-    : skySpots(total, seed, hole, aspect);
+    ? skySpots(total, seed, { l: hole?.l ?? 50, r: hole?.r ?? 50, t: room.floor, b: Math.max(hole?.b ?? 0, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
+    : skySpots(total, seed, hole, aspect).map((p) => (bottomGap ? { ...p, y: p.y * (100 - bottomGap) / 100 } : p));
   // Items a theme leaves empty keep the Classic look (the teacher's stars).
   const own = theme.itemImages?.length ? theme.itemImages : ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
   const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];

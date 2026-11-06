@@ -30,7 +30,7 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.getByRole('button', { name: /Start the game/ }).click();
   await expect(kid).toHaveURL(/\/games\/cast-catch\?set=/);
 
-  await page.getByRole('tab', { name: 'My monitor' }).click();
+  await page.getByRole('button', { name: 'My monitor' }).click();
   await page.getByRole('button', { name: 'Eyes on me, please.' }).click();
   await page.getByRole('button', { name: 'Lock all' }).click();
   await expect(kid.getByRole('dialog', { name: 'Eyes on Your Teacher' })).toBeVisible();
@@ -44,7 +44,7 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.getByRole('button', { name: 'Resume' }).click();
   await expect(kid.getByRole('dialog', { name: 'Paused' })).toHaveCount(0);
 
-  await page.getByRole('tab', { name: 'Big screen' }).click();
+  await page.getByRole('button', { name: 'My monitor' }).click(); // closes the monitor menu
   await page.screenshot({ path: `test-results/live-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'End game' }).click();
   await expect(page.getByRole('heading', { name: 'The Winners' })).toBeVisible();

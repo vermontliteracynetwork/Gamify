@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, showSetting, startTurn } from './setup';
+import { answerShare, finishSetup, noPowerUps, openSetup, showSetting, startTurn } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -74,6 +74,8 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
 test('Game Show: category grid, class vs the computer', async ({ page }, info) => {
   test.setTimeout(90_000);
   const problems = watch(page);
+  // Squares can hide power-ups now (teacher, 2026-11-06); this test counts points.
+  await noPowerUps(page, 'game-show');
   await openSetup(page, '/games/game-show');
   await page.getByRole('radio', { name: 'Category grid' }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();

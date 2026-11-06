@@ -4,7 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { ArrowLeft, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix } from '@phosphor-icons/react';
+import { Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix, SlidersHorizontal } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -17,7 +17,7 @@ import { useTier } from '../data/hooks';
 import { getGame } from '../games/registry';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { Button, buttonClasses, Panel, Tabs } from '../ui/kit';
+import { Button, buttonClasses, Panel } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 import { LimitNote } from '../billing/Upgrade';
@@ -50,7 +50,6 @@ function Room({ game }: { game: GameCode }) {
   const reduce = useReducedMotion();
   const { settings } = useSettings();
   const [approve, setApprove] = useState(true);
-  const [view, setView] = useState<'screen' | 'monitor'>('screen');
   // Play or share passes compete or together (?mode=).
   const search = useLocation().search;
   const startMode = new URLSearchParams(search).get('mode') === 'together' ? 'together' : 'compete';
@@ -58,13 +57,13 @@ function Room({ game }: { game: GameCode }) {
   const startPlay = readClassPlay(search);
   // Question Tracker shows the class sky (teacher, 2026-10-26).
   const skyGame = game.gameId === 'star-quiz';
-  const [board, setBoard] = useState<'leaders' | 'goal' | 'sky'>(skyGame ? 'sky' : startMode === 'together' ? 'goal' : 'leaders');
   const { theme: skyTheme } = useGameTheme('star-quiz');
   // The big-screen look (Theme Builder, Big screen); the teacher picks it here.
   const screen = useGameTheme('big-screen');
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [setOpen, setSetOpen] = useState(false);
+  const [monOpen, setMonOpen] = useState(false);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
   const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}) });
@@ -149,22 +148,22 @@ function Room({ game }: { game: GameCode }) {
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, disableForReducedMotion: true });
   }
   const gameName = getGame(game.gameId)?.name ?? game.gameId;
+  // A student's question set: the class set first, called Default, then the rest (teacher, 2026-11-06).
+  const SetSelect = ({ value, label, onChange }: { value: string; label: string; onChange: (v: string) => void }) => (
+    <select value={value} aria-label={label} onChange={(e) => onChange(e.target.value)} className="min-h-10 max-w-56 px-2 rounded-input border-[2px] border-border font-bold text-sm bg-surface">
+      <option value={state.setId}>{t('live.defaultSet')}</option>
+      {allSets.filter((x) => x.id !== state.setId).map((x) => <option key={x.id} value={x.id}>{x.name || t('sets.untitled')}</option>)}
+    </select>
+  );
 
   return (
     <ThemedPage theme={screen.theme}>
     <main className={`stage-text max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4 pb-4 gap-4 ${state.phase === 'ended' ? 'grid' : 'flex flex-col overflow-hidden'}`} style={state.phase === 'ended' ? undefined : { height: 'calc(100dvh - 4rem)' }}>
-      <div className="flex flex-wrap items-center gap-2">
-        <Link to="/teacher/sets" className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('live.back')}</Link>
+      <div className={`flex flex-wrap items-center gap-2 ${state.phase === 'play' || state.phase === 'paused' ? 'invisible' : ''}`}>
         <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
         {state.phase === 'lobby' && (
           <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
             className="w-11 h-11 rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
-        )}
-        {state.phase !== 'lobby' && state.phase !== 'ended' && (
-          <>
-            <Button onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}{state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')}</Button>
-            <Button variant="danger" onClick={end}><Stop weight="fill" size={18} />{t('live.end')}</Button>
-          </>
         )}
       </div>
 
@@ -211,9 +210,7 @@ function Room({ game }: { game: GameCode }) {
                       </select>
                     )}
                     {paid && p.status === 'in' && (
-                      <select value={assignOf(p.pid).setId ?? state.setId} aria-label={t('live.setFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { setId: e.target.value })} className="min-h-10 px-2 rounded-input border-[2px] border-border font-bold bg-surface text-sm max-w-52">
-                        {allSets.map((x) => <option key={x.id} value={x.id}>{x.name || t('sets.untitled')}</option>)}
-                      </select>
+                      <SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} />
                     )}
                     {p.status === 'pending' && <Button variant="primary" onClick={() => setPlayer(p.pid, { status: 'in' })}><Check weight="bold" size={16} />{t('live.letIn', { name: p.name })}</Button>}
                     <button type="button" onClick={() => setEditing(p.pid)} aria-label={t('live.rename', { name: p.name })} className="w-10 h-10 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><PencilSimple weight="bold" size={16} /></button>
@@ -229,65 +226,49 @@ function Room({ game }: { game: GameCode }) {
       )}
 
       {(state.phase === 'play' || state.phase === 'paused') && (
-        <>
-          <Tabs label={t('live.views')} value={view} onChange={setView} options={[{ id: 'screen', label: t('live.view.screen') }, { id: 'monitor', label: t('live.view.monitor') }]} />
-          {state.phase === 'paused' && <p className="font-display text-2xl bg-accent border-[2px] border-border rounded-input p-3 text-center" role="status">{t('live.pausedHost')}</p>}
-          {view === 'screen' ? (
-            // The projector view fills the screen (teacher check, 2026-10-31).
-            <Panel className="grid gap-3 grid-rows-[auto_minmax(0,1fr)] flex-1 min-h-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-bold flex-1">{t('live.screenNote', { code: game.code })}</p>
-                {timeLeft !== null && <p className="font-display text-3xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</p>}
-                <Tabs label={t('live.boards')} value={board} onChange={setBoard} options={[...(skyGame ? [{ id: 'sky' as const, label: t('live.board.sky') }] : []), { id: 'leaders', label: t('live.board.leaders') }, { id: 'goal', label: t('live.board.goal') }]} />
-              </div>
-              {board === 'sky' ? (
-                <div className="grid grid-rows-[auto_minmax(0,1fr)] gap-2 min-h-0">
-                  {state.mode === 'together'
-                    ? <p className="font-display text-2xl text-center">{t('live.goalText', { right: classRight, goal })}</p>
-                    : (
-                      <ul className="flex flex-wrap justify-center gap-2 list-none p-0 m-0" aria-label={t('live.starColors')}>
-                        {leaders.map((p) => (
-                          <li key={p.pid} className="flex items-center gap-1.5 rounded-pill border-[2px] border-border bg-surface px-3 py-1 font-bold">
-                            <StarIcon weight="fill" size={22} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />{p.name} <span className="font-display">{p.right}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%"
-                    filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
-                    total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
-                    colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
-                    label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
-                </div>
-              ) : board === 'leaders' ? (
-                <ol className="grid gap-3 content-center list-none p-0 m-0" aria-label={t('live.board.leaders')}>
-                  {leaders.slice(0, 10).map((p, i) => (
-                    <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3">
-                      <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="#c98a00" aria-label="1" /> : i + 1}</span>
-                      <span className="font-bold text-2xl truncate">{p.name}</span>
-                      <span className="h-10 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><motion.span className="block h-full bg-accent" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} transition={{ duration: reduce ? 0 : 0.5 }} /></span>
-                      <span className="font-display text-3xl text-right">{p.right}</span>
-                    </motion.li>
-                  ))}
-                </ol>
-              ) : (
-                <div className="grid gap-6 content-center justify-items-center text-center py-4">
-                  <p className="font-display text-5xl">{t('live.goalText', { right: classRight, goal })}</p>
-                  <div className="w-full h-20 rounded-pill bg-surface-2 border-[3px] border-border overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(classRight, goal)} aria-label={t('live.board.goal')}>
-                    <motion.div className="h-full bg-[#7dd3a8]" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (classRight / goal) * 100)}%` }} transition={{ duration: reduce ? 0 : 0.6 }} />
-                  </div>
-                </div>
-              )}
-            </Panel>
-          ) : !canMonitor ? <LimitNote>{t('live.monitorPlan')}</LimitNote> : (
-            <Panel className="grid gap-3 content-start flex-1 min-h-0 overflow-y-auto">
+        // The big screen fills the whole window (teacher, 2026-11-06): the sky
+        // (or board) edge to edge, the goal small along the bottom, the
+        // leaderboard in the top right, and the teacher's tools behind small
+        // buttons, so nothing covers the stars.
+        <div className="fixed inset-x-0 bottom-0 top-16 z-30 overflow-hidden" style={skyGame ? undefined : { background: 'var(--stage-bg, var(--color-bg))' }}>
+          {skyGame ? (
+            <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%" bleed bottomGap={14}
+              hole={state.mode === 'together' ? null : { l: 74, t: 0, r: 100, b: 48 }}
+              filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
+              total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
+              colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
+              label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
+          ) : state.mode !== 'together' && (
+            <ol className="absolute inset-x-0 top-20 bottom-24 mx-auto max-w-4xl px-6 grid gap-3 content-center list-none m-0" aria-label={t('live.board.leaders')}>
+              {leaders.slice(0, 10).map((p, i) => (
+                <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3 stage-text">
+                  <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="#c98a00" aria-label="1" /> : i + 1}</span>
+                  <span className="font-bold text-2xl truncate">{p.name}</span>
+                  <span className="h-10 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><motion.span className="block h-full bg-accent" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} /></span>
+                  <span className="font-display text-3xl text-right">{p.right}</span>
+                </motion.li>
+              ))}
+            </ol>
+          )}
+
+          {/* Teacher tools: small, top left, with hover text. */}
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+            <button type="button" onClick={() => setMonOpen((o) => !o)} aria-expanded={monOpen} aria-label={t('live.view.monitor')} data-tip={t('live.view.monitor')} className={TOOL}><SlidersHorizontal weight="bold" size={20} /></button>
+            <button type="button" onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} aria-label={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} data-tip={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} className={TOOL}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}</button>
+            <button type="button" onClick={end} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}><Stop weight="fill" size={18} /></button>
+            {timeLeft !== null && <span className="ml-1 px-3 min-h-10 inline-flex items-center rounded-pill bg-surface border-[2px] border-border font-display text-xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
+          </div>
+          {monOpen && (
+            <div className="absolute top-16 left-3 z-20 w-[min(26rem,calc(100vw-1.5rem))] max-h-[calc(100%-5rem)] overflow-y-auto bg-surface border-[2.5px] border-border rounded-panel p-3 text-[var(--text)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="dialog" aria-label={t('live.view.monitor')}>
+              {!canMonitor ? <LimitNote>{t('live.monitorPlan')}</LimitNote> : (
+            <div className="grid gap-3">
               <p className="text-sm font-bold">{t('live.monitorNote')}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className="flex-1 min-w-48 min-h-11 px-3 rounded-input border-[2px] border-border font-bold" />
                 {TEMPLATES.map((k) => <button key={k} type="button" onClick={() => setMessage(t(k))} className="min-h-10 px-3 rounded-pill border-[2px] border-border-soft bg-surface font-bold text-sm">{t(k)}</button>)}
                 <Button variant="primary" onClick={() => lock('all', !allLocked)}>{allLocked ? <LockSimpleOpen weight="bold" size={18} /> : <LockSimple weight="fill" size={18} />}{allLocked ? t('live.unlockAll') : t('live.lockAll')}</Button>
               </div>
-              <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 list-none p-0 m-0" aria-label={t('live.players')}>
+              <ul className="grid gap-2 list-none p-0 m-0" aria-label={t('live.players')}>
                 {inRoom.map((p) => {
                   const locked = state.locks[p.pid] !== undefined || allLocked;
                   const onQ = p.askedAt ? Math.round((now - p.askedAt) / 1000) : null;
@@ -300,15 +281,48 @@ function Room({ game }: { game: GameCode }) {
                         <button type="button" onClick={() => lock(p.pid, state.locks[p.pid] === undefined)} aria-pressed={locked} aria-label={t(locked ? 'live.unlockOne' : 'live.lockOne', { name: p.name })} className={`w-10 h-10 rounded-full border-[2px] border-border flex items-center justify-center ${locked ? 'bg-accent' : 'bg-surface'}`}>{locked ? <LockSimple weight="fill" size={18} /> : <LockSimpleOpen weight="bold" size={18} />}</button>
                       </div>
                       <p className="text-sm font-semibold">{t('live.tile', { right: p.right, answered: p.answered })}</p>
+                      {paid && <SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} />}
                       <p className="text-sm font-semibold text-muted">{onQ === null ? t('live.between') : t('live.onQuestion', { s: onQ })}</p>
                       {(stuck || low) && <p className="text-sm font-bold flex items-center gap-1"><Warning weight="fill" size={16} aria-hidden="true" />{stuck ? t('live.stuck') : t('live.guessing')}</p>}
                     </li>
                   );
                 })}
               </ul>
-            </Panel>
+            </div>
+              )}
+            </div>
           )}
-        </>
+
+          {state.phase === 'paused' && <p className="absolute top-3 left-1/2 -translate-x-1/2 z-10 font-display text-xl bg-accent border-[2px] border-border rounded-pill px-4 py-1" role="status">{t('live.pausedHost')}</p>}
+
+          {/* Compete: a small leaderboard in the top right, in the corner the stars leave free. */}
+          {state.mode !== 'together' && skyGame && (
+            <ol className="absolute top-3 right-3 z-10 w-[min(22%,18rem)] grid gap-1.5 list-none m-0 p-2 rounded-panel bg-surface/90 border-[2px] border-border" aria-label={t('live.board.leaders')}>
+              {leaders.slice(0, 8).map((p, i) => (
+                <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-sm">
+                  <span className="w-5 text-center font-display">{i + 1}</span>
+                  <StarIcon weight="fill" size={18} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />
+                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="font-display tabular-nums">{p.right}</span>
+                </motion.li>
+              ))}
+            </ol>
+          )}
+
+          {/* The goal, small and centered along the bottom. */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-[2px] border-border">
+            {state.mode === 'together' ? (
+              <>
+                <p className="font-display text-lg">{t('live.goalText', { right: classRight, goal })}</p>
+                <div className="w-full h-3 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(classRight, goal)} aria-label={t('live.board.goal')}>
+                  <motion.div className="h-full bg-[#7dd3a8]" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (classRight / goal) * 100)}%` }} transition={{ duration: reduce ? 0 : 0.6 }} />
+                </div>
+              </>
+            ) : (
+              <p className="font-display text-lg">{state.endAt?.right ? t('live.firstTo', { n: state.endAt.right }) : t('live.lateCode', { code: game.code })}</p>
+            )}
+          </div>
+        </div>
       )}
 
       {state.phase === 'ended' && (
@@ -345,7 +359,7 @@ function Room({ game }: { game: GameCode }) {
             </div>
             <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
               {(['compete', 'together'] as const).map((m) => (
-                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(skyGame ? 'sky' : m === 'compete' ? 'leaders' : 'goal'); }}
+                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); }}
                   className={`min-h-16 px-4 rounded-input border-[2px] text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                   <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
                 </button>
@@ -403,4 +417,5 @@ function Room({ game }: { game: GameCode }) {
   );
 }
 
+const TOOL = 'w-11 h-11 rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center text-[var(--text)]';
 const clock = (ms: number) => { const sec = Math.ceil(ms / 1000); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };

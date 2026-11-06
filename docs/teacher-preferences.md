@@ -105,3 +105,6 @@ line that fits, and add each new preference the same turn she says it.
 - The computer player's level (Easy, Medium, Hard) sits on its card where a name would go (2026-11-06).
 - The turn-card glow must always be visible and moving, even when the device has Reduce Motion on; Full motion in Gamify settings overrides the device setting (2026-11-06).
 - Category grid has power-ups too (2026-11-06): some squares hide one, shown after a right answer; the teacher turns each on or off like the cards version.
+- Live big screen (2026-11-06): the sky fills the whole window (no purple), the goal small and centered along the bottom, a small leaderboard top right when competing, nothing covering stars; teacher tools (monitor, pause, end) are small buttons with hover text, and "My monitor" opens as a small menu, not a tab. No "back to question sets" button.
+- A student's question set list starts with "Default set" (the class set), not the set's own name (2026-11-06); it can be changed from the lobby and from the monitor menu during play.
+- Every in-game message or celebration pops up in the center of the screen on the top layer, never hidden behind a goal tracker (2026-11-06). The student's live goal bar sits at the bottom.

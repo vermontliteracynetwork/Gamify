@@ -134,7 +134,7 @@ export default function GameShow() {
       startTurn(state, 'cards');
     } else {
       const base = chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false })));
-      const hidden = dealCards(base.length, Math.random, powers.filter(powerOn));
+      const hidden = dealCards(base.length, Math.random, (setup as { powerUps?: boolean }).powerUps === false ? [] : powers.filter(powerOn));
       setCells(base.map((c, i) => { const h = hidden[i]; return h.kind === 'power' ? { ...c, power: h.item } : c; }));
       startTurn(state, 'grid');
     }
@@ -422,7 +422,7 @@ export default function GameShow() {
           </div>
           <section className="relative grid gap-4 min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
-            <div className="absolute inset-x-0 top-2 z-20 grid justify-items-center gap-2 pointer-events-none" role="status">
+            <div className="fixed inset-0 z-[70] grid place-content-center justify-items-center gap-2 pointer-events-none" role="status">
               <AnimatePresence>
                 {toasts.map((x) => (
                   <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-accent border-[3px] border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}

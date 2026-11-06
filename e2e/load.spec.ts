@@ -43,7 +43,7 @@ test('live load: 30 students join and answer; the host keeps up', async ({ page,
   await expect(board.getByText('Student 11')).toBeVisible({ timeout: 5000 });
   await expect(board.locator('li').first()).toContainText('10');
   const caughtUp = Date.now() - t0;
-  await page.getByRole('tab', { name: 'My monitor' }).click();
+  await page.getByRole('button', { name: 'My monitor' }).click();
   await expect(page.getByRole('list', { name: 'Players' }).getByRole('listitem')).toHaveCount(30);
   const longest = await page.evaluate(() => Math.max(0, ...(window as unknown as { longTasks: number[] }).longTasks));
   console.log(`load: 30 students, 330 messages, host caught up in ${caughtUp} ms, longest main-thread task ${Math.round(longest)} ms`);

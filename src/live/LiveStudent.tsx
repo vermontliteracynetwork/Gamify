@@ -93,7 +93,7 @@ export function LiveOverlay() {
     const heads = left !== null && ((left <= 180 && left > 174) || (left <= 60 && left > 54)) ? t(left > 60 ? 'clock.three' : 'clock.one') : '';
     const clock = left !== null && <span className={`inline-flex items-center gap-1 font-display tabular-nums ${left <= 60 ? 'text-danger' : ''}`}><Timer weight="bold" size={18} aria-hidden="true" />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>;
     return (
-      <div className="fixed top-[4.5rem] left-1/2 -translate-x-1/2 z-[55] pointer-events-none" role="status" aria-live="polite">
+      <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 pointer-events-none" role="status" aria-live="polite">
         {state.mode === 'together' ? (
           <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-[2.5px] border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>

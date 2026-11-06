@@ -24,7 +24,7 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
     <AnimatePresence>
       {pop && (
         <motion.div key={pop.id} role="status" aria-live="polite"
-          className="fixed left-1/2 top-[22%] z-40 -translate-x-1/2 pointer-events-none bg-surface border-[3px] border-border rounded-panel px-5 py-3 flex items-center gap-3 max-w-[92vw]"
+          className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 pointer-events-none bg-surface border-[3px] border-border rounded-panel px-5 py-3 flex items-center gap-3 max-w-[92vw]"
           style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
           initial={still ? { opacity: 0 } : { scale: 0.4, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
           transition={POP_IN}>

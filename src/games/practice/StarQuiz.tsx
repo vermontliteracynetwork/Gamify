@@ -143,7 +143,7 @@ export default function StarQuiz() {
           {/* A streak of first-try answers: the stars turn gold. */}
           <AnimatePresence>
             {streakNote && phase === 'play' && (
-              <motion.p key={streakNote.id} role="status" className={`absolute left-1/2 top-4 -translate-x-1/2 z-10 font-display text-2xl sm:text-3xl ${streakNote.gold ? 'bg-[#ffc93c]' : 'bg-[#9fe7a0]'} border-[2.5px] border-border rounded-pill px-5 py-1.5 flex items-center gap-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}
+              <motion.p key={streakNote.id} role="status" className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] pointer-events-none whitespace-nowrap font-display text-2xl sm:text-3xl ${streakNote.gold ? 'bg-[#ffc93c]' : 'bg-[#9fe7a0]'} border-[2.5px] border-border rounded-pill px-5 py-1.5 flex items-center gap-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}
                 initial={settings.motion === 'still' ? false : { y: -30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
               >
                 <Star weight="fill" size={26} aria-hidden="true" />{streakNote.text}
