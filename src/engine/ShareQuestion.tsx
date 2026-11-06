@@ -198,9 +198,10 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
         className="relative grid justify-items-center gap-4 p-6 rounded-full" aria-label={t('share.turnStart')}>
         {/* A glow that spins clockwise behind the icon, which bobs and
             gently grows and shrinks (teacher, 2026-11-06). */}
-        {!still && <motion.span aria-hidden="true" className="absolute left-1/2 top-1/2 w-[min(24rem,56vh)] h-[min(24rem,56vh)] -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-          style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.9) 0deg 12deg, rgba(253,253,148,0) 12deg 30deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', filter: 'blur(3px)' }}
-          animate={{ rotate: 360, scale: [1, 1.08, 1] }} transition={{ rotate: { duration: 9, repeat: Infinity, ease: 'linear' }, scale: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } }} />}
+        {/* Always on, slow and soft, so it shows even with calm motion settings
+            (teacher, 2026-11-06: "where is the glow animation"). */}
+        <span aria-hidden="true" className="turn-rays absolute left-1/2 top-1/2 w-[min(30rem,70vh)] h-[min(30rem,70vh)] -ml-[min(15rem,35vh)] -mt-[min(15rem,35vh)] rounded-full pointer-events-none" />
+        <span aria-hidden="true" className="turn-halo absolute left-1/2 top-1/2 w-[min(22rem,52vh)] h-[min(22rem,52vh)] -ml-[min(11rem,26vh)] -mt-[min(11rem,26vh)] rounded-full pointer-events-none" />
         <motion.span className="relative" animate={still ? undefined : { y: [0, -12, 0], rotate: [-3, 3, -3], scale: [1, 1.06, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}

@@ -46,7 +46,8 @@ import DialogFocus from '../../ui/DialogFocus';
 type Board = 'cards' | 'grid';
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 interface Card { kind: CardKind; open: boolean; by?: number }
-interface Cell { col: number; points: number; used: boolean }
+// Some squares hide a power-up, shown after a right answer (teacher, 2026-11-06).
+interface Cell { col: number; points: number; used: boolean; power?: ThemeItem }
 
 export default function GameShow() {
   const { settings } = useSettings();
@@ -64,6 +65,8 @@ export default function GameShow() {
   const gap = grid.rows > 4 ? 8 : 12;
   // The theme's power-ups (Classic ones until a theme makes its own).
   const powers = theme.items?.length ? theme.items : gameShowManifest.items!.classic;
+  // Category squares are worth 100 to 500, so power-up points count ten times.
+  const scale = board === 'grid' ? 10 : 1;
   // Steal and Swap stay off unless the teacher turns them on (market research,
   // 2026-10-31: teachers say taking points brings out the worst).
   const takes = (p: { ability: string }) => p.ability === 'steal' || p.ability === 'swap';
@@ -130,7 +133,9 @@ export default function GameShow() {
       setLucky(Math.floor(Math.random() * deck.length));
       startTurn(state, 'cards');
     } else {
-      setCells(chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false }))));
+      const base = chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false })));
+      const hidden = dealCards(base.length, Math.random, powers.filter(powerOn));
+      setCells(base.map((c, i) => { const h = hidden[i]; return h.kind === 'power' ? { ...c, power: h.item } : c; }));
       startTurn(state, 'grid');
     }
     setPhase('play');
@@ -188,6 +193,21 @@ export default function GameShow() {
       setCells(nextCells);
       setQuestion(null);
       const scored = right ? addPoints(turns, player.id, cell.points) : turns;
+      // A hidden power-up: its box opens after the points (never one that
+      // takes points when nobody else has any).
+      if (right && cell.power) {
+        const kind: CardKind = { kind: 'power', item: cell.power };
+        const others = scored.players.filter((p) => p.id !== player.id && p.score > 0);
+        if (!picksTeam(kind) || others.length > 0) {
+          setTurns(scored);
+          playEffect('win', settings);
+          if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 60, spread: 90, origin: { y: 0.45 }, disableForReducedMotion: true });
+          setStep('pick');
+          setReveal({ card: kind, choosing: picksTeam(kind) });
+          if (!picksTeam(kind)) applyCard(kind);
+          return;
+        }
+      }
       finishTurn(scored, nextCells.filter((c) => !c.used).length);
       return;
     }
@@ -276,7 +296,7 @@ export default function GameShow() {
       let next = state;
       const ability = kind.kind === 'power' ? kind.item.ability : 'points';
       if (kind.kind === 'points') next = addPoints(state, me.id, kind.points);
-      else if (ability === 'bonus') next = addPoints(state, me.id, powerAmount(kind.item));
+      else if (ability === 'bonus') next = addPoints(state, me.id, powerAmount(kind.item) * scale);
       else if (ability === 'double') next = addPoints(state, me.id, me.score);
       else if (ability === 'swap' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
@@ -285,7 +305,7 @@ export default function GameShow() {
       } else if (ability === 'steal' && targetId) {
         const other = state.players.find((p) => p.id === targetId)!;
         if (other.score > 0) playClip(`${GS}fail.mp3`, settings);
-        const take = Math.min(powerAmount(kind.item), other.score);
+        const take = Math.min(powerAmount(kind.item) * scale, other.score);
         next = setScores(state, { [me.id]: me.score + take, [other.id]: other.score - take });
       }
       return next;
@@ -295,11 +315,11 @@ export default function GameShow() {
 
   function closeReveal() {
     setReveal(null);
-    if (turns) finishTurn(turns, cards.filter((c) => !c.open).length);
+    if (turns) finishTurn(turns, board === 'grid' ? cells.filter((c) => !c.used).length : cards.filter((c) => !c.open).length);
   }
 
   function pickCell(i: number) {
-    if (!turns || step !== 'pick' || cells[i]?.used || question) return;
+    if (!turns || step !== 'pick' || cells[i]?.used || question || reveal) return;
     setStep('answer');
     const set = chosenSets[cells[i].col];
     playClip(`${GS}page-turn.mp3`, settings);
@@ -334,7 +354,7 @@ export default function GameShow() {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const revealText = (k: CardKind) =>
-    k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : `${k.item.name}: ${t(`tb.reveal.${k.item.ability}` as 'tb.reveal.steal', { points: powerAmount(k.item) })}`;
+    k.kind === 'points' ? t('tb.reveal.points', { points: k.points }) : `${k.item.name}: ${t(`tb.reveal.${k.item.ability}` as 'tb.reveal.steal', { points: powerAmount(k.item) * scale })}`;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -373,13 +393,11 @@ export default function GameShow() {
             <>
               <Slider label={t('tb.tries')} min={0} max={2} value={['1', '3', 'all'].indexOf(setup.tries ?? '1')}
                 show={(v) => t((['tb.tries.1', 'tb.tries.3', 'tb.tries.all'] as const)[v])} onChange={(v) => change({ tries: (['1', '3', 'all'] as const)[v] })} />
-              {board === 'cards' && <>
-              <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
-                options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }), art: <GridPreview cols={g.cols} rows={g.rows} /> }))} />
+              {board === 'cards' && <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
+                options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }), art: <GridPreview cols={g.cols} rows={g.rows} /> }))} />}
               <PowerUpCards hint={t('tb.powersHint')}
-                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) }), art: <ItemArt item={p} size={64} still />, on: powerOn(p) }))}
+                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) * scale }), art: <ItemArt item={p} size={64} still />, on: powerOn(p) }))}
                 onChange={(id, on) => { const p = powers.find((x) => x.id === id)!; if (takes(p)) change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) }); else change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] }); }} />
-              </>}
             </>
           ) },
           versus

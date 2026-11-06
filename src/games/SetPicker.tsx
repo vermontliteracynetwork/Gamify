@@ -58,7 +58,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
   const PAGE = fit.cols * fit.rows;
-  const compact = fit.size < 140;
+  const compact = fit.size < 200;
   // My sets and public (ready-made) sets on their own tabs (teacher, 2026-11-06).
   const ready = sets.filter((s) => missingDetails(s).length === 0);
   const mineReady = ready.filter((s) => !LIBRARY_IDS.has(s.id));
@@ -100,7 +100,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
             // small chips for grades and how many questions.
             <button key={s.id} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
               onClick={() => onChange(max === 1 ? [s.id] : on ? value.filter((x) => x !== s.id) : value.length < max ? [...value, s.id] : value)}
-              className={`tile-wiggle relative rounded-input border-[2.5px] border-border text-left overflow-hidden grid grid-rows-[46%_1fr] bg-surface motion-safe:transition-transform ${on ? 'ring-4 ring-accent -translate-y-1' : ''}`}
+              className={`tile-wiggle relative rounded-input border-[2.5px] border-border text-left overflow-hidden grid grid-rows-[40%_1fr] bg-surface motion-safe:transition-transform ${on ? 'ring-4 ring-accent -translate-y-1' : ''}`}
               style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
               <span className="relative flex items-center justify-center border-b-[2.5px] border-border overflow-hidden" style={{ background: art.bg }}>
                 <I weight="fill" size={Math.round(fit.size * 0.26)} color={art.ink} aria-hidden="true" className="-rotate-6 drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />
@@ -112,11 +112,11 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                   {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
                 </span>
               )}
-              <span className={`grid content-between min-w-0 ${compact ? 'p-1.5' : 'p-2'}`}>
-                <span className={`font-bold leading-tight line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>{s.name || t('sets.untitled')}</span>
-                <span className="flex flex-wrap gap-1 text-[10px] font-bold leading-none">
-                  <span className="rounded-pill border border-border px-1.5 py-0.5 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                  <span className="rounded-pill border border-border px-1.5 py-0.5" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+              <span className={`grid content-between gap-1 min-w-0 ${compact ? 'p-2.5' : 'p-3'}`}>
+                <span className={`font-bold leading-snug line-clamp-2 ${compact ? 'text-base' : 'text-lg'}`}>{s.name || t('sets.untitled')}</span>
+                <span className={`flex flex-wrap gap-1.5 font-bold leading-none ${compact ? 'text-xs' : 'text-sm'}`}>
+                  <span className="rounded-pill border border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                  <span className="rounded-pill border border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
                 </span>
               </span>
             </button>
@@ -134,8 +134,9 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
 
 const GAP = 10;
 const ARROW = 44;
-const MIN = 120; // the smallest card that still reads (name and details)
-const MAX = 220;
+// Big cards with big text are the main view (teacher, 2026-11-06).
+const MIN = 180; // the smallest card that still reads (name and details)
+const MAX = 290;
 
 // A page arrow beside the cards (space kept even when there is one page).
 function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; show: boolean; disabled: boolean; onClick: () => void }) {

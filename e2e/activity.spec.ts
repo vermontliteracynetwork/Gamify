@@ -77,7 +77,7 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of/ })).toBeVisible();
   // Alone on their device, the student plays the computer.
-  await expect(page.getByText('Computer level')).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Computer level' })).toBeVisible();
   await page.screenshot({ path: `test-results/choose-vs-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });

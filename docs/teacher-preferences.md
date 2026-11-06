@@ -101,3 +101,7 @@ line that fits, and add each new preference the same turn she says it.
 - "First to a number right" goes up to 500 (2026-11-06).
 - Question Tracker live (2026-11-06): no "Number of questions" step; How the Class Plays decides when the game ends.
 - Live host screen (2026-11-06): it is what the projector shows, so it NEVER scrolls; settings (how the class plays, groups, approve names) live behind a gear that opens a full view; once Start is pressed the big screen shows all the stars (or whatever the game tracks); students see their question screen with the stars around the border.
+- Question set cards (2026-11-06): larger cards with bigger text (name and chips fully readable); fewer per page is fine.
+- The computer player's level (Easy, Medium, Hard) sits on its card where a name would go (2026-11-06).
+- The turn-card glow must always be visible and moving, even when the device has Reduce Motion on; Full motion in Gamify settings overrides the device setting (2026-11-06).
+- Category grid has power-ups too (2026-11-06): some squares hide one, shown after a right answer; the teacher turns each on or off like the cards version.

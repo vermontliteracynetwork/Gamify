@@ -169,7 +169,13 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
               </div>
             )}
             {s.kind === 'cpu' ? (
-              <span className="flex-1 font-bold">{t('teams.computer')}</span>
+              // The computer's level sits where its name would be (teacher, 2026-11-06).
+              <div role="radiogroup" aria-label={t('teams.level')} className="flex-1 min-w-0 flex p-0.5 rounded-pill border-[2px] border-border bg-surface">
+                {(['easy', 'medium', 'hard'] as const).map((lv) => (
+                  <button key={lv} type="button" role="radio" aria-checked={level === lv} onClick={() => setLevel(lv)}
+                    className={`flex-1 min-h-10 px-2 rounded-pill text-sm font-bold motion-safe:transition-colors ${level === lv ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(`opt.${lv}`)}</button>
+                ))}
+              </div>
             ) : (
               <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
@@ -194,7 +200,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       {solo && (
         <Choice label={t('teams.opponent')} value={opponent} options={[['cpu', 'teams.vsCpu'], ['teacher', 'teams.vsTeacher']]} onChange={setOpponent} />
       )}
-      {hasCpu && <Choice label={t('teams.level')} value={level} options={[['easy', 'opt.easy'], ['medium', 'opt.medium'], ['hard', 'opt.hard']]} onChange={setLevel} />}
+      {hasCpu && !slots.some((x) => x.kind === 'cpu') && <Choice label={t('teams.level')} value={level} options={[['easy', 'opt.easy'], ['medium', 'opt.medium'], ['hard', 'opt.hard']]} onChange={setLevel} />}
 
       {onStart && <button type="button" onClick={start} disabled={slots.some((s) => s.kind !== 'cpu' && !s.name.trim())}
         className="justify-self-center min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center gap-2 active:scale-95 disabled:opacity-50"
