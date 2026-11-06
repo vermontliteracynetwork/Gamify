@@ -22,6 +22,8 @@ for (const game of ['star-quiz', 'cast-catch']) {
     }
     await page.getByRole('button', { name: 'Open the live lobby' }).click();
     await expect(page).toHaveURL(/\/teacher\/live\/[A-Z]{5}\?mode=compete&end=right%3A7/);
+    // Lobby settings sit behind the gear (teacher, 2026-11-06).
+    await page.getByRole('button', { name: 'Game settings' }).click();
     await expect(page.getByRole('radio', { name: 'First to a number right' })).toHaveAttribute('aria-checked', 'true');
     await expect(page.getByLabel('Right answers')).toHaveValue('7');
     expect(problems).toEqual([]);
@@ -40,5 +42,6 @@ test('Together: the class goal carries into the lobby', async ({ page }) => {
   }
   await page.getByRole('button', { name: 'Open the live lobby' }).click();
   await expect(page).toHaveURL(/mode=together&goal=40/);
+  await page.getByRole('button', { name: 'Game settings' }).click();
   await expect(page.getByRole('radio', { name: /^Together/ })).toHaveAttribute('aria-checked', 'true');
 });

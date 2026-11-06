@@ -26,8 +26,10 @@ test('Question Tracker class sky: star colors, first to a number right ends it',
   await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.replace(/\W/g, '').slice(-5);
+  await page.getByRole('button', { name: 'Game settings' }).click();
   await page.getByRole('radio', { name: 'First to a number right' }).click();
   await page.getByLabel('Right answers').fill('2');
+  await page.getByRole('button', { name: 'Done' }).click();
 
   const kid = await context.newPage();
   kid.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
