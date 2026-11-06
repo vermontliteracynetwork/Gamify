@@ -8,7 +8,7 @@ import { useAsync, useTier } from '../data/hooks';
 import { missingDetails } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
 import { GameCover } from '../games/covers';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeDot } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { Button, buttonClasses } from '../ui/kit';
@@ -54,9 +54,11 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('host.title', { name: set.name })}>
+    // A full view, not a small card (teacher, 2026-11-06: "I prefer a full
+    // view over a preview menu card").
+    <div className="fixed inset-0 z-50 flex p-3 sm:p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('host.title', { name: set.name })}>
       <DialogFocus onClose={onClose} />
-      <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 w-full max-w-3xl max-h-[calc(100dvh-32px)] overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 flex flex-col gap-4 w-full h-full overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-2xl"><Title text={t('host.title', { name: set.name || t('sets.untitled') })} /></h2>
           <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
@@ -64,14 +66,14 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
         {missing.length > 0 ? <p className="font-bold">{t('host.needsDetails')}</p> : (
           <>
             <p className="font-bold">{t('host.pickGame')}</p>
-            <div role="radiogroup" aria-label={t('host.pickGame')} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div role="radiogroup" aria-label={t('host.pickGame')} className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {GAMES.map((g) => {
                 const open = canPlayGame(tier, g.id);
                 return (
                   <button key={g.id} type="button" role="radio" aria-checked={gameId === g.id} disabled={!open} onClick={() => { setGameId(g.id); setWhere(g.modes.includes('share') ? 'screen' : 'devices'); setCode(null); setStatus(''); }}
                     className={`rounded-input border-[2.5px] overflow-hidden text-left bg-surface ${gameId === g.id ? 'border-border ring-4 ring-accent' : 'border-border-soft'} disabled:opacity-60`}>
-                    <span className="relative block"><GameCover gameId={g.id} className="aspect-[16/10]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
-                    <span className="p-2 grid gap-1"><span className="font-display text-lg">{g.name}</span><span className="flex flex-wrap gap-1">{g.modes.map((m) => <ModeBadge key={m} mode={m} />)}</span></span>
+                    <span className="relative block"><GameCover gameId={g.id} className="aspect-[100/62]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
+                    <span className="p-2.5 flex items-center justify-between gap-2"><span className="font-display text-lg leading-tight">{g.name}</span><span className="flex gap-1 shrink-0">{g.modes.map((m) => <ModeDot key={m} mode={m} />)}</span></span>
                   </button>
                 );
               })}

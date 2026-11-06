@@ -314,7 +314,7 @@ export const en = {
   'tb.cards': 'Surprise cards',
   'tb.cardsHint': 'Pick a card, answer right to flip it: points or a power-up',
   'tb.grid': 'Category grid',
-  'tb.gridHint': 'Each column is a question set. Pick a square, answer for its points',
+  'tb.gridHint': 'Like a classic TV quiz-show board. Each column is a category (one question set, like Animals or Math). Pick a square and answer for its points: bigger points, harder questions.',
   'tb.cardCount': 'Card grid',
   'tb.gridSize': '{cols} x {rows}',
   'tb.gridSizeLabel': '{cols} by {rows}, {count} cards',

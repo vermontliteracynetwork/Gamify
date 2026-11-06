@@ -28,3 +28,15 @@ export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint
     )
   );
 }
+
+// A way to play as just its icon in a colored circle; the hover text names
+// it, in the same color (teacher, 2026-11-06).
+export function ModeDot({ mode }: { mode: PlayMode }) {
+  const Icon = MODE_ICONS[mode];
+  return (
+    <span data-tip={t(`mode.${mode}`)} data-tip-bg={MODE_COLORS[mode]} role="img" aria-label={t(`mode.${mode}`)}
+      className="w-9 h-9 rounded-full border-[2px] border-border inline-flex items-center justify-center" style={{ background: MODE_COLORS[mode] }}>
+      <Icon weight="bold" size={18} aria-hidden="true" />
+    </span>
+  );
+}

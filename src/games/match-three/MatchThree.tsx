@@ -250,7 +250,7 @@ export default function MatchThree() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6'}>
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
       {clock.element}
       {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{t('bm.title')}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}

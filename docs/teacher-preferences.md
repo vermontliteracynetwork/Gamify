@@ -67,3 +67,6 @@ line that fits, and add each new preference the same turn she says it.
 - Theme Builder preview, Pick a ball: tap a ball to see it big on white; tap again to go back (2026-11-02).
 - Draw studio: Restore (magic wand) rubs back what the eraser took off the last upload; Start over returns to that upload; a new upload always replaces old drawing (2026-11-02).
 - Answer sounds everywhere: an up chime for right, a boing for wrong or try again; never a harsh buzzer (2026-11-05).
+- Menus are full views, never small cards (2026-11-06): game welcome, setup steps and Play or share fill the whole space; covers always show whole, never cropped.
+- Ways to play show as just an icon in a colored circle; the hover text names it in the same color (2026-11-06).
+- Game Show category grid: show example category names and explain it as a classic TV quiz-show board, without naming any show (2026-11-06).

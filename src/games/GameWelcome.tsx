@@ -17,13 +17,17 @@ export interface HowStep { icon: ReactNode; text: string }
 export default function GameWelcome({ game, steps, onStart }: { game: GameManifest; steps: HowStep[]; cover?: string; onStart: () => void }) {
   const { settings } = useSettings();
   return (
-    <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
+    // Fills the whole stage (teacher, 2026-11-06), and the cover is always
+    // shown whole at its own shape, never cropped.
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden max-w-5xl w-full mx-auto grid md:grid-cols-[1fr_1fr]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden w-full grid md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"
+      style={{ boxShadow: 'var(--shadow-sticker-lg)', minHeight: 'calc(100dvh - 11.875rem)' }}>
       {/* One standard start screen for every game (teacher, 2026-10-31): the
           Gamify cover, never a theme's, so menus need no custom design. */}
-      <GameCover gameId={game.id} className="min-h-48 md:min-h-full aspect-[16/10] md:aspect-auto" />
-      <div className="p-6 sm:p-8 grid gap-5 content-start">
+      <div className="p-4 sm:p-6 flex items-center justify-center bg-surface-2 border-b-[2.5px] md:border-b-0 md:border-r-[2.5px] border-border">
+        <GameCover gameId={game.id} className="w-full aspect-[100/62] rounded-panel border-[2.5px] border-border" />
+      </div>
+      <div className="p-6 sm:p-10 grid gap-6 content-center">
         {/* On the white card, not the stage: panel text color, never the night-sky white. */}
         <h1 className="title-bubble text-4xl sm:text-5xl" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
         <div className="grid gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
@@ -42,6 +46,5 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
         </button>
       </div>
     </motion.section>
-    </div>
   );
 }

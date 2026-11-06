@@ -75,7 +75,7 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
     <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
-    <section className="setup-roomy w-full bg-surface border-[2.5px] border-border rounded-panel max-w-4xl mx-auto flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 11.875rem)', minHeight: 'min(30rem, calc(100dvh - 11.875rem))' }}>
+    <section className="setup-roomy w-full bg-surface border-[2.5px] border-border rounded-panel flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', height: 'calc(100dvh - 11.875rem)' }}>
       <div className="px-6 sm:px-8 pt-5 pb-4 border-b-[2px] border-border-soft grid gap-3">
         <ol className="flex gap-1.5 list-none p-0 m-0" aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
@@ -91,7 +91,7 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
         </ol>
         <h2 className="font-display text-3xl font-bold"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 py-6 grid gap-6 content-start min-h-0 flex-1 text-lg ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} className={`relative px-6 sm:px-8 py-6 grid gap-6 content-center min-h-0 flex-1 text-lg ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0' : 'grid gap-6 absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
