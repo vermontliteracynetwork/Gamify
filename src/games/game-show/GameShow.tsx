@@ -498,7 +498,7 @@ export default function GameShow() {
           </section>
 
           <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14 lg:self-stretch">
-          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : `${cells.filter((c) => c.used).length}/${cells.length}`} />
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : `${cells.filter((c) => c.used).length}/${cells.length}`} roundLabel={t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')} />
           </div>
         </div>
       )}

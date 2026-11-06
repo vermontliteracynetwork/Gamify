@@ -90,7 +90,7 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: 'Shoot!' }).click();
   // The computer's turn: its question, its lane, its shot, then back to us.
-  await expect(page.getByText('Round 2 of 5').locator('visible=true').first()).toBeVisible({ timeout: 40_000 });
+  await expect(page.getByText('2/5').locator('visible=true').first()).toBeVisible({ timeout: 40_000 });
   await answerShare(page, true);
   await expect(page.getByRole('button', { name: 'Shoot up lane 2' })).toBeEnabled({ timeout: 10_000 });
   await page.screenshot({ path: `test-results/pinball-cpu-${info.project.name}.png` });

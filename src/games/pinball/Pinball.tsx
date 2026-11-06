@@ -593,7 +593,7 @@ export default function Pinball() {
               <div className="lg:hidden absolute left-2 w-[min(15rem,45%)] z-10" style={{ bottom: '5.5rem' }}>{tray}</div>
             </section>
             <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid gap-3">
-              <ScoreBoard turns={turns} playing={phase === 'play'} round={t('pb.roundOf', { n: round, total: setup.rounds })} />
+              <ScoreBoard turns={turns} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={t('pb.roundWord')} />
               {/* Held power-ups, right under the scores (teacher, 2026-10-31). */}
               <div className="hidden lg:block">{tray}</div>
             </div>

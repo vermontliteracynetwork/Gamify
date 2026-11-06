@@ -90,3 +90,4 @@ line that fits, and add each new preference the same turn she says it.
 - Power-up cards: centered, bigger pictures, never crossed out when off (2026-11-06).
 - Putting students on teams: a small "Students on teams" button beside the team count opens a full page (class list, random, balanced or by hand, save) with Done to go back (2026-11-06).
 - Results box: compact title and buttons, bigger winner stage, always see-through over the game (2026-11-06). Set pickers open on My sets when the teacher has sets, else Public sets.
+- Round/progress counter under the scores: a short number like 2/5 with a small word above it (Round, Frame, Cards turned); never a long sentence in big type (2026-11-06).

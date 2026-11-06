@@ -9,7 +9,7 @@ import { leaders, type TurnState } from './turns';
 // whose turn it is glows here, with no "pick a..." bar over the board). On
 // small screens it is one row that scrolls sideways, so it never pushes the
 // board off the screen. `round` is a line such as "Drop 2 of 6".
-export default function ScoreBoard({ turns, playing, round }: { turns: TurnState; playing: boolean; round?: string }) {
+export default function ScoreBoard({ turns, playing, round, roundLabel }: { turns: TurnState; playing: boolean; round?: string; roundLabel?: string }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   const now = playing ? turns.players[turns.turn] : null;
@@ -48,8 +48,8 @@ export default function ScoreBoard({ turns, playing, round }: { turns: TurnState
     </aside>
     {round && (
       <motion.p key={round} initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}
-        className="hidden lg:block mt-auto self-center font-display text-5xl font-bold tabular-nums text-center rounded-panel border-[2.5px] border-border bg-surface px-6 py-2"
-        style={{ boxShadow: 'var(--shadow-sticker)' }}>{round}</motion.p>
+        className={`hidden lg:block mt-auto self-center font-display font-bold tabular-nums text-center rounded-panel border-[2.5px] border-border bg-surface px-5 py-2 ${round.length <= 7 ? 'text-5xl' : 'text-lg leading-snug'}`}
+        style={{ boxShadow: 'var(--shadow-sticker)' }}>{roundLabel && <span className="block text-xs uppercase tracking-wider text-muted font-body">{roundLabel}</span>}{round}</motion.p>
     )}
     </div>
   );

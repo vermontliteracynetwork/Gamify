@@ -368,7 +368,7 @@ export default function FourInARow() {
           </div>
           </div>
           <div className="order-first lg:order-none lg:w-[260px] grid gap-2 min-w-0">
-            <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} round={t('fr.rightsHint')} />
+            <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} />
             <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />
             {step === 'pop' && <p className="bg-accent border-[2px] border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
             {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
