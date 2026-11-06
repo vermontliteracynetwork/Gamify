@@ -91,15 +91,15 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   const words = q.prompt.split(/(\s+)/);
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${framed ? '' : 'bg-black/45'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${framed ? 'p-4' : 'bg-surface'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={POP_IN}
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'h-full border-[3px] p-6 sm:p-10 gap-6 content-center'}`}
-        style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'var(--shadow-sticker-lg)' }}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'h-full !rounded-none px-6 py-6 sm:px-14 sm:py-10 gap-6 content-center'}`}
+        style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'none' }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           {progress && progress.total > 1 && (

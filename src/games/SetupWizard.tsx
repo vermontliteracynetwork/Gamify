@@ -77,8 +77,9 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
         card, a generous minimum height, larger text and controls. */}
     <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
       {/* The step title and its progress line sit on one row, centered
-          with the corner buttons (teacher, 2026-11-06). */}
-      <div className="px-6 sm:px-8 pt-0 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
+          with the corner buttons (teacher, 2026-11-06). The question set
+          search and filters lock right under it. */}
+      <div className="px-6 sm:px-8 pt-1.5 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
         <h2 className="font-display text-xl font-bold"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
         <ol className="flex gap-1 list-none p-0 m-0 w-56 max-w-full" aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
@@ -93,7 +94,7 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
           }))}
         </ol>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 py-4 grid gap-5 content-center min-h-0 flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${page.id === 'questions' ? 'content-start pt-1 pb-4' : 'content-center py-4'} flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).

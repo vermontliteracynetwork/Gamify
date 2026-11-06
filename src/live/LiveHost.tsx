@@ -4,7 +4,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { ArrowLeft, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -19,6 +19,7 @@ import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { Button, buttonClasses, Panel, Tabs } from '../ui/kit';
 import Title from '../ui/Title';
+import DialogFocus from '../ui/DialogFocus';
 import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
 import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
@@ -63,6 +64,7 @@ function Room({ game }: { game: GameCode }) {
   const screen = useGameTheme('big-screen');
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
+  const [setOpen, setSetOpen] = useState(false);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
   const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}) });
@@ -150,10 +152,14 @@ function Room({ game }: { game: GameCode }) {
 
   return (
     <ThemedPage theme={screen.theme}>
-    <main className="stage-text max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24 grid gap-4">
+    <main className={`stage-text max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4 pb-4 gap-4 ${state.phase === 'ended' ? 'grid' : 'flex flex-col overflow-hidden'}`} style={state.phase === 'ended' ? undefined : { height: 'calc(100dvh - 4rem)' }}>
       <div className="flex flex-wrap items-center gap-2">
         <Link to="/teacher/sets" className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('live.back')}</Link>
         <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
+        {state.phase === 'lobby' && (
+          <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
+            className="w-11 h-11 rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
+        )}
         {state.phase !== 'lobby' && state.phase !== 'ended' && (
           <>
             <Button onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}{state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')}</Button>
@@ -163,8 +169,8 @@ function Room({ game }: { game: GameCode }) {
       </div>
 
       {state.phase === 'lobby' && (
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4 items-start">
-          <Panel className="grid gap-3 justify-items-center text-center">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4 min-h-0 flex-1">
+          <Panel className="grid gap-3 justify-items-center content-center text-center min-h-0">
             <p className="font-display text-2xl">{t('show.goTo', { host: window.location.host })}</p>
             <p className="font-display text-7xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: game.code })}>{game.code}</p>
             <div className="flex items-center justify-center gap-3">
@@ -178,65 +184,10 @@ function Room({ game }: { game: GameCode }) {
                 </select>
               </label>
             )}
-            <p className="font-bold">{t('live.joined', { count: inRoom.length })}</p>
           </Panel>
-          <Panel className="grid gap-3 lg:col-span-2 lg:order-last">
-            <h2 className="font-display text-2xl"><Title text={t('live.howPlay')} /></h2>
-            <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
-              {(['compete', 'together'] as const).map((m) => (
-                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(skyGame ? 'sky' : m === 'compete' ? 'leaders' : 'goal'); }}
-                  className={`min-h-16 px-4 rounded-input border-[2px] text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                  <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
-                </button>
-              ))}
-            </div>
-            {(state.mode ?? 'compete') === 'compete' && (
-              <div className="grid gap-1.5">
-                <span className="font-bold">{t('live.endWhen')}</span>
-                <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t('live.endWhen')}>
-                  {(['teacher', 'right', 'minutes'] as const).map((k) => {
-                    const on = k === 'teacher' ? !state.endAt?.right && !state.endAt?.minutes : !!state.endAt?.[k];
-                    return (
-                      <button key={k} type="button" role="radio" aria-checked={on}
-                        onClick={() => update((s) => ({ ...s, endAt: k === 'teacher' ? undefined : k === 'right' ? { right: 10 } : { minutes: 5 } }))}
-                        className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`live.end.${k}`)}</button>
-                    );
-                  })}
-                  {state.endAt?.right !== undefined && (
-                    <label className="flex items-center gap-2 font-bold">{t('live.end.rightN')}
-                      <input type="number" min={1} max={200} value={state.endAt.right} onChange={(e) => update((s) => ({ ...s, endAt: { right: Math.max(1, Math.min(200, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
-                    </label>
-                  )}
-                  {state.endAt?.minutes !== undefined && (
-                    <label className="flex items-center gap-2 font-bold">{t('live.end.minutesN')}
-                      <input type="number" min={1} max={60} value={state.endAt.minutes} onChange={(e) => update((s) => ({ ...s, endAt: { minutes: Math.max(1, Math.min(60, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
-                    </label>
-                  )}
-                </div>
-              </div>
-            )}
-            {state.mode === 'together' && (
-              <label className="flex flex-wrap items-center gap-2 font-bold">{t('live.goalLabel')}
-                <input type="number" min={5} max={999} value={goal} onChange={(e) => update((s) => ({ ...s, goal: Math.max(5, Math.min(999, Number(e.target.value) || 5)) }))} className="w-24 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
-              </label>
-            )}
-            <h3 className="font-bold text-lg">{t('live.groups')}</h3>
-            {!paid && <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('live.groupsPlan')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {groups.map((g, i) => (
-                <label key={i} className="grid gap-1 font-bold text-sm rounded-input border-[2px] border-border-soft p-2">{t('live.groupN', { n: i + 1 })}
-                  <select value={g.gameId} disabled={!paid} aria-label={t('live.groupGame', { n: i + 1 })} onChange={(e) => update((s) => ({ ...s, groups: groups.map((x, j) => (j === i ? { gameId: e.target.value } : x)) }))} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface">
-                    {playable.map((x) => <option key={x.id} value={x.id}>{x.name}{x.id === 'four-in-a-row' ? ` (${t('live.pairs')})` : ''}</option>)}
-                  </select>
-                </label>
-              ))}
-            </div>
-            {paid && <Button className="justify-self-start" disabled={groups.length >= 8} onClick={() => update((s) => ({ ...s, groups: [...groups, { gameId: s.gameId }] }))}><PlusIcon weight="bold" size={18} />{t('live.addGroup')}</Button>}
-            <p className="text-sm font-semibold text-muted">{t('live.groupsHint')}</p>
-          </Panel>
-          <Panel className="grid gap-3">
+          <Panel className="flex flex-col gap-3 min-h-0">
             <div className="flex flex-wrap items-center gap-3">
-              <label className="inline-flex items-center gap-2 font-bold min-h-11"><input type="checkbox" checked={approve} onChange={(e) => setApprove(e.target.checked)} className="w-5 h-5" />{t('live.approveNames')}</label>
+              <p className="font-display text-xl flex-1">{t('live.joined', { count: inRoom.length })}</p>
               <Button onClick={() => update((s) => ({ ...s, roomLocked: !s.roomLocked }))}>{state.roomLocked ? <LockSimple weight="fill" size={18} /> : <LockSimpleOpen weight="bold" size={18} />}{state.roomLocked ? t('live.roomLocked') : t('live.lockRoom')}</Button>
             </div>
             {pending.length > 0 && (
@@ -247,7 +198,7 @@ function Room({ game }: { game: GameCode }) {
                 </div>
               </div>
             )}
-            <ul className="grid gap-2 list-none p-0 m-0" aria-label={t('live.players')}>
+            <ul className="grid gap-2 list-none p-0 m-0 content-start flex-1 min-h-0 overflow-y-auto" aria-label={t('live.players')}>
               <AnimatePresence initial={false}>
                 {state.players.filter((p) => p.status !== 'removed').map((p) => (
                   <motion.li key={p.pid} layout={!reduce} initial={reduce ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`flex flex-wrap items-center gap-2 rounded-input border-[2px] p-2 ${p.status === 'pending' ? 'border-border bg-accent/40' : 'border-border-soft'}`}>
@@ -283,14 +234,14 @@ function Room({ game }: { game: GameCode }) {
           {state.phase === 'paused' && <p className="font-display text-2xl bg-accent border-[2px] border-border rounded-input p-3 text-center" role="status">{t('live.pausedHost')}</p>}
           {view === 'screen' ? (
             // The projector view fills the screen (teacher check, 2026-10-31).
-            <Panel className="grid gap-3 grid-rows-[auto_1fr] [@media(min-height:900px)]:min-h-[calc(100dvh-21rem)]">
+            <Panel className="grid gap-3 grid-rows-[auto_minmax(0,1fr)] flex-1 min-h-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-bold flex-1">{t('live.screenNote', { code: game.code })}</p>
                 {timeLeft !== null && <p className="font-display text-3xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</p>}
                 <Tabs label={t('live.boards')} value={board} onChange={setBoard} options={[...(skyGame ? [{ id: 'sky' as const, label: t('live.board.sky') }] : []), { id: 'leaders', label: t('live.board.leaders') }, { id: 'goal', label: t('live.board.goal') }]} />
               </div>
               {board === 'sky' ? (
-                <div className="grid gap-2">
+                <div className="grid grid-rows-[auto_minmax(0,1fr)] gap-2 min-h-0">
                   {state.mode === 'together'
                     ? <p className="font-display text-2xl text-center">{t('live.goalText', { right: classRight, goal })}</p>
                     : (
@@ -302,7 +253,7 @@ function Room({ game }: { game: GameCode }) {
                         ))}
                       </ul>
                     )}
-                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="max(220px, calc(100dvh - 32.5rem))"
+                  <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%"
                     filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
                     total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
                     colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
@@ -329,7 +280,7 @@ function Room({ game }: { game: GameCode }) {
               )}
             </Panel>
           ) : !canMonitor ? <LimitNote>{t('live.monitorPlan')}</LimitNote> : (
-            <Panel className="grid gap-3">
+            <Panel className="grid gap-3 content-start flex-1 min-h-0 overflow-y-auto">
               <p className="text-sm font-bold">{t('live.monitorNote')}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className="flex-1 min-w-48 min-h-11 px-3 rounded-input border-[2px] border-border font-bold" />
@@ -381,6 +332,71 @@ function Room({ game }: { game: GameCode }) {
             <Link to="/teacher/reports" className={buttonClasses('secondary')}>{t('live.reports')}</Link>
           </div>
         </Panel>
+      )}
+      {/* Lobby settings open in their own full view, so the projected lobby
+          never scrolls (teacher, 2026-11-06). */}
+      {setOpen && (
+        <div className="fixed inset-0 z-50 bg-surface overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('live.settings')}>
+          <DialogFocus onClose={() => setSetOpen(false)} />
+          <div className="max-w-4xl mx-auto px-6 py-6 grid gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="font-display text-2xl flex-1"><Title text={t('live.howPlay')} /></h2>
+              <button type="button" onClick={() => setSetOpen(false)} className="min-h-11 px-5 rounded-pill border-[2.5px] border-border bg-accent font-bold inline-flex items-center gap-1.5" style={{ boxShadow: '0 3px 0 #000' }}><Check weight="bold" size={18} />{t('teams.done')}</button>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
+              {(['compete', 'together'] as const).map((m) => (
+                <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); setBoard(skyGame ? 'sky' : m === 'compete' ? 'leaders' : 'goal'); }}
+                  className={`min-h-16 px-4 rounded-input border-[2px] text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                  <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
+                </button>
+              ))}
+            </div>
+            {(state.mode ?? 'compete') === 'compete' && (
+              <div className="grid gap-1.5">
+                <span className="font-bold">{t('live.endWhen')}</span>
+                <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t('live.endWhen')}>
+                  {(['teacher', 'right', 'minutes'] as const).map((k) => {
+                    const on = k === 'teacher' ? !state.endAt?.right && !state.endAt?.minutes : !!state.endAt?.[k];
+                    return (
+                      <button key={k} type="button" role="radio" aria-checked={on}
+                        onClick={() => update((s) => ({ ...s, endAt: k === 'teacher' ? undefined : k === 'right' ? { right: 10 } : { minutes: 5 } }))}
+                        className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`live.end.${k}`)}</button>
+                    );
+                  })}
+                  {state.endAt?.right !== undefined && (
+                    <label className="flex items-center gap-2 font-bold">{t('live.end.rightN')}
+                      <input type="number" min={1} max={500} value={state.endAt.right} onChange={(e) => update((s) => ({ ...s, endAt: { right: Math.max(1, Math.min(500, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+                    </label>
+                  )}
+                  {state.endAt?.minutes !== undefined && (
+                    <label className="flex items-center gap-2 font-bold">{t('live.end.minutesN')}
+                      <input type="number" min={1} max={60} value={state.endAt.minutes} onChange={(e) => update((s) => ({ ...s, endAt: { minutes: Math.max(1, Math.min(60, Number(e.target.value) || 1)) } }))} className="w-20 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
+            {state.mode === 'together' && (
+              <label className="flex flex-wrap items-center gap-2 font-bold">{t('live.goalLabel')}
+                <input type="number" min={5} max={999} value={goal} onChange={(e) => update((s) => ({ ...s, goal: Math.max(5, Math.min(999, Number(e.target.value) || 5)) }))} className="w-24 min-h-11 px-2 rounded-input border-[2px] border-border font-bold" />
+              </label>
+            )}
+            <h3 className="font-bold text-lg">{t('live.groups')}</h3>
+            {!paid && <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('live.groupsPlan')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {groups.map((g, i) => (
+                <label key={i} className="grid gap-1 font-bold text-sm rounded-input border-[2px] border-border-soft p-2">{t('live.groupN', { n: i + 1 })}
+                  <select value={g.gameId} disabled={!paid} aria-label={t('live.groupGame', { n: i + 1 })} onChange={(e) => update((s) => ({ ...s, groups: groups.map((x, j) => (j === i ? { gameId: e.target.value } : x)) }))} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface">
+                    {playable.map((x) => <option key={x.id} value={x.id}>{x.name}{x.id === 'four-in-a-row' ? ` (${t('live.pairs')})` : ''}</option>)}
+                  </select>
+                </label>
+              ))}
+            </div>
+            {paid && <Button className="justify-self-start" disabled={groups.length >= 8} onClick={() => update((s) => ({ ...s, groups: [...groups, { gameId: s.gameId }] }))}><PlusIcon weight="bold" size={18} />{t('live.addGroup')}</Button>}
+            <p className="text-sm font-semibold text-muted">{t('live.groupsHint')}</p>
+            <label className="inline-flex items-center gap-2 font-bold min-h-11"><input type="checkbox" checked={approve} onChange={(e) => setApprove(e.target.checked)} className="w-5 h-5" />{t('live.approveNames')}</label>
+          </div>
+        </div>
       )}
     </main>
     </ThemedPage>

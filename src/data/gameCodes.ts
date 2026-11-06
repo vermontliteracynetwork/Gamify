@@ -37,10 +37,11 @@ export async function makeGameCode(gameId: string, setId: string, kind: 'play' |
   // A two-device game gets a fresh code every time; others reuse theirs.
   const same = versus || mirror || limits.minutes || limits.endAt || limits.goal ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && !!c.design === design && c.due === due);
   if (same) return same;
-  const classCodes = (await data.listClassrooms()).map((c) => c.joinCode ?? '');
+  // A class list or cloud hiccup never stops a game from opening (teacher, 2026-11-06).
+  const classCodes = (await data.listClassrooms().catch(() => [])).map((c) => c.joinCode ?? '');
   const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }), ...limits };
-  await data.setSetting(KEY, [...all, code]);
-  await shareToCloud(code, kind);
+  await data.setSetting(KEY, [...all, code]).catch((e) => console.warn('game code not saved', e));
+  await shareToCloud(code, kind).catch((e) => console.warn('game code not shared', e));
   return code;
 }
 

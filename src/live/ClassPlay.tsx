@@ -37,7 +37,7 @@ export default function ClassPlayOptions({ value, onChange }: { value: ClassPlay
         <>
           <ChoiceRow label={t('classPlay.ends')} value={value.end} onChange={(end) => set({ end, n: end === 'minutes' ? 5 : 10 })}
             options={[{ value: 'teacher', label: t('live.end.teacher') }, { value: 'right', label: t('live.end.right') }, { value: 'minutes', label: t('live.end.minutes') }]} />
-          {value.end === 'right' && <Slider label={t('live.end.rightN')} min={1} max={50} value={value.n} onChange={(n) => set({ n })} />}
+          {value.end === 'right' && <Slider label={t('live.end.rightN')} min={1} max={500} value={value.n} onChange={(n) => set({ n })} />}
           {value.end === 'minutes' && <Slider label={t('live.end.minutesN')} min={1} max={30} value={value.n} onChange={(n) => set({ n })} />}
         </>
       )}

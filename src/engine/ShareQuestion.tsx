@@ -101,14 +101,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   if (!ready && turnCard) return <TurnCard player={player} avatar={avatar} answerer={answerer} onStart={() => setReady(true)} />;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={q.prompt}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface" role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="w-full h-full overflow-y-auto bg-surface border-[3px] border-border rounded-panel p-6 sm:p-10 grid gap-6 content-center"
-        style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+        className="w-full h-full overflow-y-auto bg-surface px-6 py-6 sm:px-14 sm:py-10 grid gap-6 content-center"
       >
         <div className="flex items-center gap-3 flex-wrap">
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
@@ -200,8 +199,8 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
         {/* A glow that spins clockwise behind the icon, which bobs and
             gently grows and shrinks (teacher, 2026-11-06). */}
         {!still && <motion.span aria-hidden="true" className="absolute left-1/2 top-1/2 w-[min(24rem,56vh)] h-[min(24rem,56vh)] -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-          style={{ background: 'conic-gradient(from 0deg, rgba(253,253,148,0.95), rgba(253,253,148,0) 25%, rgba(253,253,148,0.95) 50%, rgba(253,253,148,0) 75%, rgba(253,253,148,0.95))', filter: 'blur(18px)' }}
-          animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }} />}
+          style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.9) 0deg 12deg, rgba(253,253,148,0) 12deg 30deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', filter: 'blur(3px)' }}
+          animate={{ rotate: 360, scale: [1, 1.08, 1] }} transition={{ rotate: { duration: 9, repeat: Infinity, ease: 'linear' }, scale: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } }} />}
         <motion.span className="relative" animate={still ? undefined : { y: [0, -12, 0], rotate: [-3, 3, -3], scale: [1, 1.06, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}

@@ -1771,6 +1771,7 @@ export const en = {
   'live.end.minutesN': 'Minutes',
   'live.yourColor': 'Your star color',
   'live.howPlay': 'How the class plays',
+  'live.settings': 'Game settings',
   'classPlay.style': 'Compete or work together',
   'classPlay.ends': 'When the game ends',
   'classPlay.goalHint': 'Right answers the whole class adds up together. Default 50.',

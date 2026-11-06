@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, LockSimple, X } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
@@ -14,18 +14,43 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   onChoose: (id: string) => void; onBack: () => void; onNext: () => void;
 }) {
   const [preview, setPreview] = useState<GameTheme | null>(null);
+  // Every theme card fits on screen, as big as the space allows (teacher,
+  // 2026-11-06: "you cant even see it all").
+  const body = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState({ cols: 1, w: 320 });
+  useLayoutEffect(() => {
+    const el = body.current;
+    if (!el) return;
+    const GAP = 20, LABEL = 56, PAD = 16;
+    const measure = () => {
+      const W = el.clientWidth - 40, H = el.clientHeight - 32;
+      let best = { cols: 1, w: 0 };
+      for (let cols = 1; cols <= themes.length; cols++) {
+        const rows = Math.ceil(themes.length / cols);
+        const byW = (W - GAP * (cols - 1)) / cols;
+        const byH = ((H - GAP * (rows - 1)) / rows - LABEL - PAD) * (4 / 3) + PAD;
+        const w = Math.min(byW, byH, 560);
+        if (w > best.w) best = { cols, w };
+      }
+      setFit({ cols: best.cols, w: Math.max(160, Math.floor(best.w)) });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [themes.length]);
   return (
     <div className="grid">
       <section className="menu-panel max-w-6xl w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
         <h2 className="font-display text-xl font-bold px-5 pt-1 pb-2 min-h-11 flex items-center pr-40"><Title text={t('themeScreen.title')} /></h2>
-        <div role="radiogroup" aria-label={t('theme.pick')} className="px-5 py-4 grid gap-5 overflow-y-auto min-h-0 flex-1 content-center justify-center" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(16rem, ${themes.length <= 2 ? 34 : themes.length <= 3 ? 27 : themes.length <= 6 ? 22 : 17}rem))` }}>
+        <div role="radiogroup" aria-label={t('theme.pick')} ref={body} className="px-5 py-4 grid gap-5 overflow-hidden min-h-0 flex-1 content-center justify-center" style={{ gridTemplateColumns: `repeat(${fit.cols}, ${fit.w}px)` }}>
           {themes.map((th) => {
             const open = playable(th);
             const on = current.id === th.id;
             return (
               <button key={th.id} type="button" role="radio" aria-checked={on} aria-label={open ? th.name : t('theme.locked', { name: th.name })}
                 onClick={() => (open ? onChoose(th.id) : setPreview(th))}
-                className={`group relative rounded-panel border-[2.5px] border-border p-2 grid gap-1.5 text-left bg-surface motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : ''}`} style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
+                className={`tile-wiggle group relative rounded-panel border-[2.5px] border-border p-2 grid gap-1.5 text-left bg-surface ${on ? 'ring-4 ring-accent' : ''}`} style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
                 <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
                 <span className="flex items-center gap-2 font-display text-base font-bold px-1">
                   {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}

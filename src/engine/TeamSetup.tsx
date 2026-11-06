@@ -1,3 +1,4 @@
+import { FitInput } from '../ui/FitText';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DiceFive, Minus, Play, Plus, UsersThree, X } from '@phosphor-icons/react';
@@ -170,7 +171,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
             {s.kind === 'cpu' ? (
               <span className="flex-1 font-bold">{t('teams.computer')}</span>
             ) : (
-              <input id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
+              <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
                 className="flex-1 min-w-0 min-h-11 px-2 rounded-input border-[2px] border-border-soft font-bold" />
             )}

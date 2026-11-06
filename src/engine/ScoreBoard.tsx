@@ -1,3 +1,4 @@
+import { FitText } from '../ui/FitText';
 import { motion } from 'motion/react';
 import { Crown } from '@phosphor-icons/react';
 import { t } from '../i18n';
@@ -33,7 +34,7 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
               className={`shrink-0 lg:shrink flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
               <TeamBadge colorIndex={p.colorIndex} />
               <span className="flex-1 min-w-0 grid">
-                <span className="font-bold truncate">{p.name}</span>
+                <FitText text={p.name} max={16} min={11} className="font-bold" />
                 {p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
               </span>
               {top.some((l) => l.id === p.id) && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}

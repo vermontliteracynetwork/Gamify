@@ -92,3 +92,12 @@ line that fits, and add each new preference the same turn she says it.
 - Results box: compact title and buttons, bigger winner stage, always see-through over the game (2026-11-06). Set pickers open on My sets when the teacher has sets, else Public sets.
 - Round/progress counter under the scores: a short number like 2/5 with a small word above it (Round, Frame, Cards turned); never a long sentence in big type (2026-11-06).
 - Game welcome screens (2026-11-06): balanced and centered on every screen; title, short description and mode chips at the top, a framed How to play box, then one big Start button; no empty bands.
+- Setup steps (2026-11-06): the step title and progress line sit level with the corner buttons; on the question set step the tabs, search and filters lock to the top under the progress line.
+- Names and text always shrink to fit their box (team names, scoreboards), never cut off (2026-11-06).
+- Turn card glow (2026-11-06): sun rays that spin slowly and gently pulse around the icon.
+- Question screens (2026-11-06): a full white screen with no border; nothing of the game shows behind the question.
+- Card tiles always wiggle and lift a little on hover, even while waiting for a turn (2026-11-06).
+- Theme cards (2026-11-06): sized so every theme is fully visible on the screen at once, no scroll.
+- "First to a number right" goes up to 500 (2026-11-06).
+- Question Tracker live (2026-11-06): no "Number of questions" step; How the Class Plays decides when the game ends.
+- Live host screen (2026-11-06): it is what the projector shows, so it NEVER scrolls; settings (how the class plays, groups, approve names) live behind a gear that opens a full view; once Start is pressed the big screen shows all the stars (or whatever the game tracks); students see their question screen with the stars around the border.

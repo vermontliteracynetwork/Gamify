@@ -126,9 +126,11 @@ export default function StarQuiz() {
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-          { id: 'options', title: t('setup.options'), content: (
+          // Live: How the Class Plays already says when the game ends, so no
+          // number of questions (teacher, 2026-11-06).
+          ...(teacher && way === 'live' ? [] : [{ id: 'options', title: t('setup.options'), content: (
             <Slider label={t('practice.rounds')} hint={t('practice.roundsHint')} min={starQuizManifest.rounds!.min} max={starQuizManifest.rounds!.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
-          ) },
+          ) }]),
         ]} />
       )}
 
