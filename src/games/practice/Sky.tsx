@@ -9,6 +9,18 @@ import type { GameTheme } from '../../theme/types';
 // default, or a theme's own items, like fish or safari animals) for every
 // right answer. Items come in different sizes and slowly turn.
 
+// Combo stars for answers right in a row (teacher, 2026-11-06): 3 glowing,
+// 5 mega, 10 spinning, 15 shooting (it flies around the sky), 20 pulsing,
+// 25 rainbow; then from 30 the same order again every 5. A miss starts the
+// count over; every star in between is a regular one.
+export type StarFx = 'glow' | 'mega' | 'spin' | 'shoot' | 'pulse' | 'rainbow';
+const FX_ORDER: StarFx[] = ['glow', 'mega', 'spin', 'shoot', 'pulse', 'rainbow'];
+const FIRST: Record<number, StarFx> = { 3: 'glow', 5: 'mega', 10: 'spin', 15: 'shoot', 20: 'pulse', 25: 'rainbow' };
+export function comboFx(run: number): StarFx | undefined {
+  if (run < 30) return FIRST[run];
+  return run % 5 === 0 ? FX_ORDER[((run - 30) / 5) % FX_ORDER.length] : undefined;
+}
+
 const ITEM_PIECES = ['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6'];
 
 // Items fill the open sky around the question box (it sits over the sky),
@@ -97,7 +109,7 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 // `hole` overrides the measured question box (the live big screen keeps a
 // corner free for its leaderboard); `bottomGap` keeps a strip at the bottom
 // (in % of the height) free for the goal bar (teacher, 2026-11-06).
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, golden, hole: holeProp, bottomGap = 0 }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; golden?: boolean[]; hole?: Hole | null; bottomGap?: number }) {
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, fx, hole: holeProp, bottomGap = 0 }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; fx?: (StarFx | undefined)[]; hole?: Hole | null; bottomGap?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const measured = useHole(ref);
   const aspect = measured.aspect;
@@ -143,19 +155,29 @@ export default function Sky({ theme, filled, total, still, label, colors, height
       {spots.map((p, i) => {
         if (i >= filled) return null;
         const img = items.length && !colors ? items[kinds[i] % items.length] : undefined;
-        const gold = golden?.[i];
+        const f = fx?.[i];
+        const glow = f === 'glow' || f === 'mega' || f === 'pulse' || f === 'shoot';
         const late = comet?.i === i ? 0.55 : 0; // pops in when its shooting star lands
+        const grow = f === 'mega' ? 1.5 : f === 'rainbow' ? 1.3 : 1;
+        const body = f === 'rainbow'
+          ? <RainbowStar />
+          : img
+            ? <img src={img} alt="" className={`relative w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={{ ...(theme.pixelArt ? { imageRendering: 'pixelated' as const } : {}), ...(glow ? { filter: 'drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 2px #fff6c2)' } : {}) }} />
+            : <Star weight="fill" className="relative w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={glow ? '#ffc93c' : colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />;
         return (
-          <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size})`, height: `calc(${p.unit} * ${p.size})` }}
+          <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size * grow})`, height: `calc(${p.unit} * ${p.size * grow})`, zIndex: f ? 2 : undefined }}
             initial={still ? false : room ? { y: '-120%', opacity: 0, scale: 0.6 } : { scale: 0, rotate: -90, opacity: 0 }}
             animate={still ? { opacity: 1 } : room ? { y: ['0%', '-8%', '0%'], opacity: 1, scale: 1 } : { scale: 1, opacity: 1, rotate: [p.spin, p.spin + 12, p.spin - 8, p.spin] }}
             transition={still ? undefined : room
               ? { scale: { type: 'spring', stiffness: 300, damping: 12 }, opacity: { duration: 0.25 }, y: { duration: 1.4 + (i % 3) * 0.3, repeat: Infinity, ease: 'easeInOut', delay: 0.4 + (i % 5) * 0.2 } }
               : { scale: { type: 'spring', stiffness: 260, damping: 14, delay: late }, opacity: { duration: 0.3, delay: late }, rotate: { duration: 6 + (i % 4), repeat: Infinity, ease: 'easeInOut' } }}>
-            {gold && <span aria-hidden="true" className={`absolute -inset-[18%] rounded-full ${still ? '' : 'qt-gold'}`} style={{ background: 'radial-gradient(circle, rgba(255,215,90,0.75) 0%, rgba(255,200,60,0.35) 45%, transparent 70%)' }} />}
-            {img
-              ? <img src={img} alt="" className={`relative w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={{ ...(theme.pixelArt ? { imageRendering: 'pixelated' as const } : {}), ...(gold ? { filter: 'drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 2px #fff6c2)' } : {}) }} />
-              : <Star weight="fill" className="relative w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={gold ? '#ffc93c' : colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />}
+            {f ? (
+              <span className={`absolute inset-0 qt-${f}`}>
+                {(glow || f === 'rainbow') && <span aria-hidden="true" className="absolute -inset-[22%] rounded-full qt-gold" style={{ background: f === 'rainbow' ? 'radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(180,140,255,0.35) 45%, transparent 70%)' : 'radial-gradient(circle, rgba(255,215,90,0.8) 0%, rgba(255,200,60,0.35) 45%, transparent 70%)' }} />}
+                {f === 'shoot' && <span aria-hidden="true" className="absolute right-1/2 top-1/2 -translate-y-1/2 h-[18%] w-[260%] rounded-pill" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,240,170,0.9))' }} />}
+                {body}
+              </span>
+            ) : body}
           </motion.span>
         );
       })}
@@ -176,4 +198,20 @@ export function pickKinds(spots: SkySpot[], n: number, aspect = 1): number[] {
     out.push(k); used[k] += 1;
   });
   return out;
+}
+
+// The rainbow star, drawn here (teacher, 2026-11-06): striped bands in a star.
+function RainbowStar() {
+  const bands = ['#ff1f2d', '#ff9f00', '#ffde00', '#72c456', '#38b8f8', '#005fdf', '#ae1fc4'];
+  return (
+    <svg viewBox="0 0 100 100" className="relative w-full h-full" aria-hidden="true">
+      <defs>
+        <clipPath id="rainbow-star"><path d="M50 4 L62 34 L95 37 L70 59 L78 92 L50 75 L22 92 L30 59 L5 37 L38 34 Z" strokeLinejoin="round" /></clipPath>
+      </defs>
+      <g clipPath="url(#rainbow-star)">
+        {bands.map((c, k) => <path key={c} d={`M0 ${k * 14} Q50 ${k * 14 + 10} 100 ${k * 14 + 2} L100 ${k * 14 + 16} Q50 ${k * 14 + 24} 0 ${k * 14 + 14} Z`} fill={c} />)}
+        <rect x="0" y="96" width="100" height="10" fill="#ae1fc4" />
+      </g>
+    </svg>
+  );
 }

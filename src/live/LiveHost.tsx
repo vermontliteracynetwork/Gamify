@@ -64,10 +64,20 @@ function Room({ game }: { game: GameCode }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [setOpen, setSetOpen] = useState(false);
   const [monOpen, setMonOpen] = useState(false);
+  const [confirmEnd, setConfirmEnd] = useState(false);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
   const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}) });
   const link = useRef<LiveLink>();
+  // Closing or leaving this page ends the game for everyone, and every
+  // student is told and sent back to Join (teacher, 2026-11-06).
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  useEffect(() => {
+    const bye = () => { const s0 = stateRef.current; if (s0.phase !== 'ended' && s0.phase !== 'lobby') link.current?.send({ t: 'state', state: { ...s0, phase: 'ended', closedByTeacher: true, locks: {}, at: Date.now() } }); };
+    window.addEventListener('pagehide', bye);
+    return () => { window.removeEventListener('pagehide', bye); bye(); };
+  }, []);
   const approveRef = useRef(approve);
   approveRef.current = approve;
   const joinUrl = `${window.location.origin}/join/${game.code}`;
@@ -255,7 +265,7 @@ function Room({ game }: { game: GameCode }) {
           <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
             <button type="button" onClick={() => setMonOpen((o) => !o)} aria-expanded={monOpen} aria-label={t('live.view.monitor')} data-tip={t('live.view.monitor')} className={TOOL}><SlidersHorizontal weight="bold" size={20} /></button>
             <button type="button" onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} aria-label={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} data-tip={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} className={TOOL}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}</button>
-            <button type="button" onClick={end} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}><Stop weight="fill" size={18} /></button>
+            <button type="button" onClick={() => setConfirmEnd(true)} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}><Stop weight="fill" size={18} /></button>
             {timeLeft !== null && <span className="ml-1 px-3 min-h-10 inline-flex items-center rounded-pill bg-surface border-[2px] border-border font-display text-xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
           </div>
           {monOpen && (
@@ -293,6 +303,19 @@ function Room({ game }: { game: GameCode }) {
             </div>
           )}
 
+          {confirmEnd && (
+            <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50" role="dialog" aria-modal="true" aria-label={t('live.endConfirm')}>
+              <DialogFocus onClose={() => setConfirmEnd(false)} />
+              <div className="bg-surface border-[3px] border-border rounded-panel p-6 grid gap-4 justify-items-center text-center max-w-sm w-full text-[var(--text)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+                <p className="font-display text-2xl">{t('live.endConfirm')}</p>
+                <p className="font-bold text-sm">{t('live.endConfirmHint')}</p>
+                <div className="flex gap-2">
+                  <Button onClick={() => setConfirmEnd(false)}>{t('live.keepPlaying')}</Button>
+                  <Button variant="danger" onClick={() => { setConfirmEnd(false); end(); }}><Stop weight="fill" size={18} />{t('live.end')}</Button>
+                </div>
+              </div>
+            </div>
+          )}
           {state.phase === 'paused' && <p className="absolute top-3 left-1/2 -translate-x-1/2 z-10 font-display text-xl bg-accent border-[2px] border-border rounded-pill px-4 py-1" role="status">{t('live.pausedHost')}</p>}
 
           {/* Compete: a small leaderboard in the top right, in the corner the stars leave free. */}

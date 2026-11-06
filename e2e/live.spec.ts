@@ -47,6 +47,7 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.getByRole('button', { name: 'My monitor' }).click(); // closes the monitor menu
   await page.screenshot({ path: `test-results/live-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'End game' }).click();
+  await page.getByRole('dialog', { name: 'End the game for everyone?' }).getByRole('button', { name: 'End game' }).click();
   await expect(page.getByRole('heading', { name: 'The Winners' })).toBeVisible();
   await expect(kid.getByRole('dialog', { name: 'Game Over!' })).toBeVisible();
   await kid.screenshot({ path: `test-results/live-podium-kid-${info.project.name}.png` });

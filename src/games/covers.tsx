@@ -85,27 +85,33 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
-    case 'four-in-a-row':
-      // Mirrors the game: the blue board with round holes and the Classic
-      // Ball Collection pieces (teacher, 2026-11-01).
+    case 'four-in-a-row': {
+      // A real four-in-a-row board (teacher, 2026-11-06): a standing 7 by 6
+      // frame, pieces stacked from the bottom, one dropping in, and a
+      // glowing line through four in a row.
+      const stacks = ['a', 'bab', 'ba', 'bbaa', 'ba', 'a', ''];
+      const cx = (c: number) => 26.6 + c * 7.8, cy = (r: number) => 51 - r * 7.3; // r 0 = bottom row
       return (
         <div className={base} style={{ background: 'linear-gradient(160deg, #a8d8f0, #6aa9e9)' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62">
-            <rect x="18" y="6" width="64" height="48" rx="5" fill="#4f8fe0" stroke="#000" strokeWidth="1.2" />
-            {Array.from({ length: 15 }, (_, i) => {
-              const a = [10, 11, 6, 2].includes(i), b = [12, 7, 13, 14].includes(i);
-              const cx = 26 + (i % 5) * 12, cy = 17 + Math.floor(i / 5) * 14;
+            <path d="M24 55 L19 61 M76 55 L81 61" stroke="#000" strokeWidth="2.4" strokeLinecap="round" />
+            <rect x="21.5" y="9.5" width="57" height="46" rx="3.5" fill="#4f8fe0" stroke="#000" strokeWidth="1.2" />
+            {Array.from({ length: 42 }, (_, i) => {
+              const c = i % 7, r = Math.floor(i / 7), piece = stacks[c][r];
               return (
                 <g key={i}>
-                  <circle cx={cx} cy={cy} r="5.2" fill="#e8eef9" stroke="#2c3e66" strokeWidth="0.8" />
-                  {(a || b) && <image href={`/classic/four-in-a-row/${a ? '8-billiard-ball' : 'basket-ball'}.webp`} x={cx - 5} y={cy - 5} width="10" height="10" />}
+                  <circle cx={cx(c)} cy={cy(r)} r="3.2" fill="#e8eef9" stroke="#2c3e66" strokeWidth="0.5" />
+                  {piece && <image href={`/classic/four-in-a-row/${piece === 'a' ? '8-billiard-ball' : 'basket-ball'}.webp`} x={cx(c) - 3.2} y={cy(r) - 3.2} width="6.4" height="6.4" />}
                 </g>
               );
             })}
-            <line x1="26" y1="45" x2="62" y2="17" stroke="#fdfd94" strokeWidth="1.6" strokeLinecap="round" opacity="0.85" />
+            <line x1={cx(1)} y1={cy(0)} x2={cx(4)} y2={cy(0)} stroke="#fdfd94" strokeWidth="1.8" strokeLinecap="round" opacity="0.9" />
+            <image href="/classic/four-in-a-row/8-billiard-ball.webp" x={cx(6) - 3.2} y="1.2" width="6.4" height="6.4" />
+            <path d={`M${cx(6)} 8.2 l0 1`} stroke="#000" strokeWidth="0.6" />
           </svg>
         </div>
       );
+    }
     case 'cast-catch':
       // The Classic lake: wooden boat at the top left, Kenney fish and floor.
       return (

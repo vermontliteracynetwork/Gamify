@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import FourWays from '../games/FourWays';
+import type { PlayMode } from '../data/types';
 import { Link, Navigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
@@ -22,6 +24,7 @@ export default function Home() {
   const session = useSession();
   const teacher = useTeacher();
   const tier = useTier();
+  const [mode, setMode] = useState<PlayMode | null>(null);
   // Students never browse games; their code opens the one game (teacher, 2026-10-31).
   if (session && !teacher) return <Navigate to="/join" replace />;
 
@@ -34,9 +37,9 @@ export default function Home() {
         className="mb-10"
       >
         <h1 className="title-bubble text-4xl sm:text-5xl tracking-tight mb-2"><Title text={t('home.title')} /></h1>
-        <p className="text-text font-bold text-base max-w-[50ch]">{teacher && !session ? t('home.subtitleTeacher') : t('home.subtitle')}</p>
+        {!(teacher && !session) && <p className="text-text font-bold text-base max-w-[50ch]">{t('home.subtitle')}</p>}
         {/* A reminder of the four ways every game can be played (teacher, 2026-10-31). */}
-        {teacher && !session && <div className="mt-5"><FourWays compact /></div>}
+        {teacher && !session && <div className="mt-5"><FourWays compact filter={mode} onFilter={setMode} /></div>}
       </motion.div>
 
 
@@ -51,7 +54,7 @@ export default function Home() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {GAMES.map((game, i) => (
+        {GAMES.filter((g) => !mode || g.modes.includes(mode)).map((game, i) => (
           <motion.div
             key={game.id}
             initial={reduce ? false : { opacity: 0, y: 20 }}

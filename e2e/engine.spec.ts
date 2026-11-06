@@ -122,7 +122,7 @@ test('Question Tracker: every star stays in view around the question box', async
   await page.waitForTimeout(800);
   await page.screenshot({ path: `test-results/sky-${info.project.name}.png` });
   const box = (await dialog.locator('> div').first().boundingBox())!;
-  const stars = await page.locator('[role=img] svg, [role=img] > span > img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));
+  const stars = await page.locator('[role=img] > span svg, [role=img] > span img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));
   expect(stars.length).toBe(11);
   for (const s of stars) {
     const overlap = s.x < box.x + box.width && s.x + s.w > box.x && s.y < box.y + box.height && s.y + s.h > box.y;

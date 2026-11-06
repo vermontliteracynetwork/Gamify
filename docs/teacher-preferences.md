@@ -108,3 +108,9 @@ line that fits, and add each new preference the same turn she says it.
 - Live big screen (2026-11-06): the sky fills the whole window (no purple), the goal small and centered along the bottom, a small leaderboard top right when competing, nothing covering stars; teacher tools (monitor, pause, end) are small buttons with hover text, and "My monitor" opens as a small menu, not a tab. No "back to question sets" button.
 - A student's question set list starts with "Default set" (the class set), not the set's own name (2026-11-06); it can be changed from the lobby and from the monitor menu during play.
 - Every in-game message or celebration pops up in the center of the screen on the top layer, never hidden behind a goal tracker (2026-11-06). The student's live goal bar sits at the bottom.
+- Question Tracker combo stars (2026-11-06): right answers in a row earn 3 glowing, 5 mega, 10 spinning, 15 shooting (flies around, never sits still), 20 pulsing, 25 rainbow; then the same order every 5 from 30. A miss restarts the count; stars in between are regular. The celebration text pops up center middle.
+- Pick a Game (teacher view): no intro sentence; the four way-to-play cards are filter buttons for the games below (tap again for all).
+- Four in a Row cover shows a real standing 7 by 6 board with stacked pieces and a winning line.
+- Live games: when the teacher ends (with a confirm) or closes the game, every student sees a message and a button back to the join screen.
+- A player's team picture IS their game piece in piece games (Four in a Row, Board Game): one picture, picked on the player card, the same on the board. Never two different things.
+- Hover animations, slight movement and power-up randomness are VERY important to the game's success and go everywhere (2026-11-06).

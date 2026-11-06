@@ -13,9 +13,9 @@ test('Board Game: a right answer earns a roll, the die tumbles, the pawn hops al
   page.on('pageerror', (e) => problems.push(e.message));
   await openSetup(page, '/games/castle-quest');
   // Players pick from 20 animals (teacher, 2026-10-31); picking a taken one swaps.
-  await showSetting(page, page.getByRole('button', { name: /^Pick an animal for / }));
-  await page.getByRole('button', { name: /^Pick an animal for / }).first().click();
-  const animals = page.getByRole('dialog').getByRole('group', { name: /^Pick an animal for / });
+  await showSetting(page, page.getByRole('button', { name: /^Pick a player piece for / }));
+  await page.getByRole('button', { name: /^Pick a player piece for / }).first().click();
+  const animals = page.getByRole('dialog').getByRole('group', { name: /^Pick a player piece for / });
   await expect(animals.getByRole('button')).toHaveCount(20);
   await page.screenshot({ path: `test-results/castle-quest-animals-${info.project.name}.png` });
   await animals.getByRole('button', { name: /^Unicorn/ }).click(); // a taken animal swaps

@@ -18,6 +18,8 @@ export interface LiveState {
   // How the class plays (teacher, 2026-10-26): against each other on a
   // leaderboard, or together toward a class goal of right answers.
   mode?: 'compete' | 'together';
+  // The teacher closed the game page (teacher, 2026-11-06): students are told and sent back to Join.
+  closedByTeacher?: boolean;
   goal?: number;
   // Groups, each playing its own game (Plus, Homeschool and Pro), and each
   // student's group and question set (their own level, same game).

@@ -28,7 +28,7 @@ import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 import Title from '../../ui/Title';
-import Sky from './Sky';
+import Sky, { comboFx, type StarFx } from './Sky';
 import { liveStarColor } from '../../live/LiveStudent';
 import { getLive } from '../../live/session';
 
@@ -61,7 +61,7 @@ export default function StarQuiz() {
   const [leftEarly, setLeftEarly] = useState(false);
   // A fresh sky each game, and golden stars for a streak of first-try answers.
   const [seed, setSeed] = useState(7);
-  const [golden, setGolden] = useState<boolean[]>([]);
+  const [golden, setGolden] = useState<(StarFx | undefined)[]>([]);
   const [streakNote, setStreakNote] = useState<{ id: number; text: string; gold: boolean } | null>(null);
   // The note clears on its own (also in still motion, where no animation ends).
   useEffect(() => { if (!streakNote) return; const id = window.setTimeout(() => setStreakNote(null), 2400); return () => window.clearTimeout(id); }, [streakNote]);
@@ -84,13 +84,15 @@ export default function StarQuiz() {
       const done = await ask();
       if (timeUp.current) break;
       if (!done) { setLeftEarly(true); break; }
-      // Three or more first-try answers in a row: a golden star. Getting one
-      // right after a miss earns a cheer too (growth counts, not only speed).
+      // Right answers in a row earn combo stars (teacher, 2026-11-06): 3
+      // glowing, 5 mega, 10 spinning, 15 shooting, 20 pulsing, 25 rainbow,
+      // then again every 5. A miss starts the count over. Getting one right
+      // after a miss earns a cheer too (growth counts, not only speed).
       const first = lastRight.current === 'first';
       run = first ? run + 1 : 0;
-      const gold = run >= 3;
-      setGolden((g) => { const n = [...g]; n[r] = gold; return n; });
-      if (gold) { setStreakNote({ id: Date.now(), text: t('practice.streak', { n: run }), gold: true }); playEffect('win', settings); }
+      const fx = comboFx(run);
+      setGolden((g) => { const n = [...g]; n[r] = fx; return n; });
+      if (fx) { setStreakNote({ id: Date.now(), text: t(`practice.combo.${fx}`, { n: run }), gold: true }); playEffect('win', settings); }
       else if (lastRight.current === 'retry') setStreakNote({ id: Date.now(), text: t('practice.keptGoing'), gold: false });
       setStars((s) => s + 1);
     }
@@ -139,7 +141,7 @@ export default function StarQuiz() {
         // sit on top (teacher, 2026-10-31).
         <section className="relative play-fill">
           <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
-          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed seed={seed} golden={myColor ? undefined : golden} />
+          <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed seed={seed} fx={myColor ? undefined : golden} />
           {/* A streak of first-try answers: the stars turn gold. */}
           <AnimatePresence>
             {streakNote && phase === 'play' && (

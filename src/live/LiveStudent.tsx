@@ -56,7 +56,7 @@ export function LiveOverlay() {
   useEffect(() => { try { if (state && me) sessionStorage.setItem('gamify:live-color', skyColor(state, me.pid) ?? ''); } catch { /* this tab only */ } }, [state, me]);
   if (!session || !state || !me) return null;
   const lockMsg = state.locks[me.pid] ?? state.locks.all;
-  const shell = 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/55';
+  const shell = 'fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/55';
   const panel = 'bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full';
   if (state.phase === 'ended') {
     const top = ranked(state.players).slice(0, 3);
@@ -66,13 +66,14 @@ export function LiveOverlay() {
         <DialogFocus />
         <div className={panel} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="font-display text-4xl"><Title text={t('live.endTitle')} /></h2>
+          <p className="font-bold text-lg">{t(state.closedByTeacher ? 'live.closedByTeacher' : 'live.endedByTeacher')}</p>
           {state.mode === 'together' ? (
             <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
           ) : <>
           <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-[2px] border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
           <p className="font-display text-2xl">{t('live.you', { count: me.right, place: mine })}</p>
           </>}
-          <button type="button" onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', 'min-h-14 px-8 text-lg')}>{t('live.done')}</button>
+          <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', 'min-h-14 px-8 text-lg')}>{t('live.toJoinScreen')}</button>
         </div>
       </div>
     );
