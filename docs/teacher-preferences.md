@@ -79,3 +79,6 @@ line that fits, and add each new preference the same turn she says it.
 - Power-ups and bonuses (like x2) are never shown before a pick, in any game; they are a surprise after a right answer (2026-11-06).
 - Progress (like 2/20 cards) sits big and centered under the scoreboard, level with the board's bottom (2026-11-06).
 - More animation everywhere: marquee lights twinkle, tiles wiggle on hover (2026-11-06).
+- Game start menus (welcome, theme, setup) have no card and no purple: the menu is the whole area under the top bar, never scrolls, content centered with wide side margins; the corner buttons sit level with the title on the right (2026-11-06).
+- Question set cards look like library cards: a colored picture band with the subject icon, the name, and grade and question-count chips (2026-11-06).
+- No Christmas theme in Match Three (2026-11-06).

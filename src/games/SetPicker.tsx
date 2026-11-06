@@ -91,19 +91,29 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
           const art = ART[s.subject ?? 'Other'];
           const I = art.icon;
           return (
+            // A set card like a game library card (teacher, 2026-11-06): a
+            // colored picture band with the subject's icon, then the name and
+            // small chips for grades and how many questions.
             <button key={s.id} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
               onClick={() => onChange(max === 1 ? [s.id] : on ? value.filter((x) => x !== s.id) : value.length < max ? [...value, s.id] : value)}
-              className={`relative rounded-input border-[2.5px] text-left overflow-hidden flex flex-col justify-between ${compact ? 'p-2' : 'p-2.5'} ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}
-              style={{ background: `color-mix(in srgb, ${art.bg} 45%, var(--color-surface, #fbfcf8))` }}>
-              <I weight="fill" size={compact ? 18 : 22} color={art.ink} aria-hidden="true" />
+              className={`tile-wiggle relative rounded-input border-[2.5px] border-border text-left overflow-hidden grid grid-rows-[46%_1fr] bg-surface motion-safe:transition-transform ${on ? 'ring-4 ring-accent -translate-y-1' : ''}`}
+              style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
+              <span className="relative flex items-center justify-center border-b-[2.5px] border-border overflow-hidden" style={{ background: art.bg }}>
+                <I weight="fill" size={Math.round(fit.size * 0.26)} color={art.ink} aria-hidden="true" className="-rotate-6 drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />
+                <I weight="fill" size={Math.round(fit.size * 0.14)} color={art.ink} aria-hidden="true" className="absolute left-[8%] bottom-[8%] rotate-12 opacity-25" />
+                <I weight="fill" size={Math.round(fit.size * 0.11)} color={art.ink} aria-hidden="true" className="absolute right-[10%] top-[10%] -rotate-12 opacity-25" />
+              </span>
               {on && (
-                <span className="absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold">
+                <span className="absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
                   {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
                 </span>
               )}
-              <span className="grid gap-0.5 min-w-0">
-                <span className={`font-bold text-sm leading-tight ${compact ? 'line-clamp-2' : 'line-clamp-3'}`}>{s.name || t('sets.untitled')}</span>
-                <span className={`text-[11px] leading-tight text-muted font-bold ${compact ? 'line-clamp-1' : 'line-clamp-2'}`}>{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })} · {t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+              <span className={`grid content-between min-w-0 ${compact ? 'p-1.5' : 'p-2'}`}>
+                <span className={`font-bold leading-tight line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>{s.name || t('sets.untitled')}</span>
+                <span className="flex flex-wrap gap-1 text-[10px] font-bold leading-none">
+                  <span className="rounded-pill border border-border px-1.5 py-0.5 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                  <span className="rounded-pill border border-border px-1.5 py-0.5" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+                </span>
               </span>
             </button>
           );
@@ -120,7 +130,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
 
 const GAP = 10;
 const ARROW = 44;
-const MIN = 104; // the smallest card that still reads (name and details)
+const MIN = 120; // the smallest card that still reads (name and details)
 const MAX = 220;
 
 // A page arrow beside the cards (space kept even when there is one page).

@@ -20,16 +20,16 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
     // Fills the whole stage (teacher, 2026-11-06), and the cover is always
     // shown whole at its own shape, never cropped.
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden w-full grid md:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]"
-      style={{ boxShadow: 'var(--shadow-sticker-lg)', minHeight: 'calc(100dvh - 11.875rem)' }}>
+      className="menu-panel overflow-hidden w-full max-w-7xl mx-auto grid lg:grid-rows-[auto_minmax(0,1fr)] max-lg:content-start max-lg:gap-y-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-x-10 gap-y-4 px-2 sm:px-4"
+      style={{ height: 'calc(100dvh - 7.5rem)' }}>
       {/* One standard start screen for every game (teacher, 2026-10-31): the
           Gamify cover, never a theme's, so menus need no custom design. */}
-      <div className="p-4 sm:p-6 flex items-center justify-center bg-surface-2 border-b-[2.5px] md:border-b-0 md:border-r-[2.5px] border-border">
-        <GameCover gameId={game.id} className="w-full aspect-[100/62] rounded-panel border-[2.5px] border-border" />
+      {/* The title sits level with the corner buttons (teacher, 2026-11-06). */}
+      <h1 className="lg:col-span-2 title-bubble text-4xl sm:text-5xl pr-48 min-h-14 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+      <div className="flex items-center justify-center min-h-0 max-lg:max-h-[38vh]">
+        <GameCover gameId={game.id} className="w-full max-h-full max-lg:w-auto max-lg:h-full aspect-[100/62] rounded-panel border-[2.5px] border-border" />
       </div>
-      <div className="p-6 sm:p-10 grid gap-6 content-center">
-        {/* On the white card, not the stage: panel text color, never the night-sky white. */}
-        <h1 className="title-bubble text-4xl sm:text-5xl" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+      <div className="pb-4 grid gap-5 content-center min-h-0">
         <div className="grid gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
         <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
           {steps.map((s, i) => (

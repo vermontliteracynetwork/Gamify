@@ -21,17 +21,7 @@ export const HOUSE_THEMES: GameTheme[] = [
     pieces: { board: { color: '#f7d488' } },
     discs: ANIMALS.map((a) => ({ id: a, name: cap(a), image: `/themes/animals/${a}.webp` })),
   })),
-  // Match Three: Christmas Treats, from TrulyMalicious's Christmas Set #1 (CC BY 4.0, credited).
-  house('match-three', 'christmas-treats', 'Christmas Treats', () => ({
-    colors: { background: '#1f6f4a', backgroundText: '#ffffff' } as GameTheme['colors'],
-    backdrop: { kind: 'pattern', pattern: 'dots' },
-    pieces: {
-      board: { color: '#f7fbff' },
-      ...Object.fromEntries([['candy-cane', 'Candy cane', '#ffe3e3'], ['tree', 'Christmas tree', '#dff5df'], ['gingerbread', 'Gingerbread', '#f4e3cf'], ['snowflake', 'Snowflake', '#dcefff'], ['bell', 'Bell', '#fff3c4'], ['ornament', 'Ornament', '#d9f4f1']]
-        .map(([file, alt, color], i) => [`tile-${i}`, { image: `/themes/christmas/${file}.webp`, alt, color }])),
-      cover: { image: '/themes/christmas/present.webp', color: '#1f6f4a' },
-    },
-  })),
+  // Match Three's Christmas Treats theme was removed (teacher, 2026-11-06).
   // Question Tracker: Pet Room, Nasha's Cozy Pets Pack (free for commercial
   // use in a game; never handed out as art files). A pet joins the room for
   // every right answer (teacher, 2026-10-31).

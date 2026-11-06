@@ -15,9 +15,9 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
 }) {
   const [preview, setPreview] = useState<GameTheme | null>(null);
   return (
-    <div className="grid content-center" style={{ minHeight: 'calc(100dvh - 11.875rem)' }}>
-      <section className="bg-surface border-[2.5px] border-border rounded-panel max-w-4xl w-full mx-auto flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 11.875rem)' }}>
-        <h2 className="font-display text-2xl font-bold px-5 pt-4 pb-3 border-b-[2px] border-border-soft"><Title text={t('themeScreen.title')} /></h2>
+    <div className="grid">
+      <section className="menu-panel max-w-6xl w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
+        <h2 className="font-display text-3xl font-bold px-5 pt-1 pb-3 min-h-14 flex items-center md:pr-48 border-b-[2px] border-border-soft"><Title text={t('themeScreen.title')} /></h2>
         <div role="radiogroup" aria-label={t('theme.pick')} className="px-5 py-4 grid grid-cols-2 md:grid-cols-3 gap-4 overflow-y-auto min-h-0 flex-1 content-start">
           {themes.map((th) => {
             const open = playable(th);

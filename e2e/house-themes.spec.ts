@@ -33,14 +33,7 @@ test('Question Tracker Pet Room: a pet joins the room for every right answer', a
   expect(problems).toEqual([]);
 });
 
-test('Match Three Christmas Treats and Four in a Row Animal Friends', async ({ page }, info) => {
-  await page.goto('/games/match-three');
-  await page.getByRole('button', { name: 'Set up and play' }).click();
-  await page.getByRole('radio', { name: /Christmas Treats/ }).click();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await finishSetup(page);
-  await expect(page.getByRole('gridcell', { name: /^Candy cane, / }).first()).toBeVisible();
-  await page.screenshot({ path: `test-results/christmas-${info.project.name}.png` });
+test('Four in a Row Animal Friends', async ({ page }, info) => {
   await page.goto('/games/four-in-a-row');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('radio', { name: /Animal Friends/ }).click();
