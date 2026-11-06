@@ -41,7 +41,7 @@ export default function QuestionSetsPage() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader
         title={t('sets.title')}

@@ -46,7 +46,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
       <div className="min-w-0">
-        <h1 className="title-bubble text-3xl sm:text-4xl tracking-tight"><Title text={title} /></h1>
+        <h1 className="title-bubble text-2xl sm:text-3xl tracking-tight"><Title text={title} /></h1>
         {subtitle && <p className="text-text font-bold mt-1">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

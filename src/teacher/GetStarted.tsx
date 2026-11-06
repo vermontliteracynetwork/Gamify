@@ -54,8 +54,8 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
           <h2 className="font-display text-xl"><Title text={t('start.title')} /></h2>
           <p className="font-bold text-sm">{t('start.progress', { done: count, total: steps.length })}</p>
         </div>
-        <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
-        <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
+        <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
+        <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
       </div>
       {!small && <ol className="grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr gap-2 list-none p-0 m-0">
         {steps.map((s, i) => (

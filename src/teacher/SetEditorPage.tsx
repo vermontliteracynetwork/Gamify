@@ -63,7 +63,7 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
   const ready = set.questions.filter((q) => !questionIssue(q)).length;
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
 
       <div className="flex flex-wrap items-center gap-3 mb-2">
         {library ? (

@@ -19,30 +19,35 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
   return (
     // Fills the whole stage (teacher, 2026-11-06), and the cover is always
     // shown whole at its own shape, never cropped.
+    // The cover on the left; on the right the title (top even with the
+    // cover's top and the corner buttons), the ways to play and steps, and a
+    // big start button whose bottom lines up with the cover's bottom
+    // (teacher, 2026-11-06).
     <motion.section initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="menu-panel overflow-hidden w-full max-w-7xl mx-auto grid lg:grid-rows-[auto_minmax(0,1fr)] max-lg:content-start max-lg:gap-y-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-x-10 gap-y-4 px-2 sm:px-4"
-      style={{ height: 'calc(100dvh - 7.5rem)' }}>
+      className="menu-panel w-full max-w-[110rem] mx-auto px-2 sm:px-4 grid gap-x-10 gap-y-5 items-stretch content-start lg:grid-cols-[minmax(0,calc((100dvh-9.5rem)*1.613))_minmax(27rem,1fr)]">
       {/* One standard start screen for every game (teacher, 2026-10-31): the
           Gamify cover, never a theme's, so menus need no custom design. */}
-      {/* The title sits level with the corner buttons (teacher, 2026-11-06). */}
-      <h1 className="lg:col-span-2 title-bubble text-3xl sm:text-4xl pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-      <div className="flex items-center justify-center min-h-0 max-lg:max-h-[38vh]">
-        <GameCover gameId={game.id} className="motion-safe:hover:scale-[1.01] motion-safe:transition-transform w-full max-h-full max-lg:w-auto max-lg:h-full aspect-[100/62] rounded-panel border-[2.5px] border-border" />
+      <h1 className="lg:hidden title-bubble text-3xl sm:text-4xl pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+      <div className="min-w-0 self-start">
+        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[calc(100dvh-9.5rem)] max-lg:max-h-[40vh] mx-auto rounded-panel border-[2.5px] border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
       </div>
-      <div className="pb-4 grid gap-5 content-center min-h-0">
-        <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
-        <ol className="grid gap-2 list-none p-0 m-0" aria-label={t('welcome.how')}>
-          {steps.map((s, i) => (
-            <li key={i} className="flex items-center gap-2.5 text-base leading-snug">
-              <span className="w-9 h-9 shrink-0 rounded-full border-[2px] [&>svg]:w-5 [&>svg]:h-5 border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
-              <span className="font-bold">{s.text}</span>
-            </li>
-          ))}
-        </ol>
+      <div className="min-w-0 flex flex-col justify-between gap-5">
+        <h1 className="max-lg:hidden title-bubble text-3xl xl:text-4xl pr-44 leading-none -mt-1 whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+        <div className="grid gap-4">
+          <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
+          <ol className="grid gap-2.5 list-none p-0 m-0" aria-label={t('welcome.how')}>
+            {steps.map((s, i) => (
+              <li key={i} className="flex items-center gap-2.5 text-base leading-snug">
+                <span className="w-9 h-9 shrink-0 rounded-full border-[2px] [&>svg]:w-5 [&>svg]:h-5 border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
+                <span className="font-bold">{s.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
         <button type="button" onClick={onStart}
-          className="justify-self-start min-h-12 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-105 motion-safe:transition-transform"
-          style={{ boxShadow: '0 3px 0 #000' }}>
-          <Play weight="fill" size={20} />{t('welcome.start')}
+          className="w-full min-h-16 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-[1.02] motion-safe:transition-transform"
+          style={{ boxShadow: '0 4px 0 #000' }}>
+          <Play weight="fill" size={24} />{t('welcome.start')}
         </button>
       </div>
     </motion.section>

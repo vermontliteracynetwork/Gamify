@@ -61,7 +61,7 @@ export default function ClassPage() {
   if (!classroom) return null;
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
       <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })} />
