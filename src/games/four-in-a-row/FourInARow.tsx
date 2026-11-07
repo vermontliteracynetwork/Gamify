@@ -314,7 +314,7 @@ export default function FourInARow() {
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
           <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
-            <div className="grid gap-1.5 mb-1.5 mt-[min(4.5vw,2.6rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
+            <div className="grid gap-1.5 mb-1.5 mt-[min(2.4vw,1.4rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const popping = step === 'pop';
                 const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
@@ -324,12 +324,12 @@ export default function FourInARow() {
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
                     onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
                     aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`relative isolate min-h-11 rounded-input flex items-center justify-center gap-0.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent' : 'bg-surface/60 opacity-70'}`}>
+                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
                     {/* The player's piece peeks out above the numbers and slides
                         across the columns, then drops (teacher, 2026-11-06). */}
                     {holding && player && (
                       <motion.span layoutId="fr-held" transition={{ type: 'spring', stiffness: 420, damping: 30 }} aria-hidden="true"
-                        className="absolute left-1/2 -translate-x-1/2 bottom-[45%] w-[78%] aspect-square -z-10 flex items-end justify-center pointer-events-none">
+                        className="absolute left-1/2 -translate-x-1/2 bottom-[58%] w-[78%] aspect-square -z-10 flex items-end justify-center pointer-events-none">
                         <Disc who={(turn + 1) as 1 | 2} size="100%" />
                       </motion.span>
                     )}

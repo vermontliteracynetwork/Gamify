@@ -525,3 +525,8 @@ html[data-motion="full"] .turn-halo { animation-duration: 2.4s !important; }
   100% { transform: translate(0, 0) rotate(-20deg); opacity: 1; }
 }
 html[data-motion="still"] :is(.qt-spin, .qt-pulse, .qt-mega, .qt-rainbow, .qt-shoot) { animation-duration: 0.001ms !important; }
+
+/* A held power-up gently bobs so it catches the eye (teacher, 2026-11-07). */
+.pu-bob { display: inline-block; animation: pu-bob 1.8s ease-in-out infinite; }
+@keyframes pu-bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+html[data-motion="still"] .pu-bob { animation: none; }

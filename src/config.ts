@@ -103,4 +103,5 @@ export const PUZZLE_PACK_CLEARED = true;
 // from itch.io under a commercial license, confirmed by the teacher
 // (2026-11-01). Files in public/classic/four-in-a-row/.
 export const BALL_PACK_CLEARED = true;
-export const BALL_PACK = ['gas', 'spike-ball', '8-billiard-ball', 'beach-ball', 'earth-africa', 'mars', 'moon', 'coin', 'baseball-ball', 'basket-ball', 'white-soccer-ball'];
+// No Gas Tank (teacher, 2026-11-07).
+export const BALL_PACK = ['spike-ball', '8-billiard-ball', 'beach-ball', 'earth-africa', 'mars', 'moon', 'coin', 'baseball-ball', 'basket-ball', 'white-soccer-ball'];

@@ -42,14 +42,13 @@ export function PowerUpTray({ manifest, items, onUse, disabled = false }: { mani
         <AnimatePresence initial={false}>
           {items.map((it, i) => (
             <motion.li key={`${it.id}-${i}`} initial={still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={still ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}>
-              <button type="button" disabled={disabled} onClick={() => onUse(i)} aria-label={t('pu.use', { name: it.name, role: roleOf(manifest, it) })}
-                className={`w-full flex items-center gap-2 text-left rounded-input border-[2.5px] border-border bg-accent p-1.5 pr-3 disabled:opacity-60 ${disabled || still ? '' : 'motion-safe:animate-pulse hover:-translate-y-0.5'} transition-transform`}>
-                <ItemArt item={it} size={44} still={still} />
-                <span className="grid min-w-0 flex-1">
-                  <span className="font-display font-bold leading-tight">{it.name}</span>
-                  <span className="text-xs font-bold leading-snug">{roleOf(manifest, it)}</span>
-                </span>
-                <span className="shrink-0 rounded-pill border-[2px] border-border bg-surface px-2.5 py-1 text-sm font-bold">{t('pu.useShort')}</span>
+              {/* The power-up's picture is the star of the card, its name under it,
+                  and what it does in hover text (teacher, 2026-11-07). */}
+              <button type="button" disabled={disabled} onClick={() => onUse(i)} aria-label={t('pu.use', { name: it.name, role: roleOf(manifest, it) })} data-tip={roleOf(manifest, it)}
+                className={`tile-wiggle w-full grid justify-items-center gap-1 text-center rounded-input border-[2.5px] border-border bg-accent px-2 pt-2 pb-2.5 disabled:opacity-60 ${disabled || still ? '' : 'hover:-translate-y-0.5'} transition-transform`}>
+                <span className={disabled || still ? '' : 'pu-bob'}><ItemArt item={it} size={76} still={still} /></span>
+                <span className="font-display font-bold text-lg leading-tight">{it.name}</span>
+                <span className="rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold">{t('pu.useShort')}</span>
               </button>
             </motion.li>
           ))}

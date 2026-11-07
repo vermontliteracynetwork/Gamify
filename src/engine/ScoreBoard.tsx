@@ -32,7 +32,8 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94', '0 0 0 4px #fdfd94, 0 0 26px 10px #fdfd94', '0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94'] } : { boxShadow: on ? glow : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
               className={`shrink-0 lg:shrink flex items-center gap-2 rounded-input border-[2px] p-1.5 lg:p-2 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
-              <TeamBadge colorIndex={p.colorIndex} />
+              {/* A player's picture is their game piece when they have one (teacher, 2026-11-06). */}
+              {p.art ? <img src={p.art} alt="" aria-hidden="true" className="w-9 h-9 object-contain shrink-0" /> : <TeamBadge colorIndex={p.colorIndex} />}
               <span className="flex-1 min-w-0 grid">
                 <FitText text={p.name} max={16} min={11} className="font-bold" />
                 {p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
