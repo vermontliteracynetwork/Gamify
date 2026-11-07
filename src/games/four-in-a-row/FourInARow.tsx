@@ -142,8 +142,13 @@ export default function FourInARow() {
     if (remoteTurn) return; // the other device asks its own player
     let live = true;
     if (player.kind === 'cpu') {
-      const timer = window.setTimeout(() => { if (live) place(cpuMove(board, (turn + 1) as 1 | 2, level)); }, 900 * pace(settings));
-      return () => { live = false; window.clearTimeout(timer); };
+      // The computer takes its time (5 to 8 seconds, teacher 2026-11-07): its
+      // piece wanders over the columns, settles on its pick, then drops.
+      const target = cpuMove(board, (turn + 1) as 1 | 2, level);
+      const wait = (5000 + Math.random() * 3000) * pace(settings);
+      const settle = window.setTimeout(() => { if (live) { pointedAt.current = Date.now(); setHeldCol(target); } }, wait - 1200);
+      const timer = window.setTimeout(() => { if (live) place(target); }, wait);
+      return () => { live = false; window.clearTimeout(timer); window.clearTimeout(settle); };
     }
     void ask({ player: player.name, count: setup.perTurn, turn: { player, avatar: discs.length >= 2 ? discs[picks[turn]]?.image : pieceImage(theme, `piece-${turn + 1}`) } }).then((ok) => {
       if (!live) return;
@@ -206,17 +211,18 @@ export default function FourInARow() {
   // The held piece wanders across the columns until the player points at
   // one, as if moving it along before choosing (teacher, 2026-11-06).
   const anyPick = phase === 'play' && (step === 'pick' || step === 'pop') && player?.kind !== 'cpu' && !remoteTurn;
+  const showHeld = phase === 'play' && !remoteTurn && (anyPick || (player?.kind === 'cpu' && step === 'answer'));
   const [heldCol, setHeldCol] = useState(3);
   const pointedAt = useRef(0);
   const hoverCol = (c: number) => { pointedAt.current = Date.now(); setHeldCol(c); };
   useEffect(() => {
-    if (!anyPick || settings.motion === 'still') return;
+    if (!showHeld || settings.motion === 'still') return;
     const id = window.setInterval(() => {
       if (Date.now() - pointedAt.current < 2500) return;
       setHeldCol((c) => Math.max(0, Math.min(COLS - 1, c + (Math.random() < 0.5 ? -1 : 1) * (c === 0 ? -1 : c === COLS - 1 ? -1 : 1))));
     }, 650);
     return () => window.clearInterval(id);
-  }, [anyPick, settings.motion]);
+  }, [showHeld, settings.motion]);
   const Disc = ({ who, size = '82%' }: { who: 1 | 2; size?: string }) => {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
@@ -252,7 +258,7 @@ export default function FourInARow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.where === 'other' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.where === 'other' && team.players[1]?.kind !== 'cpu' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             // Each player's team picture is their piece (teacher, 2026-11-06):
             // one picture, picked on the player card, the same on the board.
@@ -268,8 +274,8 @@ export default function FourInARow() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceRow label={t('fr.where')} value={setup.where} onChange={(v) => change({ where: v })}
-                options={[{ value: 'here', label: t('fr.where.here') }, { value: 'other', label: t('fr.where.other') }]} />
+              {team.players[1]?.kind !== 'cpu' && <ChoiceRow label={t('fr.where')} value={setup.where} onChange={(v) => change({ where: v })}
+                options={[{ value: 'here', label: t('fr.where.here') }, { value: 'other', label: t('fr.where.other') }]} />}
               <ChoiceRow label={t('fr.first')} value={setup.first} onChange={(v) => change({ first: v })}
                 options={[{ value: 'p1', label: t('fr.first.p1') }, { value: 'p2', label: t('fr.first.p2') }, { value: 'random', label: t('fr.first.random') }]} />
               <Slider label={t('fr.perTurn')} hint={t('fr.perTurnHint')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
@@ -313,7 +319,7 @@ export default function FourInARow() {
                 const popping = step === 'pop';
                 const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
                 const canPick = phase === 'play' && (step === 'pick' || popping) && player?.kind !== 'cpu' && !remoteTurn && !full;
-                const holding = anyPick && heldCol === c;
+                const holding = showHeld && heldCol === c;
                 return (
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
                     onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
@@ -365,7 +371,7 @@ export default function FourInARow() {
                         <motion.span key={`${r}-${c}-${cell}-${popped?.col === c ? popped.id : 0}`} className={`w-[84%] h-[84%] flex items-center justify-center ${k >= 0 && !still ? 'fr-win' : ''}`} style={k >= 0 ? { animationDelay: `${k * 0.12}s` } : undefined}
                           initial={isLast && !still ? { y: `-${(r + 1) * 119}%` } : popped?.col === c && !still ? { y: '-119%' } : false}
                           animate={isLast && !still ? { y: ['-' + (r + 1) * 119 + '%', '0%', '-13%', '0%', '-4%', '0%'] } : { y: '0%' }}
-                          transition={{ duration: 0.32 + r * 0.06, times: [0, 0.58, 0.72, 0.84, 0.93, 1], ease: 'easeIn' }}>
+                          transition={{ duration: 0.75 + r * 0.12, times: [0, 0.62, 0.75, 0.86, 0.94, 1], ease: 'easeIn' }}>
                           <Disc who={cell} size="100%" />
                         </motion.span>
                       )}

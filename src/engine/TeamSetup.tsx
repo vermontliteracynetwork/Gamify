@@ -170,12 +170,10 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
             )}
             {s.kind === 'cpu' ? (
               // The computer's level sits where its name would be (teacher, 2026-11-06).
-              <div role="radiogroup" aria-label={t('teams.level')} className="flex-1 min-w-0 flex p-0.5 rounded-pill border-[2px] border-border bg-surface">
-                {(['easy', 'medium', 'hard'] as const).map((lv) => (
-                  <button key={lv} type="button" role="radio" aria-checked={level === lv} onClick={() => setLevel(lv)}
-                    className={`flex-1 min-h-10 px-2 rounded-pill text-sm font-bold motion-safe:transition-colors ${level === lv ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(`opt.${lv}`)}</button>
-                ))}
-              </div>
+              <select value={level} onChange={(e) => setLevel(e.target.value as CpuLevel)} aria-label={t('teams.level')}
+                className="flex-1 min-w-0 min-h-11 px-2 rounded-input border-[2px] border-border bg-surface font-bold">
+                {(['easy', 'medium', 'hard'] as const).map((lv) => <option key={lv} value={lv}>{t(`opt.${lv}`)}</option>)}
+              </select>
             ) : (
               <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
