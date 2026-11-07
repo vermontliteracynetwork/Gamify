@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowArcLeft, ArrowArcRight, Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
+import { Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -24,8 +24,9 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
+import { pace } from '../../engine/pace';
+import type { ThemeItem } from '../../theme/types';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
-import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
 import {
   center, clampAngle, colorsLeft, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, nextShot, placeShot, pushRow, R, rescue,
@@ -77,15 +78,16 @@ export default function BubblePop() {
   const doubleNext = useRef(false);
   // Held power-ups (teacher, 2026-10-31): ready for the next turn of shots,
   // listed under the score, gone after that turn.
-  const held = useHeldPowerUps();
-  function applyItem(i: number) {
-    const it = held.use(i);
-    if (!it) return;
+  // Earned power-ups switch on by themselves at the start of the next shots
+  // (teacher, 2026-11-07): no tray, just a message saying what happened.
+  function applyNow(it: ThemeItem) {
     playEffect('win', settings);
+    setCallout({ id: Date.now(), text: `${it.name}!` });
     if (it.ability === 'shots') setShots((n) => n + powers.amount(it));
     if (it.ability === 'bonus') setScore((sc) => sc + powers.amount(it));
     if (it.ability === 'mystery') setScore((sc) => sc + 10 * (1 + Math.floor(Math.random() * 10)));
-    if (it.ability === 'double') { doubleNext.current = true; setNote(t('bm.doubleReady')); }
+    if (it.ability === 'double') doubleNext.current = true;
+    setNote(t('bp.powerOn', { name: it.name }));
   }
   const svg = useRef<SVGSVGElement>(null);
   const flyer = useRef<SVGGElement>(null);
@@ -108,15 +110,13 @@ export default function BubblePop() {
   async function load(done: number) {
     setStep('question');
     setNote(done === 0 ? '' : t('bp.answer'));
-    held.endTurn(); // unused power-ups are gone after the turn
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
     const it = powers.grant(true);
     setShots(plan.current.shots);
-    if (it) held.earn('solo', it);
-    held.beginTurn('solo');
     setNote('');
     setStep('aim');
+    if (it) window.setTimeout(() => applyNow(it), 900 * pace(settings));
   }
 
   function finish() {
@@ -131,7 +131,7 @@ export default function BubblePop() {
     if (!hits.length || still) return;
     const id = ++shotCount.current;
     setFx((f) => [...f, { id, hits, kind, board: from }]);
-    window.setTimeout(() => setFx((f) => f.filter((x) => x.id !== id)), 700);
+    window.setTimeout(() => setFx((f) => f.filter((x) => x.id !== id)), 950);
   }
 
   function shoot(a = angle) {
@@ -141,7 +141,6 @@ export default function BubblePop() {
     setStep('fly');
     playEffect('whoosh', settings);
     const land = () => settle(cell);
-    if (still) { land(); return; }
     // The bubble flies along the aim path at a steady speed (bouncing off walls).
     const lens = [0];
     for (let i = 1; i < path.length; i++) lens.push(lens[i - 1] + Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y));
@@ -316,7 +315,7 @@ export default function BubblePop() {
       {(phase === 'play' || phase === 'end') && (
         // The board fills the play space like the reference games, the same in
         // full screen; small controls sit on top (teacher, 2026-10-31).
-        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center lg:gap-4">
+        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center lg:gap-4 lg:pr-44">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
@@ -327,7 +326,7 @@ export default function BubblePop() {
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="grid gap-2 min-w-0">
-            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem] [--bp-side:1.5rem] lg:[--bp-side:300px]"
+            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem] [--bp-side:1.5rem] lg:[--bp-side:470px]"
               style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `min(calc(100vw - var(--bp-side)), calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H}))`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
@@ -336,6 +335,7 @@ export default function BubblePop() {
                 onPointerUp={(e) => { if (!pressed.current) return; pressed.current = false; const a = toAngle(e); setAngle(a); shoot(a); }}
                 onPointerLeave={() => { pressed.current = false; }}>
                 <defs>
+                  <radialGradient id="bp-gold-glow"><stop offset="0%" stopColor="#ffe680" stopOpacity="0.95" /><stop offset="55%" stopColor="#ffc93c" stopOpacity="0.45" /><stop offset="100%" stopColor="#ffc93c" stopOpacity="0" /></radialGradient>
                   {patterns.map((src, i) => (src || PUZZLE_PACK_CLEARED) && (
                     <pattern key={i} id={`bp-art-${i}`} patternContentUnits="objectBoundingBox" width="1" height="1"><image href={src ?? `/classic/bubble-pop/ball-${i}.webp`} width="1" height="1" preserveAspectRatio={src ? 'xMidYMid slice' : 'xMidYMid meet'} /></pattern>
                   ))}
@@ -348,7 +348,7 @@ export default function BubblePop() {
                 }))}
                 {fx.map((f) => f.hits.map(([r, c, k]) => {
                   const p = center(f.board, r, c);
-                  return bubble(k, p.x, p.y, `fx-${f.id}-${r}-${c}`, 'bp-fx', { animation: f.kind === 'pop' ? 'bp-pop 0.3s ease-out forwards' : 'bp-fall 0.6s ease-in forwards', pointerEvents: 'none' });
+                  return bubble(k, p.x, p.y, `fx-${f.id}-${r}-${c}`, 'bp-fx', { animation: f.kind === 'pop' ? 'bp-pop 0.7s ease-in forwards' : 'bp-fall 0.8s ease-in forwards', pointerEvents: 'none' });
                 }))}
                 {canAim && aim.path.length > 1 && (
                   <>
@@ -366,9 +366,13 @@ export default function BubblePop() {
                 )}
                 <AnimatePresence>
                   {gain && (
-                    <motion.text key={gain.id} x={gain.x} textAnchor="middle" fontSize={1.6} fontWeight={800} fill="#fff" stroke="#000" strokeWidth={0.12} paintOrder="stroke"
-                      initial={{ y: gain.y, opacity: 1 }} animate={{ y: gain.y - 3, opacity: 0 }} transition={{ duration: still ? 0.01 : 1 }}
-                      onAnimationComplete={() => setGain(null)}>+{gain.n}</motion.text>
+                    // The points pop up big, in gold, with a glowing halo (teacher, 2026-11-07).
+                    <motion.g key={gain.id} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                      initial={{ y: gain.y, opacity: 0, scale: 0.4 }} animate={{ y: [gain.y, gain.y - 1.5, gain.y - 4], opacity: [0, 1, 0], scale: [0.4, 1.25, 1] }}
+                      transition={{ duration: still ? 0.6 : 1.4, times: [0, 0.3, 1] }} onAnimationComplete={() => setGain(null)}>
+                      <circle cx={gain.x} cy={0} r={2.6} fill="url(#bp-gold-glow)" />
+                      <text x={gain.x} y={0.7} textAnchor="middle" fontSize={2.4} fontWeight={900} fill="#ffd23f" stroke="#000" strokeWidth={0.16} paintOrder="stroke" style={{ filter: 'drop-shadow(0 0 0.5px #fff3b0)' }}>+{gain.n}</text>
+                    </motion.g>
                   )}
                 </AnimatePresence>
               </svg>
@@ -382,19 +386,15 @@ export default function BubblePop() {
               </AnimatePresence>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.left')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a - 0.08))}><ArrowArcLeft weight="bold" size={26} /></button>
               <button type="button" className={buttonClasses('primary', 'h-14 !px-6 !text-lg')} disabled={!canAim} onClick={() => shoot()}><Crosshair weight="bold" size={24} />{t('bp.shoot')}</button>
-              <button type="button" className={buttonClasses('secondary', 'w-14 h-14 !px-0')} aria-label={t('bp.right')} disabled={!canAim} onClick={() => setAngle((a) => clampAngle(a + 0.08))}><ArrowArcRight weight="bold" size={26} /></button>
             </div>
           </section>
-          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start lg:pt-14">
+          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
             <SoloPanel score={score} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })}
               dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
               status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : step === 'question' ? t('bp.answer') : undefined} note={note} />
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
-            <div className="hidden lg:block"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
           </div>
-          <div className="lg:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={bubblePopManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} /></div>
           </div>
         </div>
       )}

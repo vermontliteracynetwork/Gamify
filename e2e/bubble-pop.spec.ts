@@ -26,7 +26,7 @@ test('Bubble Pop: a right answer loads bubbles; aim, shoot, and the bubble lands
   await expect(shoot).toBeEnabled({ timeout: 8000 });
   await expect(page.getByRole('img', { name: '3 bubbles left' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
-  await page.getByRole('button', { name: 'Aim left' }).click();
+  await page.keyboard.press('ArrowLeft');
   await page.screenshot({ path: `test-results/bubble-aim-${info.project.name}.png` });
   // Tap on the board to aim there and shoot.
   const board = page.getByRole('img', { name: /^Bubble board/ });

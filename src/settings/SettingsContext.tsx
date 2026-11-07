@@ -21,7 +21,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const settings = useMemo(() => ({ ...saved, ...overrides }), [saved, overrides]);
 
   useEffect(() => {
-    data.getSetting<Partial<PlayerSettings>>(KEY).then((saved) => { if (saved) setSettings(withDefaults(saved)); });
+    data.getSetting<Partial<PlayerSettings>>(KEY).then(async (saved) => {
+      if (!saved) return;
+      // Once (teacher, 2026-11-07): Still saved back when the device's Reduce
+      // Motion picked it turns into Full, so the games move again. Choosing
+      // Still in Settings after this keeps it.
+      if (saved.motion === 'still' && !(await data.getSetting<boolean>('motion-reviewed'))) {
+        saved = { ...saved, motion: 'full', calm: false };
+        void data.setSetting(KEY, saved);
+      }
+      void data.setSetting('motion-reviewed', true);
+      setSettings(withDefaults(saved));
+    });
   }, []);
 
   // Page-wide effects read by CSS in index.css (text size, contrast, motion...).
