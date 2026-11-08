@@ -47,14 +47,18 @@ export function trailFor(path: string, teacher: boolean, label?: string): Crumb[
   return name ? [home, { label: name }] : null;
 }
 
+const SHOW_TRAIL = false;
+
 export default function Breadcrumbs() {
   const { pathname, hash } = useLocation();
   const { teacher } = useSignedIn();
   // Mounts with each new page (it sits inside the page's keyed wrapper), so
   // every page opens at the top unless the link points to a spot on it.
   useEffect(() => { if (!hash) window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // No visual breadcrumb trail (teacher, 2026-11-08); this only keeps
+  // every page opening at the top.
   const label = useSyncExternalStore((l) => { listeners.add(l); return () => { listeners.delete(l); }; }, () => (named?.path === pathname ? named.label : undefined));
-  const trail = trailFor(pathname, !!teacher, label);
+  const trail = SHOW_TRAIL ? trailFor(pathname, !!teacher, label) : null;
   if (!trail) return null;
   return (
     <nav aria-label={t('crumbs.label')} className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 -mb-3 relative z-10">

@@ -121,3 +121,7 @@ line that fits, and add each new preference the same turn she says it.
 - Four in a Row (2026-11-07): the computer's level is a dropdown on its card; no "Where is player 2?" when player 2 is the computer; pieces drop more slowly; the computer's turn takes 5 to 8 seconds, its piece wandering the columns before it drops.
 - Power-up cards (2026-11-07, every game): the picture big and centered on top (gently bobbing), the name under it, a Use button; what it does lives in hover text, not on the card.
 - Four in a Row (2026-11-07): no Gas Tank piece; the column number tabs are tall rectangles reaching to the top of the board, the held piece peeking above them; scoreboards show each player's piece, not a team icon.
+- No visual breadcrumb trail anywhere (2026-11-08).
+- Power-ups everywhere switch on by themselves at the start of the earner's next turn, with a big centered message (picture, "X is on!", what it does); no power-up box to tap (2026-11-07/08).
+- Every game opens in the Classic theme; another theme lasts only for that visit (2026-11-08).
+- Setup power-up cards: picture and name only, what it does in hover text, sized so they all fit with no scroll (2026-11-08). NO scroll ever: always resize to fit.

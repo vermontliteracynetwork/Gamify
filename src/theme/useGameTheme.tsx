@@ -31,7 +31,8 @@ export function useGameTheme(gameId: string) {
   const listed = offered.length > 1 ? offered : all;
   const themes = teacher ? listed : listed.filter(playable);
   const [id, setId] = useState(themes[0].id);
-  useEffect(() => { data.getSetting<string>(`theme:${gameId}`).then((v) => { if (v) setId(v); }); }, [gameId]);
+  // Every game opens in Classic (teacher, 2026-11-08); a pick lasts for this visit.
+  useEffect(() => { setId(themes[0].id); }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
   const chosen = themes.find((th) => th.id === id && playable(th)) ?? themes[0];
   const { settings } = useSettings();
   const theme = settings.calm ? calmVersion(chosen) : chosen;

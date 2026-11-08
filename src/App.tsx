@@ -1,10 +1,10 @@
 import { Suspense, useEffect, useState } from 'react';
+import Breadcrumbs from './ui/Breadcrumbs';
 import { lazyPage } from './lib/lazyPage';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from './ui/useReducedMotion';
 import NavBar from './ui/NavBar';
-import Breadcrumbs from './ui/Breadcrumbs';
 import Home from './student/Home';
 import { SettingsProvider } from './settings/SettingsContext';
 import PublicHome from './public/PublicHome';

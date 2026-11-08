@@ -2222,6 +2222,8 @@ export const en = {
   'bp.shots.one': '1 bubble left',
   'bp.board': 'Board {n}',
   'bp.roundOf': 'Round {n} of {total}',
+  'pu.on': '{name} is on!',
+  'pu.used': '{name} is on. {role}',
   'bp.powerOn': '{name} is on for these shots!',
   'bp.shoot': 'Shoot the bubble',
   'bp.left': 'Aim left',

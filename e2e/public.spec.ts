@@ -292,7 +292,7 @@ test('Status page checks each part; the accessibility report prints as a VPAT-st
   await expect(page.getByRole('cell', { name: /^1\.4\.3 Contrast/ })).toBeVisible();
 });
 
-test('breadcrumbs lead back, every new page opens at the top, and paid plans list every highlight', async ({ page }, info) => {
+test('every new page opens at the top, and paid plans list every highlight', async ({ page }, info) => {
   const problems = watch(page);
   await page.goto('/blog');
   await expect(page.locator('main a[href^="/blog/"]').last()).toBeVisible();
@@ -300,12 +300,9 @@ test('breadcrumbs lead back, every new page opens at the top, and paid plans lis
   await page.evaluate(() => window.scrollTo(0, 1500));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
   await page.locator('main a[href^="/blog/"]').last().click();
-  const crumbs = page.getByRole('navigation', { name: 'You are here' });
-  await expect(crumbs.getByRole('link', { name: 'Blog' })).toBeVisible();
+  // No visual breadcrumb trail (teacher, 2026-11-08).
+  await expect(page.getByRole('navigation', { name: 'You are here' })).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-  await page.screenshot({ path: `test-results/crumbs-${info.project.name}.png` });
-  await crumbs.getByRole('link', { name: 'Blog' }).click();
-  await expect(page).toHaveURL(/\/blog$/);
   await page.goto('/pricing');
   await expect(page.getByText('A game for each student: pick the game and the questions, one student at a time')).toBeVisible();
   await expect(page.getByText('Live class lobby: compete on a leaderboard or work together toward one class goal')).toBeVisible();

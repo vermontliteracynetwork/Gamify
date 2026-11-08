@@ -40,7 +40,7 @@ test.beforeEach(async ({ page }) => { await noPowerUps(page, 'bowling'); });
 test('Bowling with calm motion: sliders aim and spin, then Throw', async ({ page }) => {
   test.setTimeout(60_000);
   // Still motion (Settings) swaps the swinging aim for sliders.
-  await page.addInitScript(() => { const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'); localStorage.setItem('gamify:settings', JSON.stringify({ ...s, 'player-settings': { ...(s['player-settings'] ?? {}), motion: 'still', calm: true } })); });
+  await page.addInitScript(() => { const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'); localStorage.setItem('gamify:settings', JSON.stringify({ ...s, 'motion-reviewed': true, 'player-settings': { ...(s['player-settings'] ?? {}), motion: 'still', calm: true } })); });
   await openSetup(page, '/games/bowling');
   await finishSetup(page);
   await answerShare(page, true);

@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { pace } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
@@ -31,29 +32,39 @@ export function roleOf(manifest: GameManifest, it: ThemeItem) {
   return a ? `${a.label}: ${a.hint}` : '';
 }
 
+// Earned power-ups switch on by themselves at the start of the player's next
+// turn (teacher, 2026-11-07): no box to tap, just a big centered message with
+// the power-up's picture so everyone sees what happened.
 export function PowerUpTray({ manifest, items, onUse, disabled = false }: { manifest: GameManifest; items: ThemeItem[]; onUse: (index: number) => void; disabled?: boolean }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
-  if (!items.length) return null;
+  const [shown, setShown] = useState<{ id: number; item: ThemeItem } | null>(null);
+  const tried = useRef(new Set<ThemeItem>());
+  const next = items.findIndex((it) => !tried.current.has(it));
+  useEffect(() => {
+    if (disabled || next < 0) return;
+    const id = window.setTimeout(() => {
+      const it = items[next];
+      tried.current.add(it); // one that needs a tap on the board (like a magnet) is not retried
+      setShown({ id: Date.now(), item: it });
+      onUse(next);
+    }, 900 * pace(settings));
+    return () => window.clearTimeout(id);
+  }, [disabled, next, items]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!shown) return; const id = window.setTimeout(() => setShown(null), 2400); return () => window.clearTimeout(id); }, [shown]);
   return (
-    <section className="bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('pu.tray')}>
-      <h2 className="text-xs font-bold uppercase tracking-wider text-muted px-1">{t('pu.tray')}</h2>
-      <ul className="grid gap-2 list-none p-0 m-0">
-        <AnimatePresence initial={false}>
-          {items.map((it, i) => (
-            <motion.li key={`${it.id}-${i}`} initial={still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={still ? { opacity: 0 } : { scale: 0.6, opacity: 0 }}>
-              {/* The power-up's picture is the star of the card, its name under it,
-                  and what it does in hover text (teacher, 2026-11-07). */}
-              <button type="button" disabled={disabled} onClick={() => onUse(i)} aria-label={t('pu.use', { name: it.name, role: roleOf(manifest, it) })} data-tip={roleOf(manifest, it)}
-                className={`tile-wiggle w-full grid justify-items-center gap-1 text-center rounded-input border-[2.5px] border-border bg-accent px-2 pt-2 pb-2.5 disabled:opacity-60 ${disabled || still ? '' : 'hover:-translate-y-0.5'} transition-transform`}>
-                <span className={disabled || still ? '' : 'pu-bob'}><ItemArt item={it} size={76} still={still} /></span>
-                <span className="font-display font-bold text-lg leading-tight">{it.name}</span>
-                <span className="rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold">{t('pu.useShort')}</span>
-              </button>
-            </motion.li>
-          ))}
-        </AnimatePresence>
-      </ul>
-    </section>
+    <AnimatePresence>
+      {shown && (
+        <motion.div key={shown.id} role="status" aria-live="polite" aria-label={t('pu.used', { name: shown.item.name, role: roleOf(manifest, shown.item) })}
+          className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 pointer-events-none grid justify-items-center gap-1 bg-surface border-[3px] border-border rounded-panel px-6 py-4 text-center"
+          style={{ boxShadow: '0 0 0 6px rgba(253,253,148,0.6), var(--shadow-sticker-lg)' }}
+          initial={still ? { opacity: 0 } : { scale: 0.4, opacity: 0, rotate: -6 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 16 }}>
+          <span className={still ? '' : 'pu-bob'}><ItemArt item={shown.item} size={84} still={still} /></span>
+          <span className="font-display text-2xl font-bold">{t('pu.on', { name: shown.item.name })}</span>
+          <span className="text-sm font-bold max-w-[22rem]">{roleOf(manifest, shown.item)}</span>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

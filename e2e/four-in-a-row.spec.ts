@@ -96,13 +96,12 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   await expect(page.getByText('The computer is choosing...')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 15000 });
   await answer();
-  const use = page.getByRole('button', { name: /^Use Double Drop/ });
-  await expect(use).toBeEnabled({ timeout: 15000 });
+  // Earned power-ups switch on by themselves on the next turn (teacher, 2026-11-07).
+  await expect(page.getByRole('status', { name: /^Double Drop is on/ })).toBeVisible({ timeout: 15000 });
   await page.screenshot({ path: `test-results/four-power-${info.project.name}.png` });
   // The board never runs off the screen.
   const box = (await page.getByRole('grid').first().boundingBox())!;
   expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-  await use.click();
   await page.getByRole('button', { name: 'Drop in column 3' }).click();
   await expect(page.getByRole('button', { name: 'Drop in column 5' })).toBeEnabled({ timeout: 4000 });
   await page.getByRole('button', { name: 'Drop in column 5' }).click();

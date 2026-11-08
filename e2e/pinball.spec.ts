@@ -56,18 +56,16 @@ test('Pinball: a power-up waits for your next turn under the scores', async ({ p
   await finishSetup(page);
   await answer();
   await expect(page.getByRole('status').filter({ hasText: 'Ready on your next turn' })).toBeVisible({ timeout: 8000 });
-  // Not usable this turn.
-  await expect(page.getByRole('button', { name: /^Use Golden Ball/ })).toHaveCount(0);
+  // Not on this turn.
+  await expect(page.getByRole('status', { name: /^Golden Ball is on/ })).toHaveCount(0);
   await page.getByRole('button', { name: 'Shoot up lane 3' }).click();
   await page.waitForTimeout(400);
   await page.getByRole('button', { name: 'Shoot!' }).click();
   await answer();
-  const use = page.getByRole('button', { name: /^Use Golden Ball: Double points: / });
-  await expect(use).toBeVisible({ timeout: 8000 });
+  // It switches on by itself on the next turn (teacher, 2026-11-07).
+  await expect(page.getByRole('status', { name: /^Golden Ball is on/ })).toBeVisible({ timeout: 8000 });
   await page.screenshot({ path: `test-results/pinball-held-${info.project.name}.png` });
-  await use.click();
-  await expect(use).toHaveCount(0);
-  await expect(page.getByText('Double points', { exact: true })).toBeVisible();
+  await expect(page.getByText('Double points', { exact: true }).first()).toBeVisible();
   expect(problems).toEqual([]);
 });
 
