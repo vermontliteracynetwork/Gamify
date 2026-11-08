@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { impact } from '../../engine/impact';
 import { pace } from '../../engine/pace';
 import { useSearchParams } from 'react-router-dom';
 import { makeGameCode } from '../../data/gameCodes';
@@ -173,7 +174,7 @@ export default function FourInARow() {
     setBoard(next); setLast(null); setPopped({ col, id: Date.now() });
     playEffect('whoosh', settings);
     const win = winningLine(next);
-    if (win) { setLine(win); setPhase('end'); playEffect('win', settings); return; }
+    if (win) { setLine(win); setPhase('end'); playEffect('win', settings); impact(settings, true); return; }
     setStep('pick');
   }
 

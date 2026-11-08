@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
@@ -196,6 +197,7 @@ export default function BubblePop() {
     if (filled(b) === 0) {
       points += 100; message = t('bp.cleared');
       playEffect('win', settings);
+      impact(settings);
       if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: 60, spread: 70, origin: { y: 0.4 }, disableForReducedMotion: true });
       b = makeBoard(level + 1); setLevel((l) => l + 1); misses = 0;
     } else if (misses >= NO_POP_PUSH) {

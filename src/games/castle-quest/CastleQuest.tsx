@@ -1,4 +1,5 @@
 import '@fontsource/chicle/400.css';
+import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { pace } from '../../engine/pace';
@@ -234,7 +235,7 @@ export default function CastleQuest() {
     }
     const kind = kinds[posRef.current[who]];
     if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); say(t('cq.loseTurn'), 'lose', true); await sleep(ms(1600)); return endTurn(); }
-    if (kind === 'again') { playEffect('win', settings); say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
+    if (kind === 'again') { playEffect('win', settings); impact(settings); say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
     return endTurn();
   }
   // A hidden power-up: the shield goes up at once (it starts at the reveal);
@@ -273,6 +274,7 @@ export default function CastleQuest() {
     await sleep(still ? 400 : 3000);
     place(to);
     buzz(80, settings);
+    impact(settings, true);
     await sleep(ms(500));
     setSwirl(null);
     say(t('cq.tornadoDone'));
@@ -304,6 +306,7 @@ export default function CastleQuest() {
     await sleep(still ? 500 : 4200);
     setWheel((w) => (w ? { ...w, done: true } : w));
     playEffect(forward ? 'win' : 'miss', settings);
+    impact(settings);
     await sleep(ms(1500));
     setWheel(null);
     if (target !== me && shieldRef.current[target]) { say(t('cq.shieldBlocks'), 'shield'); await sleep(ms(1400)); setStep('roll'); return; }
@@ -321,6 +324,7 @@ export default function CastleQuest() {
     if (done >= 0) {
       setWinner(s.players[done]);
       playEffect('win', settings);
+      impact(settings, true);
       if (settings.celebrations !== 'off' && !still) {
         void confetti({ particleCount: 160, spread: 110, origin: { x: 0.5, y: 0.3 }, colors: SQUARE_COLORS, disableForReducedMotion: true });
         window.setTimeout(() => void confetti({ particleCount: 120, spread: 80, origin: { x: 0.3, y: 0.4 }, colors: SQUARE_COLORS, disableForReducedMotion: true }), 500);

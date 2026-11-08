@@ -542,3 +542,7 @@ html[data-motion="still"] .pop-gold { animation: none; }
 .cq-idle { animation: cq-idle 2.2s ease-in-out infinite; }
 @keyframes cq-idle { 0%, 100% { translate: 0 0; rotate: 0deg; } 30% { translate: 0 -6%; rotate: -4deg; } 65% { translate: 0 1%; rotate: 3deg; } }
 html[data-motion="still"] .cq-idle { animation: none; }
+.impact-punch { animation: impact-punch 0.38s cubic-bezier(.3,1.6,.5,1); }
+@keyframes impact-punch { 0% { scale: 1; } 35% { scale: 1.025; } 100% { scale: 1; } }
+.impact-shake { animation: impact-shake 0.36s linear; }
+@keyframes impact-shake { 0%, 100% { translate: 0 0; } 20% { translate: -5px 2px; } 40% { translate: 5px -2px; } 60% { translate: -3px 1px; } 80% { translate: 3px 0; } }
