@@ -1172,6 +1172,8 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 102 | **The teacher picks every power-up.** Every game shows its power-ups as picture cards on one page; tap one to turn it off. Power-ups that take points never show up when the other team has none. | Teacher control without a settings maze, and no mean surprises for a team at zero | Teacher, 2026-11-01 |
 | 103 | **Your voice, your lesson.** Record a question in your own voice (or add a sound clip), make any question true or false in one tap, and give a set a short teach card that is shown and read aloud before the game starts. | Pre-readers hear their own teacher; every game starts with the skill, not just the score | Market research, 2026-11-01 |
 
+| 104 | **A classic board game on the smart board.** A real tabletop race board: answer, roll, hop square by square. A spinning forward or back wheel, a tornado that swirls every piece, and a die your class can redraw on one page. | Familiar board-game fun with a question on every turn; "your class designs the dice" | Teacher, 2026-11-08 |
+
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
 Direct from you (2026-10-24): a running list of blog-style articles for the
@@ -1243,3 +1245,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 60 | **Earn three stars: goal setting with Match Three** | Students set a star goal before playing, then reflect on how close they came and what helped (special pieces, careful swaps, right answers). A short SEL routine. | Match Three, Solo, any set | Golden Rule pass, 2026-10-31; grades 1-8 |
 | 61 | **Fish facts science warm-up with Cast and Catch** | Project the game, cast together, and read each fish fact aloud; students keep a class fish book of the kinds found and research one that is still hiding. | Cast and Catch, Live or Solo, any set | Golden Rule pass, 2026-11-01; grades K-5 |
 | 62 | **Teach, Then Play** | Write a one-line teach card for the skill ("A noun is a person, place or thing"), record the questions in your own voice, then play any game; the card is read aloud before the first turn. | Teach cards, recorded questions | Development, 2026-11-01; K-3 |
+- Board Game review race (2026-11-08): teams answer to roll; use Lose a turn and Roll again squares to talk about chance and fairness, then let students design their own die faces (counting dots stays the same).
