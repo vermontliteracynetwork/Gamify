@@ -230,31 +230,22 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'castle-quest': {
-      // Board Game: a winding sand trail over hexagon meadows, a bridge over
-      // the river, and the castle built from stacked stone pieces.
-      const S = 0.2, W = 65 * S, STEP = 51 * S, SIDE = 22 * S;
-      const at = (r: number, c: number) => ({ x: -4 + c * W + (r % 2 ? W / 2 : 0), y: 14 + r * STEP });
-      const trail = new Set(['4,0', '4,1', '4,2', '4,3', '4,4', '4,5', '3,5', '2,5', '2,4', '2,3', '2,2', '2,1', '1,1', '0,2', '0,3', '0,4', '0,5']);
-      const water = new Set(['3,0', '3,1', '3,2', '3,3', '3,4']);
-      const tiles = Array.from({ length: 5 }, (_, r) => Array.from({ length: 9 }, (_, c) => [r, c] as const)).flat();
-      const stack = (r: number, c: number, blocks: string[], roof: string) => {
-        const p = at(r, c); let y = p.y;
-        return [...blocks.map((n) => { y -= SIDE; return { n, x: p.x, y, h: 89 * S }; }), { n: roof, x: p.x, y: y - (roof === 'stoneRing' ? 9 : 25) * S, h: (roof === 'stoneRing' ? 76 : 92) * S }];
-      };
-      const castle = [...stack(0, 7, ['stoneWindows', 'stoneWindowLeft', 'stoneWindows'], 'stoneRoofTall'), ...stack(0, 8, ['stoneDoorWindow', 'stoneWindows', 'stoneWindowBlinds', 'stoneWindows'], 'stoneRoofPointy'), ...stack(1, 7, ['stoneGateLeft', 'stoneWindows'], 'stoneRing'), ...stack(1, 8, ['stoneWindowRight', 'stoneWindows'], 'stoneRing')];
+      // Board Game (redesign 2026-11-08): the flat classic board of squares,
+      // two round pieces, a die and the finish flag, in the vision board colors.
+      const cols = ['#BCD9E2', '#F9CC14', '#D35252', '#9AB582'];
+      const sq: [number, number][] = [];
+      for (let k = 0; k < 7; k++) sq.push([k, 0]); sq.push([6, 1]);
+      for (let k = 6; k >= 0; k--) sq.push([k, 2]); sq.push([0, 3]);
+      for (let k = 0; k < 7; k++) sq.push([k, 4]);
       return (
-        <div className={base} style={{ background: 'linear-gradient(#bfe6ff, #8fd0f3 50%, #6fbfe8)' }} aria-hidden="true">
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
-            <ellipse cx="22" cy="7" rx="8" ry="2.4" fill="#fff" opacity="0.9" /><ellipse cx="60" cy="5" rx="6" ry="2" fill="#fff" opacity="0.8" />
-            {tiles.map(([r, c]) => { const p = at(r, c); const k = `${r},${c}`; const n = trail.has(k) ? 'tileSand' : water.has(k) ? 'tileWater' : (r <= 1 && c >= 7) ? 'tileStone' : 'tileGrass'; return <image key={k} href={`/classic/castle-quest/world/${n}.png`} x={p.x} y={p.y} width={W} height={89 * S} />; })}
-            <line x1={at(4, 2).x + W / 2} y1={at(4, 2).y + 6.6} x2={at(2, 2).x + W / 2} y2={at(2, 2).y + 6.6} stroke="#8a5a2b" strokeWidth="4.6" strokeLinecap="round" />
-            <line x1={at(4, 2).x + W / 2} y1={at(4, 2).y + 6.6} x2={at(2, 2).x + W / 2} y2={at(2, 2).y + 6.6} stroke="#d59a5c" strokeWidth="3.6" strokeDasharray="1.1 0.5" />
-            {[[0, 0], [1, 4], [0, 6], [2, 7], [3, 7], [4, 7], [3, 8]].map(([r, c], i) => { const p = at(r, c); return <image key={i} href={`/classic/castle-quest/world/${i % 2 ? 'treeGreen_high' : 'pineGreen_high'}.png`} x={p.x + 3.5} y={p.y - 9} width={6} height={18} />; })}
-            {castle.map((b, i) => <image key={i} href={`/classic/castle-quest/castle/${b.n}.png`} x={b.x} y={b.y} width={W} height={b.h} />)}
-            <image href="/classic/castle-quest/heroes/blue_knight.webp" x={at(4, 4).x + 2} y={at(4, 4).y - 4} width="9" height="9" />
-            <image href="/classic/castle-quest/heroes/red_mage.webp" x={at(2, 4).x + 2} y={at(2, 4).y - 4} width="9" height="9" />
-            <image href="/classic/castle-quest/powerups/chest.webp" x={at(0, 3).x + 3} y={at(0, 3).y - 1} width="7" height="7" />
-            <image href="/classic/castle-quest/powerups/tornado.webp" x={at(2, 1).x + 3} y={at(2, 1).y - 1} width="7" height="7" />
+        <div className={base} style={{ backgroundColor: '#F1DFBB', backgroundImage: 'radial-gradient(#FAE9DF 18%, transparent 19%)', backgroundSize: '14px 14px' }} aria-hidden="true">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid meet">
+            <rect x="9" y="3" width="82" height="56" rx="5" fill="#FAE9DF" stroke="#474241" strokeWidth="1.4" />
+            {sq.map(([x, y], i) => <rect key={i} x={12 + x * 11} y={5 + y * 10.4} width="9.4" height="9.4" rx="1.6" fill={i === 0 ? '#9AB582' : i === sq.length - 1 ? '#F9CC14' : i === 9 ? '#474241' : cols[i % 4]} stroke="#474241" strokeWidth="0.9" transform={`rotate(${((i * 37) % 7) - 3} ${16.7 + x * 11} ${9.7 + y * 10.4})`} />)}
+            <g transform="translate(81.5 47.5)"><rect x="-1" y="-3" width="1" height="7" fill="#474241" /><path d="M0 -3 H5 V0.5 H0 Z" fill="#fff" stroke="#474241" strokeWidth="0.5" /><rect x="0" y="-3" width="1.7" height="1.7" fill="#474241" /><rect x="3.4" y="-3" width="1.6" height="1.7" fill="#474241" /><rect x="1.7" y="-1.3" width="1.7" height="1.8" fill="#474241" /></g>
+            <circle cx={16.7 + 3 * 11} cy={9.7 + 2 * 10.4} r="3.6" fill="#f6c544" stroke="#241c3d" strokeWidth="0.9" />
+            <circle cx={16.7 + 5 * 11} cy={9.7 + 0} r="3.6" fill="#6aa9e9" stroke="#241c3d" strokeWidth="0.9" />
+            <g transform="translate(40 36) rotate(-12)"><rect x="0" y="0" width="13" height="13" rx="2.6" fill="#fffdf6" stroke="#474241" strokeWidth="1" /><circle cx="3.5" cy="3.5" r="1.2" fill="#474241" /><circle cx="6.5" cy="6.5" r="1.2" fill="#474241" /><circle cx="9.5" cy="9.5" r="1.2" fill="#474241" /></g>
           </svg>
         </div>
       );

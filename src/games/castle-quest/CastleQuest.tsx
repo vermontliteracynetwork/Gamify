@@ -1,9 +1,10 @@
+import '@fontsource/chicle/400.css';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { CastleTurret, CheckCircle, DiceFive, Lightning, Shield, Timer, Trophy } from '@phosphor-icons/react';
+import { ArrowsClockwise, CheckCircle, DiceFive, FlagCheckered, HourglassHigh, ShieldCheck, Star, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -12,7 +13,8 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import TeamSetup, { type Character } from '../../engine/TeamSetup';
+import TeamSetup from '../../engine/TeamSetup';
+import { TeamBadge } from '../../engine/TeamBadge';
 import { current, nextTurn, setScores, startTurns, TEAM_COLORS, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
@@ -24,6 +26,7 @@ import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
+import ItemArt from '../../theme/ItemArt';
 import { ChoiceTiles } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
@@ -34,30 +37,23 @@ import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
-import {
-  BRIDGES, bridgeFrom, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, POWERS, roll, spotOf, dieSides, trailOf, trailStart, TRAILS,
-  tileXY, WORLD_H, WORLD_W, buildCountry, COUNTRY, MARGIN, ROWS, SIDE, type Bridge, type ChestPrize, type Power,
-} from './board';
+import { layout, placePowers, POWERS, roll, spaceKinds, tornadoSpots, TRAIL_SPACES, trailOf, TRAILS, wheelStop, type Layout, type Power, type SpaceKind } from './board';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
-type Step = 'question' | 'roll' | 'rolling' | 'moving' | 'target';
-type Pt = { x: number; y: number };
-const ART = '/classic/castle-quest';
+type Step = 'question' | 'roll' | 'busy' | 'pick';
 const JUMP = '/sounds/board/jump.mp3';
 const DICE = '/sounds/board/dice.mp3';
-// Classic players (teacher, 2026-10-31): 20 voxel animals from SonaSar's
-// Voxel Animals pack, drawn from the 3D models; each player picks one.
-const ANIMALS = ['Axolotl', 'Bear', 'Bunny', 'Cat', 'Chicken', 'Cow', 'Crocodile', 'Dog', 'Elephant', 'Fox', 'Frog', 'Mole', 'Monkey', 'Mouse', 'Panda', 'Parrot', 'Penguin', 'Piglet', 'Turtle', 'Unicorn'];
-const CLASSIC_PLAYERS: Character[] = ANIMALS.map((name) => ({ id: name.toLowerCase(), name, image: `/classic/castle-quest/animals/${name.toLowerCase()}.webp` }));
-const HEROES = ['blue_knight', 'red_mage', 'green_barbarian', 'yellow_rogue', 'red_knight', 'blue_mage', 'yellow_barbarian', 'green_rogue', 'green_knight', 'yellow_mage'];
+// The vision board palette (teacher, 2026-11-08): light blue, yellow, red,
+// sage, cream, blush and charcoal, with Chicle for the board's words.
+const C = { blue: '#BCD9E2', yellow: '#F9CC14', red: '#D35252', sage: '#9AB582', cream: '#F1DFBB', blush: '#FAE9DF', ink: '#474241' };
+const SQUARE_COLORS = [C.blue, C.yellow, C.red, C.sage];
+const CHICLE: CSSProperties = { fontFamily: "'Chicle', 'Grow Year', system-ui, sans-serif" };
 const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
-// Board Game (teacher design, 2026-10-31; rebuilt after her review the same
-// day): one winding trail through a hexagon wilderness to a castle that rises
-// as the race goes on. Teams on one screen, or two players head to head (or
-// against the computer). A right answer earns a roll of the die; pieces hop
-// space by space, bridges cut across the bends, and power-up spaces bring
-// magnets, tornadoes, potions, treasure chests, shields, lightning and speed.
+// Board Game (teacher redesign, 2026-11-08): "solve the question, roll the
+// dice, move the corresponding places, first to the end wins". A flat classic
+// board of squares winds from Start to Finish; lose-a-turn and roll-again
+// squares, and power-ups hidden under ordinary squares.
 export default function CastleQuest() {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
@@ -65,15 +61,11 @@ export default function CastleQuest() {
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[] });
-  // Where pieces start: the full trail, or the short one from the second bend.
-  const [start, setStart] = useState(0);
-  const startRef = useRef(0);
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const versus = setup.who === 'versus';
-  const sides = dieSides(trailOf(setup.trail));
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -81,80 +73,62 @@ export default function CastleQuest() {
   const [step, setStep] = useState<Step>('question');
   const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string } | null>(null);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
-  const [pos, setPos] = useState<number[]>([]);
-  const [hop, setHop] = useState<{ who: number; n: number; ms: number }>({ who: -1, n: 0, ms: 300 });
-  const [override, setOverride] = useState<Record<number, Pt & { lift?: boolean }>>({});
+  const [n, setN] = useState(TRAIL_SPACES.medium);
+  const [kinds, setKinds] = useState<SpaceKind[]>([]);
   const [powers, setPowers] = useState<Map<number, Power>>(new Map());
+  const [pos, setPos] = useState<number[]>([]);
+  const [hop, setHop] = useState<{ who: number; k: number; ms: number }>({ who: -1, k: 0, ms: 300 });
+  const [swirl, setSwirl] = useState<{ id: number; to: number[]; lifted: boolean[] } | null>(null);
   const [die, setDie] = useState(1);
-  const [toss, setToss] = useState<{ id: number; n: number; mult: number } | null>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const sideRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const [vb, setVb] = useState({ x: 0, y: 0, w: WORLD_W, h: WORLD_H });
-  useLayoutEffect(() => {
-    const fit = () => {
-      const el = stageRef.current;
-      if (!el) return;
-      const R = el.getBoundingClientRect();
-      if (!R.width || !R.height) return;
-      const lg = window.matchMedia('(min-width: 1024px)').matches;
-      const side = sideRef.current?.getBoundingClientRect();
-      const bot = bottomRef.current?.getBoundingClientRect();
-      const L = 8;
-      let T = 8, Rt = 8, B = 8;
-      if (lg && side) Rt = R.right - side.left + 10;
-      else {
-        if (side) T = side.bottom - R.top + 6;
-        if (bot && bot.height) B = R.bottom - bot.top + 6;
-      }
-      const sw = Math.max(80, R.width - L - Rt), sh = Math.max(80, R.height - T - B);
-      const k = Math.min(sw / WORLD_W, sh / WORLD_H);
-      const next = { x: WORLD_W / 2 - (L + sw / 2) / k, y: WORLD_H / 2 - (T + sh / 2) / k, w: R.width / k, h: R.height / k };
-      setVb((v) => (Math.abs(v.x - next.x) + Math.abs(v.y - next.y) + Math.abs(v.w - next.w) + Math.abs(v.h - next.h) < 0.5 ? v : next));
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    [stageRef.current, sideRef.current, bottomRef.current].forEach((e) => e && ro.observe(e));
-    window.addEventListener('resize', fit);
-    return () => { ro.disconnect(); window.removeEventListener('resize', fit); };
-  });
-  // Every roll of the die shakes in a hand first (teacher's sound, 2026-11-01).
-  useEffect(() => { if (toss) playClip(DICE, settings, 0.8); }, [toss?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  const [ahead, setAhead] = useState<number[]>([]);
-  const [shield, setShield] = useState<number[]>([]);
-  const [fast, setFast] = useState<number[]>([]);
-  const [potion, setPotion] = useState(false);
-  const [magnetOn, setMagnetOn] = useState(false);
-  const [tornado, setTornado] = useState(false);
-  const [bolt, setBolt] = useState<{ id: number; at: Pt } | null>(null);
-  const [sip, setSip] = useState<{ id: number; at: Pt; img: string } | null>(null);
-  const [puffs, setPuffs] = useState<{ id: number; at: Pt }[]>([]);
-  const [banner, setBanner] = useState<{ id: number; text: string; image?: string; bad?: boolean } | null>(null);
+  const [toss, setToss] = useState<{ id: number; rolls: number[]; mult: number } | null>(null);
+  const [wheel, setWheel] = useState<{ id: number; stop: number; forward: boolean; n: number; name: string; done: boolean } | null>(null);
+  const [shield, setShield] = useState<boolean[]>([]);
+  const [skip, setSkip] = useState<boolean[]>([]);
+  const [potion, setPotion] = useState<number[]>([]); // doubled rolls left
+  const [boost, setBoost] = useState<{ double: boolean; x2: boolean }>({ double: false, x2: false });
+  const [banner, setBanner] = useState<{ id: number; text: string; icon?: 'lose' | 'again' | 'shield'; bad?: boolean } | null>(null);
   const [pop, setPop] = useState<{ id: number; item: ThemeItem; text: string } | null>(null);
   const [winner, setWinner] = useState<TurnPlayer | null>(null);
   const live = useRef(true);
-  const posRef = useRef<number[]>([]);
-  posRef.current = pos;
-  const turnsRef = useRef<TurnState | null>(null);
-  turnsRef.current = turns;
-  const shieldRef = useRef<number[]>([]);
-  shieldRef.current = shield;
+  const posRef = useRef<number[]>([]); posRef.current = pos;
+  const turnsRef = useRef<TurnState | null>(null); turnsRef.current = turns;
+  const shieldRef = useRef<boolean[]>([]); shieldRef.current = shield;
+  const potionRef = useRef<number[]>([]); potionRef.current = potion;
+  const boostRef = useRef(boost); boostRef.current = boost;
+  const skipRef = useRef<boolean[]>([]); skipRef.current = skip;
+  const pickRef = useRef<((who: number) => void) | null>(null);
   const held = useHeldPowerUps();
-
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
+
   const items = theme.items?.length ? theme.items : castleQuestManifest.items?.classic ?? [];
   const itemFor = (p: Power) => items.find((it) => it.ability === p) ?? castleQuestManifest.items!.classic!.find((it) => it.ability === p)!;
   const player = turns ? current(turns) : null;
   const me = turns ? turns.turn : 0;
   const human = player?.kind !== 'cpu';
-  // A theme's own team pieces win; otherwise each player's picked animal.
-  const themePieces = !!pieceImage(theme, 'team-1');
-  const heroOf = (p: TurnPlayer, i: number) => pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) ?? p.art ?? `${ART}/heroes/${HEROES[p.colorIndex % HEROES.length] ?? HEROES[i % HEROES.length]}.webp`;
-  const figureOf = (p: TurnPlayer) => !pieceImage(theme, `team-${(p.colorIndex % 10) + 1}`) && !!p.art;
-  const ms = (n: number) => (still ? Math.min(n, 120) : n * pace(settings));
+  const finish = n - 1;
+  const ms = (x: number) => (still ? Math.min(x, 150) : x * pace(settings));
 
-  function say(text: string, image?: string, bad = false) { setBanner({ id: Date.now() + Math.random(), text, image, bad }); }
-  function puff(at: Pt) { if (still) return; const id = Date.now() + Math.random(); setPuffs((p) => [...p.slice(-6), { id, at }]); window.setTimeout(() => setPuffs((p) => p.filter((x) => x.id !== id)), 700); }
+  // The board fills the space it is given; squares stay 1 to 1.
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 800, h: 500 });
+  useLayoutEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const fit = () => { const r = el.getBoundingClientRect(); if (r.width && r.height) setBox((b) => (Math.abs(b.w - r.width) + Math.abs(b.h - r.height) < 1 ? b : { w: r.width, h: r.height })); };
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(el);
+    return () => ro.disconnect();
+  }, [phase]);
+  const pad = 22;
+  const L: Layout = useMemo(() => layout(n, Math.max(100, box.w - pad * 2), Math.max(100, box.h - pad * 2)), [n, box.w, box.h]);
+  const ox = (box.w - L.cols * L.size) / 2, oy = (box.h - L.rows * L.size) / 2;
+  const at = (i: number) => { const c = L.cells[Math.max(0, Math.min(n - 1, i))]; return { x: ox + (c.x + 0.5) * L.size, y: oy + (c.y + 0.5) * L.size }; };
+  // A little wobble per square, the same all game (surprise and irregularity).
+  const wobble = useMemo(() => Array.from({ length: 80 }, (_, i) => ({ r: ((i * 37) % 7) - 3, dx: ((i * 53) % 5) - 2, dy: ((i * 29) % 5) - 2 })), []);
+
+  useEffect(() => { if (toss) playClip(DICE, settings, 0.8); }, [toss?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function say(text: string, icon?: 'lose' | 'again' | 'shield', bad = false) { setBanner({ id: Date.now() + Math.random(), text, icon, bad }); }
   function place(next: number[]) {
     posRef.current = next; setPos(next);
     const s = turnsRef.current;
@@ -164,41 +138,38 @@ export default function CastleQuest() {
   }
 
   function begin(ps: TurnPlayer[]) {
+    const size = TRAIL_SPACES[trailOf(setup.trail)];
+    const k = spaceKinds(size);
+    const allowed = POWERS.filter((p) => !(setup.powerOff ?? []).includes(itemFor(p).id));
+    setN(size); setKinds(k);
+    setPowers(setup.powerUps ? placePowers(k, ps.length < 2 ? allowed.filter((p) => p !== 'wheel' && p !== 'shield') : allowed) : new Map());
     const state = startTurns(ps);
     turnsRef.current = state;
-    setTurns(state); setMissed([]); setWinner(null); setOverride({}); setAhead([]);
-    const from = trailStart(trailOf(setup.trail));
-    startRef.current = from; setStart(from);
-    place(ps.map(() => from));
-    setShield(ps.map(() => 0)); setFast(ps.map(() => 0)); setPotion(false);
-    // Lightning needs someone to send it to (Claudia review, 2026-10-31).
-    // Only the power-ups the teacher left on land on the trail.
-    const allowed = POWERS.filter((p) => !(setup.powerOff ?? []).includes(itemFor(p).id));
-    const placed = setup.powerUps ? placePowers(Math.random, from, allowed) : new Map<number, Power>();
-    if (ps.length < 2) for (const [k, v] of placed) if (v === 'lightning') placed.set(k, 'chest');
-    setPowers(placed);
+    setTurns(state); setMissed([]); setWinner(null); setSwirl(null); setWheel(null);
+    place(ps.map(() => 0));
+    setShield(ps.map(() => false)); setSkip(ps.map(() => false)); setPotion(ps.map(() => 0));
     held.reset();
     setPhase('play');
-    startTurn(state);
+    void startTurn(state);
   }
-  function startTurn(state: TurnState) {
+  async function startTurn(state: TurnState) {
+    const i = state.turn;
     const p = current(state);
-    setPotion(false); setAhead([]);
-    setShield((s) => s.map((n, i) => (i === state.turn ? Math.max(0, n - 1) : n)));
-    setFast((s) => s.map((n, i) => (i === state.turn ? Math.max(0, n - 1) : n)));
+    // A shield lasts until the start of its owner's next turn (teacher, 2026-11-08).
+    if (shieldRef.current[i]) setShield((s) => s.map((v, k) => (k === i ? false : v)));
+    setBoost({ double: false, x2: false });
+    if (skipRef.current[i]) {
+      setSkip((s) => s.map((v, k) => (k === i ? false : v)));
+      setStep('busy');
+      say(t('cq.skipped', { name: p.name }), 'lose', true);
+      await sleep(ms(1800));
+      return advance();
+    }
     held.beginTurn(p.id);
-    setMagnetOn(false);
     setStep('question');
     const d = deck.next();
     setQuestion({ q: d.question, setId: d.setId });
   }
-  // A held magnet goes straight onto this question (teacher, 2026-10-31).
-  useEffect(() => {
-    if (step !== 'question' || !question) return;
-    const i = held.held.findIndex((it) => it.ability === 'magnet');
-    if (i >= 0) { held.use(i); setMagnetOn(true); playClip(POWER_SOUNDS.magnet, settings); }
-  }, [question, held.held]); // eslint-disable-line react-hooks/exhaustive-deps
-
   function onResult(right: boolean) {
     const s = turnsRef.current;
     if (!s || !question) return;
@@ -207,185 +178,136 @@ export default function CastleQuest() {
       void data.logQuestion({ id: newId('log'), at: new Date().toISOString(), teamName: p.name, gameId: 'castle-quest', mode: versus ? 'versus' : 'share', setId: question.setId, prompt: question.q.prompt, answer: question.q.choices[question.q.correctIndex], tries: [], ms: 0, outcome: right ? 'right' : 'skipped' });
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
-    setQuestion(null); setMagnetOn(false);
-    if (right) setStep('roll'); // the question already played the right-answer sound
-    else { say(t('cq.nextTime'), `${ART}/world/bushGrass.png`); void endTurn(); }
+    setQuestion(null);
+    if (right) setStep('roll');
+    else { say(t('cq.nextTime')); void endTurn(); }
   }
 
-  // Hops: one space at a time with a little arc; Time makes it 5 times faster.
-  const hopMs = (who: number) => (still ? 60 : fast[who] > 0 ? 75 : 380);
   async function walk(who: number, to: number) {
     const from = posRef.current[who];
+    if (to === from) return;
     const dir = to > from ? 1 : -1;
-    // Long trips hop faster so nobody waits (a trip back to Start takes a few seconds, not twenty).
-    const speed = still ? 60 : Math.min(hopMs(who), Math.max(90, Math.round(2600 / Math.max(1, Math.abs(to - from)))));
-    for (let n = from; n !== to; n += dir) {
+    const speed = still ? 80 : Math.max(170, Math.min(360, Math.round(3200 / Math.abs(to - from))));
+    for (let k = from; k !== to; k += dir) {
       if (!live.current) return;
-      const next = [...posRef.current]; next[who] = n + dir; place(next);
-      setHop((h) => ({ who, n: h.n + 1, ms: speed }));
-      playClip(JUMP, settings, 0.7); // the teacher's jump sound on every hop (2026-11-01)
+      const next = [...posRef.current]; next[who] = k + dir; place(next);
+      setHop((h) => ({ who, k: h.k + 1, ms: speed }));
+      playClip(JUMP, settings, 0.7); // the teacher's jump sound on every hop
       await sleep(speed);
-      puff(spotOf(n + dir));
     }
   }
-  // Across a bridge, plank by plank, then onto the far bend.
-  async function cross(who: number, b: Bridge) {
-    say(t('cq.bridge'), undefined);
+  async function throwDie(count: number, mult: number) {
+    const rolls = Array.from({ length: count }, () => roll());
+    setToss({ id: Date.now(), rolls, mult });
+    await sleep(still ? 500 : 1700 + (count - 1) * 500);
+    setDie(rolls[rolls.length - 1]);
     playEffect('right', settings);
-    const speed = Math.max(hopMs(who), still ? 60 : 420);
-    for (const [r, c] of b.over) {
-      const at = centerOf(r, c);
-      setOverride((o) => ({ ...o, [who]: { x: at.x, y: at.y - 6 } }));
-      setHop((h) => ({ who, n: h.n + 1, ms: speed }));
-      playClip(JUMP, settings, 0.7);
-      await sleep(speed);
-    }
-    setOverride((o) => { const { [who]: _, ...rest } = o; return rest; });
-    const next = [...posRef.current]; next[who] = b.to; place(next);
-    setHop((h) => ({ who, n: h.n + 1, ms: speed }));
-    await sleep(speed);
-    puff(spotOf(b.to));
+    await sleep(ms(900));
+    setToss(null);
+    return rolls;
   }
-
   async function rollDie() {
     if (step !== 'roll') return;
     try { await rollAndMove(); } catch { await endTurn(); }
   }
   async function rollAndMove() {
-    setStep('rolling');
-    const n = roll(Math.random, sides);
-    const mult = potion ? 3 : 1;
-    setPotion(false);
-    setToss({ id: Date.now(), n, mult });
-    await sleep(still ? 350 : 1500);
-    setDie(n);
-    playEffect('right', settings);
-    if (mult > 1) say(t('cq.potionRoll', { n, total: n * mult }), itemFor('potion').image);
-    // Show the spaces ahead, then go.
-    const from = posRef.current[me];
-    const to = clampPos(from + n * mult);
-    setAhead(Array.from({ length: to - from }, (_, k) => from + k + 1));
-    await sleep(still ? 200 : 700);
-    setToss(null);
-    setStep('moving');
-    await walk(me, to);
-    setAhead([]);
+    setStep('busy');
+    const b = boostRef.current;
+    const pot = (potionRef.current[me] ?? 0) > 0;
+    if (pot) setPotion((v) => v.map((x, k) => (k === me ? x - 1 : x)));
+    const mult = b.x2 || pot ? 2 : 1;
+    const rolls = await throwDie(b.double ? 2 : 1, mult);
+    setBoost({ double: false, x2: false });
+    const by = rolls.reduce((a, r) => a + r, 0) * mult;
+    await walk(me, Math.min(finish, posRef.current[me] + by));
     await land(me);
-    await endTurn();
   }
-  async function move(who: number, by: number, powersOn = true) {
-    await walk(who, clampPos(posRef.current[who] + by));
-    await land(who, powersOn);
+  async function land(who: number) {
+    const here = posRef.current[who];
+    if (here >= finish) return endTurn();
+    const power = powers.get(here);
+    if (power) {
+      setPowers((m) => { const x = new Map(m); x.delete(here); return x; });
+      await found(who, power);
+      if (posRef.current.some((p) => p >= finish)) return endTurn();
+    }
+    const kind = kinds[posRef.current[who]];
+    if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); say(t('cq.loseTurn'), 'lose', true); await sleep(ms(1600)); return endTurn(); }
+    if (kind === 'again') { playEffect('win', settings); say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
+    return endTurn();
   }
-  async function land(who: number, powersOn = true) {
-    const at = posRef.current[who];
-    if (at >= FINISH) return;
-    const b = bridgeFrom(at);
-    if (b) await cross(who, b);
-    const power = powersOn ? powers.get(posRef.current[who]) : undefined;
-    if (power) await gotPower(who, power);
-  }
-  async function gotPower(who: number, power: Power) {
+  // A hidden power-up: the shield goes up at once (it starts at the reveal);
+  // tornado and every other power wait for the finder's next turn.
+  async function found(who: number, power: Power) {
     const s = turnsRef.current!;
-    // Lightning sends someone back; with nobody else off the start yet it
-    // would do nothing, so it comes up as a treasure chest (teacher, 2026-11-01).
-    if (power === 'lightning' && !posRef.current.some((p, i) => i !== who && p > startRef.current)) power = 'chest';
     const it = itemFor(power);
-    if (power === 'tornado') { playClip(POWER_SOUNDS.tornado, settings); setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) }); await sleep(ms(1300)); await blowAway(); return; }
-    if (power === 'chest') { playClip(POWER_SOUNDS.chest, settings); setPop({ id: Date.now(), item: it, text: t('cq.chestOpen') }); await sleep(ms(1500)); await openTheChest(who); return; }
+    if (power === 'shield') {
+      setShield((v) => v.map((x, k) => (k === who ? true : x)));
+      setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) });
+      await sleep(ms(1800));
+      return;
+    }
     held.earn(s.players[who].id, it);
     setPop({ id: Date.now(), item: it, text: t('pu.later', { role: roleOf(castleQuestManifest, it) }) });
-    playEffect('win', settings);
-    await sleep(ms(1100));
+    await sleep(ms(1800));
   }
-  // Tornado (teacher, 2026-10-31): no way to say no. Every piece is lifted in
-  // the wind and dropped on a random space; a shield holds you down.
-  async function blowAway() {
-    playEffect('whoosh', settings);
-    setTornado(true);
-    const lift: Record<number, Pt & { lift: boolean }> = {};
-    posRef.current.forEach((p, i) => { if (shieldRef.current[i] <= 0 && p < FINISH) lift[i] = { x: WORLD_W * (0.3 + 0.4 * Math.random()), y: WORLD_H * (0.15 + 0.2 * Math.random()), lift: true }; });
-    setOverride(lift);
-    await sleep(ms(1500));
-    const next = posRef.current.map((p, i) => (lift[i] ? startRef.current + 1 + Math.floor(Math.random() * (FINISH - startRef.current - 6)) : p));
-    setOverride({});
-    place(next);
-    buzz(80, settings);
-    await sleep(ms(700));
-    setTornado(false);
-    next.forEach((p, i) => { if (lift[i]) puff(spotOf(p)); });
-    say(t('cq.tornadoDone'), itemFor('tornado').image);
-    await sleep(ms(1000));
-  }
-  async function openTheChest(who: number) {
-    const prize: ChestPrize = openChest();
-    if (isBad(prize) && shieldRef.current[who] > 0) { say(t('cq.shieldBlocks'), itemFor('shield').image); await sleep(ms(1200)); return; }
-    if (prize.kind === 'move') { say(t(prize.n > 0 ? 'cq.chestAhead' : 'cq.chestBack', { n: Math.abs(prize.n) }), undefined, prize.n < 0); await sleep(ms(1000)); await move(who, prize.n, false); return; }
-    if (prize.kind === 'start') { say(t('cq.chestStart'), undefined, true); await sleep(ms(1000)); await walk(who, startRef.current); return; }
-    if (prize.kind === 'swap') {
-      const others = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== who).sort((a, b) => a[0] - b[0]);
-      const back = others[0];
-      if (!back || back[0] >= posRef.current[who]) { say(t('cq.chestSwapNone')); await sleep(ms(1000)); return; }
-      say(t('cq.chestSwap', { name: turnsRef.current!.players[back[1]].name }), undefined, true); await sleep(ms(1000));
-      const a = spotOf(posRef.current[who]), z = spotOf(back[0]);
-      setOverride({ [who]: { ...z, lift: true }, [back[1]]: { ...a, lift: true } });
-      await sleep(ms(900));
-      setOverride({});
-      const next = [...posRef.current]; [next[who], next[back[1]]] = [next[back[1]], next[who]]; place(next); await sleep(ms(500)); return;
-    }
-    if (prize.kind === 'potion') { const n = roll(Math.random, sides); await drink(who); say(t('cq.potionRoll', { n, total: n * 3 }), itemFor('potion').image); await sleep(ms(1000)); await move(who, n * 3, false); return; }
-    if (prize.kind === 'reroll') { const n = roll(Math.random, sides); setToss({ id: Date.now(), n, mult: 1 }); await sleep(ms(1500)); setToss(null); setDie(n); say(t('cq.chestReroll', { n })); await sleep(ms(800)); await move(who, n, false); return; }
-    // Mystery box: a roll that could double, go backward, or bring a power-up.
-    const n = roll(Math.random, sides);
-    setToss({ id: Date.now(), n, mult: 1 }); await sleep(ms(1500)); setToss(null);
-    const twist = Math.random();
-    if (twist < 0.2 && shieldRef.current[who] <= 0) { say(t('cq.mysteryBack', { n }), `${ART}/powerups/mystery.webp`, true); await sleep(ms(900)); await move(who, -n, false); return; }
-    if (twist < 0.4) { say(t('cq.mysteryDouble', { n, total: n * 2 }), `${ART}/powerups/mystery.webp`); await sleep(ms(900)); await move(who, n * 2, false); return; }
-    if (twist < 0.55) { const it = itemFor(['shield', 'potion', 'time', 'magnet'][Math.floor(Math.random() * 4)] as Power); held.earn(turnsRef.current!.players[who].id, it); setPop({ id: Date.now(), item: it, text: t('pu.later', { role: roleOf(castleQuestManifest, it) }) }); await sleep(ms(1100)); return; }
-    say(t('cq.chestMystery', { n }), `${ART}/powerups/mystery.webp`);
-    await sleep(ms(900));
-    await move(who, n, false);
-  }
-  async function drink(who: number) {
-    const at = spotOf(posRef.current[who]);
-    setSip({ id: Date.now(), at, img: itemFor('potion').image ?? '' });
-    playEffect('win', settings);
-    await sleep(ms(1100));
-    setSip(null);
-  }
-
-  // Use a held power-up before rolling.
+  // Held power-ups switch on by themselves at the start of the roll.
   async function applyItem(i: number) {
     const it = held.use(i);
     if (!it) return;
-    playEffect('win', settings);
-    if (it.ability === 'potion') { setPotion(true); setStep('rolling'); await drink(me); setStep('roll'); say(t('cq.potionReady'), it.image); }
-    if (it.ability === 'time') { setFast((f) => f.map((n, k) => (k === me ? 3 : n))); say(t('cq.timeOn'), it.image); }
-    if (it.ability === 'shield') { setShield((s) => s.map((n, k) => (k === me ? 4 : n))); say(t('cq.shieldOn'), it.image); }
-    if (it.ability === 'lightning') {
-      const others = (turnsRef.current?.players ?? []).map((_, k) => k).filter((k) => k !== me);
-      if (others.length === 1) { void strike(others[0]); return; }
-      if (others.length === 0) return;
-      setStep('target');
+    const a = it.ability as Power;
+    if (a === 'double') setBoost((b) => ({ ...b, double: true }));
+    if (a === 'x2') setBoost((b) => ({ ...b, x2: true }));
+    if (a === 'potion') setPotion((v) => v.map((x, k) => (k === me ? 2 : x)));
+    if (a === 'tornado') { setStep('busy'); await sleep(ms(1400)); await blowAway(); }
+    if (a === 'wheel') { setStep('busy'); await sleep(ms(1400)); await spinWheel(); }
+  }
+  // Tornado (teacher, 2026-11-08): every piece is lifted, swirled round and
+  // dropped evenly spaced, never back on its own square. A shield holds you down.
+  async function blowAway() {
+    playClip(POWER_SOUNDS.tornado, settings);
+    const lifted = posRef.current.map((_, i) => i === me || !shieldRef.current[i]);
+    const to = tornadoSpots(posRef.current, lifted, finish);
+    setSwirl({ id: Date.now(), to, lifted });
+    await sleep(still ? 400 : 3000);
+    place(to);
+    buzz(80, settings);
+    await sleep(ms(500));
+    setSwirl(null);
+    say(t('cq.tornadoDone'));
+    await sleep(ms(1300));
+    setStep('roll');
+  }
+  // Wheel (teacher, 2026-11-08): pick a player, roll, then a spinning wheel
+  // split in half decides: forward or back that many squares.
+  async function spinWheel() {
+    const s = turnsRef.current!;
+    let target = me;
+    if (s.players.length > 1) {
+      if (current(s).kind === 'cpu') {
+        // The computer picks whoever is furthest ahead (not itself).
+        target = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== me).sort((a, b) => b[0] - a[0])[0][1];
+        say(t('cq.wheelPicks', { name: s.players[target].name }));
+        await sleep(ms(1300));
+      } else {
+        setStep('pick');
+        target = await new Promise<number>((res) => { pickRef.current = res; });
+        pickRef.current = null;
+        setStep('busy');
+      }
     }
-  }
-  async function strike(target: number) {
-    try { await strikeNow(target); } catch { setStep('roll'); }
-  }
-  async function strikeNow(target: number) {
-    setStep('moving');
-    const it = itemFor('lightning');
-    const at = spotOf(posRef.current[target]);
-    setBolt({ id: Date.now(), at });
-    playEffect('whoosh', settings); buzz(90, settings);
-    await sleep(ms(900));
-    setBolt(null);
-    if (shieldRef.current[target] > 0) { say(t('cq.shieldBlocks'), itemFor('shield').image); await sleep(ms(1100)); setStep('roll'); return; }
-    const n = roll(Math.random, sides);
-    setDie(n);
-    say(t('cq.lightning', { name: turnsRef.current!.players[target].name, n }), it.image, true);
-    await sleep(ms(800));
-    await walk(target, clampPos(posRef.current[target] - n));
+    const [n1] = await throwDie(1, 1);
+    const forward = Math.random() < 0.5;
+    setWheel({ id: Date.now(), stop: wheelStop(forward), forward, n: n1, name: s.players[target].name, done: false });
+    playEffect('whoosh', settings);
+    await sleep(still ? 500 : 4200);
+    setWheel((w) => (w ? { ...w, done: true } : w));
+    playEffect(forward ? 'win' : 'miss', settings);
+    await sleep(ms(1500));
+    setWheel(null);
+    if (target !== me && shieldRef.current[target]) { say(t('cq.shieldBlocks'), 'shield'); await sleep(ms(1400)); setStep('roll'); return; }
+    await walk(target, Math.max(0, Math.min(finish, posRef.current[target] + (forward ? n1 : -n1))));
+    if (posRef.current.some((p) => p >= finish)) return endTurn();
     setStep('roll');
   }
 
@@ -394,75 +316,61 @@ export default function CastleQuest() {
     if (!s) return;
     await sleep(ms(500));
     held.endTurn();
-    const done = posRef.current.findIndex((p) => p >= FINISH);
+    const done = posRef.current.findIndex((p) => p >= finish);
     if (done >= 0) {
       setWinner(s.players[done]);
       playEffect('win', settings);
       if (settings.celebrations !== 'off' && !still) {
-        void confetti({ particleCount: 160, spread: 110, origin: { x: 0.75, y: 0.25 }, disableForReducedMotion: true });
-        window.setTimeout(() => void confetti({ particleCount: 120, spread: 80, origin: { x: 0.5, y: 0.35 }, disableForReducedMotion: true }), 500);
+        void confetti({ particleCount: 160, spread: 110, origin: { x: 0.5, y: 0.3 }, colors: SQUARE_COLORS, disableForReducedMotion: true });
+        window.setTimeout(() => void confetti({ particleCount: 120, spread: 80, origin: { x: 0.3, y: 0.4 }, colors: SQUARE_COLORS, disableForReducedMotion: true }), 500);
       }
       await sleep(ms(2600));
       setPhase('end');
       return;
     }
+    return advance();
+  }
+  function advance() {
+    const s = turnsRef.current;
+    if (!s) return;
     const next = nextTurn(s);
     turnsRef.current = next; setTurns(next);
-    startTurn(next);
+    void startTurn(next);
   }
 
-  // The computer uses what it holds, then rolls.
+  // The computer rolls by itself.
   useEffect(() => {
-    if (phase !== 'play' || player?.kind !== 'cpu') return;
-    if (step === 'roll') {
-      const id = window.setTimeout(() => {
-        const k = held.held.findIndex((it) => it.ability !== 'lightning');
-        if (k >= 0) { void applyItem(k); return; }
-        const l = held.held.findIndex((it) => it.ability === 'lightning');
-        if (l >= 0) { void applyItem(l); return; }
-        void rollDie();
-      }, 900 * pace(settings));
-      return () => window.clearTimeout(id);
-    }
-    if (step === 'target') {
-      const id = window.setTimeout(() => {
-        const lead = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== me).sort((a, b) => b[0] - a[0])[0];
-        if (lead) void strike(lead[1]);
-      }, 800 * pace(settings));
-      return () => window.clearTimeout(id);
-    }
+    if (phase !== 'play' || player?.kind !== 'cpu' || step !== 'roll' || held.held.length) return;
+    const id = window.setTimeout(() => void rollDie(), 1400 * pace(settings));
+    return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const best = Math.max(start, ...pos);
-  // The castle rises with the share of the trail covered, short or full.
-  const stage = castleStage(Math.round(((best - start) / (FINISH - start)) * FINISH));
-  // Fit the trail into the space the panels leave; the countryside fills the rest.
-  const px = (x: number) => `${((x - vb.x) / vb.w) * 100}%`;
-  const py = (y: number) => `${((y - vb.y) / vb.h) * 100}%`;
-  const ks = WORLD_W / vb.w; // board width units to stage percent
-  // A held magnet shows too; it goes on by itself at the next question.
-  const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => { if (held.held[i]?.ability !== 'magnet') void applyItem(i); }} disabled={step !== 'roll' || !human} />;
-  const rollButton = step === 'roll' && human && phase === 'play' && (
-    <motion.button type="button" onClick={() => void rollDie()} className={buttonClasses('primary', 'h-16 !px-6 !text-xl w-full')}
-      animate={still ? undefined : { scale: [1, 1.05, 1] }} transition={{ duration: 1.1, repeat: Infinity }}>
-      <DiceFive weight="fill" size={28} />{potion ? t('cq.rollPotion') : t('cq.roll')}
+  const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={step !== 'roll'} />;
+  const boosted = boost.double || boost.x2 || (potion[me] ?? 0) > 0;
+  const rollLabel = boost.double ? t('cq.rollTwice') : boosted ? t('cq.rollDouble') : t('cq.roll');
+  const rollButton = step === 'roll' && human && phase === 'play' && held.held.length === 0 && (
+    <motion.button type="button" onClick={() => void rollDie()} className={buttonClasses('primary', 'h-14 !px-5 !text-xl w-full')}
+      animate={still ? undefined : { scale: [1, 1.06, 1], rotate: [0, -1.5, 1.5, 0] }} transition={{ duration: 1.1, repeat: Infinity }} whileHover={still ? undefined : { scale: 1.1 }}>
+      <DiceFive weight="fill" size={26} />{rollLabel}
     </motion.button>
   );
-  const targetPicker = turns && (
-    <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="group" aria-label={t('cq.pickTarget')}>
-      <p className="font-bold flex items-center gap-2"><Lightning weight="fill" size={20} className="text-[#e8b400]" />{t('cq.pickTarget')}</p>
-      <button type="button" onClick={() => setStep('roll')} className={buttonClasses('ghost', 'justify-start !min-h-10')}>{t('cq.keepIt')}</button>
-      {turns.players.map((p, i) => i !== me && (
-        <button key={p.id} type="button" onClick={() => void strike(i)} className={buttonClasses('secondary', 'justify-start')}>
-          <img src={heroOf(p, i)} alt="" className="w-8 h-8 object-contain" />{p.name}
-        </button>
-      ))}
-    </div>
-  );
-  const dieCard = (
-    <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-3 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <Die3D value={die} size={64} spinning={step === 'rolling' && !still} theme={theme} />
-      {rollButton}
+  const picker = step === 'pick' && turns && (
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-[#241c3d]/35 p-4" role="dialog" aria-label={t('cq.wheelPick')}>
+      <motion.div className="bg-surface border-[3px] border-border rounded-panel p-5 grid gap-4 justify-items-center max-w-[min(40rem,94vw)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+        initial={still ? false : { scale: 0.6, rotate: -4 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 16 }}>
+        <ItemArt item={itemFor('wheel')} size={72} still={still} />
+        <p className="font-display text-2xl font-bold text-center">{t('cq.wheelPick')}</p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          {turns.players.map((p, i) => (
+            <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { y: -4, rotate: [0, -3, 3, 0] }}
+              className="grid justify-items-center gap-1 rounded-panel border-[2.5px] border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
+              <TeamBadge colorIndex={p.colorIndex} size={56} />
+              <span className="font-bold">{p.name}</span>
+              {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#3d7fb8]" aria-label={t('cq.shielded')} />}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 
@@ -475,7 +383,7 @@ export default function CastleQuest() {
         <GameWelcome game={castleQuestManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('cq.how1') },
           { icon: <DiceFive weight="fill" size={22} />, text: t('cq.how2') },
-          { icon: <CastleTurret weight="fill" size={22} />, text: t('cq.how3') },
+          { icon: <FlagCheckered weight="fill" size={22} />, text: t('cq.how3') },
         ]} />
       )}
       {phase === 'theme' && <ThemeScreen gameName={castleQuestManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
@@ -491,96 +399,80 @@ export default function CastleQuest() {
             </>
           ) },
           versus
-            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> }
-            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded characters={themePieces ? undefined : CLASSIC_PLAYERS} onChange={(ps, level) => setTeam({ players: ps, level })} /> },
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        // The whole stage is the board (teacher, 2026-11-01): the world fills
-        // the screen, and the panels float over the countryside, never over
-        // the trail (the trail is fitted into the space the panels leave).
-        <div ref={stageRef} className="relative play-fill overflow-hidden">
+        <div className="relative play-fill overflow-hidden grid grid-rows-[auto_1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_290px]" style={boardGround(theme)}>
           <h1 className="sr-only"><Title text={castleQuestManifest.name} /></h1>
-          <div className={`absolute inset-0 select-none ${tornado && !still && settings.screenShake ? 'cq-shake' : ''}`}>
-            <svg viewBox={`${vb.x} ${vb.y} ${vb.w} ${vb.h}`} preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" role="img" aria-label={t('cq.board', { n: FINISH })}>
-              <WorldArt theme={theme} still={still} start={start} />
-              <TrailMarks ahead={ahead} here={phase === 'play' && turns ? (override[me] ? null : pos[me] ?? 0) : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} still={still} />
-              <Castle stage={stage} theme={theme} still={still} flag={winner ? TEAM_COLORS[winner.colorIndex % TEAM_COLORS.length] : '#ef6f6c'} />
-            </svg>
-            {/* Pieces: the players' animals hop space to space. */}
+          {/* Players: a round badge each, like every other game (teacher, 2026-11-08). */}
+          <div className="lg:col-start-2 lg:row-start-1 p-2 lg:pt-16 lg:pr-3 pr-40 lg:pl-0 grid gap-3 content-start min-w-0 z-10">
+            <Race turns={turns} pos={pos} finish={finish} playing={phase === 'play'} shield={shield} skip={skip} still={still} />
+            <div className="hidden lg:grid bg-surface border-[2.5px] border-border rounded-panel p-3 gap-3 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <Die2D value={die} size={84} rolling={false} theme={theme} />
+              {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
+              {rollButton}
+            </div>
+          </div>
+          <div ref={boardRef} className="relative lg:col-start-1 lg:row-start-1 min-h-0 min-w-0 select-none">
+            <BoardArt L={L} ox={ox} oy={oy} n={n} kinds={kinds} theme={theme} wobble={wobble} still={still} here={phase === 'play' && player ? pos[me] : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} />
             {turns.players.map((p, i) => {
               const here = pos[i] ?? 0;
-              const o = override[i];
-              const sp = o ?? spotOf(here);
-              const same = turns.players.map((_, k) => k).filter((k) => !override[k] && (pos[k] ?? 0) === here);
-              const off = !o && same.length > 1 ? (same.indexOf(i) - (same.length - 1) / 2) * 2.4 * ks : 0;
+              const same = turns.players.map((_, k) => k).filter((k) => (pos[k] ?? 0) === here);
+              const slot = same.indexOf(i);
+              const tok = L.size * (same.length > 1 ? 0.44 : 0.6);
+              const off = same.length > 1 ? { x: ((slot % 2) - 0.5) * L.size * 0.42, y: (Math.floor(slot / 2) - (same.length > 2 ? 0.5 : 0)) * L.size * 0.42 } : { x: 0, y: 0 };
+              const sp = at(here);
+              const sw = swirl && swirl.lifted[i] ? swirl : null;
               const on = i === turns.turn && phase === 'play';
-              const flying = !!o?.lift;
+              const cx = box.w / 2, cy = box.h / 2, R = Math.min(box.w, box.h) * 0.22;
+              const a0 = (i / turns.players.length) * Math.PI * 2;
+              const dest = sw ? at(sw.to[i]) : sp;
+              const ring = sw ? Array.from({ length: 9 }, (_, k) => ({ x: cx + Math.cos(a0 + k * 0.9) * R * (0.6 + k * 0.06), y: cy + Math.sin(a0 + k * 0.9) * R * 0.55 - R * 0.35 })) : [];
               return (
-                <motion.div key={p.id} className="absolute aspect-[4/5] pointer-events-none" style={{ width: `${6.4 * ks}%`, zIndex: on ? 15 : 10, translateX: '-50%', translateY: '-92%' }}
-                  aria-label={t('cq.pieceAt', { name: p.name })}
-                  animate={{ left: `calc(${px(sp.x)} + ${off}%)`, top: py(sp.y), rotate: flying && !still ? 720 : 0, scale: flying ? 0.7 : 1 }}
-                  transition={flying ? { duration: still ? 0.01 : 1.3, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 500) / 1000, ease: 'easeOut' }}>
-                  <Pawn img={heroOf(p, i)} figure={figureOf(p)} color={TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]} on={on} shield={shield[i] > 0} fast={fast[i] > 0} still={still} hopKey={hop.who === i ? hop.n : 0} hopMs={hop.ms} />
+                <motion.div key={p.id} className="absolute pointer-events-none" aria-label={t('cq.pieceAt', { name: p.name })} style={{ width: tok, height: tok, zIndex: sw ? 30 : on ? 15 : 10, translateX: '-50%', translateY: '-50%' }}
+                  animate={sw && !still
+                    ? { left: [sp.x, ...ring.map((q) => q.x), dest.x], top: [sp.y, ...ring.map((q) => q.y), dest.y], rotate: [0, 720], scale: [1, 1.3, 1.3, 1] }
+                    : { left: sp.x + off.x, top: sp.y + off.y, rotate: 0, scale: 1 }}
+                  transition={sw && !still ? { duration: 2.9, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 450) / 1000, ease: 'easeOut' }}>
+                  <Token player={p} on={on} shield={shield[i]} still={still} hopKey={hop.who === i ? hop.k : 0} hopMs={hop.ms} />
                 </motion.div>
               );
             })}
             <AnimatePresence>
-              {puffs.map((pf) => (
-                <motion.span key={pf.id} className="absolute aspect-[2/1] rounded-[50%] bg-white/70 pointer-events-none z-[9]" style={{ width: `${5 * ks}%`, left: px(pf.at.x), top: py(pf.at.y), translateX: '-50%', translateY: '-30%' }}
-                  initial={{ scale: 0.3, opacity: 0.9 }} animate={{ scale: 1.6, opacity: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }} />
-              ))}
-              {tornado && (
-                <motion.img key="tornado" src={itemFor('tornado').image} alt="" className="absolute pointer-events-none z-20 drop-shadow-[0_8px_10px_rgba(0,0,0,0.35)]" style={{ width: `${30 * ks}%`, top: py(WORLD_H * 0.12) }}
-                  initial={{ left: '-30%', opacity: 0 }} animate={still ? { left: '35%', opacity: 1 } : { left: ['-30%', '20%', '45%', '75%', '110%'], opacity: [0, 1, 1, 1, 0], rotate: [0, -10, 10, -8, 0], scale: [0.7, 1.1, 1.2, 1.05, 0.8] }}
-                  exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 2.2, ease: 'easeInOut' }} />
-              )}
-              {bolt && (
-                <motion.div key={bolt.id} className="absolute inset-0 pointer-events-none z-20" initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  {!still && settings.screenShake && <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 0 }} animate={{ opacity: [0, 0.85, 0, 0.6, 0] }} transition={{ duration: 0.6 }} />}
-                  <motion.img src={itemFor('lightning').image} alt="" className="absolute drop-shadow-[0_0_16px_#fff7a1]" style={{ width: `${13 * ks}%`, left: px(bolt.at.x), translateX: '-50%', translateY: '-100%' }}
-                    initial={{ top: '-15%', scale: 0.6 }} animate={{ top: py(bolt.at.y), scale: [0.6, 1.3, 1] }} transition={{ duration: still ? 0.01 : 0.35, ease: 'easeIn' }} />
-                </motion.div>
-              )}
-              {sip && (
-                <motion.img key={sip.id} src={sip.img} alt="" className="absolute pointer-events-none z-20" style={{ width: `${7 * ks}%`, left: px(sip.at.x), top: py(sip.at.y), translateX: '-20%', translateY: '-210%' }}
-                  initial={{ scale: 0, rotate: 0 }} animate={still ? { scale: 1 } : { scale: [0, 1.2, 1, 1], rotate: [0, 0, -70, -70], y: [0, -6, 0, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 1 }} />
-              )}
-              {toss && <DieToss key={toss.id} n={toss.n} mult={toss.mult} still={still} theme={theme} />}
+              {swirl && !still && <Twister key={swirl.id} item={itemFor('tornado')} w={box.w} h={box.h} />}
               {banner && (
-                <motion.p key={banner.id} className={`absolute -translate-x-1/2 w-max max-w-[80%] flex items-center gap-2 font-display text-xl sm:text-2xl border-[2.5px] border-border rounded-pill pl-2 pr-5 py-1 pointer-events-none z-20 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)', left: px(WORLD_W / 2), top: py(WORLD_H * 0.86) }}
-                  initial={{ y: 30, opacity: 0, scale: 0.8 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 22, duration: still ? 0.01 : undefined }}
+                <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-[3px] border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
+                  initial={{ y: 30, opacity: 0, scale: 0.7, rotate: -4 }} animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 18, duration: still ? 0.01 : undefined }}
                   onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
-                  {banner.image && <img src={banner.image} alt="" className="w-9 h-9 object-contain" />}{banner.text}
+                  {banner.icon === 'lose' && <HourglassHigh weight="fill" size={30} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={30} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={30} />}{banner.text}
                 </motion.p>
               )}
             </AnimatePresence>
+          </div>
+          {/* Small screens: the die and the roll button along the bottom. */}
+          <div className="lg:hidden p-2 flex items-center justify-center gap-3 z-10">
+            <div className="bg-surface/95 border-[2.5px] border-border rounded-panel px-3 py-2 flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <Die2D value={die} size={52} rolling={false} theme={theme} />
+              {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
+              {rollButton && <div className="w-56">{rollButton}</div>}
+            </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-30 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
-          {/* The panels float over the countryside. Big screens: a column on the right. */}
-          <div ref={sideRef} className="absolute z-20 top-2 left-2 right-[10.5rem] lg:left-auto lg:right-3 lg:top-16 lg:w-[270px] grid gap-3 min-w-0">
-            <Race turns={turns} pos={pos} playing={phase === 'play'} heroOf={heroOf} start={start} />
-            <div className="hidden lg:block">{tray}</div>
-            <div className="hidden lg:block">{dieCard}</div>
-            {step === 'target' && human && <div className="hidden lg:block">{targetPicker}</div>}
-          </div>
-          {/* Small screens: the die, roll button and held power-ups along the bottom. */}
-          <div ref={bottomRef} className="lg:hidden absolute z-20 bottom-2 inset-x-2 flex items-end justify-center gap-3 flex-wrap">
-            {held.held.length > 0 && <div className="w-[min(15rem,45%)]">{tray}</div>}
-            {step === 'target' && human ? <div className="w-[min(22rem,90%)]">{targetPicker}</div> : (
-              <div className="bg-surface/95 border-[2.5px] border-border rounded-panel px-3 py-2 flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <Die3D value={die} size={48} spinning={step === 'rolling' && !still} theme={theme} />
-                {rollButton && <div className="w-56">{rollButton}</div>}
-              </div>
-            )}
-          </div>
+          <AnimatePresence>
+            {toss && <DieToss key={toss.id} rolls={toss.rolls} mult={toss.mult} still={still} theme={theme} />}
+            {wheel && <Wheel key={wheel.id} spin={wheel} still={still} />}
+          </AnimatePresence>
         </div>
       )}
-      {question && player && phase === 'play' && <ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} magnet={magnetOn ? itemFor('magnet').image : undefined} avatar={heroOf(player, turns?.turn ?? 0)} />}
+      {tray}
+      {picker}
+      {question && player && phase === 'play' && <ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} />}
       {phase === 'end' && turns && (
         <ResultsModal winners={winner ? [winner] : undefined} title={winner ? t('cq.won', { name: winner.name }) : t('share.tie')} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-display text-xl font-bold flex items-center gap-2 justify-center"><Trophy weight="fill" size={24} />{t('cq.built')}</p>
@@ -592,276 +484,206 @@ export default function CastleQuest() {
   );
 }
 
-// ---- The world: ground, water, trees, bridges (drawn once) -----------------
-
-const WORLD = buildWorld();
-const LAND = buildCountry();
-const TILE: Record<string, string> = { grass: 'tileGrass', grassFull: 'tileGrass_full', water: 'tileWater', stone: 'tileStone', dirt: 'tileDirt', magic: 'tileMagic_full', sand: 'tileSand' };
-const ROW_LIST = Array.from({ length: ROWS + MARGIN.top + MARGIN.bottom }, (_, k) => k - MARGIN.top);
-
-const WorldArt = memo(function WorldArt({ theme, still, start }: { theme: GameTheme; still: boolean; start: number }) {
-  const custom = pieceImage(theme, 'tile');
-  const ground = pieceImage(theme, 'background');
-  return (
-    <g>
-      {/* Under everything, in case the screen is wider than the countryside. */}
-      <rect x={COUNTRY.x - 4000} y={COUNTRY.y - 4000} width={COUNTRY.w + 8000} height={COUNTRY.h + 8000} fill="#7cc35b" />
-      {ground && <image href={ground} x={COUNTRY.x} y={COUNTRY.y} width={COUNTRY.w} height={COUNTRY.h} preserveAspectRatio="xMidYMid slice" />}
-      {ROW_LIST.map((r) => (
-        <g key={r}>
-          {/* The countryside around the board: hills lift some tiles up. */}
-          {!ground && LAND.cells.filter((c) => c.r === r).map((c) => {
-            const { x, y } = tileXY(c.r, c.c);
-            const img = `${ART}/world/${TILE[c.ground]}.png`;
-            return (
-              <g key={`l${c.r},${c.c}`}>
-                {Array.from({ length: c.lift + 1 }, (_, k) => <image key={k} href={img} x={x} y={y - k * SIDE} width={65} height={89} />)}
-                {c.ground === 'water' && <image href={`${ART}/world/waveWater.png`} x={x + 18 + (((c.c % 3) + 3) % 3) * 4} y={y + 22} width={26} height={9} className={still ? '' : 'cq-wave'} style={{ animationDelay: `${-(((c.r * 7 + c.c * 3) % 10) + 10) * 0.3}s` }} />}
-              </g>
-            );
-          })}
-          {WORLD.cells.filter((c) => c.r === r).map((c) => {
-            const { x, y } = tileXY(c.r, c.c);
-            const i = c.i ?? -1;
-            const img = c.ground === 'path' ? (custom ?? `${ART}/world/${i === start ? 'tileStone' : i % 2 ? 'tileSand_full' : 'tileSand'}.png`) : `${ART}/world/${TILE[c.ground]}.png`;
-            return (
-              <g key={`${c.r},${c.c}`}>
-                <image href={img} x={x} y={y} width={65} height={89} />
-                {c.ground === 'path' && i < start && <polygon points={hexPoints(x, y, 1)} fill="#3d6b2f" opacity={0.45} />}
-                {c.ground === 'path' && <polygon points={hexPoints(x, y, 0.82)} fill="none" stroke={i % 2 ? '#c9a46a' : '#e9d6ad'} strokeWidth={2} opacity={0.9} />}
-                {c.ground === 'water' && <image href={`${ART}/world/waveWater.png`} x={x + 18 + (c.c % 3) * 4} y={y + 22 + (c.r % 2) * 6} width={26} height={9} className={still ? '' : 'cq-wave'} style={{ animationDelay: `${-((c.r * 7 + c.c * 3) % 10) * 0.3}s` }} />}
-              </g>
-            );
-          })}
-        </g>
-      ))}
-      {/* A dotted guide along the trail, so the way through every bend is clear. */}
-      <polyline points={[...PATH.map(([r, c]) => centerOf(r, c)), centerOf(1, 13)].map((p) => `${p.x},${p.y + 2}`).join(' ')} fill="none" stroke="#fffdf2" strokeWidth={3.2} strokeDasharray="0.1 11" strokeLinecap="round" strokeLinejoin="round" opacity={0.95} />
-      {/* Start: a flag on the first space. */}
-      <StartFlag still={still} at={start} />
-      {/* Bridges: wooden planks across the water, from one bend to the next. */}
-      {BRIDGES.map((b) => <BridgeArt key={b.from} b={b} />)}
-      {ROW_LIST.map((r) => (
-        <g key={`p${r}`}>
-          {!ground && LAND.props.filter((p) => p.row === r).map((p, k) => (
-            <image key={`l${k}`} href={`${ART}/${p.img}.png`} x={p.x} y={p.y} width={p.w} height={p.h} className={p.sway && !still ? 'cq-sway' : ''} style={p.sway ? { animationDelay: `${-((Math.abs(p.x) * 13) % 40) / 10}s` } : undefined} />
-          ))}
-          {WORLD.props.filter((p) => p.row === r).map((p, k) => (
-            <image key={k} href={`${ART}/world/${p.img}.png`} x={p.x} y={p.y} width={p.w} height={p.h} className={p.sway && !still ? 'cq-sway' : ''} style={p.sway ? { animationDelay: `${-((p.x * 13) % 40) / 10}s` } : undefined} />
-          ))}
-        </g>
-      ))}
-      {/* Soft clouds drifting over the land, their shadows on the ground. */}
-      {[[COUNTRY.x + 300, COUNTRY.y + 120, 1], [520, 40, 0.8], [1150, 300, 0.9], [COUNTRY.x + 200, 700, 1.1], [1350, 900, 0.9]].map(([x, y, s], k) => (
-        <g key={k} className={still ? '' : 'cq-cloud'} style={{ animationDelay: `${-k * 9}s` }} opacity={0.75}>
-          <ellipse cx={x} cy={y} rx={46 * s} ry={14 * s} fill="#fff" /><ellipse cx={x - 22 * s} cy={y + 4} rx={24 * s} ry={11 * s} fill="#fff" /><ellipse cx={x + 24 * s} cy={y + 3} rx={28 * s} ry={12 * s} fill="#fff" />
-        </g>
-      ))}
-    </g>
-  );
-});
-
-function hexPoints(x: number, y: number, s: number) {
-  const cx = x + 32.5, cy = y + 33, hw = 32.5 * s, hh = 33 * s;
-  return [[cx, cy - hh], [cx + hw, cy - hh * 0.45], [cx + hw, cy + hh * 0.45], [cx, cy + hh], [cx - hw, cy + hh * 0.45], [cx - hw, cy - hh * 0.45]].map((p) => p.join(',')).join(' ');
+// The ground behind the board: the theme's background, or Classic's cream
+// with a soft dotted pattern like an old board-game box.
+function boardGround(theme: GameTheme): CSSProperties {
+  const bg = pieceImage(theme, 'background');
+  if (bg) return { background: `center / cover no-repeat url("${bg}")` };
+  return { backgroundColor: C.cream, backgroundImage: `radial-gradient(${C.blush} 18%, transparent 19%), radial-gradient(${C.blush} 18%, transparent 19%)`, backgroundSize: '28px 28px', backgroundPosition: '0 0, 14px 14px' };
 }
 
-function StartFlag({ still, at }: { still: boolean; at: number }) {
-  const { x, y } = spotOf(at);
-  return (
-    <g transform={`translate(${x - 24} ${y - 40})`}>
-      <rect x={0} y={0} width={3} height={40} rx={1.5} fill="#5b3a1e" />
-      <path d="M3 1 L26 7 L3 14 Z" fill="#ef6f6c" stroke="#241c3d" strokeWidth={1.2} className={still ? '' : 'cq-flag'} />
-    </g>
-  );
-}
+// ---- The board --------------------------------------------------------------
 
-function BridgeArt({ b }: { b: Bridge }) {
-  const a = spotOf(b.from), z = spotOf(b.to);
-  const ang = (Math.atan2(z.y - a.y, z.x - a.x) * 180) / Math.PI;
-  const len = Math.hypot(z.x - a.x, z.y - a.y);
-  const planks = Math.round(len / 9);
+function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, color }: { L: Layout; ox: number; oy: number; n: number; kinds: SpaceKind[]; theme: GameTheme; wobble: { r: number; dx: number; dy: number }[]; still: boolean; here: number | null; color: string }) {
+  const s = L.size;
+  const used = new Set(L.cells.map((c) => `${c.x},${c.y}`));
+  const art = { regular: pieceImage(theme, 'space'), lose: pieceImage(theme, 'space-lose'), again: pieceImage(theme, 'space-again'), start: pieceImage(theme, 'start'), finish: pieceImage(theme, 'finish') };
+  // The empty spots between the lanes get little doodles that bob.
+  const blanks: { x: number; y: number; k: number }[] = [];
+  for (let y = 1; y < L.rows; y += 2) for (let x = 0; x < L.cols; x++) if (!used.has(`${x},${y}`) && (x * 7 + y * 3) % 3 === 0) blanks.push({ x, y, k: x * 11 + y });
   return (
-    <g transform={`translate(${a.x} ${a.y}) rotate(${ang})`}>
-      <rect x={6} y={-15} width={len - 12} height={30} rx={4} fill="rgba(0,0,0,0.18)" transform="translate(0 6)" />
-      <rect x={6} y={-13} width={len - 12} height={26} rx={3} fill="#8a5a2b" />
-      {Array.from({ length: planks }, (_, k) => <rect key={k} x={10 + k * ((len - 20) / planks)} y={-12} width={(len - 20) / planks - 2} height={24} rx={1.5} fill={k % 2 ? '#c88a4e' : '#d59a5c'} stroke="#6b4320" strokeWidth={0.8} />)}
-      <line x1={6} y1={-14} x2={len - 6} y2={-14} stroke="#5b3a1e" strokeWidth={2.6} strokeLinecap="round" />
-      <line x1={6} y1={14} x2={len - 6} y2={14} stroke="#5b3a1e" strokeWidth={2.6} strokeLinecap="round" />
-      {[8, len / 2, len - 8].map((px, k) => <g key={k}><circle cx={px} cy={-14} r={3} fill="#5b3a1e" /><circle cx={px} cy={14} r={3} fill="#5b3a1e" /></g>)}
-    </g>
-  );
-}
-
-// The spaces you will hop on light up after a roll; the space of the player
-// whose turn it is pulses in their color. Power-up spaces look like every
-// other space (teacher, 2026-11-01: "hide power ups and randomize. there
-// should be no indication to the player that they will earn a power up until
-// they do"): they are placed at random each game and found by landing.
-function TrailMarks({ ahead, here, color, still }: { ahead: number[]; here: number | null; color: string; still: boolean }) {
-  return (
-    <g>
-      {ahead.map((i, k) => {
-        if (i >= FINISH) return null;
-        const [r, c] = PATH[i]; const { x, y } = tileXY(r, c);
-        const last = k === ahead.length - 1;
-        return <polygon key={`a${i}`} points={hexPoints(x, y, 0.9)} fill={last ? color : '#fffbe0'} opacity={last ? 0.75 : 0.55} stroke={last ? '#241c3d' : 'none'} strokeWidth={2.5} className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />;
+    <div className="absolute inset-0" role="img" aria-label={t('cq.board', { n })}>
+      {/* The board: one rounded panel with a charcoal edge, like a printed board. */}
+      <div className="absolute rounded-[22px] border-[4px]" style={{ left: ox - 10, top: oy - 10, width: L.cols * s + 20, height: L.rows * s + 20, borderColor: C.ink, background: pieceImage(theme, 'background') ? 'rgba(255,253,246,0.55)' : C.blush, boxShadow: `0 6px 0 ${C.ink}` }} />
+      {blanks.map((b) => (
+        <span key={`d${b.k}`} className={`absolute grid place-items-center ${still ? '' : 'cq-bob'}`} style={{ left: ox + b.x * s, top: oy + b.y * s, width: s, height: s, animationDelay: `${-(b.k % 7) * 0.4}s` }} aria-hidden="true">
+          {b.k % 3 === 0 ? <Star weight="fill" size={s * 0.38} color={C.yellow} /> : b.k % 3 === 1 ? <svg width={s * 0.5} height={s * 0.3} viewBox="0 0 50 30"><path d="M10 26 Q0 26 2 18 Q4 10 12 12 Q16 2 27 4 Q37 4 39 13 Q49 12 48 20 Q48 26 40 26 Z" fill="#fff" stroke={C.ink} strokeWidth="2" /></svg> : <svg width={s * 0.34} height={s * 0.34} viewBox="0 0 30 30"><circle cx="15" cy="15" r="5" fill={C.yellow} stroke={C.ink} strokeWidth="1.6" />{[0, 72, 144, 216, 288].map((a) => <circle key={a} cx={15 + Math.cos((a * Math.PI) / 180) * 9} cy={15 + Math.sin((a * Math.PI) / 180) * 9} r="5" fill={C.red} stroke={C.ink} strokeWidth="1.6" />)}</svg>}
+        </span>
+      ))}
+      {L.cells.map((c, i) => {
+        const w = wobble[i % wobble.length];
+        const kind: SpaceKind | 'start' | 'finish' = i === 0 ? 'start' : i === n - 1 ? 'finish' : kinds[i] ?? 'regular';
+        const img = art[kind];
+        const fill = kind === 'start' ? C.sage : kind === 'finish' ? C.yellow : kind === 'lose' ? C.ink : kind === 'again' ? C.cream : SQUARE_COLORS[i % SQUARE_COLORS.length];
+        const lit = here === i;
+        return (
+          <div key={i} className="absolute" style={{ left: ox + c.x * s + s * 0.05 + w.dx, top: oy + c.y * s + s * 0.05 + w.dy, width: s * 0.9, height: s * 0.9, transform: `rotate(${w.r}deg)` }}>
+            <div className={`w-full h-full rounded-[16%] border-[3px] grid place-items-center overflow-hidden ${lit && !still ? 'cq-glow' : ''}`}
+              style={{ borderColor: C.ink, background: img ? `center / cover url("${img}")` : fill, boxShadow: lit ? `0 0 0 4px ${color}, 0 0 16px 4px ${color}` : `0 3px 0 ${C.ink}` }}>
+              {!img && kind === 'start' && <span className="text-[#fffdf6] leading-none" style={{ ...CHICLE, fontSize: s * 0.26, WebkitTextStroke: `1px ${C.ink}` }}>{t('cq.startWord')}</span>}
+              {!img && kind === 'finish' && <span className="grid justify-items-center leading-none" style={{ ...CHICLE, fontSize: s * 0.22, color: C.ink }}><FlagCheckered weight="fill" size={s * 0.4} />{t('cq.finishWord')}</span>}
+              {!img && kind === 'lose' && <span className="grid justify-items-center leading-none text-center" style={{ ...CHICLE, fontSize: s * 0.15, color: C.cream }}><HourglassHigh weight="fill" size={s * 0.42} color={C.yellow} />{t('cq.loseWord')}</span>}
+              {!img && kind === 'again' && <span className="grid justify-items-center leading-none text-center" style={{ ...CHICLE, fontSize: s * 0.15, color: C.ink }}><ArrowsClockwise weight="bold" size={s * 0.42} color={C.red} className={still ? '' : 'cq-spin-slow'} />{t('cq.againWord')}</span>}
+              {!img && kind === 'regular' && <span className="w-[30%] h-[30%] rounded-full opacity-35" style={{ background: '#fffdf6' }} />}
+            </div>
+          </div>
+        );
       })}
-      {here !== null && here < FINISH && (() => { const [r, c] = PATH[here]; const { x, y } = tileXY(r, c); return <polygon points={hexPoints(x, y, 0.92)} fill="none" stroke={color} strokeWidth={5} className={still ? '' : 'cq-glow'} />; })()}
-    </g>
+    </div>
   );
 }
 
-// The castle rises layer by layer; new blocks drop in with a bounce.
-function Castle({ stage, theme, still, flag }: { stage: number; theme: GameTheme; still: boolean; flag: string }) {
-  const blocks = useMemo(() => castleBlocks(), []);
-  const custom = pieceImage(theme, 'castle');
-  if (custom) {
-    const { x, y } = tileXY(0, 12);
-    return <image href={custom} x={x - 10} y={y - 130} width={230} height={260} opacity={0.35 + stage * 0.13} className={!still && stage === 5 ? 'cq-castle' : ''} />;
-  }
-  // The first layer of stone stands from the start, so there are never empty
-  // tiles where the castle goes (teacher, 2026-11-01: no blank tiles).
-  const shown = blocks.filter((b) => b.stage <= Math.max(1, stage)).sort((a, b) => a.r - b.r || a.order - b.order);
+// A player's piece: their round team badge on a little shadow, hopping.
+function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlayer; on: boolean; shield: boolean; still: boolean; hopKey: number; hopMs: number }) {
+  const [size, setSize] = useState(40);
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => { const el = ref.current; if (el && Math.abs(el.offsetWidth - size) > 0.5) setSize(el.offsetWidth); });
   return (
-    <g className={!still && stage === 5 ? 'cq-castle' : ''}>
-      {shown.map((b) => b.img === 'banner'
-        // Flags in the winner's color fly from the towers when the castle is built.
-        ? <g key={b.order} className={still ? '' : 'cq-drop'} style={{ animationDelay: `${(b.order % 6) * 0.07}s` }}>
-            <rect x={b.x + 8} y={b.y - 4} width={2.4} height={b.h + 6} rx={1.2} fill="#5b3a1e" />
-            <path d={`M${b.x + 10.4} ${b.y - 3} L${b.x + 30} ${b.y + 3} L${b.x + 10.4} ${b.y + 10} Z`} fill={flag} stroke="#241c3d" strokeWidth={1} className={still ? '' : 'cq-flag'} />
-          </g>
-        : <image key={b.order} href={`${ART}/castle/${b.img}.png`} x={b.x} y={b.y} width={b.w} height={b.h} className={still ? '' : 'cq-drop'} style={{ animationDelay: `${(b.order % 6) * 0.07}s` }} />)}
-    </g>
-  );
-}
-
-// ---- Pieces, the die, and the race panel -----------------------------------
-
-function Pawn({ img, figure, color, on, shield, fast, still, hopKey, hopMs }: { img: string; figure: boolean; color: string; on: boolean; shield: boolean; fast: boolean; still: boolean; hopKey: number; hopMs: number }) {
-  return (
-    <div className="relative w-full h-full">
-      <span className="absolute left-1/2 bottom-[2%] w-[70%] h-[14%] -translate-x-1/2 rounded-[50%] bg-black/30" />
-      <motion.div key={hopKey} className="absolute inset-0" initial={false}
-        animate={!still && hopKey ? { y: ['0%', `-${30 + ((hopKey * 37) % 17)}%`, '0%', '0%'], rotate: [0, ((hopKey * 53) % 11) - 5, 0, 0], scaleY: [1, 1.06, 0.86, 1], scaleX: [1, 0.96, 1.1, 1] } : { y: '0%' }}
-        transition={{ duration: Math.max(0.07, hopMs / 1000), times: [0, 0.45, 0.8, 1], ease: 'easeOut' }} style={{ transformOrigin: '50% 100%' }}>
-        {on && !still && <motion.span className="absolute left-1/2 -top-[34%] -translate-x-1/2 text-[0]" animate={{ y: [0, -5, 0] }} transition={{ duration: 0.8, repeat: Infinity }}>
-          <svg viewBox="0 0 20 14" className="w-[clamp(12px,1.6vw,22px)]"><path d="M2 2 L18 2 L10 12 Z" fill={color} stroke="#241c3d" strokeWidth={2} strokeLinejoin="round" /></svg>
-        </motion.span>}
-        {figure ? <>
-          {/* The animal stands on a little disc in its team color. */}
-          <span className="absolute left-1/2 bottom-[2%] w-[92%] h-[24%] -translate-x-1/2 rounded-[50%] border-[2px] border-[#241c3d]" style={{ background: color, boxShadow: on ? '0 0 0 3px #fdfd94, 0 0 14px 5px #fdfd94' : undefined }} />
-          <img src={img} alt="" draggable="false" className="absolute left-1/2 bottom-[10%] w-[112%] max-w-none aspect-square -translate-x-1/2 object-contain drop-shadow-[0_2px_0_rgba(0,0,0,0.3)]" />
-        </> : <>
-          {/* The stand. */}
-          <span className="absolute left-1/2 bottom-[6%] w-[64%] h-[26%] -translate-x-1/2 rounded-[45%_45%_40%_40%] border-[2px] border-[#241c3d]" style={{ background: `linear-gradient(${color}, color-mix(in srgb, ${color} 70%, #241c3d))` }} />
-          {/* The hero on top. */}
-          <img src={img} alt="" draggable="false" className="absolute left-1/2 top-0 w-[86%] aspect-square -translate-x-1/2 rounded-full object-cover border-[3px]" style={{ borderColor: color, boxShadow: on ? `0 0 0 3px #fdfd94, 0 0 14px 4px #fdfd94` : '0 2px 0 rgba(0,0,0,0.35)' }} />
-        </>}
-        {shield && <span className={`absolute -inset-[16%] rounded-full border-[3px] border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.45))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')}><Shield weight="fill" className="absolute -right-[6%] -top-[6%] w-[34%] h-[34%] text-[#4a90d9] drop-shadow-[0_1px_0_#000]" /></span>}
-        {fast && <Timer weight="fill" className="absolute -left-[12%] top-[8%] w-[34%] h-[34%] text-[#ef6f6c] drop-shadow-[0_1px_0_#000]" aria-label={t('cq.fast')} />}
+    <div ref={ref} className="relative w-full h-full">
+      <span className="absolute left-1/2 bottom-[-8%] w-[80%] h-[22%] -translate-x-1/2 rounded-[50%] bg-black/25" />
+      <motion.div key={hopKey} className="absolute inset-0 grid place-items-center" initial={false}
+        animate={!still && hopKey ? { y: ['0%', `-${45 + ((hopKey * 37) % 20)}%`, '0%', '0%'], rotate: [0, ((hopKey * 53) % 15) - 7, 0, 0], scaleY: [1, 1.08, 0.82, 1], scaleX: [1, 0.94, 1.12, 1] } : { y: '0%' }}
+        transition={{ duration: Math.max(0.08, hopMs / 1000), times: [0, 0.45, 0.8, 1], ease: 'easeOut' }} style={{ transformOrigin: '50% 100%' }}>
+        <motion.span className="rounded-full" animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 10px 3px #fdfd94', '0 0 0 5px #fdfd94, 0 0 20px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 10px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 2px 0 rgba(0,0,0,0.35)' }}
+          transition={on && !still ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
+          <TeamBadge colorIndex={player.colorIndex} size={size} />
+        </motion.span>
+        {shield && <span className={`absolute -inset-[18%] rounded-full border-[3px] border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.5))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
       </motion.div>
     </div>
   );
 }
 
-// A real cube with pips that tumbles; it settles on the number rolled.
-const FACE_TURN: Record<number, [number, number]> = { 1: [0, 0], 6: [0, 180], 3: [0, -90], 4: [0, 90], 2: [-90, 0], 5: [90, 0] };
-// Classic: the low-poly 3D die (smolware, free for any project), rendered to
-// pictures of each face and of the tumble (teacher, 2026-11-01).
-const DIE_ART = '/classic/castle-quest/die';
-let dieLoaded = false;
-function loadDieArt() {
-  if (dieLoaded || typeof Image === 'undefined') return;
-  dieLoaded = true;
-  for (let n = 1; n <= 6; n++) new Image().src = `${DIE_ART}/face-${n}.webp`;
-  for (let n = 0; n < 8; n++) new Image().src = `${DIE_ART}/roll-${n}.webp`;
-}
-function ModelDie({ value, size, spinning }: { value: number; size: number; spinning: boolean }) {
-  const [frame, setFrame] = useState(0);
-  useEffect(loadDieArt, []);
+// ---- The die: a flat classic die; a theme draws all six sides on one strip --
+
+const PIPS: Record<number, [number, number][]> = { 1: [[50, 50]], 2: [[28, 28], [72, 72]], 3: [[26, 26], [50, 50], [74, 74]], 4: [[28, 28], [72, 28], [28, 72], [72, 72]], 5: [[26, 26], [74, 26], [50, 50], [26, 74], [74, 74]], 6: [[28, 24], [72, 24], [28, 50], [72, 50], [28, 76], [72, 76]] };
+function Die2D({ value, size, rolling, theme }: { value: number; size: number; rolling: boolean; theme: GameTheme }) {
+  const [face, setFace] = useState(value);
   useEffect(() => {
-    if (!spinning) return;
-    const id = window.setInterval(() => setFrame((f) => (f + 1) % 8), 75);
+    if (!rolling) { setFace(value); return; }
+    const id = window.setInterval(() => setFace((f) => 1 + ((f + 1 + Math.floor(Math.random() * 4)) % 6)), 85);
     return () => window.clearInterval(id);
-  }, [spinning]);
+  }, [rolling, value]);
+  const strip = pieceImage(theme, 'dice');
   return (
-    <div style={{ width: size * 1.25, height: size * 1.25 }} className="relative" role="img" aria-label={t('cq.dieShows', { n: value })}>
-      {spinning
-        ? <img src={`${DIE_ART}/roll-${frame}.webp`} alt="" draggable="false" className="absolute inset-0 w-full h-full object-contain" style={{ transform: `rotate(${frame * 45}deg)` }} />
-        : <motion.img key={value} src={`${DIE_ART}/face-${value}.webp`} alt="" draggable="false" className="absolute inset-0 w-full h-full object-contain"
-            initial={{ scale: 1.15, rotate: -12 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 14 }} />}
-    </div>
+    <span role="img" aria-label={rolling ? t('cq.dieRolling') : t('cq.dieShows', { n: value })} className="inline-block shrink-0" style={{ width: size, height: size }}>
+      {strip
+        ? <span className="block w-full h-full rounded-[18%]" style={{ backgroundImage: `url("${strip}")`, backgroundSize: '600% 100%', backgroundPosition: `${(face - 1) * 20}% 0` }} />
+        : <svg viewBox="0 0 100 100" width={size} height={size}>
+            <rect x="5" y="9" width="90" height="88" rx="18" fill={C.ink} />
+            <rect x="5" y="4" width="90" height="88" rx="18" fill="#fffdf6" stroke={C.ink} strokeWidth="4" />
+            {PIPS[face].map(([x, y], k) => <circle key={k} cx={x} cy={y - 2} r={face === 1 ? 12 : 9} fill={face === 1 ? C.red : C.ink} />)}
+          </svg>}
+    </span>
   );
 }
-
-function Die3D({ value, size, spinning, theme, spins = 0 }: { value: number; size: number; spinning: boolean; theme: GameTheme; spins?: number }) {
-  const [rx, ry] = FACE_TURN[value];
-  const face = pieceImage(theme, 'die');
-  // A theme that draws its own die face keeps the cube; Classic uses the model.
-  if (!face && (!theme.pieces.die?.color || theme.pieces.die.color.toLowerCase() === '#fbfcf8')) return <ModelDie value={value} size={size} spinning={spinning} />;
-  const extra = spinning ? 2 : spins;
-  return (
-    <div style={{ width: size, height: size, perspective: size * 5 }} role="img" aria-label={t('cq.dieShows', { n: value })}>
-      <div className={spinning ? 'cq-tumble' : ''} style={{ width: '100%', height: '100%', position: 'relative', transformStyle: 'preserve-3d', transform: `rotateX(${rx - 18 + extra * 360}deg) rotateY(${ry + 24 + extra * 360}deg)`, transition: spinning ? 'none' : 'transform 0.9s cubic-bezier(.2,1.4,.4,1)' }}>
-        {[1, 2, 3, 4, 5, 6].map((n) => (
-          <div key={n} className="absolute inset-0 rounded-[18%] border-[2px] border-[#241c3d] grid grid-cols-3 grid-rows-3 p-[14%] gap-[4%]"
-            style={{ transform: `${FACE_POS[n]} translateZ(${size / 2}px)`, backfaceVisibility: 'hidden', background: face ? `center / cover url("${face}")` : 'radial-gradient(circle at 30% 25%, #ffffff, #f1efe6)' }}>
-            {Array.from({ length: 9 }, (_, k) => <span key={k} className={`rounded-full ${PIPS[n].includes(k) ? (n === 1 ? 'bg-[#ef6f6c]' : 'bg-[#241c3d]') : ''}`} />)}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-const FACE_POS: Record<number, string> = { 1: 'rotateY(0deg)', 6: 'rotateY(180deg)', 3: 'rotateY(90deg)', 4: 'rotateY(-90deg)', 2: 'rotateX(90deg)', 5: 'rotateX(-90deg)' };
-
-// The big throw over the board: the die flies in, bounces and lands.
-function DieToss({ n, mult, still, theme }: { n: number; mult: number; still: boolean; theme: GameTheme }) {
+// The throw: the die (or two) tumbles in over the board, bounces, lands.
+function DieToss({ rolls, mult, still, theme }: { rolls: number[]; mult: number; still: boolean; theme: GameTheme }) {
   const [landed, setLanded] = useState(still);
-  useEffect(() => { if (still) return; const id = window.setTimeout(() => setLanded(true), 950); return () => window.clearTimeout(id); }, [still]);
+  useEffect(() => { if (still) return; const id = window.setTimeout(() => setLanded(true), 1150 + (rolls.length - 1) * 500); return () => window.clearTimeout(id); }, [still, rolls.length]);
+  const sum = rolls.reduce((a, r) => a + r, 0);
+  const label = rolls.length > 1 ? `${rolls.join(' + ')}${mult > 1 ? ` x ${mult}` : ''} = ${sum * mult}` : mult > 1 ? `${sum} x ${mult} = ${sum * mult}` : String(sum);
   return (
-    <motion.div className="absolute inset-0 z-20 grid place-items-center pointer-events-none" initial={{ backgroundColor: 'rgba(36,28,61,0)' }} animate={{ backgroundColor: 'rgba(36,28,61,0.28)' }} exit={{ opacity: 0 }}>
-      <motion.div className="grid justify-items-center gap-2"
-        initial={still ? false : { x: '-140%', y: '-60%', rotate: -40 }}
-        animate={still ? undefined : { x: ['-140%', '-40%', '10%', '0%'], y: ['-60%', '10%', '-25%', '0%'], rotate: [-40, 200, 330, 360] }}
-        transition={{ duration: 0.95, times: [0, 0.45, 0.75, 1], ease: 'easeOut' }}>
-        <Die3D value={n} size={120} spinning={!landed} theme={theme} />
+    <motion.div className="absolute inset-0 z-40 grid place-items-center pointer-events-none" initial={{ backgroundColor: 'rgba(36,28,61,0)' }} animate={{ backgroundColor: 'rgba(36,28,61,0.3)' }} exit={{ opacity: 0 }}>
+      <div className="grid justify-items-center gap-3">
+        <div className="flex gap-6">
+          {rolls.map((r, k) => (
+            <motion.div key={k} initial={still ? false : { x: k ? 260 : -260, y: -220, rotate: k ? 60 : -60 }}
+              animate={still ? undefined : { x: [k ? 260 : -260, k ? 40 : -60, 0], y: [-220, 30, -40, 0], rotate: [k ? 60 : -60, 250, 340, 360 + (k ? 6 : -6)] }}
+              transition={{ duration: 1.1, delay: k * 0.5, times: [0, 0.45, 0.75, 1], ease: 'easeOut' }}>
+              <Die2D value={r} size={128} rolling={!landed} theme={theme} />
+            </motion.div>
+          ))}
+        </div>
         <AnimatePresence>
           {landed && (
-            <motion.p className="font-display text-4xl bg-surface border-[3px] border-border rounded-pill px-5 py-1" style={{ boxShadow: 'var(--shadow-sticker)' }}
-              initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }}>
-              {mult > 1 ? `${n} x ${mult} = ${n * mult}` : n}
+            <motion.p className="text-5xl bg-surface border-[3px] border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
+              initial={{ scale: 0.3, opacity: 0, rotate: -8 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1, rotate: 0 }} transition={{ duration: 0.45 }}>
+              {label}
             </motion.p>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
 
-// Who is closest to the castle: a little trail per player, no numbers.
-function Race({ turns, pos, playing, heroOf, start }: { turns: TurnState; pos: number[]; playing: boolean; heroOf: (p: TurnPlayer, i: number) => string; start: number }) {
-  const { settings } = useSettings();
-  const still = settings.motion === 'still';
+// ---- The wheel: half forward, half back; a pointer at the top --------------
+function Wheel({ spin, still }: { spin: { stop: number; forward: boolean; n: number; name: string; done: boolean }; still: boolean }) {
+  const size = 'min(62vmin, 440px)';
+  return (
+    <motion.div className="absolute inset-0 z-40 grid place-items-center bg-[#241c3d]/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
+      aria-label={spin.done ? t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n }) : t('cq.wheelSpinning')}>
+      <div className="grid justify-items-center gap-3">
+        <p className="text-3xl bg-surface border-[3px] border-border rounded-pill px-5 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}>{spin.name}: {spin.n}</p>
+        <div className="relative" style={{ width: size, height: size }}>
+          <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: still ? spin.stop % 360 : spin.stop }}
+            transition={{ duration: still ? 0.01 : 4, ease: [0.15, 0.85, 0.25, 1] }}>
+            <circle cx="100" cy="100" r="96" fill={C.ink} />
+            <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={C.sage} opacity={spin.done && !spin.forward ? 0.35 : 1} />
+            <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={C.red} opacity={spin.done && spin.forward ? 0.35 : 1} />
+            {Array.from({ length: 12 }, (_, k) => <line key={k} x1="100" y1="100" x2={100 + 92 * Math.sin((k * Math.PI) / 6)} y2={100 - 92 * Math.cos((k * Math.PI) / 6)} stroke="#fffdf6" strokeWidth="1" opacity="0.35" />)}
+            <text x="148" y="106" textAnchor="middle" fontSize="20" fill="#fffdf6" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(90 148 100)">{t('cq.forward')}</text>
+            <text x="52" y="106" textAnchor="middle" fontSize="20" fill="#fffdf6" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(-90 52 100)">{t('cq.back')}</text>
+            <circle cx="100" cy="100" r="16" fill={C.yellow} stroke={C.ink} strokeWidth="4" />
+            {Array.from({ length: 16 }, (_, k) => <circle key={`b${k}`} cx={100 + 88 * Math.sin((k * Math.PI) / 8)} cy={100 - 88 * Math.cos((k * Math.PI) / 8)} r="3" fill="#fffdf6" className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />)}
+          </motion.svg>
+          {/* The pointer at the top. */}
+          <svg viewBox="0 0 40 44" className="absolute left-1/2 -top-[6%] -translate-x-1/2 w-[14%]" aria-hidden="true"><path d="M4 4 H36 L20 40 Z" fill={C.yellow} stroke={C.ink} strokeWidth="4" strokeLinejoin="round" /></svg>
+        </div>
+        <AnimatePresence>
+          {spin.done && (
+            <motion.p className="text-4xl bg-surface border-[3px] border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#3f6b2a' : C.red }}
+              initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1 }} transition={{ duration: 0.4 }}>
+              {t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n })}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// The tornado itself, sweeping across the board while the pieces swirl.
+function Twister({ item, w, h }: { item: ThemeItem; w: number; h: number }) {
+  const s = Math.min(w, h) * 0.55;
+  return (
+    <motion.div className="absolute z-20 pointer-events-none" style={{ width: s, height: s, top: h / 2 - s * 0.6 }}
+      initial={{ left: -s, opacity: 0 }} animate={{ left: [-s, w * 0.2, w / 2 - s / 2, w * 0.6, w + s], opacity: [0, 1, 1, 1, 0], rotate: [0, -8, 8, -6, 0], scale: [0.7, 1.1, 1.25, 1.1, 0.8] }}
+      exit={{ opacity: 0 }} transition={{ duration: 3, ease: 'easeInOut' }}>
+      <motion.span className="block w-full h-full" animate={{ scaleX: [1, -1, 1] }} transition={{ duration: 0.5, repeat: Infinity }}><ItemArt item={item} size={s} still /></motion.span>
+    </motion.div>
+  );
+}
+
+function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: boolean }; potion: number; still: boolean }) {
+  const text = boost.double ? t('cq.boostTwice') : boost.x2 || potion > 0 ? t('cq.boostDouble') : '';
+  return <motion.span className="text-xl px-3 py-0.5 rounded-pill border-[2.5px] border-border bg-accent" style={CHICLE} animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>{text}</motion.span>;
+}
+
+// Who is closest to the finish: a round badge and a progress line each.
+function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: TurnState; pos: number[]; finish: number; playing: boolean; shield: boolean[]; skip: boolean[]; still: boolean }) {
   return (
     <aside className="bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-3 grid gap-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cq.race')}>
-      <h2 className="hidden lg:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted"><CastleTurret weight="fill" size={16} />{t('cq.firstToCastle')}</h2>
+      <h2 className="hidden lg:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted"><FlagCheckered weight="fill" size={16} />{t('cq.firstToFinish')}</h2>
       <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid gap-1.5 list-none m-0 p-1 lg:p-0">
         {turns.players.map((p, i) => {
           const on = playing && i === turns.turn;
-          const f = Math.max(0, Math.min(1, ((pos[i] ?? start) - start) / (FINISH - start)));
+          const f = Math.max(0, Math.min(1, (pos[i] ?? 0) / finish));
           const color = TEAM_COLORS[p.colorIndex % TEAM_COLORS.length];
           return (
             <motion.li key={p.id} aria-current={on ? 'true' : undefined} aria-label={t('cq.raceRow', { name: p.name, n: Math.round(f * 100) })}
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
               className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2 rounded-input border-[2px] p-1.5 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
-              <img src={heroOf(p, i)} alt="" className="row-span-2 w-11 h-11 object-contain drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]" />
+              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={40} />
+                {shield[i] && <ShieldCheck weight="fill" size={18} className="absolute -right-1 -bottom-1 text-[#3d7fb8] bg-surface rounded-full" aria-label={t('cq.shielded')} />}
+                {skip[i] && <HourglassHigh weight="fill" size={18} className="absolute -left-1 -bottom-1 bg-surface rounded-full" aria-label={t('cq.losesNext')} />}
+              </span>
               <span className="font-bold truncate leading-tight">{p.name}</span>
               <span className="relative h-3 rounded-pill bg-surface-2 border-[1.5px] border-border overflow-visible">
                 <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
-                <CastleTurret weight="fill" className="absolute -right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d8a8f]" aria-hidden="true" />
+                <FlagCheckered weight="fill" className="absolute -right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[#474241]" aria-hidden="true" />
               </span>
             </motion.li>
           );
@@ -870,6 +692,3 @@ function Race({ turns, pos, playing, heroOf, start }: { turns: TurnState; pos: n
     </aside>
   );
 }
-
-// Which of the nine spots on a die face hold a pip.
-const PIPS: Record<number, number[]> = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };

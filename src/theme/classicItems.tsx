@@ -151,6 +151,52 @@ export const CLASSIC_ITEM_ART: Record<string, () => JSX.Element> = {
       <path d="M30 70 L26 82 M50 70 L46 86 M70 70 L66 82" stroke="#6aa9e9" strokeWidth="5" strokeLinecap="round" />
     </g>
   ),
+  // Board Game (teacher, 2026-11-08): basic Classic power-ups.
+  'two-dice': () => (
+    <g>
+      <rect x="8" y="30" width="46" height="46" rx="9" fill="#fffdf6" {...S} transform="rotate(-12 31 53)" />
+      <rect x="46" y="22" width="46" height="46" rx="9" fill="#F9CC14" {...S} transform="rotate(10 69 45)" />
+      <g transform="rotate(-12 31 53)" fill={INK}><circle cx="20" cy="42" r="4.5" /><circle cx="31" cy="53" r="4.5" /><circle cx="42" cy="64" r="4.5" /></g>
+      <g transform="rotate(10 69 45)" fill={INK}><circle cx="58" cy="34" r="4.5" /><circle cx="80" cy="34" r="4.5" /><circle cx="58" cy="56" r="4.5" /><circle cx="80" cy="56" r="4.5" /></g>
+    </g>
+  ),
+  'twister': () => (
+    <g>
+      <path d="M10 18 Q50 6 90 18 Q86 30 50 32 Q16 30 10 18 Z" fill="#BCD9E2" {...S} />
+      <path d="M18 34 Q50 44 82 34 Q76 48 50 50 Q24 48 18 34 Z" fill="#BCD9E2" {...S} />
+      <path d="M28 52 Q50 60 72 52 Q66 64 50 66 Q34 64 28 52 Z" fill="#BCD9E2" {...S} />
+      <path d="M38 68 Q50 74 62 68 Q58 78 50 80 Q42 78 38 68 Z" fill="#BCD9E2" {...S} />
+      <path d="M46 82 Q52 88 48 94" fill="none" {...S} />
+    </g>
+  ),
+  'spin-wheel': () => (
+    <g>
+      <circle cx="50" cy="54" r="38" fill="#fffdf6" {...S} />
+      <path d="M50 16 A38 38 0 0 1 50 92 Z" fill="#9AB582" {...S} />
+      <path d="M50 16 A38 38 0 0 0 50 92 Z" fill="#D35252" {...S} />
+      <path d="M62 54 L76 54 M70 48 L76 54 L70 60" fill="none" {...S} strokeWidth={4} />
+      <path d="M38 54 L24 54 M30 48 L24 54 L30 60" fill="none" {...S} strokeWidth={4} />
+      <circle cx="50" cy="54" r="6" fill="#F9CC14" {...S} />
+      <path d="M42 4 H58 L50 18 Z" fill="#474241" {...S} />
+    </g>
+  ),
+  'magic-potion': () => (
+    <g>
+      <rect x="40" y="8" width="20" height="12" rx="3" fill="#c9a46a" {...S} />
+      <path d="M42 20 V36 Q16 46 16 66 Q16 92 50 92 Q84 92 84 66 Q84 46 58 36 V20 Z" fill="#fffdf6" {...S} />
+      <path d="M20 64 Q34 56 50 64 Q66 72 80 64 Q82 90 50 90 Q18 90 20 64 Z" fill="#D35252" stroke="none" />
+      <path d="M42 20 V36 Q16 46 16 66 Q16 92 50 92 Q84 92 84 66 Q84 46 58 36 V20 Z" fill="none" {...S} />
+      <circle cx="40" cy="74" r="4" fill="#FAE9DF" /><circle cx="58" cy="80" r="3" fill="#FAE9DF" />
+      <text x="50" y="58" textAnchor="middle" fontSize="18" fontWeight="bold" fill={INK}>x2</text>
+    </g>
+  ),
+  'round-shield': () => (
+    <g>
+      <path d="M50 8 L86 20 V48 Q86 78 50 94 Q14 78 14 48 V20 Z" fill="#BCD9E2" {...S} />
+      <path d="M50 20 L74 28 V48 Q74 70 50 82 Q26 70 26 48 V28 Z" fill="#F9CC14" {...S} />
+      <path d="M50 34 L55 46 L68 47 L58 55 L61 68 L50 61 L39 68 L42 55 L32 47 L45 46 Z" fill="#fffdf6" {...S} strokeWidth={2.4} />
+    </g>
+  ),
   magnet: () => (
     <g>
       <path d="M20 14 H40 V54 Q40 66 50 66 Q60 66 60 54 V14 H80 V54 Q80 86 50 86 Q20 86 20 54 Z" fill="#f2735f" {...S} />

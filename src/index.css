@@ -474,6 +474,8 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 .cq-drop { animation: cq-drop 0.7s cubic-bezier(.3,1.3,.5,1) both; transform-box: fill-box; }
 @keyframes cq-tumble { from { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } to { transform: rotateX(720deg) rotateY(540deg) rotateZ(180deg); } }
 .cq-tumble { animation: cq-tumble 0.55s linear infinite; }
+.cq-spin-slow { animation: cq-spin-slow 3.5s linear infinite; }
+@keyframes cq-spin-slow { to { transform: rotate(360deg); } }
 
 
 .game-stage.brand-menu { background: var(--surface); }

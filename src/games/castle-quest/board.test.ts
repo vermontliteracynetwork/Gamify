@@ -1,49 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import { BRIDGES, buildWorld, castleBlocks, castleStage, centerOf, clampPos, FINISH, isBad, openChest, PATH, placePowers, roll, spotOf, WORLD_H, WORLD_W } from './board';
+import { layout, placePowers, spaceKinds, tornadoSpots, TRAIL_SPACES, wheelStop } from './board';
 
-const near = (a: readonly [number, number], b: readonly [number, number]) => { const p = centerOf(a[0], a[1]), q = centerOf(b[0], b[1]); return Math.hypot(p.x - q.x, p.y - q.y) < 70; };
+const seeded = (s = 1) => () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
 
-describe('board game', () => {
-  it('one trail: each space touches the next, and never touches any other space', () => {
-    for (let i = 1; i < PATH.length; i++) expect(near(PATH[i - 1], PATH[i])).toBe(true);
-    for (let i = 0; i < PATH.length; i++) for (let j = i + 2; j < PATH.length; j++) expect(near(PATH[i], PATH[j])).toBe(false);
-    for (let i = 0; i <= FINISH; i++) { const s = spotOf(i); expect(s.x).toBeGreaterThan(0); expect(s.x).toBeLessThan(WORLD_W); expect(s.y).toBeGreaterThan(0); expect(s.y).toBeLessThan(WORLD_H); }
-    expect(near(PATH[PATH.length - 1], [1, 13])).toBe(true);
-  });
-  it('bridges only go forward and cross water between two bends', () => {
-    const water = new Set(buildWorld().cells.filter((c) => c.ground === 'water').map((c) => `${c.r},${c.c}`));
-    for (const b of BRIDGES) {
-      expect(b.to).toBeGreaterThan(b.from + 5);
-      const steps = [PATH[b.from], ...b.over, PATH[b.to]];
-      for (let k = 1; k < steps.length; k++) expect(near(steps[k - 1], steps[k])).toBe(true);
-      for (const [r, c] of b.over) expect(water.has(`${r},${c}`)).toBe(true);
+describe('Board Game board', () => {
+  it('lays every square next to the one before it', () => {
+    for (const n of Object.values(TRAIL_SPACES)) for (const [w, h] of [[1000, 600], [600, 900], [1400, 700]]) {
+      const L = layout(n, w, h);
+      expect(L.cells).toHaveLength(n);
+      for (let i = 1; i < n; i++) expect(Math.abs(L.cells[i].x - L.cells[i - 1].x) + Math.abs(L.cells[i].y - L.cells[i - 1].y)).toBe(1);
+      expect(L.cols * L.size).toBeLessThanOrEqual(w + 0.01);
+      expect(L.rows * L.size).toBeLessThanOrEqual(h + 0.01);
     }
   });
-  it('power-up spaces are frequent, never on bridges or the start, never two in a row', () => {
-    const ends = BRIDGES.flatMap((b) => [b.from, b.to]);
-    for (let k = 0; k < 30; k++) {
-      const p = placePowers();
-      expect(p.size).toBeGreaterThan(10);
-      for (const i of p.keys()) { expect(i).toBeGreaterThan(1); expect(p.has(i + 1)).toBe(false); expect(ends).not.toContain(i); }
+  it('keeps special squares apart and off the ends', () => {
+    const k = spaceKinds(40, seeded(3));
+    k.forEach((v, i) => { if (v !== 'regular') { expect(i).toBeGreaterThan(2); expect(i).toBeLessThan(37); expect(k[i + 1]).toBe('regular'); } });
+    expect(k.filter((v) => v === 'lose').length).toBeGreaterThan(0);
+    expect(k.filter((v) => v === 'again').length).toBeGreaterThan(0);
+  });
+  it('hides power-ups only on regular squares', () => {
+    const k = spaceKinds(52, seeded(5));
+    const p = placePowers(k, ['double', 'tornado'], seeded(9));
+    expect(p.size).toBeGreaterThan(2);
+    for (const i of p.keys()) expect(k[i]).toBe('regular');
+  });
+  it('tornado spreads players evenly and never back home', () => {
+    for (let s = 1; s < 30; s++) {
+      const pos = [5, 5, 12, 20];
+      const out = tornadoSpots(pos, [true, true, true, false], 40, seeded(s));
+      expect(out[3]).toBe(20);
+      [0, 1, 2].forEach((i) => expect(out[i]).not.toBe(pos[i]));
+      expect(new Set(out.slice(0, 3)).size).toBe(3);
     }
   });
-  it('chests hold good and bad surprises, rolls are 1 to 6, and moves stay on the board', () => {
-    const seen = new Set<string>();
-    for (let k = 0; k < 2000; k++) seen.add(JSON.stringify(openChest()));
-    expect(seen.size).toBe(11);
-    expect(isBad({ kind: 'move', n: -3 })).toBe(true);
-    for (let k = 0; k < 200; k++) { const r = roll(); expect(r).toBeGreaterThanOrEqual(1); expect(r).toBeLessThanOrEqual(6); }
-    expect([clampPos(-4), clampPos(99)]).toEqual([0, FINISH]);
-  });
-  it('the castle rises in layers as the leader gets closer', () => {
-    expect([0, 11, 22, 33, 44, FINISH].map(castleStage)).toEqual([0, 1, 2, 3, 4, 5]);
-    const blocks = castleBlocks();
-    for (let s = 1; s <= 5; s++) expect(blocks.some((b) => b.stage === s)).toBe(true);
-    expect(Math.min(...blocks.map((b) => b.y))).toBeGreaterThan(0);
-  });
-  it('the world is the same every game, with a trail and water', () => {
-    const a = buildWorld(), b = buildWorld();
-    expect(a.props.length).toBe(b.props.length);
-    expect(a.cells.filter((c) => c.ground === 'path').length).toBe(PATH.length);
+  it('wheel stops on the half it picked', () => {
+    for (let s = 1; s < 20; s++) {
+      const fwd = (360 - (wheelStop(true, seeded(s)) % 360)) % 360;
+      const back = (360 - (wheelStop(false, seeded(s)) % 360)) % 360;
+      expect(fwd).toBeLessThan(180);
+      expect(back).toBeGreaterThan(180);
+    }
   });
 });

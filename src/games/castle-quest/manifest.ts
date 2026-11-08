@@ -1,44 +1,48 @@
 import type { GameManifest } from '../types';
 
 // Kept apart from the game so the game list loads without loading every game.
-// Board Game (teacher design, 2026-10-31; named "Board game" by the teacher):
-// a hexagon trail race to the castle.
+// Board Game (teacher redesign, 2026-11-08): a flat classic board of square
+// spaces, Start to Finish. Answer, roll, move; first to the end wins.
 export const castleQuestManifest: GameManifest = {
   id: 'castle-quest',
   name: 'Board Game',
-  description: 'Answer right, roll the die and hop along the winding forest trail. Cross bridges, grab power-ups and reach the castle first to build it!',
+  description: 'Answer right, roll the die and move that many squares. Watch for lose-a-turn and roll-again squares, find hidden power-ups, and be first to the finish!',
   modes: ['share', 'versus'],
   questionKinds: ['mc'],
+  // Everything is designable (teacher, 2026-11-08): each kind of square, all
+  // six sides of the die on one page, the background and every power-up.
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'tile', label: 'Trail space', width: 65, height: 89, hint: 'One hexagon space on the trail' },
-    { id: 'castle', label: 'Castle', width: 240, height: 280, hint: 'The castle at the end of the path' },
-    { id: 'die', label: 'Die', width: 128, height: 128, hint: 'The die you roll', color: '#fbfcf8' },
-    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The piece for team ${i + 1}` })),
+    { id: 'space', label: 'Regular square', width: 256, height: 256, hint: 'Most squares on the board. Square, 1 to 1.' },
+    { id: 'space-lose', label: 'Lose a turn square', width: 256, height: 256, hint: 'Land here and skip your next turn. Square, 1 to 1.' },
+    { id: 'space-again', label: 'Roll again square', width: 256, height: 256, hint: 'Land here and roll one more time. Square, 1 to 1.' },
+    { id: 'start', label: 'Start square', width: 256, height: 256, hint: 'Where every piece begins. Square, 1 to 1.' },
+    { id: 'finish', label: 'Finish square', width: 256, height: 256, hint: 'The last square. First one here wins. Square, 1 to 1.' },
+    { id: 'dice', label: 'Die (all six sides)', width: 1536, height: 256, hint: 'One page with all six sides in a row, 1 to 6 from left to right. Draw the dots your way, but each side keeps its number of dots.' },
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The round piece for team ${i + 1}` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],
-  // Classic roles (teacher, 2026-10-31); a theme can redraw each one.
+  // Classic roles (teacher, 2026-11-08): basic in look and action; a theme
+  // can redraw each one.
   items: {
-    label: 'Power-ups', hint: 'Found on the board. Give each one art and a power.', max: 7, width: 256, height: 256,
+    label: 'Power-ups', hint: 'Hidden on the board. Give each one art and a power.', max: 6, width: 256, height: 256,
     abilities: [
-      { id: 'magnet', label: 'Magnet', hint: 'On your next question, a magnet sticks to the right answer to help you.' },
-      { id: 'tornado', label: 'Tornado', hint: 'Whoosh! Every player is blown to a new random space on the trail.' },
-      { id: 'time', label: 'Stopwatch', hint: 'Your piece hops five times faster for your next 3 turns.' },
-      { id: 'potion', label: 'Potion', hint: 'Your next roll of the die moves you three times as far.' },
-      { id: 'chest', label: 'Treasure chest', hint: 'A surprise: it might move you ahead, give a roll again, or send you back a little.' },
-      { id: 'shield', label: 'Shield', hint: 'For the next 3 rounds, nothing can push your piece back.' },
-      { id: 'lightning', label: 'Lightning', hint: 'Pick another player: they roll the die and move back that many spaces.' },
+      { id: 'double', label: 'Double roll', hint: 'On your next turn you roll twice and move both rolls.' },
+      { id: 'x2', label: '2x', hint: 'On your next turn your roll counts double.' },
+      { id: 'tornado', label: 'Tornado', hint: 'Whoosh! Every player is lifted, swirled and dropped on new squares, evenly spread out.' },
+      { id: 'wheel', label: 'Wheel', hint: 'On your next turn, pick a player and roll. The wheel decides: they move forward or back that many squares.' },
+      { id: 'potion', label: 'Potion', hint: 'Your next two rolls count double.' },
+      { id: 'shield', label: 'Shield', hint: 'From now until your next turn starts, other players\' power-ups cannot touch you.' },
     ],
     classic: [
-      { id: 'classic-magnet', name: 'Magnet', ability: 'magnet', motion: 'wiggle', often: 1, image: '/classic/castle-quest/powerups/magnet.webp' },
-      { id: 'classic-tornado', name: 'Tornado', ability: 'tornado', motion: 'spin', often: 1, image: '/classic/castle-quest/powerups/tornado.webp' },
-      { id: 'classic-time', name: 'Stopwatch', ability: 'time', motion: 'wiggle', often: 1, image: '/classic/castle-quest/powerups/time.webp' },
-      { id: 'classic-potion', name: 'Potion', ability: 'potion', motion: 'bob', often: 1, image: '/classic/castle-quest/powerups/potion.webp' },
-      { id: 'classic-chest', name: 'Treasure Chest', ability: 'chest', motion: 'bob', often: 1, image: '/classic/castle-quest/powerups/chest.webp' },
-      { id: 'classic-shield', name: 'Shield', ability: 'shield', motion: 'sparkle', often: 1, image: '/classic/castle-quest/powerups/shield.webp' },
-      { id: 'classic-lightning', name: 'Lightning', ability: 'lightning', motion: 'sparkle', often: 1, image: '/classic/castle-quest/powerups/lightning.webp' },
+      { id: 'classic-double', name: 'Double Roll', ability: 'double', motion: 'wiggle', often: 1, art: 'two-dice' },
+      { id: 'classic-x2', name: '2x', ability: 'x2', motion: 'sparkle', often: 1, art: 'double-star' },
+      { id: 'classic-tornado', name: 'Tornado', ability: 'tornado', motion: 'wiggle', often: 1, art: 'twister' },
+      { id: 'classic-wheel', name: 'Wheel', ability: 'wheel', motion: 'spin', often: 1, art: 'spin-wheel' },
+      { id: 'classic-potion', name: 'Potion', ability: 'potion', motion: 'bob', often: 1, art: 'magic-potion' },
+      { id: 'classic-shield', name: 'Shield', ability: 'shield', motion: 'sparkle', often: 1, art: 'round-shield' },
     ],
   },
   hasCpu: true,
-  borrowedFrom: 'New (teacher design, 2026-10-31)',
+  borrowedFrom: 'New (teacher design, 2026-10-31; classic board redesign 2026-11-08)',
 };
