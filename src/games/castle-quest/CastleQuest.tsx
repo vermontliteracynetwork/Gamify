@@ -518,7 +518,7 @@ function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, color }: { 
         const fill = kind === 'start' ? C.sage : kind === 'finish' ? C.yellow : kind === 'lose' ? C.ink : kind === 'again' ? C.cream : SQUARE_COLORS[i % SQUARE_COLORS.length];
         const lit = here === i;
         return (
-          <div key={i} className="absolute" style={{ left: ox + c.x * s + s * 0.05 + w.dx, top: oy + c.y * s + s * 0.05 + w.dy, width: s * 0.9, height: s * 0.9, transform: `rotate(${w.r}deg)` }}>
+          <div key={i} className="absolute tile-wiggle" style={{ left: ox + c.x * s + s * 0.05 + w.dx, top: oy + c.y * s + s * 0.05 + w.dy, width: s * 0.9, height: s * 0.9, transform: `rotate(${w.r}deg)` }}>
             <div className={`w-full h-full rounded-[16%] border-[3px] grid place-items-center overflow-hidden ${lit && !still ? 'cq-glow' : ''}`}
               style={{ borderColor: C.ink, background: img ? `center / cover url("${img}")` : fill, boxShadow: lit ? `0 0 0 4px ${color}, 0 0 16px 4px ${color}` : `0 3px 0 ${C.ink}` }}>
               {!img && kind === 'start' && <span className="text-[#fffdf6] leading-none" style={{ ...CHICLE, fontSize: s * 0.26, WebkitTextStroke: `1px ${C.ink}` }}>{t('cq.startWord')}</span>}
@@ -540,7 +540,7 @@ function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlaye
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => { const el = ref.current; if (el && Math.abs(el.offsetWidth - size) > 0.5) setSize(el.offsetWidth); });
   return (
-    <div ref={ref} className="relative w-full h-full">
+    <div ref={ref} className={`relative w-full h-full ${!on && !still ? 'cq-idle' : ''}`} style={{ animationDelay: `${-(player.colorIndex * 0.37) % 2}s` }}>
       <span className="absolute left-1/2 bottom-[-8%] w-[80%] h-[22%] -translate-x-1/2 rounded-[50%] bg-black/25" />
       <motion.div key={hopKey} className="absolute inset-0 grid place-items-center" initial={false}
         animate={!still && hopKey ? { y: ['0%', `-${45 + ((hopKey * 37) % 20)}%`, '0%', '0%'], rotate: [0, ((hopKey * 53) % 15) - 7, 0, 0], scaleY: [1, 1.08, 0.82, 1], scaleX: [1, 0.94, 1.12, 1] } : { y: '0%' }}

@@ -149,3 +149,4 @@ Every item respects her preferences: no scroll, power-ups auto-use next turn, Cl
 ## Progress
 - 2026-11-08: audit written.
 - 2026-11-08: shipped quick wins 1 to 4: star burst from the right answer, hover lift and press squash on answer tiles, letter-by-letter PopText (gold shimmer for right answers, power-up names, Board Game banners), a hopping-pieces loading screen instead of a blank page, the right-answer chime rising with each answer in a row and a slight random pitch on every other clip. Next: 5 (hover and press on board elements) and 6 (idle life).
+- 2026-11-08: shipped 5 and 6 (first pass): Match Three gems wiggle and grow on hover and squash on tap; Four in a Row columns wiggle, lift and press down; Board Game squares wiggle on hover and waiting pieces bob and sway. Next: medium list (7 per-power-up entrances and sounds, 8 first-turn pointer, 9 impact on big moments, 10 My shelf).

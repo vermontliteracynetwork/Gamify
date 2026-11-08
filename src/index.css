@@ -537,3 +537,8 @@ html[data-motion="still"] .pu-bob { animation: none; }
 .pop-gold { background: linear-gradient(100deg, #b8860b 20%, #ffe680 40%, #fff6c8 50%, #ffe680 60%, #b8860b 80%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1px #5a3d00; animation: pop-gold 1.8s linear infinite; }
 @keyframes pop-gold { from { background-position: 100% 0; } to { background-position: -150% 0; } }
 html[data-motion="still"] .pop-gold { animation: none; }
+
+/* Idle life: pieces waiting their turn breathe and bob a little (engagement audit, 2026-11-08). */
+.cq-idle { animation: cq-idle 2.2s ease-in-out infinite; }
+@keyframes cq-idle { 0%, 100% { translate: 0 0; rotate: 0deg; } 30% { translate: 0 -6%; rotate: -4deg; } 65% { translate: 0 1%; rotate: 3deg; } }
+html[data-motion="still"] .cq-idle { animation: none; }

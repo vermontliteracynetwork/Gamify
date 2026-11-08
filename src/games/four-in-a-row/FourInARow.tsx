@@ -324,7 +324,7 @@ export default function FourInARow() {
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
                     onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
                     aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
+                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent tile-wiggle motion-safe:hover:-translate-y-1 motion-safe:active:scale-95 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
                     {/* The player's piece peeks out above the numbers and slides
                         across the columns, then drops (teacher, 2026-11-06). */}
                     {holding && player && (
