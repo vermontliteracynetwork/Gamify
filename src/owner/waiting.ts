@@ -7,9 +7,6 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'dice-sound-license', kind: 'legal', added: '2026-11-08', title: 'Check the license of the new dice sound',
-    why: 'The new dice roll sound (Freesound 790970 by kvv_audio) is in the Board Game. It needs a commercial-use license in the asset ledger.',
-    how: 'Open freesound.org/s/790970 and tell Claudia the license (CC0 or CC BY is fine; CC BY needs a credit line).' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },
