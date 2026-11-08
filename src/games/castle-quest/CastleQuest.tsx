@@ -91,6 +91,7 @@ export default function CastleQuest() {
   const [banner, setBanner] = useState<{ id: number; text: string; icon?: 'lose' | 'again' | 'shield'; bad?: boolean } | null>(null);
   const [pop, setPop] = useState<{ id: number; item: ThemeItem; text: string } | null>(null);
   const [winner, setWinner] = useState<TurnPlayer | null>(null);
+  const [puff, setPuff] = useState<{ id: number; at: number } | null>(null);
   const live = useRef(true);
   const posRef = useRef<number[]>([]); posRef.current = pos;
   const turnsRef = useRef<TurnState | null>(null); turnsRef.current = turns;
@@ -197,6 +198,8 @@ export default function CastleQuest() {
       playClip(JUMP, settings, 0.7); // the teacher's jump sound on every hop
       await sleep(speed);
     }
+    // A little dust puff where the piece lands (engagement audit, 2026-11-08).
+    setPuff({ id: Date.now(), at: to });
   }
   async function throwDie(count: number, mult: number) {
     const rolls = Array.from({ length: count }, () => roll());
@@ -235,7 +238,7 @@ export default function CastleQuest() {
     }
     const kind = kinds[posRef.current[who]];
     if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); say(t('cq.loseTurn'), 'lose', true); await sleep(ms(1600)); return endTurn(); }
-    if (kind === 'again') { playEffect('win', settings); impact(settings); say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
+    if (kind === 'again') { playEffect('win', settings); impact(settings); if (!still && settings.celebrations !== 'off' && boardRef.current) { const r = boardRef.current.getBoundingClientRect(); const p = at(posRef.current[who]); void confetti({ particleCount: 45, spread: 70, startVelocity: 28, origin: { x: (r.left + p.x) / window.innerWidth, y: (r.top + p.y) / window.innerHeight }, colors: SQUARE_COLORS, disableForReducedMotion: true }); } say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
     return endTurn();
   }
   // A hidden power-up: the shield goes up at once (it starts at the reveal);
@@ -446,6 +449,11 @@ export default function CastleQuest() {
               );
             })}
             <AnimatePresence>
+              {puff && !still && (
+                <motion.span key={puff.id} className="absolute pointer-events-none z-[9]" style={{ left: at(puff.at).x, top: at(puff.at).y + L.size * 0.25, translateX: '-50%', translateY: '-50%' }} initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.7 }} aria-hidden="true">
+                  {[-1, 0, 1].map((d) => <motion.span key={d} className="absolute rounded-full bg-white/80 border border-[#474241]/30" style={{ width: L.size * 0.22, height: L.size * 0.16 }} initial={{ x: -L.size * 0.11, y: 0, scale: 0.4 }} animate={{ x: -L.size * 0.11 + d * L.size * 0.35, y: -L.size * 0.08 - Math.abs(d) * 4, scale: 1.3 }} transition={{ duration: 0.6, ease: 'easeOut' }} />)}
+                </motion.span>
+              )}
               {swirl && !still && <Twister key={swirl.id} item={itemFor('tornado')} w={box.w} h={box.h} />}
               {banner && (
                 <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-[3px] border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
