@@ -3,7 +3,7 @@ import { POP_IN } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Feather, Mountains, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, X } from '@phosphor-icons/react';
+import { Books, ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Feather, Mountains, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, X } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 import { saveCheckIn } from '../beta/surveys';
 import { getSession } from '../student/session';
@@ -16,6 +16,9 @@ import { speak } from './feedback';
 import { TeamBadge } from './TeamBadge';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
+import ItemArt from '../theme/ItemArt';
+import PopText from '../ui/PopText';
+import { allStickers, award, owned } from '../student/shelf';
 
 // A two-tap review at the end of every game (teacher, 2026-10-26: instead of
 // a class check-in): how it felt, then easy or tricky. Pictures only, read
@@ -161,6 +164,10 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const { student } = useSignedIn();
   const [view, setView] = useState<'main' | 'rate'>('main');
   const [reviewing, setReviewing] = useState(false);
+  const gameId = useLocation().pathname.split('/')[2] ?? '';
+  // One sticker for finishing the game (engagement audit, 2026-11-08).
+  const [won] = useState(() => award(gameId));
+  const [shelf, setShelf] = useState(false);
   const btn = 'min-h-12 px-3 rounded-input border-[2.5px] border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform';
   return (
     <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
@@ -172,6 +179,21 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
           <h2 className="title-bubble text-3xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
           {children}
         </div>
+        {won && (
+          <div className="flex items-center justify-center gap-3">
+            <motion.span initial={settings.motion === 'still' ? false : { rotateY: 540, scale: 0.2 }} animate={{ rotateY: 0, scale: 1 }} transition={{ duration: 1.1, ease: 'easeOut', delay: 0.4 }}
+              className="rounded-full p-1.5 bg-accent border-[2.5px] border-border" style={{ boxShadow: '0 0 0 4px rgba(253,253,148,0.7), 0 0 18px 6px rgba(253,253,148,0.7)' }}>
+              <ItemArt item={won.sticker.item} size={52} still={settings.motion === 'still'} />
+            </motion.span>
+            <span className="grid text-left leading-tight">
+              <span className="font-display text-xl font-bold"><PopText text={won.isNew ? t('shelf.new') : t('shelf.again')} delay={0.9} /></span>
+              <span className="font-bold text-sm">{won.sticker.item.name}</span>
+            </span>
+            <button type="button" onClick={() => setShelf(true)} className="min-h-11 px-3 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold inline-flex items-center gap-1.5 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform">
+              <Books weight="bold" size={18} />{t('shelf.open', { n: owned().size, total: allStickers().length })}
+            </button>
+          </div>
+        )}
         {view === 'main' ? (
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={onAgain} className={`${btn} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -198,6 +220,53 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
         )}
       </motion.div>
       {reviewing && missed.length > 0 && <ReviewScreen missed={missed} onClose={() => setReviewing(false)} />}
+      {shelf && <ShelfScreen fresh={won?.isNew ? won.sticker.item.id : undefined} onClose={() => setShelf(false)} />}
+    </div>
+  );
+}
+
+// My shelf: every sticker from every game; the ones still to find are
+// shadows (engagement audit, 2026-11-08). A private collection, no ranks.
+function ShelfScreen({ onClose, fresh }: { onClose: () => void; fresh?: string }) {
+  const { settings } = useSettings();
+  const still = settings.motion === 'still';
+  const all = allStickers();
+  const mine = owned();
+  const games = [...new Set(all.map((s) => s.gameId))];
+  return (
+    <div className="brand-menu fixed inset-0 z-[60] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label={t('shelf.title')}>
+      <DialogFocus onClose={onClose} />
+      <div className="flex items-center gap-3 px-4 sm:px-8 py-3 border-b-[2.5px] border-border bg-surface">
+        <Books weight="fill" size={30} aria-hidden="true" />
+        <h2 className="title-bubble text-2xl flex-1" style={{ color: 'var(--text)' }}><Title text={t('shelf.title')} /></h2>
+        <span className="font-bold tabular-nums">{t('shelf.count', { n: mine.size, total: all.length })}</span>
+        <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+      </div>
+      <div className="flex-1 min-h-0 overflow-hidden px-4 sm:px-8 py-4 grid gap-2 content-start" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 15rem), 1fr))' }}>
+        {games.map((g, gi) => {
+          const list = all.filter((s) => s.gameId === g);
+          return (
+            <section key={g} className="rounded-panel border-[2.5px] border-border bg-surface p-2 grid gap-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <h3 className="font-bold text-sm truncate">{list[0].gameName}</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {list.map((s, k) => {
+                  const got = mine.has(`${s.gameId}:${s.item.id}`);
+                  const isFresh = got && s.item.id === fresh;
+                  return (
+                    <motion.span key={s.item.id} title={got ? s.item.name : t('shelf.missing')} aria-label={got ? s.item.name : t('shelf.missing')} role="img"
+                      initial={still ? false : { scale: 0, rotate: -20 }} animate={isFresh && !still ? { scale: [0, 1.4, 1], rotate: [0, 15, 0] } : { scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.03 * (gi * 4 + k), duration: isFresh ? 0.8 : 0.3 }} whileHover={still || !got ? undefined : { scale: 1.25, rotate: [0, -10, 10, 0] }}
+                      className={`rounded-full border-[2px] p-0.5 ${got ? 'border-border bg-accent/50' : 'border-border-soft bg-surface-2'}`}
+                      style={isFresh ? { boxShadow: '0 0 0 3px #fdfd94, 0 0 14px 5px #fdfd94' } : undefined}>
+                      <span style={got ? undefined : { filter: 'brightness(0)', opacity: 0.18 }} className="block"><ItemArt item={s.item} size={36} still /></span>
+                    </motion.span>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -2400,6 +2400,12 @@ export const en = {
   'guide.all': 'All theme guides',
   'crumbs.label': 'You are here',
   // Board Game (was Castle Quest) (teacher design, 2026-10-31).
+  'shelf.new': 'New sticker!',
+  'shelf.again': 'You found this sticker again!',
+  'shelf.open': 'My shelf {n}/{total}',
+  'shelf.title': 'My shelf',
+  'shelf.count': '{n} of {total} stickers',
+  'shelf.missing': 'Still to find',
   'load.ready': 'Getting ready...',
   'cq.how1': 'Answer the question right.',
   'cq.how2': 'Roll the die and move that many squares.',
