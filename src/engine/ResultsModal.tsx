@@ -233,6 +233,8 @@ function ShelfScreen({ onClose, fresh }: { onClose: () => void; fresh?: string }
   const all = allStickers();
   const mine = owned();
   const games = [...new Set(all.map((s) => s.gameId))];
+  // Stickers grow to use the screen (no dead space, no scroll).
+  const size = Math.round(Math.min(64, Math.max(34, (typeof window === 'undefined' ? 800 : window.innerHeight) / 16)));
   return (
     <div className="brand-menu fixed inset-0 z-[60] bg-bg flex flex-col" role="dialog" aria-modal="true" aria-label={t('shelf.title')}>
       <DialogFocus onClose={onClose} />
@@ -246,9 +248,9 @@ function ShelfScreen({ onClose, fresh }: { onClose: () => void; fresh?: string }
         {games.map((g, gi) => {
           const list = all.filter((s) => s.gameId === g);
           return (
-            <section key={g} className="rounded-panel border-[2.5px] border-border bg-surface p-2 grid gap-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <section key={g} className="self-start rounded-panel border-[2.5px] border-border bg-surface p-2 grid gap-1 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <h3 className="font-bold text-sm truncate">{list[0].gameName}</h3>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-start gap-1.5">
                 {list.map((s, k) => {
                   const got = mine.has(`${s.gameId}:${s.item.id}`);
                   const isFresh = got && s.item.id === fresh;
@@ -256,9 +258,9 @@ function ShelfScreen({ onClose, fresh }: { onClose: () => void; fresh?: string }
                     <motion.span key={s.item.id} title={got ? s.item.name : t('shelf.missing')} aria-label={got ? s.item.name : t('shelf.missing')} role="img"
                       initial={still ? false : { scale: 0, rotate: -20 }} animate={isFresh && !still ? { scale: [0, 1.4, 1], rotate: [0, 15, 0] } : { scale: 1, rotate: 0 }}
                       transition={{ delay: 0.03 * (gi * 4 + k), duration: isFresh ? 0.8 : 0.3 }} whileHover={still || !got ? undefined : { scale: 1.25, rotate: [0, -10, 10, 0] }}
-                      className={`rounded-full border-[2px] p-0.5 ${got ? 'border-border bg-accent/50' : 'border-border-soft bg-surface-2'}`}
+                      className={`block shrink-0 rounded-full border-[2px] p-0.5 ${got ? 'border-border bg-accent/50' : 'border-border-soft bg-surface-2'}`}
                       style={isFresh ? { boxShadow: '0 0 0 3px #fdfd94, 0 0 14px 5px #fdfd94' } : undefined}>
-                      <span style={got ? undefined : { filter: 'brightness(0)', opacity: 0.18 }} className="block"><ItemArt item={s.item} size={36} still /></span>
+                      <span style={got ? undefined : { filter: 'brightness(0)', opacity: 0.18 }} className="block"><ItemArt item={s.item} size={size} still /></span>
                     </motion.span>
                   );
                 })}

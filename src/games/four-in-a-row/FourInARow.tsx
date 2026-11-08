@@ -194,6 +194,7 @@ export default function FourInARow() {
         setLine(win);
         setPhase('end');
         playEffect('win', settings);
+        if (win) impact(settings, true);
         if (win && settings.celebrations !== 'off' && !still) void confetti({ particleCount: settings.celebrations === 'big' ? 140 : 50, spread: 80, origin: { y: 0.5 }, disableForReducedMotion: true });
         return;
       }

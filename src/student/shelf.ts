@@ -1,4 +1,4 @@
-import { ALL_GAMES } from '../games/registry';
+import { GAMES } from '../games/registry';
 import type { ThemeItem } from '../theme/types';
 
 // My shelf (engagement audit, 2026-11-08): every finished game earns a
@@ -7,8 +7,17 @@ import type { ThemeItem } from '../theme/types';
 const KEY = 'gamify:shelf';
 export interface Sticker { gameId: string; gameName: string; item: ThemeItem }
 
+// Games with no power-ups still give stickers, drawn from the Classic art.
+const EXTRA: Record<string, [string, string][]> = {
+  'star-quiz': [['Lucky Star', 'double-star'], ['Rain Cloud', 'rain-cloud'], ['Snow Globe', 'snow-globe']],
+};
 export function allStickers(): Sticker[] {
-  return ALL_GAMES.flatMap((g) => (g.items?.classic ?? []).map((item) => ({ gameId: g.id, gameName: g.name, item })));
+  // Only the games on the list (hidden games join when they come back).
+  return GAMES.flatMap((g) => {
+    const items: ThemeItem[] = g.items?.classic?.length ? g.items.classic
+      : (EXTRA[g.id] ?? []).map(([name, art]) => ({ id: `sticker-${art}`, name, ability: '', motion: 'bob', often: 1, art }));
+    return items.map((item) => ({ gameId: g.id, gameName: g.name, item }));
+  });
 }
 const keyOf = (s: { gameId: string; item: ThemeItem }) => `${s.gameId}:${s.item.id}`;
 export function owned(): Set<string> {
