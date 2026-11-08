@@ -8,6 +8,16 @@ import PopText from '../ui/PopText';
 import type { ThemeItem } from '../theme/types';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect } from './feedback';
+import { playClip, POWER_SOUNDS } from './music';
+
+// Each power-up arrives its own way, from how its art moves (engagement audit, 2026-11-08).
+const ENTER: Record<string, { scale: number; opacity: number; y?: number; rotate?: number; x?: number }> = {
+  spin: { scale: 0.2, opacity: 0, rotate: -540 },
+  wiggle: { scale: 0.5, opacity: 0, rotate: 25, x: -60 },
+  bob: { scale: 0.6, opacity: 0, y: 120 },
+  sparkle: { scale: 1.8, opacity: 0 },
+  none: { scale: 0.4, opacity: 0, y: 20 },
+};
 
 // The power-up a right answer brought: its picture, name and what it does,
 // popping in over the game for a moment. Never blocks a tap on the game, and
@@ -17,7 +27,9 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
   const still = settings.motion === 'still';
   useEffect(() => {
     if (!pop) return;
-    playEffect('win', settings);
+    // Its own sound when it has one (magnet, tornado, chest), else the win chime.
+    const own = (POWER_SOUNDS as Record<string, string>)[pop.item.ability];
+    if (own) playClip(own, settings); else playEffect('win', settings);
     const id = window.setTimeout(onDone, (still ? 2600 : 2200) * pace(settings));
     return () => window.clearTimeout(id);
   }, [pop?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -27,7 +39,7 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
         <motion.div key={pop.id} role="status" aria-live="polite"
           className="fixed left-1/2 top-1/2 z-[70] -translate-x-1/2 -translate-y-1/2 pointer-events-none bg-surface border-[3px] border-border rounded-panel px-5 py-3 flex items-center gap-3 max-w-[92vw]"
           style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
-          initial={still ? { opacity: 0 } : { scale: 0.4, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
+          initial={still ? { opacity: 0 } : ENTER[pop.item.motion] ?? ENTER.none} animate={{ scale: 1, opacity: 1, y: 0, x: 0, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
           transition={POP_IN}>
           <ItemArt item={pop.item} size={72} still={still} />
           <span className="grid">
