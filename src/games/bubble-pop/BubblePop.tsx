@@ -180,7 +180,11 @@ export default function BubblePop() {
       buzz(45, settings);
     }
     if (res.popped.length) {
-      playEffect(res.popped.length + res.dropped.length >= 6 ? 'win' : 'right', settings); buzz(25, settings);
+      // Every bubble in the group pops with a rising note (engagement audit, 2026-11-08).
+      const n = res.popped.length + res.dropped.length;
+      for (let k = 0; k < Math.min(n, 8); k++) window.setTimeout(() => playEffect('tap', settings, undefined, 1 + k * 0.1), k * 55);
+      playEffect(n >= 6 ? 'win' : 'right', settings); buzz(25, settings);
+      if (n >= 6) impact(settings);
       addFx(res.popped, 'pop', board); addFx(res.dropped, 'fall', board);
       misses = 0;
       combo.current += 1;

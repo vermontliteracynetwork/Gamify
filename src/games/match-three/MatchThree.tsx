@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
+import PopText from '../../ui/PopText';
+import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ArrowsDownUp, ArrowsLeftRight, Cake, Coffee, Cookie, Diamond, IceCream, Pizza, Popcorn, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
@@ -158,7 +160,8 @@ export default function MatchThree() {
       }
       const word = res.fired.length ? t(SPECIAL_KEY[res.fired[0].special]) : cascade >= 2 ? t(CALLOUTS[Math.min(CALLOUTS.length, cascade - 1) - 1]) : '';
       if (word) setCallout({ id, text: word });
-      playEffect(res.fired.length || cascade >= 3 ? 'win' : 'right', settings);
+      playEffect(res.fired.length || cascade >= 3 ? 'win' : 'right', settings, undefined, 1 + Math.min(cascade - 1, 6) * 0.09);
+      if (cascade >= 3) impact(settings, cascade >= 4);
       buzz(res.fired.length ? 40 : 20, settings);
       await wait(res.fired.length ? 420 : 260);
       const pts = (pointsFor(res.cleared.size, cascade) + res.fired.length * 20) * mult;
@@ -359,7 +362,7 @@ export default function MatchThree() {
                 {callout && (
                   <motion.p key={callout.id} className="absolute inset-x-0 top-[40%] text-center font-display text-5xl sm:text-6xl text-[#fdfd94]" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
                     initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, y: -20 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }}
-                    onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 650); }}>{callout.text}</motion.p>
+                    onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 650); }}><PopText text={callout.text} /></motion.p>
                 )}
               </AnimatePresence>
             </div>

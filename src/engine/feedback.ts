@@ -51,7 +51,9 @@ function sample(ac: AudioContext, name: Effect): AudioBuffer | null {
 }
 export function preloadSounds() { const ac = audio(); if (ac) (Object.keys(TONES) as Effect[]).forEach((n) => sample(ac, n)); }
 
-export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack): void {
+// `rate` raises the pitch (1 = as recorded), so a chain of hits climbs
+// (engagement audit, 2026-11-08).
+export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack, rate = 1): void {
   const p = PACKS[with_];
   // Effects dip while the read-aloud talks, so the words come through.
   const gain = volume(s, 'effects') * 0.25 * p.gain * (isSpeaking() ? 0.3 : 1);
@@ -65,6 +67,7 @@ export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = p
       const g = ac.createGain();
       g.gain.value = Math.min(1, gain * 3.2);
       src.buffer = buf;
+      src.playbackRate.value = rate;
       src.connect(g).connect(ac.destination);
       src.start();
       return;
@@ -77,7 +80,7 @@ export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = p
     osc.type = p.type ?? tone.type;
     const start = ac.currentTime + i * tone.step;
     const length = tone.length * p.length;
-    osc.frequency.setValueAtTime(freq * p.freq, start);
+    osc.frequency.setValueAtTime(freq * p.freq * rate, start);
     if (p.slide) osc.frequency.exponentialRampToValueAtTime(freq * p.freq * p.slide, start + length);
     g.gain.setValueAtTime(gain, start);
     g.gain.exponentialRampToValueAtTime(0.0001, start + length);
