@@ -2400,6 +2400,7 @@ export const en = {
   'guide.all': 'All theme guides',
   'crumbs.label': 'You are here',
   // Board Game (was Castle Quest) (teacher design, 2026-10-31).
+  'load.ready': 'Getting ready...',
   'cq.how1': 'Answer the question right.',
   'cq.how2': 'Roll the die and move that many squares.',
   'cq.how3': 'Find hidden power-ups and be first to the finish!',

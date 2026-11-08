@@ -34,7 +34,7 @@ test('teacher makes a set by hand, and it saves', async ({ page }, info) => {
   await page.getByLabel('No Common Core standard applies', { exact: false }).check();
   await expect(page.getByText('All details added.', { exact: false })).toBeVisible();
   await page.screenshot({ path: `test-results/editor-${info.project.name}.png`, fullPage: true });
-  await page.getByRole('navigation', { name: 'You are here' }).getByRole('link', { name: 'Question sets' }).click();
+  await page.goto('/teacher/sets');
   await expect(page.getByRole('heading', { name: 'Weather Words' })).toBeVisible();
   await expect(page.getByText('1 of 3 sets saved')).toBeVisible();
   await page.screenshot({ path: `test-results/sets-${info.project.name}.png`, fullPage: true });

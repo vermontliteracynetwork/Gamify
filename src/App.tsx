@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import Loading from './ui/Loading';
 import Breadcrumbs from './ui/Breadcrumbs';
 import { lazyPage } from './lib/lazyPage';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
@@ -102,7 +103,7 @@ function AnimatedRoutes() {
         className="flex-1"
       >
         <Breadcrumbs />
-        <Suspense fallback={<div className="min-h-[60dvh]" aria-busy="true" />}>
+        <Suspense fallback={<Loading />}>
         <Routes location={location}>
           <Route path="/" element={<PublicHome />} />
           <Route path="/features" element={<FeaturesPage />} />

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { X } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import ItemArt from '../theme/ItemArt';
+import PopText from '../ui/PopText';
 import type { ThemeItem } from '../theme/types';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect } from './feedback';
@@ -30,7 +31,7 @@ export default function PowerUpPop({ pop, onDone }: { pop: { id: number; item: T
           transition={POP_IN}>
           <ItemArt item={pop.item} size={72} still={still} />
           <span className="grid">
-            <span className="font-display text-2xl leading-tight">{pop.item.name}</span>
+            <span className="font-display text-2xl leading-tight"><PopText text={pop.item.name} /></span>
             <span className="font-bold">{pop.text}</span>
           </span>
           <button type="button" onClick={onDone} aria-label={t('class.close')} className="pointer-events-auto self-start w-11 h-11 shrink-0 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>

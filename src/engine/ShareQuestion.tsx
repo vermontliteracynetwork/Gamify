@@ -13,6 +13,7 @@ import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
 import DialogFocus from '../ui/DialogFocus';
+import PopText from '../ui/PopText';
 import { mirrorSend } from '../live/mirror';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -144,6 +145,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
               <motion.button key={i} type="button" onClick={() => choose(i)} disabled={picked !== null || !!cpu} data-magnet={magnet && i === q.correctIndex ? 'true' : undefined}
                 animate={isWrong && settings.motion !== 'still' ? { x: [0, -8, 8, -5, 5, 0] } : isRight && picked === i && settings.motion !== 'still' ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.4 }}
+                whileHover={picked === null && !cpu && settings.motion !== 'still' ? { y: -4, rotate: [0, -1.5, 1.5, -1, 0], transition: { duration: 0.5 } } : undefined}
+                whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
                 className={`min-h-24 sm:min-h-32 px-5 py-4 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl text-left active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -153,6 +156,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-[2px] border-border bg-surface" />}
                 <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
+                {isRight && picked === i && settings.motion !== 'still' && <Burst />}
                 {magnet && i === q.correctIndex && (
                   <motion.img src={magnet} alt={t('cq.magnetHere')} className="absolute -top-7 -right-4 w-16 h-16 object-contain pointer-events-none drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]"
                     initial={settings.motion === 'still' ? false : { x: 240, y: -260, rotate: -60, opacity: 0, scale: 0.6 }} animate={{ x: 0, y: 0, rotate: [-60, 12, -6, 0], opacity: 1, scale: 1 }}
@@ -169,7 +173,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           </p>
         ) : (
           <p className="min-h-10 font-display text-3xl font-bold text-center" role="status" aria-live="polite">
-            {picked === null ? '' : picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')}
+            {picked === null ? '' : <PopText key={`${picked}-${chance?.n ?? 0}`} text={picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} gold={picked === q.correctIndex} />}
           </p>
         )}
       </motion.div>
@@ -209,5 +213,27 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
         {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-[2.5px] border-border bg-[#c8f0dc] px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
       </motion.button>
     </div>
+  );
+}
+
+// Stars and sparks burst out of the right answer (engagement audit, 2026-11-08).
+const BURST_COLORS = ['#f9cc14', '#ef7d96', '#5cc3a0', '#6aa9e9', '#fffdf6'];
+function Burst() {
+  const bits = useMemo(() => Array.from({ length: 14 }, (_, k) => {
+    const a = (k / 14) * Math.PI * 2 + Math.random() * 0.4;
+    const d = 90 + Math.random() * 110;
+    return { x: Math.cos(a) * d, y: Math.sin(a) * d * 0.7, r: Math.random() * 540 - 270, s: 0.6 + Math.random() * 0.8, c: BURST_COLORS[k % BURST_COLORS.length], star: k % 2 === 0 };
+  }), []);
+  return (
+    <span className="absolute inset-0 pointer-events-none overflow-visible" aria-hidden="true">
+      {bits.map((b, k) => (
+        <motion.span key={k} className="absolute left-1/2 top-1/2" initial={{ x: 0, y: 0, scale: 0, rotate: 0, opacity: 1 }}
+          animate={{ x: b.x, y: b.y, scale: [0, b.s * 1.3, b.s], rotate: b.r, opacity: [1, 1, 1, 0] }} transition={{ duration: 1.4, ease: "easeOut", delay: Math.random() * 0.08 }}>
+          {b.star
+            ? <svg width="36" height="36" viewBox="0 0 24 24" className="-translate-x-1/2 -translate-y-1/2"><path d="M12 1 L15 9 L23 9 L16.5 14 L19 22 L12 17 L5 22 L7.5 14 L1 9 L9 9 Z" fill={b.c} stroke="#241c3d" strokeWidth="1.5" strokeLinejoin="round" /></svg>
+            : <span className="block w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border-[1.5px] border-[#241c3d]" style={{ background: b.c }} />}
+        </motion.span>
+      ))}
+    </span>
   );
 }

@@ -5,6 +5,7 @@ import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import ItemArt from '../theme/ItemArt';
+import PopText from '../ui/PopText';
 import type { ThemeItem } from '../theme/types';
 
 // Power-ups you hold (teacher, 2026-10-31): one earned on a right answer
@@ -61,7 +62,7 @@ export function PowerUpTray({ manifest, items, onUse, disabled = false }: { mani
           initial={still ? { opacity: 0 } : { scale: 0.4, opacity: 0, rotate: -6 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.8 }}
           transition={{ type: 'spring', stiffness: 320, damping: 16 }}>
           <span className={still ? '' : 'pu-bob'}><ItemArt item={shown.item} size={84} still={still} /></span>
-          <span className="font-display text-2xl font-bold">{t('pu.on', { name: shown.item.name })}</span>
+          <span className="font-display text-2xl font-bold"><PopText text={t('pu.on', { name: shown.item.name })} /></span>
           <span className="text-sm font-bold max-w-[22rem]">{roleOf(manifest, shown.item)}</span>
         </motion.div>
       )}

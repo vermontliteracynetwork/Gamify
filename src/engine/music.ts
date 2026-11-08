@@ -25,8 +25,17 @@ export function playClip(src: string, s: PlayerSettings, level = 0.8) {
   if (!base) { base = new Audio(src); base.preload = 'auto'; clips.set(src, base); }
   const a = base.cloneNode(true) as HTMLAudioElement;
   a.volume = Math.min(1, v);
+  // Engagement audit 2026-11-08: the right-answer chime climbs a step for
+  // every answer in a row (a quiet reset on a miss), and every other clip
+  // varies a touch so repeated hops and rolls never sound canned.
+  let rate = 0.96 + Math.random() * 0.08;
+  if (src === ANSWER_SOUNDS.right) { streak++; rate = 1 + Math.min(streak - 1, 7) * 0.06; }
+  else if (src === ANSWER_SOUNDS.wrong) { streak = 0; rate = 1; }
+  (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
+  a.playbackRate = rate;
   void a.play().catch(() => undefined);
 }
+let streak = 0;
 
 let current: { el: HTMLAudioElement; src: string; timer: number } | null = null;
 function fadeTo(el: HTMLAudioElement, target: number, ms: number, done?: () => void) {

@@ -30,6 +30,7 @@ import ItemArt from '../../theme/ItemArt';
 import { ChoiceTiles } from '../../ui/fields';
 import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
+import PopText from '../../ui/PopText';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
@@ -446,7 +447,7 @@ export default function CastleQuest() {
                 <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-[3px] border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
                   initial={{ y: 30, opacity: 0, scale: 0.7, rotate: -4 }} animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 18, duration: still ? 0.01 : undefined }}
                   onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
-                  {banner.icon === 'lose' && <HourglassHigh weight="fill" size={30} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={30} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={30} />}{banner.text}
+                  {banner.icon === 'lose' && <HourglassHigh weight="fill" size={30} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={30} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={30} />}<PopText text={banner.text} />
                 </motion.p>
               )}
             </AnimatePresence>
