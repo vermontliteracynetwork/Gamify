@@ -98,7 +98,7 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
-          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0 w-full max-w-4xl mx-auto' : 'grid gap-6 absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
+          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0 w-full max-w-4xl mx-auto' : 'grid gap-6 min-w-0 w-auto max-w-4xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
       <div className="px-6 sm:px-8 py-3 flex justify-between gap-2">
