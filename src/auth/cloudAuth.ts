@@ -49,6 +49,10 @@ export async function cloudSignUp(f: { username: string; email: string; password
     options: { data: { username: u }, emailRedirectTo: `${window.location.origin}/login` },
   });
   if (error) return /registered|exists/i.test(error.message) ? ['emailTaken'] : 'offline';
+  // With email confirmation on, Supabase answers a sign-up for an email that
+  // already has an account with a stand-in user that has no identities (and
+  // sends nothing). One email, one account (teacher, 2026-11-09).
+  if (data.user && (data.user.identities?.length ?? 1) === 0) return ['emailTaken'];
   if (!data.session) return 'checkEmail';
   await enterCloud();
   return 'ok';

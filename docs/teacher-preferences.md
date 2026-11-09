@@ -129,3 +129,4 @@ line that fits, and add each new preference the same turn she says it.
 - Board Game players are round circle icons like every other game (2026-11-08). Dice roll uses her kvv_audio dice sound; jump sound on every hop.
 - Freesound.org sounds she supplies are always cleared for use; no license check needed (2026-11-08).
 - Owner dashboards (2026-11-09): grayscale, simple and calm; never cut off text; everything visible (no text hidden inside small scroll boxes).
+- One email, one account (2026-11-09): sign-up with an email that already has an account shows "That email already has an account. Log in instead." and makes nothing new.
