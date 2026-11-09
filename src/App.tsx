@@ -183,6 +183,7 @@ function AnimatedRoutes() {
           <Route path="/arcade/design" element={<DesignPage />} />
           <Route path="/arcade/:classId" element={<Navigate to="/join" replace />} />
           <Route path="/owner" element={<OwnerPage />} />
+          <Route path="/owner/line" element={<OwnerPage view="line" />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
         </Routes>

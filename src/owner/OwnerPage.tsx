@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import ProductionLine from './ProductionLine';
 import { Link } from 'react-router-dom';
 import { ListChecks, ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Eye, Lightbulb, Notebook, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
@@ -37,10 +38,11 @@ interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
 
-export default function OwnerPage() {
+export default function OwnerPage({ view }: { view?: 'line' } = {}) {
   const [open, setOpen] = useState(false);
   // With cloud accounts on: the owner account plus an authenticator code.
-  if (supabase) return <OwnerGate><Desktop /></OwnerGate>;
+  const inner = view === 'line' ? <ProductionLine /> : <Desktop />;
+  if (supabase) return <OwnerGate>{inner}</OwnerGate>;
   if (!open) {
     return (
       <main className="max-w-md mx-auto px-4 pt-10 pb-24">
@@ -48,7 +50,7 @@ export default function OwnerPage() {
       </main>
     );
   }
-  return <Desktop />;
+  return inner;
 }
 
 function Desktop() {
@@ -84,6 +86,7 @@ function Desktop() {
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <PageHeader title={t('owner.title')} subtitle={t('owner.subtitle')} />
+      <Link to="/owner/line" className="mb-4 min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2 no-underline text-text motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('line.open')}</Link>
       <div className="grid md:grid-cols-2 gap-4 items-start">
         {layout.order.map((id, i) => {
           const c = cards[id]; const Icon = c.icon;
