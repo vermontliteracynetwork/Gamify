@@ -365,6 +365,7 @@ export const en = {
   'bm.moves': 'Moves left this round: {count}',
   'bm.round': 'Round {n} of {total}',
   'bm.score': 'Score',
+  'solo.left': 'Left this round',
   'bm.tile': '{kind}, row {row}, column {col}',
   'bm.selected': 'selected',
   'bm.noMove': 'No match there. Try a different swap!',

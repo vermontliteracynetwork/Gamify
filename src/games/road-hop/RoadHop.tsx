@@ -280,9 +280,9 @@ export default function RoadHop() {
               ))}
             </div>
           </section>
-          <aside className="order-first lg:order-none bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-4" aria-label={t('share.scores')}>
-            <p className="hidden lg:block font-display text-lg mb-2">{t('rh.map', { n: level + 1 })}</p>
-            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-0 m-0">
+          <aside className="order-first lg:order-none score-card overflow-hidden" aria-label={t('share.scores')}>
+            <p className="score-head hidden lg:flex">{t('rh.map', { n: level + 1 })}</p>
+            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-2 lg:p-3 m-0">
               {turns.players.map((p) => (
                 <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
                   <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 break-words">{p.name}</span>

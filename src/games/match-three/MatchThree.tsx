@@ -370,7 +370,7 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-3 content-start sm:grid-cols-2 lg:grid-cols-1 lg:w-[220px] w-full mx-auto" style={{ maxWidth: 'min(100%, calc(var(--play-h) - 2rem - var(--m3-extra)), 64rem)' }}>
-            <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })}
+            <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })} round={{ now: `${round}/${plan.current.rounds}`, label: t('pb.roundWord') }}
               dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
             {/* The star goal fills as points come in (a goal that visibly builds). */}
             <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>

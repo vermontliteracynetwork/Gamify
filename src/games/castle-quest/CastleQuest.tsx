@@ -677,9 +677,9 @@ function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: bool
 // Who is closest to the finish: a round badge and a progress line each.
 function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: TurnState; pos: number[]; finish: number; playing: boolean; shield: boolean[]; skip: boolean[]; still: boolean }) {
   return (
-    <aside className="bg-surface border-[2.5px] border-border rounded-panel p-2 lg:p-3 grid gap-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cq.race')}>
-      <h2 className="hidden lg:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted"><FlagCheckered weight="fill" size={16} />{t('cq.firstToFinish')}</h2>
-      <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid gap-1.5 list-none m-0 p-1 lg:p-0">
+    <aside className="score-card grid min-w-0 overflow-hidden" aria-label={t('cq.race')}>
+      <h2 className="score-head hidden lg:flex"><FlagCheckered weight="fill" size={16} />{t('cq.firstToFinish')}</h2>
+      <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid gap-2 list-none m-0 p-2 lg:p-3">
         {turns.players.map((p, i) => {
           const on = playing && i === turns.turn;
           const f = Math.max(0, Math.min(1, (pos[i] ?? 0) / finish));
@@ -688,13 +688,13 @@ function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: Tur
             <motion.li key={p.id} aria-current={on ? 'true' : undefined} aria-label={t('cq.raceRow', { name: p.name, n: Math.round(f * 100) })}
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
-              className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2 rounded-input border-[2px] p-1.5 ${on ? 'border-border bg-accent' : 'border-border-soft'}`}>
-              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={40} />
+              className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-1 rounded-input border-[2px] p-2 motion-safe:transition-transform motion-safe:hover:scale-[1.03] ${on ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}>
+              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={46} />
                 {shield[i] && <ShieldCheck weight="fill" size={18} className="absolute -right-1 -bottom-1 text-[#3d7fb8] bg-surface rounded-full" aria-label={t('cq.shielded')} />}
                 {skip[i] && <HourglassHigh weight="fill" size={18} className="absolute -left-1 -bottom-1 bg-surface rounded-full" aria-label={t('cq.losesNext')} />}
               </span>
               <span className="font-bold break-words leading-tight">{p.name}</span>
-              <span className="relative h-3 rounded-pill bg-surface-2 border-[1.5px] border-border overflow-visible">
+              <span className="relative h-3.5 mr-2 rounded-pill bg-surface-2 border-[2px] border-border overflow-visible">
                 <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
                 <FlagCheckered weight="fill" className="absolute -right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[#474241]" aria-hidden="true" />
               </span>

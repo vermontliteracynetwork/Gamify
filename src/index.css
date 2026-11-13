@@ -674,3 +674,19 @@ html[data-motion="still"] [class*="animate-[float"] { animation: none !important
 .pb-peg-in { animation: pb-peg-in 0.45s cubic-bezier(.3,1.6,.5,1) both; }
 @keyframes pb-star-float { 0%, 100% { transform: translate(0, 0) rotate(-8deg); } 33% { transform: translate(1.6px, -1.8px) rotate(6deg); } 66% { transform: translate(-1.4px, -0.6px) rotate(-2deg); } }
 .pb-star-float { animation: pb-star-float 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+/* One score board look in every game (teacher, 2026-11-13): a white card
+   with a navy header strip, roomy rows and the title font for numbers. */
+.score-card { background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--radius-panel, 1.25rem); box-shadow: 0 5px 0 #000, 0 14px 26px rgba(36, 28, 61, 0.14); }
+.score-head { display: flex; align-items: center; gap: 0.4rem; margin: 0; padding: 0.45rem 0.9rem; background: #241c3d; color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2.5px solid var(--border); }
+.score-head svg { color: #fdfd94; }
+
+/* Game screens: a thin, quiet top bar so the board gets the room (teacher,
+   2026-11-13: "the top menu bar should be thin and not prominent"). */
+:root:has(.play-fill) { --play-h: calc(100dvh - 2.75rem); }
+html:fullscreen:has(.play-fill) { --play-h: 100dvh; }
+.site-header:has(~ * .play-fill), body:has(.play-fill) .site-header { height: 2.75rem; border-bottom-width: 1.5px; }
+body:has(.play-fill) .site-header img { height: 1.4rem; }
+body:has(.play-fill) .site-header :is(a, button) { min-height: 2rem; font-size: 0.8rem; }
+body:has(.play-fill) .site-header button.w-11 { width: 2rem; height: 2rem; }
+body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px; }

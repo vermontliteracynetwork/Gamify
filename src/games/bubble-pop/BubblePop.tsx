@@ -396,7 +396,7 @@ export default function BubblePop() {
             </div>
           </section>
           <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
-            <SoloPanel score={score} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })}
+            <SoloPanel score={score} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} round={{ now: `${Math.min(breaks + 1, plan.current.rounds)}/${plan.current.rounds}`, label: t('pb.roundWord') }}
               dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
               status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : step === 'question' ? t('bp.answer') : undefined} note={note} />
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
