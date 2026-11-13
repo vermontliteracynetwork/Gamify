@@ -47,6 +47,7 @@ test('the week 1 teacher survey appears in the menu, and its answers reach the o
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta and surveys' }).click();
   const card = page.getByRole('region', { name: 'Beta and surveys' });
   await expect(card.getByText('More science sets')).toBeVisible();
   await expect(card.getByText('5.0 / 5')).toBeVisible();
@@ -58,6 +59,7 @@ test('owner dashboard shows growth tips from the numbers', async ({ page }) => {
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Growth chart' }).click();
   const card = page.getByRole('region', { name: 'Growth tips' });
   await expect(card.getByText(/no class or set yet|Nothing to act on/)).toBeVisible();
   await card.screenshot({ path: `test-results/owner-growth-${test.info().project.name}.png` });
@@ -74,6 +76,7 @@ test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboa
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Tell Gamify reports' }).click();
   const card = page.getByRole('region', { name: 'Tell Gamify reports' });
   await card.getByRole('radio', { name: /Help requests \(1\)/ }).click();
   await expect(card.getByText('How do I print the theme template?')).toBeVisible();
@@ -84,7 +87,9 @@ test('developer dashboard: bookkeeping with totals and CSV, plan preview with a 
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Subscriptions' }).click();
   await expect(page.getByRole('region', { name: 'Subscriptions' })).toContainText('Real numbers show here once the cloud is connected.');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Bookkeeping' }).click();
   const books = page.getByRole('region', { name: 'Bookkeeping' });
   await books.getByLabel('Category').selectOption('Hosting');
   await books.getByLabel('What it was').fill('Vercel Pro');
@@ -101,6 +106,7 @@ test('developer dashboard: bookkeeping with totals and CSV, plan preview with a 
   expect((await wait).suggestedFilename()).toMatch(/^gamify-books-\d{4}\.csv$/);
   await books.screenshot({ path: `test-results/owner-books-${info.project.name}.png` });
 
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Plan preview' }).click();
   const preview = page.getByRole('region', { name: 'Plan preview' });
   await preview.getByRole('radio', { name: 'Pro' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Previewing the Pro plan' })).toBeVisible();

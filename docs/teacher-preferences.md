@@ -130,3 +130,4 @@ line that fits, and add each new preference the same turn she says it.
 - Freesound.org sounds she supplies are always cleared for use; no license check needed (2026-11-08).
 - Owner dashboards (2026-11-09): grayscale, simple and calm; never cut off text; everything visible (no text hidden inside small scroll boxes).
 - One email, one account (2026-11-09): sign-up with an email that already has an account shows "That email already has an account. Log in instead." and makes nothing new.
+- Developer dashboard /owner (2026-11-13): simple, clean lines, grayscale with purple accents (not the sticker look); a one-screen view that is well spaced out and responsive: side menu of sections, Overview fits one screen with no page scroll.

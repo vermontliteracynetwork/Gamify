@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
-import { Link } from 'react-router-dom';
-import { ListChecks, ArrowLeft, ArrowRight, ArrowsInLineHorizontal, ArrowsOutLineHorizontal, CaretDown, CaretUp, ChartLineUp, ChatCircleDots, CreditCard, Eye, Lightbulb, Notebook, PaintBrush, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, CurrencyDollar, Eye, Factory, GameController, Notebook, PaintBrush, SquaresFour, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -10,12 +10,11 @@ import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
-import { Button, PageHeader } from '../ui/kit';
+import { Button } from '../ui/kit';
 import type { StringKey } from '../i18n/en';
 import { saveMadeTheme, useMadeThemes } from '../theme/made';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { GALLERY_REASONS, type GalleryReason, type GameTheme } from '../theme/types';
-import Title from '../ui/Title';
 import { monthlyRevenue, project, type Subs } from './income';
 import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
@@ -29,13 +28,9 @@ import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
-// The owner's developer view (development plan Stage 7B): a desktop of
-// cards you can reorder, widen and fold, saved on this device. Until
+// The owner's developer view (development plan Stage 7B). Until
 // accounts exist (Stage 5) it opens with its own 4-digit owner PIN. Cards
 // that need Stripe or cloud data say so until those connect.
-type CardId = 'waiting' | 'feedback' | 'access' | 'subs' | 'chart' | 'books' | 'preview' | 'gallery' | 'usage' | 'growth' | 'income' | 'themes' | 'inbox' | 'beta';
-const DEFAULT_ORDER: CardId[] = ['waiting', 'feedback', 'access', 'subs', 'chart', 'books', 'preview', 'gallery', 'usage', 'growth', 'income', 'themes', 'inbox', 'beta'];
-interface Layout { order: CardId[]; folded: CardId[]; wide: CardId[] }
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
 
@@ -54,65 +49,150 @@ export default function OwnerPage({ view }: { view?: 'line' } = {}) {
   return inner;
 }
 
+type SectionId = 'overview' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta';
+const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
+  { id: 'overview', label: 'owner.overview', icon: SquaresFour },
+  { id: 'waiting', label: 'owner.waiting', icon: ListChecks },
+  { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots },
+  { id: 'subs', label: 'owner.subs', icon: CreditCard },
+  { id: 'growth', label: 'owner.chart', icon: ChartLineUp },
+  { id: 'usage', label: 'owner.usage', icon: GameController },
+  { id: 'income', label: 'owner.income', icon: CurrencyDollar },
+  { id: 'books', label: 'owner.books', icon: Notebook },
+  { id: 'access', label: 'owner.access', icon: Ticket },
+  { id: 'preview', label: 'owner.preview', icon: Eye },
+  { id: 'gallery', label: 'owner.gallery', icon: PaintBrush },
+  { id: 'beta', label: 'owner.beta', icon: UsersThree },
+];
+
+// The developer dashboard (teacher, 2026-11-13: "simple, clean lines,
+// grayscale with purple accents ... a one screen view that is well spaced
+// out, simple and responsive"). A side menu picks one section; Overview
+// fits on one screen. Styled by .dev-dash in index.css, not the sticker look.
 function Desktop() {
-  const [layout, setLayout] = useState<Layout>({ order: DEFAULT_ORDER, folded: [], wide: ['waiting', 'feedback', 'chart', 'books'] });
-  useEffect(() => { void data.getSetting<Layout>('owner-layout').then((l) => { if (l) setLayout({ ...l, folded: l.folded.filter((x) => x !== 'waiting'), wide: [...new Set([...l.wide, 'waiting' as CardId])], order: ['waiting', ...l.order.filter((x) => x !== 'waiting' && DEFAULT_ORDER.includes(x)), ...DEFAULT_ORDER.filter((x) => x !== 'waiting' && !l.order.includes(x))] }); }); }, []);
-  function save(next: Layout) { setLayout(next); void data.setSetting('owner-layout', next); }
-  function move(id: CardId, by: -1 | 1) {
-    const o = [...layout.order]; const i = o.indexOf(id); const j = i + by;
-    if (j < 0 || j >= o.length) return;
-    [o[i], o[j]] = [o[j], o[i]];
-    save({ ...layout, order: o });
-  }
+  const [params, setParams] = useSearchParams();
+  const section = (SECTIONS.find((x) => x.id === params.get('s'))?.id ?? 'overview') as SectionId;
+  const go = (id: SectionId) => setParams(id === 'overview' ? {} : { s: id }, { replace: true });
   const owner = useOwnerStats();
-  const toggle = (key: 'folded' | 'wide', id: CardId) => save({ ...layout, [key]: layout[key].includes(id) ? layout[key].filter((x) => x !== id) : [...layout[key], id] });
-
-  const cards: Record<CardId, { title: string; icon: typeof Star; body: ReactNode }> = {
-    feedback: { title: t('owner.feedback'), icon: ChatCircleDots, body: <FeedbackCard /> },
-    waiting: { title: t('owner.waiting'), icon: ListChecks, body: <WaitingCard /> },
-    gallery: { title: t('owner.gallery'), icon: PaintBrush, body: <GalleryCard /> },
-    usage: { title: t('owner.usage'), icon: ChartLineUp, body: <UsageCard /> },
-    growth: { title: t('owner.growthTips'), icon: Lightbulb, body: <GrowthCard /> },
-    income: { title: t('owner.income'), icon: ChartLineUp, body: <IncomeCard /> },
-    themes: { title: t('owner.themes'), icon: PaintBrush, body: <div className="grid gap-2"><p className="font-semibold">{t('owner.themesHint')}</p><Link to="/owner/themes" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center no-underline text-text">{t('owner.openThemes')}</Link></div> },
-    access: { title: t('owner.access'), icon: Ticket, body: <AccessCard /> },
-    subs: { title: t('owner.subs'), icon: CreditCard, body: <SubsCard {...owner} /> },
-    chart: { title: t('owner.chart'), icon: ChartLineUp, body: <GrowthChartCard {...owner} /> },
-    books: { title: t('owner.books'), icon: Notebook, body: <LedgerCard /> },
-    preview: { title: t('owner.preview'), icon: Eye, body: <PlanPreviewCard /> },
-    inbox: { title: t('owner.inbox'), icon: UsersThree, body: <p className="font-semibold">{t('owner.needsCloud')}</p> },
-    beta: { title: t('owner.beta'), icon: Ticket, body: <BetaCard /> },
+  const current = SECTIONS.find((x) => x.id === section)!;
+  const body: Record<SectionId, ReactNode> = {
+    overview: <Overview owner={owner} go={go} />,
+    waiting: <WaitingCard />,
+    feedback: <FeedbackCard />,
+    subs: <SubsCard {...owner} />,
+    growth: <div className="grid gap-10"><GrowthChartCard {...owner} /><section aria-labelledby="tips-h" className="grid gap-3"><h2 id="tips-h" className="font-bold text-lg">{t('owner.growthTips')}</h2><GrowthCard /></section></div>,
+    usage: <UsageCard />,
+    income: <IncomeCard />,
+    books: <LedgerCard />,
+    access: <AccessCard />,
+    preview: <PlanPreviewCard />,
+    gallery: <GalleryCard />,
+    beta: <BetaCard />,
   };
-
+  const linkCls = 'dash-nav-item no-underline';
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
-      <PageHeader title={t('owner.title')} subtitle={t('owner.subtitle')} />
-      <Link to="/owner/line" className="mb-4 min-h-12 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2 no-underline text-text motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('line.open')}</Link>
-      <div className="grid md:grid-cols-2 gap-4 items-start">
-        {layout.order.map((id, i) => {
-          const c = cards[id]; const Icon = c.icon;
-          const folded = layout.folded.includes(id);
-          return (
-            <section key={id} aria-label={c.title} className={`bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-3 ${layout.wide.includes(id) ? 'md:col-span-2' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <div className="flex items-center gap-2">
-                <Icon weight="bold" size={24} aria-hidden="true" />
-                <h2 className="font-display text-2xl flex-1"><Title text={c.title} /></h2>
-                <IconBtn label={t('owner.moveEarlier', { card: c.title })} disabled={i === 0} onClick={() => move(id, -1)}><ArrowLeft weight="bold" size={16} /></IconBtn>
-                <IconBtn label={t('owner.moveLater', { card: c.title })} disabled={i === layout.order.length - 1} onClick={() => move(id, 1)}><ArrowRight weight="bold" size={16} /></IconBtn>
-                <IconBtn label={t('owner.widen', { card: c.title })} onClick={() => toggle('wide', id)}>{layout.wide.includes(id) ? <ArrowsInLineHorizontal weight="bold" size={16} /> : <ArrowsOutLineHorizontal weight="bold" size={16} />}</IconBtn>
-                <IconBtn label={folded ? t('owner.unfold', { card: c.title }) : t('owner.fold', { card: c.title })} onClick={() => toggle('folded', id)}>{folded ? <CaretDown weight="bold" size={16} /> : <CaretUp weight="bold" size={16} />}</IconBtn>
-              </div>
-              {!folded && c.body}
-            </section>
-          );
-        })}
-      </div>
+    <main className="dev-dash">
+      <nav aria-label={t('owner.sections')} className="dash-side">
+        <p className="dash-brand">{t('owner.title')}</p>
+        <ul className="dash-nav">
+          {SECTIONS.map(({ id, label, icon: Icon }) => (
+            <li key={id}>
+              <button type="button" aria-current={section === id ? 'page' : undefined} onClick={() => go(id)} className="dash-nav-item">
+                <Icon size={18} aria-hidden="true" /><span>{t(label)}</span>
+              </button>
+            </li>
+          ))}
+          <li className="dash-nav-sep" aria-hidden="true" />
+          <li><Link to="/owner/line" className={linkCls}><Factory size={18} aria-hidden="true" /><span>{t('line.open')}</span></Link></li>
+          <li><Link to="/owner/themes" className={linkCls}><PaintBrush size={18} aria-hidden="true" /><span>{t('owner.themes')}</span></Link></li>
+        </ul>
+      </nav>
+      <section className="dash-main" aria-labelledby="dash-title">
+        <header className="dash-head">
+          <h1 id="dash-title" className="dash-title">{t(current.label)}</h1>
+          <p className="dash-sub">{section === 'overview' ? t('owner.subtitle') : new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        </header>
+        <div className={section === 'overview' ? 'dash-body dash-body-fit' : 'dash-body dash-panel'}>{body[section]}</div>
+      </section>
     </main>
   );
 }
 
-function IconBtn({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: ReactNode }) {
-  return <button type="button" aria-label={label} title={label} onClick={onClick} disabled={disabled} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-30">{children}</button>;
+const PAID_TIERS = ['homeschool', 'plus', 'pro', 'school'] as const;
+
+// One screen: four numbers, the growth chart, the top of Waiting on you and
+// the newest reports, each with a link to its full section.
+function Overview({ owner, go }: { owner: ReturnType<typeof useOwnerStats>; go: (id: SectionId) => void }) {
+  const { value: done = [] } = useAsync(() => data.getSetting<string[]>('owner-waiting-done').then((v) => v ?? []));
+  const { value: reports = [] } = useAsync(() => data.listFeedback());
+  const { value: meta = {} } = useAsync(() => data.getSetting<Record<string, FeedbackMeta>>('feedback-meta').then((v) => v ?? {}));
+  const { value: log = [] } = useAsync(() => data.listQuestionLog());
+  const chartH = useChartHeight();
+  const open = WAITING.filter((w) => !done.includes(w.id));
+  const fresh = reports.filter((r) => (meta[r.id]?.status ?? 'new') === 'new');
+  const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const paying = owner.stats ? PAID_TIERS.reduce((n, k) => n + (owner.stats!.tiers[k] ?? 0), 0) : null;
+  const kpis: { label: string; value: string | number; to: SectionId }[] = [
+    { label: t('owner.waiting'), value: open.length, to: 'waiting' },
+    { label: t('owner.kpiNewReports'), value: fresh.length, to: 'feedback' },
+    { label: t('owner.kpiAnswersWeek'), value: log.filter((e) => e.at >= weekAgo).length, to: 'usage' },
+    { label: t('owner.kpiPaying'), value: paying ?? '–', to: 'subs' },
+  ];
+  return (
+    <div className="dash-overview">
+      <ul className="dash-kpis">
+        {kpis.map((k) => (
+          <li key={k.label}><button type="button" className="dash-card dash-kpi" onClick={() => go(k.to)}><span className="dash-kpi-label">{k.label}</span><span className="dash-kpi-value">{k.value}</span></button></li>
+        ))}
+      </ul>
+      <div className="dash-grid">
+        <section className="dash-card dash-chart" aria-labelledby="ov-chart">
+          <DashHead id="ov-chart" title={t('owner.chart')} more={() => go('growth')} />
+          <GrowthChartCard {...owner} height={chartH} />
+        </section>
+        <section className="dash-card" aria-labelledby="ov-wait">
+          <DashHead id="ov-wait" title={t('owner.waiting')} more={() => go('waiting')} />
+          {open.length === 0 ? <p className="dash-empty">{t('owner.waitingNone')}</p> : (
+            <ol className="dash-list">
+              {open.slice(0, 4).map((w) => <li key={w.id}><span className="dash-dot" aria-hidden="true" />{w.title}</li>)}
+            </ol>
+          )}
+          {open.length > 4 && <p className="dash-more-note">{t('owner.andMore', { count: open.length - 4 })}</p>}
+        </section>
+        <section className="dash-card" aria-labelledby="ov-feed">
+          <DashHead id="ov-feed" title={t('owner.feedback')} more={() => go('feedback')} />
+          {reports.length === 0 ? <p className="dash-empty">{t('owner.noFeedback')}</p> : (
+            <ul className="dash-list">
+              {reports.slice(-3).reverse().map((r) => (
+                <li key={r.id} className="dash-report">
+                  <span className="dash-tag">{t(`owner.kind.${r.kind}`)}</span>
+                  <span>{r.details ? (r.details.length > 90 ? `${r.details.slice(0, 90)}…` : r.details) : t('owner.noDetails')}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+// The two overview charts share whatever height the screen has left, so a
+// big monitor shows big charts and a laptop still fits on one screen.
+function useChartHeight(): number {
+  const calc = () => Math.round(Math.min(240, Math.max(110, (window.innerHeight - 560) / 2)));
+  const [h, setH] = useState(calc);
+  useEffect(() => { const on = () => setH(calc()); window.addEventListener('resize', on); return () => window.removeEventListener('resize', on); }, []);
+  return h;
+}
+
+function DashHead({ id, title, more }: { id: string; title: string; more: () => void }) {
+  return (
+    <div className="dash-card-head">
+      <h2 id={id}>{title}</h2>
+      <button type="button" onClick={more} className="dash-link">{t('owner.seeAll')}<ArrowRight size={14} aria-hidden="true" /></button>
+    </div>
+  );
 }
 
 // Every Tell Gamify report: filter by kind, set a status, star the ones
