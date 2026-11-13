@@ -55,7 +55,4 @@ export const WAITING: WaitingItem[] = [
   { id: 'guesses', kind: 'decide', added: '2026-10-25', title: 'Confirm Claudia\'s guesses',
     why: 'Claudia predicted these from your past answers and built them; change any you disagree with.',
     how: 'Homeschool co-ops of 5+ families buy like a school; school plans include a free online kickoff for teachers; we sign district data privacy agreements; school invoices go out within one school day; starter themes play on Plus and Pro; Pro\'s early access means new games open to Pro a few weeks early.' },
-  { id: 'engagement-ideas', kind: 'decide', added: '2026-11-13', title: 'Pick which new engagement ideas to build (or none)',
-    why: 'The engagement audit listed a few new features. Since you did not approve the stickers, nothing new gets built without your yes: a rare golden card in Game Show, a catch of the day in Cast and Catch, a weekly featured power-up, and tappable bouncing pieces on the lobby screen.',
-    how: 'Tell Claudia the ones you want (by name), or "none". Everything else in the audit (polish, motion, sounds) is already built.' },
 ];

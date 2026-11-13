@@ -1,3 +1,4 @@
+import LobbyToy from './LobbyToy';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -39,6 +40,8 @@ export default function LiveLobby() {
           <p className="flex items-center gap-2 font-display text-2xl"><Star weight="fill" size={44} color={skyColor(state, me.pid)} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />{t('live.yourColor')}</p>
         )}
       </div>
+      {/* Something to play with while the class gathers (teacher, 2026-11-13). */}
+      {(status === 'in' || status === 'pending') && <LobbyToy />}
     </main>
   );
 }

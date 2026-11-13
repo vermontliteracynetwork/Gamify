@@ -92,6 +92,8 @@ export default function GameShow() {
   // that changes every turn and doubles its points, +10 for a full row or
   // column of your own cards, and +10 for three right answers in a row.
   const [lucky, setLucky] = useState<number | null>(null);
+  // A rare golden card (teacher, 2026-11-13): about one game in two hides one; it pays 100.
+  const golden = useRef<number | null>(null);
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const streak = useRef<Record<string, number>>({});
   function toast(text: string) {
@@ -131,6 +133,7 @@ export default function GameShow() {
       setCards(deck);
       streak.current = {};
       setLucky(Math.floor(Math.random() * deck.length));
+      golden.current = Math.random() < 0.5 ? Math.floor(Math.random() * deck.length) : null;
       startTurn(state, 'cards');
     } else {
       const base = chosenSets.slice(0, 5).flatMap((_, col) => GRID_POINTS.map((points) => ({ col, points, used: false })));
@@ -257,6 +260,12 @@ export default function GameShow() {
       const swapped = kind;
       setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: swapped } : c)));
     }
+    // The golden card: 100 points, with a golden show.
+    if (i === golden.current) {
+      kind = { kind: 'points', points: 100, golden: true };
+      const gold = kind;
+      setCards((cs) => cs.map((c, j) => (j === i ? { ...c, kind: gold } : c)));
+    } else
     // The lucky card doubles its points.
     if (i === lucky && kind.kind === 'points') {
       kind = { ...kind, points: kind.points * 2, lucky: true };
@@ -272,6 +281,7 @@ export default function GameShow() {
     if (!turns) return;
     const tier = prizeTier(kind);
     if (tier > 1) playEffect('win', settings); // the correct sound already played
+    if (isGolden(kind) && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 160, spread: 120, origin: { y: 0.45 }, colors: ['#ffd75e', '#f2b705', '#fff3b0', '#ffffff'], disableForReducedMotion: true });
     // Every prize gets a burst of confetti; bigger prizes get more (teacher, 2026-11-01).
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: (settings.celebrations === 'big' ? 40 : 25) * tier, spread: 60 + tier * 15, origin: { y: 0.45 }, disableForReducedMotion: true });
     const me = current(turns);
@@ -460,7 +470,7 @@ export default function GameShow() {
                     transition={{ duration: 0.35 }}
                     className={`relative w-full h-full min-h-0 rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
                       ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${!c.open ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={flipping === i ? {} : { boxShadow: 'var(--shadow-sticker)', ...(c.open ? {} : pieceFill(theme, 'card-back', '#fdfd94')) }}
+                    style={flipping === i ? {} : { boxShadow: c.open && isGolden(c.kind) ? '0 0 0 4px #f2b705, 0 0 22px 6px rgba(242,183,5,0.7)' : 'var(--shadow-sticker)', ...(c.open ? (isGolden(c.kind) ? { background: 'linear-gradient(135deg, #fff3b0 0%, #ffd75e 45%, #f2b705 100%)' } : {}) : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {flipping === i ? (
                       <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
@@ -533,7 +543,7 @@ export default function GameShow() {
               initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}>
               {/* The spin lives on an inner layer so the grow-in still shows. */}
               <div className={`w-full h-full rounded-full ${settings.motion === 'full' ? 'gs-rays' : ''}`}
-                style={{ background: 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
+                style={{ background: isGolden(reveal.card) ? 'repeating-conic-gradient(from 0deg, rgba(255,196,0,0.95) 0deg 8deg, rgba(255,255,255,0.6) 8deg 12deg, transparent 12deg 20deg)' : 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
             </motion.div>
           )}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
@@ -558,7 +568,7 @@ export default function GameShow() {
                 </motion.p>
               </>
             )}
-            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? (reveal.card.lucky ? t('tb.pointsLucky') : t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord')) : revealText(reveal.card)}</p>
+            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? (reveal.card.golden ? t('tb.pointsGolden') : reveal.card.lucky ? t('tb.pointsLucky') : t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord')) : revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
                 <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
@@ -588,6 +598,7 @@ export default function GameShow() {
 
 // How big a prize is: 1 small, 2 medium, 3 big (40 or more, or a power-up).
 const prizeTier = (k: CardKind) => (k.kind === 'power' ? 3 : k.points >= 40 ? 3 : k.points >= 30 ? 2 : 1);
+const isGolden = (k: CardKind) => k.kind === 'points' && !!k.golden;
 
 function CountUp({ to, still }: { to: number; still: boolean }) {
   const [n, setN] = useState(still ? to : 0);

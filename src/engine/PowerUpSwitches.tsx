@@ -3,9 +3,10 @@ import { Check, X } from '@phosphor-icons/react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import ItemArt from '../theme/ItemArt';
+import { featuredId } from './powerUps';
 import type { GameTheme } from '../theme/types';
 
-export interface PowerCard { id: string; name: string; hint: string; art: ReactNode; on: boolean }
+export interface PowerCard { id: string; name: string; hint: string; art: ReactNode; on: boolean; featured?: boolean }
 
 // Every power-up on one page as small square cards (teacher, 2026-11-01):
 // tap a card to turn that power-up on or off. One element, so the setup
@@ -45,6 +46,7 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
             <span className={`font-bold text-base leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
             {c.hint && <span className="text-xs font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
+            {c.featured && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-pill border-[2px] border-border bg-accent px-2.5 py-0.5 text-xs font-bold motion-safe:animate-pulse">{t('pu.featured')}</span>}
             {/* On: a mint check in the corner. Off: a faded X. */}
             <span className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-[2px] flex items-center justify-center ${c.on ? 'bg-success border-border' : 'bg-surface border-border-soft text-muted'}`} aria-hidden="true">
               {c.on ? <Check weight="bold" size={15} /> : <X weight="bold" size={13} />}
@@ -71,8 +73,9 @@ export function powerUpSwitches({ manifest, theme, on, off, change }: {
     else { const next = [...new Set([...off, id])]; change({ powerOff: next, ...(next.length >= items.length ? { powerUps: false } : {}) }); }
   }
   const hint = (ability: string) => manifest.items?.abilities.find((a) => a.id === ability)?.hint ?? '';
+  const featured = featuredId(items, manifest.id);
   return (
     <PowerUpCards hint={t('pu.switchHint')} onChange={set}
-      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={64} still />, on: isOn(it.id) }))} />
+      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={64} still />, on: isOn(it.id), featured: it.id === featured }))} />
   );
 }

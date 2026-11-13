@@ -2,7 +2,7 @@ import type { ThemeItem } from '../../theme/types';
 
 // Surprise cards for Game Show: mostly points, some power-ups (the theme's
 // items: double, swap, steal). No card ever takes a team below zero.
-export type CardKind = { kind: 'points'; points: number; lucky?: boolean } | { kind: 'power'; item: ThemeItem };
+export type CardKind = { kind: 'points'; points: number; lucky?: boolean; golden?: boolean } | { kind: 'power'; item: ThemeItem };
 
 // Lines a team just filled (teacher, 2026-11-01: "fill a whole row or column,
 // you get 10 bonus points"): how many full rows and columns through card `i`

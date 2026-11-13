@@ -25,6 +25,9 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await expect(page.getByText('1 waiting to come in')).toBeVisible();
   await page.getByRole('button', { name: /^Let (?!everyone).* in$/ }).click();
   await expect(kid.getByRole('heading', { name: 'You Are In!' })).toBeVisible();
+  // A toy to tap while the class gathers (teacher, 2026-11-13).
+  await kid.getByRole('button', { name: 'Bounce piece 3' }).click({ force: true });
+  await kid.screenshot({ path: 'test-results/live-lobby-toy.png' });
   await page.waitForTimeout(800);
   await page.screenshot({ path: `test-results/live-lobby-${info.project.name}.png` });
   await page.getByRole('button', { name: /Start the game/ }).click();

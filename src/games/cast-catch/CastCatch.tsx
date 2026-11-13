@@ -42,7 +42,7 @@ import { castQuality, catchFish, catchItem, FISH, itemEffect, pointsFor, type Fi
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'ready' | 'power' | 'casting' | 'ask' | 'wait' | 'bite' | 'reeling' | 'caught';
 // A catch is a fish, or one of the theme's power-up items.
-interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean }
+interface Catch { fish?: FishKind; item?: ThemeItem; cm: number; points: number; seconds?: number; double?: boolean; daily?: boolean }
 
 // A fish drawn in code: body, tail, fin, optional stripes, an eye.
 // The waterline sits at 20% of the scene; the boat's deck rests on it.
@@ -108,6 +108,8 @@ export default function CastCatch() {
   const [cast, setCast] = useState(0.5);
   const [catches, setCatches] = useState<Catch[]>([]);
   const [last, setLast] = useState<Catch | null>(null);
+  // Catch of the day (teacher, 2026-11-13): one common or uncommon fish each game is worth triple.
+  const [daily, setDaily] = useState<FishKind>(() => FISH[0]);
   const [endsAt, setEndsAt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const quality = useRef<0 | 1 | 2 | 3>(0);
@@ -143,6 +145,7 @@ export default function CastCatch() {
   useEffect(() => { if (getLive() && !liveStart.current && phase === 'welcome' && game.pool.length) { liveStart.current = true; begin(); } }); // eslint-disable-line react-hooks/exhaustive-deps
   function begin() {
     setCatches([]); setLast(null); setStep('ready'); doubleNext.current = false;
+    const pool = FISH.filter((f) => f.rarity <= 1); setDaily(pool[Math.floor(Math.random() * pool.length)]);
     setEndsAt(Date.now() + (byCasts ? 24 * 3600000 : setup.minutes * 60000)); setNow(Date.now());
     setPhase('play');
   }
@@ -206,7 +209,8 @@ export default function CastCatch() {
       doubleNext.current = e.double ? true : e.points > 0 ? false : doubleNext.current;
     } else {
       const { fish, cm } = catchFish(quality.current);
-      c = { fish, cm, points: pointsFor(fish, cm) * times };
+      const isDaily = fish.id === daily.id;
+      c = { fish, cm, points: pointsFor(fish, cm) * times * (isDaily ? 3 : 1), daily: isDaily || undefined };
       doubleNext.current = false;
     }
     setCatches((cs) => [...cs, c]);
@@ -379,6 +383,7 @@ export default function CastCatch() {
                       {/* The whole fish, big and never cut off. */}
                       <span className="grid place-items-center w-full py-3 overflow-visible"><FishArt fish={last.fish} size={220} theme={theme} /></span>
                       <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
+                      {last.daily && <p className="font-display text-2xl text-[#b8860b]">{t('cc.dailyCaught')}</p>}
                       <p className="font-bold">+{last.points} {t('cc.pts')} · {t(`cc.rarity.${last.fish.rarity}` as 'cc.rarity.0')}</p>
                       <p className="text-sm font-semibold">{last.fish.fact}</p>
                     </>
@@ -391,6 +396,8 @@ export default function CastCatch() {
 
           {/* Top: score chips in the middle, full screen and settings on the right. */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            {/* Catch of the day: the fish worth triple this game. */}
+            {phase === 'play' && <span className="inline-flex items-center gap-1.5 bg-[#fff3b0] border-[2px] border-border rounded-pill pl-2 pr-3 min-h-10 font-bold text-sm" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.daily', { name: daily.name })} title={t('cc.daily', { name: daily.name })}><FishArt fish={daily} size={36} theme={theme} />x3</span>}
             {/* The player's icon beside the scores (teacher, 2026-11-13). */}
             {pieceImage(theme, 'player') ? <img src={pieceImage(theme, 'player')} alt="" aria-hidden="true" className="w-11 h-11 rounded-full border-[2px] border-border bg-surface object-contain" style={{ boxShadow: 'var(--shadow-sticker)' }} /> : <span className="rounded-full" style={{ boxShadow: 'var(--shadow-sticker)' }}><TeamBadge colorIndex={0} size={44} /></span>}
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>

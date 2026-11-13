@@ -700,3 +700,6 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
 /* Winning screen rays (teacher, 2026-11-13). */
 @keyframes results-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .results-rays { animation: results-rays 40s linear infinite; }
+
+/* Waiting-room toy (teacher, 2026-11-13). */
+@keyframes toy-bounce { 0%, 100% { transform: translateY(0) scale(1.08, 0.92); } 45%, 55% { transform: translateY(-46px) scale(0.96, 1.04); } }
