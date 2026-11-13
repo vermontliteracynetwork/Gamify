@@ -131,3 +131,20 @@ line that fits, and add each new preference the same turn she says it.
 - Owner dashboards (2026-11-09): grayscale, simple and calm; never cut off text; everything visible (no text hidden inside small scroll boxes).
 - One email, one account (2026-11-09): sign-up with an email that already has an account shows "That email already has an account. Log in instead." and makes nothing new.
 - Developer dashboard /owner (2026-11-13): simple, clean lines, grayscale with purple accents (not the sticker look); a one-screen view that is well spaced out and responsive: side menu of sections, Overview fits one screen with no page scroll.
+- Developer view (2026-11-13): one page named "Developer view" (never "production line"): a dashboard first, then tabs for the details, with every tool she needs.
+- Never ship a feature she did not ask for or approve (2026-11-13: "remove all sticker logic. i didnt approve that").
+- Hover (2026-11-13): a slight enlarge, never a wiggle; when something grows, its border stays. Question answers and game board prompts enlarge slightly on hover.
+- Text (2026-11-13): ALWAYS full names and full text, never ellipses, never cut off. Making text bigger never shrinks its box.
+- Read-aloud never starts by itself (2026-11-13); students tap to hear.
+- Results box (2026-11-13): the winner's avatar big, with no name caption on it.
+- Question set cards (2026-11-13): no cover picture unless the teacher added one; full set names; bigger cards.
+- Menus (2026-11-13): light purple background with some dimension (depth, shading, motion), strict to the Gamify look; professional.
+- Setup pages (2026-11-13): power-ups ALWAYS on their own page, laid out top center; the power-up cards sit straight on the purple (no white box), each with the picture, the name and a short caption of what it does, slightly enlarging on hover. Sliders start at the default value; hints never say "Default N".
+- Pinball (2026-11-13): rounds = turns, default 10 (1 to 20); "Questions" = right answers before each shot, default 2 (1 to 5); no power meter, every shot the same power; no "Pick a lane" caption; lanes vanish after the pick; pockets better designed with Grow Year numbers and no stars; 2 to 6 pegs in new random spots each turn (more as the game goes on), each bounce a musical note; 1 to 3 stars float on the table, popping when hit and earning a power-up for the next turn; no light row; Classic page background is the table's navy.
+- No power meter in any game (2026-11-13): actions happen on a tap.
+- Game screens (2026-11-13): wider boards; a thin, quiet top bar; a game's background replaces the purple; hover and movement in the gameplay itself.
+- Score boards (2026-11-13): one improved look everywhere (navy header strip, roomy rows, big avatars, numbers in the title font, a round box with a progress bar).
+- Never close anything without a click (2026-11-13): the die, the wheel, power-up cards and catch cards wait for a tap (the computer's turns go on by themselves).
+- Board Game (2026-11-13): no clouds or stars on the board; no "Roll the die" text, just a big die (no box) under the score board; the rolled die shows large with no number caption and waits for a tap so students can count; no "Next time!" caption; tap the wheel to spin it and tap to go on; "Exact roll to win" setting.
+- Power-up cards in play (2026-11-13): a tall card with the picture on top, the name, a short description, and an X at the top that must be tapped to close.
+- Cast and Catch (2026-11-13): better clouds, fish swimming by, cast on a tap (no meter), the catch card shows the whole fish and stays until tapped, end by a timer or by a number of casts.
