@@ -893,6 +893,7 @@ export const en = {
   'owner.chartSignups': 'New teachers each week',
   'owner.chartAnswers': 'Answers each week',
   'owner.chartTotal': '{n} in the last 26 weeks',
+  'owner.chartWeekOf': 'Week of {week}',
   'owner.chartLabel': '{title}: {n} in the last 26 weeks, {last} this week',
   'owner.ledger.date': 'Date',
   'owner.ledger.kind': 'In or out',

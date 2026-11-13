@@ -8,6 +8,7 @@ import { useReducedMotion } from './ui/useReducedMotion';
 import NavBar from './ui/NavBar';
 import Home from './student/Home';
 import { SettingsProvider } from './settings/SettingsContext';
+import MotionRoot from './ui/motion/MotionRoot';
 import PublicHome from './public/PublicHome';
 import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
@@ -245,6 +246,7 @@ if (typeof window !== 'undefined') window.addEventListener('pointerdown', () => 
 export default function App() {
   return (
     <SettingsProvider>
+    <MotionRoot>
     <BrowserRouter>
       <div className="min-h-dvh relative text-text font-body flex flex-col">
         <AmbientBackground />
@@ -258,6 +260,7 @@ export default function App() {
         </div>
       </div>
     </BrowserRouter>
+    </MotionRoot>
     </SettingsProvider>
   );
 }

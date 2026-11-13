@@ -22,9 +22,10 @@ import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
 import OwnerGate from './OwnerGate';
+import { GrowthChartCard } from './GrowthChart';
 import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
-import { AccessCard, GrowthChartCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
+import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 

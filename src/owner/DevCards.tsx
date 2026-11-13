@@ -62,51 +62,6 @@ function Tile({ label, value, small = false }: { label: string; value: number | 
 }
 
 // Two weekly bar charts: new teachers and answers, last 26 weeks.
-export function GrowthChartCard({ stats, problem }: { stats: OwnerStats | null; problem: string }) {
-  if (!stats) return <p className="font-semibold">{problem || t('owner.loading')}</p>;
-  return (
-    <div className="grid gap-4">
-      <WeekBars title={t('owner.chartSignups')} rows={stats.signups} color="#7f8fe0" />
-      <WeekBars title={t('owner.chartAnswers')} rows={stats.answersByWeek} color="#3f9e6a" />
-    </div>
-  );
-}
-
-function weeksBack(n: number): string[] {
-  const out: string[] = [];
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); // Monday, like date_trunc('week')
-  for (let i = n - 1; i >= 0; i--) out.push(new Date(d.getTime() - i * 7 * 86400000).toISOString().slice(0, 10));
-  return out;
-}
-
-function WeekBars({ title, rows, color }: { title: string; rows: { week: string; n: number }[]; color: string }) {
-  const weeks = weeksBack(26);
-  const byWeek = new Map(rows.map((r) => [r.week.slice(0, 10), r.n]));
-  const values = weeks.map((w) => byWeek.get(w) ?? 0);
-  const max = Math.max(1, ...values);
-  const total = values.reduce((a, b) => a + b, 0);
-  const W = 520, H = 120, bw = W / weeks.length;
-  return (
-    <figure className="grid gap-1 m-0">
-      <figcaption className="flex items-baseline gap-2"><span className="font-bold">{title}</span><span className="text-sm font-semibold text-muted">{t('owner.chartTotal', { n: total })}</span></figcaption>
-      <svg viewBox={`0 0 ${W} ${H + 18}`} className="w-full h-auto" role="img" aria-label={t('owner.chartLabel', { title, n: total, last: values.at(-1) ?? 0 })}>
-        <line x1={0} x2={W} y1={H} y2={H} stroke="#000" strokeWidth={1.5} />
-        {values.map((v, i) => (
-          <g key={weeks[i]}>
-            <rect x={i * bw + 2} y={H - (v / max) * (H - 14)} width={bw - 4} height={(v / max) * (H - 14)} fill={color} rx={2}>
-              <title>{`${weeks[i]}: ${v}`}</title>
-            </rect>
-            {v > 0 && v === max && <text x={i * bw + bw / 2} y={H - (v / max) * (H - 14) - 3} textAnchor="middle" fontSize="11" fontWeight="bold">{v}</text>}
-          </g>
-        ))}
-        {[0, 13, 25].map((i) => <text key={i} x={i * bw + bw / 2} y={H + 14} textAnchor="middle" fontSize="10" fill="#4a4f6a">{weeks[i].slice(5)}</text>)}
-      </svg>
-    </figure>
-  );
-}
-
 // Bookkeeping: money in and out, saved with the owner's settings (the cloud
 // when signed in). Download as CSV for an accountant, or a PDF (print).
 export interface LedgerRow { id: string; date: string; kind: 'in' | 'out'; category: string; description: string; amount: number }

@@ -32,6 +32,13 @@ asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
 `.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
 Golden Rule, the three lenses or Claudia.
 
+## Animation and charts
+
+Motion (`motion/react`) for UI motion, anime.js (`useAnime`) for timelines,
+SVG and text effects, and the shadcn-style Recharts kit (`src/ui/chart`) for
+charts. Use the `ui-libraries` skill and `docs/ui-libraries.md` first; shared
+presets live in `src/ui/motion`.
+
 ## The Three-Lens Standard (mandatory)
 
 "It technically works" and "good enough" are never the bar here. Before any

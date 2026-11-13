@@ -79,6 +79,16 @@
   --success: #9fe7a0;
   --danger: #e5635f;
 
+  /* Chart series (src/ui/chart): brand colors in an order that stays
+     distinct side by side. Every mark also gets the black sticker outline,
+     so color is never the only cue. */
+  --chart-1: #7f8fe0;
+  --chart-2: #3f9e6a;
+  --chart-3: #ed9d75;
+  --chart-4: #314677;
+  --chart-5: #e5635f;
+  --chart-6: #fdfd94;
+
   --radius-panel: 26px;
   --radius-pill: 999px;
   --radius-input: 16px;

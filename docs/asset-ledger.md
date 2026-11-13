@@ -22,6 +22,9 @@ ships without a line here.
 | Drawing studio brushes, shapes, starter backgrounds, Classic power-up art | Theme Builder drawing studio | Drawn in our own code (src/theme/builder/DrawStudio.tsx, src/theme/classicItems.tsx) | Ours | 2026-10-26 |
 | React, React DOM, React Router | App framework | npm | MIT | 2026-10 |
 | Motion | Animation | npm `motion` | MIT | 2026-10 |
+| anime.js 4 | Timelines, SVG drawing and morphing, text and grid staggers (`src/ui/motion/useAnime.ts`, loaded on first use) | npm `animejs` (animejs.com) | MIT | 2026-11-13 |
+| Recharts 3 (+ react-is) | Charts (`src/ui/chart`, owner growth chart) | npm `recharts` | MIT | 2026-11-13 |
+| shadcn/ui chart pattern | API shape of the chart kit (ChartConfig, ChartContainer, tooltip and legend content), rewritten in our own code and style | ui.shadcn.com | MIT (pattern only; no files copied) | 2026-11-13 |
 | canvas-confetti | Celebrations | npm | ISC | 2026-10 |
 | Tailwind CSS, Vite | Styling and build tools | npm | MIT | 2026-10 |
 | Sound effects | Every game (right, miss, tap, win, whoosh; five theme sound packs) | Generated in code with the Web Audio API (`src/engine/feedback.ts`) | Original, owned; no files | 2026-10-25 |
