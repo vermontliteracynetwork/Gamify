@@ -34,10 +34,10 @@ export const OWNER_PIN_KEY = 'owner-pin-hash';
 type Status = 'new' | 'looking' | 'fixed' | 'shipped';
 interface FeedbackMeta { status: Status; social: boolean }
 
-export default function OwnerPage({ view }: { view?: 'line' } = {}) {
+export default function OwnerPage(_props: { view?: 'line' } = {}) {
   const [open, setOpen] = useState(false);
   // With cloud accounts on: the owner account plus an authenticator code.
-  const inner = view === 'line' ? <ProductionLine /> : <Desktop />;
+  const inner = <Desktop />;
   if (supabase) return <OwnerGate>{inner}</OwnerGate>;
   if (!open) {
     return (
@@ -49,15 +49,17 @@ export default function OwnerPage({ view }: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta';
+type SectionId = 'overview' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
-  { id: 'overview', label: 'owner.overview', icon: SquaresFour },
+  { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
+  { id: 'release', label: 'owner.release', icon: Factory },
+  { id: 'forecast', label: 'owner.forecast', icon: CurrencyDollar },
+  { id: 'stripe', label: 'owner.stripe', icon: CreditCard },
   { id: 'waiting', label: 'owner.waiting', icon: ListChecks },
   { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots },
   { id: 'subs', label: 'owner.subs', icon: CreditCard },
   { id: 'growth', label: 'owner.chart', icon: ChartLineUp },
   { id: 'usage', label: 'owner.usage', icon: GameController },
-  { id: 'income', label: 'owner.income', icon: CurrencyDollar },
   { id: 'books', label: 'owner.books', icon: Notebook },
   { id: 'access', label: 'owner.access', icon: Ticket },
   { id: 'preview', label: 'owner.preview', icon: Eye },
@@ -76,7 +78,10 @@ function Desktop() {
   const owner = useOwnerStats();
   const current = SECTIONS.find((x) => x.id === section)!;
   const body: Record<SectionId, ReactNode> = {
-    overview: <Overview owner={owner} go={go} />,
+    overview: <div className="grid gap-6"><ProductionLine section="overview" go={(x) => go(x as SectionId)} /><Overview owner={owner} go={go} /></div>,
+    release: <ProductionLine section="release" />,
+    forecast: <ProductionLine section="forecast" />,
+    stripe: <ProductionLine section="stripe" />,
     waiting: <WaitingCard />,
     feedback: <FeedbackCard />,
     subs: <SubsCard {...owner} />,
@@ -103,7 +108,6 @@ function Desktop() {
             </li>
           ))}
           <li className="dash-nav-sep" aria-hidden="true" />
-          <li><Link to="/owner/line" className={linkCls}><Factory size={18} aria-hidden="true" /><span>{t('line.open')}</span></Link></li>
           <li><Link to="/owner/themes" className={linkCls}><PaintBrush size={18} aria-hidden="true" /><span>{t('owner.themes')}</span></Link></li>
         </ul>
       </nav>
@@ -112,7 +116,7 @@ function Desktop() {
           <h1 id="dash-title" className="dash-title">{t(current.label)}</h1>
           <p className="dash-sub">{section === 'overview' ? t('owner.subtitle') : new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
         </header>
-        <div className={section === 'overview' ? 'dash-body dash-body-fit' : 'dash-body dash-panel'}>{body[section]}</div>
+        <div className={section === 'overview' || section === 'release' || section === 'forecast' || section === 'stripe' ? 'dash-body' : 'dash-body dash-panel'}>{body[section]}</div>
       </section>
     </main>
   );

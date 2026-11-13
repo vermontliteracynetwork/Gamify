@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, CheckCircle, Circle, Factory } from '@phosphor-icons/react';
+import { ArrowRight, CheckCircle, Circle } from '@phosphor-icons/react';
 import { data } from '../data';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
@@ -16,13 +15,19 @@ import { RELEASE, type ReleaseState } from './release';
 // Left: the line, the income forecast, plans and sign-ups. Right: the road
 // to release and the Stripe connection. Laptop first; every word shows.
 
+const P = '#6d28d9'; // the Developer view's purple accent
 const G = { ink: '#1f1f1f', mid: '#5c5c5c', soft: '#8d8d8d', faint: '#c9c9c6', line: '#e2e2df', panel: '#ffffff', ground: '#f3f3f1' };
 const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
 const monthName = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
 interface StripeStatus { secretKey: boolean; live: boolean; webhook: boolean; reachable: boolean; chargesEnabled: boolean; prices: number }
 
-export default function ProductionLine() {
+export type LineSection = 'overview' | 'forecast' | 'release' | 'stripe';
+
+// The Developer view's dashboard and its detail tabs (teacher, 2026-11-13:
+// one Developer view; the dashboard like the production line, tabs for the
+// details). Grayscale with purple accents.
+export default function ProductionLine({ section = 'overview', go }: { section?: LineSection; go?: (s: LineSection) => void }) {
   const { stats, problem } = useOwnerStats();
   const still = useSettings().settings.motion === 'still';
   const real: PlanCounts & { free: number } = {
@@ -74,21 +79,15 @@ export default function ProductionLine() {
   const stripeOk = stripeSteps.filter((s) => s.ok).length;
 
   return (
-    <div className="min-h-[calc(100dvh-4rem)]" style={{ background: G.ground, color: G.ink }}>
-    <main className="w-full max-w-[1600px] mx-auto px-4 lg:px-6 py-3 grid gap-3">
-      <header className="flex items-center gap-3 flex-wrap">
-        <Link to="/owner" className="min-h-10 px-3 rounded-input border inline-flex items-center gap-1.5 font-semibold no-underline text-sm" style={{ borderColor: G.faint, background: G.panel, color: G.ink }}><ArrowLeft weight="bold" size={16} />{t('line.back')}</Link>
-        <h1 className="font-heading text-2xl font-bold flex items-center gap-2"><Factory weight="duotone" size={28} />{t('line.title')}</h1>
-        {problem && <p className="ml-auto text-sm" style={{ color: G.mid }}>{problem}</p>}
-      </header>
-
-      {/* The line: five stations left to right, a belt underneath. */}
+    <div className="grid gap-4 min-w-0" style={{ color: G.ink }}>
+      {problem && section === 'overview' && <p className="text-sm" style={{ color: G.mid }}>{problem}</p>}
+      {section === 'overview' && <>
       <Card label={t('line.belt')} tight>
         <ol className="grid grid-cols-[repeat(5,minmax(0,1fr))] gap-2 list-none m-0 p-0">
           {stations.map((s, i) => (
             <li key={s.label} className="relative grid gap-0.5 rounded-input border px-3 py-1.5" style={{ borderColor: G.line }}>
               <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: G.mid }}>
-                <span className="w-2.5 h-2.5 rounded-full shrink-0 border" style={{ background: s.on ? G.ink : 'transparent', borderColor: G.ink }} aria-label={s.on ? t('line.running') : t('line.waiting')} />
+                <span className="w-2.5 h-2.5 rounded-full shrink-0 border" style={{ background: s.on ? P : 'transparent', borderColor: s.on ? P : G.soft }} aria-label={s.on ? t('line.running') : t('line.waiting')} />
                 {i + 1}. {s.label}
               </span>
               <span className="text-xl font-bold tabular-nums leading-tight">{s.value}</span>
@@ -99,8 +98,56 @@ export default function ProductionLine() {
         <div aria-hidden="true" className={`h-1.5 rounded-pill ${still ? '' : 'belt-move'}`} style={{ backgroundImage: `repeating-linear-gradient(90deg, ${G.faint} 0 10px, ${G.line} 10px 20px)` }} />
       </Card>
 
-      <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-3 items-start">
-        <div className="grid gap-3 min-w-0">
+      <div className="grid lg:grid-cols-3 gap-4 items-start">
+          <Card label={t('line.forecast')} title={t('line.forecast')} note={paidReal > 0 ? t('line.fromReal') : t('line.fromPlan')}>
+            <ForecastChart lines={lines} still={still} />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[[t('line.now'), mrrOf(start), t('line.perMonthShort')], [monthName(expected[2].date), expected[2].total, t('line.collected')], [monthName(expected[5].date), expected[5].total, t('line.collected')], [monthName(expected[11].date), expected[11].total, t('line.collected')]].map(([l, v, sub]) => (
+                <div key={String(l)} className="rounded-input border px-3 py-1" style={{ borderColor: G.line }} title={String(sub)}>
+                  <p className="text-xs font-semibold" style={{ color: G.mid }}>{l}</p>
+                  <p className="text-lg font-bold tabular-nums leading-tight">{money(Number(v))}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs -mt-1" style={{ color: G.soft }}>{t('line.totalsNote')}</p>
+            {go && <button type="button" className="dash-link justify-self-start" onClick={() => go('forecast')}>{t('owner.seeAll')} <ArrowRight size={14} aria-hidden="true" /></button>}
+          </Card>
+          <Card label={t('line.release')} title={t('line.release')} note={daysLeft === null ? t('line.noDate') : daysLeft >= 0 ? t('line.daysLeft', { n: daysLeft }) : t('line.pastDate')}>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-2.5 rounded-pill overflow-hidden" style={{ background: G.line }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={t('line.release')}>
+                <motion.div className="h-full rounded-pill" style={{ background: P }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: still ? 0 : 0.8 }} />
+              </div>
+              <span className="text-lg font-bold tabular-nums">{pct}%</span>
+            </div>
+            <ul className="grid gap-1.5 list-none m-0 p-0">
+              {RELEASE.map((st) => {
+                const n = st.items.filter((i) => isDone(i.id, i.state)).length;
+                return (
+                  <li key={st.id} className="grid grid-cols-[7rem_minmax(0,1fr)_2.5rem] items-center gap-2 text-[13px]">
+                    <span className="font-semibold">{st.title}</span>
+                    <span className="h-1.5 rounded-pill overflow-hidden" style={{ background: G.line }}><span className="block h-full rounded-pill" style={{ width: `${(n / st.items.length) * 100}%`, background: n === st.items.length ? P : G.mid }} /></span>
+                    <span className="tabular-nums text-right" style={{ color: G.mid }}>{n}/{st.items.length}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="text-xs" style={{ color: G.mid }}>{t('line.youOpen', { n: all.filter((i) => i.state === 'you' && !isDone(i.id, i.state)).length })}</p>
+            {go && <button type="button" className="dash-link justify-self-start" onClick={() => go('release')}>{t('owner.seeAll')} <ArrowRight size={14} aria-hidden="true" /></button>}
+          </Card>
+          <Card label={t('line.stripeTitle')} title={t('line.stripeTitle')} note={stripeProblem ? t('line.stripeUnreachable') : t('line.stripeCount', { n: stripeOk, total: stripeSteps.length })}>
+            <ol className="grid gap-y-1 list-none m-0 p-0">
+              {stripeSteps.map((s) => (
+                <li key={s.label} title={s.hint} className="flex items-start gap-1.5 text-[13px] leading-snug">
+                  {s.ok ? <CheckCircle weight="fill" size={17} className="shrink-0 mt-px" style={{ color: P }} aria-label={t('line.ready')} /> : <Circle weight="regular" size={17} className="shrink-0 mt-px" style={{ color: G.soft }} aria-label={t('line.notYet')} />}
+                  <span style={{ color: s.ok ? G.ink : G.mid }}>{s.label}</span>
+                </li>
+              ))}
+            </ol>
+            {go && <button type="button" className="dash-link justify-self-start" onClick={() => go('stripe')}>{t('owner.seeAll')} <ArrowRight size={14} aria-hidden="true" /></button>}
+          </Card>
+      </div>
+      </>}
+      {section === 'forecast' && <>
           <Card label={t('line.forecast')} title={t('line.forecast')} note={paidReal > 0 ? t('line.fromReal') : t('line.fromPlan')}>
             <ForecastChart lines={lines} still={still} />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -125,13 +172,12 @@ export default function ProductionLine() {
             <Card label={t('line.plans')} title={t('line.plans')}><PlanBars counts={real} /></Card>
             <Card label={t('line.weekly')} title={t('line.weekly')}><WeekBars weeks={stats?.signups ?? []} /></Card>
           </div>
-        </div>
-
-        <div className="grid gap-3 min-w-0">
+      </>}
+      {section === 'release' && <>
           <Card label={t('line.release')} title={t('line.release')} note={daysLeft === null ? t('line.noDate') : daysLeft >= 0 ? t('line.daysLeft', { n: daysLeft }) : t('line.pastDate')}>
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex-1 min-w-32 h-2.5 rounded-pill overflow-hidden" style={{ background: G.line }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={t('line.release')}>
-                <motion.div className="h-full rounded-pill" style={{ background: G.ink }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: still ? 0 : 0.8 }} />
+                <motion.div className="h-full rounded-pill" style={{ background: P }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: still ? 0 : 0.8 }} />
               </div>
               <span className="text-lg font-bold tabular-nums">{pct}%</span>
               <label className="text-xs font-semibold flex items-center gap-1.5" style={{ color: G.mid }}>{t('line.target')}
@@ -149,7 +195,7 @@ export default function ProductionLine() {
                       const done = isDone(it.id, it.state);
                       return (
                         <label key={it.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-1.5 text-[13px] leading-snug cursor-pointer">
-                          <input type="checkbox" checked={done} onChange={() => toggle(it.id, it.state)} className="mt-[3px]" style={{ accentColor: G.ink }} />
+                          <input type="checkbox" checked={done} onChange={() => toggle(it.id, it.state)} className="mt-[3px]" style={{ accentColor: P }} />
                           <span style={{ color: done ? G.soft : G.ink, textDecoration: done ? 'line-through' : undefined }}>{it.text}</span>
                           {!done && <span className="text-[11px] font-semibold rounded-pill border px-1.5 whitespace-nowrap" style={{ borderColor: it.state === 'you' ? G.ink : G.faint, color: it.state === 'you' ? G.ink : G.mid }}>{it.state === 'you' ? t('line.you') : t('line.build')}</span>}
                         </label>
@@ -160,27 +206,27 @@ export default function ProductionLine() {
               })}
             </div>
           </Card>
+      </>}
+      {section === 'stripe' && <>
           <Card label={t('line.stripeTitle')} title={t('line.stripeTitle')} note={stripeProblem ? t('line.stripeUnreachable') : t('line.stripeCount', { n: stripeOk, total: stripeSteps.length })}>
-            <ol className="grid sm:grid-cols-2 gap-x-4 gap-y-1 list-none m-0 p-0">
+            <ol className="grid sm:grid-cols-2 gap-x-6 gap-y-1 list-none m-0 p-0">
               {stripeSteps.map((s) => (
                 <li key={s.label} title={s.hint} className="flex items-start gap-1.5 text-[13px] leading-snug">
-                  {s.ok ? <CheckCircle weight="fill" size={17} className="shrink-0 mt-px" style={{ color: G.ink }} aria-label={t('line.ready')} /> : <Circle weight="regular" size={17} className="shrink-0 mt-px" style={{ color: G.soft }} aria-label={t('line.notYet')} />}
-                  <span style={{ color: s.ok ? G.ink : G.mid }}>{s.label}</span>
+                  {s.ok ? <CheckCircle weight="fill" size={17} className="shrink-0 mt-px" style={{ color: P }} aria-label={t('line.ready')} /> : <Circle weight="regular" size={17} className="shrink-0 mt-px" style={{ color: G.soft }} aria-label={t('line.notYet')} />}
+                  <span style={{ color: s.ok ? G.ink : G.mid }}>{s.label}{s.hint && <code className="ml-1.5 text-[11px]" style={{ color: G.soft }}>{s.hint}</code>}</span>
                 </li>
               ))}
             </ol>
             {!stripe?.secretKey && <p className="text-xs" style={{ color: G.mid }}>{t('line.stripeHow')}</p>}
           </Card>
-        </div>
-      </div>
-    </main>
+      </>}
     </div>
   );
 }
 
 function Card({ label, title, note, tight = false, children }: { label: string; title?: string; note?: string; tight?: boolean; children: ReactNode }) {
   return (
-    <section aria-label={label} className={`rounded-panel border grid content-start min-w-0 ${tight ? 'px-3 py-2.5 gap-2' : 'p-4 gap-3'}`} style={{ background: G.panel, borderColor: G.line, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+    <section aria-label={label} className={`dash-card !grid content-start min-w-0 ${tight ? '!py-3 !gap-2' : '!gap-3'}`}>
       {title && (
         <div className="flex items-baseline justify-between gap-x-3 gap-y-0.5 flex-wrap">
           <h2 className="font-heading text-base font-bold">{title}</h2>
@@ -275,7 +321,7 @@ function ForecastChart({ lines, still }: { lines: { id: string; points: { date: 
   const max = Math.max(1, ...lines.flatMap((l) => l.points.map((p) => p.mrr)));
   const x = (i: number) => L + (i / (pts.length - 1)) * (W - L - R);
   const y = (v: number) => H - 4 - (v / max) * (H - 16);
-  const stroke: Record<string, { c: string; dash?: string; w: number }> = { slow: { c: G.soft, dash: '4 5', w: 2 }, expected: { c: G.ink, w: 3 }, fast: { c: G.mid, dash: '10 5', w: 2 } };
+  const stroke: Record<string, { c: string; dash?: string; w: number }> = { slow: { c: G.soft, dash: '4 5', w: 2 }, expected: { c: P, w: 3 }, fast: { c: G.mid, dash: '10 5', w: 2 } };
   const at = hover ?? pts.length - 1;
   return (
     <div ref={box} className="grid gap-1.5">
@@ -287,7 +333,7 @@ function ForecastChart({ lines, still }: { lines: { id: string; points: { date: 
           <motion.polyline key={l.id} fill="none" stroke={stroke[l.id].c} strokeWidth={stroke[l.id].w} strokeDasharray={stroke[l.id].dash} strokeLinejoin="round" strokeLinecap="round"
             points={l.points.map((p, i) => `${x(i)},${y(p.mrr)}`).join(' ')} initial={still ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }} />
         ))}
-        {pts.map((p, i) => (i % 2 === 0 || i === pts.length - 1) && <text key={i} x={x(i)} y={H + 17} textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'} fontSize="12" fill={G.mid}>{p.date.toLocaleDateString('en-US', { month: 'short' })}</text>)}
+        {pts.map((_p, i) => { const every = W < 520 ? 3 : 2; const last = pts.length - 1; return (i === last || (i % every === 0 && last - i >= every)); }).map((show, i) => show && <text key={i} x={x(i)} y={H + 17} textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'} fontSize="12" fill={G.mid}>{pts[i].date.toLocaleDateString('en-US', { month: 'short' })}</text>)}
         <line x1={x(at)} y1={6} x2={x(at)} y2={H - 4} stroke={G.faint} strokeWidth={1} />
         {lines.map((l) => <circle key={l.id} cx={x(at)} cy={y(l.points[at].mrr)} r={5} fill={stroke[l.id].c} stroke="#fff" strokeWidth={2} />)}
       </svg>
