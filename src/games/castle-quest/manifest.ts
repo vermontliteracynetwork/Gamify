@@ -21,6 +21,7 @@ export const castleQuestManifest: GameManifest = {
     { id: 'dice', label: 'Die (all six sides)', width: 1536, height: 256, hint: 'One page with all six sides in a row, 1 to 6 from left to right. Draw the dots your way, but each side keeps its number of dots.' },
     ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The round piece for team ${i + 1}` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
+    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   // Classic roles (teacher, 2026-11-08): basic in look and action; a theme
   // can redraw each one.

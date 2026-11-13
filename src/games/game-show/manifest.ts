@@ -13,6 +13,7 @@ export const gameShowManifest: GameManifest = {
     { id: 'square', label: 'Grid square', width: 300, height: 180, hint: 'One square of the category grid', color: '#fdfd94' },
     ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} icon`, width: 256, height: 256, hint: `The round badge for team ${i + 1}` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
+    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   items: {
     label: 'Power-ups', hint: 'Cards that do something special when a team turns them over. Give each one art and a power.', max: 6, width: 256, height: 256,

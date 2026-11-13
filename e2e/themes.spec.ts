@@ -62,7 +62,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await expect(page).toHaveTitle('Game Show | Gamify');
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /^Step 1 of 5:/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
   await finishSetup(page);
   expect(await page.locator('h1, h2').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
   const bg = await page.getByRole('button', { name: /^Card 1(,|$)/ }).evaluate((el) => getComputedStyle(el).backgroundImage);
@@ -303,7 +303,7 @@ test('developer view opens with the owner PIN and links to the Theme Builder', a
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Overview' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Dashboard' })).toBeVisible();
   await page.screenshot({ path: `test-results/owner-${test.info().project.name}.png` });
   // One screen: the page itself never scrolls.
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);

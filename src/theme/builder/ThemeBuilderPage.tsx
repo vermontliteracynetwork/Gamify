@@ -511,10 +511,19 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
       )}
       <p className="font-semibold text-muted text-sm">{spec.hint} {t('builder.items.hint', { max: spec.max })}</p>
       {items.length === 0 && <p className="font-bold">{t('builder.items.none')}</p>}
+      {/* Start from the game's power-ups in the same order as the template's
+          power-up pages (teacher, 2026-11-13), so each uploaded page lands on
+          the power it was drawn for. Only names and powers: Classic art is never handed out. */}
+      {items.length === 0 && (
+        <Button variant="primary" className="justify-self-start" onClick={() => onChange(spec.classic.map((c) => ({ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion, often: c.often })))}>
+          <PaintBrush weight="bold" size={18} />{t('builder.items.fromTemplate', { n: spec.classic.length })}
+        </Button>
+      )}
       <Pages key={`items-${items.length}`} per={2} items={items.map((it, i) => {
         const ability = spec.abilities.find((a) => a.id === it.ability) ?? spec.abilities[0];
         return (
           <div key={it.id} className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted">{t('builder.items.templatePage', { n: i + 1 })}</span>
             <div className="flex items-center gap-3">
               <label className="shrink-0 cursor-pointer rounded-input border-[2px] border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
                 <ItemArt item={it} size={64} still />

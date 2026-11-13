@@ -42,17 +42,24 @@ export const isSolid = (piece: Pick<ThemePieceSpec, 'id'>) => SOLID.test(piece.i
 
 // Round pieces (discs, team icons, sign-in pictures, the star, Bowling's
 // balls) are drawn in a circle.
-export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^ball-|^star$/.test(piece.id);
+export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^ball-|^ball$|^bubble-|^bumper$|^bobber$|^sun$|^star$/.test(piece.id);
 
 // The template pages for power-ups (teacher, 2026-11-01: "power ups need to
 // be included in all download files for all games, printable and sized"):
 // one page for every power-up a theme can have, at the power-up's own size,
 // after the game's pieces.
+// Each Classic power-up gets its own page with its name and what it does
+// (teacher, 2026-11-13: power-ups can be redesigned, so the page says what
+// each one does and the upload makes sense), then blank pages for new ones.
 export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
   if (!spec) return [];
-  return Array.from({ length: spec.max }, (_, k) => ({
-    id: `power-${k + 1}`, label: t('builder.items.pageLabel', { n: k + 1 }), width: spec.width, height: spec.height, hint: t('builder.items.pageHint'),
-  }));
+  const does = (ability: string) => spec.abilities.find((a) => a.id === ability)?.hint ?? '';
+  return Array.from({ length: spec.max }, (_, k) => {
+    const it = spec.classic[k];
+    return it
+      ? { id: `power-${k + 1}`, label: t('builder.items.namedLabel', { n: k + 1, name: it.name }), width: spec.width, height: spec.height, hint: t('builder.items.namedHint', { does: does(it.ability) }) }
+      : { id: `power-${k + 1}`, label: t('builder.items.pageLabel', { n: k + 1 }), width: spec.width, height: spec.height, hint: t('builder.items.pageHint') };
+  });
 }
 
 // Every page a game's template has: its pieces, then its power-ups.

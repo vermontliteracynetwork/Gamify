@@ -16,6 +16,7 @@ export const castCatchManifest: GameManifest = {
     { id: 'cloud', label: 'Cloud', width: 320, height: 110, hint: 'A cloud that drifts across the sky', color: '#ffffff' },
     ...['Common', 'Uncommon', 'Rare', 'Legendary'].map((r) => ({ id: `fish-${r.toLowerCase()}`, label: `${r} fish`, width: 256, height: 160, hint: `Every ${r.toLowerCase()} fish you reel in, facing left` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
+    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   rounds: { label: 'Minutes', min: 1, max: 10, default: 3 },
   // Silly catches with power-ups (teacher, 2026-10-26): a boot, a rainbow fish...

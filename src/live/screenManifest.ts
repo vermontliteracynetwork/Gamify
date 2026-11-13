@@ -16,5 +16,6 @@ export const bigScreenManifest: GameManifest = {
     { id: 'mascot', label: 'Lobby picture', width: 400, height: 400, hint: 'Waves hello next to the game code while students join' },
     { id: 'trophy', label: 'Winner trophy', width: 400, height: 400, hint: 'Over the first place spot on the podium' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on this design\'s card' },
+    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
 };

@@ -18,7 +18,13 @@ const PIN: Shape = {
   segs: pinRaw.segs.map((s) => [...norm(s[0], s[1]), ...norm(s[2], s[3]), ...norm(s[4], s[5])] as Seg),
 };
 
-const SHAPES: Record<string, Shape> = { pin: PIN };
+// Pinball's flipper: a round pivot end on the left tapering to a rounded tip.
+const FLIPPER: Shape = { start: [0.18, 0.04], segs: [
+  [0.5, 0.18, 0.8, 0.3, 0.94, 0.36], [1, 0.4, 1, 0.6, 0.94, 0.64], [0.8, 0.7, 0.5, 0.82, 0.18, 0.96],
+  [0.08, 1, 0, 0.78, 0, 0.5], [0, 0.22, 0.08, 0, 0.18, 0.04],
+] };
+
+const SHAPES: Record<string, Shape> = { pin: PIN, flipper: FLIPPER };
 export const hasShape = (pieceId: string) => !!SHAPES[pieceId];
 
 // The shape as an SVG path in a box.

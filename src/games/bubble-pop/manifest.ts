@@ -14,6 +14,7 @@ export const bubblePopManifest: GameManifest = {
     { id: 'board', label: 'Board', width: 1000, height: 1300, hint: 'Behind the bubbles', color: '#314677' },
     ...BUBBLE_COLORS.map((color, i) => ({ id: `bubble-${i}`, label: `Bubble ${i + 1}`, width: 128, height: 128, hint: 'One of the six bubbles you match', color })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
+    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   rounds: { label: 'Question breaks', min: 1, max: 10, default: 4 },
   questionsPerBreak: { label: 'Questions each time', min: 1, max: 5, default: 1 },

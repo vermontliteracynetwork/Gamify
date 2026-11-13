@@ -292,7 +292,20 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
 
 // Covers for Gamify's designed themes (teacher, 2026-10-31): each shows the
 // theme's own art in a small scene of its game.
+// A theme's cover with its title lettering across the bottom when it has one
+// (teacher, 2026-11-13: themes can design their own title).
 export function ThemeCover({ theme, className = '' }: { theme: GameTheme; className?: string }) {
+  const title = theme.pieces.title?.image;
+  if (!title) return <ThemeCoverArt theme={theme} className={className} />;
+  return (
+    <div className={`relative ${className}`}>
+      <ThemeCoverArt theme={theme} className="absolute inset-0 w-full h-full" />
+      <img src={title} alt="" aria-hidden="true" className="absolute inset-x-[6%] bottom-[5%] w-[88%] h-[28%] object-contain drop-shadow-[0_3px_0_rgba(0,0,0,0.35)]" />
+    </div>
+  );
+}
+
+function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?: string }) {
   const base = `relative overflow-hidden ${className}`;
   const bg = theme.colors.background;
   if (theme.discs?.length) {

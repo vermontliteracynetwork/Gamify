@@ -16,7 +16,10 @@ function pageStream(p: ThemePieceSpec, n: number): string {
   const w = p.width * PT, h = p.height * PT;
   const m = Math.min(w, h), line = Math.max(1, m * 0.01), inset = line * 2;
   const ops = ['q', '0.72 0.72 0.72 RG', `${line.toFixed(2)} w`, `[${(line * 4).toFixed(2)} ${(line * 3).toFixed(2)}] 0 d`];
-  if (hasShape(p.id)) {
+  if (p.id === 'dice') {
+    const cw = (w - inset * 2) / 6;
+    for (let k = 0; k < 6; k++) ops.push(`${(inset + k * cw + line * 2).toFixed(2)} ${(inset + line * 2).toFixed(2)} ${(cw - line * 4).toFixed(2)} ${(h - inset * 2 - line * 4).toFixed(2)} re S`);
+  } else if (hasShape(p.id)) {
     ops.push(...shapePdf(p.id, inset, inset, w - inset * 2, h - inset * 2, h), 'S');
   } else if (isRound(p)) {
     const r = m / 2 - inset, cx = w / 2, cy = h / 2, k = 0.5523 * r;
@@ -30,9 +33,13 @@ function pageStream(p: ThemePieceSpec, n: number): string {
     ops.push(`${inset.toFixed(2)} ${inset.toFixed(2)} ${(w - inset * 2).toFixed(2)} ${(h - inset * 2).toFixed(2)} re S`);
   }
   ops.push('Q');
-  const size = Math.max(6, Math.min(12, m * 0.05));
-  ops.push('BT', '0.6 0.6 0.6 rg', `/F1 ${size.toFixed(1)} Tf`, `1 0 0 1 ${(inset * 3).toFixed(2)} ${(h - inset * 3 - size).toFixed(2)} Tm`,
-    `(${clean(`${n}. ${p.label}, ${p.width} x ${p.height} px`)}) Tj`, 'ET');
+  // The piece's name and size, then what it is for (a power-up's power),
+  // wrapped to the page so nothing runs off a small page.
+  const size = Math.max(5, Math.min(12, m * 0.045));
+  const max = Math.max(12, Math.floor((w - inset * 6) / (size * 0.52)));
+  const wrapText = (text: string) => { const out: string[] = []; let cur = ''; for (const wd of clean(text).split(' ')) { if ((cur + ' ' + wd).trim().length > max && cur) { out.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim(); } if (cur) out.push(cur); return out; };
+  const lines = [...wrapText(`${n}. ${p.label}, ${p.width} x ${p.height} px`), ...(p.hint ? wrapText(p.hint) : [])].slice(0, Math.max(2, Math.floor((h * 0.45) / (size * 1.3))));
+  lines.forEach((ln, i) => ops.push('BT', '0.6 0.6 0.6 rg', `/F1 ${size.toFixed(1)} Tf`, `1 0 0 1 ${(inset * 3).toFixed(2)} ${(h - inset * 3 - size - i * size * 1.3).toFixed(2)} Tm`, `(${ln}) Tj`, 'ET'));
   return ops.join('\n');
 }
 
