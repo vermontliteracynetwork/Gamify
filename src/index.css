@@ -696,3 +696,7 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
 @keyframes cc-cloud { from { transform: translateX(-120vw); } to { transform: translateX(120vw); } }
 @keyframes cc-fish-wiggle { 0%, 100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-6px); } }
 .cc-fish-wiggle { animation: cc-fish-wiggle 1.6s ease-in-out infinite; transform-origin: 70% 50%; }
+
+/* Winning screen rays (teacher, 2026-11-13). */
+@keyframes results-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.results-rays { animation: results-rays 40s linear infinite; }

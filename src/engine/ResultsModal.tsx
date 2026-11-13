@@ -62,7 +62,9 @@ function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number
   const list = winners?.length ? winners : null;
   const size = list && list.length > 2 ? 112 : 168;
   return (
-    <div className="relative w-full max-w-md mx-auto h-[17rem] select-none" aria-hidden="true">
+    <div className="relative w-full mx-auto h-[17rem] select-none overflow-hidden" aria-hidden="true">
+      {/* Sun rays turn slowly behind the winner (teacher, 2026-11-13: a better winning screen). */}
+      <span className={`absolute left-1/2 top-[42%] w-[44rem] h-[44rem] -translate-x-1/2 -translate-y-1/2 ${still ? '' : 'results-rays'}`} style={{ background: 'repeating-conic-gradient(rgba(255,255,255,0.55) 0deg 9deg, transparent 9deg 22.5deg)', maskImage: 'radial-gradient(circle, #000 18%, transparent 62%)', WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 62%)' }} />
       {/* Stage lights */}
       <span className="absolute inset-x-[18%] bottom-8 top-0 rounded-t-full opacity-60" style={{ background: 'radial-gradient(ellipse at 50% 100%, #fdfd94 0%, rgba(253,253,148,0.35) 45%, transparent 72%)' }} />
       {/* The stage: a round top and a front */}
@@ -160,19 +162,22 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const { student } = useSignedIn();
   const [view, setView] = useState<'main' | 'rate'>('main');
   const [reviewing, setReviewing] = useState(false);
-  const btn = 'min-h-12 px-3 rounded-input border-[2.5px] border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform';
+  const btn = 'min-h-12 px-3 rounded-input border-[2.5px] border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
   return (
     <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
-        className="w-full max-w-lg bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
-        <WinnerStage winners={winners} />
-        <div className="grid justify-items-center gap-1 text-center">
-          <h2 className="title-bubble text-3xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
+        className="w-full max-w-xl bg-surface border-[3px] border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
+        {/* The stage sits in a light purple band across the top of the box. */}
+        <div className="border-b-[3px] border-border" style={{ background: 'radial-gradient(120% 100% at 50% 20%, #ffffff 0%, #e6e9ff 45%, #c9d2ff 100%)' }}>
+          <WinnerStage winners={winners} />
+        </div>
+        <div className="grid justify-items-center gap-1 text-center px-5">
+          <h2 className="title-bubble text-4xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
           {children}
         </div>
         {view === 'main' ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 px-5 pb-5">
             <button type="button" onClick={onAgain} className={`${btn} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <ArrowCounterClockwise weight="bold" size={18} />{againLabel}
             </button>
@@ -190,7 +195,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             {missed.length === 0 && <p className="col-span-2 text-sm font-bold text-center text-muted">{t('rv.none')}</p>}
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="grid gap-2 px-5 pb-5">
             <GameReview onDone={() => setView('main')} />
             <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-[2px] border-border bg-surface-2 font-bold">{t('rv.back')}</button>
           </div>
