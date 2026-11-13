@@ -90,15 +90,26 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
     await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
   };
   await answer();
-  await expect(page.getByRole('status').filter({ hasText: /Double Drop|Pop Out/ })).toBeVisible({ timeout: 15000 });
+  // A power-up card stays until it is closed (teacher, 2026-11-13).
+  const card = page.getByRole('dialog').filter({ hasText: /Double Drop|Pop Out/ });
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.getByRole('button', { name: 'Close' }).click();
   // Held power-ups show on the player's next turn.
   await page.getByRole('button', { name: 'Drop in column 4' }).click();
   await expect(page.getByText('The computer is choosing...')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 15000 });
   await answer();
   // Earned power-ups switch on by themselves on the next turn (teacher, 2026-11-07).
-  await expect(page.getByRole('status', { name: /^Double Drop is on/ })).toBeVisible({ timeout: 15000 });
+  const on = page.getByRole('dialog', { name: /^Double Drop is on/ });
+  await expect(on).toBeVisible({ timeout: 15000 });
   await page.screenshot({ path: `test-results/four-power-${info.project.name}.png` });
+  // Close every power-up card (a new one can stack on top).
+  for (let k = 0; k < 4; k++) {
+    const top = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Close' }) }).last();
+    if (!(await top.isVisible().catch(() => false))) break;
+    await top.getByRole('button', { name: 'Close' }).click();
+    await page.waitForTimeout(400);
+  }
   // The board never runs off the screen.
   const box = (await page.getByRole('grid').first().boundingBox())!;
   expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);

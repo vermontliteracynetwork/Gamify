@@ -28,8 +28,7 @@ import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
 import ItemArt from '../../theme/ItemArt';
-import { ChoiceTiles } from '../../ui/fields';
-import { buttonClasses } from '../../ui/kit';
+import { ChoiceTiles, Toggle } from '../../ui/fields';
 import Title from '../../ui/Title';
 import PopText from '../../ui/PopText';
 import GameWelcome from '../GameWelcome';
@@ -62,7 +61,7 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -82,8 +81,11 @@ export default function CastleQuest() {
   const [hop, setHop] = useState<{ who: number; k: number; ms: number }>({ who: -1, k: 0, ms: 300 });
   const [swirl, setSwirl] = useState<{ id: number; to: number[]; lifted: boolean[] } | null>(null);
   const [die, setDie] = useState(1);
-  const [toss, setToss] = useState<{ id: number; rolls: number[]; mult: number } | null>(null);
-  const [wheel, setWheel] = useState<{ id: number; stop: number; forward: boolean; n: number; name: string; done: boolean } | null>(null);
+  const [toss, setToss] = useState<{ id: number; rolls: number[]; mult: number; wait: boolean } | null>(null);
+  // Click to go on (teacher, 2026-11-13): the die, the wheel and power-up cards wait for a tap.
+  const goRef = useRef<(() => void) | null>(null);
+  const tapToGo = (auto: boolean) => new Promise<void>((res) => { goRef.current = () => { goRef.current = null; res(); }; if (auto) window.setTimeout(() => goRef.current?.(), ms(1400)); });
+  const [wheel, setWheel] = useState<{ id: number; stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean } | null>(null);
   const [shield, setShield] = useState<boolean[]>([]);
   const [skip, setSkip] = useState<boolean[]>([]);
   const [potion, setPotion] = useState<number[]>([]); // doubled rolls left
@@ -183,7 +185,7 @@ export default function CastleQuest() {
     }
     setQuestion(null);
     if (right) setStep('roll');
-    else { say(t('cq.nextTime')); void endTurn(); }
+    else void endTurn();
   }
 
   async function walk(who: number, to: number) {
@@ -203,11 +205,14 @@ export default function CastleQuest() {
   }
   async function throwDie(count: number, mult: number) {
     const rolls = Array.from({ length: count }, () => roll());
-    setToss({ id: Date.now(), rolls, mult });
+    setToss({ id: Date.now(), rolls, mult, wait: false });
     await sleep(still ? 500 : 1700 + (count - 1) * 500);
     setDie(rolls[rolls.length - 1]);
     playEffect('right', settings);
-    await sleep(ms(900));
+    // The die waits big on the screen until it is tapped, so the student can
+    // count the dots before the piece moves (teacher, 2026-11-13).
+    setToss((x) => (x ? { ...x, wait: true } : x));
+    await tapToGo(current(turnsRef.current!).kind === 'cpu');
     setToss(null);
     return rolls;
   }
@@ -224,7 +229,10 @@ export default function CastleQuest() {
     const rolls = await throwDie(b.double ? 2 : 1, mult);
     setBoost({ double: false, x2: false });
     const by = rolls.reduce((a, r) => a + r, 0) * mult;
-    await walk(me, Math.min(finish, posRef.current[me] + by));
+    const to = posRef.current[me] + by;
+    // Exact roll to win (teacher, 2026-11-13): too many and the piece bounces back from the finish.
+    if (setup.exact && to > finish) { await walk(me, finish - 1); await sleep(ms(200)); await walk(me, Math.max(0, finish - (to - finish))); }
+    else await walk(me, Math.min(finish, to));
     await land(me);
   }
   async function land(who: number) {
@@ -249,12 +257,14 @@ export default function CastleQuest() {
     if (power === 'shield') {
       setShield((v) => v.map((x, k) => (k === who ? true : x)));
       setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) });
-      await sleep(ms(1800));
+      await tapToGo(current(s).kind === 'cpu');
+      setPop(null);
       return;
     }
     held.earn(s.players[who].id, it);
     setPop({ id: Date.now(), item: it, text: t('pu.later', { role: roleOf(castleQuestManifest, it) }) });
-    await sleep(ms(1800));
+    await tapToGo(current(s).kind === 'cpu');
+    setPop(null);
   }
   // Held power-ups switch on by themselves at the start of the roll.
   async function applyItem(i: number) {
@@ -304,13 +314,17 @@ export default function CastleQuest() {
     }
     const [n1] = await throwDie(1, 1);
     const forward = Math.random() < 0.5;
-    setWheel({ id: Date.now(), stop: wheelStop(forward), forward, n: n1, name: s.players[target].name, done: false });
+    const cpu = current(s).kind === 'cpu';
+    // Tap the wheel to spin it, and tap again to go on (teacher, 2026-11-13).
+    setWheel({ id: Date.now(), stop: wheelStop(forward), forward, n: n1, name: s.players[target].name, done: false, spinning: false });
+    await tapToGo(cpu);
+    setWheel((w) => (w ? { ...w, spinning: true } : w));
     playEffect('whoosh', settings);
     await sleep(still ? 500 : 4200);
     setWheel((w) => (w ? { ...w, done: true } : w));
     playEffect(forward ? 'win' : 'miss', settings);
     impact(settings);
-    await sleep(ms(1500));
+    await tapToGo(cpu);
     setWheel(null);
     if (target !== me && shieldRef.current[target]) { say(t('cq.shieldBlocks'), 'shield'); await sleep(ms(1400)); setStep('roll'); return; }
     await walk(target, Math.max(0, Math.min(finish, posRef.current[target] + (forward ? n1 : -n1))));
@@ -356,10 +370,14 @@ export default function CastleQuest() {
   const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={step !== 'roll'} />;
   const boosted = boost.double || boost.x2 || (potion[me] ?? 0) > 0;
   const rollLabel = boost.double ? t('cq.rollTwice') : boosted ? t('cq.rollDouble') : t('cq.roll');
-  const rollButton = step === 'roll' && human && phase === 'play' && held.held.length === 0 && (
-    <motion.button type="button" onClick={() => void rollDie()} className={buttonClasses('primary', 'h-14 !px-5 !text-xl w-full')}
-      animate={still ? undefined : { scale: [1, 1.06, 1], rotate: [0, -1.5, 1.5, 0] }} transition={{ duration: 1.1, repeat: Infinity }} whileHover={still ? undefined : { scale: 1.1 }}>
-      <DiceFive weight="fill" size={26} />{rollLabel}
+  const canRoll = step === 'roll' && human && phase === 'play' && held.held.length === 0;
+  // Just the die, big, under the scores: tap it to roll (teacher, 2026-11-13: no text, no box).
+  const dieButton = (size: number) => (
+    <motion.button type="button" onClick={() => void rollDie()} disabled={!canRoll} aria-label={rollLabel} className="rounded-[18%] disabled:cursor-default"
+      style={{ filter: canRoll ? 'drop-shadow(0 0 14px #fdfd94) drop-shadow(0 6px 0 rgba(0,0,0,0.25))' : 'drop-shadow(0 6px 0 rgba(0,0,0,0.25))' }}
+      animate={canRoll && !still ? { y: [0, -10, 0], rotate: [0, -6, 6, 0] } : { y: 0, rotate: 0 }} transition={canRoll ? { duration: 1.2, repeat: Infinity } : { duration: 0.2 }}
+      whileHover={canRoll && !still ? { scale: 1.1 } : undefined} whileTap={canRoll && !still ? { scale: 0.9 } : undefined}>
+      <Die2D value={die} size={size} rolling={false} theme={theme} />
     </motion.button>
   );
   const picker = step === 'pick' && turns && (
@@ -403,6 +421,7 @@ export default function CastleQuest() {
             <>
               <ChoiceTiles label={t('cq.trail')} value={trailOf(setup.trail)} onChange={(v) => change({ trail: v })}
                 options={TRAILS.map((tr) => ({ value: tr, label: t(`cq.trail.${tr}` as 'cq.trail.short'), tip: t(`cq.trailTip.${tr}` as 'cq.trailTip.short') }))} />
+              <Toggle label={t('cq.exact')} hint={t('cq.exactHint')} value={!!setup.exact} onChange={(v) => change({ exact: v })} />
               {powerUpSwitches({ manifest: castleQuestManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
@@ -417,10 +436,9 @@ export default function CastleQuest() {
           {/* Players: a round badge each, like every other game (teacher, 2026-11-08). */}
           <div className="lg:col-start-2 lg:row-start-1 p-2 lg:pt-16 lg:pr-3 pr-40 lg:pl-0 grid gap-3 content-start min-w-0 z-10">
             <Race turns={turns} pos={pos} finish={finish} playing={phase === 'play'} shield={shield} skip={skip} still={still} />
-            <div className="hidden lg:grid bg-surface border-[2.5px] border-border rounded-panel p-3 gap-3 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <Die2D value={die} size={84} rolling={false} theme={theme} />
+            <div className="hidden lg:grid gap-3 justify-items-center pt-4">
+              {dieButton(150)}
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
-              {rollButton}
             </div>
           </div>
           <div ref={boardRef} className="relative lg:col-start-1 lg:row-start-1 min-h-0 min-w-0 select-none">
@@ -466,10 +484,9 @@ export default function CastleQuest() {
           </div>
           {/* Small screens: the die and the roll button along the bottom. */}
           <div className="lg:hidden p-2 flex items-center justify-center gap-3 z-10">
-            <div className="bg-surface/95 border-[2.5px] border-border rounded-panel px-3 py-2 flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <Die2D value={die} size={52} rolling={false} theme={theme} />
+            <div className="flex items-center gap-3">
+              {dieButton(84)}
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
-              {rollButton && <div className="w-56">{rollButton}</div>}
             </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-30 [&_button]:!w-11 [&_button]:!h-11">
@@ -478,8 +495,8 @@ export default function CastleQuest() {
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <AnimatePresence>
-            {toss && <DieToss key={toss.id} rolls={toss.rolls} mult={toss.mult} still={still} theme={theme} />}
-            {wheel && <Wheel key={wheel.id} spin={wheel} still={still} />}
+            {toss && <DieToss key={toss.id} rolls={toss.rolls} wait={toss.wait} still={still} theme={theme} onGo={() => goRef.current?.()} />}
+            {wheel && <Wheel key={wheel.id} spin={wheel} still={still} onTap={() => goRef.current?.()} />}
           </AnimatePresence>
         </div>
       )}
@@ -491,7 +508,7 @@ export default function CastleQuest() {
           <p className="font-display text-xl font-bold flex items-center gap-2 justify-center"><Trophy weight="fill" size={24} />{t('cq.built')}</p>
         </ResultsModal>
       )}
-      <PowerUpPop pop={pop} onDone={() => setPop(null)} />
+      <PowerUpPop pop={pop} onDone={() => { if (goRef.current) goRef.current(); else setPop(null); }} />
     </main>
     </ThemedPage>
   );
@@ -513,7 +530,8 @@ function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, color }: { 
   const art = { regular: pieceImage(theme, 'space'), lose: pieceImage(theme, 'space-lose'), again: pieceImage(theme, 'space-again'), start: pieceImage(theme, 'start'), finish: pieceImage(theme, 'finish') };
   // The empty spots between the lanes get little doodles that bob.
   const blanks: { x: number; y: number; k: number }[] = [];
-  for (let y = 1; y < L.rows; y += 2) for (let x = 0; x < L.cols; x++) if (!used.has(`${x},${y}`) && (x * 7 + y * 3) % 3 === 0) blanks.push({ x, y, k: x * 11 + y });
+  // Only the little flowers (teacher, 2026-11-13: no clouds or stars).
+  for (let y = 1; y < L.rows; y += 2) for (let x = 0; x < L.cols; x++) if (!used.has(`${x},${y}`) && (x * 7 + y * 3) % 3 === 0 && (x * 11 + y) % 3 === 2) blanks.push({ x, y, k: x * 11 + y });
   return (
     <div className="absolute inset-0" role="img" aria-label={t('cq.board', { n })}>
       {/* The board: one rounded panel with a charcoal edge, like a printed board. */}
@@ -590,48 +608,44 @@ function Die2D({ value, size, rolling, theme }: { value: number; size: number; r
     </span>
   );
 }
-// The throw: the die (or two) tumbles in over the board, bounces, lands.
-function DieToss({ rolls, mult, still, theme }: { rolls: number[]; mult: number; still: boolean; theme: GameTheme }) {
+// The throw: the die (or two) tumbles in over the board, big, bounces and
+// lands, then waits there until it is tapped (no number under it: the
+// student counts the dots, teacher 2026-11-13).
+function DieToss({ rolls, wait, still, theme, onGo }: { rolls: number[]; wait: boolean; still: boolean; theme: GameTheme; onGo: () => void }) {
   const [landed, setLanded] = useState(still);
   useEffect(() => { if (still) return; const id = window.setTimeout(() => setLanded(true), 1150 + (rolls.length - 1) * 500); return () => window.clearTimeout(id); }, [still, rolls.length]);
-  const sum = rolls.reduce((a, r) => a + r, 0);
-  const label = rolls.length > 1 ? `${rolls.join(' + ')}${mult > 1 ? ` x ${mult}` : ''} = ${sum * mult}` : mult > 1 ? `${sum} x ${mult} = ${sum * mult}` : String(sum);
+  const size = rolls.length > 1 ? 'min(30vmin, 220px)' : 'min(40vmin, 300px)';
   return (
-    <motion.div className="absolute inset-0 z-40 grid place-items-center pointer-events-none" initial={{ backgroundColor: 'rgba(36,28,61,0)' }} animate={{ backgroundColor: 'rgba(36,28,61,0.3)' }} exit={{ opacity: 0 }}>
-      <div className="grid justify-items-center gap-3">
-        <div className="flex gap-6">
-          {rolls.map((r, k) => (
-            <motion.div key={k} initial={still ? false : { x: k ? 260 : -260, y: -220, rotate: k ? 60 : -60 }}
-              animate={still ? undefined : { x: [k ? 260 : -260, k ? 40 : -60, 0], y: [-220, 30, -40, 0], rotate: [k ? 60 : -60, 250, 340, 360 + (k ? 6 : -6)] }}
-              transition={{ duration: 1.1, delay: k * 0.5, times: [0, 0.45, 0.75, 1], ease: 'easeOut' }}>
-              <Die2D value={r} size={128} rolling={!landed} theme={theme} />
-            </motion.div>
-          ))}
-        </div>
-        <AnimatePresence>
-          {landed && (
-            <motion.p className="text-5xl bg-surface border-[3px] border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
-              initial={{ scale: 0.3, opacity: 0, rotate: -8 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1, rotate: 0 }} transition={{ duration: 0.45 }}>
-              {label}
-            </motion.p>
-          )}
-        </AnimatePresence>
+    <motion.div className={`absolute inset-0 z-40 grid place-items-center ${wait ? 'cursor-pointer' : 'pointer-events-none'}`} onClick={wait ? onGo : undefined}
+      initial={{ backgroundColor: 'rgba(36,28,61,0)' }} animate={{ backgroundColor: 'rgba(36,28,61,0.35)' }} exit={{ opacity: 0 }}>
+      <div className="flex gap-8">
+        {rolls.map((r, k) => (
+          <motion.button key={k} type="button" disabled={!wait} onClick={onGo} aria-label={t('cq.dieShows', { n: r })} className="rounded-[18%]"
+            initial={still ? false : { x: k ? 300 : -300, y: -260, rotate: k ? 60 : -60, scale: 0.6 }}
+            animate={still ? undefined : wait ? { x: 0, y: [0, -8, 0], rotate: 360 + (k ? 6 : -6), scale: [1, 1.04, 1] } : { x: [k ? 300 : -300, k ? 40 : -60, 0], y: [-260, 30, -40, 0], rotate: [k ? 60 : -60, 250, 340, 360 + (k ? 6 : -6)], scale: [0.6, 1.15, 1] }}
+            transition={wait ? { duration: 1.2, repeat: Infinity } : { duration: 1.1, delay: k * 0.5, times: [0, 0.45, 0.75, 1], ease: 'easeOut' }}
+            whileHover={wait && !still ? { scale: 1.08 } : undefined}
+            style={{ width: size, height: size, filter: wait ? 'drop-shadow(0 0 18px #fdfd94)' : undefined }}>
+            <span className="block w-full h-full [&>span]:!w-full [&>span]:!h-full [&_svg]:w-full [&_svg]:h-full"><Die2D value={r} size={300} rolling={!landed} theme={theme} /></span>
+          </motion.button>
+        ))}
       </div>
     </motion.div>
   );
 }
 
 // ---- The wheel: half forward, half back; a pointer at the top --------------
-function Wheel({ spin, still }: { spin: { stop: number; forward: boolean; n: number; name: string; done: boolean }; still: boolean }) {
+function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean }; still: boolean; onTap: () => void }) {
   const size = 'min(62vmin, 440px)';
   return (
-    <motion.div className="absolute inset-0 z-40 grid place-items-center bg-[#241c3d]/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
+    <motion.div className={`absolute inset-0 z-40 grid place-items-center bg-[#241c3d]/40 ${!spin.spinning || spin.done ? 'cursor-pointer' : ''}`} onClick={!spin.spinning || spin.done ? onTap : undefined} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
       aria-label={spin.done ? t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n }) : t('cq.wheelSpinning')}>
       <div className="grid justify-items-center gap-3">
         <p className="text-3xl bg-surface border-[3px] border-border rounded-pill px-5 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}>{spin.name}: {spin.n}</p>
-        <div className="relative" style={{ width: size, height: size }}>
-          <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: still ? spin.stop % 360 : spin.stop }}
-            transition={{ duration: still ? 0.01 : 4, ease: [0.15, 0.85, 0.25, 1] }}>
+        <motion.div className="relative" style={{ width: size, height: size }} whileHover={!spin.spinning && !still ? { scale: 1.04 } : undefined}
+          animate={!spin.spinning && !still ? { rotate: [0, -4, 4, 0] } : { rotate: 0 }} transition={!spin.spinning ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
+          <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: !spin.spinning ? 0 : still ? spin.stop % 360 : spin.stop }}
+            transition={{ duration: still || !spin.spinning ? 0.01 : 4, ease: [0.15, 0.85, 0.25, 1] }}>
             <circle cx="100" cy="100" r="96" fill={C.ink} />
             <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={C.sage} opacity={spin.done && !spin.forward ? 0.35 : 1} />
             <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={C.red} opacity={spin.done && spin.forward ? 0.35 : 1} />
@@ -643,7 +657,8 @@ function Wheel({ spin, still }: { spin: { stop: number; forward: boolean; n: num
           </motion.svg>
           {/* The pointer at the top. */}
           <svg viewBox="0 0 40 44" className="absolute left-1/2 -top-[6%] -translate-x-1/2 w-[14%]" aria-hidden="true"><path d="M4 4 H36 L20 40 Z" fill={C.yellow} stroke={C.ink} strokeWidth="4" strokeLinejoin="round" /></svg>
-        </div>
+          {!spin.spinning && <button type="button" onClick={(e) => { e.stopPropagation(); onTap(); }} aria-label={t('cq.wheelSpin')} className="absolute inset-0 rounded-full" />}
+        </motion.div>
         <AnimatePresence>
           {spin.done && (
             <motion.p className="text-4xl bg-surface border-[3px] border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#3f6b2a' : C.red }}

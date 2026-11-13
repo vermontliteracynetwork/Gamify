@@ -21,9 +21,15 @@ test('Board Game: a right answer earns a roll, the die tumbles, the round piece 
   await expect(rollBtn).toBeVisible({ timeout: 8000 });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.screenshot({ path: `test-results/castle-quest-roll-${info.project.name}.png` });
-  await rollBtn.click();
+  await rollBtn.click({ force: true }); // it bobs, so it is never 'stable'
   if (info.project.name === 'ipad-landscape') for (let f = 0; f < 14; f++) { await page.screenshot({ path: `test-results/castle-quest-hop-${f}.png` }); await page.waitForTimeout(170); }
   await expect(page.getByRole('img', { name: /^The die shows [1-6]$/ }).first()).toBeVisible();
+  // The die waits big until it is tapped, so the student can count (teacher, 2026-11-13).
+  const landed = page.getByRole('button', { name: /^The die shows [1-6]$/ }).first();
+  await expect(landed).toBeEnabled({ timeout: 6000 });
+  await page.screenshot({ path: `test-results/castle-quest-die-${info.project.name}.png` });
+  await landed.click({ force: true });
+  await expect(landed).toBeHidden({ timeout: 4000 });
   await page.waitForTimeout(3000);
   await page.screenshot({ path: `test-results/castle-quest-moved-${info.project.name}.png` });
   expect(problems).toEqual([]);
