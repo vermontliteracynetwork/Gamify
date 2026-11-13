@@ -87,7 +87,8 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   // Options: tries for each turn (teacher, 2026-10-31).
   await expect(page.getByRole('slider', { name: /Tries for each turn/ })).toBeVisible();
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  // Power-ups have their own page (teacher, 2026-11-13).
+  while (!(await page.getByRole('button', { name: 'Fewer teams' }).isVisible())) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Fewer teams' }).click();
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-setup-teams-${info.project.name}.png` });

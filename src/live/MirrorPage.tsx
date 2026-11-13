@@ -19,7 +19,7 @@ export default function MirrorPage() {
   const [result, setResult] = useState<Extract<MirrorMsg, { t: 'result' }> | null>(null);
   const [size, setSize] = useState(1);
   const [contrast, setContrast] = useState(false);
-  const [autoRead, setAutoRead] = useState(true);
+  const [autoRead, setAutoRead] = useState(false);
   useEffect(() => listenMirror(code, (m) => {
     if (m.t === 'q') { setQ(m); setResult(null); }
     if (m.t === 'result') setResult(m);

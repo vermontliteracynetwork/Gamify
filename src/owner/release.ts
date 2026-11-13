@@ -36,7 +36,6 @@ export const RELEASE: ReleaseStage[] = [
     { id: 'board-game', text: 'Board Game classic rework', state: 'done' },
     { id: 'engagement', text: 'Engagement audit improvements', state: 'build', note: 'docs/engagement-audit.md' },
     { id: 'themes', text: 'Theme library and Theme Builder', state: 'done' },
-    { id: 'shelf', text: 'My shelf stickers', state: 'done' },
     { id: 'art', text: 'Buy avatar and theme art', state: 'you' },
   ] },
   { id: 'readiness', title: 'Readiness', items: [

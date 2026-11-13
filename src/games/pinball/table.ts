@@ -58,6 +58,23 @@ export const pocketCenter = (i: number, count: number) => WALL + ((W - 2 * WALL)
 export const BALL_R = 3.1;
 export const BUMPERS: Pt[] = [{ x: 24, y: 44 }, { x: 50, y: 56 }, { x: 76, y: 44 }];
 export const BUMPER_R = 5.2;
+// Pegs (teacher, 2026-11-13): 2 to 6 in new random spots every turn, more as
+// the game goes on. Stars float between them; the ball collects any it touches.
+export const PEG_R = 3.4;
+export const STAR_R = 3.6;
+export const SHOT_POWER = 0.82; // every shot has the same power (no power bar)
+export const pegCount = (progress: number) => Math.min(6, 2 + Math.round(Math.min(1, Math.max(0, progress)) * 4));
+// Random spots in the open middle of the table, never touching each other.
+export function scatter(n: number, avoid: Pt[] = [], gap = 13, rand = Math.random): Pt[] {
+  const out: Pt[] = [];
+  for (let tries = 0; out.length < n && tries < 400; tries++) {
+    // Above or below the lane band (so nothing hides under it), clear of the side kickers.
+    const low = rand() < 0.3;
+    const p = low ? { x: 24 + rand() * 52, y: 82 + rand() * 8 } : { x: 14 + rand() * 72, y: TOP_Y + 12 + rand() * 28 };
+    if ([...out, ...avoid].every((q) => Math.hypot(q.x - p.x, q.y - p.y) >= gap)) out.push(p);
+  }
+  return out;
+}
 export const FLIP_Y = 110;
 const GRAVITY = 24;
 const STEP = 1 / 240;
@@ -66,7 +83,7 @@ export const RAILS: [Pt, Pt][] = [[{ x: 5.5, y: 88 }, { x: 22, y: 109 }], [{ x: 
 export const KICKERS: [Pt, Pt][] = [[{ x: 12, y: 84 }, { x: 19.5, y: 99.5 }], [{ x: 88, y: 84 }, { x: 80.5, y: 99.5 }]];
 export const FLIPPER_SPAN = { from: 24, to: 76 };
 
-export type ShotEvent = { t: number; kind: 'wall' | 'bumper' | 'rattle' | 'flip' | 'top'; x: number; y: number; i?: number };
+export type ShotEvent = { t: number; kind: 'wall' | 'bumper' | 'rattle' | 'flip' | 'top' | 'star'; x: number; y: number; i?: number };
 export interface Frame { t: number; x: number; y: number }
 export interface Shot { frames: Frame[]; pocket: number | null; events: ShotEvent[]; bounces: number; bumps: number; flipped: boolean; rattled: boolean; dur: number }
 export interface ShotOptions {
@@ -75,6 +92,9 @@ export interface ShotOptions {
   magnetTo?: number; // a jackpot magnet pulls the ball to this pocket at the top
   luck?: number; // chance of a lucky flip when the ball falls back (default 0.12)
   rails?: boolean; // the rails and kickers down to the flippers (default on)
+  pegs?: Pt[]; // the bumpers this turn (default: the three fixed bumpers)
+  pegR?: number;
+  stars?: Pt[]; // stars the ball can collect (event 'star', i = which)
   rand?: () => number;
 }
 
@@ -88,7 +108,10 @@ export function simulateShot(zone: number, power: number, o: ShotOptions): Shot 
   let x = LAUNCH.x, y = LAUNCH.y, t = 0, play = 0;
   const frames: Frame[] = [{ t: 0, x, y }];
   const events: ShotEvent[] = [];
-  const cool = BUMPERS.map(() => -1);
+  const pegs = o.pegs ?? BUMPERS;
+  const pegR = o.pegR ?? (o.pegs ? PEG_R : BUMPER_R);
+  const cool = pegs.map(() => -1);
+  const got = new Set<number>();
   let bounces = 0, bumps = 0, flips = 0, steps = 0;
   const lo = WALL + BALL_R, hi = W - WALL - BALL_R;
   const add = (kind: ShotEvent['kind'], i?: number) => events.push({ t: play, kind, x, y, ...(i === undefined ? {} : { i }) });
@@ -103,11 +126,12 @@ export function simulateShot(zone: number, power: number, o: ShotOptions): Shot 
       vx = -vx * (0.86 + rand() * 0.1);
       bounces++; add('wall');
     }
-    BUMPERS.forEach((b, i) => {
+    o.stars?.forEach((s, i) => { if (!got.has(i) && Math.hypot(x - s.x, y - s.y) < STAR_R + BALL_R) { got.add(i); add('star', i); } });
+    pegs.forEach((b, i) => {
       const dx = x - b.x, dy = y - b.y, d = Math.hypot(dx, dy);
-      if (d >= BUMPER_R + BALL_R || t < cool[i]) return;
+      if (d >= pegR + BALL_R || t < cool[i]) return;
       const nx = dx / d, ny = dy / d;
-      x = b.x + nx * (BUMPER_R + BALL_R); y = b.y + ny * (BUMPER_R + BALL_R);
+      x = b.x + nx * (pegR + BALL_R); y = b.y + ny * (pegR + BALL_R);
       const vn = vx * nx + vy * ny;
       if (vn < 0) { vx -= 2 * vn * nx; vy -= 2 * vn * ny; }
       // A pop bumper kicks the ball away, up and to the side, a bit differently each time.

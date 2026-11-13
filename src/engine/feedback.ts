@@ -91,6 +91,37 @@ export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = p
 }
 
 // iPads can't vibrate; Android can. Never the only signal.
+// A musical note for a peg bounce (teacher, 2026-11-13): each bounce in a
+// shot plays the next note up a pentatonic scale, like a tune.
+const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
+export function playNote(step: number, s: PlayerSettings): void {
+  const gain = volume(s, 'effects') * 0.22 * (isSpeaking() ? 0.3 : 1);
+  const ac = gain > 0 ? audio() : null;
+  if (!ac) return;
+  const f = SCALE[Math.max(0, step) % SCALE.length];
+  [1, 2].forEach((h, k) => {
+    const osc = ac.createOscillator(); const g = ac.createGain();
+    osc.type = k ? 'sine' : 'triangle';
+    osc.frequency.setValueAtTime(f * h, ac.currentTime);
+    g.gain.setValueAtTime(gain / (k ? 3 : 1), ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.45);
+    osc.connect(g).connect(ac.destination); osc.start(); osc.stop(ac.currentTime + 0.5);
+  });
+}
+// A bubbly pop (a star collected).
+export function playPop(s: PlayerSettings): void {
+  const gain = volume(s, 'effects') * 0.35 * (isSpeaking() ? 0.3 : 1);
+  const ac = gain > 0 ? audio() : null;
+  if (!ac) return;
+  const osc = ac.createOscillator(); const g = ac.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(420, ac.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1500, ac.currentTime + 0.07);
+  g.gain.setValueAtTime(gain, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.14);
+  osc.connect(g).connect(ac.destination); osc.start(); osc.stop(ac.currentTime + 0.16);
+}
+
 export const canVibrate = (): boolean => typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
 
 export function buzz(pattern: number | number[], s: PlayerSettings): void {

@@ -426,7 +426,9 @@ html[data-motion="still"] :is(.qt-gold) { animation: none; }
 .gs-bulbs-y.gs-twinkle { animation: gs-bulbs-y 0.9s linear infinite, gs-twinkle 1.3s ease-in-out infinite; }
 @keyframes gs-twinkle { 0%, 100% { filter: drop-shadow(0 0 1px #fff6b0); } 50% { filter: drop-shadow(0 0 5px #fdfd94) drop-shadow(0 0 9px rgba(253,253,148,0.8)); } }
 /* A slight wiggle when a pointer rests on a card tile (teacher, 2026-11-06). */
-@media (hover: hover) { .tile-wiggle { transition: scale 0.15s ease-out; } .tile-wiggle:hover { animation: tile-wiggle 0.6s ease-in-out 2; scale: 1.03; z-index: 2; } }
+/* Hover: a slight enlarge, border kept (teacher, 2026-11-13: no wiggle). */
+@media (hover: hover) { .tile-wiggle { transition: scale 0.18s ease-out; } .tile-wiggle:hover { scale: 1.03; z-index: 2; position: relative; } }
+html[data-motion="still"] .tile-wiggle:hover { scale: 1; }
 @keyframes tile-wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -2.5deg; } 50% { rotate: 2deg; } 75% { rotate: -1deg; } }
 html[data-motion="still"] :is(.gs-bulbs-x, .gs-bulbs-y, .gs-rays, .gs-lucky, .tile-wiggle:hover) { animation: none !important; }
 .pb-hit { animation: pb-hit 0.32s ease-out; }
@@ -488,7 +490,9 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 @keyframes cq-spin-slow { to { transform: rotate(360deg); } }
 
 
-.game-stage.brand-menu { background: var(--surface); }
+.game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f4f5ff 0%, #e6e9ff 60%, #dde1ff 100%); }
+/* Each setting sits on its own white card with a soft lift (teacher, 2026-11-13: dimension, professional). */
+.brand-menu .setup-item { background: var(--surface); border: 2.5px solid #000; border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 #000, 0 16px 30px rgba(36, 28, 61, 0.10); }
 .brand-menu > main { position: relative; padding-top: 1.5rem !important; }
 .brand-menu .game-top { position: absolute; top: calc(1.5rem + var(--menu-offset, 0px)); right: 1.5rem; margin: 0; z-index: 5; }
 .brand-menu .menu-panel { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
@@ -661,3 +665,12 @@ html[data-motion="still"] .belt-move { animation: none; }
 .dev-dash .gamify-slider::-webkit-slider-thumb { width: 22px; height: 22px; background: var(--dash-purple); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--dash-purple); }
 .dev-dash .gamify-slider::-moz-range-thumb { width: 20px; height: 20px; background: var(--dash-purple); border: 3px solid #fff; box-shadow: 0 0 0 1px var(--dash-purple); }
 .dev-dash .gamify-slider { height: 6px; border: 0; background: #e4e4e7; }
+
+@keyframes float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+html[data-motion="still"] [class*="animate-[float"] { animation: none !important; }
+
+/* Pinball pegs pop in each turn; stars float and drift (teacher, 2026-11-13). */
+@keyframes pb-peg-in { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); } }
+.pb-peg-in { animation: pb-peg-in 0.45s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes pb-star-float { 0%, 100% { transform: translate(0, 0) rotate(-8deg); } 33% { transform: translate(1.6px, -1.8px) rotate(6deg); } 66% { transform: translate(-1.4px, -0.6px) rotate(-2deg); } }
+.pb-star-float { animation: pb-star-float 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }

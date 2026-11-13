@@ -156,3 +156,4 @@ Every item respects her preferences: no scroll, power-ups auto-use next turn, Cl
 - 2026-11-08: shipped 13 and 15 (first pass): Match Three cascades climb in pitch with a punch at 3 or more and the callout springs in letter by letter; Bubble Pop groups pop with a run of rising notes and a punch on 6 or more.
 - 2026-11-08: shipped 21 (first pass): Board Game dust puff where each move lands and a confetti pop on Roll again.
 - 2026-11-08: My shelf: Question Tracker gives stickers too (Lucky Star, Rain Cloud, Snow Globe); only listed games show; stickers size to the screen; e2e covers the sticker and the shelf. Four in a Row win gets the impact punch.
+- 2026-11-13: My shelf (stickers) removed: the teacher did not approve it.

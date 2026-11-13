@@ -3,12 +3,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Crosshair, RocketLaunch, Star, Trophy } from '@phosphor-icons/react';
+import { CheckCircle, Crosshair, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import type { MultipleChoiceQuestion } from '../../data/types';
-import { buzz, playEffect } from '../../engine/feedback';
+import { buzz, playEffect, playNote, playPop } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
@@ -27,7 +27,6 @@ import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
-import { buttonClasses } from '../../ui/kit';
 import Title from '../../ui/Title';
 import { useSignedIn } from '../../auth/session';
 import GameWelcome from '../GameWelcome';
@@ -37,28 +36,21 @@ import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { pinballManifest } from './manifest';
-import { BUMPER_R, BUMPERS, frameAt, H, LANE_H, LANE_Y, LAUNCH, pickValues, pocketCount, POCKET_H, POCKET_TOP, simulateShot, TOP_Y, W, WALL, ZONE_X, ZONES, type Pt, type Shot, type ShotEvent } from './table';
+import { frameAt, H, LANE_H, LANE_Y, LAUNCH, PEG_R, pegCount, pickValues, pocketCount, POCKET_H, POCKET_TOP, scatter, SHOT_POWER, simulateShot, W, WALL, ZONE_X, ZONES, type Pt, type Shot, type ShotEvent } from './table';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
-type Step = 'question' | 'aim' | 'power' | 'shot' | 'result';
+type Step = 'question' | 'aim' | 'shot' | 'result';
 type Boost = 'double' | 'super' | 'magnet' | 'bounce';
 // The lane band's colors, like a painted alley (teacher reference, 2026-10-31).
 const LANE_COLORS = ['#f6c544', '#9b7be0', '#ef5d7a', '#4fb6d8', '#f39ac0'];
 const POCKET_COLORS = ['#ff9b54', '#fbc94a', '#f2735f', '#8fe3a0', '#8ec5ff', '#c9a3f5'];
-// Six big bonus lights, then a star that shows the bonus (Claudia, 2026-10-31).
-const LIGHTS = Array.from({ length: 6 }, (_, i) => 15 + i * 11);
-const LIGHT_STAR = 79;
-// The bonus lights fill with every bumper and wall hit; all lit, the next
-// pocket pays a bonus (a goal the whole class watches build).
-const LIGHT_BONUS = 50;
 // Each colored bumper is worth points and has its own sound (teacher,
 // 2026-11-01, with her uploaded sounds): left red, middle blue, right green.
 const SND = '/sounds/pinball/';
-const BUMP = [
-  { color: '#f2735f', points: 10, sound: `${SND}bell.mp3` },
-  { color: '#6aa9e9', points: 20, sound: `${SND}button.mp3` },
-  { color: '#5cc3a0', points: 15, sound: `${SND}collision.mp3` },
-];
+// Pegs (teacher, 2026-11-13): 2 to 6 in new random spots each turn, each
+// worth 10 and singing the next note of a tune when the ball bounces off.
+const PEG_COLORS = ['#f2735f', '#6aa9e9', '#5cc3a0', '#f6c544', '#c9a3f5', '#f39ac0'];
+const PEG_POINTS = 10;
 const MAX_SHOT = 4.5; // seconds: longer runs play a little faster
 
 // Pinball (teacher design, 2026-10-31; replaces Peg Drop). A right answer
@@ -75,7 +67,7 @@ export default function Pinball() {
   const { theme, themes, playable, choose } = useGameTheme('pinball');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
+  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 10, questions: 2, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -92,29 +84,30 @@ export default function Pinball() {
   turnsNow.current = turns;
   const clock = usePlayClock({ playing: phase === 'play' && solo, score: turns?.players[0]?.score ?? 0, onTimeUp: () => { if (asking) cancel(); else if (turnsNow.current) end(turnsNow.current); } });
   const [step, setStep] = useState<Step>('question');
-  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; chance: number } | null>(null);
+  const [question, setQuestion] = useState<{ q: MultipleChoiceQuestion; setId?: string; chance: number; got: number } | null>(null);
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
   const [shots, setShots] = useState(0);
-  const [zone, setZone] = useState<number | null>(null);
-  const [power, setPower] = useState(0);
+  const [, setZone] = useState<number | null>(null);
+  // This turn's pegs and floating stars; a collected star pops away.
+  const [pegs, setPegs] = useState<Pt[]>([]);
+  const [stars, setStars] = useState<Pt[]>([]);
+  const [gotStars, setGotStars] = useState<number[]>([]);
+  const noteNo = useRef(0);
+  const [layout, setLayout] = useState(0);
   const [values, setValues] = useState<number[]>([]);
   const [hit, setHit] = useState<{ id: number; pocket: number | null; points: number; jackpot: boolean; bonus: number } | null>(null);
   const [sparks, setSparks] = useState<{ id: number; x: number; y: number; big: boolean }[]>([]);
   // Points from bumpers this shot, shown floating up from each bumper hit.
   const bumpPoints = useRef(0);
   const [floats, setFloats] = useState<{ id: number; x: number; y: number; n: number; color: string }[]>([]);
-  const [lights, setLights] = useState(0);
-  const lightsNow = useRef(0);
-  // Each player fills their own lights (no one cashes in another's hits).
-  const lightsBy = useRef<Record<string, number>>({});
   const phaseNow = useRef<Phase>('welcome');
   const boardRef = useRef<HTMLDivElement>(null);
   const [banner, setBanner] = useState<{ id: number; text: string } | null>(null);
   const [flip, setFlip] = useState(0);
   const [armed, setArmed] = useState<Boost[]>([]);
   const timers = useRef<number[]>([]);
+  const shotsNow = useRef(0);
   const raf = useRef(0);
-  const powerAt = useRef(0);
   const ballRef = useRef<SVGGElement>(null);
   const trailRefs = useRef<(SVGCircleElement | null)[]>([]);
   const bumperRefs = useRef<(SVGCircleElement | null)[]>([]);
@@ -128,6 +121,7 @@ export default function Pinball() {
   const player = turns ? current(turns) : null;
   const players = turns?.players.length ?? 1;
   const total = players * setup.rounds;
+  const need = Math.max(1, Math.min(5, setup.questions ?? 2));
   const round = Math.min(setup.rounds, Math.floor(shots / players) + 1);
   const human = player?.kind !== 'cpu';
   const best = values.length ? Math.max(...values) : 0;
@@ -143,7 +137,8 @@ export default function Pinball() {
   function begin() {
     const ps = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(ps);
-    setTurns(state); setShots(0); setMissed([]); setHit(null); setLights(0); lightsNow.current = 0; lightsBy.current = {};
+    shotsNow.current = 0;
+    setTurns(state); setShots(0); setMissed([]); setHit(null);
     held.reset();
     newTable(1);
     setPhase('play');
@@ -154,21 +149,26 @@ export default function Pinball() {
     trailRefs.current.forEach((c) => c?.setAttribute('opacity', '0'));
   }
   function startTurn(state: TurnState) {
-    setStep('question'); setHit(null); setPower(0); setZone(null); setArmed([]); restBall();
-    lightsNow.current = lightsBy.current[current(state).id] ?? 0; setLights(lightsNow.current);
+    setStep('question'); setHit(null); setZone(null); setArmed([]); restBall();
+    // New pegs (more as the game goes on) and 1 to 3 stars, every turn.
+    const progress = total > 1 ? shotsNow.current / (total - 1) : 0;
+    const ps = scatter(pegCount(progress));
+    setPegs(ps); setStars(scatter(1 + Math.floor(Math.random() * 3), ps, 11)); setGotStars([]); setLayout((n) => n + 1);
     boost.current = new Set();
     held.beginTurn(current(state).id);
     if (solo) {
-      void ask().then((ok) => { if (!ok) { end(state); return; } earned(state); setStep('aim'); });
+      void ask({ count: need }).then((ok) => { if (!ok) { end(state); return; } setStep('aim'); });
     } else {
       const d = deck.next();
-      setQuestion({ q: d.question, setId: d.setId, chance: 1 });
+      setQuestion({ q: d.question, setId: d.setId, chance: 1, got: 0 });
     }
   }
-  function earned(state: TurnState) {
+  // A collected star earns a power-up for the player's next turn (teacher, 2026-11-13).
+  function starPower(state: TurnState) {
     const me = current(state).id;
     const it = powers.grant(true, (x) => x.ability !== 'swipe' || state.players.some((p) => p.id !== me && p.score > 0));
-    if (it) held.earn(current(state).id, it);
+    if (it) held.earn(me, it);
+    return it;
   }
   function onShareResult(right: boolean) {
     if (!turns || !question || !player) return;
@@ -177,9 +177,11 @@ export default function Pinball() {
       if (!right) setMissed((m) => (m.some((x) => x.id === question.q.id) ? m : [...m, question.q]));
     }
     // Three tries, a new question each time (teacher, 2026-10-31, as in Game Show).
-    if (!right && question.chance < CHANCES) { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: question.chance + 1 }); return; }
+    if (!right && question.chance < CHANCES) { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: question.chance + 1, got: question.got }); return; }
+    // Questions between shots (teacher, 2026-11-13): that many right answers pull the plunger back.
+    if (right && question.got + 1 < need) { const d = deck.next(); setQuestion({ q: d.question, setId: d.setId, chance: 1, got: question.got + 1 }); return; }
     setQuestion(null);
-    if (right) { earned(turns); setStep('aim'); } else afterTurn(turns);
+    if (right) setStep('aim'); else afterTurn(turns);
   }
 
   // Use a held power-up: its Classic role happens now or on this shot.
@@ -204,22 +206,13 @@ export default function Pinball() {
     setTurns(next);
   }
 
-  // Pick a lane: the band fades away and the power bar starts swinging (like
-  // the casting meter in Cast and Catch). Tap Shoot to stop it.
+  // Pick a lane: the band fades away and the ball shoots up that lane at
+  // the same power every time (teacher, 2026-11-13: no power bar).
   function pickLane(z: number) {
     if (step !== 'aim') return;
     setZone(z);
-    setStep('power');
     playEffect('tap', settings);
-    const t0 = performance.now();
-    const period = still ? 2600 : 1600;
-    const tick = (ts: number) => {
-      const x = ((ts - t0) % period) / period;
-      const p = x < 0.5 ? x * 2 : 2 - x * 2;
-      powerAt.current = p; setPower(p);
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
+    shoot(z);
   }
   // Restart a CSS animation on an element.
   function replay(el: Element | null | undefined, cls: string) {
@@ -228,44 +221,43 @@ export default function Pinball() {
     void (el as HTMLElement).getBoundingClientRect();
     el.classList.add(cls);
   }
-  function addLight() {
-    if (lightsNow.current >= LIGHTS.length) return;
-    lightsNow.current += 1;
-    const me = turnsNow.current && current(turnsNow.current).id;
-    if (me) lightsBy.current[me] = lightsNow.current;
-    setLights(lightsNow.current);
-    if (lightsNow.current === LIGHTS.length) { setBanner({ id: Date.now(), text: t('pb.lightsFull', { n: LIGHT_BONUS }) }); playEffect('right', settings); }
-  }
   // What happens at each moment of the shot: bumpers flash and kick, walls
   // spark, the ball rattles on a pocket line, a lucky flip sends it back up.
   function onEvent(e: ShotEvent) {
+    if (e.kind === 'star' && e.i !== undefined) {
+      const i = e.i;
+      setGotStars((g) => [...g, i]);
+      playPop(settings);
+      buzz(15, settings);
+      const state = turnsNow.current;
+      if (state && starPower(state)) setBanner({ id: Date.now(), text: t('pb.starPower') });
+      setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: true }]);
+    }
     if (e.kind === 'bumper' && e.i !== undefined) {
       const c = bumperRefs.current[e.i];
-      const kind = BUMP[e.i % BUMP.length];
       c?.setAttribute('fill', '#fdfd94');
       timers.current.push(window.setTimeout(() => c?.setAttribute('fill', bumperFill(e.i!)), 170));
-      bumpPoints.current += kind.points;
-      setFloats((f) => [...f.slice(-8), { id: Date.now() + Math.random(), x: e.x, y: e.y - 6, n: kind.points, color: kind.color }]);
-      playClip(kind.sound, settings, 0.75);
+      bumpPoints.current += PEG_POINTS;
+      setFloats((f) => [...f.slice(-8), { id: Date.now() + Math.random(), x: e.x, y: e.y - 6, n: PEG_POINTS, color: bumperFill(e.i!) }]);
+      playNote(noteNo.current++, settings);
       replay(bumperGroups.current[e.i], 'pb-hit');
       if (settings.screenShake && !still) replay(boardRef.current, 'pb-shake');
       buzz(12, settings);
       setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: true }]);
-      addLight();
     }
-    if (e.kind === 'wall') { playEffect('tap', settings); setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: false }]); addLight(); }
+    if (e.kind === 'wall') { playEffect('tap', settings); setSparks((sp) => [...sp, { id: Date.now() + Math.random(), x: e.x, y: e.y, big: false }]); }
     if (e.kind === 'rattle') playEffect('tap', settings);
     if (e.kind === 'flip') { setFlip((f) => f + 1); playClip(`${SND}flippers.mp3`, settings); setBanner({ id: Date.now(), text: t('pb.luckyFlip') }); }
   }
-  function shoot() {
-    if (step !== 'power' || zone === null || !turns) return;
+  function shoot(lane: number) {
+    if (!turns) return;
     cancelAnimationFrame(raf.current);
     const b = boost.current;
-    const shot = simulateShot(zone, powerAt.current, { count: values.length, rails: plainTable, sure: b.has('super') || b.has('magnet'), magnetTo: b.has('magnet') ? values.indexOf(best) : undefined });
-    setStep('shot'); setSparks([]); setFloats([]); bumpPoints.current = 0;
+    const shot = simulateShot(lane, SHOT_POWER, { count: values.length, rails: plainTable, pegs, stars, sure: b.has('super') || b.has('magnet'), magnetTo: b.has('magnet') ? values.indexOf(best) : undefined });
+    setStep('shot'); setSparks([]); setFloats([]); bumpPoints.current = 0; noteNo.current = 0;
     playEffect('whoosh', settings);
     if (still) {
-      shot.events.forEach((e) => { if (e.kind === 'bumper' || e.kind === 'wall') addLight(); if (e.kind === 'bumper' && e.i !== undefined) bumpPoints.current += BUMP[e.i % BUMP.length].points; });
+      shot.events.forEach((e) => { if (e.kind === 'bumper') bumpPoints.current += PEG_POINTS; if (e.kind === 'star') onEvent(e); });
       if (shot.flipped) { playEffect('whoosh', settings); setBanner({ id: Date.now(), text: t('pb.luckyFlip') }); }
       const end = shot.frames[shot.frames.length - 1];
       ballRef.current?.setAttribute('transform', `translate(${end.x} ${end.y})`);
@@ -297,9 +289,7 @@ export default function Pinball() {
     let next = state;
     const b = boost.current;
     if (pocket !== null) {
-      // All the lights on: this pocket pays the light bonus, and they reset.
-      const bonus = lightsNow.current >= LIGHTS.length ? LIGHT_BONUS : 0;
-      if (bonus) { lightsNow.current = 0; lightsBy.current[current(state).id] = 0; setLights(0); }
+      const bonus = 0;
       // Bounce bonus: 10 a hit, up to 8 hits.
       const points = values[pocket] * (b.has('double') ? 2 : 1) + (b.has('bounce') ? Math.min(8, shot.bounces + shot.bumps) * 10 : 0) + bonus + bumpPoints.current;
       const jackpot = values[pocket] === best;
@@ -324,6 +314,7 @@ export default function Pinball() {
     if (phaseNow.current !== 'play') return;
     held.endTurn(); // unused power-ups are gone after the turn
     const n = shots + 1;
+    shotsNow.current = n;
     setShots(n);
     if (n >= total) { end(state); return; }
     const next = nextTurn(state);
@@ -342,22 +333,11 @@ export default function Pinball() {
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: 90, spread: 90, origin: { y: 0.5 }, disableForReducedMotion: true });
   }
   phaseNow.current = phase;
-  // The computer uses what it holds, picks a lane, lets the bar run and shoots.
-  // Runs once per step (the power bar re-renders every frame, which must not
-  // reset its timer). Harder computers stop the bar higher.
-  const shootNow = useRef(shoot);
-  shootNow.current = shoot;
+  // The computer uses what it holds, then picks a lane.
   useEffect(() => {
-    if (phase !== 'play' || player?.kind !== 'cpu') return;
-    if (step === 'aim') {
-      const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); pickLane(Math.floor(Math.random() * ZONES)); }, 900 * pace(settings));
-      return () => window.clearTimeout(id);
-    }
-    if (step === 'power') {
-      const [lo, hi] = team.level === 'easy' ? [0.15, 0.7] : team.level === 'hard' ? [0.55, 1] : [0.3, 0.9];
-      const id = window.setTimeout(() => { powerAt.current = lo + Math.random() * (hi - lo); shootNow.current(); }, (700 + Math.random() * 700) * pace(settings));
-      return () => window.clearTimeout(id);
-    }
+    if (phase !== 'play' || player?.kind !== 'cpu' || step !== 'aim') return;
+    const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); pickLane(Math.floor(Math.random() * ZONES)); }, 900 * pace(settings));
+    return () => window.clearTimeout(id);
   }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Keyboard: 1 to 5 pick a lane, Space or Enter shoots.
   useEffect(() => {
@@ -366,7 +346,6 @@ export default function Pinball() {
       if ((e.target as HTMLElement)?.closest?.('input, textarea, [role="dialog"], dialog')) return;
       const n = Number(e.key);
       if (step === 'aim' && n >= 1 && n <= ZONES) { e.preventDefault(); pickLane(n - 1); }
-      if (step === 'power' && (e.key === ' ' || e.key === 'Enter') && (e.target as HTMLElement)?.tagName !== 'BUTTON') { e.preventDefault(); shoot(); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -376,17 +355,12 @@ export default function Pinball() {
   const ballArt = pieceImage(theme, 'ball');
   // A theme's own bumper color paints all three; Classic gives each its color.
   const themedBumper = pieceColor(theme, 'bumper', '') && pieceColor(theme, 'bumper', '').toLowerCase() !== '#f2735f';
-  const bumperFill = (i: number) => (themedBumper ? pieceColor(theme, 'bumper', '#f2735f') : BUMP[i % BUMP.length].color);
+  const bumperFill = (i: number) => (themedBumper ? pieceColor(theme, 'bumper', '#f2735f') : PEG_COLORS[i % PEG_COLORS.length]);
   const flipperColor = pieceColor(theme, 'flipper', '#fdfd94');
-  const aiming = phase === 'play' && step === 'power' && zone !== null;
   const plainTable = !pieceImage(theme, 'board');
-  const dir = zone === null ? { x: 0, y: -1 } : { x: ZONE_X[zone] - LAUNCH.x, y: LANE_Y - LAUNCH.y };
-  const dlen = Math.hypot(dir.x, dir.y);
-  const tip = { x: LAUNCH.x + (dir.x / dlen) * 26, y: LAUNCH.y + (dir.y / dlen) * 26 };
-  const ang = (Math.atan2(dir.y, dir.x) * 180) / Math.PI;
   const pw = 100 / Math.max(1, values.length);
-  const boardW = `calc((var(--play-h) - 6.25rem - var(--pb-extra)) * ${W / H})`;
-  const tray = <PowerUpTray manifest={pinballManifest} items={held.held} onUse={applyItem} disabled={!(step === 'aim' || step === 'power') || !human} />;
+  const boardW = `calc((var(--play-h) - 1.5rem - var(--pb-extra)) * ${W / H})`;
+  const tray = <PowerUpTray manifest={pinballManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim' || !human} />;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -408,7 +382,8 @@ export default function Pinball() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('pb.rounds')} hint={solo ? t('pb.roundsHintSolo') : t('pb.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Slider label={t('pb.rounds')} hint={solo ? t('pb.roundsHintSolo') : t('pb.roundsHint')} min={1} max={20} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
+              <Slider label={t('pb.questions')} hint={t('pb.questionsHint')} min={1} max={5} value={need} onChange={(v) => change({ questions: v })} />
               {powerUpSwitches({ manifest: pinballManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
@@ -423,7 +398,6 @@ export default function Pinball() {
         // controls sit on top and the scores sit right beside it, top aligned.
         <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={pinballManifest.name} /></h1>
-          <p className="sr-only">{t('pb.lightsCount', { n: lights, total: LIGHTS.length, bonus: LIGHT_BONUS })}</p>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
@@ -448,8 +422,7 @@ export default function Pinball() {
                       {[[38, 36], [62, 36], [50, 40]].map(([x, y], i) => (
                         <path key={`ar-${i}`} d={`M${x - 3} ${y + 2.4} L${x} ${y - 1.2} L${x + 3} ${y + 2.4}`} fill="none" stroke="#fdfd94" strokeWidth={1.1} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} className={still || step !== 'shot' ? '' : 'pb-blink'} style={{ animationDelay: `${i * 0.25}s` }} />
                       ))}
-                      <circle cx={50} cy={95} r={9.5} fill="none" stroke="#fff" strokeOpacity={0.35} strokeWidth={0.7} strokeDasharray="1.2 1.6" />
-                      <path d="M50 87.5 L52.2 92.4 L57.5 92.9 L53.5 96.4 L54.7 101.6 L50 98.9 L45.3 101.6 L46.5 96.4 L42.5 92.9 L47.8 92.4 Z" fill="#fdfd94" fillOpacity={0.85} stroke="#000" strokeWidth={0.5} strokeLinejoin="round" />
+                      {/* Only collectible stars on the table now (teacher, 2026-11-13). */}
                       {[-1, 1].map((sd) => (
                         <g key={`side-${sd}`}>
                           <path d={sd < 0 ? 'M5.5 88 L22 109' : 'M94.5 88 L78 109'} stroke="#000" strokeWidth={2.4} strokeLinecap="round" />
@@ -461,46 +434,34 @@ export default function Pinball() {
                     </g>
                   )}
                   <rect x={3} y={3} width={W - 6} height={H - 6} rx={9} fill="none" stroke="#fff" strokeOpacity={0.3} strokeWidth={0.7} />
-                  {/* The bonus lights under the pockets: one lights with every bumper
-                      or wall hit; all on, the next pocket pays a bonus. */}
-                  <g aria-hidden="true">
-                    <rect x={WALL + 3} y={TOP_Y + 0.8} width={W - 2 * WALL - 6} height={6.4} rx={3.2} fill="#000" opacity={0.4} />
-                    {LIGHTS.map((x, i) => {
-                      const on = i < lights;
-                      const full = lights >= LIGHTS.length;
-                      return <circle key={`l-${i}`} cx={x} cy={TOP_Y + 4} r={2.3} fill={on ? (full ? LANE_COLORS[i % LANE_COLORS.length] : '#fdfd94') : '#1d2440'} stroke={on ? '#000' : '#fff'} strokeOpacity={on ? 1 : 0.7} strokeWidth={on ? 0.4 : 0.5}
-                        className={on && !still ? (full ? 'pb-chase-on' : 'pb-light-on') : ''} style={full ? { animationDelay: `${i * 0.07}s` } : undefined} />;
-                    })}
-                    {/* The prize at the end of the row: a star with the bonus. */}
-                    <g transform={`translate(${LIGHT_STAR} ${TOP_Y + 4})`} className={lights >= LIGHTS.length && !still ? 'pb-chase-on' : ''}>
-                      <path d="M0 -3.6 L1.05 -1.2 L3.6 -1.1 L1.6 0.5 L2.3 3 L0 1.6 L-2.3 3 L-1.6 0.5 L-3.6 -1.1 L-1.05 -1.2 Z" fill={lights >= LIGHTS.length ? '#fdfd94' : '#55607d'} stroke="#000" strokeWidth={0.35} strokeLinejoin="round" />
-                      <text x={4.6} y={1.5} fontSize={4.2} fontWeight={800} fill="#fff" stroke="#000" strokeWidth={0.5} paintOrder="stroke" fontFamily="var(--font-display, sans-serif)">+{LIGHT_BONUS}</text>
-                    </g>
-                  </g>
-                  {/* Pop bumpers: they flash, swell and kick the ball away. */}
-                  {BUMPERS.map((b, i) => (
-                    <g key={`b-${i}`} ref={(el) => { bumperGroups.current[i] = el; }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-                      <circle cx={b.x} cy={b.y + 0.9} r={BUMPER_R + 1.2} fill="#000" opacity={0.25} />
-                      <circle cx={b.x} cy={b.y} r={BUMPER_R + 0.9} fill="#fff" stroke="#000" strokeWidth={0.5} />
-                      <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={BUMPER_R} fill={bumperFill(i)} stroke="#000" strokeWidth={0.6} />
-                      {pieceImage(theme, 'bumper') ? <image href={pieceImage(theme, 'bumper')} x={b.x - 6} y={b.y - 9} width={12} height={12} /> : <>
-                        <circle cx={b.x} cy={b.y} r={2.6} fill="#fff" opacity={0.9} />
-                        <Star x={b.x - 1.6} y={b.y - 1.6} size={3.2} weight="fill" color="#241c3d" />
-                      </>}
+                  {/* Pegs in new spots every turn: they pop in, bob a little, and
+                      flash and swell when the ball bounces off. */}
+                  {pegs.map((b, i) => (
+                    <g key={`p-${layout}-${i}`} className={still ? '' : 'pb-peg-in'} style={{ transformBox: 'fill-box', transformOrigin: 'center', animationDelay: `${i * 0.06}s` }}>
+                      <g ref={(el) => { bumperGroups.current[i] = el; }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
+                        <circle cx={b.x} cy={b.y + 0.8} r={PEG_R + 0.9} fill="#000" opacity={0.25} />
+                        <circle cx={b.x} cy={b.y} r={PEG_R + 0.7} fill="#fff" stroke="#000" strokeWidth={0.45} />
+                        <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={PEG_R} fill={bumperFill(i)} stroke="#000" strokeWidth={0.5} />
+                        {pieceImage(theme, 'bumper') ? <image href={pieceImage(theme, 'bumper')} x={b.x - 4} y={b.y - 4} width={8} height={8} /> : <circle cx={b.x - 1} cy={b.y - 1} r={1.1} fill="#fff" opacity={0.85} />}
+                      </g>
                     </g>
                   ))}
-                  {aiming && (
-                    <g>
-                      <line x1={LAUNCH.x} y1={LAUNCH.y} x2={tip.x} y2={tip.y} stroke="#fff" strokeWidth={0.9} strokeLinecap="round" strokeDasharray="0.1 2.2" />
-                      <path d="M0 -2.6 L4.6 0 L0 2.6 Z" fill="#fff" stroke="#000" strokeWidth={0.4} transform={`translate(${tip.x} ${tip.y}) rotate(${ang})`} />
+                  {/* Stars float between the pegs: the ball pops any it touches
+                      and earns a power-up for the next turn. */}
+                  {stars.map((st, i) => !gotStars.includes(i) && (
+                    <g key={`s-${layout}-${i}`} transform={`translate(${st.x} ${st.y})`}>
+                      <g className={still ? '' : 'pb-star-float'} style={{ animationDelay: `${i * 0.4}s` }}>
+                        <circle r={4.4} fill="#fdfd94" opacity={0.25} className={still ? '' : 'pb-blink'} />
+                        <path d="M0 -3.8 L1.1 -1.3 L3.8 -1.2 L1.7 0.6 L2.4 3.2 L0 1.7 L-2.4 3.2 L-1.7 0.6 L-3.8 -1.2 L-1.1 -1.3 Z" fill="#fdfd94" stroke="#000" strokeWidth={0.45} strokeLinejoin="round" />
+                      </g>
                     </g>
-                  )}
+                  ))}
                   <g key={`f-${flip}`}>
                     <path d="M0 -1.6 L15 -0.6 L15 0.6 L0 1.6 Z" fill={flipperColor} stroke="#000" strokeWidth={0.5} strokeLinejoin="round" transform="translate(26 118) rotate(18)" className={flip && !still ? 'pb-flip-l' : ''} style={{ transformOrigin: '0 0', transformBox: 'view-box' as const }} />
                     <path d="M0 -1.6 L-15 -0.6 L-15 0.6 L0 1.6 Z" fill={flipperColor} stroke="#000" strokeWidth={0.5} strokeLinejoin="round" transform="translate(74 118) rotate(-18)" className={flip && !still ? 'pb-flip-r' : ''} style={{ transformOrigin: '0 0', transformBox: 'view-box' as const }} />
                   </g>
                   {/* The plunger pulls back as the power bar fills. */}
-                  <rect x={LAUNCH.x - 3} y={LAUNCH.y + 3.6 + (step === 'power' ? power * 4 : 0)} width={6} height={6} rx={1} fill="#9aa3b5" stroke="#000" strokeWidth={0.5} />
+                  <rect x={LAUNCH.x - 3} y={LAUNCH.y + 3.6} width={6} height={6} rx={1} fill="#9aa3b5" stroke="#000" strokeWidth={0.5} />
                   {floats.map((f) => (
                     <text key={f.id} x={f.x} y={f.y} textAnchor="middle" fontSize={5.5} fontWeight={800} fill={f.color} stroke="#000" strokeWidth={0.7} paintOrder="stroke" fontFamily="var(--font-display, sans-serif)" className={still ? '' : 'pb-float'}>+{f.n}</text>
                   ))}
@@ -508,7 +469,7 @@ export default function Pinball() {
                     <circle key={sp.id} cx={sp.x} cy={sp.y} r={sp.big ? 4 : 2.5} fill="none" stroke="#fdfd94" strokeWidth={sp.big ? 1.1 : 0.8} className="pb-spark" style={{ transformOrigin: `${sp.x}px ${sp.y}px`, transformBox: 'view-box' as const }} />
                   ))}
                   {[0, 1, 2, 3].map((k) => <circle key={k} ref={(el) => { trailRefs.current[k] = el; }} r={3.1 - k * 0.45} fill="#fdfd94" opacity={0} />)}
-                  <g ref={ballRef} transform={`translate(${LAUNCH.x} ${LAUNCH.y + (step === 'power' ? power * 4 : 0)})`}>
+                  <g ref={ballRef} transform={`translate(${LAUNCH.x} ${LAUNCH.y})`}>
                     <circle cx={0.7} cy={1.1} r={3.1} fill="#000" opacity={0.3} />
                     {armed.length > 0 && !still && <circle r={4.8} fill="none" stroke="#fdfd94" strokeWidth={0.9} className="pb-aura" />}
                     <circle r={3.1} fill={ballArt ? 'url(#pb-ball-art)' : 'url(#pb-ball)'} stroke="#000" strokeWidth={0.5} />
@@ -522,9 +483,8 @@ export default function Pinball() {
                     return (
                       <motion.div key={`${round}-${i}`} initial={still ? false : { y: -30, opacity: 0 }} animate={on && !still ? { y: 0, opacity: 1, scale: [1, 1.12, 1] } : { y: 0, opacity: 1 }} transition={{ delay: still ? 0 : i * 0.05 }}
                         aria-label={t('pb.pocket', { value: v })}
-                        className={`relative flex-1 min-w-0 border-[2px] border-border flex items-end justify-center pb-[6%] font-display ${values.length > 7 ? 'text-base sm:text-lg' : 'text-xl sm:text-3xl'} ${on ? 'ring-4 ring-white z-10' : ''}`}
-                        style={{ ...(pieceImage(theme, 'pocket') ? pieceFill(theme, 'pocket', POCKET_COLORS[i % POCKET_COLORS.length]) : { background: on ? '#fdfd94' : POCKET_COLORS[i % POCKET_COLORS.length] }), width: `${pw}%`, color: '#fff', WebkitTextStroke: '1.5px #000', paintOrder: 'stroke' }}>
-                        {v === best && <Star weight="fill" size={18} color="#fff" className={`absolute top-1 left-1/2 -translate-x-1/2 drop-shadow-[0_0_1px_#000] ${still ? '' : 'pb-twinkle'}`} aria-hidden="true" />}
+                        className={`relative flex-1 min-w-0 mx-[1.5px] border-[2.5px] border-border rounded-b-[14px] rounded-t-[4px] flex items-center justify-center ${values.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-4xl'} ${on ? 'ring-4 ring-white z-10' : ''}`}
+                        style={{ ...(pieceImage(theme, 'pocket') ? pieceFill(theme, 'pocket', POCKET_COLORS[i % POCKET_COLORS.length]) : { background: on ? '#fdfd94' : `linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%), linear-gradient(180deg, ${POCKET_COLORS[i % POCKET_COLORS.length]} 0%, ${POCKET_COLORS[i % POCKET_COLORS.length]} 70%, rgba(255,255,255,0.35) 100%)` }), boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.18), inset 0 3px 6px rgba(0,0,0,0.25)', width: `${pw}%`, color: '#fff', fontFamily: "'Grow Year', var(--font-display)", WebkitTextStroke: '1.5px #000', paintOrder: 'stroke' }}>
                         {v}
                       </motion.div>
                     );
@@ -538,7 +498,7 @@ export default function Pinball() {
                       initial={still ? false : { opacity: 0, scaleY: 0.4 }} animate={{ opacity: 1, scaleY: 1 }} exit={still ? { opacity: 0 } : { opacity: 0, scaleY: 0.2 }} transition={{ duration: 0.25 }}>
                       {ZONE_X.map((_, i) => (
                         <button key={i} type="button" onClick={() => canAim && pickLane(i)} disabled={!canAim} aria-label={t('pb.zone', { n: i + 1 })}
-                          className={`flex-1 border-y-[2.5px] border-border first:border-l-[2.5px] last:border-r-[2.5px] first:rounded-l-input last:rounded-r-input font-display text-3xl sm:text-5xl text-white flex items-center justify-center disabled:cursor-default ${canAim && !still ? 'hover:brightness-110 active:scale-95' : ''}`}
+                          className={`flex-1 border-y-[2.5px] border-border first:border-l-[2.5px] last:border-r-[2.5px] first:rounded-l-input last:rounded-r-input font-display text-3xl sm:text-5xl text-white flex items-center justify-center disabled:cursor-default ${canAim && !still ? 'hover:brightness-110 hover:scale-y-110 hover:z-10 active:scale-95 motion-safe:transition-transform' : ''}`}
                           style={{ background: LANE_COLORS[i], WebkitTextStroke: '2px #000', paintOrder: 'stroke' }}>{i + 1}</button>
                       ))}
                     </motion.div>
@@ -575,22 +535,8 @@ export default function Pinball() {
                   )}
                 </AnimatePresence>
               </div>
-              {/* Under the table: what to do now, then the power bar and Shoot. */}
-              <div className="flex items-center justify-center gap-3 mx-auto w-full min-h-14" style={{ maxWidth: boardW }}>
-                {step === 'power' && human ? (
-                  <>
-                    <div className="relative flex-1 h-7 rounded-pill border-[2.5px] border-border overflow-hidden" style={{ background: 'linear-gradient(90deg, #ed9d75 0%, #fdfd94 40%, #9fe7a0 70%, #4fc77a 100%)' }} role="meter" aria-label={t('pb.meter')} aria-valuenow={Math.round(power * 100)} aria-valuemin={0} aria-valuemax={100}>
-                      <span className="absolute inset-y-0 left-0 bg-black/15" style={{ width: `${power * 100}%` }} />
-                      <span className="absolute top-0 bottom-0 w-1.5 bg-black" style={{ left: `calc(${power * 100}% - 3px)` }} />
-                    </div>
-                    <button type="button" className={buttonClasses('primary', 'h-14 !px-6 !text-lg')} onClick={shoot}><RocketLaunch weight="fill" size={24} />{t('pb.shoot')}</button>
-                  </>
-                ) : canAim ? (
-                  <p className="font-display text-xl bg-surface border-[2.5px] border-border rounded-pill px-5 py-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('pb.pickLane')}</p>
-                ) : null}
-              </div>
               {/* Small screens: held power-ups float over the table's lower left. */}
-              <div className="lg:hidden absolute left-2 w-[min(15rem,45%)] z-10" style={{ bottom: '5.5rem' }}>{tray}</div>
+              <div className="lg:hidden absolute left-2 w-[min(15rem,45%)] z-10" style={{ bottom: '1rem' }}>{tray}</div>
             </section>
             <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid gap-3">
               <ScoreBoard turns={turns} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={t('pb.roundWord')} />
@@ -600,7 +546,7 @@ export default function Pinball() {
           </div>
         </div>
       )}
-      {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}
+      {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}-${question.got}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}
       {phase === 'end' && turns && (
         <ResultsModal winners={turns.players.length > 1 ? leaders(turns) : undefined} title={turns.players.length > 1 ? (leaders(turns).length > 1 ? t('share.tie') : t('share.winner', { name: leaders(turns)[0].name })) : t('pb.done', { count: turns.players[0].score })} missed={solo ? soloMissed : missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />
       )}

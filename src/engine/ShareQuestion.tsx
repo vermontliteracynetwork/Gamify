@@ -145,7 +145,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
               <motion.button key={i} type="button" onClick={() => choose(i)} disabled={picked !== null || !!cpu} data-magnet={magnet && i === q.correctIndex ? 'true' : undefined}
                 animate={isWrong && settings.motion !== 'still' ? { x: [0, -8, 8, -5, 5, 0] } : isRight && picked === i && settings.motion !== 'still' ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.4 }}
-                whileHover={picked === null && !cpu && settings.motion !== 'still' ? { y: -4, rotate: [0, -1.5, 1.5, -1, 0], transition: { duration: 0.5 } } : undefined}
+                whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
                 whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
                 className={`min-h-24 sm:min-h-32 px-5 py-4 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl text-left active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}

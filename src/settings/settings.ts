@@ -84,7 +84,7 @@ export const PRESETS: Record<PresetId, (s: PlayerSettings) => PlayerSettings> = 
   // Quiet room (market research, 2026-10-31): soft effects, no music and small
   // celebrations, so the class hears the teacher and the read-aloud.
   // Little reader (K-1): big text, every question read aloud, no read-first wait, no timers.
-  'little-reader': (s) => ({ ...s, autoRead: true, textSize: 'larger', readingComfort: true, voice: Math.max(s.voice, 4) as Level, allSoundOff: false, readFirstSeconds: 0, timers: 'off' }),
+  'little-reader': (s) => ({ ...s, autoRead: false, textSize: 'larger', readingComfort: true, voice: Math.max(s.voice, 4) as Level, allSoundOff: false, readFirstSeconds: 0, timers: 'off' }),
   quiet: (s) => ({ ...s, allSoundOff: false, effects: 1, music: 0, celebrations: 'small', voice: Math.max(s.voice, 4) as Level }),
   'low-vision': (s) => ({ ...s, textSize: 'larger', highContrast: true, readingComfort: true, voice: 5, colorSafe: true }),
   hearing: (s) => ({ ...s, allSoundOff: true, haptics: true }),

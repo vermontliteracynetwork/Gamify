@@ -31,6 +31,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         void data.setSetting(KEY, saved);
       }
       void data.setSetting('motion-reviewed', true);
+      // Read-aloud never starts by itself (teacher, 2026-11-13): a saved
+      // auto-read turns off once; the 🔊 buttons still read on tap.
+      if (saved.autoRead && !(await data.getSetting<boolean>('autoread-reviewed'))) {
+        saved = { ...saved, autoRead: false };
+        void data.setSetting(KEY, saved);
+      }
+      void data.setSetting('autoread-reviewed', true);
       setSettings(withDefaults(saved));
     });
   }, []);

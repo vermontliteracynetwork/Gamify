@@ -24,7 +24,7 @@ function useFit<T extends HTMLElement>(text: string, max: number, min: number) {
 
 export function FitText({ text, max = 16, min = 10, className = '' }: { text: string; max?: number; min?: number; className?: string }) {
   const ref = useFit<HTMLSpanElement>(text, max, min);
-  return <span ref={ref} className={`block min-w-0 whitespace-nowrap overflow-hidden text-ellipsis ${className}`}>{text}</span>;
+  return <span ref={ref} className={`block min-w-0 break-words ${className}`}>{text}</span>;
 }
 
 export function FitInput({ max = 16, min = 10, ...props }: InputHTMLAttributes<HTMLInputElement> & { value: string; max?: number; min?: number }) {

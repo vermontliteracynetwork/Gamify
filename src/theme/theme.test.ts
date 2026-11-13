@@ -12,7 +12,7 @@ describe('themes', () => {
   it('Classic passes every readability check', () => expect(themeProblems(classicTheme('pinball'))).toEqual([]));
 
   it('flags unreadable colors', () => {
-    const t = classicTheme('pinball');
+    const t = classicTheme('match-three');
     expect(themeProblems({ ...t, colors: { ...t.colors, text: '#cfc8e8', backgroundText: '#c9c0f0' } })).toHaveLength(2);
   });
 

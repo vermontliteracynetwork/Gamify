@@ -54,7 +54,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                 <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
                 <span className="flex items-center gap-2 font-display text-base font-bold px-1">
                   {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
-                  <span className="flex-1 truncate">{th.name}</span>
+                  <span className="flex-1 break-words">{th.name}</span>
                   {on && <span className="w-7 h-7 rounded-full bg-accent border-[2px] border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
                 </span>
                 {th.designedBy && <span className="text-xs font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}

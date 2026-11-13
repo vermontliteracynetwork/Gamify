@@ -274,7 +274,7 @@ export default function LunchRush() {
             <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-0 m-0">
               {turns.players.map((p) => (
                 <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
-                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 truncate">{p.name}</span>
+                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 break-words">{p.name}</span>
                   <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{p.score}</motion.span>
                 </li>
               ))}

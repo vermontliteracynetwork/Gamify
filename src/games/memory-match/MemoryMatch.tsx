@@ -203,7 +203,7 @@ export default function MemoryMatch() {
                   {up ? (
                     <span className="grid gap-1 justify-items-center">
                       {c.image && <img src={c.image} alt={c.alt ?? ''} className="max-h-12 object-contain" />}
-                      <span className={`font-bold leading-tight line-clamp-4 ${c.side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{c.text}</span>
+                      <span className={`font-bold leading-tight break-words ${c.side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{c.text}</span>
                     </span>
                   ) : !pieceImage(theme, 'card-back') && <Cards weight="fill" size={30} aria-hidden="true" />}
                 </motion.button>

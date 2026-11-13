@@ -693,7 +693,7 @@ function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: Tur
                 {shield[i] && <ShieldCheck weight="fill" size={18} className="absolute -right-1 -bottom-1 text-[#3d7fb8] bg-surface rounded-full" aria-label={t('cq.shielded')} />}
                 {skip[i] && <HourglassHigh weight="fill" size={18} className="absolute -left-1 -bottom-1 bg-surface rounded-full" aria-label={t('cq.losesNext')} />}
               </span>
-              <span className="font-bold truncate leading-tight">{p.name}</span>
+              <span className="font-bold break-words leading-tight">{p.name}</span>
               <span className="relative h-3 rounded-pill bg-surface-2 border-[1.5px] border-border overflow-visible">
                 <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
                 <FlagCheckered weight="fill" className="absolute -right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[#474241]" aria-hidden="true" />

@@ -28,7 +28,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   }, [value.join(','), sets]); // eslint-disable-line react-hooks/exhaustive-deps
   const wrap = useRef<HTMLDivElement>(null);
   const gridEl = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ cols: 4, rows: 2, size: 140 });
+  const [fit, setFit] = useState({ cols: 4, rows: 2, size: 240, h: 170 });
   useLayoutEffect(() => {
     const measure = () => {
       const w = wrap.current, g = gridEl.current;
@@ -49,7 +49,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
       const high = card ? room - (g.offsetTop - w.offsetTop) - 4 : MAX * 2 + GAP;
       const width = w.clientWidth - 2 * (ARROW + GAP);
       const next = layout(width, high);
-      setFit((f) => (f.cols === next.cols && f.rows === next.rows && Math.abs(f.size - next.size) < 1 ? f : next));
+      setFit((f) => (f.cols === next.cols && f.rows === next.rows && Math.abs(f.size - next.size) < 1 && Math.abs(f.h - next.h) < 1 ? f : next));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -58,7 +58,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
   const PAGE = fit.cols * fit.rows;
-  const compact = fit.size < 200;
+  const compact = fit.h < 185 || fit.size < 240;
   // My sets and public (ready-made) sets on their own tabs (teacher, 2026-11-06).
   const ready = sets.filter((s) => missingDetails(s).length === 0);
   const mineReady = ready.filter((s) => !LIBRARY_IDS.has(s.id));
@@ -74,7 +74,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   useEffect(() => { const k = shown.findIndex((s) => value.includes(s.id)); if (k >= 0) setPage(Math.floor(k / PAGE)); }, [PAGE]); // eslint-disable-line react-hooks/exhaustive-deps
   const onPage = shown.slice(page * PAGE, page * PAGE + PAGE);
   return (
-    <div ref={wrap} className="grid gap-3">
+    <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
         <div role="tablist" aria-label={t('sets.tabs')} className="inline-flex shrink-0 p-0.5 rounded-pill border-[2px] border-border bg-surface">
@@ -89,7 +89,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
       <div className="flex items-center justify-center gap-2.5">
       <PageArrow side="prev" show={pages > 1} disabled={page === 0} onClick={() => setPage(page - 1)} />
-      <div ref={gridEl} className="grid" style={{ gap: GAP, gridTemplateColumns: `repeat(${fit.cols}, ${fit.size}px)`, gridAutoRows: `${fit.size}px` }}>
+      <div ref={gridEl} className="grid" style={{ gap: GAP, gridTemplateColumns: `repeat(${fit.cols}, ${fit.size}px)`, gridAutoRows: `${fit.h}px` }}>
         {onPage.map((s) => {
           const on = value.includes(s.id);
           const art = ART[s.subject ?? 'Other'];
@@ -99,25 +99,27 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
             // colored picture band with the subject's icon, then the name and
             // small chips for grades and how many questions.
             <button key={s.id} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
+              aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
               onClick={() => onChange(max === 1 ? [s.id] : on ? value.filter((x) => x !== s.id) : value.length < max ? [...value, s.id] : value)}
-              className={`tile-wiggle relative rounded-input border-[2.5px] border-border text-left overflow-hidden grid grid-rows-[40%_1fr] bg-surface motion-safe:transition-transform ${on ? 'ring-4 ring-accent -translate-y-1' : ''}`}
-              style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-              <span className="relative flex items-center justify-center border-b-[2.5px] border-border overflow-hidden" style={{ background: art.bg }}>
-                <I weight="fill" size={Math.round(fit.size * 0.26)} color={art.ink} aria-hidden="true" className="-rotate-6 drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />
-                <I weight="fill" size={Math.round(fit.size * 0.14)} color={art.ink} aria-hidden="true" className="absolute left-[8%] bottom-[8%] rotate-12 opacity-25" />
-                <I weight="fill" size={Math.round(fit.size * 0.11)} color={art.ink} aria-hidden="true" className="absolute right-[10%] top-[10%] -rotate-12 opacity-25" />
+              className={`group relative rounded-panel border-[2.5px] border-border text-left grid grid-rows-[auto_1fr_auto] gap-2 bg-surface motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${compact ? 'p-3' : 'p-4'} ${on ? 'ring-4 ring-[#b4c4fb] -translate-y-1' : ''}`}
+              style={{ boxShadow: on ? '0 6px 0 #000, 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.08)' }}>
+              {/* No cover picture unless the teacher added one (teacher, 2026-11-13):
+                  just a small subject badge, the full name and the details. */}
+              <span className="flex items-center gap-2 min-w-0 pr-8">
+                <span className="w-8 h-8 shrink-0 rounded-full border-[2px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }}>
+                  <I weight="fill" size={17} color={art.ink} aria-hidden="true" />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wide text-muted">{s.subject ?? t('sets.otherSubject')}</span>
               </span>
               {on && (
-                <span className="absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
+                <span className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
                   {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
                 </span>
               )}
-              <span className={`grid content-between gap-1 min-w-0 ${compact ? 'p-2.5' : 'p-3'}`}>
-                <span className={`font-bold leading-snug line-clamp-2 ${compact ? 'text-base' : 'text-lg'}`}>{s.name || t('sets.untitled')}</span>
-                <span className={`flex flex-wrap gap-1.5 font-bold leading-none ${compact ? 'text-xs' : 'text-sm'}`}>
-                  <span className="rounded-pill border border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                  <span className="rounded-pill border border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
-                </span>
+              <span className={`font-bold leading-snug self-start break-words text-balance ${compact ? 'text-base' : 'text-lg'}`}>{s.name || t('sets.untitled')}</span>
+              <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
+                <span className="rounded-pill border-[1.5px] border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                <span className="rounded-pill border-[1.5px] border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
               </span>
             </button>
           );
@@ -135,8 +137,10 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
 const GAP = 10;
 const ARROW = 44;
 // Big cards with big text are the main view (teacher, 2026-11-06).
-const MIN = 180; // the smallest card that still reads (name and details)
-const MAX = 290;
+const MIN = 210; // the narrowest card that still reads (name and details)
+const MAX = 320;
+const H_MIN = 165;
+const H_MAX = 210;
 
 // A page arrow beside the cards (space kept even when there is one page).
 function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; show: boolean; disabled: boolean; onClick: () => void }) {
@@ -154,18 +158,20 @@ function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; s
 // many rows (3, 2, then 1) as the height holds, so rows are always full and
 // tall screens have no empty space.
 export function layout(width: number, high: number) {
-  // The shape that gives the cards the most room in all (teacher, 2026-11-06:
-  // the cards are the main view), with full rows of 2 to 8 across.
-  let best: { cols: number; rows: number; size: number } | null = null, score = 0;
+  // Wide cards that show every word (teacher, 2026-11-13): as many across as
+  // keep a card at least MIN wide, in as many rows as the height holds.
+  let best: { cols: number; rows: number; size: number; h: number } | null = null, score = 0;
   for (const rows of [3, 2, 1]) {
-    const tall = (high - GAP * (rows - 1)) / rows;
-    for (const cols of [8, 7, 6, 5, 4, 3, 2]) {
-      const size = Math.floor(Math.min(MAX, (width - GAP * (cols - 1)) / cols, tall));
-      const sc = rows * cols * size * size;
-      if (size >= MIN && sc > score) { score = sc; best = { cols, rows, size }; }
+    const h = Math.floor(Math.min(H_MAX, (high - GAP * (rows - 1)) / rows));
+    if (h < H_MIN) continue;
+    for (const cols of [6, 5, 4, 3, 2]) {
+      const size = Math.floor(Math.min(MAX, (width - GAP * (cols - 1)) / cols));
+      if (size < MIN) continue;
+      const sc = rows * cols * Math.min(size, 260) * h;
+      if (sc > score) { score = sc; best = { cols, rows, size, h }; }
     }
   }
   if (best) return best;
-  const size = Math.max(84, Math.floor(Math.min(MAX, high)));
-  return { cols: Math.max(1, Math.min(6, Math.floor((width + GAP) / (size + GAP)))), rows: 1, size };
+  const size = Math.max(160, Math.floor(Math.min(MAX, width)));
+  return { cols: Math.max(1, Math.min(4, Math.floor((width + GAP) / (size + GAP)))), rows: 1, size, h: Math.max(140, Math.min(H_MAX, high)) };
 }

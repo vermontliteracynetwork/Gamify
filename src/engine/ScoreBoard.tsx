@@ -1,4 +1,3 @@
-import { FitText } from '../ui/FitText';
 import { motion } from 'motion/react';
 import { Crown } from '@phosphor-icons/react';
 import { t } from '../i18n';
@@ -35,8 +34,8 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
               {/* A player's picture is their game piece when they have one (teacher, 2026-11-06). */}
               {p.art ? <img src={p.art} alt="" aria-hidden="true" className="w-9 h-9 object-contain shrink-0" /> : <TeamBadge colorIndex={p.colorIndex} />}
               <span className="flex-1 min-w-0 grid">
-                <FitText text={p.name} max={16} min={11} className="font-bold" />
-                {p.members && <span className="hidden lg:block text-xs font-semibold text-muted truncate" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
+                <span className="font-bold leading-tight break-words">{p.name}</span>
+                {p.members && <span className="hidden lg:block text-xs font-semibold text-muted break-words" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
               </span>
               {top.some((l) => l.id === p.id) && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}
               <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl font-bold tabular-nums" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>

@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import Title from '../ui/Title';
 import { TeachCardBox, TeachCards, type TeachShow } from './TeachCard';
+import { PowerUpCards } from '../engine/PowerUpSwitches';
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
 
@@ -17,7 +18,20 @@ const GAP = 24;
 // theme...) with a step bar, Back and Next, and Play on the last page.
 // NEVER a scroll (teacher, 2026-10-31: "always do pages"): when a page's
 // settings do not fit the screen, they flow onto more pages.
-export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
+// Power-ups always get their own page (teacher, 2026-11-13: "rounds and
+// power ups should be two separate pages").
+function splitPowers(pages: SetupPage[]): SetupPage[] {
+  return pages.flatMap((p) => {
+    const items = itemsOf(p.content);
+    const isPow = (it: ReactNode) => isValidElement(it) && it.type === PowerUpCards;
+    const pow = items.filter(isPow);
+    if (!pow.length || pow.length === items.length) return [p];
+    return [{ ...p, content: <>{items.filter((it) => !isPow(it))}</> }, { id: `${p.id}-powers`, title: t('tb.powers'), content: <>{pow}</> }];
+  });
+}
+
+export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
+  const pages = splitPowers(given);
   const [i, setI] = useState(0);
   // Teach cards from the picked sets, shown after Play (market gaps, 2026-11-01).
   const [teach, setTeach] = useState<TeachShow[]>([]);
@@ -94,11 +108,11 @@ export default function SetupWizard({ pages, onBack, onPlay, playLabel }: { page
           }))}
         </ol>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${page.id === 'questions' ? 'content-start pt-1 pb-4' : 'content-center py-4'} flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 content-start pt-2 pb-4 flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
-          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? 'grid gap-6 min-w-0 w-full max-w-4xl mx-auto' : 'grid gap-6 min-w-0 w-auto max-w-4xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none'} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
+          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${['way', 'questions', 'players', 'teams'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${['way', 'questions', 'players', 'teams'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
       <div className="px-6 sm:px-8 py-3 flex justify-between gap-2">

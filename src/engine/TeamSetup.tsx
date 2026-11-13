@@ -107,14 +107,14 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       <ol className={`grid items-start list-none p-0 m-0 ${characters?.length ? 'gap-2 grid-cols-2 lg:grid-cols-3' : mode === 'versus' ? 'gap-5 grid-cols-2 w-full max-w-3xl mx-auto' : 'gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4'}`}>
         {slots.map((s, i) => (
           <li key={i} className={true
-            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-[2.5px] border-border bg-surface p-3 ${mode === 'versus' ? 'min-h-[min(18rem,40vh)] content-center p-5' : ''}`
+            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-[2.5px] border-border bg-surface p-4 ${mode === 'versus' ? 'min-h-[min(22rem,48vh)] content-center gap-3 p-6 bg-gradient-to-b from-[#eef0ff] to-surface' : 'bg-gradient-to-b from-[#f3f4ff] to-surface'}`
             : 'flex flex-wrap items-center gap-2 rounded-input border-[2px] border-border-soft p-2'}
-            style={true ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
+            style={true ? { boxShadow: '0 5px 0 #000, 0 14px 24px rgba(36,28,61,0.12)' } : undefined}>
             <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
-              onClick={() => setPicking(picking === i ? null : i)} className={`${true ? 'basis-full flex justify-center' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:transition-transform`}>
+              onClick={() => setPicking(picking === i ? null : i)} className={`${true ? 'basis-full flex justify-center pt-1 pb-3' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:hover:-rotate-3 motion-safe:transition-transform`}>
               {characters?.length
                 ? <img src={characters[charOf(i)].image} alt="" className="w-[min(6.5rem,14vh)] aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
-                : <TeamBadge colorIndex={iconOf(i)} size={mode === 'versus' ? 128 : 84} />}
+                : <span className="rounded-full inline-flex motion-safe:animate-[float_3.2s_ease-in-out_infinite]" style={{ boxShadow: '0 10px 18px rgba(36,28,61,0.25)' }}><TeamBadge colorIndex={iconOf(i)} size={mode === 'versus' ? 172 : 104} /></span>}
             </button>
             {picking === i && characters?.length ? (
               // A pop-up box of big animal tiles, so the setup page never scrolls (teacher, 2026-10-31).
@@ -177,7 +177,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
             ) : (
               <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
-                className="flex-1 min-w-0 min-h-11 px-2 rounded-input border-[2px] border-border-soft font-bold" />
+                className="flex-1 min-w-0 min-h-12 px-3 rounded-input border-[2px] border-border bg-surface font-bold text-lg" />
             )}
             {s.kind !== 'cpu' && (
               <button type="button" aria-label={t('teams.roll', { name: s.name })}

@@ -11,14 +11,16 @@ export function classicTheme(gameId: string): GameTheme {
   const alley = gameId === 'bowling';
   // Game Show's Classic stage is red (teacher, 2026-11-01).
   const show = gameId === 'game-show';
+  // Pinball's Classic page is the table's own navy (teacher, 2026-11-13).
+  const pin = gameId === 'pinball';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : '#b4c4fb',
-      backgroundText: night || alley || show ? '#ffffff' : '#000000',
+      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : pin ? '#25365f' : '#b4c4fb',
+      backgroundText: night || alley || show || pin ? '#ffffff' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
       accent: '#fdfd94',

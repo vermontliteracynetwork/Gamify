@@ -26,24 +26,25 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
   const n = Math.max(1, cards.length);
   const across = (cols: number) => (width - 10 * (cols - 1)) / cols;
   let cols = n;
-  for (let rows = 1; rows <= n && across(cols) < 136; rows++) cols = Math.ceil(n / rows);
-  // Picture first with the name under it; what it does is in hover text, so
-  // every card fits with no scroll (teacher, 2026-11-07 and 11-08).
-  const size = Math.max(110, Math.min(160, Math.floor(across(cols))));
+  for (let rows = 1; rows <= n && across(cols) < 180; rows++) cols = Math.ceil(n / rows);
+  // Picture, name, then a short caption of what it does, on its own page
+  // (teacher, 2026-11-13; this replaces the 11-08 hover-text rule).
+  const size = Math.max(150, Math.min(210, Math.floor(across(cols))));
   return (
     <div ref={box} className="grid gap-2 min-w-0 w-full">
       <div className="grid gap-0.5 text-center">
         <span className="font-bold">{t('tb.powers')}</span>
         <span className="text-sm font-semibold text-muted">{hint}</span>
       </div>
-      <div className="grid gap-2.5 justify-center" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `${Math.round(size * 0.85)}px` }}>
+      <div className="grid gap-2.5 justify-center" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `minmax(${Math.round(size * 1.05)}px, auto)` }}>
         {cards.map((c) => (
           <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)}
-            aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name} data-tip={c.hint || undefined}
-            className={`relative rounded-input border-[2.5px] tile-wiggle p-2 pt-3 grid justify-items-center content-center gap-1.5 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
-            style={c.on ? { boxShadow: '0 3px 0 #000' } : undefined}>
+            aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name}
+            className={`relative rounded-input border-[2.5px] tile-wiggle p-3 pt-4 grid justify-items-center content-start gap-1.5 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
+            style={c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : undefined}>
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
-            <span className={`font-bold text-sm leading-tight line-clamp-2 ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
+            <span className={`font-bold text-base leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
+            {c.hint && <span className="text-xs font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
             {/* On: a mint check in the corner. Off: a faded X. */}
             <span className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-[2px] flex items-center justify-center ${c.on ? 'bg-success border-border' : 'bg-surface border-border-soft text-muted'}`} aria-hidden="true">
               {c.on ? <Check weight="bold" size={15} /> : <X weight="bold" size={13} />}

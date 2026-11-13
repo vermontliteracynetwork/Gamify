@@ -486,7 +486,7 @@ export default function GameShow() {
             {phase === 'play' && board === 'grid' && (
               // Room inside the scroll box for the bottom row's outline and shadow
               // (teacher, 2026-10-31: never cut off).
-              <div className="overflow-x-auto pb-2 pr-2 -mb-2">
+              <div className="overflow-x-auto p-3 -m-3">
                 <div className="grid gap-2 min-w-[560px]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
                     <div key={s.id} className="min-h-16 rounded-input border-[2.5px] border-border bg-surface-2 font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]">{s.name}</div>
@@ -630,7 +630,7 @@ function BoardArt({ kind }: { kind: Board }) {
   return (
     <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
-      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-[2px] border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 truncate">{c}</span>)}
+      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-[2px] border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
         <span key={i} className="rounded-sm border-[2px] border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}

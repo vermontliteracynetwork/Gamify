@@ -60,14 +60,6 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   const results = page.getByRole('dialog', { name: 'You caught 5 stars!' });
   for (const b of [/^Play again/, /^New game/, /Rate game/]) await expect(results.getByRole(b.source.includes('New') ? 'link' : 'button', { name: b })).toBeVisible();
   await page.screenshot({ path: `test-results/results-${info.project.name}.png` });
-  // My shelf: a sticker for finishing, and the whole collection one tap away.
-  await expect(results.getByText(/New sticker!|found this sticker again/)).toBeVisible();
-  await results.getByRole('button', { name: /^My shelf/ }).click();
-  const shelf = page.getByRole('dialog', { name: 'My shelf' });
-  await expect(shelf.getByRole('img', { name: 'Still to find' }).first()).toBeVisible();
-  expect(await shelf.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
-  await page.screenshot({ path: `test-results/shelf-${info.project.name}.png` });
-  await shelf.getByRole('button', { name: 'Close' }).click();
   await results.getByRole('button', { name: 'Review (1 missed)' }).click();
   const review = page.getByRole('dialog', { name: "Let's Review" });
   await expect(review.getByText('Read it together.', { exact: false })).toBeVisible();

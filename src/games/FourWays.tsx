@@ -39,7 +39,7 @@ function Compact({ mode: m, on = false, dim = false, onClick }: { mode: PlayMode
       <span className="shrink-0 w-12 h-12 rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
       <span className="grid gap-0 min-w-0">
         <span className="font-display font-bold leading-tight text-lg"><Title text={t(`mode.${m}` as StringKey)} /></span>
-        <span className="font-bold text-xs text-muted line-clamp-2">{t(`mode.${m}.hint` as StringKey)}</span>
+        <span className="font-bold text-xs text-muted break-words">{t(`mode.${m}.hint` as StringKey)}</span>
       </span>
     </Tag>
   );
