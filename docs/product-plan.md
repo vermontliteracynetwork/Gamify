@@ -1058,6 +1058,9 @@ start to build?" Claudia's gap review of everything above.
 
 ## 10. Marketing ideas (running list)
 
+- Something to look forward to every week: each game has a featured power-up that changes weekly, and surprises like Game Show's golden card and Cast and Catch's catch of the day keep every round fresh (2026-11-13).
+- No dead time: students waiting for the class to join play with bouncy pieces that sing a little tune (2026-11-13).
+
 Direct from you (2026-10-24): "keep a list going anytime that you know that
 something could be used well in marketing." Claudia adds to this list
 every time a feature or finding would sell Gamify; add your own any time.
