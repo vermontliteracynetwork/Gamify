@@ -388,7 +388,7 @@ export default function CastleQuest() {
         <p className="font-display text-2xl font-bold text-center">{t('cq.wheelPick')}</p>
         <div className="flex flex-wrap gap-3 justify-center">
           {turns.players.map((p, i) => (
-            <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { y: -4, rotate: [0, -3, 3, 0] }}
+            <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { scale: 1.05 }}
               className="grid justify-items-center gap-1 rounded-panel border-[2.5px] border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
               <TeamBadge colorIndex={p.colorIndex} size={56} />
               <span className="font-bold">{p.name}</span>

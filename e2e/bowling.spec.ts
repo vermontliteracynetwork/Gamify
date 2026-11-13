@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
 });
 
-test('Bowling: a right answer earns a roll; tap to aim, tap to spin, and the pins scatter', async ({ page }, info) => {
+test('Bowling: a right answer earns a roll; point to aim, tap to throw, and the pins scatter', async ({ page }, info) => {
   test.setTimeout(60_000);
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
@@ -14,17 +14,13 @@ test('Bowling: a right answer earns a roll; tap to aim, tap to spin, and the pin
   await openSetup(page, '/games/bowling');
   await finishSetup(page);
   await answerShare(page, true);
-  const meter = page.getByRole('button', { name: 'Tap to aim!' });
-  await expect(meter).toBeEnabled();
-  expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
+  // Aim follows the pointer over the lane; one tap throws (teacher, 2026-11-13: no meters).
+  const lane = page.getByRole('button', { name: 'Tap the lane to throw' });
+  await expect(lane).toBeVisible({ timeout: 8000 });
+  const box = (await lane.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6);
   await page.screenshot({ path: `test-results/bowling-aim-${info.project.name}.png` });
-  await meter.click();
-  const spin = page.getByRole('button', { name: 'Tap to spin!' });
-  await expect(spin).toBeEnabled();
-  await page.screenshot({ path: `test-results/bowling-spin-${info.project.name}.png` });
-  // A quick double tap never skips the spin meter, so wait a moment like a player would.
-  await page.waitForTimeout(500);
-  await spin.click();
+  await lane.click({ position: { x: box.width * 0.6, y: box.height * 0.6 } });
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 12; f++) { await page.screenshot({ path: `test-results/bowling-frame-${f}.png` }); await page.waitForTimeout(160); }
   await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 9000 });
   await page.screenshot({ path: `test-results/bowling-result-${info.project.name}.png` });
@@ -46,6 +42,6 @@ test('Bowling with calm motion: sliders aim and spin, then Throw', async ({ page
   await answerShare(page, true);
   await expect(page.getByLabel('Aim')).toBeVisible();
   await expect(page.getByLabel('Spin')).toBeVisible();
-  await page.getByRole('button', { name: 'Throw' }).click();
+  await page.getByRole('button', { name: 'Throw', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 9000 });
 });

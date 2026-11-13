@@ -4,7 +4,7 @@ import { pace } from '../../engine/pace';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowArcLeft, ArrowArcRight, CheckCircle, Crosshair, HandTap, Trophy } from '@phosphor-icons/react';
+import { CheckCircle, Crosshair, HandTap, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -188,33 +188,24 @@ export default function Bowling() {
   // runs real pin physics, so pins scatter, bump and teeter differently each time.
   const [aim, setAim] = useState(0);
   const [hook, setHook] = useState(0);
-  const sweep = useRef({ t0: 0, raf: 0 });
-  useEffect(() => {
-    if (still || (step !== 'aim' && step !== 'spin') || player?.kind === 'cpu') return;
-    sweep.current.t0 = performance.now();
-    const tick = (now: number) => {
-      const k = (now - sweep.current.t0) / 1000;
-      if (step === 'aim') setAim(Math.sin(k * 2.6) * 0.92);
-      else setHook(Math.sin(k * 3.4));
-      sweep.current.raf = requestAnimationFrame(tick);
-    };
-    sweep.current.raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(sweep.current.raf);
-  }, [step, still, player?.kind]);
   // A quick double tap never skips the spin meter (a K-3 habit).
   const lockedAt = useRef(0);
   function tapLane() {
     if (player?.kind === 'cpu' || twisting) return;
     if (performance.now() - lockedAt.current < 400) return;
     lockedAt.current = performance.now();
-    if (step === 'aim') { playEffect('tap', settings); setStep('spin'); return; }
-    if (step === 'spin') throwBall({ aim, hook });
+    // One tap throws (teacher, 2026-11-13: no meters in any game); the spin
+    // is a little different every time, so no two throws are the same.
+    const h = (Math.random() - 0.5) * 0.7;
+    setHook(h);
+    throwBall({ aim, hook: h });
   }
   useEffect(() => {
     if (phase !== 'play' || (step !== 'aim' && step !== 'spin') || player?.kind === 'cpu') return;
     const key = (e: KeyboardEvent) => {
       if (e.repeat || (e.target as HTMLElement | null)?.closest?.('button, input, select, textarea, [role="slider"], [role="dialog"]')) return;
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tapLane(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); setAim((a) => Math.max(-0.92, Math.min(0.92, a + (e.key === 'ArrowLeft' ? -0.1 : 0.1)))); }
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
@@ -406,7 +397,8 @@ export default function Bowling() {
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="relative grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
-            <div className={`relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined}
+            <div className={`relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
+              onPointerMove={canAim ? (e) => { const r = e.currentTarget.getBoundingClientRect(); setAim(Math.max(-0.92, Math.min(0.92, ((e.clientX - r.left) / r.width) * 2 - 1))); } : undefined}
               style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
@@ -486,14 +478,11 @@ export default function Bowling() {
                 })()}
                 </g>
               </svg>
-              {/* What to do now, in big friendly words and a pointing hand. */}
-              {canAim && (
-                <motion.div key={step} className="absolute inset-x-0 top-[50%] flex justify-center pointer-events-none" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                  <span className="flex items-center gap-2 font-display text-2xl sm:text-3xl bg-surface border-[2.5px] border-border rounded-pill px-5 py-1.5" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                    {step === 'aim' ? <Crosshair weight="bold" size={28} /> : <><ArrowArcLeft weight="bold" size={26} /><ArrowArcRight weight="bold" size={26} /></>}
-                    {step === 'aim' ? t('sb.tapAim') : t('sb.tapSpin')}
-                  </span>
-                </motion.div>
+              {/* No caption (teacher, 2026-11-13): the dotted aim line follows the pointer; a soft target pulses on the lane. */}
+              {canAim && !still && (
+                <motion.span className="absolute left-1/2 top-[55%] -translate-x-1/2 pointer-events-none text-white/80" animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 1.4, repeat: Infinity }} aria-hidden="true">
+                  <Crosshair weight="bold" size={44} />
+                </motion.span>
               )}
               <AnimatePresence>
                 {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 top-[22%] w-[34%] -translate-x-1/2 pointer-events-none" initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
@@ -511,7 +500,7 @@ export default function Bowling() {
                 )}
               </AnimatePresence>
             </div>
-            {/* The meters under the lane: tap anywhere on the lane, or here. */}
+            {/* Aim follows the finger or mouse over the lane; tap the lane to throw. With Motion off, sliders set the aim and spin. */}
             <div className="mx-auto w-full grid gap-2" style={{ width: laneW, maxWidth: '100%' }}>
               {still && canAim ? (
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
@@ -519,15 +508,7 @@ export default function Bowling() {
                   <Slider label={t('sb.spin')} min={-10} max={10} value={Math.round(hook * 10)} onChange={(v) => setHook(v / 10)} show={(v) => (v === 0 ? t('sb.straight') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
                   <button type="button" onClick={() => throwBall({ aim, hook })} className="min-h-14 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl">{t('sb.throw')}</button>
                 </div>
-              ) : (
-                <button type="button" onClick={tapLane} disabled={!canAim} aria-label={step === 'spin' ? t('sb.tapSpin') : t('sb.tapAim')}
-                  className="relative h-14 rounded-pill border-[2.5px] border-border bg-surface overflow-hidden disabled:opacity-60" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                  <span className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 font-bold text-muted">
-                    {step === 'spin' ? <><ArrowArcLeft weight="bold" size={22} /><span>{t('sb.spin')}</span><ArrowArcRight weight="bold" size={22} /></> : <><span>{t('sb.left')}</span><span>{t('sb.aim')}</span><span>{t('sb.right')}</span></>}
-                  </span>
-                  {canAim && <span className="absolute top-1 bottom-1 w-3 rounded-pill border-[2px] border-border" style={{ left: `calc(${((step === 'spin' ? hook : aim / 0.92) + 1) * 50}% - 6px)`, background: step === 'spin' ? '#ff4fa3' : '#fdfd94' }} />}
-                </button>
-              )}
+              ) : null}
             </div>
             {armed.length > 0 && (
               <div className="absolute inset-x-0 top-3 flex justify-center gap-1.5 flex-wrap pointer-events-none z-10">

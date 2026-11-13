@@ -321,7 +321,7 @@ export default function MatchThree() {
                     onPointerUp={(e) => onPointerUp(e, { row: r, col: c })}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap({ row: r, col: c }); } }}
                     initial={still ? false : sp ? { scale: 1.8, opacity: 0 } : { y: -40, opacity: 0 }}
-                    whileHover={still || phase !== 'play' ? undefined : { scale: 1.1, rotate: [0, -6, 6, -3, 0], transition: { duration: 0.45 } }}
+                    whileHover={still || phase !== 'play' ? undefined : { scale: 1.08 }}
                     whileTap={still ? undefined : { scale: 0.88 }}
                     animate={popping.has(key) ? { scale: [1, 1.25, 0], opacity: [1, 1, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : { scale: 1, opacity: 1, y: 0, x: 0 }}
                     // Pieces fall with a little bounce, one column just after the
