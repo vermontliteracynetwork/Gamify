@@ -7,12 +7,14 @@
 type Seg = [number, number, number, number, number, number]; // cubic: c1, c2, end
 interface Shape { start: [number, number]; segs: Seg[] }
 
-// Bowling's pin, from the game's pin drawing (x -3.2..3.2, y -11..0.3).
+// Bowling's pin (teacher's reference, 2026-11-13: a real pin shape so uploads
+// cut exactly): small round head, long thin neck, wide belly two thirds down,
+// narrow flat base. The game draws the same curve (x -1.8..1.8, y -11..0.3).
 const pinRaw = { start: [0, -11] as [number, number], segs: [
-  [1.6, -11, 2, -9.6, 1.6, -8.2], [1.3, -7.2, 1, -6.6, 1.7, -5.4], [2.9, -3.6, 3.2, -1.8, 2.6, -0.4], [2.3, 0.2, 1.6, 0.3, 0, 0.3],
-  [-1.6, 0.3, -2.3, 0.2, -2.6, -0.4], [-3.2, -1.8, -2.9, -3.6, -1.7, -5.4], [-1, -6.6, -1.3, -7.2, -1.6, -8.2], [-2, -9.6, -1.6, -11, 0, -11],
+  [0.6, -11, 0.99, -10.6, 0.99, -9.87], [0.99, -9, 0.58, -8, 0.58, -6.93], [0.58, -5.6, 1.75, -5, 1.75, -3.54], [1.75, -2, 1.15, -0.9, 0.94, -0.13], [0.85, 0.2, 0.4, 0.3, 0, 0.3],
+  [-0.4, 0.3, -0.85, 0.2, -0.94, -0.13], [-1.15, -0.9, -1.75, -2, -1.75, -3.54], [-1.75, -5, -0.58, -5.6, -0.58, -6.93], [-0.58, -8, -0.99, -9, -0.99, -9.87], [-0.99, -10.6, -0.6, -11, 0, -11],
 ] as Seg[] };
-const norm = (x: number, y: number): [number, number] => [(x + 3.2) / 6.4, (y + 11) / 11.3];
+const norm = (x: number, y: number): [number, number] => [(x + 1.8) / 3.6, (y + 11) / 11.3];
 const PIN: Shape = {
   start: norm(...pinRaw.start),
   segs: pinRaw.segs.map((s) => [...norm(s[0], s[1]), ...norm(s[2], s[3]), ...norm(s[4], s[5])] as Seg),
@@ -52,4 +54,4 @@ export function clipToShape(ctx: CanvasRenderingContext2D, pieceId: string, w: n
 }
 
 // The pin as the game draws it (x -3.2..3.2, y -11..0.3), for clipping drawn pins.
-export const PIN_OUTLINE = shapePath('pin', -3.2, -11, 6.4, 11.3)!;
+export const PIN_OUTLINE = shapePath('pin', -1.8, -11, 3.6, 11.3)!;

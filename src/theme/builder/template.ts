@@ -42,7 +42,7 @@ export const isSolid = (piece: Pick<ThemePieceSpec, 'id'>) => SOLID.test(piece.i
 
 // Round pieces (discs, team icons, sign-in pictures, the star, Bowling's
 // balls) are drawn in a circle.
-export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^ball-|^ball$|^bubble-|^bumper$|^bobber$|^sun$|^star$/.test(piece.id);
+export const isRound = (piece: ThemePieceSpec) => /^piece-|^team-|^pic-|^player$|^ball-|^ball$|^bubble-|^bumper$|^bobber$|^sun$|^star$/.test(piece.id);
 
 // The template pages for power-ups (teacher, 2026-11-01: "power ups need to
 // be included in all download files for all games, printable and sized"):

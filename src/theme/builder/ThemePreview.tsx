@@ -136,9 +136,9 @@ function BowlingLane({ theme }: { theme: GameTheme }) {
       <polygon points={lane} fill={laneArt ? 'url(#pv-lane)' : laneColor} stroke="#000" strokeWidth={0.6} />
       {pins.map((p, i) => (
         <g key={i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
-          {pinArt ? <image href={pinArt} x={-3.2} y={-11} width={6.4} height={11.3} preserveAspectRatio="none" clipPath="url(#pv-pin-shape)" /> : <>
-            <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
-            <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
+          {pinArt ? <image href={pinArt} x={-1.8} y={-11} width={3.6} height={11.3} preserveAspectRatio="none" clipPath="url(#pv-pin-shape)" /> : <>
+            <path d="M0,-11 C0.6,-11 0.99,-10.6 0.99,-9.87 C0.99,-9 0.58,-8 0.58,-6.93 C0.58,-5.6 1.75,-5 1.75,-3.54 C1.75,-2 1.15,-0.9 0.94,-0.13 C0.85,0.2 0.4,0.3 0,0.3 C-0.4,0.3 -0.85,0.2 -0.94,-0.13 C-1.15,-0.9 -1.75,-2 -1.75,-3.54 C-1.75,-5 -0.58,-5.6 -0.58,-6.93 C-0.58,-8 -0.99,-9 -0.99,-9.87 C-0.99,-10.6 -0.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
+            <rect x={-0.8} y={-8.5} width={1.6} height={0.55} fill="#e5635f" /><rect x={-0.62} y={-7.6} width={1.24} height={0.55} fill="#e5635f" />
           </>}
         </g>
       ))}

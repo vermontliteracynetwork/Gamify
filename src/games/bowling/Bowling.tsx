@@ -434,7 +434,7 @@ export default function Bowling() {
                   <g key={swept.id}>
                     {swept.pins.map((p) => (
                       <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
-                        <g className="sb-swept"><g transform="rotate(85)"><path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} /></g></g>
+                        <g className="sb-swept"><g transform="rotate(85)"><path d="M0,-11 C0.6,-11 0.99,-10.6 0.99,-9.87 C0.99,-9 0.58,-8 0.58,-6.93 C0.58,-5.6 1.75,-5 1.75,-3.54 C1.75,-2 1.15,-0.9 0.94,-0.13 C0.85,0.2 0.4,0.3 0,0.3 C-0.4,0.3 -0.85,0.2 -0.94,-0.13 C-1.15,-0.9 -1.75,-2 -1.75,-3.54 C-1.75,-5 -0.58,-5.6 -0.58,-6.93 C-0.58,-8 -0.99,-9 -0.99,-9.87 C-0.99,-10.6 -0.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} /></g></g>
                       </g>
                     ))}
                     {/* The sweep bar drops in front of the pins and pulls them back into the pit. */}
@@ -451,10 +451,10 @@ export default function Bowling() {
                     <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${s})`} opacity={fallen ? 0.9 : 1}>
                       <g transform={`rotate(${lean})`}><g className={wob && !still ? (toppling ? 'sb-topple' : 'sb-wobble') : ''}>
                         <ellipse cx={0} cy={0.1} rx={2.4} ry={0.7} fill="rgba(0,0,0,0.25)" />
-                        {pinArt ? <image href={pinArt} x={-3.2} y={-11} width={6.4} height={11.3} preserveAspectRatio="none" clipPath="url(#sb-pin-shape)" /> : <>
-                        <path d="M0,-11 C1.6,-11 2,-9.6 1.6,-8.2 C1.3,-7.2 1,-6.6 1.7,-5.4 C2.9,-3.6 3.2,-1.8 2.6,-0.4 C2.3,0.2 1.6,0.3 0,0.3 C-1.6,0.3 -2.3,0.2 -2.6,-0.4 C-3.2,-1.8 -2.9,-3.6 -1.7,-5.4 C-1,-6.6 -1.3,-7.2 -1.6,-8.2 C-2,-9.6 -1.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
-                        <rect x={-1.25} y={-7.6} width={2.5} height={0.7} fill="#e5635f" /><rect x={-1.4} y={-6.5} width={2.8} height={0.7} fill="#e5635f" />
-                        <path d="M-0.9,-10.4 C-1.2,-9.4 -1,-8.6 -0.8,-8" stroke="#fff" strokeWidth={0.45} fill="none" opacity={0.8} />
+                        {pinArt ? <image href={pinArt} x={-1.8} y={-11} width={3.6} height={11.3} preserveAspectRatio="none" clipPath="url(#sb-pin-shape)" /> : <>
+                        <path d="M0,-11 C0.6,-11 0.99,-10.6 0.99,-9.87 C0.99,-9 0.58,-8 0.58,-6.93 C0.58,-5.6 1.75,-5 1.75,-3.54 C1.75,-2 1.15,-0.9 0.94,-0.13 C0.85,0.2 0.4,0.3 0,0.3 C-0.4,0.3 -0.85,0.2 -0.94,-0.13 C-1.15,-0.9 -1.75,-2 -1.75,-3.54 C-1.75,-5 -0.58,-5.6 -0.58,-6.93 C-0.58,-8 -0.99,-9 -0.99,-9.87 C-0.99,-10.6 -0.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
+                        <rect x={-0.8} y={-8.5} width={1.6} height={0.55} fill="#e5635f" /><rect x={-0.62} y={-7.6} width={1.24} height={0.55} fill="#e5635f" />
+                        <path d="M-0.45,-10.5 C-0.65,-9.8 -0.6,-9.2 -0.45,-8.8" stroke="#fff" strokeWidth={0.45} fill="none" opacity={0.8} />
                         </>}
                       </g></g>
                     </g>

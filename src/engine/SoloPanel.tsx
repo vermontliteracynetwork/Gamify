@@ -2,14 +2,17 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Star } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { RoundMeter } from './ScoreBoard';
+import { TeamBadge } from './TeamBadge';
 import { useSettings } from '../settings/SettingsContext';
 
 // The score panel beside every solo game, the same in each (teacher,
 // 2026-10-31: one cohesive look across games). Big score, a round line, dots
 // for moves or shots left, an optional "what to do" line, and a short note.
 // Small screens: one compact row; large screens: a column beside the board.
-export default function SoloPanel({ score, line, round, dots, status, note, className = '' }: {
+export default function SoloPanel({ score, line, round, dots, status, note, player, className = '' }: {
   score: number;
+  // The theme's player icon (teacher, 2026-11-13: player icons in solo games too); Classic shows the star badge.
+  player?: string;
   line: string;
   // "2/6" and its label: shown as the round box under the score.
   round?: { now: string; label: string };
@@ -25,7 +28,10 @@ export default function SoloPanel({ score, line, round, dots, status, note, clas
       <div className="score-card overflow-hidden">
         <p className="score-head hidden lg:flex"><Star weight="fill" size={16} aria-hidden="true" />{t('bm.score')}</p>
         <div className="px-4 py-2 lg:p-4 flex lg:grid items-center gap-x-5 gap-y-2 flex-wrap">
-        <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl lg:text-6xl tabular-nums leading-none">{score}</motion.p>
+        <div className="flex items-center gap-3">
+          {player ? <img src={player} alt="" aria-hidden="true" className="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-[2.5px] border-border bg-surface object-contain" /> : <TeamBadge colorIndex={0} size={56} />}
+          <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl lg:text-6xl tabular-nums leading-none">{score}</motion.p>
+        </div>
         <p className={`font-bold whitespace-nowrap ${round ? 'lg:hidden' : ''}`}>{line}</p>
         {dots && (
           <div className="flex gap-1.5 flex-wrap items-center" role="img" aria-label={dots.label}>

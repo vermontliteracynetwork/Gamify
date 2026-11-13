@@ -1,3 +1,4 @@
+import { shapePath } from './shapes';
 import { Carrot, Hamburger, IceCream, Pizza, Question, Smiley, Sparkle, Star, Trophy } from '@phosphor-icons/react';
 import { TEAM_ICONS } from '../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../engine/turns';
@@ -103,9 +104,8 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
   if (id === 'pin') {
     return (
       <g>
-        <ellipse cx={w / 2} cy={h * 0.68} rx={w * 0.42} ry={h * 0.3} fill="#ffffff" stroke={INK} strokeWidth={line} />
-        <ellipse cx={w / 2} cy={h * 0.22} rx={w * 0.26} ry={h * 0.2} fill="#ffffff" stroke={INK} strokeWidth={line} />
-        <rect x={w * 0.22} y={h * 0.38} width={w * 0.56} height={h * 0.06} fill="#e5635f" />
+        <path d={shapePath('pin', 0, 0, w, h)!} fill="#ffffff" stroke={INK} strokeWidth={line} />
+        <rect x={w * 0.28} y={h * 0.22} width={w * 0.44} height={h * 0.05} fill="#e5635f" />
       </g>
     );
   }

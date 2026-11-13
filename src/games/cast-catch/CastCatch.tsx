@@ -35,6 +35,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
+import { TeamBadge } from '../../engine/TeamBadge';
 import { castQuality, catchFish, catchItem, FISH, itemEffect, pointsFor, type FishKind } from './fish';
 
 
@@ -390,6 +391,8 @@ export default function CastCatch() {
 
           {/* Top: score chips in the middle, full screen and settings on the right. */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            {/* The player's icon beside the scores (teacher, 2026-11-13). */}
+            {pieceImage(theme, 'player') ? <img src={pieceImage(theme, 'player')} alt="" aria-hidden="true" className="w-11 h-11 rounded-full border-[2px] border-border bg-surface object-contain" style={{ boxShadow: 'var(--shadow-sticker)' }} /> : <span className="rounded-full" style={{ boxShadow: 'var(--shadow-sticker)' }}><TeamBadge colorIndex={0} size={44} /></span>}
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
@@ -412,7 +415,7 @@ export default function CastCatch() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={t('cc.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
+        <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('cc.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-bold">{t('cc.summary', { count: catches.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
             {catches.slice().sort((a, b) => b.points - a.points).slice(0, 6).map((c, i) => (

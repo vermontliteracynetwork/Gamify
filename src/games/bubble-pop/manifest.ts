@@ -13,6 +13,7 @@ export const bubblePopManifest: GameManifest = {
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
     { id: 'board', label: 'Board', width: 1000, height: 1300, hint: 'Behind the bubbles', color: '#314677' },
     ...BUBBLE_COLORS.map((color, i) => ({ id: `bubble-${i}`, label: `Bubble ${i + 1}`, width: 128, height: 128, hint: 'One of the six bubbles you match', color })),
+    { id: 'player', label: 'Player icon', width: 256, height: 256, hint: 'The player: shown beside the score and on the winner stage' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

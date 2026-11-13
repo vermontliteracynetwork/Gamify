@@ -396,7 +396,7 @@ export default function BubblePop() {
             </div>
           </section>
           <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
-            <SoloPanel score={score} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} round={{ now: `${Math.min(breaks + 1, plan.current.rounds)}/${plan.current.rounds}`, label: t('pb.roundWord') }}
+            <SoloPanel score={score} player={pieceImage(theme, 'player')} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} round={{ now: `${Math.min(breaks + 1, plan.current.rounds)}/${plan.current.rounds}`, label: t('pb.roundWord') }}
               dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
               status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : step === 'question' ? t('bp.answer') : undefined} note={note} />
             {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
@@ -405,7 +405,7 @@ export default function BubblePop() {
         </div>
       )}
 
-      {phase === 'end' && <ResultsModal title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
+      {phase === 'end' && <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
       {powers.element}
       {element}
     </main>

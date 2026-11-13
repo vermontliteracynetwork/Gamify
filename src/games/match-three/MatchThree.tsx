@@ -370,7 +370,7 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-3 content-start sm:grid-cols-2 lg:grid-cols-1 lg:w-[220px] w-full mx-auto" style={{ maxWidth: 'min(100%, calc(var(--play-h) - 2rem - var(--m3-extra)), 64rem)' }}>
-            <SoloPanel score={score} line={t('bm.round', { n: round, total: plan.current.rounds })} round={{ now: `${round}/${plan.current.rounds}`, label: t('pb.roundWord') }}
+            <SoloPanel score={score} player={pieceImage(theme, 'player')} line={t('bm.round', { n: round, total: plan.current.rounds })} round={{ now: `${round}/${plan.current.rounds}`, label: t('pb.roundWord') }}
               dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
             {/* The star goal fills as points come in (a goal that visibly builds). */}
             <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
@@ -392,7 +392,7 @@ export default function MatchThree() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
+        <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Star key={i} weight={stars > i ? 'fill' : 'bold'} size={40} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} aria-hidden="true" />)}</p>
         </ResultsModal>
       )}
