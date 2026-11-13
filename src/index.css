@@ -690,3 +690,9 @@ body:has(.play-fill) .site-header img { height: 1.4rem; }
 body:has(.play-fill) .site-header :is(a, button) { min-height: 2rem; font-size: 0.8rem; }
 body:has(.play-fill) .site-header button.w-11 { width: 2rem; height: 2rem; }
 body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px; }
+
+/* Cast and Catch (teacher, 2026-11-13): clouds cross the whole sky slowly;
+   background fish wiggle as they swim. */
+@keyframes cc-cloud { from { transform: translateX(-120vw); } to { transform: translateX(120vw); } }
+@keyframes cc-fish-wiggle { 0%, 100% { transform: rotate(-4deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-6px); } }
+.cc-fish-wiggle { animation: cc-fish-wiggle 1.6s ease-in-out infinite; transform-origin: 70% 50%; }

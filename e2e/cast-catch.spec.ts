@@ -13,10 +13,9 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   await finishSetup(page);
   await expect(page.getByLabel(/seconds left/)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
-  await page.getByRole('button', { name: 'Cast', exact: true }).click();
-  await expect(page.getByRole('meter', { name: 'Cast meter' })).toBeVisible();
-  await page.waitForTimeout(400);
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  // Tap Cast and the line flies out: no power meter (teacher, 2026-11-13).
+  await page.getByRole('button', { name: 'Cast', exact: true }).click({ force: true });
+  await expect(page.getByRole('meter')).toHaveCount(0);
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 5; f++) { await page.screenshot({ path: `test-results/cast-frame-${f}.png` }); await page.waitForTimeout(140); }
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 8000 });
@@ -29,8 +28,14 @@ test('Cast and Catch: cast, answer while the bobber floats, reel in a fish', asy
   await page.getByRole('button', { name: 'Reel it in!' }).click({ timeout: 8000 });
   if (info.project.name === 'ipad-landscape') for (let f = 0; f < 3; f++) { await page.screenshot({ path: `test-results/cast-reel-${f}.png` }); await page.waitForTimeout(250); }
   // A fish, or one of the Classic power-ups (a boot, a rainbow fish...).
-  await expect(page.getByRole('status').filter({ hasText: / cm |You reeled in/ })).toBeVisible();
+  // The catch card stays until it is closed (teacher, 2026-11-13).
+  const caught = page.getByRole('dialog').filter({ hasText: / cm |You reeled in/ });
+  await expect(caught).toBeVisible();
   await page.screenshot({ path: `test-results/cast-caught-${info.project.name}.png` });
+  await page.waitForTimeout(3200);
+  await expect(caught).toBeVisible();
+  await caught.getByRole('button', { name: 'Close' }).click();
+  await expect(caught).toBeHidden();
   await expect(page.getByLabel('1 fish caught')).toBeVisible();
   expect(problems).toEqual([]);
 });

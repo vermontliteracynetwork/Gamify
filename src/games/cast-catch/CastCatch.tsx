@@ -3,7 +3,7 @@ import { impact } from '../../engine/impact';
 import ClassPlayOptions, { classPlayQuery, DEFAULT_CLASS_PLAY, type ClassPlay } from '../../live/ClassPlay';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Fish as FishIcon, HandGrabbing, Question, Timer } from '@phosphor-icons/react';
+import { Fish as FishIcon, HandGrabbing, Question, Timer, Waves, X } from '@phosphor-icons/react';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -22,7 +22,7 @@ import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
 import ItemArt from '../../theme/ItemArt';
 import type { ThemeItem } from '../../theme/types';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { Slider } from '../../ui/fields';
+import { ChoiceTiles, Slider } from '../../ui/fields';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -70,6 +70,17 @@ export function FishArt({ fish, size, theme }: { fish: FishKind; size: number; t
   );
 }
 
+// The fish that swim by in the background: depth (% from the top), size,
+// direction, speed and a head start, so they never move in step.
+const SWIMMERS = [
+  { kind: 0, top: 30, size: 70, dir: 1, secs: 19, delay: 2 },
+  { kind: 3, top: 44, size: 90, dir: -1, secs: 24, delay: 9 },
+  { kind: 6, top: 56, size: 60, dir: 1, secs: 15, delay: 6 },
+  { kind: 9, top: 66, size: 110, dir: -1, secs: 30, delay: 17 },
+  { kind: 12, top: 78, size: 75, dir: 1, secs: 22, delay: 12 },
+  { kind: 4, top: 86, size: 55, dir: -1, secs: 17, delay: 3 },
+];
+
 // Live's first game (development plan Stage 6), playable solo now:
 // tap to start the cast meter, tap to stop it (the middle is best), answer
 // while the bobber floats, then reel in. Better casts bring rarer fish.
@@ -84,7 +95,8 @@ export default function CastCatch() {
   async function openLive() { navigate(`/teacher/live/${(await makeGameCode('cast-catch', setId, 'live')).code}?${classPlayQuery(classPlay)}`); }
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 8, powerUps: true, powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('cast-catch', { setId: LIBRARY[0].id, minutes: 8, powerUps: true, powerOff: [] as string[], endBy: 'time' as 'time' | 'casts', casts: 10 });
+  const byCasts = setup.endBy === 'casts';
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -92,7 +104,6 @@ export default function CastCatch() {
   const [phase, setPhase] = useState<Phase>('welcome');
   const [step, setStep] = useState<Step>('ready');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [power, setPower] = useState(0);
   const [cast, setCast] = useState(0.5);
   const [catches, setCatches] = useState<Catch[]>([]);
   const [last, setLast] = useState<Catch | null>(null);
@@ -101,11 +112,12 @@ export default function CastCatch() {
   const quality = useRef<0 | 1 | 2 | 3>(0);
   const doubleNext = useRef(false);
   const raf = useRef(0);
-  const started = useRef(0);
 
   const left = Math.max(0, Math.ceil((endsAt - now) / 1000));
   const score = Math.max(0, catches.reduce((s, c) => s + c.points, 0));
-  const timeUp = phase === 'play' && left === 0;
+  const castsLeft = Math.max(0, (setup.casts ?? 10) - catches.length);
+  // The game ends when the timer runs out, or after a number of casts (teacher, 2026-11-13).
+  const timeUp = phase === 'play' && (byCasts ? castsLeft === 0 : left === 0);
 
   useEffect(() => {
     if (phase !== 'play') return;
@@ -130,7 +142,7 @@ export default function CastCatch() {
   useEffect(() => { if (getLive() && !liveStart.current && phase === 'welcome' && game.pool.length) { liveStart.current = true; begin(); } }); // eslint-disable-line react-hooks/exhaustive-deps
   function begin() {
     setCatches([]); setLast(null); setStep('ready'); doubleNext.current = false;
-    setEndsAt(Date.now() + setup.minutes * 60000); setNow(Date.now());
+    setEndsAt(Date.now() + (byCasts ? 24 * 3600000 : setup.minutes * 60000)); setNow(Date.now());
     setPhase('play');
   }
   function finish() {
@@ -144,20 +156,11 @@ export default function CastCatch() {
   }  // The teacher's play clock or score goal ends the game the usual way (2026-10-31).
   const clock = usePlayClock({ playing: phase === 'play', score, onTimeUp: () => { if (asking) cancel(); else finish(); } });
 
-  // The cast meter swings back and forth until the player taps Stop.
-  function startPower() {
-    setStep('power');
-    started.current = performance.now();
-    const period = still ? 2600 : 1500;
-    const tick = (ts: number) => {
-      const x = ((ts - started.current) % period) / period;
-      setPower(x < 0.5 ? x * 2 : 2 - x * 2);
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-  }
-  async function stopPower() {
-    cancelAnimationFrame(raf.current);
+  // Tap Cast and the line flies out (teacher, 2026-11-13: no power meter in
+  // any game). Each cast lands somewhere a little different on the water.
+  async function castNow() {
+    if (step !== 'ready' || timeUp) return;
+    const power = 0.3 + Math.random() * 0.6;
     quality.current = castQuality(power);
     setCast(power);
     setFlying(true);
@@ -213,7 +216,7 @@ export default function CastCatch() {
     setApproach(null);
     setStep('caught');
     if (c.points < 0) playEffect('miss', settings); else playClip(`${SND}catch-bell.mp3`, settings); // ding! a catch
-    later(() => { setLast(null); setStep('ready'); }, still ? 2200 : 2600);
+    // The catch card stays until it is tapped (teacher, 2026-11-13).
   }
 
   const qualityWord = [t('cc.cast.short'), t('cc.cast.good'), t('cc.cast.great'), t('cc.cast.perfect')];
@@ -230,7 +233,8 @@ export default function CastCatch() {
     ro.observe(el);
     return () => ro.disconnect();
   }, [phase]);
-  const tip = step === 'power' ? { x: 300 - power * 40, y: -50 + power * 6 } : { x: 316, y: -52 };
+  const tip = { x: 316, y: -52 };
+  const closeCatch = () => { setLast(null); setStep('ready'); };
   const tipAt = { x: -8 + (tip.x * 26) / 320, y: BOAT_TOP - 9.1 * aspect + ((tip.y + 60) * 26 * aspect) / 320 };
   // The bobber starts at the rod tip, then (next frame) flies to where the cast lands.
   const [flying, setFlying] = useState(false);
@@ -274,7 +278,11 @@ export default function CastCatch() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={20} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} />
+              <ChoiceTiles label={t('cc.endBy')} value={byCasts ? 'casts' : 'time'} onChange={(v) => change({ endBy: v })}
+                options={[{ value: 'time', label: t('cc.endTime'), tip: t('cc.endTimeTip') }, { value: 'casts', label: t('cc.endCasts'), tip: t('cc.endCastsTip') }]} />
+              {byCasts
+                ? <Slider label={t('cc.casts')} hint={t('cc.castsHint')} min={3} max={30} value={setup.casts ?? 10} show={(v) => t('cc.castsValue', { count: v })} onChange={(v) => change({ casts: v })} />
+                : <Slider label={t('cc.minutes')} hint={t('cc.minutesHint')} min={1} max={20} value={setup.minutes} show={(v) => t('cc.minutesValue', { count: v })} onChange={(v) => change({ minutes: v })} />}
               {powerUpSwitches({ manifest: castCatchManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
@@ -292,12 +300,19 @@ export default function CastCatch() {
               <span key={i} className="absolute h-1.5 rounded-pill bg-white/45" style={{ top: `${26 + i * 16}%`, width: `${14 + (i % 2) * 6}%`, animation: `cc-swim-right ${9 + i * 3}s linear ${-i * 4}s infinite` }} aria-hidden="true" />
             ))}
             <span className="absolute right-[16%] top-[3%] w-[5%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
-            {[[22, 10, 12], [62, 11, 9]].map(([x, y, w], i) => (
-              <span key={`c${i}`} className={`absolute h-[5%] ${pieceImage(theme, 'cloud') ? '' : 'rounded-pill border-[2px] border-border'}`} style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, ...(pieceImage(theme, 'cloud') ? { background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")` } : { background: pieceColor(theme, 'cloud', '#ffffff') }), animation: still ? undefined : `cc-drift ${18 + i * 6}s ease-in-out infinite` }} aria-hidden="true" />
+            {/* Puffy clouds drift slowly across the sky (teacher, 2026-11-13). */}
+            {[[8, 4, 13, 0], [40, 9, 10, 1], [70, 3, 15, 2], [92, 10, 9, 3]].map(([x, y, w, i]) => (
+              pieceImage(theme, 'cloud')
+                ? <span key={`c${i}`} className="absolute aspect-[2/1]" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, background: `center / contain no-repeat url("${pieceImage(theme, 'cloud')}")`, animation: still ? undefined : `cc-cloud ${70 + i * 18}s linear ${-i * 23}s infinite` }} aria-hidden="true" />
+                : <svg key={`c${i}`} viewBox="0 0 120 56" className="absolute pointer-events-none" style={{ left: `${x}%`, top: `${y}%`, width: `${w}%`, animation: still ? undefined : `cc-cloud ${70 + i * 18}s linear ${-i * 23}s infinite`, filter: 'drop-shadow(0 4px 0 rgba(36,28,61,0.12))' }} aria-hidden="true">
+                    <path d="M18 50 Q2 50 4 38 Q6 26 20 28 Q22 12 40 12 Q50 0 66 6 Q80 0 90 14 Q108 12 112 28 Q120 34 116 44 Q114 50 104 50 Z" fill={pieceColor(theme, 'cloud', '#ffffff')} stroke="#241c3d" strokeWidth="2.5" strokeLinejoin="round" />
+                    <path d="M24 42 Q40 46 58 42 M70 44 Q86 47 100 42" fill="none" stroke="#c9d6f2" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
             ))}
-            {!still && [0, 1, 2].map((i) => (
-              <span key={`f${i}`} className="absolute opacity-25" style={{ top: `${58 + i * 11}%`, animation: `${i % 2 ? 'cc-swim-left' : 'cc-swim-right'} ${14 + i * 4}s linear ${-i * 5}s infinite` }} aria-hidden="true">
-                <svg width="70" height="34" viewBox="0 0 100 50" style={{ transform: i % 2 ? 'none' : 'scaleX(-1)' }}><path d="M78 25 L98 8 L94 25 L98 42 Z M44 5 a38 20 0 1 0 0.1 0 Z" fill="#0b2a4a" /></svg>
+            {/* Real fish swim by under the water at different depths and speeds (teacher, 2026-11-13). */}
+            {!still && SWIMMERS.map((f, i) => (
+              <span key={`f${i}`} className="absolute pointer-events-none" style={{ top: `${f.top}%`, animation: `${f.dir > 0 ? 'cc-swim-right' : 'cc-swim-left'} ${f.secs}s linear ${-f.delay}s infinite`, opacity: f.top > 70 ? 0.8 : 0.95 }} aria-hidden="true">
+                <span className="block" style={{ transform: f.dir > 0 ? 'scaleX(-1)' : 'none' }}><span className="block cc-fish-wiggle" style={{ animationDelay: `${-i * 0.3}s` }}><FishArt fish={FISH[f.kind % FISH.length]} size={f.size} theme={theme} /></span></span>
               </span>
             ))}
             {/* Classic lake floor (Kenney Fish Pack, CC0): seaweed sways, rocks sit still. */}
@@ -347,23 +362,27 @@ export default function CastCatch() {
             )}
             <AnimatePresence>
               {last && (
-                <motion.div key={catches.length} className="absolute inset-x-0 top-[14%] mx-auto w-[min(90%,420px)] bg-surface border-[3px] border-border rounded-panel p-4 grid gap-1 justify-items-center text-center"
-                  style={{ boxShadow: 'var(--shadow-sticker-lg)' }} initial={still ? false : { y: 120, scale: 0.6, rotate: -8 }} animate={{ y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0 }} role="status">
+                <motion.div key={catches.length} className="absolute inset-0 z-20 grid place-items-center bg-[#241c3d]/30 cursor-pointer" onClick={closeCatch} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div className="relative w-[min(90%,440px)] bg-surface border-[3px] border-border rounded-panel px-6 pt-10 pb-6 grid gap-1.5 justify-items-center text-center"
+                  style={{ boxShadow: '0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }} initial={still ? false : { y: 120, scale: 0.6, rotate: -8 }} animate={{ y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0 }} role="dialog" aria-label={last.item ? last.item.name : last.fish?.name}>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); closeCatch(); }} aria-label={t('class.close')} className="absolute top-3 right-3 w-11 h-11 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
                   {last.item ? (
                     <>
-                      <ItemArt item={last.item} size={140} still={still} />
+                      <ItemArt item={last.item} size={180} still={still} />
                       <p className="font-display text-2xl">{t('cc.youCaughtItem', { name: last.item.name })}</p>
                       <p className="font-bold">{last.double ? t('cc.effect.double') : last.seconds ? t('cc.effect.time', { s: last.seconds }) : last.points < 0 ? t('cc.effect.lose', { n: -last.points }) : `+${last.points} ${t('cc.pts')}`}</p>
                     </>
                   ) : last.fish && (
                     <>
                       {firstOfKind && <span className="absolute top-3 left-3 rotate-[-8deg] font-display text-lg bg-accent border-[2px] border-border rounded-pill px-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('cc.new')}</span>}
-                      <FishArt fish={last.fish} size={140} theme={theme} />
+                      {/* The whole fish, big and never cut off. */}
+                      <span className="grid place-items-center w-full py-3 overflow-visible"><FishArt fish={last.fish} size={220} theme={theme} /></span>
                       <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
                       <p className="font-bold">+{last.points} {t('cc.pts')} · {t(`cc.rarity.${last.fish.rarity}` as 'cc.rarity.0')}</p>
                       <p className="text-sm font-semibold">{last.fish.fact}</p>
                     </>
                   )}
+                </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -371,7 +390,7 @@ export default function CastCatch() {
 
           {/* Top: score chips in the middle, full screen and settings on the right. */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.timeLeft', { s: left })}><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
           </div>
@@ -382,15 +401,7 @@ export default function CastCatch() {
           </div>
           {phase === 'play' && (
             <div className="absolute inset-x-0 bottom-5 grid gap-2 justify-items-center z-10 pointer-events-none [&>*]:pointer-events-auto">
-              {step === 'ready' && !timeUp && <BigButton onClick={startPower} label={t('cc.cast')} />}
-              {step === 'power' && (
-                <>
-                  <div className="relative w-full max-w-md h-6 rounded-pill border-[2.5px] border-border overflow-hidden" style={{ background: 'linear-gradient(90deg, #ed9d75 0%, #fdfd94 38%, #9fe7a0 50%, #9fe7a0 74%, #fdfd94 86%, #ed9d75 100%)' }} role="meter" aria-label={t('cc.meter')} aria-valuenow={Math.round(power * 100)} aria-valuemin={0} aria-valuemax={100}>
-                    <span className="absolute top-0 bottom-0 w-1.5 bg-black" style={{ left: `calc(${power * 100}% - 3px)` }} />
-                  </div>
-                  <BigButton onClick={() => void stopPower()} label={t('cc.stop')} />
-                </>
-              )}
+              {step === 'ready' && !timeUp && <BigButton onClick={() => void castNow()} label={t('cc.cast')} pulse={!still} />}
               {step === 'casting' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{qualityWord[quality.current]}</p>}
               {step === 'wait' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{t('cc.waiting')}</p>}
               {step === 'bite' && <BigButton onClick={reel} label={t('cc.reel')} pulse={!still} />}
