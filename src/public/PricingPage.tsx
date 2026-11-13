@@ -184,7 +184,7 @@ function SchoolPlans() {
       <div className="grid md:grid-cols-2 gap-5 items-start">
         <div className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-3">
           <p className="font-display text-2xl leading-tight">{t('pricing.savingsNoPrice', { min: SCHOOL_MIN_SEATS })}</p>
-          <p className="text-sm font-bold">{t('pricing.po')}</p>
+          <p className="text-sm font-bold">{t('pricing.po')} <Link to="/pricing/purchase-order">{t('po.link')}</Link></p>
           <PrincipalNote />
         </div>
         <div className="grid gap-3">

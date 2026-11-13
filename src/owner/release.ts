@@ -26,7 +26,7 @@ export const RELEASE: ReleaseStage[] = [
     { id: 'stripe-account', text: 'Open the Stripe account', state: 'you' },
     { id: 'prices', text: 'Confirm final prices', state: 'you' },
     { id: 'checkout', text: 'Checkout, customer portal, receipts', state: 'build', note: 'Starts when the Stripe keys are in' },
-    { id: 'po', text: 'School purchase-order form', state: 'build' },
+    { id: 'po', text: 'School purchase-order form', state: 'done' },
     { id: 'promo', text: 'Stripe promotion codes', state: 'build' },
     { id: 'limits', text: 'Plan limits enforced', state: 'done' },
     { id: 'access-codes', text: 'Access codes and beta plans', state: 'done' },
@@ -34,7 +34,7 @@ export const RELEASE: ReleaseStage[] = [
   { id: 'product', title: 'Product', items: [
     { id: 'roster', text: 'Launch game roster', state: 'done' },
     { id: 'board-game', text: 'Board Game classic rework', state: 'done' },
-    { id: 'engagement', text: 'Engagement audit improvements', state: 'build', note: 'docs/engagement-audit.md' },
+    { id: 'engagement', text: 'Engagement audit improvements', state: 'done' },
     { id: 'themes', text: 'Theme library and Theme Builder', state: 'done' },
     { id: 'art', text: 'Buy avatar and theme art', state: 'you' },
   ] },

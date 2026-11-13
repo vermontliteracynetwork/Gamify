@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
       ...(BCC && { bcc: [BCC] }),
       ...(BCC && { reply_to: BCC }),
       subject: `Your Gamify school quote (${q.number})`,
-      text: `Hello ${req.name},\n\nThank you for asking about Gamify for ${req.school}. Your quote for ${q.seats} teachers is attached as a PDF, good until ${q.validUntil}.\n\nTo go ahead, reply to this email or send your purchase order. We answer within one school day.\n\nGamify (Vermont Literacy Network LLC)`,
+      text: `Hello ${req.name},\n\nThank you for asking about Gamify for ${req.school}. Your quote for ${q.seats} teachers is attached as a PDF, good until ${q.validUntil}.\n\nTo go ahead, reply to this email or send your purchase order details at /pricing/purchase-order on the Gamify website. We answer within one school day.\n\nGamify (Vermont Literacy Network LLC)`,
       attachments: [{ filename: `Gamify-quote-${q.number}.pdf`, content: btoa(bin) }],
     }),
   });

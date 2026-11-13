@@ -67,6 +67,7 @@ const SchoolsPage = lazyPage(() => import('./public/AudiencePages').then((m) => 
 const HomeschoolPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.HomeschoolPage })));
 const StudentDataPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.StudentDataPage })));
 const PricingPage = lazyPage(() => import('./public/PricingPage'));
+const PurchaseOrderPage = lazyPage(() => import('./public/PurchaseOrderPage'));
 const CodeScreen = lazyPage(() => import('./public/CodeScreen'));
 const ClassesPage = lazyPage(() => import('./teacher/ClassesPage'));
 const ClassPage = lazyPage(() => import('./teacher/ClassPage'));
@@ -123,6 +124,7 @@ function AnimatedRoutes() {
           <Route path="/homeschool" element={<HomeschoolPage />} />
           <Route path="/student-data" element={<StudentDataPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/pricing/purchase-order" element={<PurchaseOrderPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />
           <Route path="/help" element={<HelpPage />} />
