@@ -161,3 +161,4 @@ line that fits, and add each new preference the same turn she says it.
 - Setup menus (2026-11-16): the same in every game; pages that are just cards (players, teams, power-ups) sit in the middle of the box. Only one scroll bar on a page.
 - Game cards in Pick a Game (2026-11-16): ways to play are small colored icon circles in one row, no words.
 - Game welcome screens (2026-11-16): the right column is spaced evenly (title, How to play, start), sized up on big screens.
+- Theme ideas (2026-11-15): keep a running Blog post of suggested themes to create, per game, in many art mediums (digital, drawing, colored pencil, paint, play dough and clay, fabric, recycled materials, and more). Show her the list for approval before posting.
