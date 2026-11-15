@@ -12,11 +12,44 @@ export interface Post {
   minutes: number;
   body: string[];
   tryIt: string[];
+  // Optional bulleted lists after the body, each under its own heading.
+  lists?: { heading: string; items: string[] }[];
   // Topics a post belongs to, like 'homeschool' (shown on the Homeschool page).
   tags?: string[];
 }
 
 export const POSTS: Post[] = [
+  {
+    slug: 'theme-ideas-to-make',
+    title: 'Theme Ideas to Make',
+    summary: 'A running list of the themes we would love to see for every game, and the art materials that work best for making them. New ideas are added as games ship.',
+    cover: 'star-quiz',
+    grades: 'K-12',
+    minutes: 45,
+    tags: ['themes'],
+    body: [
+      'Every Gamify game can wear a theme your class designs. Here are the themes we would love to have for each game. Pick one, make it your own, or invent something new.',
+      'Any art material works if you can take a clear photo of it or save it as a picture. Some favorites: digital drawing apps, pencil and marker drawings, colored pencils, crayons, watercolor and poster paint, chalk and oil pastels, play dough and clay, felt and fabric scraps, yarn and buttons, recycled materials like cardboard, bottle caps and cereal boxes, torn paper and magazine collage, stamps and fingerprint art, and photos of real objects like leaves, rocks or building blocks.',
+      'For handmade pieces, work on a plain light background, take the photo straight on in good light, and fill the frame. Three-dimensional pieces like clay or recycled builds look great photographed from just above.',
+    ],
+    lists: [
+      { heading: 'Question Tracker', items: ['Flower garden', 'Fish tank', 'Sharks', 'Clouds', 'Driving down the road, seeing new things pass by', 'Birthday cake, adding candles', 'Bookshelf, adding books', 'Cookie jar', 'Apple tree', 'Quilt squares', 'Pizza toppings', 'Beehive filling with honey', 'Snowman build', 'Coral reef', 'Treasure chest', 'Fall leaf pile'] },
+      { heading: 'Game Show', items: ['Talent show stage', 'Science fair', 'Space mission control', 'Jungle explorer camp', 'Cooking contest', 'Under the sea', 'Carnival midway', 'Dinosaur dig'] },
+      { heading: 'Pinball', items: ['Outer space', 'Haunted house', 'Candy land', 'Robot factory', 'Volcano island', 'Ocean deep', 'Rainforest', 'Music jam'] },
+      { heading: 'Board Game', items: ['Enchanted forest path', 'Island hop', 'Mountain climb', 'City streets', 'Candy trail', 'Space trip from planet to planet', 'Dinosaur valley', 'River raft ride'] },
+      { heading: 'Cast and Catch', items: ['Frozen lake ice fishing', 'Tropical reef', 'Pond with frogs and lily pads', 'Deep sea glow fish', 'Pirate harbor', 'Fishing for stars in the sky', 'Rainy day puddle', 'Mountain stream'] },
+      { heading: 'Match Three', items: ['Garden veggies', 'Gems and crystals', 'Sweet treats', 'Seashells', 'Bugs', 'Fruit market', 'Weather', 'Toy box'] },
+      { heading: 'Four in a Row', items: ['Cookies on a baking tray', 'Apples in a crate', 'Planets', 'Bubbles in a tank', 'Buttons on a coat', 'Snowballs', 'Ladybugs', 'Coins in a bank'] },
+      { heading: 'Bubble Pop', items: ['Soap bubbles in the bath', 'Balloons at a party', 'Fish bubbles underwater', 'Gumballs', 'Fireflies at night', 'Snowflakes', 'Planets in space', 'Raindrops'] },
+      { heading: 'Bowling', items: ['Bowling for pumpkins', 'Snowman pins', 'Penguins on ice', 'Space aliens', 'Soup cans at the grocery store', 'Jungle animals', 'Robots', 'Sand pails at the beach'] },
+    ],
+    tryIt: [
+      'Pick a game and a theme from the lists above.',
+      'Open that game\'s theme guide in the Blog to see every piece and its size.',
+      'Choose your art material and split the pieces up among students.',
+      'Photograph or save each piece, then add them in the Theme Builder.',
+    ],
+  },
   {
     slug: 'designing-a-theme-file',
     title: 'Designing a Theme File, Step by Step',
