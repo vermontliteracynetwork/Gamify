@@ -92,6 +92,12 @@ export function WaysPost() {
         <Meta grades={post.grades} minutes={post.minutes} />
         <p className="text-xl font-bold">{post.summary}</p>
         {post.body.map((para, i) => <p key={i} className="text-lg leading-relaxed">{para}</p>)}
+        {post.lists?.map((l) => (
+          <section key={l.heading} className="grid gap-2">
+            <h2 className="text-2xl">{l.heading}</h2>
+            <ul className="grid gap-1 pl-7 m-0 text-lg list-disc">{l.items.map((item) => <li key={item}>{item}</li>)}</ul>
+          </section>
+        ))}
         <section className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 className="font-display text-3xl"><Title text={t('ways.tryIt')} /></h2>
           <p className="font-bold">{t('ways.tryItSub')}</p>
