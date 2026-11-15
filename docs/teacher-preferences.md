@@ -163,3 +163,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game welcome screens (2026-11-16): the right column is spaced evenly (title, How to play, start), sized up on big screens.
 - Theme ideas (2026-11-15): keep a running Blog post of suggested themes to create, per game, in many art mediums (digital, drawing, colored pencil, paint, play dough and clay, fabric, recycled materials, and more). Show her the list for approval before posting.
 - Theme ideas post (2026-11-15): recommend art mediums in general, not per theme; each game gets a plain bulleted list of themes we'd love to have. Games not built yet (Code Breaker) stay internal in `docs/theme-ideas.md` until they ship. Approved lists (2026-11-15) replace the drafts; she edits them directly.
+- Theme idea lists (2026-11-15): professional descriptions of what she wants, never made-up theme names; details go in parentheses.
