@@ -157,3 +157,4 @@ line that fits, and add each new preference the same turn she says it.
 - Theme idea lists (2026-11-15): professional descriptions of what she wants, never made-up theme names; details go in parentheses.
 - Themes from her reference images (2026-11-15): match the art style closely (medium, texture, line, palette), not just the subject; show mockups for approval before building or pushing. Pencil Picnic (Board Game): colored pencil on cream paper, animals in clothes enjoying sweet treats.
 - Theme mockups (2026-11-15): use the Classic game's exact screen layout (for Board Game: the snake board panel, race card and die on the right, corner buttons); the theme only swaps the art. She wants a real hand-drawn, human feel.
+- Board Game themes follow the Classic vintage board (2026-11-15): cream ground with dots, plain squares taking turns in four colors, lettered Start, Finish, Lose a turn and Roll again squares; the theme redraws them in its own style.
