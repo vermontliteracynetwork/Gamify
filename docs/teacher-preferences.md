@@ -162,4 +162,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game cards in Pick a Game (2026-11-16): ways to play are small colored icon circles in one row, no words.
 - Game welcome screens (2026-11-16): the right column is spaced evenly (title, How to play, start), sized up on big screens.
 - Theme ideas (2026-11-15): keep a running Blog post of suggested themes to create, per game, in many art mediums (digital, drawing, colored pencil, paint, play dough and clay, fabric, recycled materials, and more). Show her the list for approval before posting.
-- Theme ideas post (2026-11-15): recommend art mediums in general, not per theme; each game gets a plain bulleted list of themes we'd love to have. Games not built yet (Code Breaker) stay internal in `docs/theme-ideas.md` until they ship.
+- Theme ideas post (2026-11-15): recommend art mediums in general, not per theme; each game gets a plain bulleted list of themes we'd love to have. Games not built yet (Code Breaker) stay internal in `docs/theme-ideas.md` until they ship. Approved lists (2026-11-15) replace the drafts; she edits them directly.
