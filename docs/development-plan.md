@@ -368,3 +368,9 @@ production release.
   scope-check, asset-audit, bug-report) in `.claude/`, adapted from Claude
   Code Game Studios (MIT). They draft and check; Claudia and the Golden Rule
   still decide. Next: continue the current stage.
+- 2026-11-16: Theme Builder: smaller draw and trash buttons on each piece
+  card, a new see-through switch between them (re-cuts the last upload when
+  flipped), and the Board Game preview is now the game's own board, squares,
+  team pieces and die (shared `castle-quest/boardArt.tsx`). Next: real game
+  previews for the games still on the generic stand-in (Bubble Pop, Cast and
+  Catch, Lunch Rush, Pinball, Road Hop, Match Up, Memory Match, Flashcards).

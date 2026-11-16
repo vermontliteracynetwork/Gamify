@@ -9,6 +9,8 @@ import { THEME_FONTS, type GameTheme, type ThemeItem } from '../types';
 import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
+import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
+import { layout, spaceKinds } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
 
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
@@ -32,6 +34,8 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
   // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
   if (view === 'pick') return <PickView theme={theme} />;
+  // The Board Game's own board, squares, pieces and die (teacher, 2026-11-16).
+  if (theme.gameId === 'castle-quest' && view === 'game') return <BoardGamePreview theme={theme} />;
   return (
     <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
@@ -113,6 +117,41 @@ function PowersView({ theme }: { theme: GameTheme }) {
           {best.cell > 70 && <span className="text-[11px] leading-tight font-bold max-w-full px-1 truncate">{it.name}</span>}
         </span>
       ))}
+    </div>
+  );
+}
+
+// The Board Game exactly as play draws it: the board winding Start to
+// Finish with lose-a-turn and roll-again squares, two team pieces and the die.
+// Anything left empty shows Classic's own squares.
+const PREVIEW_SQUARES = 28;
+const PREVIEW_KINDS = (() => { let x = 7; return spaceKinds(PREVIEW_SQUARES, () => ((x = (x * 9301 + 49297) % 233280) / 233280)); })();
+function BoardGamePreview({ theme }: { theme: GameTheme }) {
+  const box = useRef<HTMLDivElement>(null);
+  const [room, setRoom] = useState({ w: 400, h: 300 });
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const fit = () => setRoom({ w: el.clientWidth, h: el.clientHeight });
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // The die sits in its own strip under the board, so it never covers a square.
+  const pad = 16, die = Math.max(24, Math.min(56, room.w * 0.09));
+  const L = layout(PREVIEW_SQUARES, Math.max(60, room.w - pad * 2), Math.max(60, room.h - pad * 2 - die));
+  const ox = (room.w - L.cols * L.size) / 2, oy = (room.h - die - L.rows * L.size) / 2;
+  const at = (i: number) => ({ x: ox + (L.cells[i].x + 0.5) * L.size, y: oy + (L.cells[i].y + 0.5) * L.size });
+  const tok = L.size * 0.6;
+  return (
+    <div ref={box} className="relative rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3]" style={boardGround(theme)} role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>
+      <BoardArt L={L} ox={ox} oy={oy} n={PREVIEW_SQUARES} kinds={PREVIEW_KINDS} theme={theme} wobble={WOBBLE} still here={null} color="#fff" />
+      <TeamArt.Provider value={teamArt(theme)}>
+        {[0, 6].map((sq, k) => (
+          <span key={k} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: at(sq).x, top: at(sq).y }}><TeamBadge colorIndex={k} size={tok} /></span>
+        ))}
+      </TeamArt.Provider>
+      <span className="absolute right-3 bottom-1.5"><Die2D value={5} size={die} rolling={false} theme={theme} /></span>
     </div>
   );
 }

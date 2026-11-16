@@ -230,14 +230,28 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
   }
   // Every picture is cut out for its piece (teacher, 2026-11-01): a photo
   // of a template page (any version) or of a drawing on paper.
-  async function upload(piece: ThemePieceSpec, file: File | undefined) {
+  // The last file picked for each piece this visit, so flipping its
+  // see-through switch cuts it again (teacher, 2026-11-16).
+  const files = useRef(new Map<string, File>());
+  const isClear = (piece: ThemePieceSpec) => draft.pieces[piece.id]?.clear ?? !isSolid(piece);
+  async function upload(piece: ThemePieceSpec, file: File | undefined, clear = isClear(piece)) {
     if (!file) return;
+    files.current.set(piece.id, file);
     setBusy(true); setStatus(t('builder.cutting'));
     try {
-      const art = await cutPhotoForPiece(file, piece, isRound(piece), isSolid(piece));
+      const art = await cutPhotoForPiece(file, piece, isRound(piece), !clear);
       if (art) { setPiece(piece.id, art); void saveOriginal(draft.id, piece.id, art); setStatus(''); } else setStatus(t('builder.cutEmpty'));
     } catch (e) { setStatus(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
+  }
+  function toggleClear(piece: ThemePieceSpec) {
+    const clear = !isClear(piece);
+    touched.current = true;
+    setDraft((d) => ({ ...d, pieces: { ...d.pieces, [piece.id]: { ...d.pieces[piece.id], clear } } }));
+    const file = files.current.get(piece.id);
+    const msg = t(clear ? 'builder.clearOn' : 'builder.solidOn', { piece: piece.label });
+    if (file && draft.pieces[piece.id]?.image) void upload(piece, file, clear);
+    else setStatus(draft.pieces[piece.id]?.image ? `${msg} ${t('builder.clearReupload')}` : msg);
   }
   async function save() {
     const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
@@ -347,7 +361,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   </div>
                   <p className="text-xs font-semibold text-muted -mt-1">{t('builder.scanHint')}</p>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
-                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
+                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} clear={isClear(p)} onClearBg={() => toggleClear(p)} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
                 </>
               )}
               {tab === 'items' && game.items && (
@@ -463,7 +477,10 @@ function Pages({ items, per }: { items: ReactNode[]; per: number }) {
   );
 }
 
-function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePieceSpec; image?: string; onFile: (f: File | undefined) => void; onDraw: () => void; onClear: () => void }) {
+// The checkerboard that means "see-through", like in drawing apps.
+const CHECKER = { backgroundColor: '#ffffff', backgroundImage: 'conic-gradient(#d9dce6 25%, transparent 0 50%, #d9dce6 0 75%, transparent 0)', backgroundSize: '10px 10px' };
+
+function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: { piece: ThemePieceSpec; image?: string; clear: boolean; onClearBg: () => void; onFile: (f: File | undefined) => void; onDraw: () => void; onClear: () => void }) {
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   return (
@@ -472,7 +489,7 @@ function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePiec
       onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}>
       <button type="button" onClick={() => ref.current?.click()} aria-label={t('builder.uploadPiece', { piece: piece.label })}
         className={`shrink-0 w-16 h-16 border-[2px] border-dashed border-border-soft flex items-center justify-center overflow-hidden ${isRound(piece) ? 'rounded-full' : 'rounded-input'}`}>
-        {image ? <img src={image} alt="" className="w-full h-full object-cover" /> : <UploadSimple weight="bold" size={22} className="text-muted" />}
+        {image ? <img src={image} alt="" className={`w-full h-full ${clear ? 'object-contain' : 'object-cover'}`} style={clear ? CHECKER : undefined} /> : <UploadSimple weight="bold" size={22} className="text-muted" />}
       </button>
       <input ref={ref} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
       <div className="min-w-0 flex-1">
@@ -480,9 +497,15 @@ function PieceCard({ piece, image, onFile, onDraw, onClear }: { piece: ThemePiec
         <p className="text-xs font-semibold text-muted line-clamp-2" title={piece.hint}>{piece.hint}</p>
         <p className="text-xs font-bold tabular-nums">{piece.width} x {piece.height}</p>
       </div>
-      <div className="shrink-0 grid gap-1.5">
-        <IconButton variant="primary" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={20} /></IconButton>
-        {image && <IconButton label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={18} /></IconButton>}
+      {/* Small buttons (teacher, 2026-11-16): draw, see-through on or off, remove. */}
+      <div className="shrink-0 grid gap-1">
+        <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
+        <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
+          className="shrink-0 w-8 h-8 rounded-full border-[2px] border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
+          style={clear ? CHECKER : { background: '#fbfcf8' }}>
+          <span className={`block w-3.5 h-3.5 rounded-[4px] border-[2px] border-border ${clear ? 'bg-transparent border-dashed' : 'bg-[#f6a5c0]'}`} />
+        </button>
+        {image && <IconButton className="!w-8 !h-8" label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={14} /></IconButton>}
       </div>
     </div>
   );

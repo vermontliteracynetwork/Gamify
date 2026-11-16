@@ -96,6 +96,10 @@ export interface PieceArt {
   color?: string;
   image?: string;
   alt?: string;
+  // See-through background on upload (teacher, 2026-11-16): paper and plain
+  // background are cut away; off keeps the picture solid. Unset follows the
+  // piece's own default (backgrounds and covers solid, the rest see-through).
+  clear?: boolean;
 }
 
 export interface GameTheme {

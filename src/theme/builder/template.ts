@@ -37,7 +37,7 @@ export function outlineBox(piece: Pick<ThemePieceSpec, 'width' | 'height'>) {
 
 // Pieces that fill their whole shape: never see-through (a cover with a
 // see-through background gets white behind it; teacher, 2026-10-31).
-const SOLID = /^(background|board|road|soil|lane|square|card-back|card-front|question-tile|answer-tile|counter|cover)$/;
+const SOLID = /^(background|board|road|soil|lane|square|space|space-lose|space-again|start|finish|card-back|card-front|question-tile|answer-tile|counter|cover)$/;
 export const isSolid = (piece: Pick<ThemePieceSpec, 'id'>) => SOLID.test(piece.id);
 
 // Round pieces (discs, team icons, sign-in pictures, the star, Bowling's

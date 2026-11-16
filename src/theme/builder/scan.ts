@@ -275,6 +275,8 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   const ow = ratio >= 1 ? max : Math.round(max * ratio), oh = ratio >= 1 ? Math.round(max / ratio) : max;
   const out = canvas(ow, oh), octx = ctx2d(out);
   if (solid) {
+    // Solid means solid: see-through parts sit on white.
+    octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, ow, oh);
     const s = Math.max(ow / bw, oh / bh);
     octx.drawImage(src, x0 + (bw - ow / s) / 2, y0 + (bh - oh / s) / 2, ow / s, oh / s, 0, 0, ow, oh);
     return piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
