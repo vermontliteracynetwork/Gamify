@@ -162,3 +162,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game cards in Pick a Game (2026-11-16): ways to play are small colored icon circles in one row, no words.
 - Game welcome screens (2026-11-16): the right column is spaced evenly (title, How to play, start), sized up on big screens.
 - Public and Pick a Game pages (2026-11-16): a little more margin on the left and right.
+- Classes (2026-11-16): student names listed right under the class name, each opening a student view (its own page) apart from the class view; a printable class and student progress report (Print or save as PDF) one tap from the class page, each student page and Reports; reports comprehensive and professional (letterhead, at a glance, students with trend, sets, games, activity by day, questions to practice, mastered, how it's measured).

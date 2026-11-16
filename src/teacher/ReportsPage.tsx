@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { DownloadSimple, Eye, SortAscending, SortDescending } from '@phosphor-icons/react';
+import { DownloadSimple, Eye, Printer, SortAscending, SortDescending } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -13,7 +13,9 @@ import { listLiveEvents } from '../live/events';
 import TeacherNav from '../ui/TeacherNav';
 import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 import { UpgradeButton } from '../billing/Upgrade';
-import { DEFAULT_SETTINGS } from '../settings/settings';
+import { supportsText } from './reportDoc';
+import { Link } from 'react-router-dom';
+import { buttonClasses } from '../ui/kit';
 import { EXAMPLE_CLASS, EXAMPLE_STUDENTS, exampleLog } from './exampleReport';
 
 // Teacher reports over the question log (development plan Stage 4): group
@@ -81,7 +83,7 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
-        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
+        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('primary', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
       <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-accent' : ''}`}>
         <Eye weight="fill" size={24} aria-hidden="true" />
         <p className="font-bold flex-1 min-w-60">{example ? t('reports.exampleOn') : t('reports.exampleOff')}</p>
@@ -151,19 +153,6 @@ export default function ReportsPage() {
       {!example && <LiveLog />}
     </main>
   );
-}
-
-// The supports a teacher set for a student, in a few words for the report.
-function supportsText(s?: Student): string {
-  const a = s?.accommodations;
-  if (!a) return '';
-  const parts: string[] = [];
-  if (a.readFirstSeconds !== undefined && a.readFirstSeconds !== DEFAULT_SETTINGS.readFirstSeconds) parts.push(t('reports.sup.read', { n: a.readFirstSeconds }));
-  if (a.triesPerQuestion !== undefined && a.triesPerQuestion !== DEFAULT_SETTINGS.triesPerQuestion) parts.push(t('reports.sup.tries', { n: a.triesPerQuestion }));
-  if (a.shuffleAnswers === false) parts.push(t('reports.sup.noShuffle'));
-  const tools = Object.entries(a.tools ?? {}).filter(([, on]) => on).map(([k]) => t(`tool.${k as 'listen'}`));
-  if (tools.length) parts.push(tools.join(', '));
-  return parts.join('; ');
 }
 
 // Locks from live games, newest first (Stage 6: Lock is logged in reports).

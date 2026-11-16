@@ -2,7 +2,7 @@ import { makeGameCode } from '../data/gameCodes';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { DiceFive, GearSix, Heart, Plus, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
+import { DiceFive, GearSix, Heart, Plus, Printer, Star, Trash, UploadSimple, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -26,8 +26,10 @@ import { readOnlyIds } from '../data/downgrade';
 import Title from '../ui/Title';
 import { LimitNote, UpgradeButton } from '../billing/Upgrade';
 import DialogFocus from '../ui/DialogFocus';
+import ReportDoc from './reportDoc';
+import type { GameTheme } from '../theme/types';
 
-type Tab = 'students' | 'sets' | 'modes';
+type Tab = 'students' | 'report' | 'sets' | 'modes';
 
 // One classroom: the class list with avatar + PIN sign-in and per-student
 // accommodations (behind the teacher PIN), assigned sets, and which play
@@ -58,20 +60,27 @@ export default function ClassPage() {
     void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
   }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
   useCrumbLabel(classroom?.name);
+  const { themes: madeThemes } = useMadeThemes();
+  const look = madeThemes.find((th) => th.id === classroom?.signInThemeId);
   if (!classroom) return null;
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
-      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })} />
+      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
+        actions={<Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('rp.classReport')}</Link>} />
+      {/* Every student's name right under the class name, each opening that
+          student's own page (teacher, 2026-11-16). */}
+      <StudentStrip classId={id} students={students} look={look} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
-        { id: 'students', label: t('class.tab.students') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
+        { id: 'students', label: t('class.tab.students') }, { id: 'report', label: t('rp.classReport') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
       {frozen && <LimitNote className="mb-4">{t('class.frozen')}</LimitNote>}
       <fieldset disabled={frozen} className="contents">
-      {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
       {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} />}
+      {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
+      {tab === 'report' && <ClassReport classId={id} className={classroom.name} students={students} />}
       {tab === 'sets' && <SetsTab classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} />}
       {tab === 'modes' && (
         <Panel className="grid gap-3">
@@ -159,6 +168,21 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
 
   return (
     <div className="grid gap-4">
+      {students.length === 0 && <Panel><p className="font-bold">{t('class.noStudents')}</p></Panel>}
+      <div className="grid sm:grid-cols-2 gap-3">
+        {students.map((s) => (
+          <Panel key={s.id} className="flex items-center gap-3 !p-3">
+            <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95"><Avatar avatar={avatarOf(s)} theme={look} size={48} /></button>
+            <span className="flex-1 min-w-0 grid">
+              <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="font-bold [overflow-wrap:anywhere] underline-offset-2 hover:underline">{s.name}</Link>
+              <span className="text-sm font-bold text-muted tabular-nums">{t('class.pinIs', { pin: s.pin ?? '' })}</span>
+            </span>
+            {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}
+            <button type="button" onClick={() => openSettings(s)} aria-label={t('class.supportsFor', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><GearSix weight="bold" size={20} /></button>
+            <button type="button" onClick={async () => { await data.deleteStudent(s.id); reload(); }} aria-label={t('class.remove', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={20} /></button>
+          </Panel>
+        ))}
+      </div>
       <Panel className="grid gap-2">
         <label htmlFor="student-names" className="font-bold">{t('class.addStudents')}</label>
         <textarea id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
@@ -169,21 +193,6 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
         </div>
         {toAdd.length > room && <div className="flex flex-wrap items-center gap-2"><p className="font-bold text-sm">{t('class.overLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
       </Panel>
-      {students.length === 0 && <Panel><p className="font-bold">{t('class.noStudents')}</p></Panel>}
-      <div className="grid sm:grid-cols-2 gap-3">
-        {students.map((s) => (
-          <Panel key={s.id} className="flex items-center gap-3 !p-3">
-            <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95"><Avatar avatar={avatarOf(s)} theme={look} size={48} /></button>
-            <span className="flex-1 min-w-0 grid">
-              <span className="font-bold truncate">{s.name}</span>
-              <span className="text-sm font-bold text-muted tabular-nums">{t('class.pinIs', { pin: s.pin ?? '' })}</span>
-            </span>
-            {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}
-            <button type="button" onClick={() => openSettings(s)} aria-label={t('class.supportsFor', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><GearSix weight="bold" size={20} /></button>
-            <button type="button" onClick={async () => { await data.deleteStudent(s.id); reload(); }} aria-label={t('class.remove', { name: s.name })} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={20} /></button>
-          </Panel>
-        ))}
-      </div>
       {asking && (
         <Dialog title={t('class.supportsFor', { name: asking.name })} onClose={() => setAsking(null)}>
           <PinGate onUnlock={() => { setUnlocked(true); setEditing(asking); setAsking(null); }} />
@@ -198,7 +207,7 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
 // A student's avatar and PIN (teacher, 2026-10-26): a built-in picture on
 // every plan, or an uploaded picture on Plus and Pro; a PIN the teacher types
 // or rolls, different from everyone else's on the list.
-function AvatarDialog({ student, others, look, onClose }: { student: Student; others: Student[]; look?: Parameters<typeof Avatar>[0]['theme']; onClose: () => void }) {
+export function AvatarDialog({ student, others, look, onClose }: { student: Student; others: Student[]; look?: Parameters<typeof Avatar>[0]['theme']; onClose: () => void }) {
   const tier = useTier();
   const [avatar, setAvatar] = useState(avatarOf(student));
   const [pin, setPin] = useState(student.pin ?? '');
@@ -258,7 +267,7 @@ function SignInLook({ classroom, onChange }: { classroom: Classroom; onChange: (
   );
 }
 
-function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+export function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={title}>
       <DialogFocus onClose={onClose} />
@@ -274,7 +283,7 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
 }
 
 // Per-student accommodations (IEP-style), applied when they sign in.
-function SupportsDialog({ student, onClose }: { student: Student; onClose: () => void }) {
+export function SupportsDialog({ student, onClose }: { student: Student; onClose: () => void }) {
   const base = { readFirstSeconds: DEFAULT_SETTINGS.readFirstSeconds, triesPerQuestion: DEFAULT_SETTINGS.triesPerQuestion, shuffleAnswers: DEFAULT_SETTINGS.shuffleAnswers, tools: DEFAULT_SETTINGS.tools };
   const [a, setA] = useState({ ...base, ...student.accommodations, tools: { ...base.tools, ...student.accommodations?.tools } });
   const [modes, setModes] = useState<PlayMode[]>(student.allowedModes ?? ALL_MODES);
@@ -414,5 +423,39 @@ function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: st
       )}
       {value.length > 0 && <p className="text-sm font-bold" aria-live="polite">{t('class.themesPicked', { count: value.length, max: MAX_THEME_CHOICES })}</p>}
     </fieldset>
+  );
+}
+
+// The class's students in a row of name chips under the class name; each one
+// opens that student's page (teacher, 2026-11-16). The current one is lit.
+export function StudentStrip({ classId, students, current, look }: { classId: string; students: Student[]; current?: string; look?: GameTheme }) {
+  if (!students.length) return null;
+  return (
+    <nav aria-label={t('cv.allStudents')} className="flex flex-wrap gap-2 mb-5">
+      {[...students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
+        <Link key={s.id} to={`/teacher/classes/${classId}/students/${s.id}`} aria-current={s.id === current ? 'page' : undefined} aria-label={t('cv.openStudent', { name: s.name })}
+          className={`inline-flex items-center gap-1.5 min-h-10 pl-1 pr-3 rounded-pill border-[2px] font-bold text-sm no-underline text-text hover-pop ${s.id === current ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+          <Avatar avatar={avatarOf(s)} theme={look} size={30} />{s.name}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+// The class view of the progress report, the same one that prints.
+function ClassReport({ classId, className, students }: { classId: string; className: string; students: Student[] }) {
+  const { value: log = [] } = useAsync(() => data.listQuestionLog({ classroomId: classId }), [classId]);
+  const { value: mine = [] } = useMySets();
+  const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
+  const names = {
+    student: (sid?: string) => students.find((s) => s.id === sid)?.name ?? t('reports.noStudent'),
+    set: (x?: string) => sets.find((s) => s.id === x)?.name ?? t('reports.noSet'),
+    game: (g: string) => GAMES.find((x) => x.id === g)?.name ?? g,
+  };
+  return (
+    <div className="grid gap-3">
+      <Link to={`/teacher/reports/print?class=${classId}`} className={buttonClasses('primary', 'justify-self-start')}><Printer weight="bold" size={18} />{t('rp.print')}</Link>
+      <ReportDoc log={log} students={students} names={names} className={className} />
+    </div>
   );
 }
