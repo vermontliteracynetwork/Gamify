@@ -27,7 +27,7 @@ export default function PublicHome() {
   const reduce = useReducedMotion();
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10">
+      <main className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-12 pt-10">
         <section className="grid lg:grid-cols-[1.1fr_1fr] gap-8 items-center">
           <motion.div initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="grid gap-5">
             <h1 className="title-bubble text-5xl sm:text-6xl leading-tight"><Title text={t('public.hero')} /></h1>

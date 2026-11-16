@@ -2577,8 +2577,8 @@ export const en = {
   'cq.built': 'First to the finish!',
   // Pinball (teacher design, 2026-10-31; replaced Peg Drop).
   'pb.how1': 'Answer the question right.',
-  'pb.how2': 'Pick a lane, then stop the power bar to shoot.',
-  'pb.how3': 'Land in a pocket for its points. Bumpers light the lights: all six lit is a bonus!',
+  'pb.how2': 'Pick a lane and the ball shoots right away.',
+  'pb.how3': 'Pegs score and sing, stars bring power-ups, and pockets give big points!',
   'pb.rounds': 'Rounds',
   'pb.roundsHint': 'Turns each team takes. One turn is one shot.',
   'pb.roundsHintSolo': 'How many shots you take.',
