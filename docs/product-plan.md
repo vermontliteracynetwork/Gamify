@@ -1058,6 +1058,8 @@ start to build?" Claudia's gap review of everything above.
 
 ## 10. Marketing ideas (running list)
 
+- Peek before you pick: double-tap any question set card to flip it and see question 1 with its answers and the right one marked, so teachers choose in seconds (2026-11-16).
+- What you design is what you see: every game's Theme Builder preview is the real play screen wearing your art (2026-11-16).
 - Something to look forward to every week: each game has a featured power-up that changes weekly, and surprises like Game Show's golden card and Cast and Catch's catch of the day keep every round fresh (2026-11-13).
 - No dead time: students waiting for the class to join play with bouncy pieces that sing a little tune (2026-11-13).
 

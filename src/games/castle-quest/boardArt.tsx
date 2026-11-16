@@ -29,6 +29,7 @@ export function boardGround(theme: GameTheme): CSSProperties {
 export function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, color }: { L: Layout; ox: number; oy: number; n: number; kinds: SpaceKind[]; theme: GameTheme; wobble: { r: number; dx: number; dy: number }[]; still: boolean; here: number | null; color: string }) {
   const s = L.size;
   const used = new Set(L.cells.map((c) => `${c.x},${c.y}`));
+  const regular = ['space', 'space-2', 'space-3', 'space-4'].map((id) => pieceImage(theme, id) ?? pieceImage(theme, 'space'));
   const art = { regular: pieceImage(theme, 'space'), lose: pieceImage(theme, 'space-lose'), again: pieceImage(theme, 'space-again'), start: pieceImage(theme, 'start'), finish: pieceImage(theme, 'finish') };
   // The empty spots between the lanes get little doodles that bob.
   const blanks: { x: number; y: number; k: number }[] = [];
@@ -46,7 +47,7 @@ export function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, colo
       {L.cells.map((c, i) => {
         const w = wobble[i % wobble.length];
         const kind: SpaceKind | 'start' | 'finish' = i === 0 ? 'start' : i === n - 1 ? 'finish' : kinds[i] ?? 'regular';
-        const img = art[kind];
+        const img = kind === 'regular' ? regular[i % 4] : art[kind];
         const fill = kind === 'start' ? C.sage : kind === 'finish' ? C.yellow : kind === 'lose' ? C.ink : kind === 'again' ? C.cream : SQUARE_COLORS[i % SQUARE_COLORS.length];
         const lit = here === i;
         return (

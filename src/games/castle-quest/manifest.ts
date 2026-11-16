@@ -13,13 +13,18 @@ export const castleQuestManifest: GameManifest = {
   // six sides of the die on one page, the background and every power-up.
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'space', label: 'Regular square', width: 256, height: 256, hint: 'Most squares on the board. Square, 1 to 1.' },
+    // Four regular squares that take turns along the board, like Classic's
+    // four colors (teacher, 2026-11-16).
+    { id: 'space', label: 'Regular square 1', width: 256, height: 256, hint: 'Regular squares take turns 1, 2, 3, 4 along the board. Square, 1 to 1.' },
+    { id: 'space-2', label: 'Regular square 2', width: 256, height: 256, hint: 'The second regular square. Left empty, it uses square 1. Square, 1 to 1.' },
+    { id: 'space-3', label: 'Regular square 3', width: 256, height: 256, hint: 'The third regular square. Left empty, it uses square 1. Square, 1 to 1.' },
+    { id: 'space-4', label: 'Regular square 4', width: 256, height: 256, hint: 'The fourth regular square. Left empty, it uses square 1. Square, 1 to 1.' },
     { id: 'space-lose', label: 'Lose a turn square', width: 256, height: 256, hint: 'Land here and skip your next turn. Square, 1 to 1.' },
     { id: 'space-again', label: 'Roll again square', width: 256, height: 256, hint: 'Land here and roll one more time. Square, 1 to 1.' },
     { id: 'start', label: 'Start square', width: 256, height: 256, hint: 'Where every piece begins. Square, 1 to 1.' },
     { id: 'finish', label: 'Finish square', width: 256, height: 256, hint: 'The last square. First one here wins. Square, 1 to 1.' },
     { id: 'dice', label: 'Die (all six sides)', width: 1536, height: 256, hint: 'One page with all six sides in a row, 1 to 6 from left to right. Draw the dots your way, but each side keeps its number of dots.' },
-    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The round piece for team ${i + 1}` })),
+    ...Array.from({ length: 10 }, (_, i) => ({ id: `team-${i + 1}`, label: `Team ${i + 1} piece`, width: 256, height: 256, hint: `The round piece for player ${i + 1}. Up to 10 players.` })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

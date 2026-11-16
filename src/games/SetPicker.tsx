@@ -1,6 +1,8 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TeachCards } from './TeachCard';
-import { CaretLeft, CaretRight, CheckCircle } from '@phosphor-icons/react';
+import { CheckCircle } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
+import { useSettings } from '../settings/SettingsContext';
 import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
 import { isPlayable } from '../engine/questions';
@@ -10,46 +12,45 @@ import SetFilterBar from './SetFilterBar';
 import { LIBRARY } from '../data/library';
 
 const LIBRARY_IDS = new Set(LIBRARY.map((s) => s.id));
+const COL_GAP = 18;
+const COL_MIN = 230;
 
 // Pick one question set (or up to `max` for games like the category grid)
-// from square cards, the same menu in every game (teacher, 2026-11-01: no
-// cover pictures, no "Pick a question set" line), with filters. The cards
-// fill whole rows, 4, 5 or 6 across, whatever fits, and their rows always
-// fit the setup box with no scroll (teacher, 2026-11-01). Sets still missing their details
-// (subject, grades, tags, standards) can't be picked until they're added.
+// from cards, the same menu in every game, with filters. The cards sit in an
+// uneven gallery that scrolls under the locked tabs and search (teacher,
+// 2026-11-16): every name shown whole inside its card, never cut short, a
+// teacher's cover at the shape it was uploaded, and a double-tap turns a card
+// over to show question 1. Sets still missing their details (subject,
+// grades, tags, standards) can't be picked until they're added.
 export default function SetPicker({ sets, value, onChange, max = 1 }: {
   sets: QuestionSet[]; value: string[]; onChange: (ids: string[]) => void; max?: number;
 }) {
   const [filter, setFilter] = useState<SetFilter>({});
+  const still = useSettings().settings.motion === 'still';
   // The picked sets' teach cards, shown before play.
   const teach = useContext(TeachCards);
   useEffect(() => {
     teach?.(value.map((id) => sets.find((s) => s.id === id)).filter((s): s is QuestionSet => !!s?.teachCard?.text.trim()).map((s) => ({ name: s.name, card: s.teachCard! })));
   }, [value.join(','), sets]); // eslint-disable-line react-hooks/exhaustive-deps
   const wrap = useRef<HTMLDivElement>(null);
-  const gridEl = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ cols: 4, rows: 2, size: 240, h: 170 });
+  const gallery = useRef<HTMLDivElement>(null);
+  // The gallery scrolls on its own under the locked tabs and search
+  // (teacher, 2026-11-16: a vertical scroll, not pages). In the setup box it
+  // takes the height left; elsewhere about two thirds of the screen.
+  const [high, setHigh] = useState<number | null>(null);
+  const [cols, setCols] = useState(3);
   useLayoutEffect(() => {
     const measure = () => {
-      const w = wrap.current, g = gridEl.current;
+      const w = wrap.current, g = gallery.current;
       if (!w || !g) return;
-      // The room the setup box gives its body (the same sum the setup
-      // pages use), less what sits above the cards and the page arrows.
+      // Cards in fixed columns, so turning one over never shuffles the others.
+      const c = Math.max(1, Math.floor((g.clientWidth - 16 + COL_GAP) / (COL_MIN + COL_GAP)));
+      setCols((x) => (x === c ? x : c));
       const card = w.closest('section.setup-roomy') as HTMLElement | null;
-      let room = Infinity;
-      if (card) {
-        const maxH = parseFloat(getComputedStyle(card).maxHeight) || card.clientHeight;
-        const head = (card.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0;
-        const foot = (card.lastElementChild as HTMLElement | null)?.offsetHeight ?? 0;
-        room = maxH - head - foot - 48 - 6;
-      }
-      // Outside the setup box (class and activity pages): two rows.
-      // The page arrows sit beside the cards, not under them, so the cards
-      // get all the height (teacher, 2026-11-01: "the cards are the priority").
-      const high = card ? room - (g.offsetTop - w.offsetTop) - 4 : MAX * 2 + GAP;
-      const width = w.clientWidth - 2 * (ARROW + GAP);
-      const next = layout(width, high);
-      setFit((f) => (f.cols === next.cols && f.rows === next.rows && Math.abs(f.size - next.size) < 1 && Math.abs(f.h - next.h) < 1 ? f : next));
+      const body = card?.children[1] as HTMLElement | undefined;
+      if (!body) { setHigh(null); return; }
+      const next = Math.max(220, Math.floor(body.getBoundingClientRect().bottom - g.getBoundingClientRect().top - 12));
+      setHigh((h) => (h !== null && Math.abs(h - next) < 1 ? h : next));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -57,8 +58,6 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     window.addEventListener('resize', measure);
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
-  const PAGE = fit.cols * fit.rows;
-  const compact = fit.h < 185 || fit.size < 240;
   // My sets and public (ready-made) sets on their own tabs (teacher, 2026-11-06).
   const ready = sets.filter((s) => missingDetails(s).length === 0);
   const mineReady = ready.filter((s) => !LIBRARY_IDS.has(s.id));
@@ -66,112 +65,105 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   const inTab = tab === 'mine' ? mineReady : ready.filter((s) => LIBRARY_IDS.has(s.id));
   const shown = inTab.filter((s) => matchesFilter(s, filter));
   const hidden = tab === 'mine' ? sets.filter((s) => !LIBRARY_IDS.has(s.id)).length - mineReady.length : 0;
-  // Sets come in pages (teacher, 2026-10-31), opening on the page with the pick.
-  const pages = Math.max(1, Math.ceil(shown.length / PAGE));
-  const [page, setPage] = useState(() => Math.max(0, Math.floor(shown.findIndex((s) => value.includes(s.id)) / PAGE)));
-  useEffect(() => { if (page >= pages) setPage(pages - 1); }, [page, pages]);
-  // When the cards across change with the screen, stay on the picked set.
-  useEffect(() => { const k = shown.findIndex((s) => value.includes(s.id)); if (k >= 0) setPage(Math.floor(k / PAGE)); }, [PAGE]); // eslint-disable-line react-hooks/exhaustive-deps
-  const onPage = shown.slice(page * PAGE, page * PAGE + PAGE);
+  // Double-tap (or double-click) a card to turn it over and see question 1
+  // with its answers (teacher, 2026-11-16).
+  const [flipped, setFlipped] = useState<Set<string>>(new Set());
+  const lastTap = useRef<{ id: string; at: number } | null>(null);
+  function tap(s: QuestionSet, on: boolean) {
+    const now = Date.now(), last = lastTap.current;
+    if (last && last.id === s.id && now - last.at < 400) {
+      lastTap.current = null;
+      setFlipped((f) => { const n = new Set(f); if (n.has(s.id)) n.delete(s.id); else n.add(s.id); return n; });
+      return;
+    }
+    lastTap.current = { id: s.id, at: now };
+    if (!on || max > 1) onChange(max === 1 ? [s.id] : on ? value.filter((x) => x !== s.id) : value.length < max ? [...value, s.id] : value);
+  }
   return (
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
         <div role="tablist" aria-label={t('sets.tabs')} className="inline-flex shrink-0 p-0.5 rounded-pill border-[2px] border-border bg-surface">
           {(['mine', 'library'] as const).map((v) => (
-            <button key={v} type="button" role="tab" aria-selected={tab === v} onClick={() => { setTab(v); setPage(0); }}
+            <button key={v} type="button" role="tab" aria-selected={tab === v} onClick={() => setTab(v)}
               className={`min-h-8 px-3 rounded-pill text-sm font-bold motion-safe:transition-colors ${tab === v ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(v === 'mine' ? 'sets.mine' : 'sets.library')}</button>
           ))}
         </div>
-        <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={(f) => { setFilter(f); setPage(0); }} sets={inTab} /></div>
+        <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
-      <div className="flex items-center justify-center gap-2.5">
-      <PageArrow side="prev" show={pages > 1} disabled={page === 0} onClick={() => setPage(page - 1)} />
-      <div ref={gridEl} className="grid" style={{ gap: GAP, gridTemplateColumns: `repeat(${fit.cols}, ${fit.size}px)`, gridAutoRows: `${fit.h}px` }}>
-        {onPage.map((s) => {
-          const on = value.includes(s.id);
-          const art = ART[s.subject ?? 'Other'];
-          const I = art.icon;
-          return (
-            // A set card like a game library card (teacher, 2026-11-06): a
-            // colored picture band with the subject's icon, then the name and
-            // small chips for grades and how many questions.
-            <button key={s.id} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
-              aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
-              onClick={() => onChange(max === 1 ? [s.id] : on ? value.filter((x) => x !== s.id) : value.length < max ? [...value, s.id] : value)}
-              className={`group relative rounded-panel border-[2.5px] border-border text-left grid grid-rows-[auto_1fr_auto] gap-2 bg-surface motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${compact ? 'p-3' : 'p-4'} ${on ? 'ring-4 ring-[#b4c4fb] -translate-y-1' : ''}`}
-              style={{ boxShadow: on ? '0 6px 0 #000, 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.08)' }}>
-              {/* No cover picture unless the teacher added one (teacher, 2026-11-13):
-                  just a small subject badge, the full name and the details. */}
-              <span className="flex items-center gap-2 min-w-0 pr-8">
-                <span className="w-8 h-8 shrink-0 rounded-full border-[2px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }}>
-                  <I weight="fill" size={17} color={art.ink} aria-hidden="true" />
-                </span>
-                <span className="text-xs font-bold uppercase tracking-wide text-muted">{s.subject ?? t('sets.otherSubject')}</span>
-              </span>
-              {on && (
-                <span className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
-                  {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
-                </span>
-              )}
-              <span className={`font-bold leading-snug self-start break-words text-balance ${compact ? 'text-base' : 'text-lg'}`}>{s.name || t('sets.untitled')}</span>
-              <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
-                <span className="rounded-pill border-[1.5px] border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                <span className="rounded-pill border-[1.5px] border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
-      <span className="grid justify-items-center gap-1">
-        <PageArrow side="next" show={pages > 1} disabled={page >= pages - 1} onClick={() => setPage(page + 1)} />
-        {pages > 1 && <span className="text-xs font-bold tabular-nums whitespace-nowrap" aria-live="polite" aria-label={t('sets.pageOf', { n: page + 1, total: pages })}>{page + 1} / {pages}</span>}
-      </span>
+      <div ref={gallery} className="overflow-y-auto overscroll-contain -mx-4 px-4 pt-2 pb-4" style={{ maxHeight: high ?? '68vh' }}>
+        {/* An uneven gallery (teacher, 2026-11-16): each card as tall as its
+            words and cover need, with room between cards. */}
+        <div className="grid items-start" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: COL_GAP }}>
+          {Array.from({ length: cols }, (_, col) => (
+          <div key={col} className="grid gap-[18px] min-w-0">
+          {shown.filter((_, k) => k % cols === col).map((s) => {
+            const on = value.includes(s.id);
+            const art = ART[s.subject ?? 'Other'];
+            const I = art.icon;
+            const back = flipped.has(s.id);
+            const q = s.questions.find(isPlayable);
+            return (
+              <div key={s.id} className="[perspective:900px]">
+                <motion.button key={back ? 'back' : 'front'} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
+                  initial={still ? false : { rotateY: back ? -90 : 90 }} animate={{ rotateY: 0 }} transition={{ duration: 0.28, ease: 'easeOut' }}
+                  aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
+                  aria-description={t('sets.flipHint')} title={t('sets.flipHint')}
+                  onClick={() => tap(s, on)}
+                  className={`group relative w-full rounded-panel border-[2.5px] border-border text-left grid gap-2.5 p-4 bg-surface motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-[#b4c4fb] -translate-y-1' : ''}`}
+                  style={{ boxShadow: on ? '0 6px 0 #000, 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.08)' }}>
+                  {on && (
+                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
+                      {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
+                    </span>
+                  )}
+                  {!back ? (
+                    <>
+                      {/* A small subject tag (teacher, 2026-11-16). */}
+                      <span className="flex items-center gap-1.5 min-w-0 pr-9">
+                        <span className="w-6 h-6 shrink-0 rounded-full border-[1.5px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }}>
+                          <I weight="fill" size={13} color={art.ink} aria-hidden="true" />
+                        </span>
+                        <span className="text-[11px] font-bold uppercase tracking-wide text-muted">{s.subject ?? t('sets.otherSubject')}</span>
+                      </span>
+                      {/* A cover keeps the shape it was uploaded in. */}
+                      {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-[2px] border-border" />}
+                      <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere]">{s.name || t('sets.untitled')}</span>
+                      <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
+                        <span className="rounded-pill border-[1.5px] border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                        <span className="rounded-pill border-[1.5px] border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-muted pr-9">{t('sets.question1')}</span>
+                      {q?.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="w-full h-auto max-h-28 object-contain rounded-input" />}
+                      <span className="text-sm font-bold leading-snug break-words [overflow-wrap:anywhere]">{q ? q.prompt : t('sets.noQuestions')}</span>
+                      {q && (
+                        <ol className="grid gap-1 list-none p-0 m-0">
+                          {q.choices.map((c, k) => {
+                            const right = k === q.correctIndex;
+                            return (
+                              <li key={k} className={`flex items-start justify-end gap-1.5 text-right text-xs font-semibold leading-snug rounded-input border-[1.5px] px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
+                                <span className="min-w-0">{c}</span>
+                                {right && <CheckCircle weight="fill" size={15} color="#1f7a45" className="shrink-0 mt-px" aria-label={t('sets.correct')} />}
+                              </li>
+                            );
+                          })}
+                        </ol>
+                      )}
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            );
+          })}
+          </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
-
-const GAP = 10;
-const ARROW = 44;
-// Big cards with big text are the main view (teacher, 2026-11-06).
-const MIN = 210; // the narrowest card that still reads (name and details)
-const MAX = 320;
-const H_MIN = 165;
-const H_MAX = 210;
-
-// A page arrow beside the cards (space kept even when there is one page).
-function PageArrow({ side, show, disabled, onClick }: { side: 'prev' | 'next'; show: boolean; disabled: boolean; onClick: () => void }) {
-  const label = t(side === 'prev' ? 'sets.prevPage' : 'sets.nextPage');
-  if (!show) return <span className="w-11 shrink-0" aria-hidden="true" />;
-  return (
-    <button type="button" data-tip={label} aria-label={label} disabled={disabled} onClick={onClick}
-      className="w-11 h-11 shrink-0 rounded-full border-[2px] border-border bg-surface flex items-center justify-center disabled:opacity-40">
-      {side === 'prev' ? <CaretLeft weight="bold" size={20} /> : <CaretRight weight="bold" size={20} />}
-    </button>
-  );
-}
-
-// The most cards across (6, 5, 4...) that keep each square readable, in as
-// many rows (3, 2, then 1) as the height holds, so rows are always full and
-// tall screens have no empty space.
-export function layout(width: number, high: number) {
-  // Wide cards that show every word (teacher, 2026-11-13): as many across as
-  // keep a card at least MIN wide, in as many rows as the height holds.
-  let best: { cols: number; rows: number; size: number; h: number } | null = null, score = 0;
-  for (const rows of [3, 2, 1]) {
-    const h = Math.floor(Math.min(H_MAX, (high - GAP * (rows - 1)) / rows));
-    if (h < H_MIN) continue;
-    for (const cols of [6, 5, 4, 3, 2]) {
-      const size = Math.floor(Math.min(MAX, (width - GAP * (cols - 1)) / cols));
-      if (size < MIN) continue;
-      const sc = rows * cols * Math.min(size, 260) * h;
-      if (sc > score) { score = sc; best = { cols, rows, size, h }; }
-    }
-  }
-  if (best) return best;
-  const size = Math.max(160, Math.floor(Math.min(MAX, width)));
-  return { cols: Math.max(1, Math.min(4, Math.floor((width + GAP) / (size + GAP)))), rows: 1, size, h: Math.max(140, Math.min(H_MAX, high)) };
 }

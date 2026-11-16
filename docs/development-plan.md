@@ -376,4 +376,8 @@ production release.
   Match Up, Memory Match and Flashcards, each drawn by its game's own art file
   (`src/theme/builder/previews/<game>.tsx`). Lunch Rush, Road Hop, Match Up,
   Memory Match and Flashcards are still later games, so their builder pages
-  open once they launch.
+  open once they launch. Also: white How to play card with depth on every
+  game; Board Game takes up to 10 players and four regular square designs;
+  question set picker is now a scrolling uneven gallery (full names, covers
+  at their own shape, small subject tag, locked search) and a double-tap
+  flips a card to question 1 with the right answer marked.

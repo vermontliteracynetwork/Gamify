@@ -425,7 +425,7 @@ export default function CastleQuest() {
           ) },
           versus
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
-            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={6} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
@@ -445,8 +445,11 @@ export default function CastleQuest() {
               const here = pos[i] ?? 0;
               const same = turns.players.map((_, k) => k).filter((k) => (pos[k] ?? 0) === here);
               const slot = same.indexOf(i);
-              const tok = L.size * (same.length > 1 ? 0.44 : 0.6);
-              const off = same.length > 1 ? { x: ((slot % 2) - 0.5) * L.size * 0.42, y: (Math.floor(slot / 2) - (same.length > 2 ? 0.5 : 0)) * L.size * 0.42 } : { x: 0, y: 0 };
+              // Up to 10 pieces share a square in a small grid (teacher, 2026-11-16).
+              const per = Math.ceil(Math.sqrt(same.length)), lines = Math.ceil(same.length / per);
+              const step = (L.size * 0.84) / Math.max(per, lines);
+              const tok = same.length > 1 ? step * 1.02 : L.size * 0.6;
+              const off = same.length > 1 ? { x: ((slot % per) - (per - 1) / 2) * step, y: (Math.floor(slot / per) - (lines - 1) / 2) * step } : { x: 0, y: 0 };
               const sp = at(here);
               const sw = swirl && swirl.lifted[i] ? swirl : null;
               const on = i === turns.turn && phase === 'play';
@@ -616,10 +619,12 @@ function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: bool
 
 // Who is closest to the finish: a round badge and a progress line each.
 function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: TurnState; pos: number[]; finish: number; playing: boolean; shield: boolean[]; skip: boolean[]; still: boolean }) {
+  // Seven to ten players: smaller rows, so the list and the die still fit.
+  const many = turns.players.length > 6;
   return (
     <aside className="score-card grid min-w-0 overflow-hidden" aria-label={t('cq.race')}>
       <h2 className="score-head hidden lg:flex"><FlagCheckered weight="fill" size={16} />{t('cq.firstToFinish')}</h2>
-      <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid gap-2 list-none m-0 p-2 lg:p-3">
+      <ol className={`flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid list-none m-0 p-2 lg:p-3 ${many ? 'gap-1.5' : 'gap-2'}`}>
         {turns.players.map((p, i) => {
           const on = playing && i === turns.turn;
           const f = Math.max(0, Math.min(1, (pos[i] ?? 0) / finish));
@@ -628,8 +633,8 @@ function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: Tur
             <motion.li key={p.id} aria-current={on ? 'true' : undefined} aria-label={t('cq.raceRow', { name: p.name, n: Math.round(f * 100) })}
               animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
               transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
-              className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-1 rounded-input border-[2px] p-2 motion-safe:transition-transform motion-safe:hover:scale-[1.03] ${on ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}>
-              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={46} />
+              className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-1 rounded-input border-[2px] ${many ? 'p-1 gap-y-0.5 text-sm' : 'p-2'} motion-safe:transition-transform motion-safe:hover:scale-[1.03] ${on ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}>
+              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={many ? 30 : 46} />
                 {shield[i] && <ShieldCheck weight="fill" size={18} className="absolute -right-1 -bottom-1 text-[#3d7fb8] bg-surface rounded-full" aria-label={t('cq.shielded')} />}
                 {skip[i] && <HourglassHigh weight="fill" size={18} className="absolute -left-1 -bottom-1 bg-surface rounded-full" aria-label={t('cq.losesNext')} />}
               </span>

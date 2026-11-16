@@ -61,7 +61,8 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
         <section aria-label={t('welcome.how')} className="flex-1 min-h-0 grid content-center">
-          <div className="rounded-panel border-[2px] border-border-soft px-5 py-4 grid gap-3">
+          {/* White with a little depth, on every game (teacher, 2026-11-16). */}
+          <div className="rounded-panel border-[2px] border-border-soft bg-white px-5 py-4 grid gap-3" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('welcome.how')}</h2>
             <ol className="grid gap-3 list-none p-0 m-0">
               {steps.map((s, i) => (
