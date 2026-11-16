@@ -141,12 +141,12 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
         const on = value === o.value;
         return (
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.title} onClick={() => onChange(o.value)}
-            className={`group relative rounded-panel border-[2.5px] border-border overflow-hidden text-left grid bg-surface motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
+            className={`group relative rounded-panel border-[2.5px] border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
             style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-            <span className="block h-[clamp(9rem,34vh,20rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
+            <span className="block h-[clamp(5rem,30vh,18rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
             <span className="px-3 py-2 grid gap-0.5">
-              <span className="font-display text-lg font-bold leading-tight">{o.title}</span>
-              <span className="font-semibold text-sm text-muted leading-snug">{o.hint}</span>
+              <span className="font-display text-base font-bold leading-tight">{o.title}</span>
+              <span className="font-semibold text-xs text-muted leading-snug">{o.hint}</span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

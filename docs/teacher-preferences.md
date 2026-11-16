@@ -163,3 +163,7 @@ line that fits, and add each new preference the same turn she says it.
 - Game welcome screens (2026-11-16): the right column is spaced evenly (title, How to play, start), sized up on big screens.
 - Public and Pick a Game pages (2026-11-16): a little more margin on the left and right.
 - Classes (2026-11-16): student names listed right under the class name, each opening a student view (its own page) apart from the class view; a printable class and student progress report (Print or save as PDF) one tap from the class page, each student page and Reports; reports comprehensive and professional (letterhead, at a glance, students with trend, sets, games, activity by day, questions to practice, mastered, how it's measured).
+- THE SCREEN-SIZE RULE (2026-11-16): every screen is sized to the device it is on, width and height, with no scrolling on game screens and menus, on every browser size (short laptop windows, zoomed browsers, iPads, smart boards). All sizes in rem; the root font follows the screen (src/index.css). Test at a short laptop window (1190 x 540) as well as 1440 x 900, 1920 x 1080 and iPad.
+- Top bar thinner on every screen; setup Back/Next buttons small so the cards lead; the set filter/search bar compact; question text and answers scale with the screen height.
+- Setup board choices are white cards on the purple background, no big white panel around them.
+- Pinball and Cast and Catch hidden from the site for now (2026-11-16); all their code stays.

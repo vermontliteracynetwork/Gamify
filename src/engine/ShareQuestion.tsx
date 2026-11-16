@@ -108,13 +108,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="w-full h-full overflow-y-auto bg-surface px-6 py-6 sm:px-14 sm:py-10 grid gap-6 content-center"
+        className="w-full h-full overflow-y-auto bg-surface px-6 py-[clamp(0.75rem,3vh,2.5rem)] sm:px-14 grid gap-[clamp(0.5rem,2.2vh,1.5rem)] content-center"
       >
         <div className="flex items-center gap-3 flex-wrap">
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
           {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
-            <span className="font-display text-3xl sm:text-4xl font-bold">{t('share.whoseTurn', { name: player.name })}</span>
+            <span className="font-display text-[clamp(1.2rem,4vh,2.25rem)] font-bold">{t('share.whoseTurn', { name: player.name })}</span>
             {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
@@ -135,7 +135,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className="font-body text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-balance">{q.prompt}</h2>
+        <h2 className="font-body text-[clamp(1.4rem,min(6vh,4.5vw),3.75rem)] font-bold leading-tight text-balance">{q.prompt}</h2>
 
         <div className="grid sm:grid-cols-2 gap-3">
           {q.choices.map((c, i) => {
@@ -147,7 +147,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 transition={{ duration: 0.4 }}
                 whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
                 whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-24 sm:min-h-32 px-5 py-4 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl text-left active:scale-[0.98] disabled:cursor-default
+                className={`min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-[clamp(1.1rem,min(4.2vh,2.8vw),1.9rem)] text-left active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center font-display text-2xl">

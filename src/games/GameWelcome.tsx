@@ -47,12 +47,12 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
     // description and the ways to play, a framed "How to play" list, and a
     // big start button whose bottom lines up with the cover's bottom.
     <motion.section ref={box} style={{ marginTop: 'var(--menu-offset, 0px)' }} initial={settings.motion === 'still' ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="menu-panel w-full max-w-[112rem] mx-auto px-2 sm:px-6 grid gap-x-12 gap-y-6 items-stretch content-start lg:grid-cols-[minmax(0,calc((100dvh-7.5rem)*1.613))_minmax(28rem,1fr)]">
+      className="menu-panel w-full max-w-[112rem] mx-auto px-2 sm:px-6 grid gap-x-12 gap-y-6 items-stretch content-start lg:grid-cols-[minmax(0,calc((100dvh-6.5rem)*1.613))_minmax(28rem,1fr)]">
       {/* One standard start screen for every game (teacher, 2026-10-31): the
           Gamify cover, never a theme's, so menus need no custom design. */}
       <h1 className="lg:hidden title-bubble text-3xl sm:text-4xl pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
       <div className="min-w-0 self-start">
-        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[calc(100dvh-7.5rem)] max-lg:max-h-[38vh] mx-auto rounded-panel border-[2.5px] border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
+        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[calc(100dvh-6.5rem)] max-lg:max-h-[38vh] mx-auto rounded-panel border-[2.5px] border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
       </div>
       {/* Three even groups, title, How to play, start (teacher, 2026-11-16:
           "more professionally spaced"), sized up to fill the column. */}
