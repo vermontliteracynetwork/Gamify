@@ -371,6 +371,9 @@ production release.
 - 2026-11-16: Theme Builder: smaller draw and trash buttons on each piece
   card, a new see-through switch between them (re-cuts the last upload when
   flipped), and the Board Game preview is now the game's own board, squares,
-  team pieces and die (shared `castle-quest/boardArt.tsx`). Next: real game
-  previews for the games still on the generic stand-in (Bubble Pop, Cast and
-  Catch, Lunch Rush, Pinball, Road Hop, Match Up, Memory Match, Flashcards).
+  team pieces and die (shared `castle-quest/boardArt.tsx`). Same day: real
+  previews for Bubble Pop, Cast and Catch, Lunch Rush, Pinball, Road Hop,
+  Match Up, Memory Match and Flashcards, each drawn by its game's own art file
+  (`src/theme/builder/previews/<game>.tsx`). Lunch Rush, Road Hop, Match Up,
+  Memory Match and Flashcards are still later games, so their builder pages
+  open once they launch.

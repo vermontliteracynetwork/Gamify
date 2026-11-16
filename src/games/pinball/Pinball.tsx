@@ -24,7 +24,7 @@ import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
+import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
 import Title from '../../ui/Title';
@@ -36,20 +36,17 @@ import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
 import { useSavedSetup } from '../useSavedSetup';
 import { pinballManifest } from './manifest';
-import { frameAt, H, LANE_H, LANE_Y, LAUNCH, PEG_R, pegCount, pickValues, pocketCount, POCKET_H, POCKET_TOP, scatter, SHOT_POWER, simulateShot, W, WALL, ZONE_X, ZONES, type Pt, type Shot, type ShotEvent } from './table';
+import { BallArt, Flippers, LANE_COLORS, PegArt, pegFill, Plunger, pocketStyle, StarArt, TableDecor, TableDefs } from './art';
+import { frameAt, H, LANE_H, LANE_Y, LAUNCH, pegCount, pickValues, pocketCount, POCKET_H, POCKET_TOP, scatter, SHOT_POWER, simulateShot, W, WALL, ZONE_X, ZONES, type Pt, type Shot, type ShotEvent } from './table';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'shot' | 'result';
 type Boost = 'double' | 'super' | 'magnet' | 'bounce';
-// The lane band's colors, like a painted alley (teacher reference, 2026-10-31).
-const LANE_COLORS = ['#f6c544', '#9b7be0', '#ef5d7a', '#4fb6d8', '#f39ac0'];
-const POCKET_COLORS = ['#ff9b54', '#fbc94a', '#f2735f', '#8fe3a0', '#8ec5ff', '#c9a3f5'];
 // Each colored bumper is worth points and has its own sound (teacher,
 // 2026-11-01, with her uploaded sounds): left red, middle blue, right green.
 const SND = '/sounds/pinball/';
 // Pegs (teacher, 2026-11-13): 2 to 6 in new random spots each turn, each
 // worth 10 and singing the next note of a tune when the ball bounces off.
-const PEG_COLORS = ['#f2735f', '#6aa9e9', '#5cc3a0', '#f6c544', '#c9a3f5', '#f39ac0'];
 const PEG_POINTS = 10;
 const MAX_SHOT = 4.5; // seconds: longer runs play a little faster
 
@@ -236,9 +233,9 @@ export default function Pinball() {
     if (e.kind === 'bumper' && e.i !== undefined) {
       const c = bumperRefs.current[e.i];
       c?.setAttribute('fill', '#fdfd94');
-      timers.current.push(window.setTimeout(() => c?.setAttribute('fill', bumperFill(e.i!)), 170));
+      timers.current.push(window.setTimeout(() => c?.setAttribute('fill', pegFill(theme, e.i!)), 170));
       bumpPoints.current += PEG_POINTS;
-      setFloats((f) => [...f.slice(-8), { id: Date.now() + Math.random(), x: e.x, y: e.y - 6, n: PEG_POINTS, color: bumperFill(e.i!) }]);
+      setFloats((f) => [...f.slice(-8), { id: Date.now() + Math.random(), x: e.x, y: e.y - 6, n: PEG_POINTS, color: pegFill(theme, e.i!) }]);
       playNote(noteNo.current++, settings);
       replay(bumperGroups.current[e.i], 'pb-hit');
       if (settings.screenShake && !still) replay(boardRef.current, 'pb-shake');
@@ -253,7 +250,7 @@ export default function Pinball() {
     if (!turns) return;
     cancelAnimationFrame(raf.current);
     const b = boost.current;
-    const shot = simulateShot(lane, SHOT_POWER, { count: values.length, rails: plainTable, pegs, stars, sure: b.has('super') || b.has('magnet'), magnetTo: b.has('magnet') ? values.indexOf(best) : undefined });
+    const shot = simulateShot(lane, SHOT_POWER, { count: values.length, rails: !pieceImage(theme, 'board'), pegs, stars, sure: b.has('super') || b.has('magnet'), magnetTo: b.has('magnet') ? values.indexOf(best) : undefined });
     setStep('shot'); setSparks([]); setFloats([]); bumpPoints.current = 0; noteNo.current = 0;
     playEffect('whoosh', settings);
     if (still) {
@@ -352,12 +349,6 @@ export default function Pinball() {
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canAim = phase === 'play' && step === 'aim' && human;
-  const ballArt = pieceImage(theme, 'ball');
-  // A theme's own bumper color paints all three; Classic gives each its color.
-  const themedBumper = pieceColor(theme, 'bumper', '') && pieceColor(theme, 'bumper', '').toLowerCase() !== '#f2735f';
-  const bumperFill = (i: number) => (themedBumper ? pieceColor(theme, 'bumper', '#f2735f') : PEG_COLORS[i % PEG_COLORS.length]);
-  const flipperColor = pieceColor(theme, 'flipper', '#fdfd94');
-  const plainTable = !pieceImage(theme, 'board');
   const pw = 100 / Math.max(1, values.length);
   const boardW = `calc((var(--play-h) - 1.5rem - var(--pb-extra)) * ${W / H})`;
   const tray = <PowerUpTray manifest={pinballManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim' || !human} />;
@@ -408,41 +399,17 @@ export default function Pinball() {
               <div ref={boardRef} className="relative mx-auto rounded-[28px] border-[3px] border-border overflow-hidden select-none touch-none"
                 style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: boardW, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
                 <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('pb.board', { n: values.length })}>
-                  <defs>
-                    <radialGradient id="pb-ball" cx="35%" cy="30%" r="70%"><stop offset="0%" stopColor="#ffffff" /><stop offset="55%" stopColor={pieceColor(theme, 'ball', '#e7ecf5')} /><stop offset="100%" stopColor="#8a93a8" /></radialGradient>
-                    <radialGradient id="pb-spot" cx="50%" cy="55%" r="60%"><stop offset="0%" stopColor="#fff" stopOpacity={0.2} /><stop offset="100%" stopColor="#fff" stopOpacity={0} /></radialGradient>
-                    {ballArt && <pattern id="pb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
-                  </defs>
+                  <TableDefs theme={theme} />
                   {/* Table art (Golden Rule pass, 2026-10-31), drawn over the table
                       color so a theme's color still shows: a glow, arrow lights,
                       a big star, rails down to the flippers and two kickers. */}
-                  {plainTable && (
-                    <g aria-hidden="true">
-                      <rect x={0} y={0} width={W} height={H} fill="url(#pb-spot)" />
-                      {[[38, 36], [62, 36], [50, 40]].map(([x, y], i) => (
-                        <path key={`ar-${i}`} d={`M${x - 3} ${y + 2.4} L${x} ${y - 1.2} L${x + 3} ${y + 2.4}`} fill="none" stroke="#fdfd94" strokeWidth={1.1} strokeLinecap="round" strokeLinejoin="round" opacity={0.75} className={still || step !== 'shot' ? '' : 'pb-blink'} style={{ animationDelay: `${i * 0.25}s` }} />
-                      ))}
-                      {/* Only collectible stars on the table now (teacher, 2026-11-13). */}
-                      {[-1, 1].map((sd) => (
-                        <g key={`side-${sd}`}>
-                          <path d={sd < 0 ? 'M5.5 88 L22 109' : 'M94.5 88 L78 109'} stroke="#000" strokeWidth={2.4} strokeLinecap="round" />
-                          <path d={sd < 0 ? 'M5.5 88 L22 109' : 'M94.5 88 L78 109'} stroke="#c9d3ea" strokeWidth={1.2} strokeLinecap="round" />
-                          <path d={sd < 0 ? 'M12 84 L12 96 L19.5 99.5 Z' : 'M88 84 L88 96 L80.5 99.5 Z'} fill="#f2735f" stroke="#000" strokeWidth={0.6} strokeLinejoin="round" />
-                          <path d={sd < 0 ? 'M13.4 87.5 L13.4 94.6 L17.6 96.6' : 'M86.6 87.5 L86.6 94.6 L82.4 96.6'} fill="none" stroke="#fff" strokeWidth={0.7} strokeLinecap="round" />
-                        </g>
-                      ))}
-                    </g>
-                  )}
-                  <rect x={3} y={3} width={W - 6} height={H - 6} rx={9} fill="none" stroke="#fff" strokeOpacity={0.3} strokeWidth={0.7} />
+                  <TableDecor theme={theme} blink={!still && step === 'shot'} />
                   {/* Pegs in new spots every turn: they pop in, bob a little, and
                       flash and swell when the ball bounces off. */}
                   {pegs.map((b, i) => (
                     <g key={`p-${layout}-${i}`} className={still ? '' : 'pb-peg-in'} style={{ transformBox: 'fill-box', transformOrigin: 'center', animationDelay: `${i * 0.06}s` }}>
                       <g ref={(el) => { bumperGroups.current[i] = el; }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
-                        <circle cx={b.x} cy={b.y + 0.8} r={PEG_R + 0.9} fill="#000" opacity={0.25} />
-                        <circle cx={b.x} cy={b.y} r={PEG_R + 0.7} fill="#fff" stroke="#000" strokeWidth={0.45} />
-                        <circle ref={(el) => { bumperRefs.current[i] = el; }} cx={b.x} cy={b.y} r={PEG_R} fill={bumperFill(i)} stroke="#000" strokeWidth={0.5} />
-                        {pieceImage(theme, 'bumper') ? <image href={pieceImage(theme, 'bumper')} x={b.x - 4} y={b.y - 4} width={8} height={8} /> : <circle cx={b.x - 1} cy={b.y - 1} r={1.1} fill="#fff" opacity={0.85} />}
+                        <PegArt b={b} i={i} theme={theme} circleRef={(el) => { bumperRefs.current[i] = el; }} />
                       </g>
                     </g>
                   ))}
@@ -451,17 +418,15 @@ export default function Pinball() {
                   {stars.map((st, i) => !gotStars.includes(i) && (
                     <g key={`s-${layout}-${i}`} transform={`translate(${st.x} ${st.y})`}>
                       <g className={still ? '' : 'pb-star-float'} style={{ animationDelay: `${i * 0.4}s` }}>
-                        <circle r={4.4} fill="#fdfd94" opacity={0.25} className={still ? '' : 'pb-blink'} />
-                        <path d="M0 -3.8 L1.1 -1.3 L3.8 -1.2 L1.7 0.6 L2.4 3.2 L0 1.7 L-2.4 3.2 L-1.7 0.6 L-3.8 -1.2 L-1.1 -1.3 Z" fill="#fdfd94" stroke="#000" strokeWidth={0.45} strokeLinejoin="round" />
+                        <StarArt blink={!still} />
                       </g>
                     </g>
                   ))}
                   <g key={`f-${flip}`}>
-                    <path d="M0 -1.6 L15 -0.6 L15 0.6 L0 1.6 Z" fill={flipperColor} stroke="#000" strokeWidth={0.5} strokeLinejoin="round" transform="translate(26 118) rotate(18)" className={flip && !still ? 'pb-flip-l' : ''} style={{ transformOrigin: '0 0', transformBox: 'view-box' as const }} />
-                    <path d="M0 -1.6 L-15 -0.6 L-15 0.6 L0 1.6 Z" fill={flipperColor} stroke="#000" strokeWidth={0.5} strokeLinejoin="round" transform="translate(74 118) rotate(-18)" className={flip && !still ? 'pb-flip-r' : ''} style={{ transformOrigin: '0 0', transformBox: 'view-box' as const }} />
+                    <Flippers theme={theme} moving={!!flip && !still} />
                   </g>
                   {/* The plunger pulls back as the power bar fills. */}
-                  <rect x={LAUNCH.x - 3} y={LAUNCH.y + 3.6} width={6} height={6} rx={1} fill="#9aa3b5" stroke="#000" strokeWidth={0.5} />
+                  <Plunger />
                   {floats.map((f) => (
                     <text key={f.id} x={f.x} y={f.y} textAnchor="middle" fontSize={5.5} fontWeight={800} fill={f.color} stroke="#000" strokeWidth={0.7} paintOrder="stroke" fontFamily="var(--font-display, sans-serif)" className={still ? '' : 'pb-float'}>+{f.n}</text>
                   ))}
@@ -470,9 +435,7 @@ export default function Pinball() {
                   ))}
                   {[0, 1, 2, 3].map((k) => <circle key={k} ref={(el) => { trailRefs.current[k] = el; }} r={3.1 - k * 0.45} fill="#fdfd94" opacity={0} />)}
                   <g ref={ballRef} transform={`translate(${LAUNCH.x} ${LAUNCH.y})`}>
-                    <circle cx={0.7} cy={1.1} r={3.1} fill="#000" opacity={0.3} />
-                    {armed.length > 0 && !still && <circle r={4.8} fill="none" stroke="#fdfd94" strokeWidth={0.9} className="pb-aura" />}
-                    <circle r={3.1} fill={ballArt ? 'url(#pb-ball-art)' : 'url(#pb-ball)'} stroke="#000" strokeWidth={0.5} />
+                    <BallArt theme={theme} aura={armed.length > 0 && !still} />
                   </g>
                 </svg>
                 {/* Scoring pockets in a line across the top (teacher, 2026-10-31),
@@ -484,7 +447,7 @@ export default function Pinball() {
                       <motion.div key={`${round}-${i}`} initial={still ? false : { y: -30, opacity: 0 }} animate={on && !still ? { y: 0, opacity: 1, scale: [1, 1.12, 1] } : { y: 0, opacity: 1 }} transition={{ delay: still ? 0 : i * 0.05 }}
                         aria-label={t('pb.pocket', { value: v })}
                         className={`relative flex-1 min-w-0 mx-[1.5px] border-[2.5px] border-border rounded-b-[14px] rounded-t-[4px] flex items-center justify-center ${values.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-4xl'} ${on ? 'ring-4 ring-white z-10' : ''}`}
-                        style={{ ...(pieceImage(theme, 'pocket') ? pieceFill(theme, 'pocket', POCKET_COLORS[i % POCKET_COLORS.length]) : { background: on ? '#fdfd94' : `linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%), linear-gradient(180deg, ${POCKET_COLORS[i % POCKET_COLORS.length]} 0%, ${POCKET_COLORS[i % POCKET_COLORS.length]} 70%, rgba(255,255,255,0.35) 100%)` }), boxShadow: 'inset 0 -5px 0 rgba(0,0,0,0.18), inset 0 3px 6px rgba(0,0,0,0.25)', width: `${pw}%`, color: '#fff', fontFamily: "'Grow Year', var(--font-display)", WebkitTextStroke: '1.5px #000', paintOrder: 'stroke' }}>
+                        style={{ ...pocketStyle(theme, i, on), width: `${pw}%` }}>
                         {v}
                       </motion.div>
                     );
