@@ -22,9 +22,8 @@ test('Bubble Pop: a right answer loads bubbles; aim, shoot, and the bubble lands
   const buttons = dialog.getByRole('button', { name: /^[A-D] / });
   const labels = await buttons.allInnerTexts();
   await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
-  const shoot = page.getByRole('button', { name: 'Shoot the bubble' });
-  await expect(shoot).toBeEnabled({ timeout: 8000 });
-  await expect(page.getByRole('img', { name: '3 bubbles left' })).toBeVisible();
+  // No Shoot button (teacher, 2026-11-16): a click on the board shoots.
+  await expect(page.getByRole('img', { name: '3 bubbles left' })).toBeVisible({ timeout: 8000 });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.keyboard.press('ArrowLeft');
   await page.screenshot({ path: `test-results/bubble-aim-${info.project.name}.png` });
@@ -34,7 +33,7 @@ test('Bubble Pop: a right answer loads bubbles; aim, shoot, and the bubble lands
   await page.mouse.click(box.x + box.width * 0.7, box.y + box.height * 0.3);
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 5; f++) { await page.screenshot({ path: `test-results/bubble-frame-${f}.png` }); await page.waitForTimeout(90); }
   await expect(page.getByRole('img', { name: '2 bubbles left' })).toBeVisible({ timeout: 5000 });
-  await shoot.click();
+  await page.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.3);
   await expect(page.getByRole('img', { name: '1 bubble left' })).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/bubble-shot-${info.project.name}.png` });
   expect(problems).toEqual([]);

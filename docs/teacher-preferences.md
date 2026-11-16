@@ -167,3 +167,4 @@ line that fits, and add each new preference the same turn she says it.
 - Top bar thinner on every screen; setup Back/Next buttons small so the cards lead; the set filter/search bar compact; question text and answers scale with the screen height.
 - Setup board choices are white cards on the purple background, no big white panel around them.
 - Pinball and Cast and Catch hidden from the site for now (2026-11-16); all their code stays.
+- Bubble Pop (2026-11-16): board centered; one strip across the top with score, the rounds as a progress bar and shots left; no Shoot button, a tap or click on the board shoots.

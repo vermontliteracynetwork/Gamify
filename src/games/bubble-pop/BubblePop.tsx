@@ -6,7 +6,7 @@ import { Crosshair, Question, Sparkle, Star } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
-import SoloPanel from '../../engine/SoloPanel';
+import { TeamBadge } from '../../engine/TeamBadge';
 import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
@@ -17,7 +17,6 @@ import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
-import { buttonClasses } from '../../ui/kit';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
@@ -307,7 +306,10 @@ export default function BubblePop() {
       {(phase === 'play' || phase === 'end') && (
         // The board fills the play space like the reference games, the same in
         // full screen; small controls sit on top (teacher, 2026-10-31).
-        <div className="relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center lg:gap-4 lg:pr-44">
+        // Solo, so the board sits in the middle with one strip across its top:
+        // score, the rounds as a progress bar, and the shots left (teacher,
+        // 2026-11-16). Tap or click the board to shoot; no Shoot button.
+        <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
@@ -316,10 +318,10 @@ export default function BubblePop() {
 
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
-          <div className="contents lg:flex lg:items-start lg:gap-4">
-          <section className="grid gap-2 min-w-0">
-            <div className="relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none touch-none [--bp-extra:4.375rem] lg:[--bp-extra:0rem] [--bp-side:1.5rem] lg:[--bp-side:470px]"
-              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: `min(calc(100vw - var(--bp-side)), calc((var(--play-h) - 6.5rem - var(--bp-extra)) * ${W / H}))`, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <section className="grid gap-2 min-w-0" style={{ width: `min(calc(100vw - 9rem), calc((var(--play-h) - 5.75rem) * ${W / H}))` }}>
+            <RoundStrip score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} shots={shots} total={plan.current.shots} />
+            <div className="relative w-full rounded-panel border-[3px] border-border overflow-hidden select-none touch-none"
+              style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
                 onPointerMove={(e) => { if (canAim && (e.pointerType === 'mouse' || pressed.current)) setAngle(toAngle(e)); }}
@@ -374,18 +376,10 @@ export default function BubblePop() {
                     onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 700); }}>{callout.text}</motion.p>
                 )}
               </AnimatePresence>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <button type="button" className={buttonClasses('primary', 'h-14 !px-6 !text-lg')} disabled={!canAim} onClick={() => shoot()}><Crosshair weight="bold" size={24} />{t('bp.shoot')}</button>
+              {/* Short messages sit over the top of the board. */}
+              {(() => { const msg = note ?? (step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : undefined); return msg ? <p className="absolute left-1/2 top-2 -translate-x-1/2 max-w-[90%] text-center rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold pointer-events-none" role="status">{msg}</p> : null; })()}
             </div>
           </section>
-          <div className="order-first lg:order-none lg:w-[230px] grid gap-3 content-start">
-            <SoloPanel score={score} player={pieceImage(theme, 'player')} line={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} round={{ now: `${Math.min(breaks + 1, plan.current.rounds)}/${plan.current.rounds}`, label: t('pb.roundWord') }}
-              dots={{ left: shots, total: plan.current.shots, label: t('bp.shots', { count: shots }) }}
-              status={step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : step === 'question' ? t('bp.answer') : undefined} note={note} />
-            {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
-          </div>
-          </div>
         </div>
       )}
 
@@ -394,5 +388,26 @@ export default function BubblePop() {
       {element}
     </main>
     </ThemedPage>
+  );
+}
+
+// One strip across the top of the board (teacher, 2026-11-16): the player and
+// score, the rounds as a progress bar, and the shots left this round.
+function RoundStrip({ score, player, round, rounds, shots, total }: { score: number; player?: string; round: number; rounds: number; shots: number; total: number }) {
+  const still = useSettings().settings.motion === 'still';
+  return (
+    <div className="score-card w-full flex items-center gap-3 px-3 py-1.5" role="group" aria-label={t('bp.roundOf', { n: round, total: rounds })}>
+      {player ? <img src={player} alt="" aria-hidden="true" className="w-8 h-8 rounded-full border-[2px] border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={0} size={32} />}
+      <motion.span key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums leading-none min-w-[2.5ch]" aria-label={t('share.points', { count: score })}>{score}</motion.span>
+      <span className="flex-1 grid gap-0.5 min-w-0">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted leading-none">{t('pb.roundWord')} {round}/{rounds}</span>
+        <span className="h-3 rounded-pill border-[2px] border-border bg-surface-2 overflow-hidden" aria-hidden="true">
+          <motion.span className="block h-full rounded-pill" style={{ background: 'linear-gradient(90deg, #b4c4fb, #8fe3a0)' }} initial={false} animate={{ width: `${(round / Math.max(1, rounds)) * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
+        </span>
+      </span>
+      <span className="flex gap-1 shrink-0" role="img" aria-label={t('bp.shots', { count: shots })}>
+        {Array.from({ length: Math.max(total, shots) }, (_, i) => <span key={i} className={`w-3.5 h-3.5 rounded-full border-[2px] border-border ${i < shots ? 'bg-accent' : 'bg-surface-2'}`} />)}
+      </span>
+    </div>
   );
 }
