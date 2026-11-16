@@ -3,10 +3,9 @@ import { Check, X } from '@phosphor-icons/react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import ItemArt from '../theme/ItemArt';
-import { featuredId } from './powerUps';
 import type { GameTheme } from '../theme/types';
 
-export interface PowerCard { id: string; name: string; hint: string; art: ReactNode; on: boolean; featured?: boolean }
+export interface PowerCard { id: string; name: string; hint: string; art: ReactNode; on: boolean }
 
 // Every power-up on one page as small square cards (teacher, 2026-11-01):
 // tap a card to turn that power-up on or off. One element, so the setup
@@ -33,20 +32,18 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
   const size = Math.max(150, Math.min(210, Math.floor(across(cols))));
   return (
     <div ref={box} className="grid gap-2 min-w-0 w-full">
-      <div className="grid gap-0.5 text-center">
-        <span className="font-bold">{t('tb.powers')}</span>
-        <span className="text-sm font-semibold text-muted">{hint}</span>
-      </div>
-      <div className="grid gap-2.5 justify-center" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `minmax(${Math.round(size * 1.05)}px, auto)` }}>
+      {/* No heading or line of help: the step title says Power-ups and
+          the check on each card says on or off (teacher, 2026-11-16). */}
+      <div role="group" aria-label={hint} className="grid gap-2.5 justify-center" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `minmax(${Math.round(size * 0.78)}px, auto)` }}>
         {cards.map((c) => (
           <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)}
             aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name}
-            className={`relative rounded-input border-[2.5px] tile-wiggle p-3 pt-4 grid justify-items-center content-start gap-1.5 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
+            className={`relative rounded-input border-[2.5px] tile-wiggle p-2.5 pt-3 grid justify-items-center content-start gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
             style={c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : undefined}>
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
-            <span className={`font-bold text-base leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
-            {c.hint && <span className="text-xs font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
-            {c.featured && <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-pill border-[2px] border-border bg-accent px-2.5 py-0.5 text-xs font-bold motion-safe:animate-pulse">{t('pu.featured')}</span>}
+            <span className={`font-bold text-sm leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
+            {/* Small words, so the cards stay near 4:3 (teacher, 2026-11-16). */}
+            {c.hint && <span className="text-[9.5px] font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
             {/* On: a mint check in the corner. Off: a faded X. */}
             <span className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-[2px] flex items-center justify-center ${c.on ? 'bg-success border-border' : 'bg-surface border-border-soft text-muted'}`} aria-hidden="true">
               {c.on ? <Check weight="bold" size={15} /> : <X weight="bold" size={13} />}
@@ -73,9 +70,8 @@ export function powerUpSwitches({ manifest, theme, on, off, change }: {
     else { const next = [...new Set([...off, id])]; change({ powerOff: next, ...(next.length >= items.length ? { powerUps: false } : {}) }); }
   }
   const hint = (ability: string) => manifest.items?.abilities.find((a) => a.id === ability)?.hint ?? '';
-  const featured = featuredId(items, manifest.id);
   return (
     <PowerUpCards hint={t('pu.switchHint')} onChange={set}
-      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={64} still />, on: isOn(it.id), featured: it.id === featured }))} />
+      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={48} still />, on: isOn(it.id) }))} />
   );
 }

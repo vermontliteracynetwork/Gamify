@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Crown, Trophy } from '@phosphor-icons/react';
+import { Crown } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { TeamBadge } from './TeamBadge';
@@ -15,8 +15,9 @@ export function RoundMeter({ round, label, className = '' }: { round: string; la
   const part = total > 0 && Number.isFinite(n) ? Math.min(1, n / total) : null;
   return (
     <div className={`score-card overflow-hidden text-center ${className}`}>
-      {label && <p className="score-head justify-center">{label}</p>}
-      <motion.p key={round} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className={`font-display font-bold tabular-nums leading-none px-4 pt-2 ${round.length <= 7 ? 'text-5xl' : 'text-xl'}`}>{round}</motion.p>
+      {/* No dark title bar (teacher, 2026-11-16): the word sits small under the number. */}
+      <motion.p key={round} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className={`font-display font-bold tabular-nums leading-none px-4 pt-3 ${round.length <= 7 ? 'text-5xl' : 'text-xl'}`}>{round}</motion.p>
+      {label && <p className="text-xs font-bold uppercase tracking-wider text-muted mt-1">{label}</p>}
       {part !== null && (
         <div className="mx-4 mt-2 mb-3 h-3 rounded-pill border-[2px] border-border bg-surface-2 overflow-hidden" aria-hidden="true">
           <motion.span className="block h-full rounded-pill" style={{ background: 'linear-gradient(90deg, #b4c4fb, #8fe3a0)' }} initial={false} animate={{ width: `${part * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
@@ -39,10 +40,10 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
   return (
     // On big screens the round or progress sits big and centered under the
     // scores, level with the bottom of the board (teacher, 2026-11-06).
-    <div className="order-first lg:order-none min-w-0 lg:h-full lg:flex lg:flex-col lg:gap-3">
+    <div className="order-first lg:order-none min-w-0 lg:min-w-[15rem] lg:h-full lg:flex lg:flex-col lg:gap-3">
     <aside className="score-card grid min-w-0 overflow-hidden" aria-label={t('share.scores')}>
-      <h2 className="score-head hidden lg:flex"><Trophy weight="fill" size={16} aria-hidden="true" />{t('share.scores')}</h2>
-      <ol className="flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none m-0 p-2 lg:p-3">
+      {/* No title, just the scores; every name shown whole (teacher, 2026-11-16). */}
+      <ol className="flex flex-wrap lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none m-0 p-2 lg:p-3">
         {turns.players.map((p) => {
           const on = now?.id === p.id;
           return (
@@ -52,8 +53,9 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
               className={`shrink-0 lg:shrink flex items-center gap-2.5 rounded-input border-[2px] p-1.5 lg:p-2 motion-safe:transition-transform motion-safe:hover:scale-[1.03] ${on ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}>
               {/* A player's picture is their game piece when they have one (teacher, 2026-11-06). */}
               {p.art ? <img src={p.art} alt="" aria-hidden="true" className="w-11 h-11 object-contain shrink-0" /> : <TeamBadge colorIndex={p.colorIndex} size={44} />}
-              <span className="flex-1 min-w-0 grid">
-                <span className="font-bold leading-tight break-words">{p.name}</span>
+              {/* Whole names, never cut off or hidden (teacher, 2026-11-16). */}
+              <span className="flex-1 min-w-0 grid grid-cols-[minmax(0,1fr)]">
+                <span className="font-bold leading-tight [overflow-wrap:anywhere]">{p.name}</span>
                 {p.members && <span className="hidden lg:block text-xs font-semibold text-muted break-words" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
               </span>
               {top.some((l) => l.id === p.id) && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}

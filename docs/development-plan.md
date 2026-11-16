@@ -380,4 +380,12 @@ production release.
   game; Board Game takes up to 10 players and four regular square designs;
   question set picker is now a scrolling uneven gallery (full names, covers
   at their own shape, small subject tag, locked search) and a double-tap
-  flips a card to question 1 with the right answer marked.
+  flips a card to question 1 with the right answer marked (answers left-
+  aligned, at most five across, one scroll bar). Later the same day: no
+  featured power-up anywhere; power-up setup cards smaller with no heading;
+  one shared score board everywhere with no title and whole names (Lunch Rush
+  and Road Hop moved onto it); Board Game score board removed; card-only
+  setup pages centered; game cards show ways to play as icon circles; the
+  welcome screen's right column evenly spaced. The power-up e2e test now
+  checks the power-up card (a dialog since 2026-11-13) and leaves out Pinball,
+  whose power-ups come from stars.

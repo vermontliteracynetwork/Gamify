@@ -8,7 +8,7 @@ import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
 
 import { GameCover } from '../games/covers';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeDot } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { useTier } from '../data/hooks';
 import { useTeacher } from '../auth/session';
@@ -74,7 +74,8 @@ export default function Home() {
               </span>
               <div className="p-5 flex flex-col gap-3 flex-1">
                 <h2 className="font-display text-2xl font-bold text-text"><Title text={game.name} /></h2>
-                <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
+                {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
+<div className="flex gap-1.5">{game.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
                 <p className="text-muted text-sm leading-relaxed">{game.description}</p>
                 <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
                   {t('home.play')}

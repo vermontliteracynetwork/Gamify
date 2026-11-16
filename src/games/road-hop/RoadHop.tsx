@@ -15,6 +15,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
+import ScoreBoard from '../../engine/ScoreBoard';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
@@ -266,17 +267,8 @@ export default function RoadHop() {
               ))}
             </div>
           </section>
-          <aside className="order-first lg:order-none score-card overflow-hidden" aria-label={t('share.scores')}>
-            <p className="score-head hidden lg:flex">{t('rh.map', { n: level + 1 })}</p>
-            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-2 lg:p-3 m-0">
-              {turns.players.map((p) => (
-                <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
-                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 break-words">{p.name}</span>
-                  <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{p.score}</motion.span>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          {/* The same score board as every game (teacher, 2026-11-16). */}
+          <ScoreBoard turns={turns} playing={phase === 'play'} />
         </div>
       )}
       {question && player && phase === 'play' && !solo && <ShareQuestion question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} />}

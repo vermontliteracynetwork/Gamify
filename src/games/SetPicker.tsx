@@ -14,6 +14,8 @@ import { LIBRARY } from '../data/library';
 const LIBRARY_IDS = new Set(LIBRARY.map((s) => s.id));
 const COL_GAP = 18;
 const COL_MIN = 230;
+// At most five across (teacher, 2026-11-16).
+const MAX_COLS = 5;
 
 // Pick one question set (or up to `max` for games like the category grid)
 // from cards, the same menu in every game, with filters. The cards sit in an
@@ -44,12 +46,17 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
       const w = wrap.current, g = gallery.current;
       if (!w || !g) return;
       // Cards in fixed columns, so turning one over never shuffles the others.
-      const c = Math.max(1, Math.floor((g.clientWidth - 16 + COL_GAP) / (COL_MIN + COL_GAP)));
+      const c = Math.max(1, Math.min(MAX_COLS, Math.floor((g.clientWidth - 16 + COL_GAP) / (COL_MIN + COL_GAP))));
       setCols((x) => (x === c ? x : c));
       const card = w.closest('section.setup-roomy') as HTMLElement | null;
-      const body = card?.children[1] as HTMLElement | undefined;
-      if (!body) { setHigh(null); return; }
-      const next = Math.max(220, Math.floor(body.getBoundingClientRect().bottom - g.getBoundingClientRect().top - 12));
+      if (!card) { setHigh(null); return; }
+      // The room the setup box gives its body (its padding is 8 + 16, its
+      // border 5), less what sits above the gallery. Fixed, not measured
+      // from the body, so it never feeds back into itself.
+      const maxH = parseFloat(getComputedStyle(card).maxHeight) || card.clientHeight;
+      const head = (card.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0;
+      const foot = (card.lastElementChild as HTMLElement | null)?.offsetHeight ?? 0;
+      const next = Math.max(220, Math.floor(maxH - head - foot - 24 - 5 - (g.offsetTop - w.offsetTop) - 2));
       setHigh((h) => (h !== null && Math.abs(h - next) < 1 ? h : next));
     };
     measure();
@@ -146,7 +153,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                           {q.choices.map((c, k) => {
                             const right = k === q.correctIndex;
                             return (
-                              <li key={k} className={`flex items-start justify-end gap-1.5 text-right text-xs font-semibold leading-snug rounded-input border-[1.5px] px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
+                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-[1.5px] px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
                                 <span className="min-w-0">{c}</span>
                                 {right && <CheckCircle weight="fill" size={15} color="#1f7a45" className="shrink-0 mt-px" aria-label={t('sets.correct')} />}
                               </li>

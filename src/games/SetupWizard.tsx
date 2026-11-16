@@ -40,8 +40,13 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // How many parts each page splits into (measured when it is shown).
   const [splits, setSplits] = useState<Record<string, number[][]>>({});
   // Only a single setting taller than the whole screen may scroll on its own.
+  // The question sets scroll inside their own gallery, so that page never
+  // shows a second scroll bar (teacher, 2026-11-16).
   const [tall, setTall] = useState(false);
   const page = pages[i];
+  // Pages of just cards (players, teams, power-ups) sit in the middle of the
+  // box, the same in every game (teacher, 2026-11-16).
+  const cardsOnly = ['players', 'teams'].includes(page.id) || page.id.endsWith('-powers');
   const items = itemsOf(page.content);
   const body = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
@@ -108,7 +113,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
           }))}
         </ol>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 content-start pt-2 pb-4 flex-1 text-base ${tall ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).

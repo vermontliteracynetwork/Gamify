@@ -429,11 +429,12 @@ export default function CastleQuest() {
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        <div className="relative play-fill overflow-hidden grid grid-rows-[auto_1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_290px]" style={boardGround(theme)}>
+        <div className="relative play-fill overflow-hidden grid grid-rows-[auto_1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_220px]" style={boardGround(theme)}>
           <h1 className="sr-only"><Title text={castleQuestManifest.name} /></h1>
-          {/* Players: a round badge each, like every other game (teacher, 2026-11-08). */}
-          <div className="lg:col-start-2 lg:row-start-1 p-2 lg:pt-16 lg:pr-3 pr-40 lg:pl-0 grid gap-3 content-start min-w-0 z-10">
-            <Race turns={turns} pos={pos} finish={finish} playing={phase === 'play'} shield={shield} skip={skip} still={still} />
+          {/* No scoreboard (teacher, 2026-11-16): the pieces on the board show
+              the race. Big screens keep the die in this column; small
+              screens keep the row clear for the corner buttons. */}
+          <div className="lg:col-start-2 lg:row-start-1 p-2 lg:pt-16 lg:pr-3 pr-40 lg:pl-0 grid gap-3 content-start min-w-0 z-10 max-lg:min-h-14">
             <div className="hidden lg:grid gap-3 justify-items-center pt-4">
               {dieButton(150)}
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
@@ -615,38 +616,4 @@ function Twister({ item, w, h }: { item: ThemeItem; w: number; h: number }) {
 function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: boolean }; potion: number; still: boolean }) {
   const text = boost.double ? t('cq.boostTwice') : boost.x2 || potion > 0 ? t('cq.boostDouble') : '';
   return <motion.span className="text-xl px-3 py-0.5 rounded-pill border-[2.5px] border-border bg-accent" style={CHICLE} animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>{text}</motion.span>;
-}
-
-// Who is closest to the finish: a round badge and a progress line each.
-function Race({ turns, pos, finish, playing, shield, skip, still }: { turns: TurnState; pos: number[]; finish: number; playing: boolean; shield: boolean[]; skip: boolean[]; still: boolean }) {
-  // Seven to ten players: smaller rows, so the list and the die still fit.
-  const many = turns.players.length > 6;
-  return (
-    <aside className="score-card grid min-w-0 overflow-hidden" aria-label={t('cq.race')}>
-      <h2 className="score-head hidden lg:flex"><FlagCheckered weight="fill" size={16} />{t('cq.firstToFinish')}</h2>
-      <ol className={`flex flex-nowrap overflow-x-auto lg:overflow-visible lg:grid list-none m-0 p-2 lg:p-3 ${many ? 'gap-1.5' : 'gap-2'}`}>
-        {turns.players.map((p, i) => {
-          const on = playing && i === turns.turn;
-          const f = Math.max(0, Math.min(1, (pos[i] ?? 0) / finish));
-          const color = TEAM_COLORS[p.colorIndex % TEAM_COLORS.length];
-          return (
-            <motion.li key={p.id} aria-current={on ? 'true' : undefined} aria-label={t('cq.raceRow', { name: p.name, n: Math.round(f * 100) })}
-              animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94', '0 0 0 4px #fdfd94, 0 0 22px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 12px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 0 0 0 transparent' }}
-              transition={on && !still ? { duration: 1.6, repeat: Infinity } : { duration: 0.2 }}
-              className={`shrink-0 lg:shrink min-w-[11rem] lg:min-w-0 grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-1 rounded-input border-[2px] ${many ? 'p-1 gap-y-0.5 text-sm' : 'p-2'} motion-safe:transition-transform motion-safe:hover:scale-[1.03] ${on ? 'border-border bg-accent' : 'border-border-soft bg-surface'}`}>
-              <span className="row-span-2 relative"><TeamBadge colorIndex={p.colorIndex} size={many ? 30 : 46} />
-                {shield[i] && <ShieldCheck weight="fill" size={18} className="absolute -right-1 -bottom-1 text-[#3d7fb8] bg-surface rounded-full" aria-label={t('cq.shielded')} />}
-                {skip[i] && <HourglassHigh weight="fill" size={18} className="absolute -left-1 -bottom-1 bg-surface rounded-full" aria-label={t('cq.losesNext')} />}
-              </span>
-              <span className="font-bold break-words leading-tight">{p.name}</span>
-              <span className="relative h-3.5 mr-2 rounded-pill bg-surface-2 border-[2px] border-border overflow-visible">
-                <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: color }} animate={{ width: `${f * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
-                <FlagCheckered weight="fill" className="absolute -right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-[#474241]" aria-hidden="true" />
-              </span>
-            </motion.li>
-          );
-        })}
-      </ol>
-    </aside>
-  );
 }

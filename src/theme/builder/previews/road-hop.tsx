@@ -41,7 +41,6 @@ export default function RoadHopPreview({ theme }: { theme: GameTheme }) {
             <span className="font-display text-xs leading-tight">{t('rh.go', { name: TEAMS[0] })}</span>
           </div>
           <div className="score-card overflow-hidden">
-            <p className="score-head !text-[10px] !py-1 !px-2">{t('rh.map', { n: 2 })}</p>
             <ol className="grid gap-1 list-none p-1.5 m-0">
               {TEAMS.map((name, i) => (
                 <li key={name} className={`flex items-center gap-1.5 rounded-md border-[2px] p-1 ${i === 0 ? 'border-border bg-surface-2' : 'border-border-soft'}`}>

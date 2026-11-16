@@ -54,21 +54,23 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
       <div className="min-w-0 self-start">
         <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[calc(100dvh-7.5rem)] max-lg:max-h-[38vh] mx-auto rounded-panel border-[2.5px] border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
       </div>
-      <div className="min-w-0 flex flex-col gap-6 lg:py-0">
-        <div className="grid gap-3">
+      {/* Three even groups, title, How to play, start (teacher, 2026-11-16:
+          "more professionally spaced"), sized up to fill the column. */}
+      <div className="min-w-0 flex flex-col gap-6 lg:justify-between lg:py-0">
+        <div className="grid gap-4">
           <h1 className="max-lg:hidden title-bubble text-4xl pr-44 min-h-11 flex items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-          {game.description && <p className="text-base font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
+          {game.description && <p className="text-base xl:text-lg font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
           <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
-        <section aria-label={t('welcome.how')} className="flex-1 min-h-0 grid content-center">
+        <section aria-label={t('welcome.how')} className="min-h-0">
           {/* White with a little depth, on every game (teacher, 2026-11-16). */}
-          <div className="rounded-panel border-[2px] border-border-soft bg-white px-5 py-4 grid gap-3" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
+          <div className="rounded-panel border-[2px] border-border-soft bg-white px-6 py-5 xl:py-6 grid gap-4" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('welcome.how')}</h2>
-            <ol className="grid gap-3 list-none p-0 m-0">
+            <ol className="grid gap-4 list-none p-0 m-0">
               {steps.map((s, i) => (
                 <motion.li key={i} initial={settings.motion === 'still' ? false : { opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}
-                  className="flex items-center gap-3 text-base leading-snug">
-                  <span className="w-10 h-10 shrink-0 rounded-full border-[2px] [&>svg]:w-5 [&>svg]:h-5 border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
+                  className="flex items-center gap-3.5 text-base xl:text-lg leading-snug">
+                  <span className="w-10 h-10 xl:w-12 xl:h-12 shrink-0 rounded-full border-[2px] [&>svg]:w-5 [&>svg]:h-5 xl:[&>svg]:w-6 xl:[&>svg]:h-6 border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
                   <span className="font-bold">{s.text}</span>
                 </motion.li>
               ))}

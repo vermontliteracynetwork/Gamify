@@ -5,9 +5,10 @@ import { finishSetup, openSetup, showSetting, startTurn } from './setup';
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.trim(), q.choices[q.correctIndex]] as const)));
 
 // With luck forced on (every roll low), a right answer brings a power-up
-// and it pops up with its picture, name and what it does.
+// and it pops up with its picture, name and what it does, until closed.
+// Pinball is not here: since 2026-11-13 its power-ups come from stars the
+// ball collects, not from a right answer.
 for (const g of [
-  { id: 'pinball', first: 'Golden Ball', name: /(Golden Ball|Super Shooter|Jackpot Magnet|Bouncy Ball|Mystery Bottle|Sneaky Swipe)/ },
   { id: 'lunch-rush', first: 'Extra Plate', name: /(Extra Plate|Tip Jar|Double Star)/ },
   { id: 'bowling', first: 'Golden Pin', name: /(Golden Pin|Pin Magnet|Pin Twister|Bumper Rails|Fireball|Mystery Box|Sneaky Swipe)/ },
 ]) {
@@ -29,8 +30,13 @@ for (const g of [
     const buttons = dialog.getByRole('button', { name: /^[A-D] / });
     const labels = (await buttons.allInnerTexts()).map((l) => l.trim());
     await buttons.nth(labels.findIndex((l) => l.endsWith(answers.get(prompt)!))).click();
-    await expect(page.getByRole('status').filter({ hasText: g.name })).toBeVisible({ timeout: 8000 });
+    // The power-up card stays until it is closed (2026-11-13), as a dialog
+    // named for the power-up.
+    const card = page.getByRole('dialog', { name: g.name });
+    await expect(card).toBeVisible({ timeout: 8000 });
     await page.screenshot({ path: `test-results/powerup-${g.id}-${info.project.name}.png` });
+    await card.getByRole('button', { name: 'Close' }).click();
+    await expect(card).toBeHidden();
     expect(problems).toEqual([]);
   });
 }

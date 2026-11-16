@@ -2586,7 +2586,6 @@ export const en = {
   'cq.exact': 'Exact roll to win',
   'cq.exactHint': 'Land right on the finish. Roll too many and your piece bounces back.',
   'cq.wheelSpin': 'Spin the wheel',
-  'pu.featured': 'Featured this week',
   'pb.starPower': 'Star! A power-up for your next turn',
   'pb.questionsHint': 'Right answers before each shot pulls back the plunger.',
   'pb.board': 'Pinball table with {n} pockets',

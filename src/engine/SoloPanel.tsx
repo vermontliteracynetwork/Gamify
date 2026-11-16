@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { Star } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { RoundMeter } from './ScoreBoard';
 import { TeamBadge } from './TeamBadge';
@@ -26,7 +25,6 @@ export default function SoloPanel({ score, line, round, dots, status, note, play
   return (
     <aside className={`grid gap-2 lg:gap-3 content-start min-w-0 ${className}`} aria-label={t('bm.score')}>
       <div className="score-card overflow-hidden">
-        <p className="score-head hidden lg:flex"><Star weight="fill" size={16} aria-hidden="true" />{t('bm.score')}</p>
         <div className="px-4 py-2 lg:p-4 flex lg:grid items-center gap-x-5 gap-y-2 flex-wrap">
         <div className="flex items-center gap-3">
           {player ? <img src={player} alt="" aria-hidden="true" className="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-[2.5px] border-border bg-surface object-contain" /> : <TeamBadge colorIndex={0} size={56} />}

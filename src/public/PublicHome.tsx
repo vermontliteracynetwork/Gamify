@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Buildings, House, RocketLaunch, Brain, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
 import { CyclingCover } from '../games/covers';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeDot } from '../games/ModeBadge';
 import FourWays from '../games/FourWays';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
@@ -66,7 +66,8 @@ export default function PublicHome() {
                 <span className="block overflow-hidden border-b-[2.5px] border-border"><CyclingCover gameId={g.id} className="aspect-[16/9]" /></span>
                 <div className="p-4 grid gap-2">
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
-                  <div className="flex flex-wrap gap-2">{g.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
+                  {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
+<div className="flex gap-1.5">{g.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
                   <p className="text-sm font-bold text-muted">{g.description}</p>
                   <span className="text-sm font-bold inline-flex items-center gap-1.5">{t('public.tryIt')}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>
                 </div>

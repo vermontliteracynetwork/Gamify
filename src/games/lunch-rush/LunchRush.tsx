@@ -15,6 +15,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
+import ScoreBoard from '../../engine/ScoreBoard';
 import type { StringKey } from '../../i18n/en';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
@@ -64,7 +65,6 @@ export default function LunchRush() {
   const [counter, setCounter] = useState<Counter>(() => openCounter());
   const [serves, setServes] = useState(0);
   const [asked, setAsked] = useState(0);
-  const [served, setServed] = useState(0);
   const [flying, setFlying] = useState<{ id: number; food: Food; seat: number | null } | null>(null);
   const [happy, setHappy] = useState<number | null>(null);
   const [banner, setBanner] = useState<{ id: number; text: string } | null>(null);
@@ -79,7 +79,7 @@ export default function LunchRush() {
   function begin() {
     const players = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(players);
-    setTurns(state); setAsked(0); setServed(0); setMissed([]); setBanner(null); setFlying(null); setHappy(null);
+    setTurns(state); setAsked(0); setMissed([]); setBanner(null); setFlying(null); setHappy(null);
     setCounter(openCounter()); setServes(0);
     setPhase('play');
     askNext(state, 0);
@@ -130,7 +130,7 @@ export default function LunchRush() {
     later(() => {
       setFlying(null);
       if (res.servedSeat !== null) {
-        setHappy(res.servedSeat); setServed((n) => n + 1); setTurns(scored);
+        setHappy(res.servedSeat); setTurns(scored);
         setBanner({ id: Date.now(), text: t('lr.yum', { count: res.points }) });
         playEffect('right', settings); buzz(25, settings);
         if (res.points >= 5 + PATIENCE && settings.celebrations !== 'off' && !still) void confetti({ particleCount: 40, spread: 60, origin: { y: 0.4 }, disableForReducedMotion: true });
@@ -260,17 +260,8 @@ export default function LunchRush() {
               })}
             </div>
           </section>
-          <aside className="order-first lg:order-none score-card overflow-hidden" aria-label={t('share.scores')}>
-            <p className="score-head hidden lg:flex">{t('lr.served', { count: served })}</p>
-            <ol className="flex flex-wrap lg:grid gap-1.5 list-none p-2 lg:p-3 m-0">
-              {turns.players.map((p) => (
-                <li key={p.id} className={`flex items-center gap-2 rounded-input border-[2px] p-1.5 ${player.id === p.id && phase === 'play' ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
-                  <TeamBadge colorIndex={p.colorIndex} size={28} /><span className="font-bold flex-1 break-words">{p.name}</span>
-                  <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{p.score}</motion.span>
-                </li>
-              ))}
-            </ol>
-          </aside>
+          {/* The same score board as every game (teacher, 2026-11-16). */}
+          <ScoreBoard turns={turns} playing={phase === 'play'} />
         </div>
       )}
       {question && player && phase === 'play' && !solo && <ShareQuestion question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} />}

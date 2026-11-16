@@ -45,7 +45,7 @@ test('Board Game Versus: one player against the computer', async ({ page }) => {
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('img', { name: /^A game board of \d+ squares/ })).toBeVisible();
-  await expect(page.getByText('Computer').first()).toBeVisible();
+  await expect(page.getByLabel(/^Computer on the board/).first()).toBeAttached();
 });
 
 test('Board Game short board: fewer squares', async ({ page }, info) => {
