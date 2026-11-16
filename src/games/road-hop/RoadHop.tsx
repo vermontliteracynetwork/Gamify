@@ -18,7 +18,7 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
+import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -27,13 +27,13 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { roadHopManifest } from './manifest';
-import { COLS, cpuMove, HIDE, hop, hopPoints, makeMap, moveTo, ROWS, START, type Lane, type Move, type Pos } from './road';
+import { carBox, Hopper, Lanes, roadLook, Vehicle } from './art';
+import { COLS, cpuMove, hop, hopPoints, makeMap, moveTo, ROWS, START, type Lane, type Move, type Pos } from './road';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'hop' | 'pause';
 const HOPS = 3;
 const HOP_MS = 230;
-const CAR_COLORS = ['#e5635f', '#6aa9e9', '#f6c544', '#c58ce8', '#f39a6b', '#5cc3a0'];
 
 // Road Hop (roster Stage 9): a right answer earns three hops. Traffic moves
 // one step each hop, so a young player can look before they hop. A bonk
@@ -178,12 +178,7 @@ export default function RoadHop() {
   });
 
   const canHop = phase === 'play' && step === 'hop' && player?.kind !== 'cpu';
-  const grass = pieceColor(theme, 'background', '#8fe3a0');
-  const roadColor = pieceColor(theme, 'road', '#4a4f6a');
-  const hopperColor = pieceColor(theme, 'hopper', '#9bd35a');
-  const hopperArt = pieceImage(theme, 'hopper');
-  const carColors = [pieceColor(theme, 'car', CAR_COLORS[0]), ...CAR_COLORS.slice(1)];
-  const cell = (r: number) => ({ top: `${((ROWS - 1 - r) / ROWS) * 100}%`, height: `${100 / ROWS}%` });
+  const { grass, hopperColor, hopperArt, carColors } = roadLook(theme);
   const boardWidth = `min(100%, calc((100dvh - 20.625rem + var(--chrome-save, 0rem) - var(--rh-extra)) * ${COLS} / ${ROWS}))`;
 
   return (
@@ -228,19 +223,10 @@ export default function RoadHop() {
             )}
             <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" role="img" aria-label={t('rh.board', { row: spot.pos.row + 1, rows: ROWS })}
               style={{ ...pieceFill(theme, 'background', grass), aspectRatio: `${COLS} / ${ROWS}`, maxWidth: boardWidth }}>
-              {map.map((lane, r) => lane.kind === 'road' ? (
-                <div key={`${level}-${r}`} className="absolute inset-x-0" style={{ ...cell(r), background: roadColor }}>
-                  {map[r + 1]?.kind === 'road' && <div className="absolute inset-x-0 top-0 border-t-[3px] border-dashed border-white/50" />}
-                </div>
-              ) : (
-                <div key={`${level}-${r}`} className="absolute inset-x-0" style={{ ...cell(r), backgroundImage: 'radial-gradient(rgba(0,0,0,0.08) 1.5px, transparent 1.6px)', backgroundSize: '18px 18px' }}>
-                  {r === ROWS - 1 && <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'repeating-conic-gradient(#000 0 25%, #fff 0 50%)', backgroundSize: '24px 24px' }} />}
-                </div>
-              ))}
+              <Lanes map={map} k={level} roadColor={roadLook(theme).roadColor} />
               {map.flatMap((lane, r) => lane.cars.map((c) => {
-                const leftCol = c.len === 2 && lane.dir === 1 ? c.x - HIDE - 1 : c.x - HIDE;
                 return (
-                  <div key={`${level}-${r}-${c.id}-${c.lap ?? 0}`} className="absolute p-[3%]" style={{ ...cell(r), left: `${(leftCol / COLS) * 100}%`, width: `${(c.len / COLS) * 100}%`, transition: still ? undefined : `left ${HOP_MS}ms linear` }}>
+                  <div key={`${level}-${r}-${c.id}-${c.lap ?? 0}`} className="absolute p-[3%]" style={{ ...carBox(lane, c, r), transition: still ? undefined : `left ${HOP_MS}ms linear` }}>
                     <Vehicle color={carColors[(r + c.id) % carColors.length]} long={c.len === 2} facing={lane.dir} />
                   </div>
                 );
@@ -300,39 +286,5 @@ export default function RoadHop() {
       {element}
     </main>
     </ThemedPage>
-  );
-}
-
-// A round little hopper drawn in code, with big eyes a pre-reader spots.
-function Hopper({ color, art, dizzy }: { color: string; art?: string; dizzy: boolean }) {
-  if (art) return <img src={art} alt="" className="w-full h-full object-contain" />;
-  return (
-    <svg viewBox="-10 -10 20 20" className="w-full h-full drop-shadow" aria-hidden="true">
-      <ellipse cx="0" cy="3" rx="8" ry="6" fill={color} stroke="#000" strokeWidth="0.9" />
-      <circle cx="-4" cy="-3.5" r="3.3" fill={color} stroke="#000" strokeWidth="0.9" />
-      <circle cx="4" cy="-3.5" r="3.3" fill={color} stroke="#000" strokeWidth="0.9" />
-      {dizzy ? (
-        <g stroke="#241c3d" strokeWidth="0.9" strokeLinecap="round"><path d="M-5.4,-4.9 L-2.6,-2.1 M-2.6,-4.9 L-5.4,-2.1" /><path d="M2.6,-4.9 L5.4,-2.1 M5.4,-4.9 L2.6,-2.1" /></g>
-      ) : (
-        <g><circle cx="-4" cy="-3.5" r="1.8" fill="#fff" /><circle cx="4" cy="-3.5" r="1.8" fill="#fff" /><circle cx="-3.6" cy="-3.9" r="0.9" fill="#241c3d" /><circle cx="4.4" cy="-3.9" r="0.9" fill="#241c3d" /></g>
-      )}
-      <path d="M-3,3.5 Q0,6 3,3.5" fill="none" stroke="#241c3d" strokeWidth="0.8" strokeLinecap="round" />
-      <circle cx="-5.5" cy="3" r="1.1" fill="#f6a5c0" opacity="0.8" /><circle cx="5.5" cy="3" r="1.1" fill="#f6a5c0" opacity="0.8" />
-    </svg>
-  );
-}
-
-// A friendly car (or a long truck) facing the way its lane drives.
-function Vehicle({ color, long, facing }: { color: string; long: boolean; facing: 1 | -1 }) {
-  const w = long ? 40 : 20;
-  return (
-    <svg viewBox={`0 0 ${w} 14`} className="w-full h-full" preserveAspectRatio="none" aria-hidden="true" style={{ transform: facing === -1 ? 'scaleX(-1)' : undefined }}>
-      <circle cx={4.5} cy={11.5} r={2.2} fill="#241c3d" /><circle cx={w - 4.5} cy={11.5} r={2.2} fill="#241c3d" />
-      {long && <circle cx={w / 2} cy={11.5} r={2.2} fill="#241c3d" />}
-      <rect x={1} y={long ? 2 : 4.5} width={w - 2} height={long ? 8.5 : 6} rx={2.5} fill={color} stroke="#000" strokeWidth={0.8} />
-      {!long && <path d={`M5,4.8 L7.5,1.2 L13.5,1.2 L16,4.8 Z`} fill={color} stroke="#000" strokeWidth={0.8} />}
-      <rect x={w - (long ? 9 : 7.5)} y={long ? 3.5 : 2.2} width={long ? 6 : 3} height={long ? 3.5 : 2.4} rx={0.8} fill="#cdeaff" stroke="#000" strokeWidth={0.5} />
-      <circle cx={w - 1.5} cy={long ? 8.5 : 7.5} r={0.9} fill="#fdfd94" />
-    </svg>
   );
 }
