@@ -13,6 +13,13 @@ import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/b
 import { layout, spaceKinds } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
 
+// Each game's own preview, one file per game in ./previews, named by game id
+// (teacher, 2026-11-16: "ALWAYS show preview as the actual game template").
+// A preview gets the theme with Classic art already filled into its blanks
+// and draws the whole 4:3 frame.
+const GAME_PREVIEWS = Object.fromEntries(Object.entries(import.meta.glob<{ default: (p: { theme: GameTheme }) => JSX.Element }>('./previews/*.tsx', { eager: true }))
+  .map(([path, mod]) => [path.replace(/^.*\/(.*)\.tsx$/, '$1'), mod.default]));
+
 const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 
 // The views a game's preview can show (teacher, 2026-11-01: "tabs can be
@@ -36,6 +43,8 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
   if (view === 'pick') return <PickView theme={theme} />;
   // The Board Game's own board, squares, pieces and die (teacher, 2026-11-16).
   if (theme.gameId === 'castle-quest' && view === 'game') return <BoardGamePreview theme={theme} />;
+  const Own = view === 'game' ? GAME_PREVIEWS[theme.gameId] : undefined;
+  if (Own) return <Own theme={theme} />;
   return (
     <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
