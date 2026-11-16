@@ -389,3 +389,11 @@ production release.
   welcome screen's right column evenly spaced. The power-up e2e test now
   checks the power-up card (a dialog since 2026-11-13) and leaves out Pinball,
   whose power-ups come from stars.
+- 2026-11-16 (later): class view and student view (names under the class
+  name, a page per student), printable class and student progress reports
+  (/teacher/reports/print, Print or save as PDF); the screen-size rule (root
+  font follows the screen, thinner top bar, small setup buttons, compact
+  filters, questions scale with height); board choices as white cards;
+  Bubble Pop centered with a round strip and shoot on click; Pinball and
+  Cast and Catch hidden; Help Center rebuilt as topic tiles and article
+  pages. Pinball description matches the new game.

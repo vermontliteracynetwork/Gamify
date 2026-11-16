@@ -168,3 +168,4 @@ line that fits, and add each new preference the same turn she says it.
 - Setup board choices are white cards on the purple background, no big white panel around them.
 - Pinball and Cast and Catch hidden from the site for now (2026-11-16); all their code stays.
 - Bubble Pop (2026-11-16): board centered; one strip across the top with score, the rounds as a progress bar and shots left; no Shoot button, a tap or click on the board shoots.
+- Help Center (2026-11-16): looks like a professional help guide (Google Help style): one big search, a tile per topic, each topic its own article page with numbered steps, related articles, Was this helpful?, Still need help.

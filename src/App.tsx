@@ -130,6 +130,7 @@ function AnimatedRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/help/:topic" element={<HelpPage />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/beta-kit" element={<BetaKitPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />

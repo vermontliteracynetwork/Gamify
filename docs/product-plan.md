@@ -1058,6 +1058,8 @@ start to build?" Claudia's gap review of everything above.
 
 ## 10. Marketing ideas (running list)
 
+- Parent-conference ready: one tap prints a professional class or student progress report (at a glance, trend, questions to practice, mastered) or saves it as a PDF (2026-11-16).
+- Fits any screen: Gamify sizes itself to the device, from a short laptop window to a smart board, with no scrolling (2026-11-16).
 - Peek before you pick: double-tap any question set card to flip it and see question 1 with its answers and the right one marked, so teachers choose in seconds (2026-11-16).
 - What you design is what you see: every game's Theme Builder preview is the real play screen wearing your art (2026-11-16).
 - Surprises like Game Show's golden card and Cast and Catch's catch of the day keep every round fresh (2026-11-13).
