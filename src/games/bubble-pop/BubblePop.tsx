@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Crosshair, Drop, Flower, Heart, Lightning, Moon, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
+import { Crosshair, Question, Sparkle, Star } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -14,7 +14,6 @@ import { t } from '../../i18n';
 import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { PUZZLE_PACK_CLEARED } from '../../config';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
@@ -29,13 +28,12 @@ import { pace } from '../../engine/pace';
 import type { ThemeItem } from '../../theme/types';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
+import { BubblePatternDefs, bubblePatterns, drawBubble } from './bubbleArt';
 import {
   center, clampAngle, colorsLeft, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, nextShot, placeShot, pushRow, R, rescue,
   rowLen, SHOOTER, shotPoints, traceShot, W, type Board, type Hit, type Shot,
 } from './board';
 
-// Every bubble has its own shape AND color (never color alone).
-const SHAPES: Icon[] = [Star, Heart, Lightning, Drop, Flower, Moon];
 const NO_POP_PUSH = 5; // shots in a row without a pop before a new row slides in
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'fly';
@@ -253,20 +251,8 @@ export default function BubblePop() {
     return () => window.removeEventListener('keydown', onKey);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const patterns = BUBBLE_COLORS.map((_, i) => pieceImage(theme, `bubble-${i}`));
-  // Classic bubbles are shiny balls (teacher, 2026-10-31) with their shape
-  // icon kept on top, so color is never the only clue.
-  const fill = (k: number) => (patterns[k] || PUZZLE_PACK_CLEARED ? `url(#bp-art-${k})` : BUBBLE_COLORS[k]);
-  const bubble = (k: number, x: number, y: number, key?: string, cls = '', style?: React.CSSProperties) => {
-    const S = SHAPES[k];
-    return (
-      <g key={key} className={cls} style={style}>
-        <circle cx={x} cy={y} r={R * 0.94} fill={fill(k)} stroke={PUZZLE_PACK_CLEARED && !patterns[k] ? 'none' : '#000'} strokeWidth={0.13} />
-        {!patterns[k] && (PUZZLE_PACK_CLEARED ? <S x={x - 0.42} y={y - 0.36} size={0.84} weight="fill" color="#241c3d" opacity={0.8} /> : <S x={x - 0.55} y={y - 0.55} size={1.1} weight="fill" color="#241c3d" />)}
-        {(patterns[k] || !PUZZLE_PACK_CLEARED) && <ellipse cx={x - 0.35} cy={y - 0.42} rx={0.26} ry={0.15} fill="#fff" opacity={0.7} />}
-      </g>
-    );
-  };
+  const patterns = bubblePatterns(theme);
+  const bubble = (k: number, x: number, y: number, key?: string, cls = '', style?: React.CSSProperties) => drawBubble(patterns, k, x, y, key, cls, style);
   // Special shots: a rainbow bubble (wedges of every color, a white star) and
   // a star burst (dark with a glowing ring and a sparkle).
   const shotBubble = (shot: Shot, x: number, y: number) => {
@@ -342,9 +328,7 @@ export default function BubblePop() {
                 onPointerLeave={() => { pressed.current = false; }}>
                 <defs>
                   <radialGradient id="bp-gold-glow"><stop offset="0%" stopColor="#ffe680" stopOpacity="0.95" /><stop offset="55%" stopColor="#ffc93c" stopOpacity="0.45" /><stop offset="100%" stopColor="#ffc93c" stopOpacity="0" /></radialGradient>
-                  {patterns.map((src, i) => (src || PUZZLE_PACK_CLEARED) && (
-                    <pattern key={i} id={`bp-art-${i}`} patternContentUnits="objectBoundingBox" width="1" height="1"><image href={src ?? `/classic/bubble-pop/ball-${i}.webp`} width="1" height="1" preserveAspectRatio={src ? 'xMidYMid slice' : 'xMidYMid meet'} /></pattern>
-                  ))}
+                  <BubblePatternDefs patterns={patterns} />
                 </defs>
                 <line x1={0} x2={W} y1={dangerY} y2={dangerY} stroke="#fff" strokeOpacity={0.35} strokeWidth={0.12} strokeDasharray="0.5 0.4" />
                 {board.rows.slice(0, MAX_ROWS).map((row, r) => row.slice(0, rowLen(board, r)).map((k, c) => {

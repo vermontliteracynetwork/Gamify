@@ -15,7 +15,7 @@ import { t } from '../../i18n';
 import { GameTopRow, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceFill, pieceImage } from '../../theme/library';
+import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { ChoiceRow } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -25,6 +25,7 @@ import ThemeScreen from '../ThemeScreen';
 import { memoryMatchManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { buildDeck, type MemoryCard } from './deck';
+import { CardFace, cardClass, cardStyle } from './cardArt';
 
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
@@ -198,14 +199,9 @@ export default function MemoryMatch() {
                 <motion.button type="button" onClick={() => player?.kind !== 'cpu' && flip(i)} disabled={phase !== 'play' || player?.kind === 'cpu'}
                   aria-label={up ? `${c.side === 'q' ? t('mm.question') : t('mm.answer')}: ${c.text}` : t('mm.card', { n: i + 1 })}
                   key={`${c.key}-${up ? 'up' : 'down'}`} initial={still ? false : { scaleX: 0.05 }} animate={{ scaleX: 1 }} transition={{ duration: 0.25 }}
-                  className={`rounded-input border-[2.5px] border-border p-1.5 flex items-center justify-center text-center overflow-hidden ${owner !== undefined ? 'ring-4 ring-[#9fe7a0]' : ''}`}
-                  style={{ aspectRatio: String(ratio), boxShadow: 'var(--shadow-sticker)', ...(up ? { background: c.side === 'q' ? '#fbfcf8' : '#fdfd94' } : pieceFill(theme, 'card-back', '#b4c4fb')) }}>
-                  {up ? (
-                    <span className="grid gap-1 justify-items-center">
-                      {c.image && <img src={c.image} alt={c.alt ?? ''} className="max-h-12 object-contain" />}
-                      <span className={`font-bold leading-tight break-words ${c.side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{c.text}</span>
-                    </span>
-                  ) : !pieceImage(theme, 'card-back') && <Cards weight="fill" size={30} aria-hidden="true" />}
+                  className={cardClass(owner !== undefined)}
+                  style={{ aspectRatio: String(ratio), ...cardStyle(theme, up, c.side) }}>
+                  <CardFace theme={theme} up={up} side={c.side} text={c.text} image={c.image} alt={c.alt} />
                 </motion.button>
               );
             })}
