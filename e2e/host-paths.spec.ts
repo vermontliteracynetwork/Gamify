@@ -45,7 +45,7 @@ test('Play or share: together on own devices opens the lobby on Together', async
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
-  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('radio', { name: /^Together/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
   await expect(page).toHaveURL(/mode=together/);

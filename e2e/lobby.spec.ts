@@ -12,7 +12,7 @@ test('lobby: play together toward a goal, a second group with its own game, a se
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
-  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.replace(/\W/g, '').slice(-5);
 

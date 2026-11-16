@@ -13,7 +13,7 @@ test('Create an activity: pick the game, how they play and the set, then get a c
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.getByRole('radio', { name: /A code to play on their own/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
@@ -44,7 +44,7 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('radio', { name: /Choice board/ }).click();
   await page.getByRole('button', { name: 'Next' }).click();
-  await page.getByRole('checkbox', { name: /Cast and Catch/ }).click();
+  await page.getByRole('checkbox', { name: /Question Tracker/ }).click();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
   await page.getByRole('checkbox', { name: /Match Three/ }).click();
   // Two-player games join the board, played against the computer.
@@ -64,7 +64,7 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: "I'm not on the list" }).click();
   await page.getByRole('button', { name: /Play/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Pick a game/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Cast and Catch' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Question Tracker' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Match Three' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Game Show' })).toHaveCount(0);
   await page.screenshot({ path: `test-results/choose-${info.project.name}.png` });

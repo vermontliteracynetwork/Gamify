@@ -40,7 +40,7 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
   return (
     // On big screens the round or progress sits big and centered under the
     // scores, level with the bottom of the board (teacher, 2026-11-06).
-    <div className="order-first lg:order-none min-w-0 lg:min-w-[15rem] lg:h-full lg:flex lg:flex-col lg:gap-3">
+    <div className="order-first lg:order-none min-w-0 lg:h-full lg:flex lg:flex-col lg:gap-3">
     <aside className="score-card grid min-w-0 overflow-hidden" aria-label={t('share.scores')}>
       {/* No title, just the scores; every name shown whole (teacher, 2026-11-16). */}
       <ol className="flex flex-wrap lg:grid lg:grid-cols-1 gap-1.5 lg:gap-2 list-none m-0 p-2 lg:p-3">

@@ -56,7 +56,7 @@ test('no automated accessibility violations on the question screen and a game bo
 // Full sweep for the conformance report (Stage 8): every listed game's start
 // screen, the newer teacher screens and dialogs, and the rest of the site.
 test.describe('full sweep', () => {
-  for (const g of ['pinball', 'cast-catch', 'match-three', 'four-in-a-row', 'bubble-pop', 'bowling', 'lunch-rush', 'farm-grow', 'star-quiz']) {
+  for (const g of ['castle-quest', 'game-show', 'match-three', 'four-in-a-row', 'bubble-pop', 'bowling', 'lunch-rush', 'farm-grow', 'star-quiz']) {
     test(`no automated accessibility violations on the ${g} start screen`, async ({ page }) => {
       await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
       await page.goto(`/games/${g}`);
@@ -69,7 +69,7 @@ test.describe('full sweep', () => {
     await page.goto('/teacher/sets');
     await page.getByRole('tab', { name: 'Public sets' }).click();
     await page.getByRole('button', { name: 'Play or share' }).first().click();
-    await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+    await page.getByRole('radio', { name: /Question Tracker/ }).click();
     expect(await scan(page)).toEqual([]);
     await page.getByRole('button', { name: 'Host a live game' }).click();
     await page.waitForTimeout(400);
@@ -83,7 +83,7 @@ test.describe('full sweep', () => {
   });
   test.describe('more public pages', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
-    for (const path of ['/blog', '/blog?tag=themes', '/blog/themes/game-show', '/blog/themes/pinball', '/blog/designing-a-theme-file', '/research', '/credits', '/privacy', '/terms', '/accessibility', '/challenge/permission', '/owner', '/status', '/accessibility/report']) {
+    for (const path of ['/blog', '/blog?tag=themes', '/blog/themes/game-show', '/blog/themes/bowling', '/blog/designing-a-theme-file', '/research', '/credits', '/privacy', '/terms', '/accessibility', '/challenge/permission', '/owner', '/status', '/accessibility/report']) {
       test(`no automated accessibility violations on ${path}`, async ({ page }) => {
         await page.goto(path);
         await page.waitForTimeout(400);

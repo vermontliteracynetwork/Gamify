@@ -92,7 +92,7 @@ test('Big screen design: lobby picture shows in the live lobby; teacher pages ha
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
-  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
   await page.getByLabel('Big screen look').selectOption({ label: 'Party' });
   await expect(page.locator('main img[src^="data:image"]').first()).toBeVisible();
