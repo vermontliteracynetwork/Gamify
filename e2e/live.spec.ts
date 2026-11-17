@@ -11,9 +11,9 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
-  await page.getByRole('radio', { name: /Cast and Catch/ }).click();
+  await page.getByRole('radio', { name: /Question Tracker/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
-  await expect(page.getByRole('heading', { name: /Live: Cast and Catch/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Live: Question Tracker/ })).toBeVisible();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.replace(/\W/g, '').slice(-5);
 
   const kid = await context.newPage();
@@ -31,7 +31,7 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.waitForTimeout(800);
   await page.screenshot({ path: `test-results/live-lobby-${info.project.name}.png` });
   await page.getByRole('button', { name: /Start the game/ }).click();
-  await expect(kid).toHaveURL(/\/games\/cast-catch\?set=/);
+  await expect(kid).toHaveURL(/\/games\/star-quiz\?set=/);
 
   await page.getByRole('button', { name: 'My monitor' }).click();
   await page.getByRole('button', { name: 'Eyes on me, please.' }).click();

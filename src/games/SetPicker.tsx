@@ -93,7 +93,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
         <div role="tablist" aria-label={t('sets.tabs')} className="inline-flex shrink-0 p-0.5 rounded-pill border-[2px] border-border bg-surface">
           {(['mine', 'library'] as const).map((v) => (
             <button key={v} type="button" role="tab" aria-selected={tab === v} onClick={() => setTab(v)}
-              className={`min-h-8 px-3 rounded-pill text-sm font-bold motion-safe:transition-colors ${tab === v ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(v === 'mine' ? 'sets.mine' : 'sets.library')}</button>
+              className={`min-h-7 px-2.5 rounded-pill text-xs font-bold motion-safe:transition-colors ${tab === v ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(v === 'mine' ? 'sets.mine' : 'sets.library')}</button>
           ))}
         </div>
         <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>

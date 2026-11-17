@@ -76,6 +76,11 @@ teacher no control or educational value is not done.
   teachers use (teacher, 2026-10-24); Playwright runs all three sizes. Check for dead/empty space on both short and tall screens. Game screens
   must never need scrolling (teacher, 2026-10-24): boards size to the
   screen and results open in a box over the game.
+- The screen-size rule (teacher, 2026-11-16): every screen is optimized for
+  the size of the device it is on. Sizes are in rem and the root font follows
+  the screen width and height (`src/index.css`), so text, cards and boards
+  shrink on short or zoomed laptop windows and grow on smart boards. Check a
+  short laptop window (1190 x 540) too; nothing may scroll or be cut off.
 - Read every console error/warning from the browser session before calling
   something done.
 

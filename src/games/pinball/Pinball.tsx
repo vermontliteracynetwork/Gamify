@@ -52,7 +52,7 @@ const MAX_SHOT = 4.5; // seconds: longer runs play a little faster
 
 // Pinball (teacher design, 2026-10-31; replaces Peg Drop). A right answer
 // earns a shot. Pick a lane (the numbered band across the middle, which
-// then fades away and never touches the ball), stop the power bar, and the
+// then fades away and never touches the ball) and the
 // ball flies up from the bottom center, bouncing off the walls, into one of
 // the scoring pockets in a line across the top. Too little power and it
 // rolls back down. Three pockets in round 1 and one more each round (up to
@@ -425,7 +425,7 @@ export default function Pinball() {
                   <g key={`f-${flip}`}>
                     <Flippers theme={theme} moving={!!flip && !still} />
                   </g>
-                  {/* The plunger pulls back as the power bar fills. */}
+                  {/* The plunger pulls back, then the ball shoots. */}
                   <Plunger />
                   {floats.map((f) => (
                     <text key={f.id} x={f.x} y={f.y} textAnchor="middle" fontSize={5.5} fontWeight={800} fill={f.color} stroke="#000" strokeWidth={0.7} paintOrder="stroke" fontFamily="var(--font-display, sans-serif)" className={still ? '' : 'pb-float'}>+{f.n}</text>
@@ -501,7 +501,7 @@ export default function Pinball() {
               {/* Small screens: held power-ups float over the table's lower left. */}
               <div className="lg:hidden absolute left-2 w-[min(15rem,45%)] z-10" style={{ bottom: '1rem' }}>{tray}</div>
             </section>
-            <div className="order-first lg:order-none lg:w-[260px] min-w-0 grid gap-3">
+            <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3">
               <ScoreBoard turns={turns} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={t('pb.roundWord')} />
               {/* Held power-ups, right under the scores (teacher, 2026-10-31). */}
               <div className="hidden lg:block">{tray}</div>

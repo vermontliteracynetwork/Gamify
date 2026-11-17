@@ -9,7 +9,7 @@ import { t } from '../i18n';
 // sets on hand; a picked tag becomes a filter chip (teacher, 2026-10-25).
 export default function SetFilterBar({ value, onChange, sets = [], compact = false }: { value: SetFilter; onChange: (f: SetFilter) => void; sets?: Pick<QuestionSet, 'tags'>[]; compact?: boolean }) {
   // compact: small fields so the cards stay the main view (teacher, 2026-11-06).
-  const field = compact ? 'min-h-9 px-2.5 rounded-input border-[2px] border-border bg-surface font-bold text-sm' : 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+  const field = compact ? 'min-h-8 px-2 rounded-input border-[1.5px] border-border bg-surface font-bold text-xs' : 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
   const chosen = value.tags ?? [];
   const typed = value.search?.trim() ?? '';
   const offers = typed ? suggestTags(tagCounts(sets), typed, chosen, 6) : [];

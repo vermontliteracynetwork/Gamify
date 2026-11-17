@@ -206,6 +206,11 @@ button, a, [role="button"] {
 }
 
 /* Player settings (src/settings). Set as data attributes on <html>. */
+/* Every other page (teacher pages, the public site) follows the screen too:
+   16px on a normal laptop, down to 13px on a short or narrow window. */
+@media (pointer: fine) {
+  html { font-size: clamp(13px, min(8.5px + 0.833vh, 9px + 0.5vw), 16px); }
+}
 html[data-text-size="large"] { font-size: 18px; --text-scale: 1.125; }
 html[data-text-size="larger"] { font-size: 20px; --text-scale: 1.25; }
 /* Game screens grow with big screens (teacher, 2026-10-29: smart boards,
@@ -227,8 +232,19 @@ html:fullscreen:has(.game-stage) .site-header { display: none; }
 html:fullscreen .game-stage { --fs-save: 4rem; min-height: 100dvh; }
 /* Full screen sits the game in the middle of the board (teacher, 2026-10-31). */
 html:fullscreen .game-stage > main { min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
+/* THE SCREEN-SIZE RULE (teacher, 2026-11-16: "make a rule so the screen size
+   of the device recognized is optimized always"). Every size in Gamify is in
+   rem, and the root font follows the screen, both its width and its height,
+   so a short laptop window, a zoomed-in browser, an iPad and a smart board
+   each get text, cards, boards and buttons sized to fit with no scrolling.
+   Game screens: 12px on a short 1190 x 540 window, 15px on 1440 x 900, about
+   20px on a 1920 x 1080 board, up to 26px. Touch screens never go below 15px
+   so buttons stay easy to tap. */
 html:has(.game-stage) {
-  font-size: calc(var(--text-scale, 1) * clamp(16px, min(100vw / 90, 100vh / 50), 28px));
+  font-size: calc(var(--text-scale, 1) * clamp(12px, min(100vw / 96, 100vh / 52), 26px));
+}
+@media (pointer: coarse) {
+  html:has(.game-stage) { font-size: calc(var(--text-scale, 1) * clamp(15px, min(100vw / 96, 100vh / 52), 26px)); }
 }
 html[data-comfort="on"] body { letter-spacing: 0.04em; word-spacing: 0.12em; line-height: 1.75; }
 html[data-contrast="high"] {
@@ -267,6 +283,19 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
   .template-sheet { width: 8.5in; height: 11in; display: block; }
   main { padding: 0 !important; max-width: none !important; }
   main > .grid { gap: 0 !important; }
+}
+
+/* The progress report prints on letter paper with real margins
+   (teacher, 2026-11-16), only the report itself. */
+@page report { size: letter; margin: 0.55in 0.6in; }
+@media print {
+  body:has(.report-page) .report-doc { page: report; }
+  body:has(.report-page) nav, body:has(.report-page) footer:not(.report-doc footer), body:has(.report-page) .no-print { display: none !important; }
+  .report-doc { font-size: 11pt; }
+  .report-doc h2 { break-after: avoid; }
+  .report-doc table { break-inside: auto; }
+  .report-doc tr { break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* Cast and Catch scenery (CSS so position moves stay smooth). */

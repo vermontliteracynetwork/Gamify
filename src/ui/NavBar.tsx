@@ -12,19 +12,19 @@ export default function NavBar() {
   const path = useLocation().pathname;
   const role = path.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
-  const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
+  const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-text no-underline px-3 min-h-9 rounded-pill border-[2px] border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
-    <header className="site-header no-print sticky top-0 z-50 h-16 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
+    <header className="site-header no-print sticky top-0 z-50 h-12 flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border">
       <Link to={any ? '/play' : '/'} className="flex items-center shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
-        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-9 w-auto shrink-0" draggable="false" />
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-6 sm:h-7 w-auto shrink-0" draggable="false" />
       </Link>
       {!any && (
         <nav aria-label={t('public.nav.label')} className="flex items-center gap-1 sm:gap-2">
-          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
-          <Link to="/features" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
-          <Link to="/pricing" className="nav-grow hidden sm:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
-          <Link to="/research" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.research')}</Link>
-          <Link to="/blog" className="nav-grow hidden md:flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
+          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="nav-grow hidden sm:flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
+          <Link to="/features" className="nav-grow hidden sm:flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
+          <Link to="/pricing" className="nav-grow hidden sm:flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.pricing')}</Link>
+          <Link to="/research" className="nav-grow hidden md:flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.research')}</Link>
+          <Link to="/blog" className="nav-grow hidden md:flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
           <Link to="/join" className={pill}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>
@@ -35,15 +35,15 @@ export default function NavBar() {
               and help (teacher, 2026-10-31). Students never see these. */}
           {teacher && !student && (
             <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1 mr-1">
-              <Link to="/" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
-              <Link to="/features" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
-              <Link to="/blog" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
-              <Link to="/help" className="nav-grow flex min-h-11 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.faq')}</Link>
+              <Link to="/" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
+              <Link to="/features" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>
+              <Link to="/blog" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.ideas')}</Link>
+              <Link to="/help" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.faq')}</Link>
             </nav>
           )}
           <button type="button" onClick={() => setTellOpen(true)} aria-label={t('tell.open')}
-            className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
-            <ChatCircleDots weight="bold" size={22} />
+            className="w-9 h-9 rounded-full border-[2px] border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
+            <ChatCircleDots weight="bold" size={18} />
           </button>
           {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
           {!student && <Link to="/play" className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.allGames')}</span></Link>}

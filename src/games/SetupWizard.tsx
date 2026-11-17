@@ -44,9 +44,9 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // shows a second scroll bar (teacher, 2026-11-16).
   const [tall, setTall] = useState(false);
   const page = pages[i];
-  // Pages of just cards (players, teams, power-ups) sit in the middle of the
+  // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
-  const cardsOnly = ['players', 'teams'].includes(page.id) || page.id.endsWith('-powers');
+  const cardsOnly = ['players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers');
   const items = itemsOf(page.content);
   const body = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
@@ -94,7 +94,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
     <div className="grid">
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
-    <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
+    <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 6.5rem)' }}>
       {/* The step title and its progress line sit on one row, centered
           with the corner buttons (teacher, 2026-11-06). The question set
           search and filters lock right under it. */}
@@ -117,17 +117,17 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
-          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${['way', 'questions', 'players', 'teams'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${['way', 'questions', 'players', 'teams'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
+          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${['way', 'questions', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${['way', 'questions', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
-      <div className="px-6 sm:px-8 py-3 flex justify-between gap-2">
+      <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">
         <button type="button" onClick={back}
-          className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-base inline-flex items-center gap-1.5 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
-          <ArrowLeft weight="bold" size={16} />{t('setup.back')}
+          className="min-h-8 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
+          <ArrowLeft weight="bold" size={14} />{t('setup.back')}
         </button>
         <button type="button" disabled={page.ready === false} onClick={() => (last ? (teach.length ? setTeaching(true) : onPlay()) : next())}
-          className="min-h-11 px-6 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 disabled:opacity-50 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}>
-          {last ? <><Play weight="fill" size={18} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={16} /></>}
+          className="min-h-8 px-4 rounded-pill border-[2px] border-border bg-accent font-display text-base font-bold inline-flex items-center gap-1 disabled:opacity-50 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 2px 0 #000' }}>
+          {last ? <><Play weight="fill" size={15} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={14} /></>}
         </button>
       </div>
     </section>

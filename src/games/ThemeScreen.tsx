@@ -41,7 +41,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   }, [themes.length]);
   return (
     <div className="grid">
-      <section className="menu-panel max-w-6xl w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 7.5rem)' }}>
+      <section className="menu-panel max-w-6xl w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 6.5rem)' }}>
         <h2 className="font-display text-xl font-bold px-5 pt-1 pb-2 min-h-11 flex items-center pr-40"><Title text={t('themeScreen.title')} /></h2>
         <div role="radiogroup" aria-label={t('theme.pick')} ref={body} className="px-5 py-4 grid gap-5 overflow-hidden min-h-0 flex-1 content-center justify-center" style={{ gridTemplateColumns: `repeat(${fit.cols}, ${fit.w}px)` }}>
           {themes.map((th) => {

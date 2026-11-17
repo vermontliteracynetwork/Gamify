@@ -22,7 +22,8 @@ for (const size of [{ width: 1480, height: 680 }, { width: 1180, height: 820 }, 
       const body = page.locator('section.setup-roomy > div').nth(1);
       expect(await body.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
       for (const l of ['Rounds', 'Shots each round', 'Questions each round']) if (await page.getByText(l, { exact: true }).isVisible()) seen.add(l);
-      if (await page.getByText('Power-ups', { exact: true }).isVisible()) seen.add('Power-ups');
+      // The power-up page has no heading of its own (teacher, 2026-11-16): look for its cards.
+      if (await page.getByRole('switch').first().isVisible()) seen.add('Power-ups');
       await page.screenshot({ path: `test-results/setup-pages-${size.width}-${k}.png` });
       const next = page.getByRole('button', { name: 'Next', exact: true });
       if (!(await next.isVisible())) break;

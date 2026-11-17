@@ -5,7 +5,7 @@ import type { GameManifest } from '../types';
 export const pinballManifest: GameManifest = {
   id: 'pinball',
   name: 'Pinball',
-  description: 'Answer right, aim through a zone, fill the power bar and shoot the ball into a pocket of points.',
+  description: 'Answer right, pick a lane and the ball shoots! Bounce off musical pegs, grab stars for power-ups and land in a pocket of points.',
   modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [
@@ -21,7 +21,7 @@ export const pinballManifest: GameManifest = {
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 5 },
   items: {
-    label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
+    label: 'Power-ups', hint: 'A star the ball grabs brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
     // Classic roles (teacher, 2026-10-31): a theme can redraw and rename each
     // item, but its role stays. Held for the player's next turn.
     abilities: [

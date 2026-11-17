@@ -24,7 +24,9 @@ export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, cas
 // later; their code and links stay, they are just not listed. Castle Guard
 // waits too: the teacher took it off the queue (2026-10-26) before it was built.
 // Lunch Rush and Farm Grow are kept but not listed for now (teacher, 2026-10-31).
-export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'lunch-rush', 'farm-grow'];
+// Pinball and Cast and Catch are hidden too (teacher, 2026-11-16): all their
+// logic stays, they are just off the main site for now.
+export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'lunch-rush', 'farm-grow', 'pinball', 'cast-catch'];
 export const GAMES: GameManifest[] = ALL_GAMES.filter((g) => !LATER_GAMES.includes(g.id));
 
 export function getGame(id: string): GameManifest | undefined {

@@ -72,6 +72,8 @@ const CodeScreen = lazyPage(() => import('./public/CodeScreen'));
 const ClassesPage = lazyPage(() => import('./teacher/ClassesPage'));
 const ClassPage = lazyPage(() => import('./teacher/ClassPage'));
 const ReportsPage = lazyPage(() => import('./teacher/ReportsPage'));
+const ReportPrintPage = lazyPage(() => import('./teacher/ReportPrintPage'));
+const StudentPage = lazyPage(() => import('./teacher/StudentPage'));
 const AccountPage = lazyPage(() => import('./teacher/AccountPage'));
 const CheckInPage = lazyPage(() => import('./beta/CheckInPage'));
 const DesignPage = lazyPage(() => import('./student/DesignPage'));
@@ -128,6 +130,7 @@ function AnimatedRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/it" element={<ItPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/help/:topic" element={<HelpPage />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/beta-kit" element={<BetaKitPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
@@ -178,8 +181,10 @@ function AnimatedRoutes() {
           <Route path="/teacher/themes/:gameId/template" element={<RequireTeacher><TemplatePage /></RequireTeacher>} />
           <Route path="/teacher/account" element={<RequireTeacher><AccountPage /></RequireTeacher>} />
           <Route path="/teacher/reports" element={<RequireTeacher><ReportsPage /></RequireTeacher>} />
+          <Route path="/teacher/reports/print" element={<RequireTeacher><ReportPrintPage /></RequireTeacher>} />
           <Route path="/teacher/classes" element={<RequireTeacher><ClassesPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
+          <Route path="/teacher/classes/:id/students/:sid" element={<RequireTeacher><StudentPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id/check-in" element={<RequireTeacher><CheckInPage /></RequireTeacher>} />
           {/* No open Arcade: students reach games only with a code (teacher, 2026-10-31). */}
           <Route path="/arcade" element={<Navigate to="/join" replace />} />

@@ -30,7 +30,7 @@ export default function Home() {
   if (session && !teacher) return <Navigate to="/join" replace />;
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-16">
+    <main className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-12 pt-10 pb-16">
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
