@@ -107,7 +107,7 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   for (let k = 0; k < 4; k++) {
     const top = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Close' }) }).last();
     if (!(await top.isVisible().catch(() => false))) break;
-    await top.getByRole('button', { name: 'Close' }).click();
+    await top.getByRole('button', { name: 'Close' }).click({ force: true }); // the card keeps bobbing, so it is never "stable"
     await page.waitForTimeout(400);
   }
   // The board never runs off the screen.
