@@ -128,16 +128,16 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                   )}
                   {!back ? (
                     <>
-                      {/* A small subject tag (teacher, 2026-11-16). */}
-                      <span className="flex items-center gap-1.5 min-w-0 pr-9">
-                        <span className="w-6 h-6 shrink-0 rounded-full border-[1.5px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }}>
-                          <I weight="fill" size={13} color={art.ink} aria-hidden="true" />
-                        </span>
-                        <span className="text-[11px] font-bold uppercase tracking-wide text-muted">{s.subject ?? t('sets.otherSubject')}</span>
-                      </span>
                       {/* A cover keeps the shape it was uploaded in. */}
                       {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-[2px] border-border" />}
-                      <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere]">{s.name || t('sets.untitled')}</span>
+                      {/* The subject icon, then the title right beside it, no subject
+                          word (teacher, 2026-11-18). */}
+                      <span className="flex items-start gap-2 min-w-0 pr-8">
+                        <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-[1.5px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
+                          <I weight="fill" size={15} color={art.ink} aria-hidden="true" />
+                        </span>
+                        <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere] min-w-0">{s.name || t('sets.untitled')}</span>
+                      </span>
                       <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
                         <span className="rounded-pill border-[1.5px] border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
                         <span className="rounded-pill border-[1.5px] border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>

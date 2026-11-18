@@ -175,3 +175,11 @@ line that fits, and add each new preference the same turn she says it.
 - Pinball and Cast and Catch hidden from the site for now (2026-11-16); all their code stays.
 - Bubble Pop (2026-11-16): board centered; one strip across the top with score, the rounds as a progress bar and shots left; no Shoot button, a tap or click on the board shoots.
 - Help Center (2026-11-16): looks like a professional help guide (Google Help style): one big search, a tile per topic, each topic its own article page with numbered steps, related articles, Was this helpful?, Still need help.
+- Laptop sizing (2026-11-18): smaller text and roomier side margins on laptops so pages never look big or crowded.
+- Welcome screens (2026-11-18): the right column is exactly as tall as the cover picture on the left, on every game, side by side even on short laptop windows.
+- How will you play? (2026-11-18): square cards in the middle of the box; no second line like "One big screen up front".
+- Question set cards (2026-11-18): the title starts right beside the subject icon, no subject word. Subjects to start: Literacy (was Reading, Writing, Language), Math, Science, Social studies.
+- Power-up setup cards (2026-11-18): bigger titles.
+- In a game (2026-11-18): the top bar shows only the buttons on the right, not Home, Features, Blog, Help Center.
+- Settings (2026-11-18): hints are hover text on a small (i), not a line under the label; sliders fill with color up to the thumb.
+- Board size choices (2026-11-18): each shows a small picture of the board at that size.

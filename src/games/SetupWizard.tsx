@@ -46,7 +46,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   const page = pages[i];
   // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
-  const cardsOnly = ['players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers');
+  const cardsOnly = ['way', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers');
   const items = itemsOf(page.content);
   const body = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLDivElement | null)[]>([]);

@@ -151,7 +151,7 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
       </div>
       {!readOnly && (
         <>
-          {(math || ['Reading', 'Writing', 'Language'].includes(set.subject ?? '')) && (
+          {(math || set.subject === 'Literacy') && (
             <div className="flex flex-wrap items-end gap-2">
               <label className="grid gap-1 text-sm font-bold">{t('filter.grade')}
                 <select value={grade} onChange={(e) => { setGrade(e.target.value as Grade); setN(1); }} className={field}>{GRADES.filter((g) => g !== 'College').map((g) => <option key={g} value={g}>{g}</option>)}</select>
@@ -174,7 +174,7 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
               )}
             </div>
           )}
-          {(math || ['Reading', 'Writing', 'Language'].includes(set.subject ?? '')) && !hs && (
+          {(math || set.subject === 'Literacy') && !hs && (
             <p className="text-sm font-semibold bg-surface-2 border-[2px] border-border-soft rounded-input p-2" aria-live="polite">
               {builtText ? <><span className="font-bold">{built}: </span>{builtText}</> : t('details.noSuchStandard', { code: built })}
             </p>

@@ -973,7 +973,7 @@ export const en = {
   'class.studentLimit': '{count} of {limit} students',
   'class.studentCount': '{count} students',
   'class.overLimit': 'Only the first names fit: your plan includes {limit} students per class. Plus fits 60 and Pro the whole school.',
-  'class.noStudents': 'No students yet. Add names above: each student gets a picture and a 4-digit PIN.',
+  'class.noStudents': 'No students yet. Add names below: each student gets a picture and a 4-digit PIN.',
   'class.pictures': 'Sign-in pictures: {a} then {b}',
   'class.hasSupports': 'Supports',
   'class.avatarFor': 'Picture and PIN for {name}',

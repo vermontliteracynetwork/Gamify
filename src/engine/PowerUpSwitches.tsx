@@ -41,7 +41,7 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
             className={`relative rounded-input border-[2.5px] tile-wiggle p-2.5 pt-3 grid justify-items-center content-start gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-[#c8f0dc]' : 'border-dashed border-border-soft bg-surface-2'}`}
             style={c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : undefined}>
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
-            <span className={`font-bold text-sm leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
+            <span className={`font-bold text-lg leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
             {/* Small words, so the cards stay near 4:3 (teacher, 2026-11-16). */}
             {c.hint && <span className="text-[9.5px] font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
             {/* On: a mint check in the corner. Off: a faded X. */}

@@ -5,8 +5,17 @@ import type { QuestionSet } from './types';
 // standards (or "no Common Core standard" for subjects it doesn't cover).
 // They drive the set filters in every game and the teacher library.
 
-export const SUBJECTS = ['Reading', 'Writing', 'Language', 'Math', 'Science', 'Social studies', 'Other'] as const;
-export type Subject = (typeof SUBJECTS)[number];
+// Literacy, Math, Science and Social studies to start (teacher, 2026-11-18):
+// Reading, Writing and Language are all Literacy now. "Other" stays only for
+// sets saved before subjects were required.
+export const SUBJECTS = ['Literacy', 'Math', 'Science', 'Social studies'] as const;
+export type Subject = (typeof SUBJECTS)[number] | 'Other';
+// Sets saved with an older subject read as the new one.
+export function normalizeSubject(s: string | undefined | null): Subject | undefined {
+  if (!s) return undefined;
+  if (s === 'Reading' || s === 'Writing' || s === 'Language') return 'Literacy';
+  return (SUBJECTS as readonly string[]).includes(s) || s === 'Other' ? (s as Subject) : 'Other';
+}
 
 export const GRADES = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'College'] as const;
 export type Grade = (typeof GRADES)[number];

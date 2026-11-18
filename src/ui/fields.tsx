@@ -2,7 +2,7 @@ import { Check } from '@phosphor-icons/react';
 import { useId, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
-import { Minus, Plus } from '@phosphor-icons/react';
+import { Info, Minus, Plus } from '@phosphor-icons/react';
 
 // Shared form controls, iPad-sized: switches, choice rows, sliders,
 // steppers and picture cards.
@@ -10,10 +10,11 @@ import { Minus, Plus } from '@phosphor-icons/react';
 // `art` and `hint` add a small picture on the left and a line under the label.
 export function Toggle({ label, value, onChange, art, hint }: { label: string; value: boolean; onChange: (v: boolean) => void; art?: ReactNode; hint?: string }) {
   return (
-    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
+    // The hint is hover text on a small (i) (teacher, 2026-11-18).
+    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)} aria-description={hint}
       className="flex items-center justify-between gap-3 min-h-12 px-4 py-1.5 rounded-input border-[2px] border-border-soft bg-surface text-left font-bold">
       {art}
-      <span className="flex-1 min-w-0 grid">{label}{hint && <span className="text-sm font-semibold text-muted">{hint}</span>}</span>
+      <span className="flex-1 min-w-0 inline-flex items-center gap-1.5">{label}{hint && <span data-tip={hint} aria-hidden="true" className="text-muted cursor-help shrink-0"><Info weight="bold" size={16} /></span>}</span>
       <span className={`relative w-14 h-8 rounded-pill border-[2px] border-border shrink-0 ${value ? 'bg-success' : 'bg-surface-2'}`} aria-hidden="true">
         <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-[2px] border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
       </span>
@@ -103,13 +104,15 @@ export function Slider({ label, hint, min, max, value, disabled, show = String, 
   const id = `slider-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
     <div className={`grid gap-1.5 ${disabled ? 'opacity-50' : ''}`}>
-      <label htmlFor={id} className="flex items-center justify-between font-bold">
-        <span>{label}</span>
+      {/* The hint is hover text on a small (i), not a line under the label
+          (teacher, 2026-11-18); the track fills up to the thumb. */}
+      <label htmlFor={id} className="flex items-center justify-between gap-2 font-bold">
+        <span className="inline-flex items-center gap-1.5">{label}{hint && <span data-tip={hint} aria-hidden="true" className="text-muted cursor-help"><Info weight="bold" size={16} /></span>}</span>
         <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-[2px] border-border tabular-nums">{show(value)}</span>
       </label>
-      {hint && <p className="-mt-1 text-sm font-semibold text-muted">{hint}</p>}
-      <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled}
-        onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full" />
+      <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled} aria-description={hint}
+        onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full"
+        style={{ '--fill': `${max > min ? ((value - min) / (max - min)) * 100 : 0}%` } as React.CSSProperties} />
     </div>
   );
 }

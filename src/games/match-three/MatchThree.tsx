@@ -281,7 +281,7 @@ export default function MatchThree() {
               {powerUpSwitches({ manifest: matchThreeManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
               <Slider label={t('bm.perBreak')} hint={t('bm.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
               <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
-                options={[{ value: '6', label: t('bm.size.small') }, { value: '7', label: t('bm.size.medium') }, { value: '8', label: t('bm.size.big') }]} />
+                options={[6, 7, 8].map((n) => ({ value: String(n), label: t(n === 6 ? 'bm.size.small' : n === 7 ? 'bm.size.medium' : 'bm.size.big'), art: <SizeMock n={n} /> }))} />
             </>
           ) },
         ]} />
@@ -400,5 +400,16 @@ export default function MatchThree() {
       {element}
     </main>
     </ThemedPage>
+  );
+}
+
+// A small picture of each board size, so the choice reads at a glance
+// (teacher, 2026-11-18: "show board grid sizes"). Same box, more pieces.
+const MOCK = ['#9fd8f0', '#f6a5c0', '#fdfd94', '#a3e6b8', '#c9b6f2', '#f7b267'];
+function SizeMock({ n }: { n: number }) {
+  return (
+    <span className="grid gap-[2px] p-1 rounded-md border-[1.5px] border-border bg-white" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, width: 64, height: 64 }} aria-hidden="true">
+      {Array.from({ length: n * n }, (_, i) => <span key={i} className="rounded-[2px]" style={{ background: MOCK[(i * 7 + Math.floor(i / n)) % MOCK.length] }} />)}
+    </span>
   );
 }

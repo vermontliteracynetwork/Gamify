@@ -12,12 +12,12 @@ type Row = [prompt: string, right: string, ...wrong: string[]];
 type Details = { grades: [Grade, Grade]; subject: Subject; tags: string[]; standards: string[] | null };
 const DETAILS: Record<string, Details> = {
   'lib-example-addition': { grades: ['K', '2'], subject: 'Math', tags: ['addition', 'math facts', 'example'], standards: ['1.OA.6', '2.OA.2'] },
-  'lib-short-vowels': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'vowels'], standards: ['RF.K.3', 'RF.1.3'] },
-  'lib-rhymes': { grades: ['K', '1'], subject: 'Reading', tags: ['phonics', 'rhyming', 'phonological awareness'], standards: ['RF.K.2', 'RF.1.2'] },
-  'lib-sight-words': { grades: ['K', '1'], subject: 'Reading', tags: ['sight words', 'high-frequency words'], standards: ['RF.K.3', 'RF.1.3'] },
-  'lib-capitals-punctuation': { grades: ['1', '2'], subject: 'Writing', tags: ['capital letters', 'punctuation', 'conventions'], standards: ['L.1.2', 'L.2.2'] },
-  'lib-nouns-verbs': { grades: ['2', '3'], subject: 'Language', tags: ['grammar', 'parts of speech'], standards: ['L.2.1', 'L.3.1'] },
-  'lib-synonyms-antonyms': { grades: ['2', '4'], subject: 'Language', tags: ['vocabulary', 'word relationships'], standards: ['L.4.5'] },
+  'lib-short-vowels': { grades: ['K', '1'], subject: 'Literacy', tags: ['phonics', 'vowels'], standards: ['RF.K.3', 'RF.1.3'] },
+  'lib-rhymes': { grades: ['K', '1'], subject: 'Literacy', tags: ['phonics', 'rhyming', 'phonological awareness'], standards: ['RF.K.2', 'RF.1.2'] },
+  'lib-sight-words': { grades: ['K', '1'], subject: 'Literacy', tags: ['sight words', 'high-frequency words'], standards: ['RF.K.3', 'RF.1.3'] },
+  'lib-capitals-punctuation': { grades: ['1', '2'], subject: 'Literacy', tags: ['capital letters', 'punctuation', 'conventions'], standards: ['L.1.2', 'L.2.2'] },
+  'lib-nouns-verbs': { grades: ['2', '3'], subject: 'Literacy', tags: ['grammar', 'parts of speech'], standards: ['L.2.1', 'L.3.1'] },
+  'lib-synonyms-antonyms': { grades: ['2', '4'], subject: 'Literacy', tags: ['vocabulary', 'word relationships'], standards: ['L.4.5'] },
   'lib-add-10': { grades: ['K', '1'], subject: 'Math', tags: ['addition', 'math facts'], standards: ['K.OA.5', '1.OA.6'] },
   'lib-sub-10': { grades: ['K', '1'], subject: 'Math', tags: ['subtraction', 'math facts'], standards: ['K.OA.5', '1.OA.6'] },
   'lib-add-sub-20': { grades: ['1', '2'], subject: 'Math', tags: ['addition', 'subtraction', 'fluency'], standards: ['1.OA.6', '2.OA.2'] },
@@ -28,7 +28,7 @@ const DETAILS: Record<string, Details> = {
   'lib-shapes': { grades: ['K', '2'], subject: 'Math', tags: ['geometry', 'shapes'], standards: ['K.G.2', '1.G.1', '2.G.1'] },
   'lib-states-of-matter': { grades: ['2', '4'], subject: 'Science', tags: ['matter', 'physical science'], standards: null },
   'lib-animals': { grades: ['K', '3'], subject: 'Science', tags: ['animals', 'habitats', 'life science'], standards: null },
-  'lib-literary-terms': { grades: ['6', '12'], subject: 'Reading', tags: ['literature', 'literary terms'], standards: ['RL.6.4', 'RL.9-10.4'] },
+  'lib-literary-terms': { grades: ['6', '12'], subject: 'Literacy', tags: ['literature', 'literary terms'], standards: ['RL.6.4', 'RL.9-10.4'] },
   'lib-algebra-1': { grades: ['8', '10'], subject: 'Math', tags: ['algebra', 'equations'], standards: ['8.EE.7', 'A-REI.3'] },
   'lib-cell-biology': { grades: ['9', '10'], subject: 'Science', tags: ['cells', 'biology'], standards: null },
   'lib-civics': { grades: ['7', '12'], subject: 'Social studies', tags: ['civics', 'government'], standards: null },
@@ -71,7 +71,7 @@ export const LIBRARY: QuestionSet[] = [
     ['2 + 9 =', '11', '12', '10', '13'],
     ['9 + 6 =', '15', '16', '14', '17'],
   ]),
-  makeSet('lib-short-vowels', 'Short vowel sounds', 'K-1', 'Reading', [
+  makeSet('lib-short-vowels', 'Short vowel sounds', 'K-1', 'Literacy', [
     ['Which word has the short a sound, like in "cat"?', 'map', 'cake', 'rain', 'saw'],
     ['Which word has the short e sound, like in "bed"?', 'pet', 'feet', 'me', 'her'],
     ['Which word has the short i sound, like in "pig"?', 'sit', 'kite', 'bike', 'see'],
@@ -83,7 +83,7 @@ export const LIBRARY: QuestionSet[] = [
     ['Which letter makes the middle sound in "net"?', 'e', 'i', 'a', 'o'],
     ['Which letter makes the middle sound in "log"?', 'o', 'u', 'a', 'i'],
   ]),
-  makeSet('lib-rhymes', 'Rhyming words', 'K-1', 'Reading', [
+  makeSet('lib-rhymes', 'Rhyming words', 'K-1', 'Literacy', [
     ['Which word rhymes with "cat"?', 'hat', 'cap', 'dog', 'cut'],
     ['Which word rhymes with "sun"?', 'fun', 'sit', 'sad', 'son'],
     ['Which word rhymes with "bed"?', 'red', 'bad', 'bee', 'bud'],
@@ -95,7 +95,7 @@ export const LIBRARY: QuestionSet[] = [
     ['Which word rhymes with "ball"?', 'tall', 'bell', 'bill', 'bowl'],
     ['Which word rhymes with "boat"?', 'coat', 'bat', 'boot', 'bit'],
   ]),
-  makeSet('lib-sight-words', 'Sight words', 'K-1', 'Reading', [
+  makeSet('lib-sight-words', 'Sight words', 'K-1', 'Literacy', [
     ['Which word is "the"?', 'the', 'then', 'they', 'this'],
     ['Which word is "said"?', 'said', 'sad', 'side', 'seed'],
     ['Which word is "was"?', 'was', 'saw', 'way', 'wash'],
@@ -107,7 +107,7 @@ export const LIBRARY: QuestionSet[] = [
     ['Finish the sentence: "I ___ a dog."', 'have', 'has', 'haves', 'having'],
     ['Finish the sentence: "We ___ going home."', 'are', 'is', 'am', 'be'],
   ]),
-  makeSet('lib-capitals-punctuation', 'Capital letters and punctuation', '1-2', 'Writing', [
+  makeSet('lib-capitals-punctuation', 'Capital letters and punctuation', '1-2', 'Literacy', [
     ['Which sentence starts with a capital letter?', 'My cat is soft.', 'my cat is soft.', 'my Cat is soft.', 'mY cat is soft.'],
     ['Which punctuation ends a telling sentence?', 'period (.)', 'question mark (?)', 'comma (,)', 'apostrophe (\')'],
     ['Which punctuation ends an asking sentence?', 'question mark (?)', 'period (.)', 'comma (,)', 'quotation mark (")'],

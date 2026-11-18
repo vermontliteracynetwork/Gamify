@@ -33,7 +33,8 @@ export default function NavBar() {
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
               and help (teacher, 2026-10-31). Students never see these. */}
-          {teacher && !student && (
+          {/* Not inside a game (teacher, 2026-11-18): just the buttons on the right. */}
+          {teacher && !student && !path.startsWith('/games/') && (
             <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1 mr-1">
               <Link to="/" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.home')}</Link>
               <Link to="/features" className="nav-grow flex min-h-9 px-3 items-center font-bold text-sm no-underline text-text">{t('public.nav.features')}</Link>

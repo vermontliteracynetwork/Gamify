@@ -1,4 +1,5 @@
 import type { DataStore } from './store';
+import { normalizeSubject } from './setDetails';
 import type { Classroom, FeedbackReport, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
 
 // Browser-storage backend. Falls back to memory when localStorage is
@@ -14,6 +15,8 @@ type Tables = {
 };
 
 const PREFIX = 'gamify:';
+// Older subjects (Reading, Writing, Language) read as Literacy.
+const withSubject = (s: QuestionSet): QuestionSet => (s.subject ? { ...s, subject: normalizeSubject(s.subject) } : s);
 const empty = (): Tables => ({ sets: [], classrooms: [], students: [], assignments: [], log: [], feedback: [], settings: {} });
 
 export function createLocalStore(storage: Storage | null = safeStorage()): DataStore {
@@ -38,8 +41,8 @@ export function createLocalStore(storage: Storage | null = safeStorage()): DataS
   }
 
   return {
-    async listQuestionSets() { return read('sets'); },
-    async getQuestionSet(id) { return read('sets').find((s) => s.id === id); },
+    async listQuestionSets() { return read('sets').map(withSubject); },
+    async getQuestionSet(id) { const s = read('sets').find((x) => x.id === id); return s && withSubject(s); },
     async saveQuestionSet(set) { write('sets', upsert(read('sets'), set)); },
     async deleteQuestionSet(id) {
       write('sets', read('sets').filter((s) => s.id !== id));

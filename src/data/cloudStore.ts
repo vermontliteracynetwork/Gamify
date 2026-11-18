@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Tier } from '../config';
-import type { Grade, Subject } from './setDetails';
+import { normalizeSubject, type Grade } from './setDetails';
 import type { DataStore } from './store';
 import type { Classroom, FeedbackReport, QuestionLogEntry, QuestionSet, SetAssignment, Student } from './types';
 import { normId, toUuid } from './supabase';
@@ -19,7 +19,7 @@ const setRow = (s: QuestionSet): Row => ({
 });
 const fromSet = (r: Row): QuestionSet => ({
   id: r.id, name: r.name, questions: r.questions ?? [], ownerId: r.owner_id, visibility: r.visibility,
-  createdAt: r.created_at, updatedAt: r.updated_at, subject: (r.subject ?? undefined) as Subject | undefined,
+  createdAt: r.created_at, updatedAt: r.updated_at, subject: normalizeSubject(r.subject),
   grades: r.grade_from && r.grade_to ? [r.grade_from as Grade, r.grade_to as Grade] : undefined,
   tags: r.tags ?? [], standards: r.standards ?? [], noStandard: r.no_standard || undefined, cover: r.cover ?? undefined,
   teachCard: r.teach_card ?? undefined,

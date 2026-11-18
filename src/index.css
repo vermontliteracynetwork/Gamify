@@ -4,6 +4,12 @@
    movement off everywhere. */
 @custom-variant motion-safe (&:where(html:not([data-motion="still"]) *));
 @custom-variant motion-reduce (&:where(html[data-motion="still"] *));
+/* Side by side on big screens and on any landscape screen at least 768px
+   wide (short laptop windows), so start screens never stack and scroll. */
+@custom-variant wide {
+  @media (min-width: 1024px) { @slot; }
+  @media (min-width: 768px) and (orientation: landscape) { @slot; }
+}
 @import "@fontsource/inclusive-sans/400.css";
 @import "@fontsource/inclusive-sans/400-italic.css";
 @import "@fontsource/inclusive-sans/500.css";
@@ -209,7 +215,15 @@ button, a, [role="button"] {
 /* Every other page (teacher pages, the public site) follows the screen too:
    16px on a normal laptop, down to 13px on a short or narrow window. */
 @media (pointer: fine) {
-  html { font-size: clamp(13px, min(8.5px + 0.833vh, 9px + 0.5vw), 16px); }
+  /* 2026-11-18: smaller on laptops ("it doesnt look so big, large font, and
+     crowded"): about 15px on 1440 x 900, 13px on 1280 x 720, 11px on a small
+     or zoomed-in window, 16px on big desktops. */
+  html { font-size: clamp(11px, min(6.5px + 0.95vh, 6px + 0.7vw), 16px); }
+}
+/* Roomier side margins on every content page (not game screens), growing
+   with the window, so pages never look crowded (teacher, 2026-11-18). */
+@media (min-width: 640px) {
+  body:not(:has(.game-stage)) main.mx-auto { padding-left: clamp(1.5rem, 6vw, 5rem); padding-right: clamp(1.5rem, 6vw, 5rem); }
 }
 html[data-text-size="large"] { font-size: 18px; --text-scale: 1.125; }
 html[data-text-size="larger"] { font-size: 20px; --text-scale: 1.25; }
@@ -260,7 +274,7 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
 .stage-text { color: var(--stage-bg-text, var(--text)); }
 
 /* Big touch-friendly sliders (settings). */
-.gamify-slider { -webkit-appearance: none; appearance: none; height: 14px; border-radius: 999px; background: var(--surface-2); border: 2px solid var(--border); }
+.gamify-slider { -webkit-appearance: none; appearance: none; height: 14px; border-radius: 999px; background: linear-gradient(90deg, #8fe3a0 0 var(--fill, 0%), var(--surface-2) var(--fill, 0%) 100%); border: 2px solid var(--border); }
 .gamify-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 36px; height: 36px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 999px; background: var(--accent); border: 2.5px solid var(--border); box-shadow: 0 3px 0 var(--border); cursor: pointer; }
 .gamify-slider:focus-visible { outline: 3px solid var(--border); outline-offset: 4px; }

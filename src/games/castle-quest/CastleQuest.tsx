@@ -28,7 +28,7 @@ import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import type { GameTheme, ThemeItem } from '../../theme/types';
 import ItemArt from '../../theme/ItemArt';
-import { ChoiceTiles, Toggle } from '../../ui/fields';
+import { ChoiceRow, Toggle } from '../../ui/fields';
 import Title from '../../ui/Title';
 import PopText from '../../ui/PopText';
 import GameWelcome from '../GameWelcome';
@@ -417,8 +417,8 @@ export default function CastleQuest() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceTiles label={t('cq.trail')} value={trailOf(setup.trail)} onChange={(v) => change({ trail: v })}
-                options={TRAILS.map((tr) => ({ value: tr, label: t(`cq.trail.${tr}` as 'cq.trail.short'), tip: t(`cq.trailTip.${tr}` as 'cq.trailTip.short') }))} />
+              <ChoiceRow label={t('cq.trail')} value={trailOf(setup.trail)} onChange={(v) => change({ trail: v as typeof TRAILS[number] })}
+                options={TRAILS.map((tr) => ({ value: tr, label: t(`cq.trail.${tr}` as 'cq.trail.short'), art: <TrailMock n={TRAIL_SPACES[tr]} /> }))} />
               <Toggle label={t('cq.exact')} hint={t('cq.exactHint')} value={!!setup.exact} onChange={(v) => change({ exact: v })} />
               {powerUpSwitches({ manifest: castleQuestManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
@@ -616,4 +616,16 @@ function Twister({ item, w, h }: { item: ThemeItem; w: number; h: number }) {
 function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: boolean }; potion: number; still: boolean }) {
   const text = boost.double ? t('cq.boostTwice') : boost.x2 || potion > 0 ? t('cq.boostDouble') : '';
   return <motion.span className="text-xl px-3 py-0.5 rounded-pill border-[2.5px] border-border bg-accent" style={CHICLE} animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>{text}</motion.span>;
+}
+
+// A small picture of each board length: the same box, more squares
+// (teacher, 2026-11-18: "show board grid sizes").
+function TrailMock({ n }: { n: number }) {
+  const W = 96, H = 64, L = layout(n, W - 6, H - 6);
+  const s = L.size, ox = (W - L.cols * s) / 2, oy = (H - L.rows * s) / 2;
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" className="rounded-md border-[1.5px] border-border" style={{ background: C.blush }}>
+      {L.cells.map((c, i) => <rect key={i} x={ox + c.x * s + 0.6} y={oy + c.y * s + 0.6} width={s - 1.2} height={s - 1.2} rx={1} fill={i === 0 ? C.sage : i === n - 1 ? C.yellow : SQUARE_COLORS[i % 4]} stroke={C.ink} strokeWidth={0.5} />)}
+    </svg>
+  );
 }

@@ -1,13 +1,11 @@
-import { BookOpen, ChatText, Flask, Globe, MathOperations, PencilLine, Shapes, type Icon } from '@phosphor-icons/react';
+import { BookOpen, Flask, Globe, MathOperations, Shapes, type Icon } from '@phosphor-icons/react';
 import type { Subject } from '../data/setDetails';
 import type { QuestionSet } from '../data/types';
 
 // A question set's cover: the teacher's picture, or one drawn for its
 // subject (brand colors and a subject icon pattern, no bought art).
 export const ART: Record<Subject, { icon: Icon; bg: string; ink: string }> = {
-  Reading: { icon: BookOpen, bg: '#fdfd94', ink: '#314677' },
-  Writing: { icon: PencilLine, bg: '#ed9d75', ink: '#000000' },
-  Language: { icon: ChatText, bg: '#ddfcc6', ink: '#314677' },
+  Literacy: { icon: BookOpen, bg: '#fdfd94', ink: '#314677' },
   Math: { icon: MathOperations, bg: '#b4c4fb', ink: '#000000' },
   Science: { icon: Flask, bg: '#ddfcc6', ink: '#000000' },
   'Social studies': { icon: Globe, bg: '#e5635f', ink: '#000000' },
