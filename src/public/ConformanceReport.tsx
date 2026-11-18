@@ -25,7 +25,7 @@ export default function ConformanceReport() {
         {(['A', 'AA'] as const).map((lv) => (
           <section key={lv} className="grid gap-2">
             <h2 className="font-display text-2xl">{t('vpat.table', { level: lv })}</h2>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t('vpat.table', { level: lv })}>
               <table className="w-full text-sm border-collapse">
                 <thead><tr className="text-left"><th className="p-2 border-[1.5px] border-border">{t('vpat.criterion')}</th><th className="p-2 border-[1.5px] border-border">{t('vpat.result')}</th><th className="p-2 border-[1.5px] border-border">{t('vpat.remarks')}</th></tr></thead>
                 <tbody>

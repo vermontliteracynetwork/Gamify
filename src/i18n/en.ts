@@ -586,6 +586,8 @@ export const en = {
   'builder.allGames': 'All games',
   'builder.designsFor': 'Designs for {game}:',
   'builder.new': 'New design',
+  'builder.prevView': 'Show the screen before',
+  'builder.nextView': 'Show the next screen',
   'builder.filled': '{filled} of {total} pictures added. Anything left empty keeps the Classic look.',
   'builder.name': 'Theme name',
   'builder.itemsTitle': 'Power-ups',

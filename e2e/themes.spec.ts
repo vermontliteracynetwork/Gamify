@@ -127,10 +127,9 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   expect(px.middle[0]).toBeGreaterThan(150);
   expect(px.middle[1]).toBeLessThan(100);
   if (info.project.name === 'ipad-landscape') await page.screenshot({ path: 'test-results/bowling-ball-cut.png' });
-  // The preview shows each screen the pieces appear on (teacher, 2026-11-01).
-  const views = page.getByRole('tablist', { name: 'Preview screens' });
-  await expect(views.getByRole('tab')).toHaveText(['Lane', 'Pick a ball', 'Power-ups']);
-  await views.getByRole('tab', { name: 'Pick a ball' }).click();
+  // The preview turns between each screen the pieces appear on, by arrows (teacher, 2026-11-18).
+  const next = page.getByRole('button', { name: 'Show the next screen' });
+  await next.click();
   const picker = page.getByRole('group', { name: 'Preview: each team picks its ball' });
   await expect(picker.locator('img[src^="data:image"]').first()).toBeVisible();
   // Tap a ball: it shows big on white; tap again: back to the list (teacher, 2026-11-02).
@@ -139,9 +138,9 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   if (info.project.name === 'laptop') await page.screenshot({ path: 'test-results/preview-ball-big.png' });
   await picker.getByRole('button', { name: 'Back to the list' }).click();
   await expect(picker.getByRole('button', { name: 'Back to the list' })).toHaveCount(0);
-  await views.getByRole('tab', { name: 'Power-ups' }).click();
+  await next.click();
   await expect(page.getByRole('img', { name: /^Preview of / })).toBeVisible();
-  await views.getByRole('tab', { name: 'Lane' }).click();
+  await next.click();
   // Players pick a ball as their icon.
   await openSetup(page, '/games/bowling');
   for (let k = 0; k < 6 && !(await page.getByRole('button', { name: /^Pick a team picture for / }).first().isVisible()); k++) await page.getByRole('button', { name: 'Next', exact: true }).click();

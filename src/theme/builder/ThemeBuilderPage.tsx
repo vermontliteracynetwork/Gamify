@@ -59,7 +59,7 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
   return (
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
     // the preview and the tabs share the space left under the menu.
-    <main className={`max-w-6xl mx-auto px-4 sm:px-6 pt-5 ${game ? 'pb-4 h-[calc(100dvh-4rem)] flex flex-col' : 'pb-6'}`}>
+    <main className={`max-w-7xl mx-auto px-4 sm:px-6 pt-4 ${game ? 'pb-4 h-[calc(100dvh-3rem)] flex flex-col' : 'pb-6'}`}>
       <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} />}</div>
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
@@ -199,7 +199,6 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     : plan === 'three-per-game' && isNew && mine.length >= 3 ? t('builder.limitHomeschool')
     : null;
   const problems = useMemo(() => [...themeProblems(draft), ...((draft.items ?? []).some((it) => !it.name.trim()) ? [t('builder.items.nameEvery')] : [])], [draft]);
-  const filled = game.themePieces.filter((p) => draft.pieces[p.id]?.image).length;
 
   const [drawing, setDrawingPiece] = useState<ThemePieceSpec | null>(null);
   // The piece's last upload, so the studio's Restore and Start over bring it
@@ -280,27 +279,28 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
       )}
       <div className="shrink-0 flex flex-wrap items-center gap-2 mb-3">
         <Link to={base} aria-label={t('builder.allGames')} data-tip={t('builder.allGames')} className={buttonClasses('secondary', 'w-11 !px-0')}><ArrowLeft weight="bold" size={20} /></Link>
-        <span className="font-display text-xl">{t('builder.designsFor', { game: game.name })}</span>
+        <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
         {mine.map((th) => (
           <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
             className={`min-h-11 px-4 rounded-pill border-[2px] font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
         ))}
       </div>
 
-      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        {/* The preview, as big as the space allows. */}
-        <div className="min-h-0 flex flex-col items-center gap-2 [container-type:size]">
-          {/* Tabs for each screen the pieces show up on (teacher, 2026-11-01). */}
-          {views.length > 1 && (
-            <div role="tablist" aria-label={t('builder.previewViews')} className="flex gap-1.5 flex-wrap justify-center">
-              {views.map((v) => (
-                <button key={v.id} type="button" role="tab" aria-selected={view === v.id} onClick={() => setView(v.id)}
-                  className={`min-h-10 px-4 rounded-pill border-[2px] font-bold text-sm ${view === v.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{v.label}</button>
-              ))}
-            </div>
-          )}
-          <div className="w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 5 : 2}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} /></div>
-          <p className="font-bold text-sm text-center">{t('builder.filled', { filled, total: game.themePieces.length })}</p>
+      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        {/* The preview, as big as the space allows, with arrows that turn
+            between the screens the pieces show up on (teacher, 2026-11-18:
+            no Game / Power-ups buttons, no count line). */}
+        <div className="min-h-0 flex items-center justify-center gap-2 [container-type:size]">
+          {views.length > 1 && <PageTurn dir="prev" label={t('builder.prevView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) - 1 + views.length) % views.length].id)} />}
+          <div className="flex-1 min-w-0 grid justify-items-center gap-1.5">
+            <div className="w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 1.5 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} /></div>
+            {views.length > 1 && (
+              <span className="flex gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
+                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-[1.5px] border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
+              </span>
+            )}
+          </div>
+          {views.length > 1 && <PageTurn dir="next" label={t('builder.nextView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) + 1) % views.length].id)} />}
         </div>
 
         <div className="min-h-0 flex flex-col gap-3">
@@ -310,9 +310,9 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             <div className="shrink-0 flex items-center gap-2">
               <label className="grid font-bold text-sm flex-1 min-w-0"><span className="sr-only">{t('builder.name')}</span>
                 <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
-                  className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold w-full" />
+                  className="min-h-9 px-3 rounded-input border-[2px] border-border font-bold text-sm w-full" />
               </label>
-              <Button variant="primary" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
+              <Button variant="primary" className="!min-h-9 !text-sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
               {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
               {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
             </div>
@@ -320,7 +320,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             <div role="tablist" aria-label={t('builder.tabsLabel')} className="shrink-0 grid grid-flow-col auto-cols-fr gap-0.5 p-1 rounded-pill bg-surface-2 border-[2px] border-border">
               {(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
                 <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-11 px-1 rounded-pill font-bold text-sm whitespace-nowrap ${tab === k ? 'bg-accent text-accent-ink ring-2 ring-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
+                  className={`min-h-8 px-1 rounded-pill font-bold text-xs whitespace-nowrap ${tab === k ? 'bg-accent text-accent-ink ring-2 ring-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
               ))}
             </div>
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto grid gap-3 content-start pr-1">
@@ -357,9 +357,8 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                 <>
                   <div className="flex flex-wrap items-center gap-2">
                     <input type="search" value={find} onChange={(e) => setFind(e.target.value)} placeholder={t('builder.findPiece')} aria-label={t('builder.findPiece')}
-                      className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold flex-1 min-w-40" />
+                      className="min-h-8 px-3 rounded-input border-[2px] border-border font-bold text-sm flex-1 min-w-40" />
                   </div>
-                  <p className="text-xs font-semibold text-muted -mt-1">{t('builder.scanHint')}</p>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
                   <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} clear={isClear(p)} onClearBg={() => toggleClear(p)} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
                 </>
@@ -488,17 +487,18 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
       onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
       onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}>
       <button type="button" onClick={() => ref.current?.click()} aria-label={t('builder.uploadPiece', { piece: piece.label })}
-        className={`shrink-0 w-16 h-16 border-[2px] border-dashed border-border-soft flex items-center justify-center overflow-hidden ${isRound(piece) ? 'rounded-full' : 'rounded-input'}`}>
+        className={`shrink-0 w-12 h-12 border-[2px] border-dashed border-border-soft flex items-center justify-center overflow-hidden ${isRound(piece) ? 'rounded-full' : 'rounded-input'}`}>
         {image ? <img src={image} alt="" className={`w-full h-full ${clear ? 'object-contain' : 'object-cover'}`} style={clear ? CHECKER : undefined} /> : <UploadSimple weight="bold" size={22} className="text-muted" />}
       </button>
       <input ref={ref} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
-      <div className="min-w-0 flex-1">
-        <p className="font-bold flex items-center gap-1.5 min-w-0"><span className="truncate">{piece.label}</span>{image && <CheckCircle weight="fill" size={20} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
-        <p className="text-xs font-semibold text-muted line-clamp-2" title={piece.hint}>{piece.hint}</p>
-        <p className="text-xs font-bold tabular-nums">{piece.width} x {piece.height}</p>
+      {/* Only the title shows; what the piece is and its size are hover
+          text (teacher, 2026-11-18). */}
+      <div className="min-w-0 flex-1" data-tip={`${piece.hint} (${piece.width} x ${piece.height})`}>
+        <p className="font-bold text-sm leading-tight flex items-center gap-1.5 min-w-0"><span className="[overflow-wrap:anywhere]">{piece.label}</span>{image && <CheckCircle weight="fill" size={16} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
+        <p className="sr-only">{piece.hint} {piece.width} x {piece.height}</p>
       </div>
       {/* Small buttons (teacher, 2026-11-16): draw, see-through on or off, remove. */}
-      <div className="shrink-0 grid gap-1">
+      <div className="shrink-0 flex gap-1">
         <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
         <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
           className="shrink-0 w-8 h-8 rounded-full border-[2px] border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
@@ -657,5 +657,15 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
       )}
       <p className="text-xs font-semibold text-muted">{CHALLENGE_OPEN ? t('builder.shareChallengeOpen') : t('builder.shareChallengeSoon')} <Link to="/challenge">{t('builder.shareChallengeLink')}</Link></p>
     </div>
+  );
+}
+
+// A round page-turn arrow beside the preview.
+function PageTurn({ dir, label, onClick }: { dir: 'prev' | 'next'; label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={label} data-tip={label}
+      className="shrink-0 w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center hover:bg-accent motion-safe:active:scale-95">
+      {dir === 'prev' ? <CaretLeft weight="bold" size={18} /> : <CaretRight weight="bold" size={18} />}
+    </button>
   );
 }

@@ -72,11 +72,11 @@ export default function Home() {
                 <GameCover gameId={game.id} className={`aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform ${canPlayGame(tier, game.id) ? '' : 'grayscale opacity-60'}`} />
                 {!canPlayGame(tier, game.id) && <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-surface border-[3px] border-border flex items-center justify-center"><LockSimple weight="fill" size={28} aria-label={t('arcade.locked', { name: game.name })} /></span></span>}
               </span>
-              <div className="p-5 flex flex-col gap-3 flex-1">
-                <h2 className="font-display text-2xl font-bold text-text"><Title text={game.name} /></h2>
+              <div className="p-4 flex flex-col gap-2 flex-1">
+                <h2 className="font-display text-xl font-bold text-text"><Title text={game.name} /></h2>
                 {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
 <div className="flex gap-1.5">{game.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
-                <p className="text-muted text-sm leading-relaxed">{game.description}</p>
+                <p className="text-muted text-xs leading-snug">{game.description}</p>
                 <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
                   {t('home.play')}
                   <ArrowRight weight="bold" size={16} className="transition-transform group-hover:translate-x-1" />

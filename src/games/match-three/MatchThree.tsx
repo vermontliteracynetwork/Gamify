@@ -3,12 +3,11 @@ import PopText from '../../ui/PopText';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsDownUp, ArrowsLeftRight, Cake, Coffee, Cookie, Diamond, IceCream, Pizza, Popcorn, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Cake, Coffee, Cookie, Diamond, IceCream, Pizza, Popcorn, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
 import { PUZZLE_PACK_CLEARED } from '../../config';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
-import SoloPanel from '../../engine/SoloPanel';
 import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
@@ -48,7 +47,6 @@ const RAINBOW_BG = 'conic-gradient(from 0deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff
 // and the board size (bigger boards chain more). Tuned so a careful player
 // earns 3 and most players earn 1 or 2 (Claudia's simulation, 2026-10-31).
 const starGoals = (totalMoves: number, size: number) => [40, 80, 125].map((k) => Math.round((totalMoves * k * (size / 7) ** 1.5) / 10) * 10);
-const METER = 1.08; // the bar runs a little past the third star
 const SPECIAL_KEY: Record<Special, StringKey> = { row: 'm3.special.row', col: 'm3.special.col', burst: 'm3.special.burst', rainbow: 'm3.special.rainbow' };
 
 export default function MatchThree() {
@@ -289,18 +287,20 @@ export default function MatchThree() {
 
       {(phase === 'play' || phase === 'end') && (
         // The board fills the play space like the reference games (teacher, 2026-10-31).
-        <div className={`relative play-fill grid content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center ${held.held.length ? '[--m3-extra:15rem]' : '[--m3-extra:7rem]'} lg:[--m3-extra:0rem]`}>
-          {/* Board and score panel share one row, the panel top aligned with the
-              board (teacher, 2026-10-31). */}
-          <div className="contents lg:flex lg:items-start lg:gap-4">
+        // The board in the middle of the screen with one strip across its
+        // top (teacher, 2026-11-18): the score in the Gamify font, one meter of
+        // dashes for every move of every round, and the star goal.
+        <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 
-          {/* The board is the star, the score panel right beside it (teacher, 2026-10-31). */}
-          <div className="border-[2.5px] border-border rounded-panel p-3 sm:p-4 mx-auto lg:mx-0 w-full lg:w-[min(calc(var(--play-h)-2rem),calc(100vw-19rem),64rem)]" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)', maxWidth: 'min(100%, calc(var(--play-h) - 2rem - var(--m3-extra)), 64rem)' }}>
+          <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
+          <RoundMeter score={score} round={round} rounds={plan.current.rounds} moves={moves} perRound={MOVES_PER_ROUND} stars={stars} goals={goals} still={still} />
+          <div className="relative border-[2.5px] border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
+            {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
             <div className="relative">
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
@@ -327,20 +327,25 @@ export default function MatchThree() {
                     // Pieces fall with a little bounce, one column just after the
                     // next, so a refill ripples across the board.
                     transition={{ type: 'spring', stiffness: 520, damping: 24, delay: still ? 0 : c * 0.025, opacity: { duration: 0.2 } }}
-                    className={`relative aspect-square rounded-input border-[2px] flex items-center justify-center ${isSel ? 'border-border ring-4 ring-accent' : sp ? 'border-border' : 'border-border-soft'}`}
-                    style={{ ...(sp === 'rainbow' ? { background: RAINBOW_BG } : pieceFill(theme, `tile-${tileItem.kind}`, TILE_COLORS[tileItem.kind])), ...(sp ? { boxShadow: '0 0 0 2.5px #241c3d, 0 0 0 5px #fdfd94, 0 0 16px 4px #fdfd94' } : {}) }}
+                    // No colored square behind a piece (teacher, 2026-11-18): just the piece.
+                    className={`relative aspect-square rounded-input flex items-center justify-center ${isSel ? 'ring-4 ring-accent bg-white/40' : ''}`}
                   >
-                    {sp === 'rainbow' && <Star weight="fill" className={`w-3/5 h-3/5 drop-shadow-[0_0_2px_#000] ${loop ? 'm3-spin' : ''}`} color="#fff" aria-hidden="true" />}
-                    {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className={`absolute inset-[6%] rounded-[inherit] pointer-events-none ${loop ? 'm3-glow' : ''}`} style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.85) 0 10%, transparent 10% 24%)` }} />}
-                    {sp === 'burst' && <span aria-hidden="true" className={`absolute inset-[4%] rounded-full border-[3px] border-[#fdfd94] pointer-events-none ${loop ? 'm3-pulse' : ''}`} style={{ boxShadow: '0 0 10px #fdfd94, inset 0 0 8px #fdfd94' }} />}
-                    {/* A badge says what the special piece does, by picture. */}
-                    {(sp === 'row' || sp === 'col' || sp === 'burst') && (
-                      <span aria-hidden="true" className="absolute -top-1.5 -right-1.5 w-[42%] aspect-square rounded-full bg-[#241c3d] border-[2px] border-white flex items-center justify-center z-[1]">
-                        {sp === 'row' ? <ArrowsLeftRight weight="bold" className="w-3/4 h-3/4" color="#fdfd94" /> : sp === 'col' ? <ArrowsDownUp weight="bold" className="w-3/4 h-3/4" color="#fdfd94" /> : <Sparkle weight="fill" className="w-3/4 h-3/4" color="#fdfd94" />}
-                      </span>
-                    )}
-                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="relative w-3/5 h-3/5" color="#241c3d" aria-hidden="true" />; })()}
-                    {sp !== 'rainbow' && !pieceImage(theme, `tile-${tileItem.kind}`) && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="relative w-4/5 h-4/5 object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
+                    {(() => {
+                      // A piece made by a combo is its own design (teacher, 2026-11-18:
+                      // like a wrapped candy): a theme's picture for it, else Classic's.
+                      const made = sp ? pieceImage(theme, `special-${sp}`) : undefined;
+                      if (made) return <img src={made} alt="" aria-hidden="true" draggable="false" className={`relative w-[92%] h-[92%] object-contain pointer-events-none ${loop ? 'm3-pulse' : ''}`} />;
+                      const own = pieceImage(theme, `tile-${tileItem.kind}`);
+                      return <>
+                        {sp === 'rainbow' && <span aria-hidden="true" className={`relative w-[86%] h-[86%] rounded-full border-[2.5px] border-[#241c3d] grid place-items-center ${loop ? 'm3-spin' : ''}`} style={{ background: RAINBOW_BG }}><Star weight="fill" className="w-3/5 h-3/5 drop-shadow-[0_0_2px_#000]" color="#fff" /></span>}
+                        {sp !== 'rainbow' && own && <img src={own} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none" />}
+                        {sp !== 'rainbow' && !own && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="relative w-4/5 h-4/5" color={TILE_COLORS[tileItem.kind]} aria-hidden="true" />; })()}
+                        {sp !== 'rainbow' && !own && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
+                        {/* Classic made pieces: shine stripes (lines) or a glowing wrap (burst) on the piece itself. */}
+                        {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className={`absolute inset-[14%] rounded-[30%] pointer-events-none mix-blend-screen ${loop ? 'm3-glow' : ''}`} style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.9) 0 9%, transparent 9% 22%)` }} />}
+                        {sp === 'burst' && <span aria-hidden="true" className={`absolute inset-[6%] rounded-full pointer-events-none ${loop ? 'm3-pulse' : ''}`} style={{ boxShadow: '0 0 12px 3px #fdfd94, inset 0 0 10px #fff' }} />}
+                      </>;
+                    })()}
                   </motion.button>
                 );
               })}</div>)}
@@ -369,25 +374,9 @@ export default function MatchThree() {
             </div>
           </div>
 
-          <div className="grid gap-3 content-start sm:grid-cols-2 lg:grid-cols-1 lg:w-[220px] w-full mx-auto" style={{ maxWidth: 'min(100%, calc(var(--play-h) - 2rem - var(--m3-extra)), 64rem)' }}>
-            <SoloPanel score={score} player={pieceImage(theme, 'player')} line={t('bm.round', { n: round, total: plan.current.rounds })} round={{ now: `${round}/${plan.current.rounds}`, label: t('pb.roundWord') }}
-              dots={{ left: moves, total: MOVES_PER_ROUND, label: t('bm.moves', { count: moves }) }} note={note} />
-            {/* The star goal fills as points come in (a goal that visibly builds). */}
-            <div className="bg-surface border-[2.5px] border-border rounded-panel px-4 py-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }} role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
-              <div className="relative h-5 rounded-pill border-[2px] border-border bg-surface-2 overflow-visible">
-                <motion.span className="absolute inset-y-0 left-0 rounded-pill" style={{ background: 'linear-gradient(90deg, #fdfd94, #f7b267)' }} initial={false} animate={{ width: `${Math.min(100, (score / (goals[2] * METER)) * 100)}%` }} transition={{ duration: still ? 0 : 0.5 }} />
-                {goals.map((g, i) => (
-                  <motion.span key={g} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2" style={{ left: `${(g / (goals[2] * METER)) * 100}%` }} animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-                    <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
-                  </motion.span>
-                ))}
-              </div>
-            </div>
-            {/* Held power-ups, right under the score (teacher, 2026-10-31). */}
-            <div className="hidden sm:block sm:col-span-2 lg:col-span-1"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
           </div>
-          <div className="sm:hidden fixed left-3 bottom-3 w-[min(15rem,60vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
-          </div>
+          {/* Held power-ups wait in the corner, off the board. */}
+          <div className="fixed left-3 bottom-3 w-[min(14rem,40vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
         </div>
       )}
 
@@ -411,5 +400,34 @@ function SizeMock({ n }: { n: number }) {
     <span className="grid gap-[2px] p-1 rounded-md border-[1.5px] border-border bg-white" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, width: 64, height: 64 }} aria-hidden="true">
       {Array.from({ length: n * n }, (_, i) => <span key={i} className="rounded-[2px]" style={{ background: MOCK[(i * 7 + Math.floor(i / n)) % MOCK.length] }} />)}
     </span>
+  );
+}
+
+// One meter across the top (teacher, 2026-11-18): the score in the Gamify
+// font with no box behind it, then a dash for every move of every round,
+// grouped by round (used dashes filled, this move glowing), then the stars.
+function RoundMeter({ score, round, rounds, moves, perRound, stars, goals, still }: { score: number; round: number; rounds: number; moves: number; perRound: number; stars: number; goals: number[]; still: boolean }) {
+  const done = (round - 1) * perRound + (perRound - moves);
+  return (
+    <div className="flex items-center gap-3 min-w-0" role="group" aria-label={`${t('bm.round', { n: round, total: rounds })}, ${t('bm.moves', { count: moves })}`}>
+      <motion.span key={score} initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }} className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" aria-label={t('share.points', { count: score })}>{score}</motion.span>
+      <span className="flex-1 min-w-0 flex gap-2" aria-hidden="true">
+        {Array.from({ length: rounds }, (_, r) => (
+          <span key={r} className="flex-1 flex gap-[3px] p-[3px] rounded-pill border-[2px] border-border bg-surface">
+            {Array.from({ length: perRound }, (_, m) => {
+              const k = r * perRound + m;
+              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${k < done ? 'bg-[#8fe3a0]' : k === done ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'bg-[#cdd7fb]'}`} />;
+            })}
+          </span>
+        ))}
+      </span>
+      <span className="flex gap-0.5 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
+        {goals.map((g, i) => (
+          <motion.span key={g} animate={stars > i && !still ? { scale: [1, 1.5, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
+            <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
+          </motion.span>
+        ))}
+      </span>
+    </div>
   );
 }

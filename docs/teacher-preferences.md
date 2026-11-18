@@ -183,3 +183,8 @@ line that fits, and add each new preference the same turn she says it.
 - In a game (2026-11-18): the top bar shows only the buttons on the right, not Home, Features, Blog, Help Center.
 - Settings (2026-11-18): hints are hover text on a small (i), not a line under the label; sliders fill with color up to the thumb.
 - Board size choices (2026-11-18): each shows a small picture of the board at that size.
+- Pick a Game cards (2026-11-18): smaller description text so the cards are shorter.
+- Teacher pages (2026-11-18): the Classes / Question sets / Reports bar is thinner.
+- Theme Builder (2026-11-18): smaller text and controls; no "Designs for" title, no "pictures added" line, no "Drew on paper?" line; upload cards show only the title (what it is and its size are hover text); the preview is bigger and page-turn arrows move between its screens instead of Game / Power-ups buttons.
+- Match Three (2026-11-18): no colored square behind each piece; the board in the middle of the screen; one strip across the top: the score in the Gamify font with no box, a dash for every move grouped by round, and the stars; the background is designable. Pieces made by combos (line pieces, bomb, rainbow) are their own designable pieces, like wrapped candies, with no badge or outline.
+- Keep a consistent queue (2026-11-18): every request goes on a visible numbered checklist the moment it arrives.
