@@ -16,7 +16,7 @@ export const howToGames = (): GameManifest[] => GAMES.filter((g) => HOW_TO_PLAY.
 
 export function HowToPlayCard({ game }: { game: GameManifest }) {
   return (
-    <Link to={`/blog/how-to-play/${game.id}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <Link to={`/blog/how-to-play/${game.id}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={game.id} className="aspect-[16/9] cover-zoom" /></span>
       <span className="p-4 grid gap-2">
         <span className="font-display text-2xl leading-tight">{t('howto.cardTitle', { game: game.name })}</span>
@@ -29,7 +29,7 @@ export function HowToPlayCard({ game }: { game: GameManifest }) {
 
 function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <section className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <section className="bg-surface border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <h2 className="font-display text-2xl flex items-center gap-2">{icon}<Title text={title} /></h2>
       {children}
     </section>
@@ -45,7 +45,7 @@ export default function HowToPlayPage() {
   return (
     <>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
+        <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-bold border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('howto.cardTitle', { game: game.name })} /></h1>
         <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
         <p className="text-xl font-bold">{h.goal}</p>
@@ -54,7 +54,7 @@ export default function HowToPlayPage() {
           {SHOTS.map((s) => (
             <figure key={s} className="m-0 grid gap-1">
               <img src={`/help/${game.id}-${s}.png`} onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }} alt={t(`howto.shot.${s}`, { game: game.name })} loading="lazy"
-                className="w-full aspect-[16/10] object-cover object-top rounded-input border-[2.5px] border-border bg-surface" />
+                className="w-full aspect-[16/10] object-cover object-top rounded-input border-bold border-border bg-surface" />
               <figcaption className="text-sm font-bold">{t(`howto.shot.${s}`, { game: game.name })}</figcaption>
             </figure>
           ))}

@@ -106,7 +106,7 @@ export default function Flashcards() {
       {phase === 'play' && card && (
         <section className="grid gap-4 justify-items-center">
           <div className="w-full flex items-center gap-2">
-            <div className="flex-1 h-4 rounded-pill border-[2.5px] border-border bg-surface overflow-hidden" role="progressbar" aria-label={t('fc.progress', { known, total })} aria-valuenow={known} aria-valuemin={0} aria-valuemax={total}>
+            <div className="flex-1 h-4 rounded-pill border-bold border-border bg-surface overflow-hidden" role="progressbar" aria-label={t('fc.progress', { known, total })} aria-valuenow={known} aria-valuemin={0} aria-valuemax={total}>
               <motion.span className="block h-full" style={{ background: '#9fe7a0' }} animate={{ width: `${(known / total) * 100}%` }} />
             </div>
             <span className="font-display text-xl stage-text tabular-nums">{known}/{total}</span>
@@ -115,7 +115,7 @@ export default function Flashcards() {
             <motion.button key={`${card.q.id}-${flipped}`} type="button" onClick={() => { setFlipped(!flipped); playEffect('whoosh', settings); }}
               initial={still ? false : { rotateY: 90, opacity: 0.4 }} animate={{ rotateY: 0, opacity: 1 }} exit={still ? undefined : { rotateY: -90, opacity: 0.4 }} transition={{ duration: 0.22 }}
               aria-label={flipped ? t('fc.answerIs', { answer }) : t('fc.questionIs', { q: card.q.prompt })}
-              className="w-full rounded-panel border-[3px] border-border p-6 grid gap-3 content-center justify-items-center text-center"
+              className="w-full rounded-panel border-heavy border-border p-6 grid gap-3 content-center justify-items-center text-center"
               style={{ minHeight: 'min(48dvh, 420px)', boxShadow: 'var(--shadow-sticker-lg)', ...pieceFill(theme, flipped ? 'card-back' : 'card-front', flipped ? '#fdfd94' : '#fbfcf8') }}>
               <span className="text-xs font-bold uppercase tracking-wider text-muted">{flipped ? t('mm.answer') : t('mm.question')}</span>
               {!flipped && card.q.imageUrl && <img src={card.q.imageUrl} alt={card.q.imageAlt ?? ''} className="max-h-40 object-contain" />}
@@ -125,11 +125,11 @@ export default function Flashcards() {
             </motion.button>
           </AnimatePresence>
           <div className="flex flex-wrap justify-center gap-3">
-            <button type="button" onClick={() => speak(flipped ? answer : card.q.prompt, settings)} className="min-h-14 px-5 rounded-pill border-[2.5px] border-border bg-surface font-bold inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('fc.listen')}</button>
+            <button type="button" onClick={() => speak(flipped ? answer : card.q.prompt, settings)} className="min-h-14 px-5 rounded-pill border-bold border-border bg-surface font-bold inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('fc.listen')}</button>
             {flipped && (
               <>
-                <button type="button" onClick={() => rate(false)} className="min-h-14 px-6 rounded-pill border-[2.5px] border-border bg-secondary font-display text-xl inline-flex items-center gap-2"><ArrowCounterClockwise weight="bold" size={22} />{t('fc.again')}</button>
-                <button type="button" onClick={() => rate(true)} className="min-h-14 px-6 rounded-pill border-[2.5px] border-border bg-[#9fe7a0] font-display text-xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}><CheckCircle weight="fill" size={22} />{t('fc.knew')}</button>
+                <button type="button" onClick={() => rate(false)} className="min-h-14 px-6 rounded-pill border-bold border-border bg-secondary font-display text-xl inline-flex items-center gap-2"><ArrowCounterClockwise weight="bold" size={22} />{t('fc.again')}</button>
+                <button type="button" onClick={() => rate(true)} className="min-h-14 px-6 rounded-pill border-bold border-border bg-success font-display text-xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}><CheckCircle weight="fill" size={22} />{t('fc.knew')}</button>
               </>
             )}
           </div>

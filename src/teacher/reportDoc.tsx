@@ -151,7 +151,7 @@ export default function ReportDoc(input: ReportInput) {
   const byId = new Map(students.map((s) => [s.id, s]));
 
   return (
-    <article className="report-doc bg-white text-black border-[2.5px] border-border rounded-panel p-6 sm:p-10 grid gap-7 print:border-0 print:rounded-none print:p-0 print:gap-5" aria-label={title}>
+    <article className="report-doc bg-white text-black border-bold border-border rounded-panel p-6 sm:p-10 grid gap-7 print:border-0 print:rounded-none print:p-0 print:gap-5" aria-label={title}>
       {/* Letterhead */}
       {/* A div, not a header: the site hides every header when printing. */}
       <div className="flex flex-wrap items-start justify-between gap-4 border-b-[3px] border-border pb-4">
@@ -173,7 +173,7 @@ export default function ReportDoc(input: ReportInput) {
         <Section title={t('rp.glance')}>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 print:grid-cols-7 gap-2">
             {stat.map(([l, v]) => (
-              <div key={l} className="rounded-input border-[2px] border-border p-2.5 break-inside-avoid">
+              <div key={l} className="rounded-input border-std border-border p-2.5 break-inside-avoid">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-muted leading-tight">{l}</p>
                 <p className="font-display text-2xl tabular-nums">{v}</p>
               </div>

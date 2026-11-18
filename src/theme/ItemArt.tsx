@@ -19,7 +19,7 @@ export default function ItemArt({ item, size, still = false }: { item: ThemeItem
       {item.image
         ? <img src={item.image} alt="" className="w-full h-full object-contain" />
         : item.art ? <ClassicItemSvg art={item.art} size={size} />
-        : <span className="w-full h-full rounded-full border-[2.5px] border-border flex items-center justify-center font-display" style={{ background: item.color ?? '#fdfd94', fontSize: size * 0.4 }}>{item.name.slice(0, 1).toUpperCase()}</span>}
+        : <span className="w-full h-full rounded-full border-bold border-border flex items-center justify-center font-display" style={{ background: item.color ?? '#fdfd94', fontSize: size * 0.4 }}>{item.name.slice(0, 1).toUpperCase()}</span>}
     </motion.span>
   );
 }

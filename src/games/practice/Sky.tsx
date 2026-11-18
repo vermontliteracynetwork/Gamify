@@ -135,7 +135,7 @@ export default function Sky({ theme, filled, total, still, label, colors, height
     prev.current = filled;
   }, [filled, flying]);
   return (
-    <div ref={ref} className={`relative w-full overflow-hidden ${bleed ? '' : 'rounded-panel border-[2.5px] border-border'}`} role="img" aria-label={label}
+    <div ref={ref} className={`relative w-full overflow-hidden ${bleed ? '' : 'rounded-panel border-bold border-border'}`} role="img" aria-label={label}
       style={{ containerType: 'size', height, background: theme.pieces.background?.image ? `center / cover url("${theme.pieces.background.image}")` : `linear-gradient(180deg, #0d1638 0%, ${theme.colors.background} ${40 + (filled / total) * 60}%)` }}>
       {!theme.pieces.background?.image && dust.map((d, i) => (
         <span key={`d${i}`} className="absolute rounded-full bg-white" style={{ left: `${d.x}%`, top: `${d.y}%`, width: 2 + (i % 3), height: 2 + (i % 3), opacity: 0.25 + 0.5 * (filled / total) }} aria-hidden="true" />

@@ -28,7 +28,7 @@ export default function FourWays({ compact = false, filter, onFilter }: { compac
   );
 }
 
-const card = 'bg-surface border-[2.5px] border-border rounded-panel overflow-hidden';
+const card = 'bg-surface border-bold border-border rounded-panel overflow-hidden';
 
 function Compact({ mode: m, on = false, dim = false, onClick }: { mode: PlayMode; on?: boolean; dim?: boolean; onClick?: () => void }) {
   const Icon = MODE_ICONS[m];
@@ -36,7 +36,7 @@ function Compact({ mode: m, on = false, dim = false, onClick }: { mode: PlayMode
   return (
     <Tag {...(onClick ? { type: 'button' as const, onClick, 'aria-pressed': on, 'data-tip': t('ways.filterTip', { mode: t(`mode.${m}` as StringKey) }) } : {})}
       className={`${card} w-full text-left flex items-center gap-3 p-2 pr-3 h-full motion-safe:transition-[opacity,transform] ${on ? 'ring-4 ring-accent -translate-y-0.5' : ''} ${dim ? 'opacity-55' : ''}`} style={{ boxShadow: on ? '0 5px 0 #000' : 'var(--shadow-sticker)' }}>
-      <span className="shrink-0 w-12 h-12 rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
+      <span className="shrink-0 w-12 h-12 rounded-full border-bold border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
       <span className="grid gap-0 min-w-0">
         <span className="font-display font-bold leading-tight text-lg"><Title text={t(`mode.${m}` as StringKey)} /></span>
         <span className="font-bold text-xs text-muted break-words">{t(`mode.${m}.hint` as StringKey)}</span>
@@ -54,7 +54,7 @@ function FlipCard({ mode: m }: { mode: PlayMode }) {
   const Icon = MODE_ICONS[m];
   const face = `${card} [grid-area:1/1] flex flex-col [backface-visibility:hidden] ${reduce ? '' : 'transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]'}`;
   const turn = (b: boolean) => ({ transform: reduce ? undefined : `rotateY(${b ? 180 : 0}deg)`, visibility: reduce ? (b ? 'hidden' : 'visible') : undefined, boxShadow: 'var(--shadow-sticker)' } as const);
-  const flipBtn = 'mt-auto self-start inline-flex items-center gap-1.5 min-h-11 px-3 -ml-1 rounded-pill border-[2px] border-border font-bold text-sm hover-pop';
+  const flipBtn = 'mt-auto self-start inline-flex items-center gap-1.5 min-h-11 px-3 -ml-1 rounded-pill border-std border-border font-bold text-sm hover-pop';
   return (
     <div className="group grid [perspective:1200px]">
       <div className={face} style={turn(back)} aria-hidden={back} {...((back ? { inert: "" } : {}) as object)}>
@@ -99,7 +99,7 @@ function FlipCard({ mode: m }: { mode: PlayMode }) {
 // star twinkles, the lightning flashes. CSS loops (.fw-*) in index.css, so
 // calm mode and reduced motion still them.
 function Scene({ mode }: { mode: PlayMode }) {
-  const dot = 'rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center';
+  const dot = 'rounded-full border-bold border-border bg-surface flex items-center justify-center';
   if (mode === 'live') {
     return (
       <span className="flex items-end gap-2">
@@ -116,7 +116,7 @@ function Scene({ mode }: { mode: PlayMode }) {
       <span className="grid justify-items-center gap-1.5">
         <span className={`${dot} !rounded-input w-28 h-14`}><ProjectorScreen weight="fill" size={34} /></span>
         <span className="flex gap-1.5">{['#f6c544', '#5cc3a0', '#6aa9e9', '#f2735f'].map((c, k) => (
-          <span key={c} className="w-5 h-5 rounded-full border-[2px] border-border fw-hop" style={{ background: c, animationDelay: `${k * 0.18}s` }} />
+          <span key={c} className="w-5 h-5 rounded-full border-std border-border fw-hop" style={{ background: c, animationDelay: `${k * 0.18}s` }} />
         ))}</span>
       </span>
     );

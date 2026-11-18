@@ -38,7 +38,7 @@ export default function FaqPage() {
     document.head.appendChild(el);
     return () => el.remove();
   }, []);
-  const panel = 'bg-surface border-[2px] border-border rounded-panel';
+  const panel = 'bg-surface border-std border-border rounded-panel';
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
@@ -49,7 +49,7 @@ export default function FaqPage() {
           <label className="relative max-w-3xl">
             <MagnifyingGlass weight="bold" size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('faq.search')} aria-label={t('faq.search')}
-              className="w-full min-h-14 pl-12 pr-4 rounded-input border-[2px] border-border bg-surface-2 font-semibold text-lg" />
+              className="w-full min-h-14 pl-12 pr-4 rounded-input border-std border-border bg-surface-2 font-semibold text-lg" />
           </label>
         </header>
 
@@ -86,7 +86,7 @@ export default function FaqPage() {
                 <details key={`${f.g}-${f.q}`} className="group px-5 py-4">
                   <summary className="cursor-pointer flex items-start gap-3 list-none font-bold text-lg">
                     <span className="flex-1">{f.q}</span>
-                    {q && <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[1.5px] border-border-soft whitespace-nowrap">{t(`faq.group.${f.g}` as StringKey)}</span>}
+                    {q && <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-thin border-border-soft whitespace-nowrap">{t(`faq.group.${f.g}` as StringKey)}</span>}
                     <CaretDown weight="bold" size={20} className="shrink-0 mt-1 motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" />
                   </summary>
                   <p className="font-semibold leading-relaxed mt-2 mb-0 text-text/90">{f.a}</p>

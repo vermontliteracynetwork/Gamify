@@ -13,10 +13,10 @@ export const TeamArt = createContext<(string | undefined)[]>([]);
 export function TeamBadge({ colorIndex, size = 36 }: { colorIndex: number; size?: number }) {
   const Icon = TEAM_ICONS[colorIndex % TEAM_ICONS.length];
   const art = useContext(TeamArt)[colorIndex % TEAM_ICONS.length];
-  if (art) return <img src={art} alt="" aria-hidden="true" className="rounded-full border-[2.5px] border-border shrink-0 object-cover" style={{ width: size, height: size }} />;
+  if (art) return <img src={art} alt="" aria-hidden="true" className="rounded-full border-bold border-border shrink-0 object-cover" style={{ width: size, height: size }} />;
   return (
     <span
-      className="inline-flex items-center justify-center rounded-full border-[2.5px] border-border shrink-0"
+      className="inline-flex items-center justify-center rounded-full border-bold border-border shrink-0"
       style={{ width: size, height: size, background: TEAM_COLORS[colorIndex % TEAM_COLORS.length] }}
       aria-hidden="true"
     >

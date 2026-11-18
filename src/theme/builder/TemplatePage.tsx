@@ -86,7 +86,7 @@ export default function TemplatePage({ guide = false }: { guide?: boolean }) {
       </div>
       <div className="grid gap-6">
         {pages.map((p, i) => (
-          <div key={p.id} className="template-page bg-white border-[2px] border-border-soft rounded-input overflow-hidden">
+          <div key={p.id} className="template-page bg-white border-std border-border-soft rounded-input overflow-hidden">
             <TemplateSheet gameName={game.name} piece={p} page={i + 1} total={pages.length} />
           </div>
         ))}

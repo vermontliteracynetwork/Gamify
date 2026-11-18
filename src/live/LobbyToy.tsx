@@ -21,7 +21,7 @@ export default function LobbyToy() {
     setNote((n) => n + 1);
   }
   return (
-    <div className="relative w-full h-36 rounded-panel border-[2.5px] border-border overflow-hidden" style={{ background: 'linear-gradient(180deg, #e6e9ff 0%, #c9d2ff 100%)', boxShadow: 'var(--shadow-sticker)' }}
+    <div className="relative w-full h-36 rounded-panel border-bold border-border overflow-hidden" style={{ background: 'linear-gradient(180deg, #e6e9ff 0%, #c9d2ff 100%)', boxShadow: 'var(--shadow-sticker)' }}
       role="group" aria-label={t('live.toy')}>
       <span className="absolute inset-x-0 bottom-0 h-5 bg-[#9fb0f0] border-t-[2.5px] border-border" aria-hidden="true" />
       {PIECES.map((p) => (

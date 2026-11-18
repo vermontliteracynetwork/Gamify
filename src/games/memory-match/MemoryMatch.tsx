@@ -184,11 +184,11 @@ export default function MemoryMatch() {
         <section className="grid gap-3">
           <div className="flex flex-wrap items-center gap-2" aria-live="polite">
             {players.length > 1 ? players.map((p, i) => (
-              <span key={p.id} className={`inline-flex items-center gap-2 rounded-pill border-[2.5px] px-3 min-h-11 font-bold bg-surface ${i === turn && phase === 'play' ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}>
+              <span key={p.id} className={`inline-flex items-center gap-2 rounded-pill border-bold px-3 min-h-11 font-bold bg-surface ${i === turn && phase === 'play' ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}>
                 <TeamBadge colorIndex={p.colorIndex} size={28} />{p.name}<span className="font-display text-xl tabular-nums">{scores[i]}</span>
               </span>
-            )) : <span className="inline-flex items-center gap-2 rounded-pill border-[2.5px] border-border px-4 min-h-11 font-display text-xl bg-surface">{t('mm.found', { found: Object.keys(found).length, total: deck.length / 2 })}</span>}
-            <span className="inline-flex items-center rounded-pill border-[2.5px] border-border px-4 min-h-11 font-bold bg-surface">{t('mm.moves', { count: moves })}</span>
+            )) : <span className="inline-flex items-center gap-2 rounded-pill border-bold border-border px-4 min-h-11 font-display text-xl bg-surface">{t('mm.found', { found: Object.keys(found).length, total: deck.length / 2 })}</span>}
+            <span className="inline-flex items-center rounded-pill border-bold border-border px-4 min-h-11 font-bold bg-surface">{t('mm.moves', { count: moves })}</span>
             {player?.kind === 'cpu' && phase === 'play' && <span className="font-bold stage-text">{t('mm.cpuTurn')}</span>}
           </div>
           <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 18.125rem + var(--chrome-save, 0rem)) / ${rows} * ${cols} * ${ratio.toFixed(3)}))` }}>

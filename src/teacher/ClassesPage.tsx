@@ -57,7 +57,7 @@ export default function ClassesPage() {
             <div className="flex flex-wrap gap-2">
               <input id="class-name" autoFocus value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={t('classes.namePlaceholder')}
                 onKeyDown={(e) => { if (e.key === 'Enter' && name.trim()) { void create(); setAdding(false); } if (e.key === 'Escape') setAdding(false); }}
-                className="flex-1 min-w-48 min-h-12 px-3 rounded-input border-[2px] border-border font-bold" />
+                className="flex-1 min-w-48 min-h-12 px-3 rounded-input border-std border-border font-bold" />
               <Button variant="primary" disabled={!name.trim()} onClick={() => { void create(); setAdding(false); }}><Plus weight="bold" size={18} />{t('classes.create')}</Button>
               <Button onClick={() => setAdding(false)}>{t('classes.cancel')}</Button>
             </div>

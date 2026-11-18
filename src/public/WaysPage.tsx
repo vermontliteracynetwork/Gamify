@@ -34,17 +34,17 @@ export function WaysList() {
         <div role="group" aria-label={t('ways.filter')} className="flex flex-wrap gap-2">
           {BANDS.map((b) => (
             <button key={b.id} type="button" aria-pressed={band.id === b.id} onClick={() => setParams(b.id === 'all' ? {} : { grades: b.id }, { replace: true })}
-              className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-accent' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
+              className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-accent' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
           ))}
           <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
           <button type="button" aria-pressed={tag === 'howto'} onClick={() => setParams(tag === 'howto' ? {} : { tag: 'howto' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'howto' ? 'bg-accent' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'howto' ? 'bg-accent' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
           <button type="button" aria-pressed={tag === 'themes'} onClick={() => setParams(tag === 'themes' ? {} : { tag: 'themes' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-[2px] border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
         </div>
         {!tag && (
-          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-accent border-[2.5px] border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-accent border-bold border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <PaintBrush weight="fill" size={44} aria-hidden="true" />
             <span className="grid gap-1 flex-1 min-w-60"><span className="font-display text-2xl">{t('guide.listTitle')}</span><span className="font-semibold">{t('guide.listSub')}</span></span>
             <span className={buttonClasses('secondary')}>{t('guide.listOpen')}<ArrowRight weight="bold" size={18} /></span>
@@ -52,7 +52,7 @@ export function WaysList() {
         )}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts.map((p) => (
-            <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={p.cover} className="aspect-[16/9] cover-zoom" /></span>
               <span className="p-4 grid gap-2">
                 <span className="font-display text-2xl leading-tight">{p.title}</span>
@@ -87,7 +87,7 @@ export function WaysPost() {
   return (
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
+        <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-bold border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />
         <p className="text-xl font-bold">{post.summary}</p>
@@ -98,11 +98,11 @@ export function WaysPost() {
             <ul className="grid gap-1 pl-7 m-0 text-lg list-disc">{l.items.map((item) => <li key={item}>{item}</li>)}</ul>
           </section>
         ))}
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 className="font-display text-3xl"><Title text={t('ways.tryIt')} /></h2>
           <p className="font-bold">{t('ways.tryItSub')}</p>
           <ol className="grid gap-2 pl-7 m-0 font-semibold text-lg list-decimal marker:font-bold">{post.tryIt.map((s, i) => <li key={i}>{s}</li>)}</ol>
-          <Link to="/login?mode=signup" className={buttonClasses('secondary', 'justify-self-start min-h-14 px-8 text-lg hover-pop')}>{t('ways.start')}<ArrowRight weight="bold" size={20} /></Link>
+          <Link to="/login?mode=signup" className={buttonClasses('secondary', 'justify-self-start hover-pop', 'lg')}>{t('ways.start')}<ArrowRight weight="bold" size={20} /></Link>
         </section>
       </main>
       <PublicFooter />

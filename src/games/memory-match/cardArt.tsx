@@ -5,7 +5,7 @@ import type { GameTheme } from '../../theme/types';
 
 // Memory Match's cards, drawn the same in the game and the Theme Builder
 // preview (teacher, 2026-11-16: "ALWAYS show preview as the actual game template").
-export const cardClass = (won: boolean) => `rounded-input border-[2.5px] border-border p-1.5 flex items-center justify-center text-center overflow-hidden ${won ? 'ring-4 ring-[#9fe7a0]' : ''}`;
+export const cardClass = (won: boolean) => `rounded-input border-bold border-border p-1.5 flex items-center justify-center text-center overflow-hidden ${won ? 'ring-4 ring-success' : ''}`;
 export function cardStyle(theme: GameTheme, up: boolean, side: 'q' | 'a'): CSSProperties {
   return { boxShadow: 'var(--shadow-sticker)', ...(up ? { background: side === 'q' ? '#fbfcf8' : '#fdfd94' } : pieceFill(theme, 'card-back', '#b4c4fb')) };
 }

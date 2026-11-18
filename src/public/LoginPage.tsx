@@ -6,7 +6,7 @@ import { setTeacher, useTeacher } from '../auth/session';
 import { cloudLogIn, cloudOn, cloudSignUp } from '../auth/cloudAuth';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, Panel, Tabs } from '../ui/kit';
+import { Button, Panel, Tabs, fieldClasses } from '../ui/kit';
 import { openUpgrade } from '../billing/Upgrade';
 import { upgradeTo } from '../billing/upgrade';
 import Title from '../ui/Title';
@@ -65,8 +65,8 @@ export default function LoginPage() {
       if (account) enter(account.username); else setWrong(true);
     }
   }
-  const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold';
-  const problem = (k: SignUpProblem) => problems.includes(k) && <span id={`p-${k}`} className="text-sm font-bold text-[#9b2c3a]" role="alert">{t(`login.problem.${k}` as StringKey)}</span>;
+  const field = fieldClasses('md');
+  const problem = (k: SignUpProblem) => problems.includes(k) && <span id={`p-${k}`} className="text-sm font-bold text-error" role="alert">{t(`login.problem.${k}` as StringKey)}</span>;
   const bad = (...k: SignUpProblem[]) => k.some((x) => problems.includes(x));
   return (
     <main className="max-w-xl mx-auto px-4 pt-10 pb-16 grid gap-4">
@@ -75,7 +75,7 @@ export default function LoginPage() {
       <Panel>
         <form className="grid gap-3" onSubmit={(e) => void submit(e)} noValidate>
           <p className="font-bold flex items-center gap-2"><ChalkboardTeacher weight="bold" size={22} />{t('login.forTeachers')}</p>
-          {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-[2px] border-border-soft">{t('login.localNote')}</p>}
+          {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-std border-border-soft">{t('login.localNote')}</p>}
           {mode === 'signup' && (
             <label className="grid gap-1 font-bold">{t('login.email')}
               <input type="email" autoComplete="email" value={f.email} onChange={set('email')} aria-invalid={bad('email', 'emailTaken')} className={field} />
@@ -97,8 +97,8 @@ export default function LoginPage() {
               {problem('confirm')}
             </label>
           )}
-          {wrong && <p className="font-bold text-[#9b2c3a]" role="alert">{t('login.wrong')}</p>}
-          {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-[#9b2c3a]'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}
+          {wrong && <p className="font-bold text-error" role="alert">{t('login.wrong')}</p>}
+          {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-error'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}
           <Button type="submit" disabled={busy} variant="primary" className="min-h-14 text-lg">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
           {mode === 'login' && <button type="button" onClick={() => setMode('signup')} className="font-bold underline justify-self-center min-h-11">{t('login.noAccount')}</button>}
         </form>

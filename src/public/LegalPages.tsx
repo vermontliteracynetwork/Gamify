@@ -14,7 +14,7 @@ function LegalPage({ title, intro, sections }: { title: string; intro: string; s
         <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
         <p className="text-lg font-bold">{intro}</p>
         {sections.map((s) => (
-          <section key={s.h} className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <section key={s.h} className="bg-surface border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <h2 className="font-display text-3xl"><Title text={s.h} /></h2>
             <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{k}</li>)}</ul>
           </section>

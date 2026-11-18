@@ -114,19 +114,19 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
           {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
-            <span className="font-display text-[clamp(1.2rem,4vh,2.25rem)] font-bold">{t('share.whoseTurn', { name: player.name })}</span>
+            <span className="font-display text-fit-turn font-bold">{t('share.whoseTurn', { name: player.name })}</span>
             {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
           </span>
           <span className="flex-1" />
           {chance && chance.total === Infinity && <span className="font-bold">{t('share.chanceOpen', { n: chance.n })}</span>}
           {chance && chance.total > 1 && chance.total !== Infinity && (
             <span className="inline-flex items-center gap-1.5 font-bold" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
-              {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-[2px] border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-accent' : 'bg-surface'}`} />)}
+              {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-std border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-accent' : 'bg-surface'}`} />)}
               <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
             </span>
           )}
           <button type="button" onClick={() => speakQuestion(q, settings)}
-            className="min-h-12 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2">
+            className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
           <AccessButton small />
@@ -134,8 +134,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className="font-body text-[clamp(1.4rem,min(6vh,4.5vw),3.75rem)] font-bold leading-tight text-balance">{q.prompt}</h2>
+        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
+        <h2 className="font-body text-fit-question font-bold leading-tight text-balance">{q.prompt}</h2>
 
         <div className="grid sm:grid-cols-2 gap-3">
           {q.choices.map((c, i) => {
@@ -147,13 +147,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 transition={{ duration: 0.4 }}
                 whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
                 whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-[clamp(1.1rem,min(4.2vh,2.8vw),1.9rem)] text-left active:scale-[0.98] disabled:cursor-default
+                className={`min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold text-fit-answer text-left active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center font-display text-2xl">
+                <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-2xl">
                   {isRight ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
-                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-[2px] border-border bg-surface" />}
+                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
                 <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
                 {isRight && picked === i && settings.motion !== 'still' && <Burst />}
@@ -210,7 +210,7 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
           style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}
         </motion.span>
-        {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-[2.5px] border-border bg-[#c8f0dc] px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
+        {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-bold border-border bg-mint-soft px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
       </motion.button>
     </div>
   );
@@ -231,7 +231,7 @@ function Burst() {
           animate={{ x: b.x, y: b.y, scale: [0, b.s * 1.3, b.s], rotate: b.r, opacity: [1, 1, 1, 0] }} transition={{ duration: 1.4, ease: "easeOut", delay: Math.random() * 0.08 }}>
           {b.star
             ? <svg width="36" height="36" viewBox="0 0 24 24" className="-translate-x-1/2 -translate-y-1/2"><path d="M12 1 L15 9 L23 9 L16.5 14 L19 22 L12 17 L5 22 L7.5 14 L1 9 L9 9 Z" fill={b.c} stroke="#241c3d" strokeWidth="1.5" strokeLinejoin="round" /></svg>
-            : <span className="block w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border-[1.5px] border-[#241c3d]" style={{ background: b.c }} />}
+            : <span className="block w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border-thin border-ink-night" style={{ background: b.c }} />}
         </motion.span>
       ))}
     </span>

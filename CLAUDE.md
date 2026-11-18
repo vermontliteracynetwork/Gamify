@@ -32,6 +32,13 @@ asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
 `.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
 Golden Rule, the three lenses or Claudia.
 
+## Design system
+
+`docs/design-system.md` is the look of every menu and teacher page: the
+tokens (colors, type, borders, shadows), the shared components (Button sizes,
+IconButton, `fieldClasses`, `Dialog`, `Tabs`, `ChoiceRow`, `TopStrip`) and the
+do's and don'ts. Use a component, then a token, before hand-typing a value.
+
 ## Animation and charts
 
 Motion (`motion/react`) for UI motion, anime.js (`useAnime`) for timelines,

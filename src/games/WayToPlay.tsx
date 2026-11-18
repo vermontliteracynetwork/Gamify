@@ -18,7 +18,7 @@ export default function WayToPlay({ modes, value, onChange }: { modes: PlayMode[
         return (
           // A big picture band for each way to play, small text under it (teacher, 2026-11-06).
           <button key={m} type="button" role="radio" aria-checked={on} onClick={() => onChange(m)}
-            className={`group relative aspect-square rounded-panel border-[2.5px] border-border overflow-hidden text-left flex flex-col bg-surface motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : ''}`}
+            className={`group relative aspect-square rounded-panel border-bold border-border overflow-hidden text-left flex flex-col bg-surface motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : ''}`}
             style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
             <span className="relative flex-1 min-h-0 flex items-center justify-center border-b-[2.5px] border-border overflow-hidden" style={{ background: MODE_COLORS[m] }} aria-hidden="true">
               <Icon weight="fill" className="w-[38%] h-[60%] motion-safe:group-hover:scale-110 motion-safe:group-hover:-rotate-6 motion-safe:transition-transform" />
@@ -29,7 +29,7 @@ export default function WayToPlay({ modes, value, onChange }: { modes: PlayMode[
               <span className="font-display text-lg font-bold leading-tight">{t(`mode.${m}` as StringKey)}</span>
               <span className="font-semibold text-sm leading-snug">{t(`mode.${m}.hint` as StringKey)}</span>
             </span>
-            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
+            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>
         );
       })}

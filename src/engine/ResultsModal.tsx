@@ -40,12 +40,12 @@ function GameReview({ onDone }: { onDone: () => void }) {
     window.setTimeout(onDone, 1400);
   }
   return (
-    <div className="grid gap-2 justify-items-center rounded-input border-[2px] border-border-soft p-3">
+    <div className="grid gap-2 justify-items-center rounded-input border-std border-border-soft p-3">
       <p className="font-bold">{t(step === 0 ? 'review.feel' : 'review.level')}</p>
       <div className="flex gap-2">
         {icons.map((I, i) => (
           <button key={i} type="button" onClick={() => pick(i)} aria-label={t(`checkin.${key}.${i}` as StringKey)}
-            className="w-16 h-16 rounded-full border-[2.5px] border-border flex items-center justify-center active:scale-90" style={{ background: COLORS[step][i] }}>
+            className="w-16 h-16 rounded-full border-bold border-border flex items-center justify-center active:scale-90" style={{ background: COLORS[step][i] }}>
             <I weight="fill" size={34} aria-hidden="true" />
           </button>
         ))}
@@ -68,15 +68,15 @@ function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number
       {/* Stage lights */}
       <span className="absolute inset-x-[18%] bottom-8 top-0 rounded-t-full opacity-60" style={{ background: 'radial-gradient(ellipse at 50% 100%, #fdfd94 0%, rgba(253,253,148,0.35) 45%, transparent 72%)' }} />
       {/* The stage: a round top and a front */}
-      <span className="absolute inset-x-[12%] bottom-0 h-9 rounded-b-[1.25rem] border-[2.5px] border-border" style={{ background: '#ed9d75' }} />
-      <span className="absolute inset-x-[12%] bottom-6 h-7 rounded-[50%] border-[2.5px] border-border" style={{ background: '#fdfd94' }} />
+      <span className="absolute inset-x-[12%] bottom-0 h-9 rounded-b-[1.25rem] border-bold border-border" style={{ background: '#ed9d75' }} />
+      <span className="absolute inset-x-[12%] bottom-6 h-7 rounded-[50%] border-bold border-border" style={{ background: '#fdfd94' }} />
       <div className="absolute inset-x-0 bottom-12 flex justify-center gap-4">
         {(list ?? [null]).map((w, i) => (
           <motion.div key={i} className="grid justify-items-center gap-1"
             animate={still ? undefined : { y: [0, -8, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 }}>
             <span className="rounded-full" style={{ boxShadow: '0 0 0 5px rgba(253,253,148,0.95), 0 0 22px 12px rgba(253,253,148,0.85), 0 0 46px 18px rgba(255,255,255,0.55)' }}>
-              {w?.art ? <img src={w.art} alt="" className="rounded-full border-[2.5px] border-border bg-surface object-contain p-1" style={{ width: size, height: size }} /> : w ? <TeamBadge colorIndex={w.colorIndex} size={size} /> : (
-                <span className="rounded-full border-[2.5px] border-border bg-accent flex items-center justify-center" style={{ width: size, height: size }}><Star weight="fill" size={size * 0.6} color="#241c3d" /></span>
+              {w?.art ? <img src={w.art} alt="" className="rounded-full border-bold border-border bg-surface object-contain p-1" style={{ width: size, height: size }} /> : w ? <TeamBadge colorIndex={w.colorIndex} size={size} /> : (
+                <span className="rounded-full border-bold border-border bg-accent flex items-center justify-center" style={{ width: size, height: size }}><Star weight="fill" size={size * 0.6} color="#241c3d" /></span>
               )}
             </span>
           </motion.div>
@@ -102,7 +102,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         <ChalkboardTeacher weight="fill" size={30} aria-hidden="true" />
         <h2 className="title-bubble text-2xl flex-1" style={{ color: 'var(--text)' }}><Title text={t('rv.title')} /></h2>
         <span className="font-bold tabular-nums">{t('q.progress', { n: i + 1, total: missed.length })}</span>
-        <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+        <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 grid gap-5">
@@ -110,16 +110,16 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
           <div className="flex items-start gap-3">
             <h3 className="font-body text-4xl sm:text-5xl font-bold leading-tight flex-1 text-balance">{q.prompt}</h3>
             <button type="button" aria-label={`${t('q.listen')}: ${q.prompt}`} onClick={() => speak(`${q.prompt}. ${q.choices.join('. ')}`, settings)}
-              className="w-14 h-14 shrink-0 rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center"><SpeakerHigh weight="bold" size={26} /></button>
+              className="w-14 h-14 shrink-0 rounded-full border-bold border-border bg-surface flex items-center justify-center"><SpeakerHigh weight="bold" size={26} /></button>
           </div>
-          {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[30dvh] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
+          {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[30dvh] w-auto mx-auto rounded-input border-std border-border-soft" />}
           <ol className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
             {q.choices.map((c, k) => {
               const right = shown && k === q.correctIndex;
               return (
-                <li key={k} className={`min-h-20 px-4 py-3 rounded-input border-[3px] border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl bg-surface ${shown && !right ? 'opacity-40' : ''} ${right ? 'ring-[6px] ring-success' : ''}`}
+                <li key={k} className={`min-h-20 px-4 py-3 rounded-input border-heavy border-border flex items-center gap-3 font-bold text-2xl sm:text-3xl bg-surface ${shown && !right ? 'opacity-40' : ''} ${right ? 'ring-[6px] ring-success' : ''}`}
                   style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                  <span className="w-12 h-12 shrink-0 rounded-full bg-surface-2 border-[2.5px] border-border flex items-center justify-center font-display text-2xl">
+                  <span className="w-12 h-12 shrink-0 rounded-full bg-surface-2 border-bold border-border flex items-center justify-center font-display text-2xl">
                     {right ? <CheckCircle weight="fill" size={30} aria-label={t('q.rightMark')} /> : String.fromCharCode(65 + k)}
                   </span>
                   <span className="min-w-0 break-words">{c}</span>
@@ -129,7 +129,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
           </ol>
           <AnimatePresence>
             {shown && (
-              <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="justify-self-start inline-flex items-center gap-2 font-display text-2xl font-bold px-4 py-2 rounded-input bg-success/40 border-[2.5px] border-border" role="status">
+              <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="justify-self-start inline-flex items-center gap-2 font-display text-2xl font-bold px-4 py-2 rounded-input bg-success/40 border-bold border-border" role="status">
                 <CheckCircle weight="fill" size={28} />{t('look.rightAnswer', { answer })}
               </motion.p>
             )}
@@ -137,12 +137,12 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 px-4 sm:px-8 py-3 border-t-[2.5px] border-border bg-surface">
-        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-11 px-5 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold inline-flex items-center gap-2 disabled:opacity-30"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
+        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-surface-2 font-bold inline-flex items-center gap-2 disabled:opacity-40"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
         {!shown
-          ? <button type="button" onClick={() => setShown(true)} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
+          ? <button type="button" onClick={() => setShown(true)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
           : i < missed.length - 1
-            ? <button type="button" onClick={() => go(i + 1)} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
-            : <button type="button" onClick={onClose} className="min-h-11 px-7 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('rv.done')}</button>}
+            ? <button type="button" onClick={() => go(i + 1)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
+            : <button type="button" onClick={onClose} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-xl font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('rv.done')}</button>}
         <span className="w-24" aria-hidden="true" />
       </div>
     </div>
@@ -162,12 +162,12 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const { student } = useSignedIn();
   const [view, setView] = useState<'main' | 'rate'>('main');
   const [reviewing, setReviewing] = useState(false);
-  const btn = 'min-h-12 px-3 rounded-input border-[2.5px] border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
+  const btn = 'min-h-12 px-3 rounded-input border-bold border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
   return (
     <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
-        className="w-full max-w-xl bg-surface border-[3px] border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
+        className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
         {/* The stage sits in a light purple band across the top of the box. */}
         <div className="border-b-[3px] border-border" style={{ background: 'radial-gradient(120% 100% at 50% 20%, #ffffff 0%, #e6e9ff 45%, #c9d2ff 100%)' }}>
           <WinnerStage winners={winners} />
@@ -187,7 +187,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             </Link>
             <button type="button" onClick={() => setReviewing(true)} disabled={missed.length === 0}
               aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ChalkboardTeacher weight="bold" size={18} />{t('rv.short')}{missed.length > 0 && <span className="ml-1 min-w-7 h-7 px-1.5 rounded-full bg-surface border-[2px] border-border text-base flex items-center justify-center">{missed.length}</span>}
+              <ChalkboardTeacher weight="bold" size={18} />{t('rv.short')}{missed.length > 0 && <span className="ml-1 min-w-7 h-7 px-1.5 rounded-full bg-surface border-std border-border text-base flex items-center justify-center">{missed.length}</span>}
             </button>
             <button type="button" onClick={() => setView('rate')} className={`${btn} bg-quiz-green`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <Smiley weight="bold" size={24} />{t('rv.rate')}
@@ -197,7 +197,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
         ) : (
           <div className="grid gap-2 px-5 pb-5">
             <GameReview onDone={() => setView('main')} />
-            <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-[2px] border-border bg-surface-2 font-bold">{t('rv.back')}</button>
+            <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('rv.back')}</button>
           </div>
         )}
       </motion.div>

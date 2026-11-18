@@ -13,17 +13,17 @@ import PublicFooter from './PublicFooter';
 // 3rd). Dates and official rules come before entries open (attorney review).
 export default function ChallengePage() {
   const reduce = useReducedMotion();
-  const card = 'bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-3 content-start';
+  const card = 'bg-surface border-bold border-border rounded-panel p-6 grid gap-3 content-start';
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <p className="font-bold uppercase tracking-wider text-sm">{t('challenge.kicker')}</p>
           <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0 break-words"><Trophy weight="fill" size={52} color="#c98a00" aria-hidden="true" className="wiggle-on-hover shrink-0 hidden sm:block" /><Title text={t('challenge.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('challenge.sub')}</p>
           <div className="flex flex-wrap gap-3">
-            <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}><PaintBrush weight="bold" size={20} />{t('challenge.start')}</Link>
-            <Link to="/themes" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('themes.seeAll')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}><PaintBrush weight="bold" size={20} />{t('challenge.start')}</Link>
+            <Link to="/themes" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('themes.seeAll')}</Link>
           </div>
         </section>
 
@@ -45,7 +45,7 @@ export default function ChallengePage() {
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-12 h-12 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center font-display text-2xl">{n}</span>
+                <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-2xl">{n}</span>
                 <h3 className="font-display text-2xl">{t(`challenge.step.${n}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`challenge.step.${n}.text` as StringKey)}</p>
               </li>

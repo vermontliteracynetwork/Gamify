@@ -15,13 +15,13 @@ export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint
     // name, then the hint in its own column, so a long hint wraps under
     // itself instead of under the name (teacher, 2026-10-31: no weird spacing).
     withHint ? (
-      <span className="grid grid-cols-[auto_5.5rem_1fr] items-center gap-x-3 rounded-input border-[2px] border-border px-4 py-2 text-base leading-snug" style={{ background: MODE_COLORS[mode] }}>
+      <span className="grid grid-cols-[auto_5.5rem_1fr] items-center gap-x-3 rounded-input border-std border-border px-4 py-2 text-base leading-snug" style={{ background: MODE_COLORS[mode] }}>
         <Icon weight="bold" size={22} aria-hidden="true" />
         <span className="font-display font-bold text-lg">{t(`mode.${mode}` as StringKey)}</span>
         <span className="font-semibold">{t(`mode.${mode}.hint` as StringKey)}</span>
       </span>
     ) : (
-      <span data-tip={t(`mode.${mode}.hint` as StringKey)} data-tip-bg={MODE_COLORS[mode]} className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
+      <span data-tip={t(`mode.${mode}.hint` as StringKey)} data-tip-bg={MODE_COLORS[mode]} className="inline-flex items-center gap-2 rounded-pill border-std border-border px-3 py-1 font-bold text-sm" style={{ background: MODE_COLORS[mode] }}>
         <Icon weight="bold" size={18} aria-hidden="true" />
         <span>{t(`mode.${mode}` as StringKey)}</span>
       </span>
@@ -35,7 +35,7 @@ export function ModeDot({ mode, small = false }: { mode: PlayMode; small?: boole
   const Icon = MODE_ICONS[mode];
   return (
     <span data-tip={t(`mode.${mode}`)} data-tip-bg={MODE_COLORS[mode]} role="img" aria-label={t(`mode.${mode}`)}
-      className={`${small ? 'w-7 h-7' : 'w-9 h-9'} shrink-0 rounded-full border-[2px] border-border inline-flex items-center justify-center`} style={{ background: MODE_COLORS[mode] }}>
+      className={`${small ? 'w-7 h-7' : 'w-9 h-9'} shrink-0 rounded-full border-std border-border inline-flex items-center justify-center`} style={{ background: MODE_COLORS[mode] }}>
       <Icon weight="bold" size={small ? 15 : 18} aria-hidden="true" />
     </span>
   );

@@ -17,13 +17,13 @@ export function CalculatorTool() {
   }
   return (
     <div className="grid gap-2 max-w-xs">
-      <div className="min-h-12 px-3 flex items-center justify-end rounded-input border-[2px] border-border bg-surface font-display text-2xl font-bold" aria-live="polite">{expr || '0'}</div>
+      <div className="min-h-12 px-3 flex items-center justify-end rounded-input border-std border-border bg-surface font-display text-2xl font-bold" aria-live="polite">{expr || '0'}</div>
       <div className="grid grid-cols-4 gap-1.5">
         {keys.map((k) => (
-          <button key={k} type="button" onClick={() => press(k)} className="min-h-11 rounded-input border-[2px] border-border bg-surface-2 font-display text-xl font-bold">{k}</button>
+          <button key={k} type="button" onClick={() => press(k)} className="min-h-11 rounded-input border-std border-border bg-surface-2 font-display text-xl font-bold">{k}</button>
         ))}
       </div>
-      <button type="button" onClick={() => setExpr('')} className="min-h-11 rounded-pill border-[2px] border-border bg-surface font-bold">{t('q.clear')}</button>
+      <button type="button" onClick={() => setExpr('')} className="min-h-11 rounded-pill border-std border-border bg-surface font-bold">{t('q.clear')}</button>
     </div>
   );
 }
@@ -43,7 +43,7 @@ export function Scratchpad() {
         width={800}
         height={300}
         aria-label={t('q.scratchpad')}
-        className="w-full h-40 rounded-input border-[2px] border-border bg-surface touch-none"
+        className="w-full h-40 rounded-input border-std border-border bg-surface touch-none"
         onPointerDown={(e) => {
           drawing.current = true;
           const ctx = canvas.current!.getContext('2d')!;
@@ -54,7 +54,7 @@ export function Scratchpad() {
         onPointerMove={(e) => { if (drawing.current) { const ctx = canvas.current!.getContext('2d')!; ctx.lineTo(...point(e)); ctx.stroke(); } }}
         onPointerUp={() => { drawing.current = false; }}
       />
-      <button type="button" className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold"
+      <button type="button" className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold"
         onClick={() => { const c = canvas.current!; c.getContext('2d')!.clearRect(0, 0, c.width, c.height); }}>{t('q.clear')}</button>
     </div>
   );

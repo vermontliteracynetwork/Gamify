@@ -12,14 +12,14 @@ import { useStandardText } from '../data/standardText';
 import SetCover from '../games/SetCover';
 import { t } from '../i18n';
 import { imageFileToDataUrl } from '../ui/imageFile';
-import { Button, Panel } from '../ui/kit';
+import { Button, Panel, fieldClasses } from '../ui/kit';
 
 // The details every question set needs (all required): subject, grades,
 // tags and Common Core standards, plus an optional cover picture.
 export default function SetDetailsPanel({ set, onChange, readOnly }: { set: QuestionSet; onChange: (s: QuestionSet) => void; readOnly: boolean }) {
   const missing = missingDetails(set);
   const [tag, setTag] = useState('');
-  const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+  const field = fieldClasses('md');
   const req = (key: string) => missing.includes(key) && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-danger border border-border ml-2">{t('details.required')}</span>;
   const grades = set.grades ?? [undefined, undefined];
 
@@ -38,10 +38,10 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
     <Panel className="grid gap-4 mb-5">
       <div className="flex flex-wrap items-start gap-4">
         <div className="w-48 grid gap-2">
-          <SetCover set={set} className="aspect-[16/9] rounded-input border-[2px] border-border" />
+          <SetCover set={set} className="aspect-[16/9] rounded-input border-std border-border" />
           {!readOnly && (
             <div className="flex gap-2">
-              <label className="min-h-11 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
+              <label className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
                 <UploadSimple weight="bold" size={16} />{t('details.cover')}
                 <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onChange({ ...set, cover: await imageFileToDataUrl(f, 800) }); }} />
               </label>
@@ -84,7 +84,7 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
         <span className="font-bold">{t('details.tags')}{req('tags')}</span>
         <div className="flex flex-wrap items-center gap-2">
           {(set.tags ?? []).map((x) => (
-            <span key={x} className="inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface-2 border-[2px] border-border font-bold text-sm">#{x}
+            <span key={x} className="inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface-2 border-std border-border font-bold text-sm">#{x}
               {!readOnly && <button type="button" aria-label={t('details.removeTag', { tag: x })} onClick={() => onChange({ ...set, tags: set.tags!.filter((y) => y !== x) })} className="w-7 h-7 rounded-full flex items-center justify-center"><X weight="bold" size={14} /></button>}
             </span>
           ))}
@@ -99,7 +99,7 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
           <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('details.tagIdeas')}>
             <span className="text-sm font-bold text-muted">{tag.trim() ? t('details.tagMatches') : t('details.tagPopular')}</span>
             {tagOffers.map((x) => (
-              <button key={x} type="button" onClick={() => addTag(x)} aria-label={t('details.useTag', { tag: x })} className="inline-flex items-center gap-1 min-h-9 px-3 rounded-pill bg-surface border-[2px] border-border-soft hover:border-border font-bold text-sm"><Plus weight="bold" size={12} aria-hidden="true" />#{x}</button>
+              <button key={x} type="button" onClick={() => addTag(x)} aria-label={t('details.useTag', { tag: x })} className="inline-flex items-center gap-1 min-h-9 px-3 rounded-pill bg-surface border-std border-border-soft hover:border-border font-bold text-sm"><Plus weight="bold" size={12} aria-hidden="true" />#{x}</button>
             ))}
           </div>
         )}
@@ -111,7 +111,7 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
 }
 
 function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSet; onChange: (s: QuestionSet) => void; readOnly: boolean; required: React.ReactNode }) {
-  const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+  const field = fieldClasses('md');
   const math = set.subject === 'Math';
   const startGrade = set.grades?.[0] ?? 'K';
   const [grade, setGrade] = useState<Grade>(startGrade);
@@ -136,18 +136,18 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
         {(set.standards ?? []).map((c) => {
           const about = text(c);
           return (
-            <span key={c} className="group relative inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface border-[2px] border-border font-bold text-sm">
+            <span key={c} className="group relative inline-flex items-center gap-1 min-h-9 pl-3 pr-1 rounded-pill bg-surface border-std border-border font-bold text-sm">
               <span tabIndex={about ? 0 : undefined} aria-describedby={about ? `std-${c}` : undefined} className="outline-offset-2">{c}</span>
               {!readOnly && <button type="button" aria-label={t('details.removeStandard', { code: c })} onClick={() => onChange({ ...set, standards: set.standards!.filter((y) => y !== c) })} className="w-7 h-7 rounded-full flex items-center justify-center"><X weight="bold" size={14} /></button>}
               {about && (
-                <span id={`std-${c}`} role="tooltip" className="hidden group-hover:block group-focus-within:block absolute left-0 top-full mt-1.5 z-20 w-72 max-w-[80vw] p-3 rounded-input bg-surface border-[2px] border-border text-sm font-semibold leading-snug" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <span id={`std-${c}`} role="tooltip" className="hidden group-hover:block group-focus-within:block absolute left-0 top-full mt-1.5 z-20 w-72 max-w-[80vw] p-3 rounded-input bg-surface border-std border-border text-sm font-semibold leading-snug" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                   <span className="font-bold">{c}: </span>{about}
                 </span>
               )}
             </span>
           );
         })}
-        {set.noStandard && <span className="min-h-9 px-3 rounded-pill bg-surface-2 border-[2px] border-border font-bold text-sm inline-flex items-center">{t('details.noStandard')}</span>}
+        {set.noStandard && <span className="min-h-9 px-3 rounded-pill bg-surface-2 border-std border-border font-bold text-sm inline-flex items-center">{t('details.noStandard')}</span>}
       </div>
       {!readOnly && (
         <>
@@ -175,7 +175,7 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
             </div>
           )}
           {(math || set.subject === 'Literacy') && !hs && (
-            <p className="text-sm font-semibold bg-surface-2 border-[2px] border-border-soft rounded-input p-2" aria-live="polite">
+            <p className="text-sm font-semibold bg-surface-2 border-std border-border-soft rounded-input p-2" aria-live="polite">
               {builtText ? <><span className="font-bold">{built}: </span>{builtText}</> : t('details.noSuchStandard', { code: built })}
             </p>
           )}
@@ -188,7 +188,7 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
             </label>
           </div>
           {typed && !isStandardCode(typed) && <p className="text-sm font-bold">{t('details.badCode')}</p>}
-          {typedText && <p className="text-sm font-semibold bg-surface-2 border-[2px] border-border-soft rounded-input p-2"><span className="font-bold">{typed.trim()}: </span>{typedText}</p>}
+          {typedText && <p className="text-sm font-semibold bg-surface-2 border-std border-border-soft rounded-input p-2"><span className="font-bold">{typed.trim()}: </span>{typedText}</p>}
         </>
       )}
     </div>

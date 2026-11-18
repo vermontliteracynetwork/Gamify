@@ -211,7 +211,7 @@ export default function RoadHop() {
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
           <section className="grid gap-2 min-w-0 [--rh-extra:4.375rem] lg:[--rh-extra:0rem]">
             {phase === 'play' && (
-              <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
+              <div className="flex items-center gap-3 bg-surface border-bold border-border rounded-panel px-4 py-2" aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={36} />
                 <span className="font-display text-xl sm:text-2xl">{step === 'question' ? t('share.whoseTurn', { name: player.name }) : player.kind === 'cpu' ? t('fr.cpuThinking') : t('rh.go', { name: player.name })}</span>
                 <span className="ml-auto font-bold text-sm text-right">
@@ -222,7 +222,7 @@ export default function RoadHop() {
                 </span>
               </div>
             )}
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" role="img" aria-label={t('rh.board', { row: spot.pos.row + 1, rows: ROWS })}
+            <div className="relative mx-auto w-full rounded-panel border-heavy border-border overflow-hidden" role="img" aria-label={t('rh.board', { row: spot.pos.row + 1, rows: ROWS })}
               style={{ ...pieceFill(theme, 'background', grass), aspectRatio: `${COLS} / ${ROWS}`, maxWidth: boardWidth }}>
               <Lanes map={map} k={level} roadColor={roadLook(theme).roadColor} />
               {map.flatMap((lane, r) => lane.cars.map((c) => {
@@ -262,7 +262,7 @@ export default function RoadHop() {
             <div className="grid grid-cols-[1fr_1.4fr_1fr_1fr] gap-2 mx-auto w-full" style={{ maxWidth: boardWidth }}>
               {([['left', t('rh.left'), <ArrowFatLeft key="l" weight="fill" size={30} />], ['up', t('rh.up'), <ArrowFatUp key="u" weight="fill" size={34} />], ['right', t('rh.right'), <ArrowFatRight key="r" weight="fill" size={30} />], ['wait', t('rh.waitLabel'), <HourglassMedium key="w" weight="fill" size={28} />]] as [Move, string, ReactNode][]).map(([m, label, icon]) => (
                 <button key={m} type="button" onClick={() => go(m)} disabled={!canHop} aria-label={label} title={label}
-                  className={`min-h-14 rounded-input border-[2.5px] border-border flex items-center justify-center gap-1 font-bold disabled:opacity-50 ${m === 'up' ? 'bg-accent' : 'bg-surface'} ${canHop && m === 'up' ? 'motion-safe:animate-pulse' : ''}`}
+                  className={`min-h-14 rounded-input border-bold border-border flex items-center justify-center gap-1 font-bold disabled:opacity-40 ${m === 'up' ? 'bg-accent' : 'bg-surface'} ${canHop && m === 'up' ? 'motion-safe:animate-pulse' : ''}`}
                   style={{ boxShadow: 'var(--shadow-sticker)' }}>{icon}{m === 'wait' && <span className="hidden sm:inline">{t('rh.wait')}</span>}</button>
               ))}
             </div>

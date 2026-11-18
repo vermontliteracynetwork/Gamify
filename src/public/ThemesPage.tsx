@@ -9,7 +9,7 @@ import { creditLine } from '../theme/credit';
 import type { StringKey } from '../i18n/en';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
-import { buttonClasses } from '../ui/kit';
+import { buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
@@ -39,7 +39,7 @@ export default function ThemesPage() {
     // samples keep their showcase order under every sort but Name.
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? b.order - a.order : a.order - b.order));
   const gameName = (id: string) => GAMES.find((g) => g.id === id)?.name ?? id;
-  const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+  const field = fieldClasses('md');
 
   return (
     <>
@@ -49,8 +49,8 @@ export default function ThemesPage() {
           <p className="text-xl font-bold max-w-3xl">{t('themes.sub')}</p>
         </div>
 
-        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-accent border-[2.5px] border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <span className="w-16 h-16 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="#c98a00" aria-hidden="true" /></span>
+        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-accent border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="#c98a00" aria-hidden="true" /></span>
           <span className="grid gap-1">
             <span className="text-xs font-bold uppercase tracking-wider">{t('themes.featured')}</span>
             <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
@@ -88,7 +88,7 @@ export default function ThemesPage() {
             const fav = favorites.includes(x.theme.id);
             return (
               <motion.li key={x.theme.id} layout={!reduce} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
-                className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                className="hover-lift bg-surface border-bold border-border rounded-panel p-3 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} />
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
@@ -96,12 +96,12 @@ export default function ThemesPage() {
                     <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
                   </div>
                   <button type="button" aria-pressed={fav} aria-label={t(fav ? 'themes.unfavorite' : 'themes.favorite', { name: x.name })} onClick={() => toggle(x.theme.id)}
-                    className={`w-11 h-11 shrink-0 rounded-full border-[2px] border-border flex items-center justify-center hover-pop ${fav ? 'bg-[#ffd9e3]' : 'bg-surface'}`}>
+                    className={`w-11 h-11 shrink-0 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-[#ffd9e3]' : 'bg-surface'}`}>
                     <Heart weight={fav ? 'fill' : 'bold'} size={22} color={fav ? '#d6336c' : undefined} />
                   </button>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-[2px] border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
                   <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>

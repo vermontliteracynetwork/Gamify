@@ -24,9 +24,9 @@ export default function PinballPreview({ theme }: { theme: GameTheme }) {
   const tableH = h * 0.92, tableW = (tableH * W) / H;
   const pct = (v: number, of: number) => `${(v / of) * 100}%`;
   return (
-    <div ref={box} className="relative rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] grid place-items-center" style={backdropStyle(theme, false)}
+    <div ref={box} className="relative rounded-panel border-bold border-border overflow-hidden aspect-[4/3] grid place-items-center" style={backdropStyle(theme, false)}
       role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>
-      <div className="relative rounded-[14px] border-[2.5px] border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), width: tableW, height: tableH, boxShadow: '0 4px 0 #000' }}>
+      <div className="relative rounded-[14px] border-bold border-border overflow-hidden" style={{ ...pieceFill(theme, 'board', '#314677'), width: tableW, height: tableH, boxShadow: '0 4px 0 #000' }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" aria-hidden="true">
           <TableDefs theme={theme} />
           <TableDecor theme={theme} blink={false} />
@@ -39,7 +39,7 @@ export default function PinballPreview({ theme }: { theme: GameTheme }) {
         </svg>
         <div className="absolute flex" style={{ left: pct(WALL, W), right: pct(WALL, W), top: pct(6, H), height: pct(17, H) }}>
           {VALUES.map((v, i) => (
-            <span key={i} className="relative flex-1 min-w-0 mx-[1px] border-[1.5px] border-border rounded-b-[8px] rounded-t-[3px] grid place-items-center"
+            <span key={i} className="relative flex-1 min-w-0 mx-[1px] border-thin border-border rounded-b-[8px] rounded-t-[3px] grid place-items-center"
               style={{ ...pocketStyle(theme, i, false), fontSize: tableW * 0.085, WebkitTextStroke: '1px #000' }}>{v}</span>
           ))}
         </div>

@@ -16,7 +16,7 @@ function Scatter({ icons, colors }: { icons: Icon[]; colors: string[] }) {
       {spots.map(([x, y, r], i) => {
         const I = icons[i % icons.length];
         return (
-          <span key={i} className="absolute rounded-full border-[3px] border-border flex items-center justify-center"
+          <span key={i} className="absolute rounded-full border-heavy border-border flex items-center justify-center"
             style={{ left: `${x}%`, top: `${y}%`, width: '22%', aspectRatio: '1', transform: `rotate(${r}deg)`, background: colors[i % colors.length] }}>
             <I weight="fill" className="w-3/5 h-3/5" color="#241c3d" />
           </span>
@@ -123,7 +123,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
             <line x1="250" y1="36" x2="330" y2="-50" stroke="#5b3a1e" strokeWidth="8" strokeLinecap="round" />
           </svg>
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M30 6 Q52 4 62 30" stroke="#000" strokeWidth="0.5" fill="none" /></svg>
-          <span className="absolute w-[8%] aspect-square rounded-full border-[2.5px] border-border" style={{ left: '58%', top: '44%', background: '#e5635f' }} />
+          <span className="absolute w-[8%] aspect-square rounded-full border-bold border-border" style={{ left: '58%', top: '44%', background: '#e5635f' }} />
           {[['seaweed-green-a', 4, 22], ['rock-a', 22, 16], ['seaweed-pink-a', 74, 20], ['rock-b', 86, 14], ['seaweed-orange-a', 56, 18]].map(([n, x, w]) => (
             <img key={n as string} src={`/classic/cast-catch/${n}.svg`} alt="" className="absolute bottom-0 h-auto" style={{ left: `${x}%`, width: `${w}%` }} draggable="false" />
           ))}
@@ -137,7 +137,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true">
           <div className="absolute inset-[10%] grid grid-cols-4 gap-[4%]">
             {['?', '', 'cat', '', '', '2+2', '', '4'].map((v, i) => (
-              <span key={i} className="rounded-lg border-[2.5px] border-border flex items-center justify-center font-display text-[clamp(8px,4cqw,22px)]" style={{ background: v ? (i % 2 ? '#fdfd94' : '#fbfcf8') : '#b4c4fb', transform: `rotate(${(i % 3) - 1}deg)` }}>{v}</span>
+              <span key={i} className="rounded-lg border-bold border-border flex items-center justify-center font-display text-[clamp(8px,4cqw,22px)]" style={{ background: v ? (i % 2 ? '#fdfd94' : '#fbfcf8') : '#b4c4fb', transform: `rotate(${(i % 3) - 1}deg)` }}>{v}</span>
             ))}
           </div>
         </div>
@@ -146,7 +146,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       return (
         <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #fdfd94, #ed9d75)' }} aria-hidden="true">
           {[[18, 22, -8, '#fbfcf8', ''], [28, 18, 4, '#fbfcf8', ''], [36, 24, -2, '#fbfcf8', '2 + 3 = ?']].map(([x, y, r, bg, txt], i) => (
-            <span key={i} className="absolute w-[50%] aspect-[8/5] rounded-xl border-[3px] border-border flex items-center justify-center font-display text-[clamp(10px,7cqw,34px)]" style={{ left: `${x}%`, top: `${y}%`, transform: `rotate(${r}deg)`, background: bg as string }}>{txt}</span>
+            <span key={i} className="absolute w-[50%] aspect-[8/5] rounded-xl border-heavy border-border flex items-center justify-center font-display text-[clamp(10px,7cqw,34px)]" style={{ left: `${x}%`, top: `${y}%`, transform: `rotate(${r}deg)`, background: bg as string }}>{txt}</span>
           ))}
         </div>
       );
@@ -155,7 +155,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #b4c4fb, #ddfcc6)' }} aria-hidden="true">
           <div className="absolute inset-[10%] grid grid-cols-2 gap-x-[18%] gap-y-[6%]">
             {['3 + 4', '7', 'cat', 'animal', 'red', 'color'].map((v, i) => (
-              <span key={i} className="rounded-lg border-[2.5px] border-border flex items-center justify-center font-display text-[clamp(8px,5cqw,24px)]" style={{ background: i % 2 ? '#fdfd94' : '#fbfcf8' }}>{v}</span>
+              <span key={i} className="rounded-lg border-bold border-border flex items-center justify-center font-display text-[clamp(8px,5cqw,24px)]" style={{ background: i % 2 ? '#fdfd94' : '#fbfcf8' }}>{v}</span>
             ))}
           </div>
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="none"><path d="M42 14 L58 14 M42 31 L58 31 M42 48 L58 48" stroke="#000" strokeWidth="1.5" strokeDasharray="3 2" /></svg>
@@ -213,7 +213,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           <div className="absolute inset-x-0 bottom-0 h-[30%] border-t-[3px] border-border" style={{ background: '#ed9d75' }} />
           {[[8, Pizza, '#f6c544'], [38, IceCream, '#f6a5c0'], [68, Hamburger, '#f39a6b']].map(([x, I, c], i) => {
             const S = I as Icon;
-            return <span key={i} className="absolute w-[24%] aspect-square rounded-full border-[3px] border-border flex items-center justify-center" style={{ left: `${x}%`, top: '28%', background: c as string }}><S weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>;
+            return <span key={i} className="absolute w-[24%] aspect-square rounded-full border-heavy border-border flex items-center justify-center" style={{ left: `${x}%`, top: '28%', background: c as string }}><S weight="fill" className="w-3/5 h-3/5" color="#241c3d" /></span>;
           })}
           <Heart weight="fill" className="absolute right-[6%] bottom-[8%] w-[14%] h-auto" color="#e5635f" />
         </div>

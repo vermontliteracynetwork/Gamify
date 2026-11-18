@@ -24,6 +24,7 @@ import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
+import TopStrip from '../../engine/TopStrip';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
@@ -298,9 +299,10 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
-          <RoundMeter score={score} round={round} rounds={plan.current.rounds} moves={moves} perRound={MOVES_PER_ROUND} stars={stars} goals={goals} still={still} />
-          <div className="relative border-[2.5px] border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
-            {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
+          <TopStrip leftLabel={t('bm.moves', { count: moves })} score={score} player={pieceImage(theme, 'player')} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
+            label={t('bm.round', { n: round, total: plan.current.rounds })} right={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />
+          <div className="relative border-bold border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
+            {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
             <div className="relative">
             <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
@@ -337,7 +339,7 @@ export default function MatchThree() {
                       if (made) return <img src={made} alt="" aria-hidden="true" draggable="false" className={`relative w-[92%] h-[92%] object-contain pointer-events-none ${loop ? 'm3-pulse' : ''}`} />;
                       const own = pieceImage(theme, `tile-${tileItem.kind}`);
                       return <>
-                        {sp === 'rainbow' && <span aria-hidden="true" className={`relative w-[86%] h-[86%] rounded-full border-[2.5px] border-[#241c3d] grid place-items-center ${loop ? 'm3-spin' : ''}`} style={{ background: RAINBOW_BG }}><Star weight="fill" className="w-3/5 h-3/5 drop-shadow-[0_0_2px_#000]" color="#fff" /></span>}
+                        {sp === 'rainbow' && <span aria-hidden="true" className={`relative w-[86%] h-[86%] rounded-full border-bold border-ink-night grid place-items-center ${loop ? 'm3-spin' : ''}`} style={{ background: RAINBOW_BG }}><Star weight="fill" className="w-3/5 h-3/5 drop-shadow-[0_0_2px_#000]" color="#fff" /></span>}
                         {sp !== 'rainbow' && own && <img src={own} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none" />}
                         {sp !== 'rainbow' && !own && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="relative w-4/5 h-4/5" color={TILE_COLORS[tileItem.kind]} aria-hidden="true" />; })()}
                         {sp !== 'rainbow' && !own && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
@@ -365,7 +367,7 @@ export default function MatchThree() {
               }))}
               <AnimatePresence>
                 {callout && (
-                  <motion.p key={callout.id} className="absolute inset-x-0 top-[40%] text-center font-display text-5xl sm:text-6xl text-[#fdfd94]" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
+                  <motion.p key={callout.id} className="absolute inset-x-0 top-[40%] text-center font-display text-5xl sm:text-6xl text-accent" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
                     initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, y: -20 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }}
                     onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 650); }}><PopText text={callout.text} /></motion.p>
                 )}
@@ -397,37 +399,21 @@ export default function MatchThree() {
 const MOCK = ['#9fd8f0', '#f6a5c0', '#fdfd94', '#a3e6b8', '#c9b6f2', '#f7b267'];
 function SizeMock({ n }: { n: number }) {
   return (
-    <span className="grid gap-[2px] p-1 rounded-md border-[1.5px] border-border bg-white" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, width: 64, height: 64 }} aria-hidden="true">
+    <span className="grid gap-[2px] p-1 rounded-md border-thin border-border bg-white" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, width: 64, height: 64 }} aria-hidden="true">
       {Array.from({ length: n * n }, (_, i) => <span key={i} className="rounded-[2px]" style={{ background: MOCK[(i * 7 + Math.floor(i / n)) % MOCK.length] }} />)}
     </span>
   );
 }
 
-// One meter across the top (teacher, 2026-11-18): the score in the Gamify
-// font with no box behind it, then a dash for every move of every round,
-// grouped by round (used dashes filled, this move glowing), then the stars.
-function RoundMeter({ score, round, rounds, moves, perRound, stars, goals, still }: { score: number; round: number; rounds: number; moves: number; perRound: number; stars: number; goals: number[]; still: boolean }) {
-  const done = (round - 1) * perRound + (perRound - moves);
+// The three stars of the goal, at the right end of the top strip.
+function StarGoal({ score, stars, goals, still }: { score: number; stars: number; goals: number[]; still: boolean }) {
   return (
-    <div className="flex items-center gap-3 min-w-0" role="group" aria-label={`${t('bm.round', { n: round, total: rounds })}, ${t('bm.moves', { count: moves })}`}>
-      <motion.span key={score} initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }} className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" aria-label={t('share.points', { count: score })}>{score}</motion.span>
-      <span className="flex-1 min-w-0 flex gap-2" aria-hidden="true">
-        {Array.from({ length: rounds }, (_, r) => (
-          <span key={r} className="flex-1 flex gap-[3px] p-[3px] rounded-pill border-[2px] border-border bg-surface">
-            {Array.from({ length: perRound }, (_, m) => {
-              const k = r * perRound + m;
-              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${k < done ? 'bg-[#8fe3a0]' : k === done ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'bg-[#cdd7fb]'}`} />;
-            })}
-          </span>
-        ))}
-      </span>
-      <span className="flex gap-0.5 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
-        {goals.map((g, i) => (
-          <motion.span key={g} animate={stars > i && !still ? { scale: [1, 1.5, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-            <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
-          </motion.span>
-        ))}
-      </span>
-    </div>
+    <span className="flex gap-0.5 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
+      {goals.map((g, i) => (
+        <motion.span key={g} animate={stars > i && !still ? { scale: [1, 1.5, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
+          <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
+        </motion.span>
+      ))}
+    </span>
   );
 }

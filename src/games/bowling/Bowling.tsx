@@ -397,7 +397,7 @@ export default function Bowling() {
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <section className="relative grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
-            <div className={`relative mx-auto rounded-panel border-[3px] border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
+            <div className={`relative mx-auto rounded-panel border-heavy border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
               onPointerMove={canAim ? (e) => { const r = e.currentTarget.getBoundingClientRect(); setAim(Math.max(-0.92, Math.min(0.92, ((e.clientX - r.left) / r.width) * 2 - 1))); } : undefined}
               style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
@@ -506,13 +506,13 @@ export default function Bowling() {
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
                   <Slider label={t('sb.aim')} min={-9} max={9} value={Math.round(aim * 10)} onChange={(v) => setAim(v / 10)} show={(v) => (v === 0 ? t('sb.middle') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
                   <Slider label={t('sb.spin')} min={-10} max={10} value={Math.round(hook * 10)} onChange={(v) => setHook(v / 10)} show={(v) => (v === 0 ? t('sb.straight') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
-                  <button type="button" onClick={() => throwBall({ aim, hook })} className="min-h-14 px-5 rounded-pill border-[2.5px] border-border bg-accent font-display text-xl">{t('sb.throw')}</button>
+                  <button type="button" onClick={() => throwBall({ aim, hook })} className="min-h-14 px-5 rounded-pill border-bold border-border bg-accent font-display text-xl">{t('sb.throw')}</button>
                 </div>
               ) : null}
             </div>
             {armed.length > 0 && (
               <div className="absolute inset-x-0 top-3 flex justify-center gap-1.5 flex-wrap pointer-events-none z-10">
-                {armed.map((a, i) => <span key={i} className="rounded-pill border-[2px] border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{bowlingManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
+                {armed.map((a, i) => <span key={i} className="rounded-pill border-std border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{bowlingManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
               </div>
             )}
           </section>

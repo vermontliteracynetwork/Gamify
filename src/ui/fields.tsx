@@ -12,48 +12,23 @@ export function Toggle({ label, value, onChange, art, hint }: { label: string; v
   return (
     // The hint is hover text on a small (i) (teacher, 2026-11-18).
     <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)} aria-description={hint}
-      className="flex items-center justify-between gap-3 min-h-12 px-4 py-1.5 rounded-input border-[2px] border-border-soft bg-surface text-left font-bold">
+      className="flex items-center justify-between gap-3 min-h-12 px-4 py-1.5 rounded-input border-std border-border-soft bg-surface text-left font-bold">
       {art}
       <span className="flex-1 min-w-0 inline-flex items-center gap-1.5">{label}{hint && <span data-tip={hint} aria-hidden="true" className="text-muted cursor-help shrink-0"><Info weight="bold" size={16} /></span>}</span>
-      <span className={`relative w-14 h-8 rounded-pill border-[2px] border-border shrink-0 ${value ? 'bg-success' : 'bg-surface-2'}`} aria-hidden="true">
-        <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-[2px] border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
+      <span className={`relative w-14 h-8 rounded-pill border-std border-border shrink-0 ${value ? 'bg-success' : 'bg-surface-2'}`} aria-hidden="true">
+        <span className={`absolute top-0.5 w-6 h-6 rounded-full bg-surface border-std border-border motion-safe:transition-all ${value ? 'left-6' : 'left-0.5'}`} />
       </span>
     </button>
   );
 }
 
-// Choices shown like a question's answer tiles (teacher, 2026-11-01): big
-// colored tiles in a grid, the picked one ringed and checked. Each can have
-// hover text (`tip`); on touch screens the tip shows on the tile instead.
-const TILE_BG = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
-export function ChoiceTiles<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; tip?: string }[]; onChange: (v: T) => void }) {
-  return (
-    <div className="grid gap-1.5">
-      <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-3">
-        {options.map((o, i) => {
-          const on = value === o.value;
-          return (
-            <button key={o.value} type="button" role="radio" aria-checked={on} aria-description={o.tip} data-tip={o.tip} onClick={() => onChange(o.value)}
-              className={`min-h-16 px-4 py-2 rounded-input border-[2.5px] border-border flex items-center gap-3 text-left font-bold text-xl ${TILE_BG[i % TILE_BG.length]} ${on ? 'ring-4 ring-border' : 'opacity-85'}`}
-              style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <span className={`w-10 h-10 shrink-0 rounded-full border-[2px] border-border flex items-center justify-center ${on ? 'bg-success' : 'bg-surface'}`} aria-hidden="true">{on && <Check weight="bold" size={20} />}</span>
-              <span className="grid">
-                {o.label}
-                {o.tip && <span className="hidden [@media(hover:none)]:block text-sm font-semibold">{o.tip}</span>}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 // A row of choices with a highlight that slides to the pick with a little
 // bounce (teacher, 2026-11-06: "make it amusing. slight animations").
 // `art` puts a small picture above a choice's label (like a grid preview).
-export function ChoiceRow<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; art?: ReactNode }[]; onChange: (v: T) => void }) {
+// The one choice control (design system, 2026-11-18): a row of choices, with
+// an optional small picture (`art`) and hover text (`tip`) for each.
+export function ChoiceRow<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string; art?: ReactNode; tip?: string }[]; onChange: (v: T) => void }) {
   const id = useId();
   const still = useSettings().settings.motion === 'still';
   // Pictured choices (like card grid sizes) are separate white cards that
@@ -65,10 +40,12 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
         {options.map((o) => {
           const on = value === o.value;
           return (
-            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)}
-              className={`min-w-24 px-4 py-3 rounded-input border-[2.5px] bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
+            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
+              className={`min-w-24 px-4 py-3 rounded-input border-bold bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
               style={{ boxShadow: on ? '0 4px 0 #000' : undefined }}>
               {o.art}<span>{o.label}</span>
+              {/* Touch screens have no hover, so the tip shows on the card (Claudia, 2026-11-18). */}
+              {o.tip && <span className="hidden [@media(hover:none)]:block text-xs font-semibold text-muted max-w-48">{o.tip}</span>}
             </button>
           );
         })}
@@ -78,14 +55,15 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
   return (
     <div className="grid gap-1.5">
       <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className={`inline-flex flex-wrap justify-self-start gap-1 p-1 ${options.some((o) => o.art) ? 'rounded-panel' : 'rounded-[1.6rem]'} border-[2px] border-border bg-surface-2`}>
+      {options.some((o) => o.tip) && <p className="hidden [@media(hover:none)]:block -mt-1 text-xs font-semibold text-muted">{options.find((o) => o.value === value)?.tip}</p>}
+      <div role="radiogroup" aria-label={label} className={`inline-flex flex-wrap justify-self-start gap-1 p-1 ${options.some((o) => o.art) ? 'rounded-panel' : 'rounded-[1.6rem]'} border-std border-border bg-surface-2`}>
         {options.map((o) => {
           const on = value === o.value;
           return (
-            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)}
+            <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
               className={`relative min-h-11 px-4 ${o.art ? 'rounded-input' : 'rounded-pill'} font-bold motion-safe:active:scale-95 motion-safe:transition-transform ${o.art ? 'py-2 grid justify-items-center gap-1' : ''}`}>
               {on && <motion.span layoutId={still ? undefined : `pick-${id}`} transition={{ type: 'spring', stiffness: 520, damping: 30 }}
-                className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-accent border-[2px] border-border`} style={{ boxShadow: '0 2px 0 #000' }} aria-hidden="true" />}
+                className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-accent border-std border-border`} style={{ boxShadow: '0 2px 0 #000' }} aria-hidden="true" />}
               {o.art && <span className="relative">{o.art}</span>}
               <span className="relative">{o.label}</span>
             </button>
@@ -103,12 +81,12 @@ export function Slider({ label, hint, min, max, value, disabled, show = String, 
 }) {
   const id = `slider-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
-    <div className={`grid gap-1.5 ${disabled ? 'opacity-50' : ''}`}>
+    <div className={`grid gap-1.5 ${disabled ? 'opacity-40' : ''}`}>
       {/* The hint is hover text on a small (i), not a line under the label
           (teacher, 2026-11-18); the track fills up to the thumb. */}
       <label htmlFor={id} className="flex items-center justify-between gap-2 font-bold">
         <span className="inline-flex items-center gap-1.5">{label}{hint && <span data-tip={hint} aria-hidden="true" className="text-muted cursor-help"><Info weight="bold" size={16} /></span>}</span>
-        <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-[2px] border-border tabular-nums">{show(value)}</span>
+        <span className="min-w-12 text-center px-2 py-0.5 rounded-pill bg-surface-2 border-std border-border tabular-nums">{show(value)}</span>
       </label>
       <input id={id} type="range" min={min} max={max} step={1} value={value} disabled={disabled} aria-description={hint}
         onChange={(e) => onChange(Number(e.target.value))} aria-valuetext={show(value)} className="gamify-slider w-full"
@@ -124,10 +102,10 @@ export function Stepper({ label, value, min, max, onChange, lessLabel, moreLabel
     <div className="flex items-center gap-3">
       <span className="font-bold flex-1">{label}</span>
       <button type="button" aria-label={lessLabel} disabled={value <= min} onClick={() => onChange(value - 1)}
-        className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={22} /></button>
+        className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={22} /></button>
       <span className="font-display text-3xl font-bold w-12 text-center tabular-nums" aria-live="polite">{value}</span>
       <button type="button" aria-label={moreLabel} disabled={value >= max} onClick={() => onChange(value + 1)}
-        className="w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
+        className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
     </div>
   );
 }
@@ -144,14 +122,14 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
         const on = value === o.value;
         return (
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.title} onClick={() => onChange(o.value)}
-            className={`group relative rounded-panel border-[2.5px] border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
+            className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
             style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
             <span className="block h-[clamp(5rem,30vh,18rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
             <span className="px-3 py-2 grid gap-0.5">
               <span className="font-display text-base font-bold leading-tight">{o.title}</span>
               <span className="font-semibold text-xs text-muted leading-snug">{o.hint}</span>
             </span>
-            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
+            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>
         );
       })}

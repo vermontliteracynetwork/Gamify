@@ -9,6 +9,7 @@ import { isPlayable } from '../engine/questions';
 import { t } from '../i18n';
 import { ART } from './SetCover';
 import SetFilterBar from './SetFilterBar';
+import { Tabs } from '../ui/kit';
 import { LIBRARY } from '../data/library';
 
 const LIBRARY_IDS = new Set(LIBRARY.map((s) => s.id));
@@ -90,12 +91,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
-        <div role="tablist" aria-label={t('sets.tabs')} className="inline-flex shrink-0 p-0.5 rounded-pill border-[2px] border-border bg-surface">
-          {(['mine', 'library'] as const).map((v) => (
-            <button key={v} type="button" role="tab" aria-selected={tab === v} onClick={() => setTab(v)}
-              className={`min-h-7 px-2.5 rounded-pill text-xs font-bold motion-safe:transition-colors ${tab === v ? 'bg-accent' : 'hover:bg-surface-2'}`}>{t(v === 'mine' ? 'sets.mine' : 'sets.library')}</button>
-          ))}
-        </div>
+        <Tabs size="sm" className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
         <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
@@ -119,28 +115,28 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                   aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
                   aria-description={t('sets.flipHint')} title={t('sets.flipHint')}
                   onClick={() => tap(s, on)}
-                  className={`group relative w-full rounded-panel border-[2.5px] border-border text-left grid gap-2.5 p-4 bg-surface motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-[#b4c4fb] -translate-y-1' : ''}`}
+                  className={`group relative w-full rounded-panel border-bold border-border text-left grid gap-2.5 p-4 bg-surface motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-bg -translate-y-1' : ''}`}
                   style={{ boxShadow: on ? '0 6px 0 #000, 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.08)' }}>
                   {on && (
-                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-accent border-[2px] border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
+                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
                       {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
                     </span>
                   )}
                   {!back ? (
                     <>
                       {/* A cover keeps the shape it was uploaded in. */}
-                      {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-[2px] border-border" />}
+                      {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-std border-border" />}
                       {/* The subject icon, then the title right beside it, no subject
                           word (teacher, 2026-11-18). */}
                       <span className="flex items-start gap-2 min-w-0 pr-8">
-                        <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-[1.5px] border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
+                        <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-thin border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
                           <I weight="fill" size={15} color={art.ink} aria-hidden="true" />
                         </span>
                         <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere] min-w-0">{s.name || t('sets.untitled')}</span>
                       </span>
                       <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
-                        <span className="rounded-pill border-[1.5px] border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                        <span className="rounded-pill border-[1.5px] border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+                        <span className="rounded-pill border-thin border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                        <span className="rounded-pill border-thin border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
                       </span>
                     </>
                   ) : (
@@ -153,7 +149,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                           {q.choices.map((c, k) => {
                             const right = k === q.correctIndex;
                             return (
-                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-[1.5px] px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
+                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-thin px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
                                 <span className="min-w-0">{c}</span>
                                 {right && <CheckCircle weight="fill" size={15} color="#1f7a45" className="shrink-0 mt-px" aria-label={t('sets.correct')} />}
                               </li>

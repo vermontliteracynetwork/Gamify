@@ -141,9 +141,9 @@ export default function MatchUp() {
       {phase === 'play' && (
         <section className="grid gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-display text-xl tabular-nums"><Timer weight="bold" size={22} />{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
-            <span className="inline-flex items-center bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-bold">{t('mu.round', { n: round, total: setup.rounds })}</span>
-            <span className="inline-flex items-center bg-surface border-[2.5px] border-border rounded-pill px-4 min-h-11 font-bold" aria-live="polite">{t('mu.matched', { done: done.length, total: left.length })}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-bold border-border rounded-pill px-4 min-h-11 font-display text-xl tabular-nums"><Timer weight="bold" size={22} />{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span>
+            <span className="inline-flex items-center bg-surface border-bold border-border rounded-pill px-4 min-h-11 font-bold">{t('mu.round', { n: round, total: setup.rounds })}</span>
+            <span className="inline-flex items-center bg-surface border-bold border-border rounded-pill px-4 min-h-11 font-bold" aria-live="polite">{t('mu.matched', { done: done.length, total: left.length })}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-6" style={{ gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`, gridAutoFlow: 'column', height: `min(calc(100dvh - 16.875rem + var(--chrome-save, 0rem)), ${rows * 165}px)` }}>
             {left.map((tile) => (

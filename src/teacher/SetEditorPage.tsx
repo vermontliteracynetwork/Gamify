@@ -75,7 +75,7 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
             onChange={(e) => update({ ...set, name: e.target.value })}
             placeholder={t('sets.untitled')}
             aria-label={t('editor.name')}
-            className="flex-1 min-w-0 min-h-12 px-4 rounded-input border-[2.5px] border-border bg-surface font-display text-2xl font-bold"
+            className="flex-1 min-w-0 min-h-12 px-4 rounded-input border-bold border-border bg-surface font-display text-2xl font-bold"
           />
         )}
         {!library && <span className="text-sm font-bold text-text" aria-live="polite">{status === 'saved' ? t('editor.saved') : t('editor.saving')}</span>}
@@ -146,7 +146,7 @@ function TeachCardEditor({ set, readOnly, onChange }: { set: QuestionSet; readOn
         {card?.imageUrl && <CaptionedImage src={card.imageUrl} alt={card.imageAlt ?? ''} onAlt={(imageAlt) => put({ imageAlt })} readOnly={readOnly} required className="h-24 w-auto" />}
         <textarea id="teach-text" value={card?.text ?? ''} readOnly={readOnly} maxLength={200} rows={2} placeholder={t('editor.teach.placeholder')}
           onChange={(e) => put({ text: e.target.value })}
-          className="flex-1 min-w-60 min-h-11 px-3 py-2 rounded-input border-[2px] border-border-soft bg-surface font-bold resize-y" />
+          className="flex-1 min-w-60 min-h-11 px-3 py-2 rounded-input border-std border-border-soft bg-surface font-bold resize-y" />
       </div>
       {!readOnly && (
         <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +193,7 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
 
   return (
     <li
-      className={`bg-surface border-[2.5px] rounded-panel p-4 grid gap-3 ${issue && started ? 'border-danger' : 'border-border'}`}
+      className={`bg-surface border-bold rounded-panel p-4 grid gap-3 ${issue && started ? 'border-danger' : 'border-border'}`}
       style={{ boxShadow: 'var(--shadow-sticker)' }}
     >
       {q.imageUrl && (
@@ -212,7 +212,7 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
           placeholder={t('editor.question')}
           aria-label={`${t('editor.question')} ${n}`}
           rows={1}
-          className="flex-1 min-w-0 min-h-11 px-3 py-2 rounded-input border-[2px] border-border-soft bg-surface font-bold resize-y"
+          className="flex-1 min-w-0 min-h-11 px-3 py-2 rounded-input border-std border-border-soft bg-surface font-bold resize-y"
         />
         {!readOnly && (
           <div className="flex gap-1 shrink-0">
@@ -226,14 +226,14 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
         {q.choices.map((c, k) => {
           const right = q.correctIndex === k;
           return (
-            <div key={k} className={`flex items-center gap-2 rounded-input border-[2px] p-1 ${right ? 'border-border bg-success/40' : 'border-border-soft'}`}>
+            <div key={k} className={`flex items-center gap-2 rounded-input border-std p-1 ${right ? 'border-border bg-success/40' : 'border-border-soft'}`}>
               <button
                 type="button"
                 disabled={readOnly}
                 onClick={() => onChange({ correctIndex: k })}
                 aria-label={t('editor.markRight', { letter: LETTERS[k] })}
                 aria-pressed={right}
-                className={`w-11 h-11 shrink-0 rounded-full border-[2px] border-border font-display font-bold text-lg flex items-center justify-center
+                className={`w-11 h-11 shrink-0 rounded-full border-std border-border font-display font-bold text-lg flex items-center justify-center
                             ${right ? 'bg-success text-text' : 'bg-surface text-text'}`}
               >
                 {right ? <Check weight="bold" size={20} /> : LETTERS[k]}
@@ -320,7 +320,7 @@ function SpreadsheetTools({ set, readOnly, onAdd }: { set: QuestionSet; readOnly
   const fileRef = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState('');
   const slug = (set.name || 'question-set').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const pill = 'min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-2 hover-pop';
+  const pill = 'min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-2 hover-pop';
   async function upload(file: File) {
     const { questions, errors } = csvRowsToQuestions(parseCsv(await file.text()), () => newId('q'));
     if (questions.length) onAdd(questions);

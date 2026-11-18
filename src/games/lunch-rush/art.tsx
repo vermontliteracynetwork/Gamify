@@ -19,8 +19,8 @@ export const SHIRT = ['#6aa9e9', '#c58ce8', '#5cc3a0', '#ef7d96', '#f0d36b', '#7
 // The guest's order: the food picture, and hearts for how long they'll wait.
 export function OrderBubble({ theme, food, patience, served }: { theme: GameTheme; food: Food; patience: number; served: boolean }) {
   return (
-    <div className="w-[70%] bg-surface border-[2.5px] border-border rounded-panel p-[4%] grid justify-items-center gap-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <span className="w-[62%] aspect-square rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ ...foodBg(theme, food), opacity: served ? 0.4 : 1 }}>
+    <div className="w-[70%] bg-surface border-bold border-border rounded-panel p-[4%] grid justify-items-center gap-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <span className="w-[62%] aspect-square rounded-full border-bold border-border flex items-center justify-center" style={{ ...foodBg(theme, food), opacity: served ? 0.4 : 1 }}>
         <FoodFace theme={theme} food={food} />
       </span>
       <span className="flex gap-[3%] w-full justify-center" aria-hidden="true">

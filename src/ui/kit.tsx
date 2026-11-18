@@ -12,14 +12,19 @@ const VARIANTS: Record<Variant, string> = {
   danger: 'bg-surface hover:bg-danger text-text border-border',
 };
 
-// Also used on links that look like buttons (never a button inside a link).
-export function buttonClasses(variant: Variant = 'secondary', className = ''): string {
-  return `inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-pill border-[2px] font-bold text-sm no-underline
-          active:scale-95 motion-safe:transition disabled:opacity-50 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
+// Three button sizes (design system, 2026-11-18): sm 36px for compact bars,
+// md 44px (the touch minimum) for most buttons, lg 56px for a screen's one
+// big action. Also used on links that look like buttons (never a button
+// inside a link).
+export type ButtonSize = 'sm' | 'md' | 'lg';
+const SIZES: Record<ButtonSize, string> = { sm: 'min-h-9 px-3 text-sm tap', md: 'min-h-11 px-4 text-sm', lg: 'min-h-14 px-6 text-lg' };
+export function buttonClasses(variant: Variant = 'secondary', className = '', size: ButtonSize = 'md'): string {
+  return `inline-flex items-center justify-center gap-2 ${SIZES[size]} rounded-pill border-std font-bold no-underline
+          active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
 }
 
-export function Button({ variant = 'secondary', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return <button type="button" {...props} className={buttonClasses(variant, className)} />;
+export function Button({ variant = 'secondary', size = 'md', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: ButtonSize }) {
+  return <button type="button" {...props} className={buttonClasses(variant, className, size)} />;
 }
 
 // A round button that shows only its icon; its words show on hover or
@@ -28,15 +33,22 @@ export function Button({ variant = 'secondary', className = '', ...props }: Butt
 export function IconButton({ label, children, variant = 'secondary', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant; children: ReactNode }) {
   return (
     <button type="button" aria-label={label} data-tip={label} {...props}
-      className={`shrink-0 w-11 h-11 rounded-full border-[2px] flex items-center justify-center active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
+      className={`shrink-0 w-11 h-11 rounded-full border-std flex items-center justify-center active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
       {children}
     </button>
   );
 }
 
+// The one look for text boxes and dropdowns (design system, 2026-11-18):
+// md for teacher forms, sm for compact filter bars.
+export type FieldSize = 'sm' | 'md';
+export function fieldClasses(size: FieldSize = 'md', className = ''): string {
+  return `${size === 'sm' ? 'min-h-9 px-2.5 text-sm tap' : 'min-h-11 px-3'} rounded-input border-std border-border bg-surface font-bold ${className}`;
+}
+
 export function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`bg-surface border-[2.5px] border-border rounded-panel p-5 ${className}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <section className={`bg-surface border-bold border-border rounded-panel p-5 ${className}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
       {children}
     </section>
   );
@@ -54,17 +66,24 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function Tabs<T extends string>({ value, options, onChange, label }: { value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string }) {
+// The one tab bar (design system, 2026-11-18). size sm for compact bars
+// (question set tabs), md for page tabs; fill stretches the tabs across the
+// bar; panelIds links each tab to its panel (`tab-<id>` / `panel-<id>`).
+export function Tabs<T extends string>({ value, options, onChange, label, size = 'md', fill = false, panelIds = false, className = 'mb-5' }: {
+  value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string; size?: 'sm' | 'md'; fill?: boolean; panelIds?: boolean; className?: string;
+}) {
   return (
-    <div role="tablist" aria-label={label} className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-[1.75rem] bg-surface border-[2px] border-border mb-5">
+    <div role="tablist" aria-label={label} className={`${fill ? 'flex' : 'inline-flex flex-wrap max-w-full'} ${size === 'sm' ? 'gap-0.5 p-0.5' : 'gap-1 p-1'} rounded-[1.75rem] bg-surface border-std border-border ${className}`}>
       {options.map((o) => (
         <button
           key={o.id}
           type="button"
           role="tab"
+          id={panelIds ? `tab-${o.id}` : undefined}
+          aria-controls={panelIds && value === o.id ? `panel-${o.id}` : undefined}
           aria-selected={value === o.id}
           onClick={() => onChange(o.id)}
-          className={`min-h-11 px-4 rounded-pill font-bold text-sm ${value === o.id ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`}
+          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-xs' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`}
         >
           {o.label}
         </button>

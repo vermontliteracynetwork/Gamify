@@ -396,7 +396,7 @@ export default function Pinball() {
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
             <section className="relative grid gap-2 min-w-0 [--pb-extra:4.5rem] lg:[--pb-extra:0rem]">
-              <div ref={boardRef} className="relative mx-auto rounded-[28px] border-[3px] border-border overflow-hidden select-none touch-none"
+              <div ref={boardRef} className="relative mx-auto rounded-[28px] border-heavy border-border overflow-hidden select-none touch-none"
                 style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, width: boardW, maxWidth: '100%', boxShadow: 'var(--shadow-sticker-lg)' }}>
                 <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('pb.board', { n: values.length })}>
                   <TableDefs theme={theme} />
@@ -446,7 +446,7 @@ export default function Pinball() {
                     return (
                       <motion.div key={`${round}-${i}`} initial={still ? false : { y: -30, opacity: 0 }} animate={on && !still ? { y: 0, opacity: 1, scale: [1, 1.12, 1] } : { y: 0, opacity: 1 }} transition={{ delay: still ? 0 : i * 0.05 }}
                         aria-label={t('pb.pocket', { value: v })}
-                        className={`relative flex-1 min-w-0 mx-[1.5px] border-[2.5px] border-border rounded-b-[14px] rounded-t-[4px] flex items-center justify-center ${values.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-4xl'} ${on ? 'ring-4 ring-white z-10' : ''}`}
+                        className={`relative flex-1 min-w-0 mx-[1.5px] border-bold border-border rounded-b-[14px] rounded-t-[4px] flex items-center justify-center ${values.length > 7 ? 'text-lg sm:text-xl' : 'text-2xl sm:text-4xl'} ${on ? 'ring-4 ring-white z-10' : ''}`}
                         style={{ ...pocketStyle(theme, i, on), width: `${pw}%` }}>
                         {v}
                       </motion.div>
@@ -470,7 +470,7 @@ export default function Pinball() {
                 {/* What this shot carries, from the power-ups used. */}
                 {armed.length > 0 && (
                   <div className="absolute inset-x-0 flex justify-center gap-1.5 flex-wrap pointer-events-none" style={{ top: `${((LANE_Y + 10) / H) * 100}%` }}>
-                    {armed.map((a, i) => <span key={i} className="rounded-pill border-[2px] border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{pinballManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
+                    {armed.map((a, i) => <span key={i} className="rounded-pill border-std border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{pinballManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
                   </div>
                 )}
                 <AnimatePresence>
@@ -479,11 +479,11 @@ export default function Pinball() {
                       initial={{ top: '18%', opacity: 1, scale: 0.6 }} animate={{ top: '26%', opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.6 }}>+{hit.points}</motion.span>
                   )}
                   {hit && hit.bonus > 0 && (
-                    <motion.p key={`lb-${hit.id}`} className="absolute inset-x-0 top-[46%] text-center font-display text-3xl sm:text-4xl text-[#fdfd94] pointer-events-none" style={{ WebkitTextStroke: '2px #000' }}
+                    <motion.p key={`lb-${hit.id}`} className="absolute inset-x-0 top-[46%] text-center font-display text-3xl sm:text-4xl text-accent pointer-events-none" style={{ WebkitTextStroke: '2px #000' }}
                       initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 280, damping: 13, delay: 0.25 }} role="status">{t('pb.lightsBonus', { n: hit.bonus })}</motion.p>
                   )}
                   {hit && hit.jackpot && (
-                    <motion.p key={`j-${hit.id}`} className="absolute inset-x-0 top-[34%] text-center font-display text-5xl text-[#fdfd94] pointer-events-none" style={{ WebkitTextStroke: '2px #000' }}
+                    <motion.p key={`j-${hit.id}`} className="absolute inset-x-0 top-[34%] text-center font-display text-5xl text-accent pointer-events-none" style={{ WebkitTextStroke: '2px #000' }}
                       initial={{ scale: 0.4, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 14 }} role="status">{t('pb.jackpot')}</motion.p>
                   )}
                   {hit && hit.pocket === null && (
@@ -491,7 +491,7 @@ export default function Pinball() {
                       initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} role="status">{t('pb.close')}</motion.p>
                   )}
                   {banner && (
-                    <motion.p key={banner.id} className="absolute inset-x-0 top-[24%] mx-auto w-max max-w-[90%] text-center font-display text-xl sm:text-2xl bg-surface border-[2.5px] border-border rounded-pill px-4 py-1 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }}
+                    <motion.p key={banner.id} className="absolute inset-x-0 top-[24%] mx-auto w-max max-w-[90%] text-center font-display text-xl sm:text-2xl bg-surface border-bold border-border rounded-pill px-4 py-1 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }}
                       initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.35 }}
                       onAnimationComplete={() => { const id = banner.id; timers.current.push(window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600)); }}
                       role="status">{banner.text}</motion.p>

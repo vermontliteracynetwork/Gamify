@@ -22,7 +22,7 @@ import { pieceFill, pieceImage } from '../../theme/library';
 import ItemArt from '../../theme/ItemArt';
 import type { ThemeItem } from '../../theme/types';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
-import { ChoiceTiles, Slider } from '../../ui/fields';
+import { ChoiceRow, Slider } from '../../ui/fields';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -245,7 +245,7 @@ export default function CastCatch() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <ChoiceTiles label={t('cc.endBy')} value={byCasts ? 'casts' : 'time'} onChange={(v) => change({ endBy: v })}
+              <ChoiceRow label={t('cc.endBy')} value={byCasts ? 'casts' : 'time'} onChange={(v) => change({ endBy: v })}
                 options={[{ value: 'time', label: t('cc.endTime'), tip: t('cc.endTimeTip') }, { value: 'casts', label: t('cc.endCasts'), tip: t('cc.endCastsTip') }]} />
               {byCasts
                 ? <Slider label={t('cc.casts')} hint={t('cc.castsHint')} min={3} max={30} value={setup.casts ?? 10} show={(v) => t('cc.castsValue', { count: v })} onChange={(v) => change({ casts: v })} />
@@ -289,20 +289,20 @@ export default function CastCatch() {
               </motion.span>
             )}
             {(step === 'bite' || reeling) && !still && [0, 1].map((k) => (
-              <span key={`sp${k}-${step}`} aria-hidden="true" className="absolute w-14 h-5 -ml-7 -mt-1 rounded-[50%] border-[2px] border-white/80 pointer-events-none cc-splash" style={{ left: `${bobberLeft}%`, top: '42%', animationDelay: `${k * 0.3}s` }} />
+              <span key={`sp${k}-${step}`} aria-hidden="true" className="absolute w-14 h-5 -ml-7 -mt-1 rounded-[50%] border-std border-white/80 pointer-events-none cc-splash" style={{ left: `${bobberLeft}%`, top: '42%', animationDelay: `${k * 0.3}s` }} />
             ))}
             {(step === 'casting' || lineOut) && (
               <span className="absolute w-9 h-9 -ml-[18px] -mt-[18px]" aria-hidden="true"
                 style={{ left: `${flying ? tipAt.x : bob.x}%`, top: `${flying ? tipAt.y : bob.y}%`, transition: still ? 'none' : reeling ? 'left 0.8s cubic-bezier(0.5, 0, 0.3, 1), top 0.8s cubic-bezier(0.5, 0, 0.3, 1)' : 'left 0.7s ease-out, top 0.7s cubic-bezier(0.3, -0.8, 0.7, 1)' }}>
-                <span className="block w-full h-full rounded-full border-[2.5px] border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f'), animation: still || step === 'casting' ? undefined : step === 'bite' ? 'cc-bite 0.5s ease-in-out infinite' : 'cc-bob 2s ease-in-out infinite' }} />
+                <span className="block w-full h-full rounded-full border-bold border-border" style={{ ...pieceFill(theme, 'bobber', '#e5635f'), animation: still || step === 'casting' ? undefined : step === 'bite' ? 'cc-bite 0.5s ease-in-out infinite' : 'cc-bob 2s ease-in-out infinite' }} />
               </span>
             )}
             <AnimatePresence>
               {last && (
-                <motion.div key={catches.length} className="absolute inset-0 z-20 grid place-items-center bg-[#241c3d]/30 cursor-pointer" onClick={closeCatch} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <motion.div className="relative w-[min(90%,440px)] bg-surface border-[3px] border-border rounded-panel px-6 pt-10 pb-6 grid gap-1.5 justify-items-center text-center"
+                <motion.div key={catches.length} className="absolute inset-0 z-20 grid place-items-center bg-ink-night/30 cursor-pointer" onClick={closeCatch} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div className="relative w-[min(90%,440px)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-6 grid gap-1.5 justify-items-center text-center"
                   style={{ boxShadow: '0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }} initial={still ? false : { y: 120, scale: 0.6, rotate: -8 }} animate={{ y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0 }} role="dialog" aria-label={last.item ? last.item.name : last.fish?.name}>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); closeCatch(); }} aria-label={t('class.close')} className="absolute top-3 right-3 w-11 h-11 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); closeCatch(); }} aria-label={t('class.close')} className="absolute top-3 right-3 w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
                   {last.item ? (
                     <>
                       <ItemArt item={last.item} size={180} still={still} />
@@ -311,7 +311,7 @@ export default function CastCatch() {
                     </>
                   ) : last.fish && (
                     <>
-                      {firstOfKind && <span className="absolute top-3 left-3 rotate-[-8deg] font-display text-lg bg-accent border-[2px] border-border rounded-pill px-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('cc.new')}</span>}
+                      {firstOfKind && <span className="absolute top-3 left-3 rotate-[-8deg] font-display text-lg bg-accent border-std border-border rounded-pill px-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('cc.new')}</span>}
                       {/* The whole fish, big and never cut off. */}
                       <span className="grid place-items-center w-full py-3 overflow-visible"><FishArt fish={last.fish} size={220} theme={theme} /></span>
                       <p className="font-display text-2xl">{t('cc.youCaught', { name: last.fish.name, cm: last.cm })}</p>
@@ -329,12 +329,12 @@ export default function CastCatch() {
           {/* Top: score chips in the middle, full screen and settings on the right. */}
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
             {/* Catch of the day: the fish worth triple this game. */}
-            {phase === 'play' && <span className="inline-flex items-center gap-1.5 bg-[#fff3b0] border-[2px] border-border rounded-pill pl-2 pr-3 min-h-10 font-bold text-sm" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.daily', { name: daily.name })} title={t('cc.daily', { name: daily.name })}><FishArt fish={daily} size={36} theme={theme} />x3</span>}
+            {phase === 'play' && <span className="inline-flex items-center gap-1.5 bg-[#fff3b0] border-std border-border rounded-pill pl-2 pr-3 min-h-10 font-bold text-sm" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.daily', { name: daily.name })} title={t('cc.daily', { name: daily.name })}><FishArt fish={daily} size={36} theme={theme} />x3</span>}
             {/* The player's icon beside the scores (teacher, 2026-11-13). */}
-            {pieceImage(theme, 'player') ? <img src={pieceImage(theme, 'player')} alt="" aria-hidden="true" className="w-11 h-11 rounded-full border-[2px] border-border bg-surface object-contain" style={{ boxShadow: 'var(--shadow-sticker)' }} /> : <span className="rounded-full" style={{ boxShadow: 'var(--shadow-sticker)' }}><TeamBadge colorIndex={0} size={44} /></span>}
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
-            <span className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
+            {pieceImage(theme, 'player') ? <img src={pieceImage(theme, 'player')} alt="" aria-hidden="true" className="w-11 h-11 rounded-full border-std border-border bg-surface object-contain" style={{ boxShadow: 'var(--shadow-sticker)' }} /> : <span className="rounded-full" style={{ boxShadow: 'var(--shadow-sticker)' }}><TeamBadge colorIndex={0} size={44} /></span>}
+            <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
+            <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
@@ -344,10 +344,10 @@ export default function CastCatch() {
           {phase === 'play' && (
             <div className="absolute inset-x-0 bottom-5 grid gap-2 justify-items-center z-10 pointer-events-none [&>*]:pointer-events-auto">
               {step === 'ready' && !timeUp && <BigButton onClick={() => void castNow()} label={t('cc.cast')} pulse={!still} />}
-              {step === 'casting' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{qualityWord[quality.current]}</p>}
-              {step === 'wait' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border" role="status">{t('cc.waiting')}</p>}
+              {step === 'casting' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-std border-border" role="status">{qualityWord[quality.current]}</p>}
+              {step === 'wait' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-std border-border" role="status">{t('cc.waiting')}</p>}
               {step === 'bite' && <BigButton onClick={reel} label={t('cc.reel')} pulse={!still} />}
-              {timeUp && step === 'ready' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-[2px] border-border">{t('cc.timeUp')}</p>}
+              {timeUp && step === 'ready' && <p className="font-display text-2xl px-4 py-1 rounded-pill bg-surface/90 border-std border-border">{t('cc.timeUp')}</p>}
             </div>
           )}
         </section>
@@ -365,7 +365,7 @@ export default function CastCatch() {
           <p className="font-display text-xl">{t('cc.book', { n: caughtKinds.size, total: FISH.length })}</p>
           <div className="grid grid-cols-6 gap-1.5 justify-items-center" role="img" aria-label={t('cc.book', { n: caughtKinds.size, total: FISH.length })}>
             {FISH.map((f) => (
-              <span key={f.id} title={caughtKinds.has(f.id) ? f.name : '?'} className={`w-11 h-9 rounded-input border-[2px] border-border flex items-center justify-center ${caughtKinds.has(f.id) ? 'bg-surface' : 'bg-surface-2'}`} aria-hidden="true">
+              <span key={f.id} title={caughtKinds.has(f.id) ? f.name : '?'} className={`w-11 h-9 rounded-input border-std border-border flex items-center justify-center ${caughtKinds.has(f.id) ? 'bg-surface' : 'bg-surface-2'}`} aria-hidden="true">
                 <span style={caughtKinds.has(f.id) ? undefined : { filter: 'brightness(0) opacity(0.3)' }}><FishArt fish={f} size={30} theme={theme} /></span>
               </span>
             ))}
@@ -381,7 +381,7 @@ export default function CastCatch() {
 function BigButton({ onClick, label, pulse = false }: { onClick: () => void; label: string; pulse?: boolean }) {
   return (
     <motion.button type="button" onClick={onClick} animate={pulse ? { scale: [1, 1.06, 1] } : undefined} transition={{ duration: 0.8, repeat: Infinity }}
-      className="min-h-14 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      className="min-h-14 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       {label}
     </motion.button>
   );

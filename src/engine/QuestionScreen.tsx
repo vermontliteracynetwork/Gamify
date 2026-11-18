@@ -99,23 +99,23 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={POP_IN}
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-[3px] p-4 gap-3' : 'h-full !rounded-none px-6 py-[clamp(0.75rem,3vh,2.5rem)] sm:px-14 gap-[clamp(0.5rem,2.2vh,1.5rem)] content-center'}`}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-heavy p-4 gap-3' : 'h-full !rounded-none px-6 py-[clamp(0.75rem,3vh,2.5rem)] sm:px-14 gap-[clamp(0.5rem,2.2vh,1.5rem)] content-center'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'none' }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           {progress && progress.total > 1 && (
-            <span className="px-3 min-h-9 inline-flex items-center rounded-pill bg-surface-2 border-[2px] border-border font-bold text-sm">
+            <span className="px-3 min-h-9 inline-flex items-center rounded-pill bg-surface-2 border-std border-border font-bold text-sm">
               {t('q.progress', progress)}
             </span>
           )}
-          {player && <span className={`font-display font-bold ${framed ? 'text-lg' : 'text-[clamp(1.2rem,4vh,2.25rem)]'}`}>{t('q.turn', { name: player })}</span>}
+          {player && <span className={`font-display font-bold ${framed ? 'text-lg' : 'text-fit-turn'}`}>{t('q.turn', { name: player })}</span>}
           <span className="flex-1" />
-          {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+          {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
             {speaking ? t('q.stop') : t('q.listen')}
           </button>}
           {toolList.length > 0 && <button type="button" onClick={() => setMenuOpen((m) => !m)} aria-label={t('q.tools')} aria-expanded={menuOpen}
-            className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
+            className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center">
             <Toolbox weight="bold" size={20} />
           </button>}
           {/* Full screen stays in reach while a question is up (teacher, 2026-10-31). */}
@@ -123,16 +123,16 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             <AccessButton small />
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <button type="button" onClick={() => setConfirmLeave(true)} aria-label={t('q.close')}
-            className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center">
+            className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center">
             <X weight="bold" size={20} />
           </button>
         </div>
 
         {confirmLeave && (
-          <div className="flex flex-wrap items-center gap-2 p-3 rounded-input bg-surface-2 border-[2px] border-border">
+          <div className="flex flex-wrap items-center gap-2 p-3 rounded-input bg-surface-2 border-std border-border">
             <span className="font-bold flex-1">{t('q.leaveAsk')}</span>
-            <button type="button" className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold" onClick={onClose}>{t('q.leaveYes')}</button>
-            <button type="button" className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold" onClick={() => setConfirmLeave(false)}>{t('q.leaveNo')}</button>
+            <button type="button" className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold" onClick={onClose}>{t('q.leaveYes')}</button>
+            <button type="button" className="min-h-11 px-4 rounded-pill border-std border-border bg-accent font-bold" onClick={() => setConfirmLeave(false)}>{t('q.leaveNo')}</button>
           </div>
         )}
 
@@ -144,7 +144,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 return (
                   <button key={id} type="button" aria-pressed={on}
                     onClick={() => (id === 'highlighter' ? setHighlighting((h) => !h) : toggleCard(id))}
-                    className={`min-h-11 px-3 rounded-pill border-[2px] font-bold inline-flex items-center gap-1.5 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                    className={`min-h-11 px-3 rounded-pill border-std font-bold inline-flex items-center gap-1.5 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                     <Icon weight="bold" size={18} />{t(`q.${id}`)}
                   </button>
                 );
@@ -160,8 +160,8 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </FloatingCard>
         ))}
 
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-[2px] border-border-soft" />}
-        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-[clamp(1.4rem,min(6vh,4.5vw),3.75rem)]'}`}>
+        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
+        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-fit-question'}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
@@ -194,15 +194,15 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 aria-disabled={locked || picked !== null || triedWrong}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
-                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] text-2xl sm:text-3xl'} rounded-input border-[2.5px] border-border text-left font-bold flex items-center gap-3
+                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] text-2xl sm:text-3xl'} rounded-input border-bold border-border text-left font-bold flex items-center gap-3
                             ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >
-                <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display text-xl">
+                <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-std border-border flex items-center justify-center font-display text-xl">
                   {right ? <Check weight="bold" size={22} aria-label={t('q.rightMark')} /> : wrong || triedWrong ? <X weight="bold" size={22} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
-                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-[2px] border-border bg-surface" />}
+                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
                 <span className="sr-only"> </span>
                 <span className="min-w-0 break-words">{c}</span>
               </motion.button>

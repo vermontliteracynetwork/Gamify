@@ -111,7 +111,7 @@ function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (i
       {shown.length === 0 && <Panel><p className="font-bold">{t('filter.none')}</p></Panel>}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {shown.map((s) => (
-          <div key={s.id} className="bg-surface border-[2.5px] border-border rounded-panel overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <div key={s.id} className="bg-surface border-bold border-border rounded-panel overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <SetCover set={s} className="aspect-[16/7] border-b-[2.5px] border-border" />
             <div className="p-4 flex flex-col gap-2 flex-1">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">{s.subject} · {t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</p>

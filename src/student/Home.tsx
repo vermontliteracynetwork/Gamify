@@ -46,7 +46,7 @@ export default function Home() {
 
       {GAMES.length === 0 && (
         <div
-          className="flex flex-col items-center gap-3 p-8 rounded-panel bg-surface border-[2.5px] border-border text-center"
+          className="flex flex-col items-center gap-3 p-8 rounded-panel bg-surface border-bold border-border text-center"
           style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
         >
           <Sparkle weight="fill" size={40} className="text-accent" />
@@ -64,13 +64,13 @@ export default function Home() {
           >
             <Link
               to={`/games/${game.id}`}
-              className="group relative flex flex-col rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden h-full
+              className="group relative flex flex-col rounded-panel bg-surface border-bold border-border no-underline overflow-hidden h-full
                          hover:bg-surface-hover active:scale-[0.98] motion-safe:transition-transform"
               style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
             >
               <span className="relative block">
                 <GameCover gameId={game.id} className={`aspect-[16/9] border-b-[2.5px] border-border motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform ${canPlayGame(tier, game.id) ? '' : 'grayscale opacity-60'}`} />
-                {!canPlayGame(tier, game.id) && <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-surface border-[3px] border-border flex items-center justify-center"><LockSimple weight="fill" size={28} aria-label={t('arcade.locked', { name: game.name })} /></span></span>}
+                {!canPlayGame(tier, game.id) && <span className="absolute inset-0 flex items-center justify-center"><span className="w-14 h-14 rounded-full bg-surface border-heavy border-border flex items-center justify-center"><LockSimple weight="fill" size={28} aria-label={t('arcade.locked', { name: game.name })} /></span></span>}
               </span>
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <h2 className="font-display text-xl font-bold text-text"><Title text={game.name} /></h2>

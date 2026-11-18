@@ -23,7 +23,7 @@ import { useSession } from './session';
 const DrawStudio = lazyPage(() => import('../theme/builder/DrawStudio'));
 
 const SWATCHES = ['#fdfd94', '#ddfcc6', '#b4c4fb', '#ed9d75', '#f6a5c0', '#8ec5ff', '#c9a3f5', '#ffffff'];
-const big = 'min-h-14 px-6 rounded-pill border-[2.5px] border-border font-display text-xl inline-flex items-center gap-2 no-underline text-text';
+const big = 'min-h-14 px-6 rounded-pill border-bold border-border font-display text-xl inline-flex items-center gap-2 no-underline text-text';
 
 // A student's own theme, step by step with big pictures: pick a game, add a
 // photo or picture for each piece, pick a color, name it, send it to the
@@ -74,7 +74,7 @@ export default function DesignPage() {
           <p className="font-display text-2xl">{t('design.pickGame')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {games.map((g) => (
-              <button key={g.id} type="button" onClick={() => pick(g.id)} className="rounded-panel bg-surface border-[2.5px] border-border overflow-hidden text-left active:scale-[0.98]" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <button key={g.id} type="button" onClick={() => pick(g.id)} className="rounded-panel bg-surface border-bold border-border overflow-hidden text-left active:scale-[0.98]" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <GameCover gameId={g.id} className="aspect-[16/10] border-b-[2.5px] border-border" />
                 <span className="block p-3 font-display text-xl">{g.name}</span>
               </button>
@@ -86,7 +86,7 @@ export default function DesignPage() {
       {draft && game && step >= 1 && step <= 3 && (
         <div className="grid md:grid-cols-2 gap-4 items-start">
           <div className="grid gap-2"><ThemePreview theme={draft} gameName={draft.name || game.name} /></div>
-          <section className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <section className="bg-surface border-bold border-border rounded-panel p-4 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             {step === 1 && pieces[piece] && (
               <>
                 <p className="font-bold text-sm">{t('design.pieceOf', { n: piece + 1, total: pieces.length })}</p>
@@ -115,7 +115,7 @@ export default function DesignPage() {
                 <div className="grid grid-cols-4 gap-3" role="radiogroup" aria-label={t('design.pickColor')}>
                   {SWATCHES.map((c) => (
                     <button key={c} type="button" role="radio" aria-checked={draft.colors.accent === c} aria-label={c} onClick={() => setDraft({ ...draft, colors: { ...draft.colors, accent: c, accentText: '#000000' } })}
-                      className={`aspect-square rounded-full border-[3px] ${draft.colors.accent === c ? 'border-border ring-4 ring-offset-2 ring-border' : 'border-border'}`} style={{ background: c }} />
+                      className={`aspect-square rounded-full border-heavy ${draft.colors.accent === c ? 'border-border ring-4 ring-offset-2 ring-border' : 'border-border'}`} style={{ background: c }} />
                   ))}
                 </div>
                 <button type="button" onClick={() => setStep(3)} className={`${big} bg-surface-2 !text-base justify-self-start`}>{t('design.next')}<ArrowRight weight="bold" size={20} /></button>
@@ -124,9 +124,9 @@ export default function DesignPage() {
             {step === 3 && (
               <>
                 <label className="grid gap-2"><span className="font-display text-2xl">{t('design.name')}</span>
-                  <input value={draft.name} maxLength={30} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="min-h-14 px-4 rounded-input border-[2.5px] border-border font-bold text-xl" />
+                  <input value={draft.name} maxLength={30} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="min-h-14 px-4 rounded-input border-bold border-border font-bold text-xl" />
                 </label>
-                <button type="button" disabled={!draft.name.trim()} onClick={() => void send()} className={`${big} bg-accent justify-self-start disabled:opacity-50`}><PaperPlaneTilt weight="fill" size={24} />{t('design.send')}</button>
+                <button type="button" disabled={!draft.name.trim()} onClick={() => void send()} className={`${big} bg-accent justify-self-start disabled:opacity-40`}><PaperPlaneTilt weight="fill" size={24} />{t('design.send')}</button>
               </>
             )}
           </section>

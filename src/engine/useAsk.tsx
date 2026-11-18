@@ -135,16 +135,16 @@ function BreathBreak({ onDone }: { onDone: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('q.breathTitle')}>
       <DialogFocus />
-      <div className="w-full max-w-md bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      <div className="w-full max-w-md bg-surface border-bold border-border rounded-panel p-6 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <h2 className="font-display text-3xl font-bold"><Title text={t('q.breathTitle')} /></h2>
         <motion.div
-          className="w-32 h-32 rounded-full bg-quiz-blue border-[2.5px] border-border"
+          className="w-32 h-32 rounded-full bg-quiz-blue border-bold border-border"
           animate={still ? undefined : { scale: [0.7, 1.1, 0.7] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           aria-hidden="true"
         />
         <p className="font-bold">{t('q.breathBody')}</p>
-        <button type="button" onClick={onDone} className="min-h-12 px-6 rounded-pill border-[2px] border-border bg-accent font-bold">{t('q.breathDone')}</button>
+        <button type="button" onClick={onDone} className="min-h-12 px-6 rounded-pill border-std border-border bg-accent font-bold">{t('q.breathDone')}</button>
       </div>
     </div>
   );

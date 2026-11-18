@@ -42,7 +42,7 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   if (!open) {
     return (
       <main className="max-w-md mx-auto px-4 pt-10 pb-24">
-        <div className="bg-surface border-[2.5px] border-border rounded-panel p-5"><p className="font-display text-2xl text-center mb-2">{t('owner.title')}</p><PinGate pinKey={OWNER_PIN_KEY} createLabel={t('owner.pinCreate')} onUnlock={() => setOpen(true)} /></div>
+        <div className="bg-surface border-bold border-border rounded-panel p-5"><p className="font-display text-2xl text-center mb-2">{t('owner.title')}</p><PinGate pinKey={OWNER_PIN_KEY} createLabel={t('owner.pinCreate')} onUnlock={() => setOpen(true)} /></div>
       </main>
     );
   }
@@ -215,7 +215,7 @@ function FeedbackCard() {
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('owner.kind')}>
         {(['all', 'help', 'quote', 'beta', 'bug', 'problem', 'idea'] as const).map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)} className={`min-h-10 px-3 rounded-pill border-[2px] font-bold text-sm ${kind === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)} className={`min-h-10 px-3 rounded-pill border-std font-bold text-sm ${kind === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
             {t(`owner.kind.${k}`)} ({k === 'all' ? reports.length : reports.filter((r) => r.kind === k).length})
           </button>
         ))}
@@ -225,13 +225,13 @@ function FeedbackCard() {
         {shown.map((r) => {
           const m = meta[r.id] ?? { status: 'new', social: false };
           return (
-            <li key={r.id} className="rounded-input border-[2px] border-border-soft p-2.5 grid gap-1.5">
+            <li key={r.id} className="rounded-input border-std border-border-soft p-2.5 grid gap-1.5">
               <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
                 <span className="px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t(`owner.kind.${r.kind}`)}</span>
                 <span>{t(`owner.role.${r.role}`)}</span>
                 <span className="text-muted">{r.where} · {new Date(r.at).toLocaleDateString()}</span>
-                <button type="button" aria-pressed={m.social} aria-label={t('owner.social')} onClick={() => void set(r.id, { social: !m.social })} className="ml-auto w-9 h-9 rounded-full border-[2px] border-border flex items-center justify-center" style={{ background: m.social ? '#fdfd94' : undefined }}><Star weight={m.social ? 'fill' : 'bold'} size={16} /></button>
-                <select aria-label={t('owner.status')} value={m.status} onChange={(e) => void set(r.id, { status: e.target.value as Status })} className="min-h-9 px-2 rounded-input border-[2px] border-border font-bold">
+                <button type="button" aria-pressed={m.social} aria-label={t('owner.social')} onClick={() => void set(r.id, { social: !m.social })} className="ml-auto w-9 h-9 rounded-full border-std border-border flex items-center justify-center" style={{ background: m.social ? '#fdfd94' : undefined }}><Star weight={m.social ? 'fill' : 'bold'} size={16} /></button>
+                <select aria-label={t('owner.status')} value={m.status} onChange={(e) => void set(r.id, { status: e.target.value as Status })} className="min-h-9 px-2 rounded-input border-std border-border font-bold">
                   {(['new', 'looking', 'fixed', 'shipped'] as const).map((s) => <option key={s} value={s}>{t(`owner.status.${s}`)}</option>)}
                 </select>
               </div>
@@ -261,7 +261,7 @@ function BetaCard() {
     <div className="grid gap-2">
       <div className="grid grid-cols-3 gap-2">
         {[[t('owner.surveys'), surveys.length], [t('owner.going'), `${going} / 5`], [t('owner.recommend'), rec === null ? '-' : rec]].map(([l, v]) => (
-          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
+          <div key={String(l)} className="rounded-input border-std border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
         ))}
       </div>
       <p className="font-bold text-sm">{t('owner.checkins')}: {kids ? `${Math.round((feel[0] / kids) * 100)}% ${t('checkin.feel.0')}, ${Math.round((feel[1] / kids) * 100)}% ${t('checkin.feel.1')}, ${Math.round((feel[2] / kids) * 100)}% ${t('checkin.feel.2')} (${t('checkin.count', { count: kids })})` : '-'}</p>
@@ -303,7 +303,7 @@ function UsageCard() {
     <div className="grid gap-2">
       <div className="grid grid-cols-3 gap-2">
         {[[t('owner.answers'), log.length], [t('owner.thisWeek'), log.filter((e) => e.at >= weekAgo).length], [t('owner.classes'), classes.length]].map(([l, v]) => (
-          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
+          <div key={String(l)} className="rounded-input border-std border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-2xl">{v}</p></div>
         ))}
       </div>
       <ul className="grid gap-1 list-none p-0 m-0">
@@ -333,7 +333,7 @@ function IncomeCard() {
       <Slider label={t('owner.growth')} min={0} max={30} value={s.growth} show={(v) => `${v}%`} onChange={(v) => setS({ ...s, growth: v })} />
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
         {[[t('owner.mrr'), monthlyRevenue(subs)], ...[1, 3, 6, 12].map((m) => [t('owner.nextMonths', { count: m }), project(subs, s.growth / 100, m)])].map(([l, v]) => (
-          <div key={String(l)} className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-xl tabular-nums">{money(Number(v))}</p></div>
+          <div key={String(l)} className="rounded-input border-std border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{l}</p><p className="font-display text-xl tabular-nums">{money(Number(v))}</p></div>
         ))}
       </div>
       <p className="text-xs font-bold text-muted">{t('owner.incomeNote')}</p>
@@ -355,14 +355,14 @@ function GalleryCard() {
   return (
     <ul className="grid gap-3 list-none p-0 m-0">
       {pending.map((th) => (
-        <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-[2px] border-border-soft p-2">
+        <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-std border-border-soft p-2">
           <ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} />
           <div className="grid gap-2 content-start">
             <p className="font-display text-xl">{th.name}</p>
             <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
             <div className="flex flex-wrap gap-2 items-center">
               <Button variant="primary" onClick={() => void decide(th, 'approved')}>{t('owner.approve')}</Button>
-              <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-[2px] border-border font-bold text-sm">
+              <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-std border-border font-bold text-sm">
                 {GALLERY_REASONS.map((r) => <option key={r} value={r}>{t(`gallery.reason.${r}` as StringKey)}</option>)}
               </select>
               <Button variant="danger" onClick={() => void decide(th, 'declined')}>{t('owner.decline')}</Button>
@@ -391,7 +391,7 @@ function WaitingCard() {
         {[...open, ...WAITING.filter((w) => done.includes(w.id))].map((w) => {
           const ticked = done.includes(w.id);
           return (
-            <li key={w.id} className={`rounded-input border-[2px] p-3 grid grid-cols-[auto_1fr] gap-3 ${ticked ? 'border-border-soft opacity-60' : 'border-border bg-surface'}`}>
+            <li key={w.id} className={`rounded-input border-std p-3 grid grid-cols-[auto_1fr] gap-3 ${ticked ? 'border-border-soft opacity-60' : 'border-border bg-surface'}`}>
               <input type="checkbox" checked={ticked} onChange={() => toggle(w.id)} aria-label={t('owner.waitingDone', { title: w.title })} className="w-6 h-6 mt-1" />
               <div className="grid gap-1">
                 <p className={`font-display text-lg leading-tight ${ticked ? 'line-through' : ''}`}>{w.title}</p>
@@ -438,7 +438,7 @@ function ReplyBox({ report, onSent }: { report: FeedbackReport; onSent: () => vo
     <details>
       <summary className="font-bold text-sm cursor-pointer">{t('owner.reply')}</summary>
       <div className="grid gap-1.5 pt-1.5">
-        <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={3} aria-label={t('owner.replyLabel')} className="px-2 py-1.5 rounded-input border-[2px] border-border font-semibold" />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={3} aria-label={t('owner.replyLabel')} className="px-2 py-1.5 rounded-input border-std border-border font-semibold" />
         <Button className="justify-self-start" disabled={!text.trim()} onClick={() => void send()}>{t('owner.replySend')}</Button>
         {problem && <p className="text-sm font-bold" role="status">{problem}</p>}
       </div>

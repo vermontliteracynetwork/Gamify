@@ -58,10 +58,10 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
     // view over a preview menu card").
     <div className="fixed inset-0 z-50 flex p-3 sm:p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('host.title', { name: set.name })}>
       <DialogFocus onClose={onClose} />
-      <div className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 flex flex-col gap-4 w-full h-full overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      <div className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 flex flex-col gap-4 w-full h-full overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-2xl"><Title text={t('host.title', { name: set.name || t('sets.untitled') })} /></h2>
-          <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+          <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
         </div>
         {missing.length > 0 ? <p className="font-bold">{t('host.needsDetails')}</p> : (
           <>
@@ -71,7 +71,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 const open = canPlayGame(tier, g.id);
                 return (
                   <button key={g.id} type="button" role="radio" aria-checked={gameId === g.id} disabled={!open} onClick={() => { setGameId(g.id); setWhere(g.modes.includes('share') ? 'screen' : 'devices'); setCode(null); setStatus(''); }}
-                    className={`rounded-input border-[2.5px] overflow-hidden text-left bg-surface ${gameId === g.id ? 'border-border ring-4 ring-accent' : 'border-border-soft'} disabled:opacity-60`}>
+                    className={`rounded-input border-bold overflow-hidden text-left bg-surface ${gameId === g.id ? 'border-border ring-4 ring-accent' : 'border-border-soft'} disabled:opacity-40`}>
                     <span className="relative block"><GameCover gameId={g.id} className="aspect-[100/62]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
                     <span className="p-2.5 flex items-center justify-between gap-2"><span className="font-display text-lg leading-tight">{g.name}</span><span className="flex gap-1 shrink-0">{g.modes.map((m) => <ModeDot key={m} mode={m} />)}</span></span>
                   </button>
@@ -84,7 +84,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 <div role="radiogroup" aria-label={t('host.where')} className="grid sm:grid-cols-3 gap-2">
                   {WHERE.map(({ id, icon: Icon }) => (
                     <button key={id} type="button" role="radio" aria-checked={where === id} onClick={() => { setWhere(id); setCode(null); setStatus(''); }}
-                      className={`min-h-20 p-3 rounded-input border-[2.5px] text-left grid grid-cols-[auto_1fr] gap-x-2 items-center ${where === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                      className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-2 items-center ${where === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                       <Icon weight="fill" size={30} aria-hidden="true" className="row-span-2" />
                       <span className="font-display text-lg leading-tight">{t(`host.where.${id}`)}</span>
                       <span className="text-sm font-semibold text-muted leading-snug">{t(`host.where.${id}Hint`)}</span>
@@ -93,7 +93,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 </div>
 
                 {where === 'screen' && (
-                  <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-3">
+                  <div className="rounded-input border-std border-border-soft p-3 grid gap-3">
                     {game.modes.includes('share') ? (
                       <Choices label={t('host.teams')} value={teams} onChange={setTeams}
                         options={(['teacher', 'random', 'class'] as const).map((k) => ({ id: k, title: t(`host.teams.${k}`), hint: t(`host.teams.${k}Hint`) }))} />
@@ -103,7 +103,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 )}
 
                 {where === 'devices' && (
-                  <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-3">
+                  <div className="rounded-input border-std border-border-soft p-3 grid gap-3">
                     <Choices label={t('live.howPlay')} value={together} onChange={setTogether}
                       options={(['compete', 'together'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`) }))} />
                     <div className="flex flex-wrap gap-2">
@@ -116,17 +116,17 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 )}
 
                 {where === 'homework' && (
-                  <div className="rounded-input border-[2px] border-border-soft p-3 grid gap-3">
+                  <div className="rounded-input border-std border-border-soft p-3 grid gap-3">
                     <label className="flex flex-wrap items-center gap-2 font-bold">{t('host.due')}
                       <input type="date" value={due} min={today} max={lastDue} onChange={(e) => { setDue(e.target.value); setCode(null); }}
-                        className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold bg-surface" />
+                        className="min-h-11 px-3 rounded-input border-std border-border font-bold bg-surface" />
                     </label>
                     {Number.isFinite(TIERS[tier].homeworkDaysAhead) && <p className="text-sm font-semibold text-muted">{t('host.dueLimit', { days: TIERS[tier].homeworkDaysAhead })}</p>}
                     {code ? <CodeBox code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} />
                       : <Button variant="primary" className="justify-self-start" disabled={!dueOk} onClick={async () => setCode(await makeGameCode(game.id, set.id, 'play', due))}><QrCode weight="bold" size={18} />{t('host.makeHomework')}</Button>}
                     {classes.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2">
-                        <select aria-label={t('reports.class')} value={classId} onChange={(e) => setClassId(e.target.value)} className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold">
+                        <select aria-label={t('reports.class')} value={classId} onChange={(e) => setClassId(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border font-bold">
                           <option value="">{t('host.pickClass')}</option>
                           {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
@@ -153,7 +153,7 @@ export function Choices<T extends string>({ label, value, options, onChange }: {
       <div role="radiogroup" aria-label={label} className={`grid gap-2 ${options.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         {options.map((o) => (
           <button key={o.id} type="button" role="radio" aria-checked={value === o.id} onClick={() => onChange(o.id)}
-            className={`min-h-14 px-3 py-2 rounded-input border-[2px] text-left grid ${value === o.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+            className={`min-h-14 px-3 py-2 rounded-input border-std text-left grid ${value === o.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
             <span className="font-bold">{o.title}</span><span className="text-sm font-semibold text-muted">{o.hint}</span>
           </button>
         ))}

@@ -63,7 +63,7 @@ export default function StudentPage() {
         <h2 className="font-display text-xl font-bold">{t('cv.assignedHere', { name: student.name })}</h2>
         {own.length === 0 ? <p className="font-semibold">{t('class.noAssigned')}</p> : (
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-            {own.map((a) => <li key={a.id} className="rounded-pill border-[2px] border-border-soft px-3 py-1 font-bold text-sm">{setName(a.setId)}<span className="text-muted font-semibold"> · {a.studentId ? student.name : t('class.wholeClass')}</span></li>)}
+            {own.map((a) => <li key={a.id} className="rounded-pill border-std border-border-soft px-3 py-1 font-bold text-sm">{setName(a.setId)}<span className="text-muted font-semibold"> · {a.studentId ? student.name : t('class.wholeClass')}</span></li>)}
           </ul>
         )}
       </Panel>

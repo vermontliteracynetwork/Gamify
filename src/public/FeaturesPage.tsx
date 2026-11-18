@@ -32,7 +32,7 @@ const PILLARS = [
 const MORE: { key: string; items: number }[] = [
   { key: 'sets', items: 5 }, { key: 'classes', items: 7 }, { key: 'supports', items: 6 }, { key: 'safety', items: 5 },
 ];
-const card = 'bg-surface border-[2.5px] border-border rounded-panel';
+const card = 'bg-surface border-bold border-border rounded-panel';
 
 export default function FeaturesPage() {
   const reduce = useReducedMotion();
@@ -47,7 +47,7 @@ export default function FeaturesPage() {
             {PILLARS.map(({ id, icon: I }, i) => (
               <motion.a key={id} href={`#${id}`} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
                 className={`${card} hover-lift p-5 grid gap-2 no-underline text-text ${id === 'themes' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-14 h-14 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={30} aria-hidden="true" /></span>
+                <span className="w-14 h-14 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={30} aria-hidden="true" /></span>
                 <span className="font-display text-2xl">{t(`features.p.${id}` as StringKey)}</span>
                 <span className="font-semibold">{t(`features.p.${id}.short` as StringKey)}</span>
               </motion.a>
@@ -72,8 +72,8 @@ export default function FeaturesPage() {
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
-            <p className="font-bold bg-surface border-[2px] border-border rounded-input p-3 flex gap-2"><Sparkle weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('features.theme.challenge')}</p>
-            <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
+            <p className="font-bold bg-surface border-std border-border rounded-input p-3 flex gap-2"><Sparkle weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('features.theme.challenge')}</p>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
           </div>
         </motion.section>
 
@@ -120,8 +120,8 @@ export default function FeaturesPage() {
           <h2 className="title-bubble text-4xl"><Title text={t('features.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('features.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
-            <Link to="/pricing" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.seePlans')}<ArrowRight weight="bold" size={20} /></Link>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
+            <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}<ArrowRight weight="bold" size={20} /></Link>
           </div>
         </section>
       </main>
@@ -153,8 +153,8 @@ function QuestionDemo() {
   const prompt = t('features.demo.q');
   const choices = ['1/4', '4/1', '1/2', '3/4'];
   const right = 0;
-  const tiles = calm ? ['bg-surface-2', 'bg-surface-2', 'bg-surface-2', 'bg-surface-2'] : ['bg-[#fdfd94]', 'bg-[#d9f5d0]', 'bg-[#d6e4ff]', 'bg-[#ffd9cf]'];
-  const toggle = 'min-h-11 px-3 rounded-pill border-[2px] border-border font-bold text-sm inline-flex items-center gap-1.5';
+  const tiles = calm ? ['bg-surface-2', 'bg-surface-2', 'bg-surface-2', 'bg-surface-2'] : ['bg-accent', 'bg-[#d9f5d0]', 'bg-[#d6e4ff]', 'bg-[#ffd9cf]'];
+  const toggle = 'min-h-11 px-3 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-1.5';
   return (
     <div className={`${card} p-5 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('features.demo.supports')}>
@@ -163,7 +163,7 @@ function QuestionDemo() {
         <button type="button" aria-pressed={big} className={`${toggle} ${big ? 'bg-accent' : 'bg-surface-2'}`} onClick={() => setBig(!big)}><TextAa weight="bold" size={18} />{t('features.demo.big')}</button>
         <button type="button" aria-pressed={calm} className={`${toggle} ${calm ? 'bg-accent' : 'bg-surface-2'}`} onClick={() => setCalm(!calm)}><Leaf weight="bold" size={18} />{t('features.demo.calm')}</button>
       </div>
-      <span className="justify-self-start text-xs font-bold px-2 py-1 rounded-pill border-[2px] border-border bg-surface-2">3.NF.1</span>
+      <span className="justify-self-start text-xs font-bold px-2 py-1 rounded-pill border-std border-border bg-surface-2">3.NF.1</span>
       <p className={`font-body font-bold leading-snug ${big ? 'text-3xl' : 'text-2xl'}`}>{prompt}</p>
       <div className="grid grid-cols-2 gap-3">
         {choices.map((c, i) => {
@@ -171,9 +171,9 @@ function QuestionDemo() {
           return (
             <motion.button key={c} type="button" onClick={() => setPicked(i)}
               animate={reduce || calm ? undefined : no ? { x: [0, -6, 6, -4, 4, 0] } : ok ? { scale: [1, 1.06, 1] } : undefined}
-              className={`min-h-16 px-3 rounded-input border-[2.5px] border-border font-bold flex items-center gap-2 ${tiles[i]} ${big ? 'text-2xl' : 'text-lg'} ${ok ? 'ring-4 ring-success' : ''} ${no ? 'ring-4 ring-danger' : ''}`}
+              className={`min-h-16 px-3 rounded-input border-bold border-border font-bold flex items-center gap-2 ${tiles[i]} ${big ? 'text-2xl' : 'text-lg'} ${ok ? 'ring-4 ring-success' : ''} ${no ? 'ring-4 ring-danger' : ''}`}
               style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <span className="w-9 h-9 shrink-0 rounded-full bg-surface border-[2px] border-border flex items-center justify-center font-display">{ok ? <Check weight="bold" size={18} /> : no ? <X weight="bold" size={18} /> : 'ABCD'[i]}</span><span className="sr-only"> </span>{c}
+              <span className="w-9 h-9 shrink-0 rounded-full bg-surface border-std border-border flex items-center justify-center font-display">{ok ? <Check weight="bold" size={18} /> : no ? <X weight="bold" size={18} /> : 'ABCD'[i]}</span><span className="sr-only"> </span>{c}
             </motion.button>
           );
         })}
@@ -195,7 +195,7 @@ function ThemeDemo() {
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('features.demo.pickTheme')}>
         {samples.map((s) => (
           <button key={s.id} type="button" role="radio" aria-checked={pick === s.id} onClick={() => setPick(s.id)}
-            className={`min-h-12 px-3 rounded-input border-[2px] border-border text-left ${pick === s.id ? 'bg-text text-white' : 'bg-surface'}`}>
+            className={`min-h-12 px-3 rounded-input border-std border-border text-left ${pick === s.id ? 'bg-text text-white' : 'bg-surface'}`}>
             <span className="block font-bold text-sm leading-tight">{s.name}</span>
             <span className="block text-xs font-semibold opacity-80">{t(`features.band.${s.band}` as StringKey)}</span>
           </button>
@@ -215,18 +215,18 @@ function ModesDemo() {
       <div role="tablist" aria-label={t('features.play.modes')} className="flex flex-wrap gap-2">
         {ALL_MODES.map((m) => (
           <button key={m} type="button" role="tab" id={`mode-${m}`} aria-controls="mode-panel" aria-selected={mode === m} onClick={() => setMode(m)}
-            className={`min-h-12 px-4 rounded-pill border-[2px] font-display text-lg ${mode === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
+            className={`min-h-12 px-4 rounded-pill border-std font-display text-lg ${mode === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
         ))}
       </div>
       <div id="mode-panel" role="tabpanel" aria-labelledby={`mode-${mode}`} className="grid md:grid-cols-[1fr_1.4fr] gap-5 items-start">
         <div className="grid gap-3">
           <ModeBadge mode={mode} withHint />
           <p className="text-lg font-semibold">{t(`features.mode.${mode}` as StringKey)}</p>
-          <p className="font-bold bg-surface-2 border-[2px] border-border-soft rounded-input p-3">{t(`features.mode.${mode}.best` as StringKey)}</p>
+          <p className="font-bold bg-surface-2 border-std border-border-soft rounded-input p-3">{t(`features.mode.${mode}.best` as StringKey)}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {games.map((g) => (
-            <Link key={g.id} to="/login?mode=signup" className="hover-lift rounded-input border-[2px] border-border overflow-hidden bg-surface no-underline text-text">
+            <Link key={g.id} to="/login?mode=signup" className="hover-lift rounded-input border-std border-border overflow-hidden bg-surface no-underline text-text">
               <CyclingCover gameId={g.id} className="aspect-[4/3]" />
               <span className="block px-2 py-1 font-bold text-sm">{g.name}</span>
             </Link>

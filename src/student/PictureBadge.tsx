@@ -8,6 +8,6 @@ export default function PictureBadge({ id, theme, size }: { id: string; theme?: 
   const P = picture(id);
   const I = P.icon;
   return art
-    ? <img src={art} alt="" className="rounded-full border-[2px] border-border object-cover shrink-0" style={{ width: size, height: size }} />
-    : <span className="rounded-full border-[2px] border-border flex items-center justify-center shrink-0" style={{ width: size, height: size, background: theme?.pieces[`pic-${id}`]?.color ?? P.color }}><I weight="fill" size={size * 0.55} /></span>;
+    ? <img src={art} alt="" className="rounded-full border-std border-border object-cover shrink-0" style={{ width: size, height: size }} />
+    : <span className="rounded-full border-std border-border flex items-center justify-center shrink-0" style={{ width: size, height: size, background: theme?.pieces[`pic-${id}`]?.color ?? P.color }}><I weight="fill" size={size * 0.55} /></span>;
 }

@@ -20,7 +20,7 @@ export default function CaptionedImage({ src, alt, onAlt, readOnly, className = 
         onDoubleClick={open}
         onPointerUp={(e) => { if (e.pointerType !== 'touch') return; const now = Date.now(); if (now - lastTap.current < 350) open(); lastTap.current = now; }}
         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); open(); } }}
-        className={`rounded-input border-[2px] border-border-soft ${readOnly ? '' : 'cursor-pointer'} ${className}`}
+        className={`rounded-input border-std border-border-soft ${readOnly ? '' : 'cursor-pointer'} ${className}`}
       />
       {editing ? (
         <input
@@ -32,7 +32,7 @@ export default function CaptionedImage({ src, alt, onAlt, readOnly, className = 
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') setEditing(false); }}
           placeholder={t('editor.pictureAlt')}
           aria-label={t('editor.pictureAlt')}
-          className="min-h-11 w-full min-w-48 px-3 rounded-input border-[2px] border-border font-bold text-sm"
+          className="min-h-11 w-full min-w-48 px-3 rounded-input border-std border-border font-bold text-sm"
         />
       ) : alt ? (
         <figcaption className="text-sm font-semibold text-muted max-w-xs">{alt}</figcaption>

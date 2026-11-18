@@ -56,7 +56,7 @@ export default function CheckInPage() {
         {QUESTIONS.map((qq) => {
           const tl = tallies[qq.key]; const max = Math.max(1, ...tl);
           return (
-            <section key={qq.key} className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid gap-2">
+            <section key={qq.key} className="bg-surface border-bold border-border rounded-panel p-4 grid gap-2">
               <h2 className="font-bold">{t(`checkin.${qq.key}` as StringKey)}</h2>
               {qq.icons.map((I, i) => (
                 <div key={i} className="grid grid-cols-[2.5rem_8rem_1fr_2.5rem] items-center gap-2 font-bold">
@@ -76,7 +76,7 @@ export default function CheckInPage() {
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6 grid gap-5 min-h-[calc(100dvh-80px)] content-center">
       <div className="flex items-center gap-2 justify-between">
-        <span className="font-bold text-sm bg-surface rounded-pill border-[2px] border-border px-3 py-1">{t('checkin.count', { count })}</span>
+        <span className="font-bold text-sm bg-surface rounded-pill border-std border-border px-3 py-1">{t('checkin.count', { count })}</span>
         <Button onClick={() => void finish()}>{t('checkin.finish')}</Button>
       </div>
       <AnimatePresence mode="wait">
@@ -89,12 +89,12 @@ export default function CheckInPage() {
           <motion.section key={q} initial={still ? false : { x: 40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -40, opacity: 0 }} className="grid gap-5">
             <div className="flex items-center gap-3 justify-center flex-wrap">
               <h1 className="font-display text-4xl sm:text-5xl text-center"><Title text={prompt} /></h1>
-              <button type="button" onClick={() => speak(prompt, settings)} aria-label={t('q.listen')} className="w-14 h-14 rounded-full border-[2.5px] border-border bg-surface flex items-center justify-center"><SpeakerHigh weight="bold" size={28} /></button>
+              <button type="button" onClick={() => speak(prompt, settings)} aria-label={t('q.listen')} className="w-14 h-14 rounded-full border-bold border-border bg-surface flex items-center justify-center"><SpeakerHigh weight="bold" size={28} /></button>
             </div>
             <div className="grid grid-cols-3 gap-3 sm:gap-5">
               {question.icons.map((I, i) => (
                 <motion.button key={i} type="button" onClick={() => pick(i)} whileTap={still ? undefined : { scale: 0.92 }}
-                  className="aspect-square rounded-panel border-[3px] border-border flex flex-col items-center justify-center gap-2 p-3" style={{ background: question.colors[i], boxShadow: 'var(--shadow-sticker-lg)' }}>
+                  className="aspect-square rounded-panel border-heavy border-border flex flex-col items-center justify-center gap-2 p-3" style={{ background: question.colors[i], boxShadow: 'var(--shadow-sticker-lg)' }}>
                   <I weight="fill" size="45%" aria-hidden="true" />
                   <span className="font-display text-xl sm:text-3xl">{t(`checkin.${question.key}.${i}` as StringKey)}</span>
                 </motion.button>

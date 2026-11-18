@@ -46,13 +46,13 @@ export default function DeviceCheckPage() {
         <p className="text-lg font-bold -mt-2">{t('check.sub')}</p>
         {!checks ? <p className="font-bold" role="status">{t('check.running')}</p> : (
           <>
-            <section className={`border-[2.5px] border-border rounded-panel p-5 flex items-center gap-3 ${worst === 'ok' ? 'bg-[#d9f5d0]' : worst === 'warn' ? 'bg-accent' : 'bg-[#ffd9cf]'}`} style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
+            <section className={`border-bold border-border rounded-panel p-5 flex items-center gap-3 ${worst === 'ok' ? 'bg-[#d9f5d0]' : worst === 'warn' ? 'bg-accent' : 'bg-[#ffd9cf]'}`} style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
               {icon(worst, 44)}
               <p className="font-display text-2xl">{t(`check.overall.${worst}` as StringKey)}</p>
             </section>
             <ul className="grid gap-2 list-none p-0 m-0">
               {checks.map((c) => (
-                <li key={c.id} className="bg-surface border-[2px] border-border rounded-input p-4 flex items-start gap-3">
+                <li key={c.id} className="bg-surface border-std border-border rounded-input p-4 flex items-start gap-3">
                   {icon(c.result)}
                   <span className="grid gap-0.5">
                     <span className="font-bold text-lg">{t(`check.${c.id}` as StringKey)}{c.detail ? `: ${c.detail}` : ''}</span>

@@ -55,7 +55,7 @@ export default function ImportPage() {
                     id="import-name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold"
+                    className="min-h-11 px-3 rounded-input border-std border-border bg-surface font-bold"
                   />
                 </label>
                 <ol className="list-decimal pl-6 text-sm font-bold grid gap-1 max-h-72 overflow-y-auto">

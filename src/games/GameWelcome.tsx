@@ -52,7 +52,7 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           Gamify cover, never a theme's, so menus need no custom design. */}
       <h1 className="wide:hidden title-bubble text-3xl sm:text-4xl pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
       <div className="min-w-0 self-start">
-        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[38vh] wide:max-h-[calc(100dvh-6.5rem)] mx-auto rounded-panel border-[2.5px] border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
+        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[38vh] wide:max-h-[calc(100dvh-6.5rem)] mx-auto rounded-panel border-bold border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
       </div>
       {/* Three even groups, title, How to play, start (teacher, 2026-11-16:
           "more professionally spaced"), sized up to fill the column. */}
@@ -61,19 +61,19 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           no height of its own, and its text scales with the screen. */}
       <div className="min-w-0 flex flex-col gap-6 wide:gap-[clamp(0.5rem,2.2vh,1.5rem)] wide:justify-between wide:h-0 wide:min-h-full">
         <div className="grid gap-[clamp(0.4rem,1.6vh,1rem)]">
-          <h1 className="hidden wide:flex title-bubble text-[clamp(1.6rem,5vh,2.25rem)] pr-44 min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-          {game.description && <p className="text-[clamp(0.8rem,2.3vh,1.125rem)] font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
+          <h1 className="hidden wide:flex title-bubble text-fit-title pr-44 min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+          {game.description && <p className="text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
           <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
         <section aria-label={t('welcome.how')} className="min-h-0">
           {/* White with a little depth, on every game (teacher, 2026-11-16). */}
-          <div className="rounded-panel border-[2px] border-border-soft bg-white px-6 py-[clamp(0.6rem,2.4vh,1.5rem)] grid gap-[clamp(0.4rem,1.8vh,1rem)]" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
+          <div className="rounded-panel border-std border-border-soft bg-white px-6 py-[clamp(0.6rem,2.4vh,1.5rem)] grid gap-[clamp(0.4rem,1.8vh,1rem)]" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('welcome.how')}</h2>
             <ol className="grid gap-[clamp(0.4rem,1.8vh,1rem)] list-none p-0 m-0">
               {steps.map((s, i) => (
                 <motion.li key={i} initial={settings.motion === 'still' ? false : { opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}
-                  className="flex items-center gap-3.5 text-[clamp(0.8rem,2.3vh,1.125rem)] leading-snug">
-                  <span className="w-[clamp(1.9rem,5.5vh,3rem)] h-[clamp(1.9rem,5.5vh,3rem)] shrink-0 rounded-full border-[2px] [&>svg]:w-[45%] [&>svg]:h-[45%] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
+                  className="flex items-center gap-3.5 text-fit-body leading-snug">
+                  <span className="w-[clamp(1.9rem,5.5vh,3rem)] h-[clamp(1.9rem,5.5vh,3rem)] shrink-0 rounded-full border-std [&>svg]:w-[45%] [&>svg]:h-[45%] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
                   <span className="font-bold">{s.text}</span>
                 </motion.li>
               ))}
@@ -81,7 +81,7 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           </div>
         </section>
         <button type="button" onClick={onStart}
-          className="w-full min-h-[clamp(2.75rem,8vh,4rem)] shrink-0 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-[clamp(1.1rem,3.4vh,1.5rem)] font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-[1.02] motion-safe:transition-transform"
+          className="w-full min-h-[clamp(2.75rem,8vh,4rem)] shrink-0 px-8 rounded-pill border-bold border-border bg-accent font-display text-fit-button font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-[1.02] motion-safe:transition-transform"
           style={{ boxShadow: '0 4px 0 #000' }}>
           <Play weight="fill" size={24} />{t('welcome.start')}
         </button>

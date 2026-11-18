@@ -6,6 +6,15 @@
 @custom-variant motion-reduce (&:where(html[data-motion="still"] *));
 /* Side by side on big screens and on any landscape screen at least 768px
    wide (short laptop windows), so start screens never stack and scroll. */
+/* Design system tokens beyond the theme (2026-11-18): four border
+   thicknesses by name instead of hand-typed pixels. */
+/* Compact controls (Button sm, fieldClasses sm, Tabs sm) grow to the 44px
+   touch minimum on touch screens (Claudia review, 2026-11-18). */
+@media (pointer: coarse) { .tap, .min-h-11 { min-height: 44px; } .tap-round, .w-11.h-11 { width: 44px; height: 44px; } }
+@utility border-thin { border-width: 1.5px; }
+@utility border-std { border-width: 2px; }
+@utility border-bold { border-width: 2.5px; }
+@utility border-heavy { border-width: 3px; }
 @custom-variant wide {
   @media (min-width: 1024px) { @slot; }
   @media (min-width: 768px) and (orientation: landscape) { @slot; }
@@ -43,6 +52,19 @@
   --color-quiz-green: #ddfcc6;
   --color-quiz-blue: #b4c4fb;
   --color-quiz-orange: #ed9d75;
+  /* Named 2026-11-18 (design system audit): colors that were hand-typed. */
+  --color-ink-night: #241c3d;
+  --color-gold: #f6c544;
+  --color-mint-soft: #c8f0dc;
+  --color-error: #9b2c3a;
+  --color-success-ink: #1f7a45;
+  /* Text sizes that follow the screen height (the screen-size rule). */
+  --text-fit-title: clamp(1.6rem, 5vh, 2.25rem);
+  --text-fit-body: clamp(0.8rem, 2.3vh, 1.125rem);
+  --text-fit-button: clamp(1.1rem, 3.4vh, 1.5rem);
+  --text-fit-turn: clamp(1.2rem, 4vh, 2.25rem);
+  --text-fit-question: clamp(1.4rem, min(6vh, 4.5vw), 3.75rem);
+  --text-fit-answer: clamp(1.1rem, min(4.2vh, 2.8vw), 1.9rem);
 
   --radius-panel: 26px;
   --radius-pill: 999px;
@@ -633,7 +655,7 @@ html[data-motion="still"] .belt-move { animation: none; }
   height: var(--play-h); min-height: 34rem; overflow: hidden;
   background: var(--bg); color: var(--text); font-family: var(--font-body);
 }
-.dev-dash :is([class*="border-[2px]"], [class*="border-[2.5px]"], [class*="border-2"]) { border-width: 1px; }
+.dev-dash :is([class*="border-std"], [class*="border-bold"], [class*="border-heavy"], [class*="border-2"]) { border-width: 1px; }
 .dev-dash .font-display { font-weight: 700; letter-spacing: -0.01em; }
 .dev-dash :focus-visible { outline: 2px solid var(--dash-purple); outline-offset: 2px; }
 .dev-dash input[type="checkbox"], .dev-dash input[type="range"] { accent-color: var(--dash-purple); }

@@ -40,7 +40,7 @@ export default function OwnerGate({ children }: { children: ReactNode }) {
   }
   if (step.k === 'open') return <>{children}</>;
   const box = 'max-w-md mx-auto px-4 pt-10 pb-24';
-  const panel = 'bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3 justify-items-center text-center';
+  const panel = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 justify-items-center text-center';
   return (
     <main className={box}>
       <div className={panel} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -52,7 +52,7 @@ export default function OwnerGate({ children }: { children: ReactNode }) {
         {step.k === 'enroll' && (
           <>
             <p className="font-semibold">{t('ownerGate.enroll')}</p>
-            <img src={step.qr} alt={t('ownerGate.qr')} className="w-48 h-48 bg-white rounded-input border-[2px] border-border" />
+            <img src={step.qr} alt={t('ownerGate.qr')} className="w-48 h-48 bg-white rounded-input border-std border-border" />
             <p className="text-xs font-semibold text-muted break-all">{t('ownerGate.secret', { secret: step.secret })}</p>
           </>
         )}
@@ -60,7 +60,7 @@ export default function OwnerGate({ children }: { children: ReactNode }) {
         {(step.k === 'enroll' || step.k === 'verify') && (
           <form className="flex flex-wrap justify-center gap-2" onSubmit={(e) => { e.preventDefault(); void verify(step.factorId); }}>
             <input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" aria-label={t('ownerGate.code')} placeholder="123456"
-              className="min-h-12 w-36 px-3 rounded-input border-[2px] border-border font-bold text-xl tracking-[0.3em] text-center" />
+              className="min-h-12 w-36 px-3 rounded-input border-std border-border font-bold text-xl tracking-[0.3em] text-center" />
             <Button variant="primary" type="submit" disabled={code.length !== 6}>{t('ownerGate.go')}</Button>
           </form>
         )}

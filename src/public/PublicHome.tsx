@@ -33,8 +33,8 @@ export default function PublicHome() {
             <h1 className="title-bubble text-4xl sm:text-5xl xl:text-6xl leading-tight"><Title text={t('public.hero')} /></h1>
             <p className="text-lg font-bold max-w-xl">{t('public.heroSub')}</p>
             <div className="flex flex-wrap gap-3">
-              <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop')} style={{ boxShadow: 'var(--shadow-sticker)' }}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
-              <Link to="/join" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.joinCode')}<ArrowRight weight="bold" size={20} /></Link>
+              <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')} style={{ boxShadow: 'var(--shadow-sticker)' }}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
+              <Link to="/join" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.joinCode')}<ArrowRight weight="bold" size={20} /></Link>
             </div>
             <p className="text-sm font-bold text-muted">{t('public.freeNote')}</p>
           </motion.div>
@@ -42,7 +42,7 @@ export default function PublicHome() {
             {GAMES.slice(0, 6).map((g, i) => (
               <motion.div key={g.id} initial={reduce ? false : { opacity: 0, y: 20, rotate: i % 2 ? 2 : -2 }} animate={{ opacity: 1, y: 0, rotate: i % 2 ? 1.5 : -1.5 }} transition={{ delay: reduce ? 0 : 0.1 * i }}
                 whileHover={reduce ? undefined : { y: -8, rotate: i % 2 ? -2 : 2, scale: 1.04, transition: { type: 'spring', stiffness: 400, damping: 14 } }}
-                className="rounded-panel border-[2.5px] border-border overflow-hidden bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                className="rounded-panel border-bold border-border overflow-hidden bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <CyclingCover gameId={g.id} className="aspect-[4/3]" />
               </motion.div>
             ))}
@@ -62,7 +62,7 @@ export default function PublicHome() {
           <h2 className="title-bubble text-4xl"><Title text={t('public.gamesTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {GAMES.map((g) => (
-              <Link key={g.id} to="/login?mode=signup" className="hover-lift group block bg-surface border-[2.5px] border-border rounded-panel overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <Link key={g.id} to="/login?mode=signup" className="hover-lift group block bg-surface border-bold border-border rounded-panel overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="block overflow-hidden border-b-[2.5px] border-border"><CyclingCover gameId={g.id} className="aspect-[16/9]" /></span>
                 <div className="p-4 grid gap-2">
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
@@ -80,8 +80,8 @@ export default function PublicHome() {
           <h2 className="title-bubble text-4xl"><Title text={t('public.featuresTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(({ icon: Icon, key }) => (
-              <div key={key} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="wiggle-on-hover w-12 h-12 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center"><Icon weight="bold" size={24} /></span>
+              <div key={key} className="hover-lift bg-surface border-bold border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <span className="wiggle-on-hover w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center"><Icon weight="bold" size={24} /></span>
                 <h3 className="font-display text-2xl"><Title text={t(`public.feature.${key}` as StringKey)} /></h3>
                 <p className="font-semibold">{t(`public.feature.${key}.text` as StringKey)}</p>
               </div>
@@ -94,7 +94,7 @@ export default function PublicHome() {
           <h2 className="title-bubble text-4xl flex items-center gap-3"><Brain weight="bold" size={36} aria-hidden="true" /><Title text={t('public.whyTitle')} /></h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {WHY.map((k) => (
-              <div key={k} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <div key={k} className="hover-lift bg-surface border-bold border-border rounded-panel p-5 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-2xl"><Title text={t(`public.why.${k}` as StringKey)} /></h3>
                 <p className="font-semibold">{t(`public.why.${k}.text` as StringKey)}</p>
               </div>
@@ -104,17 +104,17 @@ export default function PublicHome() {
           <Link to="/research" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('research.seeAll')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
 
-        <Link to="/beta" className="mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-surface border-[2.5px] border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <span className="w-14 h-14 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><RocketLaunch weight="fill" size={28} aria-hidden="true" /></span>
+        <Link to="/beta" className="mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-surface border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <span className="w-14 h-14 rounded-full bg-accent border-bold border-border flex items-center justify-center wiggle-on-hover"><RocketLaunch weight="fill" size={28} aria-hidden="true" /></span>
           <span className="grid gap-1"><span className="font-display text-2xl">{t('public.betaTitle')}</span><span className="font-semibold">{t('public.betaText')}</span></span>
           <span className={buttonClasses('primary', '!bg-text !text-white')}>{t('beta.join')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
-        <section className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="mt-16 bg-accent border-bold border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('public.ctaTitle')} /></h2>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/login?mode=signup" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.startFree')}</Link>
-            <Link to="/pricing" className={buttonClasses('ghost', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.seePlans')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
+            <Link to="/pricing" className={buttonClasses('ghost', 'hover-pop', 'lg')}>{t('public.seePlans')}</Link>
           </div>
         </section>
       </main>
@@ -130,7 +130,7 @@ function ThemesShowcase() {
   const reduce = useReducedMotion();
   const top = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 4);
   return (
-    <section aria-labelledby="home-themes" className="mt-16 bg-accent border-[2.5px] border-border rounded-panel p-5 sm:p-8 grid gap-5" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+    <section aria-labelledby="home-themes" className="mt-16 bg-accent border-bold border-border rounded-panel p-5 sm:p-8 grid gap-5" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <div className="grid gap-2 max-w-3xl">
         <h2 id="home-themes" className="title-bubble text-4xl flex items-center gap-3"><PaintBrush weight="fill" size={38} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('public.themesTitle')} /></h2>
         <p className="text-lg font-semibold">{t('public.themesText')}</p>
@@ -139,7 +139,7 @@ function ThemesShowcase() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {top.map((x, i) => (
           <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
-            <Link to="/themes" className="hover-lift block bg-surface border-[2.5px] border-border rounded-panel p-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link to="/themes" className="hover-lift block bg-surface border-bold border-border rounded-panel p-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <ThemePreview theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
               <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
               <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
@@ -148,8 +148,8 @@ function ThemesShowcase() {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Link to="/themes" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
-        <Link to="/challenge" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.themesChallenge')}</Link>
+        <Link to="/themes" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
+        <Link to="/challenge" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.themesChallenge')}</Link>
       </div>
     </section>
   );
@@ -167,8 +167,8 @@ function WhoFor() {
       <h2 id="who-for" className="title-bubble text-4xl"><Title text={t('public.whoTitle')} /></h2>
       <div className="grid md:grid-cols-3 gap-4">
         {doors.map(({ key, icon: I, to }) => (
-          <Link key={key} to={to} className="hover-lift group bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <span className="w-12 h-12 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
+          <Link key={key} to={to} className="hover-lift group bg-surface border-bold border-border rounded-panel p-5 grid gap-2 content-start no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
             <span className="font-display text-2xl">{t(`public.who.${key}` as StringKey)}</span>
             <span className="font-semibold">{t(`public.who.${key}.text` as StringKey)}</span>
             <span className="text-sm font-bold inline-flex items-center gap-1.5">{t(`public.who.${key}.go` as StringKey)}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>

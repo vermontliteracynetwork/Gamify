@@ -101,10 +101,10 @@ export default function JoinPage() {
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
           <div className="grid sm:grid-cols-2 gap-3">
-            {rosters.map((c) => <button key={c.id} type="button" onClick={() => setRoster(c.id)} className="min-h-16 rounded-panel border-[2.5px] border-border bg-surface font-display text-2xl font-bold active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>{c.name}</button>)}
+            {rosters.map((c) => <button key={c.id} type="button" onClick={() => setRoster(c.id)} className="min-h-16 rounded-panel border-bold border-border bg-surface font-display text-2xl font-bold active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>{c.name}</button>)}
           </div>
         )}
-        <button type="button" onClick={() => setGuest(true)} className="justify-self-center min-h-12 px-5 rounded-pill border-[2px] border-border bg-surface-2 font-bold inline-flex items-center gap-2"><UserCircle weight="bold" size={20} />{t('join.notOnList')}</button>
+        <button type="button" onClick={() => setGuest(true)} className="justify-self-center min-h-12 px-5 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2"><UserCircle weight="bold" size={20} />{t('join.notOnList')}</button>
       </main>
     );
   }
@@ -115,10 +115,10 @@ export default function JoinPage() {
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
-        <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-[2.5px] border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2">
+        <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-bold border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2">
           <DiceFive weight="fill" size={26} />{t('join.roll')}
         </button>
-        <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {t('join.play')}<ArrowRight weight="bold" size={26} />
         </button>
       </main>
@@ -137,14 +137,14 @@ export default function JoinPage() {
         <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoCapitalize="characters" autoComplete="off" spellCheck={false}
           onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && ready) void ready.go(); }}
           aria-label={t('join.code')} placeholder="BKDFT"
-          className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-[3px] border-border bg-surface uppercase" />
+          className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-heavy border-border bg-surface uppercase" />
         {code.length > 0 && <IconButton label={t('join.hearCode')} onClick={() => speak(code.split('').join(', '), settings)}><SpeakerHigh weight="bold" size={20} /></IconButton>}
       </div>
       <p className="min-h-6 font-bold" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
       <AnimatePresence>
         {ready && ready.code === code && (
           <motion.button type="button" onClick={() => void ready.go()} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-            className="min-h-16 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             {t('join.go')}<ArrowRight weight="bold" size={26} />
           </motion.button>
         )}

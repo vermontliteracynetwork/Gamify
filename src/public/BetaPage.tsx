@@ -6,7 +6,7 @@ import { CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, P
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, buttonClasses } from '../ui/kit';
+import { Button, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 
@@ -17,7 +17,7 @@ const ASKS: { key: string; minutes: string }[] = [
   { key: 'setup', minutes: '15' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
   { key: 'checkin', minutes: '1' }, { key: 'surveys', minutes: '5' }, { key: 'report', minutes: '1' },
 ];
-const card = 'bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3 content-start';
+const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 content-start';
 
 export default function BetaPage() {
   const reduce = useReducedMotion();
@@ -25,14 +25,14 @@ export default function BetaPage() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <p className="font-bold uppercase tracking-wider text-sm">{t('betaPage.kicker')}</p>
           <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0 break-words"><RocketLaunch weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={t('betaPage.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('betaPage.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-            {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
+            {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-std border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
           </ul>
-          <a href="#apply" className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop !bg-text !text-white')}>{t('betaPage.apply')}</a>
+          <a href="#apply" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}>{t('betaPage.apply')}</a>
         </section>
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">
@@ -54,15 +54,15 @@ export default function BetaPage() {
             {ASKS.map((a, i) => (
               <motion.li key={a.key} {...enter(i)} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <div className="flex items-center gap-3">
-                  <span className="w-11 h-11 shrink-0 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center font-display text-xl">{i + 1}</span>
-                  <span className="text-sm font-bold inline-flex items-center gap-1 bg-surface-2 border-[2px] border-border-soft rounded-pill px-2 py-0.5"><Clock weight="bold" size={14} aria-hidden="true" />{t('betaPage.minutes', { n: a.minutes })}</span>
+                  <span className="w-11 h-11 shrink-0 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-xl">{i + 1}</span>
+                  <span className="text-sm font-bold inline-flex items-center gap-1 bg-surface-2 border-std border-border-soft rounded-pill px-2 py-0.5"><Clock weight="bold" size={14} aria-hidden="true" />{t('betaPage.minutes', { n: a.minutes })}</span>
                 </div>
                 <h3 className="font-display text-2xl">{t(`betaPage.ask.${a.key}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`betaPage.ask.${a.key}.text` as StringKey)}</p>
               </motion.li>
             ))}
           </ol>
-          <p className="font-bold bg-surface-2 border-[2px] border-border rounded-input p-3">{t('betaPage.optional')}</p>
+          <p className="font-bold bg-surface-2 border-std border-border rounded-input p-3">{t('betaPage.optional')}</p>
         </section>
 
         <section aria-labelledby="gets" className="grid md:grid-cols-2 gap-5">
@@ -80,7 +80,7 @@ export default function BetaPage() {
           <h2 id="timeline" className="title-bubble text-4xl flex items-center gap-3"><CalendarCheck weight="fill" size={36} aria-hidden="true" /><Title text={t('betaPage.whenTitle')} /></h2>
           <ol className="grid sm:grid-cols-4 gap-3 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
-              <li key={n} className="bg-surface border-[2px] border-border rounded-input p-4 grid gap-1 content-start">
+              <li key={n} className="bg-surface border-std border-border rounded-input p-4 grid gap-1 content-start">
                 <span className="font-display text-xl">{t(`betaPage.when.${n}` as StringKey)}</span>
                 <span className="font-semibold text-sm">{t(`betaPage.when.${n}.text` as StringKey)}</span>
               </li>
@@ -118,7 +118,7 @@ function ApplyForm() {
     });
     setSent(true);
   }
-  const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface w-full';
+  const field = fieldClasses('md', 'w-full');
   return (
     <section id="apply" aria-labelledby="apply-title" className={`${card} scroll-mt-24 !p-6`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <h2 id="apply-title" className="title-bubble text-4xl"><Title text={t('betaPage.applyTitle')} /></h2>

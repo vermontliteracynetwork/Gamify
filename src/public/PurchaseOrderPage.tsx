@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle, Receipt } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { t } from '../i18n';
-import { Button } from '../ui/kit';
+import { Button, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 
@@ -28,7 +28,7 @@ export default function PurchaseOrderPage() {
     setBusy(false);
     setSent(true);
   }
-  const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface w-full';
+  const field = fieldClasses('md', 'w-full');
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [k]: k === 'seats' ? Math.max(1, Number(e.target.value) || 1) : e.target.value });
   return (
     <>
@@ -38,14 +38,14 @@ export default function PurchaseOrderPage() {
           <p className="text-lg font-bold">{t('po.sub')}</p>
         </div>
         {sent ? (
-          <section className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-start" style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
+          <section className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3 justify-items-start" style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
             <CheckCircle weight="fill" size={48} color="#1f7a45" aria-hidden="true" />
             <p className="font-display text-2xl">{t('po.thanks')}</p>
             <p className="font-bold">{t('po.thanksText', { email: form.email.trim() })}</p>
             <Link to="/pricing" className="font-bold">{t('po.back')}</Link>
           </section>
         ) : (
-          <section className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('po.title')}>
+          <section className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('po.title')}>
             <ol className="grid gap-1 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`po.step.${n}` as 'po.step.1')}</li>)}</ol>
             <div className="grid sm:grid-cols-2 gap-3">
               <label className="grid gap-1 font-bold sm:col-span-2">{t('po.school')}<input value={form.school} onChange={set('school')} maxLength={120} className={field} /></label>

@@ -379,15 +379,15 @@ export default function CastleQuest() {
     </motion.button>
   );
   const picker = step === 'pick' && turns && (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-[#241c3d]/35 p-4" role="dialog" aria-label={t('cq.wheelPick')}>
-      <motion.div className="bg-surface border-[3px] border-border rounded-panel p-5 grid gap-4 justify-items-center max-w-[min(40rem,94vw)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-ink-night/35 p-4" role="dialog" aria-label={t('cq.wheelPick')}>
+      <motion.div className="bg-surface border-heavy border-border rounded-panel p-5 grid gap-4 justify-items-center max-w-[min(40rem,94vw)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
         initial={still ? false : { scale: 0.6, rotate: -4 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 16 }}>
         <ItemArt item={itemFor('wheel')} size={72} still={still} />
         <p className="font-display text-2xl font-bold text-center">{t('cq.wheelPick')}</p>
         <div className="flex flex-wrap gap-3 justify-center">
           {turns.players.map((p, i) => (
             <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { scale: 1.05 }}
-              className="grid justify-items-center gap-1 rounded-panel border-[2.5px] border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
+              className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
               <TeamBadge colorIndex={p.colorIndex} size={56} />
               <span className="font-bold">{p.name}</span>
               {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#3d7fb8]" aria-label={t('cq.shielded')} />}
@@ -476,7 +476,7 @@ export default function CastleQuest() {
               )}
               {swirl && !still && <Twister key={swirl.id} item={itemFor('tornado')} w={box.w} h={box.h} />}
               {banner && (
-                <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-[3px] border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
+                <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-heavy border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
                   initial={{ y: 30, opacity: 0, scale: 0.7, rotate: -4 }} animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 18, duration: still ? 0.01 : undefined }}
                   onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
                   {banner.icon === 'lose' && <HourglassHigh weight="fill" size={30} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={30} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={30} />}<PopText text={banner.text} />
@@ -531,7 +531,7 @@ function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlaye
           transition={on && !still ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
           <TeamBadge colorIndex={player.colorIndex} size={size} />
         </motion.span>
-        {shield && <span className={`absolute -inset-[18%] rounded-full border-[3px] border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.5))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
+        {shield && <span className={`absolute -inset-[18%] rounded-full border-heavy border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.5))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
       </motion.div>
     </div>
   );
@@ -567,10 +567,10 @@ function DieToss({ rolls, wait, still, theme, onGo }: { rolls: number[]; wait: b
 function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean }; still: boolean; onTap: () => void }) {
   const size = 'min(62vmin, 440px)';
   return (
-    <motion.div className={`absolute inset-0 z-40 grid place-items-center bg-[#241c3d]/40 ${!spin.spinning || spin.done ? 'cursor-pointer' : ''}`} onClick={!spin.spinning || spin.done ? onTap : undefined} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
+    <motion.div className={`absolute inset-0 z-40 grid place-items-center bg-ink-night/40 ${!spin.spinning || spin.done ? 'cursor-pointer' : ''}`} onClick={!spin.spinning || spin.done ? onTap : undefined} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
       aria-label={spin.done ? t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n }) : t('cq.wheelSpinning')}>
       <div className="grid justify-items-center gap-3">
-        <p className="text-3xl bg-surface border-[3px] border-border rounded-pill px-5 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}>{spin.name}: {spin.n}</p>
+        <p className="text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}>{spin.name}: {spin.n}</p>
         <motion.div className="relative" style={{ width: size, height: size }} whileHover={!spin.spinning && !still ? { scale: 1.04 } : undefined}
           animate={!spin.spinning && !still ? { rotate: [0, -4, 4, 0] } : { rotate: 0 }} transition={!spin.spinning ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
           <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: !spin.spinning ? 0 : still ? spin.stop % 360 : spin.stop }}
@@ -590,7 +590,7 @@ function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean;
         </motion.div>
         <AnimatePresence>
           {spin.done && (
-            <motion.p className="text-4xl bg-surface border-[3px] border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#3f6b2a' : C.red }}
+            <motion.p className="text-4xl bg-surface border-heavy border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#3f6b2a' : C.red }}
               initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1 }} transition={{ duration: 0.4 }}>
               {t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n })}
             </motion.p>
@@ -615,7 +615,7 @@ function Twister({ item, w, h }: { item: ThemeItem; w: number; h: number }) {
 
 function BoostTag({ boost, potion, still }: { boost: { double: boolean; x2: boolean }; potion: number; still: boolean }) {
   const text = boost.double ? t('cq.boostTwice') : boost.x2 || potion > 0 ? t('cq.boostDouble') : '';
-  return <motion.span className="text-xl px-3 py-0.5 rounded-pill border-[2.5px] border-border bg-accent" style={CHICLE} animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>{text}</motion.span>;
+  return <motion.span className="text-xl px-3 py-0.5 rounded-pill border-bold border-border bg-accent" style={CHICLE} animate={still ? undefined : { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>{text}</motion.span>;
 }
 
 // A small picture of each board length: the same box, more squares
@@ -624,7 +624,7 @@ function TrailMock({ n }: { n: number }) {
   const W = 96, H = 64, L = layout(n, W - 6, H - 6);
   const s = L.size, ox = (W - L.cols * s) / 2, oy = (H - L.rows * s) / 2;
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" className="rounded-md border-[1.5px] border-border" style={{ background: C.blush }}>
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" className="rounded-md border-thin border-border" style={{ background: C.blush }}>
       {L.cells.map((c, i) => <rect key={i} x={ox + c.x * s + 0.6} y={oy + c.y * s + 0.6} width={s - 1.2} height={s - 1.2} rx={1} fill={i === 0 ? C.sage : i === n - 1 ? C.yellow : SQUARE_COLORS[i % 4]} stroke={C.ink} strokeWidth={0.5} />)}
     </svg>
   );

@@ -1,44 +1,33 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Check, Sparkle, X } from '@phosphor-icons/react';
+import { Check, Sparkle } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR } from '../config';
 import { useTier } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
 import { buttonClasses, Panel } from '../ui/kit';
-import Title from '../ui/Title';
 import { upgradeTo } from './upgrade';
-import DialogFocus from '../ui/DialogFocus';
+import Dialog from '../ui/Dialog';
 
 type Plan = 'plus' | 'pro';
 
 // The plan choice, one tap from any limit. Teacher pages only, never on a
 // student page.
 export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; onClose: () => void }) {
-  const { settings } = useSettings();
   const [done, setDone] = useState<Plan | null>(null);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
-      <DialogFocus onClose={onClose} />
-      <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-2xl bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
-        <div className="flex items-start gap-2">
-          <h2 id="upgrade-title" className="font-display text-3xl flex-1"><Title text={done ? t('upgrade.done', { plan: t(`pricing.${done}` as StringKey) }) : t('upgrade.title')} /></h2>
-          <button type="button" aria-label={t('upgrade.close')} onClick={onClose} className="w-11 h-11 rounded-full border-[2px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={18} /></button>
-        </div>
+    <Dialog size="lg" title={done ? t('upgrade.done', { plan: t(`pricing.${done}` as StringKey) }) : t('upgrade.title')} onClose={onClose} closeLabel={t('upgrade.close')}>
         {done ? (
           <div className="grid gap-3">
             <p className="text-lg font-bold">{t('upgrade.doneText')}</p>
             <p className="text-sm font-semibold text-muted">{t('upgrade.testMode')}</p>
-            <button type="button" onClick={onClose} className={buttonClasses('primary', 'justify-self-start min-h-14 px-8 text-lg hover-pop')}>{t('upgrade.keepGoing')}</button>
+            <button type="button" onClick={onClose} className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('upgrade.keepGoing')}</button>
           </div>
         ) : (
           <PlanCards suggest={suggest} onDone={setDone} />
         )}
-      </motion.div>
-    </div>
+    </Dialog>
   );
 }
 
@@ -56,8 +45,8 @@ export function PlanCards({ suggest = 'plus', onDone }: { suggest?: Plan; onDone
   return (
           <div className="grid sm:grid-cols-2 gap-3">
             {plans.map((p) => (
-              <div key={p} className={`rounded-panel border-[2.5px] border-border p-4 grid gap-3 content-start ${p === suggest ? 'bg-accent' : 'bg-surface'}`}>
-                <p className="font-display text-2xl flex items-center gap-2">{t(`pricing.${p}` as StringKey)}{p === suggest && <span className="text-xs font-bold bg-surface border-[2px] border-border rounded-pill px-2 py-0.5">{t('upgrade.best')}</span>}</p>
+              <div key={p} className={`rounded-panel border-bold border-border p-4 grid gap-3 content-start ${p === suggest ? 'bg-accent' : 'bg-surface'}`}>
+                <p className="font-display text-2xl flex items-center gap-2">{t(`pricing.${p}` as StringKey)}{p === suggest && <span className="text-xs font-bold bg-surface border-std border-border rounded-pill px-2 py-0.5">{t('upgrade.best')}</span>}</p>
                 <div><p className="font-display text-5xl leading-none">{t('upgrade.price', { m: (PRICES_USD_PER_YEAR[p] / 12).toFixed(0) })}</p><p className="font-display text-xl">{t('upgrade.perMonth')}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[p] })}</p></div>
                 <ul className="grid gap-1 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-1.5 font-semibold text-sm"><Check weight="bold" size={18} className="shrink-0" aria-hidden="true" />{t(`upgrade.${p}.${n}` as StringKey)}</li>)}</ul>
                 <button type="button" disabled={tier === p || (tier === 'pro' && p === 'plus')} onClick={() => void go(p)}

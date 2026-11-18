@@ -51,14 +51,14 @@ export function ChartTooltipContent({ active, payload, label, labelFormatter, hi
   const config = useChart();
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-input border-[2.5px] border-border bg-surface px-3 py-2 shadow-[0_4px_0_var(--border)] text-sm grid gap-1 min-w-32">
+    <div className="rounded-input border-bold border-border bg-surface px-3 py-2 shadow-[0_4px_0_var(--border)] text-sm grid gap-1 min-w-32">
       {!hideLabel && <div className="font-bold">{labelFormatter ? labelFormatter(label) : String(label ?? '')}</div>}
       {payload.map((p) => {
         const key = String(p.dataKey ?? p.name ?? '');
         const item = config[key];
         return (
           <div key={key} className="flex items-center gap-2">
-            <span className="inline-block size-3 rounded-[4px] border-[1.5px] border-border" style={{ background: `var(--color-${key})` }} />
+            <span className="inline-block size-3 rounded-[4px] border-thin border-border" style={{ background: `var(--color-${key})` }} />
             <span className="font-semibold text-muted flex-1">{item?.label ?? p.name}</span>
             <span className="font-bold tabular-nums">{typeof p.value === 'number' ? p.value.toLocaleString() : String(p.value ?? '')}</span>
           </div>
@@ -80,7 +80,7 @@ export function ChartLegendContent({ payload }: { payload?: readonly LegendPaylo
         const Icon = item?.icon;
         return (
           <li key={key} className="inline-flex items-center gap-1.5">
-            {Icon ? <Icon size={14} /> : <span className="inline-block size-3 rounded-[4px] border-[1.5px] border-border" style={{ background: `var(--color-${key})` }} />}
+            {Icon ? <Icon size={14} /> : <span className="inline-block size-3 rounded-[4px] border-thin border-border" style={{ background: `var(--color-${key})` }} />}
             {item?.label ?? p.value}
           </li>
         );

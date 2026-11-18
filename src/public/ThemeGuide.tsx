@@ -43,7 +43,7 @@ export const guideGames = (): GameManifest[] => GAMES;
 
 export function ThemeGuideCard({ game }: { game: GameManifest }) {
   return (
-    <Link to={`/blog/themes/${game.id}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <Link to={`/blog/themes/${game.id}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={game.id} className="aspect-[16/9] cover-zoom" /></span>
       <span className="p-4 grid gap-2">
         <span className="font-display text-2xl leading-tight">{t('guide.cardTitle', { game: game.name })}</span>
@@ -63,7 +63,7 @@ function ClassicLook({ piece, gameId }: { piece: ThemePieceSpec; gameId: string 
       <svg width={piece.width * k} height={piece.height * k} viewBox={`0 0 ${piece.width} ${piece.height}`} className="pointer-events-none" style={isRound(piece) ? { clipPath: 'circle(50%)' } : undefined}>
         <ClassicPiece piece={piece} gameId={gameId} />
       </svg>
-      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-[2px] border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
+      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
     </span>
   );
 }
@@ -85,17 +85,17 @@ export function ThemeGuidePage() {
   return (
     <>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-[2.5px] border-border" />
+        <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-bold border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('guide.cardTitle', { game: game.name })} /></h1>
         <p className="text-xl font-bold">{t('guide.intro', { game: game.name })}</p>
         <p className="text-lg leading-relaxed">{t('guide.classicNote')}</p>
 
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
+        <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
           <h2 id="guide-dl" className="font-display text-3xl"><Title text={t('guide.dlTitle')} /></h2>
           <p className="font-bold">{t('guide.dlSub')}</p>
           <TemplateLock access={access} />
           {access === 'ok' && <div className="flex flex-wrap gap-2">
-            <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'min-h-14 px-6 hover-pop')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
+            <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'hover-pop', 'lg')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
             <Button variant="secondary" className="min-h-14 px-6 hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => void zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
           </div>}
           {dl && <p className="font-bold" role="status">{dl}</p>}
@@ -105,12 +105,12 @@ export function ThemeGuidePage() {
         <h2 className="font-display text-3xl mt-2"><Title text={t('guide.piecesTitle')} /></h2>
         <ol className="grid gap-3 list-none p-0 m-0">
           {game.themePieces.map((p, i) => (
-            <li key={p.id} className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid sm:grid-cols-[170px_1fr] gap-4 items-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <span className="flex items-center justify-center min-h-[150px] bg-surface-2 rounded-input border-[2px] border-border-soft p-2"><ClassicLook piece={p} gameId={game.id} /></span>
+            <li key={p.id} className="bg-surface border-bold border-border rounded-panel p-4 grid sm:grid-cols-[170px_1fr] gap-4 items-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <span className="flex items-center justify-center min-h-[150px] bg-surface-2 rounded-input border-std border-border-soft p-2"><ClassicLook piece={p} gameId={game.id} /></span>
               <div className="grid gap-1.5">
                 <h3 className="font-display text-2xl">{i + 1}. {p.label}</h3>
                 <p className="font-bold">{t(`guide.what.${pieceKind(p)}`, { hint: p.hint })}</p>
-                <p className="text-sm font-bold"><span className="inline-block px-2 rounded-pill bg-accent border-[2px] border-border mr-2">{t('guide.size', { w: p.width, h: p.height })}</span>{isRound(p) || ROUND_LOOK.test(p.id) ? t('guide.shapeRound') : t('guide.shapeBox')}</p>
+                <p className="text-sm font-bold"><span className="inline-block px-2 rounded-pill bg-accent border-std border-border mr-2">{t('guide.size', { w: p.width, h: p.height })}</span>{isRound(p) || ROUND_LOOK.test(p.id) ? t('guide.shapeRound') : t('guide.shapeBox')}</p>
                 <ul className="grid gap-1 pl-5 m-0 list-disc text-sm font-semibold">{pieceTips(p).map((tip) => <li key={tip}>{tip}</li>)}</ul>
               </div>
             </li>
@@ -125,10 +125,10 @@ export function ThemeGuidePage() {
               {items.classic.map((it) => {
                 const ability = items.abilities.find((a) => a.id === it.ability);
                 return (
-                  <li key={it.id} className="bg-surface border-[2.5px] border-border rounded-panel p-4 grid grid-cols-[84px_1fr] gap-3 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                    <span className="relative w-20 h-20 flex items-center justify-center bg-surface-2 rounded-input border-[2px] border-border-soft select-none" aria-hidden="true" onContextMenu={(e) => e.preventDefault()}>
+                  <li key={it.id} className="bg-surface border-bold border-border rounded-panel p-4 grid grid-cols-[84px_1fr] gap-3 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                    <span className="relative w-20 h-20 flex items-center justify-center bg-surface-2 rounded-input border-std border-border-soft select-none" aria-hidden="true" onContextMenu={(e) => e.preventDefault()}>
                       <span className="pointer-events-none"><ClassicItemSvg art={it.art ?? ''} size={64} /></span>
-                      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-[2px] border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
+                      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
                     </span>
                     <span className="grid gap-1">
                       <span className="font-display text-xl">{it.name}</span>
@@ -146,7 +146,7 @@ export function ThemeGuidePage() {
           </>
         )}
 
-        <section className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section className="bg-surface border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 className="font-display text-3xl"><Title text={t('guide.allTipsTitle')} /></h2>
           <ul className="grid gap-1.5 pl-5 m-0 list-disc text-lg font-semibold">
             {(['png', 'exact', 'words', 'kids', 'own'] as const).map((k) => <li key={k}>{t(`guide.rule.${k}`)}</li>)}

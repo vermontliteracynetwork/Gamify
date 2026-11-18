@@ -30,7 +30,7 @@ export default function LiveLobby() {
   return (
     <main className={box}>
       <motion.p key={session.name} initial={reduce ? false : { scale: 0.8 }} animate={{ scale: 1 }} className="font-display text-4xl">{session.name}</motion.p>
-      <div className="bg-surface border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
+      <div className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
         {status === 'in' ? <CheckCircle weight="fill" size={64} color="#1f7a45" aria-hidden="true" /> : status === 'removed' ? <Prohibit weight="fill" size={64} aria-hidden="true" /> : (
           <motion.span animate={reduce ? undefined : { rotate: [0, 180, 180, 360] }} transition={{ repeat: Infinity, duration: 2.4 }}><HourglassMedium weight="fill" size={64} aria-hidden="true" /></motion.span>
         )}
@@ -61,7 +61,7 @@ export function LiveOverlay() {
   if (!session || !state || !me) return null;
   const lockMsg = state.locks[me.pid] ?? state.locks.all;
   const shell = 'fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/55';
-  const panel = 'bg-surface border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full';
+  const panel = 'bg-surface border-heavy border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full';
   if (state.phase === 'ended') {
     const top = ranked(state.players).slice(0, 3);
     const mine = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
@@ -74,10 +74,10 @@ export function LiveOverlay() {
           {state.mode === 'together' ? (
             <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
           ) : <>
-          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-[2px] border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
+          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
           <p className="font-display text-2xl">{t('live.you', { count: me.right, place: mine })}</p>
           </>}
-          <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', 'min-h-14 px-8 text-lg')}>{t('live.toJoinScreen')}</button>
+          <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', '', 'lg')}>{t('live.toJoinScreen')}</button>
         </div>
       </div>
     );
@@ -100,16 +100,16 @@ export function LiveOverlay() {
     return (
       <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 pointer-events-none" role="status" aria-live="polite">
         {state.mode === 'together' ? (
-          <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-[2.5px] border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-bold border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>
-            <span className="h-3 rounded-pill bg-surface-2 border-[2px] border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
+            <span className="h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
           </div>
         ) : (
-          <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-[2.5px] border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-bold border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <Crown weight="fill" size={18} color="#c98a00" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}{clock}
           </span>
         )}
-        {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-accent border-[2.5px] border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}
+        {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-accent border-bold border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}
       </div>
     );
   }

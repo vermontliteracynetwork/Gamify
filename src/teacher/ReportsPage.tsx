@@ -7,7 +7,7 @@ import { LIBRARY } from '../data/library';
 import type { Student } from '../data/types';
 import { GAMES, getGame } from '../games/registry';
 import { t } from '../i18n';
-import { PageHeader, Panel, Tabs } from '../ui/kit';
+import { PageHeader, Panel, Tabs, fieldClasses } from '../ui/kit';
 import { listLiveEvents } from '../live/events';
 
 import TeacherNav from '../ui/TeacherNav';
@@ -60,7 +60,7 @@ export default function ReportsPage() {
 
   const total = rows.grouped.reduce((a, r) => ({ asked: a.asked + r.asked, right: a.right + r.right, firstTry: a.firstTry + r.firstTry }), { asked: 0, right: 0, firstTry: 0 });
   const kept = useMemo(() => retention(rows.kept), [rows.kept]);
-  const field = 'min-h-11 px-3 rounded-input border-[2px] border-border bg-surface font-bold';
+  const field = fieldClasses('md');
   const groupLabel = t(`reports.by.${by}`);
 
   function download() {
@@ -83,12 +83,12 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
-        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('primary', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-50"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
+        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('primary', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
       <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-accent' : ''}`}>
         <Eye weight="fill" size={24} aria-hidden="true" />
         <p className="font-bold flex-1 min-w-60">{example ? t('reports.exampleOn') : t('reports.exampleOff')}</p>
         <button type="button" onClick={() => { setExampleOn(!example); setClassId(''); setFilter({}); }} aria-pressed={example}
-          className="min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface font-bold">{example ? t('reports.exampleHide') : t('reports.exampleShow')}</button>
+          className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold">{example ? t('reports.exampleHide') : t('reports.exampleShow')}</button>
       </Panel>
       <Tabs label={t('reports.groupBy')} value={by} onChange={setBy} options={(['student', 'question', 'set', 'game', 'day', 'team'] as GroupBy[]).map((g) => ({ id: g, label: t(`reports.by.${g}`) }))} />
       <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4">
@@ -114,7 +114,7 @@ export default function ReportsPage() {
         ))}
       </div>
       {rows.grouped.length === 0 ? <Panel><p className="font-bold">{t('reports.empty')}</p></Panel> : (
-        <div className="overflow-x-auto bg-surface border-[2.5px] border-border rounded-panel">
+        <div className="overflow-x-auto bg-surface border-bold border-border rounded-panel">
           <table className="w-full min-w-[720px]">
             <caption className="sr-only">{t('reports.title')}</caption>
             <thead className="border-b-[2px] border-border"><tr>
@@ -160,7 +160,7 @@ function LiveLog() {
   const { value: events = [] } = useAsync(() => listLiveEvents());
   if (!events.length) return null;
   return (
-    <details className="mt-4 bg-surface border-[2.5px] border-border rounded-panel p-4">
+    <details className="mt-4 bg-surface border-bold border-border rounded-panel p-4">
       <summary className="font-display text-2xl cursor-pointer">{t('reports.liveLog', { count: events.length })}</summary>
       <ul className="grid gap-1 list-none p-0 mt-3 mb-0">
         {events.slice(0, 50).map((e) => (

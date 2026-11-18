@@ -4,7 +4,7 @@ import { PRICES_USD_PER_YEAR, TIERS, type Tier } from '../config';
 import { data, newId, previewTier, setPreviewTier } from '../data';
 import { supabase } from '../data/supabase';
 import { t } from '../i18n';
-import { Button } from '../ui/kit';
+import { Button, fieldClasses } from '../ui/kit';
 
 // Developer dashboard cards (teacher, 2026-10-25: "subscriptions, growth
 // chart, bookkeeping table and PDF, plan preview").
@@ -58,7 +58,7 @@ export function SubsCard({ stats, problem }: { stats: OwnerStats | null; problem
 }
 
 function Tile({ label, value, small = false }: { label: string; value: number | string; small?: boolean }) {
-  return <div className="rounded-input border-[2px] border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{label}</p><p className={`font-display tabular-nums ${small ? 'text-xl' : 'text-2xl'}`}>{typeof value === 'number' ? value.toLocaleString() : value}</p></div>;
+  return <div className="rounded-input border-std border-border-soft p-2"><p className="text-xs font-bold uppercase text-muted">{label}</p><p className={`font-display tabular-nums ${small ? 'text-xl' : 'text-2xl'}`}>{typeof value === 'number' ? value.toLocaleString() : value}</p></div>;
 }
 
 // Two weekly bar charts: new teachers and answers, last 26 weeks.
@@ -77,7 +77,7 @@ export function LedgerCard() {
   const shown = useMemo(() => rows.filter((r) => r.date.startsWith(year)).sort((a, b) => b.date.localeCompare(a.date)), [rows, year]);
   const sum = (k: 'in' | 'out') => shown.filter((r) => r.kind === k).reduce((n, r) => n + r.amount, 0);
   const byCat = CATEGORIES.map((c) => ({ c, in: shown.filter((r) => r.category === c && r.kind === 'in').reduce((n, r) => n + r.amount, 0), out: shown.filter((r) => r.category === c && r.kind === 'out').reduce((n, r) => n + r.amount, 0) })).filter((x) => x.in || x.out);
-  const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface';
+  const field = fieldClasses('md');
   const cents = (n: number) => `$${n.toFixed(2)}`;
 
   function add() {
@@ -141,8 +141,8 @@ export function LedgerCard() {
               {shown.map((r) => (
                 <tr key={r.id} className="border-b border-border-soft">
                   <td className="p-1.5 tabular-nums">{r.date}</td><td className="p-1.5">{r.kind === 'in' ? t('owner.ledger.in') : t('owner.ledger.out')}</td><td className="p-1.5">{r.category}</td><td className="p-1.5">{r.description}</td>
-                  <td className={`p-1.5 tabular-nums text-right font-bold ${r.kind === 'in' ? 'text-[#1f7a45]' : ''}`}>{r.kind === 'out' ? '-' : ''}{cents(r.amount)}</td>
-                  <td className="p-1.5"><button type="button" onClick={() => save(rows.filter((x) => x.id !== r.id))} aria-label={t('owner.ledger.removeOne', { what: r.description })} className="w-9 h-9 rounded-full border-[2px] border-border-soft flex items-center justify-center"><Trash size={16} /></button></td>
+                  <td className={`p-1.5 tabular-nums text-right font-bold ${r.kind === 'in' ? 'text-success-ink' : ''}`}>{r.kind === 'out' ? '-' : ''}{cents(r.amount)}</td>
+                  <td className="p-1.5"><button type="button" onClick={() => save(rows.filter((x) => x.id !== r.id))} aria-label={t('owner.ledger.removeOne', { what: r.description })} className="w-9 h-9 rounded-full border-std border-border-soft flex items-center justify-center"><Trash size={16} /></button></td>
                 </tr>
               ))}
             </tbody>
@@ -166,7 +166,7 @@ export function PlanPreviewCard() {
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('owner.preview')}>
         {(Object.keys(TIERS) as Tier[]).map((k) => (
           <button key={k} type="button" role="radio" aria-checked={now === k} onClick={() => pick(k)}
-            className={`min-h-11 px-4 rounded-pill border-[2px] font-bold ${now === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`owner.plan.${k}` as 'owner.plan.free')}</button>
+            className={`min-h-11 px-4 rounded-pill border-std font-bold ${now === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`owner.plan.${k}` as 'owner.plan.free')}</button>
         ))}
         {now && <Button onClick={() => pick(null)}><X weight="bold" size={18} />{t('owner.previewStop')}</Button>}
       </div>
@@ -182,7 +182,7 @@ export function PreviewBanner() {
   return (
     <div className="no-print sticky top-0 z-[70] flex flex-wrap items-center justify-center gap-3 bg-accent border-b-[2.5px] border-border px-4 py-1.5 font-bold text-sm" role="status">
       <Eye weight="bold" size={18} aria-hidden="true" />{t('owner.previewing', { plan: t(`owner.plan.${now}` as 'owner.plan.free') })}
-      <button type="button" onClick={() => setPreviewTier(null)} className="min-h-9 px-3 rounded-pill border-[2px] border-border bg-surface font-bold">{t('owner.previewStop')}</button>
+      <button type="button" onClick={() => setPreviewTier(null)} className="min-h-9 px-3 rounded-pill border-std border-border bg-surface font-bold">{t('owner.previewStop')}</button>
     </div>
   );
 }
@@ -217,7 +217,7 @@ export function AccessCard() {
     setMsg(error ? t('owner.access.codeBad') : (r as { found: boolean }).found ? t('owner.access.given', { name: grant.username }) : t('owner.access.noUser', { name: grant.username }));
     void load();
   }
-  const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface';
+  const field = fieldClasses('md');
   const plans = ['plus', 'pro', 'homeschool'] as const;
   if (problem) return <p className="font-semibold">{problem}</p>;
   return (

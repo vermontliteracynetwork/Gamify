@@ -15,7 +15,7 @@ function InfoPage({ title, sub, sections, extra }: { title: string; sub: string;
         <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
         <p className="text-lg font-bold">{sub}</p>
         {sections.map((s) => (
-          <section key={s.h} className="hover-lift bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <section key={s.h} className="hover-lift bg-surface border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <h2 className="font-display text-3xl"><Title text={t(s.h)} /></h2>
             <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{t(k, { host: window.location.host, cloud: CLOUD_HOST })}</li>)}</ul>
           </section>
@@ -60,7 +60,7 @@ export function HelpPage() {
   const host = { host: window.location.host };
   const article = HELP.find((g) => g.slug === topic);
   const hits = find ? HELP.flatMap((g) => stepsOf(g).filter((k) => `${t(g.h as StringKey)} ${t(k, host)}`.toLowerCase().includes(find)).map((k) => ({ g, k }))) : [];
-  const card = 'bg-white border-[1.5px] border-border-soft rounded-panel';
+  const card = 'bg-white border-thin border-border-soft rounded-panel';
 
   if (article) {
     const I = article.icon;
@@ -70,7 +70,7 @@ export function HelpPage() {
           <article className={`${card} p-6 sm:p-10 grid gap-6`}>
             <nav aria-label={t('help.backTo')} className="text-sm font-bold"><Link to="/help" className="text-muted no-underline hover:underline">{t('help.backTo')}</Link><span className="text-faint" aria-hidden="true"> / </span><span>{t(article.h as StringKey)}</span></nav>
             <header className="grid gap-3 border-b-[1.5px] border-border-soft pb-5">
-              <span className="w-12 h-12 rounded-full bg-accent border-[2px] border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={24} /></span>
+              <span className="w-12 h-12 rounded-full bg-accent border-std border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={24} /></span>
               <h1 className="font-display text-3xl sm:text-4xl leading-tight">{t(article.h as StringKey)}</h1>
               <p className="text-lg text-muted font-semibold leading-relaxed">{t(`${article.h}.desc` as StringKey)}</p>
               <p className="text-xs font-bold text-faint uppercase tracking-wider">{t('help.updated')}</p>
@@ -78,7 +78,7 @@ export function HelpPage() {
             <ol className="grid gap-5 list-none p-0 m-0">
               {stepsOf(article).map((k, i) => (
                 <li key={k} className="grid grid-cols-[2.25rem_1fr] gap-3 items-start">
-                  <span className="w-9 h-9 rounded-full border-[2px] border-border grid place-items-center font-display font-bold" aria-label={t('help.steps', { n: i + 1 })}>{i + 1}</span>
+                  <span className="w-9 h-9 rounded-full border-std border-border grid place-items-center font-display font-bold" aria-label={t('help.steps', { n: i + 1 })}>{i + 1}</span>
                   <p className="m-0 text-base leading-relaxed pt-1">{t(k, host)}</p>
                 </li>
               ))}
@@ -109,7 +109,7 @@ export function HelpPage() {
           <label className="relative w-full max-w-2xl">
             <MagnifyingGlass weight="bold" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('help.search')} aria-label={t('help.search')}
-              className="w-full min-h-12 pl-11 pr-4 rounded-pill border-[1.5px] border-border bg-surface-2 text-base font-semibold" />
+              className="w-full min-h-12 pl-11 pr-4 rounded-pill border-thin border-border bg-surface-2 text-base font-semibold" />
           </label>
           <nav aria-label={t('help.shortcuts')} className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm font-bold">
             {[['/faq', 'public.nav.faq', Question], ['/it', 'public.nav.it', WifiHigh], ['/check', 'public.nav.check', DeviceMobile], ['/beta-kit', 'beta.kit', Printer], ['/blog', 'ways.title', Lightbulb]].map(([to, k, Ic]) => {
@@ -143,7 +143,7 @@ export function HelpPage() {
                   return (
                     <li key={g.slug}>
                       <Link to={`/help/${g.slug}`} className={`${card} hover-lift h-full p-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 no-underline text-text`}>
-                        <span className="row-span-2 w-11 h-11 rounded-full bg-surface-2 border-[1.5px] border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={22} /></span>
+                        <span className="row-span-2 w-11 h-11 rounded-full bg-surface-2 border-thin border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={22} /></span>
                         <span className="font-bold text-lg leading-tight">{t(g.h as StringKey)}</span>
                         <span className="text-sm text-muted font-semibold leading-snug">{t(`${g.h}.desc` as StringKey)}</span>
                       </Link>
@@ -155,7 +155,7 @@ export function HelpPage() {
             <section className="grid gap-3">
               <h2 className="font-display text-2xl">{t('help.howToPlay')}</h2>
               <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-                {GAMES.map((g) => <li key={g.id}><Link to={`/blog/how-to-play/${g.id}`} className="inline-flex min-h-9 items-center px-3 rounded-pill bg-white border-[1.5px] border-border-soft font-bold text-sm no-underline text-text hover:border-border">{g.name}</Link></li>)}
+                {GAMES.map((g) => <li key={g.id}><Link to={`/blog/how-to-play/${g.id}`} className="inline-flex min-h-9 tap items-center px-3 rounded-pill bg-white border-thin border-border-soft font-bold text-sm no-underline text-text hover:border-border">{g.name}</Link></li>)}
               </ul>
             </section>
             <StillStuck card={card} />
@@ -174,8 +174,8 @@ function Helpful() {
     <div className="border-t-[1.5px] border-border-soft pt-5 flex flex-wrap items-center gap-3">
       {said ? <p className="m-0 font-bold" role="status">{t('help.thanks')}</p> : <>
         <p className="m-0 font-bold">{t('help.helpful')}</p>
-        <button type="button" onClick={() => setSaid(true)} className="min-h-9 px-4 rounded-pill border-[1.5px] border-border bg-white font-bold text-sm">{t('help.yes')}</button>
-        <button type="button" onClick={() => setSaid(true)} className="min-h-9 px-4 rounded-pill border-[1.5px] border-border bg-white font-bold text-sm">{t('help.no')}</button>
+        <button type="button" onClick={() => setSaid(true)} className="min-h-9 tap px-4 rounded-pill border-thin border-border bg-white font-bold text-sm">{t('help.yes')}</button>
+        <button type="button" onClick={() => setSaid(true)} className="min-h-9 tap px-4 rounded-pill border-thin border-border bg-white font-bold text-sm">{t('help.no')}</button>
       </>}
     </div>
   );

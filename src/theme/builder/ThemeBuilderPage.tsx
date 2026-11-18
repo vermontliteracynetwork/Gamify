@@ -12,7 +12,7 @@ import { bigScreenManifest } from '../../live/screenManifest';
 
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
-import { Button, buttonClasses, IconButton, PageHeader, Panel } from '../../ui/kit';
+import { Button, buttonClasses, IconButton, PageHeader, Panel, Tabs, fieldClasses } from '../../ui/kit';
 import TeacherNav from '../../ui/TeacherNav';
 import { teacherUsername } from '../credit';
 import { classicTheme } from '../classic';
@@ -79,7 +79,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
           const mine = themes.filter((th) => th.gameId === g.id && (owner ? th.source === 'library' : th.source === 'custom'));
           const locked = !owner && TIERS[tier].themeBuilder === 'trial' && g.id !== THEME_TRIAL_GAME;
           return (
-            <Link key={g.id} to={`${base}/${g.id}`} className="group rounded-panel bg-surface border-[2.5px] border-border no-underline overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link key={g.id} to={`${base}/${g.id}`} className="group rounded-panel bg-surface border-bold border-border no-underline overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <GameCover gameId={g.id} className="aspect-[16/10] border-b-[2.5px] border-border" />
               <span className="p-4 grid gap-1">
                 <span className="font-display text-xl font-bold text-text flex items-center gap-2">{locked && <LockSimple weight="fill" size={18} aria-label={t('builder.lockedGame')} />}{g.name}</span>
@@ -122,7 +122,7 @@ function StudentRequests() {
           const room = classes.find((c) => c.id === r.classroomId)?.name ?? '';
           const blocked = limit(r.theme.gameId);
           return (
-            <div key={r.id} className="rounded-input border-[2px] border-border-soft p-2 grid gap-2">
+            <div key={r.id} className="rounded-input border-std border-border-soft p-2 grid gap-2">
               <ThemePreview theme={r.theme} gameName={r.theme.name} />
               <p className="font-bold text-sm">{t('builder.requestFor', { game: game?.name ?? '', class: room })}</p>
               {blocked && <div className="flex flex-wrap items-center gap-2"><p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
@@ -282,7 +282,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
         <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
         {mine.map((th) => (
           <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
-            className={`min-h-11 px-4 rounded-pill border-[2px] font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
+            className={`min-h-11 px-4 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
         ))}
       </div>
 
@@ -296,7 +296,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             <div className="w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 1.5 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} /></div>
             {views.length > 1 && (
               <span className="flex gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
-                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-[1.5px] border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
+                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
               </span>
             )}
           </div>
@@ -310,25 +310,21 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             <div className="shrink-0 flex items-center gap-2">
               <label className="grid font-bold text-sm flex-1 min-w-0"><span className="sr-only">{t('builder.name')}</span>
                 <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
-                  className="min-h-9 px-3 rounded-input border-[2px] border-border font-bold text-sm w-full" />
+                  className="min-h-9 px-3 rounded-input border-std border-border font-bold text-sm w-full" />
               </label>
-              <Button variant="primary" className="!min-h-9 !text-sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
+              <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
               {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
               {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
             </div>
             {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
-            <div role="tablist" aria-label={t('builder.tabsLabel')} className="shrink-0 grid grid-flow-col auto-cols-fr gap-0.5 p-1 rounded-pill bg-surface-2 border-[2px] border-border">
-              {(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => (
-                <button key={k} type="button" role="tab" id={`tab-${k}`} aria-controls={`panel-${k}`} aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-8 px-1 rounded-pill font-bold text-xs whitespace-nowrap ${tab === k ? 'bg-accent text-accent-ink ring-2 ring-border' : 'text-text'}`}>{t(`builder.${k}Title`)}</button>
-              ))}
-            </div>
+            <Tabs size="sm" fill panelIds className="shrink-0" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
+              options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto grid gap-3 content-start pr-1">
               {tab === 'download' && (
                 <>
                   <p className="font-semibold text-muted text-sm">{t('builder.downloadHint')}</p>
                   <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+                    <div className="rounded-input border-std border-border p-3 grid gap-2 content-start">
                       <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
                       <div className="flex flex-wrap gap-2">
@@ -336,7 +332,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                         {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}><BookOpen weight="bold" size={18} />{t('builder.dl.guide')}</Link>}
                       </div>
                     </div>
-                    <div className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+                    <div className="rounded-input border-std border-border p-3 grid gap-2 content-start">
                       <p className="font-display text-lg flex items-center gap-2"><DownloadSimple weight="bold" size={22} aria-hidden="true" />{t('builder.dl.digital')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.digitalText')}</p>
                       <div className="flex flex-wrap gap-2">
@@ -357,7 +353,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                 <>
                   <div className="flex flex-wrap items-center gap-2">
                     <input type="search" value={find} onChange={(e) => setFind(e.target.value)} placeholder={t('builder.findPiece')} aria-label={t('builder.findPiece')}
-                      className="min-h-8 px-3 rounded-input border-[2px] border-border font-bold text-sm flex-1 min-w-40" />
+                      className="min-h-8 px-3 rounded-input border-std border-border font-bold text-sm flex-1 min-w-40" />
                   </div>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
                   <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} clear={isClear(p)} onClearBg={() => toggleClear(p)} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
@@ -373,7 +369,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                     <p className="font-bold">{t('builder.creditedTo', { name: teacherUsername() })}</p>
                     <label className="grid gap-1 font-bold text-sm">{t('builder.studentDesigner')}
                       <input id="theme-student" value={draft.studentDesigner ?? ''} maxLength={20} onChange={(e) => setDraft({ ...draft, studentDesigner: e.target.value || undefined })} placeholder={t('builder.studentDesignerPlaceholder')}
-                        className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold w-full max-w-72" />
+                        className="min-h-11 px-3 rounded-input border-std border-border font-bold w-full max-w-72" />
                     </label>
                   </div>
                   <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
@@ -386,7 +382,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('builder.font')}>
                     {APPROVED_FONTS.map((f) => (
                       <button key={f} type="button" role="radio" aria-checked={draft.fonts.display === f} aria-label={f} onClick={() => setDraft({ ...draft, fonts: { ...draft.fonts, display: f } })}
-                        className={`min-h-14 px-3 rounded-input border-[2px] text-left ${draft.fonts.display === f ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        className={`min-h-14 px-3 rounded-input border-std text-left ${draft.fonts.display === f ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                         <span className="block text-xl leading-tight" style={{ fontFamily: THEME_FONTS[f] }}>{game.name}</span>
                         <span className="block text-xs font-bold text-muted">{f}</span>
                       </button>
@@ -397,7 +393,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                     {SOUND_PACKS.map((p: SoundPack) => (
                       <button key={p} type="button" role="radio" aria-checked={(draft.sounds ?? 'classic') === p}
                         onClick={() => { setDraft({ ...draft, sounds: p }); playEffect('right', settings, p); window.setTimeout(() => playEffect('win', settings, p), 450); }}
-                        className={`min-h-12 px-3 rounded-input border-[2px] font-bold ${(draft.sounds ?? 'classic') === p ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        className={`min-h-12 px-3 rounded-input border-std font-bold ${(draft.sounds ?? 'classic') === p ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
                         {t(`builder.sound.${p}` as StringKey)}
                       </button>
                     ))}
@@ -420,7 +416,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               )}
             </div>
             {problems.length > 0 && (
-              <div className="shrink-0 grid gap-1 rounded-input border-[2px] border-danger/60 bg-danger/10 p-2">
+              <div className="shrink-0 grid gap-1 rounded-input border-std border-danger/60 bg-danger/10 p-2">
                 {problems.map((p) => <p key={p} className="font-bold text-sm flex items-center gap-2"><WarningCircle weight="fill" size={18} color="#9b2c3a" className="shrink-0" />{p}</p>)}
               </div>
             )}
@@ -483,11 +479,11 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   return (
-    <div className={`rounded-input border-[2px] p-2 flex items-center gap-3 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-accent' : ''}`}
+    <div className={`rounded-input border-std p-2 flex items-center gap-3 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-accent' : ''}`}
       onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
       onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}>
       <button type="button" onClick={() => ref.current?.click()} aria-label={t('builder.uploadPiece', { piece: piece.label })}
-        className={`shrink-0 w-12 h-12 border-[2px] border-dashed border-border-soft flex items-center justify-center overflow-hidden ${isRound(piece) ? 'rounded-full' : 'rounded-input'}`}>
+        className={`shrink-0 w-12 h-12 border-std border-dashed border-border-soft flex items-center justify-center overflow-hidden ${isRound(piece) ? 'rounded-full' : 'rounded-input'}`}>
         {image ? <img src={image} alt="" className={`w-full h-full ${clear ? 'object-contain' : 'object-cover'}`} style={clear ? CHECKER : undefined} /> : <UploadSimple weight="bold" size={22} className="text-muted" />}
       </button>
       <input ref={ref} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
@@ -501,9 +497,9 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
       <div className="shrink-0 flex gap-1">
         <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
         <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
-          className="shrink-0 w-8 h-8 rounded-full border-[2px] border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
+          className="shrink-0 w-8 h-8 rounded-full border-std border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
           style={clear ? CHECKER : { background: '#fbfcf8' }}>
-          <span className={`block w-3.5 h-3.5 rounded-[4px] border-[2px] border-border ${clear ? 'bg-transparent border-dashed' : 'bg-[#f6a5c0]'}`} />
+          <span className={`block w-3.5 h-3.5 rounded-[4px] border-std border-border ${clear ? 'bg-transparent border-dashed' : 'bg-[#f6a5c0]'}`} />
         </button>
         {image && <IconButton className="!w-8 !h-8" label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={14} /></IconButton>}
       </div>
@@ -518,7 +514,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   const [drawing, setDrawing] = useState<number | null>(null);
   const drawn = drawing === null ? undefined : items[drawing];
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
-  const field = 'min-h-11 px-2 rounded-input border-[2px] border-border font-bold bg-surface w-full';
+  const field = fieldClasses('md', 'w-full');
   function add() {
     const a = spec.abilities[0];
     // New ones go first, unnamed: every power-up needs its own name.
@@ -545,10 +541,10 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
       <Pages key={`items-${items.length}`} per={2} items={items.map((it, i) => {
         const ability = spec.abilities.find((a) => a.id === it.ability) ?? spec.abilities[0];
         return (
-          <div key={it.id} className="rounded-input border-[2px] border-border p-3 grid gap-2 content-start">
+          <div key={it.id} className="rounded-input border-std border-border p-3 grid gap-2 content-start">
             <span className="text-xs font-bold uppercase tracking-wide text-muted">{t('builder.items.templatePage', { n: i + 1 })}</span>
             <div className="flex items-center gap-3">
-              <label className="shrink-0 cursor-pointer rounded-input border-[2px] border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
+              <label className="shrink-0 cursor-pointer rounded-input border-std border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
                 <ItemArt item={it} size={64} still />
                 <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { put(i, { image: await imageFileToDataUrl(f, Math.max(spec.width, spec.height), true) }); } catch (err) { onProblem(err instanceof Error ? err.message : String(err)); } }} />
               </label>
@@ -605,14 +601,14 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
   useEffect(() => setText(value), [value]);
   const id = `color-${label.replace(/\W+/g, '-').toLowerCase()}`;
   return (
-    <div className="rounded-input border-[2px] border-border-soft p-2 flex items-center gap-2">
+    <div className="rounded-input border-std border-border-soft p-2 flex items-center gap-2">
       <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} className="color-dot shrink-0 w-11 h-11" />
       <div className="min-w-0 flex-1">
         <label htmlFor={id} className="font-bold block">{label}</label>
         <p className="text-xs font-semibold text-muted truncate" title={hint}>{hint}</p>
       </div>
       <input value={text} aria-label={`${label} hex code`} maxLength={7} onChange={(e) => { setText(e.target.value); if (HEX.test(e.target.value)) onChange(e.target.value.toLowerCase()); }}
-        className="shrink-0 min-h-11 w-24 px-2 rounded-input border-[2px] border-border font-mono font-bold uppercase text-sm" />
+        className="shrink-0 min-h-11 w-24 px-2 rounded-input border-std border-border font-mono font-bold uppercase text-sm" />
     </div>
   );
 }
@@ -623,13 +619,13 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
   const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
   const ready = saved && !problems;
-  const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-[2px] font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
+  const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
   return (
     <div className="grid gap-3">
       <p className="font-semibold text-muted text-sm">{t('builder.shareHint')}</p>
       <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.shareTitle')}>
         <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
-        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-50`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
+        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
       </div>
       {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
         : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p> : null}
@@ -639,7 +635,7 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
         {t('builder.shareChallenge')}
       </label>
       {theme.challenge && (
-        <div className="grid gap-2 rounded-input border-[2px] border-border-soft p-3">
+        <div className="grid gap-2 rounded-input border-std border-border-soft p-3">
           <p className="font-bold">{t('builder.track')}</p>
           <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.track')}>
             {(['studio', 'hand'] as const).map((k) => (
@@ -664,7 +660,7 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
 function PageTurn({ dir, label, onClick }: { dir: 'prev' | 'next'; label: string; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} data-tip={label}
-      className="shrink-0 w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center hover:bg-accent motion-safe:active:scale-95">
+      className="shrink-0 w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center hover:bg-accent motion-safe:active:scale-95">
       {dir === 'prev' ? <CaretLeft weight="bold" size={18} /> : <CaretRight weight="bold" size={18} />}
     </button>
   );

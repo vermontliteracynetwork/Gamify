@@ -6,6 +6,6 @@ import PictureBadge from './PictureBadge';
 // picture, drawn in the class's sign-in design when it has one.
 export default function Avatar({ avatar, theme, size }: { avatar: string; theme?: GameTheme; size: number }) {
   return isUploadedAvatar(avatar)
-    ? <img src={avatar} alt="" className="rounded-full border-[2px] border-border object-cover shrink-0" style={{ width: size, height: size }} />
+    ? <img src={avatar} alt="" className="rounded-full border-std border-border object-cover shrink-0" style={{ width: size, height: size }} />
     : <PictureBadge id={avatar} theme={theme} size={size} />;
 }

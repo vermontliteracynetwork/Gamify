@@ -235,7 +235,7 @@ export default function FourInARow() {
           <img src={discs[picks[who - 1]]?.image} alt="" className="w-full h-full object-contain" draggable="false" />
         </span>
       ) :
-      <span className="rounded-full border-[2.5px] border-border flex items-center justify-center" style={{ width: size, height: size, ...pieceFill(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
+      <span className="rounded-full border-bold border-border flex items-center justify-center" style={{ width: size, height: size, ...pieceFill(theme, `piece-${who}`, TEAM_COLORS[p?.colorIndex ?? 0]) }}>
         {!pieceImage(theme, `piece-${who}`) && <Icon weight="fill" className="w-1/2 h-1/2" color="#241c3d" aria-hidden="true" />}
       </span>
     );
@@ -288,14 +288,14 @@ export default function FourInARow() {
       )}
 
       {(phase === 'waiting' || phase === 'joining') && (
-        <div className="grid gap-4 justify-items-center text-center bg-surface border-[2.5px] border-border rounded-panel p-6 max-w-lg mx-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
+        <div className="grid gap-4 justify-items-center text-center bg-surface border-bold border-border rounded-panel p-6 max-w-lg mx-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
           <motion.span animate={still ? undefined : { y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.2 }}><Disc who={phase === 'waiting' ? 2 : 1} size="64px" /></motion.span>
           <h2 className="font-display text-3xl"><Title text={phase === 'waiting' ? t('fr.waitingTitle') : t('fr.joiningTitle')} /></h2>
           {phase === 'waiting' && (
             <>
               <p className="font-bold text-lg">{t('fr.waitingText', { host: window.location.host })}</p>
               <p className="font-display text-6xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: hostCode })}>{hostCode}</p>
-              <button type="button" onClick={() => { link.current?.close(); link.current = null; setPhase('setup'); }} className="min-h-12 px-5 rounded-pill border-[2px] border-border bg-surface-2 font-bold">{t('setup.back')}</button>
+              <button type="button" onClick={() => { link.current?.close(); link.current = null; setPhase('setup'); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('setup.back')}</button>
             </>
           )}
         </div>
@@ -315,7 +315,7 @@ export default function FourInARow() {
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
-          <div className="border-[3px] border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <div className="border-heavy border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5 mt-[min(2.4vw,1.4rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const popping = step === 'pop';
@@ -326,7 +326,7 @@ export default function FourInARow() {
                   <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
                     onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
                     aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-[2px] border-border ${canPick ? 'bg-accent tile-wiggle motion-safe:hover:-translate-y-1 motion-safe:active:scale-95 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
+                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-std border-border ${canPick ? 'bg-accent tile-wiggle motion-safe:hover:-translate-y-1 motion-safe:active:scale-95 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
                     {/* The player's piece peeks out above the numbers and slides
                         across the columns, then drops (teacher, 2026-11-06). */}
                     {holding && player && (
@@ -392,9 +392,9 @@ export default function FourInARow() {
           <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 grid gap-2 min-w-0">
             <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} />
             <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />
-            {step === 'pop' && <p className="bg-accent border-[2px] border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
+            {step === 'pop' && <p className="bg-accent border-std border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
             {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
-              <p className="bg-surface border-[2px] border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
+              <p className="bg-surface border-std border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
             )}
           </div>
           </div>

@@ -64,7 +64,7 @@ export default function QuestionVoice({ n, audioUrl, onChange }: { n: number; au
           <Stop weight="fill" size={16} />{t('editor.voice.stopShort', { secs: MAX_SECONDS - secs })}
         </Button>
       ) : audioUrl ? (
-        <span className="inline-flex items-center gap-1 rounded-pill border-[2px] border-border bg-[#c8f0dc] pl-1 pr-1">
+        <span className="inline-flex items-center gap-1 rounded-pill border-std border-border bg-mint-soft pl-1 pr-1">
           <button type="button" onClick={play} aria-label={t('editor.voice.play', { n })} className="min-h-10 px-3 inline-flex items-center gap-1.5 font-bold text-sm"><Play weight="fill" size={16} />{t('editor.voice.yours')}</button>
           <button type="button" onClick={() => onChange(undefined)} aria-label={t('editor.voice.remove', { n })} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface"><Trash weight="bold" size={16} /></button>
         </span>

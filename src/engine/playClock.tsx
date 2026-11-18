@@ -50,7 +50,7 @@ export function usePlayClock({ playing, score, onTimeUp }: { playing: boolean; s
     <AnimatePresence>
       {note && (
         <motion.div role="status" initial={{ y: -40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -40, opacity: 0 }}
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 px-5 min-h-14 rounded-pill bg-accent border-[2.5px] border-border font-display text-xl"
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2 px-5 min-h-14 rounded-pill bg-accent border-bold border-border font-display text-xl"
           style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <Timer weight="fill" size={26} aria-hidden="true" />{t(note === 'three' ? 'clock.three' : 'clock.one')}
         </motion.div>

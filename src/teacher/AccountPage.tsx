@@ -80,7 +80,7 @@ export default function AccountPage() {
         <h2 className="font-display text-2xl">{t('account.deleteTitle')}</h2>
         <p className="font-semibold">{t('account.deleteText')}</p>
         <label className="grid gap-1 font-bold">{t('account.typeDelete')}
-          <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className="min-h-11 px-3 rounded-input border-[2px] border-border font-bold max-w-xs" />
+          <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border font-bold max-w-xs" />
         </label>
         <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => void deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
       </Panel>

@@ -67,7 +67,7 @@ export default function Breadcrumbs() {
           <li key={i} className="flex items-center gap-1 min-w-0">
             {i > 0 && <CaretRight weight="bold" size={14} className="text-muted shrink-0" aria-hidden="true" />}
             {c.to && i < trail.length - 1
-              ? <Link to={c.to} className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-pill bg-surface/70 border-[1.5px] border-border-soft no-underline text-text hover:bg-surface hover:border-border">{i === 0 && <House weight="bold" size={16} aria-hidden="true" />}{c.label}</Link>
+              ? <Link to={c.to} className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-pill bg-surface/70 border-thin border-border-soft no-underline text-text hover:bg-surface hover:border-border">{i === 0 && <House weight="bold" size={16} aria-hidden="true" />}{c.label}</Link>
               : <span aria-current="page" className="px-2 truncate max-w-[60vw]">{c.label}</span>}
           </li>
         ))}

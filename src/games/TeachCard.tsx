@@ -29,14 +29,14 @@ export function TeachCardBox({ cards, onDone }: { cards: TeachShow[]; onDone: ()
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('teach.title')}>
       <DialogFocus />
       <motion.div key={k} initial={settings.motion === 'still' ? false : { scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
-        className="brand-menu w-full max-w-2xl max-h-[92dvh] overflow-hidden bg-surface border-[3px] border-border rounded-panel p-6 sm:p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-        <span className="inline-flex items-center gap-2 rounded-pill border-[2px] border-border bg-accent px-4 py-1 font-bold"><Lightbulb weight="fill" size={20} />{t('teach.title')}</span>
+        className="brand-menu w-full max-w-2xl max-h-[92dvh] overflow-hidden bg-surface border-heavy border-border rounded-panel p-6 sm:p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <span className="inline-flex items-center gap-2 rounded-pill border-std border-border bg-accent px-4 py-1 font-bold"><Lightbulb weight="fill" size={20} />{t('teach.title')}</span>
         <p className="font-bold text-muted">{c.name}</p>
-        {c.card.imageUrl && <img src={c.card.imageUrl} alt={c.card.imageAlt ?? ''} className="max-h-[32dvh] max-w-full rounded-input border-[2px] border-border object-contain" />}
+        {c.card.imageUrl && <img src={c.card.imageUrl} alt={c.card.imageAlt ?? ''} className="max-h-[32dvh] max-w-full rounded-input border-std border-border object-contain" />}
         <p className="font-display text-3xl sm:text-4xl leading-snug">{c.card.text}</p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <button type="button" onClick={() => speak(c.card.text, settings)} className="min-h-14 px-6 rounded-pill border-[2px] border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('q.listen')}</button>
-          <button type="button" onClick={() => (last ? onDone() : setK(k + 1))} className="min-h-14 px-8 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold inline-flex items-center gap-2">
+          <button type="button" onClick={() => speak(c.card.text, settings)} className="min-h-14 px-6 rounded-pill border-std border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2"><SpeakerHigh weight="bold" size={22} />{t('q.listen')}</button>
+          <button type="button" onClick={() => (last ? onDone() : setK(k + 1))} className="min-h-14 px-8 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold inline-flex items-center gap-2">
             {last ? <><Play weight="fill" size={22} />{t('teach.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={20} /></>}
           </button>
         </div>

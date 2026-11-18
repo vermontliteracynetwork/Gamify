@@ -146,20 +146,20 @@ export default function FarmGrow() {
 
       {(phase === 'play' || phase === 'end') && (
         <div className="grid gap-3">
-          <div className="flex flex-wrap items-center gap-2 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <div className="flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel px-4 py-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <span className="font-display text-xl flex-1 min-w-40" aria-live="polite">{tip}</span>
             <span className="inline-flex items-center gap-1.5 font-display text-2xl" aria-label={t('fg.jobs', { n: jobs })}><Shovel weight="fill" size={28} aria-hidden="true" />{jobs}</span>
             <span className="font-bold">{t('fg.dayOf', { n: day, total: days })}</span>
             <span className="font-bold">{t('fg.picked', { n: picked })}</span>
             {stage === 'work' && phase === 'play' && (
-              <button type="button" onClick={endDay} className={`min-h-12 px-5 rounded-pill border-[2.5px] border-border font-display text-xl inline-flex items-center gap-2 ${jobs === 0 ? 'bg-accent motion-safe:animate-pulse' : 'bg-surface-2'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <button type="button" onClick={endDay} className={`min-h-12 px-5 rounded-pill border-bold border-border font-display text-xl inline-flex items-center gap-2 ${jobs === 0 ? 'bg-accent motion-safe:animate-pulse' : 'bg-surface-2'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <Moon weight="fill" size={22} />{t('fg.endDay')}
               </button>
             )}
           </div>
 
           <div className="grid gap-3 landscape:grid-cols-[1fr_auto] items-start">
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden select-none aspect-[4/3]"
+            <div className="relative mx-auto w-full rounded-panel border-heavy border-border overflow-hidden select-none aspect-[4/3]"
               style={{ ...pieceFill(theme, 'background', '#bfe6a0'), maxWidth: 'min(100%, calc((100dvh - 17.625rem + var(--chrome-save, 0rem) + var(--wide-save, 0rem)) * 4 / 3))' }}>
               {!pieceImage(theme, 'background') && <div className="absolute inset-x-0 top-0 h-[16%] bg-[#bfe8ff] border-b-[3px] border-border" aria-hidden="true" />}
               <div className="absolute right-[3%] top-[2%] w-[16%] aspect-square" aria-hidden="true">
@@ -172,7 +172,7 @@ export default function FarmGrow() {
                   return (
                     <button key={i} type="button" onClick={() => tap(i)} disabled={stage !== 'work' || phase !== 'play'}
                       aria-label={plotLabel(i, p)}
-                      className={`relative rounded-input border-[3px] border-border overflow-hidden ${can ? 'cursor-pointer' : ''}`}
+                      className={`relative rounded-input border-heavy border-border overflow-hidden ${can ? 'cursor-pointer' : ''}`}
                       style={{ background: pieceColor(theme, 'soil', '#b98a5e'), filter: p.watered ? 'brightness(0.78)' : undefined, boxShadow: can ? '0 0 0 3px #fdfd94' : undefined }}>
                       <span className="absolute inset-x-0 top-[30%] h-[6%] bg-black/15" aria-hidden="true" /><span className="absolute inset-x-0 top-[62%] h-[6%] bg-black/15" aria-hidden="true" />
                       <AnimatePresence>
@@ -184,14 +184,14 @@ export default function FarmGrow() {
                         )}
                       </AnimatePresence>
                       {p.watered && <Drop weight="fill" size={22} color="#6aa9e9" className="absolute top-1 right-1 drop-shadow-[0_0_1px_#000]" aria-hidden="true" />}
-                      {can && <span className="absolute bottom-1 left-1 w-8 h-8 rounded-full bg-white border-[2px] border-border flex items-center justify-center" aria-hidden="true">{job === 'plant' ? <Plant weight="fill" size={18} /> : job === 'water' ? <Drop weight="fill" size={18} color="#3d7fd0" /> : <Shovel weight="fill" size={18} />}</span>}
+                      {can && <span className="absolute bottom-1 left-1 w-8 h-8 rounded-full bg-white border-std border-border flex items-center justify-center" aria-hidden="true">{job === 'plant' ? <Plant weight="fill" size={18} /> : job === 'water' ? <Drop weight="fill" size={18} color="#3d7fd0" /> : <Shovel weight="fill" size={18} />}</span>}
                     </button>
                   );
                 })}
               </div>
               <AnimatePresence>
                 {stage === 'night' && (
-                  <motion.div className="absolute inset-0 bg-[#241c3d]/70 flex items-center justify-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0 : 0.5 }}>
+                  <motion.div className="absolute inset-0 bg-ink-night/70 flex items-center justify-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0 : 0.5 }}>
                     <motion.span initial={still ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.6 }}><Moon weight="fill" size={90} color="#fdfd94" aria-hidden="true" /></motion.span>
                   </motion.div>
                 )}
@@ -200,7 +200,7 @@ export default function FarmGrow() {
                 {banner && (
                   <motion.div key={banner.id} className="absolute inset-x-[6%] top-[34%] flex justify-center pointer-events-none" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }} role="status">
                     {banner.crop ? (
-                      <p className="bg-surface border-[3px] border-border rounded-panel px-4 py-3 font-display text-xl sm:text-2xl text-center max-w-md inline-flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+                      <p className="bg-surface border-heavy border-border rounded-panel px-4 py-3 font-display text-xl sm:text-2xl text-center max-w-md inline-flex items-center gap-3" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
                         <span className="w-14 h-14 shrink-0"><CropArt theme={theme} crop={banner.crop} stage={3} /></span>{banner.text}
                       </p>
                     ) : <p className="font-display text-3xl sm:text-5xl text-white text-center" style={{ WebkitTextStroke: '2px #000' }}>{banner.text}</p>}
@@ -212,7 +212,7 @@ export default function FarmGrow() {
             <div className="grid grid-cols-4 landscape:grid-cols-1 gap-2" role="radiogroup" aria-label={t('fg.seeds')}>
               {CROPS.map((c) => (
                 <button key={c} type="button" role="radio" aria-checked={seed === c} onClick={() => { setSeed(c); playEffect('tap', settings); }}
-                  className={`rounded-input border-[2.5px] border-border p-2 grid justify-items-center gap-0.5 font-display text-base landscape:w-24 ${seed === c ? 'bg-accent -translate-y-0.5' : 'bg-surface'}`}
+                  className={`rounded-input border-bold border-border p-2 grid justify-items-center gap-0.5 font-display text-base landscape:w-24 ${seed === c ? 'bg-accent -translate-y-0.5' : 'bg-surface'}`}
                   style={{ boxShadow: seed === c ? 'var(--shadow-sticker)' : undefined }}>
                   <span className="w-12 h-12"><CropArt theme={theme} crop={c} stage={3} /></span>{t(`fg.crop.${c}`)}
                 </button>
@@ -223,7 +223,7 @@ export default function FarmGrow() {
           {/* Tall portrait screens have room under the seeds: how a crop grows. */}
           <ol className="hidden [@media(orientation:portrait)_and_(min-height:1100px)]:grid grid-cols-4 gap-2 list-none p-0 m-0" aria-label={t('fg.guide')}>
             {([['plant', <Plant weight="fill" size={30} />], ['water', <Drop weight="fill" size={30} color="#3d7fd0" />], ['night', <Moon weight="fill" size={30} color="#241c3d" />], ['pick', <Shovel weight="fill" size={30} />]] as const).map(([k, icon], i) => (
-              <li key={k} className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid justify-items-center gap-1 text-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <li key={k} className="bg-surface border-bold border-border rounded-panel p-3 grid justify-items-center gap-1 text-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="font-display text-lg">{i + 1}</span>{icon}
                 <span className="text-sm font-semibold">{t(`fg.step.${k}`)}</span>
               </li>

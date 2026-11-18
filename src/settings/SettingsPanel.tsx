@@ -31,7 +31,7 @@ export function FullScreenButton({ small = false }: { small?: boolean }) {
   const toggle = () => { void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
   return (
     <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')}
-      className={`${small ? 'w-11 h-11 border-[2px] bg-surface-2' : 'w-14 h-14 border-[2.5px] bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+      className={`${small ? 'w-11 h-11 border-std bg-surface-2' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
       style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
       {on ? <CornersIn weight="bold" size={small ? 20 : 28} /> : <CornersOut weight="bold" size={small ? 20 : 28} />}
     </button>
@@ -44,7 +44,7 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
       type="button"
       onClick={onClick}
       aria-label={t('settings.open')}
-      className={`${small ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 rounded-full bg-surface border-[2.5px] border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+      className={`${small ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
       style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}
     >
       <GearSix weight="bold" size={small ? 20 : 30} />
@@ -69,17 +69,17 @@ export function AccessButton({ small = false }: { small?: boolean }) {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-label={t('access.open')} title={t('access.open')}
-        className={`${small ? 'w-11 h-11 border-[2px] bg-surface-2' : 'w-14 h-14 border-[2.5px] bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+        className={`${small ? 'w-11 h-11 border-std bg-surface-2' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
         style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
         <PersonArmsSpread weight="bold" size={small ? 22 : 30} />
       </button>
       <dialog ref={ref} onClose={() => setOpen(false)} aria-label={t('access.title')}
-        className="m-auto w-[min(720px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-[2.5px] border-border bg-surface p-0 backdrop:bg-black/40 brand-menu">
+        className="m-auto w-[min(720px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-bold border-border bg-surface p-0 backdrop:bg-black/40 brand-menu">
         {open && (
           <>
             <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-[2px] border-border-soft">
               <h2 className="font-display text-2xl font-bold flex items-center gap-2"><PersonArmsSpread weight="bold" size={26} /><Title text={t('access.title')} /></h2>
-              <button type="button" onClick={() => setOpen(false)} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-[2px] border-border flex items-center justify-center bg-surface-2"><X weight="bold" size={22} /></button>
+              <button type="button" onClick={() => setOpen(false)} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-std border-border flex items-center justify-center bg-surface-2"><X weight="bold" size={22} /></button>
             </div>
             <div className="px-5 py-4 grid sm:grid-cols-2 gap-3 items-start">
               <div className="grid gap-3">
@@ -146,11 +146,11 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
       ref={ref}
       onClose={onClose}
       aria-label={t('settings.title')}
-      className="m-auto w-[min(640px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-[2.5px] border-border bg-surface p-0 backdrop:bg-black/40"
+      className="m-auto w-[min(640px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-bold border-border bg-surface p-0 backdrop:bg-black/40"
     >
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 bg-surface border-b-[2px] border-border-soft">
         <h2 className="font-display text-2xl font-bold flex items-center gap-2"><GearSix weight="bold" size={26} /><Title text={t('settings.title')} /></h2>
-        <button type="button" onClick={onClose} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-[2px] border-border flex items-center justify-center bg-surface-2">
+        <button type="button" onClick={onClose} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-std border-border flex items-center justify-center bg-surface-2">
           <X weight="bold" size={22} />
         </button>
       </div>
@@ -158,7 +158,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
       <div role="tablist" aria-label={t('settings.title')} className="flex gap-1.5 overflow-x-auto px-4 py-2 border-b-[2px] border-border-soft bg-surface">
         {TABS.map(({ id, icon: Icon, label }) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
-            className={`shrink-0 min-h-14 min-w-16 px-2.5 rounded-input border-[2px] flex flex-col items-center justify-center gap-0.5 font-bold text-xs
+            className={`shrink-0 min-h-14 min-w-16 px-2.5 rounded-input border-std flex flex-col items-center justify-center gap-0.5 font-bold text-xs
               ${tab === id ? 'bg-accent border-border' : 'bg-surface border-transparent hover:bg-surface-2'}`}>
             <Icon weight="bold" size={22} aria-hidden="true" />{t(label)}
           </button>
@@ -170,7 +170,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
           <div className="grid grid-cols-2 gap-2">
             {(Object.keys(PRESETS) as PresetId[]).map((id) => (
               <button key={id} type="button" onClick={() => update(PRESETS[id](s))}
-                className="min-h-14 px-3 rounded-input border-[2px] border-border bg-surface-2 font-bold active:scale-95">
+                className="min-h-14 px-3 rounded-input border-std border-border bg-surface-2 font-bold active:scale-95">
                 {t(`preset.${id}` as StringKey)}
               </button>
             ))}
@@ -252,17 +252,17 @@ const SHARE_GAMES = ['game-show', 'pinball', 'castle-quest', 'bowling', 'road-ho
 function MirrorControl({ gameId }: { gameId: string }) {
   const [code, setCode] = useState(getMirrorCode());
   return (
-    <div className="grid gap-2 rounded-input border-[2px] border-border p-3">
+    <div className="grid gap-2 rounded-input border-std border-border p-3">
       <span className="font-bold">{t('mirror.teacherTitle')}</span>
       <span className="text-sm font-semibold">{t('mirror.teacherHint')}</span>
       {code ? (
         <>
           <span className="font-display text-4xl tracking-[0.15em]" aria-label={t('host.codeIs', { code })}>{code}</span>
           <span className="text-sm font-semibold">{t('mirror.teacherHow', { host: window.location.host })}</span>
-          <button type="button" onClick={() => { setMirrorCode(''); setCode(''); }} className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-surface-2 font-bold">{t('mirror.stop')}</button>
+          <button type="button" onClick={() => { setMirrorCode(''); setCode(''); }} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold">{t('mirror.stop')}</button>
         </>
       ) : (
-        <button type="button" onClick={async () => { const c = (await makeGameCode(gameId, '', 'mirror')).code; setMirrorCode(c); setCode(c); }} className="justify-self-start min-h-11 px-4 rounded-pill border-[2px] border-border bg-accent font-bold">{t('mirror.start')}</button>
+        <button type="button" onClick={async () => { const c = (await makeGameCode(gameId, '', 'mirror')).code; setMirrorCode(c); setCode(c); }} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-accent font-bold">{t('mirror.start')}</button>
       )}
     </div>
   );
@@ -274,7 +274,7 @@ function StageColorPicker({ gameId }: { gameId: string }) {
   const color = useStageColor(gameId);
   const swatch = (c: string | null, label: string) => (
     <button key={label} type="button" role="radio" aria-checked={(color ?? null) === c} aria-label={label} data-tip={label} onClick={() => setStageColor(gameId, c)}
-      className={`w-11 h-11 rounded-full border-[2.5px] border-border flex items-center justify-center font-bold text-xs ${(color ?? null) === c ? 'ring-4 ring-accent' : ''}`}
+      className={`w-11 h-11 rounded-full border-bold border-border flex items-center justify-center font-bold text-xs ${(color ?? null) === c ? 'ring-4 ring-accent' : ''}`}
       style={c ? { background: c } : { background: 'linear-gradient(135deg, #fbfcf8 50%, #b4c4fb 50%)' }}>{c ? '' : 'A'}</button>
   );
   return (
@@ -284,7 +284,7 @@ function StageColorPicker({ gameId }: { gameId: string }) {
       <div className="flex flex-wrap gap-2 items-center" role="radiogroup" aria-label={t('settings.stageColor')}>
         {swatch(null, t('settings.stageColorTheme'))}
         {STAGE_SWATCHES.map((c) => swatch(c, c))}
-        <label className="w-11 h-11 rounded-full border-[2.5px] border-border overflow-hidden relative cursor-pointer" data-tip={t('settings.stageColorCustom')} style={{ background: 'conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)' }}>
+        <label className="w-11 h-11 rounded-full border-bold border-border overflow-hidden relative cursor-pointer" data-tip={t('settings.stageColorCustom')} style={{ background: 'conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)' }}>
           <span className="sr-only">{t('settings.stageColorCustom')}</span>
           <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={color ?? '#b4c4fb'} onChange={(e) => setStageColor(gameId, e.target.value)} />
         </label>

@@ -17,12 +17,12 @@ import { FAQS } from './faq';
 // homeschool families, plus the student data promise both ask about. Value
 // first, the free start always visible, the price framed per teacher or per
 // month, and every committee question answered with a link.
-const card = 'bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-2 content-start';
+const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-2 content-start';
 type Icon = typeof Brain;
 
 function Hero({ icon: I, kicker, title, sub, children }: { icon: Icon; kicker: string; title: string; sub: string; children: ReactNode }) {
   return (
-    <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+    <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <p className="font-bold uppercase tracking-wider text-sm">{kicker}</p>
       <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0 break-words"><I weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={title} /></h1>
       <p className="text-xl font-bold max-w-3xl">{sub}</p>
@@ -38,7 +38,7 @@ function Pillars({ items }: { items: { icon: Icon; key: string }[] }) {
       {items.map(({ icon: I, key }, i) => (
         <motion.article key={key} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.06 }}
           className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <span className="w-12 h-12 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
+          <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
           <h3 className="font-display text-2xl"><Title text={t(`${key}` as StringKey)} /></h3>
           <p className="font-semibold">{t(`${key}.text` as StringKey)}</p>
         </motion.article>
@@ -52,7 +52,7 @@ function FaqTeaser({ group }: { group: 'schools' | 'homeschool' }) {
     <section aria-labelledby="faq-teaser" className="grid gap-3">
       <h2 id="faq-teaser" className="font-display text-3xl"><Title text={t('aud.faqTitle')} /></h2>
       {FAQS[group].slice(0, 5).map((f) => (
-        <details key={f.q} className="bg-surface border-[2px] border-border rounded-input p-4">
+        <details key={f.q} className="bg-surface border-std border-border rounded-input p-4">
           <summary className="font-display text-xl cursor-pointer">{f.q}</summary>
           <p className="font-semibold mt-2 mb-0">{f.a}</p>
         </details>
@@ -67,8 +67,8 @@ export function SchoolsPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={Buildings} kicker={t('schools.kicker')} title={t('schools.title')} sub={t('schools.sub')}>
-          <Link to="/pricing#schools" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('schools.quote')}</Link>
-          <Link to="/beta" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('schools.pilot')}</Link>
+          <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('schools.quote')}</Link>
+          <Link to="/beta" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('schools.pilot')}</Link>
         </Hero>
 
         <section aria-labelledby="why" className="grid gap-4">
@@ -81,7 +81,7 @@ export function SchoolsPage() {
           <p className="font-semibold">{t('schools.committeeSub')}</p>
           <ul className="grid sm:grid-cols-2 gap-2 list-none p-0 m-0">
             {([['privacy', '/student-data'], ['dpa', '/faq?for=schools'], ['a11y', '/accessibility'], ['it', '/it'], ['research', '/research'], ['price', '/pricing#schools']] as const).map(([k, to]) => (
-              <li key={k}><Link to={to} className="hover-lift flex items-start gap-2 rounded-input border-[2px] border-border p-3 no-underline text-text bg-surface-2 h-full">
+              <li key={k}><Link to={to} className="hover-lift flex items-start gap-2 rounded-input border-std border-border p-3 no-underline text-text bg-surface-2 h-full">
                 <Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />
                 <span><span className="font-bold block">{t(`schools.c.${k}` as StringKey)}</span><span className="text-sm font-semibold">{t(`schools.c.${k}.text` as StringKey)}</span></span>
               </Link></li>
@@ -94,7 +94,7 @@ export function SchoolsPage() {
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-11 h-11 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center font-display text-xl">{n}</span>
+                <span className="w-11 h-11 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-xl">{n}</span>
                 <h3 className="font-display text-2xl">{t(`schools.step.${n}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`schools.step.${n}.text` as StringKey)}</p>
               </li>
@@ -121,12 +121,12 @@ export function SchoolsPage() {
 
         <FaqTeaser group="schools" />
 
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('schools.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('schools.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/pricing#schools" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('schools.quote')}</Link>
-            <Link to="/login?mode=signup" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('public.startFree')}</Link>
+            <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('schools.quote')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
           </div>
         </section>
       </main>
@@ -141,8 +141,8 @@ export function HomeschoolPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={House} kicker={t('hs.kicker')} title={t('hs.title')} sub={t('hs.sub')}>
-          <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}><ChalkboardTeacher weight="bold" size={22} />{t('hs.start')}</Link>
-          <Link to="/faq?for=homeschool" className={buttonClasses('secondary', 'min-h-14 px-7 text-lg hover-pop')}>{t('hs.questions')}</Link>
+          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('hs.start')}</Link>
+          <Link to="/faq?for=homeschool" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('hs.questions')}</Link>
         </Hero>
 
         <section aria-labelledby="fit" className="grid gap-4">
@@ -161,7 +161,7 @@ export function HomeschoolPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {POSTS.filter((p) => p.tags?.includes('homeschool')).map((p) => (
-              <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-[2.5px] border-border no-underline text-text overflow-hidden grid grid-cols-[8rem_minmax(0,1fr)]" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden grid grid-cols-[8rem_minmax(0,1fr)]" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <GameCover gameId={p.cover} className="h-full min-h-32 border-r-[2.5px] border-border" />
                 <span className="p-4 grid gap-1 content-start">
                   <span className="font-display text-xl leading-tight">{p.title}</span>
@@ -195,9 +195,9 @@ export function HomeschoolPage() {
 
         <FaqTeaser group="homeschool" />
 
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('hs.endTitle')} /></h2>
-          <Link to="/login?mode=signup" className={buttonClasses('primary', 'min-h-14 px-7 text-lg hover-pop !bg-text !text-white')}>{t('hs.start')}</Link>
+          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('hs.start')}</Link>
         </section>
       </main>
       <PublicFooter />

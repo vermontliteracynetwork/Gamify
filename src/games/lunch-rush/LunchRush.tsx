@@ -196,7 +196,7 @@ export default function LunchRush() {
         <div className="grid lg:grid-cols-[1fr_260px] gap-3 lg:gap-4 items-start">
           <section className="grid gap-2 min-w-0 [--lr-extra:4.375rem] lg:[--lr-extra:0rem] [--lr-ratio:1.5] portrait:[--lr-ratio:1.05]">
             {phase === 'play' && (
-              <div className="flex items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel px-4 py-2" aria-live="polite">
+              <div className="flex items-center gap-3 bg-surface border-bold border-border rounded-panel px-4 py-2" aria-live="polite">
                 <TeamBadge colorIndex={player.colorIndex} size={36} />
                 <span className="font-display text-xl sm:text-2xl">{step === 'question' ? t('share.whoseTurn', { name: player.name }) : player.kind === 'cpu' ? t('fr.cpuThinking') : t('lr.go', { name: player.name })}</span>
                 <span className="ml-auto font-bold text-sm text-right">
@@ -207,12 +207,12 @@ export default function LunchRush() {
                 </span>
               </div>
             )}
-            <div className="relative mx-auto w-full rounded-panel border-[3px] border-border overflow-hidden" role="group" aria-label={t('lr.counter')}
+            <div className="relative mx-auto w-full rounded-panel border-heavy border-border overflow-hidden" role="group" aria-label={t('lr.counter')}
               style={{ ...pieceFill(theme, 'background', '#fde2c4'), aspectRatio: 'var(--lr-ratio)', maxWidth: boardWidth }}>
               {!pieceImage(theme, 'background') && <div className="absolute inset-x-0 top-0 h-[14%] border-b-[3px] border-border" style={{ background: 'repeating-linear-gradient(90deg, #e5635f 0 8%, #fbfcf8 8% 16%)' }} aria-hidden="true" />}
               <div className="absolute inset-x-0 bottom-0 h-[26%] border-t-[3px] border-border" style={{ background: counterColor }} aria-hidden="true" />
               {!pieceImage(theme, 'background') && (
-                <div className="hidden portrait:flex absolute left-1/2 -translate-x-1/2 top-[19%] w-[56%] h-[14%] rounded-input border-[3px] border-border bg-[#314677] items-center justify-around px-[3%]" aria-hidden="true">
+                <div className="hidden portrait:flex absolute left-1/2 -translate-x-1/2 top-[19%] w-[56%] h-[14%] rounded-input border-heavy border-border bg-[#314677] items-center justify-around px-[3%]" aria-hidden="true">
                   {FOODS.map((f) => { return <span key={f} className="h-[70%] aspect-square rounded-full border-2 border-border flex items-center justify-center" style={foodBg(theme, f)}><FoodFace theme={theme} food={f} /></span>; })}
                 </div>
               )}
@@ -232,7 +232,7 @@ export default function LunchRush() {
                 {flying && (() => {
                   const toX = flying.seat === null ? 50 : ((flying.seat + 0.5) / SEATS) * 100;
                   return (
-                    <motion.span key={flying.id} className="absolute w-[11%] aspect-square -translate-x-1/2 rounded-full border-[3px] border-border flex items-center justify-center pointer-events-none" style={foodBg(theme, flying.food)}
+                    <motion.span key={flying.id} className="absolute w-[11%] aspect-square -translate-x-1/2 rounded-full border-heavy border-border flex items-center justify-center pointer-events-none" style={foodBg(theme, flying.food)}
                       initial={{ left: '50%', top: '96%', scale: 0.6 }} animate={flying.seat === null ? { left: ['50%', '50%'], top: ['96%', '70%', '96%'], rotate: [0, -12, 12, 0] } : { left: `${toX}%`, top: '44%', scale: 1 }} exit={{ opacity: 0, scale: 0.4 }}
                       transition={{ duration: still ? 0 : FLY_MS / 1000, ease: 'easeOut' }}>
                       <FoodFace theme={theme} food={flying.food} />
@@ -252,7 +252,7 @@ export default function LunchRush() {
                 const wanted = counter.seats.some((g) => g?.food === f);
                 return (
                   <button key={f} type="button" onClick={() => give(f)} disabled={!canServe} aria-label={t('lr.serve', { food: foodName(f) })}
-                    className={`min-h-16 rounded-input border-[2.5px] border-border flex flex-col items-center justify-center font-bold text-sm disabled:opacity-50 ${canServe && wanted ? 'motion-safe:animate-pulse' : ''}`}
+                    className={`min-h-16 rounded-input border-bold border-border flex flex-col items-center justify-center font-bold text-sm disabled:opacity-40 ${canServe && wanted ? 'motion-safe:animate-pulse' : ''}`}
                     style={{ ...foodBg(theme, f), boxShadow: 'var(--shadow-sticker)' }}>
                     <FoodFace theme={theme} food={f} size={34} /><span className="hidden sm:inline">{foodName(f)}</span>
                   </button>

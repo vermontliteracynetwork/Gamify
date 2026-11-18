@@ -52,7 +52,7 @@ export const sceneBackground = (theme: GameTheme): CSSProperties => (theme.piece
 export function Sky({ theme, still }: { theme: GameTheme; still: boolean }) {
   return (
     <>
-      <span className="absolute right-[16%] top-[3%] w-[5%] aspect-square rounded-full border-[2.5px] border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
+      <span className="absolute right-[16%] top-[3%] w-[5%] aspect-square rounded-full border-bold border-border" style={pieceFill(theme, 'sun', '#fdfd94')} aria-hidden="true" />
       {/* Puffy clouds drift slowly across the sky (teacher, 2026-11-13). */}
       {[[8, 4, 13, 0], [40, 9, 10, 1], [70, 3, 15, 2], [92, 10, 9, 3]].map(([x, y, w, i]) => (
         pieceImage(theme, 'cloud')

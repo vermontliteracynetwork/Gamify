@@ -40,7 +40,7 @@ export default function StatusPage() {
         <p className="text-lg font-semibold">{t('status.sub')}</p>
         <ul className="grid gap-3 list-none p-0 m-0">
           {(['app', 'cloud', 'live', 'voice'] as const).map((k) => (
-            <li key={k} className="bg-surface border-[2.5px] border-border rounded-panel p-4 flex items-start gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <li key={k} className="bg-surface border-bold border-border rounded-panel p-4 flex items-start gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               {icon(checks[k])}
               <div className="grid gap-0.5">
                 <p className="font-display text-xl">{t(`status.${k}` as StringKey)}</p>
@@ -54,7 +54,7 @@ export default function StatusPage() {
           <Button onClick={() => void run()}>{t('status.again')}</Button>
           <span className="text-sm font-bold text-muted">{t('status.at', { time: at.toLocaleTimeString() })}</span>
         </div>
-        <section className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-2">
+        <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-2">
           <h2 className="font-display text-2xl">{t('status.helpTitle')}</h2>
           <p className="font-semibold">{t('status.help')}</p>
         </section>

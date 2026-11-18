@@ -435,7 +435,7 @@ export default function GameShow() {
             <div className="fixed inset-0 z-[70] grid place-content-center justify-items-center gap-2 pointer-events-none" role="status">
               <AnimatePresence>
                 {toasts.map((x) => (
-                  <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-accent border-[3px] border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+                  <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-accent border-heavy border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
                     initial={settings.motion === 'still' ? false : { y: -40, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} transition={POP_IN}>{x.text}</motion.p>
                 ))}
               </AnimatePresence>
@@ -468,15 +468,15 @@ export default function GameShow() {
                     aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`relative w-full h-full min-h-0 rounded-input border-[2.5px] border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
+                    className={`relative w-full h-full min-h-0 rounded-input border-bold border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
                       ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${!c.open ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
                     style={flipping === i ? {} : { boxShadow: c.open && isGolden(c.kind) ? '0 0 0 4px #f2b705, 0 0 22px 6px rgba(242,183,5,0.7)' : 'var(--shadow-sticker)', ...(c.open ? (isGolden(c.kind) ? { background: 'linear-gradient(135deg, #fff3b0 0%, #ffd75e 45%, #f2b705 100%)' } : {}) : pieceFill(theme, 'card-back', '#fdfd94')) }}
                   >
                     {flipping === i ? (
                       <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
                         <motion.span className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }} initial={{ rotateY: 0, scale: 1 }} animate={{ rotateY: 180, scale: [1, 1.18, 1.08] }} transition={{ duration: 0.65 * pace(settings), ease: 'easeInOut' }}>
-                          <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center" style={{ backfaceVisibility: 'hidden', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{i + 1}</span>
-                          <span className="absolute inset-0 rounded-input border-[2.5px] border-border flex items-center justify-center bg-surface overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: '0 0 24px 6px #fdfd94' }}>
+                          <span className="absolute inset-0 rounded-input border-bold border-border flex items-center justify-center" style={{ backfaceVisibility: 'hidden', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{i + 1}</span>
+                          <span className="absolute inset-0 rounded-input border-bold border-border flex items-center justify-center bg-surface overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: '0 0 24px 6px #fdfd94' }}>
                             {c.kind.kind === 'power' ? <span className="h-[70%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><ItemArt item={c.kind.item} size={96} still /></span> : <span className="text-[clamp(1.5rem,6cqw,4rem)]">+{c.kind.points}</span>}
                           </span>
                         </motion.span>
@@ -499,7 +499,7 @@ export default function GameShow() {
               <div className="overflow-x-auto p-3 -m-3">
                 <div className="grid gap-2 min-w-[560px]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
-                    <div key={s.id} className="min-h-16 rounded-input border-[2.5px] border-border bg-surface-2 font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]">{s.name}</div>
+                    <div key={s.id} className="min-h-16 rounded-input border-bold border-border bg-surface-2 font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]">{s.name}</div>
                   ))}
                   {GRID_POINTS.map((points) => chosenSets.slice(0, 5).map((s, col) => {
                     const i = cells.findIndex((c) => c.col === col && c.points === points);
@@ -508,7 +508,7 @@ export default function GameShow() {
                       <button key={`${col}-${points}`} type="button" onClick={() => pickCell(i)}
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
-                        className={`rounded-input border-[2.5px] border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : 'tile-wiggle'}`}
+                        className={`rounded-input border-bold border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : 'tile-wiggle'}`}
                         style={{ minHeight: 'max(3rem, calc((var(--play-h) - 1.5rem - var(--gs-extra, 0rem) - 9rem) / 5))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
                         {cell?.used ? '' : points}
                       </button>
@@ -548,10 +548,10 @@ export default function GameShow() {
           )}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
-            className="relative border-[3px] border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', background: reveal.card.kind === 'points' ? 'radial-gradient(circle at 50% 35%, #fffbd1, #fdfd94 45%, #f7b267 100%)' : 'var(--color-surface, #fbfcf8)' }}>
+            className="relative border-heavy border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', background: reveal.card.kind === 'points' ? 'radial-gradient(circle at 50% 35%, #fffbd1, #fdfd94 45%, #f7b267 100%)' : 'var(--color-surface, #fbfcf8)' }}>
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
             {current(turns).kind !== 'cpu' && (
-              <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-[2.5px] border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+              <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
             )}
             {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : (
               // The points count up, bigger for bigger prizes.
@@ -575,7 +575,7 @@ export default function GameShow() {
                 <div className="grid grid-cols-2 gap-2">
                   {turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).map((p) => (
                     <button key={p.id} type="button" onClick={() => applyCard(reveal.card, p.id)}
-                      className="min-h-14 px-3 rounded-input border-[2px] border-border bg-surface-2 font-bold flex items-center gap-2">
+                      className="min-h-14 px-3 rounded-input border-std border-border bg-surface-2 font-bold flex items-center gap-2">
                       <TeamBadge colorIndex={p.colorIndex} size={30} />{p.name} ({p.score})
                     </button>
                   ))}
@@ -586,7 +586,7 @@ export default function GameShow() {
               <p className="font-bold">{t('tb.nobodyToPick')}</p>
             )}
             {!reveal.choosing && current(turns).kind !== 'cpu' && (
-              <button type="button" onClick={closeReveal} className="min-h-14 px-10 rounded-pill border-[2.5px] border-border bg-accent font-display text-2xl font-bold">{t('tb.ok')}</button>
+              <button type="button" onClick={closeReveal} className="min-h-14 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold">{t('tb.ok')}</button>
             )}
           </motion.div>
         </div>
@@ -631,7 +631,7 @@ function BoardArt({ kind }: { kind: Board }) {
     return (
       <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
         {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
+          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
             {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
           </span>
         ))}
@@ -641,9 +641,9 @@ function BoardArt({ kind }: { kind: Board }) {
   return (
     <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
-      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-[2px] border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
+      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
-        <span key={i} className="rounded-sm border-[2px] border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}
     </span>
   );

@@ -7,7 +7,7 @@ import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, type Tier } from '../conf
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, buttonClasses } from '../ui/kit';
+import { Button, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import PlanFeatures from '../billing/PlanFeatures';
@@ -61,14 +61,14 @@ export default function PricingPage() {
           <h1 className="title-bubble text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
           <p className="text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 mt-4 mb-0">
-            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-[2px] border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
+            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
           {tiers.map((x, i) => {
             return (
-              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-[2.5px] border-border p-5 grid gap-3 content-start relative ${x === 'plus' ? 'bg-accent md:-mt-3 md:mb-3' : 'bg-surface'}`} style={{ boxShadow: x === 'plus' ? 'var(--shadow-sticker-lg)' : 'var(--shadow-sticker)' }}>
+              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-bold border-border p-5 grid gap-3 content-start relative ${x === 'plus' ? 'bg-accent md:-mt-3 md:mb-3' : 'bg-surface'}`} style={{ boxShadow: x === 'plus' ? 'var(--shadow-sticker-lg)' : 'var(--shadow-sticker)' }}>
                 {x === 'plus' && <span className="absolute -top-4 right-5 bg-text text-white font-display rounded-pill px-3 py-1 text-sm">{t('upgrade.best')}</span>}
                 <h2 id={`plan-${x}`} className="font-display text-3xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-bold">{t(`pricing.${x}.who` as StringKey)}</p>
@@ -87,14 +87,14 @@ export default function PricingPage() {
             );
           })}
         </div>
-        <Link to="/homeschool" className="hover-lift flex flex-wrap items-center gap-3 bg-surface border-[2.5px] border-border rounded-panel p-4 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <Link to="/homeschool" className="hover-lift flex flex-wrap items-center gap-3 bg-surface border-bold border-border rounded-panel p-4 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <House weight="fill" size={30} aria-hidden="true" />
           <span className="grid flex-1 min-w-60"><span className="font-display text-2xl">{t('pricing.homeschoolLink')}</span><span className="font-semibold">{t('pricing.homeschoolLinkText')}</span></span>
           <ArrowRight weight="bold" size={24} aria-hidden="true" />
         </Link>
 
-        <section aria-labelledby="themes-value" className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <span className="w-16 h-16 rounded-full bg-accent border-[2.5px] border-border flex items-center justify-center wiggle-on-hover"><PaintBrush weight="fill" size={32} aria-hidden="true" /></span>
+        <section aria-labelledby="themes-value" className="bg-surface border-bold border-border rounded-panel p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <span className="w-16 h-16 rounded-full bg-accent border-bold border-border flex items-center justify-center wiggle-on-hover"><PaintBrush weight="fill" size={32} aria-hidden="true" /></span>
           <div>
             <h2 id="themes-value" className="font-display text-2xl"><Title text={t('pricing.themesTitle')} /></h2>
             <p className="font-semibold">{t('pricing.themesText')}</p>
@@ -102,7 +102,7 @@ export default function PricingPage() {
           <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}</Link>
         </section>
 
-        <div className="overflow-x-auto bg-surface border-[2.5px] border-border rounded-panel">
+        <div className="overflow-x-auto bg-surface border-bold border-border rounded-panel">
           <table className="w-full min-w-[560px] text-left">
             <caption className="sr-only">{t('pricing.compare')}</caption>
             <thead><tr className="border-b-[2px] border-border">
@@ -126,7 +126,7 @@ export default function PricingPage() {
         <SchoolPlans />
 
         {/* What is never behind a paywall, in public (teacher research, 2026-10-31). */}
-        <section aria-labelledby="always-free" className="bg-surface border-[2.5px] border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section aria-labelledby="always-free" className="bg-surface border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 id="always-free" className="font-display text-3xl flex items-center gap-2"><ShieldCheck weight="fill" size={30} aria-hidden="true" /><Title text={t('pricing.always.title')} /></h2>
           <p className="font-semibold">{t('pricing.always.text')}</p>
           <ul className="grid sm:grid-cols-2 gap-2 list-none p-0 m-0">
@@ -139,7 +139,7 @@ export default function PricingPage() {
           {/* FAQ structured data: search and AI answer tools read these (teacher, 2026-10-31). */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [1, 2, 3, 4, 5, 6].map((n) => ({ '@type': 'Question', name: t(`pricing.faq.${n}.q` as StringKey), acceptedAnswer: { '@type': 'Answer', text: t(`pricing.faq.${n}.a` as StringKey) } })) }) }} />
           {[1, 2, 3, 4, 5, 6].map((n) => (
-            <details key={n} className="bg-surface border-[2px] border-border rounded-input p-4">
+            <details key={n} className="bg-surface border-std border-border rounded-input p-4">
               <summary className="font-display text-xl cursor-pointer">{t(`pricing.faq.${n}.q` as StringKey)}</summary>
               <p className="font-semibold mt-2 mb-0">{t(`pricing.faq.${n}.a` as StringKey)}</p>
             </details>
@@ -170,19 +170,19 @@ function SchoolPlans() {
     setBusy(false);
     setSent(res?.ok ? 'emailed' : 'queued');
   }
-  const field = 'min-h-12 px-3 rounded-input border-[2px] border-border font-bold bg-surface';
+  const field = fieldClasses('md');
   return (
-    <section id="schools" aria-labelledby="school-title" className="bg-surface border-[2.5px] border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <section id="schools" aria-labelledby="school-title" className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <div className="grid gap-2">
         <h2 id="school-title" className="title-bubble text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('pricing.schoolSub')}</p>
         <Link to="/schools" className="font-bold justify-self-start">{t('pricing.schoolMore')}</Link>
       </div>
       <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
-        {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold bg-surface-2 border-[2px] border-border rounded-input p-3"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.school.${n}` as StringKey)}</li>)}
+        {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold bg-surface-2 border-std border-border rounded-input p-3"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.school.${n}` as StringKey)}</li>)}
       </ul>
       <div className="grid md:grid-cols-2 gap-5 items-start">
-        <div className="bg-accent border-[2.5px] border-border rounded-panel p-5 grid gap-3">
+        <div className="bg-accent border-bold border-border rounded-panel p-5 grid gap-3">
           <p className="font-display text-2xl leading-tight">{t('pricing.savingsNoPrice', { min: SCHOOL_MIN_SEATS })}</p>
           <p className="text-sm font-bold">{t('pricing.po')} <Link to="/pricing/purchase-order">{t('po.link')}</Link></p>
           <PrincipalNote />
@@ -218,7 +218,7 @@ function PrincipalNote() {
   const [copied, setCopied] = useState(false);
   const note = t('pricing.note');
   return (
-    <details className="bg-surface border-[2px] border-border rounded-input p-3">
+    <details className="bg-surface border-std border-border rounded-input p-3">
       <summary className="font-bold cursor-pointer">{t('pricing.noteTitle')}</summary>
       <p className="font-semibold text-sm mt-2 mb-2 whitespace-pre-line">{note}</p>
       <Button onClick={async () => { try { await navigator.clipboard.writeText(note); setCopied(true); } catch { setCopied(false); } }}>{copied ? t('pricing.noteCopied') : t('pricing.noteCopy')}</Button>

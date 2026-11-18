@@ -52,7 +52,7 @@ export function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, colo
         const lit = here === i;
         return (
           <div key={i} className="absolute tile-wiggle" style={{ left: ox + c.x * s + s * 0.05 + w.dx, top: oy + c.y * s + s * 0.05 + w.dy, width: s * 0.9, height: s * 0.9, transform: `rotate(${w.r}deg)` }}>
-            <div className={`w-full h-full rounded-[16%] border-[3px] grid place-items-center overflow-hidden ${lit && !still ? 'cq-glow' : ''}`}
+            <div className={`w-full h-full rounded-[16%] border-heavy grid place-items-center overflow-hidden ${lit && !still ? 'cq-glow' : ''}`}
               style={{ borderColor: C.ink, background: img ? `center / cover url("${img}")` : fill, boxShadow: lit ? `0 0 0 4px ${color}, 0 0 16px 4px ${color}` : `0 3px 0 ${C.ink}` }}>
               {!img && kind === 'start' && <span className="text-[#fffdf6] leading-none" style={{ ...CHICLE, fontSize: s * 0.26, WebkitTextStroke: `1px ${C.ink}` }}>{t('cq.startWord')}</span>}
               {!img && kind === 'finish' && <span className="grid justify-items-center leading-none" style={{ ...CHICLE, fontSize: s * 0.22, color: C.ink }}><FlagCheckered weight="fill" size={s * 0.4} />{t('cq.finishWord')}</span>}

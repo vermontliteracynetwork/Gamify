@@ -6,7 +6,7 @@ import { Crosshair, Question, Sparkle, Star } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
-import { TeamBadge } from '../../engine/TeamBadge';
+import TopStrip from '../../engine/TopStrip';
 import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
@@ -319,8 +319,9 @@ export default function BubblePop() {
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <section className="grid gap-2 min-w-0" style={{ width: `min(calc(100vw - 9rem), calc((var(--play-h) - 5.75rem) * ${W / H}))` }}>
-            <RoundStrip score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} shots={shots} total={plan.current.shots} />
-            <div className="relative w-full rounded-panel border-[3px] border-border overflow-hidden select-none touch-none"
+            <TopStrip leftLabel={t('bp.shots', { count: shots })} score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} perRound={plan.current.shots} left={shots}
+              label={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} />
+            <div className="relative w-full rounded-panel border-heavy border-border overflow-hidden select-none touch-none"
               style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, boxShadow: 'var(--shadow-sticker-lg)' }}>
               <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('bp.boardLabel')}
                 style={{ cursor: canAim ? 'crosshair' : 'default' }}
@@ -371,13 +372,13 @@ export default function BubblePop() {
               {/* Special shots and combos call out over the board. */}
               <AnimatePresence>
                 {callout && (
-                  <motion.p key={callout.id} className="absolute inset-x-0 top-[38%] text-center font-display text-4xl sm:text-5xl text-[#fdfd94] pointer-events-none" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
+                  <motion.p key={callout.id} className="absolute inset-x-0 top-[38%] text-center font-display text-4xl sm:text-5xl text-accent pointer-events-none" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
                     initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0, rotate: -8 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, y: -16 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }}
                     onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 700); }}>{callout.text}</motion.p>
                 )}
               </AnimatePresence>
               {/* Short messages sit over the top of the board. */}
-              {(() => { const msg = note ?? (step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : undefined); return msg ? <p className="absolute left-1/2 top-2 -translate-x-1/2 max-w-[90%] text-center rounded-pill border-[2px] border-border bg-surface px-3 py-0.5 text-sm font-bold pointer-events-none" role="status">{msg}</p> : null; })()}
+              {(() => { const msg = note ?? (step === 'aim' ? (shooter.now === 'rainbow' ? t('bp.rainbowReady') : shooter.now === 'burst' ? t('bp.burstReady') : undefined) : undefined); return msg ? <p className="absolute left-1/2 top-2 -translate-x-1/2 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold pointer-events-none" role="status">{msg}</p> : null; })()}
             </div>
           </section>
         </div>
@@ -388,26 +389,5 @@ export default function BubblePop() {
       {element}
     </main>
     </ThemedPage>
-  );
-}
-
-// One strip across the top of the board (teacher, 2026-11-16): the player and
-// score, the rounds as a progress bar, and the shots left this round.
-function RoundStrip({ score, player, round, rounds, shots, total }: { score: number; player?: string; round: number; rounds: number; shots: number; total: number }) {
-  const still = useSettings().settings.motion === 'still';
-  return (
-    <div className="score-card w-full flex items-center gap-3 px-3 py-1.5" role="group" aria-label={t('bp.roundOf', { n: round, total: rounds })}>
-      {player ? <img src={player} alt="" aria-hidden="true" className="w-8 h-8 rounded-full border-[2px] border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={0} size={32} />}
-      <motion.span key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums leading-none min-w-[2.5ch]" aria-label={t('share.points', { count: score })}>{score}</motion.span>
-      <span className="flex-1 grid gap-0.5 min-w-0">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted leading-none">{t('pb.roundWord')} {round}/{rounds}</span>
-        <span className="h-3 rounded-pill border-[2px] border-border bg-surface-2 overflow-hidden" aria-hidden="true">
-          <motion.span className="block h-full rounded-pill" style={{ background: 'linear-gradient(90deg, #b4c4fb, #8fe3a0)' }} initial={false} animate={{ width: `${(round / Math.max(1, rounds)) * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
-        </span>
-      </span>
-      <span className="flex gap-1 shrink-0" role="img" aria-label={t('bp.shots', { count: shots })}>
-        {Array.from({ length: Math.max(total, shots) }, (_, i) => <span key={i} className={`w-3.5 h-3.5 rounded-full border-[2px] border-border ${i < shots ? 'bg-accent' : 'bg-surface-2'}`} />)}
-      </span>
-    </div>
   );
 }

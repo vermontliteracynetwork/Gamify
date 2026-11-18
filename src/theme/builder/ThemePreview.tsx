@@ -46,10 +46,10 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
   const Own = view === 'game' ? GAME_PREVIEWS[theme.gameId] : undefined;
   if (Own) return <Own theme={theme} />;
   return (
-    <div className="rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
+    <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
-        <span className="px-3 py-1 rounded-pill border-[2px] border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
+        <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
       </div>
       <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme)}</div>
     </div>
@@ -70,14 +70,14 @@ function PickView({ theme }: { theme: GameTheme }) {
   const [big, setBig] = useState<number | null>(null);
   const label = theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : 'Preview: each team picks its icon';
   return (
-    <div className="relative brand-menu rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="group" aria-label={label}>
+    <div className="relative brand-menu rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="group" aria-label={label}>
       <TeamArt.Provider value={art}>
-        <div className="bg-surface border-[2.5px] border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <div className="bg-surface border-bold border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <span className="font-bold text-lg">Teams</span>
           {names.map((n, i) => (
-            <span key={n} className="flex items-center gap-2 rounded-input border-[2px] border-border-soft p-1.5"><TeamBadge colorIndex={i} size={30} /><span className="font-bold text-sm truncate">{n}</span></span>
+            <span key={n} className="flex items-center gap-2 rounded-input border-std border-border-soft p-1.5"><TeamBadge colorIndex={i} size={30} /><span className="font-bold text-sm truncate">{n}</span></span>
           ))}
-          <div className="grid grid-cols-5 gap-1.5 rounded-input border-[2px] border-border p-2 bg-[#e6ebff] justify-items-center">
+          <div className="grid grid-cols-5 gap-1.5 rounded-input border-std border-border p-2 bg-[#e6ebff] justify-items-center">
             {Array.from({ length: 10 }, (_, k) => (
               <button key={k} type="button" onClick={() => setBig(k)} aria-label={`See picture ${k + 1} big`} className={`rounded-full motion-safe:hover:scale-110 motion-safe:transition-transform ${k === 0 ? 'ring-4 ring-accent' : ''}`}>
                 <TeamBadge colorIndex={k} size={34} />
@@ -121,7 +121,7 @@ function PowersView({ theme }: { theme: GameTheme }) {
   return (
     <div ref={box} className="w-full h-full grid place-content-center gap-2" style={{ gridTemplateColumns: `repeat(${best.cols}, ${Math.floor(best.cell)}px)`, gridAutoRows: `${Math.floor(best.cell)}px` }}>
       {items.map((it) => (
-        <span key={it.id} className="grid place-items-center content-center gap-0.5 rounded-input border-[2px] border-border bg-surface overflow-hidden" style={{ boxShadow: '0 3px 0 #000' }} title={it.name}>
+        <span key={it.id} className="grid place-items-center content-center gap-0.5 rounded-input border-std border-border bg-surface overflow-hidden" style={{ boxShadow: '0 3px 0 #000' }} title={it.name}>
           <ItemArt item={it} size={art} still />
           {best.cell > 70 && <span className="text-[11px] leading-tight font-bold max-w-full px-1 truncate">{it.name}</span>}
         </span>
@@ -153,7 +153,7 @@ function BoardGamePreview({ theme }: { theme: GameTheme }) {
   const at = (i: number) => ({ x: ox + (L.cells[i].x + 0.5) * L.size, y: oy + (L.cells[i].y + 0.5) * L.size });
   const tok = L.size * 0.6;
   return (
-    <div ref={box} className="relative rounded-panel border-[2.5px] border-border overflow-hidden aspect-[4/3]" style={boardGround(theme)} role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>
+    <div ref={box} className="relative rounded-panel border-bold border-border overflow-hidden aspect-[4/3]" style={boardGround(theme)} role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>
       <BoardArt L={L} ox={ox} oy={oy} n={PREVIEW_SQUARES} kinds={PREVIEW_KINDS} theme={theme} wobble={WOBBLE} still here={null} color="#fff" />
       <TeamArt.Provider value={teamArt(theme)}>
         {[0, 6].map((sq, k) => (
@@ -204,30 +204,30 @@ function board(theme: GameTheme) {
       return <BowlingLane theme={theme} />;
     case 'match-three':
       return (
-        <div className="grid grid-cols-5 gap-1 p-2 rounded-input border-[2px] border-border h-full aspect-square" style={pieceFill(theme, 'board', '#ffffff')}>
-          {Array.from({ length: 25 }, (_, i) => <span key={i} className="rounded-md border-[1.5px] border-border-soft" style={pieceFill(theme, `tile-${(i * 7) % 6}`, TILE_COLORS[(i * 7) % 6])} />)}
+        <div className="grid grid-cols-5 gap-1 p-2 rounded-input border-std border-border h-full aspect-square" style={pieceFill(theme, 'board', '#ffffff')}>
+          {Array.from({ length: 25 }, (_, i) => <span key={i} className="rounded-md border-thin border-border-soft" style={pieceFill(theme, `tile-${(i * 7) % 6}`, TILE_COLORS[(i * 7) % 6])} />)}
         </div>
       );
     case 'four-in-a-row':
       return (
-        <div className="grid grid-cols-7 gap-1 p-2 rounded-input border-[2px] border-border h-full aspect-[7/6]" style={pieceFill(theme, 'board', '#a8d8f0')}>
+        <div className="grid grid-cols-7 gap-1 p-2 rounded-input border-std border-border h-full aspect-[7/6]" style={pieceFill(theme, 'board', '#a8d8f0')}>
           {Array.from({ length: 42 }, (_, i) => {
             const who = [38, 31, 24, 39].includes(i) ? 1 : [37, 40, 32].includes(i) ? 2 : 0;
-            return <span key={i} className="rounded-full border-[1.5px] border-border bg-white overflow-hidden">{who > 0 && <span className="block w-full h-full rounded-full" style={pieceFill(theme, `piece-${who}`, who === 1 ? '#f6a5c0' : '#9fd8f0')} />}</span>;
+            return <span key={i} className="rounded-full border-thin border-border bg-white overflow-hidden">{who > 0 && <span className="block w-full h-full rounded-full" style={pieceFill(theme, `piece-${who}`, who === 1 ? '#f6a5c0' : '#9fd8f0')} />}</span>;
           })}
         </div>
       );
     case 'farm-grow':
       return (
         <div className="grid grid-cols-5 gap-2 items-end w-full p-2 rounded-input" style={{ background: pieceColor(theme, 'soil', '#b98a5e') }}>
-          {(['sprout', 'crop-corn', 'crop-pumpkin', 'crop-sunflower', 'crop-tomato'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-14 object-contain justify-self-center" /> : <span key={id} className="h-10 w-10 justify-self-center rounded-full border-[2px] border-border bg-[#7cc66a]" />)}
+          {(['sprout', 'crop-corn', 'crop-pumpkin', 'crop-sunflower', 'crop-tomato'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-14 object-contain justify-self-center" /> : <span key={id} className="h-10 w-10 justify-self-center rounded-full border-std border-border bg-[#7cc66a]" />)}
         </div>
       );
     case 'big-screen':
       return (
         <div className="grid grid-cols-[auto_1fr] items-center gap-3 w-full">
           {pieceImage(theme, 'mascot') ? <img src={pieceImage(theme, 'mascot')} alt="" className="w-16 h-16 object-contain" /> : <Star weight="fill" size={56} color="#f6c544" />}
-          <span className="rounded-input border-[2px] border-border bg-surface p-2 font-display text-2xl tracking-[0.15em] text-center">ABCDE</span>
+          <span className="rounded-input border-std border-border bg-surface p-2 font-display text-2xl tracking-[0.15em] text-center">ABCDE</span>
           {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt="" className="col-span-2 h-12 justify-self-center object-contain" />}
         </div>
       );
@@ -240,7 +240,7 @@ function board(theme: GameTheme) {
             <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
           </TeamArt.Provider>
           {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className="aspect-[4/3] rounded-md border-[2px] border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
+            <span key={i} className="aspect-[4/3] rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
               {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
             </span>
           ))}

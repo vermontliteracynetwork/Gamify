@@ -54,13 +54,13 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
           <h2 className="font-display text-xl"><Title text={t('start.title')} /></h2>
           <p className="font-bold text-sm">{t('start.progress', { done: count, total: steps.length })}</p>
         </div>
-        <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
-        <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-9 h-9 rounded-full border-[2px] border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
+        <button type="button" aria-label={small ? t('start.expand') : t('start.minimize')} aria-expanded={!small} onClick={toggle} className="w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center">{small ? <CaretDown weight="bold" size={18} /> : <Minus weight="bold" size={18} />}</button>
+        <button type="button" aria-label={t('start.hide')} onClick={onFold} className="w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center"><X weight="bold" size={18} /></button>
       </div>
       {!small && <ol className="grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr gap-2 list-none p-0 m-0">
         {steps.map((s, i) => (
           <li key={s.key}>
-            <Link to={s.to} className={`hover-pop h-full min-h-11 rounded-input border-[2px] border-border px-2.5 py-1.5 flex items-center gap-1.5 no-underline text-text ${s.done ? 'bg-surface-2' : 'bg-surface'}`}>
+            <Link to={s.to} className={`hover-pop h-full min-h-11 rounded-input border-std border-border px-2.5 py-1.5 flex items-center gap-1.5 no-underline text-text ${s.done ? 'bg-surface-2' : 'bg-surface'}`}>
               <span className="flex items-center gap-1 font-bold shrink-0">{s.done ? <CheckCircle weight="fill" size={20} color="#1f7a45" aria-label={t('start.done')} /> : <Circle weight="bold" size={20} aria-hidden="true" />}{i + 1}</span>
               <span className="font-bold text-xs sm:text-sm leading-tight">{t(`start.step.${s.key}` as StringKey)}</span>
             </Link>
