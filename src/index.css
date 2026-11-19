@@ -237,10 +237,10 @@ button, a, [role="button"] {
 /* Every other page (teacher pages, the public site) follows the screen too:
    16px on a normal laptop, down to 13px on a short or narrow window. */
 @media (pointer: fine) {
-  /* 2026-11-18: smaller on laptops ("it doesnt look so big, large font, and
-     crowded"): about 15px on 1440 x 900, 13px on 1280 x 720, 11px on a small
-     or zoomed-in window, 16px on big desktops. */
-  html { font-size: clamp(11px, min(6.5px + 0.95vh, 6px + 0.7vw), 16px); }
+  /* Laptop text (teacher, 2026-11-18 "too big", then 2026-11-19 "too small"):
+     the middle ground. About 15.5px on 1440 x 900, 14px on 1280 x 720, 12px on
+     a small or zoomed-in window, 16px on big desktops. */
+  html { font-size: clamp(12px, min(7.5px + 0.9vh, 7.5px + 0.62vw), 16px); }
 }
 /* Roomier side margins on every content page (not game screens), growing
    with the window, so pages never look crowded (teacher, 2026-11-18). */
