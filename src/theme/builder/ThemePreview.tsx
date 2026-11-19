@@ -263,8 +263,10 @@ function board(theme: GameTheme, size?: number) {
       return (
         <div className="flex flex-wrap gap-3 justify-center items-center">
           {Array.from({ length: 6 }, (_, i) => {
-            const img = pieceImage(theme, `item-${i + 1}`);
-            const look = { transform: `rotate(${[-18, 12, -6, 24, -28, 8][i]}deg)`, width: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem`, height: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem` };
+            // A theme with its own items (Pet Room's pets) shows those, never the Classic stars (teacher, 2026-11-19).
+            const own = theme.itemImages?.[i];
+            const img = own ?? pieceImage(theme, `item-${i + 1}`);
+            const look = own ? { width: '3.25rem', height: '3.25rem', imageRendering: theme.pixelArt ? 'pixelated' as const : undefined } : { transform: `rotate(${[-18, 12, -6, 24, -28, 8][i]}deg)`, width: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem`, height: `${[3, 2.25, 3.5, 2.5, 2, 3][i]}rem` };
             return img
               ? <img key={i} src={img} alt="" className="object-contain" style={look} />
               : <Star key={i} weight="fill" style={look} color={pieceColor(theme, 'item-1', '#f6c544')} />;

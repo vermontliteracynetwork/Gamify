@@ -3,6 +3,7 @@ import type { PlayMode } from '../data/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
+import { InfoDot } from '../ui/fields';
 
 // The first setup step when a game can be played more than one way (teacher,
 // 2026-10-31): big cards for each way, saying whether it runs on one screen
@@ -26,8 +27,7 @@ export default function WayToPlay({ modes, value, onChange }: { modes: PlayMode[
               <Icon weight="fill" size={22} className="absolute right-[10%] top-[12%] opacity-20 -rotate-12" />
             </span>
             <span className="px-4 py-3 grid gap-1">
-              <span className="font-display text-2xl font-bold leading-tight">{t(`mode.${m}` as StringKey)}</span>
-              <span className="font-semibold text-base leading-snug">{t(`mode.${m}.hint` as StringKey)}</span>
+              <span className="font-display text-2xl font-bold leading-tight inline-flex items-center gap-2">{t(`mode.${m}` as StringKey)}<InfoDot tip={t(`mode.${m}.hint` as StringKey)} /></span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

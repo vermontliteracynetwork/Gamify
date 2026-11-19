@@ -1,3 +1,4 @@
+import { InfoDot } from '../ui/fields';
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { TeachCards } from './TeachCard';
 import { CheckCircle } from '@phosphor-icons/react';
@@ -89,8 +90,8 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   }
   return (
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
-      {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
+        {max > 1 && <InfoDot tip={t('setup.pickSets', { max })} />}
         <Tabs className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
         <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>

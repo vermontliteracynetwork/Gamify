@@ -9,11 +9,15 @@ import { TeamBadge } from './TeamBadge';
 // score in the Gamify font with no box behind it, then a dash for every turn
 // of every round, grouped by round (used turns filled, this turn glowing),
 // then anything the game adds on the right (Match Three's stars).
-export default function TopStrip({ score, player, round, rounds, perRound, left, label, leftLabel, right }: {
+export default function TopStrip({ score, player, round, rounds, perRound, left, label, leftLabel, right, thisRound }: {
   score: number; player?: string; round: number; rounds: number; perRound: number; left: number; label: string; leftLabel: string; right?: ReactNode;
+  // Turns in the current round when a power-up adds some (Bubble Pop's extra shots): every shot taken fills a dash.
+  thisRound?: number;
 }) {
   const still = useSettings().settings.motion === 'still';
-  const done = (Math.min(round, rounds) - 1) * perRound + (perRound - left);
+  const cur = Math.min(round, rounds) - 1;
+  const now = Math.max(perRound, thisRound ?? perRound);
+  const usedNow = Math.max(0, now - left);
   return (
     <div className="w-full flex items-center gap-3 min-w-0" role="group" aria-label={label}>
       {player ? <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={0} size={36} />}
@@ -24,10 +28,10 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
       <span className="flex-1 min-w-0 flex gap-2" role="img" aria-label={leftLabel}>
         {Array.from({ length: rounds }, (_, r) => (
           <span key={r} aria-hidden="true" className="flex-1 flex gap-[3px] p-[3px] rounded-pill border-std border-border bg-surface">
-            {Array.from({ length: perRound }, (_, m) => {
-              const k = r * perRound + m;
+            {Array.from({ length: r === cur ? now : perRound }, (_, m) => {
+              const used = r < cur ? perRound : r === cur ? usedNow : 0;
               // Used turns are filled green, this turn yellow with a ring, turns to come are hollow (shape, not only color).
-              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${k < done ? 'bg-success' : k === done ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'border-thin border-muted bg-transparent'}`} />;
+              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${m < used ? 'bg-success' : r === cur && m === used ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'border-thin border-muted bg-transparent'}`} />;
             })}
           </span>
         ))}

@@ -13,6 +13,8 @@ export function classicTheme(gameId: string): GameTheme {
   const show = gameId === 'game-show';
   // Pinball's Classic page is the table's own navy (teacher, 2026-11-13).
   const pin = gameId === 'pinball';
+  // Bubble Pop's Classic page is a kid pattern in its three main bubble colors (teacher, 2026-11-19).
+  const bubbles = gameId === 'bubble-pop';
   return {
     id: `${gameId}:classic`,
     gameId,
@@ -29,7 +31,8 @@ export function classicTheme(gameId: string): GameTheme {
       miss: '#9b2c3a',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true } : { kind: 'color' },
+    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true }
+      : bubbles ? { kind: 'image', src: '/classic/bubble-pop/background.svg', alt: 'A playful pattern of red, yellow and green bubbles, stars and squiggles', tile: true } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the

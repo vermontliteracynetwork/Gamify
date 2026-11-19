@@ -11,7 +11,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -64,6 +64,8 @@ export default function BubblePop() {
   const [blast, setBlast] = useState<{ id: number; x: number; y: number; kind: 'rainbow' | 'burst' } | null>(null);
   const [angle, setAngle] = useState(-Math.PI / 2);
   const [shots, setShots] = useState(0);
+  // Shots this round, bonus shots included, so the top strip counts every bubble shot (teacher, 2026-11-19).
+  const [roundShots, setRoundShots] = useState(0);
   const [breaks, setBreaks] = useState(0);
   const [score, setScore] = useState(0);
   const [noPop, setNoPop] = useState(0);
@@ -81,7 +83,7 @@ export default function BubblePop() {
   function applyNow(it: ThemeItem) {
     playEffect('win', settings);
     setCallout({ id: Date.now(), text: `${it.name}!` });
-    if (it.ability === 'shots') setShots((n) => n + powers.amount(it));
+    if (it.ability === 'shots') { setShots((n) => n + powers.amount(it)); setRoundShots((n) => n + powers.amount(it)); }
     if (it.ability === 'bonus') setScore((sc) => sc + powers.amount(it));
     if (it.ability === 'mystery') setScore((sc) => sc + 10 * (1 + Math.floor(Math.random() * 10)));
     if (it.ability === 'double') doubleNext.current = true;
@@ -111,7 +113,9 @@ export default function BubblePop() {
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
     const it = powers.grant(true);
-    setShots(plan.current.shots);
+    setShots(plan.current.shots); setRoundShots(plan.current.shots);
+    // Classic adds a new bubble color every round (teacher, 2026-11-19): a fresh row brings it in.
+    if (done > 0 && theme.id === 'bubble-pop:classic') { const n = Math.min(BUBBLE_COLORS.length, 3 + done); setBoard((b0) => pushRow(b0, [...Array.from({ length: n }, (_, k) => k), n - 1, n - 1])); }
     setNote('');
     setStep('aim');
     if (it) window.setTimeout(() => applyNow(it), 900 * pace(settings));
@@ -282,7 +286,7 @@ export default function BubblePop() {
       {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{bubblePopManifest.name}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
-        <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('bp.how1') },
           { icon: <Crosshair weight="bold" size={22} />, text: t('bp.how2') },
           { icon: <Star weight="fill" size={22} />, text: t('bp.how3') },
@@ -290,7 +294,7 @@ export default function BubblePop() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={bubblePopManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -312,14 +316,13 @@ export default function BubblePop() {
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <section className="grid gap-2 min-w-0" style={{ width: `min(calc(100vw - 9rem), calc((var(--play-h) - 5.75rem) * ${W / H}))` }}>
-            <TopStrip leftLabel={t('bp.shots', { count: shots })} score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} perRound={plan.current.shots} left={shots}
+            <TopStrip leftLabel={t('bp.shots', { count: shots })} score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} perRound={plan.current.shots} left={shots} thisRound={roundShots}
               label={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} />
             <div className="relative w-full rounded-panel border-heavy border-border overflow-hidden select-none touch-none"
               style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, boxShadow: 'var(--shadow-sticker-lg)' }}>

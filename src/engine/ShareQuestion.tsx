@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ANSWER_SOUNDS, playClip } from './music';
 import { pace, POP_IN } from './pace';
-import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -96,7 +95,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     const right = i === q.correctIndex;
     setPicked(i); setShown(true);
     answerSound(right);
-    window.setTimeout(() => onResult(right), settings.motion === 'still' ? 900 : right ? 1300 : 2200);
+    // A miss waits for a tap before the question closes (teacher, 2026-11-19).
+    if (right) window.setTimeout(() => onResult(right), settings.motion === 'still' ? 900 : 1300);
   }
 
   if (!ready && turnCard) return <TurnCard player={player} avatar={avatar} answerer={answerer} onStart={() => setReady(true)} />;
@@ -131,15 +131,14 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
-          <AccessButton small />
         </div>
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className={`w-full max-w-[90rem] mx-auto text-center font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
+        <h2 className={`w-full max-w-[90rem] mx-auto text-left font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
 
-        <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
+        <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(42vh,26rem)] portrait:max-h-[50vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
           {q.choices.map((c, i) => {
             const isRight = shown && i === q.correctIndex;
             const isWrong = picked === i && i !== q.correctIndex;
@@ -149,7 +148,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 transition={{ duration: 0.4 }}
                 whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
                 whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-[clamp(3rem,11vh,8rem)] h-full pl-[clamp(4.25rem,11vh,7rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold leading-tight ${q.choices.every((ch) => ch.length <= 22) ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'} active:scale-[0.98] disabled:cursor-default
+                className={`min-h-[clamp(3rem,9vh,6.5rem)] h-full pl-[clamp(4.25rem,11vh,7rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold leading-tight ${q.choices.every((ch) => ch.length <= 22) ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'} active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.75rem,7.5vh,4.25rem)] h-[clamp(2.75rem,7.5vh,4.25rem)] shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-[clamp(1.2rem,3.6vh,2rem)]">
@@ -177,6 +176,11 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           <p className="min-h-10 font-display text-3xl font-bold text-center" role="status" aria-live="polite">
             {picked === null ? '' : <PopText key={`${picked}-${chance?.n ?? 0}`} text={picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} gold={picked === q.correctIndex} />}
           </p>
+        )}
+        {!cpu && picked !== null && picked !== q.correctIndex && (
+          <button type="button" autoFocus onClick={() => onResult(false)}
+            className="justify-self-center self-center min-h-14 px-12 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"
+            style={{ boxShadow: '0 4px 0 #000' }}>{t('q.continue')}</button>
         )}
       </motion.div>
     </div>

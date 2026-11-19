@@ -20,7 +20,7 @@ import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { BALL_PACK, BALL_PACK_CLEARED } from '../../config';
 import type { StringKey } from '../../i18n/en';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -187,7 +187,8 @@ export default function FourInARow() {
     setBoard(res.board);
     setLast({ row: res.row, col });
     // The clack when it lands at the bottom of its drop.
-    window.setTimeout(() => { playEffect('tap', settings); if (!still) navigator.vibrate?.(15); }, still ? 0 : (0.32 + res.row * 0.06) * 580);
+    const land = still ? 0 : (0.32 + res.row * 0.06) * 580;
+    window.setTimeout(() => { playEffect('tap', settings); if (!still) navigator.vibrate?.(15); }, land);
     window.setTimeout(() => {
       const win = winningLine(res.board);
       if (win || isFull(res.board)) {
@@ -203,7 +204,9 @@ export default function FourInARow() {
       held.endTurn();
       setTurn((t0) => (t0 === 0 ? 1 : 0));
       setStep('answer');
-    }, still ? 150 : 650);
+      // The piece finishes its drop and bounce, then a full second before the
+      // next player's turn card (teacher, 2026-11-19).
+    }, still ? 1000 : land + 450 + 1000);
   }
 
   placeRef.current = place;
@@ -248,7 +251,7 @@ export default function FourInARow() {
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
-        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('fr.how1') },
           { icon: <ArrowFatDown weight="fill" size={22} />, text: t('fr.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('fr.how3') },
@@ -260,7 +263,7 @@ export default function FourInARow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.where === 'other' && team.players[1]?.kind !== 'cpu' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => (setup.where === 'other' && team.players[1]?.kind !== 'cpu' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             // Each player's team picture is their piece (teacher, 2026-11-06):
             // one picture, picked on the player card, the same on the board.
@@ -310,12 +313,13 @@ export default function FourInARow() {
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
-          <div className="border-heavy border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
+          {/* The held piece follows the pointer anywhere over the board (teacher, 2026-11-19). */}
+          <div onPointerMove={(e) => { if (!anyPick) return; const b = e.currentTarget.getBoundingClientRect(); const c = Math.max(0, Math.min(COLS - 1, Math.floor(((e.clientX - b.left) / b.width) * COLS))); if (c !== heldCol) hoverCol(c); }}
+            className="border-heavy border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="grid gap-1.5 mb-1.5 mt-[min(2.4vw,1.4rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
               {Array.from({ length: COLS }, (_, c) => {
                 const popping = step === 'pop';

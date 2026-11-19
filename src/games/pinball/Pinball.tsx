@@ -21,7 +21,7 @@ import { usePowerUps } from '../../engine/usePowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -360,7 +360,7 @@ export default function Pinball() {
       {clock.element}
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
-        <GameWelcome game={pinballManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={pinballManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('pb.how1') },
           { icon: <Crosshair weight="bold" size={22} />, text: t('pb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('pb.how3') },
@@ -368,7 +368,7 @@ export default function Pinball() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={pinballManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
@@ -391,7 +391,6 @@ export default function Pinball() {
           <h1 className="sr-only"><Title text={pinballManifest.name} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">

@@ -128,8 +128,7 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
             style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
             <span className="block w-full aspect-[2/1] max-h-[46vh] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
             <span className="px-4 py-3 grid gap-1">
-              <span className="font-display text-2xl font-bold leading-tight">{o.title}</span>
-              <span className="font-semibold text-sm text-muted leading-snug">{o.hint}</span>
+              <span className="font-display text-2xl font-bold leading-tight inline-flex items-center gap-2">{o.title}<InfoDot tip={o.hint} /></span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>
@@ -137,4 +136,10 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
       })}
     </div>
   );
+}
+
+// The small (i) that holds a hint as hover text (teacher, 2026-11-19: info
+// icons replace most subtext in every game menu). Screen readers get the hint too.
+export function InfoDot({ tip, className = '' }: { tip: string; className?: string }) {
+  return <span data-tip={tip} role="img" aria-label={tip} className={`inline-flex text-muted cursor-help shrink-0 ${className}`}><Info weight="bold" size={16} aria-hidden="true" /></span>;
 }

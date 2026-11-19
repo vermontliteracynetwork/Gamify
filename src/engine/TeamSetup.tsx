@@ -86,12 +86,17 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   function start() { onStart?.(build(), level); }
   useEffect(() => { onChange?.(build(), level); }, [slots, opponent, level, members]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Rows by player count (teacher, 2026-11-19), sized so the page never scrolls.
+  const n = slots.length;
+  const rows = n <= 4 ? 1 : n <= 8 ? 2 : 3;
+  const cols = Math.ceil(n / rows);
+  const badge = rows === 1 ? 120 : rows === 2 ? 92 : 72;
   return (
-    <section className={embedded ? 'grid gap-5' : 'bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
+    <section className={embedded ? 'grid gap-5 justify-items-center content-center' : 'bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
       {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={mode === 'share' ? t('teams.title') : t('teams.players')} /></h1>}
 
       {/* A game with a fixed number of players (Four in a Row: always 2) shows no count (teacher, 2026-10-31). */}
-      {min !== max && <div className="flex items-center gap-2 text-base">
+      {min !== max && <div className="flex items-center justify-center gap-2 text-base">
         <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>
         <button type="button" aria-label={t('teams.less')} disabled={slots.length <= min} onClick={() => resize(slots.length - 1)}
           className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={18} /></button>
@@ -104,17 +109,20 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       {/* Characters (Board Game animals) show as player cards: the animal big,
           no circle around it, the name under it (teacher, 2026-11-01). */}
       {/* Versus players are big cards too (teacher, 2026-11-06). */}
-      <ol className={`grid items-start list-none p-0 m-0 ${characters?.length ? 'gap-2 grid-cols-2 lg:grid-cols-3' : mode === 'versus' ? 'gap-5 grid-cols-2 w-full max-w-3xl mx-auto' : 'gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4'}`}>
+      {/* One player screen for every game (teacher, 2026-11-19): Game Show's
+          cards, centered; 1 to 4 in one row, 5 to 8 in two rows, 9 or 10 in three. */}
+      <ol className="grid items-start justify-center gap-4 list-none p-0 m-0 w-full"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, ${slots.length <= 4 ? 16 : slots.length <= 8 ? 14 : 12}rem))` }}>
         {slots.map((s, i) => (
           <li key={i} className={true
-            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-bold border-border bg-surface p-4 ${mode === 'versus' ? 'min-h-[min(22rem,48vh)] content-center gap-3 p-6 bg-gradient-to-b from-[#eef0ff] to-surface' : 'bg-gradient-to-b from-[#f3f4ff] to-surface'}`
+            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-bold border-border bg-surface p-4 bg-gradient-to-b from-[#f3f4ff] to-surface ${rows === 1 ? 'min-h-[min(18rem,42vh)] content-center' : ''}`
             : 'flex flex-wrap items-center gap-2 rounded-input border-std border-border-soft p-2'}
             style={true ? { boxShadow: '0 5px 0 #000, 0 14px 24px rgba(36,28,61,0.12)' } : undefined}>
             <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
               onClick={() => setPicking(picking === i ? null : i)} className={`${true ? 'basis-full flex justify-center pt-1 pb-3' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:hover:-rotate-3 motion-safe:transition-transform`}>
               {characters?.length
-                ? <img src={characters[charOf(i)].image} alt="" className="w-[min(6.5rem,14vh)] aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
-                : <span className="rounded-full inline-flex motion-safe:animate-[float_3.2s_ease-in-out_infinite]" style={{ boxShadow: '0 10px 18px rgba(36,28,61,0.25)' }}><TeamBadge colorIndex={iconOf(i)} size={mode === 'versus' ? 172 : 104} /></span>}
+                ? <img src={characters[charOf(i)].image} alt="" style={{ width: `min(${badge / 16}rem, ${rows === 1 ? 18 : rows === 2 ? 11 : 8}vh)` }} className="aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
+                : <span className="rounded-full inline-flex motion-safe:animate-[float_3.2s_ease-in-out_infinite]" style={{ boxShadow: '0 10px 18px rgba(36,28,61,0.25)' }}><TeamBadge colorIndex={iconOf(i)} size={badge} /></span>}
             </button>
             {picking === i && characters?.length ? (
               // A pop-up box of big animal tiles, so the setup page never scrolls (teacher, 2026-10-31).
@@ -186,7 +194,8 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
             )}
             {mode === 'versus' && i > 0 && (
               <button type="button" onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, kind: x.kind === 'cpu' ? 'student' : 'cpu' } : x)))}
-                className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm">
+                className="order-first min-h-9 px-4 rounded-pill border-std border-border bg-surface-2 font-bold text-sm">
+                {/* Above the picture, so the name keeps its full width (names never shrink or cut off). */}
                 {s.kind === 'cpu' ? t('teams.cpu') : t('teams.human')}
               </button>
             )}

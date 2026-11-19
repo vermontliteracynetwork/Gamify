@@ -21,7 +21,7 @@ import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps'
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import PowerUpPop from '../../engine/PowerUpPop';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
@@ -404,7 +404,7 @@ export default function CastleQuest() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="castle-quest" />
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
-        <GameWelcome game={castleQuestManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={castleQuestManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('cq.how1') },
           { icon: <DiceFive weight="fill" size={22} />, text: t('cq.how2') },
           { icon: <FlagCheckered weight="fill" size={22} />, text: t('cq.how3') },
@@ -412,7 +412,7 @@ export default function CastleQuest() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={castleQuestManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players)} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players)} pages={[
           { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
@@ -493,7 +493,6 @@ export default function CastleQuest() {
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-30 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <AnimatePresence>

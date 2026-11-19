@@ -40,6 +40,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
       await expect(dialog.getByText('Not this one. Here comes a new question.')).toBeVisible();
       await page.screenshot({ path: `test-results/question-miss-${info.project.name}.png` });
       missedOnce = true;
+      await dialog.getByRole('button', { name: 'OK', exact: true }).click();
       await expect(dialog.getByText('Not this one. Here comes a new question.')).toBeHidden({ timeout: 4000 });
       continue;
     }

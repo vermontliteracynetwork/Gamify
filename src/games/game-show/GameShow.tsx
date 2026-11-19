@@ -24,7 +24,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Slider } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -373,7 +373,7 @@ export default function GameShow() {
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
-        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <UsersThree weight="fill" size={22} />, text: t('tb.how1') },
           { icon: <CheckCircle weight="fill" size={22} />, text: t('tb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('tb.how3') },
@@ -385,7 +385,7 @@ export default function GameShow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players, team.level)} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players, team.level)} pages={[
           // Teams on the big screen, or two players head to head (teacher, 2026-10-31).
           { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
           { id: 'board', title: t('setup.board'), content: (
@@ -427,7 +427,6 @@ export default function GameShow() {
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <section className="relative grid gap-4 min-w-0 @container">

@@ -10,7 +10,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -111,7 +111,7 @@ export default function StarQuiz() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="star-quiz" />
 
       {phase === 'welcome' && (
-        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={starQuizManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <Question weight="bold" size={22} />, text: t('practice.how1') },
           { icon: <Star weight="fill" size={22} />, text: t('practice.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('practice.how3') },
@@ -123,7 +123,7 @@ export default function StarQuiz() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={way === 'live' ? () => void openLive() : () => void play({ rounds: setup.rounds })} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={way === 'live' ? () => void openLive() : () => void play({ rounds: setup.rounds })} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
           // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
@@ -154,7 +154,6 @@ export default function StarQuiz() {
           </AnimatePresence>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <p className="sr-only" aria-live="polite">{phase === 'play' ? t('practice.progress', { round, total }) : ''}</p>

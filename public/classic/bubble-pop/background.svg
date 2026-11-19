@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Gamify's own Classic Bubble Pop backdrop (2026-11-19): a playful kid pattern in the three main bubble colors. -->
+  <rect width="240" height="240" fill="#b4c4fb"/>
+  <g stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="34" cy="38" r="16" fill="#e5635f"/><circle cx="29" cy="33" r="4" fill="#fff" stroke="none" opacity=".7"/>
+    <circle cx="150" cy="30" r="11" fill="#fdfd94"/>
+    <circle cx="206" cy="96" r="18" fill="#8fe3a0"/><circle cx="200" cy="90" r="5" fill="#fff" stroke="none" opacity=".7"/>
+    <circle cx="96" cy="128" r="13" fill="#fdfd94"/><circle cx="92" cy="124" r="3.5" fill="#fff" stroke="none" opacity=".7"/>
+    <circle cx="40" cy="190" r="12" fill="#8fe3a0"/>
+    <circle cx="176" cy="196" r="15" fill="#e5635f"/><circle cx="171" cy="191" r="4" fill="#fff" stroke="none" opacity=".7"/>
+    <path d="M78 52 q8 -10 16 0 t16 0" fill="none" stroke="#e5635f"/>
+    <path d="M128 92 l6 12 13 2 -10 9 3 13 -12 -7 -12 7 3 -13 -10 -9 13 -2 z" fill="#fdfd94"/>
+    <path d="M14 112 q8 -10 16 0 t16 0" fill="none" stroke="#8fe3a0"/>
+    <path d="M200 150 q8 -10 16 0 t16 0" fill="none" stroke="#fdfd94"/>
+    <path d="M112 196 l8 -14 8 14 z" fill="#8fe3a0"/>
+    <path d="M226 14 v12 M220 20 h12" stroke="#e5635f"/>
+    <path d="M70 226 v12 M64 232 h12" stroke="#fdfd94"/>
+    <path d="M150 160 v10 M145 165 h10" stroke="#8fe3a0"/>
+  </g>
+  <g fill="#fff" opacity=".55"><circle cx="120" cy="60" r="3"/><circle cx="60" cy="90" r="2.5"/><circle cx="220" cy="230" r="3"/><circle cx="10" cy="230" r="2"/><circle cx="180" cy="130" r="2"/></g>
+</svg>

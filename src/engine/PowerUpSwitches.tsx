@@ -1,3 +1,4 @@
+import { InfoDot } from '../ui/fields';
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, X } from '@phosphor-icons/react';
 import type { GameManifest } from '../games/types';
@@ -43,8 +44,8 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
             {/* Names a little bigger, always inside the card's margin (teacher, 2026-11-19). */}
             <span className={`font-bold text-xl leading-tight text-balance break-words max-w-full px-1 ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
-            {/* Small words, so the cards stay near 4:3 (teacher, 2026-11-16). */}
-            {c.hint && <span className="text-xs font-semibold leading-snug text-muted text-balance break-words">{c.hint}</span>}
+            {/* What it does is an (i) hover tip, not a caption (teacher, 2026-11-19). */}
+            {c.hint && <InfoDot tip={c.hint} className="absolute top-1.5 left-1.5" />}
             {/* On: a mint check in the corner. Off: a faded X. */}
             <span className={`absolute -top-2 -right-2 w-7 h-7 rounded-full border-std flex items-center justify-center ${c.on ? 'bg-success border-border' : 'bg-surface border-border-soft text-muted'}`} aria-hidden="true">
               {c.on ? <Check weight="bold" size={15} /> : <X weight="bold" size={13} />}

@@ -15,7 +15,7 @@ import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -230,7 +230,7 @@ export default function CastCatch() {
         : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
-        <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <HandGrabbing weight="fill" size={22} />, text: t('cc.how1') },
           { icon: <Question weight="bold" size={22} />, text: t('cc.how2') },
           { icon: <FishIcon weight="fill" size={22} />, text: t('cc.how3') },
@@ -238,7 +238,7 @@ export default function CastCatch() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={castCatchManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={way === 'live' ? () => void openLive() : begin} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={way === 'live' ? () => void openLive() : begin} playLabel={way === 'live' ? t('way.openLobby') : undefined} pages={[
           // Pick the way to play first (teacher, 2026-10-31): Live opens a class lobby.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
@@ -338,7 +338,6 @@ export default function CastCatch() {
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           {phase === 'play' && (

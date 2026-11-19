@@ -10,7 +10,7 @@ import { buzz, speakQuestion, stopSpeaking } from './feedback';
 import { ANSWER_SOUNDS, playClip } from './music';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
-import { AccessButton, FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
+import { FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import FloatingCard from '../ui/FloatingCard';
 import DialogFocus from '../ui/DialogFocus';
 
@@ -41,6 +41,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   const [picked, setPicked] = useState<number | null>(null);
   const [wrongTries, setWrongTries] = useState<number[]>([]);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [missed, setMissed] = useState<AnswerResult | null>(null);
   // Tools open as movable cards (several at once); the highlighter is a mode.
   type CardTool = 'calculator' | 'scratchpad' | 'timesTable';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -57,6 +58,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     setPicked(null);
     setWrongTries([]);
     setMarked(new Set());
+    setMissed(null);
     setLocked(settings.readFirstSeconds > 0);
     const timer = window.setTimeout(() => setLocked(false), settings.readFirstSeconds * 1000);
     // Little readers hear every question and its answers on their own.
@@ -86,7 +88,9 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     }
     setPicked(i);
     const ms = Date.now() - shownAt.current;
-    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), right ? 900 : 1400);
+    // A miss waits for a tap before the question closes (teacher, 2026-11-19).
+    if (right) window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), 900);
+    else setMissed({ tapped: q.choices[i], tries, right, ms });
   }
 
   const words = q.prompt.split(/(\s+)/);
@@ -125,7 +129,6 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </button>}
           {/* Full screen stays in reach while a question is up (teacher, 2026-10-31). */}
           <FullScreenButton small />
-            <AccessButton small />
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <button type="button" onClick={() => setConfirmLeave(true)} aria-label={t('q.close')}
             className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center">
@@ -166,7 +169,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         ))}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
+        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-left ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-left ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
@@ -175,17 +178,10 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             : words.map((w, i) => <span key={i} className={marked.has(i) ? 'bg-accent rounded px-0.5' : ''}>{w}</span>)}
         </h2>
 
-        {locked && (
-          <div className="grid gap-1" aria-live="polite">
-            <span className="font-bold text-sm">{t('q.readFirst')}</span>
-            <div className="h-2.5 rounded-pill bg-surface-2 overflow-hidden border border-border-soft">
-              <motion.div className="h-full bg-accent" initial={{ width: '100%' }} animate={{ width: '0%' }}
-                transition={{ duration: settings.readFirstSeconds, ease: 'linear' }} />
-            </div>
-          </div>
-        )}
+        {/* No "Read the question" bar (teacher, 2026-11-19): the answers just open after the wait. */}
+        {locked && <span className="sr-only" aria-live="polite">{t('q.readFirst')}</span>}
 
-        <div className={framed ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]'}>
+        <div className={framed ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(42vh,26rem)] portrait:max-h-[50vh] grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]'}>
           {q.choices.map((c, i) => {
             const triedWrong = wrongTries.includes(i);
             const isPicked = picked === i;
@@ -199,8 +195,8 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 aria-disabled={locked || picked !== null || triedWrong}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
-                className={`relative ${framed ? `min-h-[clamp(3.5rem,12vh,7rem)] pl-[clamp(4rem,10.5vh,6.75rem)] pr-4 py-2 leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}` : `min-h-[clamp(3rem,11vh,8rem)] h-full pl-[clamp(4rem,10.5vh,6.75rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}`} rounded-input border-bold border-border font-bold flex items-center gap-3
-                            ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
+                className={`relative ${framed ? `min-h-[clamp(3.5rem,12vh,7rem)] pl-[clamp(4rem,10.5vh,6.75rem)] pr-4 py-2 leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}` : `min-h-[clamp(3rem,9vh,6.5rem)] h-full pl-[clamp(4rem,10.5vh,6.75rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}`} rounded-input border-bold border-border font-bold flex items-center gap-3
+                            ${TILE_COLORS[i]} ${locked ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} motion-safe:transition-[opacity,transform] motion-safe:duration-300 ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >
@@ -221,6 +217,11 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
             ? wrongTries.length ? `${t('q.tryAgain')} ${t('q.triesLeft', { count: settings.triesPerQuestion - wrongTries.length })}` : ''
             : picked === q.correctIndex ? t('q.right') : t('q.miss')}
         </p>
+        {missed && (
+          <button type="button" autoFocus onClick={() => { const m = missed; setMissed(null); onAnswer(m); }}
+            className="justify-self-center self-center min-h-14 px-12 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"
+            style={{ boxShadow: '0 4px 0 #000' }}>{t('q.continue')}</button>
+        )}
       </motion.div>
     </div>
   );

@@ -13,7 +13,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -259,7 +259,7 @@ export default function MatchThree() {
       {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{t('bm.title')}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
-        <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <ArrowsLeftRight weight="bold" size={22} />, text: t('bm.how1') },
           { icon: PUZZLE_PACK_CLEARED ? <Diamond weight="fill" size={22} /> : <Cookie weight="fill" size={22} />, text: t('bm.how2') },
           { icon: <Sparkle weight="fill" size={22} />, text: t('bm.how4') },
@@ -272,7 +272,7 @@ export default function MatchThree() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={start} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -295,7 +295,6 @@ export default function MatchThree() {
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 

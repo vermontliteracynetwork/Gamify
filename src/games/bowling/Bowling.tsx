@@ -21,10 +21,10 @@ import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type 
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
-import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
+import { pieceColor, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import { Slider } from '../../ui/fields';
 import { useSignedIn } from '../../auth/session';
@@ -351,7 +351,8 @@ export default function Bowling() {
   const big = armed.includes('mega');
   // The aim line and the curve the spin will put on it.
   const preview = Array.from({ length: 14 }, (_, k) => { const d = (k / 13) * 0.62; const bend = step === 'spin' ? hook * 0.72 * Math.max(0, (d - 0.33) / 0.29) ** 2 : 0; return `${xAt(aim * 1.12 + bend, d)},${yAt(d)}`; }).join(' ');
-  const laneW = 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)';
+  // Bigger lane (teacher, 2026-11-19): the pins and ball are the focus.
+  const laneW = 'calc((var(--play-h) - 2rem - var(--sb-extra)) * 100 / 130)';
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -361,7 +362,7 @@ export default function Bowling() {
       {clock.element}
       {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
-        <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('sb.how1') },
           { icon: <HandTap weight="fill" size={22} />, text: t('sb.how2') },
           { icon: <Trophy weight="fill" size={22} />, text: t('sb.how3') },
@@ -369,7 +370,7 @@ export default function Bowling() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={bowlingManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
           // Pick the way to play first (teacher, 2026-10-31); students arrive with theirs set.
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
@@ -392,14 +393,15 @@ export default function Bowling() {
           <h1 className="sr-only"><Title text={bowlingManifest.name} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
-          <div className="contents lg:flex lg:items-start lg:gap-4">
-          <section className="relative grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
-            <div className={`relative mx-auto rounded-panel border-heavy border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
+          {/* The lane in the middle of the screen, the scores beside it (teacher, 2026-11-19). */}
+          <div className="contents lg:grid lg:w-full lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-4">
+          <section className="relative grid gap-2 min-w-0 lg:col-start-2 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
+            {/* One background only (teacher, 2026-11-19): the lane sits straight on the page's background, no framed second copy of it. */}
+            <div className={`relative mx-auto overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
               onPointerMove={canAim ? (e) => { const r = e.currentTarget.getBoundingClientRect(); setAim(Math.max(-0.92, Math.min(0.92, ((e.clientX - r.left) / r.width) * 2 - 1))); } : undefined}
-              style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
+              style={{ aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
               <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
                 <defs>
                   {/* A drawn pin always shows inside the pin's outline (teacher, 2026-11-02). */}
@@ -516,7 +518,7 @@ export default function Bowling() {
               </div>
             )}
           </section>
-          <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3 content-start">
+          <div className="order-first lg:order-none lg:col-start-3 lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3 content-start">
             <ScoreBoard turns={turns} playing={phase === 'play'} round={`${Math.min(frames + 1, totalFrames)}/${totalFrames}`} roundLabel={t('sb.frameWord')} />
             {/* Held power-ups, right under the scores (teacher, 2026-10-31), never over the lane. */}
             {tray}

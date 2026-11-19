@@ -199,3 +199,12 @@ line that fits, and add each new preference the same turn she says it.
 - Theme Builder Share tab (2026-11-19): no "Credited to" line and as little text as possible; explanations are hover text.
 - Pick a Game (2026-11-19): same width and side margins as the teacher pages; card descriptions about as long as Match Three's ("Swap pieces to make rows of 3. Answer questions to keep playing."), in readable text (not tiny); the ways-to-play subtext readable too.
 - Game welcome screens (2026-11-19, asked many times): the right column is evenly spaced from the cover's top to its bottom: title group, How to play and Start one equal gap apart, How to play fills the rest with its steps spread evenly. Never big empty bands.
+- Setup (2026-11-19): ways-to-play and board choice cards bigger with bigger titles; Back/Next 44px; board size choices are bigger white cards, centered, with no panel around them; set picker text readable; power-up names a little bigger inside the card margin.
+- Info icons (2026-11-19): in every game menu, hints are a small (i) with hover text instead of subtext (ways to play, board choices, power-up cards, question set picker).
+- Theme picker (2026-11-19): every game has it, even with only Classic: a carousel wheel (one big in the middle, up to two smaller each side), spin animation and a whoosh, left/right arrows and arrow keys, a search box top right. A theme with its own items (Pet Room's pets) never shows Classic stars in its preview.
+- Question screens (2026-11-19): question text left-aligned, smaller answer boxes, no "Read the question" bar (the answers appear after the wait), and a miss waits for a tap on OK before closing.
+- Accessibility (2026-11-19): no separate accessibility button; its settings are the Accessibility tab in Settings.
+- Player and team setup (2026-11-19): one screen for every game, Game Show's cards, centered; 1 to 4 in one row, 5 to 8 in two rows, 9 or 10 in three.
+- Four in a Row (2026-11-19): the next player's turn waits until the piece has landed, plus one second; the held piece follows the pointer anywhere over the board.
+- Bowling (2026-11-19): one background only (no framed copy inside the lane); the lane bigger and in the middle of the screen, scores beside it.
+- Bubble Pop (2026-11-19): the top strip counts every bubble shot (bonus shots too); Classic adds a new bubble color each round and has a kid pattern background in red, yellow and green.

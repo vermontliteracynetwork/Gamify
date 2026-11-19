@@ -120,7 +120,7 @@ export default function MatchUp() {
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-up" />
       <GameTopRow onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
-        <GameWelcome game={matchUpManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
+        <GameWelcome game={matchUpManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase('theme')} steps={[
           { icon: <HandTap weight="fill" size={22} />, text: t('mu.how1') },
           { icon: <LinkSimple weight="bold" size={22} />, text: t('mu.how2') },
           { icon: <Timer weight="bold" size={22} />, text: t('mu.how3') },
@@ -128,7 +128,7 @@ export default function MatchUp() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={matchUpManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
