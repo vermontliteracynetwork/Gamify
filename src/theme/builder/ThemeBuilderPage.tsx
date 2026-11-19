@@ -263,9 +263,9 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
     touched.current = true;
     setDraft((d) => ({ ...d, pieces: { ...d.pieces, [piece.id]: { ...d.pieces[piece.id], clear } } }));
     const file = files.current.get(piece.id);
-    const msg = t(clear ? 'builder.clearOn' : 'builder.solidOn', { piece: piece.label });
+    // No message line when it switches (teacher, 2026-11-19); the button's
+    // checkers (transparent) or solid fill and its hover text say which.
     if (file && draft.pieces[piece.id]?.image) void upload(piece, file, clear);
-    else setStatus(draft.pieces[piece.id]?.image ? `${msg} ${t('builder.clearReupload')}` : msg);
   }
   async function save() {
     const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
@@ -342,7 +342,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
           {blocked && <LimitNote><span className="flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</span></LimitNote>}
           {!blocked && (
           <Panel className="flex-1 min-h-0 flex flex-col gap-3 !p-4">
-            <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto grid gap-3 content-start pr-1">
+            <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 pr-1">
               {tab === 'download' && (
                 <>
                   <p className="font-semibold text-muted text-sm">{t('builder.downloadHint')}</p>
@@ -481,11 +481,12 @@ function Pages({ items, per }: { items: ReactNode[]; per: number }) {
   const total = Math.max(1, Math.ceil(items.length / fit));
   const at = Math.min(page, total - 1);
   return (
-    <div ref={ref} className="grid gap-3">
+    // The page number sits at the bottom of the panel (teacher, 2026-11-19).
+    <div ref={ref} className="flex-1 flex flex-col gap-3">
       {/* Two columns of cards (teacher, 2026-11-19). */}
       <div className="grid grid-cols-2 gap-3">{items.slice(at * fit, at * fit + fit)}</div>
       {total > 1 && (
-        <div className="flex items-center gap-2">
+        <div className="mt-auto flex items-center gap-2">
           <Button aria-label={t('builder.prevPage')} disabled={at === 0} onClick={() => setPage(at - 1)} className="w-11 !px-0"><CaretLeft weight="bold" size={18} /></Button>
           <span className="font-bold text-sm" aria-live="polite">{t('builder.pageOf', { n: at + 1, total })}</span>
           <Button aria-label={t('builder.nextPage')} disabled={at === total - 1} onClick={() => setPage(at + 1)} className="w-11 !px-0"><CaretRight weight="bold" size={18} /></Button>
@@ -496,6 +497,7 @@ function Pages({ items, per }: { items: ReactNode[]; per: number }) {
 }
 
 // The checkerboard that means "see-through", like in drawing apps.
+const CHECKER_SMALL = { backgroundColor: '#ffffff', backgroundImage: 'conic-gradient(#c4c8d4 25%, transparent 0 50%, #c4c8d4 0 75%, transparent 0)', backgroundSize: '6px 6px' };
 const CHECKER = { backgroundColor: '#ffffff', backgroundImage: 'conic-gradient(#d9dce6 25%, transparent 0 50%, #d9dce6 0 75%, transparent 0)', backgroundSize: '10px 10px' };
 
 function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: { piece: ThemePieceSpec; image?: string; clear: boolean; onClearBg: () => void; onFile: (f: File | undefined) => void; onDraw: () => void; onClear: () => void }) {
@@ -523,8 +525,9 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
         <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
         <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
           className="shrink-0 w-8 h-8 rounded-full border-std border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
-          style={clear ? CHECKER : { background: '#fbfcf8' }}>
-          <span className={`block w-3.5 h-3.5 rounded-[4px] border-std border-border ${clear ? 'bg-transparent border-dashed' : 'bg-[#f6a5c0]'}`} />
+          style={clear ? CHECKER_SMALL : { background: '#fbfcf8' }}>
+          {/* Transparent: small white and gray checkers; solid: a filled square (teacher, 2026-11-19). */}
+          {!clear && <span className="block w-3.5 h-3.5 rounded-[4px] border-std border-border bg-[#f6a5c0]" />}
         </button>
         {image && <IconButton className="!w-8 !h-8" label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={14} /></IconButton>}
       </div>
