@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup, openSetup, startTurn } from './setup';
+import { finishSetup, noPowerUps, openSetup, startTurn } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt, q.choices[q.correctIndex]] as const)));
 
@@ -9,6 +9,8 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
+  // A power-up won on the answer would wait for a tap before the drop; this test is the plain turn.
+  await noPowerUps(page, 'four-in-a-row');
   await openSetup(page, '/games/four-in-a-row');
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await page.getByRole('combobox', { name: 'Computer level' }).selectOption('easy');
