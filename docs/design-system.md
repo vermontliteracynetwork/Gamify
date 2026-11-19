@@ -31,7 +31,7 @@ its own colors in code; menus and teacher pages may not.
 - Fonts: `font-display` (Grow Year: h1, `.title-bubble`, big numbers and scores), `font-heading` / `font-body` (Inclusive Sans).
 - The root size follows the screen (the screen-size rule, `src/index.css`): about 16px on a 1440 x 900 laptop, 12 to 14px on short or zoomed windows, 16.5px on big desktops; the page column (`max-w-6xl`) is 84rem; game screens 12 to 26px. Size everything in rem so it all scales together.
 - Tailwind's scale (`text-xs` … `text-6xl`) for most text.
-- Screen-fit sizes, which follow the window height: `text-fit-title`, `text-fit-body`, `text-fit-button` (welcome screens), `text-fit-turn`, `text-fit-question`, `text-fit-answer` (question screens).
+- Screen-fit sizes, which follow the window height: `text-fit-title`, `text-fit-body`, `text-fit-button` (welcome screens), `text-fit-turn`, `text-fit-question`, `text-fit-answer` (question screens), and `text-fit-question-big` / `text-fit-answer-big` for short questions (48 letters or fewer) and short answers (22 or fewer), bigger again on portrait screens.
 - Hints are hover text on a small (i), never a line under a label (teacher, 2026-11-18).
 
 ### Shape

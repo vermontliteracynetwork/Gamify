@@ -68,6 +68,9 @@
   --text-fit-turn: clamp(1.2rem, 4vh, 2.25rem);
   --text-fit-question: clamp(1.4rem, min(6vh, 4.5vw), 3.75rem);
   --text-fit-answer: clamp(1.1rem, min(4.2vh, 2.8vw), 1.9rem);
+  /* Short questions and answers read big from the back of the room (2026-11-19). */
+  --text-fit-question-big: clamp(1.9rem, min(10vh, 6.5vw), 6.5rem);
+  --text-fit-answer-big: clamp(1.6rem, min(8vh, 4.6vw), 4.5rem);
 
   --radius-panel: 26px;
   --radius-pill: 999px;
@@ -233,6 +236,14 @@ button, a, [role="button"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Tall screens (iPad portrait) have room to read bigger (2026-11-19). */
+@media (orientation: portrait) {
+  :root {
+    --text-fit-question-big: clamp(1.9rem, min(7vh, 9vw), 6.5rem);
+    --text-fit-answer-big: clamp(1.6rem, min(5.5vh, 7.5vw), 4.5rem);
   }
 }
 

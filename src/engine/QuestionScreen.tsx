@@ -90,6 +90,9 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   }
 
   const words = q.prompt.split(/(\s+)/);
+  // Short words read big; long ones get the regular screen-fit size.
+  const bigPrompt = q.prompt.length <= 48 && !q.imageUrl;
+  const bigAnswers = q.choices.every((c) => c.length <= 22);
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${framed ? 'p-4' : 'bg-surface'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
@@ -99,10 +102,12 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         initial={reduce ? false : { scale: 0.92, opacity: 0, y: 12 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={POP_IN}
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel grid ${framed ? 'max-w-lg border-heavy p-4 gap-3' : 'h-full !rounded-none px-6 py-[clamp(0.75rem,3vh,2.5rem)] sm:px-14 gap-[clamp(0.5rem,2.2vh,1.5rem)] content-center'}`}
+        // Full screen (2026-11-19): the question big and centered, the four
+        // answers filling the rest of the screen like big game buttons.
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel ${framed ? 'grid max-w-[min(60rem,94vw)] border-heavy p-[clamp(1rem,3vh,2rem)] gap-[clamp(0.6rem,2vh,1.25rem)]' : 'h-full !rounded-none flex flex-col justify-center px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] gap-[clamp(0.5rem,2.5vh,1.75rem)]'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'none' }}
       >
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className={`flex items-center gap-2 flex-wrap ${framed ? '' : 'w-full max-w-[90rem] mx-auto'}`}>
           {progress && progress.total > 1 && (
             <span className="px-3 min-h-9 inline-flex items-center rounded-pill bg-surface-2 border-std border-border font-bold text-sm">
               {t('q.progress', progress)}
@@ -161,7 +166,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         ))}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? 'text-xl sm:text-2xl' : 'text-fit-question'}`}>
+        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
@@ -180,7 +185,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className={framed ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]'}>
           {q.choices.map((c, i) => {
             const triedWrong = wrongTries.includes(i);
             const isPicked = picked === i;
@@ -194,12 +199,12 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 aria-disabled={locked || picked !== null || triedWrong}
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
-                className={`relative ${framed ? 'min-h-14 px-3 py-2 text-base' : 'min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] text-2xl sm:text-3xl'} rounded-input border-bold border-border text-left font-bold flex items-center gap-3
+                className={`relative ${framed ? `min-h-[clamp(3.5rem,12vh,7rem)] pl-[clamp(4rem,10.5vh,6.75rem)] pr-4 py-2 leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}` : `min-h-[clamp(3rem,11vh,8rem)] h-full pl-[clamp(4rem,10.5vh,6.75rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}`} rounded-input border-bold border-border font-bold flex items-center gap-3
                             ${TILE_COLORS[i]} ${locked ? 'opacity-55' : ''} ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >
-                <span className="w-10 h-10 shrink-0 rounded-full bg-surface border-std border-border flex items-center justify-center font-display text-xl">
+                <span className={`shrink-0 rounded-full bg-surface border-std border-border flex items-center justify-center font-display ${framed ? 'absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.5rem,7vh,4rem)] h-[clamp(2.5rem,7vh,4rem)] text-[clamp(1.1rem,3.4vh,1.9rem)]' : 'absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.5rem,7vh,4rem)] h-[clamp(2.5rem,7vh,4rem)] text-[clamp(1.1rem,3.4vh,1.9rem)]'}`}>
                   {right ? <Check weight="bold" size={22} aria-label={t('q.rightMark')} /> : wrong || triedWrong ? <X weight="bold" size={22} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
                 {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}

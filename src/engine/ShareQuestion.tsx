@@ -108,9 +108,11 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         key={q.id}
         initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="w-full h-full overflow-y-auto bg-surface px-6 py-[clamp(0.75rem,3vh,2.5rem)] sm:px-14 grid gap-[clamp(0.5rem,2.2vh,1.5rem)] content-center"
+        // The question big and centered, the four answers filling the rest of
+        // the screen like big game buttons (2026-11-19).
+        className="w-full h-full overflow-y-auto bg-surface px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] flex flex-col justify-center gap-[clamp(0.5rem,2.5vh,1.75rem)]"
       >
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="w-full max-w-[90rem] mx-auto flex items-center gap-3 flex-wrap">
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
           {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
@@ -135,9 +137,9 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className="font-body text-fit-question font-bold leading-tight text-balance">{q.prompt}</h2>
+        <h2 className={`w-full max-w-[90rem] mx-auto text-center font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
 
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
           {q.choices.map((c, i) => {
             const isRight = shown && i === q.correctIndex;
             const isWrong = picked === i && i !== q.correctIndex;
@@ -147,10 +149,10 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 transition={{ duration: 0.4 }}
                 whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
                 whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-[clamp(3rem,13vh,8rem)] px-5 py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold text-fit-answer text-left active:scale-[0.98] disabled:cursor-default
+                className={`min-h-[clamp(3rem,11vh,8rem)] h-full pl-[clamp(4.25rem,11vh,7rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold leading-tight ${q.choices.every((ch) => ch.length <= 22) ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'} active:scale-[0.98] disabled:cursor-default
                 ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-12 h-12 shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-2xl">
+                <span className="absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.75rem,7.5vh,4.25rem)] h-[clamp(2.75rem,7.5vh,4.25rem)] shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-[clamp(1.2rem,3.6vh,2rem)]">
                   {isRight ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
                 {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}

@@ -423,7 +423,7 @@ export default function GameShow() {
       {(phase === 'play' || phase === 'end') && turns && (
         // The board fills the play space, the same in full screen; small controls
         // on top, the scores right beside it (teacher, 2026-10-31).
-        <div className="relative play-fill px-3 sm:px-4 py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
+        <div className="relative play-fill px-3 sm:px-[clamp(1rem,2.5vw,2.5rem)] py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
