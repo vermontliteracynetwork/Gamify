@@ -32,6 +32,14 @@ asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
 `.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
 Golden Rule, the three lenses or Claudia.
 
+## Design team (2026-11-19)
+
+The design seat of the C-suite: `.claude/agents/design-lead.md` (plans fixes
+by shared part, makes mockups for her approval) and `design-reviewer.md`
+(judges real screenshots at all four sizes). The `design-audit` skill runs
+the sweep (`e2e/design-audit.spec.ts`). Sources and licenses in
+`.claude/THIRD_PARTY.md`.
+
 ## Design system
 
 `docs/design-system.md` is the look of every menu and teacher page: the

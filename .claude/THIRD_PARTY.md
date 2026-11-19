@@ -9,6 +9,7 @@ Standard above everything else. This is development tooling only; none of it
 ships to users.
 
 - Agents: `accessibility-specialist`, `economy-designer`, `sound-designer`, `qa-tester`
+  (Gamify also has `design-lead` and `design-reviewer`, listed under Design team sources below.)
 - Skills: `balance-check`, `playtest-report`, `scope-check`, `asset-audit`, `bug-report`
 
 Gamify's own reviewers (Claudia, `golden-rule`) still have the final word. These
@@ -37,3 +38,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+# Design team sources (added 2026-11-19)
+
+Development tooling only; none of it ships to users. Gamify keeps its own look.
+
+- `design-reviewer` agent: adapted from the design-review agent in
+  **claude-code-workflows** by Patrick Ellis
+  (https://github.com/OneRedOak/claude-code-workflows), MIT License,
+  Copyright (c) 2025 Patrick Ellis. Rewritten for Gamify's screens, sizes and
+  rules; the MIT permission notice above applies to it.
+- `design-lead` agent: its "plan before you draw" and "spend boldness in one
+  place" steps are adapted from the **frontend-design** skill in Anthropic's
+  skills repository (https://github.com/anthropics/skills), Apache License 2.0
+  (https://www.apache.org/licenses/LICENSE-2.0). Changed: shortened and
+  rewritten for Gamify's design system and the teacher's rules.
+- UX rule checklists consulted (not copied): **UI UX Pro Max**
+  (https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), MIT License,
+  Copyright (c) 2024 Next Level Builder.
+- `design-audit` skill and `e2e/design-audit.spec.ts`: Gamify's own.
