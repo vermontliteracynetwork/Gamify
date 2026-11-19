@@ -122,12 +122,12 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
       </div>
       <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">
         <button type="button" onClick={back}
-          className="min-h-8 tap px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
-          <ArrowLeft weight="bold" size={14} />{t('setup.back')}
+          className="min-h-11 tap px-5 rounded-pill border-std border-border bg-surface-2 font-bold text-base inline-flex items-center gap-1.5 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
+          <ArrowLeft weight="bold" size={17} />{t('setup.back')}
         </button>
         <button type="button" disabled={page.ready === false} onClick={() => (last ? (teach.length ? setTeaching(true) : onPlay()) : next())}
-          className="min-h-8 tap px-4 rounded-pill border-std border-border bg-accent font-display text-base font-bold inline-flex items-center gap-1 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 2px 0 #000' }}>
-          {last ? <><Play weight="fill" size={15} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={14} /></>}
+          className="min-h-11 tap px-6 rounded-pill border-std border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}>
+          {last ? <><Play weight="fill" size={18} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={17} /></>}
         </button>
       </div>
     </section>

@@ -11,7 +11,7 @@ export default function WayToPlay({ modes, value, onChange }: { modes: PlayMode[
   return (
     // Every way fits side by side, no scrolling (teacher, 2026-10-31).
     // Square cards in the middle of the box (teacher, 2026-11-18).
-    <div role="radiogroup" aria-label={t('way.title')} className="grid gap-5 justify-center" style={{ gridTemplateColumns: `repeat(${modes.length}, min(18rem, 40vh, calc((100% - ${(modes.length - 1) * 1.25}rem) / ${modes.length})))` }}>
+    <div role="radiogroup" aria-label={t('way.title')} className="grid gap-5 justify-center" style={{ gridTemplateColumns: `repeat(${modes.length}, min(25rem, 52vh, calc((100% - ${(modes.length - 1) * 1.25}rem) / ${modes.length})))` }}>
       {modes.map((m) => {
         const Icon = MODE_ICONS[m];
         const on = value === m;
@@ -25,9 +25,9 @@ export default function WayToPlay({ modes, value, onChange }: { modes: PlayMode[
               <Icon weight="fill" size={28} className="absolute left-[8%] bottom-[10%] opacity-20 rotate-12" />
               <Icon weight="fill" size={22} className="absolute right-[10%] top-[12%] opacity-20 -rotate-12" />
             </span>
-            <span className="px-3 py-2 grid gap-0.5">
-              <span className="font-display text-lg font-bold leading-tight">{t(`mode.${m}` as StringKey)}</span>
-              <span className="font-semibold text-sm leading-snug">{t(`mode.${m}.hint` as StringKey)}</span>
+            <span className="px-4 py-3 grid gap-1">
+              <span className="font-display text-2xl font-bold leading-tight">{t(`mode.${m}` as StringKey)}</span>
+              <span className="font-semibold text-base leading-snug">{t(`mode.${m}.hint` as StringKey)}</span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

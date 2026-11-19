@@ -91,7 +91,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
-        <Tabs size="sm" className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
+        <Tabs className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
         <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
@@ -134,22 +134,22 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                         </span>
                         <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere] min-w-0">{s.name || t('sets.untitled')}</span>
                       </span>
-                      <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
+                      <span className="flex flex-wrap gap-1.5 text-sm font-bold leading-none">
                         <span className="rounded-pill border-thin border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
                         <span className="rounded-pill border-thin border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-muted pr-9">{t('sets.question1')}</span>
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted pr-9">{t('sets.question1')}</span>
                       {q?.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="w-full h-auto max-h-28 object-contain rounded-input" />}
-                      <span className="text-sm font-bold leading-snug break-words [overflow-wrap:anywhere]">{q ? q.prompt : t('sets.noQuestions')}</span>
+                      <span className="text-base font-bold leading-snug break-words [overflow-wrap:anywhere]">{q ? q.prompt : t('sets.noQuestions')}</span>
                       {q && (
                         <ol className="grid gap-1 list-none p-0 m-0">
                           {q.choices.map((c, k) => {
                             const right = k === q.correctIndex;
                             return (
-                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-thin px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
+                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-sm font-semibold leading-snug rounded-input border-thin px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
                                 <span className="min-w-0">{c}</span>
                                 {right && <CheckCircle weight="fill" size={15} color="#1f7a45" className="shrink-0 mt-px" aria-label={t('sets.correct')} />}
                               </li>

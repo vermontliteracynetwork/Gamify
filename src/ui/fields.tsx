@@ -34,16 +34,18 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
   // Pictured choices (like card grid sizes) are separate white cards that
   // get a black border on hover (teacher, 2026-11-06).
   if (options.some((o) => o.art)) return (
-    <div className="grid gap-1.5">
-      <span className="font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-3">
+    // Bigger, centered, each its own white card on the purple with no panel
+    // around them (teacher, 2026-11-19; .choice-cards drops the setup panel).
+    <div className="choice-cards grid gap-3 justify-items-center">
+      <span className="font-display text-xl font-bold">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex flex-wrap justify-center gap-4">
         {options.map((o) => {
           const on = value === o.value;
           return (
             <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
-              className={`min-w-24 px-4 py-3 rounded-input border-bold bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
-              style={{ boxShadow: on ? '0 4px 0 #000' : undefined }}>
-              {o.art}<span>{o.label}</span>
+              className={`min-w-44 px-6 py-5 rounded-panel border-bold bg-white grid justify-items-center gap-3 font-bold text-lg motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
+              style={{ boxShadow: on ? '0 5px 0 #000' : '0 3px 0 rgba(0,0,0,0.25)' }}>
+              <span className="[&>*]:scale-[1.6] [&>*]:origin-center py-[1.3rem] px-[1.3rem]">{o.art}</span><span>{o.label}</span>
               {/* Touch screens have no hover, so the tip shows on the card (Claudia, 2026-11-18). */}
               {o.tip && <span className="hidden [@media(hover:none)]:block text-xs font-semibold text-muted max-w-48">{o.tip}</span>}
             </button>
@@ -124,10 +126,10 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.title} onClick={() => onChange(o.value)}
             className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
             style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-            <span className="block h-[clamp(5rem,30vh,18rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
-            <span className="px-3 py-2 grid gap-0.5">
-              <span className="font-display text-base font-bold leading-tight">{o.title}</span>
-              <span className="font-semibold text-xs text-muted leading-snug">{o.hint}</span>
+            <span className="block w-full aspect-[2/1] max-h-[46vh] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
+            <span className="px-4 py-3 grid gap-1">
+              <span className="font-display text-2xl font-bold leading-tight">{o.title}</span>
+              <span className="font-semibold text-sm text-muted leading-snug">{o.hint}</span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

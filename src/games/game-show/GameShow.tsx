@@ -629,21 +629,22 @@ function GridPreview({ cols, rows }: { cols: number; rows: number }) {
 function BoardArt({ kind }: { kind: Board }) {
   if (kind === 'cards') {
     return (
-      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
-        {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
-            {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
+      // Cards are always wider than tall (teacher, 2026-11-01): 3 by 2 in a wide picture.
+      <span className="h-full grid grid-cols-3 grid-rows-2 gap-2 p-4" style={{ background: '#ffe9a8' }}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <span key={i} className="rounded-lg border-std border-border flex items-center justify-center font-display font-bold text-2xl" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
+            {i === 2 ? <Sparkle weight="fill" size={28} /> : i + 1}
           </span>
         ))}
       </span>
     );
   }
   return (
-    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
+    <span className="h-full grid grid-cols-4 grid-rows-4 gap-1.5 p-4" style={{ background: '#cdd7fb' }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
-      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
+      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-sm leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
-        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-lg flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}
     </span>
   );
