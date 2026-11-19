@@ -68,7 +68,7 @@ export default function PublicHome() {
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
                   {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
 <div className="flex gap-1.5">{g.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
-                  <p className="text-muted text-xs leading-snug">{g.description}</p>
+                  <p className="text-text text-sm font-semibold leading-snug">{g.description}</p>
                   <span className="text-sm font-bold inline-flex items-center gap-1.5">{t('public.tryIt')}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>
                 </div>
               </Link>

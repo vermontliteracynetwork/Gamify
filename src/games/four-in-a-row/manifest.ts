@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const fourInARowManifest: GameManifest = {
   id: 'four-in-a-row',
   name: 'Four in a Row',
-  description: 'Answer a question, then drop your piece. Get four in a row to win!',
+  description: 'Answer right, then drop your piece. Get four in a row!',
   modes: ['versus'],
   questionKinds: ['mc'],
   themePieces: [

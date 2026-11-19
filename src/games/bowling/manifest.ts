@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const bowlingManifest: GameManifest = {
   id: 'bowling',
   name: 'Bowling',
-  description: 'Answer right, aim, put some spin on it and send the ball crashing into the pins. Every roll is different!',
+  description: 'Answer right, then aim and send the ball into the pins.',
   modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [

@@ -6,7 +6,7 @@ export const BUBBLE_COLORS = ['#fdfd94', '#e5635f', '#8fe3a0', '#8ec5ff', '#f6a5
 export const bubblePopManifest: GameManifest = {
   id: 'bubble-pop',
   name: 'Bubble Pop',
-  description: 'Answer questions to load bubbles, then aim and match 3 to pop them.',
+  description: 'Answer questions to load bubbles. Aim and match 3 to pop.',
   modes: ['solo'],
   questionKinds: ['mc'],
   themePieces: [

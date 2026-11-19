@@ -387,9 +387,8 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
               )}
               {tab === 'share' && (
                 <>
-                  {/* Credit (moved here from the top, 2026-10-31). */}
+                  {/* Less text (teacher, 2026-11-19): no "Credited to" line; explanations are hover text. */}
                   <div className="grid gap-1">
-                    <p className="font-bold">{t('builder.creditedTo', { name: teacherUsername() })}</p>
                     <label className="grid gap-1 font-bold text-sm">{t('builder.studentDesigner')}
                       <input id="theme-student" value={draft.studentDesigner ?? ''} maxLength={20} onChange={(e) => setDraft({ ...draft, studentDesigner: e.target.value || undefined })} placeholder={t('builder.studentDesignerPlaceholder')}
                         className="min-h-11 px-3 rounded-input border-std border-border font-bold w-full max-w-72" />
@@ -570,16 +569,19 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
         const ability = spec.abilities.find((a) => a.id === it.ability) ?? spec.abilities[0];
         return (
           <div key={it.id} className="rounded-input border-std border-border p-3 grid gap-2 content-start">
-            <span className="text-xs font-bold uppercase tracking-wide text-muted">{t('builder.items.templatePage', { n: i + 1 })}</span>
+            {/* No "Template page" line (teacher, 2026-11-19): the name gets the room. */}
             <div className="flex items-center gap-3">
-              <label className="shrink-0 cursor-pointer rounded-input border-std border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
+              <span className="relative shrink-0">
+              <label className="block cursor-pointer rounded-input border-std border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
                 <ItemArt item={it} size={64} still />
                 <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { put(i, { image: await imageFileToDataUrl(f, Math.max(spec.width, spec.height), true) }); } catch (err) { onProblem(err instanceof Error ? err.message : String(err)); } }} />
               </label>
-              <label className="grid gap-1 font-bold text-sm flex-1">{t('builder.items.name')}
+              {/* The yellow brush opens the drawing studio for this power-up's picture; it sits on the picture's corner. */}
+              <IconButton variant="primary" className="!w-8 !h-8 absolute -right-2 -bottom-2" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} data-tip={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={15} /></IconButton>
+              </span>
+              <label className="grid gap-1 font-bold text-sm flex-1 min-w-0">{t('builder.items.name')}
                 <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
               </label>
-              <IconButton variant="primary" className="self-end" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={20} /></IconButton>
             </div>
             <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
@@ -612,7 +614,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               </label>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              {!it.image && <label className="flex items-center gap-2 font-bold text-sm">{t('builder.items.color')}<input type="color" value={it.color ?? '#fdfd94'} onChange={(e) => put(i, { color: e.target.value })} className="color-dot w-9 h-9" /></label>}
+              {!it.image && <label className="flex items-center gap-2 font-bold text-sm" data-tip={t('builder.items.colorTip')}>{t('builder.items.color')}<input type="color" value={it.color ?? '#fdfd94'} onChange={(e) => put(i, { color: e.target.value })} className="color-dot w-9 h-9" /></label>}
               {it.image && <Button onClick={() => put(i, { image: undefined })}>{t('builder.items.removePicture')}</Button>}
               <IconButton variant="danger" className="ml-auto" label={t('builder.items.delete')} onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash weight="bold" size={18} /></IconButton>
             </div>
@@ -664,18 +666,19 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
   const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
   return (
     <div className="grid gap-3">
-      <p className="font-semibold text-muted text-sm">{t('builder.shareHint')}</p>
       <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.shareTitle')}>
-        <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
-        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
+        <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} data-tip={t('builder.shareClassTip')} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
+        {/* Why it can't be shared yet is hover text (disabled buttons get no hover, so the tip sits on a wrapper). */}
+        <span className="grid" data-tip={!saved ? t('builder.shareSaveFirst') : problems ? t('builder.shareProblems') : t('builder.shareGalleryTip')}>
+          <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
+        </span>
       </div>
-      {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
-        : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p> : null}
       {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}</p>}
-      <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${CHALLENGE_OPEN && inGallery ? '' : 'opacity-60'}`}>
-        <input type="checkbox" className="w-5 h-5" disabled={!CHALLENGE_OPEN || !inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
-        {t('builder.shareChallenge')}
-      </label>
+      {/* The challenge shows only once entries open (guess, 2026-11-19: less text until launch). */}
+      {CHALLENGE_OPEN && <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${inGallery ? '' : 'opacity-60'}`} data-tip={t('builder.shareChallengeOpen')}>
+        <input type="checkbox" className="w-5 h-5" disabled={!inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
+        {t('builder.shareChallenge')} <Link to="/challenge" className="text-sm">{t('builder.shareChallengeLink')}</Link>
+      </label>}
       {theme.challenge && (
         <div className="grid gap-2 rounded-input border-std border-border-soft p-3">
           <p className="font-bold">{t('builder.track')}</p>
@@ -693,7 +696,6 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
           )}
         </div>
       )}
-      <p className="text-xs font-semibold text-muted">{CHALLENGE_OPEN ? t('builder.shareChallengeOpen') : t('builder.shareChallengeSoon')} <Link to="/challenge">{t('builder.shareChallengeLink')}</Link></p>
     </div>
   );
 }

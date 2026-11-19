@@ -30,7 +30,8 @@ export default function Home() {
   if (session && !teacher) return <Navigate to="/join" replace />;
 
   return (
-    <main className="max-w-5xl mx-auto px-6 sm:px-10 lg:px-12 pt-10 pb-16">
+    // Same width and side margins as the teacher pages (teacher, 2026-11-19: "match the other images").
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-16">
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,7 +77,7 @@ export default function Home() {
                 <h2 className="font-display text-xl font-bold text-text"><Title text={game.name} /></h2>
                 {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
 <div className="flex gap-1.5">{game.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
-                <p className="text-muted text-xs leading-snug">{game.description}</p>
+                <p className="text-text text-sm font-semibold leading-snug">{game.description}</p>
                 <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
                   {t('home.play')}
                   <ArrowRight weight="bold" size={16} className="transition-transform group-hover:translate-x-1" />

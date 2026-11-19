@@ -6,7 +6,7 @@ import type { GameManifest } from '../types';
 export const castleQuestManifest: GameManifest = {
   id: 'castle-quest',
   name: 'Board Game',
-  description: 'Answer right, roll the die and move that many squares. Watch for lose-a-turn and roll-again squares, find hidden power-ups, and be first to the finish!',
+  description: 'Answer right, roll the die and race to the finish.',
   modes: ['share', 'versus'],
   questionKinds: ['mc'],
   // Everything is designable (teacher, 2026-11-08): each kind of square, all

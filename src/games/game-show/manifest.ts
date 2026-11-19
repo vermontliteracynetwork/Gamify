@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const gameShowManifest: GameManifest = {
   id: 'game-show',
   name: 'Game Show',
-  description: 'Teams take turns on the big screen. Answer right to pick a card (some hold power-ups) or a square.',
+  description: 'Answer right to pick a card. Some cards hide power-ups!',
   modes: ['share', 'versus'],
   questionKinds: ['mc'],
   themePieces: [

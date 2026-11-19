@@ -54,13 +54,14 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await page.goto('/teacher/themes/game-show');
   await page.getByLabel('Theme name').fill('Rainbow Room');
   await page.getByRole('tab', { name: 'Share' }).click();
-  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
+  await page.getByLabel('Student designer (optional)').fill('Ava');
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Rainbow Room.', { exact: false })).toBeVisible();
   await page.getByRole('tab', { name: 'Share' }).click();
   await page.getByRole('radio', { name: 'Share in the public gallery' }).click();
   await expect(page.getByText('Sent to the gallery.', { exact: false })).toBeVisible();
-  await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeDisabled();
+  // The challenge shows only once entries open (2026-11-19).
+  await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toHaveCount(0);
   await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 

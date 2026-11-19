@@ -4,7 +4,7 @@ import type { GameManifest } from '../types';
 export const starQuizManifest: GameManifest = {
   id: 'star-quiz',
   name: 'Question Tracker',
-  description: 'Every right answer adds a star until the whole sky is full. With the class: fill one sky together, or race to get the most stars in your color.',
+  description: 'Every right answer adds a star until the sky is full.',
   modes: ['live', 'solo'],
   questionKinds: ['mc'],
   themePieces: [

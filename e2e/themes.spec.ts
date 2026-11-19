@@ -48,7 +48,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('button', { name: /^Main color: double-tap/ }).dblclick();
   await page.getByLabel('Main color hex code').fill('#7ad3f5');
   await page.getByRole('tab', { name: 'Share' }).click();
-  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
+  await page.getByLabel('Student designer (optional)').fill('Ava');
   await page.getByRole('tab', { name: 'Style' }).click();
   await page.getByRole('radio', { name: 'Storybook' }).click();
   await page.getByRole('radio', { name: 'Chimes' }).click();
