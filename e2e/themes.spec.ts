@@ -253,7 +253,7 @@ test('Bowling Pin: the template page is pin-shaped and the cut follows the pin o
   expect(px.corner).toBe(0);
   expect(px.neck).toBe(0);
   expect(px.belly).toBe(255);
-  expect(px.w / px.h).toBeCloseTo(0.5, 1);
+  expect(px.w / px.h).toBeCloseTo(64 / 200, 1); // the pin piece is 64 x 200 (redrawn as a real pin)
   expect(problems).toEqual([]);
 });
 
@@ -267,7 +267,7 @@ test('Bowling Pin: paper around a drawn pin outline is cut away, the white insid
   await sheet.evaluate((svg) => {
     const ns = 'http://www.w3.org/2000/svg';
     const e = document.createElementNS(ns, 'ellipse');
-    e.setAttribute('cx', '850'); e.setAttribute('cy', '1350'); e.setAttribute('rx', '200'); e.setAttribute('ry', '520'); e.setAttribute('fill', '#ffffff'); e.setAttribute('stroke', '#111111'); e.setAttribute('stroke-width', '18');
+    e.setAttribute('cx', '850'); e.setAttribute('cy', '1350'); e.setAttribute('rx', '120'); e.setAttribute('ry', '520'); e.setAttribute('fill', '#ffffff'); e.setAttribute('stroke', '#111111'); e.setAttribute('stroke-width', '18');
     const smudge = document.createElementNS(ns, 'circle');
     smudge.setAttribute('cx', '590'); smudge.setAttribute('cy', '1500'); smudge.setAttribute('r', '40'); smudge.setAttribute('fill', '#d2d2d2');
     svg.appendChild(smudge); svg.appendChild(e);

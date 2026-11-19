@@ -241,6 +241,7 @@ export default function MatchThree() {
 
   // Swiping a gem also swaps it (unless the player chose tap only).
   function onPointerUp(e: React.PointerEvent, pos: Pos) {
+    if (!e.nativeEvent.isTrusted) return;
     const d = drag.current;
     drag.current = null;
     if (!d || settings.tapOnly) { tap(pos); return; }
@@ -319,7 +320,10 @@ export default function MatchThree() {
                     aria-label={`${t('bm.tile', { kind: kindName, row: r + 1, col: c + 1 })}${isSel ? `, ${t('bm.selected')}` : ''}`}
                     aria-selected={isSel}
                     disabled={phase !== 'play'}
-                    onPointerDown={(e) => { drag.current = { pos: { row: r, col: c }, x: e.clientX, y: e.clientY }; }}
+                    // Motion turns Enter into a made-up pointer press for whileTap;
+                    // only real fingers and mice count, or Enter would pick and
+                    // drop the same piece at once (keyboard players, 2026-11-19).
+                    onPointerDown={(e) => { if (!e.nativeEvent.isTrusted) return; drag.current = { pos: { row: r, col: c }, x: e.clientX, y: e.clientY }; }}
                     onPointerUp={(e) => onPointerUp(e, { row: r, col: c })}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap({ row: r, col: c }); } }}
                     initial={still ? false : sp ? { scale: 1.8, opacity: 0 } : { y: -40, opacity: 0 }}

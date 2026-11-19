@@ -13,3 +13,10 @@ describe('starter library', () => {
   });
   it('uses no em dashes (copy rule)', () => expect(JSON.stringify(LIBRARY)).not.toMatch(/—/));
 });
+
+// Every built-in question reads differently, so a prompt names one answer
+// (two "Which sentence is written correctly?" items made tests guess, 2026-11-19).
+it('built-in question prompts are all different', () => {
+  const prompts = LIBRARY.flatMap((s) => s.questions.map((q) => q.prompt));
+  expect(new Set(prompts).size).toBe(prompts.length);
+});

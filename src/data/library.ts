@@ -112,7 +112,7 @@ export const LIBRARY: QuestionSet[] = [
     ['Which punctuation ends a telling sentence?', 'period (.)', 'question mark (?)', 'comma (,)', 'apostrophe (\')'],
     ['Which punctuation ends an asking sentence?', 'question mark (?)', 'period (.)', 'comma (,)', 'quotation mark (")'],
     ['Which punctuation shows strong feeling?', 'exclamation mark (!)', 'period (.)', 'comma (,)', 'question mark (?)'],
-    ['Which sentence is written correctly?', 'Where is my hat?', 'where is my hat?', 'Where is my hat.', 'where is my hat'],
+    ['Which question is written correctly?', 'Where is my hat?', 'where is my hat?', 'Where is my hat.', 'where is my hat'],
     ['Which name needs a capital letter?', 'Maria', 'dog', 'table', 'happy'],
     ['Which word in this sentence needs a capital letter? "we went to the park."', 'we', 'went', 'park', 'the'],
     ['Which sentence is written correctly?', 'I like apples.', 'i like apples.', 'I like apples', 'i Like apples.'],
