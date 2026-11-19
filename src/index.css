@@ -26,6 +26,9 @@
 @import "@fontsource/inclusive-sans/700.css";
 
 @theme {
+  /* Wider page column (teacher, 2026-11-19: "main column ... too small"). */
+  --container-6xl: 84rem;
+  --container-7xl: 92rem;
   --color-bg: #b4c4fb;
   --color-bg-elevated: #9fb2f5;
   --color-surface: #fbfcf8;
@@ -238,9 +241,10 @@ button, a, [role="button"] {
    16px on a normal laptop, down to 13px on a short or narrow window. */
 @media (pointer: fine) {
   /* Laptop text (teacher, 2026-11-18 "too big", then 2026-11-19 "too small"):
-     the middle ground. About 15.5px on 1440 x 900, 14px on 1280 x 720, 12px on
+     the middle ground, nudged up 2026-11-19 ("still too small"). About 16px on
+     1440 x 900, 15.5px on a wide 1856 x 795 window, 15px on 1280 x 720, 12px on
      a small or zoomed-in window, 16px on big desktops. */
-  html { font-size: clamp(12px, min(7.5px + 0.9vh, 7.5px + 0.62vw), 16px); }
+  html { font-size: clamp(12px, min(8px + 0.95vh, 7.5px + 0.6vw), 16.5px); }
 }
 /* Roomier side margins on every content page (not game screens), growing
    with the window, so pages never look crowded (teacher, 2026-11-18). */

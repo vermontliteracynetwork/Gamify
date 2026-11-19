@@ -44,6 +44,8 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await cardBack.setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: await png(page, '#2a9df4') });
   await expect(page.getByLabel('Added')).toHaveCount(1);
   await page.getByRole('tab', { name: 'Colors' }).click();
+  // Double-tap a color's circle to open its picker and hex box (teacher, 2026-11-19).
+  await page.getByRole('button', { name: /^Main color: double-tap/ }).dblclick();
   await page.getByLabel('Main color hex code').fill('#7ad3f5');
   await page.getByRole('tab', { name: 'Share' }).click();
   await page.getByLabel('Student first name or nickname (optional)').fill('Ava');

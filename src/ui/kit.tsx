@@ -83,7 +83,7 @@ export function Tabs<T extends string>({ value, options, onChange, label, size =
           aria-controls={panelIds && value === o.id ? `panel-${o.id}` : undefined}
           aria-selected={value === o.id}
           onClick={() => onChange(o.id)}
-          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-xs' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`}
+          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-sm' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`}
         >
           {o.label}
         </button>

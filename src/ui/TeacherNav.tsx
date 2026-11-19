@@ -23,7 +23,7 @@ export default function TeacherNav({ startOpen = true }: { startOpen?: boolean }
   useEffect(() => { void surveyDue().then(setSurvey); }, []);
   const showing = open ?? startOpen;
   const link = ({ isActive }: { isActive: boolean }) =>
-    `min-h-8 px-3 rounded-pill font-bold text-xs inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
+    `min-h-9 px-3 rounded-pill font-bold text-xs lg:text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.
   const onAccount = useLocation().pathname.startsWith('/teacher/account');
   const unfinished = start && start.count < start.steps.length && !onAccount;

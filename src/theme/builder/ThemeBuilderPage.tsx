@@ -59,7 +59,7 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
   return (
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
     // the preview and the tabs share the space left under the menu.
-    <main className={`max-w-7xl mx-auto px-4 sm:px-6 pt-4 ${game ? 'pb-4 h-[calc(100dvh-3rem)] flex flex-col' : 'pb-6'}`}>
+    <main className={`max-w-7xl mx-auto px-4 sm:px-6 pt-4 ${game ? 'pb-4 h-[calc(100dvh-3.5rem)] flex flex-col' : 'pb-6'}`}>
       <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} />}</div>
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
@@ -147,7 +147,7 @@ function blankTheme(gameId: string, owner: boolean): GameTheme {
   return { ...classicTheme(gameId), id: newId('theme'), name: '', source: owner ? 'library' : 'custom', pieces: {} };
 }
 
-function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base: string }) {
+function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: string }) {
   const game = BUILDER_TARGETS.find((g) => g.id === gameId)!;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -210,7 +210,22 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     if (p) void loadOriginal(draft.id, p.id).then((o) => setOriginal(o && draft.pieces[p.id]?.image ? o : undefined));
   }
   const views = previewViews(gameId, !!game.items);
-  const [view, setView] = useState<PreviewView>('game');
+  const previewBox = useRef<HTMLDivElement>(null);
+  const [previewH, setPreviewH] = useState<number>();
+  useEffect(() => {
+    const el = previewBox.current;
+    if (!el) return;
+    const wide = window.matchMedia('(min-width: 1024px)');
+    const measure = () => setPreviewH(wide.matches ? el.getBoundingClientRect().height : undefined);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    wide.addEventListener('change', measure);
+    return () => { ro.disconnect(); wide.removeEventListener('change', measure); };
+  }, [blocked]);
+  const [picked, setView] = useState<PreviewView>(views[0].id);
+  // Always one of this game's screens (board sizes start on the first size).
+  const view = views.some((v) => v.id === picked) ? picked : views[0].id;
   const [find, setFind] = useState('');
   // Tall screens show more pieces a page, so there is no empty space.
   const [tall, setTall] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-height: 860px)').matches);
@@ -277,14 +292,28 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             onSave={(img) => { setPiece(drawing.id, img); setDrawing(null); setStatus(''); }} />
         </Suspense>
       )}
-      <div className="shrink-0 flex flex-wrap items-center gap-2 mb-3">
-        <Link to={base} aria-label={t('builder.allGames')} data-tip={t('builder.allGames')} className={buttonClasses('secondary', 'w-11 !px-0')}><ArrowLeft weight="bold" size={20} /></Link>
-        <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
-        {mine.map((th) => (
-          <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
-            className={`min-h-11 px-4 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
-        ))}
-      </div>
+      {/* One bar across the top, under the teacher bar (teacher, 2026-11-19):
+          the theme's name, Save, and the design tabs. No back arrow: the
+          teacher bar's Theme Builder link goes back to all games. */}
+      <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
+      {!blocked && (
+        <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          {mine.map((th) => (
+            <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
+              className={`min-h-9 tap px-3 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
+          ))}
+          <label className="grid font-bold text-sm w-56 max-w-full"><span className="sr-only">{t('builder.name')}</span>
+            <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
+              className={fieldClasses('sm', 'w-full')} />
+          </label>
+          <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
+          {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
+          {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
+          {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
+          <Tabs size="sm" fill panelIds className="flex-1 min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
+            options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
+        </div>
+      )}
 
       <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         {/* The preview, as big as the space allows, with arrows that turn
@@ -292,33 +321,27 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
             no Game / Power-ups buttons, no count line). */}
         <div className="min-h-0 flex items-center justify-center gap-2 [container-type:size]">
           {views.length > 1 && <PageTurn dir="prev" label={t('builder.prevView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) - 1 + views.length) % views.length].id)} />}
-          <div className="flex-1 min-w-0 grid justify-items-center gap-1.5">
-            <div className="w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 1.5 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} /></div>
+          <div className="flex-1 min-w-0 grid justify-items-center">
+            {/* The dots hang under the preview, so the preview itself sits in
+                the middle and the panel beside it can match its height. */}
+            <div ref={previewBox} className="relative w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 3 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} />
             {views.length > 1 && (
-              <span className="flex gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
+              <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
                 {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
+                {/* Board sizes say which size is showing. */}
+                {view.startsWith('size:') && <span aria-hidden="true" className="ml-1 font-bold text-xs leading-none whitespace-nowrap">{views.find((v) => v.id === view)?.label}</span>}
               </span>
             )}
+            </div>
           </div>
           {views.length > 1 && <PageTurn dir="next" label={t('builder.nextView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) + 1) % views.length].id)} />}
         </div>
 
-        <div className="min-h-0 flex flex-col gap-3">
+        {/* The menu is as tall as the preview beside it (teacher, 2026-11-19). */}
+        <div className="min-h-0 flex flex-col gap-3 lg:self-center" style={previewH ? { height: previewH } : undefined}>
           {blocked && <LimitNote><span className="flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</span></LimitNote>}
           {!blocked && (
           <Panel className="flex-1 min-h-0 flex flex-col gap-3 !p-4">
-            <div className="shrink-0 flex items-center gap-2">
-              <label className="grid font-bold text-sm flex-1 min-w-0"><span className="sr-only">{t('builder.name')}</span>
-                <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
-                  className="min-h-9 px-3 rounded-input border-std border-border font-bold text-sm w-full" />
-              </label>
-              <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
-              {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
-              {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
-            </div>
-            {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
-            <Tabs size="sm" fill panelIds className="shrink-0" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
-              options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto grid gap-3 content-start pr-1">
               {tab === 'download' && (
                 <>
@@ -356,7 +379,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                       className="min-h-8 px-3 rounded-input border-std border-border font-bold text-sm flex-1 min-w-40" />
                   </div>
                   {shownPieces.length === 0 && <p className="font-bold text-sm text-muted">{t('builder.noPieces')}</p>}
-                  <Pages key={`upload-${find}`} per={tall ? 6 : 4} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} clear={isClear(p)} onClearBg={() => toggleClear(p)} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
+                  <Pages key={`upload-${find}`} per={tall ? 12 : 8} items={shownPieces.map((p) => <PieceCard key={p.id} piece={p} image={draft.pieces[p.id]?.image} clear={isClear(p)} onClearBg={() => toggleClear(p)} onFile={(f) => void upload(p, f)} onDraw={() => setDrawing(p)} onClear={() => { setPiece(p.id, undefined); void saveOriginal(draft.id, p.id, undefined); }} />)} />
                 </>
               )}
               {tab === 'items' && game.items && (
@@ -402,7 +425,6 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               )}
               {tab === 'colors' && (
                 <>
-                  <p className="font-semibold text-muted text-sm">{t('builder.colorsHint')}</p>
                   <Pages key="colors" per={6} items={[
                     ...COLOR_FIELDS.map((f) => (
                       <ColorField key={f.key} label={f.label} hint={f.hint} value={draft.colors[f.key]} onChange={(v) => setDraft({ ...draft, colors: { ...draft.colors, [f.key]: v } })} />
@@ -460,7 +482,8 @@ function Pages({ items, per }: { items: ReactNode[]; per: number }) {
   const at = Math.min(page, total - 1);
   return (
     <div ref={ref} className="grid gap-3">
-      <div className="grid @lg:grid-cols-2 gap-3">{items.slice(at * fit, at * fit + fit)}</div>
+      {/* Two columns of cards (teacher, 2026-11-19). */}
+      <div className="grid grid-cols-2 gap-3">{items.slice(at * fit, at * fit + fit)}</div>
       {total > 1 && (
         <div className="flex items-center gap-2">
           <Button aria-label={t('builder.prevPage')} disabled={at === 0} onClick={() => setPage(at - 1)} className="w-11 !px-0"><CaretLeft weight="bold" size={18} /></Button>
@@ -479,7 +502,7 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   return (
-    <div className={`rounded-input border-std p-2 flex items-center gap-3 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-accent' : ''}`}
+    <div className={`rounded-input border-std p-2 grid grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-1.5 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-accent' : ''}`}
       onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
       onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}>
       <button type="button" onClick={() => ref.current?.click()} aria-label={t('builder.uploadPiece', { piece: piece.label })}
@@ -489,12 +512,14 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
       <input ref={ref} type="file" accept="image/*" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
       {/* Only the title shows; what the piece is and its size are hover
           text (teacher, 2026-11-18). */}
-      <div className="min-w-0 flex-1" data-tip={`${piece.hint} (${piece.width} x ${piece.height})`}>
-        <p className="font-bold text-sm leading-tight flex items-center gap-1.5 min-w-0"><span className="[overflow-wrap:anywhere]">{piece.label}</span>{image && <CheckCircle weight="fill" size={16} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
+      {/* Two columns of cards (teacher, 2026-11-19): the title gets its own
+          line under the picture and buttons, so words never split. */}
+      <div className="min-w-0 col-span-3 row-start-2" data-tip={`${piece.hint} (${piece.width} x ${piece.height})`}>
+        <p className="font-bold text-sm leading-tight flex items-center gap-1.5 min-w-0"><span className="break-words">{piece.label}</span>{image && <CheckCircle weight="fill" size={16} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
         <p className="sr-only">{piece.hint} {piece.width} x {piece.height}</p>
       </div>
       {/* Small buttons (teacher, 2026-11-16): draw, see-through on or off, remove. */}
-      <div className="shrink-0 flex gap-1">
+      <div className="shrink-0 flex gap-1 col-start-3">
         <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
         <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
           className="shrink-0 w-8 h-8 rounded-full border-std border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
@@ -596,19 +621,33 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   );
 }
 
+// A color: just its circle and name (teacher, 2026-11-19: no hint line, no
+// hex box). Double-tap or double-click the circle to open a color picker with
+// a hex code box; what the color is for is hover text.
 function ColorField({ label, hint, value, onChange }: { label: string; hint: string; value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
   const [text, setText] = useState(value);
   useEffect(() => setText(value), [value]);
+  const lastTap = useRef(0);
   const id = `color-${label.replace(/\W+/g, '-').toLowerCase()}`;
+  function tap() {
+    const now = Date.now();
+    if (now - lastTap.current < 400) { setOpen((o) => !o); lastTap.current = 0; } else lastTap.current = now;
+  }
   return (
-    <div className="rounded-input border-std border-border-soft p-2 flex items-center gap-2">
-      <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} className="color-dot shrink-0 w-11 h-11" />
-      <div className="min-w-0 flex-1">
-        <label htmlFor={id} className="font-bold block">{label}</label>
-        <p className="text-xs font-semibold text-muted truncate" title={hint}>{hint}</p>
-      </div>
-      <input value={text} aria-label={`${label} hex code`} maxLength={7} onChange={(e) => { setText(e.target.value); if (HEX.test(e.target.value)) onChange(e.target.value.toLowerCase()); }}
-        className="shrink-0 min-h-11 w-24 px-2 rounded-input border-std border-border font-mono font-bold uppercase text-sm" />
+    <div className="relative rounded-input border-std border-border-soft p-2 flex items-center gap-2" data-tip={hint}>
+      <button type="button" onClick={tap} aria-expanded={open} aria-label={t('builder.colorOpen', { name: label })}
+        className="shrink-0 w-11 h-11 rounded-full border-bold border-border motion-safe:active:scale-95" style={{ background: value }} />
+      <span className="font-bold text-sm leading-tight min-w-0 [overflow-wrap:anywhere]">{label}</span>
+      {open && (
+        <div className="absolute left-2 top-full mt-1 z-20 bg-surface border-std border-border rounded-input p-2 flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} aria-label={t('builder.colorPick', { name: label })} className="color-dot shrink-0 w-11 h-11" />
+          <input value={text} aria-label={`${label} hex code`} maxLength={7} autoFocus onChange={(e) => { setText(e.target.value); if (HEX.test(e.target.value)) onChange(e.target.value.toLowerCase()); }}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Escape') setOpen(false); }}
+            className={fieldClasses('sm', 'w-24 font-mono uppercase')} />
+          <Button size="sm" onClick={() => setOpen(false)}>{t('builder.colorDone')}</Button>
+        </div>
+      )}
     </div>
   );
 }

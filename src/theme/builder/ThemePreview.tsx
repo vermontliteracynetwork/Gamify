@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
@@ -10,7 +10,7 @@ import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
-import { layout, spaceKinds } from '../../games/castle-quest/board';
+import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
 
 // Each game's own preview, one file per game in ./previews, named by game id
@@ -20,14 +20,20 @@ import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowl
 const GAME_PREVIEWS = Object.fromEntries(Object.entries(import.meta.glob<{ default: (p: { theme: GameTheme }) => JSX.Element }>('./previews/*.tsx', { eager: true }))
   .map(([path, mod]) => [path.replace(/^.*\/(.*)\.tsx$/, '$1'), mod.default]));
 
-const TILE_COLORS = ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
 
 // The views a game's preview can show (teacher, 2026-11-01: "tabs can be
 // toggled through to see the different views where your items will be
 // shown"), each a screen of the game where the theme's pieces appear.
-export type PreviewView = 'game' | 'pick' | 'powers';
+// Games with board sizes show the board at every size (teacher, 2026-11-19):
+// `size:<n>` is the Board Game's number of squares or Match Three's grid.
+export type PreviewView = 'game' | 'pick' | 'powers' | `size:${number}`;
+const SIZE_VIEWS: Record<string, { n: number; label: string }[]> = {
+  'castle-quest': Object.entries(TRAIL_SPACES).map(([k, n]) => ({ n, label: `${{ short: 'Short', medium: 'Medium', long: 'Long', xlong: 'Extra long' }[k as keyof typeof TRAIL_SPACES]} board` })),
+  'match-three': [6, 7, 8].map((n) => ({ n, label: `${n} by ${n} board` })),
+};
 export function previewViews(gameId: string, hasItems: boolean): { id: PreviewView; label: string }[] {
-  const views: { id: PreviewView; label: string }[] = [{ id: 'game', label: gameId === 'bowling' ? 'Lane' : 'Game' }];
+  const sizes = SIZE_VIEWS[gameId];
+  const views: { id: PreviewView; label: string }[] = sizes ? sizes.map((z) => ({ id: `size:${z.n}` as PreviewView, label: z.label })) : [{ id: 'game', label: gameId === 'bowling' ? 'Lane' : 'Game' }];
   if (gameId === 'bowling') views.push({ id: 'pick', label: 'Pick a ball' });
   else if (gameId === 'game-show') views.push({ id: 'pick', label: 'Team icons' });
   if (hasItems) views.push({ id: 'powers', label: 'Power-ups' });
@@ -42,7 +48,8 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
   // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
   if (view === 'pick') return <PickView theme={theme} />;
   // The Board Game's own board, squares, pieces and die (teacher, 2026-11-16).
-  if (theme.gameId === 'castle-quest' && view === 'game') return <BoardGamePreview theme={theme} />;
+  const size = view.startsWith('size:') ? Number(view.slice(5)) : undefined;
+  if (theme.gameId === 'castle-quest' && (view === 'game' || size)) return <BoardGamePreview theme={theme} squares={size ?? TRAIL_SPACES.medium} />;
   const Own = view === 'game' ? GAME_PREVIEWS[theme.gameId] : undefined;
   if (Own) return <Own theme={theme} />;
   return (
@@ -51,7 +58,7 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
         <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
       </div>
-      <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme)}</div>
+      <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
     </div>
   );
 }
@@ -133,9 +140,9 @@ function PowersView({ theme }: { theme: GameTheme }) {
 // The Board Game exactly as play draws it: the board winding Start to
 // Finish with lose-a-turn and roll-again squares, two team pieces and the die.
 // Anything left empty shows Classic's own squares.
-const PREVIEW_SQUARES = 28;
-const PREVIEW_KINDS = (() => { let x = 7; return spaceKinds(PREVIEW_SQUARES, () => ((x = (x * 9301 + 49297) % 233280) / 233280)); })();
-function BoardGamePreview({ theme }: { theme: GameTheme }) {
+const kindsFor = (n: number) => { let x = 7; return spaceKinds(n, () => ((x = (x * 9301 + 49297) % 233280) / 233280)); };
+function BoardGamePreview({ theme, squares: PREVIEW_SQUARES }: { theme: GameTheme; squares: number }) {
+  const PREVIEW_KINDS = useMemo(() => kindsFor(PREVIEW_SQUARES), [PREVIEW_SQUARES]);
   const box = useRef<HTMLDivElement>(null);
   const [room, setRoom] = useState({ w: 400, h: 300 });
   useLayoutEffect(() => {
@@ -198,16 +205,22 @@ function BowlingLane({ theme }: { theme: GameTheme }) {
   );
 }
 
-function board(theme: GameTheme) {
+function board(theme: GameTheme, size?: number) {
   switch (theme.gameId) {
     case 'bowling':
       return <BowlingLane theme={theme} />;
-    case 'match-three':
+    case 'match-three': {
+      // The board as play draws it (no square behind each piece), at the chosen size.
+      const n = size ?? 7;
       return (
-        <div className="grid grid-cols-5 gap-1 p-2 rounded-input border-std border-border h-full aspect-square" style={pieceFill(theme, 'board', '#ffffff')}>
-          {Array.from({ length: 25 }, (_, i) => <span key={i} className="rounded-md border-thin border-border-soft" style={pieceFill(theme, `tile-${(i * 7) % 6}`, TILE_COLORS[(i * 7) % 6])} />)}
+        <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full aspect-square" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+          {Array.from({ length: n * n }, (_, i) => {
+            const k = (i * 7 + Math.floor(i / n) * 3) % 6;
+            return <img key={i} src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;
+          })}
         </div>
       );
+    }
     case 'four-in-a-row':
       return (
         <div className="grid grid-cols-7 gap-1 p-2 rounded-input border-std border-border h-full aspect-[7/6]" style={pieceFill(theme, 'board', '#a8d8f0')}>
