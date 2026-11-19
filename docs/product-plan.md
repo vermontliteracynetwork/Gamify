@@ -499,8 +499,8 @@ Direct from you (2026-10-24).
 
 ### One join page for everything: `<domain>.com/join`
 Every way into a game goes through the same page, no matter the game or
-mode: **`<domain>.com/join`** (for example `joingamify.com/join` if that
-domain is chosen). The student types the code the teacher shows, or scans
+mode: **`<domain>.com/join`** (**`learngamify.com/join`**, the teacher's
+choice, 2026-11-19). The student types the code the teacher shows, or scans
 the QR code, which opens `/join` with the code already filled in. The page
 reads the code and sends the student to the right place.
 
@@ -916,7 +916,9 @@ game only decides *when to ask* and *what a right answer does*.
 
 1. ~~Owner and seller~~ DECIDED 2026-10-24: **you, personally.** You'll
    buy the domain soon.
-2. **Product name and domain**: you want "Gamify." Open .com domains as of
+2. ~~Product name and domain~~ DECIDED 2026-11-19: **Gamify**, at
+   **learngamify.com**, with students joining at **learngamify.com/join**
+   (open on 2026-11-19, not bought yet). Earlier notes: open .com domains as of
    2026-10-24 (checked, not bought): joingamify.com, heygamify.com,
    gamifyclassroom.com, gamifymyclass.com, gamifyschool.com,
    gamifyroom.com, gamifyquiz.com, gamifykids.com. Claudia's pick:

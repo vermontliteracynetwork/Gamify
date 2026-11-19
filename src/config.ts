@@ -2,8 +2,9 @@
 // section 5). Change numbers here, never inline in screens.
 
 export const APP_NAME = 'Gamify';
-// Placeholder until the domain is bought (development plan, defaults table).
-export const APP_DOMAIN = 'joingamify.com';
+// The domain (teacher, 2026-11-19): learngamify.com, with the student join
+// page at learngamify.com/join. Not bought yet (Waiting on you).
+export const APP_DOMAIN = 'learngamify.com';
 
 // Homeschool is its own plan (teacher, 2026-10-26), shown on the Homeschool
 // page, not on the main Pricing table.
