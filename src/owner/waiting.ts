@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'research-network', kind: 'setup', added: '2026-11-19', title: 'Let Beth open web pages for sales research',
+    why: 'The competitor scan (Marketing and Sales doc, Sales research tab) is built from search summaries only; Beth cites a page only after opening it.',
+    how: 'In Claude Code on the web: the environment menu in the session title bar, Edit, Network access: add the review sites (Reddit, Common Sense, G2, Capterra, EdWeek) under Allowed domains, or pick a broader level.' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },

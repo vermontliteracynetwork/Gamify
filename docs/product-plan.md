@@ -1058,6 +1058,11 @@ start to build?" Claudia's gap review of everything above.
 
 ## 10. Marketing ideas (running list)
 
+- Made for kids who can't read the screen yet: pictures and a human voice lead every question, with no timer, so K-3 plays the same live game as everyone else (competitor scan, 2026-11-19).
+- Knowing the answer wins: no luck or stealing modes, so the leader is the kid who learned, and the report shows it (competitor scan, 2026-11-19).
+- Nothing is ever sold to a student: no ads, no upgrade prompts, no paid perks in class (competitor scan, 2026-11-19).
+- Read-aloud, calm settings and sound control on every game for every student, free, never bolted on later (competitor scan, 2026-11-19).
+- One question set, live in class or as homework, with real per-student data either way (competitor scan, 2026-11-19).
 - Parent-conference ready: one tap prints a professional class or student progress report (at a glance, trend, questions to practice, mastered) or saves it as a PDF (2026-11-16).
 - Fits any screen: Gamify sizes itself to the device, from a short laptop window to a smart board, with no scrolling (2026-11-16).
 - Peek before you pick: double-tap any question set card to flip it and see question 1 with its answers and the right one marked, so teachers choose in seconds (2026-11-16).
