@@ -19,6 +19,8 @@ import PlanFeatures from '../billing/PlanFeatures';
 // call. Teacher-facing only: student pages never show prices. Every number
 // comes from src/config.ts.
 const fmt = (n: number) => (Number.isFinite(n) ? String(n) : t('pricing.unlimited'));
+// Price per school day (180 a year): a small, concrete number next to the big one.
+const perDay = (x: Exclude<Tier, 'free'>) => { const c = Math.round((PRICES_USD_PER_YEAR[x] / 180) * 100); return c >= 100 ? '$' + (c / 100).toFixed(2) : c + '¢'; };
 const monthly = (x: Exclude<Tier, 'free'>) => (PRICES_USD_PER_YEAR[x] / 12).toFixed(0);
 
 export default function PricingPage() {
@@ -57,10 +59,11 @@ export default function PricingPage() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
-        <div>
+        {/* The heading, its line and the promise chips line up with the plan cards: centered over the full width, chips in one row (teacher, 2026-11-20). */}
+        <div className="grid justify-items-center text-center">
           <h1 className="title-bubble text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
-          <p className="text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>
-          <ul className="flex flex-wrap gap-2 list-none p-0 mt-4 mb-0">
+          <p className="text-xl font-bold max-w-3xl text-balance">{t('pricing.sub')}</p>
+          <ul className="flex flex-wrap lg:flex-nowrap justify-center gap-2 list-none p-0 mt-5 mb-0 w-full">
             {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
@@ -78,7 +81,7 @@ export default function PricingPage() {
                 <div className="mt-1">
                   {x === 'free'
                     ? <><p className="font-display text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>
-                    : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })}</p></>}
+                    : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-bold text-success-ink">{t('pricing.perDay', { price: perDay(x) })}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })}</p></>}
                 </div>
                 <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('primary', `min-h-14 text-lg hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
@@ -102,12 +105,12 @@ export default function PricingPage() {
           <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}</Link>
         </section>
 
-        <div className="overflow-x-auto bg-surface border-bold border-border rounded-panel">
+        <div className="overflow-x-auto bg-surface border-bold border-border rounded-panel" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <table className="w-full min-w-[560px] text-left">
             <caption className="sr-only">{t('pricing.compare')}</caption>
             <thead><tr className="border-b-[2px] border-border">
               <th scope="col" className="p-3 font-display text-xl">{t('pricing.compare')}</th>
-              {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-display text-xl ${x === 'plus' ? 'bg-accent' : ''}`}>{t(`pricing.${x}`)}</th>)}
+              {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-display text-xl text-center ${x === 'plus' ? 'bg-accent' : ''}`}>{t(`pricing.${x}`)}{x === 'plus' && <span className="block font-body text-xs font-bold">{t('upgrade.best')}</span>}{x !== 'free' && <span className="block font-body text-sm font-bold text-muted">{t('upgrade.price', { m: monthly(x) })} {t('upgrade.perMonth')}</span>}</th>)}
             </tr></thead>
             <tbody>
               {rows.map((r) => (
@@ -115,10 +118,21 @@ export default function PricingPage() {
                   <th scope="row" className="p-3 font-bold">{r.label}</th>
                   {tiers.map((x) => {
                     const v = r.value(x);
-                    return <td key={x} className={`p-3 font-semibold ${x === 'plus' ? 'bg-accent/40' : ''}`}>{typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}</td>;
+                    return <td key={x} className={`p-3 font-semibold text-center ${x === 'plus' ? 'bg-accent/40' : ''}`}>{typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}</td>;
                   })}
                 </tr>
               ))}
+              {/* Decide where you read (pricing psychology): a start button under every column. */}
+              <tr>
+                <td className="p-3" />
+                {tiers.map((x) => (
+                  <td key={x} className={`p-3 text-center ${x === 'plus' ? 'bg-accent/40' : ''}`}>
+                    <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses(x === 'plus' ? 'primary' : 'secondary', `hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
+                      {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
+                    </Link>
+                  </td>
+                ))}
+              </tr>
             </tbody>
           </table>
         </div>

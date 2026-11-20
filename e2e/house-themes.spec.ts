@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
-import { finishSetup } from './setup';
+import { finishSetup, pickTheme } from './setup';
 
 const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.trim(), q.choices[q.correctIndex]] as const)));
 async function answer(page: Page) {
@@ -23,7 +23,7 @@ test('Question Tracker Pet Room: a pet joins the room for every right answer', a
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await page.goto('/games/star-quiz');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await page.getByRole('radio', { name: /Pet Room/ }).click();
+  await pickTheme(page, /Pet Room/);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await finishSetup(page);
   for (let k = 1; k <= 3; k++) { await answer(page); await expect(page.getByText(`Question ${k + 1} of`)).toBeAttached({ timeout: 8000 }); }
@@ -36,7 +36,7 @@ test('Question Tracker Pet Room: a pet joins the room for every right answer', a
 test('Four in a Row Animal Friends', async ({ page }, info) => {
   await page.goto('/games/four-in-a-row');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await page.getByRole('radio', { name: /Animal Friends/ }).click();
+  await pickTheme(page, /Animal Friends/);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   // The team picture is the player's piece, picked on the player card (teacher, 2026-11-06).
   await page.getByRole('button', { name: /^Pick a player piece for / }).first().click();

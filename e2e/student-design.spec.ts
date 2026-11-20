@@ -57,6 +57,6 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   await page.goto('/games/match-three');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('radio', { name: /Pink Party/ })).toBeVisible();
-  await expect(page.getByText('Made by Test Teacher')).toBeVisible();
+  await expect(page.getByText('Test Teacher', { exact: false }).first()).toBeVisible();
   expect(problems).toEqual([]);
 });

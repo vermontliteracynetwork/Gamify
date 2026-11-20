@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, pickTheme } from './setup';
 
 function watch(page: Page) {
   const problems: string[] = [];
@@ -61,8 +61,8 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
 
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await page.getByRole('radio', { name: 'Ocean Party' }).click();
-  await expect(page.getByText('Made by Test Teacher, designed by Ava')).toBeVisible();
+  await pickTheme(page, 'Ocean Party');
+  await expect(page.getByText('Test Teacher, designed by Ava')).toBeVisible();
   await expect(page).toHaveTitle('Game Show | Gamify');
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();

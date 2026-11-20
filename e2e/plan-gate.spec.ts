@@ -49,7 +49,7 @@ test('Upgrade from the Question sets limit lifts the cap', async ({ page }) => {
 test('Pricing: Start with Pro opens the plan box after sign-up, and a school gets a quote with no sales call', async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem('gamify:teacher-session'));
   await page.goto('/pricing');
-  await expect(page.getByText('Only $8')).toBeVisible();
+  await expect(page.getByText('Only $8').first()).toBeVisible();
   await page.getByLabel('Number of teachers').fill('25');
   await expect(page.getByText('Save 30%')).toHaveCount(0);
   await page.getByLabel('Your name').fill('Ms. Rivera');
@@ -59,7 +59,7 @@ test('Pricing: Start with Pro opens the plan box after sign-up, and a school get
   // Without the email service (as here) the request is kept and the quote follows by email.
   await expect(page.getByText(/rivera@school\.org/)).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: /quote/i })).toBeVisible();
-  await page.getByRole('link', { name: 'Start with Pro' }).click();
+  await page.getByRole('link', { name: 'Start with Pro' }).first().click();
   await expect(page).toHaveURL(/plan=pro/);
   await signUpTeacher(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Get Pro now' })).toBeVisible();

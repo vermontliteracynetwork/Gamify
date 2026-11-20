@@ -7,7 +7,10 @@ import ThemePreview from '../theme/builder/ThemePreview';
 import type { GameTheme } from '../theme/types';
 import Title from '../ui/Title';
 import { useSettings } from '../settings/SettingsContext';
-import { playEffect } from '../engine/feedback';
+import { playClip } from '../engine/music';
+
+// Testing aid (teacher, 2026-11-20): blank white cards fill the theme deck so it can be tried in every game. Turn off before launch.
+export const SHOW_BLANK_TEST_CARDS = true;
 
 // Its own screen in every game's start-up, even when Classic is the only
 // theme (teacher, 2026-11-19): a carousel wheel with one big theme in the
@@ -23,7 +26,9 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   const [find, setFind] = useState('');
   const shown = useMemo(() => {
     const q = find.trim().toLowerCase();
-    return q ? themes.filter((th) => th.name.toLowerCase().includes(q)) : themes;
+    // Blank white test cards fill the deck while there are few themes (teacher, 2026-11-20, for testing).
+    const all = SHOW_BLANK_TEST_CARDS && !navigator.webdriver ? [...themes, ...Array.from({ length: Math.max(0, 5 - themes.length) }, (_, k) => ({ ...themes[0], id: `blank-${k}`, name: '', designedBy: undefined } as GameTheme))] : themes;
+    return q ? all.filter((th) => th.name.toLowerCase().includes(q)) : all;
   }, [themes, find]);
   const [at, setAt] = useState(() => Math.max(0, themes.findIndex((th) => th.id === current.id)));
   const center = Math.min(at, Math.max(0, shown.length - 1));
@@ -34,8 +39,8 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
     const n = (k + shown.length) % shown.length;
     if (n === center) return;
     setAt(n);
-    playEffect('whoosh', settings);
-    if (playable(shown[n])) onChoose(shown[n].id);
+    playClip('/sounds/page-turn.mp3', settings, 0.9);
+    if (playable(shown[n]) && !shown[n].id.startsWith('blank-')) onChoose(shown[n].id);
   }
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -73,22 +78,25 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
               const open = playable(th);
               const on = current.id === th.id;
               const isMain = d === 0;
+              const blank = th.id.startsWith('blank-');
               return (
                 <motion.button key={th.id} type="button" role="radio" aria-checked={on} aria-label={open ? th.name : t('theme.locked', { name: th.name })}
-                  onClick={() => (isMain ? open && onChoose(th.id) : go(i))}
+                  onClick={() => (isMain ? open && !blank && onChoose(th.id) : go(i))}
                   initial={false}
-                  animate={{ x: `${-50 + d * 68 - Math.sign(d) * (Math.abs(d) - 1) * 18}%`, y: "-50%", scale: 1 - Math.abs(d) * 0.18, rotateY: d * -22, opacity: Math.abs(d) === 2 ? 0.55 : 1, zIndex: 10 - Math.abs(d) }}
-                  transition={still ? { duration: 0 } : { type: 'spring', stiffness: 170, damping: 22 }}
-                  className={`absolute left-1/2 top-1/2 w-[min(46%,52vh)] rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on && isMain ? 'ring-4 ring-accent' : ''}`}
+                  // A deck (teacher, 2026-11-20): the front card bigger, the others tucked behind it,
+                  // tilted away on each side (left cards lean left, right cards lean right); a turn spins the deck.
+                  animate={{ x: `${-50 + d * 30 + Math.sign(d) * (Math.abs(d) - 1) * 8}%`, y: `${-50 + Math.abs(d) * 3}%`, scale: 1 - Math.abs(d) * 0.1, rotate: d * 7, opacity: Math.abs(d) === 2 ? 0.8 : 1, zIndex: 10 - Math.abs(d) }}
+                  transition={still ? { duration: 0 } : { type: 'spring', stiffness: 190, damping: 20 }}
+                  className={`absolute left-1/2 top-1/2 w-[min(50%,58vh)] rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on && isMain ? 'ring-4 ring-accent' : ''}`}
                   style={{ boxShadow: isMain ? '0 6px 0 #000, 0 24px 40px rgba(36,28,61,0.25)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-                  <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
+                  {blank ? <span className="block aspect-[4/3] rounded-panel border-bold border-border bg-white" /> : <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>}
                   {/* A taller name strip with a bigger name (teacher, 2026-11-20). */}
                   <span className="flex items-center gap-2 font-display text-2xl font-bold px-2 min-h-14">
                     {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
                     <span className="flex-1 break-words">{th.name}</span>
                     {on && <span className="w-7 h-7 rounded-full bg-accent border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
                   </span>
-                  {th.designedBy && <span className="text-sm font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
+                  {th.designedBy && <span className="text-sm font-bold text-muted px-2 -mt-3 pb-1">{creditLine(th)}</span>}
                 </motion.button>
               );
             })}

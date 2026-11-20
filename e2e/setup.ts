@@ -108,3 +108,13 @@ export async function vsComputer(page: Page) {
   await page.getByRole('button', { name: 'Person', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).last().click();
 }
+
+// Turn the theme deck until a theme is in front (side cards tuck behind the front one).
+export async function pickTheme(page: Page, name: string | RegExp) {
+  const card = page.getByRole('radio', { name });
+  for (let k = 0; k < 12 && (await card.getAttribute('aria-checked')) !== 'true'; k++) {
+    await page.getByRole('button', { name: 'Next theme' }).click();
+    await page.waitForTimeout(150);
+  }
+  await expect(card).toHaveAttribute('aria-checked', 'true');
+}
