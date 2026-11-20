@@ -13,7 +13,7 @@ import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
-import { avatarOf, isUploadedAvatar, newPicturePassword, newPin, PICTURES, PIN_RULE } from '../student/pictures';
+import { avatarOf, drawnExtras, isUploadedAvatar, newPicturePassword, newPin, PICTURES, PIN_RULE } from '../student/pictures';
 import Avatar from '../student/Avatar';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
@@ -150,8 +150,9 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
   async function add() {
     const taken = students.map((s) => s.picturePassword);
     const pins = students.map((s) => s.pin ?? '');
-    // Each new student gets the built-in picture used least so far.
-    const uses = new Map(PICTURES.map((p) => [p.id, students.filter((s) => avatarOf(s) === p.id).length]));
+    // Each new student gets the picture used least so far, counting the extra
+    // pictures the class's sign-in design has drawn (one per student, 2026-11-20).
+    const uses = new Map([...PICTURES.map((p) => p.id), ...drawnExtras(look)].map((id) => [id, students.filter((s) => avatarOf(s) === id).length]));
     for (const name of toAdd.slice(0, room)) {
       const pw = newPicturePassword(taken);
       taken.push(pw);
@@ -226,9 +227,9 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
     <Dialog title={t('class.avatarFor', { name: student.name })} onClose={onClose}>
       <div className="flex items-center gap-3"><Avatar avatar={avatar} theme={look} size={80} /><p className="font-bold">{t('class.avatarHint')}</p></div>
       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" role="radiogroup" aria-label={t('class.avatarPick')}>
-        {PICTURES.map((p) => (
-          <button key={p.id} type="button" role="radio" aria-checked={avatar === p.id} aria-label={p.id} onClick={() => setAvatar(p.id)}
-            className={`rounded-full p-1 ${avatar === p.id ? 'bg-accent ring-[3px] ring-border' : ''}`}><Avatar avatar={p.id} theme={look} size={52} /></button>
+        {[...PICTURES.map((p) => p.id), ...drawnExtras(look)].map((id) => (
+          <button key={id} type="button" role="radio" aria-checked={avatar === id} aria-label={/^\d+$/.test(id) ? t('class.pictureN', { n: id }) : id} onClick={() => setAvatar(id)}
+            className={`rounded-full p-1 ${avatar === id ? 'bg-accent ring-[3px] ring-border' : ''}`}><Avatar avatar={id} theme={look} size={52} /></button>
         ))}
       </div>
       {tier === 'free' ? (

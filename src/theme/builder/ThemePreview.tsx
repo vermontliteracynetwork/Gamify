@@ -2,13 +2,14 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
-import { PICTURES } from '../../student/pictures';
+import { drawnExtras, PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
 import { type GameTheme, type ThemeItem } from '../types';
 import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
+import { ShareQuestionView, StudentQuestionView } from './QuestionViews';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
 import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
@@ -26,7 +27,7 @@ const GAME_PREVIEWS = Object.fromEntries(Object.entries(import.meta.glob<{ defau
 // shown"), each a screen of the game where the theme's pieces appear.
 // Games with board sizes show the board at every size (teacher, 2026-11-19):
 // `size:<n>` is the Board Game's number of squares or Match Three's grid.
-export type PreviewView = 'game' | 'pick' | 'powers' | `size:${number}`;
+export type PreviewView = 'game' | 'question' | 'share' | 'pick' | 'powers' | `size:${number}`;
 const SIZE_VIEWS: Record<string, { n: number; label: string }[]> = {
   'castle-quest': Object.entries(TRAIL_SPACES).map(([k, n]) => ({ n, label: `${{ short: 'Short', medium: 'Medium', long: 'Long', xlong: 'Extra long' }[k as keyof typeof TRAIL_SPACES]} board` })),
   'match-three': [6, 7, 8].map((n) => ({ n, label: `${n} by ${n} board` })),
@@ -37,6 +38,11 @@ export function previewViews(gameId: string, hasItems: boolean): { id: PreviewVi
   if (gameId === 'bowling') views.push({ id: 'pick', label: 'Pick a ball' });
   else if (gameId === 'game-show') views.push({ id: 'pick', label: 'Team icons' });
   if (hasItems) views.push({ id: 'powers', label: 'Power-ups' });
+  // Every game's question box, and the shared screen for games played on one
+  // screen (teacher, 2026-11-20), with the theme's text and buttons.
+  const game = GAMES.find((g) => g.id === gameId);
+  if (game?.questionKinds.length) views.push({ id: 'question', label: 'Question' });
+  if (game?.modes.some((m) => m === 'share' || m === 'live')) views.push({ id: 'share', label: 'Share screen' });
   return views;
 }
 
@@ -46,6 +52,8 @@ export default function ThemePreview({ theme: own, view = 'game' }: { theme: Gam
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
   // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
   if (view === 'pick') return <PickView theme={theme} />;
+  if (view === 'question') return <StudentQuestionView theme={theme} />;
+  if (view === 'share') return <ShareQuestionView theme={theme} />;
   // The Board Game's own board, squares, pieces and die (teacher, 2026-11-16).
   const size = view.startsWith('size:') ? Number(view.slice(5)) : undefined;
   if (theme.gameId === 'castle-quest' && (view === 'game' || size)) return <BoardGamePreview theme={theme} squares={size ?? TRAIL_SPACES.medium} />;
@@ -232,16 +240,8 @@ function board(theme: GameTheme, size?: number) {
           {(['sprout', 'crop-corn', 'crop-pumpkin', 'crop-sunflower', 'crop-tomato'] as const).map((id) => pieceImage(theme, id) ? <img key={id} src={pieceImage(theme, id)} alt="" className="h-14 object-contain justify-self-center" /> : <span key={id} className="h-10 w-10 justify-self-center rounded-full border-std border-border bg-[#7cc66a]" />)}
         </div>
       );
-    case 'big-screen':
-      return (
-        <div className="grid grid-cols-[auto_1fr] items-center gap-3 w-full">
-          {pieceImage(theme, 'mascot') ? <img src={pieceImage(theme, 'mascot')} alt="" className="w-16 h-16 object-contain" /> : <Star weight="fill" size={56} color="#f6c544" />}
-          <span className="rounded-input border-std border-border bg-surface p-2 font-display text-2xl tracking-[0.15em] text-center">ABCDE</span>
-          {pieceImage(theme, 'trophy') && <img src={pieceImage(theme, 'trophy')} alt="" className="col-span-2 h-12 justify-self-center object-contain" />}
-        </div>
-      );
     case 'sign-in':
-      return <div className="grid grid-cols-4 gap-2">{PICTURES.map((p) => <PictureBadge key={p.id} id={p.id} theme={theme} size={44} />)}</div>;
+      return <div className="grid grid-cols-6 gap-2">{[...PICTURES.map((p) => p.id), ...drawnExtras(theme)].slice(0, 24).map((id) => <PictureBadge key={id} id={id} theme={theme} size={44} />)}</div>;
     case 'game-show':
       return (
         <div className="grid grid-cols-4 gap-1.5 w-full">

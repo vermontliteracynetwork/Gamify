@@ -72,7 +72,7 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
   }
   if (id.startsWith('pic-')) {
     const p = PICTURES.find((x) => `pic-${x.id}` === id);
-    return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={p?.color ?? ACCENT} stroke={INK} strokeWidth={line} />{p && icon(p.icon, INK, m * 0.55)}</g>;
+    return <g><circle cx={w / 2} cy={h / 2} r={m / 2 - line} fill={piece.color ?? p?.color ?? ACCENT} stroke={INK} strokeWidth={line} />{p ? icon(p.icon, INK, m * 0.55) : <text x={w / 2} y={h / 2} dominantBaseline="central" textAnchor="middle" fontFamily="Inclusive Sans, sans-serif" fontWeight={700} fontSize={m * 0.36} fill={INK}>{id.slice(4)}</text>}</g>;
   }
   if (id.startsWith('food-')) {
     const F = { 'food-pizza': Pizza, 'food-burger': Hamburger, 'food-icecream': IceCream, 'food-carrot': Carrot }[id] ?? Star;

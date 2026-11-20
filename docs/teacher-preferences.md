@@ -218,3 +218,7 @@ line that fits, and add each new preference the same turn she says it.
 - Question wait (2026-11-20): answers show faded and can't be tapped until the wait ends (never hidden).
 - Solo top strip (2026-11-20): one long ruler bar, a small tick per turn and a tall tick between rounds.
 - Match Three Classic background (2026-11-20): a low-poly ombre in the gem colors, darker at the bottom and fading toward the top bar.
+- Theme Builder (2026-11-20): no Big screen design at all. Sign-in pictures go up to the plan's students per class (Free 30, Plus 60, Pro up to 150), the 12 built-in pictures plus numbered pictures to draw.
+- Theme Builder preview (2026-11-20): every game shows each of its screens, including a made-up question on a student's screen and, for games played on one screen, the share screen, so the theme's real text and buttons show.
+- Menu options never cut off (2026-11-20, universal): when choices would truncate, stack them. Theme Builder Download options (print, digital) and Advanced audio dropdowns are stacked.
+- Theme deck (2026-11-20): side cards tuck behind the front card; the credit line is just the maker's name ("Gamify").

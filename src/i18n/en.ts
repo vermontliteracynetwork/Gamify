@@ -1068,6 +1068,7 @@ export const en = {
   'themeScreen.none': 'No theme by that name.',
   'themeScreen.by': 'Made by {name}',
   'class.signInLook': 'Sign-in pictures',
+  'class.pictureN': 'Picture {n}',
   'class.signInBuiltIn': 'Built-in pictures',
   'class.signInDesign': 'Draw your own sign-in pictures in the Theme Builder',
   'sets.pages': 'Pages of question sets',

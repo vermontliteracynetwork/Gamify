@@ -40,14 +40,35 @@ export const PIN_RULE = /^\d{4}$/;
 
 // Sign-in pictures can be redrawn in the Theme Builder like a game theme
 // (teacher request, 2026-10-24); a class picks which design it signs in with.
-export const signInManifest: GameManifest = {
-  id: 'sign-in',
-  name: 'Sign-in pictures',
-  description: 'The pictures students tap to sign in.',
-  modes: [],
-  questionKinds: [],
-  hasCpu: false,
-  themePieces: PICTURES.map((p) => ({ id: `pic-${p.id}`, label: `${p.id[0].toUpperCase()}${p.id.slice(1)} picture`, width: 256, height: 256, hint: `Draw a ${p.id} students will know is theirs`, color: p.color })),
-};
+// Up to one sign-in picture per student the plan allows in a class (teacher,
+// 2026-11-20): the 12 built-in pictures, then numbered extra pictures to
+// draw. Pro (the whole school) gets up to EXTRA_CAP.
+const EXTRA_CAP = 150;
+export function signInPictureCount(studentsPerClassroom: number): number {
+  return Math.max(PICTURES.length, Math.min(Number.isFinite(studentsPerClassroom) ? studentsPerClassroom : EXTRA_CAP, EXTRA_CAP));
+}
+export const EXTRA_COLORS = PICTURES.map((p) => p.color);
+export const isExtraPicture = (id: string) => /^\d+$/.test(id);
+
+export function signInManifestFor(studentsPerClassroom: number): GameManifest {
+  const extras = Array.from({ length: signInPictureCount(studentsPerClassroom) - PICTURES.length }, (_, k) => {
+    const n = PICTURES.length + k + 1;
+    return { id: `pic-${n}`, label: `Picture ${n}`, width: 256, height: 256, hint: 'Draw a picture one student will know is theirs', color: EXTRA_COLORS[k % EXTRA_COLORS.length] };
+  });
+  return {
+    id: 'sign-in',
+    name: 'Sign-in pictures',
+    description: 'The pictures students tap to sign in.',
+    modes: [],
+    questionKinds: [],
+    hasCpu: false,
+    themePieces: [...PICTURES.map((p) => ({ id: `pic-${p.id}`, label: `${p.id[0].toUpperCase()}${p.id.slice(1)} picture`, width: 256, height: 256, hint: `Draw a ${p.id} students will know is theirs`, color: p.color })), ...extras],
+  };
+}
+export const signInManifest: GameManifest = signInManifestFor(PICTURES.length);
+
+// The extra pictures a sign-in design has drawn, as picture ids ("13", "14"...).
+export const drawnExtras = (theme: GameTheme | undefined) =>
+  Object.keys(theme?.pieces ?? {}).filter((k) => /^pic-\d+$/.test(k) && theme!.pieces[k]?.image).map((k) => k.slice(4)).sort((a, b) => Number(a) - Number(b));
 
 export const pictureArt = (theme: GameTheme | undefined, id: string) => theme?.pieces[`pic-${id}`]?.image;

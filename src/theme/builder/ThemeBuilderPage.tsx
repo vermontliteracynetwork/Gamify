@@ -2,13 +2,12 @@ import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from '
 import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Info, BookOpen, CaretDown, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
-import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
+import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS, type Tier } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
 import { GameCover } from '../../games/covers';
 import { GAMES } from '../../games/registry';
-import { signInManifest } from '../../student/pictures';
-import { bigScreenManifest } from '../../live/screenManifest';
+import { signInManifestFor } from '../../student/pictures';
 
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
@@ -37,7 +36,10 @@ import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
 const DrawStudio = lazyPage(() => import('./DrawStudio'));
 
 // Everything the builder can design: each game, plus the sign-in pictures.
-export const BUILDER_TARGETS = [...GAMES, signInManifest, bigScreenManifest];
+// No Big screen design (teacher, 2026-11-20). Sign-in pictures go up to the
+// plan's students per class.
+export const builderTargets = (tier: Tier) => [...GAMES, signInManifestFor(TIERS[tier].studentsPerClassroom)];
+export const BUILDER_TARGETS = builderTargets('pro');
 
 // The Theme Builder (teacher page, and the owner's developer view): pick a
 // game, then design its theme with a live preview, an upload card per piece
@@ -55,7 +57,8 @@ const HEX = /^#[0-9a-f]{6}$/i;
 
 export default function ThemeBuilderPage({ owner = false }: { owner?: boolean }) {
   const { gameId } = useParams();
-  const game = BUILDER_TARGETS.find((g) => g.id === gameId);
+  const tier = useTier();
+  const game = builderTargets(owner ? 'pro' : tier).find((g) => g.id === gameId);
   const base = owner ? '/owner/themes' : '/teacher/themes';
   return (
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
@@ -76,7 +79,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
       {!owner && TIERS[tier].themeBuilder === 'trial' && <LimitNote className="mb-4">{t('builder.trialNote')}</LimitNote>}
       {!owner && <StudentRequests />}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {BUILDER_TARGETS.map((g) => {
+        {builderTargets(owner ? 'pro' : tier).map((g) => {
           const mine = themes.filter((th) => th.gameId === g.id && (owner ? th.source === 'library' : th.source === 'custom'));
           const locked = !owner && TIERS[tier].themeBuilder === 'trial' && g.id !== THEME_TRIAL_GAME;
           return (
@@ -149,7 +152,8 @@ function blankTheme(gameId: string, owner: boolean): GameTheme {
 }
 
 function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: string }) {
-  const game = BUILDER_TARGETS.find((g) => g.id === gameId)!;
+  const tier0 = useTier();
+  const game = builderTargets(owner ? 'pro' : tier0).find((g) => g.id === gameId)!;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const tier = useTier();
@@ -330,7 +334,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
               <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
                 {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
                 {/* Board sizes say which size is showing. */}
-                {view.startsWith('size:') && <span aria-hidden="true" className="ml-1 font-bold text-xs leading-none whitespace-nowrap">{views.find((v) => v.id === view)?.label}</span>}
+                {<span aria-hidden="true" className="ml-1 font-bold text-xs leading-none whitespace-nowrap">{views.find((v) => v.id === view)?.label}</span>}
               </span>
             )}
             </div>
@@ -346,7 +350,8 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 pr-1">
               {tab === 'download' && (
                 <>
-                  <div className="grid sm:grid-cols-2 gap-3">
+                  {/* Print and digital stacked, one above the other (teacher, 2026-11-20). */}
+                  <div className="grid gap-3">
                     <div className="rounded-input border-std border-border p-3 grid gap-2 content-start">
                       <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
@@ -401,7 +406,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                 <>
                   {/* No title font choice and no explanation line (teacher, 2026-11-20). */}
                   <p className="font-bold">{t('builder.sounds')}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label={t('builder.sounds')}>
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-2" role="radiogroup" aria-label={t('builder.sounds')}>
                     {SOUND_PACKS.map((p: SoundPack) => (
                       <button key={p} type="button" role="radio" aria-checked={(draft.sounds ?? 'classic') === p}
                         onClick={() => { setDraft({ ...draft, sounds: p }); playEffect('right', settings, p); window.setTimeout(() => playEffect('win', settings, p), 450); }}
@@ -725,7 +730,8 @@ function AdvancedAudio({ audio, onChange }: { audio?: GameTheme['audio']; onChan
         {t('builder.audio.advanced')}<CaretDown weight="bold" size={14} className={`motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="grid sm:grid-cols-3 gap-3">
+        // Stacked so no choice is ever cut off (teacher, 2026-11-20).
+        <div className="grid gap-3">
           {row(t('builder.audio.music'), a.music ?? '', [{ id: '', label: t('builder.audio.gameMusic') }, { id: 'none', label: t('builder.audio.none') }, ...MUSIC_TRACKS], (v) => onChange({ ...a, music: v || undefined }))}
           {row(t('builder.audio.right'), a.right ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...RIGHT_SOUNDS], (v) => onChange({ ...a, right: v || undefined }))}
           {row(t('builder.audio.wrong'), a.wrong ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...WRONG_SOUNDS], (v) => onChange({ ...a, wrong: v || undefined }))}
