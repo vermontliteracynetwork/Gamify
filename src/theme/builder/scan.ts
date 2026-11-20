@@ -263,7 +263,7 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   // A photo or picture with no paper around it (teacher, 2026-11-20:
   // "respect the size of the uploads"): it comes in whole, cropped only to
   // the piece's shape (a square piece gets a square), never trimmed.
-  const photo = !digital && !papery;
+  const photo = !digital && !papery; void photo;
   if (!solid && !photo) {
     // Trim to the drawing, with a little room around it.
     x0 = W; y0 = H; x1 = 0; y1 = 0;
@@ -280,19 +280,18 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   const max = Math.max(piece.width, piece.height, 256);
   const ow = ratio >= 1 ? max : Math.round(max * ratio), oh = ratio >= 1 ? Math.round(max / ratio) : max;
   const out = canvas(ow, oh), octx = ctx2d(out);
-  if (solid || photo) {
-    // Solid means solid: see-through parts sit on white.
-    octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, ow, oh);
+  if (solid) {
+    // A solid piece (a background, a cover) is cropped to fill its shape.
+    // Only a picture with no see-through parts gets white behind it: a
+    // transparent background is never filled (teacher, 2026-11-20).
+    if (!digital) { octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, ow, oh); }
     const s = Math.max(ow / bw, oh / bh);
     octx.drawImage(src, x0 + (bw - ow / s) / 2, y0 + (bh - oh / s) / 2, ow / s, oh / s, 0, 0, ow, oh);
-    if (photo && round && !solid) {
-      // A round piece keeps its circle.
-      const r = canvas(ow, oh), rc = ctx2d(r);
-      rc.beginPath(); rc.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); rc.clip(); rc.drawImage(out, 0, 0);
-      return r.toDataURL('image/png');
-    }
-    return piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
+    return digital || piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
   }
+  // Every other piece shows the whole picture at its own shape, centered in
+  // the piece, never zoomed in or cut (teacher, 2026-11-20: "take the size of
+  // the image"); round pieces still fill their circle.
   if (round) { octx.beginPath(); octx.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); octx.clip(); }
   // Round pieces fill their circle (the drawing's own circle edge); others fit inside.
   const s = round ? Math.max(ow / bw, oh / bh) : Math.min(ow / bw, oh / bh);

@@ -349,3 +349,28 @@ test('Download tab: blank printable pages and digital files; the Classic look is
   await page.getByRole('link', { name: 'Theme guide' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /Theme Guide: Game Show/ })).toBeVisible();
 });
+
+// Uploads keep the whole picture at its own shape and never fill a
+// transparent background (teacher, 2026-11-20).
+test('Theme Builder: a wide photo keeps its whole shape in a square piece, with clear (not white) space around it', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'image processing; one size is enough');
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/match-three');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  // A 300 x 150 photo: red left half, blue right half, a little noise (not paper).
+  const wide = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 300; c.height = 150; const x = c.getContext('2d')!; x.fillStyle = '#d33'; x.fillRect(0, 0, 150, 150); x.fillStyle = '#33d'; x.fillRect(150, 0, 150, 150); for (let i = 0; i < 400; i++) { x.fillStyle = `rgb(${Math.random() * 255},90,90)`; x.fillRect(Math.random() * 300, Math.random() * 150, 2, 2); } return c.toDataURL('image/png').split(',')[1]; });
+  const inputs = page.locator('input[type=file]');
+  await inputs.nth(1).setInputFiles({ name: 'wide.png', mimeType: 'image/png', buffer: Buffer.from(wide, 'base64') });
+  await expect(page.getByLabel('Added').first()).toBeVisible();
+  const src = await page.locator('img[src^="data:image/png"]').first().getAttribute('src');
+  const check = await page.evaluate(async (s) => {
+    const img = new Image(); img.src = s!; await img.decode();
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d')!; x.drawImage(img, 0, 0);
+    const at = (px: number, py: number) => x.getImageData(Math.floor(px * img.width), Math.floor(py * img.height), 1, 1).data;
+    return { square: img.width === img.height, topClear: at(0.5, 0.05)[3] === 0, left: at(0.1, 0.5), right: at(0.9, 0.5) };
+  }, src);
+  expect(check.square).toBe(true);
+  expect(check.topClear).toBe(true); // letterboxed, not zoomed in
+  expect(check.left[0]).toBeGreaterThan(check.left[2]); // red side kept
+  expect(check.right[2]).toBeGreaterThan(check.right[0]); // blue side kept
+});
