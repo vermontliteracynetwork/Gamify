@@ -1070,6 +1070,8 @@ export const en = {
   'class.signInLook': 'Sign-in pictures',
   'class.pictureN': 'Picture {n}',
   'class.pinHead': 'PIN',
+  'builder.progressBar': 'Progress bar',
+  'builder.progressBarHint': 'The bar across the top that fills as the game goes on',
   'coop.title': 'Homeschool co-op code',
   'coop.hint': 'In a homeschool co-op? Enter your co-op\'s code for {pct}% off the Homeschool plan. Your account and your children\'s work stay yours.',
   'coop.label': 'Co-op code',

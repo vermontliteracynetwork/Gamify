@@ -237,3 +237,5 @@ line that fits, and add each new preference the same turn she says it.
 - Bowling lane (2026-11-20): lane numbers 1 to 7 where the aiming arrows were; no target circle; no light-up dot sign over the pins; the back wall is its own theme piece ("Back wall"). Strike and Spare words are in Grow Year.
 - Game welcome (2026-11-20, all games): the title, line and mode chips start below the top-right buttons.
 - Live host screen (2026-11-20): wears the game's own theme background; no "Live: <game>" title.
+- Top strip (2026-11-20, Match Three and Bubble Pop): a white strip; the bar just fills in as a progress bar (no highlighted current section); its color is a Theme Builder color ("Progress bar").
+- Bubble Pop Classic (2026-11-20): white background with colorful swirls and dots (coral, pink, aqua, yellow, teal); bubbles in a bright summer palette (sunflower, aqua, coral, lime, pink, tangerine), the first three far apart.

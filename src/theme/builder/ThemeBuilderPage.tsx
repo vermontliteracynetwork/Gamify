@@ -53,6 +53,9 @@ const COLOR_FIELDS: { key: keyof ThemeColors; label: string; hint: string }[] = 
   { key: 'accent', label: 'Main color', hint: 'Big buttons and highlights' },
   { key: 'accentText', label: 'Button text', hint: 'Words on the main color' },
 ];
+// Games with the top strip's progress bar get its color too (teacher, 2026-11-20).
+export const PROGRESS_BAR_GAMES = ['match-three', 'bubble-pop'];
+export const PROGRESS_DEFAULT = '#5cc3a0';
 const HEX = /^#[0-9a-f]{6}$/i;
 
 export default function ThemeBuilderPage({ owner = false }: { owner?: boolean }) {
@@ -422,8 +425,9 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                 <>
                   <Pages key="colors" per={6} items={[
                     ...COLOR_FIELDS.map((f) => (
-                      <ColorField key={f.key} label={f.label} hint={f.hint} value={draft.colors[f.key]} onChange={(v) => setDraft({ ...draft, colors: { ...draft.colors, [f.key]: v } })} />
+                      <ColorField key={f.key} label={f.label} hint={f.hint} value={draft.colors[f.key] ?? ''} onChange={(v) => setDraft({ ...draft, colors: { ...draft.colors, [f.key]: v } })} />
                     )),
+                    ...(PROGRESS_BAR_GAMES.includes(gameId) ? [<ColorField key="progress" label={t('builder.progressBar')} hint={t('builder.progressBarHint')} value={draft.colors.progress ?? PROGRESS_DEFAULT} onChange={(v) => setDraft({ ...draft, colors: { ...draft.colors, progress: v } })} />] : []),
                     ...game.themePieces.filter((p) => p.color).map((p) => (
                       <ColorField key={p.id} label={p.label} hint={t('builder.pieceColorHint')} value={draft.pieces[p.id]?.color ?? p.color!}
                         onChange={(v) => setDraft({ ...draft, pieces: { ...draft.pieces, [p.id]: { ...draft.pieces[p.id], color: v } } })} />

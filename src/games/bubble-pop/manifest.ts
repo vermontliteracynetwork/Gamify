@@ -1,6 +1,8 @@
 import type { GameManifest } from '../types';
 
-export const BUBBLE_COLORS = ['#fdfd94', '#e5635f', '#8fe3a0', '#8ec5ff', '#f6a5c0', '#f7b267'];
+// A bright summer palette (teacher, 2026-11-20), the first three far apart
+// since early rounds use only them: sunflower, aqua, coral, lime, pink, tangerine.
+export const BUBBLE_COLORS = ['#fdc512', '#26cdeb', '#ff5b4d', '#a9cf3a', '#ff9ad5', '#ff8f1f'];
 
 // Kept apart from the game so the game list loads without loading every game.
 export const bubblePopManifest: GameManifest = {

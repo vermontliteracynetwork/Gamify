@@ -20,7 +20,7 @@ export function BubblePatternDefs({ patterns }: { patterns: (string | undefined)
   return (
     <>
       {patterns.map((src, i) => (src || PUZZLE_PACK_CLEARED) && (
-        <pattern key={i} id={`bp-art-${i}`} patternContentUnits="objectBoundingBox" width="1" height="1"><image href={src ?? `/classic/bubble-pop/ball-${i}.webp`} width="1" height="1" preserveAspectRatio={src ? 'xMidYMid slice' : 'xMidYMid meet'} /></pattern>
+        <pattern key={i} id={`bp-art-${i}`} patternContentUnits="objectBoundingBox" width="1" height="1"><image href={src ?? `/classic/bubble-pop/bubble-${i}.svg`} width="1" height="1" preserveAspectRatio={src ? 'xMidYMid slice' : 'xMidYMid meet'} /></pattern>
       ))}
     </>
   );

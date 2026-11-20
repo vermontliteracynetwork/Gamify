@@ -223,10 +223,10 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       return (
         <div className={base} style={{ background: 'linear-gradient(180deg, #314677, #22336e)' }} aria-hidden="true">
           {[[6, 4, 0], [24, 4, 1], [42, 4, 1], [60, 4, 2], [78, 4, 3], [15, 30, 0], [33, 30, 3], [51, 30, 2], [69, 30, 4]].map(([x, y, k], i) => (
-            <img key={i} src={`/classic/bubble-pop/ball-${k}.webp`} alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: `${x}%`, top: `${y}%` }} draggable="false" />
+            <img key={i} src={`/classic/bubble-pop/bubble-${k}.svg`} alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: `${x}%`, top: `${y}%` }} draggable="false" />
           ))}
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 84 L58 50" stroke="#fff" strokeWidth="2" strokeDasharray="1 4" strokeLinecap="round" /></svg>
-          <img src="/classic/bubble-pop/ball-2.webp" alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: '41.5%', bottom: '6%' }} draggable="false" />
+          <img src="/classic/bubble-pop/bubble-2.svg" alt="" className="absolute w-[17%] aspect-square object-contain" style={{ left: '41.5%', bottom: '6%' }} draggable="false" />
         </div>
       );
     case 'castle-quest': {

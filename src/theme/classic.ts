@@ -34,7 +34,7 @@ export function classicTheme(gameId: string): GameTheme {
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
     backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true }
-      : bubbles ? { kind: 'image', src: '/classic/bubble-pop/background.svg', alt: 'A playful pattern of red, yellow and green bubbles, stars and squiggles', tile: true }
+      : bubbles ? { kind: 'image', src: '/classic/bubble-pop/background.svg', alt: 'A playful pattern of colorful swirls and dots on white', tile: true }
       : gems ? { kind: 'image', src: '/classic/match-three/background.svg', alt: 'A geometric ombre of gem-colored triangles, darker at the bottom' } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a

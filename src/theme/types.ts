@@ -11,6 +11,8 @@ export interface ThemeColors {
   accentText: string;
   success: string;
   miss: string;
+  // The progress bar in the top strip (teacher, 2026-11-20).
+  progress?: string;
 }
 
 // Title fonts a theme can pick. Grow Year and Inclusive Sans ship with
