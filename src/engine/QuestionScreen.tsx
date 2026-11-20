@@ -196,7 +196,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
                 animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
                 transition={{ duration: 0.4 }}
                 className={`relative ${framed ? `min-h-[clamp(3.5rem,12vh,7rem)] pl-[clamp(4rem,10.5vh,6.75rem)] pr-4 py-2 leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}` : `min-h-[clamp(3rem,9vh,6.5rem)] h-full pl-[clamp(4rem,10.5vh,6.75rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}`} rounded-input border-bold border-border font-bold flex items-center gap-3
-                            ${TILE_COLORS[i]} ${locked ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'} motion-safe:transition-[opacity,transform] motion-safe:duration-300 ${picked !== null && !isPicked ? 'opacity-45' : ''}
+                            ${TILE_COLORS[i]} ${locked ? 'opacity-50 saturate-50 pointer-events-none' : 'opacity-100'} motion-safe:transition-[opacity,transform] motion-safe:duration-300 ${picked !== null && !isPicked ? 'opacity-45' : ''}
                             ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
                 style={{ boxShadow: 'var(--shadow-sticker)' }}
               >

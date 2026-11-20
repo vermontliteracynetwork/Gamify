@@ -25,17 +25,26 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
       <span className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
         <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}>{score}</motion.span>
       </span>
-      <span className="flex-1 min-w-0 flex gap-2" role="img" aria-label={leftLabel}>
-        {Array.from({ length: rounds }, (_, r) => (
-          <span key={r} aria-hidden="true" className="flex-1 flex gap-[3px] p-[3px] rounded-pill border-std border-border bg-surface">
-            {Array.from({ length: r === cur ? now : perRound }, (_, m) => {
-              const used = r < cur ? perRound : r === cur ? usedNow : 0;
-              // Used turns are filled green, this turn yellow with a ring, turns to come are hollow (shape, not only color).
-              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${m < used ? 'bg-success' : r === cur && m === used ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'border-thin border-muted bg-transparent'}`} />;
-            })}
+      {/* One long bar like a ruler (teacher, 2026-11-20): a small tick for every
+          turn, a big tick between rounds, green up to the turns used and a
+          yellow marker on this turn. */}
+      {(() => {
+        const sizes = Array.from({ length: rounds }, (_, r) => (r === cur ? now : perRound));
+        const total = sizes.reduce((a, b) => a + b, 0) || 1;
+        const done = sizes.slice(0, cur).reduce((a, b) => a + b, 0) + usedNow;
+        const ticks: { at: number; big: boolean }[] = [];
+        let k = 0;
+        sizes.forEach((n, r) => { for (let m = 1; m <= n; m++) { k++; if (k < total) ticks.push({ at: k / total, big: m === n }); } void r; });
+        return (
+          <span className="relative flex-1 min-w-0 h-6 rounded-pill border-std border-border bg-surface overflow-hidden" role="img" aria-label={leftLabel}>
+            <motion.span aria-hidden="true" className="absolute inset-y-0 left-0 bg-success" initial={false} animate={{ width: `${(done / total) * 100}%` }} transition={{ duration: still ? 0 : 0.4 }} />
+            {done < total && <span aria-hidden="true" className="absolute inset-y-0 bg-accent shadow-[0_0_0_2px_#000_inset]" style={{ left: `${(done / total) * 100}%`, width: `${100 / total}%` }} />}
+            {ticks.map((tk, i) => (
+              <span key={i} aria-hidden="true" className={`absolute bottom-0 -translate-x-1/2 ${tk.big ? 'top-0 w-[2.5px] bg-border' : 'h-[45%] w-[1.5px] bg-muted'}`} style={{ left: `${tk.at * 100}%` }} />
+            ))}
           </span>
-        ))}
-      </span>
+        );
+      })()}
       {right}
     </div>
   );

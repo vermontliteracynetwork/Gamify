@@ -43,9 +43,9 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
           const on = value === o.value;
           return (
             <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
-              className={`min-w-44 px-6 py-5 rounded-panel border-bold bg-white grid justify-items-center gap-3 font-bold text-lg motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
+              className={`min-w-52 px-7 py-6 rounded-panel border-bold bg-white grid justify-items-center gap-3 font-bold text-xl motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
               style={{ boxShadow: on ? '0 5px 0 #000' : '0 3px 0 rgba(0,0,0,0.25)' }}>
-              <span className="[&>*]:scale-[1.6] [&>*]:origin-center py-[1.3rem] px-[1.3rem]">{o.art}</span><span>{o.label}</span>
+              <span className="[&>*]:scale-[1.9] [&>*]:origin-center py-[1.9rem] px-[1.9rem]">{o.art}</span><span>{o.label}</span>
               {/* Touch screens have no hover, so the tip shows on the card (Claudia, 2026-11-18). */}
               {o.tip && <span className="hidden [@media(hover:none)]:block text-xs font-semibold text-muted max-w-48">{o.tip}</span>}
             </button>

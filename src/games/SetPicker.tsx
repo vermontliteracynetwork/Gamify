@@ -8,7 +8,6 @@ import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../da
 import type { QuestionSet } from '../data/types';
 import { isPlayable } from '../engine/questions';
 import { t } from '../i18n';
-import { ART } from './SetCover';
 import SetFilterBar from './SetFilterBar';
 import { Tabs } from '../ui/kit';
 import { LIBRARY } from '../data/library';
@@ -105,8 +104,6 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
           <div key={col} className="grid gap-[18px] min-w-0">
           {shown.filter((_, k) => k % cols === col).map((s) => {
             const on = value.includes(s.id);
-            const art = ART[s.subject ?? 'Other'];
-            const I = art.icon;
             const back = flipped.has(s.id);
             const q = s.questions.find(isPlayable);
             return (
@@ -127,18 +124,10 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                     <>
                       {/* A cover keeps the shape it was uploaded in. */}
                       {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-std border-border" />}
-                      {/* The subject icon, then the title right beside it, no subject
-                          word (teacher, 2026-11-18). */}
-                      <span className="flex items-start gap-2 min-w-0 pr-8">
-                        <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-thin border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
-                          <I weight="fill" size={15} color={art.ink} aria-hidden="true" />
-                        </span>
-                        <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere] min-w-0">{s.name || t('sets.untitled')}</span>
-                      </span>
-                      <span className="flex flex-wrap gap-1.5 text-sm font-bold leading-none">
-                        <span className="rounded-pill border-thin border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                        <span className="rounded-pill border-thin border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
-                      </span>
+                      {/* Just the title, big and left-aligned, and the question count in small
+                          italic gray (teacher, 2026-11-20: no subject icon, no grade chip). */}
+                      <span className="font-bold text-xl leading-snug break-words [overflow-wrap:anywhere] min-w-0 pr-8 text-left">{s.name || t('sets.untitled')}</span>
+                      <span className="text-sm italic font-semibold text-muted text-left">{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
                     </>
                   ) : (
                     <>
