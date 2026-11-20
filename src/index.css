@@ -830,13 +830,18 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
    height, so its text and gaps scale with that height (container units) and
    four How to play steps never run under the Play button. */
 @media (min-width: 1024px), (min-width: 768px) and (orientation: landscape) {
-  .welcome-col { container-type: size; gap: 2.4cqh !important; }
+  /* Spacing from her Four in a Row mockup (2026-11-20): a big title, a large
+     plain-black description, a bigger mode chip, a roomy How to play card and
+     a big Play button, spread from the cover's top to its bottom. */
+  .welcome-col { container-type: size; gap: 2.6cqh !important; }
   .welcome-col section { flex-shrink: 0; }
-  .welcome-col h1 { font-size: calc(var(--text-scale, 1) * clamp(1.5rem, 8.5cqh, 3rem)) !important; }
-  .welcome-col > div > p { font-size: calc(var(--text-scale, 1) * clamp(0.8rem, 3.6cqh, 1.35rem)) !important; }
-  .welcome-col section > div { padding-block: 2.4cqh !important; gap: 1.6cqh !important; }
-  .welcome-col section ol { gap: 1.7cqh !important; }
-  .welcome-col section li { font-size: calc(var(--text-scale, 1) * clamp(0.75rem, 3.1cqh, 1.25rem)) !important; }
-  .welcome-col section li > span:first-child { width: clamp(1.5rem, 6.4cqh, 3rem) !important; height: clamp(1.5rem, 6.4cqh, 3rem) !important; }
-  .welcome-col > button { min-height: clamp(2.6rem, 11cqh, 4.5rem) !important; }
+  .welcome-col h1 { font-size: calc(var(--text-scale, 1) * clamp(1.6rem, 9cqh, 3.1rem)) !important; padding-right: 7.5rem !important; white-space: normal !important; }
+  .welcome-col > div > p { font-size: calc(var(--text-scale, 1) * clamp(0.9rem, 4.6cqh, 1.6rem)) !important; color: var(--text) !important; font-weight: 500 !important; line-height: 1.4 !important; }
+  .welcome-col > div > div > span { font-size: calc(var(--text-scale, 1) * clamp(0.85rem, 3.4cqh, 1.2rem)); padding: 0.9cqh 2.2cqh; }
+  .welcome-col section > div { padding-block: 2.6cqh !important; gap: 2cqh !important; }
+  .welcome-col section ol { gap: 2.4cqh !important; }
+  .welcome-col section li { font-size: calc(var(--text-scale, 1) * clamp(0.78rem, 3.3cqh, 1.3rem)) !important; }
+  .welcome-col section li > span:first-child { width: clamp(1.5rem, 6.6cqh, 3rem) !important; height: clamp(1.5rem, 6.6cqh, 3rem) !important; }
+  .welcome-col > button { min-height: clamp(2.8rem, 13cqh, 5rem) !important; width: 82% !important; font-size: calc(var(--text-scale, 1) * clamp(1.2rem, 5cqh, 2rem)) !important; }
 }
+

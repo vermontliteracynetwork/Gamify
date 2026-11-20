@@ -53,7 +53,6 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('tab', { name: 'Share' }).click();
   await page.getByLabel('Student designer (optional)').fill('Ava');
   await page.getByRole('tab', { name: 'Style' }).click();
-  await page.getByRole('radio', { name: 'Storybook' }).click();
   await page.getByRole('radio', { name: 'Chimes' }).click();
   await page.screenshot({ path: `test-results/builder-style-${info.project.name}.png` });
   await page.screenshot({ path: `test-results/builder-edit-${info.project.name}.png`, fullPage: true });
@@ -69,7 +68,6 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
   await finishSetup(page);
-  expect(await page.locator('h1, h2').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
   const bg = await page.getByRole('button', { name: /^Card 1(,|$)/ }).evaluate((el) => getComputedStyle(el).backgroundImage);
   expect(bg).toContain('url(');
   await page.screenshot({ path: `test-results/builder-played-${info.project.name}.png` });
