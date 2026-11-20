@@ -460,6 +460,7 @@ export const en = {
 
   'welcome.how': 'How to play',
   'welcome.start': 'Set up and play',
+  'welcome.play': 'Play',
   'setup.steps': 'Setup steps',
   'setup.stepOf': 'Step {n} of {total}: {title}',
   'setup.stepTitle': 'Step {n} of {total}: {title}',
