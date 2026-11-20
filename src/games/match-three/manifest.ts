@@ -15,10 +15,10 @@ export const matchThreeManifest: GameManifest = {
     // Pieces a combo makes (teacher, 2026-11-18: like a wrapped candy), each
     // its own design: a row of 4 makes a line piece, an L or T a bomb, a row
     // of 5 a rainbow.
-    { id: 'special-row', label: 'Sideways line piece', width: 128, height: 128, hint: 'Made by 4 in a row. When matched it clears its whole row.' },
-    { id: 'special-col', label: 'Up and down line piece', width: 128, height: 128, hint: 'Made by 4 in a column. When matched it clears its whole column.' },
-    { id: 'special-burst', label: 'Bomb piece', width: 128, height: 128, hint: 'Made by an L or T shape. When matched it pops everything around it.' },
-    { id: 'special-rainbow', label: 'Rainbow piece', width: 128, height: 128, hint: 'Made by 5 in a row. Swap it with any piece to pop all of that kind.' },
+    { id: 'special-row', label: '4 in a row (across)', width: 128, height: 128, hint: 'Made by 4 in a row. When matched it clears its whole row.' },
+    { id: 'special-col', label: '4 in a row (up and down)', width: 128, height: 128, hint: 'Made by 4 in a column. When matched it clears its whole column.' },
+    { id: 'special-burst', label: 'L or T shape', width: 128, height: 128, hint: 'Made by an L or T shape. When matched it pops everything around it.' },
+    { id: 'special-rainbow', label: '5 in a row', width: 128, height: 128, hint: 'Made by 5 in a row. Swap it with any piece to pop all of that kind.' },
     ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },

@@ -231,6 +231,7 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   for (let i = 3; i < d.length; i += 16) if (d[i] < 250) clear++;
   const digital = clear > d.length / 16 * 0.01;
   let x0 = 0, y0 = 0, x1 = W, y1 = H;
+  let papery = false;
   if (!digital) {
     // Whiten gray paper, like a template page.
     const hist = [new Uint32Array(256), new Uint32Array(256), new Uint32Array(256)];
@@ -239,9 +240,9 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
     const paper = hist.map((hh) => { let acc = 0; for (let v = 255; v >= 0; v--) { acc += hh[v]; if (acc > total * 0.03) return Math.max(v, 60); } return 255; });
     // Only when the lightest part looks like paper (light and gray): a
     // colorful digital picture with no white keeps its colors.
-    const papery = paper.every((v) => v >= 150) && Math.max(...paper) - Math.min(...paper) < 50;
+    papery = paper.every((v) => v >= 150) && Math.max(...paper) - Math.min(...paper) < 50;
     if (papery && paper.some((v) => v < 245)) for (let i = 0; i < d.length; i += 4) for (let ch = 0; ch < 3; ch++) d[i + ch] = Math.min(255, (d[i + ch] * 255) / paper[ch]);
-    if (!solid) {
+    if (!solid && papery) {
       // Paper reached from the edges turns see-through; white inside the
       // drawing (a white eye, a shine) stays.
       const light = (p: number) => d[p * 4] > 215 && d[p * 4 + 1] > 215 && d[p * 4 + 2] > 215;
@@ -259,7 +260,11 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
       }
     }
   }
-  if (!solid) {
+  // A photo or picture with no paper around it (teacher, 2026-11-20:
+  // "respect the size of the uploads"): it comes in whole, cropped only to
+  // the piece's shape (a square piece gets a square), never trimmed.
+  const photo = !digital && !papery;
+  if (!solid && !photo) {
     // Trim to the drawing, with a little room around it.
     x0 = W; y0 = H; x1 = 0; y1 = 0;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 20) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
@@ -275,11 +280,17 @@ function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, sol
   const max = Math.max(piece.width, piece.height, 256);
   const ow = ratio >= 1 ? max : Math.round(max * ratio), oh = ratio >= 1 ? Math.round(max / ratio) : max;
   const out = canvas(ow, oh), octx = ctx2d(out);
-  if (solid) {
+  if (solid || photo) {
     // Solid means solid: see-through parts sit on white.
     octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, ow, oh);
     const s = Math.max(ow / bw, oh / bh);
     octx.drawImage(src, x0 + (bw - ow / s) / 2, y0 + (bh - oh / s) / 2, ow / s, oh / s, 0, 0, ow, oh);
+    if (photo && round && !solid) {
+      // A round piece keeps its circle.
+      const r = canvas(ow, oh), rc = ctx2d(r);
+      rc.beginPath(); rc.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); rc.clip(); rc.drawImage(out, 0, 0);
+      return r.toDataURL('image/png');
+    }
     return piece.width <= 400 ? out.toDataURL('image/png') : out.toDataURL('image/jpeg', 0.86);
   }
   if (round) { octx.beginPath(); octx.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); octx.clip(); }

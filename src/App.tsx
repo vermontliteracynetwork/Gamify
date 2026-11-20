@@ -16,7 +16,7 @@ import JoinPage from './public/JoinPage';
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
-import { pageTitle } from './ui/pageTitle';
+import { pageDescription, pageTitle } from './ui/pageTitle';
 import { UpgradeHost } from './billing/Upgrade';
 import { getLive } from './live/session';
 import { t } from './i18n';
@@ -88,13 +88,19 @@ const WaysList = lazyPage(() => import('./public/WaysPage').then((m) => ({ defau
 const WaysPost = lazyPage(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
+const NotFoundPage = lazyPage(() => import('./public/NotFoundPage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
 function AnimatedRoutes() {
   const location = useLocation();
   const reduce = useReducedMotion();
-  useEffect(() => { document.title = pageTitle(location.pathname); }, [location.pathname]);
+  useEffect(() => {
+    document.title = pageTitle(location.pathname);
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
+    meta.content = pageDescription(location.pathname);
+  }, [location.pathname]);
 
   return (
     <>
@@ -196,6 +202,8 @@ function AnimatedRoutes() {
           <Route path="/owner/line" element={<Navigate to="/owner" replace />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
+          {/* Our own 404 page (site QA, 2026-11-20). */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
       </motion.div>

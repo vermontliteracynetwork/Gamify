@@ -44,6 +44,8 @@ const PAGES: [RegExp, string][] = [
   [/^\/themes/, 'Themes'],
   [/^\/beta$/, 'Join the beta test'],
   [/^\/owner/, 'Owner'],
+  [/^\/look-up/, 'Teacher time'],
+  [/^\/check/, 'Device check'],
 ];
 
 export function pageName(path: string): string | undefined {
@@ -58,4 +60,23 @@ export function pageTitle(path: string): string {
   const game = path.match(/^\/games\/([a-z0-9-]+)/);
   const name = game ? getGame(game[1])?.name : pageName(path);
   return name ? `${name} | Gamify` : 'Gamify';
+}
+
+// A short description for search results and link previews (site QA,
+// 2026-11-20). Public pages get their own; everything else the site's.
+const DEFAULT_DESC = 'Gamify turns your own questions into classroom games your students ask to play: Game Show, Bowling, Board Game and more, on iPads, laptops and the big screen.';
+const DESCRIPTIONS: [RegExp, string][] = [
+  [/^\/features/, 'Every Gamify game, the Theme Builder your class designs with, live lobbies and reports, all built from the questions you already teach.'],
+  [/^\/pricing/, 'Start free. Plus and Pro unlock every game, class designs and live play. School quotes by email, no sales call.'],
+  [/^\/schools/, 'Gamify for schools and districts: every teacher on Pro, one invoice, a signed student data privacy agreement.'],
+  [/^\/homeschool/, 'Gamify for homeschool families and co-ops: every game for up to 10 students, with co-op codes for 25% off.'],
+  [/^\/research/, 'What studies of practice questions and game-based learning found, and how Gamify puts it to work.'],
+  [/^\/(faq|help)/, 'Answers and how-to guides for teachers using Gamify.'],
+  [/^\/(blog|ways)/, 'Ideas for using Gamify in your classroom, one game at a time.'],
+  [/^\/student-data/, 'What Gamify keeps about students (first names and game results only) and what it never does.'],
+  [/^\/join/, 'Students: type the code your teacher gives you to join the game.'],
+  [/^\/themes/, 'Themes for every Gamify game, made by Gamify and by classes.'],
+];
+export function pageDescription(path: string): string {
+  return DESCRIPTIONS.find(([re]) => re.test(path))?.[1] ?? DEFAULT_DESC;
 }

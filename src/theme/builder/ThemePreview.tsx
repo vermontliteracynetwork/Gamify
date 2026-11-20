@@ -221,7 +221,19 @@ function board(theme: GameTheme, size?: number) {
         <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full max-h-full min-h-0 aspect-square overflow-hidden" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${n}, minmax(0, 1fr))` }}>
           {Array.from({ length: n * n }, (_, i) => {
             const k = (i * 7 + Math.floor(i / n) * 3) % 6;
-            return <img key={i} src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;
+            // Every extra piece shows on the board too (teacher, 2026-11-20).
+            const sp = ({ [n + 1]: 'row', [2 * n + 3]: 'col', [3 * n + 2]: 'burst', [4 * n + 4]: 'rainbow' } as Record<number, string>)[i];
+            const own = sp ? pieceImage(theme, `special-${sp}`) : undefined;
+            const tile = <img src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;
+            if (own) return <img key={i} src={own} alt="" className="w-full h-full object-contain" />;
+            if (sp === 'rainbow') return <span key={i} className="rounded-full border-std border-border" style={{ background: 'conic-gradient(#ff5b4d, #fdc512, #a9cf3a, #26cdeb, #a58be0, #ff5b4d)' }} />;
+            return (
+              <span key={i} className="relative">
+                {tile}
+                {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className="absolute inset-[14%] rounded-[30%] mix-blend-screen" style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.9) 0 9%, transparent 9% 22%)` }} />}
+                {sp === 'burst' && <span aria-hidden="true" className="absolute inset-[6%] rounded-full" style={{ boxShadow: '0 0 8px 2px #fdfd94, inset 0 0 6px #fff' }} />}
+              </span>
+            );
           })}
         </div>
       );

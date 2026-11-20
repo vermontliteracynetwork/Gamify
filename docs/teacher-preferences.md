@@ -248,3 +248,7 @@ line that fits, and add each new preference the same turn she says it.
 - Player icons (2026-11-20, every game and every design kit): 10 player icons (team-1 to team-10); solo games call them player icons.
 - Design downloads (2026-11-20): no title pages; every piece in the files is one the game really draws.
 - Power-ups (2026-11-20): none in Match Three or Four in a Row; no custom power-up actions anywhere (each power-up keeps its game's own action; Add only brings back one of the game's own).
+- Uploads (2026-11-20): a photo or picture with no paper around it comes in whole, cropped only to the piece's shape (a square piece gets a square), never trimmed; paper drawings still get their paper cleared.
+- Piece names (2026-11-20): plain words of what makes the piece, e.g. Match Three "4 in a row (across)", "4 in a row (up and down)", "L or T shape", "5 in a row".
+- Theme Builder preview (2026-11-20): every extra piece shows on the preview board (Match Three's line, bomb and rainbow pieces).
+- Site QA (2026-11-20): custom 404 page; every page has a title and a search description.
