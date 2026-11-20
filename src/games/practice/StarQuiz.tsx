@@ -21,6 +21,7 @@ import { makeGameCode } from '../../data/gameCodes';
 import type { PlayMode } from '../../data/types';
 import { useNavigate } from 'react-router-dom';
 import SetupWizard from '../SetupWizard';
+import { useSession } from '../../student/session';
 import { StageBackdrop } from '../../theme/stageBackdrop';
 import TeamSetup from '../../engine/TeamSetup';
 import { starQuizManifest } from './manifest';
@@ -56,6 +57,7 @@ export default function StarQuiz() {
   const game = useGamePool(pool);
   const { ask, cancel, element, missed, stats, lastRight } = useAsk({ gameId: 'star-quiz', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId, framed: true });
   const [phase, setPhase] = useState<Phase>('welcome');
+  const student = !!useSession();
   const [, setMe] = useState({ icon: 0, name: '' });
   const [stars, setStars] = useState(0);
   const [round, setRound] = useState(0);
@@ -131,7 +133,7 @@ export default function StarQuiz() {
           ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['live', 'solo']} value={way} onChange={setWay} /> }]),
           ...(teacher && way === 'live' ? [{ id: 'class', title: t('live.howPlay'), content: <ClassPlayOptions value={classPlay} onChange={setClassPlay} /> }] : []),
           // A player page in every game with player icons (teacher, 2026-11-20); Live players join on their own devices.
-          ...(teacher && way === 'live' ? [] : [{ id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> }]),
+          ...((teacher && way === 'live') || student ? [] : [{ id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           // Live: How the Class Plays already says when the game ends, so no
           // number of questions (teacher, 2026-11-06).

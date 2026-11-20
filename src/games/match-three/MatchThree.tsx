@@ -20,6 +20,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
+import { useSession } from '../../student/session';
 import TeamSetup from '../../engine/TeamSetup';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
@@ -64,6 +65,7 @@ export default function MatchThree() {
   const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
+  const student = !!useSession();
   const [me, setMe] = useState({ icon: 0, name: '' });
   // Background music, quieter than the effects (teacher, 2026-11-20; Freesound loop by audiocoffee).
   useGameMusic(phase === 'play', '/sounds/match-three/music.mp3', settings);
@@ -277,8 +279,9 @@ export default function MatchThree() {
 
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
-          // A player page in every game with player icons (teacher, 2026-11-20).
-          { id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> },
+          // A player page in every game with player icons (teacher, 2026-11-20);
+          // a student who joined already has their name, so it is skipped.
+          ...(student ? [] : [{ id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

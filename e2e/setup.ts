@@ -50,6 +50,8 @@ export async function openSetup(page: Page, path: string, way?: RegExp) {
     if (way) await page.getByRole('radio', { name: way }).click();
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
+  // Solo games ask for the player's picture and name next (2026-11-20); the defaults stay.
+  if (await page.getByRole('heading', { name: /^Step \d+ of \d+: Player$/ }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
 }
 
 // Next through the remaining setup pages, then Play.

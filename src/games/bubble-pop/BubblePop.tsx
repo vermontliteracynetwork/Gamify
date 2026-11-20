@@ -20,6 +20,7 @@ import { Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
+import { useSession } from '../../student/session';
 import TeamSetup from '../../engine/TeamSetup';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
@@ -55,6 +56,7 @@ export default function BubblePop() {
   const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'bubble-pop', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
+  const student = !!useSession();
   const [me, setMe] = useState({ icon: 0, name: '' });
   const [step, setStep] = useState<Step>('question');
   const [board, setBoard] = useState<Board>(() => makeBoard(0));
@@ -114,7 +116,8 @@ export default function BubblePop() {
     setNote(done === 0 ? '' : t('bp.answer'));
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
-    const it = powers.grant(true);
+    // It works right away (applyNow below), so the card says what it does, not "next turn" (design audit, 2026-11-20).
+    const it = powers.grant();
     setShots(plan.current.shots); setRoundShots(plan.current.shots);
     // Classic adds a new bubble color every round (teacher, 2026-11-19): a fresh row brings it in.
     if (done > 0 && theme.id === 'bubble-pop:classic') { const n = Math.min(BUBBLE_COLORS.length, 3 + done); setBoard((b0) => pushRow(b0, [...Array.from({ length: n }, (_, k) => k), n - 1, n - 1])); }
@@ -297,8 +300,9 @@ export default function BubblePop() {
       {phase === 'theme' && <ThemeScreen gameName={bubblePopManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
-          // A player page in every game with player icons (teacher, 2026-11-20).
-          { id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> },
+          // A player page in every game with player icons (teacher, 2026-11-20);
+          // a student who joined already has their name, so it is skipped.
+          ...(student ? [] : [{ id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
