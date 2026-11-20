@@ -1,3 +1,5 @@
+import { clientIp, limited } from '../src/lib/rateLimit';
+
 // Teacher log in by username (Stage 5). The browser sends username and
 // password; this looks up the account's email with the service key (which
 // never leaves the server), signs in, and returns only the session tokens.
@@ -6,8 +8,9 @@ const URL = process.env.VITE_SUPABASE_URL;
 const ANON = process.env.VITE_SUPABASE_ANON_KEY;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// `stage` says which check failed (no account data), so a failed log in can be traced.
-const wrong = (stage: string) => Response.json({ problem: 'wrong', stage }, { status: 401 });
+// One answer for a wrong username or a wrong password, so nobody can find
+// out which usernames exist; which check failed goes to the server log only.
+const wrong = (stage: string) => { console.warn('login failed', stage); return Response.json({ problem: 'wrong' }, { status: 401 }); };
 
 export async function POST(request: Request): Promise<Response> {
   if (!URL || !ANON || !SERVICE) return Response.json({ problem: 'setup' }, { status: 500 });
@@ -15,12 +18,18 @@ export async function POST(request: Request): Promise<Response> {
   const username = typeof body.username === 'string' ? body.username.trim().toLowerCase() : '';
   const password = typeof body.password === 'string' ? body.password : '';
   if (!/^[a-z0-9._]{3,20}$/.test(username) || !password || password.length > 200) return wrong('format');
+  // Rate limits: 8 tries a username and 30 an address in 10 minutes.
+  const ip = clientIp(request);
+  if (limited(`login:${ip}:${username}`, 8, 10 * 60_000) || limited(`login:${ip}`, 30, 10 * 60_000)) {
+    console.warn('login rate limited', ip);
+    return Response.json({ problem: 'slow' }, { status: 429, headers: { 'Retry-After': '600' } });
+  }
 
   // Supabase's newer secret keys (sb_secret_...) go only in the apikey header;
   // the older JWT service key also goes in Authorization.
   const admin: Record<string, string> = SERVICE.startsWith('sb_') ? { apikey: SERVICE } : { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
   const profiles = await fetch(`${URL}/rest/v1/profiles?select=id&username=eq.${encodeURIComponent(username)}`, { headers: admin });
-  if (!profiles.ok) return Response.json({ problem: 'server', stage: `profiles-${profiles.status}` }, { status: 502 });
+  if (!profiles.ok) { console.error('login profiles lookup', profiles.status); return Response.json({ problem: 'server' }, { status: 502 }); }
   const [profile] = (await profiles.json()) as { id: string }[];
   if (!profile) return wrong('username');
   const user = await fetch(`${URL}/auth/v1/admin/users/${profile.id}`, { headers: admin });

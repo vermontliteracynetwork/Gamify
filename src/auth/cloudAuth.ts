@@ -9,7 +9,7 @@ import { getTeacher, setTeacher } from './session';
 // back a session. Sign up is Supabase Auth with the username in metadata
 // (0005_usernames.sql copies it onto the profile).
 export const cloudOn = !!supabase;
-export type LogInResult = 'ok' | 'wrong' | 'confirm' | 'offline' | 'setup';
+export type LogInResult = 'ok' | 'wrong' | 'confirm' | 'offline' | 'setup' | 'slow';
 
 export async function cloudLogIn(username: string, password: string): Promise<LogInResult> {
   // An email works too (accounts made in the Supabase dashboard, like the
@@ -28,6 +28,7 @@ export async function cloudLogIn(username: string, password: string): Promise<Lo
   if (!res) return 'offline';
   if (res.status === 401) return 'wrong';
   if (res.status === 403) return 'confirm';
+  if (res.status === 429) return 'slow';
   if (res.status === 500) return 'setup';
   if (!res.ok) return 'offline';
   const tokens = (await res.json()) as { access_token: string; refresh_token: string };

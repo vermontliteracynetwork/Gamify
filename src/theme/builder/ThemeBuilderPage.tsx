@@ -544,13 +544,12 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const field = fieldClasses('md', 'w-full');
   // One power-up per action (teacher, 2026-11-20).
-  const used = (i: number) => new Set(items.filter((_, j) => j !== i).map((x) => x.ability));
   const free = spec.abilities.filter((a) => !items.some((x) => x.ability === a.id));
+  // Only the game's own power-ups (and actions) can be added back.
   function add() {
-    const a = free[0];
-    if (!a) return;
-    // New ones go first, unnamed: every power-up needs its own name.
-    onChange([{ id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }, ...items]);
+    const c = spec.classic.find((x) => free.some((a) => a.id === x.ability));
+    if (!c) return;
+    onChange([{ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion, often: c.often }, ...items]);
   }
   return (
     <div className="grid gap-3">
@@ -593,9 +592,8 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
                 <span data-tip={[ability.hint + (ability.amount ? ` ${t('builder.items.amountNote', { what: ability.amount.label.toLowerCase() })}` : ''), spec.classic.find((c) => c.ability === ability.id) ? t('builder.items.example', { name: spec.classic.find((c) => c.ability === ability.id)!.name }) : ''].filter(Boolean).join(' ')}
                   data-tip-bg="#ffffff" aria-hidden="true" className="text-muted cursor-help"><Info weight="bold" size={16} /></span>
               </span>
-              <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
-                {spec.abilities.map((a) => <option key={a.id} value={a.id} disabled={used(i).has(a.id)}>{a.label}</option>)}
-              </select>
+              {/* No custom actions (teacher, 2026-11-20): each power-up keeps its game's own action. */}
+              <span className={`${field} flex items-center bg-surface-2`}>{ability.label}</span>
             </label>
             {ability.amount && (
               <label className="grid gap-1 font-bold text-sm">{ability.amount.label}: {it.amount ?? ability.amount.default}
@@ -621,7 +619,8 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
           </div>
         );
       })} />
-      <Button className="justify-self-start" disabled={items.length >= spec.max || !free.length} onClick={add}><PaintBrush weight="bold" size={18} />{t('builder.items.add')}</Button>
+      {/* No new power-ups with their own actions (teacher, 2026-11-20); a removed one comes back from the game's set. */}
+      {free.some((a) => spec.classic.some((c) => c.ability === a.id)) && <Button className="justify-self-start" disabled={items.length >= spec.max} onClick={add}><PaintBrush weight="bold" size={18} />{t('builder.items.add')}</Button>}
     </div>
   );
 }

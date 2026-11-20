@@ -30,7 +30,7 @@ export default function CastCatchPreview({ theme }: { theme: GameTheme }) {
     return () => ro.disconnect();
   }, []);
   const tip = rodTipAt(ASPECT);
-  const player = pieceImage(theme, 'player');
+  const player = (pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player'));
   const chip = 'inline-flex items-center gap-1 bg-surface border-std border-border rounded-pill px-2 min-h-6 font-display text-xs whitespace-nowrap tabular-nums';
   return (
     <div ref={box} className="relative rounded-panel border-bold border-border overflow-hidden aspect-[4/3] select-none" style={sceneBackground(theme)} role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>

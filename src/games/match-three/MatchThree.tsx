@@ -23,7 +23,6 @@ import SetupWizard from '../SetupWizard';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
-import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import TopStrip from '../../engine/TopStrip';
 import { useGamePool } from '../../student/session';
@@ -102,7 +101,7 @@ export default function MatchThree() {
   // Power-ups after a question break: more moves, bonus points, or a doubled match.
   // Held power-ups (teacher, 2026-10-31): one earned at a question break is
   // ready for the next round, listed under the score, and gone after it.
-  const powers = usePowerUps(matchThreeManifest, theme, setup.powerUps, setup.powerOff ?? []);
+  const powers = usePowerUps(matchThreeManifest, theme, false, []);
   const held = useHeldPowerUps();
   const doubleNext = useRef(false);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, still ? Math.min(ms, 80) : ms));
@@ -281,7 +280,6 @@ export default function MatchThree() {
             <>
               <Slider label={t('bm.rounds')} hint={t('bm.roundsHint')} min={1} max={10} value={setup.rounds} onChange={(v) => change({ rounds: v })} />
               <Slider label={t('bm.movesEach')} hint={t('bm.movesHint')} min={2} max={6} value={setup.moves} onChange={(v) => change({ moves: v })} />
-              {powerUpSwitches({ manifest: matchThreeManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
               <Slider label={t('bm.perBreak')} hint={t('bm.perBreakHint')} min={1} max={5} value={setup.perBreak} onChange={(v) => change({ perBreak: v })} />
               <ChoiceRow label={t('bm.size')} value={String(setup.size)} onChange={(v) => change({ size: Number(v) })}
                 options={[6, 7, 8].map((n) => ({ value: String(n), label: t(n === 6 ? 'bm.size.small' : n === 7 ? 'bm.size.medium' : 'bm.size.big'), art: <SizeMock n={n} /> }))} />
@@ -302,7 +300,7 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
-          <TopStrip barColor={theme.colors.progress} leftLabel={t('bm.moves', { count: moves })} score={score} player={pieceImage(theme, 'player')} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
+          <TopStrip barColor={theme.colors.progress} leftLabel={t('bm.moves', { count: moves })} score={score} player={(pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player'))} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
             label={t('bm.round', { n: round, total: plan.current.rounds })} right={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />
           <div className="relative border-bold border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
             {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
@@ -389,7 +387,7 @@ export default function MatchThree() {
       )}
 
       {phase === 'end' && (
-        <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
+        <ResultsModal winners={(pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player')) ? [{ name: t('mm.you'), colorIndex: 0, art: (pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player')) }] : undefined} title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Star key={i} weight={stars > i ? 'fill' : 'bold'} size={40} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} aria-hidden="true" />)}</p>
         </ResultsModal>
       )}

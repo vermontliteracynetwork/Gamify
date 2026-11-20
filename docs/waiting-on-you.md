@@ -13,6 +13,7 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 7. **Later: ask an accountant about the S corp election** once Gamify has steady profit (IRS Form 2553).
 
 **Everything else**
+- **Security: four switches only you can turn on (2026-11-20).** Supabase Authentication: Leaked password protection, MFA (TOTP), Bot protection (Turnstile; send Claudia the site key). Vercel: a Spend Management cap. OpenAI: a monthly usage limit. Full list: docs/security-audit.md.
 - **Co-op codes: run 0014 and add the 25% Stripe coupon (2026-11-20).** Your pick: option B, 25% off with the co-op's code. Supabase SQL Editor: run supabase/migrations/0014_coop_codes.sql; make each co-op's code on /owner, Access codes; once Stripe is open, add a 25% off coupon named "Co-op 25".
 - **Approve the design mockups (2026-11-19).** The Gamify Design Audit page (https://claude.ai/artifact/9XVLS1bFUy2UDzP3qVZD8F), Mockups tab: the right-answer moment, setup steps, one top bar, scoreboard (laptop and iPad portrait) and team results box. Also: keep numbers on Game Show cards? Keep the slashed zero?
 1. **Attorney review.** We sell to schools, so every public promise needs a lawyer's eye. How: Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules and its parent permission slip (/challenge/permission), the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Google Classroom, Canva), the Common Core text license, DMCA agent registration.

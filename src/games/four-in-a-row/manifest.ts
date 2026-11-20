@@ -18,16 +18,6 @@ export const fourInARowManifest: GameManifest = {
   ],
   // Power-ups (Golden Rule pass, 2026-10-31): a right answer may bring one;
   // it waits for the player's next turn under the scores.
-  items: {
-    label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 4, width: 256, height: 256,
-    abilities: [
-      { id: 'double', label: 'Double drop', hint: 'This turn you drop two pieces instead of one.' },
-      { id: 'pop', label: 'Pop out', hint: 'Pull the bottom piece out of any column; the pieces above it fall down one space.' },
-    ],
-    classic: [
-      { id: 'classic-double-drop', name: 'Double Drop', ability: 'double', motion: 'bob', often: 2, image: '/classic/powerups/gem.webp' },
-      { id: 'classic-pop-out', name: 'Pop Out', ability: 'pop', motion: 'wiggle', often: 2, image: '/classic/powerups/key.webp' },
-    ],
-  },
+  // No power-ups in this game (teacher, 2026-11-20).
   hasCpu: true,
 };

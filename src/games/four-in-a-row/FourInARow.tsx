@@ -35,7 +35,6 @@ import ThemeScreen from '../ThemeScreen';
 
 import { COLS, cpuMove, drop, emptyBoard, isFull, popBottom, ROWS, winningLine, type Board } from './board';
 import { usePowerUps } from '../../engine/usePowerUps';
-import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import Title from '../../ui/Title';
 
@@ -63,7 +62,7 @@ export default function FourInARow() {
   const [turn, setTurn] = useState<0 | 1>(0);
   const [step, setStep] = useState<'answer' | 'pick' | 'dropping' | 'pop'>('answer');
   // Power-ups on one device (two devices keep the plain game, so moves stay in step).
-  const powers = usePowerUps(fourInARowManifest, theme, setup.powerUps, setup.powerOff ?? []);
+  const powers = usePowerUps(fourInARowManifest, theme, false, []);
   const held = useHeldPowerUps();
   const extraDrop = useRef(false);
   const [popped, setPopped] = useState<{ col: number; id: number } | null>(null);
@@ -284,7 +283,6 @@ export default function FourInARow() {
               <ChoiceRow label={t('fr.first')} value={setup.first} onChange={(v) => change({ first: v })}
                 options={[{ value: 'p1', label: t('fr.first.p1') }, { value: 'p2', label: t('fr.first.p2') }, { value: 'random', label: t('fr.first.random') }]} />
               <Slider label={t('fr.perTurn')} hint={t('fr.perTurnHint')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />
-              {powerUpSwitches({ manifest: fourInARowManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
         ]} />

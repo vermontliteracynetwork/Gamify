@@ -1,3 +1,4 @@
+import { playerIconPieces } from '../playerIcons';
 import type { GameManifest } from '../types';
 
 // Kept apart from the game so the game list loads without loading every game.
@@ -16,6 +17,7 @@ export const farmGrowManifest: GameManifest = {
     { id: 'crop-sunflower', label: 'Sunflower', width: 256, height: 256, hint: 'A sunflower in bloom' },
     { id: 'crop-tomato', label: 'Tomato', width: 256, height: 256, hint: 'Ripe tomatoes, ready to pick' },
     { id: 'barn', label: 'Barn', width: 400, height: 400, hint: 'The barn beside the field' },
+    ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

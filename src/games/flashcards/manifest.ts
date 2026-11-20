@@ -1,3 +1,4 @@
+import { playerIconPieces } from '../playerIcons';
 import type { GameManifest } from '../types';
 
 // Kept apart from the game so the game list loads without loading every game.
@@ -11,6 +12,7 @@ export const flashcardsManifest: GameManifest = {
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the cards' },
     { id: 'card-front', label: 'Card front', width: 800, height: 500, hint: 'The question side of each card', color: '#fbfcf8' },
     { id: 'card-back', label: 'Card back', width: 800, height: 500, hint: 'The answer side of each card', color: '#fdfd94' },
+    ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

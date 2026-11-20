@@ -72,53 +72,12 @@ test('Four in a Row on two devices: the friend joins with the code and moves sho
   expect(problems).toEqual([]);
 });
 
-test('Four in a Row: a right answer can bring Double Drop, and it drops two pieces', async ({ page }, info) => {
-  test.setTimeout(150_000);
-  await page.addInitScript(() => { Math.random = () => 0.05; if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
-  const problems: string[] = [];
-  page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
-  page.on('pageerror', (e) => problems.push(e.message));
-  await openSetup(page, '/games/four-in-a-row');
-  await vsComputer(page);
-  await page.getByRole('combobox', { name: 'Computer level' }).selectOption('easy');
-  await finishSetup(page);
-  const answer = async () => {
-    const dialog = page.getByRole('dialog');
-    await startTurn(page); // the player's turn card (icon only), then the question
-    await expect(dialog.getByText('Read the question')).toBeHidden({ timeout: 15000 });
-    const prompt = (await dialog.getByRole('heading', { level: 2 }).innerText()).trim();
-    const buttons = dialog.getByRole('button', { name: /^[A-D] / });
-    const labels = await buttons.allInnerTexts();
-    await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
-  };
-  await answer();
-  // A power-up card stays until it is closed (teacher, 2026-11-13).
-  const card = page.getByRole('dialog').filter({ hasText: /Double Drop|Pop Out/ });
-  await expect(card).toBeVisible({ timeout: 15000 });
-  await card.getByRole('button', { name: 'Close' }).click();
-  // Held power-ups show on the player's next turn.
-  await page.getByRole('button', { name: 'Drop in column 4' }).click();
-  await expect(page.getByText('The computer is choosing...')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 15000 });
-  await answer();
-  // Earned power-ups switch on by themselves on the next turn (teacher, 2026-11-07).
-  const on = page.getByRole('dialog', { name: /^Double Drop is on/ });
-  await expect(on).toBeVisible({ timeout: 15000 });
-  await page.screenshot({ path: `test-results/four-power-${info.project.name}.png` });
-  // Close every power-up card (a new one can stack on top).
-  for (let k = 0; k < 4; k++) {
-    const top = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Close' }) }).last();
-    if (!(await top.isVisible().catch(() => false))) break;
-    await top.getByRole('button', { name: 'Close' }).click({ force: true }); // the card keeps bobbing, so it is never "stable"
-    await page.waitForTimeout(400);
-  }
-  // The board never runs off the screen.
-  const box = (await page.getByRole('grid').first().boundingBox())!;
-  expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
-  await page.getByRole('button', { name: 'Drop in column 3' }).click();
-  await expect(page.getByRole('button', { name: 'Drop in column 5' })).toBeEnabled({ timeout: 4000 });
-  await page.getByRole('button', { name: 'Drop in column 5' }).click();
-  await expect(page.getByText('The computer is choosing...')).toBeVisible();
-  await expect(page.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(5, { timeout: 15000 });
-  expect(problems).toEqual([]);
-});
+// No power-ups in Four in a Row or Match Three (teacher, 2026-11-20).
+for (const game of ['four-in-a-row', 'match-three']) {
+  test(`${game}: no power-ups in setup or in the Theme Builder`, async ({ page }) => {
+    await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
+    await page.goto(`/teacher/themes/${game}`);
+    await expect(page.getByRole('tab', { name: 'Upload' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Power-ups' })).toHaveCount(0);
+  });
+}

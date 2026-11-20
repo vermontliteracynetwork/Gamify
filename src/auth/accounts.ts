@@ -1,3 +1,4 @@
+import { isCommonPassword } from './passwordCheck';
 // Teacher accounts by username (teacher, 2026-10-26): sign up with email,
 // password, confirm password and a username; log in with username and
 // password. Until the cloud database is connected (Stage 5) accounts live
@@ -7,7 +8,7 @@
 const KEY = 'gamify:accounts';
 
 export interface Account { username: string; email: string; salt: string; hash: string; createdAt: string }
-export type SignUpProblem = 'username' | 'usernameTaken' | 'email' | 'emailTaken' | 'password' | 'confirm';
+export type SignUpProblem = 'username' | 'usernameTaken' | 'email' | 'emailTaken' | 'password' | 'passwordCommon' | 'passwordLeaked' | 'confirm';
 
 export const USERNAME_RULE = /^[a-z0-9._]{3,20}$/;
 export const normalizeUsername = (u: string) => u.trim().toLowerCase();
@@ -32,6 +33,7 @@ export function signUpProblems(f: { username: string; email: string; password: s
   else if (taken.includes(u)) out.push('usernameTaken');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) out.push('email');
   if (f.password.length < 8) out.push('password');
+  else if (isCommonPassword(f.password)) out.push('passwordCommon');
   if (f.confirm !== f.password) out.push('confirm');
   return out;
 }

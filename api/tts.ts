@@ -1,3 +1,5 @@
+import { clientIp, limited } from '../src/lib/rateLimit';
+
 // A natural reading voice (development plan Stage 9). Only the words on the
 // screen come here (questions, answers, directions), never a student's name
 // or answers, and nothing is stored. GET, so the same words are served from
@@ -7,6 +9,9 @@ const KEY = process.env.OPENAI_API_KEY;
 
 export async function GET(request: Request): Promise<Response> {
   if (!KEY) return new Response('setup', { status: 503 });
+  // 300 new voice lines an address an hour (repeats come from the CDN cache),
+  // a cap on the voice bill if a page is misused.
+  if (limited(`tts:${clientIp(request)}`, 300, 60 * 60_000)) return new Response('slow', { status: 429 });
   const url = new URL(request.url);
   // Only Gamify's own pages may ask (stops other sites using it).
   const from = request.headers.get('referer') ?? '';

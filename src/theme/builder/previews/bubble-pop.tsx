@@ -12,7 +12,7 @@ const AIM = [{ x: SHOOTER.x, y: SHOOTER.y }, { x: SHOOTER.x - 6, y: SHOOTER.y - 
 
 export default function BubblePopPreview({ theme }: { theme: GameTheme }) {
   const patterns = bubblePatterns(theme);
-  const player = pieceImage(theme, 'player');
+  const player = (pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player'));
   const dangerY = R + DANGER_ROW * Math.sqrt(3) - R;
   return (
     <div className="relative rounded-panel border-bold border-border overflow-hidden aspect-[4/3] flex items-center justify-center gap-[3%] p-[3%]" style={backdropStyle(theme, false)} role="img" aria-label={`Preview of ${theme.name || 'this theme'}`}>

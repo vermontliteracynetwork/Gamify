@@ -322,7 +322,7 @@ export default function BubblePop() {
           {/* The board is the star: as big as the screen allows, with the score
               panel right beside it, not across the page (teacher, 2026-10-31). */}
           <section className="grid gap-2 min-w-0" style={{ width: `min(calc(100vw - 9rem), calc((var(--play-h) - 5.75rem) * ${W / H}))` }}>
-            <TopStrip barColor={theme.colors.progress} leftLabel={t('bp.shots', { count: shots })} score={score} player={pieceImage(theme, 'player')} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} perRound={plan.current.shots} left={shots} thisRound={roundShots}
+            <TopStrip barColor={theme.colors.progress} leftLabel={t('bp.shots', { count: shots })} score={score} player={(pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player'))} round={Math.min(breaks + 1, plan.current.rounds)} rounds={plan.current.rounds} perRound={plan.current.shots} left={shots} thisRound={roundShots}
               label={t('bp.roundOf', { n: Math.min(breaks + 1, plan.current.rounds), total: plan.current.rounds })} />
             <div className="relative w-full rounded-panel border-heavy border-border overflow-hidden select-none touch-none"
               style={{ ...pieceFill(theme, 'board', '#314677'), aspectRatio: `${W} / ${H}`, boxShadow: 'var(--shadow-sticker-lg)' }}>
@@ -387,7 +387,7 @@ export default function BubblePop() {
         </div>
       )}
 
-      {phase === 'end' && <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
+      {phase === 'end' && <ResultsModal winners={(pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player')) ? [{ name: t('mm.you'), colorIndex: 0, art: (pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player')) }] : undefined} title={t('bp.done', { count: score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')} />}
       {powers.element}
       {element}
     </main>

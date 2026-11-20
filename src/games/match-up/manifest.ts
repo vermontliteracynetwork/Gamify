@@ -1,3 +1,4 @@
+import { playerIconPieces } from '../playerIcons';
 import type { GameManifest } from '../types';
 
 // Kept apart from the game so the game list loads without loading every game.
@@ -11,6 +12,7 @@ export const matchUpManifest: GameManifest = {
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the tiles' },
     { id: 'question-tile', label: 'Question tile', width: 400, height: 160, hint: 'The tiles on the left', color: '#fbfcf8' },
     { id: 'answer-tile', label: 'Answer tile', width: 400, height: 160, hint: 'The tiles on the right', color: '#fdfd94' },
+    ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

@@ -63,4 +63,6 @@ export function itemPages(spec: ItemSlotsSpec | undefined): ThemePieceSpec[] {
 }
 
 // Every page a game's template has: its pieces, then its power-ups.
-export const templatePieces = (game: { themePieces: ThemePieceSpec[]; items?: ItemSlotsSpec }) => [...game.themePieces, ...itemPages(game.items)];
+// No title pages in any download (teacher, 2026-11-20); every other piece the
+// game draws, then its power-up pages.
+export const templatePieces = (game: { themePieces: ThemePieceSpec[]; items?: ItemSlotsSpec }) => [...game.themePieces.filter((p) => p.id !== 'title'), ...itemPages(game.items)];

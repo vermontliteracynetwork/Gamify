@@ -1,4 +1,5 @@
 import { quoteDetails, quotePdf, type QuoteRequest } from '../src/lib/quotePdf';
+import { clientIp, limited } from '../src/lib/rateLimit';
 
 // School quotes by email (teacher, 2026-10-26: the price is not on the
 // website; the quote arrives as a PDF). Builds the PDF and sends it with
@@ -10,6 +11,8 @@ const FROM = process.env.QUOTE_FROM;
 const BCC = process.env.QUOTE_BCC;
 
 export async function POST(request: Request): Promise<Response> {
+  // 5 quotes an address an hour, so the form can't be used to send spam.
+  if (limited(`quote:${clientIp(request)}`, 5, 60 * 60_000)) return Response.json({ problem: 'slow' }, { status: 429 });
   const body = (await request.json().catch(() => ({}))) as Partial<Record<keyof QuoteRequest, unknown>>;
   const text = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
   const req: QuoteRequest = { name: text(body.name, 80), email: text(body.email, 120), school: text(body.school, 120), seats: Number(body.seats), notes: text(body.notes, 500) };

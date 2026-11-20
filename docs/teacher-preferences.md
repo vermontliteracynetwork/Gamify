@@ -245,3 +245,6 @@ line that fits, and add each new preference the same turn she says it.
 - Research page (2026-11-20): no beta test tab. Login page: wider.
 - Board Game Live (2026-11-20): like Bowling, the teacher opens the lobby and sets teams; each student races their own board against the computer on their device; team points add up.
 - Pricing cards (2026-11-20): price and button first under the plan name, then what is included; the comparison table grouped (Games and designs, Your class, Live play, Extras). No other brand names in plan text ("digital and paper designs").
+- Player icons (2026-11-20, every game and every design kit): 10 player icons (team-1 to team-10); solo games call them player icons.
+- Design downloads (2026-11-20): no title pages; every piece in the files is one the game really draws.
+- Power-ups (2026-11-20): none in Match Three or Four in a Row; no custom power-up actions anywhere (each power-up keeps its game's own action; Add only brings back one of the game's own).

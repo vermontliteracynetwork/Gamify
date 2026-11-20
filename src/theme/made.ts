@@ -17,7 +17,9 @@ export async function loadMadeThemes(): Promise<GameTheme[]> {
 // balls 1 to 10.
 export function upgradeTheme(raw: GameTheme): GameTheme {
   // Never trusted: pictures and colors are checked first (2026-11-20).
-  const theme = sanitizeTheme(raw);
+  let theme = sanitizeTheme(raw);
+  // A single Player icon (before 2026-11-20) becomes player icon 1.
+  if (theme.pieces.player?.image && !theme.pieces['team-1']?.image) theme = { ...theme, pieces: { ...theme.pieces, 'team-1': theme.pieces.player } };
   if (theme.gameId !== 'bowling' || !Object.keys(theme.pieces).some((k) => k.startsWith('team-'))) return theme;
   const pieces = { ...theme.pieces };
   for (let k = 1; k <= 10; k++) {

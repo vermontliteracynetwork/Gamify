@@ -1,3 +1,4 @@
+import { isLeakedPassword } from '../auth/passwordCheck';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChalkboardTeacher, Student } from '@phosphor-icons/react';
@@ -21,7 +22,7 @@ export default function LoginPage() {
   const [f, setF] = useState({ username: '', email: '', password: '', confirm: '' });
   const [problems, setProblems] = useState<SignUpProblem[]>([]);
   const [wrong, setWrong] = useState(false);
-  const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | 'setup' | null>(null);
+  const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | 'setup' | 'slow' | null>(null);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const teacher = useTeacher();
@@ -41,6 +42,8 @@ export default function LoginPage() {
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    // A password found in a data breach is turned down before the account is made.
+    if (mode === 'signup' && f.password.length >= 8 && (await isLeakedPassword(f.password))) { setProblems(['passwordLeaked']); return; }
     if (cloudOn) {
       setBusy(true);
       if (mode === 'signup') {
@@ -52,7 +55,7 @@ export default function LoginPage() {
         const res = await cloudLogIn(f.username, f.password);
         if (res === 'ok') enter();
         else if (res === 'wrong') setWrong(true);
-        else setNote(res === 'confirm' ? 'confirmFirst' : res === 'setup' ? 'setup' : 'offline');
+        else setNote(res === 'confirm' ? 'confirmFirst' : res === 'setup' ? 'setup' : res === 'slow' ? 'slow' : 'offline');
       }
       setBusy(false);
       return;
@@ -88,8 +91,8 @@ export default function LoginPage() {
             {problem('username')}{problem('usernameTaken')}
           </label>
           <label className="grid gap-1 font-bold">{t('login.password')}
-            <input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={f.password} onChange={set('password')} aria-invalid={bad('password')} className={field} />
-            {problem('password')}
+            <input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={f.password} onChange={set('password')} aria-invalid={bad('password', 'passwordCommon', 'passwordLeaked')} className={field} />
+            {problem('password')}{problem('passwordCommon')}{problem('passwordLeaked')}
           </label>
           {mode === 'signup' && (
             <label className="grid gap-1 font-bold">{t('login.confirm')}
