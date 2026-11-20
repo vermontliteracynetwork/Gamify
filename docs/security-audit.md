@@ -19,7 +19,7 @@ The teacher's security lists (2026-11-20), item by item. "Done" was checked in c
 | Error messages don't leak details | Done. API errors are short codes; details go to the server log only. |
 | Security headers, HTTPS | Done. HSTS (preload), nosniff, frame, referrer, permissions; a Content Security Policy in report-only mode first (switch to enforcing once Vercel shows no reports). Vercel serves HTTPS only. |
 | CORS and CSRF | Done. API routes are same-origin only (no CORS headers are sent, so other sites' pages can't read them); the voice route checks the referrer; logins use bearer tokens, not cookies, so no CSRF form attack applies. |
-| Dependency scan | Done. `npm audit`: fflate fixed. React Router 6 has two moderate advisories (an open redirect through a link built from user text, and a server-rendering issue); Gamify never builds links from user text and doesn't server-render, so neither applies. Upgrade to v7 is planned. |
+| Dependency scan | Done. `npm audit`: 0 vulnerabilities (fflate fixed; React Router upgraded to v7, 2026-11-20). |
 | Debug off, production settings | Done. Production builds have no source maps or dev tools; test-only aids switch off outside tests. |
 | Logging | Done. Failed logins, rate limits and webhook refusals are logged (Vercel logs). |
 | Session token in local storage | Known. Supabase keeps the session in the browser; the strict headers above and the CSP limit XSS risk. Moving to httpOnly cookies needs server rendering; planned with Stage 5. |
