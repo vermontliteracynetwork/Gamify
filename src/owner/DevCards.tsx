@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Eye, FilePdf, FileCsv, Plus as PlusIcon, Trash, X } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, TIERS, type Tier } from '../config';
+import { PRICES_USD_PER_YEAR, TIERS, type Tier, COOP_PERCENT_OFF } from '../config';
 import { data, newId, previewTier, setPreviewTier } from '../data';
 import { supabase } from '../data/supabase';
 import { t } from '../i18n';
@@ -248,8 +248,42 @@ export function AccessCard() {
           <ul className="grid gap-1 list-none p-0 m-0">{grants.map((g, i) => <li key={`${g.username}-${i}`} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold">{g.username ?? '?'}</span> · {t(`owner.plan.${g.tier}` as 'owner.plan.plus')} · {g.plan_until ? t('owner.access.until', { date: new Date(g.plan_until).toLocaleDateString() }) : t('owner.access.forever')} · {g.plan_note}</li>)}</ul>
         )}
       </div>
+      <CoopCodes />
       {msg && <p className="font-bold" role="status">{msg}</p>}
       <p className="text-xs font-bold text-muted">{t('owner.access.note')}</p>
+    </div>
+  );
+}
+
+// Co-op codes (0014_coop_codes.sql, teacher 2026-11-20): one code per
+// homeschool co-op, 25% off for its families, with how many joined.
+interface CoopRow { code: string; coop_name: string; percent_off: number; active: boolean; families: number }
+function CoopCodes() {
+  const [rows, setRows] = useState<CoopRow[]>([]);
+  const [form, setForm] = useState({ code: '', coop_name: '' });
+  const [msg, setMsg] = useState('');
+  async function load() {
+    const r = await supabase!.rpc('owner_coops');
+    if (!r.error) setRows(r.data as CoopRow[]);
+  }
+  useEffect(() => { void load(); }, []);
+  async function make() {
+    const { error } = await supabase!.from('coop_codes').upsert({ code: form.code, coop_name: form.coop_name.trim(), percent_off: COOP_PERCENT_OFF });
+    setMsg(error ? t('owner.access.codeBad') : t('owner.coop.made', { code: form.code }));
+    void load();
+  }
+  const field = fieldClasses('md');
+  return (
+    <div className="grid gap-2">
+      <p className="font-bold">{t('owner.coop.title')}</p>
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="grid gap-1 text-sm font-bold">{t('coop.label')}<input value={form.code} maxLength={20} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') })} className={`${field} w-36 tracking-wider`} /></label>
+        <label className="grid gap-1 text-sm font-bold">{t('owner.coop.name')}<input value={form.coop_name} maxLength={80} onChange={(e) => setForm({ ...form, coop_name: e.target.value })} className={`${field} w-56`} /></label>
+        <Button variant="primary" disabled={form.code.length < 4 || form.coop_name.trim().length < 2} onClick={() => void make()}>{t('owner.coop.make')}</Button>
+      </div>
+      {rows.length > 0 && <ul className="grid gap-1 list-none p-0 m-0">{rows.map((c) => <li key={c.code} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold tracking-wider">{c.code}</span> · {t('owner.coop.row', { name: c.coop_name, pct: c.percent_off, n: c.families })}</li>)}</ul>}
+      {msg && <p className="font-bold text-sm" role="status">{msg}</p>}
+      <p className="text-xs font-bold text-muted">{t('owner.coop.note')}</p>
     </div>
   );
 }

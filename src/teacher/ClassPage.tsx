@@ -11,7 +11,6 @@ import { ALL_MODES, type Classroom, type PlayMode, type SetAssignment, type Stud
 import { ModeBadge } from '../games/ModeBadge';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
-import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
 import { avatarOf, drawnExtras, isUploadedAvatar, newPicturePassword, newPin, PICTURES, PIN_RULE } from '../student/pictures';
 import Avatar from '../student/Avatar';
@@ -60,22 +59,16 @@ export default function ClassPage() {
     void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
   }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
   useCrumbLabel(classroom?.name);
-  const { themes: madeThemes } = useMadeThemes();
-  const look = madeThemes.find((th) => th.id === classroom?.signInThemeId);
   if (!classroom) return null;
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
-      <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
-        actions={<div className="flex flex-wrap gap-2">
-          <Link to={`/teacher/classes/${id}/assign`} className={buttonClasses('primary', 'hover-pop')}><Plus weight="bold" size={18} />{t('class.newAssignment')}</Link>
-          <Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('secondary', 'hover-pop')}><Printer weight="bold" size={18} />{t('rp.classReport')}</Link>
-        </div>} />
-      {/* Every student's name right under the class name, each opening that
-          student's own page (teacher, 2026-11-16). */}
-      <StudentStrip classId={id} students={students} look={look} />
+      {/* Just the class name and New assignment (teacher, 2026-11-20: no counts
+          line, no name chips, no header Class report button; the report is a tab). */}
+      <PageHeader title={free ? t('roster.title') : classroom.name}
+        actions={<Link to={`/teacher/classes/${id}/assign`} className={buttonClasses('primary', 'hover-pop')}><Plus weight="bold" size={18} />{t('class.newAssignment')}</Link>} />
       <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'report', label: t('rp.classReport') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
@@ -142,9 +135,7 @@ function StudentsTab({ classroomId, students, reload, signInThemeId, side }: { c
   const tier = useTier();
   const limit = TIERS[tier].studentsPerClassroom;
   const [names, setNames] = useState('');
-  const [unlocked, setUnlocked] = useState(false);
   const [editing, setEditing] = useState<Student | null>(null);
-  const [asking, setAsking] = useState<Student | null>(null);
   const [picking, setPicking] = useState<Student | null>(null);
   const toAdd = names.split('\n').map((n) => n.trim()).filter(Boolean);
   const room = Number.isFinite(limit) ? limit - students.length : Infinity;
@@ -167,7 +158,9 @@ function StudentsTab({ classroomId, students, reload, signInThemeId, side }: { c
     setNames('');
     reload();
   }
-  function openSettings(s: Student) { if (unlocked) setEditing(s); else setAsking(s); }
+  // No teacher PIN on teacher pages (teacher, 2026-11-20): the signed-in
+  // teacher is the only one here; students only come in through Join.
+  function openSettings(s: Student) { setEditing(s); }
 
   // Laptop first (teacher, 2026-11-03 and 2026-11-20): the roster as one
   // compact table on the left, adding students and sign-in pictures beside it.
@@ -221,11 +214,6 @@ function StudentsTab({ classroomId, students, reload, signInThemeId, side }: { c
         </Panel>
         {side}
       </div>
-      {asking && (
-        <Dialog title={t('class.supportsFor', { name: asking.name })} onClose={() => setAsking(null)}>
-          <PinGate onUnlock={() => { setUnlocked(true); setEditing(asking); setAsking(null); }} />
-        </Dialog>
-      )}
       {editing && <SupportsDialog student={editing} onClose={() => { setEditing(null); reload(); }} />}
       {picking && <AvatarDialog student={picking} others={students.filter((x) => x.id !== picking.id)} look={look} onClose={() => { setPicking(null); reload(); }} />}
     </div>

@@ -6,7 +6,6 @@ import { useAsync, useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import { ALL_GAMES } from '../games/registry';
 import { t } from '../i18n';
-import PinGate from '../settings/PinGate';
 import Avatar from '../student/Avatar';
 import { avatarOf } from '../student/pictures';
 import { useMadeThemes } from '../theme/made';
@@ -14,7 +13,7 @@ import { Button, buttonClasses, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import Title from '../ui/Title';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
-import { AvatarDialog, Dialog, StudentStrip, SupportsDialog } from './ClassPage';
+import { AvatarDialog, StudentStrip, SupportsDialog } from './ClassPage';
 import ReportDoc from './reportDoc';
 
 // One student inside a class (teacher, 2026-11-16: a student view apart from
@@ -32,8 +31,7 @@ export default function StudentPage() {
   const classroom = classes.find((c) => c.id === id);
   const student = students.find((s) => s.id === sid);
   const look = themes.find((th) => th.id === classroom?.signInThemeId);
-  const [dialog, setDialog] = useState<'pin' | 'supports' | 'avatar' | null>(null);
-  const [unlocked, setUnlocked] = useState(false);
+  const [dialog, setDialog] = useState<'supports' | 'avatar' | null>(null);
   useCrumbLabel(student?.name);
   if (!classroom || !student) return null;
   const mineLog = log.filter((e) => e.studentId === sid);
@@ -55,7 +53,7 @@ export default function StudentPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Link to={`/teacher/reports/print?class=${id}&student=${sid}`} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('rp.print')}</Link>
-          <Button onClick={() => setDialog(unlocked ? 'supports' : 'pin')}><GearSix weight="bold" size={18} />{t('cv.supports')}</Button>
+          <Button onClick={() => setDialog('supports')}><GearSix weight="bold" size={18} />{t('cv.supports')}</Button>
           <Button onClick={() => setDialog('avatar')}><UserCircle weight="bold" size={18} />{t('cv.avatarPin')}</Button>
         </div>
       </div>
@@ -68,7 +66,6 @@ export default function StudentPage() {
         )}
       </Panel>
       <ReportDoc log={mineLog} students={[student]} names={names} className={classroom.name} student={student} />
-      {dialog === 'pin' && <Dialog title={t('class.supportsFor', { name: student.name })} onClose={() => setDialog(null)}><PinGate onUnlock={() => { setUnlocked(true); setDialog('supports'); }} /></Dialog>}
       {dialog === 'supports' && <SupportsDialog student={student} onClose={() => { setDialog(null); reload(); }} />}
       {dialog === 'avatar' && <AvatarDialog student={student} others={students.filter((x) => x.id !== sid)} look={look} onClose={() => { setDialog(null); reload(); }} />}
     </main>

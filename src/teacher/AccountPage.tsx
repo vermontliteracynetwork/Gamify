@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import AccessCode, { PlanUntil } from './AccessCode';
+import CoopCode from './CoopCode';
 
 // The teacher's account: plan, downloading everything, deleting
 // everything, and what happens on a smaller plan (nothing is deleted).
@@ -71,6 +72,7 @@ export default function AccountPage() {
         <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
       </Panel>
       {tier === 'free' && <AccessCode />}
+      {(tier === 'free' || tier === 'homeschool' || tier === 'plus') && <CoopCode />}
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.exportTitle')}</h2>
         <p className="font-semibold">{t('account.exportText')}</p>

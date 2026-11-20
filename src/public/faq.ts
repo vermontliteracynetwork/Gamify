@@ -51,7 +51,7 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
     { q: 'Will it fit my curriculum?', a: 'Yes, because you write or import the questions. Any subject, any approach, any faith or none. The ready-made library is there when you want a quick start.' },
     { q: 'Can it help with my state\'s record keeping?', a: 'Reports show what each child practiced and how they did, by subject, set and day, ready to print or download for a portfolio.' },
     { q: 'Do I need a school email?', a: 'No. Any email works for the parent account, and your children never need one.' },
-    { q: 'Our co-op wants to use it. Is there a group price?', a: 'Yes. Five or more families buy like a school: Pro for each parent-teacher with 10 to 30% off. Make a quote on the Pricing page.' },
+    { q: 'Our co-op wants to use it. Is there a group price?', a: 'Yes. Your co-op gets its own code, and every family that uses it gets 25% off the Homeschool plan (about $6 a month). Each family keeps its own account, students and reports; the co-op sees nothing about them. Ask us for a co-op code with the contact form.' },
     { q: 'How does Gamify keep screen time healthy?', a: 'Gamify games are short, every turn is a practice question, and Share games bring the whole family around one screen together. Calm mode turns down motion and sound.' },
     { q: 'Can adults learn with it too?', a: 'Yes. Gamify works from pre-K to adult learners, and themes can look as grown-up as you like.' },
   ],

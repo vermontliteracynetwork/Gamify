@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Brain, Buildings, ChalkboardTeacher, Check, FileText, Heart, House, LockKey, Rocket, ShieldCheck, Sparkle, UsersThree, X } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
-import { PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS } from '../config';
+import { COOP_PERCENT_OFF, coopPrice, PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS } from '../config';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -185,6 +185,8 @@ export function HomeschoolPage() {
               </div>
             ))}
           </div>
+          {/* Co-op families: a code for 25% off, one line, no co-op card (teacher, 2026-10-26 and 2026-11-20). */}
+          <p className="font-bold">{t('hs.coopLine', { pct: COOP_PERCENT_OFF, m: (coopPrice(PRICES_USD_PER_YEAR.homeschool) / 12).toFixed(0) })}</p>
         </section>
 
         <section aria-labelledby="never" className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>

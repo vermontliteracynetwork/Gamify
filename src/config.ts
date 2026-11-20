@@ -63,6 +63,11 @@ export const TIERS: Record<Tier, TierLimits> = {
 // Homeschool $8 a month, same as Plus (teacher, 2026-10-26).
 export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 96 };
 
+// Co-op codes (teacher, 2026-11-20): families in a homeschool co-op get 25%
+// off with their co-op's code (0014_coop_codes.sql).
+export const COOP_PERCENT_OFF = 25;
+export const coopPrice = (yearly: number, percent = COOP_PERCENT_OFF) => Math.round(yearly * (1 - percent / 100));
+
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).
 export const SCHOOL_MIN_SEATS = 5;

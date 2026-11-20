@@ -20,12 +20,8 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await expect(page.getByText('2 of 30 students')).toBeVisible();
   await page.screenshot({ path: `test-results/class-students-${info.project.name}.png`, fullPage: true });
 
-  // Supports for Ava, behind the teacher PIN (chosen here the first time).
+  // Supports for Ava open straight away: no teacher PIN on teacher pages (2026-11-20).
   await page.getByRole('button', { name: 'Supports for Ava' }).click();
-  for (const _ of [0, 1]) {
-    for (const d of '1357') await page.getByRole('button', { name: d, exact: true }).click();
-    await page.waitForTimeout(250);
-  }
   const dialog = page.getByRole('dialog', { name: 'Supports for Ava' });
   await dialog.getByRole('slider', { name: 'Time to read before answering' }).fill('0');
   await dialog.getByRole('button', { name: 'Save supports' }).click();

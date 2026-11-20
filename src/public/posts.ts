@@ -149,7 +149,7 @@ export const POSTS: Post[] = [
     body: [
       'A co-op class is a great place for a game day. Families bring children of many ages, and a shared screen turns review into a team event.',
       'Pick one set that fits the group, or one per age group. Put a Share game like Game Show or Pinball on the projector or TV, split the children into teams, and let each team answer together. Older children can read questions aloud for younger teammates.',
-      'Co-ops of five or more families can buy like a school, with savings for every family. Each teacher keeps their own students, sets and reports.',
+      'Co-ops get their own code, and every family that uses it saves 25% on the Homeschool plan. Each family keeps its own students, sets and reports.',
     ],
     tryIt: [
       'Pick one set for the group.',
