@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -20,11 +20,15 @@ export function usePowerUps(manifest: GameManifest, theme: GameTheme, on: boolea
   // teacher 2026-10-31), so the pop says when it will be ready.
   // `allow`: skip items that make no sense right now, like one that takes
   // points when nobody it would hit has any (teacher, 2026-11-01).
-  function grant(later = false, allow?: (it: ThemeItem) => boolean): ThemeItem | null {
+  // `then`: runs once the card is closed, so what the power-up does is seen
+  // after the card, never under it (design audit, 2026-11-20).
+  const after = useRef<(() => void) | null>(null);
+  function grant(later = false, allow?: (it: ThemeItem) => boolean, then?: (it: ThemeItem) => void): ThemeItem | null {
     if (!on) return null;
     const it = rollPowerUp(allow ? items.filter(allow) : items);
+    after.current = it && then ? () => then(it) : null;
     if (it) setPop({ id: Date.now(), item: it, text: later ? t('pu.later', { role: roleOf(manifest, it) }) : t(`pu.${manifest.id}.${it.ability}` as StringKey, { n: amount(it) }) });
     return it;
   }
-  return { grant, amount, element: <PowerUpPop pop={pop} onDone={() => setPop(null)} /> };
+  return { grant, amount, element: <PowerUpPop pop={pop} onDone={() => { setPop(null); const f = after.current; after.current = null; f?.(); }} /> };
 }

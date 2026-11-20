@@ -25,7 +25,6 @@ import TeamSetup from '../../engine/TeamSetup';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
-import { pace } from '../../engine/pace';
 import type { ThemeItem } from '../../theme/types';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { BUBBLE_COLORS, bubblePopManifest } from './manifest';
@@ -117,13 +116,12 @@ export default function BubblePop() {
     const ok = await ask({ count: plan.current.perBreak });
     if (!ok) { finish(); return; }
     // It works right away (applyNow below), so the card says what it does, not "next turn" (design audit, 2026-11-20).
-    const it = powers.grant();
+    powers.grant(false, undefined, applyNow);
     setShots(plan.current.shots); setRoundShots(plan.current.shots);
     // Classic adds a new bubble color every round (teacher, 2026-11-19): a fresh row brings it in.
     if (done > 0 && theme.id === 'bubble-pop:classic') { const n = Math.min(BUBBLE_COLORS.length, 3 + done); setBoard((b0) => pushRow(b0, [...Array.from({ length: n }, (_, k) => k), n - 1, n - 1])); }
     setNote('');
     setStep('aim');
-    if (it) window.setTimeout(() => applyNow(it), 900 * pace(settings));
   }
 
   function finish() {
