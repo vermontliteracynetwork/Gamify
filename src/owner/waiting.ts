@@ -31,7 +31,7 @@ export const WAITING: WaitingItem[] = [
   { id: 'coop-plan', kind: 'decide', added: '2026-11-20', title: 'Co-op accounts: pick how co-ops buy',
     why: 'You asked for co-op accounts where a co-op buys a plan and its members get discounted memberships. Claudia gave advice in chat and is waiting for your pick before building.',
     how: 'Choose: (A) a co-op group plan, where the co-op pays once for a set number of family seats (the usual way); (B) a co-op discount code, where the co-op pays a small fee or nothing and members buy their own Homeschool plan at a discount; or (C) both. Also pick the discount and the seat count.' },
- kind: 'setup', added: '2026-11-20', title: 'Stripe: turn on the signed payment webhook',
+  { id: 'stripe-webhook', kind: 'setup', added: '2026-11-20', title: 'Stripe: turn on the signed payment webhook',
     why: 'Gamify only believes a payment message that carries Stripe\'s signature, so nobody can fake "payment went through" to get a plan free. The check is built; it needs its secret.',
     how: 'In Stripe, Developers, Webhooks, add an endpoint at https://<your domain>/api/stripe-webhook for checkout.session.completed, customer.subscription.updated, customer.subscription.deleted and invoice.payment_failed. Copy its signing secret (starts with whsec_) into Vercel as STRIPE_WEBHOOK_SECRET.' },
   { id: 'llc-7-scorp', kind: 'decide', added: '2026-11-19', title: 'Later: ask an accountant about the S corp election',
