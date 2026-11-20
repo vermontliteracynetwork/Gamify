@@ -20,9 +20,9 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   await page.getByRole('slider', { name: 'Questions' }).fill('5');
   await finishSetup(page);
 
-  // Read first: answers can't be tapped yet.
+  // Answers can be tapped right away (teacher, 2026-11-20): no read-first wait.
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByText('Read the question')).toBeVisible();
+  await expect(dialog.getByText('Read the question')).toHaveCount(0);
   await page.screenshot({ path: `test-results/question-readfirst-${info.project.name}.png` });
 
   // Miss once on purpose, then answer right 5 times.
@@ -120,7 +120,7 @@ test('Question Tracker: every star stays in view around the question box', async
     await expect(dialog.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 6000 });
   }
   await expect(dialog.getByRole('heading', { level: 2 })).toBeVisible();
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1600);
   await page.screenshot({ path: `test-results/sky-${info.project.name}.png` });
   const box = (await dialog.locator('> div').first().boundingBox())!;
   const stars = await page.locator('[role=img] > span svg, [role=img] > span img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));

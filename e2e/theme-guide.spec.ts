@@ -33,7 +33,7 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   const wait = page.waitForEvent('download');
   await page.getByRole('button', { name: /Digital template/ }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('bowling-theme-for-canva.pdf');
+  expect(file.suggestedFilename()).toBe('gamify_digital_bowling.pdf');
 
   await page.getByRole('link', { name: /Printable pages/ }).click();
   await expect(page.getByText('pages, one for each piece', { exact: false })).toBeVisible();

@@ -164,7 +164,8 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
   const [status, setStatus] = useState('');
   const [, setBusy] = useState(false);
   const [tab, setTab] = useState<'download' | 'upload' | 'items' | 'colors' | 'style' | 'share'>('upload');
-  const [dl, setDl] = useState('');
+  // No "downloading" line (teacher, 2026-11-20); the button just waits while the file is made.
+  const [dl, setDl] = useState(false);
   const { settings } = useSettings();
 
   // Work in progress is kept on this device as it changes, and comes back
@@ -364,17 +365,16 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                       <p className="font-display text-lg flex items-center gap-2"><DownloadSimple weight="bold" size={22} aria-hidden="true" />{t('builder.dl.digital')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.digitalText')}</p>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="primary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
+                        <Button variant="primary" className="hover-pop" disabled={dl}
                           onClick={async () => {
-                            setDl(t('builder.dl.making'));
-                            const [{ fileSlug, saveFile }, { templatePieces }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
-                            saveFile(new Blob([templatePdf(templatePieces(game))], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-for-canva.pdf`);
-                            setDl(t('builder.dl.ready'));
+                            setDl(true);
+                            const [{ saveFile }, { templatePieces }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
+                            saveFile(new Blob([templatePdf(templatePieces(game))], { type: 'application/pdf' }), `gamify_digital_${game.id}.pdf`);
+                            setDl(false);
                           }}><DownloadSimple weight="bold" size={20} />{t('builder.dl.pdf')}</Button>
                       </div>
                     </div>
                   </div>
-                  {dl && <p className="text-sm font-bold" role="status">{dl}</p>}
                 </>
               )}
               {tab === 'upload' && (

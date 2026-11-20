@@ -338,7 +338,7 @@ test('Download tab: blank printable pages and digital files; the Classic look is
   const wait = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Digital template (.pdf)' }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('game-show-theme-for-canva.pdf');
+  expect(file.suggestedFilename()).toBe('gamify_digital_game-show.pdf');
   // One PDF, a page per piece, each page the piece's own size (Canva reads 96 dpi: 0.75 pt a pixel).
   const pdf = (await (await import('node:fs/promises')).readFile(await file.path())).toString('latin1');
   expect(pdf.startsWith('%PDF-')).toBe(true);

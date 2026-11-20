@@ -61,7 +61,7 @@ test('Match Three: swaps make matches, a round ends in a question break', async 
     }
   }
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText('Read the question')).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible();
   expect(Number((await page.getByLabel(/^\d+ points$/).first().getAttribute('aria-label'))!.split(' ')[0])).toBeGreaterThan(0);
   expect(problems).toEqual([]);
 });

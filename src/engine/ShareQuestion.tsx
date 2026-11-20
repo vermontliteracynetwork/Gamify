@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ANSWER_SOUNDS, playClip } from './music';
 import { pace, POP_IN } from './pace';
 import { motion } from 'motion/react';
-import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
+import { SpeakerHigh } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
@@ -13,11 +12,9 @@ import { TeamBadge } from './TeamBadge';
 import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
 import DialogFocus from '../ui/DialogFocus';
-import PopText from '../ui/PopText';
+import { AnswerGrid, AnswerTile, answerFeedback, OkButton, QuestionPrompt, ResultLine, type TileState } from './QuestionParts';
 import { mirrorSend } from '../live/mirror';
 
-const LETTERS = ['A', 'B', 'C', 'D'];
-const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
 
 // How many turns each team has had, to rotate who answers.
 const ANSWERED = new Map<string, number>();
@@ -40,7 +37,9 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   // False when the game already showed the turn card before the move (Game Show).
   turnCard?: boolean;
 }) {
-  const answerSound = (right: boolean) => { const set = sounds ?? ANSWER_SOUNDS; playClip(right ? set.right : set.wrong, settings); };
+  // One answer sound for every game (2026-11-20); `sounds` is no longer used.
+  void sounds;
+  const answerSound = (right: boolean) => answerFeedback(right, settings);
   const { settings } = useSettings();
   const q = useMemo(() => shuffleChoices(question), [question]);
   // Rotating answerer (market research, 2026-10-31): on a team made from the
@@ -130,8 +129,8 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             </span>
           )}
           <button type="button" onClick={() => speakQuestion(q, settings)}
-            className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
-            <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
+            className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+            <SpeakerHigh weight="bold" size={20} />{t('q.listen')}
           </button>
           {/* Settings (with the Accessibility tab) stay in reach during a question (teacher, 2026-11-20). */}
           <GearButton small onClick={() => setSettingsOpen(true)} />
@@ -141,52 +140,33 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className={`w-full max-w-[90rem] mx-auto text-left font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
+        {/* The same prompt, tiles, words and OK as every question screen (QuestionParts, 2026-11-20). */}
+        <div className="w-full max-w-[90rem] mx-auto"><QuestionPrompt>{q.prompt}</QuestionPrompt></div>
 
-        <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(42vh,26rem)] portrait:max-h-[50vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
+        <div className="w-full max-w-[90rem] mx-auto"><AnswerGrid>
           {q.choices.map((c, i) => {
             const isRight = shown && i === q.correctIndex;
             const isWrong = picked === i && i !== q.correctIndex;
+            const state: TileState = isRight ? 'right' : isWrong ? 'wrong' : shown ? 'faded' : 'open';
             return (
-              <motion.button key={i} type="button" onClick={() => choose(i)} disabled={picked !== null || !!cpu} data-magnet={magnet && i === q.correctIndex ? 'true' : undefined}
-                animate={isWrong && settings.motion !== 'still' ? { x: [0, -8, 8, -5, 5, 0] } : isRight && picked === i && settings.motion !== 'still' ? { scale: [1, 1.05, 1] } : {}}
-                transition={{ duration: 0.4 }}
-                whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
-                whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-[clamp(3rem,9vh,6.5rem)] h-full pl-[clamp(4.25rem,11vh,7rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold leading-tight ${q.choices.every((ch) => ch.length <= 22) ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'} active:scale-[0.98] disabled:cursor-default
-                ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
-                style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.75rem,7.5vh,4.25rem)] h-[clamp(2.75rem,7.5vh,4.25rem)] shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-[clamp(1.2rem,3.6vh,2rem)]">
-                  {isRight ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
-                </span>
-                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
-                <span className="sr-only"> </span>
-                <span className="min-w-0 break-words">{c}</span>
-                {isRight && picked === i && settings.motion !== 'still' && <Burst />}
-                {magnet && i === q.correctIndex && (
-                  <motion.img src={magnet} alt={t('cq.magnetHere')} className="absolute -top-7 -right-4 w-16 h-16 object-contain pointer-events-none drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]"
-                    initial={settings.motion === 'still' ? false : { x: 240, y: -260, rotate: -60, opacity: 0, scale: 0.6 }} animate={{ x: 0, y: 0, rotate: [-60, 12, -6, 0], opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.9, delay: 0.5, ease: 'easeOut' }} />
-                )}
-              </motion.button>
+              <AnswerTile key={i} index={i} text={c} image={q.choiceImages?.[i]} imageAlt={q.choiceAlts?.[i] ?? undefined} state={state} disabled={picked !== null || !!cpu} magnet={!!magnet && i === q.correctIndex}
+                onClick={() => choose(i)}
+                extra={<>
+                  {isRight && picked === i && settings.motion !== 'still' && <Burst />}
+                  {magnet && i === q.correctIndex && (
+                    <motion.img src={magnet} alt={t('cq.magnetHere')} className="absolute -top-7 -right-4 w-16 h-16 object-contain pointer-events-none drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]"
+                      initial={settings.motion === 'still' ? false : { x: 240, y: -260, rotate: -60, opacity: 0, scale: 0.6 }} animate={{ x: 0, y: 0, rotate: [-60, 12, -6, 0], opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.9, delay: 0.5, ease: 'easeOut' }} />
+                  )}
+                </>} />
             );
           })}
-        </div>
+        </AnswerGrid></div>
 
-        {cpu ? (
-          <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
-            {cpu === 'thinking' ? t('share.cpuThinking') : cpu === 'right' ? t('share.cpuRight') : t('share.cpuMiss')}
-          </p>
-        ) : (
-          <p className="min-h-10 font-display text-3xl font-bold text-center" role="status" aria-live="polite">
-            {picked === null ? '' : <PopText key={`${picked}-${chance?.n ?? 0}`} text={picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} gold={picked === q.correctIndex} />}
-          </p>
-        )}
-        {!cpu && picked !== null && picked !== q.correctIndex && (
-          <button type="button" autoFocus onClick={() => onResult(false)}
-            className="justify-self-center self-center min-h-14 px-12 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"
-            style={{ boxShadow: '0 4px 0 #000' }}>{t('q.continue')}</button>
-        )}
+        {cpu
+          ? <ResultLine popKey={cpu} right={cpu === 'right'} text={cpu === 'thinking' ? t('share.cpuThinking') : cpu === 'right' ? t('share.cpuRight') : t('share.cpuMiss')} />
+          : <ResultLine popKey={`${picked}-${chance?.n ?? 0}`} right={picked === q.correctIndex} text={picked === null ? '' : picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} />}
+        {!cpu && picked !== null && picked !== q.correctIndex && <OkButton onClick={() => onResult(false)} />}
       </motion.div>
     </div>
   );

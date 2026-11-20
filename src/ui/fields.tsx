@@ -38,7 +38,8 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
     // around them (teacher, 2026-11-19; .choice-cards drops the setup panel).
     <div className="choice-cards grid gap-3 justify-items-center">
       <span className="font-display text-xl font-bold">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex flex-wrap justify-center gap-4">
+      {/* Four choices sit in rows of two (teacher, 2026-11-20). */}
+      <div role="radiogroup" aria-label={label} className={options.length === 4 ? 'grid grid-cols-2 gap-4' : 'flex flex-wrap justify-center gap-4'}>
         {options.map((o) => {
           const on = value === o.value;
           return (

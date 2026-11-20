@@ -2,21 +2,19 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { POP_IN } from './pace';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
+import { Calculator, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { buzz, speakQuestion, stopSpeaking } from './feedback';
-import { ANSWER_SOUNDS, playClip } from './music';
+import { speakQuestion, stopSpeaking } from './feedback';
+import { AnswerGrid, AnswerTile, answerFeedback, LETTERS, OkButton, QuestionPrompt, ResultLine, type TileState } from './QuestionParts';
 import { shuffleChoices } from './questions';
 import { CalculatorTool, Scratchpad, TimesTable } from './tools';
 import { FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import FloatingCard from '../ui/FloatingCard';
 import DialogFocus from '../ui/DialogFocus';
 
-const LETTERS = ['A', 'B', 'C', 'D'];
-// Answer tiles get a shape as well as a color, so color is never the only cue.
-const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
+
 
 export interface AnswerResult { tapped: string; tries: string[]; right: boolean; ms: number }
 
@@ -77,8 +75,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   function choose(i: number) {
     if (locked || picked !== null || wrongTries.includes(i)) return;
     const right = i === q.correctIndex;
-    playClip(right ? ANSWER_SOUNDS.right : ANSWER_SOUNDS.wrong, settings);
-    buzz(right ? 30 : [20, 60, 20], settings);
+    answerFeedback(right, settings);
     const tries = [...wrongTries.map((k) => q.choices[k]), q.choices[i]];
     // Extra tries (a teacher accommodation): a miss with tries left greys
     // out that answer and lets the student pick again.
@@ -94,9 +91,6 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   }
 
   const words = q.prompt.split(/(\s+)/);
-  // Short words read big; long ones get the regular screen-fit size.
-  const bigPrompt = q.prompt.length <= 48 && !q.imageUrl;
-  const bigAnswers = q.choices.every((c) => c.length <= 22);
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${framed ? 'p-4' : 'bg-surface'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
@@ -169,59 +163,33 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         ))}
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
-        <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-left ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-left ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
+        <div className={framed ? '' : 'w-full max-w-[90rem] mx-auto'}><QuestionPrompt>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (
                 <button key={i} type="button" onClick={() => setMarked((m) => { const n = new Set(m); if (n.has(i)) n.delete(i); else n.add(i); return n; })}
                   className={`rounded px-0.5 ${marked.has(i) ? 'bg-accent' : ''}`}>{w}</button>
               ))
             : words.map((w, i) => <span key={i} className={marked.has(i) ? 'bg-accent rounded px-0.5' : ''}>{w}</span>)}
-        </h2>
+        </QuestionPrompt></div>
 
         {/* No "Read the question" bar (teacher, 2026-11-19): the answers just open after the wait. */}
         {locked && <span className="sr-only" aria-live="polite">{t('q.readFirst')}</span>}
 
-        <div className={framed ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(42vh,26rem)] portrait:max-h-[50vh] grid grid-cols-1 sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]'}>
+        {/* The same tiles in every game (QuestionParts, teacher 2026-11-20). */}
+        <div className={framed ? '' : 'w-full max-w-[90rem] mx-auto'}><AnswerGrid>
           {q.choices.map((c, i) => {
-            const triedWrong = wrongTries.includes(i);
             const isPicked = picked === i;
-            const right = isPicked && i === q.correctIndex;
-            const wrong = isPicked && i !== q.correctIndex;
-            return (
-              <motion.button
-                key={`${q.id}-${i}`}
-                type="button"
-                onClick={() => choose(i)}
-                aria-disabled={locked || picked !== null || triedWrong}
-                animate={reduce ? undefined : wrong ? { x: [0, -6, 6, -4, 4, 0] } : right ? { scale: [1, 1.05, 1] } : undefined}
-                transition={{ duration: 0.4 }}
-                className={`relative ${framed ? `min-h-[clamp(3.5rem,12vh,7rem)] pl-[clamp(4rem,10.5vh,6.75rem)] pr-4 py-2 leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}` : `min-h-[clamp(3rem,9vh,6.5rem)] h-full pl-[clamp(4rem,10.5vh,6.75rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] leading-tight ${bigAnswers ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'}`} rounded-input border-bold border-border font-bold flex items-center gap-3
-                            ${TILE_COLORS[i]} ${locked ? 'opacity-50 saturate-50 pointer-events-none' : 'opacity-100'} motion-safe:transition-[opacity,transform] motion-safe:duration-300 ${picked !== null && !isPicked ? 'opacity-45' : ''}
-                            ${right ? 'ring-4 ring-success' : ''} ${wrong ? 'ring-4 ring-danger' : ''} ${triedWrong ? 'opacity-35 line-through' : ''}`}
-                style={{ boxShadow: 'var(--shadow-sticker)' }}
-              >
-                <span className={`shrink-0 rounded-full bg-surface border-std border-border flex items-center justify-center font-display ${framed ? 'absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.5rem,7vh,4rem)] h-[clamp(2.5rem,7vh,4rem)] text-[clamp(1.1rem,3.4vh,1.9rem)]' : 'absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.5rem,7vh,4rem)] h-[clamp(2.5rem,7vh,4rem)] text-[clamp(1.1rem,3.4vh,1.9rem)]'}`}>
-                  {right ? <Check weight="bold" size={22} aria-label={t('q.rightMark')} /> : wrong || triedWrong ? <X weight="bold" size={22} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
-                </span>
-                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
-                <span className="sr-only"> </span>
-                <span className="min-w-0 break-words">{c}</span>
-              </motion.button>
-            );
+            const state: TileState = isPicked ? (i === q.correctIndex ? 'right' : 'wrong') : wrongTries.includes(i) ? 'tried' : picked !== null ? 'faded' : 'open';
+            return <AnswerTile key={`${q.id}-${i}`} index={i} text={c} image={q.choiceImages?.[i]} imageAlt={q.choiceAlts?.[i] ?? undefined} state={state} disabled={locked || picked !== null} onClick={() => choose(i)} />;
           })}
-        </div>
+        </AnswerGrid></div>
 
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-        <p className="min-h-7 font-display text-xl font-bold text-center" role="status" aria-live="polite">
-          {picked === null
+        <ResultLine popKey={`${picked}-${wrongTries.length}`} right={picked === q.correctIndex}
+          text={picked === null
             ? wrongTries.length ? `${t('q.tryAgain')} ${t('q.triesLeft', { count: settings.triesPerQuestion - wrongTries.length })}` : ''
-            : picked === q.correctIndex ? t('q.right') : t('q.miss')}
-        </p>
-        {missed && (
-          <button type="button" autoFocus onClick={() => { const m = missed; setMissed(null); onAnswer(m); }}
-            className="justify-self-center self-center min-h-14 px-12 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"
-            style={{ boxShadow: '0 4px 0 #000' }}>{t('q.continue')}</button>
-        )}
+            : picked === q.correctIndex ? t('q.right') : t('q.miss')} />
+        {missed && <OkButton onClick={() => { const m = missed; setMissed(null); onAnswer(m); }} />}
       </motion.div>
     </div>
   );

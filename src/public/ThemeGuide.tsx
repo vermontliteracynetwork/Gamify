@@ -78,8 +78,8 @@ export function ThemeGuidePage() {
   async function zip() {
     if (access !== 'ok') return;
     setDl(t('builder.dl.making'));
-    const [{ fileSlug, saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
-    saveFile(new Blob([templatePdf(templatePieces(game!))], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
+    const [{ saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
+    saveFile(new Blob([templatePdf(templatePieces(game!))], { type: 'application/pdf' }), `gamify_digital_${game!.id}.pdf`);
     setDl(t('builder.dl.ready'));
   }
   return (

@@ -229,3 +229,7 @@ line that fits, and add each new preference the same turn she says it.
 - Co-ops (2026-11-20): option B. Each co-op gets a code; families using it get 25% off (Homeschool and Plus) and keep their own accounts and data; the co-op sees nothing about them; no separate co-op card on the Homeschool page, just one line. Co-ops no longer "buy like a school".
 - Class page header (2026-11-20): just the class name and New assignment; no "students · sets assigned" line, no student name chips, no header Class report button (the report is its own tab).
 - No teacher PIN on teacher pages (2026-11-20): the signed-in teacher is the only one there (students only come in through Join), so supports open straight away.
+- Downloads (2026-11-20): files are named gamify_digital_<game>.pdf; blank print pages save as gamify_print_<game>. No "Your file is downloading." line.
+- Pictured choices (2026-11-20): four choices sit in rows of two (Board Game board length).
+- Bowling (2026-11-20): frames default 5, range 1 to 20.
+- Question screens (2026-11-20, universal): one design for every game (shared QuestionParts): same prompt, A-D answer tiles, colors, sounds, result words and OK button; a step smaller text and buttons; answers can be tapped right away (no read-first wait or faded answers by default).

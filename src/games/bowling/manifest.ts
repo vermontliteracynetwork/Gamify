@@ -17,7 +17,7 @@ export const bowlingManifest: GameManifest = {
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
-  rounds: { label: 'Frames', min: 1, max: 10, default: 3 },
+  rounds: { label: 'Frames', min: 1, max: 20, default: 5 },
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 7, width: 256, height: 256,
     // Classic roles (teacher, 2026-10-31): held for the player's next turn,

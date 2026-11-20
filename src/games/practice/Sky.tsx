@@ -84,7 +84,7 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
       if (!c || !c.width || !c.height) return;
       setAspect((a) => (Math.abs(a - c.width / c.height) > 0.02 ? c.width / c.height : a));
       if (!d || !d.width) return;
-      const pad = 10;
+      const pad = 18;
       const pct = (v: number, size: number) => Math.max(0, Math.min(100, (v / size) * 100));
       const now = { l: pct(d.left - pad - c.left, c.width), t: pct(d.top - pad - c.top, c.height), r: pct(d.right + pad - c.left, c.width), b: pct(d.bottom + pad - c.top, c.height) };
       const was = seen.current;

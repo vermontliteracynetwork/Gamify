@@ -39,6 +39,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         void data.setSetting(KEY, saved);
       }
       void data.setSetting('autoread-reviewed', true);
+      // Answers open right away (teacher, 2026-11-20): a saved read-first
+      // wait goes to 0 once; choosing one in Settings after this keeps it.
+      if (saved.readFirstSeconds && !(await data.getSetting<boolean>('readfirst-reviewed'))) {
+        saved = { ...saved, readFirstSeconds: 0 };
+        void data.setSetting(KEY, saved);
+      }
+      void data.setSetting('readfirst-reviewed', true);
       setSettings(withDefaults(saved));
     });
   }, []);

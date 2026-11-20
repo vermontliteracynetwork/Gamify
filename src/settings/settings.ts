@@ -36,7 +36,7 @@ export interface PlayerSettings {
   gameSpeed: Speed;
   // Question screen accommodations (teacher sets them per student; the
   // teacher side and locks arrive with classrooms in Stage 4).
-  readFirstSeconds: number; // 0-10, default 3
+  readFirstSeconds: number; // 0-10, default 0
   shuffleAnswers: boolean;
   triesPerQuestion: 1 | 2 | 3 | 4;
   tools: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
@@ -69,7 +69,9 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   ruler: false,
   timers: 'relaxed',
   gameSpeed: 'normal',
-  readFirstSeconds: 3,
+  // Answers can be tapped right away (teacher, 2026-11-20); a student's
+  // supports can still add a read-first wait.
+  readFirstSeconds: 0,
   shuffleAnswers: true,
   triesPerQuestion: 1,
   tools: { listen: true, calculator: true, scratchpad: true, highlighter: true, timesTable: false },

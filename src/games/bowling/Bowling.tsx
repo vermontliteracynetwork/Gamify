@@ -62,7 +62,7 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -376,7 +376,7 @@ export default function Bowling() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              <Slider label={t('sb.frames')} hint={t('sb.framesHint')} min={1} max={10} value={setup.frames} onChange={(v) => change({ frames: v })} />
+              <Slider label={t('sb.frames')} hint={t('sb.framesHint')} min={1} max={20} value={setup.frames} onChange={(v) => change({ frames: v })} />
               {powerUpSwitches({ manifest: bowlingManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },

@@ -51,6 +51,10 @@ export function pageName(path: string): string | undefined {
 }
 
 export function pageTitle(path: string): string {
+  // Blank template pages save as gamify_print_<game> (teacher, 2026-11-20):
+  // the print window names the PDF after the page title.
+  const tpl = path.match(/\/themes\/([a-z0-9-]+)\/template$/) ?? path.match(/^\/blog\/themes\/([a-z0-9-]+)\/(?:print|template)$/);
+  if (tpl) return `gamify_print_${tpl[1]}`;
   const game = path.match(/^\/games\/([a-z0-9-]+)/);
   const name = game ? getGame(game[1])?.name : pageName(path);
   return name ? `${name} | Gamify` : 'Gamify';
