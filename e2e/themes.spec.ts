@@ -374,3 +374,28 @@ test('Theme Builder: a wide photo keeps its whole shape in a square piece, with 
   expect(check.left[0]).toBeGreaterThan(check.left[2]); // red side kept
   expect(check.right[2]).toBeGreaterThan(check.right[0]); // blue side kept
 });
+
+// A picture made on the digital template at the piece's exact size goes in
+// exactly as drawn (teacher, 2026-11-20), even with dark corners that look
+// like a printed page's corner squares.
+test('Theme Builder: an exact-size design (dark corners) uploads exactly as drawn', async ({ page }, info) => {
+  test.skip(info.project.name !== 'laptop', 'image processing; one size is enough');
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
+  await page.goto('/teacher/themes/game-show');
+  await page.getByRole('tab', { name: 'Upload' }).click();
+  // Card back is 300 x 220: a black design with a yellow star in the middle and a red mark at the top left.
+  const art = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = 600; c.height = 440; const x = c.getContext('2d')!; x.fillStyle = '#000'; x.fillRect(0, 0, 600, 440); x.fillStyle = '#e33'; x.fillRect(10, 10, 60, 60); x.fillStyle = '#fd3'; x.beginPath(); x.arc(300, 220, 90, 0, Math.PI * 2); x.fill(); return c.toDataURL('image/png').split(',')[1]; });
+  await page.locator('input[type=file]').nth(1).setInputFiles({ name: 'card.png', mimeType: 'image/png', buffer: Buffer.from(art, 'base64') });
+  await expect(page.getByLabel('Added').first()).toBeVisible();
+  const src = await page.locator('img[src^="data:image/png"]').first().getAttribute('src');
+  const r = await page.evaluate(async (s) => {
+    const img = new Image(); img.src = s!; await img.decode();
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d')!; x.drawImage(img, 0, 0);
+    const at = (px: number, py: number) => [...x.getImageData(Math.floor(px * img.width), Math.floor(py * img.height), 1, 1).data];
+    return { ratio: img.width / img.height, red: at(0.06, 0.09), mid: at(0.5, 0.5), corner: at(0.98, 0.97) };
+  }, src);
+  expect(Math.abs(r.ratio - 300 / 220)).toBeLessThan(0.02);
+  expect(r.red[0]).toBeGreaterThan(180); // the top-left mark is still in its place
+  expect(r.mid[0]).toBeGreaterThan(200); // the star stays in the middle
+  expect(r.corner[0]).toBeLessThan(40); // the black corner is still black, not cut or whitened
+});

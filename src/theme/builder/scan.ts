@@ -215,9 +215,27 @@ export async function cutPhotoForPiece(file: File, piece: ThemePieceSpec, round:
   checkImageFile(file);
   let bmp: ImageBitmap;
   try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { throw new Error('That picture could not be opened.'); }
+  // A picture made on the digital template (teacher, 2026-11-20: "it should
+  // format to the exact size"): the same shape as the piece and 1 to 4 times
+  // its size, as a design app exports it. It goes in exactly as drawn: no
+  // page search, no trimming, no paper clearing, no fill.
+  const ratio = piece.width / piece.height, aspect = bmp.width / bmp.height;
+  const scale = bmp.width / piece.width;
+  if (Math.abs(aspect / ratio - 1) < 0.02 && [1, 2, 3, 4].some((k) => Math.abs(scale / k - 1) < 0.03)) return exactPiece(bmp, piece, round);
   const corners = findMarkers(bmp);
   if (corners) return cutPiece(straighten(bmp, corners), piece, round);
   return cutDrawing(bmp, piece, round, solid);
+}
+
+function exactPiece(img: ImageBitmap, piece: ThemePieceSpec, round: boolean): string {
+  const max = Math.max(piece.width, piece.height, 256);
+  const ratio = piece.width / piece.height;
+  const ow = ratio >= 1 ? max : Math.round(max * ratio), oh = ratio >= 1 ? Math.round(max / ratio) : max;
+  const out = canvas(ow, oh), octx = ctx2d(out);
+  if (round) { octx.beginPath(); octx.ellipse(ow / 2, oh / 2, ow / 2, oh / 2, 0, 0, Math.PI * 2); octx.clip(); }
+  octx.imageSmoothingQuality = 'high';
+  octx.drawImage(img, 0, 0, ow, oh);
+  return out.toDataURL('image/png');
 }
 
 function cutDrawing(img: ImageBitmap, piece: ThemePieceSpec, round: boolean, solid: boolean): string {

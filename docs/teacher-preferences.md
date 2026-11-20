@@ -260,3 +260,4 @@ line that fits, and add each new preference the same turn she says it.
 - No custom Title piece anywhere (2026-11-20): not in the Theme Builder, the downloads or on covers; theme names show in plain text.
 - Two-step sign-in for teachers (2026-11-20): Account page "Two-step sign-in" (authenticator app); once on, teacher pages ask for the code after sign-in. Needs MFA on in Supabase.
 - Theme Builder preview (2026-11-20): every game also shows its player picker and the theme picker (this theme's cover in front, blank cards behind).
+- Uploads from the digital template (2026-11-20, urgent): a picture the same shape as the piece and 1 to 4 times its size goes in exactly as drawn (no page search, trimming, paper clearing or fill).
