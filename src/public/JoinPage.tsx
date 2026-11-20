@@ -97,7 +97,7 @@ export default function JoinPage() {
 
   if (game && rosters.length > 0 && !guest) {
     return (
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-5">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 content-center">
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
           <div className="grid sm:grid-cols-2 gap-3">
@@ -111,7 +111,7 @@ export default function JoinPage() {
 
   if (game) {
     return (
-      <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+      <main className="max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
@@ -126,7 +126,8 @@ export default function JoinPage() {
   }
 
   return (
-    <main className="relative max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    // Centered on the screen, not stuck at the top (design audit, 2026-11-20).
+    <main className="relative max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
       {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
       <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">
         <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="!w-12 !h-12 bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}><SpeakerHigh weight="bold" size={24} /></IconButton>
@@ -136,8 +137,8 @@ export default function JoinPage() {
       <div className="flex items-center justify-center gap-2 w-full">
         <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoCapitalize="characters" autoComplete="off" spellCheck={false}
           onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && ready) void ready.go(); }}
-          aria-label={t('join.code')} placeholder="BKDFT"
-          className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-heavy border-border bg-surface uppercase" />
+          aria-label={t('join.code')} placeholder="•••••"
+          className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-heavy border-border bg-surface uppercase placeholder:text-faint" />
         {code.length > 0 && <IconButton label={t('join.hearCode')} onClick={() => speak(code.split('').join(', '), settings)}><SpeakerHigh weight="bold" size={20} /></IconButton>}
       </div>
       <p className="min-h-6 font-bold" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>

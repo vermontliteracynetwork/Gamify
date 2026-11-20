@@ -7,6 +7,10 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  // The public beta goal (teacher, 2026-11-20).
+  { id: 'beta-nov-29', kind: 'decide', added: '2026-11-20', title: 'Public beta on Sunday, Nov 29: what only you can finish by then',
+    why: 'Your goal is a public release for beta testing on Sunday, November 29, 2026. Students can only play on the live site once these are done; everything else Claudia keeps building toward the date.',
+    how: 'By Nov 27: run the Supabase migrations still waiting (0007 to 0014) in the SQL Editor; turn on the Supabase switches (leaked passwords, MFA, bot protection) and the Vercel and OpenAI spending caps; buy the domain and add it in Vercel; line up the beta classrooms. On Nov 28: approve the production release. Stripe checkout can follow after the beta starts (beta teachers use access codes).' },
   // Start Gamify LLC, in this order (teacher, 2026-11-19: a separate company
   // from VLN, started now, before money or contracts touch Gamify). Replaces
   // the earlier plan to run Gamify under Vermont Literacy Network LLC.

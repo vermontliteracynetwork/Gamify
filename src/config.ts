@@ -111,3 +111,6 @@ export const PUZZLE_PACK_CLEARED = true;
 export const BALL_PACK_CLEARED = true;
 // No Gas Tank (teacher, 2026-11-07).
 export const BALL_PACK = ['spike-ball', '8-billiard-ball', 'beach-ball', 'earth-africa', 'mars', 'moon', 'coin', 'baseball-ball', 'basket-ball', 'white-soccer-ball'];
+
+// Public release for beta testing (teacher, 2026-11-20): "everything will be ready for public release for beta testing on Sunday Nov 29, 2026".
+export const BETA_RELEASE_DATE = '2026-11-29';

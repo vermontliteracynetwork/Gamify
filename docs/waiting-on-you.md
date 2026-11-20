@@ -2,6 +2,8 @@
 
 Things only Kayden can do (money, accounts, legal, going live). The same list shows first on the owner desktop (`/owner`) every time it opens, with a box to tick each one. Source of truth: `src/owner/waiting.ts`; Claudia adds to it in the same change that finds the need.
 
+**Public beta on Sunday, Nov 29, 2026 (your goal, 2026-11-20).** By Nov 27: run the Supabase migrations still waiting (0007 to 0014); turn on the Supabase switches (leaked passwords, MFA, bot protection) and the Vercel and OpenAI spending caps; buy the domain and add it in Vercel; line up the beta classrooms. On Nov 28: approve the production release. Stripe checkout can follow after the beta starts (beta teachers use access codes).
+
 **Start Gamify LLC, in this order (your decision, 2026-11-19: a separate company from VLN, started now, before money or contracts touch Gamify; replaces running it under Vermont Literacy Network LLC).**
 1. **Form Gamify LLC.** Vermont Secretary of State website, Articles of Organization (small fee, yearly report after; check current fees).
 2. **Get its EIN.** IRS website, Apply for an EIN online. Free, about 10 minutes.

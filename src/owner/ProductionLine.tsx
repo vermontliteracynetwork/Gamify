@@ -1,3 +1,4 @@
+import { BETA_RELEASE_DATE } from '../config';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, CheckCircle, Circle } from '@phosphor-icons/react';
@@ -43,7 +44,8 @@ export default function ProductionLine({ section = 'overview', go }: { section?:
   useEffect(() => {
     void fetch('/api/stripe-status').then((r) => (r.ok ? r.json() : Promise.reject())).then(setStripe).catch(() => setStripeProblem(true));
     void data.getSetting<Record<string, boolean>>('release-checks').then((v) => v && setChecks(v));
-    void data.getSetting<string>('release-date').then((v) => v && setReleaseDate(v));
+    // The public beta goal (teacher, 2026-11-20) until another date is picked.
+    void data.getSetting<string>('release-date').then((v) => setReleaseDate(v || BETA_RELEASE_DATE));
   }, []);
   // Until real paid accounts exist, the forecast runs on planning numbers.
   const start: PlanCounts = paidReal > 0 ? real : plan;
