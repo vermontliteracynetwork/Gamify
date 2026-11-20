@@ -4,7 +4,7 @@ import { ArrowLeft, GearSix, Printer, UserCircle } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync, useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
-import { GAMES } from '../games/registry';
+import { ALL_GAMES } from '../games/registry';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import Avatar from '../student/Avatar';
@@ -39,7 +39,7 @@ export default function StudentPage() {
   const mineLog = log.filter((e) => e.studentId === sid);
   const setName = (x?: string) => sets.find((s) => s.id === x)?.name ?? t('reports.noSet');
   const own = assignments.filter((a) => !a.studentId || a.studentId === sid);
-  const names = { student: () => student.name, set: setName, game: (g: string) => GAMES.find((x) => x.id === g)?.name ?? g };
+  const names = { student: () => student.name, set: setName, game: (g: string) => ALL_GAMES.find((x) => x.id === g)?.name ?? g };
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">

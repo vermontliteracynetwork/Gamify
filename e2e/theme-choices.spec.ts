@@ -23,7 +23,7 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
 
   // Gamify's designed themes and a theme the teacher designs can be offered.
   await page.goto('/teacher/classes/c1');
-  await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('link', { name: 'New assignment' }).first().click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   // Gamify's own designed themes (Animal Friends, 2026-10-31) are offered too.
@@ -33,7 +33,7 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Room 7 Look.', { exact: false })).toBeVisible();
   await page.goto('/teacher/classes/c1');
-  await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('link', { name: 'New assignment' }).first().click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('checkbox', { name: /Room 7 Look/ }).click();

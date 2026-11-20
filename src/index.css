@@ -387,6 +387,37 @@ html[data-motion="still"] *, html[data-motion="still"] *::before, html[data-moti
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
+/* The formal report page (teacher, 2026-11-20: "a traditional, formal pdf
+   preview/print page"). A letter page on a gray desk on screen; on paper the
+   page margins come from @page report. System serif fonts only (none shipped). */
+.report-desk { background: #d9dbe3; border-radius: var(--radius-panel); padding: clamp(0.75rem, 3vw, 2.5rem); overflow-x: auto; }
+.report-formal { background: #fff; color: #111; width: 100%; max-width: 8.5in; min-height: 11in; margin: 0 auto; padding: 0.75in 0.8in; box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 12px 36px rgba(0,0,0,0.22); display: grid; align-content: start; gap: 1.6rem;
+  font-family: Georgia, "Times New Roman", Times, serif; font-size: 10.5pt; line-height: 1.45; }
+.report-formal .report-letterhead { display: grid; gap: 0.6rem; border-bottom: 2px solid #111; padding-bottom: 0.9rem; }
+.report-formal .report-kicker { font-family: var(--font-body); font-size: 8pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #555; }
+.report-formal .report-h1 { font-family: var(--font-heading, var(--font-body)); font-size: 22pt; font-weight: 700; line-height: 1.15; margin: 0.2rem 0 0; letter-spacing: -0.01em; }
+.report-formal .report-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.35rem 1.25rem; margin: 0; }
+.report-formal .report-meta dt { font-family: var(--font-body); font-size: 7.5pt; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; }
+.report-formal .report-meta dd { margin: 0; font-weight: 600; }
+.report-formal .report-h2 { font-family: var(--font-body); font-size: 9pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; border-bottom: 1px solid #111; padding-bottom: 0.25rem; margin: 0; }
+.report-formal .report-note { font-size: 9.5pt; font-style: italic; color: #444; margin: 0; }
+.report-formal .report-p { font-size: 10.5pt; margin: 0; }
+.report-formal table { font-size: 9.5pt; }
+.report-formal .report-th { font-family: var(--font-body); font-size: 7.5pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; color: #333; padding: 0.3rem 0.6rem 0.3rem 0; border-bottom: 1.5px solid #111; }
+.report-formal .report-td { padding: 0.3rem 0.6rem 0.3rem 0; border-bottom: 1px solid #d6d6d6; font-weight: 400; }
+.report-formal .report-tr:nth-child(even) { background: #f6f6f4; }
+.report-formal .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr)); border: 1px solid #111; }
+.report-formal .report-stats > div { padding: 0.5rem 0.65rem; border-right: 1px solid #c8c8c8; }
+.report-formal .report-stats > div:last-child { border-right: 0; }
+.report-formal .report-stat-label { font-family: var(--font-body); font-size: 7pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #555; line-height: 1.2; margin: 0; }
+.report-formal .report-stat-value { font-size: 17pt; font-weight: 700; margin: 0.15rem 0 0; }
+.report-formal .report-foot { border-top: 1px solid #111; padding-top: 0.6rem; font-size: 8pt; color: #555; display: grid; gap: 0.25rem; }
+@media print {
+  .report-desk { background: none; padding: 0; border-radius: 0; }
+  .report-formal { box-shadow: none; max-width: none; min-height: 0; padding: 0; }
+}
+@media (max-width: 700px) { .report-formal { padding: 1.25rem; min-height: 0; } }
+
 /* Cast and Catch scenery (CSS so position moves stay smooth). */
 @keyframes cc-swim-right { from { left: -20%; } to { left: 110%; } }
 @keyframes cc-swim-left { from { left: 110%; } to { left: -20%; } }

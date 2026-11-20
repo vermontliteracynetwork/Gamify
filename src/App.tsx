@@ -71,6 +71,7 @@ const PurchaseOrderPage = lazyPage(() => import('./public/PurchaseOrderPage'));
 const CodeScreen = lazyPage(() => import('./public/CodeScreen'));
 const ClassesPage = lazyPage(() => import('./teacher/ClassesPage'));
 const ClassPage = lazyPage(() => import('./teacher/ClassPage'));
+const AssignPage = lazyPage(() => import('./teacher/ClassPage').then((m) => ({ default: m.AssignPage })));
 const ReportsPage = lazyPage(() => import('./teacher/ReportsPage'));
 const ReportPrintPage = lazyPage(() => import('./teacher/ReportPrintPage'));
 const StudentPage = lazyPage(() => import('./teacher/StudentPage'));
@@ -184,6 +185,7 @@ function AnimatedRoutes() {
           <Route path="/teacher/reports/print" element={<RequireTeacher><ReportPrintPage /></RequireTeacher>} />
           <Route path="/teacher/classes" element={<RequireTeacher><ClassesPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id" element={<RequireTeacher><ClassPage /></RequireTeacher>} />
+          <Route path="/teacher/classes/:id/assign" element={<RequireTeacher><AssignPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id/students/:sid" element={<RequireTeacher><StudentPage /></RequireTeacher>} />
           <Route path="/teacher/classes/:id/check-in" element={<RequireTeacher><CheckInPage /></RequireTeacher>} />
           {/* No open Arcade: students reach games only with a code (teacher, 2026-10-31). */}

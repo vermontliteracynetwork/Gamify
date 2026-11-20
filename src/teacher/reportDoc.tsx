@@ -75,6 +75,7 @@ export function reportData({ log, names }: Pick<ReportInput, 'log' | 'names'>) {
 }
 
 const fmtDay = (d: string) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '');
+const shortDay = (d: string) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '');
 const pctOf = (r: ReportRow) => percent(r.right, r.asked - r.left);
 const band = (p: number) => (p >= 80 ? '#9fe7a0' : p >= 50 ? '#fdfd94' : '#ed9d75');
 
@@ -88,9 +89,9 @@ function Bar({ pct }: { pct: number }) {
 
 function Section({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="report-section grid gap-2 break-inside-avoid-page">
-      <h2 className="font-display text-xl font-bold border-b-[2px] border-border pb-1">{title}</h2>
-      {note && <p className="text-sm font-semibold text-muted">{note}</p>}
+    <section className="report-section grid gap-2 content-start">
+      <h2 className="report-h2">{title}</h2>
+      {note && <p className="report-note">{note}</p>}
       {children}
     </section>
   );
@@ -100,8 +101,8 @@ function Table({ head, rows, caption }: { head: string[]; rows: React.ReactNode[
   return (
     <table className="w-full text-sm border-collapse">
       <caption className="sr-only">{caption}</caption>
-      <thead><tr className="border-b-[1.5px] border-border">{head.map((h, i) => <th key={h} scope="col" className={`py-1.5 pr-3 font-bold ${i ? 'text-left' : 'text-left'}`}>{h}</th>)}</tr></thead>
-      <tbody>{rows.map((r, i) => <tr key={i} className="border-b border-border-soft last:border-0 break-inside-avoid">{r.map((c, j) => j === 0 ? <th key={j} scope="row" className="py-1.5 pr-3 text-left font-bold align-top">{c}</th> : <td key={j} className="py-1.5 pr-3 font-semibold tabular-nums align-top">{c}</td>)}</tr>)}</tbody>
+      <thead><tr>{head.map((h) => <th key={h} scope="col" className="report-th">{h}</th>)}</tr></thead>
+      <tbody>{rows.map((r, i) => <tr key={i} className="report-tr break-inside-avoid">{r.map((c, j) => j === 0 ? <th key={j} scope="row" className="report-td text-left font-bold align-top">{c}</th> : <td key={j} className="report-td tabular-nums align-top">{c}</td>)}</tr>)}</tbody>
     </table>
   );
 }
@@ -151,38 +152,42 @@ export default function ReportDoc(input: ReportInput) {
   const byId = new Map(students.map((s) => [s.id, s]));
 
   return (
-    <article className="report-doc bg-white text-black border-bold border-border rounded-panel p-6 sm:p-10 grid gap-7 print:border-0 print:rounded-none print:p-0 print:gap-5" aria-label={title}>
+    // A traditional, formal report (teacher, 2026-11-20): a letter-size white
+    // page with real margins, a serif body, thin rules and small-caps headings,
+    // shown on screen exactly as it prints.
+    <article className="report-doc report-formal" aria-label={title}>
       {/* Letterhead */}
       {/* A div, not a header: the site hides every header when printing. */}
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b-[3px] border-border pb-4">
-        <div className="grid gap-1">
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-9 w-auto self-start" />
-          <h1 className="font-display text-3xl font-bold mt-2">{title}</h1>
-          <p className="text-lg font-bold">{student ? `${student.name} · ${className}` : className}</p>
+      <div className="report-letterhead">
+        <div className="flex items-end justify-between gap-4">
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" />
+          <p className="report-kicker">{t('rp.confidential')}</p>
         </div>
-        <dl className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5 text-sm">
-          <dt className="font-bold text-muted">{t('rp.period')}</dt><dd className="m-0 font-semibold">{range}</dd>
-          {teacher && <><dt className="font-bold text-muted">{t('rp.teacher')}</dt><dd className="m-0 font-semibold">{teacher}</dd></>}
-          <dt className="font-bold text-muted">{t('rp.made')}</dt><dd className="m-0 font-semibold">{fmtDay(new Date().toISOString().slice(0, 10))}</dd>
-          {!student && <><dt className="font-bold text-muted">{t('rp.roster')}</dt><dd className="m-0 font-semibold">{t('rp.rosterCount', { count: students.length })}</dd></>}
+        <h1 className="report-h1">{title}</h1>
+        <dl className="report-meta">
+          <div><dt>{student ? t('rp.student') : t('rp.class')}</dt><dd>{student ? `${student.name}, ${className}` : className}</dd></div>
+          <div><dt>{t('rp.period')}</dt><dd>{range}</dd></div>
+          {teacher && <div><dt>{t('rp.teacher')}</dt><dd>{teacher}</dd></div>}
+          <div><dt>{t('rp.made')}</dt><dd>{fmtDay(new Date().toISOString().slice(0, 10))}</dd></div>
+          {!student && <div><dt>{t('rp.roster')}</dt><dd>{t('rp.rosterCount', { count: students.length })}</dd></div>}
         </dl>
       </div>
 
-      {log.length === 0 ? <p className="font-bold">{t('rp.empty')}</p> : <>
+      {log.length === 0 ? <p className="report-p">{t('rp.empty')}</p> : <>
         {/* At a glance */}
         <Section title={t('rp.glance')}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 print:grid-cols-7 gap-2">
+          <div className="report-stats">
             {stat.map(([l, v]) => (
-              <div key={l} className="rounded-input border-std border-border p-2.5 break-inside-avoid">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted leading-tight">{l}</p>
-                <p className="font-display text-2xl tabular-nums">{v}</p>
+              <div key={l} className="break-inside-avoid">
+                <p className="report-stat-label">{l}</p>
+                <p className="report-stat-value tabular-nums">{v}</p>
               </div>
             ))}
           </div>
-          <p className="text-sm font-semibold">{student
+          <p className="report-p">{student
             ? t('rp.summaryStudent', { name: student.name, n: d.answered, pct: d.rightPct, days: d.days.length })
             : t('rp.summaryClass', { n: d.answered, pct: d.rightPct, played: d.studentsPlayed, total: students.length })}</p>
-          {student && sup && <p className="text-sm font-semibold"><span className="font-bold">{t('rp.supports')}: </span>{sup}</p>}
+          {student && sup && <p className="report-p"><span className="font-bold">{t('rp.supports')}: </span>{sup}</p>}
         </Section>
 
         {/* Students (class report) */}
@@ -191,9 +196,9 @@ export default function ReportDoc(input: ReportInput) {
             <Table caption={t('rp.byStudent')} head={[t('rp.student'), t('rp.answeredShort'), t('rp.right'), t('rp.firstTry'), t('rp.avg'), t('rp.minutes'), t('rp.trend'), t('rp.last'), t('rp.supports')]}
               rows={d.byStudent.map((r) => {
                 const tr = trend(log.filter((e) => e.studentId === r.key));
-                return [r.label, r.asked - r.left, <Bar key="b" pct={pctOf(r)} />, `${percent(r.firstTry, r.asked - r.left)}%`, `${r.avgSeconds}s`, r.minutes, t(`rp.trend.${tr}`), fmtDay(r.lastDay), supportsText(byId.get(r.key)) || '-'];
+                return [r.label, r.asked - r.left, <Bar key="b" pct={pctOf(r)} />, `${percent(r.firstTry, r.asked - r.left)}%`, `${r.avgSeconds}s`, r.minutes, t(`rp.trend.${tr}`), shortDay(r.lastDay), supportsText(byId.get(r.key)) || '-'];
               })} />
-            {students.length > d.studentsPlayed && <p className="text-sm font-semibold"><span className="font-bold">{t('rp.notPlayed')}: </span>{students.filter((s) => !d.byStudent.some((r) => r.key === s.id)).map((s) => s.name).join(', ')}</p>}
+            {students.length > d.studentsPlayed && <p className="report-p"><span className="font-bold">{t('rp.notPlayed')}: </span>{students.filter((s) => !d.byStudent.some((r) => r.key === s.id)).map((s) => s.name).join(', ')}</p>}
           </Section>
         )}
 
@@ -213,7 +218,7 @@ export default function ReportDoc(input: ReportInput) {
         )}
 
         <Section title={t('rp.practice')} note={t('rp.practiceNote')}>
-          {d.practice.length === 0 ? <p className="text-sm font-semibold">{t('rp.practiceNone')}</p> : (
+          {d.practice.length === 0 ? <p className="report-p">{t('rp.practiceNone')}</p> : (
             <Table caption={t('rp.practice')} head={[t('rp.question'), t('rp.answer'), t('rp.right'), t('rp.topWrong')]}
               rows={d.practice.map((q) => [q.label, d.answerOf.get(q.key) ?? '', <Bar key="b" pct={pctOf(q)} />, q.topWrong ?? '-'])} />
           )}
@@ -221,14 +226,14 @@ export default function ReportDoc(input: ReportInput) {
 
         {d.mastered.length > 0 && (
           <Section title={t('rp.mastered')} note={t('rp.masteredNote')}>
-            <ul className="grid sm:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 list-disc pl-5 m-0 text-sm font-semibold">
-              {d.mastered.map((q) => <li key={q.key}>{q.label} <span className="text-muted">({pctOf(q)}%)</span></li>)}
+            <ul className="report-p grid sm:grid-cols-2 print:grid-cols-2 gap-x-6 gap-y-1 list-disc pl-5 m-0">
+              {d.mastered.map((q) => <li key={q.key}>{q.label} <span className="text-[#555]">({pctOf(q)}%)</span></li>)}
             </ul>
           </Section>
         )}
       </>}
 
-      <footer className="border-t-[2px] border-border-soft pt-3 text-xs font-semibold text-muted grid gap-1">
+      <footer className="report-foot">
         <p>{t('rp.howMeasured')}</p>
         <p>{t('rp.privacy')}</p>
       </footer>

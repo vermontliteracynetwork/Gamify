@@ -37,7 +37,7 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: 'Make class' }).click();
   await page.getByLabel('New class name').fill('Room 9');
   await page.getByRole('button', { name: 'Make class' }).last().click();
-  await page.getByLabel('Add students (type or paste names, one per line)').fill('Ava');
+  await page.getByLabel('Add students', { exact: true }).fill('Ava');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   await page.goto('/teacher/activity');
   await page.getByRole('radio', { name: /Room 9/ }).click();

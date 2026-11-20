@@ -39,7 +39,7 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   await expect(page.getByText('0 of 4 done')).toBeVisible();
   // Free has no classes: the teacher lands on their student list.
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
-  await page.getByLabel('Add students (type or paste names, one per line)').fill('Kai');
+  await page.getByLabel('Add students', { exact: true }).fill('Kai');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   // Students get in only with a game code (teacher, 2026-10-31).
   await expect(page.getByText(/Join code/)).toHaveCount(0);

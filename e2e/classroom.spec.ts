@@ -15,7 +15,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   // Classes are Plus and Pro only: Free opens the teacher's student list.
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
   await expect(page.getByLabel('New class name')).toHaveCount(0);
-  await page.getByLabel('Add students (type or paste names, one per line)').fill('Ava\nBen');
+  await page.getByLabel('Add students', { exact: true }).fill('Ava\nBen');
   await page.getByRole('button', { name: 'Add 2 students' }).click();
   await expect(page.getByText('2 of 30 students')).toBeVisible();
   await page.screenshot({ path: `test-results/class-students-${info.project.name}.png`, fullPage: true });
@@ -32,13 +32,15 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await expect(page.getByText('Supports', { exact: true })).toBeVisible();
 
   // Assign Animals and habitats to the whole class.
-  await page.getByRole('tab', { name: 'Assigned sets' }).click();
+  await page.getByRole('link', { name: 'New assignment' }).first().click();
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
   await expect(page.getByText('Whole class').first()).toBeVisible();
   // Free plan: one assigned set.
+  await page.getByRole('link', { name: 'New assignment' }).first().click();
   await expect(page.getByText('Assigned sets for each student: up to 1.', { exact: false })).toBeVisible();
+  await page.getByRole('link', { name: 'Cancel' }).click();
   await page.screenshot({ path: `test-results/class-sets-${info.project.name}.png`, fullPage: true });
 
   // Hide Versus for the class.
@@ -93,7 +95,7 @@ test('a class can sign in with sign-in pictures drawn in the Theme Builder', asy
   await page.getByLabel('New class name').fill('Room 5');
   await page.getByRole('button', { name: 'Make class' }).last().click();
   await page.getByRole('radio', { name: 'Our Animals' }).click();
-  await page.getByLabel('Add students (type or paste names, one per line)').fill('Zoe');
+  await page.getByLabel('Add students', { exact: true }).fill('Zoe');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   await seedGameCode(page, 'BKDFG');
   await joinWithCode(page, 'BKDFG');
@@ -119,7 +121,7 @@ test('Plus: upload a student picture and set a PIN; a game link asks students fo
   await dialog.getByLabel('PIN (4 numbers)').fill('4826');
   await dialog.screenshot({ path: `test-results/avatar-dialog-${info.project.name}.png` });
   await dialog.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByText('PIN 4826')).toBeVisible();
+  await expect(page.getByRole('cell', { name: '4826' })).toBeVisible();
 
   // A hosted game code: Mia taps her picture and types her PIN.
   await page.goto('/teacher/sets');

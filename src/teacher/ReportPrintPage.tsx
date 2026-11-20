@@ -5,7 +5,7 @@ import { data } from '../data';
 import { useAsync, useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import type { Student } from '../data/types';
-import { GAMES } from '../games/registry';
+import { ALL_GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import { getTeacher } from '../auth/session';
@@ -38,7 +38,7 @@ export default function ReportPrintPage() {
   const names = {
     student: (id?: string) => students.find((s) => s.id === id)?.name ?? t('reports.noStudent'),
     set: (id?: string) => sets.find((s) => s.id === id)?.name ?? t('reports.noSet'),
-    game: (id: string) => GAMES.find((g) => g.id === id)?.name ?? id,
+    game: (id: string) => ALL_GAMES.find((g) => g.id === id)?.name ?? id,
   };
   useCrumbLabel(student ? t('rp.studentReport') : t('rp.classReport'));
   const back = studentId && classId ? `/teacher/classes/${classId}/students/${studentId}` : classId && !example ? `/teacher/classes/${classId}` : '/teacher/reports';
@@ -53,7 +53,7 @@ export default function ReportPrintPage() {
         </button>
         <p className="text-sm font-bold text-muted">{t('rp.printHint')}</p>
       </div>
-      {!loading && <ReportDoc log={log} students={student ? [student] : students} names={names} className={className} student={student} teacher={example ? undefined : getTeacher()?.name} from={from} to={to} />}
+      {!loading && <div className="report-desk"><ReportDoc log={log} students={student ? [student] : students} names={names} className={className} student={student} teacher={example ? undefined : getTeacher()?.name} from={from} to={to} /></div>}
     </main>
   );
 }
