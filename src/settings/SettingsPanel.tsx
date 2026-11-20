@@ -6,7 +6,7 @@ import type { StringKey } from '../i18n/en';
 import { TellGamify } from '../ui/TellGamify';
 import PinGate from './PinGate';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
-import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
+import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId, type ReadFont, type Tint } from './settings';
 import { useSettings } from './SettingsContext';
 import Title from '../ui/Title';
 import { getMirrorCode, setMirrorCode } from '../live/mirror';
@@ -117,18 +117,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
       </div>
 
       <div className="px-5 py-4 grid gap-4" role="tabpanel">
-        {tab === 'access' && (
-          <>
-            <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
-            <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
-            <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />
-            <Toggle label={t('settings.colorSafe')} value={s.colorSafe} onChange={(v) => set('colorSafe', v)} />
-            <Slider label={t('settings.voice')} min={0} max={5} value={s.voice} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('voice', v as Level)} />
-            <Choice label={t('settings.voiceRate')} value={s.voiceRate} options={['slow', 'normal', 'fast']} onChange={(v) => set('voiceRate', v)} />
-            <Toggle label={t('settings.calm')} value={s.calm} onChange={(v) => update(applyCalm(s, v))} />
-            <Toggle label={t('settings.dim')} value={s.dim} onChange={(v) => set('dim', v)} />
-          </>
-        )}
+        {tab === 'access' && <AccessTab />}
         {tab === 'quick' && (
           <div className="grid grid-cols-2 gap-2">
             {(Object.keys(PRESETS) as PresetId[]).map((id) => (
@@ -164,7 +153,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
 
         {tab === 'reading' && (
           <>
-            <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger']} onChange={(v) => set('textSize', v)} />
+            <Choice label={t('settings.textSize')} value={s.textSize} options={['normal', 'large', 'larger', 'huge']} onChange={(v) => set('textSize', v)} />
             <Toggle label={t('settings.autoRead')} value={s.autoRead} onChange={(v) => set('autoRead', v)} />
             <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
             <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} />
@@ -252,6 +241,78 @@ function StageColorPicker({ gameId }: { gameId: string }) {
           <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={color ?? '#b4c4fb'} onChange={(e) => setStageColor(gameId, e.target.value)} />
         </label>
       </div>
+    </div>
+  );
+}
+
+// The Accessibility tab (teacher, 2026-11-20: "improve accessibility tools as
+// they are currently virtually useless"): every tool shows what it does on a
+// live sample, and each one changes the whole game at once.
+const TINTS: { id: Tint; color: string }[] = [
+  { id: 'none', color: '#ffffff' }, { id: 'yellow', color: '#ffec78' }, { id: 'blue', color: '#78b4ff' },
+  { id: 'pink', color: '#ffa0c8' }, { id: 'green', color: '#96e6a0' }, { id: 'gray', color: '#9a9aa6' },
+];
+const FONT_FAMILY: Record<ReadFont, string> = { standard: "'Inclusive Sans', system-ui, sans-serif", easy: "'Atkinson Hyperlegible', system-ui, sans-serif", dyslexia: "'OpenDyslexic', system-ui, sans-serif" };
+function AccessTab() {
+  const { settings: s, update } = useSettings();
+  const set = <K extends keyof PlayerSettings>(k: K, v: PlayerSettings[K]) => update({ ...s, [k]: v });
+  const pick = (on: boolean) => `rounded-input border-std p-2 grid justify-items-center gap-1 font-bold text-sm min-h-11 motion-safe:transition-transform motion-safe:active:scale-95 ${on ? 'bg-accent border-border ring-2 ring-border' : 'bg-surface border-border-soft hover:border-border'}`;
+  const head = 'font-bold text-base';
+  return (
+    <div className="grid gap-4">
+      {/* A live sample: it changes as each tool is switched on. */}
+      <div className="rounded-input border-std border-border p-3 grid gap-2" aria-hidden="true" style={{ fontFamily: FONT_FAMILY[s.font] }}>
+        <p className="font-bold text-lg leading-snug">{t('access.sample')}</p>
+        <div className="grid grid-cols-4 gap-2">
+          {['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'].map((c, i) => <span key={c} className={`${c} rounded-input border-std border-border min-h-10 flex items-center justify-center font-bold text-lg`}>{['A', 'B', 'C', 'D'][i]}</span>)}
+        </div>
+      </div>
+
+      <div className="grid gap-1.5">
+        <span className={head}>{t('settings.textSize')}</span>
+        <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label={t('settings.textSize')}>
+          {(['normal', 'large', 'larger', 'huge'] as const).map((v, i) => (
+            <button key={v} type="button" role="radio" aria-checked={s.textSize === v} onClick={() => set('textSize', v)} className={pick(s.textSize === v)}>
+              <span className="font-display leading-none" style={{ fontSize: `${1.1 + i * 0.35}rem` }}>Aa</span>{t(`opt.${v}` as StringKey)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-1.5">
+        <span className={head}>{t('access.font')}</span>
+        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label={t('access.font')}>
+          {(['standard', 'easy', 'dyslexia'] as const).map((v) => (
+            <button key={v} type="button" role="radio" aria-checked={s.font === v} onClick={() => set('font', v)} className={pick(s.font === v)}>
+              <span className="text-xl leading-tight" style={{ fontFamily: FONT_FAMILY[v] }}>bdpq 0 O</span>{t(`access.font.${v}` as StringKey)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-2">
+        <Toggle label={t('settings.highContrast')} value={s.highContrast} onChange={(v) => set('highContrast', v)} hint={t('access.contrastTip')} />
+        <Toggle label={t('settings.colorSafe')} value={s.colorSafe} onChange={(v) => set('colorSafe', v)} hint={t('access.colorTip')} />
+        <Toggle label={t('settings.readingComfort')} value={s.readingComfort} onChange={(v) => set('readingComfort', v)} />
+        <Toggle label={t('access.ruler')} value={s.ruler} onChange={(v) => set('ruler', v)} hint={t('access.rulerTip')} />
+        <Toggle label={t('settings.autoRead')} value={s.autoRead} onChange={(v) => set('autoRead', v)} />
+        <Toggle label={t('settings.calm')} value={s.calm} onChange={(v) => update(applyCalm(s, v))} />
+      </div>
+
+      <div className="grid gap-1.5">
+        <span className={head}>{t('access.tint')}</span>
+        <div className="flex flex-wrap gap-3" role="radiogroup" aria-label={t('access.tint')}>
+          {TINTS.map((o) => (
+            <button key={o.id} type="button" role="radio" aria-checked={s.tint === o.id} aria-label={t(`access.tint.${o.id}` as StringKey)} data-tip={t(`access.tint.${o.id}` as StringKey)} onClick={() => set('tint', o.id)}
+              className={`w-12 h-12 rounded-full border-std border-border grid place-items-center ${s.tint === o.id ? 'ring-4 ring-accent' : ''}`} style={{ background: o.color }}>
+              {o.id === 'none' && <X weight="bold" size={20} />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Slider label={t('settings.voice')} min={0} max={5} value={s.voice} disabled={s.allSoundOff} show={(v) => (v === 0 ? t('settings.off') : String(v))} onChange={(v) => set('voice', v as Level)} />
+      <Choice label={t('settings.voiceRate')} value={s.voiceRate} options={['slow', 'normal', 'fast']} onChange={(v) => set('voiceRate', v)} />
     </div>
   );
 }

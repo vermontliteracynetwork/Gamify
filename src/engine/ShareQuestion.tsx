@@ -10,6 +10,7 @@ import { playEffect, speakQuestion } from './feedback';
 import { setAnswerer } from './answerer';
 import { shuffleChoices } from './questions';
 import { TeamBadge } from './TeamBadge';
+import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import { CPU_ACCURACY, type CpuLevel, type TurnPlayer } from './turns';
 import DialogFocus from '../ui/DialogFocus';
 import PopText from '../ui/PopText';
@@ -56,6 +57,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [shown, setShown] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [cpu, setCpu] = useState<'thinking' | 'right' | 'miss' | null>(player.kind === 'cpu' ? 'thinking' : null);
   // The turn card (teacher, 2026-10-31): the player's own icon, big, and a tap
   // to start, so every team knows it is their turn. The computer's card
@@ -131,7 +133,10 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
+          {/* Settings (with the Accessibility tab) stay in reach during a question (teacher, 2026-11-20). */}
+          <GearButton small onClick={() => setSettingsOpen(true)} />
         </div>
+        <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 

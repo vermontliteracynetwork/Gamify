@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { data } from '../data';
 import { initialSettings, withDefaults, type PlayerSettings } from './settings';
+import ReadingRuler from './ReadingRuler';
 
 const KEY = 'player-settings';
 
@@ -50,6 +51,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     root.contrast = settings.highContrast ? 'high' : 'normal';
     root.comfort = settings.readingComfort ? 'on' : 'off';
     root.dim = settings.dim ? 'on' : 'off';
+    root.colorsafe = settings.colorSafe ? 'on' : 'off';
+    root.font = settings.font;
+    root.tint = settings.tint;
     root.hand = settings.leftHanded ? 'left' : 'right';
   }, [settings]);
 
@@ -59,7 +63,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings(own);
     data.setSetting(KEY, own);
   }
-  return <SettingsContext.Provider value={{ settings, update, setOverrides }}>{children}</SettingsContext.Provider>;
+  return <SettingsContext.Provider value={{ settings, update, setOverrides }}>{children}{settings.ruler && <ReadingRuler />}</SettingsContext.Provider>;
 }
 
 export function useSettings(): Ctx {

@@ -13,7 +13,7 @@ describe('settings', () => {
     expect([volume(s, 'effects'), volume(s, 'music'), volume(s, 'voice')]).toEqual([0, 0, 0]);
   });
   it('levels map to 0..1', () => expect(volume({ ...DEFAULT_SETTINGS, effects: 5 }, 'effects')).toBe(1));
-  it('low vision preset enlarges text and raises contrast', () => expect(PRESETS['low-vision'](DEFAULT_SETTINGS)).toMatchObject({ textSize: 'larger', highContrast: true }));
+  it('low vision preset enlarges text and raises contrast', () => expect(PRESETS['low-vision'](DEFAULT_SETTINGS)).toMatchObject({ textSize: 'huge', highContrast: true }));
   it('quiet room keeps sound on but soft, with no music', () => expect(PRESETS.quiet({ ...DEFAULT_SETTINGS, allSoundOff: true })).toMatchObject({ allSoundOff: false, effects: 1, music: 0, celebrations: 'small' }));
   it('little reader turns on big text (read-aloud stays off until tapped), and turns timers off', () => expect(PRESETS['little-reader'](DEFAULT_SETTINGS)).toMatchObject({ autoRead: false, textSize: 'larger', timers: 'off', readFirstSeconds: 0 }));
   it('old saved settings get new defaults', () => expect(withDefaults({ effects: 1 })).toEqual({ ...DEFAULT_SETTINGS, effects: 1 }));

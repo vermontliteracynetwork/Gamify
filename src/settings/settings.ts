@@ -5,7 +5,10 @@ export type Level = 0 | 1 | 2 | 3 | 4 | 5; // 0 = off
 export type Motion = 'full' | 'gentle' | 'still';
 export type Celebrations = 'big' | 'small' | 'off';
 export type Backgrounds = 'moving' | 'still' | 'plain';
-export type TextSize = 'normal' | 'large' | 'larger';
+export type TextSize = 'normal' | 'large' | 'larger' | 'huge';
+// Reading tools (teacher, 2026-11-20: make accessibility tools really work).
+export type ReadFont = 'standard' | 'easy' | 'dyslexia';
+export type Tint = 'none' | 'yellow' | 'blue' | 'pink' | 'green' | 'gray';
 export type Timers = 'off' | 'relaxed' | 'normal';
 export type Speed = 'slow' | 'normal' | 'fast';
 
@@ -26,6 +29,9 @@ export interface PlayerSettings {
   readingComfort: boolean;
   highContrast: boolean;
   colorSafe: boolean;
+  font: ReadFont;
+  tint: Tint;
+  ruler: boolean;
   timers: Timers;
   gameSpeed: Speed;
   // Question screen accommodations (teacher sets them per student; the
@@ -58,6 +64,9 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   readingComfort: false,
   highContrast: false,
   colorSafe: false,
+  font: 'standard',
+  tint: 'none',
+  ruler: false,
   timers: 'relaxed',
   gameSpeed: 'normal',
   readFirstSeconds: 3,
@@ -86,7 +95,7 @@ export const PRESETS: Record<PresetId, (s: PlayerSettings) => PlayerSettings> = 
   // Little reader (K-1): big text, every question read aloud, no read-first wait, no timers.
   'little-reader': (s) => ({ ...s, autoRead: false, textSize: 'larger', readingComfort: true, voice: Math.max(s.voice, 4) as Level, allSoundOff: false, readFirstSeconds: 0, timers: 'off' }),
   quiet: (s) => ({ ...s, allSoundOff: false, effects: 1, music: 0, celebrations: 'small', voice: Math.max(s.voice, 4) as Level }),
-  'low-vision': (s) => ({ ...s, textSize: 'larger', highContrast: true, readingComfort: true, voice: 5, colorSafe: true }),
+  'low-vision': (s) => ({ ...s, textSize: 'huge', highContrast: true, readingComfort: true, voice: 5, colorSafe: true, font: 'easy' }),
   hearing: (s) => ({ ...s, allSoundOff: true, haptics: true }),
   'quick-start': () => ({ ...DEFAULT_SETTINGS }),
 };

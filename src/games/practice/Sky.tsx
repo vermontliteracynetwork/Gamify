@@ -61,7 +61,7 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
         y: top + ((Math.floor(c / cols) + 0.4 + rand() * 0.2) / rows) * ht,
         // Small to big, each tipped its own way (teacher, 2026-10-31); a tipped
         // item stays inside its cell (and so never under the question box).
-        size: Math.min(size, 0.9 / (Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180)))),
+        size: Math.min(size, 0.84 / (Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180)))),
         spin,
         unit,
       },
