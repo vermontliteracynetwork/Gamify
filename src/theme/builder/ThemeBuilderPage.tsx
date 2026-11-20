@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, BookOpen, CaretDown, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
@@ -17,9 +17,10 @@ import TeacherNav from '../../ui/TeacherNav';
 import { teacherUsername } from '../credit';
 import { classicTheme } from '../classic';
 import { deleteMadeTheme, saveMadeTheme, useMadeThemes } from '../made';
-import { APPROVED_FONTS, ITEM_MOTIONS, SOUND_PACKS, THEME_FONTS, type GameTheme, type ItemSlotsSpec, type ThemeItem, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
+import { ITEM_MOTIONS, SOUND_PACKS, type GameTheme, type ItemSlotsSpec, type ThemeItem, type SoundPack, type ThemeColors, type ThemePieceSpec } from '../types';
 import ItemArt from '../ItemArt';
 import { playEffect } from '../../engine/feedback';
+import { MUSIC_TRACKS, RIGHT_SOUNDS, WRONG_SOUNDS } from '../../engine/music';
 import { useSettings } from '../../settings/SettingsContext';
 import type { StringKey } from '../../i18n/en';
 import { themeProblems } from '../validate';
@@ -345,7 +346,6 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
             <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="@container flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 pr-1">
               {tab === 'download' && (
                 <>
-                  <p className="font-semibold text-muted text-sm">{t('builder.downloadHint')}</p>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div className="rounded-input border-std border-border p-3 grid gap-2 content-start">
                       <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
@@ -399,17 +399,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
               )}
               {tab === 'style' && (
                 <>
-                  <p className="font-semibold text-muted text-sm">{t('builder.styleHint')}</p>
-                  <p className="font-bold">{t('builder.font')}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('builder.font')}>
-                    {APPROVED_FONTS.map((f) => (
-                      <button key={f} type="button" role="radio" aria-checked={draft.fonts.display === f} aria-label={f} onClick={() => setDraft({ ...draft, fonts: { ...draft.fonts, display: f } })}
-                        className={`min-h-14 px-3 rounded-input border-std text-left ${draft.fonts.display === f ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                        <span className="block text-xl leading-tight" style={{ fontFamily: THEME_FONTS[f] }}>{game.name}</span>
-                        <span className="block text-xs font-bold text-muted">{f}</span>
-                      </button>
-                    ))}
-                  </div>
+                  {/* No title font choice and no explanation line (teacher, 2026-11-20). */}
                   <p className="font-bold">{t('builder.sounds')}</p>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label={t('builder.sounds')}>
                     {SOUND_PACKS.map((p: SoundPack) => (
@@ -420,6 +410,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                       </button>
                     ))}
                   </div>
+                  <AdvancedAudio audio={draft.audio} onChange={(audio) => setDraft({ ...draft, audio })} />
                 </>
               )}
               {tab === 'colors' && (
@@ -526,7 +517,8 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
           className="shrink-0 w-8 h-8 rounded-full border-std border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
           style={clear ? CHECKER_SMALL : { background: '#fbfcf8' }}>
           {/* Transparent: small white and gray checkers; solid: a filled square (teacher, 2026-11-19). */}
-          {!clear && <span className="block w-3.5 h-3.5 rounded-[4px] border-std border-border bg-[#f6a5c0]" />}
+          {/* Solid: a solid black dot (teacher, 2026-11-20). */}
+          {!clear && <span className="block w-4 h-4 rounded-full bg-black" />}
         </button>
         {image && <IconButton className="!w-8 !h-8" label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={14} /></IconButton>}
       </div>
@@ -555,7 +547,6 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
             image={drawn.image} onClose={() => setDrawing(null)} onSave={(img) => { put(drawing, { image: img }); setDrawing(null); }} />
         </Suspense>
       )}
-      <p className="font-semibold text-muted text-sm">{spec.hint} {t('builder.items.hint', { max: spec.max })}</p>
       {items.length === 0 && <p className="font-bold">{t('builder.items.none')}</p>}
       {/* Start from the game's power-ups in the same order as the template's
           power-up pages (teacher, 2026-11-13), so each uploaded page lands on
@@ -707,5 +698,39 @@ function PageTurn({ dir, label, onClick }: { dir: 'prev' | 'next'; label: string
       className="shrink-0 w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center hover:bg-accent motion-safe:active:scale-95">
       {dir === 'prev' ? <CaretLeft weight="bold" size={18} /> : <CaretRight weight="bold" size={18} />}
     </button>
+  );
+}
+
+// Advanced audio settings (teacher, 2026-11-20): a quiet "Advanced audio
+// settings" line that opens the background music and answer sounds, from
+// the sounds already in Gamify. Tap a choice to hear it.
+function AdvancedAudio({ audio, onChange }: { audio?: GameTheme['audio']; onChange: (a: GameTheme['audio']) => void }) {
+  const [open, setOpen] = useState(false);
+  const { settings } = useSettings();
+  const a = audio ?? {};
+  const preview = useRef<HTMLAudioElement | null>(null);
+  const hear = (src?: string) => { preview.current?.pause(); if (!src || src === 'none') return; const el = new Audio(src); el.volume = 0.5; preview.current = el; void el.play().catch(() => undefined); window.setTimeout(() => { if (preview.current === el) el.pause(); }, 6000); };
+  useEffect(() => () => preview.current?.pause(), []);
+  const row = (label: string, value: string, opts: { id: string; label: string }[], set: (v: string) => void) => (
+    <label className="grid gap-1 font-bold text-sm">{label}
+      <select value={value} onChange={(e) => { set(e.target.value); hear(e.target.value); }} className={fieldClasses('md', 'w-full')}>
+        {opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+      </select>
+    </label>
+  );
+  void settings;
+  return (
+    <div className="grid gap-2">
+      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="justify-self-start inline-flex items-center gap-1.5 font-bold text-sm text-muted hover:text-text">
+        {t('builder.audio.advanced')}<CaretDown weight="bold" size={14} className={`motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="grid sm:grid-cols-3 gap-3">
+          {row(t('builder.audio.music'), a.music ?? '', [{ id: '', label: t('builder.audio.gameMusic') }, { id: 'none', label: t('builder.audio.none') }, ...MUSIC_TRACKS], (v) => onChange({ ...a, music: v || undefined }))}
+          {row(t('builder.audio.right'), a.right ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...RIGHT_SOUNDS], (v) => onChange({ ...a, right: v || undefined }))}
+          {row(t('builder.audio.wrong'), a.wrong ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...WRONG_SOUNDS], (v) => onChange({ ...a, wrong: v || undefined }))}
+        </div>
+      )}
+    </div>
   );
 }

@@ -127,6 +127,10 @@ export interface GameTheme {
   // Optional first name or nickname of the student who designed it.
   studentDesigner?: string;
   sounds?: SoundPack;
+  // Advanced audio settings (teacher, 2026-11-20): background music and the
+  // right/wrong answer sounds, picked from the sounds already in Gamify.
+  // Missing = the game's own; music 'none' = no music.
+  audio?: { music?: string; right?: string; wrong?: string };
   // Sharing beyond the teacher's own classes (teacher, 2026-10-25): sent to
   // the public gallery, where the owner reviews it before anyone sees it.
   gallery?: { status: 'pending' | 'approved' | 'declined'; at: string; reason?: GalleryReason };

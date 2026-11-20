@@ -338,7 +338,7 @@ test('Download tab: blank printable pages and digital files; the Classic look is
   // Classic is seen, never handed out (teacher, 2026-10-28): no Classic files.
   await expect(page.getByRole('button', { name: 'Classic example (.zip)' })).toHaveCount(0);
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Canva file (.pdf)' }).click();
+  await page.getByRole('button', { name: 'Digital template (.pdf)' }).click();
   const file = await wait;
   expect(file.suggestedFilename()).toBe('game-show-theme-for-canva.pdf');
   // One PDF, a page per piece, each page the piece's own size (Canva reads 96 dpi: 0.75 pt a pixel).

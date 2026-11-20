@@ -14,11 +14,30 @@ const clips = new Map<string, HTMLAudioElement>();
 // Up chime for right, boing for wrong or try again (teacher, 2026-11-05).
 export const ANSWER_SOUNDS = { right: '/sounds/answers/chime.mp3', wrong: '/sounds/answers/boing.mp3' };
 
+// A theme's Advanced audio settings, set by the game screen while it plays.
+let themeAudio: { music?: string; right?: string; wrong?: string } = {};
+export function setThemeAudio(a: { music?: string; right?: string; wrong?: string } | undefined) { themeAudio = a ?? {}; }
+// Every track a theme can pick (the music already in Gamify).
+export const MUSIC_TRACKS: { id: string; label: string }[] = [
+  { id: '/sounds/match-three/music.mp3', label: 'Creative loop' },
+  { id: '/sounds/game-show/music-cards.mp3', label: 'Game show' },
+  { id: '/sounds/game-show/music-categories.mp3', label: 'Quiz board' },
+];
+export const RIGHT_SOUNDS: { id: string; label: string }[] = [
+  { id: '/sounds/answers/chime.mp3', label: 'Chime' }, { id: '/sounds/right.mp3', label: 'Ding' }, { id: '/sounds/win.mp3', label: 'Cheer' }, { id: '/sounds/pinball/score-bell.mp3', label: 'Bell' },
+];
+export const WRONG_SOUNDS: { id: string; label: string }[] = [
+  { id: '/sounds/answers/boing.mp3', label: 'Boing' }, { id: '/sounds/miss.mp3', label: 'Soft miss' }, { id: '/sounds/tap.mp3', label: 'Tap' },
+];
+
 // Power-up sounds (teacher's uploads, 2026-11-01): a zap for magnets, wind
 // for the tornado, an 8-bit chest opening for treasure chests.
 export const POWER_SOUNDS = { magnet: '/sounds/board/magnet.mp3', tornado: '/sounds/board/wind.mp3', chest: '/sounds/board/chest.mp3' };
 
 export function playClip(src: string, s: PlayerSettings, level = 0.8) {
+  const asked = src;
+  if (src === ANSWER_SOUNDS.right && themeAudio.right) src = themeAudio.right;
+  else if (src === ANSWER_SOUNDS.wrong && themeAudio.wrong) src = themeAudio.wrong;
   const v = volume(s, 'effects') * level * (isSpeaking() ? 0.35 : 1);
   if (v <= 0 || typeof Audio === 'undefined') return;
   let base = clips.get(src);
@@ -29,8 +48,8 @@ export function playClip(src: string, s: PlayerSettings, level = 0.8) {
   // every answer in a row (a quiet reset on a miss), and every other clip
   // varies a touch so repeated hops and rolls never sound canned.
   let rate = 0.96 + Math.random() * 0.08;
-  if (src === ANSWER_SOUNDS.right) { streak++; rate = 1 + Math.min(streak - 1, 7) * 0.06; }
-  else if (src === ANSWER_SOUNDS.wrong) { streak = 0; rate = 1; }
+  if (asked === ANSWER_SOUNDS.right) { streak++; rate = 1 + Math.min(streak - 1, 7) * 0.06; }
+  else if (asked === ANSWER_SOUNDS.wrong) { streak = 0; rate = 1; }
   (a as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
   a.playbackRate = rate;
   void a.play().catch(() => undefined);
@@ -76,7 +95,7 @@ export function startMusic(src: string, s: PlayerSettings, opts: { intro?: strin
 // Plays a game's music while `on`, and stops it when the game ends or leaves.
 export function useGameMusic(on: boolean, src: string, s: PlayerSettings, intro?: string) {
   useEffect(() => {
-    if (!on) return;
+    if (!on || themeAudio.music) return; // a theme's own music plays instead (ThemedPage)
     startMusic(src, s, { intro, delay: intro ? 2200 : 0 });
     return () => stopMusic();
   }, [on, src]); // eslint-disable-line react-hooks/exhaustive-deps

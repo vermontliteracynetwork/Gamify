@@ -25,13 +25,13 @@ test('Blog theme guides: one per game, every piece with its size, blank download
 
   // Free plan: Bowling templates are locked behind Plus (teacher, 2026-10-31).
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Canva file/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Digital template/ })).toHaveCount(0);
   await page.goto('/blog/themes/bowling/print');
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
   await page.evaluate(() => localStorage.setItem('gamify:settings', JSON.stringify({ ...JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'), tier: 'plus' })));
   await page.goto('/blog/themes/bowling');
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: /Canva file/ }).click();
+  await page.getByRole('button', { name: /Digital template/ }).click();
   const file = await wait;
   expect(file.suggestedFilename()).toBe('bowling-theme-for-canva.pdf');
 

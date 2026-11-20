@@ -1,3 +1,4 @@
+import { setThemeAudio, startMusic, stopMusic } from '../engine/music';
 import { inkFor, useStageColor } from './stageColor';
 import { useEffect, useState, type ReactNode } from 'react';
 import { TIERS } from '../config';
@@ -47,6 +48,14 @@ export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme
   const { settings } = useSettings();
   const stageColor = useStageColor(theme.gameId);
   useEffect(() => { setSoundPack(menu ? 'classic' : theme.sounds); return () => setSoundPack('classic'); }, [theme.sounds, menu]);
+  // Advanced audio (teacher, 2026-11-20): the theme's own music and answer sounds during play.
+  useEffect(() => {
+    if (menu) return;
+    setThemeAudio(theme.audio);
+    const m = theme.audio?.music;
+    if (m && m !== 'none') startMusic(m, settings);
+    return () => { setThemeAudio(undefined); if (m && m !== 'none') stopMusic(); };
+  }, [menu, theme.audio?.music, theme.audio?.right, theme.audio?.wrong]); // eslint-disable-line react-hooks/exhaustive-deps
   if (menu) return <div className="game-stage brand-menu min-h-[calc(100dvh-4rem)]">{children}</div>;
   // The teacher's own background color for this game, if picked (2026-11-01).
   const stage = stageColor;

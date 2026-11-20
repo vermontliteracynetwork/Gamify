@@ -1,3 +1,4 @@
+import { useGameMusic } from '../../engine/music';
 import { useMemo, useRef, useState } from 'react';
 import PopText from '../../ui/PopText';
 import { impact } from '../../engine/impact';
@@ -63,6 +64,8 @@ export default function MatchThree() {
   const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
+  // Background music, quieter than the effects (teacher, 2026-11-20; Freesound loop by audiocoffee).
+  useGameMusic(phase === 'play', '/sounds/match-three/music.mp3', settings);
   const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
   const ROWS = plan.current.size;
   const COLS = plan.current.size;
