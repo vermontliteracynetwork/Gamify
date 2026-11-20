@@ -54,38 +54,30 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </svg>
         </div>
       );
-    case 'match-three':
-      // A match happening (teacher, 2026-10-31: "more match 3 game related"):
-      // three hearts in a row glow and burst, a gem swaps in with an arrow,
-      // and points pop up.
+    case 'match-three': {
+      // The cover is the game's own board (teacher, 2026-11-20, option 2):
+      // the Classic ombre behind a white board of pieces, made pieces included.
+      const n = 6;
+      const sp: Record<number, 'row' | 'col' | 'burst' | 'rainbow'> = { [n + 1]: 'row', [2 * n + 3]: 'col', [3 * n + 2]: 'burst', [4 * n + 4]: 'rainbow' };
       return (
-        <div className={base} style={{ background: 'radial-gradient(circle at 50% 40%, #9b7be0, #4b2f8f 75%)' }} aria-hidden="true">
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid slice">
-            <g transform="rotate(-8 50 31)">
-              <rect x="14" y="2" width="72" height="58" rx="5" fill="#ffffff" stroke="#000" strokeWidth="1.2" />
-              {[[0, 2, 4, 3, 5], [3, 1, 1, 1, 0], [5, 4, 2, 0, 3], [2, 0, 5, 4, 1]].map((row, r) => row.map((k, c) => {
-                const x = 17 + c * 13.5, y = 5 + r * 13.6;
-                const lit = r === 1 && c >= 1 && c <= 3;
-                return (
-                  <g key={`${r}-${c}`}>
-                    <rect x={x} y={y} width="12.5" height="12.5" rx="2.5" fill={lit ? '#fdfd94' : ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'][k]} stroke={lit ? '#000' : '#c9d3ee'} strokeWidth={lit ? 0.9 : 0.5} />
-                    <image href={`/classic/match-three/gem-${k}.webp`} x={x + 1.5} y={y + 1.5} width="9.5" height="9.5" />
-                  </g>
-                );
-              }))}
-              {/* The swap: an arrow from the gem that just moved in. */}
-              <path d="M 37 47 Q 42 40 44 33" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" />
-              <path d="M 37 47 Q 42 40 44 33" fill="none" stroke="#fdfd94" strokeWidth="1.2" strokeLinecap="round" />
-              <path d="M 41.5 34.5 L 44.5 31.5 L 46 35.5 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.6" />
-            </g>
-            {/* Sparkles bursting from the match, and the points. */}
-            {[[30, 12, 4], [66, 10, 3.4], [76, 24, 2.6], [24, 26, 2.4], [50, 6, 3]].map(([x, y, r], i) => (
-              <path key={i} d={`M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3} Z`} fill="#fdfd94" stroke="#000" strokeWidth="0.5" />
-            ))}
-            <text x="82" y="16" textAnchor="middle" fontSize="9" fontWeight="900" fill="#fdfd94" stroke="#000" strokeWidth="1.4" paintOrder="stroke" transform="rotate(10 82 16)">+30</text>
-          </svg>
+        <div className={base} style={{ background: '#c9a7e8 url(/classic/match-three/background.svg) center / cover' }} aria-hidden="true">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid gap-[3%] p-[3%] rounded-[6%] border-[3px] border-black bg-white h-[86%] aspect-square overflow-hidden" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${n}, minmax(0, 1fr))` }}>
+            {Array.from({ length: n * n }, (_, i) => {
+              const k = (i * 7 + Math.floor(i / n) * 3) % 6;
+              const s2 = sp[i];
+              if (s2 === 'rainbow') return <span key={i} className="rounded-full border-2 border-black" style={{ background: 'conic-gradient(#ff5b4d, #fdc512, #a9cf3a, #26cdeb, #a58be0, #ff5b4d)' }} />;
+              return (
+                <span key={i} className="relative min-h-0">
+                  <img src={`/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" draggable="false" />
+                  {(s2 === 'row' || s2 === 'col') && <span className="absolute inset-[14%] rounded-[30%] mix-blend-screen" style={{ background: `repeating-linear-gradient(${s2 === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.9) 0 9%, transparent 9% 22%)` }} />}
+                  {s2 === 'burst' && <span className="absolute inset-[6%] rounded-full" style={{ boxShadow: '0 0 6px 2px #fdfd94, inset 0 0 5px #fff' }} />}
+                </span>
+              );
+            })}
+          </div>
         </div>
       );
+    }
     case 'four-in-a-row': {
       // A real four-in-a-row board (teacher, 2026-11-06): a standing 7 by 6
       // frame, pieces stacked from the bottom, one dropping in, and a
@@ -166,8 +158,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       return (
         <div className={base} style={{ background: '#0b0b12 url(/classic/bowling/carpet.svg) center / 60% repeat' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-            <rect x="32" y="8" width="36" height="10" rx="2" fill="#241c3d" stroke="#ff4fa3" strokeWidth="1.2" />
-            {[0, 1, 2, 3, 4, 5, 6].map((k) => <circle key={k} cx={37 + k * 4.4} cy="13" r="0.9" fill={['#fdfd94', '#6aa9e9', '#ff4fa3'][k % 3]} />)}
+            {/* No light-up sign at the top (teacher, 2026-11-20). */}
             <polygon points="12,100 88,100 66,22 34,22" fill="#7f8aa3" stroke="#000" strokeWidth="1" />
             <polygon points="18,100 82,100 64,22 36,22" fill="#e9c08f" stroke="#000" strokeWidth="1" />
             {[30, 40, 50, 60, 70].map((x) => <line key={x} x1={x} y1="100" x2={50 + (x - 50) * 0.42} y2="22" stroke="#8a5a2b" strokeOpacity="0.3" strokeWidth="0.6" />)}
@@ -241,10 +232,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         <div className={base} style={{ backgroundColor: '#F1DFBB', backgroundImage: 'radial-gradient(#FAE9DF 18%, transparent 19%)', backgroundSize: '14px 14px' }} aria-hidden="true">
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 62" preserveAspectRatio="xMidYMid meet">
             <rect x="9" y="3" width="82" height="56" rx="5" fill="#FAE9DF" stroke="#474241" strokeWidth="1.4" />
-            {sq.map(([x, y], i) => <rect key={i} x={12 + x * 11} y={5 + y * 10.4} width="9.4" height="9.4" rx="1.6" fill={i === 0 ? '#9AB582' : i === sq.length - 1 ? '#F9CC14' : i === 9 ? '#474241' : cols[i % 4]} stroke="#474241" strokeWidth="0.9" transform={`rotate(${((i * 37) % 7) - 3} ${16.7 + x * 11} ${9.7 + y * 10.4})`} />)}
+            {/* Option 1's layout in the game's own look (teacher, 2026-11-20): straight
+                squares with bold outlines, a start star, lose-a-turn and roll-again squares. */}
+            {sq.map(([x, y], i) => <rect key={i} x={12 + x * 11} y={5 + y * 10.4} width="9.4" height="9.4" rx="1.4" fill={i === 0 ? '#9AB582' : i === sq.length - 1 ? '#F9CC14' : i === 9 ? '#474241' : i === 13 ? '#D35252' : cols[i % 4]} stroke="#241c3d" strokeWidth="1.2" />)}
+            <path d="M16.7 7.4 L17.5 9.1 L19.3 9.3 L18 10.5 L18.3 12.3 L16.7 11.4 L15.1 12.3 L15.4 10.5 L14.1 9.3 L15.9 9.1 Z" fill="#fff" stroke="#241c3d" strokeWidth="0.5" />
+            <text x={16.7 + sq[9][0] * 11} y={11.3 + sq[9][1] * 10.4} textAnchor="middle" fontSize="5" fontWeight="900" fill="#fff">✕</text>
+            <path d={`M${14.3 + sq[13][0] * 11} ${9.7 + sq[13][1] * 10.4} a2.6 2.6 0 1 1 1 2`} fill="none" stroke="#fff" strokeWidth="0.9" strokeLinecap="round" />
             <g transform="translate(81.5 47.5)"><rect x="-1" y="-3" width="1" height="7" fill="#474241" /><path d="M0 -3 H5 V0.5 H0 Z" fill="#fff" stroke="#474241" strokeWidth="0.5" /><rect x="0" y="-3" width="1.7" height="1.7" fill="#474241" /><rect x="3.4" y="-3" width="1.6" height="1.7" fill="#474241" /><rect x="1.7" y="-1.3" width="1.7" height="1.8" fill="#474241" /></g>
+            {/* The two team badges, as in the game. */}
             <circle cx={16.7 + 3 * 11} cy={9.7 + 2 * 10.4} r="3.6" fill="#f6c544" stroke="#241c3d" strokeWidth="0.9" />
-            <circle cx={16.7 + 5 * 11} cy={9.7 + 0} r="3.6" fill="#6aa9e9" stroke="#241c3d" strokeWidth="0.9" />
+            <path transform={`translate(${16.7 + 3 * 11} ${9.7 + 2 * 10.4}) scale(0.9)`} d="M0 -2.2 L0.6 -0.7 L2.2 -0.6 L1 0.4 L1.4 2 L0 1.1 L-1.4 2 L-1 0.4 L-2.2 -0.6 L-0.6 -0.7 Z" fill="#241c3d" />
+            <circle cx={16.7 + 5 * 11} cy={9.7 + 0} r="3.6" fill="#5cc3a0" stroke="#241c3d" strokeWidth="0.9" />
+            <path transform={`translate(${16.7 + 5 * 11} ${9.9})`} d="M0 1.9 C-2.6 0.2 -2.2 -1.9 -0.9 -1.9 C-0.4 -1.9 0 -1.5 0 -1.1 C0 -1.5 0.4 -1.9 0.9 -1.9 C2.2 -1.9 2.6 0.2 0 1.9 Z" fill="#241c3d" />
             <g transform="translate(40 36) rotate(-12)"><rect x="0" y="0" width="13" height="13" rx="2.6" fill="#fffdf6" stroke="#474241" strokeWidth="1" /><circle cx="3.5" cy="3.5" r="1.2" fill="#474241" /><circle cx="6.5" cy="6.5" r="1.2" fill="#474241" /><circle cx="9.5" cy="9.5" r="1.2" fill="#474241" /></g>
           </svg>
         </div>
