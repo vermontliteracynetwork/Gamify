@@ -7,7 +7,8 @@ export const castleQuestManifest: GameManifest = {
   id: 'castle-quest',
   name: 'Board Game',
   description: 'Answer right, roll the die and race to the finish.',
-  modes: ['share', 'versus'],
+  // Share, Versus or Live (teacher, 2026-11-20).
+  modes: ['share', 'versus', 'live'],
   questionKinds: ['mc'],
   // Everything is designable (teacher, 2026-11-08): each kind of square, all
   // six sides of the die on one page, the background and every power-up.

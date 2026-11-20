@@ -243,3 +243,4 @@ line that fits, and add each new preference the same turn she says it.
 - Bowling ways to play (2026-11-20): Share, Versus or Live, never Solo. Live opens the lobby: students bowl their own lane on their devices; the teacher puts students on teams there (several games at once for big classes) and team points add up on the big screen. The Board Game should get the same lobby teams next.
 - Live lobby "groups" are called teams (2026-11-20).
 - Research page (2026-11-20): no beta test tab. Login page: wider.
+- Board Game Live (2026-11-20): like Bowling, the teacher opens the lobby and sets teams; each student races their own board against the computer on their device; team points add up.

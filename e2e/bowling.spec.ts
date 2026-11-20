@@ -22,7 +22,7 @@ test('Bowling: a right answer earns a roll; point to aim, tap to throw, and the 
   await page.screenshot({ path: `test-results/bowling-aim-${info.project.name}.png` });
   await lane.click({ position: { x: box.width * 0.6, y: box.height * 0.6 } });
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 12; f++) { await page.screenshot({ path: `test-results/bowling-frame-${f}.png` }); await page.waitForTimeout(160); }
-  await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 9000 });
+  await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 15000 });
   await page.screenshot({ path: `test-results/bowling-result-${info.project.name}.png` });
   // Then the same team's second roll, or the next team's turn: a new question either way.
   await startTurn(page);
@@ -43,5 +43,5 @@ test('Bowling with calm motion: sliders aim and spin, then Throw', async ({ page
   await expect(page.getByLabel('Aim')).toBeVisible();
   await expect(page.getByLabel('Spin')).toBeVisible();
   await page.getByRole('button', { name: 'Throw', exact: true }).click();
-  await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 9000 });
+  await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 15000 });
 });

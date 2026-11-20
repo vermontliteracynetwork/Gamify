@@ -1,3 +1,7 @@
+import { useNavigate } from 'react-router-dom';
+import { useSignedIn } from '../../auth/session';
+import { makeGameCode } from '../../data/gameCodes';
+import { classPlayQuery, DEFAULT_CLASS_PLAY } from '../../live/ClassPlay';
 import '@fontsource/chicle/400.css';
 import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
@@ -59,12 +63,19 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus' | 'live', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
-  const versus = setup.who === 'versus';
+  // Board Game Live (teacher, 2026-11-20): the teacher opens the lobby and
+  // puts students on teams; each student races their own board against the
+  // computer on their device, and team points add up on the big screen.
+  const { teacher } = useSignedIn();
+  const versus = setup.who === 'versus' || !teacher;
+  const liveWay = !!teacher && setup.who === 'live';
+  const navigate = useNavigate();
+  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('castle-quest', setId, 'live')).code}?${classPlayQuery(DEFAULT_CLASS_PLAY)}`); }
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const [phase, setPhase] = useState<Phase>('welcome');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -412,8 +423,8 @@ export default function CastleQuest() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={castleQuestManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={() => begin(team.players)} pages={[
-          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={liveWay ? () => void openLive() : () => begin(team.players)} playLabel={liveWay ? t('way.openLobby') : undefined} pages={[
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'live']} value={liveWay ? 'live' : versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'live' ? 'live' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -423,9 +434,9 @@ export default function CastleQuest() {
               {powerUpSwitches({ manifest: castleQuestManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
-          versus
+          ...(liveWay ? [] : [versus
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
-            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
+            : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }]),
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
