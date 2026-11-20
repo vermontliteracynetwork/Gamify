@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { lazyPage } from '../../lib/lazyPage';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, BookOpen, CaretDown, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Info, BookOpen, CaretDown, CaretLeft, CaretRight, CheckCircle, DownloadSimple, FloppyDisk, LockSimple, PaintBrush, Play, Printer, Trash, UploadSimple, WarningCircle } from '@phosphor-icons/react';
 import { CHALLENGE_OPEN, THEME_TRIAL_GAME, TIERS } from '../../config';
 import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
@@ -534,8 +534,12 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
   const drawn = drawing === null ? undefined : items[drawing];
   const put = (i: number, patch: Partial<ThemeItem>) => onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const field = fieldClasses('md', 'w-full');
+  // One power-up per action (teacher, 2026-11-20).
+  const used = (i: number) => new Set(items.filter((_, j) => j !== i).map((x) => x.ability));
+  const free = spec.abilities.filter((a) => !items.some((x) => x.ability === a.id));
   function add() {
-    const a = spec.abilities[0];
+    const a = free[0];
+    if (!a) return;
     // New ones go first, unnamed: every power-up needs its own name.
     onChange([{ id: newId('item'), name: '', ability: a.id, amount: a.amount?.default, motion: 'wiggle', often: 2 }, ...items]);
   }
@@ -574,25 +578,22 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
                 <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
               </label>
             </div>
-            <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
+            {/* Action, with what it does and the Classic example in a white (i) hover card (teacher, 2026-11-20). */}
+            <label className="grid gap-1 font-bold text-sm mt-2 text-left">
+              <span className="inline-flex items-center gap-1.5">{t('builder.items.ability')}
+                <span data-tip={[ability.hint + (ability.amount ? ` ${t('builder.items.amountNote', { what: ability.amount.label.toLowerCase() })}` : ''), spec.classic.find((c) => c.ability === ability.id) ? t('builder.items.example', { name: spec.classic.find((c) => c.ability === ability.id)!.name }) : ''].filter(Boolean).join(' ')}
+                  data-tip-bg="#ffffff" aria-hidden="true" className="text-muted cursor-help"><Info weight="bold" size={16} /></span>
+              </span>
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
-                {spec.abilities.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                {spec.abilities.map((a) => <option key={a.id} value={a.id} disabled={used(i).has(a.id)}>{a.label}</option>)}
               </select>
-              {/* What the power does, in full (teacher, 2026-11-01: clear and explanatory). */}
-              <span className="text-sm font-semibold leading-snug">{ability.hint}{ability.amount ? ` ${t('builder.items.amountNote', { what: ability.amount.label.toLowerCase() })}` : ''}</span>
-              {spec.classic.find((c) => c.ability === ability.id) && (
-                <span className="flex items-center gap-2 text-xs font-bold">
-                  <ItemArt item={spec.classic.find((c) => c.ability === ability.id)!} size={32} still />
-                  {t('builder.items.example', { name: spec.classic.find((c) => c.ability === ability.id)!.name })}
-                </span>
-              )}
             </label>
             {ability.amount && (
               <label className="grid gap-1 font-bold text-sm">{ability.amount.label}: {it.amount ?? ability.amount.default}
-                <input type="range" min={ability.amount.min} max={ability.amount.max} step={ability.amount.step} value={it.amount ?? ability.amount.default} onChange={(e) => put(i, { amount: Number(e.target.value) })} />
+                <input type="range" min={ability.amount.min} max={ability.amount.default} step={ability.amount.step} value={Math.min(it.amount ?? ability.amount.default, ability.amount.default)} onChange={(e) => put(i, { amount: Number(e.target.value) })} />
               </label>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 text-left">
               <label className="grid gap-1 font-bold text-sm">{t('builder.items.motion')}
                 <select value={it.motion} onChange={(e) => put(i, { motion: e.target.value as ThemeItem['motion'] })} className={field}>
                   {ITEM_MOTIONS.map((m) => <option key={m} value={m}>{t(`builder.motion.${m}` as StringKey)}</option>)}
@@ -606,13 +607,12 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {!it.image && <label className="flex items-center gap-2 font-bold text-sm" data-tip={t('builder.items.colorTip')}>{t('builder.items.color')}<input type="color" value={it.color ?? '#fdfd94'} onChange={(e) => put(i, { color: e.target.value })} className="color-dot w-9 h-9" /></label>}
-              {it.image && <Button onClick={() => put(i, { image: undefined })}>{t('builder.items.removePicture')}</Button>}
               <IconButton variant="danger" className="ml-auto" label={t('builder.items.delete')} onClick={() => onChange(items.filter((_, j) => j !== i))}><Trash weight="bold" size={18} /></IconButton>
             </div>
           </div>
         );
       })} />
-      <Button className="justify-self-start" disabled={items.length >= spec.max} onClick={add}><PaintBrush weight="bold" size={18} />{t('builder.items.add')}</Button>
+      <Button className="justify-self-start" disabled={items.length >= spec.max || !free.length} onClick={add}><PaintBrush weight="bold" size={18} />{t('builder.items.add')}</Button>
     </div>
   );
 }

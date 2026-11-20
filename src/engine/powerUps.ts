@@ -13,5 +13,6 @@ export function rollPowerUp(items: ThemeItem[], rand: () => number = Math.random
 }
 
 // An item's number, or the ability's default when the theme left it blank.
-export const amountOf = (it: ThemeItem, fallback: number) => it.amount ?? fallback;
+// A power-up never goes above its action's default amount (teacher, 2026-11-20).
+export const amountOf = (it: ThemeItem, fallback: number) => (fallback > 0 ? Math.min(it.amount ?? fallback, fallback) : it.amount ?? fallback);
 
