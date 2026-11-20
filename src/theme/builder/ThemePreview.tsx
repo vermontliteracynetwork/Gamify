@@ -283,19 +283,30 @@ function board(theme: GameTheme, size?: number) {
       );
     case 'sign-in':
       return <div className="grid grid-cols-6 gap-2">{[...PICTURES.map((p) => p.id), ...drawnExtras(theme)].slice(0, 24).map((id) => <PictureBadge key={id} id={id} theme={theme} size={44} />)}</div>;
-    case 'game-show':
+    case 'game-show': {
+      // The board as play draws it (teacher, 2026-11-20: "preview for game
+      // show should be the actual game board"): the numbered surprise cards,
+      // one turned over, inside the marquee-light frame on the Classic stage.
+      // Players are shown on their own Pick slide, not here.
+      const marquee = theme.id.endsWith(':classic') || !theme.id;
+      const art = pieceImage(theme, 'card-back');
+      const lights = (n: number) => Array.from({ length: n }, (_, k) => <span key={k} className="w-[6px] h-[6px] rounded-full bg-[#fff6b0] motion-safe:animate-pulse" style={{ animationDelay: `${(k % 4) * 0.25}s` }} />);
       return (
-        <div className="grid grid-cols-4 gap-1.5 w-full">
-          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image ?? (theme.gameId === 'bowling' ? theme.pieces[`ball-${k + 1}`]?.image : undefined))}>
-            <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
-          </TeamArt.Provider>
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className="aspect-[4/3] rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
-              {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
-            </span>
-          ))}
+        <div className={`relative w-full rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
+          {marquee && <>
+            <span aria-hidden="true" className="absolute top-[4px] inset-x-[14px] flex justify-between">{lights(18)}</span>
+            <span aria-hidden="true" className="absolute bottom-[4px] inset-x-[14px] flex justify-between">{lights(18)}</span>
+            <span aria-hidden="true" className="absolute left-[4px] inset-y-[14px] flex flex-col justify-between">{lights(9)}</span>
+            <span aria-hidden="true" className="absolute right-[4px] inset-y-[14px] flex flex-col justify-between">{lights(9)}</span>
+          </>}
+          <div className="grid grid-cols-4 gap-2">
+            {Array.from({ length: 12 }, (_, i) => i === 5
+              ? <span key={i} className="aspect-[4/3] rounded-input border-bold border-border bg-white flex items-center justify-center font-display font-bold text-2xl ring-4 ring-accent" style={{ boxShadow: 'var(--shadow-sticker)' }}>+30</span>
+              : <span key={i} className="aspect-[4/3] rounded-input border-bold border-border flex items-center justify-center font-display font-bold text-2xl" style={{ boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{!art && i + 1}</span>)}
+          </div>
         </div>
       );
+    }
     default:
       return (
         <div className="flex flex-wrap gap-3 justify-center items-center">

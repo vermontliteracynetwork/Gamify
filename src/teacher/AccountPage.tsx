@@ -54,7 +54,7 @@ export default function AccountPage() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24 grid gap-4">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-24 grid gap-4">
       <TeacherNav />
       <PageHeader title={t('account.title')} subtitle={teacher?.name} />
       <Panel className="grid gap-2">

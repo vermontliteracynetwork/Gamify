@@ -80,7 +80,7 @@ export default function ReportsPage() {
   );
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
         actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('primary', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />

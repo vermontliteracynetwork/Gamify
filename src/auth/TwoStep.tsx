@@ -9,10 +9,10 @@ import { Button, Panel } from '../ui/kit';
 // Account; once on, every teacher page asks for the code after sign-in.
 // It needs MFA (TOTP) switched on in Supabase Authentication.
 
-function CodeForm({ onCode, busy }: { onCode: (code: string) => void; busy?: boolean }) {
+function CodeForm({ onCode, busy, center = false }: { onCode: (code: string) => void; busy?: boolean; center?: boolean }) {
   const [code, setCode] = useState('');
   return (
-    <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); onCode(code.trim()); }}>
+    <form className={`flex flex-wrap items-center gap-2 ${center ? 'justify-center' : ''}`} onSubmit={(e) => { e.preventDefault(); onCode(code.trim()); }}>
       <input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" aria-label={t('twoStep.code')} placeholder="123456"
         className="min-h-12 w-36 px-3 rounded-input border-std border-border font-bold text-xl tracking-[0.3em] text-center" />
       <Button variant="primary" type="submit" disabled={busy || code.length !== 6}>{t('twoStep.go')}</Button>
@@ -37,12 +37,13 @@ export function TwoStepGate({ children }: { children: ReactNode }) {
   if (need === 'ok') return <>{children}</>;
   if (need === 'checking') return null;
   return (
-    <main className="max-w-md mx-auto px-4 pt-12 pb-24">
+    // Centered on the page, top to bottom and side to side (teacher, 2026-11-20).
+    <main className="max-w-md mx-auto px-4 min-h-[calc(100dvh-12rem)] grid place-content-center py-8">
       <Panel className="grid gap-3 justify-items-center text-center">
         <ShieldCheck weight="fill" size={44} aria-hidden="true" />
         <h1 className="font-display text-2xl">{t('twoStep.title')}</h1>
         <p className="font-semibold">{t('twoStep.ask')}</p>
-        <CodeForm onCode={async (code) => {
+        <CodeForm center onCode={async (code) => {
           const { error } = await supabase!.auth.mfa.challengeAndVerify({ factorId: need, code });
           if (error) setProblem(t('twoStep.wrong')); else setNeed('ok');
         }} />

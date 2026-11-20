@@ -91,7 +91,7 @@ export default function ActivityPage() {
 
   const card = (on: boolean) => `rounded-input border-bold text-left bg-surface ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`;
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 pb-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-8">
       <TeacherNav startOpen={false} />
       <PageHeader title={t('activity.title')} subtitle={t('activity.sub')} />
       <ol className="flex flex-wrap gap-2 list-none p-0 m-0 mb-4" aria-label={t('activity.steps')}>

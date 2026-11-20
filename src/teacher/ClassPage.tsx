@@ -62,7 +62,7 @@ export default function ClassPage() {
   if (!classroom) return null;
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
       {/* Just the class name and New assignment (teacher, 2026-11-20: no counts
@@ -402,7 +402,7 @@ export function AssignPage() {
   if (!classroom) return null;
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader title={t('class.newAssignment')} subtitle={classroom.name}
         actions={<div className="flex flex-wrap gap-2">

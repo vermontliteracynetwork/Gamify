@@ -261,3 +261,5 @@ line that fits, and add each new preference the same turn she says it.
 - Two-step sign-in for teachers (2026-11-20): Account page "Two-step sign-in" (authenticator app); once on, teacher pages ask for the code after sign-in. Needs MFA on in Supabase.
 - Theme Builder preview (2026-11-20): every game also shows its player picker and the theme picker (this theme's cover in front, blank cards behind).
 - Uploads from the digital template (2026-11-20, urgent): a picture the same shape as the piece and 1 to 4 times its size goes in exactly as drawn (no page search, trimming, paper clearing or fill).
+- (2026-11-20) The two-step sign-in box is centered, top to bottom and side to side. Every teacher page (Account included) uses the Theme Builder's width and margins (max-w-7xl).
+- (2026-11-20) The Game Show preview in the Theme Builder is the real game board (numbered cards, one turned over), not team badges. Player selection is its own preview slide in every game.

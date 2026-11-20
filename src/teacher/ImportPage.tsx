@@ -26,7 +26,7 @@ export default function ImportPage() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <PageHeader title={t('import.title')} subtitle={t('import.subtitle')} />
 
       <Panel className="grid gap-4">

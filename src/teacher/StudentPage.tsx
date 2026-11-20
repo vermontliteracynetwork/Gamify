@@ -40,7 +40,7 @@ export default function StudentPage() {
   const names = { student: () => student.name, set: setName, game: (g: string) => ALL_GAMES.find((x) => x.id === g)?.name ?? g };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <Link to={`/teacher/classes/${id}`} className="inline-flex items-center gap-1.5 font-bold mb-3"><ArrowLeft weight="bold" size={18} />{classroom.name}</Link>
       <StudentStrip classId={id} students={students} current={sid} look={look} />
