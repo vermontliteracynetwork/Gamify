@@ -23,10 +23,26 @@ export const EASE = {
 
 export const DURATION = { fast: 0.18, base: 0.32, slow: 0.6 } as const;
 
+// The motion rules (teacher, 2026-11-20), for everyday UI (menus, pages,
+// buttons); game pieces keep their bouncy springs.
+//  - entrances ease out; moves on screen ease in and out; exits about 20% shorter
+//  - dropdowns and popovers 150 to 250ms, starting at 0.95 from their trigger
+//  - list rows stagger by 30ms; buttons press to 0.97
+//  - no spring bounce for everyday UI transitions; a pulse confirms success
+export const UI = {
+  enter: { duration: 0.22, ease: EASE.out },
+  exit: { duration: 0.18, ease: EASE.out },
+  move: { duration: 0.3, ease: EASE.inOut },
+  popover: { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, transition: { duration: 0.18, ease: EASE.out } },
+  staggerRows: 0.03,
+  press: 0.97,
+} as const;
+export const listRow = (i: number) => ({ initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.22, ease: EASE.out, delay: i * UI.staggerRows } });
+
 /** Sticker buttons: lift on hover, squash on press (laptops and iPads). */
 export const PRESS = {
   whileHover: { y: -2 },
-  whileTap: { scale: 0.95, y: 1 },
+  whileTap: { scale: 0.97, y: 1 },
   transition: SPRING.snappy,
 } as const;
 

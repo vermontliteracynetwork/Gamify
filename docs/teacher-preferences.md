@@ -253,3 +253,5 @@ line that fits, and add each new preference the same turn she says it.
 - Theme Builder preview (2026-11-20): every extra piece shows on the preview board (Match Three's line, bomb and rainbow pieces).
 - Site QA (2026-11-20): custom 404 page; every page has a title and a search description.
 - FAQ and Help Center (2026-11-20): /faq is its own page, "Frequently Asked Questions" (topics and answers only, one link to the guides); /help is the Help Center (how-to guides, IT, device check, links to the FAQ). Footers link both.
+- Design polish (2026-11-20, universal): balanced headline wrapping, no single-word last lines, tabular numbers in tables and scores, one strong call to action per section (the closing "Start free" is the bold one), no outdated copy (no teacher PIN mentions), no other brand names in copy.
+- Motion rules (2026-11-20, universal, src/ui/motion presets UI and listRow): entrances ease out about 220ms, exits about 20% shorter, popovers and dialogs from 0.95 in 150 to 250ms, list rows stagger 30ms, buttons press to 0.97, no spring bounce on everyday UI (game pieces keep their bounce).

@@ -21,7 +21,8 @@ export default function Dialog({ title, sub, onClose, closeLabel, size = 'md', c
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/40" style={{ zIndex }} role="dialog" aria-modal="true" aria-labelledby={id}>
       <DialogFocus onClose={onClose} />
-      <motion.div initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+      {/* Motion rules (teacher, 2026-11-20): pops in from 0.95 with an ease-out, about 200ms. */}
+      <motion.div initial={settings.motion === 'still' ? false : { scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         className={`w-full ${WIDTH[size]} bg-surface border-bold border-border rounded-panel p-5 grid gap-4 overflow-y-auto text-[var(--text)] ${center ? 'justify-items-center text-center' : ''}`}
         style={{ boxShadow: 'var(--shadow-sticker-lg)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <div className={`flex items-start gap-2 ${center ? 'w-full' : ''}`}>

@@ -113,7 +113,7 @@ export default function PublicHome() {
         <section className="mt-16 bg-accent border-bold border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('public.ctaTitle')} /></h2>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('ghost', 'hover-pop', 'lg')}>{t('public.seePlans')}</Link>
           </div>
         </section>

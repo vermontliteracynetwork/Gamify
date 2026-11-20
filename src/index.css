@@ -879,3 +879,12 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
   .welcome-col > button { min-height: clamp(2.8rem, 13cqh, 5rem) !important; width: 82% !important; font-size: calc(var(--text-scale, 1) * clamp(1.2rem, 5cqh, 2rem)) !important; }
 }
 
+
+/* Design polish rules (teacher, 2026-11-20): headlines wrap in balanced lines,
+   paragraphs avoid a lonely last word, and numbers in tables, scores and
+   counters line up (tabular numbers). */
+@layer base {
+  h1, h2, h3, .title-bubble { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
+  table, .tabular-nums, [role='status'] { font-variant-numeric: tabular-nums; }
+}

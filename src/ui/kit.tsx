@@ -20,7 +20,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 const SIZES: Record<ButtonSize, string> = { sm: 'min-h-9 px-3 text-sm tap', md: 'min-h-11 px-4 text-sm', lg: 'min-h-14 px-6 text-lg' };
 export function buttonClasses(variant: Variant = 'secondary', className = '', size: ButtonSize = 'md'): string {
   return `inline-flex items-center justify-center gap-2 ${SIZES[size]} rounded-pill border-std font-bold no-underline
-          active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
+          motion-safe:active:scale-[0.97] motion-safe:transition motion-safe:duration-150 motion-safe:ease-out disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
 }
 
 export function Button({ variant = 'secondary', size = 'md', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: ButtonSize }) {
@@ -33,7 +33,7 @@ export function Button({ variant = 'secondary', size = 'md', className = '', ...
 export function IconButton({ label, children, variant = 'secondary', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant; children: ReactNode }) {
   return (
     <button type="button" aria-label={label} data-tip={label} {...props}
-      className={`shrink-0 w-11 h-11 rounded-full border-std flex items-center justify-center active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
+      className={`shrink-0 w-11 h-11 rounded-full border-std flex items-center justify-center motion-safe:active:scale-[0.97] motion-safe:transition motion-safe:duration-150 motion-safe:ease-out disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
       {children}
     </button>
   );
