@@ -5,7 +5,7 @@ import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
 import { PICTURES } from '../../student/pictures';
 import PictureBadge from '../../student/PictureBadge';
 import { TeamBadge, TeamArt } from '../../engine/TeamBadge';
-import { THEME_FONTS, type GameTheme, type ThemeItem } from '../types';
+import { type GameTheme, type ThemeItem } from '../types';
 import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
@@ -41,7 +41,7 @@ export function previewViews(gameId: string, hasItems: boolean): { id: PreviewVi
 }
 
 // A small live copy of the game screen wearing the theme being built.
-export default function ThemePreview({ theme: own, gameName, view = 'game' }: { theme: GameTheme; gameName: string; view?: PreviewView }) {
+export default function ThemePreview({ theme: own, view = 'game' }: { theme: GameTheme; gameName?: string; view?: PreviewView }) {
   const theme = withClassicArt(own);
   const c = theme.colors;
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
@@ -54,8 +54,8 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
   if (Own) return <Own theme={theme} />;
   return (
     <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
+      {/* No game title on theme previews (teacher, 2026-11-20): the card already names it. */}
+      <div className="flex items-center justify-end gap-2">
         <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
       </div>
       <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
