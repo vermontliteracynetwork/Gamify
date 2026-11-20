@@ -352,7 +352,7 @@ export default function Bowling() {
   // The aim line and the curve the spin will put on it.
   const preview = Array.from({ length: 14 }, (_, k) => { const d = (k / 13) * 0.62; const bend = step === 'spin' ? hook * 0.72 * Math.max(0, (d - 0.33) / 0.29) ** 2 : 0; return `${xAt(aim * 1.12 + bend, d)},${yAt(d)}`; }).join(' ');
   // Bigger lane (teacher, 2026-11-19): the pins and ball are the focus.
-  const laneW = 'calc((var(--play-h) - 2rem - var(--sb-extra)) * 100 / 130)';
+  const laneW = 'min(calc((var(--play-h) - var(--lane-pad) - var(--sb-extra)) * 100 / 130), var(--lane-max))';
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -397,7 +397,7 @@ export default function Bowling() {
           </div>
           {/* The lane in the middle of the screen, the scores beside it (teacher, 2026-11-19). */}
           <div className="contents lg:grid lg:w-full lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-start lg:gap-4">
-          <section className="relative grid gap-2 min-w-0 lg:col-start-2 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
+          <section className="relative grid gap-2 min-w-0 lg:col-start-2 [--sb-extra:4.5rem] lg:[--sb-extra:0rem] [--lane-pad:6rem] lg:[--lane-pad:2rem] [--lane-max:100%] lg:[--lane-max:calc(100vw-560px-4rem)]">
             {/* One background only (teacher, 2026-11-19): the lane sits straight on the page's background, no framed second copy of it. */}
             <div className={`relative mx-auto overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
               onPointerMove={canAim ? (e) => { const r = e.currentTarget.getBoundingClientRect(); setAim(Math.max(-0.92, Math.min(0.92, ((e.clientX - r.left) / r.width) * 2 - 1))); } : undefined}

@@ -18,17 +18,20 @@ async function png(page: Page, color: string): Promise<Buffer> {
   return Buffer.from(data, 'base64');
 }
 
-test('Classic first, plus Gamify\'s designed themes; a game with only Classic skips the theme step', async ({ page }, info) => {
+test('Classic first, plus Gamify\'s designed themes; a game with only Classic still shows the theme step', async ({ page }, info) => {
   await page.goto('/games/four-in-a-row');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Animal Friends/ })).toBeVisible();
   await page.screenshot({ path: `test-results/theme-screen-${info.project.name}.png` });
-  // Cast and Catch wears only Classic, so the theme step is skipped and Back returns to the start.
+  // Cast and Catch wears only Classic, but the theme step still shows (teacher, 2026-11-19).
   await page.goto('/games/cast-catch');
   await page.getByRole('button', { name: 'Set up and play' }).click();
-  await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Pick a Theme' })).toBeVisible();
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Set up and play' })).toBeVisible();
 });

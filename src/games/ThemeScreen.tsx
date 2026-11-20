@@ -87,7 +87,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                     <span className="flex-1 break-words">{th.name}</span>
                     {on && <span className="w-7 h-7 rounded-full bg-accent border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
                   </span>
-                  {th.designedBy && isMain && <span className="text-sm font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
+                  {th.designedBy && <span className="text-sm font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
                 </motion.button>
               );
             })}

@@ -85,6 +85,8 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.getByRole('button', { name: 'Roll a new name' }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.getByRole('button', { name: 'Set up and play' }).click();
+  // Every game has the theme picker, even with only Classic (teacher, 2026-11-19).
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
   // The code opens one game only: no game list, no other games (teacher, 2026-10-31).
   await page.goto('/play');
