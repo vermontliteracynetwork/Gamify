@@ -30,6 +30,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
+import { StageBackdrop } from '../../theme/stageBackdrop';
 import type { GameTheme, ThemeItem } from '../../theme/types';
 import ItemArt from '../../theme/ItemArt';
 import { ChoiceRow, Toggle } from '../../ui/fields';
@@ -514,7 +515,8 @@ export default function CastleQuest() {
       )}
       {tray}
       {picker}
-      {question && player && phase === 'play' && <ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} />}
+      {/* Questions sit on the board's own ground (teacher, 2026-11-20). */}
+      {question && player && phase === 'play' && <StageBackdrop.Provider value={boardGround(theme)}><ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} /></StageBackdrop.Provider>}
       {phase === 'end' && turns && (
         <ResultsModal winners={winner ? [winner] : undefined} title={winner ? t('cq.won', { name: winner.name }) : t('share.tie')} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
           <p className="font-display text-xl font-bold flex items-center gap-2 justify-center"><Trophy weight="fill" size={24} />{t('cq.built')}</p>

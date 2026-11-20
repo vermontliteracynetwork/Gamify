@@ -46,7 +46,7 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
             <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
               className={`min-w-52 px-7 py-6 rounded-panel border-bold bg-white grid justify-items-center gap-3 font-bold text-xl motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
               style={{ boxShadow: on ? '0 5px 0 #000' : '0 3px 0 rgba(0,0,0,0.25)' }}>
-              <span className="[&>*]:scale-[1.9] [&>*]:origin-center py-[1.9rem] px-[1.9rem]">{o.art}</span><span>{o.label}</span>
+              <span className="[&>*]:scale-[1.9] [&>*]:origin-center py-[1.9rem] px-[1.9rem] [@media(max-height:640px)]:[&>*]:scale-[1.25] [@media(max-height:640px)]:py-[0.9rem] [@media(max-height:640px)]:px-[1.2rem]">{o.art}</span><span>{o.label}</span>
               {/* Touch screens have no hover, so the tip shows on the card (Claudia, 2026-11-18). */}
               {o.tip && <span className="hidden [@media(hover:none)]:block text-xs font-semibold text-muted max-w-48">{o.tip}</span>}
             </button>

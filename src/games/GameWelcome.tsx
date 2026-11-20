@@ -71,13 +71,13 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
         </div>
         <section aria-label={t('welcome.how')} className="min-h-0">
           {/* White with a little depth, on every game (teacher, 2026-11-16). */}
-          <div className="rounded-panel border-std border-border-soft bg-white px-6 py-[clamp(0.6rem,2.4vh,1.5rem)] flex flex-col gap-[clamp(0.4rem,1.6vh,1rem)]" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
+          <div className="rounded-panel border-std border-border-soft bg-white px-6 py-[clamp(0.5rem,2.4vh,1.5rem)] flex flex-col gap-[clamp(0.3rem,1.6vh,1rem)]" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
             <h2 className="text-sm font-bold uppercase tracking-wider text-muted">{t('welcome.how')}</h2>
-            <ol className="flex flex-col gap-[clamp(0.4rem,1.7vh,1.1rem)] list-none p-0 m-0">
+            <ol className="flex flex-col gap-[clamp(0.25rem,1.7vh,1.1rem)] list-none p-0 m-0">
               {steps.map((s, i) => (
                 <motion.li key={i} initial={settings.motion === 'still' ? false : { opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.08 }}
-                  className="flex items-center gap-3.5 text-[calc(var(--text-scale,1)*clamp(0.9rem,2.3vh,1.25rem))] leading-snug">
-                  <span className="w-[clamp(1.9rem,5.5vh,3rem)] h-[clamp(1.9rem,5.5vh,3rem)] shrink-0 rounded-full border-std [&>svg]:w-[45%] [&>svg]:h-[45%] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
+                  className="flex items-center gap-3.5 text-[calc(var(--text-scale,1)*clamp(0.8rem,2.3vh,1.25rem))] leading-snug">
+                  <span className="w-[clamp(1.6rem,5.5vh,3rem)] h-[clamp(1.6rem,5.5vh,3rem)] shrink-0 rounded-full border-std [&>svg]:w-[45%] [&>svg]:h-[45%] border-border bg-accent flex items-center justify-center" aria-hidden="true">{s.icon}</span>
                   <span className="font-bold">{s.text}</span>
                 </motion.li>
               ))}
@@ -85,7 +85,7 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           </div>
         </section>
         <button type="button" onClick={onStart} aria-label={t('welcome.start')}
-          className="w-[78%] self-center min-h-[clamp(3rem,8.5vh,4.5rem)] shrink-0 px-8 rounded-pill border-bold border-border bg-accent font-display text-fit-button font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-[1.08] motion-safe:transition-transform motion-safe:duration-200"
+          className="w-[78%] self-center min-h-[clamp(2.6rem,8.5vh,4.5rem)] shrink-0 px-8 rounded-pill border-bold border-border bg-accent font-display text-fit-button font-bold inline-flex items-center justify-center gap-2 active:scale-95 motion-safe:hover:scale-[1.08] motion-safe:transition-transform motion-safe:duration-200"
           style={{ boxShadow: '0 4px 0 #000' }}>
           <Play weight="fill" size={26} />{t('welcome.play')}
         </button>

@@ -267,3 +267,4 @@ line that fits, and add each new preference the same turn she says it.
 - (2026-11-20) Question screens: the progress chip and buttons sit at the top, then the question, then the answers. Answer tiles are twice as deep as before.
 - (2026-11-20) Every question screen in every game is the framed box (Question Tracker's) set on the game theme's background, never a plain full white screen.
 - (2026-11-20) Every game that has more than one player or has player icons gets a player selection page in setup (solo games: one player picks a picture and a name).
+- (2026-11-20) Question Tracker keeps its growing scene visible around the question box (its sky is the background); Board Game questions sit on the board's own ground.

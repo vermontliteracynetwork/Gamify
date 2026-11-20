@@ -21,6 +21,7 @@ import { makeGameCode } from '../../data/gameCodes';
 import type { PlayMode } from '../../data/types';
 import { useNavigate } from 'react-router-dom';
 import SetupWizard from '../SetupWizard';
+import { StageBackdrop } from '../../theme/stageBackdrop';
 import TeamSetup from '../../engine/TeamSetup';
 import { starQuizManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
@@ -170,7 +171,8 @@ export default function StarQuiz() {
           <p className="font-bold">{t('practice.score', { right: stats.right, asked: stats.asked })}</p>
         </ResultsModal>
       )}
-      {element}
+      {/* The growing scene stays in view around the question box: it is the theme's background here. */}
+      <StageBackdrop.Provider value={{ background: 'transparent' }}>{element}</StageBackdrop.Provider>
     </main>
     </ThemedPage>
   );

@@ -519,7 +519,7 @@ export default function Bowling() {
             )}
           </section>
           <div className="order-first lg:order-none lg:col-start-3 lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3 content-start">
-            <ScoreBoard turns={turns} playing={phase === 'play'} round={`${Math.min(frames + 1, totalFrames)}/${totalFrames}`} roundLabel={t('sb.frameWord')} />
+            <ScoreBoard turns={turns} playing={phase === 'play'} round={`${Math.min(Math.floor(frames / Math.max(1, turns?.players.length ?? 1)) + 1, setup.frames)}/${setup.frames}`} roundLabel={t('sb.frameWord')} />
             {/* Held power-ups, right under the scores (teacher, 2026-10-31), never over the lane. */}
             {tray}
           </div>

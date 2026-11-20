@@ -9,7 +9,8 @@ for (const size of [{ width: 1480, height: 680 }, { width: 1180, height: 820 }, 
     await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
     await page.setViewportSize(size);
     await openSetup(page, '/games/bubble-pop');
-    // Next past the questions page.
+    // Next past the Player page (2026-11-20) and the questions page.
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await page.getByRole('button', { name: 'Next', exact: true }).click();
     await expect(page.getByText('Rounds', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Rounds')).toHaveAttribute('min', '3');
