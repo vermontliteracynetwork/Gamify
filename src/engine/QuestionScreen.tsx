@@ -1,3 +1,4 @@
+import { useStageBackdrop } from '../theme/stageBackdrop';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { POP_IN } from './pace';
 import { motion } from 'motion/react';
@@ -23,7 +24,7 @@ export interface AnswerResult { tapped: string; tries: string[]; right: boolean;
 // miss a new question arrives without showing the answer.
 // `framed` (Question Tracker, teacher 2026-10-31): a smaller card set into
 // the game's scene, with no dark cover, so the background is the frame.
-export default function QuestionScreen({ question, progress, player, onAnswer, onClose, framed = false }: {
+export default function QuestionScreen({ question, progress, player, onAnswer, onClose, framed: _framed = true }: {
   question: MultipleChoiceQuestion;
   framed?: boolean;
   progress?: { n: number; total: number };
@@ -91,9 +92,13 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
   }
 
   const words = q.prompt.split(/(\s+)/);
+  // Every question is the framed box on the theme's background (teacher,
+  // 2026-11-20, "apply universaly"); without a theme, a soft cover.
+  const framed = true;
+  const behind = useStageBackdrop();
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${framed ? 'p-4' : 'bg-surface'}`} role="dialog" aria-modal="true" aria-label={q.prompt}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={behind ?? { background: 'rgba(36,28,61,0.55)' }} role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
@@ -102,7 +107,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         transition={POP_IN}
         // Full screen (2026-11-19): the question big and centered, the four
         // answers filling the rest of the screen like big game buttons.
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel ${framed ? 'grid content-center max-w-[min(60rem,94vw)] min-h-[min(30rem,60vh)] border-heavy p-[clamp(1rem,3vh,2rem)] gap-[clamp(0.6rem,2vh,1.25rem)]' : 'h-full !rounded-none flex flex-col justify-center px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] gap-[clamp(0.5rem,2.5vh,1.75rem)]'}`}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel ${framed ? 'grid content-start max-w-[min(68rem,94vw)] border-heavy p-[clamp(1rem,3vh,2rem)] gap-[clamp(0.6rem,2vh,1.25rem)]' : 'h-full !rounded-none flex flex-col justify-start px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] gap-[clamp(0.5rem,2.5vh,1.75rem)]'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'none' }}
       >
         <div className={`flex items-center gap-2 flex-wrap ${framed ? '' : 'w-full max-w-[90rem] mx-auto'}`}>

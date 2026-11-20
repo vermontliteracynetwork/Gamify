@@ -307,14 +307,11 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
       <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
       {!blocked && (
         <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          {mine.map((th) => (
-            <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
-              className={`min-h-9 tap px-3 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
-          ))}
-          <label className="grid font-bold text-sm w-56 max-w-full"><span className="sr-only">{t('builder.name')}</span>
-            <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
-              className={fieldClasses('sm', 'w-full')} />
-          </label>
+          {/* The name box is also the list of saved designs (teacher, 2026-11-20:
+              "show previous themes by making the input field of new name theme a
+              drop down"): type a name, or open the caret to pick an earlier one. */}
+          <ThemeNameCombo value={draft.name} onChange={(name) => setDraft({ ...draft, name })} current={draft.id} themes={mine}
+            onPick={(id) => setParams({ id })} onNew={() => { touched.current = true; setDraft(blankTheme(gameId, owner)); setParams({}); setStatus(''); }} />
           <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
           {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
           {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
@@ -738,6 +735,46 @@ function AdvancedAudio({ audio, onChange }: { audio?: GameTheme['audio']; onChan
           {row(t('builder.audio.music'), a.music ?? '', [{ id: '', label: t('builder.audio.gameMusic') }, { id: 'none', label: t('builder.audio.none') }, ...MUSIC_TRACKS], (v) => onChange({ ...a, music: v || undefined }))}
           {row(t('builder.audio.right'), a.right ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...RIGHT_SOUNDS], (v) => onChange({ ...a, right: v || undefined }))}
           {row(t('builder.audio.wrong'), a.wrong ?? '', [{ id: '', label: t('builder.audio.packSound') }, ...WRONG_SOUNDS], (v) => onChange({ ...a, wrong: v || undefined }))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The theme name field with the saved designs in a drop-down under it.
+function ThemeNameCombo({ value, onChange, themes, current, onPick, onNew }: {
+  value: string; onChange: (name: string) => void; themes: GameTheme[]; current: string; onPick: (id: string) => void; onNew: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: PointerEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('pointerdown', close); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const row = 'w-full text-left min-h-10 px-3 rounded-input font-bold text-sm flex items-center gap-2 hover:bg-surface-2';
+  return (
+    <div ref={box} className="relative w-64 max-w-full">
+      <label className="grid font-bold text-sm"><span className="sr-only">{t('builder.name')}</span>
+        <input id="theme-name" value={value} maxLength={40} onChange={(e) => onChange(e.target.value)} placeholder={t('builder.namePlaceholder')}
+          className={fieldClasses('sm', 'w-full pr-10')} />
+      </label>
+      <button type="button" aria-label={t('builder.savedThemes')} aria-expanded={open} aria-haspopup="listbox" onClick={() => setOpen((o) => !o)}
+        className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-2">
+        <CaretDown weight="bold" size={16} className={`motion-safe:transition-transform motion-safe:duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div role="listbox" aria-label={t('builder.savedThemes')} className="absolute z-30 left-0 right-0 mt-1 p-1.5 bg-surface border-bold border-border rounded-input grid gap-0.5 max-h-72 overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <button type="button" role="option" aria-selected={false} className={row} onClick={() => { setOpen(false); onNew(); }}>+ {t('builder.new')}</button>
+          {themes.length === 0 && <p className="px-3 py-2 text-sm text-muted">{t('builder.noSavedThemes')}</p>}
+          {themes.map((th) => (
+            <button key={th.id} type="button" role="option" aria-selected={th.id === current} className={`${row} ${th.id === current ? 'bg-accent' : ''}`}
+              onClick={() => { setOpen(false); onPick(th.id); }}>
+              <span className="truncate flex-1">{th.name}</span>{th.id === current && <CheckCircle weight="fill" size={16} aria-hidden="true" />}
+            </button>
+          ))}
         </div>
       )}
     </div>

@@ -13,6 +13,7 @@ import { THEME_FONTS, type GameTheme } from './types';
 import { calmVersion } from './validate';
 import { useArcade, useSession } from '../student/session';
 import { useSignedIn } from '../auth/session';
+import { StageBackdrop } from './stageBackdrop';
 
 // The theme a game is wearing, remembered per game. A teacher's own designs
 // always play; library and starter themes need a paid plan, and Free only
@@ -59,6 +60,9 @@ export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme
   if (menu) return <div className="game-stage brand-menu min-h-[calc(100dvh-4rem)]">{children}</div>;
   // The teacher's own background color for this game, if picked (2026-11-01).
   const stage = stageColor;
+  const plain = settings.backgrounds === 'plain';
+  const sky = !stage && !plain ? theme.pieces.background?.image : undefined;
+  const behindQuestions = sky ? { background: `${theme.colors.background} center / cover no-repeat url("${sky}")` } : stage ? { background: stage } : backdropStyle(theme, plain);
   return (
     <div className="game-stage min-h-[calc(100dvh-4rem)]" data-plain-g={theme.fonts.display !== 'Grow Year' ? '' : undefined} style={{
       ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],
@@ -69,7 +73,9 @@ export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme
       ['--color-accent' as string]: theme.colors.accent,
       ['--color-accent-ink' as string]: theme.colors.accentText,
     }}>
-      <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image)}>{children}</TeamArt.Provider>
+      <StageBackdrop.Provider value={behindQuestions}>
+        <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image)}>{children}</TeamArt.Provider>
+      </StageBackdrop.Provider>
     </div>
   );
 }

@@ -263,3 +263,7 @@ line that fits, and add each new preference the same turn she says it.
 - Uploads from the digital template (2026-11-20, urgent): a picture the same shape as the piece and 1 to 4 times its size goes in exactly as drawn (no page search, trimming, paper clearing or fill).
 - (2026-11-20) The two-step sign-in box is centered, top to bottom and side to side. Every teacher page (Account included) uses the Theme Builder's width and margins (max-w-7xl).
 - (2026-11-20) The Game Show preview in the Theme Builder is the real game board (numbered cards, one turned over), not team badges. Player selection is its own preview slide in every game.
+- (2026-11-20) The Theme Builder's theme name box is also a drop-down of the saved themes for that game (plus New design), not a row of name chips.
+- (2026-11-20) Question screens: the progress chip and buttons sit at the top, then the question, then the answers. Answer tiles are twice as deep as before.
+- (2026-11-20) Every question screen in every game is the framed box (Question Tracker's) set on the game theme's background, never a plain full white screen.
+- (2026-11-20) Every game that has more than one player or has player icons gets a player selection page in setup (solo games: one player picks a picture and a name).

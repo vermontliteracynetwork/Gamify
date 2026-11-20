@@ -9,9 +9,11 @@ import { TeamBadge } from './TeamBadge';
 // score in the Gamify font with no box behind it, then a dash for every turn
 // of every round, grouped by round (used turns filled, this turn glowing),
 // then anything the game adds on the right (Match Three's stars).
-export default function TopStrip({ score, player, round, rounds, perRound, left, label, leftLabel, right, thisRound, barColor = '#5cc3a0' }: {
+export default function TopStrip({ score, player, playerIcon = 0, round, rounds, perRound, left, label, leftLabel, right, thisRound, barColor = '#5cc3a0' }: {
   // The theme's progress bar color (Theme Builder, Colors; teacher 2026-11-20).
   barColor?: string;
+  // The picture the player picked on the Player page (theme team icons).
+  playerIcon?: number;
   score: number; player?: string; round: number; rounds: number; perRound: number; left: number; label: string; leftLabel: string; right?: ReactNode;
   // Turns in the current round when a power-up adds some (Bubble Pop's extra shots): every shot taken fills a dash.
   thisRound?: number;
@@ -23,7 +25,7 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
   return (
     // A white strip (teacher, 2026-11-20) so the score and bar read on any background.
     <div className="w-full flex items-center gap-3 min-w-0 bg-surface rounded-pill border-std border-border px-2 py-1.5" style={{ boxShadow: '0 3px 0 rgba(0,0,0,0.85)' }} role="group" aria-label={label}>
-      {player ? <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={0} size={36} />}
+      {player ? <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={playerIcon} size={36} />}
       {/* A steady live region, so screen readers hear each new score; only the inner number pops. */}
       <span className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
         <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}>{score}</motion.span>

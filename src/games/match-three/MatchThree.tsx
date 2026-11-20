@@ -20,6 +20,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
+import TeamSetup from '../../engine/TeamSetup';
 import { matchThreeManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
@@ -63,6 +64,7 @@ export default function MatchThree() {
   const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'match-three', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
+  const [me, setMe] = useState({ icon: 0, name: '' });
   // Background music, quieter than the effects (teacher, 2026-11-20; Freesound loop by audiocoffee).
   useGameMusic(phase === 'play', '/sounds/match-three/music.mp3', settings);
   const plan = useRef({ rounds: 3, perBreak: 2, moves: 3, size: 7 });
@@ -275,6 +277,8 @@ export default function MatchThree() {
 
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase('theme')} onPlay={start} pages={[
+          // A player page in every game with player icons (teacher, 2026-11-20).
+          { id: 'player', title: t('setup.player'), content: <TeamSetup mode="versus" min={1} max={1} single embedded onChange={(ps) => setMe({ icon: ps[0]?.colorIndex ?? 0, name: ps[0]?.name ?? '' })} /> },
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -300,7 +304,7 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
-          <TopStrip barColor={theme.colors.progress} leftLabel={t('bm.moves', { count: moves })} score={score} player={(pieceImage(theme, 'team-1') ?? pieceImage(theme, 'player'))} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
+          <TopStrip barColor={theme.colors.progress} leftLabel={t('bm.moves', { count: moves })} score={score} player={pieceImage(theme, 'player')} playerIcon={me.icon} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
             label={t('bm.round', { n: round, total: plan.current.rounds })} right={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />
           <div className="relative border-bold border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
             {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}

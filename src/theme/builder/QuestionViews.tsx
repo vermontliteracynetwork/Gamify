@@ -24,7 +24,7 @@ function Answers({ big }: { big?: boolean }) {
   return (
     <div className="grid grid-cols-2 gap-[1.6cqw]">
       {Q.choices.map((c, i) => (
-        <span key={c} className={`relative ${TILES[i]} rounded-[1.4cqw] border-border font-bold flex items-center leading-tight ${big ? 'border-[0.6cqw] min-h-[9cqw] text-[3cqw] pl-[9cqw]' : 'border-[0.45cqw] min-h-[7cqw] text-[2.4cqw] pl-[7cqw]'} pr-[1.5cqw] ${i === Q.right ? 'ring-[0.8cqw] ring-success' : 'opacity-45'}`} style={{ boxShadow: '0 0.6cqw 0 #000' }}>
+        <span key={c} className={`relative ${TILES[i]} rounded-[1.4cqw] border-border font-bold flex items-center leading-tight ${big ? 'border-[0.6cqw] min-h-[18cqw] text-[3cqw] pl-[9cqw]' : 'border-[0.45cqw] min-h-[14cqw] text-[2.4cqw] pl-[7cqw]'} pr-[1.5cqw] ${i === Q.right ? 'ring-[0.8cqw] ring-success' : 'opacity-45'}`} style={{ boxShadow: '0 0.6cqw 0 #000' }}>
           <span className={`absolute left-[1.4cqw] top-1/2 -translate-y-1/2 rounded-full bg-surface border-border flex items-center justify-center font-display ${big ? 'w-[6cqw] h-[6cqw] text-[2.8cqw] border-[0.5cqw]' : 'w-[4.6cqw] h-[4.6cqw] text-[2.2cqw] border-[0.35cqw]'}`}>{i + 1}</span>
           <span className="min-w-0">{c}</span>
           {i === Q.right && <CheckCircle weight="fill" className="ml-auto shrink-0 text-success w-[3.4cqw] h-[3.4cqw]" aria-hidden="true" />}

@@ -13,7 +13,8 @@ import PopText from '../ui/PopText';
 // screen) both build from these, so the prompt, the four answer tiles, the
 // sounds, the result words and the OK button look and feel the same in
 // every game. Sizes are a step smaller than before (2026-11-20), and answers
-// can be tapped right away (no faded wait).
+// can be tapped right away (no faded wait). Tiles are twice as deep as
+// that (teacher, 2026-11-20: "double the depth of the current answer fields").
 
 export const LETTERS = ['A', 'B', 'C', 'D'];
 export const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
@@ -46,7 +47,7 @@ export function AnswerTile({ index, text, image, imageAlt, state, onClick, disab
       transition={{ duration: 0.4 }}
       whileHover={live ? { scale: 1.02, transition: { duration: 0.15 } } : undefined}
       whileTap={live ? { scale: 0.97 } : undefined}
-      className={`relative min-h-[clamp(2.75rem,8vh,4.75rem)] pl-[clamp(3.25rem,8vh,4.75rem)] pr-[clamp(0.75rem,2vw,1.75rem)] py-[clamp(0.35rem,1.2vh,0.75rem)] rounded-input border-bold border-border font-bold leading-tight text-left text-fit-answer flex items-center gap-3
+      className={`relative min-h-[clamp(5.5rem,16vh,9.5rem)] pl-[calc(clamp(0.6rem,1.4vw,1.1rem)+clamp(2rem,5.5vh,3rem)+0.75rem)] pr-[clamp(0.75rem,2vw,1.75rem)] py-[clamp(0.35rem,1.2vh,0.75rem)] rounded-input border-bold border-border font-bold leading-tight text-left text-fit-answer flex items-center gap-3
         ${TILE_COLORS[index]} motion-safe:transition-opacity motion-safe:duration-300
         ${state === 'right' ? 'ring-4 ring-success' : ''} ${state === 'wrong' ? 'ring-4 ring-danger' : ''} ${state === 'tried' ? 'opacity-35 line-through' : ''} ${state === 'faded' ? 'opacity-45' : ''} ${magnet && state === 'open' ? 'ring-4 ring-accent' : ''}`}
       style={{ boxShadow: 'var(--shadow-sticker)' }}>

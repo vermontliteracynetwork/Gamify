@@ -1,3 +1,4 @@
+import { useStageBackdrop } from '../theme/stageBackdrop';
 import { useEffect, useMemo, useState } from 'react';
 import { pace, POP_IN } from './pace';
 import { motion } from 'motion/react';
@@ -100,10 +101,12 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     if (right) window.setTimeout(() => onResult(right), settings.motion === 'still' ? 900 : 1300);
   }
 
+  const behind = useStageBackdrop();
   if (!ready && turnCard) return <TurnCard player={player} avatar={avatar} answerer={answerer} onStart={() => setReady(true)} />;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface" role="dialog" aria-modal="true" aria-label={q.prompt}>
+    // The framed box on the theme's background, like every question (teacher, 2026-11-20).
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={behind ?? { background: 'rgba(36,28,61,0.55)' }} role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
@@ -111,9 +114,10 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
         // The question big and centered, the four answers filling the rest of
         // the screen like big game buttons (2026-11-19).
-        className="w-full h-full overflow-y-auto bg-surface px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] flex flex-col justify-center gap-[clamp(0.5rem,2.5vh,1.75rem)]"
+        className="w-full max-w-[min(68rem,94vw)] max-h-full overflow-y-auto bg-surface rounded-panel border-heavy border-border p-[clamp(1rem,3vh,2rem)] grid content-start gap-[clamp(0.6rem,2vh,1.25rem)]"
+        style={{ boxShadow: '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' }}
       >
-        <div className="w-full max-w-[90rem] mx-auto flex items-center gap-3 flex-wrap">
+        <div className="w-full flex items-center gap-3 flex-wrap">
           {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
           {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
           <span className="grid">
@@ -141,9 +145,9 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 
         {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
         {/* The same prompt, tiles, words and OK as every question screen (QuestionParts, 2026-11-20). */}
-        <div className="w-full max-w-[90rem] mx-auto"><QuestionPrompt>{q.prompt}</QuestionPrompt></div>
+        <div className="w-full"><QuestionPrompt>{q.prompt}</QuestionPrompt></div>
 
-        <div className="w-full max-w-[90rem] mx-auto"><AnswerGrid>
+        <div className="w-full"><AnswerGrid>
           {q.choices.map((c, i) => {
             const isRight = shown && i === q.correctIndex;
             const isWrong = picked === i && i !== q.correctIndex;

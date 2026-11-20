@@ -23,8 +23,10 @@ export interface Character { id: string; name: string; image: string }
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
 // Used on its own (with a Start button) or as a setup page (onChange only).
-export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters }: {
+export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters, single = false }: {
   mode: 'share' | 'versus'; min: number; max: number;
+  // One player alone (a solo game with player icons, teacher 2026-11-20): their picture and name.
+  single?: boolean;
   // Characters to pick from (Board Game animals, teacher 2026-10-31), in place of team icons.
   characters?: Character[];
   onStart?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
@@ -40,6 +42,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const { teacher } = useSignedIn();
   const alone = mode === 'versus' && !!session && !teacher;
   const [slots, setSlots] = useState<Slot[]>(() => {
+    if (single) return [{ name: session?.name ?? '', kind: 'student' }];
     if (alone) return [{ name: session.name, kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
     const first = rollName();
     return [{ name: '', hint: first, kind: human }, { name: '', hint: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
@@ -110,10 +113,10 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       {/* The team vs player rule (teacher, 2026-11-20): one person a turn is a
           player game; a group sharing a turn is a team game. Same screen, the
           words and the icon say which. */}
-      <p className="inline-flex items-center gap-2 font-bold text-sm text-muted -mt-2">
+      {!single && <p className="inline-flex items-center gap-2 font-bold text-sm text-muted -mt-2">
         {mode === 'share' ? <UsersThree weight="fill" size={18} aria-hidden="true" /> : <User weight="fill" size={18} aria-hidden="true" />}
         {mode === 'share' ? t('teams.ruleTeams') : t('teams.rulePlayers')}
-      </p>
+      </p>}
 
       {/* Characters (Board Game animals) show as player cards: the animal big,
           no circle around it, the name under it (teacher, 2026-11-01). */}
