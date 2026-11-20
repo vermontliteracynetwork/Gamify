@@ -305,19 +305,22 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
           the theme's name, Save, and the design tabs. No back arrow: the
           teacher bar's Theme Builder link goes back to all games. */}
       <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
-      {!blocked && (
+      {(!blocked || mine.length > 0) && (
         <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {/* The name box is also the list of saved designs (teacher, 2026-11-20:
               "show previous themes by making the input field of new name theme a
               drop down"): type a name, or open the caret to pick an earlier one. */}
           <ThemeNameCombo value={draft.name} onChange={(name) => setDraft({ ...draft, name })} current={draft.id} themes={mine}
             onPick={(id) => setParams({ id })} onNew={() => { touched.current = true; setDraft(blankTheme(gameId, owner)); setParams({}); setStatus(''); }} />
+          {/* At the plan's limit only the list shows, so a saved theme is one pick away. */}
+          {!blocked && <>
           <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
           {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
           {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
           <Tabs size="sm" fill panelIds className="flex-1 min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
             options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
+          </>}
         </div>
       )}
 
