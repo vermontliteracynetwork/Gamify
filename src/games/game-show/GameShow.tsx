@@ -406,7 +406,7 @@ export default function GameShow() {
               {board === 'cards' && <ChoiceRow label={t('tb.cardCount')} value={String(grid.cols * grid.rows)} onChange={(v) => change({ cardCount: Number(v) })}
                 options={CARD_GRIDS.map((g) => ({ value: String(g.cols * g.rows), label: t('tb.gridSize', { cols: g.cols, rows: g.rows }), art: <GridPreview cols={g.cols} rows={g.rows} /> }))} />}
               <PowerUpCards hint={t('tb.powersHint')}
-                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) * scale }), art: <ItemArt item={p} size={64} still />, on: powerOn(p) }))}
+                cards={powers.map((p) => ({ id: p.id, name: p.name, hint: t(`tb.power.${p.ability}` as 'tb.power.steal', { points: powerAmount(p) * scale }), art: <ItemArt item={p} size={80} still />, on: powerOn(p) }))}
                 onChange={(id, on) => { const p = powers.find((x) => x.id === id)!; if (takes(p)) change({ takeOn: on ? [...(setup.takeOn ?? []), p.id] : (setup.takeOn ?? []).filter((x) => x !== p.id) }); else change({ powerOff: on ? setup.powerOff.filter((x) => x !== p.id) : [...setup.powerOff, p.id] }); }} />
             </>
           ) },
@@ -525,7 +525,8 @@ export default function GameShow() {
           </section>
 
           <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14 lg:self-stretch">
-          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : `${cells.filter((c) => c.used).length}/${cells.length}`} roundLabel={t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')} />
+          {/* No Squares played box on the category grid (teacher, 2026-11-20). */}
+          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : undefined} roundLabel={board === 'cards' ? t('tb.cardsWord') : undefined} />
           </div>
         </div>
       )}

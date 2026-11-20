@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, noPowerUps, startTurn } from './setup';
+import { answerShare, finishSetup, openSetup, noPowerUps, startTurn, vsComputer } from './setup';
 
 // Pinball replaced Peg Drop (teacher, 2026-10-31).
 test('Pinball: a right answer earns a shot; pick a lane and the ball shoots at once into a top pocket or rolls back', async ({ page }, info) => {
@@ -48,7 +48,7 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
     if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
-  await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
+  await vsComputer(page); // player 2 becomes the computer
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await answerShare(page, true);
   await page.getByRole('button', { name: 'Shoot up lane 2' }).click();

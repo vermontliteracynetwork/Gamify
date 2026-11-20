@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LIBRARY } from '../src/data/library';
 import { HOW_TO_PLAY } from '../src/public/howToPlay';
-import { finishSetup, openSetup } from './setup';
+import { finishSetup, openSetup, vsComputer } from './setup';
 
 // Screenshots for the How to Play articles (public/help/<game>-<shot>.png),
 // taken from the real games at a laptop size. Run on purpose only:
@@ -21,7 +21,7 @@ for (const h of HOW_TO_PLAY) {
     await openSetup(page, `/games/${h.gameId}`);
     await page.waitForTimeout(400);
     await shot('setup');
-    if (h.gameId === 'four-in-a-row') await page.getByRole('button', { name: 'Person' }).click().catch(() => {});
+    if (h.gameId === 'four-in-a-row') await vsComputer(page);
     await finishSetup(page);
     await page.waitForTimeout(800);
     // The turn card (icon only) comes first in team games; tap it away.

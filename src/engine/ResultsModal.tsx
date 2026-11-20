@@ -61,8 +61,9 @@ function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number
   const still = settings.motion === 'still';
   const list = winners?.length ? winners : null;
   const size = list && list.length > 2 ? 112 : 168;
+  // Tall enough that the winner's circle and its bob never get cut off (teacher, 2026-11-20).
   return (
-    <div className="relative w-full mx-auto h-[17rem] select-none overflow-hidden" aria-hidden="true">
+    <div className="relative w-full mx-auto h-[19.5rem] select-none overflow-hidden" aria-hidden="true">
       {/* Sun rays turn slowly behind the winner (teacher, 2026-11-13: a better winning screen). */}
       <span className={`absolute left-1/2 top-[42%] w-[44rem] h-[44rem] -translate-x-1/2 -translate-y-1/2 ${still ? '' : 'results-rays'}`} style={{ background: 'repeating-conic-gradient(rgba(255,255,255,0.55) 0deg 9deg, transparent 9deg 22.5deg)', maskImage: 'radial-gradient(circle, #000 18%, transparent 62%)', WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 62%)' }} />
       {/* Stage lights */}

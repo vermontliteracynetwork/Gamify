@@ -82,7 +82,8 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                   className={`absolute left-1/2 top-1/2 w-[min(46%,52vh)] rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on && isMain ? 'ring-4 ring-accent' : ''}`}
                   style={{ boxShadow: isMain ? '0 6px 0 #000, 0 24px 40px rgba(36,28,61,0.25)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
                   <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
-                  <span className="flex items-center gap-2 font-display text-lg font-bold px-1">
+                  {/* A taller name strip with a bigger name (teacher, 2026-11-20). */}
+                  <span className="flex items-center gap-2 font-display text-2xl font-bold px-2 min-h-14">
                     {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
                     <span className="flex-1 break-words">{th.name}</span>
                     {on && <span className="w-7 h-7 rounded-full bg-accent border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}

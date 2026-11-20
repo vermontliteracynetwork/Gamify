@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { finishSetup, openSetup, showSetting } from './setup';
+import { finishSetup, openSetup, showSetting, vsComputer } from './setup';
 
 const noScroll = async (page: Page) =>
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
@@ -17,7 +17,7 @@ test('game boards fit the screen without scrolling', async ({ page }) => {
   await noScroll(page);
 
   await openSetup(page, '/games/four-in-a-row');
-  await page.getByRole('button', { name: 'Person' }).click();
+  await vsComputer(page);
   await finishSetup(page);
   await expect(page.getByRole('gridcell')).toHaveCount(42);
   await noScroll(page);

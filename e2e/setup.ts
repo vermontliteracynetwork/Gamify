@@ -100,3 +100,11 @@ export async function showSetting(page: Page, target: Locator) {
   }
   await expect(target.first()).toBeVisible();
 }
+
+// Player 2 becomes the computer (teacher, 2026-11-20): the Person/Computer
+// switch sits in player 2's picture picker, left of its X.
+export async function vsComputer(page: Page) {
+  await page.getByRole('button', { name: /^Pick a (team picture|player piece) for / }).nth(1).click();
+  await page.getByRole('button', { name: 'Person', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).last().click();
+}

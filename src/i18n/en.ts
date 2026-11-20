@@ -2669,7 +2669,7 @@ export const en = {
   'pb.roundsHint': 'Turns each team takes. One turn is one shot.',
   'pb.roundsHintSolo': 'How many shots you take.',
   'pb.questions': 'Questions',
-  'cq.exact': 'Exact roll to win',
+  'cq.exact': 'Perfect roll',
   'cq.exactHint': 'Land right on the finish. Roll too many and your piece bounces back.',
   'cq.wheelSpin': 'Spin the wheel',
   'pb.starPower': 'Star! A power-up for your next turn',

@@ -39,11 +39,12 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
         {cards.map((c) => (
           <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)}
             aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name}
-            className={`relative rounded-input border-bold tile-wiggle p-2.5 pt-3 grid justify-items-center content-start gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-mint-soft' : 'border-dashed border-border-soft bg-surface-2'}`}
+            className={`relative rounded-input border-bold tile-wiggle p-2.5 pt-3 grid justify-items-center content-center gap-1.5 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-mint-soft' : 'border-dashed border-border-soft bg-surface-2'}`}
             style={c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : undefined}>
+            {/* Bigger pictures (teacher, 2026-11-20), the same size in every game. */}
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
             {/* Names a little bigger, always inside the card's margin (teacher, 2026-11-19). */}
-            <span className={`font-bold text-xl leading-tight text-balance break-words max-w-full px-1 ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
+            <span className={`font-bold text-[1.4rem] leading-tight text-balance break-words max-w-full px-1 ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
             {/* What it does is an (i) hover tip, not a caption (teacher, 2026-11-19). */}
             {c.hint && <InfoDot tip={c.hint} className="absolute top-1.5 left-1.5" />}
             {/* On: a mint check in the corner. Off: a faded X. */}
@@ -74,6 +75,6 @@ export function powerUpSwitches({ manifest, theme, on, off, change }: {
   const hint = (ability: string) => manifest.items?.abilities.find((a) => a.id === ability)?.hint ?? '';
   return (
     <PowerUpCards hint={t('pu.switchHint')} onChange={set}
-      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={48} still />, on: isOn(it.id) }))} />
+      cards={items.map((it) => ({ id: it.id, name: it.name, hint: hint(it.ability), art: <ItemArt item={it} size={80} still />, on: isOn(it.id) }))} />
   );
 }

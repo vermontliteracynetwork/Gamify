@@ -43,7 +43,6 @@ export function previewViews(gameId: string, hasItems: boolean): { id: PreviewVi
 // A small live copy of the game screen wearing the theme being built.
 export default function ThemePreview({ theme: own, view = 'game' }: { theme: GameTheme; gameName?: string; view?: PreviewView }) {
   const theme = withClassicArt(own);
-  const c = theme.colors;
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
   // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
   if (view === 'pick') return <PickView theme={theme} />;
@@ -53,11 +52,8 @@ export default function ThemePreview({ theme: own, view = 'game' }: { theme: Gam
   const Own = view === 'game' ? GAME_PREVIEWS[theme.gameId] : undefined;
   if (Own) return <Own theme={theme} />;
   return (
-    <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
-      {/* No game title on theme previews (teacher, 2026-11-20): the card already names it. */}
-      <div className="flex items-center justify-end gap-2">
-        <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
-      </div>
+    <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
+      {/* No game title or Play button on theme previews (teacher, 2026-11-20). */}
       <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
     </div>
   );
@@ -213,7 +209,7 @@ function board(theme: GameTheme, size?: number) {
       // The board as play draws it (no square behind each piece), at the chosen size.
       const n = size ?? 7;
       return (
-        <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full aspect-square" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+        <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full max-h-full min-h-0 aspect-square overflow-hidden" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${n}, minmax(0, 1fr))` }}>
           {Array.from({ length: n * n }, (_, i) => {
             const k = (i * 7 + Math.floor(i / n) * 3) % 6;
             return <img key={i} src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;

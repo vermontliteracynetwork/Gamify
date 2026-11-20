@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { answerShare, finishSetup, openSetup, showSetting } from './setup';
+import { answerShare, finishSetup, openSetup, showSetting, vsComputer } from './setup';
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => { const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'); localStorage.setItem('gamify:settings', JSON.stringify({ ...s, tier: 'pro' })); });
@@ -42,7 +42,7 @@ test('Board Game Versus: one player against the computer', async ({ page }) => {
     if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
-  await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
+  await vsComputer(page); // player 2 becomes the computer
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('img', { name: /^A game board of \d+ squares/ })).toBeVisible();
   await expect(page.getByLabel(/^Computer on the board/).first()).toBeAttached();

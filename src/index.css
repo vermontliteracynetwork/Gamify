@@ -610,6 +610,8 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 
 .game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f4f5ff 0%, #e6e9ff 60%, #dde1ff 100%); }
 /* Each setting sits on its own white card with a soft lift (teacher, 2026-11-13: dimension, professional). */
+/* A lone switch is a narrow card, not a full-width bar (teacher, 2026-11-20). */
+.brand-menu .setup-item:has(> [role=switch]:only-child) { max-width: 30rem !important; width: 100%; }
 .brand-menu .setup-item:has(> .choice-cards) { background: transparent; border: 0; box-shadow: none; padding: 0; }
 .brand-menu .setup-item { background: var(--surface); border: 2.5px solid #000; border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 #000, 0 16px 30px rgba(36, 28, 61, 0.10); }
 .brand-menu > main { position: relative; padding-top: 1.5rem !important; }

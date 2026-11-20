@@ -59,8 +59,8 @@ export default function HoverTips() {
   const host = (document.fullscreenElement as HTMLElement | null) ?? document.body;
   return createPortal(
     // data-tip-bg colors a tip to match its button (a way to play, 2026-11-06).
-    <div ref={box} role="tooltip" className={`fixed pointer-events-none max-w-[min(22rem,calc(100vw-1rem))] px-2.5 py-1 rounded-[0.9rem] text-center ${tip.el.dataset.tipBg ? 'border-std border-border' : 'text-white'}`}
-      style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, zIndex: 2147483000, background: tip.el.dataset.tipBg ?? 'var(--text)', color: tip.el.dataset.tipBg ? 'var(--text)' : undefined, font: '700 0.8rem/1.25 var(--font-body)', boxShadow: '0 2px 0 rgba(0,0,0,0.25)' }}>
+    <div ref={box} role="tooltip" className={`fixed pointer-events-none max-w-[min(24rem,calc(100vw-1rem))] px-3 py-1.5 rounded-[0.9rem] text-center ${tip.el.dataset.tipBg ? 'border-std border-border' : 'text-white'}`}
+      style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, zIndex: 2147483000, background: tip.el.dataset.tipBg ?? 'var(--text)', color: tip.el.dataset.tipBg ? 'var(--text)' : undefined, font: '700 0.92rem/1.3 var(--font-body)', boxShadow: '0 2px 0 rgba(0,0,0,0.25)' }}>
       {tip.text}
     </div>,
     host,
