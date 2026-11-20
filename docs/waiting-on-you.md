@@ -13,6 +13,7 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 7. **Later: ask an accountant about the S corp election** once Gamify has steady profit (IRS Form 2553).
 
 **Everything else**
+- **Co-op accounts: pick how co-ops buy (2026-11-20).** A group plan the co-op pays for (seats for each family), a co-op discount code members use on their own Homeschool plan, or both. Also the discount and seat count.
 - **Approve the design mockups (2026-11-19).** The Gamify Design Audit page (https://claude.ai/artifact/9XVLS1bFUy2UDzP3qVZD8F), Mockups tab: the right-answer moment, setup steps, one top bar, scoreboard (laptop and iPad portrait) and team results box. Also: keep numbers on Game Show cards? Keep the slashed zero?
 1. **Attorney review.** We sell to schools, so every public promise needs a lawyer's eye. How: Terms, Privacy, the beta tester agreement, the Theme Building Challenge rules and its parent permission slip (/challenge/permission), the accessibility conformance report, the student data privacy agreement template, naming other products for compatibility (Google Sheets, Google Classroom, Canva), the Common Core text license, DMCA agent registration.
 2. **Line up 2 to 4 beta test classrooms.** Real classrooms give the feedback, quotes and the screen reader check on iPads that schools ask for. How: Send the Join the beta test page to teachers you trust; the classroom kit is at /beta-kit.
