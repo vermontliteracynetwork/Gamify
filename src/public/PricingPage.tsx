@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
@@ -27,20 +27,21 @@ export default function PricingPage() {
   const reduce = useReducedMotion();
   // Links like /pricing#schools land on that section.
   useEffect(() => { const id = window.location.hash.slice(1); if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 50); }, [reduce]);
-  const rows: { label: string; value: (tier: Tier) => string | boolean }[] = [
-    { label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
+  // Grouped so a teacher finds what matters fast (pricing psychology, 2026-11-20).
+  const rows: { label: string; value: (tier: Tier) => string | boolean; group?: string }[] = [
+    { group: t('pricing.grp.games'), label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
     { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
     { label: t('pricing.row.library'), value: (x) => TIERS[x].themesPlayable },
-    { label: t('pricing.row.classes'), value: (x) => (x === 'free' ? false : fmt(TIERS[x].classrooms)) },
+    { group: t('pricing.grp.class'), label: t('pricing.row.classes'), value: (x) => (x === 'free' ? false : fmt(TIERS[x].classrooms)) },
     { label: t('pricing.row.students'), value: (x) => fmt(TIERS[x].studentsPerClassroom) },
     { label: t('pricing.row.pictures'), value: (x) => (x === 'free' ? t('pricing.pictures.free') : t('pricing.pictures.paid')) },
     { label: t('pricing.row.sets'), value: (x) => fmt(TIERS[x].savedQuestionSets) },
     { label: t('pricing.row.homework'), value: (x) => (x === 'free' ? t('pricing.homework.free') : t('pricing.homework.paid')) },
-    { label: t('pricing.row.groups'), value: (x) => x !== 'free' },
+    { group: t('pricing.grp.live'), label: t('pricing.row.groups'), value: (x) => x !== 'free' },
     { label: t('pricing.row.assigned'), value: (x) => fmt(TIERS[x].assignedSetsPerStudent) },
     { label: t('pricing.row.live'), value: (x) => TIERS[x].liveMonitorAndLock },
     { label: t('pricing.row.lobbyGoal'), value: (x) => x !== 'free' },
-    { label: t('pricing.row.guides'), value: (x) => x !== 'free' },
+    { group: t('pricing.grp.more'), label: t('pricing.row.guides'), value: (x) => x !== 'free' },
     { label: t('pricing.row.each'), value: (x) => x === 'pro' },
     { label: t('pricing.row.board'), value: (x) => x === 'pro' },
     { label: t('pricing.row.early'), value: (x) => x === 'pro' },
@@ -76,10 +77,10 @@ export default function PricingPage() {
                 {x === 'plus' && <span className="absolute -top-4 right-5 bg-text text-white font-display rounded-pill px-3 py-1 text-sm">{t('upgrade.best')}</span>}
                 <h2 id={`plan-${x}`} className="font-display text-3xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-bold">{t(`pricing.${x}.who` as StringKey)}</p>
-                {x === 'free'
-                  ? <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.free.${n}` as StringKey)}</li>)}</ul>
-                  : <PlanFeatures plan={x as 'plus' | 'pro'} />}
-                <div className="mt-1">
+                {/* Price and button first, where the eye lands (pricing psychology,
+                    2026-11-20): the yearly price as a small monthly number with its
+                    per-school-day cost, then what is included. */}
+                <div>
                   {x === 'free'
                     ? <><p className="font-display text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>
                     : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-bold text-success-ink">{t('pricing.perDay', { price: perDay(x) })}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })}</p></>}
@@ -87,6 +88,10 @@ export default function PricingPage() {
                 <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('primary', `min-h-14 text-lg hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
                 </Link>
+                <hr className="border-0 border-t-[2px] border-border/20 my-1" />
+                {x === 'free'
+                  ? <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.free.${n}` as StringKey)}</li>)}</ul>
+                  : <PlanFeatures plan={x as 'plus' | 'pro'} />}
               </motion.section>
             );
           })}
@@ -114,15 +119,16 @@ export default function PricingPage() {
               {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-display text-xl text-center ${x === 'plus' ? 'bg-accent' : ''}`}>{t(`pricing.${x}`)}{x === 'plus' && <span className="block font-body text-xs font-bold">{t('upgrade.best')}</span>}{x !== 'free' && <span className="block font-body text-sm font-bold text-muted">{t('upgrade.price', { m: monthly(x) })} {t('upgrade.perMonth')}</span>}</th>)}
             </tr></thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.label} className="border-b border-border-soft last:border-0">
+              {rows.map((r) => (<Fragment key={r.label}>
+                {r.group && <tr><th colSpan={tiers.length + 1} scope="colgroup" className="pt-5 pb-1.5 px-3 text-left text-xs font-bold uppercase tracking-wide text-muted border-b-[2px] border-border">{r.group}</th></tr>}
+                <tr className="border-b border-border-soft last:border-0">
                   <th scope="row" className="p-3 font-bold">{r.label}</th>
                   {tiers.map((x) => {
                     const v = r.value(x);
                     return <td key={x} className={`p-3 font-semibold text-center ${x === 'plus' ? 'bg-accent/40' : ''}`}>{typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}</td>;
                   })}
                 </tr>
-              ))}
+              </Fragment>))}
               {/* Decide where you read (pricing psychology): a start button under every column. */}
               <tr>
                 <td className="p-3" />

@@ -244,3 +244,4 @@ line that fits, and add each new preference the same turn she says it.
 - Live lobby "groups" are called teams (2026-11-20).
 - Research page (2026-11-20): no beta test tab. Login page: wider.
 - Board Game Live (2026-11-20): like Bowling, the teacher opens the lobby and sets teams; each student races their own board against the computer on their device; team points add up.
+- Pricing cards (2026-11-20): price and button first under the plan name, then what is included; the comparison table grouped (Games and designs, Your class, Live play, Extras). No other brand names in plan text ("digital and paper designs").
