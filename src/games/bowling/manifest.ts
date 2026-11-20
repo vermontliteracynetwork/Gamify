@@ -14,6 +14,7 @@ export const bowlingManifest: GameManifest = {
     // Up to 10 balls, each in a round frame; a player's ball is their icon
     // too (teacher, 2026-11-01). Balls left blank stay Classic.
     ...Array.from({ length: 10 }, (_, i) => ({ id: `ball-${i + 1}`, label: `Ball ${i + 1}`, width: 256, height: 256, hint: i === 0 ? 'A bowling ball. Each player picks a ball; it is the ball they roll and their icon' : `Bowling ball ${i + 1} (leave it blank to keep a Classic ball)` })),
+    { id: 'backwall', label: 'Back wall', width: 1000, height: 270, hint: 'The back of the alley, behind the pins' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
     { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],

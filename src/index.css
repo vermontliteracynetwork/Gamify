@@ -865,9 +865,11 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
   /* Spacing from her Four in a Row mockup (2026-11-20): a big title, a large
      plain-black description, a bigger mode chip, a roomy How to play card and
      a big Play button, spread from the cover's top to its bottom. */
-  .welcome-col { container-type: size; gap: 2.6cqh !important; }
+  /* The title, line and mode chips start below the top-right buttons, so no
+     button ever breaks the title (teacher, 2026-11-20). */
+  .welcome-col { container-type: size; gap: 2.6cqh !important; padding-top: 3.4rem; }
   .welcome-col section { flex-shrink: 0; }
-  .welcome-col h1 { font-size: calc(var(--text-scale, 1) * clamp(1.6rem, 9cqh, 3.1rem)) !important; padding-right: 7.5rem !important; white-space: normal !important; }
+  .welcome-col h1 { font-size: calc(var(--text-scale, 1) * clamp(1.6rem, 9cqh, 3.1rem)) !important; padding-right: 0 !important; white-space: normal !important; }
   .welcome-col > div > p { font-size: calc(var(--text-scale, 1) * clamp(0.9rem, 4.6cqh, 1.6rem)) !important; color: var(--text) !important; font-weight: 500 !important; line-height: 1.4 !important; }
   .welcome-col > div > div > span { font-size: calc(var(--text-scale, 1) * clamp(0.85rem, 3.4cqh, 1.2rem)); padding: 0.9cqh 2.2cqh; }
   .welcome-col section > div { padding-block: 2.6cqh !important; gap: 2cqh !important; }

@@ -191,6 +191,7 @@ function BowlingLane({ theme }: { theme: GameTheme }) {
         {laneArt && <pattern id="pv-lane" patternUnits="userSpaceOnUse" x={50 - halfWidthAt(0)} y={yAt(1)} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)}><image href={laneArt} width={halfWidthAt(0) * 2} height={yAt(0) - yAt(1)} preserveAspectRatio="xMidYMid slice" /></pattern>}
         <clipPath id="pv-ball"><circle r={6} /></clipPath>
       </defs>
+      {pieceImage(theme, 'backwall') && <image href={pieceImage(theme, 'backwall')} x={0} y={yAt(1) - 26} width={100} height={27} preserveAspectRatio="xMidYMax slice" />}
       <polygon points={`${50 - halfWidthAt(0) - 5},${yAt(0)} ${50 + halfWidthAt(0) + 5},${yAt(0)} ${50 + halfWidthAt(1) + 5 * scaleAt(1)},${yAt(1)} ${50 - halfWidthAt(1) - 5 * scaleAt(1)},${yAt(1)}`} fill="#7d8597" stroke="#000" strokeWidth={0.6} />
       <polygon points={lane} fill={laneArt ? 'url(#pv-lane)' : laneColor} stroke="#000" strokeWidth={0.6} />
       {pins.map((p, i) => (

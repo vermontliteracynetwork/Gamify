@@ -1,10 +1,11 @@
+import { THEME_FONTS } from '../../theme/types';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import Title from '../../ui/Title';
 import { pace } from '../../engine/pace';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Crosshair, HandTap, Trophy } from '@phosphor-icons/react';
+import { CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -413,13 +414,9 @@ export default function Bowling() {
                   {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
                 </defs>
                 <g style={{ transformOrigin: '50% 30%', transform: sim?.zoom ? 'scale(1.18)' : 'scale(1)', transition: still ? 'none' : 'transform 0.45s ease-out' }}>
-                {!pieceImage(theme, 'background') && <>
-                  {/* The masking unit over the pins: an 80s neon sign with chasing lights. */}
-                  <rect x={50 - halfWidthAt(far) - 9} y={yAt(far) - 22} width={(halfWidthAt(far) + 9) * 2} height={16} rx={2} fill="#241c3d" stroke="#000" strokeWidth={0.6} />
-                  <rect x={50 - halfWidthAt(far) - 7} y={yAt(far) - 20} width={(halfWidthAt(far) + 7) * 2} height={12} rx={1.5} fill="none" stroke="#ff4fa3" strokeWidth={0.9} />
-                  {Array.from({ length: 9 }, (_, i) => <circle key={i} cx={50 - halfWidthAt(far) - 4 + i * ((halfWidthAt(far) + 4) * 2) / 8} cy={yAt(far) - 14} r={1.1} fill={['#fdfd94', '#8ec5ff', '#ff4fa3'][i % 3]} className={still ? '' : 'sb-chase'} style={{ animationDelay: `${i * 0.12}s` }} />)}
-                  <rect x={0} y={yAt(far) - 5} width={100} height={1.6} fill="#ff4fa3" opacity={0.75} />
-                </>}
+                {/* The back of the alley behind the pins is a theme piece (teacher,
+                    2026-11-20); Classic has no sign there. */}
+                {pieceImage(theme, 'backwall') && <image href={pieceImage(theme, 'backwall')} x={0} y={yAt(far) - 26} width={100} height={27} preserveAspectRatio="xMidYMax slice" />}
                 {/* Gutters, then the glossy wooden lane with its boards. */}
                 <polygon points={`${50 - halfWidthAt(near) - 5},${yAt(near)} ${50 + halfWidthAt(near) + 5},${yAt(near)} ${50 + halfWidthAt(far) + 5 * scaleAt(far)},${yAt(far)} ${50 - halfWidthAt(far) - 5 * scaleAt(far)},${yAt(far)}`} fill="#7d8597" stroke="#000" strokeWidth={0.6} />
                 <polygon points={lanePoly} fill="url(#sb-wood)" stroke="#000" strokeWidth={0.6} />
@@ -428,9 +425,9 @@ export default function Bowling() {
                 {/* Bumper rails pop up when the power-up is on. */}
                 {armed.includes('bumpers') && [-1, 1].map((sd) => <line key={sd} x1={50 + sd * (halfWidthAt(near) + 1.5)} y1={yAt(near)} x2={50 + sd * (halfWidthAt(far) + 1.5 * scaleAt(far))} y2={yAt(far)} stroke="#fdfd94" strokeWidth={2.2} strokeLinecap="round" className={still ? '' : 'sb-pop'} />)}
                 <ellipse cx={50} cy={(yAt(0.62) + yAt(0.86)) / 2} rx={halfWidthAt(0.7) * 1.2} ry={9} fill="url(#sb-spot)" />
-                {/* Foul line, approach dots and aiming arrows, like a real alley. */}
+                {/* Foul line, then lane numbers where the aiming arrows were (teacher, 2026-11-20). */}
                 <line x1={50 - halfWidthAt(0.005)} y1={yAt(0.005)} x2={50 + halfWidthAt(0.005)} y2={yAt(0.005)} stroke="#241c3d" strokeWidth={0.5} />
-                {[-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9].map((x, i) => { const d = 0.26; const cx = xAt(x, d), cy = yAt(d), w = 1.5 * scaleAt(d); return <path key={i} d={`M${cx} ${cy - 2.4 * w} L${cx + w} ${cy} L${cx - w} ${cy} Z`} fill="#8a5a2b" opacity={0.5} />; })}
+                {[-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9].map((x, i) => { const d = 0.26; return <text key={i} x={xAt(x, d)} y={yAt(d)} textAnchor="middle" fontFamily={THEME_FONTS['Grow Year']} fontSize={4.2 * scaleAt(d)} fill="#8a5a2b" opacity={0.6} aria-hidden="true">{i + 1}</text>; })}
                 {canAim && <polyline points={preview} fill="none" stroke={step === 'spin' ? '#ff4fa3' : '#241c3d'} strokeWidth={0.9} strokeDasharray="0.2 2.2" strokeLinecap="round" />}
                 {swept && !still && (
                   <g key={swept.id}>
@@ -480,16 +477,11 @@ export default function Bowling() {
                 })()}
                 </g>
               </svg>
-              {/* No caption (teacher, 2026-11-13): the dotted aim line follows the pointer; a soft target pulses on the lane. */}
-              {canAim && !still && (
-                <motion.span className="absolute left-1/2 top-[55%] -translate-x-1/2 pointer-events-none text-white/80" animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 1.4, repeat: Infinity }} aria-hidden="true">
-                  <Crosshair weight="bold" size={44} />
-                </motion.span>
-              )}
+              {/* No target on the lane (teacher, 2026-11-20): the dotted aim line follows the pointer. */}
               <AnimatePresence>
                 {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 top-[22%] w-[34%] -translate-x-1/2 pointer-events-none" initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
                 {banner && (
-                  <motion.p key={banner.id} className={`absolute inset-x-0 top-[34%] text-center font-display ${banner.kind === 'strike' ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl'} text-white`} style={{ WebkitTextStroke: '2px #000', textShadow: banner.kind === 'strike' ? '0 0 18px #ff4fa3, 0 0 30px #fdfd94' : undefined }}
+                  <motion.p key={banner.id} className={`absolute inset-x-0 top-[34%] text-center ${banner.kind === 'strike' ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl'} text-white`} style={{ fontFamily: THEME_FONTS['Grow Year'], WebkitTextStroke: '2px #000', textShadow: banner.kind === 'strike' ? '0 0 18px #ff4fa3, 0 0 30px #fdfd94' : undefined }}
                     initial={{ scale: 0.4, opacity: 0, rotate: banner.kind === 'strike' ? -8 : 0 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 1.2 }} transition={{ type: 'spring', stiffness: 320, damping: 14 }} role="status">
                     {banner.sign ? (
                       <span className="grid justify-items-center gap-1">

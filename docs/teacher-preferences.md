@@ -233,3 +233,7 @@ line that fits, and add each new preference the same turn she says it.
 - Pictured choices (2026-11-20): four choices sit in rows of two (Board Game board length).
 - Bowling (2026-11-20): frames default 5, range 1 to 20.
 - Question screens (2026-11-20, universal): one design for every game (shared QuestionParts): same prompt, A-D answer tiles, colors, sounds, result words and OK button; a step smaller text and buttons; answers can be tapped right away (no read-first wait or faded answers by default).
+- Game descriptions (2026-11-20): never tied to one theme (Question Tracker: "Every right answer adds an object until the screen is full.").
+- Bowling lane (2026-11-20): lane numbers 1 to 7 where the aiming arrows were; no target circle; no light-up dot sign over the pins; the back wall is its own theme piece ("Back wall"). Strike and Spare words are in Grow Year.
+- Game welcome (2026-11-20, all games): the title, line and mode chips start below the top-right buttons.
+- Live host screen (2026-11-20): wears the game's own theme background; no "Live: <game>" title.

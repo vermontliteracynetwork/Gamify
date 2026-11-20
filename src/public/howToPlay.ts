@@ -198,12 +198,12 @@ export const HOW_TO_PLAY: HowToPlay[] = [
   },
   {
     gameId: 'star-quiz',
-    goal: 'Every right answer adds a star to the night sky. Fill the sky to finish.',
+    goal: 'Every right answer adds an object to the screen (stars, pets or whatever the theme brings). Fill the screen to finish.',
     steps: [
       'Read the question (or tap Listen).',
-      'Tap an answer. A right answer sends a shooting star across the sky to its spot.',
+      'Tap an answer. A right answer sends a new object flying to its spot.',
       'Three or more right on the first try in a row: the new stars shine gold.',
-      'Keep going until the sky is full.',
+      'Keep going until the screen is full.',
     ],
     pieces: [
       { name: 'Sky', what: 'Fills with stars as answers come in, in a new pattern every game. Shooting stars cross it now and then.' },

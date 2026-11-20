@@ -5,7 +5,7 @@ import type { GameManifest } from '../types';
 export const pinballManifest: GameManifest = {
   id: 'pinball',
   name: 'Pinball',
-  description: 'Answer right, pick a lane and the ball shoots! Bounce off musical pegs, grab stars for power-ups and land in a pocket of points.',
+  description: 'Answer right, pick a lane and the ball shoots! Bounce off musical pegs, grab bonuses for power-ups and land in a pocket of points.',
   modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [

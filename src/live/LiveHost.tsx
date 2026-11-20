@@ -61,7 +61,9 @@ function Room({ game }: { game: GameCode }) {
   const skyGame = game.gameId === 'star-quiz';
   const { theme: skyTheme } = useGameTheme('star-quiz');
   // The big-screen look (Theme Builder, Big screen); the teacher picks it here.
-  const screen = useGameTheme('big-screen');
+  // The live screen wears the game's own theme (teacher, 2026-11-20); the
+  // Big screen design is gone from the Theme Builder.
+  const screen = useGameTheme(game.gameId);
   const [message, setMessage] = useState('');
   const [editing, setEditing] = useState<string | null>(null);
   const [setOpen, setSetOpen] = useState(false);
@@ -171,8 +173,9 @@ function Room({ game }: { game: GameCode }) {
   return (
     <ThemedPage theme={screen.theme}>
     <main className={`stage-text max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4 pb-4 gap-4 ${state.phase === 'ended' ? 'grid' : 'flex flex-col overflow-hidden'}`} style={state.phase === 'ended' ? undefined : { height: 'calc(100dvh - 4rem)' }}>
-      <div className={`flex flex-wrap items-center gap-2 ${state.phase === 'play' || state.phase === 'paused' ? 'invisible' : ''}`}>
-        <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
+      {/* No "Live: <game>" title (teacher, 2026-11-20); the name stays for screen readers. */}
+      <div className={`flex flex-wrap items-center justify-end gap-2 ${state.phase === 'play' || state.phase === 'paused' ? 'invisible' : ''}`}>
+        <h1 className="sr-only">{t('live.hostTitle', { game: gameName })}</h1>
         {state.phase === 'lobby' && (
           <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
             className="w-11 h-11 rounded-full border-bold border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
@@ -181,7 +184,7 @@ function Room({ game }: { game: GameCode }) {
 
       {state.phase === 'lobby' && (
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4 min-h-0 flex-1">
-          <Panel className="grid gap-3 justify-items-center content-center text-center min-h-0">
+          <Panel className="grid gap-3 justify-items-center content-center text-center min-h-0 text-text">
             <p className="font-display text-2xl">{t('show.goTo', { host: window.location.host })}</p>
             <p className="font-display text-7xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: game.code })}>{game.code}</p>
             <div className="flex items-center justify-center gap-3">
@@ -196,7 +199,7 @@ function Room({ game }: { game: GameCode }) {
               </label>
             )}
           </Panel>
-          <Panel className="flex flex-col gap-3 min-h-0">
+          <Panel className="flex flex-col gap-3 min-h-0 text-text">
             <div className="flex flex-wrap items-center gap-3">
               <p className="font-display text-xl flex-1">{t('live.joined', { count: inRoom.length })}</p>
               <Button onClick={() => update((s) => ({ ...s, roomLocked: !s.roomLocked }))}>{state.roomLocked ? <LockSimple weight="fill" size={18} /> : <LockSimpleOpen weight="bold" size={18} />}{state.roomLocked ? t('live.roomLocked') : t('live.lockRoom')}</Button>
@@ -346,7 +349,7 @@ function Room({ game }: { game: GameCode }) {
       )}
 
       {state.phase === 'ended' && (
-        <Panel className="grid gap-4 justify-items-center text-center">
+        <Panel className="grid gap-4 justify-items-center text-center text-text">
           <h2 className="font-display text-4xl"><Title text={state.mode === 'together' ? t('live.togetherTitle') : t('live.podium')} /></h2>
           {state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
