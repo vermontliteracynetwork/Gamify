@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { BookOpen, Buildings, CaretDown, ChalkboardTeacher, DeviceMobile, House, Lightbulb, MagnifyingGlass, Student, WifiHigh } from '@phosphor-icons/react';
+import { Buildings, CaretDown, ChalkboardTeacher, House, MagnifyingGlass, Student } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -14,16 +14,10 @@ const NEXT: Record<FaqGroup, { to: string; label: StringKey }> = {
   homeschool: { to: '/homeschool', label: 'faq.next.homeschool' },
   students: { to: '/join', label: 'faq.next.students' },
 };
-const LINKS = [
-  { to: '/help', icon: BookOpen, key: 'guides' },
-  { to: '/it', icon: WifiHigh, key: 'it' },
-  { to: '/check', icon: DeviceMobile, key: 'check' },
-  { to: '/blog', icon: Lightbulb, key: 'blog' },
-] as const;
 
-// The Help Center (teacher, 2026-10-26: "a more professional looking help
-// page"): one search across every answer, topics down the side, answers in
-// one clean list, and links to the how-to guides, IT and device pages.
+// The FAQ, its own page (teacher, 2026-11-20): one search across every
+// answer, topics down the side, answers in one clean list. The how-to
+// guides, IT and device pages live in the Help Center (/help).
 export default function FaqPage() {
   const [params, setParams] = useSearchParams();
   const group = (FAQ_GROUPS.includes(params.get('for') as FaqGroup) ? params.get('for') : 'teachers') as FaqGroup;
@@ -43,8 +37,8 @@ export default function FaqPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <header className={`${panel} p-6 sm:p-8 grid gap-3`}>
-          <p className="text-sm font-bold uppercase tracking-wider text-muted">{t('help.kicker')}</p>
-          <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
+          <p className="text-sm font-bold uppercase tracking-wider text-muted">{t('faq.kicker')}</p>
+          <h1 className="font-display text-4xl sm:text-5xl">{t('faq.title')}</h1>
           <p className="text-lg font-semibold max-w-3xl">{t('faq.sub')}</p>
           <label className="relative max-w-3xl">
             <MagnifyingGlass weight="bold" size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -53,14 +47,8 @@ export default function FaqPage() {
           </label>
         </header>
 
-        <nav aria-label={t('help.shortcuts')} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {LINKS.map(({ to, icon: I, key }) => (
-            <Link key={key} to={to} className={`${panel} p-4 no-underline text-text flex items-start gap-3 hover:bg-surface-hover`}>
-              <I weight="bold" size={26} className="shrink-0" aria-hidden="true" />
-              <span className="grid gap-0.5"><span className="font-bold">{t(`help.links.${key}` as StringKey)}</span><span className="text-sm font-semibold text-muted">{t(`help.links.${key}Text` as StringKey)}</span></span>
-            </Link>
-          ))}
-        </nav>
+        {/* Its own page (teacher, 2026-11-20): just the questions; guides live in the Help Center. */}
+        <p className="font-bold"><Link to="/help">{t('faq.guides')}</Link></p>
 
         <div className="grid md:grid-cols-[16rem_minmax(0,1fr)] gap-6 items-start">
           <aside className={`${panel} p-2 md:sticky md:top-24`}>

@@ -16,7 +16,8 @@ export default function PublicFooter() {
           <Link to="/homeschool">{t('public.nav.homeschool')}</Link>
           <Link to="/blog">{t('public.nav.ideas')}</Link>
           <Link to="/research">{t('research.title')}</Link>
-          <Link to="/faq">{t('public.nav.faq')}</Link>
+          <Link to="/help">{t('public.nav.faq')}</Link>
+          <Link to="/faq">{t('public.nav.faqOnly')}</Link>
           <Link to="/beta">{t('public.nav.beta')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>

@@ -112,7 +112,7 @@ export function HelpPage() {
               className="w-full min-h-12 pl-11 pr-4 rounded-pill border-thin border-border bg-surface-2 text-base font-semibold" />
           </label>
           <nav aria-label={t('help.shortcuts')} className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm font-bold">
-            {[['/faq', 'public.nav.faq', Question], ['/it', 'public.nav.it', WifiHigh], ['/check', 'public.nav.check', DeviceMobile], ['/beta-kit', 'beta.kit', Printer], ['/blog', 'ways.title', Lightbulb]].map(([to, k, Ic]) => {
+            {[['/faq', 'public.nav.faqOnly', Question], ['/it', 'public.nav.it', WifiHigh], ['/check', 'public.nav.check', DeviceMobile], ['/beta-kit', 'beta.kit', Printer], ['/blog', 'ways.title', Lightbulb]].map(([to, k, Ic]) => {
               const C = Ic as Icon;
               return <Link key={to as string} to={to as string} className="inline-flex items-center gap-1.5 no-underline text-muted hover:underline"><C weight="bold" size={16} />{t(k as StringKey)}</Link>;
             })}
