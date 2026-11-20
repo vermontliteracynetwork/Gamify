@@ -223,3 +223,4 @@ line that fits, and add each new preference the same turn she says it.
 - Menu options never cut off (2026-11-20, universal): when choices would truncate, stack them. Theme Builder Download options (print, digital) and Advanced audio dropdowns are stacked.
 - Theme deck (2026-11-20): side cards tuck behind the front card; the credit line is just the maker's name ("Gamify").
 - Security (2026-11-20, universal): escape and check everything a user submits before it shows (themes from others are checked: pictures must be real images, colors plain hex); uploads are checked for type and size and always redrawn into fresh images, never stored where they could run; payment messages count only with a valid Stripe signature.
+- Pricing header (2026-11-20): left aligned with the plan cards; the description as wide as the cards (two lines on a laptop); chips in one row.

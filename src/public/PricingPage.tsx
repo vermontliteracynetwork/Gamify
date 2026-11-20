@@ -59,12 +59,13 @@ export default function PricingPage() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
-        {/* The heading, its line and the promise chips line up with the plan cards: centered over the full width, chips in one row (teacher, 2026-11-20). */}
-        <div className="grid justify-items-center text-center">
+        {/* Left aligned with the plan cards, the line as wide as the cards so it
+            takes two lines, chips in one row without wrapping (teacher, 2026-11-20). */}
+        <div className="grid justify-items-start text-left">
           <h1 className="title-bubble text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
-          <p className="text-xl font-bold max-w-3xl text-balance">{t('pricing.sub')}</p>
-          <ul className="flex flex-wrap lg:flex-nowrap justify-center gap-2 list-none p-0 mt-5 mb-0 w-full">
-            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
+          <p className="text-xl font-bold w-full">{t('pricing.sub')}</p>
+          <ul className="flex flex-wrap lg:flex-nowrap gap-2 list-none p-0 mt-5 mb-0 w-full">
+            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm whitespace-nowrap"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
 
