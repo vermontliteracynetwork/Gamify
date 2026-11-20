@@ -23,13 +23,14 @@ export default function LiveLobby() {
     const r = routeFor(state, me.pid);
     navigate(`/games/${r.gameId}?set=${r.setId}${r.pair ? `&pair=${r.pair.code}&seat=${r.pair.seat}` : ''}`, { replace: true });
   }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
-  const box = 'max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center';
+  // Centered on the screen (share screens pass, 2026-11-20).
+  const box = 'w-full max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center';
   if (!session) return <main className={box}><p className="font-bold text-lg">{t('live.noSession')}</p><Link to="/join" className={buttonClasses('primary')}>{t('live.toJoin')}</Link></main>;
   if (closed) return <main className={box}><Prohibit weight="fill" size={64} aria-hidden="true" /><h1 className="title-bubble text-4xl"><Title text={t('live.closed')} /></h1><p className="font-bold">{t('live.closedText')}</p></main>;
   const status = !state ? 'finding' : !me ? 'finding' : me.status === 'removed' ? 'removed' : me.status === 'pending' ? 'pending' : 'in';
   return (
     <main className={box}>
-      <motion.p key={session.name} initial={reduce ? false : { scale: 0.8 }} animate={{ scale: 1 }} className="font-display text-4xl">{session.name}</motion.p>
+      <motion.p key={session.name} initial={reduce ? false : { scale: 0.8 }} animate={{ scale: 1 }} className="font-display text-4xl px-6 py-2 rounded-pill bg-surface border-bold border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>{session.name}</motion.p>
       <div className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
         {status === 'in' ? <CheckCircle weight="fill" size={64} color="#1f7a45" aria-hidden="true" /> : status === 'removed' ? <Prohibit weight="fill" size={64} aria-hidden="true" /> : (
           <motion.span animate={reduce ? undefined : { rotate: [0, 180, 180, 360] }} transition={{ repeat: Infinity, duration: 2.4 }}><HourglassMedium weight="fill" size={64} aria-hidden="true" /></motion.span>

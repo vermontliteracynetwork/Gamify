@@ -52,6 +52,8 @@ export async function makeLobbyCode(lobby: ClassLobby, limits: PlayLimits = {}):
   const first = lobby.all ?? Object.values(lobby.plan)[0] ?? { gameId: lobby.board?.gameIds[0] ?? '', setId: lobby.board?.setId ?? '' };
   const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId: first.gameId, setId: first.setId, createdAt: new Date().toISOString(), rosterClass: lobby.classId, lobby, ...limits };
   await data.setSetting(KEY, [...all, code]);
+  // Students' own devices find it too, so the shared link needs no code typed (2026-11-20).
+  await shareToCloud(code, 'play').catch((e) => console.warn('lobby code not shared', e));
   return code;
 }
 

@@ -2,7 +2,9 @@ import { lobbyPickFor } from '../data/gameCodes';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, DiceFive, SpeakerHigh, UserCircle } from '@phosphor-icons/react';
+import { ArrowRight, CircleNotch, DiceFive, SpeakerHigh, UserCircle } from '@phosphor-icons/react';
+import { getGame } from '../games/registry';
+import { GameCover } from '../games/covers';
 import { speak } from '../engine/feedback';
 import { useSettings } from '../settings/SettingsContext';
 import { data, newId } from '../data';
@@ -26,6 +28,8 @@ export default function JoinPage() {
   const { code: fromLink = '' } = useParams();
   const [code, setCode] = useState(fromLink.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5));
   const [wrong, setWrong] = useState(false);
+  // A link whose code did not check out shows the form, with the code filled in.
+  const [linkBad, setLinkBad] = useState(false);
   const [game, setGame] = useState<GameCode | null>(null);
   const [name, setName] = useState(() => rollName());
   // The teacher's student lists that have students, for avatar + PIN sign-in.
@@ -49,6 +53,7 @@ export default function JoinPage() {
     const upper = c.trim().toUpperCase();
     const g = await findGameCode(upper);
     if (g) { setReady({ code: upper, go: () => openGame(g) }); return; }
+    if (upper === fromLink.toUpperCase()) setLinkBad(true);
     misses.current += 1;
     if (misses.current >= 5) { misses.current = 0; setWaitUntil(Date.now() + 30000); setNow(Date.now()); }
     setWrong(true); window.setTimeout(() => setWrong(false), 900);
@@ -97,7 +102,8 @@ export default function JoinPage() {
 
   if (game && rosters.length > 0 && !guest) {
     return (
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 content-center">
+      <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 content-center">
+        <div className="justify-self-center"><Joining gameId={game.design ? '' : game.gameId} /></div>
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
           <div className="grid sm:grid-cols-2 gap-3">
@@ -111,7 +117,9 @@ export default function JoinPage() {
 
   if (game) {
     return (
-      <main className="max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
+      <main className="w-full max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
+        <Joining gameId={game.design ? '' : game.gameId} />
+        <div className={CARD} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
@@ -121,17 +129,26 @@ export default function JoinPage() {
         <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {t('join.play')}<ArrowRight weight="bold" size={26} />
         </button>
+        </div>
       </main>
     );
   }
 
   return (
     // Centered on the screen, not stuck at the top (design audit, 2026-11-20).
-    <main className="relative max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
+    <main className="relative w-full max-w-lg mx-auto px-4 py-8 min-h-[calc(100dvh-4rem)] grid gap-5 justify-items-center content-center text-center">
       {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
       <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">
         <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="!w-12 !h-12 bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}><SpeakerHigh weight="bold" size={24} /></IconButton>
       </div>
+      {/* While a link's code is checked, say so instead of showing the form (2026-11-20). */}
+      {fromLink.length === 5 && !linkBad && !waiting && code === fromLink.toUpperCase() ? (
+        <div className={CARD} style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status">
+          <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.4, ease: 'linear' }} className="inline-flex"><CircleNotch weight="bold" size={48} aria-hidden="true" /></motion.span>
+          <p className="font-display text-3xl">{t('join.opening')}</p>
+        </div>
+      ) : (
+      <div className={CARD} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <h1 className="title-bubble text-5xl"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-lg">{t('join.sub')}</p>
       <div className="flex items-center justify-center gap-2 w-full">
@@ -150,6 +167,22 @@ export default function JoinPage() {
           </motion.button>
         )}
       </AnimatePresence>
+      </div>
+      )}
     </main>
+  );
+}
+
+const CARD = 'w-full bg-surface border-heavy border-border rounded-panel px-6 py-8 grid gap-5 justify-items-center text-center';
+
+// Which game the student is about to play: its cover and name.
+function Joining({ gameId }: { gameId: string }) {
+  const g = gameId ? getGame(gameId) : undefined;
+  if (!g) return null;
+  return (
+    <p className="inline-flex items-center gap-3 pl-1.5 pr-5 py-1.5 rounded-pill bg-surface border-bold border-border font-bold text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <GameCover gameId={g.id} className="w-20 aspect-[100/62] rounded-[0.9rem] border-std border-border" />
+      {t('join.joining', { game: g.name })}
+    </p>
   );
 }

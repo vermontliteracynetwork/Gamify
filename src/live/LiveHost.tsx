@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix, SlidersHorizontal } from '@phosphor-icons/react';
+import { Check, Copy, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix, SlidersHorizontal } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -178,19 +178,23 @@ function Room({ game }: { game: GameCode }) {
         <h1 className="sr-only">{t('live.hostTitle', { game: gameName })}</h1>
         {state.phase === 'lobby' && (
           <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
-            className="w-11 h-11 rounded-full border-bold border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
+            className="w-11 h-11 rounded-full border-bold border-border bg-surface text-text flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
         )}
       </div>
 
       {state.phase === 'lobby' && (
         <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] gap-4 min-h-0 flex-1">
           <Panel className="grid gap-3 justify-items-center content-center text-center min-h-0 text-text">
-            <p className="font-display text-2xl">{t('show.goTo', { host: window.location.host })}</p>
-            <p className="font-display text-7xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: game.code })}>{game.code}</p>
+            {/* Two ways in (share screens pass, 2026-11-20): type the code at
+                the join page, or scan / open the link, which has the code in it. */}
+            <p className="font-display text-[clamp(1.25rem,2.6vh,1.75rem)]">{t('show.goTo', { host: window.location.host })}</p>
+            <p className="font-display text-[clamp(3.5rem,11vh,7.5rem)] leading-none tracking-[0.15em] px-6 py-2 rounded-panel bg-surface-2 border-bold border-border" aria-label={t('host.codeIs', { code: game.code })}>{game.code}</p>
             <div className="flex items-center justify-center gap-3">
               {pieceImage(screen.theme, 'mascot') && <img src={pieceImage(screen.theme, 'mascot')} alt="" className="w-32 h-32 object-contain motion-safe:animate-[bounce_2.4s_ease-in-out_infinite]" />}
-              {qr && <img src={qr} alt={t('show.qr')} className="w-48 h-48 rounded-input border-heavy border-border" />}
+              {qr && <img src={qr} alt={t('show.qr')} className="w-[min(15rem,30vh)] h-auto rounded-input border-heavy border-border" />}
             </div>
+            <p className="font-bold text-sm text-muted">{t('show.scanNoCode')}</p>
+            <CopyLink url={joinUrl} />
             {screen.themes.length > 1 && (
               <label className="flex flex-wrap items-center justify-center gap-2 font-bold text-sm">{t('live.screenLook')}
                 <select value={screen.theme.id} onChange={(e) => screen.choose(e.target.value)} className="min-h-11 px-2 rounded-input border-std border-border font-bold bg-surface">
@@ -212,20 +216,21 @@ function Room({ game }: { game: GameCode }) {
                 </div>
               </div>
             )}
-            <ul className="grid gap-2 list-none p-0 m-0 content-start flex-1 min-h-0 overflow-y-auto" aria-label={t('live.players')}>
+            <ul className="grid xl:grid-cols-2 gap-2 list-none p-0 m-0 content-start flex-1 min-h-0 overflow-y-auto" aria-label={t('live.players')}>
               <AnimatePresence initial={false}>
                 {state.players.filter((p) => p.status !== 'removed').map((p) => (
-                  <motion.li key={p.pid} layout={!reduce} initial={reduce ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`flex flex-wrap items-center gap-2 rounded-input border-std p-2 ${p.status === 'pending' ? 'border-border bg-accent/40' : 'border-border-soft'}`}>
+                  <motion.li key={p.pid} layout={!reduce} initial={reduce ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`flex flex-wrap items-center gap-2 rounded-input border-std p-2 ${p.status === 'pending' ? 'border-border bg-accent/40' : 'border-border bg-surface'}`} style={p.status === 'pending' ? undefined : { boxShadow: '0 2px 0 #000' }}>
                     {editing === p.pid
                       ? <input autoFocus defaultValue={p.name} maxLength={24} aria-label={t('live.renameTo', { name: p.name })} onBlur={(e) => { setPlayer(p.pid, { name: e.target.value.trim() || p.name }); setEditing(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} className="flex-1 min-h-10 px-2 rounded-input border-std border-border font-bold" />
-                      : <span className="flex-1 font-bold min-w-32">{p.name}</span>}
+                      : <span className="flex-1 font-bold min-w-32 flex items-center gap-2">{skyGame && p.status === 'in' && <StarIcon weight="fill" size={22} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />}{p.name}</span>}
                     {paid && p.status === 'in' && groups.length > 1 && (
-                      <select value={assignOf(p.pid).group ?? 0} aria-label={t('live.groupFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { group: Number(e.target.value) })} className="min-h-10 px-2 rounded-input border-std border-border font-bold bg-surface text-sm">
+                      <select value={assignOf(p.pid).group ?? 0} aria-label={t('live.groupFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { group: Number(e.target.value) })} className="order-last min-h-10 px-2 rounded-input border-std border-border font-bold bg-surface text-sm">
                         {groups.map((_, i) => <option key={i} value={i}>{t('live.groupN', { n: i + 1 })}</option>)}
                       </select>
                     )}
                     {paid && p.status === 'in' && (
-                      <SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} />
+                      // The set picker sits on its own line under the name, so the card never crowds (2026-11-20).
+                      <span className="order-last basis-full grid [&>select]:max-w-none"><SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} /></span>
                     )}
                     {p.status === 'pending' && <Button variant="primary" onClick={() => setPlayer(p.pid, { status: 'in' })}><Check weight="bold" size={16} />{t('live.letIn', { name: p.name })}</Button>}
                     <button type="button" onClick={() => setEditing(p.pid)} aria-label={t('live.rename', { name: p.name })} className="w-10 h-10 rounded-full border-std border-border bg-surface flex items-center justify-center"><PencilSimple weight="bold" size={16} /></button>
@@ -332,9 +337,9 @@ function Room({ game }: { game: GameCode }) {
 
           {/* Compete: a small leaderboard in the top right, in the corner the stars leave free. */}
           {state.mode !== 'together' && skyGame && (
-            <ol className="absolute top-3 right-3 z-10 w-[min(22%,18rem)] grid gap-1.5 list-none m-0 p-2 rounded-panel bg-surface/90 border-std border-border" aria-label={t('live.board.leaders')}>
+            <ol className="absolute top-3 right-3 z-10 w-[min(24%,20rem)] grid gap-1.5 list-none m-0 p-3 rounded-panel bg-surface/95 border-std border-border text-text" aria-label={t('live.board.leaders')}>
               {leaders.slice(0, 8).map((p, i) => (
-                <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-sm">
+                <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-base">
                   <span className="w-5 text-center font-display">{i + 1}</span>
                   <StarIcon weight="fill" size={18} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />
                   <span className="flex-1 truncate">{p.name}</span>
@@ -345,7 +350,7 @@ function Room({ game }: { game: GameCode }) {
           )}
 
           {/* The goal, small and centered along the bottom. */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/95 border-std border-border text-text">
             {state.mode === 'together' ? (
               <>
                 <p className="font-display text-lg">{t('live.goalText', { right: classRight, goal })}</p>
@@ -454,3 +459,16 @@ function Room({ game }: { game: GameCode }) {
 
 const TOOL = 'w-11 h-11 rounded-full border-bold border-border bg-surface flex items-center justify-center text-[var(--text)]';
 const clock = (ms: number) => { const sec = Math.ceil(ms / 1000); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; };
+
+// The join link with the code in it, to paste anywhere (share screens pass,
+// 2026-11-20): opening it needs no code typed.
+function CopyLink({ url }: { url: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-2 max-w-full">
+      <span className="font-mono text-sm font-bold px-3 min-h-9 inline-flex items-center rounded-pill bg-surface-2 border-std border-border-soft max-w-full truncate">{url.replace(/^https?:\/\//, '')}</span>
+      <button type="button" onClick={() => { void navigator.clipboard?.writeText(url).then(() => { setDone(true); window.setTimeout(() => setDone(false), 1600); }); }}
+        className="min-h-9 px-3 rounded-pill border-std border-border bg-surface font-bold text-sm inline-flex items-center gap-1.5">{done ? <Check weight="bold" size={16} /> : <Copy weight="bold" size={16} />}{done ? t('host.copiedShort') : t('host.copyLink')}</button>
+    </div>
+  );
+}

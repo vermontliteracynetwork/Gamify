@@ -166,6 +166,8 @@ export function CodeBox({ code, setName, onCopied, onShow }: { code: GameCode; s
   return (
     <div className="grid gap-2 justify-items-start">
       <p className="font-display text-4xl tracking-[0.2em]" aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
+      {/* The link has the code in it, so students who open it type nothing (2026-11-20). */}
+      <p className="text-sm font-bold flex flex-wrap items-center gap-2"><span className="font-mono px-2 py-0.5 rounded-input bg-surface-2 border-std border-border-soft">{gameLink(code).replace(/^https?:\/\//, '')}</span><span className="text-muted">{t('host.linkNoCode')}</span></p>
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => { void navigator.clipboard?.writeText(gameLink(code)).catch(() => undefined); onCopied(); }}><Copy weight="bold" size={18} />{t('host.copyLink')}</Button>
         {onShow && <Button onClick={onShow}><ProjectorScreen weight="bold" size={18} />{t('host.show')}</Button>}
