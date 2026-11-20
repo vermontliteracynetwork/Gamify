@@ -1,14 +1,15 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowSquareOut, CheckCircle, Flask, MagnifyingGlass, Printer, RocketLaunch } from '@phosphor-icons/react';
+import { ArrowSquareOut, CheckCircle, Flask, MagnifyingGlass } from '@phosphor-icons/react';
 import { t } from '../i18n';
-import { buttonClasses, Tabs } from '../ui/kit';
+import { Tabs } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
-import { BETA_DOING, CAUTIONS, FINDINGS, WONT_CLAIM } from './research';
+import { CAUTIONS, FINDINGS, WONT_CLAIM } from './research';
 
-type Tab = 'works' | 'beta' | 'sources';
+// No beta test tab (teacher, 2026-11-20); the beta has its own /beta page.
+type Tab = 'works' | 'sources';
 
 // The public Research tab (teacher requests, 2026-10-25): what the research
 // says Gamify gets right, written big and positive with the honest notes
@@ -17,7 +18,7 @@ type Tab = 'works' | 'beta' | 'sources';
 export default function ResearchPage() {
   const [params, setParams] = useSearchParams();
   const reduce = useReducedMotion();
-  const tab = (['works', 'beta', 'sources'].includes(params.get('tab') ?? '') ? params.get('tab') : 'works') as Tab;
+  const tab = (['works', 'sources'].includes(params.get('tab') ?? '') ? params.get('tab') : 'works') as Tab;
   const card = 'hover-lift bg-surface border-bold border-border rounded-panel p-6 grid gap-3 content-start';
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : Math.min(i, 8) * 0.05 } });
   const allSources = [...FINDINGS.flatMap((f) => f.sources), ...CAUTIONS.flatMap((c) => c.sources)].filter((s, i, a) => a.findIndex((x) => x.url === s.url) === i);
@@ -31,7 +32,6 @@ export default function ResearchPage() {
         </div>
         <Tabs label={t('research.tabs')} value={tab} onChange={(v) => setParams({ tab: v }, { replace: true })} options={[
           { id: 'works', label: t('research.tab.works') },
-          { id: 'beta', label: t('research.tab.beta') },
           { id: 'sources', label: t('research.tab.sources') },
         ]} />
 
@@ -72,7 +72,6 @@ export default function ResearchPage() {
           </section>
         )}
 
-        {tab === 'beta' && <BetaTab card={card} enter={enter} />}
 
         {tab === 'sources' && (
           <section aria-label={t('research.tab.sources')} className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -89,25 +88,3 @@ export default function ResearchPage() {
   );
 }
 
-// Gamify's beginning stages and the pilot; joining happens on the beta test page.
-function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }) {
-  return (
-    <section aria-label={t('research.tab.beta')} className="grid gap-5">
-      <div className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-        <h2 className="title-bubble text-4xl flex items-center gap-3"><RocketLaunch weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('beta.title')} /></h2>
-        <p className="text-lg font-bold max-w-3xl">{t('beta.intro')}</p>
-        <Link to="/beta" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}>{t('beta.join')}</Link>
-      </div>
-      <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
-        {BETA_DOING.map((m, i) => (
-          <motion.li key={m.step} {...enter(i)} className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-2xl wiggle-on-hover">{i + 1}</span>
-            <h3 className="font-display text-2xl"><Title text={m.step} /></h3>
-            <p className="font-semibold">{m.text}</p>
-          </motion.li>
-        ))}
-      </ol>
-      <Link to="/beta-kit" className={buttonClasses('secondary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('beta.kit')}</Link>
-    </section>
-  );
-}

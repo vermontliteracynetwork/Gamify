@@ -68,7 +68,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
     setPicking(null);
   }
 
-  const nameOf = (x: Slot, i: number) => x.name.trim() || x.hint || t('teams.name', { n: i + 1 });
+  const nameOf = (x: Slot, i: number) => x.name.trim() || x.hint || t(mode === 'versus' ? 'teams.playerN' : 'teams.teamN', { n: i + 1 });
   const names = () => slots.map((x, i) => nameOf(x, i));
   const resize = (n: number) => setSlots((cur) => {
     const next = cur.slice(0, n);
@@ -107,6 +107,13 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
           className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={18} /></button>
         {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
       </div>}
+      {/* The team vs player rule (teacher, 2026-11-20): one person a turn is a
+          player game; a group sharing a turn is a team game. Same screen, the
+          words and the icon say which. */}
+      <p className="inline-flex items-center gap-2 font-bold text-sm text-muted -mt-2">
+        {mode === 'share' ? <UsersThree weight="fill" size={18} aria-hidden="true" /> : <User weight="fill" size={18} aria-hidden="true" />}
+        {mode === 'share' ? t('teams.ruleTeams') : t('teams.rulePlayers')}
+      </p>
 
       {/* Characters (Board Game animals) show as player cards: the animal big,
           no circle around it, the name under it (teacher, 2026-11-01). */}
@@ -200,7 +207,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
                 {(['easy', 'medium', 'hard'] as const).map((lv) => <option key={lv} value={lv}>{t(`opt.${lv}`)}</option>)}
               </select>
             ) : (
-              <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24} max={22}
+              <FitInput id={`slot-${i}`} value={s.name} aria-label={t(mode === 'versus' ? 'teams.playerName' : 'teams.name', { n: i + 1 })} maxLength={24} max={22}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
                 className="flex-1 min-w-0 min-h-14 px-4 rounded-input border-std border-border bg-surface font-bold text-xl placeholder:text-faint placeholder:font-semibold" />
             )}

@@ -254,6 +254,17 @@ function Room({ game }: { game: GameCode }) {
               colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
               label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
           ) : state.mode !== 'together' && (
+            <>
+            {/* Teams (teacher, 2026-11-20): with more than one team, each
+                team's points add up across its players. */}
+            {groups.length > 1 && (
+              <div className="absolute inset-x-0 top-4 mx-auto max-w-4xl px-6 flex flex-wrap justify-center gap-2" aria-label={t('live.teamTotals')}>
+                {groups.map((_, i) => ({ i, n: state.players.filter((p) => p.status === 'in' && Math.min(assignOf(p.pid).group ?? 0, groups.length - 1) === i).reduce((a, p) => a + p.right, 0) }))
+                  .sort((a, b) => b.n - a.n).map(({ i, n }) => (
+                    <span key={i} className="px-4 min-h-11 inline-flex items-center rounded-pill bg-surface border-std border-border font-display text-xl text-text tabular-nums" style={{ boxShadow: '0 3px 0 #000' }}>{t('live.teamRow', { team: t('live.groupN', { n: i + 1 }), n })}</span>
+                  ))}
+              </div>
+            )}
             <ol className="absolute inset-x-0 top-20 bottom-24 mx-auto max-w-4xl px-6 grid gap-3 content-center list-none m-0" aria-label={t('live.board.leaders')}>
               {leaders.slice(0, 10).map((p, i) => (
                 <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3 stage-text">
@@ -264,6 +275,7 @@ function Room({ game }: { game: GameCode }) {
                 </motion.li>
               ))}
             </ol>
+            </>
           )}
 
           {/* Teacher tools: small, top left, with hover text. */}

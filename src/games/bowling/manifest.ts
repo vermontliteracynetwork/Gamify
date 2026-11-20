@@ -5,7 +5,8 @@ export const bowlingManifest: GameManifest = {
   id: 'bowling',
   name: 'Bowling',
   description: 'Answer right, then aim and send the ball into the pins.',
-  modes: ['share', 'versus', 'solo'],
+  // Share, Versus or Live, not Solo (teacher, 2026-11-20).
+  modes: ['share', 'versus', 'live'],
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1000, height: 1300, hint: 'The alley wall behind the lane' },

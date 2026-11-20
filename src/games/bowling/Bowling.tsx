@@ -1,3 +1,6 @@
+import { useNavigate } from 'react-router-dom';
+import { makeGameCode } from '../../data/gameCodes';
+import { classPlayQuery, DEFAULT_CLASS_PLAY } from '../../live/ClassPlay';
 import { THEME_FONTS } from '../../theme/types';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import Title from '../../ui/Title';
@@ -63,13 +66,18 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 5, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 5, who: 'teams' as 'teams' | 'solo' | 'versus' | 'live', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
   // Students who join with a code play on their own device; teachers pick the way.
   const { teacher } = useSignedIn();
-  const solo = setup.who === 'solo' || !teacher;
+  // Bowling is Share, Versus or Live, never Solo for a teacher (teacher,
+  // 2026-11-20). Students who join a live game bowl their own lane.
+  const solo = !teacher;
+  const live = !!teacher && setup.who === 'live';
+  const navigate = useNavigate();
+  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('bowling', setId, 'live')).code}?${classPlayQuery(DEFAULT_CLASS_PLAY)}`); }
   const { ask, cancel, asking, element, missed: soloMissed } = useAsk({ gameId: 'bowling', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
@@ -371,9 +379,9 @@ export default function Bowling() {
       )}
       {phase === 'theme' && <ThemeScreen gameName={bowlingManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase('theme')} onPlay={begin} pages={[
+        <SetupWizard onBack={() => setPhase('theme')} onPlay={live ? () => void openLive() : begin} playLabel={live ? t('way.openLobby') : undefined} pages={[
           // Pick the way to play first (teacher, 2026-10-31); students arrive with theirs set.
-          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'live']} value={live ? 'live' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'live' ? 'live' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -381,7 +389,7 @@ export default function Bowling() {
               {powerUpSwitches({ manifest: bowlingManifest, theme, on: setup.powerUps, off: setup.powerOff ?? [], change })}
             </>
           ) },
-          ...(solo ? [] : [setup.who === 'versus'
+          ...(solo || live ? [] : [setup.who === 'versus'
             // Every Share game can also be played Versus: two players head to head, or one against the computer (teacher, 2026-10-31).
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players: players, level })} /> }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players: players, level })} /> }]),

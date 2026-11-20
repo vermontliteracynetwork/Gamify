@@ -149,9 +149,8 @@ test.describe('research', () => {
     await page.waitForTimeout(800);
     await page.screenshot({ path: `test-results/research-${info.project.name}.png`, fullPage: true });
     await expect(page.getByRole('heading', { name: /Designed around what works/i })).toBeVisible();
-    await page.getByRole('tab', { name: 'The beta test' }).click();
-    await expect(page.getByRole('heading', { name: /Gamify is just getting started/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Join the beta test' }).first()).toHaveAttribute('href', '/beta');
+    // No beta test tab on Research (teacher, 2026-11-20).
+    await expect(page.getByRole('tab', { name: 'The beta test' })).toHaveCount(0);
     await page.getByRole('tab', { name: 'Sources' }).click();
     expect(await page.getByRole('link', { name: /Psychological Bulletin/ }).count()).toBeGreaterThan(1);
     await expect(page).toHaveTitle('Research | Gamify');

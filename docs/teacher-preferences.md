@@ -239,3 +239,7 @@ line that fits, and add each new preference the same turn she says it.
 - Live host screen (2026-11-20): wears the game's own theme background; no "Live: <game>" title.
 - Top strip (2026-11-20, Match Three and Bubble Pop): a white strip; the bar just fills in as a progress bar (no highlighted current section); its color is a Theme Builder color ("Progress bar").
 - Bubble Pop Classic (2026-11-20): white background with colorful swirls and dots (coral, pink, aqua, yellow, teal); bubbles in a bright summer palette (sunflower, aqua, coral, lime, pink, tangerine), the first three far apart.
+- Team vs player rule (2026-11-20, every game): one person a turn is a player game ("Players", "Player 1", one-person icon, "Each player takes their own turn."); a group sharing a turn is a team game ("Teams", "Team 1", group icon, "Each team takes its turn together."). Same setup screen for both.
+- Bowling ways to play (2026-11-20): Share, Versus or Live, never Solo. Live opens the lobby: students bowl their own lane on their devices; the teacher puts students on teams there (several games at once for big classes) and team points add up on the big screen. The Board Game should get the same lobby teams next.
+- Live lobby "groups" are called teams (2026-11-20).
+- Research page (2026-11-20): no beta test tab. Login page: wider.
