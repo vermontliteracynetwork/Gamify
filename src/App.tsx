@@ -88,6 +88,7 @@ const WaysList = lazyPage(() => import('./public/WaysPage').then((m) => ({ defau
 const WaysPost = lazyPage(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
+const CoverMockups = lazyPage(() => import('./owner/CoverMockups'));
 const NotFoundPage = lazyPage(() => import('./public/NotFoundPage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
@@ -200,6 +201,7 @@ function AnimatedRoutes() {
           <Route path="/arcade/:classId" element={<Navigate to="/join" replace />} />
           <Route path="/owner" element={<OwnerPage />} />
           <Route path="/owner/line" element={<Navigate to="/owner" replace />} />
+          <Route path="/owner/cover-mockups" element={<CoverMockups />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
           {/* Our own 404 page (site QA, 2026-11-20). */}
