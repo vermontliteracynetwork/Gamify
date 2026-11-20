@@ -23,6 +23,6 @@ The teacher's security lists (2026-11-20), item by item. "Done" was checked in c
 | Debug off, production settings | Done. Production builds have no source maps or dev tools; test-only aids switch off outside tests. |
 | Logging | Done. Failed logins, rate limits and webhook refusals are logged (Vercel logs). |
 | Session token in local storage | Known. Supabase keeps the session in the browser; the strict headers above and the CSP limit XSS risk. Moving to httpOnly cookies needs server rendering; planned with Stage 5. |
-| Two-step sign in | Owner: done (0012). Teachers: **You** turn on Supabase Auth, MFA (TOTP); the Account page then gets a "Turn on two-step sign in" button (planned). |
+| Two-step sign in | Owner: done (0012). Teachers: done in code (Account page, Two-step sign-in; every teacher page then asks for the code). **You** turn on Supabase Auth, MFA (TOTP) for it to work. |
 | Bot protection | **You:** turn on Supabase Auth, Bot and abuse protection (Cloudflare Turnstile) and add the site key. |
 | Spend caps | **You:** Vercel Spend Management cap, OpenAI usage limit, Resend plan limit. |

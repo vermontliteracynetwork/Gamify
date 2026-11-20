@@ -102,7 +102,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
         transition={POP_IN}
         // Full screen (2026-11-19): the question big and centered, the four
         // answers filling the rest of the screen like big game buttons.
-        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel ${framed ? 'grid max-w-[min(60rem,94vw)] border-heavy p-[clamp(1rem,3vh,2rem)] gap-[clamp(0.6rem,2vh,1.25rem)]' : 'h-full !rounded-none flex flex-col justify-center px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] gap-[clamp(0.5rem,2.5vh,1.75rem)]'}`}
+        className={`w-full max-h-full overflow-y-auto bg-surface border-border rounded-panel ${framed ? 'grid content-center max-w-[min(60rem,94vw)] min-h-[min(30rem,60vh)] border-heavy p-[clamp(1rem,3vh,2rem)] gap-[clamp(0.6rem,2vh,1.25rem)]' : 'h-full !rounded-none flex flex-col justify-center px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] gap-[clamp(0.5rem,2.5vh,1.75rem)]'}`}
         style={{ boxShadow: framed ? '0 0 0 6px rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35)' : 'none' }}
       >
         <div className={`flex items-center gap-2 flex-wrap ${framed ? '' : 'w-full max-w-[90rem] mx-auto'}`}>

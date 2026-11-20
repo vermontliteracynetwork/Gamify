@@ -11,6 +11,7 @@ import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import AccessCode, { PlanUntil } from './AccessCode';
 import CoopCode from './CoopCode';
+import { TwoStepPanel } from '../auth/TwoStep';
 
 // The teacher's account: plan, downloading everything, deleting
 // everything, and what happens on a smaller plan (nothing is deleted).
@@ -73,6 +74,7 @@ export default function AccountPage() {
       </Panel>
       {tier === 'free' && <AccessCode />}
       {(tier === 'free' || tier === 'homeschool' || tier === 'plus') && <CoopCode />}
+      <TwoStepPanel />
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.exportTitle')}</h2>
         <p className="font-semibold">{t('account.exportText')}</p>

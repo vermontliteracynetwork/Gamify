@@ -1,3 +1,4 @@
+import { TwoStepGate } from '../auth/TwoStep';
 import { useSession } from '../student/session';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -71,7 +72,7 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
 
 export function RequireTeacher({ children }: { children: ReactNode }) {
   const { teacher } = useSignedIn();
-  if (teacher) return <>{children}</>;
+  if (teacher) return <TwoStepGate>{children}</TwoStepGate>;
   return (
     <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-5xl"><Title text={t('gate.teacherTitle')} /></h1>

@@ -14,7 +14,6 @@ export const flashcardsManifest: GameManifest = {
     { id: 'card-back', label: 'Card back', width: 800, height: 500, hint: 'The answer side of each card', color: '#fdfd94' },
     ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   rounds: { label: 'Cards', min: 5, max: 30, default: 10 },
   hasCpu: false,

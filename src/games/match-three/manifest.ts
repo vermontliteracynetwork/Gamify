@@ -21,7 +21,6 @@ export const matchThreeManifest: GameManifest = {
     { id: 'special-rainbow', label: '5 in a row', width: 128, height: 128, hint: 'Made by 5 in a row. Swap it with any piece to pop all of that kind.' },
     ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
   questionsPerBreak: { label: 'Questions each time', min: 1, max: 10, default: 2 },

@@ -19,7 +19,6 @@ export const farmGrowManifest: GameManifest = {
     { id: 'barn', label: 'Barn', width: 400, height: 400, hint: 'The barn beside the field' },
     ...playerIconPieces('Player'),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   items: {
     label: 'Power-ups', hint: 'Sometimes a right answer brings one. Give each one art and a power.', max: 6, width: 256, height: 256,
