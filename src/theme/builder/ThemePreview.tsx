@@ -10,6 +10,7 @@ import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
 import { ShareQuestionView, StudentQuestionView } from './QuestionViews';
+import { GameCover } from '../../games/covers';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
 import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
@@ -27,7 +28,7 @@ const GAME_PREVIEWS = Object.fromEntries(Object.entries(import.meta.glob<{ defau
 // shown"), each a screen of the game where the theme's pieces appear.
 // Games with board sizes show the board at every size (teacher, 2026-11-19):
 // `size:<n>` is the Board Game's number of squares or Match Three's grid.
-export type PreviewView = 'game' | 'question' | 'share' | 'pick' | 'powers' | `size:${number}`;
+export type PreviewView = 'game' | 'question' | 'share' | 'pick' | 'powers' | 'themes' | `size:${number}`;
 const SIZE_VIEWS: Record<string, { n: number; label: string }[]> = {
   'castle-quest': Object.entries(TRAIL_SPACES).map(([k, n]) => ({ n, label: `${{ short: 'Short', medium: 'Medium', long: 'Long', xlong: 'Extra long' }[k as keyof typeof TRAIL_SPACES]} board` })),
   'match-three': [6, 7, 8].map((n) => ({ n, label: `${n} by ${n} board` })),
@@ -35,14 +36,15 @@ const SIZE_VIEWS: Record<string, { n: number; label: string }[]> = {
 export function previewViews(gameId: string, hasItems: boolean): { id: PreviewView; label: string }[] {
   const sizes = SIZE_VIEWS[gameId];
   const views: { id: PreviewView; label: string }[] = sizes ? sizes.map((z) => ({ id: `size:${z.n}` as PreviewView, label: z.label })) : [{ id: 'game', label: gameId === 'bowling' ? 'Lane' : 'Game' }];
-  if (gameId === 'bowling') views.push({ id: 'pick', label: 'Pick a ball' });
-  else if (gameId === 'game-show') views.push({ id: 'pick', label: 'Team icons' });
+  // Every game shows its player picker and the theme picker (teacher, 2026-11-20).
+  views.push({ id: 'pick', label: gameId === 'bowling' ? 'Pick a ball' : 'Pick a player' });
   if (hasItems) views.push({ id: 'powers', label: 'Power-ups' });
   // Every game's question box, and the shared screen for games played on one
   // screen (teacher, 2026-11-20), with the theme's text and buttons.
   const game = GAMES.find((g) => g.id === gameId);
   if (game?.questionKinds.length) views.push({ id: 'question', label: 'Question' });
   if (game?.modes.some((m) => m === 'share' || m === 'live')) views.push({ id: 'share', label: 'Share screen' });
+  views.push({ id: 'themes', label: 'Theme picker' });
   return views;
 }
 
@@ -53,6 +55,7 @@ export default function ThemePreview({ theme: own, view = 'game' }: { theme: Gam
   // Start menus wear the standard Gamify look, never a theme's (teacher, 2026-10-31).
   if (view === 'pick') return <PickView theme={theme} />;
   if (view === 'question') return <StudentQuestionView theme={theme} />;
+  if (view === 'themes') return <ThemeDeckView theme={theme} />;
   if (view === 'share') return <ShareQuestionView theme={theme} />;
   // The Board Game's own board, squares, pieces and die (teacher, 2026-11-16).
   const size = view.startsWith('size:') ? Number(view.slice(5)) : undefined;
@@ -79,12 +82,14 @@ function PickView({ theme }: { theme: GameTheme }) {
   const names = ['Glowing Pickle', 'Magic Falcon'];
   const art = teamArt(theme);
   const [big, setBig] = useState<number | null>(null);
-  const label = theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : 'Preview: each team picks its icon';
+  // The team vs player rule: team games say team, the rest say player.
+  const team = !!GAMES.find((g) => g.id === theme.gameId)?.modes.includes('share');
+  const label = theme.gameId === 'bowling' ? 'Preview: each team picks its ball' : team ? 'Preview: each team picks its icon' : 'Preview: each player picks an icon';
   return (
     <div className="relative brand-menu rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid content-start gap-2 bg-[#c8d2fb]" role="group" aria-label={label}>
       <TeamArt.Provider value={art}>
         <div className="bg-surface border-bold border-border rounded-panel p-3 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <span className="font-bold text-lg">Teams</span>
+          <span className="font-bold text-lg">{team ? 'Teams' : 'Players'}</span>
           {names.map((n, i) => (
             <span key={n} className="flex items-center gap-2 rounded-input border-std border-border-soft p-1.5"><TeamBadge colorIndex={i} size={30} /><span className="font-bold text-sm truncate">{n}</span></span>
           ))}
@@ -104,6 +109,29 @@ function PickView({ theme }: { theme: GameTheme }) {
             : <TeamArt.Provider value={art}><TeamBadge colorIndex={big} size={220} /></TeamArt.Provider>}
         </button>
       )}
+    </div>
+  );
+}
+
+// The theme picker as students see it (teacher, 2026-11-20): this theme's
+// cover in front, blank cards tucked behind on each side.
+function ThemeDeckView({ theme }: { theme: GameTheme }) {
+  const cover = pieceImage(theme, 'cover');
+  const card = 'absolute top-1/2 w-[46%] rounded-panel border-bold border-border bg-white p-[1.5%] grid gap-[1.5%]';
+  return (
+    <div className="relative brand-menu rounded-panel border-bold border-border overflow-hidden aspect-[4/3] bg-[#c8d2fb]" role="img" aria-label="Preview: the theme picker">
+      {[-1, 1].map((d) => (
+        <span key={d} className={card} style={{ left: `${50 + d * 22}%`, transform: `translate(-50%, -50%) rotate(${d * 7}deg) scale(0.88)`, zIndex: 1 }}>
+          <span className="block aspect-[4/3] rounded-input border-std border-border bg-white" />
+          <span className="block h-[1.6rem]" />
+        </span>
+      ))}
+      <span className={card} style={{ left: '50%', transform: 'translate(-50%, -50%)', zIndex: 2, boxShadow: '0 6px 0 #000' }}>
+        <span className="block aspect-[4/3] rounded-input border-std border-border overflow-hidden bg-surface-2">
+          {cover ? <img src={cover} alt="" className="w-full h-full object-cover" /> : <GameCover gameId={theme.gameId} className="w-full h-full" />}
+        </span>
+        <span className="font-display text-[1.1rem] px-1 truncate">{theme.name || 'Your theme'}</span>
+      </span>
     </div>
   );
 }
