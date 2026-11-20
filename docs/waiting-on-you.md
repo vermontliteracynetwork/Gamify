@@ -9,6 +9,7 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 4. **Open the bank account** in Gamify LLC's name.
 5. **Buy learngamify.com** in Gamify LLC's name, after a quick trademark search (open on 2026-11-19, about $12 a year); add it to the Gamify project in Vercel. Students join at learngamify.com/join, which already works.
 6. **Open Stripe** in Gamify LLC's name with its EIN and bank account; confirm prices ($96 and $180 a year) and add the keys to Vercel.
+   Then **turn on the signed payment webhook (2026-11-20):** Stripe, Developers, Webhooks, add https://<your domain>/api/stripe-webhook (checkout.session.completed, customer.subscription.updated and .deleted, invoice.payment_failed) and put its signing secret (whsec_...) in Vercel as STRIPE_WEBHOOK_SECRET. Only signed events get through.
 7. **Later: ask an accountant about the S corp election** once Gamify has steady profit (IRS Form 2553).
 
 **Everything else**

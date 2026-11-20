@@ -222,3 +222,4 @@ line that fits, and add each new preference the same turn she says it.
 - Theme Builder preview (2026-11-20): every game shows each of its screens, including a made-up question on a student's screen and, for games played on one screen, the share screen, so the theme's real text and buttons show.
 - Menu options never cut off (2026-11-20, universal): when choices would truncate, stack them. Theme Builder Download options (print, digital) and Advanced audio dropdowns are stacked.
 - Theme deck (2026-11-20): side cards tuck behind the front card; the credit line is just the maker's name ("Gamify").
+- Security (2026-11-20, universal): escape and check everything a user submits before it shows (themes from others are checked: pictures must be real images, colors plain hex); uploads are checked for type and size and always redrawn into fresh images, never stored where they could run; payment messages count only with a valid Stripe signature.

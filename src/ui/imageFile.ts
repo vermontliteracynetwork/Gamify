@@ -1,10 +1,12 @@
+import { checkImageFile } from './uploadRules';
+
 // Turns a picked image file into a small data URL (longest side <= max px)
 // so question pictures stay light in browser storage. Cloud uploads replace
 // this in Stage 5.
 // `keepClear`: keep see-through parts (a PNG); otherwise white goes behind
 // them and it is saved as a smaller JPEG (never a black background).
 export async function imageFileToDataUrl(file: File, max = 800, keepClear = false): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error('Pick a picture file (PNG, JPG, GIF or WebP).');
+  checkImageFile(file);
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {

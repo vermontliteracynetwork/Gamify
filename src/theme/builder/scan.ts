@@ -1,3 +1,4 @@
+import { checkImageFile } from '../../ui/uploadRules';
 import type { ThemePieceSpec } from '../types';
 import { clipToShape, hasShape } from './shapes';
 import { MARKER, markerCenters, OUTLINE_STROKE, outlineBox, PAGE } from './template';
@@ -211,7 +212,7 @@ export const MARKER_SIZE = MARKER.size;
 // is trimmed to the drawing, and round pieces are cut in a circle. Solid
 // pieces (backgrounds, covers) fill their whole shape.
 export async function cutPhotoForPiece(file: File, piece: ThemePieceSpec, round: boolean, solid: boolean): Promise<string | null> {
-  if (!file.type.startsWith('image/')) throw new Error('Pick a picture file (PNG, JPG, GIF or WebP).');
+  checkImageFile(file);
   let bmp: ImageBitmap;
   try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch { throw new Error('That picture could not be opened.'); }
   const corners = findMarkers(bmp);

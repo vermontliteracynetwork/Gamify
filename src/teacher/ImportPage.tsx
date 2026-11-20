@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { checkCsvFile } from '../ui/uploadRules';
 import { useNavigate } from 'react-router-dom';
 import { DownloadSimple, FileArrowUp } from '@phosphor-icons/react';
 import { csvRowsToQuestions, generateSampleCsv, parseCsv, type CsvRowError } from '../data/csv';
@@ -11,10 +12,14 @@ import { newSet } from './QuestionSetsPage';
 export default function ImportPage() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [problem, setProblem] = useState('');
   const [result, setResult] = useState<{ questions: MultipleChoiceQuestion[]; errors: CsvRowError[] } | null>(null);
   const sampleHref = `data:text/csv;charset=utf-8,${encodeURIComponent(generateSampleCsv())}`;
 
   async function onFile(file: File) {
+    const bad = checkCsvFile(file);
+    setProblem(bad ?? '');
+    if (bad) return;
     const text = await file.text();
     setResult(csvRowsToQuestions(parseCsv(text), () => newId('q')));
     if (!name) setName(file.name.replace(/\.csv$/i, ''));
@@ -34,6 +39,7 @@ export default function ImportPage() {
             <DownloadSimple weight="bold" size={18} />{t('import.sample')}
           </a>
         </div>
+        {problem && <p role="alert" className="font-bold text-danger">{problem}</p>}
 
         {result && (
           <>

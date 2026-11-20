@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { data } from '../data';
 import type { GameTheme } from './types';
+import { sanitizeTheme } from './safeTheme';
 
 // Themes made in the Theme Builder: the teacher's own ('custom') and the
 // owner's library themes ('library'). Kept on this device until cloud
@@ -14,7 +15,9 @@ export async function loadMadeThemes(): Promise<GameTheme[]> {
 // Older designs carried forward. Bowling (teacher, 2026-11-01): each player's
 // icon is now their ball, so team icons drawn on the older template become
 // balls 1 to 10.
-export function upgradeTheme(theme: GameTheme): GameTheme {
+export function upgradeTheme(raw: GameTheme): GameTheme {
+  // Never trusted: pictures and colors are checked first (2026-11-20).
+  const theme = sanitizeTheme(raw);
   if (theme.gameId !== 'bowling' || !Object.keys(theme.pieces).some((k) => k.startsWith('team-'))) return theme;
   const pieces = { ...theme.pieces };
   for (let k = 1; k <= 10; k++) {

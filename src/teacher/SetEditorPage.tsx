@@ -1,3 +1,4 @@
+import { checkCsvFile } from '../ui/uploadRules';
 import { useEffect, useRef, useState } from 'react';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -322,6 +323,8 @@ function SpreadsheetTools({ set, readOnly, onAdd }: { set: QuestionSet; readOnly
   const slug = (set.name || 'question-set').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const pill = 'min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-2 hover-pop';
   async function upload(file: File) {
+    const bad = checkCsvFile(file);
+    if (bad) { setNote(bad); return; }
     const { questions, errors } = csvRowsToQuestions(parseCsv(await file.text()), () => newId('q'));
     if (questions.length) onAdd(questions);
     setNote([t('editor.csvAdded', { count: questions.length }), errors.length ? t('editor.csvSkipped', { count: errors.length, rows: errors.slice(0, 5).map((e) => e.row).join(', ') }) : ''].filter(Boolean).join(' '));
