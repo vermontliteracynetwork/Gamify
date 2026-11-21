@@ -8,8 +8,8 @@ export const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 export const MAX_CSV_BYTES = 2 * 1024 * 1024;
 
 export function checkImageFile(file: File): void {
-  if (!IMAGE_TYPES.includes(file.type.toLowerCase())) throw new Error('Pick a picture file (PNG, JPG, GIF or WebP).');
-  if (file.size > MAX_IMAGE_BYTES) throw new Error('That picture is too big. Pick one under 15 MB.');
+  if (!IMAGE_TYPES.includes(file.type.toLowerCase())) throw new FriendlyError('Pick a picture file (PNG, JPG, GIF or WebP).');
+  if (file.size > MAX_IMAGE_BYTES) throw new FriendlyError('That picture is too big. Pick one under 15 MB.');
 }
 
 export function checkCsvFile(file: File): string | null {
@@ -17,3 +17,9 @@ export function checkCsvFile(file: File): string | null {
   if (file.size > MAX_CSV_BYTES) return 'That file is too big. Pick one under 2 MB.';
   return null;
 }
+
+// Errors written for people. Anything else (a browser decoding message) is
+// never shown raw: the user sees one plain sentence instead (2026-11-21).
+export class FriendlyError extends Error {}
+export const friendlyMessage = (e: unknown, fallback = 'That picture could not be read. Try another file, like a PNG or JPG.') =>
+  e instanceof FriendlyError ? e.message : fallback;

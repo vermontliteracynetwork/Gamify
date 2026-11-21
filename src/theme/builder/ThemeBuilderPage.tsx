@@ -11,6 +11,7 @@ import { signInManifestFor } from '../../student/pictures';
 
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
+import { friendlyMessage } from '../../ui/uploadRules';
 import { Button, buttonClasses, IconButton, PageHeader, Panel, Tabs, fieldClasses } from '../../ui/kit';
 import TeacherNav from '../../ui/TeacherNav';
 import { teacherUsername } from '../credit';
@@ -265,7 +266,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
     try {
       const art = await cutPhotoForPiece(file, piece, isRound(piece), !clear);
       if (art) { setPiece(piece.id, art); void saveOriginal(draft.id, piece.id, art); setStatus(''); } else setStatus(t('builder.cutEmpty'));
-    } catch (e) { setStatus(e instanceof Error ? e.message : String(e)); }
+    } catch (e) { setStatus(friendlyMessage(e)); }
     finally { setBusy(false); }
   }
   function toggleClear(piece: ThemePieceSpec) {
@@ -285,7 +286,11 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
     setParams({ id: theme.id });
     setStatus(t('builder.saved', { name: theme.name }));
   }
+  // Deleting is one tap, with Undo right after (2026-11-21: undo toasts, not
+  // a browser confirm box).
+  const [undo, setUndo] = useState<GameTheme | null>(null);
   async function remove() {
+    setUndo(draft);
     await deleteMadeTheme(draft.id);
     void saveDraft(gameId, null);
     reload();
@@ -317,7 +322,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
           {!blocked && <>
           <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
           {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
-          {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
+          {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => void remove()}><Trash weight="bold" size={18} /></IconButton>}
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
           <Tabs size="sm" fill panelIds className="flex-1 min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
             options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
@@ -443,6 +448,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
               </div>
             )}
             <p role="status" aria-live="polite" className="shrink-0 font-bold text-sm empty:hidden">{status}</p>
+            {undo && <Button size="sm" className="shrink-0 justify-self-start" onClick={() => { const th = undo; setUndo(null); void saveMadeTheme(th).then(() => { reload(); setParams({ id: th.id }); setDraft(th); setStatus(t('builder.restored', { name: th.name })); }); }}>{t('builder.undo')}</Button>}
           </Panel>
           )}
         </div>
@@ -578,7 +584,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               <span className="relative shrink-0">
               <label className="block cursor-pointer rounded-input border-std border-dashed border-border-soft p-1" aria-label={t('builder.items.upload', { name: it.name || t('builder.items.piece') })}>
                 <ItemArt item={it} size={64} still />
-                <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { put(i, { image: await imageFileToDataUrl(f, Math.max(spec.width, spec.height), true) }); } catch (err) { onProblem(err instanceof Error ? err.message : String(err)); } }} />
+                <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (!f) return; try { put(i, { image: await imageFileToDataUrl(f, Math.max(spec.width, spec.height), true) }); } catch (err) { onProblem(friendlyMessage(err)); } }} />
               </label>
               {/* The yellow brush opens the drawing studio for this power-up's picture; it sits on the picture's corner. */}
               <IconButton variant="primary" className="!w-8 !h-8 absolute -right-2 -bottom-2" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} data-tip={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={15} /></IconButton>

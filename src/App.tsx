@@ -17,6 +17,7 @@ import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate'
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
 import { applySeo } from './ui/seo';
+import { keepFieldInView } from './ui/keepFieldInView';
 import { UpgradeHost } from './billing/Upgrade';
 import { getLive } from './live/session';
 import { t } from './i18n';
@@ -264,6 +265,7 @@ function Supports() {
 if (typeof window !== 'undefined') window.addEventListener('pointerdown', () => { void import('./engine/feedback').then((m) => m.preloadSounds()); }, { once: true });
 
 export default function App() {
+  useEffect(() => keepFieldInView(), []);
   return (
     <SettingsProvider>
     <MotionRoot>

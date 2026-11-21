@@ -605,6 +605,8 @@ export const en = {
   'builder.allGames': 'All games',
   'builder.designsFor': 'Designs for {game}:',
   'builder.new': 'New design',
+  'builder.undo': 'Undo',
+  'builder.restored': '{name} is back.',
   'builder.savedThemes': 'Saved themes',
   'builder.noSavedThemes': 'No saved themes yet',
   'builder.colorOpen': '{name}: double-tap to change the color',

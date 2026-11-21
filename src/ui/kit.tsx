@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import Title from './Title';
 
@@ -23,16 +24,30 @@ export function buttonClasses(variant: Variant = 'secondary', className = '', si
           motion-safe:active:scale-[0.97] motion-safe:transition motion-safe:duration-150 motion-safe:ease-out disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
 }
 
-export function Button({ variant = 'secondary', size = 'md', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: ButtonSize }) {
-  return <button type="button" {...props} className={buttonClasses(variant, className, size)} />;
+// A second tap within 600 ms is ignored, so a double tap (or an excited
+// student) never does the thing twice (2026-11-21).
+function useOneTap(onClick?: ButtonHTMLAttributes<HTMLButtonElement>['onClick']) {
+  const last = useRef(0);
+  return onClick && ((e: Parameters<NonNullable<typeof onClick>>[0]) => {
+    const now = Date.now();
+    if (now - last.current < 600) { e.preventDefault(); return; }
+    last.current = now;
+    onClick(e);
+  });
+}
+
+export function Button({ variant = 'secondary', size = 'md', className = '', onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: ButtonSize }) {
+  const once = useOneTap(onClick);
+  return <button type="button" {...props} onClick={once} className={buttonClasses(variant, className, size)} />;
 }
 
 // A round button that shows only its icon; its words show on hover or
 // keyboard focus and are read aloud (teacher, 2026-10-31: "if a button can
 // have an icon, put an icon and do hover text").
-export function IconButton({ label, children, variant = 'secondary', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant; children: ReactNode }) {
+export function IconButton({ label, children, variant = 'secondary', className = '', onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; variant?: Variant; children: ReactNode }) {
+  const once = useOneTap(onClick);
   return (
-    <button type="button" aria-label={label} data-tip={label} {...props}
+    <button type="button" aria-label={label} data-tip={label} {...props} onClick={once}
       className={`shrink-0 w-11 h-11 rounded-full border-std flex items-center justify-center motion-safe:active:scale-[0.97] motion-safe:transition motion-safe:duration-150 motion-safe:ease-out disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`}>
       {children}
     </button>
