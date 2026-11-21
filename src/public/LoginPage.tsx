@@ -1,6 +1,8 @@
 import { isLeakedPassword } from '../auth/passwordCheck';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { data } from '../data';
+import { LEGAL_UPDATED } from './legalText';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChalkboardTeacher, Student } from '@phosphor-icons/react';
 import { logIn, signUp, type SignUpProblem } from '../auth/accounts';
 import { setTeacher, useTeacher } from '../auth/session';
@@ -22,6 +24,11 @@ export default function LoginPage() {
   const [f, setF] = useState({ username: '', email: '', password: '', confirm: '' });
   const [problems, setProblems] = useState<SignUpProblem[]>([]);
   const [wrong, setWrong] = useState(false);
+  // Sign-up asks for the Terms and Privacy Policy to be accepted, and offers
+  // product news as a separate box that starts unticked (legal pass, 2026-11-21).
+  const [agree, setAgree] = useState(false);
+  const [news, setNews] = useState(false);
+  const [needAgree, setNeedAgree] = useState(false);
   const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | 'setup' | 'slow' | null>(null);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
@@ -33,6 +40,8 @@ export default function LoginPage() {
 
   function enter(username?: string) {
     if (username) setTeacher({ name: username, username, at: new Date().toISOString() });
+    // A record of what was agreed and chosen at sign-up (terms version, news opt-in).
+    if (mode === 'signup') void data.setSetting('consent', { terms: LEGAL_UPDATED, at: new Date().toISOString(), news }).catch(() => undefined);
     navigate('/teacher');
     // Picked a paid plan on the pricing page: the plan box opens with it ready.
     const plan = params.get('plan');
@@ -42,6 +51,7 @@ export default function LoginPage() {
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === 'signup' && !agree) { setNeedAgree(true); return; }
     // A password found in a data breach is turned down before the account is made.
     if (mode === 'signup' && f.password.length >= 8 && (await isLeakedPassword(f.password))) { setProblems(['passwordLeaked']); return; }
     if (cloudOn) {
@@ -99,6 +109,19 @@ export default function LoginPage() {
               <input type="password" autoComplete="new-password" value={f.confirm} onChange={set('confirm')} aria-invalid={bad('confirm')} className={field} />
               {problem('confirm')}
             </label>
+          )}
+          {mode === 'signup' && (
+            <div className="grid gap-2">
+              <label className="flex items-start gap-3 font-semibold cursor-pointer">
+                <input type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setNeedAgree(false); }} aria-invalid={needAgree} aria-describedby={needAgree ? 'p-agree' : undefined} className="mt-1 w-6 h-6 shrink-0 accent-[var(--color-text)]" />
+                <span>{t('login.agreeA')} <Link to="/terms" target="_blank" className="font-bold underline">{t('legal.terms')}</Link> {t('login.agreeB')} <Link to="/privacy" target="_blank" className="font-bold underline">{t('login.privacyPolicy')}</Link>.</span>
+              </label>
+              {needAgree && <span id="p-agree" className="text-sm font-bold text-error" role="alert">{t('login.agreeNeeded')}</span>}
+              <label className="flex items-start gap-3 font-semibold cursor-pointer">
+                <input type="checkbox" checked={news} onChange={(e) => setNews(e.target.checked)} className="mt-1 w-6 h-6 shrink-0 accent-[var(--color-text)]" />
+                <span>{t('login.news')}</span>
+              </label>
+            </div>
           )}
           {wrong && <p className="font-bold text-error" role="alert">{t('login.wrong')}</p>}
           {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-error'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}

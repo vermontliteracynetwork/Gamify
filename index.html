@@ -3,14 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Gamify</title>
     <meta name="description" content="Gamify turns your own questions into classroom games your students ask to play: Game Show, Bowling, Board Game and more, on iPads, laptops and the big screen." />
-    <meta property="og:title" content="Gamify" />
-    <meta property="og:description" content="Classroom games from your own questions." />
+    <link rel="canonical" href="https://learngamify.com/" />
+    <meta property="og:site_name" content="Gamify" />
+    <meta property="og:title" content="Gamify: classroom games from your own questions" />
+    <meta property="og:description" content="Gamify turns your own questions into classroom games your students ask to play, on iPads, laptops and the big screen." />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://learngamify.com/" />
+    <meta property="og:image" content="https://learngamify.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Gamify: classroom games made from your own questions" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://learngamify.com/og-image.png" />
     <meta name="theme-color" content="#b4c4fb" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": ["Organization", "LocalBusiness"],
+            "@id": "https://learngamify.com/#business",
+            "name": "Gamify",
+            "url": "https://learngamify.com/",
+            "logo": "https://learngamify.com/apple-touch-icon.png",
+            "image": "https://learngamify.com/og-image.png",
+            "description": "Classroom games made from teachers' own question sets, for K-12 classrooms, schools and homeschool families.",
+            "email": "quotes@learngamify.com",
+            "address": { "@type": "PostalAddress", "addressRegion": "VT", "addressCountry": "US" },
+            "areaServed": { "@type": "Country", "name": "United States" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://learngamify.com/#website",
+            "name": "Gamify",
+            "url": "https://learngamify.com/",
+            "publisher": { "@id": "https://learngamify.com/#business" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "Gamify",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web browser (iPad, Chromebook, Windows, Mac)",
+            "url": "https://learngamify.com/",
+            "publisher": { "@id": "https://learngamify.com/#business" },
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "description": "Free plan" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

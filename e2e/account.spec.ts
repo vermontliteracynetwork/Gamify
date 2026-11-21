@@ -30,6 +30,7 @@ test('teacher accounts: sign up checks every field, then log in with username an
   await page.getByLabel('Username').fill('a');
   await page.getByLabel('Password', { exact: true }).fill('short');
   await page.getByLabel('Confirm password').fill('different');
+  await page.getByRole('checkbox', { name: /I agree to the/ }).check();
   await page.getByRole('button', { name: 'Create my free account' }).click();
   await expect(page.getByText('Enter an email like name@school.org.')).toBeVisible();
   await expect(page.getByText('Use 3 to 20 letters, numbers, periods or underscores.')).toBeVisible();

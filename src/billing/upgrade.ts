@@ -10,3 +10,12 @@ export async function upgradeTo(plan: 'plus' | 'pro' | 'homeschool') {
   await data.setSetting('tier', plan);
   window.dispatchEvent(new Event(TIER_EVENT));
 }
+
+// Cancelling online (legal pass, 2026-11-21: "let users cancel online"). Until
+// Stripe is connected this moves the plan to Free on this device; with Stripe
+// it opens the customer portal, where the plan stays on until the end of the
+// paid year (Waiting on you: Stripe).
+export async function cancelPlan() {
+  await data.setSetting('tier', 'free');
+  window.dispatchEvent(new Event(TIER_EVENT));
+}

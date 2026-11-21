@@ -1,0 +1,18 @@
+# Gamify: classroom games from your own questions.
+# Teacher pages, student game screens and join codes are private.
+User-agent: *
+Allow: /
+Disallow: /teacher
+Disallow: /owner
+Disallow: /join/
+Disallow: /show/
+Disallow: /live/
+Disallow: /games/
+Disallow: /play
+Disallow: /arcade
+Disallow: /choose
+Disallow: /mirror/
+Disallow: /look-up
+Disallow: /api/
+
+Sitemap: https://learngamify.com/sitemap.xml

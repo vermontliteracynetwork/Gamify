@@ -1,3 +1,4 @@
+import { usePageMeta } from '../ui/seo';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { ArrowRight, Clock, GraduationCap, PaintBrush } from '@phosphor-icons/react';
@@ -83,6 +84,7 @@ export function WaysPost() {
   const { slug } = useParams();
   const post = POSTS.find((p) => p.slug === slug);
   useCrumbLabel(post?.title);
+  usePageMeta(post?.title, post?.summary);
   if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
   return (
     <>

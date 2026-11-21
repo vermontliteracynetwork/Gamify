@@ -27,10 +27,11 @@ export async function startTurn(page: Page) {
 // A teacher creates an account (email, username, password, confirm).
 export async function signUpTeacher(page: Page, username = 'miss.jen') {
   await page.getByRole('tab', { name: 'Sign up' }).click();
-  await page.getByLabel('Email').fill(`${username}@school.org`);
+  await page.getByLabel('Email', { exact: true }).fill(`${username}@school.org`);
   await page.getByLabel('Username').fill(username);
   await page.getByLabel('Password', { exact: true }).fill('apples123');
   await page.getByLabel('Confirm password').fill('apples123');
+  await page.getByRole('checkbox', { name: /I agree to the/ }).check();
   await page.getByRole('button', { name: 'Create my free account' }).click();
 }
 

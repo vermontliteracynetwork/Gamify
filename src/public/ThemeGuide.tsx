@@ -1,3 +1,4 @@
+import { usePageMeta } from '../ui/seo';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { DownloadSimple, PaintBrush, Printer } from '@phosphor-icons/react';
@@ -71,6 +72,7 @@ function ClassicLook({ piece, gameId }: { piece: ThemePieceSpec; gameId: string 
 export function ThemeGuidePage() {
   const { gameId } = useParams();
   const game = guideGames().find((g) => g.id === gameId);
+  usePageMeta(game ? `${game.name} theme guide` : undefined, game ? `How to design a ${game.name} theme for your class: every piece, its size and tips, with blank templates to print or design digitally.` : undefined);
   const [dl, setDl] = useState('');
   const access = useTemplateAccess(gameId ?? '');
   if (!game) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog?tag=themes" className={buttonClasses('secondary')}>{t('guide.all')}</Link></main>;

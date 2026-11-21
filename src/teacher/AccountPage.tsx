@@ -1,3 +1,4 @@
+import { cancelPlan, upgradeTo } from '../billing/upgrade';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Crown, DownloadSimple, Trash } from '@phosphor-icons/react';
@@ -72,9 +73,11 @@ export default function AccountPage() {
         <PlanUntil />
         <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
       </Panel>
+      {tier !== 'free' && <CancelPlan tier={tier} />}
       {tier === 'free' && <AccessCode />}
       {(tier === 'free' || tier === 'homeschool' || tier === 'plus') && <CoopCode />}
       <TwoStepPanel />
+      <NewsChoice />
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.exportTitle')}</h2>
         <p className="font-semibold">{t('account.exportText')}</p>
@@ -89,5 +92,44 @@ export default function AccountPage() {
         <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => void deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
       </Panel>
     </main>
+  );
+}
+
+// Cancel online, in two taps, with one honest alternative first (an exit
+// offer: Pro can step down to Plus and keep classes and themes).
+function CancelPlan({ tier }: { tier: string }) {
+  const [asking, setAsking] = useState(false);
+  const [done, setDone] = useState(false);
+  if (done) return <Panel><p className="font-bold" role="status">{t('account.cancelDone')}</p></Panel>;
+  return (
+    <Panel className="grid gap-2">
+      <h2 className="font-display text-2xl">{t('account.cancelTitle')}</h2>
+      <p className="font-semibold">{t('account.cancelText')}</p>
+      {!asking ? <Button className="justify-self-start" onClick={() => setAsking(true)}>{t('account.cancelStart')}</Button> : (
+        <div className="grid gap-3 rounded-input border-std border-border p-3 bg-surface-2">
+          <p className="font-bold">{t('account.cancelKeep')}</p>
+          <div className="flex flex-wrap gap-2">
+            {tier === 'pro' && <Button variant="primary" onClick={() => { void upgradeTo('plus'); setAsking(false); }}>{t('account.cancelToPlus')}</Button>}
+            <Button onClick={() => setAsking(false)}>{t('account.cancelStay')}</Button>
+            <Button variant="danger" onClick={() => { void cancelPlan().then(() => setDone(true)); }}>{t('account.cancelConfirm')}</Button>
+          </div>
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+// Product news by email: off unless chosen at sign-up or here; one tap to stop.
+function NewsChoice() {
+  const { value: consent, reload } = useAsync(() => data.getSetting<{ terms?: string; at?: string; news?: boolean }>('consent'), []);
+  const on = !!consent?.news;
+  return (
+    <Panel className="grid gap-2">
+      <h2 className="font-display text-2xl">{t('account.newsTitle')}</h2>
+      <label className="flex items-start gap-3 font-semibold cursor-pointer">
+        <input type="checkbox" checked={on} onChange={(e) => { void data.setSetting('consent', { ...consent, news: e.target.checked, newsAt: new Date().toISOString() }).then(reload); }} className="mt-1 w-6 h-6 shrink-0 accent-[var(--color-text)]" />
+        <span>{t('login.news')}</span>
+      </label>
+    </Panel>
   );
 }

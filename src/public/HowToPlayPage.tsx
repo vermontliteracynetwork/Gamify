@@ -1,3 +1,4 @@
+import { usePageMeta } from '../ui/seo';
 import { Link, useParams } from 'react-router-dom';
 import { BookOpen, CheckCircle, Lightbulb, ListNumbers, PaintBrush, SlidersHorizontal, Sparkle } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
@@ -39,6 +40,7 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
 export default function HowToPlayPage() {
   const { gameId } = useParams();
   const game = howToGames().find((g) => g.id === gameId);
+  usePageMeta(game ? `How to play ${game.name}` : undefined, game ? `How ${game.name} works in class: the rules, the ways to play and tips for teachers.` : undefined);
   const h = HOW_TO_PLAY.find((x) => x.gameId === gameId);
   if (!game || !h) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog?tag=howto" className={buttonClasses('secondary')}>{t('howto.all')}</Link></main>;
   const list = 'grid gap-2 pl-5 m-0 font-semibold text-lg';

@@ -1,0 +1,28 @@
+# Gamify
+
+> Gamify turns a teacher's own question sets into classroom games (K-12 and homeschool). Students join with a code or link from their teacher; there are no student accounts, ads or trackers on student pages.
+
+Gamify is made for live classrooms on iPads, Chromebooks, laptops and the big screen. Teachers write or import questions, pick a game, and play it four ways: Share (one big screen, teams take turns), Live (every student on their own device), Solo (practice or homework links) and Versus (two players head to head). Classes can design a theme for any game in the Theme Builder.
+
+## Games
+- Game Show: answer right to pick a card; some cards hide power-ups.
+- Board Game: answer right, roll the die and race to the finish.
+- Match Three: swap pieces to make rows of 3; answer questions to keep playing.
+- Four in a Row: answer right, then drop your piece; get four in a row.
+- Bubble Pop: answer questions to load bubbles, then aim and match 3 to pop.
+- Bowling: answer right, then aim and send the ball into the pins.
+- Question Tracker: every right answer adds an object until the screen is full.
+
+## Pages
+- [Features](https://learngamify.com/features): every game, the Theme Builder, live lobbies and reports.
+- [Pricing](https://learngamify.com/pricing): the Free plan, Plus and Pro, and school quotes.
+- [For schools](https://learngamify.com/schools): school and district plans with a student data privacy agreement.
+- [For homeschool](https://learngamify.com/homeschool): homeschool families and co-ops.
+- [Student data promise](https://learngamify.com/student-data): what Gamify keeps about students and what it never does.
+- [Research](https://learngamify.com/research): the learning research behind the games.
+- [Blog](https://learngamify.com/blog): classroom ideas, how to play each game, and theme guides.
+- [FAQ](https://learngamify.com/faq) and [Help Center](https://learngamify.com/help).
+- [Privacy](https://learngamify.com/privacy), [Terms](https://learngamify.com/terms), [Accessibility](https://learngamify.com/accessibility).
+
+## Contact
+- School quotes and questions: quotes@learngamify.com

@@ -132,7 +132,7 @@ test.describe('signed out', () => {
     await page.screenshot({ path: `test-results/ways-${info.project.name}.png`, fullPage: true });
     await page.getByRole('link', { name: /Design a Theme as a Class/ }).click();
     await expect(page.getByRole('heading', { name: /Just try it/i })).toBeVisible();
-    await expect(page).toHaveTitle('Blog | Gamify');
+    await expect(page).toHaveTitle(/^Design a Theme as a Class.* \| Gamify$/);
     await page.screenshot({ path: `test-results/ways-post-${info.project.name}.png`, fullPage: true });
   });
 });

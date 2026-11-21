@@ -16,7 +16,7 @@ import JoinPage from './public/JoinPage';
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { SessionSupports } from './student/session';
 import { useSettings } from './settings/SettingsContext';
-import { pageDescription, pageTitle } from './ui/pageTitle';
+import { applySeo } from './ui/seo';
 import { UpgradeHost } from './billing/Upgrade';
 import { getLive } from './live/session';
 import { t } from './i18n';
@@ -82,6 +82,8 @@ const ResearchPage = lazyPage(() => import('./public/ResearchPage'));
 const BetaKitPage = lazyPage(() => import('./public/BetaKitPage'));
 const PrivacyPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.PrivacyPage })));
 const TermsPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.TermsPage })));
+const SubprocessorsPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.SubprocessorsPage })));
+const DpaPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.DpaPage })));
 const AccessibilityPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.AccessibilityPage })));
 const CreditsPage = lazyPage(() => import('./public/LegalPages').then((m) => ({ default: m.CreditsPage })));
 const WaysList = lazyPage(() => import('./public/WaysPage').then((m) => ({ default: m.WaysList })));
@@ -97,10 +99,7 @@ function AnimatedRoutes() {
   const location = useLocation();
   const reduce = useReducedMotion();
   useEffect(() => {
-    document.title = pageTitle(location.pathname);
-    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = pageDescription(location.pathname);
+    applySeo(location.pathname);
   }, [location.pathname]);
 
   return (
@@ -143,6 +142,8 @@ function AnimatedRoutes() {
           <Route path="/beta-kit" element={<BetaKitPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/subprocessors" element={<SubprocessorsPage />} />
+          <Route path="/dpa" element={<DpaPage />} />
           <Route path="/accessibility" element={<AccessibilityPage />} />
           <Route path="/credits" element={<CreditsPage />} />
           <Route path="/blog" element={<WaysList />} />

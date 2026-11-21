@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { usePageMeta } from '../ui/seo';
+
 import { Link } from 'react-router-dom';
 import { House, Keyhole, Question } from '@phosphor-icons/react';
 import { t } from '../i18n';
@@ -8,7 +9,8 @@ import Title from '../ui/Title';
 // Gamify's own "page not found" (site QA, 2026-11-20): a friendly line and
 // the three places people usually meant to go.
 export default function NotFoundPage() {
-  useEffect(() => { const id = window.setTimeout(() => { document.title = 'Page not found | Gamify'; }, 0); return () => window.clearTimeout(id); }, []);
+  // Its own title, and kept out of search (a missing page is not content).
+  usePageMeta('Page not found', 'That page is not on Gamify. Try the home page, the games or the Help Center.', true);
   return (
     <main className="max-w-2xl mx-auto px-4 pt-16 pb-24 grid gap-5 justify-items-center text-center">
       <p className="font-display text-8xl leading-none" aria-hidden="true">404</p>

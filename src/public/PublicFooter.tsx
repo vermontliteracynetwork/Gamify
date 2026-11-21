@@ -25,6 +25,8 @@ export default function PublicFooter() {
           <Link to="/privacy">{t('legal.privacy')}</Link>
           <Link to="/student-data">{t('public.nav.studentData')}</Link>
           <Link to="/terms">{t('legal.terms')}</Link>
+          <Link to="/subprocessors">{t('legal.subprocessors')}</Link>
+          <Link to="/dpa">{t('legal.dpa')}</Link>
           <Link to="/accessibility">{t('legal.a11y')}</Link>
           <Link to="/credits">{t('legal.credits')}</Link>
           <Link to="/accessibility/report">{t('footer.vpat')}</Link>
