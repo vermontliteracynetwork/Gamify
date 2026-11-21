@@ -65,7 +65,7 @@ export default function ThemePreview({ theme: own, view = 'game' }: { theme: Gam
   return (
     <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       {/* No game title or Play button on theme previews (teacher, 2026-11-20). */}
-      <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
+      <div className="min-h-0 min-w-0 flex items-center justify-center [container-type:size]">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
     </div>
   );
 }
@@ -269,7 +269,7 @@ function board(theme: GameTheme, size?: number) {
     }
     case 'four-in-a-row':
       return (
-        <div className="grid grid-cols-7 gap-1 p-2 rounded-input border-std border-border h-full aspect-[7/6]" style={pieceFill(theme, 'board', '#a8d8f0')}>
+        <div className="grid grid-cols-7 gap-1 p-2 rounded-input border-std border-border w-[min(100cqw,calc(100cqh*7/6))] aspect-[7/6]" style={pieceFill(theme, 'board', '#a8d8f0')}>
           {Array.from({ length: 42 }, (_, i) => {
             const who = [38, 31, 24, 39].includes(i) ? 1 : [37, 40, 32].includes(i) ? 2 : 0;
             return <span key={i} className="rounded-full border-thin border-border bg-white overflow-hidden">{who > 0 && <span className="block w-full h-full rounded-full" style={pieceFill(theme, `piece-${who}`, who === 1 ? '#f6a5c0' : '#9fd8f0')} />}</span>;
