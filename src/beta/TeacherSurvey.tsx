@@ -50,8 +50,8 @@ export default function TeacherSurvey({ id, onClose }: { id: SurveyId; onClose: 
               <textarea value={better} onChange={(e) => setBetter(e.target.value)} maxLength={600} rows={3} className="px-3 py-2 rounded-input border-std border-border font-semibold" />
             </label>
             <div className="flex flex-wrap gap-2">
-              <Button variant="primary" disabled={going === null || recommend === null} onClick={() => void send()}>{t('survey.send')}</Button>
-              <Button onClick={() => void later()}>{t('survey.later')}</Button>
+              <Button variant="primary" disabled={going === null || recommend === null} onClick={() => send()}>{t('survey.send')}</Button>
+              <Button onClick={() => later()}>{t('survey.later')}</Button>
             </div>
           </>
         )}

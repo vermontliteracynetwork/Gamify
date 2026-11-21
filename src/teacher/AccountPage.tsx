@@ -81,7 +81,7 @@ export default function AccountPage() {
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.exportTitle')}</h2>
         <p className="font-semibold">{t('account.exportText')}</p>
-        <Button className="justify-self-start" onClick={() => void exportAll()}><DownloadSimple weight="bold" size={18} />{t('account.export')}</Button>
+        <Button className="justify-self-start" onClick={() => exportAll()}><DownloadSimple weight="bold" size={18} />{t('account.export')}</Button>
       </Panel>
       <Panel className="grid gap-2">
         <h2 className="font-display text-2xl">{t('account.deleteTitle')}</h2>
@@ -89,7 +89,7 @@ export default function AccountPage() {
         <label className="grid gap-1 font-bold">{t('account.typeDelete')}
           <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border font-bold max-w-xs" />
         </label>
-        <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => void deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
+        <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
       </Panel>
     </main>
   );

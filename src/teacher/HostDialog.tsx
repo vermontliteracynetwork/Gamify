@@ -130,7 +130,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                           <option value="">{t('host.pickClass')}</option>
                           {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
-                        <Button disabled={!classId} onClick={() => void assign()}><UsersThree weight="bold" size={18} />{t('host.assignBtn')}</Button>
+                        <Button disabled={!classId} onClick={() => assign()}><UsersThree weight="bold" size={18} />{t('host.assignBtn')}</Button>
                       </div>
                     )}
                   </div>

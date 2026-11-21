@@ -230,7 +230,7 @@ export function AccessCard() {
           <label className="grid gap-1 text-sm font-bold">{t('owner.access.months')}<input type="number" min={1} max={24} value={code.months} onChange={(e) => setCode({ ...code, months: Number(e.target.value) })} className={`${field} w-20`} /></label>
           <label className="grid gap-1 text-sm font-bold">{t('owner.access.uses')}<input type="number" min={1} max={100000} value={code.max_uses} onChange={(e) => setCode({ ...code, max_uses: Number(e.target.value) })} className={`${field} w-24`} /></label>
           <label className="inline-flex items-center gap-2 text-sm font-bold min-h-11"><input type="checkbox" className="w-5 h-5" checked={code.beta} onChange={(e) => setCode({ ...code, beta: e.target.checked })} />{t('owner.access.beta')}</label>
-          <Button variant="primary" disabled={code.code.length < 4} onClick={() => void makeCode()}>{t('owner.access.make')}</Button>
+          <Button variant="primary" disabled={code.code.length < 4} onClick={() => makeCode()}>{t('owner.access.make')}</Button>
         </div>
         {codes.length > 0 && (
           <ul className="grid gap-1 list-none p-0 m-0">{codes.map((c) => <li key={c.code} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold tracking-wider">{c.code}</span> · {t(`owner.plan.${c.tier}` as 'owner.plan.plus')} · {t('owner.access.row', { months: c.months, uses: c.uses, max: c.max_uses })}{c.beta ? ` · ${t('owner.access.beta')}` : ''}</li>)}</ul>
@@ -242,7 +242,7 @@ export function AccessCard() {
           <label className="grid gap-1 text-sm font-bold">{t('owner.access.username')}<input value={grant.username} onChange={(e) => setGrant({ ...grant, username: e.target.value.toLowerCase() })} className={`${field} w-44`} /></label>
           <label className="grid gap-1 text-sm font-bold">{t('owner.access.plan')}<select value={grant.tier} onChange={(e) => setGrant({ ...grant, tier: e.target.value })} className={field}>{[...plans, 'free' as const].map((p) => <option key={p} value={p}>{t(`owner.plan.${p}`)}</option>)}</select></label>
           <label className="grid gap-1 text-sm font-bold">{t('owner.access.monthsOrForever')}<input type="number" min={0} max={60} value={grant.months} onChange={(e) => setGrant({ ...grant, months: Number(e.target.value) })} className={`${field} w-24`} /></label>
-          <Button variant="primary" disabled={!grant.username.trim()} onClick={() => void give()}>{t('owner.access.give')}</Button>
+          <Button variant="primary" disabled={!grant.username.trim()} onClick={() => give()}>{t('owner.access.give')}</Button>
         </div>
         {grants.length > 0 && (
           <ul className="grid gap-1 list-none p-0 m-0">{grants.map((g, i) => <li key={`${g.username}-${i}`} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold">{g.username ?? '?'}</span> · {t(`owner.plan.${g.tier}` as 'owner.plan.plus')} · {g.plan_until ? t('owner.access.until', { date: new Date(g.plan_until).toLocaleDateString() }) : t('owner.access.forever')} · {g.plan_note}</li>)}</ul>
@@ -279,7 +279,7 @@ function CoopCodes() {
       <div className="flex flex-wrap items-end gap-2">
         <label className="grid gap-1 text-sm font-bold">{t('coop.label')}<input value={form.code} maxLength={20} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') })} className={`${field} w-36 tracking-wider`} /></label>
         <label className="grid gap-1 text-sm font-bold">{t('owner.coop.name')}<input value={form.coop_name} maxLength={80} onChange={(e) => setForm({ ...form, coop_name: e.target.value })} className={`${field} w-56`} /></label>
-        <Button variant="primary" disabled={form.code.length < 4 || form.coop_name.trim().length < 2} onClick={() => void make()}>{t('owner.coop.make')}</Button>
+        <Button variant="primary" disabled={form.code.length < 4 || form.coop_name.trim().length < 2} onClick={() => make()}>{t('owner.coop.make')}</Button>
       </div>
       {rows.length > 0 && <ul className="grid gap-1 list-none p-0 m-0">{rows.map((c) => <li key={c.code} className="text-sm font-semibold rounded-input bg-surface-2 p-2"><span className="font-bold tracking-wider">{c.code}</span> · {t('owner.coop.row', { name: c.coop_name, pct: c.percent_off, n: c.families })}</li>)}</ul>}
       {msg && <p className="font-bold text-sm" role="status">{msg}</p>}

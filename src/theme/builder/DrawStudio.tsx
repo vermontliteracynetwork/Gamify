@@ -475,7 +475,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
           {restoreFrom && <IconButton label={t(original ? 'studio.startOverUpload' : 'studio.startOver')} onClick={startOver}><ClockCounterClockwise weight="bold" size={20} /></IconButton>}
           <IconButton variant="danger" label={t('studio.clearAll')} onClick={() => setConfirmClear(true)}><Trash weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.cancel')} onClick={onClose}><X weight="bold" size={20} /></IconButton>
-          <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
+          <Button variant="primary" disabled={saving} onClick={() => save()}>{t('studio.use')}</Button>
         </div>
         {confirmClear && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/45" role="alertdialog" aria-modal="true" aria-label={t('studio.clearAsk')}>
@@ -494,7 +494,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
           <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-accent border-b-[2px] border-border" role="alert">
             <span className="font-bold flex-1 min-w-48">{t('studio.hardToRead', { words: warn.join(', ') })}</span>
             <Button onClick={() => setWarn([])}>{t('studio.fixIt')}</Button>
-            <Button onClick={() => void save(true)}>{t('studio.saveAnyway')}</Button>
+            <Button onClick={() => save(true)}>{t('studio.saveAnyway')}</Button>
           </div>
         )}
 

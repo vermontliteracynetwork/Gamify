@@ -361,11 +361,11 @@ function GalleryCard() {
             <p className="font-display text-xl">{th.name}</p>
             <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
             <div className="flex flex-wrap gap-2 items-center">
-              <Button variant="primary" onClick={() => void decide(th, 'approved')}>{t('owner.approve')}</Button>
+              <Button variant="primary" onClick={() => decide(th, 'approved')}>{t('owner.approve')}</Button>
               <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-std border-border font-bold text-sm">
                 {GALLERY_REASONS.map((r) => <option key={r} value={r}>{t(`gallery.reason.${r}` as StringKey)}</option>)}
               </select>
-              <Button variant="danger" onClick={() => void decide(th, 'declined')}>{t('owner.decline')}</Button>
+              <Button variant="danger" onClick={() => decide(th, 'declined')}>{t('owner.decline')}</Button>
             </div>
           </div>
         </li>
@@ -439,7 +439,7 @@ function ReplyBox({ report, onSent }: { report: FeedbackReport; onSent: () => vo
       <summary className="font-bold text-sm cursor-pointer">{t('owner.reply')}</summary>
       <div className="grid gap-1.5 pt-1.5">
         <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={3} aria-label={t('owner.replyLabel')} className="px-2 py-1.5 rounded-input border-std border-border font-semibold" />
-        <Button className="justify-self-start" disabled={!text.trim()} onClick={() => void send()}>{t('owner.replySend')}</Button>
+        <Button className="justify-self-start" disabled={!text.trim()} onClick={() => send()}>{t('owner.replySend')}</Button>
         {problem && <p className="text-sm font-bold" role="status">{problem}</p>}
       </div>
     </details>

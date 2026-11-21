@@ -137,7 +137,7 @@ function ApplyForm() {
           <label className="grid gap-1 font-bold min-w-0">{t('betaPage.devices')}<input value={form.devices} onChange={(e) => setForm({ ...form, devices: e.target.value })} maxLength={80} className={field} placeholder={t('betaPage.devicesHint')} /></label>
           <label className="sm:col-span-2 flex items-start gap-2 font-bold"><input type="checkbox" checked={form.agree} onChange={(e) => setForm({ ...form, agree: e.target.checked })} className="w-5 h-5 mt-0.5 shrink-0" />{t('betaPage.agree')}</label>
           <p className="text-sm font-semibold text-muted sm:col-span-2">{t('beta.privacy')}</p>
-          <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void send()}>{t('betaPage.send')}</Button>
+          <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => send()}>{t('betaPage.send')}</Button>
         </div>
       )}
     </section>

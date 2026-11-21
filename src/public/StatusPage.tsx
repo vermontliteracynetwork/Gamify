@@ -51,7 +51,7 @@ export default function StatusPage() {
           ))}
         </ul>
         <div className="flex flex-wrap items-center gap-3">
-          <Button onClick={() => void run()}>{t('status.again')}</Button>
+          <Button onClick={() => run()}>{t('status.again')}</Button>
           <span className="text-sm font-bold text-muted">{t('status.at', { time: at.toLocaleTimeString() })}</span>
         </div>
         <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-2">

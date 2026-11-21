@@ -78,7 +78,7 @@ export function TwoStepPanel() {
   return (
     <Panel className="grid gap-2">
       <h2 className="font-display text-2xl flex items-center gap-2"><ShieldCheck weight="fill" size={26} aria-hidden="true" />{t('twoStep.title')}</h2>
-      {state.k === 'off' && <><p className="font-semibold">{t('twoStep.offText')}</p><Button variant="primary" className="justify-self-start" onClick={() => void start()}>{t('twoStep.turnOn')}</Button></>}
+      {state.k === 'off' && <><p className="font-semibold">{t('twoStep.offText')}</p><Button variant="primary" className="justify-self-start" onClick={() => start()}>{t('twoStep.turnOn')}</Button></>}
       {state.k === 'setup' && (
         <>
           <p className="font-semibold">{t('twoStep.scan')}</p>

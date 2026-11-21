@@ -209,7 +209,7 @@ function StudentsTab({ classroomId, students, reload, signInThemeId, side }: { c
           <textarea id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={4} placeholder={t('class.namesPlaceholder')} aria-describedby="names-hint"
             className="px-3 py-2 rounded-input border-std border-border font-bold" />
           <p id="names-hint" className="text-xs font-semibold text-muted">{t('class.namesHint')}</p>
-          <Button variant="primary" className="justify-self-start" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
+          <Button variant="primary" className="justify-self-start" disabled={toAdd.length === 0 || room <= 0} onClick={() => add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
           {toAdd.length > room && <div className="grid gap-2"><p className="font-bold text-sm">{t('class.overLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm justify-self-start" /></div>}
         </Panel>
         {side}
@@ -263,7 +263,7 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
         </span>
       </label>
       <p className="min-h-6 font-bold text-error" role="alert">{problem}</p>
-      <Button variant="primary" onClick={() => void save()}>{t('class.avatarSave')}</Button>
+      <Button variant="primary" onClick={() => save()}>{t('class.avatarSave')}</Button>
     </Dialog>
   );
 }
@@ -313,7 +313,7 @@ export function SupportsDialog({ student, onClose }: { student: Student; onClose
             className={`rounded-pill ${modes.includes(m) ? '' : 'opacity-40'}`}><ModeBadge mode={m} /></button>
         ))}
       </div>
-      <Button variant="primary" onClick={() => void save()}>{t('class.saveSupports')}</Button>
+      <Button variant="primary" onClick={() => save()}>{t('class.saveSupports')}</Button>
     </Dialog>
   );
 }
@@ -407,7 +407,7 @@ export function AssignPage() {
       <PageHeader title={t('class.newAssignment')} subtitle={classroom.name}
         actions={<div className="flex flex-wrap gap-2">
           <Link to={back} className={buttonClasses('secondary')}>{t('class.cancel')}</Link>
-          <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
+          <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
         </div>} />
       <div className="grid gap-4">
         <Panel className="grid gap-4 !p-4">

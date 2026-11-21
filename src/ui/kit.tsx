@@ -24,15 +24,18 @@ export function buttonClasses(variant: Variant = 'secondary', className = '', si
           motion-safe:active:scale-[0.97] motion-safe:transition motion-safe:duration-150 motion-safe:ease-out disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
 }
 
-// A second tap within 600 ms is ignored, so a double tap (or an excited
-// student) never does the thing twice (2026-11-21).
+// While a tap's work is still running (saving, making a code, uploading), a
+// second tap does nothing, so a double tap never does the thing twice
+// (2026-11-21). Quick taps on plain buttons (Next, Next) still each count.
 function useOneTap(onClick?: ButtonHTMLAttributes<HTMLButtonElement>['onClick']) {
-  const last = useRef(0);
+  const busy = useRef(false);
   return onClick && ((e: Parameters<NonNullable<typeof onClick>>[0]) => {
-    const now = Date.now();
-    if (now - last.current < 600) { e.preventDefault(); return; }
-    last.current = now;
-    onClick(e);
+    if (busy.current) { e.preventDefault(); return; }
+    const r = (onClick as (ev: typeof e) => unknown)(e);
+    if (r && typeof (r as Promise<unknown>).then === 'function') {
+      busy.current = true;
+      void (r as Promise<unknown>).finally(() => { busy.current = false; });
+    }
   });
 }
 

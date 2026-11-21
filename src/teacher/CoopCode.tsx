@@ -39,7 +39,7 @@ export default function CoopCode() {
         <div className="flex flex-wrap items-center gap-2">
           <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} maxLength={20} aria-label={t('coop.label')} placeholder={t('coop.label')}
             className="min-h-12 px-3 rounded-input border-std border-border font-bold tracking-[0.15em] w-56" />
-          <Button variant="primary" disabled={busy || code.length < 4} onClick={() => void join()}>{t('coop.join')}</Button>
+          <Button variant="primary" disabled={busy || code.length < 4} onClick={() => join()}>{t('coop.join')}</Button>
         </div>
       </>}
       {msg && <p className="font-bold" role="alert">{msg}</p>}

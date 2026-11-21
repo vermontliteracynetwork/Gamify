@@ -70,7 +70,7 @@ export default function QuestionVoice({ n, audioUrl, onChange }: { n: number; au
         </span>
       ) : (
         <>
-          <Button variant="ghost" onClick={() => void start()} aria-label={t('editor.voice.record', { n })}><Microphone weight="bold" size={16} />{t('editor.voice.recordShort')}</Button>
+          <Button variant="ghost" onClick={() => start()} aria-label={t('editor.voice.record', { n })}><Microphone weight="bold" size={16} />{t('editor.voice.recordShort')}</Button>
           <Button variant="ghost" onClick={() => fileRef.current?.click()} aria-label={t('editor.voice.upload', { n })}><UploadSimple weight="bold" size={16} />{t('editor.voice.uploadShort')}</Button>
           <input ref={fileRef} type="file" accept="audio/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void upload(f); }} />
         </>

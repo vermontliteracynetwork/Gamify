@@ -98,7 +98,7 @@ export function ThemeGuidePage() {
           <TemplateLock access={access} />
           {access === 'ok' && <div className="flex flex-wrap gap-2">
             <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'hover-pop', 'lg')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
-            <Button variant="secondary" className="min-h-14 px-6 hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => void zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
+            <Button variant="secondary" className="min-h-14 px-6 hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
           </div>}
           {dl && <p className="font-bold" role="status">{dl}</p>}
           <p className="text-sm font-semibold">{t('guide.dlThen')}</p>

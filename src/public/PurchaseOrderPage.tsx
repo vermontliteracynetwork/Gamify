@@ -59,7 +59,7 @@ export default function PurchaseOrderPage() {
               <label className="grid gap-1 font-bold sm:col-span-2">{t('po.notes')}<textarea value={form.notes} onChange={set('notes')} maxLength={400} rows={2} className={`${field} py-2`} /></label>
             </div>
             <p className="text-sm font-semibold text-muted">{t('po.pdfNote')}</p>
-            <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => void send()}>{t('po.send')}</Button>
+            <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => send()}>{t('po.send')}</Button>
           </section>
         )}
       </main>

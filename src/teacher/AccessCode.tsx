@@ -54,7 +54,7 @@ export default function AccessCode() {
       <div className="flex flex-wrap items-center gap-2">
         <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} maxLength={20} aria-label={t('code.label')} placeholder={t('code.label')}
           className="min-h-12 px-3 rounded-input border-std border-border font-bold tracking-[0.15em] w-56" />
-        <Button variant="primary" disabled={busy || code.length < 4} onClick={() => void redeem()}>{t('code.use')}</Button>
+        <Button variant="primary" disabled={busy || code.length < 4} onClick={() => redeem()}>{t('code.use')}</Button>
       </div>
       <label className="inline-flex items-start gap-2 font-semibold text-sm">
         <input type="checkbox" className="w-5 h-5 mt-0.5" checked={agree} onChange={(e) => setAgree(e.target.checked)} />

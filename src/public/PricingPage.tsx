@@ -237,7 +237,7 @@ function SchoolPlans() {
                 <label className="grid gap-1 font-bold">{t('pricing.seats')}<input type="number" min={1} max={5000} value={form.seats} onChange={(e) => setForm({ ...form, seats: Math.max(1, Number(e.target.value) || 1) })} className={`${field} w-32`} /></label>
                 <label className="grid gap-1 font-bold">{t('pricing.quoteNotes')}<textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} maxLength={500} rows={2} className={`${field} py-2`} /></label>
               </div>
-              <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => void send()}>{t('pricing.getQuote')}</Button>
+              <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => send()}>{t('pricing.getQuote')}</Button>
             </>
           )}
         </div>

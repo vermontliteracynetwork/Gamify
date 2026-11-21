@@ -229,7 +229,7 @@ export default function ActivityPage() {
               </div>
             )}
             {code ? <CodeBox code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} onShow={how === 'code' ? () => navigate(`/show/${code.code}`) : undefined} />
-              : <Button variant="primary" className="justify-self-start min-h-14 px-7 text-lg" onClick={() => void finish()}>
+              : <Button variant="primary" className="justify-self-start min-h-14 px-7 text-lg" onClick={() => finish()}>
                   {how === 'screen' ? <Play weight="fill" size={20} /> : how === 'lobby' ? <Broadcast weight="bold" size={20} /> : <QrCode weight="bold" size={20} />}{t(`activity.go.${how || 'code'}`)}
                 </Button>}
             <p role="status" aria-live="polite" className="font-bold min-h-6">{status}</p>

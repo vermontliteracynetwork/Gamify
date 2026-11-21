@@ -77,7 +77,7 @@ export default function CheckInPage() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6 grid gap-5 min-h-[calc(100dvh-80px)] content-center">
       <div className="flex items-center gap-2 justify-between">
         <span className="font-bold text-sm bg-surface rounded-pill border-std border-border px-3 py-1">{t('checkin.count', { count })}</span>
-        <Button onClick={() => void finish()}>{t('checkin.finish')}</Button>
+        <Button onClick={() => finish()}>{t('checkin.finish')}</Button>
       </div>
       <AnimatePresence mode="wait">
         {thanks ? (
