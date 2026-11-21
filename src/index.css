@@ -888,3 +888,11 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
   p, li { text-wrap: pretty; }
   table, .tabular-nums, [role='status'] { font-variant-numeric: tabular-nums; }
 }
+
+/* Big text never pushes the top bar off the screen (2026-11-21): words in the
+   bar stay on one line, and at the two largest text sizes the plain page
+   links (Home, Features, Blog, Help Center) step aside; they are all in the
+   footer, and the buttons keep their words. */
+.site-header a, .site-header button { white-space: nowrap; }
+html[data-text-size="larger"] .site-header .nav-grow,
+html[data-text-size="huge"] .site-header .nav-grow { display: none !important; }
