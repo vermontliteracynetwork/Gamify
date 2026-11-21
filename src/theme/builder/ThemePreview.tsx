@@ -10,7 +10,6 @@ import ItemArt from '../ItemArt';
 import { PIN_OUTLINE } from './shapes';
 import { GAMES } from '../../games/registry';
 import { ShareQuestionView, StudentQuestionView } from './QuestionViews';
-import { GameCover } from '../../games/covers';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
 import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
@@ -129,7 +128,7 @@ function ThemeDeckView({ theme }: { theme: GameTheme }) {
       <span className={card} style={{ left: '50%', transform: 'translate(-50%, -50%)', zIndex: 2, boxShadow: '0 6px 0 #000' }}>
         {/* Square, like every theme cover (teacher, 2026-11-21). */}
         <span className="block aspect-square rounded-input border-std border-border overflow-hidden bg-surface-2">
-          {cover ? <img src={cover} alt="" className="w-full h-full object-cover" /> : <GameCover gameId={theme.gameId} className="w-full h-full" />}
+          {cover ? <img src={cover} alt="" className="w-full h-full object-cover" /> : <span className="relative block w-full h-full" style={backdropStyle(theme, false)}><span className="absolute inset-0 [&>*]:!aspect-auto [&>*]:!w-full [&>*]:!h-full [&>*]:!rounded-none [&>*]:!border-0"><ThemePreview theme={theme} /></span></span>}
         </span>
         <span className="font-display text-[1.1rem] px-1 truncate">{theme.name || 'Your theme'}</span>
       </span>
@@ -293,7 +292,7 @@ function board(theme: GameTheme, size?: number) {
       const art = pieceImage(theme, 'card-back');
       const lights = (n: number) => Array.from({ length: n }, (_, k) => <span key={k} className="w-[6px] h-[6px] rounded-full bg-[#fff6b0] motion-safe:animate-pulse" style={{ animationDelay: `${(k % 4) * 0.25}s` }} />);
       return (
-        <div className={`relative w-full rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
+        <div className={`relative w-[min(100cqw,calc(100cqh*1.62))] rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
           {marquee && <>
             <span aria-hidden="true" className="absolute top-[4px] inset-x-[14px] flex justify-between">{lights(18)}</span>
             <span aria-hidden="true" className="absolute bottom-[4px] inset-x-[14px] flex justify-between">{lights(18)}</span>

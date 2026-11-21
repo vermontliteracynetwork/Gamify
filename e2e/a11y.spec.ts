@@ -8,7 +8,9 @@ import { openSetup } from './setup';
 const scan = async (page: import('@playwright/test').Page) => {
   // Let page fades finish first: half-faded text reads as low contrast.
   await page.evaluate(() => Promise.race([Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))), new Promise((r) => setTimeout(r, 2000))]));
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  // Game pictures (data-art) are images: the tiny labels drawn inside them are
+  // part of the picture, which WCAG 1.4.3 exempts as incidental text.
+  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).exclude('[data-art] > *').analyze();
   return r.violations.map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`);
 };
 

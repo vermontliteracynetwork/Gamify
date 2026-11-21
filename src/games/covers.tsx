@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { houseFor } from '../theme/house';
+import { STARTER_THEMES } from '../theme/starters';
+import { useMadeThemes } from '../theme/made';
+import { useSettings } from '../settings/SettingsContext';
 import type { GameTheme } from '../theme/types';
+import { ThemeArt } from '../theme/builder/ThemeSquare';
+import { classicTheme } from '../theme/classic';
+import { GAMES } from './registry';
 import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
@@ -27,6 +33,9 @@ function Scatter({ icons, colors }: { icons: Icon[]; colors: string[] }) {
 }
 
 export function GameCover({ gameId, className = '' }: { gameId: string; className?: string }) {
+  // Every game with a Classic preview shows that same picture (teacher,
+  // 2026-11-21: one way to present each Classic theme everywhere).
+  if (GAMES.some((g) => g.id === gameId)) return <ThemeArt theme={classicTheme(gameId)} className={className} />;
   const base = `relative overflow-hidden ${className}`;
   switch (gameId) {
     case 'game-show':
@@ -293,10 +302,13 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
 // theme's own art in a small scene of its game.
 // No custom title lettering on covers (teacher, 2026-11-20).
 export function ThemeCover({ theme, className = '' }: { theme: GameTheme; className?: string }) {
-  return <ThemeCoverArt theme={theme} className={className} />;
+  // The theme's own Cover picture, else the same game picture as everywhere else (2026-11-21).
+  const cover = theme.pieces.cover?.image;
+  if (cover) return <div className={`relative overflow-hidden ${className}`} style={{ background: `${theme.colors.background} center / contain no-repeat url("${cover}")` }} aria-hidden="true" />;
+  return <ThemeArt theme={theme} className={className} />;
 }
 
-function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?: string }) {
+export function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?: string }) {
   const base = `relative overflow-hidden ${className}`;
   const bg = theme.colors.background;
   if (theme.discs?.length) {
@@ -351,34 +363,40 @@ function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?
 // (teacher, 2026-10-31: "show them instead of the default"), and hovering
 // for 3 seconds moves to the next one, cycling through, then Classic.
 export function CyclingCover({ gameId, className = '' }: { gameId: string; className?: string }) {
-  const looks = houseFor(gameId);
-  const [i, setI] = useState(0);
-  const timer = useRef<number | null>(null);
+  // The game's one template, wearing each theme people have made for it in
+  // turn (teacher, 2026-11-21: "simple templates that the themes can merge
+  // into ... cycling through the themes that people have created on 2-3
+  // second loops forever"): Gamify's designs, the sample themes and the class
+  // themes approved for the gallery, then Classic, around and around.
+  const { themes: made } = useMadeThemes();
+  const looks = [
+    ...houseFor(gameId),
+    ...STARTER_THEMES.filter((x) => x.gameId === gameId).map((x) => x.theme),
+    ...made.filter((th) => th.gameId === gameId && (th.source === 'library' || th.gallery?.status === 'approved')),
+  ].filter((th, k, all) => all.findIndex((x) => x.id === th.id) === k);
   const reduce = useReducedMotion();
-  const box = useRef<HTMLDivElement>(null);
-  const count = looks.length + 1; // the designed themes, then Classic
-  // Hovering anywhere on the card (or focusing it) starts the cycle.
+  const still = useSettings().settings.motion === 'still';
+  const count = looks.length + 1;
+  const [i, setI] = useState(0);
   useEffect(() => {
-    if (!looks.length) return;
-    const card = box.current?.closest('a, li, article, [data-card]') ?? box.current;
-    if (!card) return;
-    const start = () => { if (!timer.current) timer.current = window.setInterval(() => setI((n) => (n + 1) % count), 3000); };
-    const stop = () => { if (timer.current) { window.clearInterval(timer.current); timer.current = null; } };
-    card.addEventListener('mouseenter', start); card.addEventListener('mouseleave', stop);
-    card.addEventListener('focusin', start); card.addEventListener('focusout', stop);
-    return () => { stop(); card.removeEventListener('mouseenter', start); card.removeEventListener('mouseleave', stop); card.removeEventListener('focusin', start); card.removeEventListener('focusout', stop); };
-  }, [looks.length, count]);
-  if (!looks.length) return <GameCover gameId={gameId} className={className} />;
+    if (count < 2 || still) return;
+    // Each card starts at its own moment, so the grid never flips all at once.
+    const offset = [...gameId].reduce((n, ch) => n + ch.charCodeAt(0), 0) % 900;
+    let id = 0;
+    const lead = window.setTimeout(() => { setI((n) => (n + 1) % count); id = window.setInterval(() => setI((n) => (n + 1) % count), 2500); }, 2500 + offset);
+    return () => { window.clearTimeout(lead); window.clearInterval(id); };
+  }, [count, still, gameId]);
+  const theme = i < looks.length ? looks[i] : classicTheme(gameId);
   return (
-    <div ref={box} className={`relative overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden ${className}`}>
       <AnimatePresence initial={false}>
-        <motion.div key={i} className="absolute inset-0" initial={reduce ? { opacity: 0 } : { opacity: 0, x: '12%' }} animate={{ opacity: 1, x: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, x: '-12%' }} transition={{ duration: 0.45 }}>
-          {i < looks.length ? <ThemeCover theme={looks[i]} className="w-full h-full" /> : <GameCover gameId={gameId} className="w-full h-full" />}
+        <motion.div key={theme.id} className="absolute inset-0" initial={reduce ? { opacity: 0 } : { opacity: 0, x: '12%' }} animate={{ opacity: 1, x: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, x: '-12%' }} transition={{ duration: 0.45 }}>
+          <ThemeArt theme={theme} className="w-full h-full" />
         </motion.div>
       </AnimatePresence>
-      <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1" aria-hidden="true">
-        {Array.from({ length: count }, (_, k) => <span key={k} className={`w-2 h-2 rounded-full border border-border ${k === i ? 'bg-accent' : 'bg-surface/80'}`} />)}
-      </span>
+      {count > 1 && <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10" aria-hidden="true">
+        {Array.from({ length: count }, (_, k) => <span key={k} className={`w-2 h-2 rounded-full border border-border ${k === (i % count) ? 'bg-accent' : 'bg-surface/80'}`} />)}
+      </span>}
     </div>
   );
 }
