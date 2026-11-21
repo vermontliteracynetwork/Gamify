@@ -7,7 +7,7 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
 import type { StringKey } from '../i18n/en';
-import ThemePreview from '../theme/builder/ThemePreview';
+import ThemeSquare from '../theme/builder/ThemeSquare';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
@@ -89,7 +89,7 @@ export default function ThemesPage() {
             return (
               <motion.li key={x.theme.id} layout={!reduce} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
                 className="hover-lift bg-surface border-bold border-border rounded-panel p-3 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} />
+                <ThemeSquare theme={x.theme} />
                 <div className="flex items-start gap-2">
                   <div className="flex-1 min-w-0">
                     <h2 className="font-display text-2xl leading-tight">{x.name}</h2>

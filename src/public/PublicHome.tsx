@@ -11,7 +11,7 @@ import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
-import ThemePreview from '../theme/builder/ThemePreview';
+import ThemeSquare from '../theme/builder/ThemeSquare';
 import { STARTER_THEMES } from '../theme/starters';
 
 // The public home page (development plan Part 3A): what Gamify is, the four
@@ -140,7 +140,7 @@ function ThemesShowcase() {
         {top.map((x, i) => (
           <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
             <Link to="/themes" className="hover-lift block bg-surface border-bold border-border rounded-panel p-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ThemePreview theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
+              <ThemeSquare theme={x.theme} />
               <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
               <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
             </Link>

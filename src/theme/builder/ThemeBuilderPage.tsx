@@ -27,6 +27,7 @@ import { cutPhotoForPiece } from './scan';
 import { loadDraft, loadOriginal, saveDraft, saveOriginal } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
+import ThemeSquare from './ThemeSquare';
 import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
@@ -130,7 +131,7 @@ function StudentRequests() {
           const blocked = limit(r.theme.gameId);
           return (
             <div key={r.id} className="rounded-input border-std border-border-soft p-2 grid gap-2">
-              <ThemePreview theme={r.theme} gameName={r.theme.name} />
+              <ThemeSquare theme={r.theme} className="max-w-56" />
               <p className="font-bold text-sm">{t('builder.requestFor', { game: game?.name ?? '', class: room })}</p>
               {blocked && <div className="flex flex-wrap items-center gap-2"><p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
               <div className="flex flex-wrap gap-2">

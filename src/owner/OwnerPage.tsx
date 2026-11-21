@@ -13,7 +13,7 @@ import { Slider } from '../ui/fields';
 import { Button } from '../ui/kit';
 import type { StringKey } from '../i18n/en';
 import { saveMadeTheme, useMadeThemes } from '../theme/made';
-import ThemePreview from '../theme/builder/ThemePreview';
+import ThemeSquare from '../theme/builder/ThemeSquare';
 import { GALLERY_REASONS, type GalleryReason, type GameTheme } from '../theme/types';
 import { monthlyRevenue, project, type Subs } from './income';
 import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
@@ -356,7 +356,7 @@ function GalleryCard() {
     <ul className="grid gap-3 list-none p-0 m-0">
       {pending.map((th) => (
         <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-std border-border-soft p-2">
-          <ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} />
+          <ThemeSquare theme={th} />
           <div className="grid gap-2 content-start">
             <p className="font-display text-xl">{th.name}</p>
             <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>

@@ -117,17 +117,18 @@ function PickView({ theme }: { theme: GameTheme }) {
 // cover in front, blank cards tucked behind on each side.
 function ThemeDeckView({ theme }: { theme: GameTheme }) {
   const cover = pieceImage(theme, 'cover');
-  const card = 'absolute top-1/2 w-[46%] rounded-panel border-bold border-border bg-white p-[1.5%] grid gap-[1.5%]';
+  const card = 'absolute top-1/2 w-[34%] rounded-panel border-bold border-border bg-white p-[1.5%] grid gap-[1.5%]';
   return (
     <div className="relative brand-menu rounded-panel border-bold border-border overflow-hidden aspect-[4/3] bg-[#c8d2fb]" role="img" aria-label="Preview: the theme picker">
       {[-1, 1].map((d) => (
         <span key={d} className={card} style={{ left: `${50 + d * 22}%`, transform: `translate(-50%, -50%) rotate(${d * 7}deg) scale(0.88)`, zIndex: 1 }}>
-          <span className="block aspect-[4/3] rounded-input border-std border-border bg-white" />
+          <span className="block aspect-square rounded-input border-std border-border bg-white" />
           <span className="block h-[1.6rem]" />
         </span>
       ))}
       <span className={card} style={{ left: '50%', transform: 'translate(-50%, -50%)', zIndex: 2, boxShadow: '0 6px 0 #000' }}>
-        <span className="block aspect-[4/3] rounded-input border-std border-border overflow-hidden bg-surface-2">
+        {/* Square, like every theme cover (teacher, 2026-11-21). */}
+        <span className="block aspect-square rounded-input border-std border-border overflow-hidden bg-surface-2">
           {cover ? <img src={cover} alt="" className="w-full h-full object-cover" /> : <GameCover gameId={theme.gameId} className="w-full h-full" />}
         </span>
         <span className="font-display text-[1.1rem] px-1 truncate">{theme.name || 'Your theme'}</span>

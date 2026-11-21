@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, CaretLeft, CaretRight, Check, LockSimple, MagnifyingGlass } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
-import ThemePreview from '../theme/builder/ThemePreview';
+import ThemeSquare from '../theme/builder/ThemeSquare';
 import type { GameTheme } from '../theme/types';
 import Title from '../ui/Title';
 import { useSettings } from '../settings/SettingsContext';
@@ -17,7 +17,7 @@ export const SHOW_BLANK_TEST_CARDS = true;
 // middle and up to two smaller ones on each side. Arrows (and the arrow keys)
 // spin it with a whoosh; a search box in the top right finds a theme by name.
 // Locked themes show a lock only (no prices or buy words).
-export default function ThemeScreen({ gameName, current, themes, playable, onChoose, onBack, onNext }: {
+export default function ThemeScreen({ gameName: _gameName, current, themes, playable, onChoose, onBack, onNext }: {
   gameName: string; current: GameTheme; themes: GameTheme[]; playable: (th: GameTheme) => boolean;
   onChoose: (id: string) => void; onBack: () => void; onNext: () => void;
 }) {
@@ -87,9 +87,10 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                   // tilted away on each side (left cards lean left, right cards lean right); a turn spins the deck.
                   animate={{ x: `${-50 + d * 30 + Math.sign(d) * (Math.abs(d) - 1) * 8}%`, y: `${-50 + Math.abs(d) * 3}%`, scale: 1 - Math.abs(d) * 0.1, rotate: d * 7, opacity: Math.abs(d) === 2 ? 0.8 : 1, zIndex: 10 - Math.abs(d) }}
                   transition={still ? { duration: 0 } : { type: 'spring', stiffness: 190, damping: 20 }}
-                  className={`absolute left-1/2 top-1/2 w-[min(50%,58vh)] rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on && isMain ? 'ring-4 ring-accent' : ''}`}
+                  className={`absolute left-1/2 top-1/2 w-[min(40%,44vh)] rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on && isMain ? 'ring-4 ring-accent' : ''}`}
                   style={{ boxShadow: isMain ? '0 6px 0 #000, 0 24px 40px rgba(36,28,61,0.25)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-                  {blank ? <span className="block aspect-[4/3] rounded-panel border-bold border-border bg-white" /> : <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>}
+                  {/* Theme covers are 1:1 squares everywhere (teacher, 2026-11-21). */}
+                  <ThemeSquare theme={th} className={open ? '' : 'grayscale opacity-70'} />
                   {/* A taller name strip with a bigger name (teacher, 2026-11-20). */}
                   <span className="flex items-center gap-2 font-display text-2xl font-bold px-2 min-h-14">
                     {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
