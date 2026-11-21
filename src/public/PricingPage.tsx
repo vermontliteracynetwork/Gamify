@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, type Tier } from '../config';
+import { PRICES_USD_PER_MONTH, PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, yearlySaving, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -49,6 +49,8 @@ export default function PricingPage() {
     { label: t('pricing.row.access'), value: () => true },
   ];
   const tiers: Tier[] = ['free', 'plus', 'pro'];
+  // Yearly first (the better deal); monthly shows what it costs without the yearly discount.
+  const [billing, setBilling] = useState<'yearly' | 'monthly'>('yearly');
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : i * 0.06 } });
   const trust = [
     { icon: CreditCard, text: t('pricing.trust.card') },
@@ -70,6 +72,15 @@ export default function PricingPage() {
           </ul>
         </div>
 
+        <div role="radiogroup" aria-label={t('pricing.billing')} className="justify-self-center inline-flex gap-1 p-1 rounded-pill border-std border-border bg-surface -mb-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          {(['yearly', 'monthly'] as const).map((b) => (
+            <button key={b} type="button" role="radio" aria-checked={billing === b} onClick={() => setBilling(b)}
+              className={`min-h-11 px-5 rounded-pill font-bold inline-flex items-center gap-2 motion-safe:active:scale-[0.97] motion-safe:transition-transform ${billing === b ? 'bg-accent border-std border-border' : ''}`}>
+              {t(`pricing.billing.${b}`)}{b === 'yearly' && <span className="text-xs font-bold bg-success-ink text-white rounded-pill px-2 py-0.5">{t('pricing.save', { n: yearlySaving('plus') })}</span>}
+            </button>
+          ))}
+        </div>
+
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
           {tiers.map((x, i) => {
             return (
@@ -83,9 +94,11 @@ export default function PricingPage() {
                 <div>
                   {x === 'free'
                     ? <><p className="font-display text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>
-                    : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-bold text-success-ink">{t('pricing.perDay', { price: perDay(x) })}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })}</p></>}
+                    : billing === 'yearly'
+                      ? <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-bold text-success-ink">{t('pricing.perDay', { price: perDay(x) })}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })} · <s>{t('pricing.wasMonthly', { n: PRICES_USD_PER_MONTH[x as Exclude<Tier, 'free'>] * 12 })}</s></p></>
+                      : <><p className="font-display text-4xl leading-none">${PRICES_USD_PER_MONTH[x as Exclude<Tier, 'free'>]} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-semibold text-muted">{t('pricing.billedMonthly')}</p><button type="button" onClick={() => setBilling('yearly')} className="text-sm font-bold underline text-success-ink">{t('pricing.switchYearly', { n: yearlySaving(x as Exclude<Tier, 'free'>) })}</button></>}
                 </div>
-                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('primary', `min-h-14 text-lg hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
+                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}${billing === 'monthly' ? '&billing=monthly' : ''}`} className={buttonClasses('primary', `min-h-14 text-lg hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
                 </Link>
                 <hr className="border-0 border-t-[2px] border-border/20 my-1" />

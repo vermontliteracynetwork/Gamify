@@ -15,6 +15,7 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 7. **Later: ask an accountant about the S corp election** once Gamify has steady profit (IRS Form 2553).
 
 **Everything else**
+- **Pricing: confirm monthly prices, then local currency and reminders (2026-11-21).** Monthly / Yearly switch added (guess: Plus $10, Pro $19 a month). Confirm or change, add them as monthly Prices in Stripe, turn on Stripe Adaptive Pricing for local currencies; after Resend, Claudia adds the email 7 days before a code or plan ends.
 - **Attorney: read the new Privacy Policy, Terms, Sub-processors and Data agreement pages (2026-11-21).** Full plain-word documents now on /privacy, /terms, /subprocessors and /dpa (src/public/legalText.ts). Confirm the liability cap, Vermont law, 72-hour breach notice, COPPA school-permission wording and a DPA template.
 - **Stripe: renewal reminders, cancel online, wallets and retries (2026-11-21).** Turn on upcoming-renewal emails, failed-payment emails and Smart Retries, the Customer portal with cancelling, and Apple Pay / Google Pay; then Claudia connects the Account page Cancel button.
 - **Before any news email: unsubscribe link and mailing address (2026-11-21).** Send only to teachers who opted in; give Claudia a postal address (PO box is fine) for the footer.

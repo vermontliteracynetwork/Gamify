@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CaretDown, CheckCircle, Circle, Minus, X } from '@phosphor-icons/react';
 import { data } from '../data';
+import { LIBRARY } from '../data/library';
 import { useAsync } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -30,7 +31,9 @@ export function useStartSteps(): StartSteps | null {
     const first = classes[0]?.id;
     const inClass = first ? `/teacher/classes/${first}` : '/teacher/classes';
     const steps = [
-      { key: 'play' as const, to: '/teacher/sets', done: log.length > 0 },
+      // Straight into a game with a ready-made set: the fastest way to see a
+      // class light up (pricing pass, 2026-11-21: onboarding reaches the aha moment).
+      { key: 'play' as const, to: `/games/game-show?set=${LIBRARY[0]?.id ?? ''}`, done: log.length > 0 },
       // Classes are Plus and Pro only; Free goes straight to its student list.
       ...(!TIERS[tier ?? 'free'].hasClasses ? [] : [{ key: 'class' as const, to: '/teacher/classes', done: classes.length > 0 }]),
       { key: 'students' as const, to: inClass, done: students.length > 0 },

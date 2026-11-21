@@ -62,6 +62,11 @@ export const TIERS: Record<Tier, TierLimits> = {
 // Placeholders: nothing charges until Stage 7 is approved.
 // Homeschool $8 a month, same as Plus (teacher, 2026-10-26).
 export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 96 };
+// Paying month to month costs more, so yearly shows its saving (pricing pass,
+// 2026-11-21: "add an annual discount"). Claudia's guess at the monthly
+// prices, to confirm (Waiting on you): about 20% more than yearly.
+export const PRICES_USD_PER_MONTH: Record<Exclude<Tier, 'free'>, number> = { plus: 10, pro: 19, homeschool: 10 };
+export const yearlySaving = (x: Exclude<Tier, 'free'>) => Math.round((1 - PRICES_USD_PER_YEAR[x] / (PRICES_USD_PER_MONTH[x] * 12)) * 100);
 
 // Co-op codes (teacher, 2026-11-20): families in a homeschool co-op get 25%
 // off with their co-op's code (0014_coop_codes.sql).

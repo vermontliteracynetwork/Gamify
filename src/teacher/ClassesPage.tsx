@@ -1,3 +1,4 @@
+import { PlanEndingNote } from './AccessCode';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, UsersThree } from '@phosphor-icons/react';
@@ -46,6 +47,7 @@ export default function ClassesPage() {
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav startOpen />
+      <PlanEndingNote />
       {/* Make class sits beside the title (teacher, 2026-10-31); its name box opens at the top. */}
       <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')}
         actions={classes.length < limit ? <Button variant="primary" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />

@@ -1,3 +1,4 @@
+import { LimitNote } from '../billing/Upgrade';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Ticket } from '@phosphor-icons/react';
@@ -15,6 +16,17 @@ export function PlanUntil() {
   const { value } = useAsync(() => data.getSetting<{ tier?: string; until: string | null; note: string | null }>('plan-info'));
   if (!value?.until) return null;
   return <p className="font-bold">{t('account.until', { date: longDate(value.until) })}</p>;
+}
+
+// A reminder a week before a beta code or plan ends (pricing pass,
+// 2026-11-21: "email them before their trial ends"; the email comes with
+// Resend, this note shows on the teacher pages now).
+export function PlanEndingNote() {
+  const { value } = useAsync(() => data.getSetting<{ tier?: string; until: string | null; note: string | null }>('plan-info'));
+  if (!value?.until) return null;
+  const days = Math.ceil((new Date(value.until).getTime() - Date.now()) / 86400000);
+  if (days < 0 || days > 7) return null;
+  return <LimitNote className="mb-4">{t('account.endingSoon', { date: longDate(value.until) })}</LimitNote>;
 }
 
 // An access code (like the Vermont Literacy Network code) or a beta code
