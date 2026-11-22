@@ -4,7 +4,7 @@ import { ArrowsLeftRight, CheckCircle, Coins, HandGrabbing, Trophy } from '@phos
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { applyChest, heapRows, needsTarget, richest, rollChests, type Chest } from './rules';
+import { applyChest, DOUBLE_CAP, heapRows, needsTarget, randomOther, rollChests, type Chest } from './rules';
 
 // Treasure Quest (Game Lab, inspired by the general idea of chest-picking
 // quiz games): answer right, then pick one of three wobbling chests on a
@@ -24,9 +24,16 @@ const POWERS: LabPower[] = [
   { id: 'shield', name: 'Pirate Shield', desc: 'Keeps your gold safe from the next take or swap.', enter: 'drop', art: <ImgArt src={`${A}/shield.webp`} ring="#cfe0ff" /> },
   { id: 'parrot', name: 'Parrot Pal', desc: 'A parrot flies by and drops 20 gold on your pile.', enter: 'wiggle', art: <Art kind="parrot" /> },
   { id: 'sneeze', name: 'Sneezy Chests', desc: 'Achoo! The chests sneeze and shuffle what is inside.', silly: true, art: <Art kind="sneeze" /> },
-  { id: 'crab', name: 'Crab Pinch', desc: 'A crab pinches 5 of your gold and scuttles off.', silly: true, art: <Art kind="crab" /> },
+  { id: 'crab', name: 'Crab Pinch', desc: 'A crab grabs a coin, trips, and the coin rolls right back.', silly: true, art: <Art kind="crab" /> },
+  // Chest surprises the teacher switches on in setup (they start off).
+  { id: 'take', name: 'Take Chest', desc: 'Some chests take a little gold from a team that has some.', takes: true, enter: 'zoom', art: <Art kind="take" /> },
+  { id: 'swap', name: 'Swap Chest', desc: 'Some chests swap gold piles with another team.', takes: true, enter: 'spin', art: <Art kind="swap" /> },
 ];
 const SHIELD = POWERS.find((p) => p.id === 'shield')!;
+// Chest outcomes listed as power-ups so setup can switch them; never dealt as cards.
+const OUTCOMES = ['take', 'swap'];
+const FLAT = 10; // gold for every right answer, before the chest
+const TRY_COIN = 2; // a coin for trying after a miss
 
 type Mode = 'wait' | 'busy' | 'pick' | 'target';
 interface Box { id: number; c: Chest }
@@ -87,7 +94,10 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const freshChests = (clover = false) => {
     const s = scores(), id = c.current.player.id;
     const others = Object.entries(s).some(([k, v]) => k !== id && v > 0);
-    return rollChests({ others, mine: s[id] ?? 0, clover }).map((ch) => ({ id: ++uid, c: ch }));
+    // Which chest surprises are switched on: ask the kit which power-ups it would deal.
+    const on = new Set<string>();
+    void c.current.power(0, (p) => { on.add(p.id); return false; });
+    return rollChests({ others, mine: s[id] ?? 0, clover, take: on.has('take'), swap: on.has('swap') }).map((ch) => ({ id: ++uid, c: ch }));
   };
 
   // Every turn: a question, a surprise power-up now and then, then a chest.
@@ -98,12 +108,14 @@ function Board({ ctx }: { ctx: LabCtx }) {
     picks.current = 1; rush.current = false;
     void x.ask().then(async (ok) => {
       if (!alive(t)) return;
-      if (!ok) { c.current.sfx.wrong(); await sleep(700); if (alive(t)) c.current.next(); return; }
+      if (!ok) { c.current.sfx.wrong(); await sleep(500); if (!alive(t)) return; c.current.points(TRY_COIN); c.current.sfx.coin(); c.current.say(`+${TRY_COIN}: a coin for trying`, 'good'); await sleep(1300); if (alive(t)) c.current.next(); return; }
+      c.current.points(FLAT); c.current.sfx.coin(); c.current.say(`+${FLAT} gold!`, 'good');
+      await sleep(900); if (!alive(t)) return;
       setBoxes(freshChests()); setMode('busy');
       c.current.sfx.whoosh();
       await sleep(500);
       if (!alive(t)) return;
-      const p = await c.current.power(0.45, (pw) => pw.id !== 'crab' || (scores()[c.current.player.id] ?? 0) >= 5);
+      const p = await c.current.power(0.45, (pw) => !OUTCOMES.includes(pw.id));
       if (!alive(t)) return;
       if (p) await fire(p, t);
       if (!alive(t)) return;
@@ -143,7 +155,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       await sleep(900);
     } else if (p.id === 'shield') {
       setShields((list) => [...new Set([...list, id])]);
-      x.setHeld(id, [SHIELD]); x.sfx.bell(); await sleep(1300);
+      x.setHeld(id, [...(x.held[id] ?? []).filter((h) => h.id !== 'shield'), SHIELD]); x.sfx.bell(); await sleep(1300);
     } else if (p.id === 'parrot') {
       x.sfx.whistle(); await sleep(900); if (!alive(t)) return;
       x.points(20); x.sfx.coin(); x.burst(wide ? 0.6 : 0.5, 0.55); await sleep(900);
@@ -154,14 +166,14 @@ function Board({ ctx }: { ctx: LabCtx }) {
       setBoxes((b) => [b[2], b[0], b[1]].map((bx, i) => ({ id: bx.id, c: fresh[i].c })));
       await sleep(1200);
     } else if (p.id === 'crab') {
-      x.sfx.chomp(); await sleep(1100); if (!alive(t)) return;
-      x.points(-5); x.sfx.oops(); await sleep(900);
+      x.sfx.chomp(); await sleep(1000); if (!alive(t)) return;
+      x.sfx.boing(); x.say('Whoops! It rolled back!', 'oops'); await sleep(900); x.sfx.coin();
     }
   }
 
   function dropShield(id: string) {
     setShields((list) => list.filter((s) => s !== id));
-    c.current.setHeld(id, []);
+    c.current.setHeld(id, (c.current.held[id] ?? []).filter((h) => h.id !== 'shield'));
     c.current.sfx.bell(); c.current.say('Shield blocked it!', 'oops');
   }
 
@@ -182,7 +194,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     let target: string | undefined;
     if (needsTarget(ch)) {
       const list = Object.entries(before).filter(([k, v]) => k !== id && v > 0).map(([k]) => k);
-      if (list.length === 1 || c.current.cpu) target = c.current.cpu ? richest(before, id) : list[0];
+      if (list.length === 1 || c.current.cpu) target = c.current.cpu ? randomOther(before, id) : list[0];
       else if (list.length > 1) {
         setTargets(list); setMode('target'); x.say(ch.kind === 'swap' ? 'Swap with who?' : 'Take from who?', 'big');
         target = await new Promise<string>((r) => { chooseRef.current = r; });
@@ -196,8 +208,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
     c.current.setScores(after);
     const k = ch.kind;
     if (k === 'gold') { x.sfx.coin(); addPop(slot, `+${delta}`, true); x.burst(0.35 + slot * 0.15, 0.5); }
-    if (k === 'double') { x.sfx.power(); addPop(slot, 'x2', true); x.say('Double gold!', 'big'); x.burst(0.4, 0.45, 'big'); }
-    if (k === 'lose') { x.sfx.slideDown(); addPop(slot, `${delta}`, false); x.say('Oops! A hole!', 'oops'); }
+    if (k === 'double') { x.sfx.power(); addPop(slot, `+${delta}`, true); x.say('Double gold!', 'big'); x.burst(0.4, 0.45, 'big'); }
+    if (k === 'lose') { x.sfx.slideDown(); addPop(slot, 'Oops!', false); x.say('Oops! The coins rolled back!', 'oops'); window.setTimeout(() => c.current.sfx.coin(), 900); }
     if (k === 'take' && target) { x.sfx.magnet(); addPop(slot, `+${delta}`, true); x.say('Got some!', 'good'); }
     if (k === 'swap' && target) { x.sfx.wind(); addPop(slot, 'Swap!', delta >= 0); x.say('Swap!', 'big'); }
     if (k === 'moth') { x.sfx.whoosh(); addPop(slot, 'Empty!', false); x.say('Just a moth!', 'oops'); }
@@ -279,8 +291,8 @@ function ChestButton({ slot, box, open, faded, show, peeked, glow, can, still, s
     <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Treasure chest ${slot + 1}`}
       className="relative w-full aspect-[6/5] max-h-full mx-auto disabled:cursor-default focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#241c3d] rounded-2xl"
       style={{ opacity: faded ? 0.75 : 1 }}
-      animate={still || open ? { rotate: 0, scale: 1 } : sneeze ? { scale: [1, 1.18, 0.9, 1], rotate: [0, -6, 6, 0] } : can ? { rotate: [0, -4, 4, -2, 0], y: [0, -6, 0] } : waiting ? { rotate: [0, -1.5, 1.5, 0] } : { rotate: 0 }}
-      transition={sneeze && !open ? { duration: 0.6 } : { duration: can ? 1.1 + seed * 0.5 : 2.4, repeat: Infinity, repeatDelay: seed * 0.8, ease: 'easeInOut' }}
+      animate={still || open ? { rotate: 0, scale: 1 } : sneeze ? { scale: [1, 1.18, 0.9, 1], rotate: [0, -6, 6, 0] } : can ? { rotate: [0, -4, 4, -2, 0, 0], y: [0, -6, 0, 0, 0, 0] } : waiting ? { rotate: [0, -1.5, 1.5, 0] } : { rotate: 0 }}
+      transition={sneeze && !open ? { duration: 0.6 } : can ? { duration: 0.7, repeat: Infinity, repeatDelay: 2.4 + seed * 2, ease: 'easeInOut' } : { duration: 2.4, repeat: Infinity, repeatDelay: 1.5 + seed, ease: 'easeInOut' }}
       whileHover={can && !still ? { scale: 1.06 } : undefined} whileTap={can && !still ? { scale: 0.95 } : undefined}>
       {/* Shadow on the sand. */}
       <span className="absolute left-[8%] right-[8%] bottom-[-3%] h-[12%] rounded-[50%] bg-black/25 blur-[2px]" />
@@ -367,7 +379,7 @@ function Pile({ gold, unit, coinW, colorIndex, name, active, shield, still, targ
         className="relative rounded-full disabled:cursor-default focus-visible:outline-4 focus-visible:outline-[#241c3d]"
         animate={target && !still ? { scale: [1, 1.15, 1] } : { scale: active ? 1.08 : 1 }} transition={target ? { duration: 0.8, repeat: Infinity } : { type: 'spring' }}
         style={{ filter: active ? 'drop-shadow(0 0 10px #fdfd94)' : undefined }}>
-        <TeamBadge colorIndex={colorIndex} size={target ? 60 : 46} />
+        <TeamBadge colorIndex={colorIndex} size={target ? 84 : 46} />
         {target && <span className="absolute -inset-2 rounded-full border-4 border-dashed border-white" />}
       </motion.button>
       <span className="font-display text-white leading-none text-xl" style={{ WebkitTextStroke: '0.1em #000', paintOrder: 'stroke fill' }}>{gold}</span>
@@ -471,14 +483,18 @@ function PowerFx({ kind, still, wide, peek, onDone }: { kind: string; still: boo
       {Array.from({ length: 7 }, (_, i) => <motion.span key={i} className="absolute rounded-full bg-white border-[3px] border-black" style={{ left: `${15 + i * 11}%`, top: '58%', width: '7cqmin', height: '7cqmin' }} initial={{ scale: 0 }} animate={{ scale: [0, 1.4, 0], y: -60 - i * 6 }} transition={{ delay: 0.5 + i * 0.04, duration: 1 }} />)}
     </motion.div>
   );
-  if (kind === 'crab') return (
-    <motion.div {...fade} animate={{ opacity: 1 }} className="absolute inset-0 pointer-events-none">
-      <motion.div className="absolute bottom-[3%] w-[14cqmin] h-[14cqmin]" initial={{ left: '-15%' }} animate={{ left: ['-15%', wide ? '78%' : '45%', wide ? '78%' : '45%', '-15%'], y: [0, -6, 0, -6, 0, -6, 0] }} transition={{ duration: 1.9, times: [0, 0.45, 0.55, 1] }}>
-        <Art kind="crab" />
-        <motion.img src={COIN} alt="" className="absolute -top-1/3 left-1/4 w-1/2" initial={{ opacity: 0 }} animate={{ opacity: [0, 0, 1, 1] }} transition={{ duration: 1.9, times: [0, 0.5, 0.55, 1] }} />
+  if (kind === 'crab') {
+    const pile = wide ? '80%' : '45%';
+    return (
+      <motion.div {...fade} animate={{ opacity: 1 }} className="absolute inset-0 pointer-events-none">
+        <motion.div className="absolute bottom-[3%] w-[14cqmin] h-[14cqmin]" initial={{ left: '-15%' }} animate={{ left: ['-15%', pile, pile, '35%', '35%', '-15%'], rotate: [0, 0, 0, 0, 35, 0], y: [0, -6, 0, -6, 4, 0] }} transition={{ duration: 2, times: [0, 0.35, 0.42, 0.62, 0.7, 1] }}>
+          <Art kind="crab" />
+        </motion.div>
+        {/* The coin: grabbed, dropped when the crab trips, and it rolls home. */}
+        <motion.img src={COIN} alt="" className="absolute bottom-[12%] w-[6cqmin]" initial={{ left: pile, opacity: 0 }} animate={{ left: [pile, pile, '37%', '37%', pile], opacity: [0, 1, 1, 1, 1], y: [0, 0, 0, -40, 0], rotate: [0, 0, 0, -180, -540] }} transition={{ duration: 2, times: [0, 0.42, 0.62, 0.75, 1] }} />
       </motion.div>
-    </motion.div>
-  );
+    );
+  }
   return null;
 }
 
@@ -505,6 +521,8 @@ function Art({ kind }: { kind: string }) {
       {kind === 'crab' && <>{ring('#ffd2c2')}<ellipse cx="50" cy="60" rx="26" ry="16" fill="#f0603c" stroke="#000" strokeWidth="4" /><path d="M24 54q-14-6-10-20 8 2 10 10M76 54q14-6 10-20-8 2-10 10" fill="#f0603c" stroke="#000" strokeWidth="4" strokeLinejoin="round" /><path d="M30 72l-8 10M38 75l-4 10M70 72l8 10M62 75l4 10" stroke="#000" strokeWidth="4" strokeLinecap="round" /><circle cx="42" cy="44" r="5" fill="#fff" stroke="#000" strokeWidth="3" /><circle cx="58" cy="44" r="5" fill="#fff" stroke="#000" strokeWidth="3" /><circle cx="42" cy="44" r="2" fill="#000" /><circle cx="58" cy="44" r="2" fill="#000" /><path d="M44 62q6 4 12 0" stroke="#000" strokeWidth="3" fill="none" strokeLinecap="round" /></>}
       {kind === 'moth' && <><path d="M50 50Q26 18 12 36Q8 58 46 56Q20 70 30 84Q44 86 50 58Q56 86 70 84Q80 70 54 56Q92 58 88 36Q74 18 50 50Z" fill="#d8cfc0" stroke="#000" strokeWidth="4" strokeLinejoin="round" /><circle cx="30" cy="40" r="5" fill="#a89a85" /><circle cx="70" cy="40" r="5" fill="#a89a85" /><ellipse cx="50" cy="56" rx="5" ry="14" fill="#8a7a66" stroke="#000" strokeWidth="3" /><path d="M48 44q-6-12-12-14M52 44q6-12 12-14" stroke="#000" strokeWidth="2.5" fill="none" /></>}
       {kind === 'hole' && <><ellipse cx="50" cy="62" rx="40" ry="20" fill="#3b2412" stroke="#000" strokeWidth="4" /><path d="M30 60q20 10 40 0" stroke="#000" strokeWidth="3" fill="none" /><circle cx="36" cy="40" r="10" fill="#f6c544" stroke="#000" strokeWidth="3" opacity="0.8" /><circle cx="62" cy="32" r="8" fill="#f6c544" stroke="#000" strokeWidth="3" opacity="0.6" /><path d="M36 30v-10M62 22v-8" stroke="#000" strokeWidth="2" strokeDasharray="3 3" /></>}
+      {kind === 'take' && <>{ring('#dff7e4')}<path d="M30 58V38a5 5 0 0 1 10 0v14V30a5 5 0 0 1 10 0v22V34a5 5 0 0 1 10 0v20-12a5 5 0 0 1 10 0v20q0 18-18 18h-6q-12 0-18-10l-8-14a5 5 0 0 1 8-6z" fill="#fdfd94" stroke="#000" strokeWidth="4" strokeLinejoin="round" /></>}
+      {kind === 'swap' && <>{ring('#e3e9ff')}<path d="M24 40h46l-10-10M76 62H30l10 10" stroke="#000" strokeWidth="7" fill="none" strokeLinecap="round" strokeLinejoin="round" /><circle cx="24" cy="62" r="8" fill="#f6c544" stroke="#000" strokeWidth="3" /><circle cx="76" cy="40" r="8" fill="#f6c544" stroke="#000" strokeWidth="3" /></>}
       {kind === 'eye' && <><path d="M15 50q35-36 70 0-35 36-70 0z" fill="#fff" stroke="#000" strokeWidth="8" /><circle cx="50" cy="50" r="13" fill="#000" /></>}
     </svg>
   );
@@ -533,7 +551,7 @@ function Cover() {
 const def: LabDef = {
   id: 'treasure-quest',
   name: 'Treasure Quest',
-  description: 'Answer right, then pick a treasure chest. Gold, double, swap or a moth? The richest pile wins.',
+  description: 'Answer right for gold, then pick a treasure chest. More gold, double or a moth? The biggest pile wins.',
   ways: ['teams', 'solo'],
   minTeams: 2,
   maxTeams: 6,

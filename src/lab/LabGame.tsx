@@ -107,6 +107,8 @@ export default function LabGame({ def }: { def: LabDef }) {
 
   const ctx: LabCtx | null = turns && player ? {
     def, solo, still, settings, turns, player,
+    timeScale: settings.timers === 'off' ? 0 : settings.timers === 'relaxed' ? 1.5 : 1,
+    shake: !still && settings.screenShake !== false,
     cpu: player.kind === 'cpu',
     cpuLevel: team.level,
     cpuRight: () => Math.random() < CPU_ACCURACY[team.level],

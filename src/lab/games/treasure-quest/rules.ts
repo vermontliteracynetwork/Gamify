@@ -12,7 +12,10 @@ export type Chest =
 export interface RollOpts {
   // Someone else has gold (takes and swaps never come up otherwise).
   others: boolean;
-  // My gold (double and lose never come up at zero).
+  // Take and swap chests are switched on in setup (they start off).
+  take?: boolean;
+  swap?: boolean;
+  // My gold (double and oops never come up at zero).
   mine: number;
   // Lucky Clover: only gold, double, take or swap.
   clover?: boolean;
@@ -24,8 +27,8 @@ export function rollChest(o: RollOpts, rand: () => number = Math.random): Chest 
     [52, () => ({ kind: 'gold', n: 10 + 5 * Math.floor(rand() * 9) })],
     [o.mine > 0 ? 10 : 0, () => ({ kind: 'double' })],
     [o.mine > 0 && !o.clover ? 10 : 0, () => ({ kind: 'lose', pct: 25 })],
-    [o.others ? 10 : 0, () => ({ kind: 'take', pct: 25 })],
-    [o.others ? 6 : 0, () => ({ kind: 'swap' })],
+    [o.others && o.take ? 10 : 0, () => ({ kind: 'take', pct: 25 })],
+    [o.others && o.swap ? 6 : 0, () => ({ kind: 'swap' })],
     [o.clover ? 0 : 12, () => ({ kind: 'moth' })],
   ];
   const total = list.reduce((s, [w]) => s + w, 0);
@@ -42,13 +45,16 @@ export const needsTarget = (c: Chest) => c.kind === 'take' || c.kind === 'swap';
 // A share of some gold, rounded to fives, never under 5.
 export const lossOf = (gold: number, pct: number) => Math.max(5, Math.round((gold * pct) / 100 / 5) * 5);
 
+// Double never adds more than this.
+export const DOUBLE_CAP = 50;
+
 // What a chest does to the scores. `rush` doubles plain gold.
 export function applyChest(scores: Record<string, number>, me: string, c: Chest, target?: string, rush = false): Record<string, number> {
   const s = { ...scores };
   const mine = s[me] ?? 0;
   if (c.kind === 'gold') s[me] = mine + c.n * (rush ? 2 : 1);
-  if (c.kind === 'double') s[me] = mine * 2;
-  if (c.kind === 'lose') s[me] = Math.max(0, mine - lossOf(mine, c.pct));
+  if (c.kind === 'double') s[me] = mine + Math.min(mine, DOUBLE_CAP);
+  // 'lose' is a funny oops: the coins roll away and bounce back (no loss).
   if (c.kind === 'take' && target) {
     const theirs = s[target] ?? 0;
     const n = Math.min(theirs, lossOf(theirs, c.pct));
@@ -58,11 +64,10 @@ export function applyChest(scores: Record<string, number>, me: string, c: Chest,
   return s;
 }
 
-// The computer takes from (or swaps with) the richest other team.
-export function richest(scores: Record<string, number>, me: string): string | undefined {
-  let best: string | undefined; let top = 0;
-  for (const [id, n] of Object.entries(scores)) if (id !== me && n > top) { top = n; best = id; }
-  return best;
+// The computer takes from (or swaps with) a random team that has gold.
+export function randomOther(scores: Record<string, number>, me: string, rand: () => number = Math.random): string | undefined {
+  const list = Object.entries(scores).filter(([id, n]) => id !== me && n > 0).map(([id]) => id);
+  return list.length ? list[Math.floor(rand() * list.length)] : undefined;
 }
 
 // A coin heap: how many coins sit in each row, bottom row first. Rows

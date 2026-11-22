@@ -58,6 +58,11 @@ export interface LabCtx {
   settings: PlayerSettings;
   turns: TurnState;
   player: TurnPlayer;
+  // The teacher's Timers setting for clocks in a game: 1 = normal, 1.5 =
+  // relaxed, 0 = no clock (end the burst by a count or goal instead).
+  timeScale: number;
+  // Screen shake allowed (the Screen shake setting).
+  shake: boolean;
   // The current player is the computer: the game makes its move for it.
   cpu: boolean;
   cpuLevel: CpuLevel;

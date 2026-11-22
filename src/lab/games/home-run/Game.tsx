@@ -84,6 +84,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const live = useRef(0);
   const keyN = useRef(1);
   const mods = useRef({ fireworks: false, rally: false });
+  const pitchPower = useRef<LabPower | null>(null);
   const outsRef = useRef(0), maxRef = useRef(3), pitchesRef = useRef(0);
   const myColor = TEAM_COLORS[ctx.player.colorIndex % TEAM_COLORS.length];
 
@@ -101,6 +102,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (mods.current.fireworks) list.push(POWERS[3]);
     if (mods.current.rally) list.push(POWERS[2]);
     if (maxRef.current > 3) list.push(POWERS[5]);
+    // This pitch's own power-up stays listed (a still picture) until the pitch is done.
+    if (pitchPower.current && !list.includes(pitchPower.current)) list.push(pitchPower.current);
     x.setHeld(x.player.id, list);
   }
 
@@ -116,6 +119,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   async function inning(id: number) {
     outsRef.current = 0; maxRef.current = 3; pitchesRef.current = 0;
     mods.current = { fireworks: false, rally: false };
+    pitchPower.current = null;
     setOuts(0); setMaxOuts(3); setPitches(0); putRunners([]); setFlight(null); setChase(null);
     setFx(NO_FX); setFlash(null); setStretching(false);
     setPhase('wait'); held(); status();
@@ -132,10 +136,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
       } else {
         const p = await c.current.power(0.4, (pw) => pw.id !== 'pinch' || openBase(runnersRef.current.map((r) => r.at)) !== null);
         if (!alive(id)) return;
+        pitchPower.current = p; held();
         const kind = await usePower(p);
         if (!alive(id)) return;
         await atBat(id, kind, p?.id === 'giant');
         if (!alive(id)) return;
+        pitchPower.current = null; held();
       }
       if (inningOver(outsRef.current, maxRef.current, pitchesRef.current)) break;
       await wait(450);
