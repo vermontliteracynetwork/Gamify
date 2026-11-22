@@ -783,3 +783,13 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
 
 /* Waiting-room toy (teacher, 2026-11-13). */
 @keyframes toy-bounce { 0%, 100% { transform: translateY(0) scale(1.08, 0.92); } 45%, 55% { transform: translateY(-46px) scale(0.96, 1.04); } }
+
+/* Game Lab (2026-11-22): sun rays behind a power-up card's picture. */
+.pu-rays { background: repeating-conic-gradient(from 0deg, rgba(253,253,148,0.95) 0deg 12deg, transparent 12deg 30deg); animation: pu-rays 8s linear infinite; mask-image: radial-gradient(circle, #000 35%, transparent 70%); -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
+@keyframes pu-rays { to { transform: rotate(360deg); } }
+html[data-motion="still"] .pu-rays { animation: none; }
+/* Game Lab boards size to their box (width and height): .lab-board is a
+   size container; .lab-fit keeps a board's shape (--ar = width / height)
+   as big as fits, never past the box (teacher, 2026-11-16 screen-size rule). */
+.lab-board { container-type: size; }
+.lab-fit { --ar: 1; width: min(100cqw, 100cqh * var(--ar)); height: min(100cqh, 100cqw / var(--ar)); }

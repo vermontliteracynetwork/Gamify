@@ -47,6 +47,9 @@ const Bowling = lazyPage(() => import('./games/bowling/Bowling'));
 const RoadHop = lazyPage(() => import('./games/road-hop/RoadHop'));
 const LunchRush = lazyPage(() => import('./games/lunch-rush/LunchRush'));
 const FarmGrow = lazyPage(() => import('./games/farm-grow/FarmGrow'));
+// The Game Lab (preview only, teacher 2026-11-22): not linked from the main site.
+const LabIndex = lazyPage(() => import('./lab/LabPage').then((m) => ({ default: m.LabIndex })));
+const LabPlay = lazyPage(() => import('./lab/LabPage').then((m) => ({ default: m.LabPlay })));
 const ThemeBuilderPage = lazyPage(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazyPage(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazyPage(() => import('./owner/OwnerPage'));
@@ -161,6 +164,8 @@ function AnimatedRoutes() {
           <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
           <Route path="/games/road-hop" element={<RequireSignIn><RequireGame id="road-hop"><RoadHop /></RequireGame></RequireSignIn>} />
           <Route path="/games/lunch-rush" element={<RequireSignIn><RequireGame id="lunch-rush"><LunchRush /></RequireGame></RequireSignIn>} />
+          <Route path="/lab" element={<LabIndex />} />
+          <Route path="/games/lab/:id" element={<LabPlay />} />
           <Route path="/games/farm-grow" element={<RequireSignIn><RequireGame id="farm-grow"><FarmGrow /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
