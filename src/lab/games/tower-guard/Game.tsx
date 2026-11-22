@@ -20,6 +20,7 @@ const COIN = `${A}/coin.webp`;
 const EARN = 30;
 const START_COINS = 40;
 const CAKE_HP = 20;
+const MISS_COINS = 10;
 
 const POWERS: LabPower[] = [
   { id: 'freeze', name: 'Snow Globe', desc: 'Every blob is frozen for the start of the next wave.', enter: 'drop', art: <Art kind="freeze" /> },
@@ -114,7 +115,11 @@ function Board({ ctx }: { ctx: LabCtx }) {
         setPhase('build');
         await new Promise<void>((r) => { goRef.current = r; });
         if (!alive(t)) return;
-      } else { c.current.sfx.wrong(); await sleep(700); }
+      } else {
+        // A comeback: a few coins after a miss, so nobody falls too far behind.
+        c.current.sfx.wrong(); await sleep(600); if (!alive(t)) return;
+        addCoins(c.current.player.id, MISS_COINS); c.current.sfx.coin(); c.current.say(`+${MISS_COINS} coins to help`, 'good'); await sleep(1200);
+      }
       if (!alive(t)) return;
       setMenu(null); setPhase('wave');
       await runWave(t);
@@ -155,7 +160,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
       let last = performance.now(), raf = 0, bitten = 0;
       const loop = (now: number) => {
         if (!alive(t)) { cancelAnimationFrame(raf); resolve(); return; }
-        const dt = Math.min(0.05, (now - last) / 1000); last = now;
+        // Relaxed timers march the blobs more slowly.
+        const dt = Math.min(0.05, (now - last) / 1000) / (c.current.timeScale > 1 ? c.current.timeScale : 1); last = now;
         const o = step(s, dt);
         const cc = c.current;
         const pts: Record<string, number> = {};
@@ -345,6 +351,7 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
             <button key={t} type="button" disabled={cpu || coins < cost} onClick={() => onPlace(t)} aria-label={`${TOWERS[t].name}, ${cost} coins`} title={TOWERS[t].name}
               className="w-[5.2rem] rounded-2xl border-std border-border bg-white p-1 grid justify-items-center gap-0.5 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform">
               <svg viewBox="-50 -70 100 110" className="w-14 h-14"><TowerBody type={t} level={1} color="#b4c4fb" /></svg>
+              <span className="font-bold text-sm leading-none">{TOWERS[t].short}</span>
               <span className="inline-flex items-center gap-1 font-display text-lg"><img src={COIN} alt="" className="w-5 h-5" />{cost}</span>
             </button>
           );
@@ -352,7 +359,7 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
           <button type="button" disabled={cpu || coins < upgradeCost(menu.tower.level)} onClick={onUpgrade} aria-label={`Upgrade, ${upgradeCost(menu.tower.level)} coins`}
             className="rounded-2xl border-std border-border bg-accent px-3 py-1 flex items-center gap-2 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform">
             <svg viewBox="-50 -70 100 110" className="w-14 h-14"><TowerBody type={menu.tower.type} level={menu.tower.level + 1} color="#b4c4fb" /></svg>
-            <ArrowFatUp weight="fill" size={26} aria-hidden="true" />
+            <span className="grid justify-items-start"><span className="font-bold text-sm leading-none inline-flex items-center gap-1"><ArrowFatUp weight="fill" size={18} aria-hidden="true" />Upgrade</span>
             <span className="inline-flex items-center gap-1 font-display text-xl"><img src={COIN} alt="" className="w-6 h-6" />{upgradeCost(menu.tower.level)}</span>
           </button>
         )}

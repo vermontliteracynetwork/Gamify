@@ -116,7 +116,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const alive = (t: number) => turn.current === t;
   useEffect(() => () => { turn.current = -1; }, []);
   const say = (s: string) => setLine(`> ${s}`);
-  const shake = () => { if (!c.current.still) setGlitch((g) => g + 1); };
+  const shake = () => { if (c.current.shake) setGlitch((g) => g + 1); };
   const mood = (m: typeof robot, ms = 1400) => { setRobot(m); window.setTimeout(() => setRobot('idle'), ms); };
   const others = () => { const s = scores(), id = c.current.player.id; return Object.entries(s).filter(([k, v]) => k !== id && v > 0).map(([k]) => k); };
   const hackOn = () => { let on = false; void c.current.power(0, (p) => { if (p.id === 'hackbox') on = true; return false; }); return on; };
@@ -127,10 +127,16 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     setMode('wait'); setOpened([]); setSeeAll(false); setTargets([]); setCrack(null);
     picks.current = 1; triple.current = false;
-    say(`${x.player.name}: answer to unlock a box`);
+    say(`${x.player.name}: answer to open a box`);
     void x.ask().then(async (ok) => {
       if (!alive(t)) return;
       if (!ok) { c.current.sfx.wrong(); say('not this time. next team!'); mood('sad'); await sleep(900); if (alive(t)) c.current.next(); return; }
+      // Code boxes are a memory game: every team's code shows for a moment.
+      if (hackOn() && others().length) {
+        setMode('busy'); setPeekCodes(true); c.current.sfx.bell(); say('look at every code. remember them!');
+        await sleep(3400); if (!alive(t)) return;
+        setPeekCodes(false);
+      }
       setBoxes(fresh()); setMode('busy'); c.current.sfx.blip(0); shake();
       say('new mystery boxes!');
       await sleep(600); if (!alive(t)) return;
@@ -159,7 +165,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       x.sfx.boing(); shake(); setBoxes((b) => { const f = fresh(); return [...b].reverse().map((bx, i) => ({ id: bx.id, b: f[i].b })); }); await sleep(1300);
       say('meow. boxes scrambled!');
     }
-    if (p.id === 'hiccup') { say('hic! hic!'); mood('hic', 1800); x.sfx.boing(); await sleep(700); x.sfx.boing(); await sleep(500); if (!alive(t)) return 'done'; x.points(-5); x.sfx.oops(); await sleep(700); }
+    if (p.id === 'hiccup') { say('hic! hic!'); mood('hic', 1800); x.sfx.boing(); await sleep(700); x.sfx.boing(); await sleep(500); if (!alive(t)) return 'done'; x.sfx.tick(); say('caught it! no crystals lost'); mood('happy'); await sleep(900); }
     if (p.id === 'autohack') { await sleep(500); if (!alive(t)) return 'done'; await hack(t); if (alive(t)) await endTurn(t); return 'done'; }
     await sleep(300);
     return 'go';
@@ -203,7 +209,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       const s = scores(); const n = borrowOf(s[target]);
       s[target] -= n; s[id] += n; c.current.setScores(s);
       playClip(`${A}/unlock.mp3`, c.current.settings, 0.5);
-      c.current.say(`Access granted! +${n}`, 'big'); say(`borrowed ${n} crystals`); mood('happy');
+      c.current.say(`You cracked it! +${n}`, 'big'); say(`borrowed ${n} crystals`); mood('happy');
       setFlow({ id: ++uid, from: target, to: id }); c.current.burst(0.5, 0.6);
       codes.set(target, makeCode()); // a cracked code changes
     } else {
@@ -231,7 +237,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     } else if (b.kind === 'empty') {
       x.sfx.slideDown(); show('Empty', false); say('empty box. try again next time'); mood('sad'); await sleep(1200);
     } else if (b.kind === 'hack') {
-      show('Hack!', true); await sleep(500); await hack(t);
+      show('Code box!', true); await sleep(500); await hack(t);
     }
     if (!alive(t)) return;
     picks.current -= 1;
@@ -261,11 +267,11 @@ function Board({ ctx }: { ctx: LabCtx }) {
   return (
     <div ref={ref} className="absolute inset-0 rounded-panel border-heavy border-border overflow-clip" style={{ background: 'radial-gradient(120% 90% at 50% 0%, #2f2756 0%, #1b1533 70%)', boxShadow: '0 8px 0 #000, 0 24px 40px rgba(36,28,61,0.3)' }}>
       <LabRoom still={ctx.still} />
-      <motion.div key={glitch} className="absolute inset-0 flex flex-col gap-[2%] p-[2.5%]" animate={glitch && !ctx.still ? { x: [0, -8, 6, -3, 0], filter: ['hue-rotate(0deg)', 'hue-rotate(70deg)', 'hue-rotate(-40deg)', 'hue-rotate(0deg)'] } : undefined} transition={{ duration: 0.35 }}>
+      <motion.div key={glitch} className="absolute inset-0 flex flex-col gap-[2%] p-[2.5%]" animate={glitch && ctx.shake ? { x: [0, -5, 4, 0], opacity: [1, 0.85, 1] } : undefined} transition={{ duration: 0.6, ease: 'easeInOut' }}>
         {/* The terminal line. */}
         <div className="shrink-0 rounded-xl border-std border-[#000] px-4 py-2 font-mono font-bold flex items-center gap-2" style={{ background: '#0c1a14', color: GLOW, boxShadow: `0 0 18px ${GLOW}55, inset 0 0 12px ${GLOW}33`, fontSize: 'clamp(0.95rem, 3cqmin, 1.6rem)' }} aria-live="polite">
-          <span className="min-w-0 whitespace-nowrap overflow-clip">{typed}</span>
-          <motion.span className="inline-block w-[0.6em] h-[1.1em]" style={{ background: GLOW }} animate={ctx.still ? undefined : { opacity: [1, 0, 1] }} transition={{ duration: 0.9, repeat: Infinity }} />
+          <span className="min-w-0 leading-snug break-words">{typed}</span>
+          <motion.span className="inline-block w-[0.6em] h-[1.1em]" style={{ background: GLOW }} animate={ctx.still ? undefined : { opacity: [1, 0.45, 1] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }} />
         </div>
         {/* The data boxes, or the code to crack. */}
         <div className="relative flex-1 min-h-0 grid place-items-center">
@@ -287,7 +293,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
           <Robot mood={robot} still={ctx.still} />
           <div className="flex-1 min-w-0 h-full flex items-end justify-around gap-[2%]">
             {players.map((p) => (
-              <Server key={p.id} crystals={p.score} max={maxScore} colorIndex={p.colorIndex} name={p.name} active={p.id === me.id} wall={walls.includes(p.id)} still={ctx.still}
+              <Server key={p.id} code={peekCodes ? codes.get(p.id) : undefined} crystals={p.score} max={maxScore} colorIndex={p.colorIndex} name={p.name} active={p.id === me.id} wall={walls.includes(p.id)} still={ctx.still}
                 target={targets.includes(p.id)} flowing={flow ? (flow.from === p.id ? 'out' : flow.to === p.id ? 'in' : null) : null} flowKey={flow?.id ?? 0}
                 onTarget={() => { const r = chooseRef.current; chooseRef.current = null; c.current.sfx.tap(); r?.(p.id); }} />
             ))}
@@ -304,7 +310,7 @@ const worth = (b: DataBox) => (b.kind === 'mega' ? 100 : b.kind === 'crystals' ?
 function DataBoxButton({ slot, box, open, show, can, still, waiting, pop, onPick }: { slot: number; box: DataBox; open: boolean; show: boolean; can: boolean; still: boolean; waiting: boolean; pop: { id: number; text: string; good: boolean } | null; onPick: () => void }) {
   const [seed] = useState(() => Math.random());
   return (
-    <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Data box ${slot + 1}`}
+    <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Mystery box ${slot + 1}`}
       className="relative w-full max-w-[13rem] aspect-square max-h-full rounded-[18%] border-heavy border-[#000] grid place-items-center disabled:cursor-default focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#3dff9a]"
       style={{ background: open ? '#0c1a14' : 'linear-gradient(160deg, #3a3170, #241c3d)', boxShadow: `0 6px 0 #000, 0 0 ${can ? 26 : 10}px ${GLOW}${can ? 'aa' : '44'}`, opacity: show && !open ? 0.8 : 1 }}
       initial={still ? false : { scale: 0, rotate: -20 }}
@@ -379,18 +385,18 @@ function CrackPanel({ crack, still, can, name, colorIndex, onPick }: { crack: Cr
 }
 
 // A team's server rack: a crystal tower grows inside its glass.
-function Server({ crystals, max, colorIndex, name, active, wall, still, target, flowing, flowKey, onTarget }: {
-  crystals: number; max: number; colorIndex: number; name: string; active: boolean; wall: boolean; still: boolean; target: boolean; flowing: 'in' | 'out' | null; flowKey: number; onTarget: () => void;
+function Server({ code, crystals, max, colorIndex, name, active, wall, still, target, flowing, flowKey, onTarget }: {
+  code?: Code; crystals: number; max: number; colorIndex: number; name: string; active: boolean; wall: boolean; still: boolean; target: boolean; flowing: 'in' | 'out' | null; flowKey: number; onTarget: () => void;
 }) {
   const gems = Math.min(12, Math.ceil((crystals / max) * 12));
   return (
-    <motion.button type="button" disabled={!target} onClick={onTarget} aria-label={target ? `Hack ${name}` : `${name}: ${crystals} crystals`}
+    <motion.button type="button" disabled={!target} onClick={onTarget} aria-label={target ? `Crack ${name}'s code` : `${name}: ${crystals} crystals`}
       className="relative h-full flex-1 min-w-0 max-w-[11rem] rounded-2xl border-heavy border-[#000] flex flex-col items-center justify-end p-[4%] gap-1 disabled:cursor-default focus-visible:outline-4 focus-visible:outline-[#3dff9a]"
       style={{ background: 'linear-gradient(180deg, #3a3170, #2b2357)', boxShadow: active ? `0 6px 0 #000, 0 0 24px ${GLOW}` : '0 6px 0 #000' }}
       animate={target && !still ? { y: [0, -8, 0] } : { y: 0 }} transition={target ? { duration: 0.8, repeat: Infinity } : undefined} whileHover={target && !still ? { scale: 1.05 } : undefined}>
       {/* Blinking lights. */}
       <span className="absolute top-[5%] left-[8%] flex gap-1" aria-hidden="true">
-        {[0, 1, 2].map((i) => <motion.span key={i} className="w-2 h-2 rounded-full" style={{ background: i === 1 ? '#ef7d96' : GLOW }} animate={still ? undefined : { opacity: [1, 0.2, 1] }} transition={{ duration: 0.6 + i * 0.3, repeat: Infinity }} />)}
+        {[0, 1, 2].map((i) => <motion.span key={i} className="w-2 h-2 rounded-full" style={{ background: i === 1 ? '#ef7d96' : GLOW }} animate={still ? undefined : { opacity: [1, 0.55, 1] }} transition={{ ease: 'easeInOut', duration: 2.4 + i * 0.3, repeat: Infinity }} />)}
       </span>
       <div className="relative w-full flex-1 min-h-0 rounded-lg border-std border-[#000] overflow-clip flex flex-wrap-reverse content-start justify-center" style={{ background: '#0c1a14', containerType: 'size' }}>
         {Array.from({ length: gems }, (_, i) => (
@@ -408,7 +414,17 @@ function Server({ crystals, max, colorIndex, name, active, wall, still, target, 
         <TeamBadge colorIndex={colorIndex} size={34} />
         <span className="font-mono font-black text-white leading-none" style={{ fontSize: 'clamp(0.9rem, 2.6cqmin, 1.4rem)' }}>{crystals}</span>
       </span>
-      <span className="flex gap-1" aria-hidden="true">{[0, 1, 2].map((i) => <span key={i} className="w-3 h-3 rounded-full border-2 border-[#000]" style={{ background: '#0c1a14' }} />)}</span>
+      <span className="flex gap-1" aria-label={code ? `Code: ${code.map((sy) => SYM[sy].name).join(', ')}` : 'Code hidden'}>
+        {[0, 1, 2].map((i) => {
+          const S = code ? SYM[code[i]] : null;
+          return (
+            <motion.span key={`${i}${code ? code[i] : ''}`} className="w-[clamp(1.2rem,5cqmin,2rem)] aspect-square rounded-full border-2 border-[#000] grid place-items-center" style={{ background: '#0c1a14' }}
+              initial={still || !code ? false : { rotateY: 90 }} animate={{ rotateY: 0 }} transition={{ delay: i * 0.12 }}>
+              {S && <S.icon weight="fill" color={S.color} className="w-[70%] h-[70%]" />}
+            </motion.span>
+          );
+        })}
+      </span>
       {target && <span className="absolute -inset-2 rounded-3xl border-4 border-dashed pointer-events-none" style={{ borderColor: GLOW }} />}
     </motion.button>
   );
@@ -421,7 +437,7 @@ function Robot({ mood, still }: { mood: 'idle' | 'happy' | 'sad' | 'spin' | 'hic
     <motion.div className="h-full aspect-[3/4] shrink-0" animate={anim} transition={mood === 'idle' ? { duration: 2.2, repeat: Infinity } : { duration: mood === 'spin' ? 1.2 : 1 }} aria-hidden="true">
       <svg viewBox="0 0 90 120" className="w-full h-full overflow-visible">
         <path d="M45 18V6" stroke="#000" strokeWidth="4" />
-        <motion.circle cx="45" cy="6" r="6" fill={mood === 'sad' ? '#ef7d96' : GLOW} stroke="#000" strokeWidth="3" animate={still ? undefined : { opacity: [1, 0.4, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+        <motion.circle cx="45" cy="6" r="6" fill={mood === 'sad' ? '#ef7d96' : GLOW} stroke="#000" strokeWidth="3" animate={still ? undefined : { opacity: [1, 0.55, 1] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }} />
         <rect x="12" y="18" width="66" height="50" rx="16" fill="#b4c4fb" stroke="#000" strokeWidth="4" />
         <rect x="20" y="26" width="50" height="32" rx="10" fill="#0c1a14" stroke="#000" strokeWidth="3" />
         {mood === 'happy' ? <><path d="M28 44q6-8 12 0M50 44q6-8 12 0" stroke={GLOW} strokeWidth="4" fill="none" strokeLinecap="round" /></>
@@ -468,7 +484,7 @@ function PowerFx({ kind, still, onDone }: { kind: string; still: boolean; onDone
   if (kind === 'firewall') return <motion.div {...base}><div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid grid-cols-4 gap-1 w-[34cqmin]">{Array.from({ length: 12 }, (_, i) => <motion.span key={i} className="aspect-[2/1] rounded-sm border-[3px] border-black" style={{ background: '#1f8f5a' }} initial={{ y: -300, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: (11 - i) * 0.06, type: 'spring', stiffness: 260, damping: 14 }} />)}</div></motion.div>;
   if (kind === 'decoder') return <motion.div {...base}><motion.div className={center} animate={{ x: [-120, 120, -60, 0], rotate: [0, 20, -20, 0] }} transition={{ duration: 1.4 }}>{art}</motion.div></motion.div>;
   if (kind === 'cat') return <motion.div {...base}><motion.div className="absolute bottom-[2%] w-[24cqmin] h-[18cqmin]" initial={{ left: '-25%' }} animate={{ left: '105%', y: [0, -8, 0, -8, 0, -8, 0] }} transition={{ duration: 1.8, ease: 'linear' }}><Art kind="cat" /></motion.div>{['k', 'j', ';', 'm', 'w', '#', 'z'].map((ch, i) => <motion.span key={i} className="absolute font-mono font-black text-3xl" style={{ color: GLOW, left: `${10 + i * 12}%`, top: '30%' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: [0, 1, 0], y: -30 }} transition={{ delay: 0.2 + i * 0.18, duration: 0.7 }}>{ch}</motion.span>)}</motion.div>;
-  if (kind === 'hiccup') return <motion.div {...base}>{[0, 1, 2].map((i) => <motion.span key={i} className="absolute left-[6%] bottom-[30%] rounded-full bg-white border-[3px] border-black px-2 font-black" initial={{ opacity: 0, y: 0, scale: 0.4 }} animate={{ opacity: [0, 1, 0], y: -100 - i * 20, scale: 1 }} transition={{ delay: i * 0.5, duration: 0.9 }}>hic!</motion.span>)}<motion.img src={GEMS[2]} alt="" className="absolute left-[8%] w-[6cqmin]" initial={{ bottom: '28%', opacity: 1 }} animate={{ bottom: '-10%', rotate: 200, opacity: 1 }} transition={{ delay: 1, duration: 0.7, ease: 'easeIn' }} /></motion.div>;
+  if (kind === 'hiccup') return <motion.div {...base}>{[0, 1, 2].map((i) => <motion.span key={i} className="absolute left-[6%] bottom-[30%] rounded-full bg-white border-[3px] border-black px-2 font-black" initial={{ opacity: 0, y: 0, scale: 0.4 }} animate={{ opacity: [0, 1, 0], y: -100 - i * 20, scale: 1 }} transition={{ delay: i * 0.5, duration: 0.9 }}>hic!</motion.span>)}<motion.img src={GEMS[2]} alt="" className="absolute left-[8%] w-[6cqmin]" initial={{ bottom: '28%', opacity: 1 }} animate={{ bottom: ['28%', '4%', '20%', '28%'], rotate: [0, 200, 300, 360], opacity: 1 }} transition={{ delay: 0.8, duration: 1.1, ease: 'easeInOut' }} /></motion.div>;
   return null;
 }
 

@@ -20,10 +20,10 @@ export function pointAt(d: number): Pt {
 }
 
 export type TowerType = 'bubble' | 'catapult' | 'ice';
-export const TOWERS: Record<TowerType, { name: string; cost: number; range: number; rate: number; dmg: number; splash: number; slow: number; flight: number }> = {
-  bubble: { name: 'Bubble Blower', cost: 20, range: 160, rate: 1.5, dmg: 1, splash: 0, slow: 0, flight: 0.35 },
-  catapult: { name: 'Catapult', cost: 30, range: 200, rate: 0.6, dmg: 2, splash: 70, slow: 0, flight: 0.7 },
-  ice: { name: 'Ice Cannon', cost: 25, range: 140, rate: 0.9, dmg: 0.5, splash: 0, slow: 1.6, flight: 0.4 },
+export const TOWERS: Record<TowerType, { name: string; short: string; cost: number; range: number; rate: number; dmg: number; splash: number; slow: number; flight: number }> = {
+  bubble: { name: 'Bubble Blower', short: 'Bubble', cost: 20, range: 160, rate: 1.5, dmg: 1, splash: 0, slow: 0, flight: 0.35 },
+  catapult: { name: 'Catapult', short: 'Catapult', cost: 30, range: 200, rate: 0.6, dmg: 2, splash: 70, slow: 0, flight: 0.7 },
+  ice: { name: 'Ice Cannon', short: 'Ice', cost: 25, range: 140, rate: 0.9, dmg: 0.5, splash: 0, slow: 1.6, flight: 0.4 },
 };
 export const MAX_LEVEL = 3;
 export const upgradeCost = (level: number) => (level === 1 ? 30 : 45);
@@ -42,7 +42,7 @@ export const BLOBS = [
 
 // The blobs of wave n (1, 2, 3...), in marching order.
 export function waveOf(n: number, rand: () => number = Math.random): number[] {
-  const count = 3 + Math.floor(n * 0.8);
+  const count = 3 + Math.floor(n * 0.6);
   const out: number[] = [];
   for (let i = 0; i < count; i++) {
     const r = rand();
@@ -51,6 +51,8 @@ export function waveOf(n: number, rand: () => number = Math.random): number[] {
   if (n >= 5 && n % 3 === 2) out.push(3);
   return out;
 }
+// Blobs march a little quicker so a wave stays short.
+export const MARCH = 1.25;
 export const hpScale = (n: number) => 1 + (n - 1) * 0.1;
 
 export interface Blob { id: number; kind: number; hp: number; max: number; d: number; slowUntil: number; phase: number }
@@ -72,7 +74,7 @@ export function newSim(): Sim {
 
 export function startWave(s: Sim, n: number, rand: () => number = Math.random) {
   s.t = 0; s.wave = n; s.shots = []; s.blobs = []; s.poofs = [];
-  s.queue = waveOf(n, rand).map((kind, i) => ({ at: 0.4 + i * (0.9 + rand() * 0.5), kind }));
+  s.queue = waveOf(n, rand).map((kind, i) => ({ at: 0.3 + i * (0.6 + rand() * 0.4), kind }));
 }
 
 export interface StepOut { pops: { owner: string; points: number; at: Pt }[]; bites: number; fired: TowerType[]; done: boolean; tornado: boolean }
@@ -92,7 +94,7 @@ export function step(s: Sim, dt: number, rand: () => number = Math.random): Step
   for (const b of s.blobs) {
     if (still) continue;
     const k = BLOBS[b.kind];
-    b.d += k.speed * s.speed * (b.slowUntil > s.t ? 0.45 : 1) * dt;
+    b.d += k.speed * MARCH * s.speed * (b.slowUntil > s.t ? 0.45 : 1) * dt;
   }
   const pop = (b: Blob, owner: string) => { b.hp = 0; out.pops.push({ owner, points: BLOBS[b.kind].points, at: pointAt(b.d) }); s.poofs.push({ id: s.nextId++, at: pointAt(b.d), t0: s.t, size: BLOBS[b.kind].size, points: BLOBS[b.kind].points }); };
   // The mega bubble rolls down the path and pops what it touches.
@@ -117,7 +119,7 @@ export function step(s: Sim, dt: number, rand: () => number = Math.random): Step
     }
     if (!best) { tw.cool = 0.1; continue; }
     tw.cool = 1 / st.rate; tw.fired = s.t;
-    const lead = pointAt(best.d + BLOBS[best.kind].speed * s.speed * st.flight * (still ? 0 : 1) * (best.slowUntil > s.t ? 0.45 : 1));
+    const lead = pointAt(best.d + BLOBS[best.kind].speed * MARCH * s.speed * st.flight * (still ? 0 : 1) * (best.slowUntil > s.t ? 0.45 : 1));
     s.shots.push({ id: s.nextId++, type: tw.type, from: at, to: lead, target: best.id, t0: s.t, dur: st.flight, dmg: st.dmg, owner: tw.owner, splash: st.splash, slow: st.slow });
     out.fired.push(tw.type);
   }

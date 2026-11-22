@@ -132,6 +132,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
     } else setMode('turn');
   }, [ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  function changePace() {
+    const next = PACES[(PACES.indexOf(paceRef.current) + 1) % PACES.length];
+    paceRef.current = next; setPaceState(next); savePace(next); c.current.sfx.tick();
+    // Keep the share of time left, on the new clock.
+    const share = Number.isFinite(total.current) ? remain.current / total.current : 1;
+    total.current = turnMs(next, c.current.solo, sRef.current.placed.length);
+    remain.current = Number.isFinite(total.current) ? total.current * share : Infinity; setLeft(share);
+  }
+
   async function beginTurn() {
     const x = c.current;
     total.current = turnMs(paceRef.current, false, 0); remain.current = total.current; setLeft(1);
@@ -348,7 +357,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   return (
     <div ref={box} className="absolute inset-0 grid place-items-center">
       <DeskBits still={ctx.still} />
-      <div className="lab-fit relative" style={{ '--ar': wide ? 1.62 : 0.64, containerType: 'size' } as CSSProperties}>
+      <div className="lab-fit relative" style={{ '--ar': wide ? 1.75 : 0.56, containerType: 'size' } as CSSProperties}>
         <div className={`absolute inset-0 flex ${wide ? 'flex-row' : 'flex-col'} gap-[2.2%]`}>
           {/* The clipboard and its puzzle page. */}
           <motion.div className="relative shrink-0 aspect-square" style={wide ? { height: '100%' } : { width: '100%' }}
@@ -447,32 +456,42 @@ function Play({ ctx }: { ctx: LabCtx }) {
             </div>
           </motion.div>
 
-          {/* The word list, the timer bar and the latest clue. */}
-          <div className="relative flex-1 min-w-0 min-h-0 flex flex-col gap-[3%]">
-            <Timer left={left} frozen={frozen} double={double} still={ctx.still} solo={ctx.solo} hide={mode === 'turn'} h={wide ? '6.5cqh' : '5.4cqw'} />
-            <div className="relative flex-1 min-h-0 rounded-[1.4rem] border-heavy border-border bg-surface px-[6%] py-[4%] flex flex-col" style={{ boxShadow: '0 6px 0 #000, 0 18px 30px rgba(36,28,61,0.25)' }}>
-              {wide && <p className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-muted" style={{ fontSize: 'max(0.75rem, 2.2cqh)' }}><MagnifyingGlass weight="bold" aria-hidden="true" /> Find these words</p>}
-              <ul className={`list-none m-0 p-0 flex-1 min-h-0 ${wide ? 'grid content-evenly' : 'flex flex-wrap content-center justify-center gap-x-[4%] gap-y-[6%]'}`} aria-label="Words to find">
+          {/* The timer (and its Relaxed / No timer / Quick choice) and the word list with every clue. */}
+          <div className="relative flex-1 min-w-0 min-h-0 flex flex-col gap-[2.5%]">
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex-1 min-w-0">{pace !== 'none' ? <Timer left={left} frozen={frozen} double={double} still={ctx.still} solo={ctx.solo} hide={mode === 'turn'} h={wide ? '6.5cqh' : '5cqw'} /> : double ? <span className="inline-grid place-items-center h-11 w-11 rounded-full border-heavy border-border bg-accent font-display">x2</span> : null}</div>
+              <button type="button" onClick={() => changePace()} className="shrink-0 min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold leading-none motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ fontSize: 'max(0.8rem, min(2.2cqh, 2.6cqw))', boxShadow: '0 3px 0 #000' }} aria-label={`Timer: ${PACE_LABEL[pace]}. Tap to change.`}>
+                Timer: {PACE_LABEL[pace]}
+              </button>
+            </div>
+            <div className="relative flex-1 min-h-0 rounded-[1.4rem] border-heavy border-border bg-surface px-[4%] py-[3%] flex flex-col gap-[2%]" style={{ boxShadow: '0 6px 0 #000, 0 18px 30px rgba(36,28,61,0.25)' }}>
+              <div className="flex items-center justify-between gap-2 shrink-0">
+                <p className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-muted m-0" style={{ fontSize: `max(0.75rem, ${wide ? '2.1cqh' : '2.3cqw'})` }}><MagnifyingGlass weight="bold" aria-hidden="true" /> Find these words</p>
+                <button type="button" onClick={() => { setCluesOnly((v) => !v); ctx.sfx.tick(); }} aria-pressed={cluesOnly}
+                  className="min-h-11 px-3 rounded-pill border-std border-border font-bold leading-none motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ fontSize: `max(0.8rem, ${wide ? '2.1cqh' : '2.4cqw'})`, background: cluesOnly ? '#fdfd94' : '#fbfcf8', boxShadow: '0 3px 0 #000' }}>
+                  {cluesOnly ? 'Show words' : 'Clues only'}
+                </button>
+              </div>
+              <ul className="list-none m-0 p-0 flex-1 min-h-0 grid content-evenly gap-[1.5%]" aria-label="Words to find">
                 {search.placed.map((p) => {
-                  const by = found[p.word];
+                  const by = found[p.word], hot = lastClue?.word === p.word;
+                  const fs = wide ? 'max(0.9rem, 3.1cqh)' : 'max(0.9rem, 3.3cqw)';
                   return (
-                    <motion.li key={`${p.word}-${search.grid[0].join('')}`} layout className="relative flex items-center gap-2 font-heading font-bold leading-none" title={by ? p.clue : undefined}
-                      style={{ fontSize: wide ? `min(5.2cqh, ${100 / Math.max(6, search.placed.length)}cqh * 0.62)` : '4.6cqw' }}
-                      initial={ctx.still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1, scale: by ? [1, 1.2, 1] : 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
-                      <span className="shrink-0 rounded-full border-std border-border grid place-items-center" style={{ width: '1.1em', height: '1.1em', background: by ? markOf(p.word) : '#fff' }} aria-hidden="true">
-                        {by && <CheckCircle weight="fill" size="0.9em" color="#241c3d" />}
+                    <motion.li key={`${p.word}-${search.grid[0].join('')}`} className="relative flex items-center gap-[0.6em] rounded-[0.8rem] px-[0.4em] py-[0.15em]" style={{ fontSize: fs, background: hot ? 'rgba(253,253,148,0.55)' : 'transparent' }}
+                      initial={ctx.still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1, scale: by && hot && !ctx.still ? [1, 1.06, 1] : 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
+                      <span className="shrink-0 rounded-full border-std border-border grid place-items-center" style={{ width: '1.2em', height: '1.2em', background: by ? markOf(p.word) : '#fff' }} aria-hidden="true">
+                        {by && <CheckCircle weight="fill" size="1em" color="#241c3d" />}
                       </span>
-                      <span className="relative" style={{ color: by ? '#5b6390' : '#241c3d' }}>
-                        {p.word}
-                        {by && <motion.span className="absolute left-0 right-0 top-1/2 h-[0.12em] bg-ink-night rounded-full" initial={ctx.still ? false : { scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.4, delay: 0.3 }} />}
+                      <span className="relative shrink-0 font-heading font-bold leading-none rounded-full border-std border-border px-[0.4em] py-[0.15em]" style={{ background: by ? markOf(p.word) : '#fff', color: '#241c3d', letterSpacing: cluesOnly && !by ? '0.12em' : undefined }}>
+                        {cluesOnly && !by ? p.word.replace(/./g, '_') : p.word}
                       </span>
-                      <span className="sr-only">{by ? `found: ${p.clue}` : 'not found yet'}</span>
+                      <span className="flex-1 min-w-0 font-bold leading-tight text-balance" style={{ fontSize: p.clue.length > 50 ? '0.82em' : '0.92em', color: '#241c3d' }}>{p.clue}</span>
+                      <span className="sr-only">{by ? 'found' : 'not found yet'}</span>
                     </motion.li>
                   );
                 })}
               </ul>
             </div>
-            <ClueCard p={lastClue} still={ctx.still} wide={wide} color={lastClue && found[lastClue.word] ? markOf(lastClue.word) : '#fdfd94'} />
           </div>
         </div>
       </div>
@@ -508,24 +527,6 @@ function LiftOut({ lift, n, still, size, onDone }: { lift: Lift; n: number; stil
         );
       })}
     </motion.div>
-  );
-}
-
-// The latest found word with its clue, like a sticky note.
-function ClueCard({ p, still, wide, color }: { p: Placed | null; still: boolean; wide: boolean; color: string }) {
-  return (
-    <div className="relative shrink-0 rounded-[1.2rem] border-heavy border-border px-[5%] py-[3%] grid content-center" style={{ background: p ? '#fffdf0' : 'rgba(251,252,248,0.55)', boxShadow: '0 5px 0 #000', minHeight: wide ? '24%' : '34%' }} aria-live="polite">
-      <AnimatePresence mode="wait">
-        {p ? (
-          <motion.div key={p.word} initial={still ? false : { rotate: -4, scale: 0.7, opacity: 0 }} animate={{ rotate: 0, scale: 1, opacity: 1 }} exit={{ opacity: 0, y: -10 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }} className="grid gap-1">
-            <span className="font-display leading-none" style={{ fontSize: wide ? '4.4cqh' : '4.6cqw' }}><span className="rounded-full border-std border-border px-3" style={{ background: color }}>{p.word}</span></span>
-            <span className="font-bold leading-snug text-balance" style={{ fontSize: wide ? 'max(0.85rem, 3cqh)' : 'max(0.85rem, 3.2cqw)' }}>{p.clue}</span>
-          </motion.div>
-        ) : (
-          <motion.span key="none" className="font-bold text-muted text-center" style={{ fontSize: wide ? 'max(0.8rem, 2.4cqh)' : 'max(0.8rem, 2.8cqw)' }}>Find a word to see its clue</motion.span>
-        )}
-      </AnimatePresence>
-    </div>
   );
 }
 

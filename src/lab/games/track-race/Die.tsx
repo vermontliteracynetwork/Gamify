@@ -27,6 +27,8 @@ export default function Die({ base, count = 1, cpu, still, sfx, size, onDone }: 
     return () => window.clearTimeout(id);
   }, [values]);
 
+  const tapRef = useRef<() => void>(() => {});
+  tapRef.current = tap;
   function tap() {
     if (!values) { sfx.thud(); setValues(Array.from({ length: count }, () => 1 + Math.floor(Math.random() * 6))); return; }
     if (!ready || done.current) return;
@@ -34,11 +36,13 @@ export default function Die({ base, count = 1, cpu, still, sfx, size, onDone }: 
   }
 
   // The computer stops and goes on its own, slowly enough to follow.
+  // (Keyed on the die's stage only, so the tumble's re-renders never reset it.)
+  const stage = !values ? 0 : ready ? 2 : 1;
   useEffect(() => {
-    if (!cpu) return;
-    const id = window.setTimeout(tap, values ? 1500 : 1400 + Math.random() * 500);
+    if (!cpu || stage === 1) return;
+    const id = window.setTimeout(() => tapRef.current(), stage === 2 ? 1300 : 1400 + Math.random() * 500);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cpu, stage]);
 
   const total = values ? values.reduce((a, b) => a + b, 0) : 0;
   const label = !values ? 'Tap to stop the die' : ready ? `Rolled ${total}. Tap to move` : `Rolled ${total}`;

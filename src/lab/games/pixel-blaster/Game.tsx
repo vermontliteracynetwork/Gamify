@@ -12,7 +12,8 @@ import { cpuTarget, H, hits, LANDED_Y, rightPoints, SHIP_Y, shuffleSlots, slotX,
 // shows on top. Slide the ship and blast the alien with the right answer.
 // Each team flies a short burst on its turn; the computer flies its own.
 
-const BURST = 40; // seconds a turn lasts
+const BURST = 40; // seconds a turn lasts (times the Timers setting)
+const WAVES = 8; // with no clock, a turn is this many waves
 const P = 5; // one art pixel
 
 // ---- Pixel art (Classic theme; each piece is its own small sprite) ----
@@ -40,6 +41,20 @@ function drawSprite(g: CanvasRenderingContext2D, rows: string[], x: number, y: n
   }
 }
 
+// The biggest font (24 to 32 world pixels) that fits the whole answer on a sign.
+function fitSign(g: CanvasRenderingContext2D, text: string, maxW: number): { fs: number; lines: string[]; w: number } {
+  let out = { fs: 24, lines: [text], w: maxW };
+  for (let fs = 32; fs >= 24; fs -= 2) {
+    g.font = `bold ${fs}px "Inclusive Sans", system-ui, sans-serif`;
+    const chars = Math.max(4, Math.floor((maxW - 16) / (fs * 0.52)));
+    const lines = wrap(text, chars);
+    const w = Math.max(...lines.map((l) => g.measureText(l).width)) + 20;
+    out = { fs, lines, w: Math.min(maxW, w) };
+    if (w <= maxW && lines.length <= 3) return out;
+  }
+  return out;
+}
+
 // Power-up pictures: chunky pixel icons drawn as SVG squares.
 function PixelIcon({ rows, pal, bg }: { rows: string[]; pal: Record<string, string>; bg: string }) {
   const n = rows.length, m = rows[0].length, s = 70 / Math.max(n, m), ox = 15 + (70 - m * s) / 2, oy = 15 + (70 - n * s) / 2;
@@ -65,7 +80,7 @@ const ICONS: Record<string, { rows: string[]; pal: Record<string, string>; bg: s
 
 const POWERS: LabPower[] = [
   { id: 'triple', name: 'Triple Shot', desc: 'Three bolts fly out with every shot for a while.', enter: 'zoom', art: <PixelIcon {...ICONS.triple} /> },
-  { id: 'laser', name: 'Mega Laser', desc: 'A giant laser finds the right alien for you.', enter: 'spin', art: <PixelIcon {...ICONS.laser} /> },
+  { id: 'laser', name: 'Mega Laser', desc: 'For a while every shot is a wide laser beam. Aim it well!', enter: 'spin', art: <PixelIcon {...ICONS.laser} /> },
   { id: 'shield', name: 'Bubble Shield', desc: 'A bubble blocks the next three goo blobs.', enter: 'drop', art: <PixelIcon {...ICONS.shield} /> },
   { id: 'slow', name: 'Slow Time', desc: 'The aliens move in slow motion for a while.', enter: 'zoom', art: <PixelIcon {...ICONS.slow} /> },
   { id: 'saucer', name: 'Bonus Saucer', desc: 'A gold saucer zooms across the top. Blast it for 5 points.', enter: 'drop', art: <PixelIcon {...ICONS.saucer} /> },
@@ -76,7 +91,7 @@ const POWERS: LabPower[] = [
 ];
 
 // ---- The world ----
-interface Alien { k: number; slot: number; text: string; lines: string[]; right: boolean; x: number; alive: boolean; hurt: number; kind: number; color: number; enter: number }
+interface Alien { k: number; slot: number; text: string; fit: { fs: number; lines: string[]; w: number } | null; right: boolean; x: number; alive: boolean; hurt: number; kind: number; color: number; enter: number }
 interface Part { x: number; y: number; vx: number; vy: number; life: number; max: number; color: string; s: number }
 interface Float { x: number; y: number; text: string; life: number; color: string }
 interface World {
@@ -86,9 +101,11 @@ interface World {
   fx: number; fy: number; dir: number; exit: number; waveIn: number; nextGoo: number;
   bolts: { x: number; y: number; vx: number }[]; goo: { x: number; y: number }[]; parts: Part[]; floats: Float[];
   saucer: { x: number; dir: number } | null; laser: { t: number; x: number } | null; laserPending: boolean; discoPending: boolean;
-  fxT: Record<'triple' | 'rapid' | 'slow' | 'wiggle' | 'disco', number>; shield: number; shake: number; flash: number;
-  cpuAim: number; cpuWait: number; over: boolean;
+  fxT: Record<'triple' | 'rapid' | 'slow' | 'wiggle' | 'disco' | 'laser', number>; shield: number; shake: number; flash: number;
+  cpuAim: number; cpuWait: number; over: boolean; waves: number; beam: { x: number; t: number } | null;
 }
+// Each player's best single round (cleared when a new game starts).
+const best = new Map<string, number>();
 const stars = Array.from({ length: 90 }, () => ({ x: Math.random() * W, y: Math.random() * H, z: 1 + Math.floor(Math.random() * 3) }));
 
 function newWorld(): World {
@@ -96,7 +113,7 @@ function newWorld(): World {
     t: 0, left: BURST, score: 0, combo: 0, shipX: W / 2, shipVX: 0, stun: 0, target: null, fireQueued: false, cool: 0, flame: 0,
     q: null, missed: false, aliens: [], buddies: [], fx: W / 2, fy: 130, dir: 1, exit: 0, waveIn: 0, nextGoo: 2.5,
     bolts: [], goo: [], parts: [], floats: [], saucer: null, laser: null, laserPending: false, discoPending: false,
-    fxT: { triple: 0, rapid: 0, slow: 0, wiggle: 0, disco: 0 }, shield: 0, shake: 0, flash: 0, cpuAim: 0, cpuWait: 0.8, over: false,
+    fxT: { triple: 0, rapid: 0, slow: 0, wiggle: 0, disco: 0, laser: 0 }, shield: 0, shake: 0, flash: 0, cpuAim: 0, cpuWait: 0.8, over: false, waves: 0, beam: null,
   };
 }
 
@@ -104,6 +121,7 @@ type Phase = 'ready' | 'play' | 'over';
 
 function Play({ ctx }: { ctx: LabCtx }) {
   const c = useRef(ctx); c.current = ctx;
+  useState(() => { best.clear(); return 0; });
   const canvas = useRef<HTMLCanvasElement>(null);
   const world = useRef<World>(newWorld());
   const paused = useRef(false);
@@ -117,6 +135,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   // A new turn: the high-score screen, then PRESS START.
   useEffect(() => {
     world.current = newWorld();
+    world.current.left = BURST * (c.current.timeScale || 1);
     setPhase('ready'); setQ(null); setLeft(BURST); setScoreNow(0);
     c.current.setHeld(c.current.player.id, []);
     c.current.setStatus(null);
@@ -129,6 +148,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (phaseRef.current !== 'ready') return;
     const x = c.current;
     world.current = newWorld();
+    world.current.left = BURST * (x.timeScale || 1);
     newWave(world.current);
     x.sfx.slideUp();
     [0, 4, 7, 12].forEach((s, i) => window.setTimeout(() => c.current.sfx.blip(s), 120 + i * 90));
@@ -141,9 +161,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const qn = x.draw();
     const n = qn.choices.length;
     const shift = Math.floor(Math.random() * BODY.length);
+    w.waves += 1;
     w.q = qn; w.missed = false; w.exit = 0; w.waveIn = 0;
     w.fx = W / 2; w.fy = 145; w.dir = Math.random() < 0.5 ? 1 : -1;
-    w.aliens = qn.choices.map((t, k) => ({ k, slot: k, text: t, lines: wrap(t, n > 3 ? 11 : 14).slice(0, 3), right: k === qn.correctIndex, x: slotX(k, n, W / 2), alive: true, hurt: 0, kind: (k + shift) % ALIENS.length, color: (k + shift) % BODY.length, enter: -k * 0.12 }));
+    w.aliens = qn.choices.map((t, k) => ({ k, slot: k, text: t, fit: null, right: k === qn.correctIndex, x: slotX(k, n, W / 2), alive: true, hurt: 0, kind: (k + shift) % ALIENS.length, color: (k + shift) % BODY.length, enter: -k * 0.12 }));
     w.buddies = Array.from({ length: 7 }, (_, i) => ({ x: 90 + i * 90, y: 0, alive: Math.random() < 0.85, kind: i % BODY.length }));
     w.cpuAim = cpuTarget(n, qn.correctIndex, x.cpuRight());
     w.cpuWait = 1 + Math.random() * 1.2;
@@ -175,9 +196,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       case 'shield': w.shield = 3; x.sfx.boing(); break;
       case 'saucer': w.saucer = { x: -70, dir: 1 }; [0, 3, 0, 3, 7].forEach((s, i) => window.setTimeout(() => c.current.sfx.blip(s + 12), i * 110)); break;
       case 'time': w.left += 10; w.floats.push({ x: W - 90, y: 60, text: '+10s', life: 0, color: '#fdfd94' }); [0, 1, 2].forEach((i) => window.setTimeout(() => c.current.sfx.tick(), i * 140)); break;
-      case 'laser': w.laserPending = true; x.sfx.slideUp(); break;
+      case 'laser': w.fxT.laser = 6; x.sfx.slideUp(); break;
       case 'disco': w.discoPending = true; [0, 2, 4, 7, 9, 7, 4].forEach((s, i) => window.setTimeout(() => c.current.sfx.note(s), i * 120)); break;
-      case 'wiggle': w.fxT.wiggle = 6; x.sfx.boing(); break;
+      case 'wiggle': w.fxT.wiggle = 3; x.sfx.boing(); break;
     }
     x.say(`${p.name}!`, p.silly ? 'oops' : 'good');
     held(w);
@@ -186,10 +207,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
   async function waveCleared() {
     const w = world.current;
     paused.current = true;
-    const p = await c.current.power(0.4);
+    const noClock = c.current.timeScale === 0;
+    const p = await c.current.power(0.4, (pw) => !noClock || pw.id !== 'time');
     paused.current = false;
     if (w !== world.current || w.over) return;
     apply(p);
+    if (noClock && w.waves >= WAVES) { endBurst(w); return; }
     newWave(w);
   }
 
@@ -197,6 +220,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     if (w.cool > 0 || w.stun > 0) return;
     w.cool = w.fxT.rapid > 0 ? 0.09 : 0.34;
+    if (w.fxT.laser > 0) {
+      // A wide beam straight up: it hits whatever alien it is aimed at.
+      w.cool = 0.5; w.beam = { x: w.shipX, t: 0.3 };
+      x.sfx.zap();
+      if (w.exit === 0 && w.waveIn >= 1) {
+        const hit = w.aliens.filter((a) => a.alive && Math.abs(a.x - w.shipX) < 70).sort((a, b) => Math.abs(a.x - w.shipX) - Math.abs(b.x - w.shipX))[0];
+        if (hit) hitAlien(w, hit);
+      }
+      return;
+    }
     w.bolts.push({ x: w.shipX, y: SHIP_Y - 26, vx: 0 });
     if (w.fxT.triple > 0) { w.bolts.push({ x: w.shipX - 12, y: SHIP_Y - 20, vx: -150 }); w.bolts.push({ x: w.shipX + 12, y: SHIP_Y - 20, vx: 150 }); }
     x.sfx.blip(12 + Math.floor(Math.random() * 3));
@@ -210,6 +243,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     x.say('They landed!', 'oops'); x.sfx.oops();
     w.shake = 0.5;
     w.aliens.forEach((a) => { if (a.alive) burstAt(w, a.x, w.fy, ['#8fe3a0', '#fff'], 8, 160); });
+    if (c.current.timeScale === 0 && w.waves >= WAVES) { endBurst(w); return; }
     newWave(w);
   }
 
@@ -217,7 +251,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function update(w: World, dt: number) {
     const x = c.current;
     w.t += dt;
-    w.left -= dt;
+    if (x.timeScale > 0) w.left -= dt;
     for (const k of Object.keys(w.fxT) as (keyof World['fxT'])[]) if (w.fxT[k] > 0) { w.fxT[k] -= dt; if (w.fxT[k] <= 0) { w.fxT[k] = 0; held(w); } }
     w.cool = Math.max(0, w.cool - dt); w.stun = Math.max(0, w.stun - dt); w.shake = Math.max(0, w.shake - dt); w.flash = Math.max(0, w.flash - dt); w.flame = Math.max(0, w.flame - dt);
     const n = w.aliens.length;
@@ -240,7 +274,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     } else want = (keys.current.r ? 1 : 0) - (keys.current.l ? 1 : 0);
     const speed = w.target !== null ? 560 : 430;
     w.shipVX += ((w.stun > 0 ? 0 : want * speed) - w.shipVX) * Math.min(1, dt * 12);
-    if (w.fxT.wiggle > 0) w.shipVX += Math.sin(w.t * 9) * 900 * dt;
+    if (w.fxT.wiggle > 0) w.shipVX += Math.sin(w.t * 6) * 420 * dt;
     w.shipX = Math.max(40, Math.min(W - 40, w.shipX + w.shipVX * dt));
 
     // The formation flies in, sweeps side to side and steps down.
@@ -249,7 +283,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
       for (const a of w.aliens) a.enter = Math.min(1, a.enter + dt * 1.25);
       if (w.waveIn >= 1) {
         if (w.discoPending) { w.discoPending = false; w.fxT.disco = 3.5; const o = shuffleSlots(n); w.aliens.forEach((a, i) => { a.slot = o[i]; }); held(w); }
-        if (w.laserPending) { w.laserPending = false; const a = w.aliens.find((al) => al.right); if (a) w.laser = { t: 1.1, x: a.x }; }
       }
     } else if (w.exit === 0) {
       const sw = sweep(n);
@@ -276,14 +309,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     }
     w.buddies.forEach((b, i) => { b.x = 90 + i * 90 + (w.fx - W / 2) * 0.6; b.y = w.fy - 70; });
 
-    // The laser sweeps down on the right alien.
-    if (w.laser) {
-      w.laser.t -= dt;
-      const a = w.aliens.find((al) => al.right && al.alive);
-      if (a) { w.laser.x = a.x; w.shipX += (a.x - w.shipX) * Math.min(1, dt * 10); }
-      if (w.laser.t <= 0.5 && a) zapRight(w, a, true);
-      if (w.laser.t <= 0) w.laser = null;
-    }
+    if (w.beam) { w.beam.t -= dt; if (w.beam.t <= 0) w.beam = null; }
 
     // The saucer.
     if (w.saucer) {
@@ -304,23 +330,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
       const hit = w.aliens.find((a) => a.alive && hits(a.x, w.fy, b.x, b.y));
       if (hit) {
         b.y = -99;
-        if (hit.right) zapRight(w, hit, false);
-        else if (hit.hurt <= 0) {
-          hit.hurt = 1.1;
-          if (w.q && !w.missed && !x.cpu) x.log(w.q, false);
-          w.missed = true; w.combo = 0;
-          if (w.score > 0) { x.points(-1); w.score -= 1; }
-          w.floats.push({ x: hit.x, y: w.fy - 30, text: 'NOPE!', life: 0, color: '#ffd2c2' });
-          x.sfx.boing();
-        }
+        hitAlien(w, hit);
         continue;
       }
       const bud = w.buddies.find((bd) => bd.alive && Math.abs(bd.x - b.x) < 24 && Math.abs(bd.y - b.y) < 22);
       if (bud) {
         bud.alive = false; b.y = -99;
         burstAt(w, bud.x, bud.y, [BODY[bud.kind][0], '#fff'], 14, 200);
-        w.floats.push({ x: bud.x, y: bud.y, text: '+1', life: 0, color: '#fff' });
-        x.points(1); w.score += 1; x.sfx.pop();
+        x.sfx.pop();
       }
     }
     w.bolts = w.bolts.filter((b) => b.y > -20 && b.x > -20 && b.x < W + 20);
@@ -341,19 +358,30 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (const f of w.floats) { f.life += dt; f.y -= 40 * dt; }
     w.floats = w.floats.filter((f) => f.life < 1.1);
 
-    if (w.left <= 0 && !w.over) endBurst(w);
+    if (x.timeScale > 0 && w.left <= 0 && !w.over) endBurst(w);
   }
 
-  function zapRight(w: World, a: Alien, byLaser: boolean) {
+  function hitAlien(w: World, hit: Alien) {
+    const x = c.current;
+    if (hit.right) { zapRight(w, hit); return; }
+    if (hit.hurt > 0) return;
+    hit.hurt = 1.1;
+    if (w.q && !w.missed && !x.cpu) x.log(w.q, false);
+    w.missed = true; w.combo = 0;
+    w.floats.push({ x: hit.x, y: w.fy - 30, text: 'NOPE!', life: 0, color: '#ffd2c2' });
+    x.sfx.boing();
+  }
+
+  function zapRight(w: World, a: Alien) {
     const x = c.current;
     a.alive = false;
-    if (w.q && !w.missed && !byLaser && !x.cpu) x.log(w.q, true);
+    if (w.q && !w.missed && !x.cpu) x.log(w.q, true);
     const pts = rightPoints(w.combo);
     w.combo += 1;
     x.points(pts); w.score += pts;
     burstAt(w, a.x, w.fy, [BODY[a.color][0], BODY[a.color][1], '#fff', '#fdfd94'], 46, 340);
     w.floats.push({ x: a.x, y: w.fy - 30, text: `+${pts}`, life: 0, color: '#fdfd94' });
-    w.shake = 0.35; w.flash = 0.12; w.exit = 0.0001;
+    w.shake = 0.35; w.exit = 0.0001;
     x.sfx.zap(); window.setTimeout(() => c.current.sfx.coin(), 90);
     if (w.combo >= 3) x.say(`Combo x${w.combo}!`, 'good');
   }
@@ -361,6 +389,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function endBurst(w: World) {
     const x = c.current;
     w.over = true; w.left = 0;
+    setScoreNow(w.score);
+    window.setTimeout(() => best.set(x.player.id, Math.max(best.get(x.player.id) ?? 0, w.score)), 2400);
     setPhase('over');
     x.sfx.whistle(); x.say('Time!', 'big');
     x.setHeld(x.player.id, []);
@@ -371,7 +401,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function draw(g: CanvasRenderingContext2D, w: World) {
     const still = c.current.still;
     g.save();
-    if (w.shake > 0 && !still) g.translate((Math.random() - 0.5) * 10 * w.shake, (Math.random() - 0.5) * 10 * w.shake);
+    if (w.shake > 0 && c.current.shake) g.translate((Math.random() - 0.5) * 10 * w.shake, (Math.random() - 0.5) * 10 * w.shake);
     // Deep space, a pixel planet, drifting stars and a pixel moonscape.
     const sky = g.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#120c2e'); sky.addColorStop(0.7, '#2a1f5c'); sky.addColorStop(1, '#3b2a7a');
@@ -408,7 +438,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       const sp = ALIENS[a.kind];
       const rows = frame ? sp.rows : [...sp.rows.slice(0, -1), sp.rows[sp.rows.length - 1].split('').reverse().join('')];
       const disco = w.fxT.disco > 0;
-      const col = disco ? BODY[(a.color + Math.floor(w.t * 8)) % BODY.length] : BODY[a.color];
+      const col = disco ? BODY[(a.color + Math.floor(w.t * 1.5)) % BODY.length] : BODY[a.color];
       const wob = still ? 0 : Math.sin(w.t * 5 + a.k) * 2 + (a.hurt > 0 ? Math.sin(w.t * 50) * 4 : 0);
       const sx = ax - 30 + wob, sy = ay - 34 + (disco && !still ? Math.abs(Math.sin(w.t * 10 + a.k)) * -14 : 0);
       drawSprite(g, rows, sx, sy, P, { X: a.hurt > 0 ? '#ff8a8a' : col[0], K: '#241c3d', W: '#fff', P: '#ef7d96' });
@@ -416,11 +446,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
       g.fillStyle = '#000';
       const look = Math.max(-1, Math.min(1, (w.shipX - ax) / 200));
       for (const [ex, ey] of sp.eyes) g.fillRect(sx + (ex + (sp.eyes.length === 1 ? 1 : 0)) * P + 1 + look * 3, sy + (ey + 1) * P - 1, sp.eyes.length === 1 ? P * 2 - 2 : P, P);
-      // The answer sign.
-      const lines = a.lines;
-      const fs = lines.length > 2 ? 16 : lines.length > 1 ? 18 : 21;
+      // The answer sign: the whole answer, the font shrinks to fit.
+      const maxW = n > 3 ? 158 : 190;
+      if (!a.fit) a.fit = fitSign(g, a.text, maxW);
+      const { fs, lines } = a.fit;
       g.font = `bold ${fs}px "Inclusive Sans", system-ui, sans-serif`;
-      const tw = Math.min(n > 3 ? 136 : 160, Math.max(70, ...lines.map((l) => g.measureText(l).width + 22)));
+      const tw = Math.max(110, a.fit.w);
       const th = lines.length * (fs + 3) + 12;
       const bx = ax - tw / 2 + wob * 0.5, by = ay + 20;
       g.fillStyle = '#000'; g.fillRect(bx - 3, by - 3, tw + 6, th + 6);
@@ -441,19 +472,22 @@ function Play({ ctx }: { ctx: LabCtx }) {
       g.fillStyle = '#fff'; g.fillRect(b.x - 1, b.y, 2, 6);
     }
     if (w.saucer) {
-      drawSprite(g, UFO, w.saucer.x - 30, 45 + Math.sin(w.t * 6) * 4, P, { W: '#fff', C: '#7fd6e3', X: '#f6c544', Y: Math.floor(w.t * 8) % 2 ? '#fdfd94' : '#ef7d96' });
+      drawSprite(g, UFO, w.saucer.x - 30, 45 + Math.sin(w.t * 6) * 4, P, { W: '#fff', C: '#7fd6e3', X: '#f6c544', Y: '#fdfd94' });
     }
-    if (w.laser) {
-      const k = Math.min(1, (1.1 - w.laser.t) * 4), wd = 10 + 30 * k + Math.sin(w.t * 40) * 4;
-      g.fillStyle = 'rgba(253,253,148,0.45)'; g.fillRect(w.laser.x - wd, 0, wd * 2, SHIP_Y - 20);
-      g.fillStyle = '#fff'; g.fillRect(w.laser.x - wd * 0.35, 0, wd * 0.7, SHIP_Y - 20);
+    if (w.beam) {
+      const k = w.beam.t / 0.3, wd = 46;
+      g.globalAlpha = Math.min(1, k * 1.5);
+      g.fillStyle = 'rgba(253,253,148,0.5)'; g.fillRect(w.beam.x - wd, 0, wd * 2, SHIP_Y - 20);
+      g.fillStyle = '#fff'; g.fillRect(w.beam.x - wd * 0.35, 0, wd * 0.7, SHIP_Y - 20);
+      g.globalAlpha = 1;
     }
+    if (w.fxT.laser > 0) { g.fillStyle = '#fdfd94'; g.fillRect(w.shipX - 6, SHIP_Y - 40, 12, 14); }
 
     // The ship (green and drippy when gooed, a bubble when shielded).
     const tilt = Math.max(-1, Math.min(1, w.shipVX / 430));
     const shipCol = w.stun > 0 ? { X: '#8fe3a0', D: '#4fb36a' } : { X: '#ef7d96', D: '#c4506c' };
     {
-      const fl = 6 + (Math.floor(w.t * 20) % 2) * 5 + (w.flame > 0 ? 6 : 0);
+      const fl = 8 + (still ? 0 : Math.sin(w.t * 6) * 2) + (w.flame > 0 ? 6 : 0);
       g.fillStyle = '#fdfd94'; g.fillRect(w.shipX - 14 - tilt * 2, SHIP_Y + 16, 8, fl); g.fillRect(w.shipX + 6 - tilt * 2, SHIP_Y + 16, 8, fl);
       g.fillStyle = '#f5a08c'; g.fillRect(w.shipX - 12 - tilt * 2, SHIP_Y + 16, 4, fl * 0.6); g.fillRect(w.shipX + 8 - tilt * 2, SHIP_Y + 16, 4, fl * 0.6);
     }
@@ -470,22 +504,22 @@ function Play({ ctx }: { ctx: LabCtx }) {
     g.textAlign = 'center'; g.textBaseline = 'middle';
     for (const f of w.floats) {
       g.globalAlpha = Math.max(0, 1 - f.life / 1.1);
-      g.font = 'bold 26px ui-monospace, Menlo, monospace';
+      g.font = 'bold 30px ui-monospace, Menlo, monospace';
       g.lineWidth = 6; g.strokeStyle = '#000'; g.strokeText(f.text, f.x, f.y); g.fillStyle = f.color; g.fillText(f.text, f.x, f.y);
     }
     g.globalAlpha = 1;
 
     // HUD: score and a chunky time bar.
-    g.font = 'bold 22px ui-monospace, Menlo, monospace'; g.textAlign = 'left'; g.textBaseline = 'top';
+    g.font = 'bold 28px ui-monospace, Menlo, monospace'; g.textAlign = 'left'; g.textBaseline = 'top';
     g.fillStyle = '#000'; g.fillText(`SCORE ${String(w.score).padStart(4, '0')}`, 18, 14);
     g.fillStyle = '#fdfd94'; g.fillText(`SCORE ${String(w.score).padStart(4, '0')}`, 16, 12);
-    const blocks = 20, on = Math.ceil((Math.max(0, w.left) / BURST) * blocks);
+    const noClock = c.current.timeScale === 0;
+    const blocks = noClock ? WAVES : 20, on = noClock ? WAVES - w.waves + 1 : Math.ceil((Math.max(0, w.left) / (BURST * (c.current.timeScale || 1))) * blocks);
     for (let i = 0; i < blocks; i++) {
-      g.fillStyle = '#000'; g.fillRect(W - 20 - (blocks - i) * 11 - 1, 13, 10, 18);
-      g.fillStyle = i < on ? (w.left < 8 ? (Math.floor(w.t * 4) % 2 ? '#ef7d96' : '#fdfd94') : '#8fe3a0') : '#3b2a7a';
-      g.fillRect(W - 20 - (blocks - i) * 11 + 1, 15, 6, 14);
+      g.fillStyle = '#000'; g.fillRect(W - 20 - (blocks - i) * (noClock ? 26 : 11) - 1, 13, noClock ? 24 : 10, 22);
+      g.fillStyle = i < on ? (w.left < 8 ? '#ef7d96' : '#8fe3a0') : '#3b2a7a';
+      g.fillRect(W - 20 - (blocks - i) * (noClock ? 26 : 11) + 1, 15, noClock ? 20 : 6, 18);
     }
-    if (w.flash > 0) { g.fillStyle = `rgba(255,255,255,${w.flash * 3})`; g.fillRect(0, 0, W, H); }
     if (w.fxT.slow > 0) { g.fillStyle = 'rgba(127,214,227,0.10)'; g.fillRect(0, 0, W, H); }
     g.restore();
   }
@@ -541,7 +575,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const hold = (side: 'l' | 'r', on: boolean) => { keys.current[side] = on; if (on) world.current.target = null; };
 
   const playing = phase === 'play' && !ctx.cpu;
-  const ranked = [...ctx.turns.players].sort((a, b) => b.score - a.score);
   return (
     <div className="absolute inset-0 flex flex-col gap-2">
       {/* The question bar on top of the cabinet. */}
@@ -561,27 +594,26 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <div className="relative w-full h-full rounded-[1rem] overflow-hidden">
             <canvas ref={canvas} width={W * 2} height={H * 2} onPointerDown={tapField} className={`block w-full h-full touch-none ${playing ? 'cursor-crosshair' : ''}`} aria-label="Pixel Blaster screen: tap an alien to blast it" />
             {/* CRT scanlines and a soft glass glow. */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0 2px, transparent 2px 4px)', mixBlendMode: 'multiply' }} />
+            {!ctx.still && <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.09) 0 2px, transparent 2px 4px)', mixBlendMode: 'multiply' }} />}
             <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 45%, transparent 60%, rgba(0,0,0,0.55) 100%)' }} />
             <AnimatePresence>
               {phase !== 'play' && (
                 <motion.div className="absolute inset-0 grid place-items-center p-[4%]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <div className="grid justify-items-center gap-[2cqh] text-center font-mono">
                     <motion.p className="m-0 font-bold tracking-[0.2em] text-[#fdfd94] text-[clamp(1.4rem,6cqw,3.4rem)] leading-none" style={{ textShadow: '4px 4px 0 #ef7d96, 8px 8px 0 #000' }}
-                      animate={ctx.still ? undefined : { scale: [1, 1.04, 1] }} transition={{ duration: 1.2, repeat: Infinity }}>HIGH SCORES</motion.p>
-                    <ol className="list-none m-0 p-0 grid gap-1.5 min-w-[60%]">
-                      {ranked.slice(0, 6).map((p, i) => (
-                        <motion.li key={p.id} className={`flex items-center gap-3 px-3 py-1 text-[clamp(0.9rem,2.6cqw,1.5rem)] font-bold ${p.id === ctx.player.id ? 'text-[#8fe3a0]' : 'text-[#fbfcf8]'}`} initial={ctx.still ? false : { x: -40, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 + i * 0.12 }}>
-                          <span className="w-8 text-left">{i + 1}.</span><TeamBadge colorIndex={p.colorIndex} size={30} /><span className="flex-1 text-left">{p.name}</span><span>{String(p.score).padStart(4, '0')}</span>
-                        </motion.li>
-                      ))}
-                    </ol>
+                      animate={ctx.still ? undefined : { scale: [1, 1.03, 1] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}>{phase === 'over' ? 'THIS ROUND' : 'YOUR BEST'}</motion.p>
+                    <div className="flex items-center gap-4 text-[#fbfcf8] font-bold text-[clamp(1.1rem,3.4cqw,2rem)]">
+                      <TeamBadge colorIndex={ctx.player.colorIndex} size={44} />
+                      <span>{ctx.player.name}</span>
+                      <span className="text-[#8fe3a0] tracking-widest">{String(phase === 'over' ? scoreNow : best.get(ctx.player.id) ?? 0).padStart(4, '0')}</span>
+                    </div>
+                    {phase === 'over' && scoreNow >= (best.get(ctx.player.id) ?? 0) && scoreNow > 0 && <p className="m-0 font-bold tracking-widest text-[#fdfd94] text-[clamp(1rem,3cqw,1.6rem)]">NEW BEST!</p>}
                     {phase === 'ready' ? (
                       <motion.button type="button" onClick={start} disabled={ctx.cpu} className="mt-[1cqh] min-h-14 px-6 rounded-xl border-heavy border-border bg-[#fdfd94] text-[#241c3d] font-mono font-bold tracking-widest text-[clamp(1.1rem,3.4cqw,2rem)] inline-flex items-center gap-3 motion-safe:hover:scale-105 motion-safe:transition-transform disabled:opacity-90"
-                        style={{ boxShadow: '0 6px 0 #000' }} animate={ctx.still ? undefined : { opacity: [1, 0.55, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                        style={{ boxShadow: '0 6px 0 #000' }} animate={ctx.still ? undefined : { scale: [1, 1.04, 1] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
                         <TeamBadge colorIndex={ctx.player.colorIndex} size={36} />{ctx.cpu ? 'COMPUTER READY' : 'PRESS START'}
                       </motion.button>
-                    ) : <p className="m-0 font-bold tracking-widest text-[#ef7d96] text-[clamp(1rem,3cqw,1.8rem)]">GAME OVER</p>}
+                    ) : <p className="m-0 font-bold tracking-widest text-[#ef7d96] text-[clamp(1rem,3cqw,1.8rem)]">NICE FLYING!</p>}
                   </div>
                 </motion.div>
               )}
@@ -592,12 +624,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
       {/* Big buttons for touch screens (keys work too). */}
       <div className="shrink-0 flex items-center justify-center gap-3">
-        <PadButton label="Slide left" disabled={!playing} onHold={(on) => hold('l', on)}><CaretLeft weight="bold" size={30} /></PadButton>
+        <PadButton label="Slide left" disabled={!playing} onHold={(on) => hold('l', on)}><CaretLeft weight="bold" size={26} /><span className="font-bold text-lg">Left</span></PadButton>
         <button type="button" disabled={!playing} onPointerDown={() => fire(world.current)} aria-label="Fire"
           className="min-h-14 min-w-[9rem] px-5 rounded-panel border-heavy border-border bg-[#ef7d96] font-mono font-bold text-xl tracking-widest inline-flex items-center justify-center gap-2 motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50" style={{ boxShadow: '0 5px 0 #000' }}>
           <Crosshair weight="bold" size={26} />FIRE
         </button>
-        <PadButton label="Slide right" disabled={!playing} onHold={(on) => hold('r', on)}><CaretRight weight="bold" size={30} /></PadButton>
+        <PadButton label="Slide right" disabled={!playing} onHold={(on) => hold('r', on)}><span className="font-bold text-lg">Right</span><CaretRight weight="bold" size={26} /></PadButton>
         <span className="hidden xl:inline font-bold text-[#fbfcf8] text-sm ml-2" style={{ textShadow: '0 1px 0 #000' }}>{phase === 'play' ? `${left}s` : ''}{scoreNow ? ` · ${scoreNow}` : ''}</span>
       </div>
     </div>
@@ -608,7 +640,7 @@ function PadButton({ label, disabled, onHold, children }: { label: string; disab
   return (
     <button type="button" aria-label={label} disabled={disabled}
       onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onHold(true); }} onPointerUp={() => onHold(false)} onPointerCancel={() => onHold(false)} onLostPointerCapture={() => onHold(false)}
-      className="min-h-14 min-w-[5.5rem] rounded-panel border-heavy border-border bg-[#b4c4fb] inline-flex items-center justify-center touch-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50" style={{ boxShadow: '0 5px 0 #000' }}>
+      className="min-h-14 min-w-[6.5rem] px-3 gap-1 rounded-panel border-heavy border-border bg-[#b4c4fb] inline-flex items-center justify-center touch-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50" style={{ boxShadow: '0 5px 0 #000' }}>
       {children}
     </button>
   );
@@ -657,7 +689,7 @@ const def: LabDef = {
     { id: 'alien-1', label: 'Alien 1', hint: 'An answer alien' },
     { id: 'alien-2', label: 'Alien 2', hint: 'An answer alien' },
     { id: 'alien-3', label: 'Alien 3', hint: 'An answer alien' },
-    { id: 'buddy', label: 'Little alien', hint: 'The small bonus aliens in the back row' },
+    { id: 'buddy', label: 'Little alien', hint: 'The small aliens in the back row (they just pop)' },
     { id: 'sign', label: 'Answer sign', hint: 'The sign each alien carries' },
     { id: 'bolt', label: 'Bolt', hint: 'What the ship shoots' },
     { id: 'goo', label: 'Goo blob', hint: 'What the aliens drop' },

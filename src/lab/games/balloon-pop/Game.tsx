@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { CheckCircle, Confetti, HandTap, Timer } from '@phosphor-icons/react';
 import type { LabCtx, LabDef } from '../../types';
-import { ArcadeFrame, StarJar, arcadePowers, clip, labelSize, pick, rand, useArcade, type Arcade } from './arcade';
+import { ArcadeFrame, Rain, StarJar, arcadePowers, clip, labelSize, pick, rand, useArcade, type Arcade } from './arcade';
 import { balloonKind, makeBag, spawnX } from './rules';
 
 // Balloon Pop (Game Lab, inspired by the classic classroom balloon game):
@@ -14,7 +14,7 @@ const COLORS = ['#ef7d96', '#f5a08c', '#fdfd94', '#8fe3a0', '#b4c4fb', '#7fd6e3'
 
 const POWERS = arcadePowers('balloon-pop', {
   slow: { name: 'Slow-mo', desc: 'Balloons drift up extra slowly for a while.' },
-  magnet: { name: 'Magnet', desc: 'The right balloon glows gold for the next two questions.' },
+  magnet: { name: 'Magnet', desc: 'For two questions the right balloon puffs up big and floats slowly.' },
   shield: { name: 'Shield', desc: 'Your next wrong pop costs nothing.' },
   double: { name: 'Double Points', desc: 'Every right pop scores two for a while.' },
   time: { name: 'Extra Time', desc: 'Five more seconds on the clock.' },
@@ -23,8 +23,8 @@ const POWERS = arcadePowers('balloon-pop', {
   wobble: { name: 'Wobble Screen', desc: 'Wibble wobble! The whole sky jiggles.' },
 });
 
-interface Balloon { id: number; choice: number; x0: number; x: number; y: number; r: number; speed: number; amp: number; ph: number; color: string; leave: boolean; hitAt: number }
-interface Drop { id: number; x: number; y: number; color: string }
+interface Balloon { id: number; choice: number; x0: number; x: number; y: number; r: number; speed: number; amp: number; ph: number; color: string; leave: boolean; hitAt: number; text: string }
+interface Drop { id: number; x: number; y: number; color: string; spin: number }
 
 function Play({ ctx }: { ctx: LabCtx }) {
   const list = useRef<Balloon[]>([]);
@@ -36,19 +36,22 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const nid = useRef(1);
 
   function spawn(ar: Arcade, y?: number) {
+    const choice = bag.current();
     const { r, speed } = balloonKind();
     // The spot farthest from the balloons already low in the sky.
     const low = list.current.filter((b) => !b.leave && b.y > 55);
     let x0 = spawnX(ar.W, r), best = -1;
     for (let k = 0; k < 6; k++) { const x = spawnX(ar.W, r); const d = Math.min(99, ...low.map((b) => Math.abs(b.x0 - x))); if (d > best) { best = d; x0 = x; } }
-    list.current.push({ id: nid.current++, choice: bag.current(), x0, x: x0, y: y ?? 100 + r * 1.3, r, speed, amp: rand(1.5, 4.5), ph: rand(0, 6.28), color: pick(COLORS), leave: false, hitAt: -9 });
+    list.current.push({ id: nid.current++, choice, text: ar.q?.choices[choice] ?? '', x0, x: x0, y: y ?? 100 + r * 1.3, r, speed, amp: rand(1.5, 4.5), ph: rand(0, 6.28), color: pick(COLORS), leave: false, hitAt: -9 });
   }
 
   const { ar, box, floaters, bits, flash } = useArcade(ctx, {
+    onReset: () => { list.current = []; },
     onStart: () => { list.current = []; },
     onQuestion: (q, a) => {
       for (const b of list.current) b.leave = true;
       bag.current = makeBag(q.choices.length);
+      a = { ...a, q };
       const n = Math.min(4, q.choices.length + 1);
       for (let i = 0; i < n; i++) spawn(a, 62 + i * 14 + rand(-4, 4));
       spawnIn.current = 1.1;
@@ -59,7 +62,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const right = a.q && b.choice === a.q.correctIndex && !b.leave;
         const mag = a.magnet && right;
         b.y -= (b.leave ? 70 : b.speed * (mag ? 0.55 : 1)) * (b.leave ? _real : dt);
-        if (mag) b.x0 += (a.W / 2 - b.x0) * Math.min(1, dt * 0.6);
         b.x = b.x0 + (a.ctx.still ? 0 : Math.sin(t * 1.3 + b.ph) * b.amp);
       }
       list.current = list.current.filter((b) => b.y > (b.leave ? -30 : 14));
@@ -83,11 +85,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   function tap(b: Balloon) {
     if (b.leave) return;
-    const res = ar.answer(b.choice, b.x, b.y);
+    const res = ar.answer(b.choice, b.x, b.y, b.id);
     if (res === 'right') {
       clip(Math.random() < 0.5 ? '/lab/balloon-pop/pop.mp3' : '/lab/balloon-pop/pop2.mp3', ctx.settings, 0.8);
       ar.bits(b.x, b.y, 18, 'confetti', [b.color, '#fff', '#fdfd94']);
-      const d = { id: b.id, x: b.x, y: b.y, color: b.color };
+      const d = { id: b.id, x: b.x, y: b.y, color: b.color, spin: rand(-90, 90) };
       b.leave = true; b.y = -999;
       setDrops((l) => [...l, d]);
       window.setTimeout(() => setDrops((l) => l.filter((v) => v !== d)), 1600);
@@ -106,20 +108,22 @@ function Play({ ctx }: { ctx: LabCtx }) {
       hint={<><HandTap weight="fill" aria-hidden="true" /> Pop the right balloon</>}
       extra={<StarJar ar={ar} style={{ left: 'calc(var(--u) * 2.5)', bottom: 'calc(var(--u) * 3)' }} />}>
       <Sky ar={ar} />
+      <Rain ar={ar} />
       {list.current.map((b) => {
-        const r = b.r * giant;
+        const r = b.r * giant * (ar.magnet && b.choice === ar.q?.correctIndex && !b.leave ? 1.25 : 1);
+        const rest = ar.locked(b.id);
         const right = ar.q && b.choice === ar.q.correctIndex && !b.leave;
         const hit = ar.t - b.hitAt < 0.5;
-        const text = ar.q?.choices[b.choice] ?? '';
+        const text = b.text;
         return (
-          <button key={b.id} type="button" disabled={ctx.cpu || b.leave || !ar.running}
+          <button key={b.id} type="button" disabled={ctx.cpu || b.leave || !ar.running || rest}
             onPointerDown={(e) => { e.preventDefault(); tap(b); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(b); } }}
             aria-label={`Balloon: ${text}`}
             className="absolute group focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-black rounded-full disabled:cursor-default"
-            style={{ left: `${((b.x - r) / ar.W) * 100}%`, top: `${b.y - r * 1.15}%`, width: `calc(var(--u) * ${r * 2})`, height: `calc(var(--u) * ${r * 3.3})`, opacity: b.leave ? 0.5 : 1, transition: 'width .4s, height .4s' }}>
+            style={{ left: `${((b.x - r) / ar.W) * 100}%`, top: `${b.y - r * 1.15}%`, width: `calc(var(--u) * ${r * 2})`, height: `calc(var(--u) * ${r * 3.3})`, opacity: b.leave ? 0.5 : rest ? 0.45 : 1, transition: 'width .4s, height .4s' }}>
             <motion.span className="absolute inset-0 block" animate={hit && !ctx.still ? { rotate: [0, -14, 12, -6, 0], scaleX: [1, 1.15, 0.92, 1], scaleY: [1, 0.85, 1.08, 1] } : { rotate: 0 }} transition={{ duration: 0.5 }}>
               <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform origin-top">
-                <BalloonArt color={b.color} glow={!!(right && ar.magnet)} sway={ctx.still ? 0 : Math.sin(ar.t * 1.3 + b.ph) * 6} />
+                <BalloonArt color={b.color} sway={ctx.still ? 0 : Math.sin(ar.t * 1.3 + b.ph) * 6} />
               </span>
               <span className="absolute left-[8%] right-[8%] top-[6%] h-[56%] grid place-items-center text-center font-bold leading-[1.05] break-words"
                 style={{ fontSize: `calc(var(--u) * ${labelSize(text, r * 1.7)})`, color: '#241c3d', transform: flip ? 'rotate(180deg)' : undefined, transition: 'transform .5s' }}>{text}</span>
@@ -130,7 +134,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       <AnimatePresence>
         {drops.map((d) => (
           <motion.svg key={d.id} viewBox="0 0 20 60" className="absolute pointer-events-none" style={{ left: `${(d.x / ar.W) * 100}%`, top: `${d.y + 8}%`, width: 'calc(var(--u) * 3)', height: 'calc(var(--u) * 12)' }}
-            initial={{ y: 0, rotate: 0, opacity: 1 }} animate={{ y: '220%', rotate: rand(-90, 90), opacity: [1, 1, 0] }} transition={{ duration: 1.5, ease: 'easeIn' }}>
+            initial={{ y: 0, rotate: 0, opacity: 1 }} animate={{ y: '220%', rotate: d.spin, opacity: [1, 1, 0] }} transition={{ duration: 1.5, ease: 'easeIn' }}>
             <path d="M10 0 Q2 15 10 30 T10 60" stroke="#241c3d" strokeWidth="2.4" fill="none" />
           </motion.svg>
         ))}
@@ -150,10 +154,10 @@ function CpuHand({ x, y, W }: { x: number; y: number; W: number }) {
 }
 
 // One balloon: a round body with a shine, a knot and a curly string.
-export function BalloonArt({ color, glow, sway = 0 }: { color: string; glow?: boolean; sway?: number }) {
+export function BalloonArt({ color, sway = 0 }: { color: string; sway?: number }) {
+  const glow = false;
   return (
     <svg viewBox="0 0 60 100" className="w-full h-full overflow-visible" aria-hidden="true">
-      {glow && <ellipse cx="30" cy="27" rx="34" ry="38" fill="#fdfd94" opacity="0.8" className="motion-safe:animate-pulse" />}
       <path d={`M30 62 Q${24 + sway} 72 30 80 T${30 - sway} 98`} stroke="#241c3d" strokeWidth="1.6" fill="none" />
       <path d="M30 2 C50 2 58 18 58 30 C58 46 44 58 30 60 C16 58 2 46 2 30 C2 18 10 2 30 2Z" fill={glow ? '#f6c544' : color} stroke="#000" strokeWidth="2.6" />
       <path d="M26 60 L34 60 L32 65 L28 65Z" fill={glow ? '#f6c544' : color} stroke="#000" strokeWidth="2" strokeLinejoin="round" />

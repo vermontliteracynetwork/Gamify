@@ -4,7 +4,7 @@
 export const W = 720;
 export const H = 540;
 export const SHIP_Y = 500;
-export const LANDED_Y = 360; // the answer row's top reaching this line means they landed
+export const LANDED_Y = 320; // the answer row's top reaching this line means they landed
 
 // Where answer slot k of n sits across the formation.
 export function slotX(k: number, n: number, fx: number): number {
@@ -20,7 +20,7 @@ export function sweep(n: number): number {
 
 // An alien (with its answer sign under it) is hit by a bolt at (bx, by).
 export function hits(ax: number, ay: number, bx: number, by: number): boolean {
-  return Math.abs(bx - ax) <= 64 && by >= ay - 26 && by <= ay + 78;
+  return Math.abs(bx - ax) <= 70 && by >= ay - 26 && by <= ay + 130;
 }
 
 // Points for the right alien: 3, plus a combo bonus that grows to 3.

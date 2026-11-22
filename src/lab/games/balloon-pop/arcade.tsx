@@ -20,9 +20,12 @@ import type { LabCtx, LabPower } from '../../types';
 // games import it from here.
 
 export type FxId = 'slow' | 'magnet' | 'shield' | 'double' | 'time' | 'freeze' | 'giant' | 'flip' | 'wobble' | 'chickens';
-const FX_LEN: Partial<Record<FxId, number>> = { slow: 8, double: 10, freeze: 5, giant: 9, flip: 7, wobble: 6, chickens: 6 };
+const FX_LEN: Partial<Record<FxId, number>> = { slow: 8, double: 10, freeze: 5, giant: 9, flip: 7, wobble: 2.5, chickens: 6 };
 export const BURST_SECONDS = 30;
 const WRONG_COST = 3;
+// With the clock off (Timers: off), a burst ends after this many right answers.
+export const BURST_GOAL = 6;
+const LOCK = 1;
 
 export interface Floater { id: number; x: number; y: number; text: string; tone: 'good' | 'oops' | 'info' }
 export interface Bit { id: number; x: number; y: number; color: string; kind: 'confetti' | 'juice' | 'star' | 'puff' | 'feather' }
@@ -35,6 +38,12 @@ export interface Arcade {
   qn: number;
   left: number;
   seconds: number;
+  // Clock off: the burst ends after `goal` right answers (`got` so far).
+  clockless: boolean;
+  goal: number;
+  got: number;
+  // A target tapped wrong rests for a second (no double boing) and fades.
+  locked: (key: string | number) => boolean;
   t: number;
   speed: number;
   on: (id: FxId) => boolean;
@@ -44,7 +53,7 @@ export interface Arcade {
   H: number;
   u: number;
   turn: number;
-  answer: (choice: number, x: number, y: number) => 'right' | 'wrong' | 'shielded' | 'ignored';
+  answer: (choice: number, x: number, y: number, key?: string | number) => 'right' | 'wrong' | 'shielded' | 'ignored';
   hurt: (x: number, y: number, cost?: number) => boolean;
   start: () => void;
   float: (x: number, y: number, text: string, tone?: Floater['tone']) => void;
@@ -60,6 +69,9 @@ interface Opts {
   // (slowed by Slow-mo, 0 under Freeze), real is the clock's.
   step: (dt: number, real: number, ar: Arcade) => void;
   onQuestion?: (q: MultipleChoiceQuestion, ar: Arcade) => void;
+  // onReset: a new turn begins (the ready card shows). onStart: Go was
+  // tapped, before the first question.
+  onReset?: (ar: Arcade) => void;
   onStart?: (ar: Arcade) => void;
   onPower?: (p: LabPower, ar: Arcade) => void;
   // Height of the world in units (width follows the box).
@@ -72,7 +84,9 @@ const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 export function useArcade(ctx: LabCtx, opts: Opts) {
   const c = useRef(ctx); c.current = ctx;
   const o = useRef(opts); o.current = opts;
-  const seconds = opts.seconds ?? BURST_SECONDS;
+  const clockless = ctx.timeScale === 0;
+  const seconds = Math.round((opts.seconds ?? BURST_SECONDS) * (clockless ? 1 : ctx.timeScale));
+  const cost = clockless ? 0 : Math.max(1, Math.round(WRONG_COST * ctx.timeScale));
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 1000, h: 700 });
   const [, setTick] = useState(0);
@@ -87,6 +101,8 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
   const magnetOn = useRef(false);
   const shield = useRef(false);
   const missedQ = useRef(false);
+  const got = useRef(0);
+  const locks = useRef<Map<string | number, number>>(new Map());
   const token = useRef(0);
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const [bitsList, setBits] = useState<Bit[]>([]);
@@ -155,11 +171,14 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
     o.current.onPower?.(p, ar.current);
   }
 
-  const answer: Arcade['answer'] = (choice, px, py) => {
+  const locked = (key: string | number) => (locks.current.get(key) ?? -1) > t.current;
+  const answer: Arcade['answer'] = (choice, px, py, key) => {
     const x = c.current;
     if (phase.current !== 'play' || pause.current || !q.current) return 'ignored';
+    if (key !== undefined && locked(key)) return 'ignored';
     const qq = q.current;
     if (choice === qq.correctIndex) {
+      got.current += 1;
       x.log(qq, !missedQ.current);
       const pts = on('double') ? 2 : 1;
       x.points(pts);
@@ -172,8 +191,9 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
       void (async () => {
         await wait(700);
         if (token.current !== my) return;
+        if (clockless && got.current >= BURST_GOAL) { pause.current = null; endBurst(); return; }
         pause.current = 'card';
-        const p = await c.current.power(o.current.powerChance ?? 0.38);
+        const p = await c.current.power(o.current.powerChance ?? 0.38, (pw) => pw.id !== 'wobble' || c.current.shake);
         if (token.current !== my) return;
         if (p) apply(p);
         newQuestion();
@@ -187,9 +207,10 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
       return 'shielded';
     }
     missedQ.current = true;
-    left.current = Math.max(0.5, left.current - WRONG_COST);
+    if (key !== undefined) locks.current.set(key, t.current + LOCK);
+    if (cost) left.current = Math.max(0.5, left.current - cost);
     x.sfx.boing();
-    float(px, py, `-${WRONG_COST}s`, 'oops');
+    float(px, py, cost ? `-${cost}s` : 'Try again', 'oops');
     return 'wrong';
   };
 
@@ -208,8 +229,8 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
     const x = c.current;
     phase.current = 'play';
     x.sfx.whistle();
-    newQuestion();
     o.current.onStart?.(ar.current);
+    newQuestion();
     setTick((n) => n + 1);
   };
 
@@ -218,7 +239,8 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
     token.current += 1;
     phase.current = 'ready'; pause.current = null; q.current = null;
     left.current = seconds; t.current = 0; fx.current = {}; magnetLeft.current = 0; magnetOn.current = false; shield.current = false;
-    if (ar.current) o.current.onStart?.(ar.current);
+    got.current = 0; locks.current.clear();
+    if (ar.current) o.current.onReset?.(ar.current);
     setTick((n) => n + 1);
     if (!c.current.cpu) return;
     const id = window.setTimeout(() => start(), 1800);
@@ -232,15 +254,9 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
       const real = Math.min(0.05, (now - last) / 1000); last = now;
       if (phase.current === 'play' && pause.current !== 'card') {
         const a = ar.current;
-        if (!pause.current) { t.current += real; left.current -= real; }
+        if (!pause.current) { t.current += real; if (!clockless) left.current -= real; }
         o.current.step(real * a.speed, real, a);
-        if (left.current <= 0 && phase.current === 'play' && !pause.current) {
-          phase.current = 'done';
-          const x = c.current;
-          x.sfx.whistle(); x.say("Time's up!", 'big');
-          const my = token.current;
-          window.setTimeout(() => { if (token.current === my) c.current.next(); }, 2000);
-        }
+        if (!clockless && left.current <= 0 && phase.current === 'play' && !pause.current) endBurst();
         setTick((n) => (n + 1) % 1e6);
       }
       raf = requestAnimationFrame(loop);
@@ -249,11 +265,19 @@ export function useArcade(ctx: LabCtx, opts: Opts) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  function endBurst() {
+    phase.current = 'done';
+    const x = c.current;
+    x.sfx.whistle(); x.say(clockless ? 'Great job!' : "Time's up!", 'big');
+    const my = token.current;
+    window.setTimeout(() => { if (token.current === my) c.current.next(); }, 2000);
+  }
+
   useEffect(() => () => { token.current += 1; }, []);
 
   ar.current = {
     phase: phase.current, running: phase.current === 'play' && !pause.current, cheering: pause.current === 'cheer',
-    q: q.current, qn: qn.current, left: Math.max(0, left.current), seconds, t: t.current, speed,
+    q: q.current, qn: qn.current, left: Math.max(0, left.current), seconds, clockless, goal: BURST_GOAL, got: got.current, locked, t: t.current, speed,
     on, magnet: magnetOn.current, shield: shield.current, W, H, u, turn: ctx.taken,
     answer, hurt, start, float, bits, burst, ctx,
   };
@@ -396,15 +420,15 @@ export function ArcadeFrame({ ar, box, floaters, bits, flash, children, hint, la
   const ctx = ar.ctx;
   const still = ctx.still;
   const flip = ar.on('flip');
-  const wobble = ar.on('wobble') && !still;
+  const wobble = ar.on('wobble') && ctx.shake;
   const style = { '--u': `${ar.u}px`, background: bg } as CSSProperties;
   return (
     <div className="absolute inset-0 grid place-items-center">
       <div ref={box} className="absolute inset-0" />
       <div className="relative rounded-panel border-heavy border-border overflow-hidden select-none touch-none" aria-label={label} role="application"
         style={{ ...style, width: ar.W * ar.u, height: ar.H * ar.u, boxShadow: '0 8px 0 #000, 0 24px 44px rgba(36,28,61,0.3)' }}>
-        <motion.div className="absolute inset-0" animate={wobble ? { rotate: [0, -2.2, 2.2, -1.4, 1.4, 0], x: [0, -8, 8, -5, 5, 0] } : { rotate: flip ? 180 : 0, x: 0 }}
-          transition={wobble ? { duration: 0.9, repeat: Infinity } : { type: 'spring', stiffness: 70, damping: 13 }}>
+        <motion.div className="absolute inset-0" animate={wobble ? { rotate: [0, -1, 1, -0.6, 0.6, 0], x: [0, -4, 4, -2, 2, 0] } : { rotate: flip ? 180 : 0, x: 0 }}
+          transition={wobble ? { duration: 0.8, repeat: 2 } : { type: 'spring', stiffness: 70, damping: 13 }}>
           {children}
         </motion.div>
         <Persist ar={ar} rain={rain} />
@@ -447,8 +471,8 @@ function BitView({ b, ar }: { b: Bit; ar: Arcade }) {
 function Banner({ ar }: { ar: Arcade }) {
   const q = ar.q;
   const long = (q?.prompt.length ?? 0) > 70;
-  const frac = ar.left / ar.seconds;
-  const low = ar.left < 6;
+  const frac = ar.clockless ? ar.got / ar.goal : ar.left / ar.seconds;
+  const low = !ar.clockless && ar.left < 6;
   return (
     <div className="absolute left-[1.5%] right-[1.5%] top-[2%] flex items-stretch gap-[1.5%] pointer-events-none" style={{ height: 'calc(var(--u) * 15)' }}>
       <AnimatePresence mode="popLayout">
@@ -460,16 +484,16 @@ function Banner({ ar }: { ar: Arcade }) {
               <SpeakerHigh weight="fill" size={22} aria-hidden="true" />
             </button>
           )}
-          <h2 className="flex-1 min-w-0 font-bold text-center leading-tight text-balance m-0" style={{ fontSize: `calc(var(--u) * ${long ? 3.6 : 4.8})`, color: '#241c3d' }} aria-live="polite">
+          <h2 className="flex-1 min-w-0 font-bold text-center leading-tight text-balance m-0" style={{ fontSize: `max(1rem, calc(var(--u) * ${long ? 3.6 : 4.8}))`, color: '#241c3d' }} aria-live="polite">
             {q ? q.prompt : ' '}
           </h2>
           {q?.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="h-[85%] w-auto rounded-lg border-std border-border object-contain bg-white" />}
         </motion.div>
       </AnimatePresence>
-      <motion.div className="shrink-0 aspect-square h-full rounded-full border-heavy border-border grid place-items-center relative" aria-label={`${Math.ceil(ar.left)} seconds left`}
+      <motion.div className="shrink-0 aspect-square h-full rounded-full border-heavy border-border grid place-items-center relative" aria-label={ar.clockless ? `${ar.got} of ${ar.goal} right` : `${Math.ceil(ar.left)} seconds left`}
         style={{ background: `conic-gradient(${low ? '#ef7d96' : '#8fe3a0'} ${frac * 360}deg, #fbfcf8 0deg)`, boxShadow: '0 5px 0 #000' }}
         animate={low && !ar.ctx.still && ar.running ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: 0.5, repeat: low ? Infinity : 0 }}>
-        <span className="font-display leading-none rounded-full bg-surface border-std border-border grid place-items-center" style={{ width: '64%', height: '64%', fontSize: 'calc(var(--u) * 5)' }}>{Math.ceil(ar.left)}</span>
+        <span className="font-display leading-none rounded-full bg-surface border-std border-border grid place-items-center" style={{ width: '64%', height: '64%', fontSize: 'calc(var(--u) * 5)' }}>{ar.clockless ? ar.goal - ar.got : Math.ceil(ar.left)}</span>
       </motion.div>
       <FxChips ar={ar} />
     </div>
@@ -484,7 +508,7 @@ function FxChips({ ar }: { ar: Arcade }) {
   return (
     <div className="absolute right-0 flex gap-1.5 justify-end flex-wrap" style={{ top: 'calc(var(--u) * 16.5)' }}>
       {tags.map((s) => (
-        <motion.span key={s} layout initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-full border-std border-border bg-accent font-bold px-2.5 py-0.5 whitespace-nowrap" style={{ fontSize: 'calc(var(--u) * 2.8)', boxShadow: '0 2px 0 #000' }}>{s}</motion.span>
+        <motion.span key={s} layout initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-full border-std border-border bg-accent font-bold px-2.5 py-0.5 whitespace-nowrap" style={{ fontSize: 'max(0.8125rem, calc(var(--u) * 2.8))', boxShadow: '0 2px 0 #000' }}>{s}</motion.span>
       ))}
     </div>
   );
@@ -533,7 +557,6 @@ function Persist({ ar, rain }: { ar: Arcade; rain: boolean }) {
       {ar.on('double') && (
         <motion.div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 calc(var(--u) * 10) rgba(253,220,80,0.75)' }} animate={still ? undefined : { opacity: [0.6, 1, 0.6] }} transition={{ duration: 1.2, repeat: Infinity }} />
       )}
-      {rain && ar.on('chickens') && <ChickenRain still={still} />}
       {ar.on('slow') && (
         <motion.span className="absolute" style={{ bottom: '2%', width: 'calc(var(--u) * 12)', height: 'calc(var(--u) * 12)' }} initial={{ left: '16%' }} animate={{ left: '105%' }} transition={{ duration: 8, ease: 'linear' }}><SnailArt /></motion.span>
       )}
@@ -543,6 +566,13 @@ function Persist({ ar, rain }: { ar: Arcade; rain: boolean }) {
 
 function Flake() {
   return <svg viewBox="0 0 20 20" className="w-full h-full"><path d="M10 1v18M2 5.5l16 9M2 14.5l16-9" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" /><path d="M10 1v18M2 5.5l16 9M2 14.5l16-9" stroke="#7fc8f0" strokeWidth="1" strokeLinecap="round" /></svg>;
+}
+
+// Chicken Rain falls between the scenery and the targets, see-through, so it
+// never covers an answer. Each game puts it right after its scenery.
+export function Rain({ ar }: { ar: Arcade }) {
+  if (!ar.on('chickens')) return null;
+  return <div className="absolute inset-0 pointer-events-none opacity-40"><ChickenRain still={ar.ctx.still} /></div>;
 }
 
 function ChickenRain({ still }: { still: boolean }) {
