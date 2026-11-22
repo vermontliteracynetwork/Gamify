@@ -17,9 +17,9 @@ const POWERS: LabPower[] = [
   { id: 'rocket', name: 'Rocket Shoes', desc: 'Your roll counts double this turn.', enter: 'zoom', art: <Art kind="rocket" /> },
   { id: 'jump', name: 'Super Jump', desc: 'One giant leap over three spaces.', enter: 'drop', art: <Art kind="jump" /> },
   { id: 'double', name: 'Double Roll', desc: 'Roll two dice and add them up.', enter: 'spin', art: <Art kind="double" /> },
-  { id: 'shell', name: 'Turtle Shell', desc: 'The runner just ahead goes half speed on their next roll.', enter: 'drop', art: <Art kind="shell" /> },
+  { id: 'mud', name: 'Sticky Mud Ball', desc: 'A sticky mud ball lands on the runner just ahead: half speed on their next roll.', enter: 'drop', art: <Art kind="mud" /> },
   { id: 'swap', name: 'Teleport Swap', desc: 'Swap places with the runner just ahead of you.', takes: true, enter: 'zoom', art: <Art kind="swap" /> },
-  { id: 'banana', name: 'Banana Peel', desc: 'Whoops! The leader slips back two spaces. Even if it is you!', silly: true, art: <Art kind="banana" /> },
+  { id: 'soap', name: 'Soap Slide', desc: 'A bubbly soap puddle! The runner in front slips back two spaces.', silly: true, art: <Art kind="soap" /> },
   { id: 'wind', name: 'Gust of Giggles', desc: 'A giant giggle wind blows every runner one space ahead.', silly: true, art: <Art kind="wind" /> },
 ];
 
@@ -53,7 +53,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [mv, setMv] = useState<Record<string, Move>>({});
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [pop, setPop] = useState<{ id: string; at: number; kind: Surprise; n: number } | null>(null);
-  const [throwFx, setThrow] = useState<{ kind: 'banana' | 'shell'; to: string; n: number } | null>(null);
+  const [throwFx, setThrow] = useState<{ kind: 'soap' | 'mud'; x: number; y: number; n: number } | null>(null);
   const [shells, setShells] = useState<Set<string>>(new Set());
   const shellsRef = useRef(shells); shellsRef.current = shells;
   const [rocket, setRocket] = useState<string | null>(null);
@@ -100,7 +100,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setRevealed((r) => new Set(r).add(`${id}:${at}`));
     setPop({ id, at, kind, n: Date.now() });
     if (kind === 'mystery') {
-      playClip('/lab/track-race/mystery.mp3', x.settings); x.say('Mystery box!');
+      playClip('/lab/track-race/mystery.mp3', x.settings); x.say('Surprise gift!');
       await sleep(1300);
       kind = (['boost', 'spring', 'mud'] as const)[Math.floor(Math.random() * 3)];
       setPop({ id, at, kind, n: Date.now() });
@@ -119,16 +119,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (p.id === 'jump') {
       x.sfx.boing(); setFx(me, 'leap'); place(me, posRef.current[me] + 3, 'slow'); await sleep(900); sync();
     }
-    if (p.id === 'banana') {
-      const l = leaderId(posRef.current, order); if (!l) return;
-      setThrow({ kind: 'banana', to: l, n: Date.now() }); await sleep(750);
+    if (p.id === 'soap') {
+      const l = leaderId(posRef.current, order); if (!l || l === me) return;
+      setThrow({ kind: 'soap', x: cx(posRef.current[l]), y: cy(lane(l)), n: Date.now() }); await sleep(750);
       x.sfx.oops(); setFx(l, 'spin'); x.say(`${name(l)} slipped!`, 'oops');
       place(l, posRef.current[l] - 2, 'slow'); x.sfx.slideDown(); await sleep(1000); sync(); setThrow(null);
     }
-    if (p.id === 'shell') {
+    if (p.id === 'mud') {
       const t = aheadOf(posRef.current, order, me); if (!t) return;
-      setThrow({ kind: 'shell', to: t, n: Date.now() }); await sleep(750);
-      x.sfx.thud(); setFx(t, 'bonk'); setShells((s) => new Set(s).add(t)); x.say('Turtle shell!', 'oops'); await sleep(700); setThrow(null);
+      setThrow({ kind: 'mud', x: cx(posRef.current[t]), y: cy(lane(t)), n: Date.now() }); await sleep(750);
+      x.sfx.splash(); setFx(t, 'bonk'); setShells((s) => new Set(s).add(t)); x.say('Sticky mud!', 'oops'); await sleep(700); setThrow(null);
     }
     if (p.id === 'swap') {
       const t = aheadOf(posRef.current, order, me); if (!t) return;
@@ -158,8 +158,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if (!live) return;
       if (!ok) { c.current.sfx.wrong(); setFx(me, 'shrug'); await sleep(800); if (live) c.current.next(); return; }
       const p = await c.current.power(0.45, (pw) => {
-        if (pw.id === 'banana') return !!leaderId(posRef.current, order);
-        if (pw.id === 'swap' || pw.id === 'shell') return !!aheadOf(posRef.current, order, me);
+        if (pw.id === 'soap') { const l = leaderId(posRef.current, order); return !!l && l !== me && posRef.current[l] > posRef.current[me]; }
+        if (pw.id === 'swap' || pw.id === 'mud') return !!aheadOf(posRef.current, order, me);
         return true;
       });
       if (!live) return;
@@ -172,7 +172,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       let n = vals.reduce((a, b) => a + b, 0);
       if (p?.id === 'rocket') n *= 2;
       if (shellsRef.current.has(me)) {
-        n = shellRoll(n); c.current.say('Slow shell! Half speed', 'oops');
+        n = shellRoll(n); c.current.say('Sticky mud! Half speed', 'oops');
         setShells((s) => { const t = new Set(s); t.delete(me); return t; });
         await sleep(900);
       }
@@ -251,13 +251,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
               </motion.div>
             )}
           </AnimatePresence>
-          {/* Thrown banana or shell. */}
+          {/* A thrown soap puddle or mud ball, aimed where the runner stood. */}
           <AnimatePresence>
             {throwFx && (
               <motion.div key={throwFx.n} className="absolute z-20 pointer-events-none" style={{ width: token * 0.9, height: token * 0.9, left: 0, top: 0 }}
-                initial={{ x: w / 2, y: -token, rotate: 0 }} animate={{ x: cx(pos[throwFx.to]) - token * 0.45, y: cy(lane(throwFx.to)) - token * 0.45, rotate: 720 }} exit={{ opacity: 0, scale: 0.3 }}
+                initial={{ x: w / 2, y: -token, rotate: 0 }} animate={{ x: throwFx.x - token * 0.45, y: throwFx.y - token * 0.45, rotate: 720 }} exit={{ opacity: 0, scale: 0.3 }}
                 transition={{ duration: ctx.still ? 0 : 0.7, ease: 'easeIn' }}>
-                <svg viewBox="0 0 100 100" className="w-full h-full">{throwFx.kind === 'banana' ? <BananaShape /> : <ShellShape />}</svg>
+                <svg viewBox="0 0 100 100" className="w-full h-full">{throwFx.kind === 'soap' ? <SoapShape /> : <MudShape />}</svg>
               </motion.div>
             )}
           </AnimatePresence>
@@ -280,8 +280,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   <TeamBadge colorIndex={p.colorIndex} size={token} />
                 </motion.span>
                 {shells.has(p.id) && (
-                  <motion.svg viewBox="0 0 100 100" className="absolute -top-[42%] left-[12%] w-[76%]" initial={ctx.still ? false : { y: -30, scale: 0.4 }} animate={{ y: 0, scale: 1 }} aria-label="Turtle shell">
-                    <ShellShape />
+                  <motion.svg viewBox="0 0 100 100" className="absolute -top-[42%] left-[12%] w-[76%]" initial={ctx.still ? false : { y: -30, scale: 0.4 }} animate={{ y: 0, scale: 1 }} aria-label="Sticky mud">
+                    <MudShape />
                   </motion.svg>
                 )}
                 {winner === p.id && <motion.span className="absolute -top-[70%] left-1/2 -translate-x-1/2 text-[1.6em]" initial={{ scale: 0 }} animate={{ scale: 1 }} aria-hidden="true"><Crown /></motion.span>}
@@ -393,16 +393,18 @@ function SurpriseArt({ kind, size }: { kind: Surprise; size: number }) {
       {kind === 'boost' && <><rect x={-42} y={-42} width={84} height={84} rx={16} fill="#fdfd94" stroke="#000" strokeWidth={6} /><path d="M-26 -22 L0 0 L-26 22 M4 -22 L30 0 L4 22" stroke="#000" strokeWidth={10} fill="none" strokeLinecap="round" /></>}
       {kind === 'spring' && <><rect x={-34} y={26} width={68} height={14} rx={5} fill="#241c3d" stroke="#000" strokeWidth={5} /><path d="M-26 26 L26 14 L-26 2 L26 -10 L-26 -22 L26 -34" stroke="#9aa8f2" strokeWidth={9} fill="none" strokeLinecap="round" /><path d="M-26 26 L26 14 L-26 2 L26 -10 L-26 -22 L26 -34" stroke="#000" strokeWidth={3} fill="none" strokeLinecap="round" /></>}
       {kind === 'mud' && <><path d="M-44 6 C-44 -18 -12 -24 0 -14 C14 -28 46 -16 42 6 C46 26 10 34 -2 26 C-20 36 -46 26 -44 6z" fill="#8a5a3b" stroke="#000" strokeWidth={6} /><ellipse cx={-12} cy={-4} rx={10} ry={5} fill="#b07a52" /></>}
-      {kind === 'mystery' && <><rect x={-40} y={-40} width={80} height={80} rx={14} fill="#c58ce8" stroke="#000" strokeWidth={6} /><text x={0} y={24} textAnchor="middle" fontSize={64} fontWeight={900} fill="#fff" stroke="#000" strokeWidth={4} paintOrder="stroke" fontFamily="system-ui">?</text></>}
+      {kind === 'mystery' && <><rect x={-38} y={-24} width={76} height={62} rx={8} fill="#c58ce8" stroke="#000" strokeWidth={6} /><rect x={-44} y={-38} width={88} height={20} rx={6} fill="#ef7d96" stroke="#000" strokeWidth={6} /><rect x={-8} y={-38} width={16} height={76} fill="#fdfd94" stroke="#000" strokeWidth={4} /><path d="M0 -40 C-20 -62 -36 -44 -6 -40 M0 -40 C20 -62 36 -44 6 -40" fill="#fdfd94" stroke="#000" strokeWidth={5} /></>}
     </g>
   );
 }
 
-function BananaShape() {
-  return <g stroke="#000" strokeWidth={5} strokeLinejoin="round"><path d="M18 30 C30 78 74 84 88 56 C70 70 40 64 30 26z" fill="#f6e04a" /><path d="M30 26 L24 14 L34 20z" fill="#8a5a3b" /><path d="M40 60 C30 74 18 80 12 76 M62 72 C64 86 58 94 52 94" fill="none" /></g>;
+// A bubbly soap puddle.
+function SoapShape() {
+  return <g stroke="#000" strokeWidth={4} strokeLinejoin="round"><path d="M10 66 C10 52 30 50 42 54 C54 46 86 50 90 64 C94 78 64 84 50 80 C34 86 10 82 10 66z" fill="#7fd6e3" /><path d="M24 64 Q40 58 56 64" stroke="#fff" strokeOpacity={0.8} fill="none" />{[[30, 38, 10], [52, 30, 13], [72, 42, 8], [62, 16, 6]].map(([x, y, r], i) => <g key={i}><circle cx={x} cy={y} r={r} fill="#fbfcf8" fillOpacity={0.7} /><circle cx={x - r * 0.35} cy={y - r * 0.35} r={r * 0.25} fill="#fff" stroke="none" /></g>)}</g>;
 }
-function ShellShape() {
-  return <g stroke="#000" strokeWidth={5} strokeLinejoin="round"><path d="M10 70 C10 30 90 30 90 70z" fill="#5cc068" /><path d="M30 68 L38 46 L62 46 L70 68 M38 46 L50 36 L62 46" fill="none" strokeWidth={4} /><rect x={6} y={66} width={88} height={12} rx={6} fill="#fdfd94" /></g>;
+// A sticky mud ball with drips.
+function MudShape() {
+  return <g stroke="#000" strokeWidth={4} strokeLinejoin="round"><path d="M22 48 C18 26 42 14 56 20 C74 16 86 34 80 50 C84 66 70 78 52 76 C30 80 18 66 22 48z" fill="#8a5a3b" /><path d="M36 74 q0 12 5 14 q5 -2 4 -14 M60 74 q0 9 4 11 q4 -2 3 -11" fill="#8a5a3b" /><ellipse cx="40" cy="34" rx="9" ry="5" fill="#b07a52" stroke="none" /><circle cx="62" cy="52" r="4" fill="#6b4329" stroke="none" /></g>;
 }
 
 // Classic power-up pictures, drawn in code.
@@ -413,9 +415,9 @@ function Art({ kind }: { kind: string }) {
       {kind === 'rocket' && <>{ring('#b4c4fb')}<path d="M14 60 Q22 50 30 58 Q22 66 14 60z" fill="#f6c544" stroke="#000" strokeWidth="3" /><path d="M30 46 L54 46 Q58 30 70 32 L74 52 Q86 54 84 66 L30 66z" fill="#ef7d96" stroke="#000" strokeWidth="4" strokeLinejoin="round" /><rect x="28" y="64" width="58" height="8" rx="4" fill="#fbfcf8" stroke="#000" strokeWidth="3.5" /><path d="M42 52 h10 M42 58 h14" stroke="#000" strokeWidth="3" /></>}
       {kind === 'jump' && <>{ring('#8fe3a0')}<path d="M26 72 Q50 8 74 60" stroke="#000" strokeWidth="5" fill="none" strokeDasharray="7 6" strokeLinecap="round" /><path d="M66 52 L76 64 L80 48z" fill="#000" /><path d="M30 82 L46 74 L30 66 L46 58" stroke="#241c3d" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" /></>}
       {kind === 'double' && <>{ring('#fdfd94')}<rect x="16" y="30" width="34" height="34" rx="7" fill="#fff" stroke="#000" strokeWidth="4" transform="rotate(-12 33 47)" /><rect x="50" y="38" width="34" height="34" rx="7" fill="#fff" stroke="#000" strokeWidth="4" transform="rotate(10 67 55)" /><circle cx="27" cy="40" r="4" /><circle cx="38" cy="52" r="4" /><circle cx="60" cy="48" r="4" /><circle cx="67" cy="56" r="4" /><circle cx="74" cy="64" r="4" /></>}
-      {kind === 'shell' && <>{ring('#e9eefe')}<g transform="translate(0 4)"><ShellShape /></g><circle cx="86" cy="64" r="7" fill="#9bd35a" stroke="#000" strokeWidth="3.5" /></>}
+      {kind === 'mud' && <>{ring('#fdfd94')}<MudShape /></>}
       {kind === 'swap' && <>{ring('#c58ce8')}<ellipse cx="50" cy="50" rx="26" ry="30" fill="#241c3d" stroke="#000" strokeWidth="4" /><ellipse cx="50" cy="50" rx="16" ry="20" fill="#7fd6e3" /><path d="M20 36 h18 l-6 -6 M80 64 h-18 l6 6" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" /><path d="M78 22 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#fdfd94" stroke="#000" strokeWidth="2" /></>}
-      {kind === 'banana' && <>{ring('#fdfd94')}<g transform="translate(-2 -4)"><BananaShape /></g></>}
+      {kind === 'soap' && <>{ring('#c9e4ff')}<SoapShape /></>}
       {kind === 'wind' && <>{ring('#7fd6e3')}<path d="M18 40 Q50 22 70 36 Q82 46 70 54 Q60 58 58 50 M14 58 H62 Q76 58 76 68 Q76 78 64 76 M22 74 H40" stroke="#000" strokeWidth="5" fill="none" strokeLinecap="round" /><circle cx="40" cy="44" r="3.5" /><circle cx="52" cy="42" r="3.5" /><path d="M40 50 Q46 56 54 49" stroke="#000" strokeWidth="3" fill="none" strokeLinecap="round" /></>}
     </svg>
   );
@@ -468,7 +470,7 @@ const def: LabDef = {
     { id: 'surprise-boost', label: 'Speed pad', hint: 'Hidden space: zoom two ahead' },
     { id: 'surprise-spring', label: 'Spring', hint: 'Hidden space: bounce three ahead' },
     { id: 'surprise-mud', label: 'Mud puddle', hint: 'Hidden space: slide back one' },
-    { id: 'surprise-mystery', label: 'Mystery box', hint: 'Hidden space: any of the three' },
+    { id: 'surprise-mystery', label: 'Surprise gift', hint: 'Hidden space: any of the three' },
     ...POWERS.map((p) => ({ id: `power-${p.id}`, label: p.name, hint: p.desc })),
   ],
   Play,

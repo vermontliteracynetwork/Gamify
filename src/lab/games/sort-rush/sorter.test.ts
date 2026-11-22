@@ -4,8 +4,9 @@ import { binAt, cpuBin, freeLane, pickBins, scoreFor } from './sorter';
 describe('sort rush', () => {
   it('scores more on a combo and doubles', () => {
     expect(scoreFor(0)).toBe(1);
-    expect(scoreFor(4)).toBe(2);
-    expect(scoreFor(9, true)).toBe(6);
+    expect(scoreFor(4)).toBe(1);
+    expect(scoreFor(5)).toBe(2);
+    expect(scoreFor(9, true)).toBe(4);
   });
   it('finds the bin under a spot', () => {
     expect(binAt(0.1, 3)).toBe(0);

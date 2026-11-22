@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { above, alongPath, hopsFrom, LADDERS, landing, nextLadder, rungs, SNAKES, snakePoints, squareXY } from './board';
+import { above, exactPath, alongPath, hopsFrom, LADDERS, landing, nextLadder, rungs, SNAKES, snakePoints, squareXY } from './board';
 
 describe('snakes and ladders', () => {
   it('lays squares out back and forth', () => {
@@ -26,6 +26,10 @@ describe('snakes and ladders', () => {
   it('hops stop on the last square', () => {
     expect(hopsFrom(97, 6)).toEqual([98, 99, 100]);
     expect(hopsFrom(0, 2)).toEqual([1, 2]);
+  });
+  it('bounces back past the last square on an exact roll', () => {
+    expect(exactPath(97, 5)).toEqual([98, 99, 100, 99, 98]);
+    expect(exactPath(96, 4)).toEqual([97, 98, 99, 100]);
   });
   it('finds the next ladder in reach', () => {
     expect(nextLadder(0)).toBe(3);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type PointerEvent as RPointerEvent } from 'react';
-import { ArrowFatDown, ArrowFatLeft, ArrowFatRight, ArrowFatUp, CheckCircle, Cloud, PersonSimpleRun, Timer } from '@phosphor-icons/react';
+import { ArrowFatDown, ArrowFatLeft, ArrowFatRight, ArrowFatUp, CheckCircle, Cloud as CloudIcon, PersonSimpleRun, Timer } from '@phosphor-icons/react';
 import type { LabCtx, LabDef } from '../../types';
 import { ArcadeFrame, StarJar, arcadePowers, clip, labelSize, useArcade, type Arcade } from '../balloon-pop/arcade';
 import { TEAM_COLORS } from '../../../engine/turns';
@@ -13,7 +13,7 @@ import { canGo, dealZones, dirTo, ghostDir, makeMaze, path, step, zoneOf, type D
 
 const POWERS = arcadePowers('maze-dash', {
   slow: { name: 'Slow-mo', desc: 'The clouds wander slowly for a while.' },
-  magnet: { name: 'Magnet', desc: 'A gold trail shows the way to the right room for two questions.' },
+  magnet: { name: 'Magnet', desc: 'For two questions the magnet pulls the silly clouds away from you.' },
   shield: { name: 'Shield', desc: 'The next cloud bump does not send you back.' },
   double: { name: 'Double Points', desc: 'Every right room scores two for a while.' },
   time: { name: 'Extra Time', desc: 'Five more seconds on the clock.' },
@@ -24,10 +24,10 @@ const POWERS = arcadePowers('maze-dash', {
 
 const FLY = 0.7;
 const ROOM = ['#fdfd94', '#f5a08c', '#8fe3a0', '#b4c4fb'];
-const GHOST = ['#ffd6e0', '#d6f5ff', '#fff3b0'];
+const PUFF = ['#ffd6e0', '#d6f5ff', '#fff3b0'];
 interface Mover { at: number; to: number | null; t: number; dir: Dir; came: Dir | null }
 interface Runner extends Mover { queued: Dir | null; goal: number | null; inv: number; steps: number; fly?: { c: number; r: number; t: number } }
-interface Ghost extends Mover { home: number; color: string; hop: number }
+interface Cloud extends Mover { home: number; color: string; hop: number }
 
 function layout(W: number) {
   const wide = W >= 118;
@@ -42,8 +42,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const rooms = useRef<number[]>([-1, -1, -1, -1]);
   const lock = useRef(-1);
   const runner = useRef<Runner>({ at: 0, to: null, t: 0, dir: 1, came: null, queued: null, goal: null, inv: 0, steps: 0 });
-  const ghosts = useRef<Ghost[]>([]);
-  const dots = useRef<Set<number>>(new Set());
+  const clouds = useRef<Cloud[]>([]);
+  const steps = useRef<{ i: number; t: number; k: number }[]>([]);
   const swipe = useRef<[number, number] | null>(null);
   const world = useRef<HTMLDivElement>(null);
   const L = useRef(layout(160));
@@ -54,12 +54,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
     maze.current = m;
     runner.current = { at: m.start, to: null, t: 0, dir: 1, came: null, queued: null, goal: null, inv: 0, steps: 0 };
     const homes = [Math.floor(l.rows / 2) * l.cols, Math.floor(l.rows / 2) * l.cols + l.cols - 1, Math.floor(l.cols / 2)];
-    ghosts.current = homes.slice(0, l.cols < 11 ? 2 : 3).map((h, i) => ({ at: h, to: null, t: 0, dir: 0, came: null, home: h, color: GHOST[i], hop: i }));
-    dots.current = new Set([...Array(l.cols * l.rows).keys()].filter((i) => zoneOf(m, i) < 0 && i !== m.start));
+    clouds.current = homes.slice(0, l.cols < 11 ? 2 : 3).map((h, i) => ({ at: h, to: null, t: 0, dir: 0, came: null, home: h, color: PUFF[i], hop: i }));
+    steps.current = [];
   }
 
   const { ar, box, floaters, bits, flash } = useArcade(ctx, {
-    onStart: (a) => build(a),
+    onReset: (a) => build(a),
+    // Go was tapped: build again only if the box changed shape since.
+    onStart: (a) => { const l = layout(a.W); if (!maze.current || l.cols !== maze.current.cols) build(a); },
     onQuestion: (q) => {
       const m = maze.current; if (!m) return;
       const R = runner.current;
@@ -77,11 +79,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
         if (opts.length) R.goal = opts[Math.floor(Math.random() * opts.length)].z;
       }
       moveRunner(m, R, real * 4.6, a);
-      const lean = a.on('giant') ? -0.85 : 0.45;
-      for (const g of ghosts.current) moveGhost(m, g, dt * 2.5, lean);
+      const lean = a.on('giant') || a.magnet ? -0.85 : 0.45;
+      for (const g of clouds.current) moveCloud(m, g, dt * 2.5, lean);
       // Cloud bumps.
       const [rx, ry] = cellPos(m, R);
-      for (const g of ghosts.current) {
+      for (const g of clouds.current) {
         const [gx, gy] = cellPos(m, g);
         if (Math.hypot(rx - gx, ry - gy) < 0.6 && a.t > R.inv) {
           const { x, y } = toWorld(rx, ry);
@@ -140,7 +142,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     }
   }
   function arrive(m: Maze, at: number, a: Arcade) {
-    if (dots.current.delete(at)) { if (dots.current.size % 3 === 0) ctx.sfx.blip(dots.current.size % 12); if (!dots.current.size) build2(m); }
+    // Footprints: the last few steps, fading.
+    const n = (steps.current[steps.current.length - 1]?.k ?? 0) + 1;
+    steps.current = [...steps.current.filter((s) => a.t - s.t < 2.5).slice(-9), { i: at, t: a.t, k: n }];
+    if (n % 4 === 0) ctx.sfx.blip(n % 12);
     const z = zoneOf(m, at);
     if (z < 0) { lock.current = -1; return; }
     if (z === lock.current || rooms.current[z] < 0) return;
@@ -150,8 +155,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (res === 'right') { clip('/lab/maze-dash/zone.mp3', ctx.settings, 0.7); a.bits(x, y, 14, 'confetti', [ROOM[z], '#fff', '#fdfd94']); runner.current.goal = null; }
     else runner.current.goal = null;
   }
-  function build2(m: Maze) { dots.current = new Set([...Array(m.cols * m.rows).keys()].filter((i) => zoneOf(m, i) < 0 && i !== m.start)); }
-  function moveGhost(m: Maze, g: Ghost, d: number, lean: number) {
+  function moveCloud(m: Maze, g: Cloud, d: number, lean: number) {
     if (d <= 0) return;
     if (g.to === null) { const w = ghostDir(m, g.at, g.came, runner.current.at, lean); g.dir = w; g.to = step(m, g.at, w); g.t = 0; }
     g.t += d;
@@ -191,7 +195,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         {!ctx.cpu && ar.phase === 'play' && <Pad style={padStyle} go={go} />}
       </>}>
       <div ref={world} className="absolute inset-0" onPointerDown={(e) => { swipe.current = [e.clientX, e.clientY]; }} onPointerUp={onUp}>
-        {m && <Board m={m} ar={ar} toWorld={toWorld} rooms={rooms.current} dots={dots.current} runner={runner.current} ghosts={ghosts.current} cellPos={cellPos} giant={giant} frozen={frozen}
+        {m && <Board m={m} ar={ar} toWorld={toWorld} rooms={rooms.current} steps={steps.current} runner={runner.current} clouds={clouds.current} cellPos={cellPos} giant={giant} frozen={frozen}
           onRoom={(z) => { if (ctx.cpu || !ar.running) return; const R = runner.current; R.goal = z; R.queued = null; }} />}
       </div>
     </ArcadeFrame>
@@ -200,20 +204,20 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
 function Pad({ style, go }: { style: CSSProperties; go: (d: Dir) => void }) {
   const b = (d: Dir, label: string, Icon: typeof ArrowFatUp, area: string) => (
-    <button type="button" aria-label={label} onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); go(d); }} onKeyDown={(e) => { if (e.key === 'Enter') go(d); }}
+    <button type="button" aria-label={label} onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); go(d); }} onClick={(e) => { if (e.detail === 0) go(d); }}
       className="rounded-2xl border-heavy border-border bg-accent grid place-items-center motion-safe:hover:scale-105 motion-safe:active:scale-90 motion-safe:transition-transform"
-      style={{ gridArea: area, boxShadow: '0 4px 0 #000' }}><Icon weight="fill" size="58%" aria-hidden="true" /></button>
+      style={{ gridArea: area, boxShadow: '0 4px 0 #000', fontSize: 'max(0.8125rem, calc(var(--u) * 2.6))' }}><span className="grid justify-items-center gap-0.5 font-bold leading-none"><Icon weight="fill" size="1.6em" aria-hidden="true" />{label}</span></button>
   );
   return (
-    <div className="absolute z-10 grid gap-1.5" style={{ ...style, width: 'max(9.5rem, calc(var(--u) * 25))', height: 'max(9.5rem, calc(var(--u) * 25))', gridTemplateAreas: '". u ." "l . r" ". d ."', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)' }}>
+    <div className="absolute z-10 grid gap-1.5" style={{ ...style, width: 'max(10.5rem, calc(var(--u) * 27))', height: 'max(10.5rem, calc(var(--u) * 27))', gridTemplateAreas: '". u ." "l . r" ". d ."', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)' }}>
       {b(0, 'Up', ArrowFatUp, 'u')}{b(3, 'Left', ArrowFatLeft, 'l')}{b(1, 'Right', ArrowFatRight, 'r')}{b(2, 'Down', ArrowFatDown, 'd')}
     </div>
   );
 }
 
-function Board({ m, ar, toWorld, rooms, dots, runner, ghosts, cellPos, giant, frozen, onRoom }: {
+function Board({ m, ar, toWorld, rooms, steps, runner, clouds, cellPos, giant, frozen, onRoom }: {
   m: Maze; ar: Arcade; toWorld: (c: number, r: number) => { x: number; y: number; cs: number; ox: number; oy: number };
-  rooms: number[]; dots: Set<number>; runner: Runner; ghosts: Ghost[]; cellPos: (m: Maze, v: Mover) => [number, number]; giant: boolean; frozen: boolean; onRoom: (z: number) => void;
+  rooms: number[]; steps: { i: number; t: number; k: number }[]; runner: Runner; clouds: Cloud[]; cellPos: (m: Maze, v: Mover) => [number, number]; giant: boolean; frozen: boolean; onRoom: (z: number) => void;
 }) {
   const { cs, ox, oy } = toWorld(0, 0);
   const flip = ar.on('flip');
@@ -232,8 +236,7 @@ function Board({ m, ar, toWorld, rooms, dots, runner, ghosts, cellPos, giant, fr
   let [rc, rr] = cellPos(m, runner);
   const fk = runner.fly ? (ar.t - runner.fly.t) / FLY : 1;
   if (runner.fly && fk < 1) { const e = 1 - (1 - fk) ** 2; rc = runner.fly.c + (rc - runner.fly.c) * e; rr = runner.fly.r + (rr - runner.fly.r) * e - Math.sin(fk * Math.PI) * 2.2; }
-  const trail = ar.magnet && right >= 0 ? [runner.to ?? runner.at, ...path(m, runner.to ?? runner.at, m.zones[right])] : [];
-  const blink = ar.t < runner.inv && !ar.ctx.still && Math.floor(ar.t * 8) % 2 === 0;
+  const safe = ar.t < runner.inv;
   const R = toWorld(rc, rr);
   const rs = cs * (giant ? 1.6 : 0.9);
   const moving = runner.to !== null;
@@ -245,10 +248,16 @@ function Board({ m, ar, toWorld, rooms, dots, runner, ghosts, cellPos, giant, fr
         {m.zones.map((z, k) => {
           const c0 = Math.min(...z.map((i) => i % m.cols)), r0 = Math.min(...z.map((i) => Math.floor(i / m.cols)));
           const c1 = Math.max(...z.map((i) => i % m.cols)), r1 = Math.max(...z.map((i) => Math.floor(i / m.cols)));
-          return rooms[k] >= 0 && <rect key={k} x={ox + c0 * cs} y={oy + r0 * cs} width={(c1 - c0 + 1) * cs} height={(r1 - r0 + 1) * cs} fill={ROOM[k]} opacity={ar.magnet && k === right ? 1 : 0.8} />;
+          return rooms[k] >= 0 && <rect key={k} x={ox + c0 * cs} y={oy + r0 * cs} width={(c1 - c0 + 1) * cs} height={(r1 - r0 + 1) * cs} fill={ROOM[k]} opacity={0.8} />;
         })}
-        {[...dots].map((i) => { const p = toWorld(i % m.cols, Math.floor(i / m.cols)); return <circle key={i} cx={p.x} cy={p.y} r={cs * 0.08} fill="#f6c544" stroke="#241c3d" strokeWidth={cs * 0.025} />; })}
-        {trail.length > 1 && <polyline points={trail.map((i) => { const p = toWorld(i % m.cols, Math.floor(i / m.cols)); return `${p.x},${p.y}`; }).join(' ')} fill="none" stroke="#f6c544" strokeWidth={cs * 0.18} strokeDasharray={`${cs * 0.2} ${cs * 0.2}`} strokeLinecap="round" strokeLinejoin="round" />}
+        {steps.map((st) => {
+          const p = toWorld(st.i % m.cols, Math.floor(st.i / m.cols));
+          const side = st.k % 2 ? 1 : -1;
+          return <g key={st.k} opacity={Math.max(0, 0.55 - (ar.t - st.t) * 0.22)} transform={`translate(${p.x + side * cs * 0.12} ${p.y + side * cs * 0.08})`}>
+            <ellipse rx={cs * 0.09} ry={cs * 0.11} fill="#a7744a" />
+            {[-1, 0, 1].map((k) => <circle key={k} cx={k * cs * 0.07} cy={-cs * 0.15} r={cs * 0.035} fill="#a7744a" />)}
+          </g>;
+        })}
         <path d={d} stroke="#241c3d" strokeWidth={cs * 0.34} strokeLinecap="round" fill="none" />
         <path d={d} stroke="#5cc37a" strokeWidth={cs * 0.2} strokeLinecap="round" fill="none" />
         <path d={d} stroke="#8fe3a0" strokeWidth={cs * 0.07} strokeLinecap="round" fill="none" transform={`translate(${-cs * 0.03} ${-cs * 0.03})`} />
@@ -263,23 +272,23 @@ function Board({ m, ar, toWorld, rooms, dots, runner, ghosts, cellPos, giant, fr
           <button key={k} type="button" disabled={ar.ctx.cpu || !ar.running} aria-label={`Room: ${text}`} onPointerDown={(e) => { e.stopPropagation(); onRoom(k); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRoom(k); } }}
             className="absolute grid place-items-center p-[3%] disabled:cursor-default focus-visible:outline-4 focus-visible:outline-black rounded-md group"
             style={{ ...pct(ox + c0 * cs + cs * 0.18, oy + r0 * cs + cs * 0.18), width: `calc(var(--u) * ${w - cs * 0.36})`, height: `calc(var(--u) * ${h - cs * 0.36})` }}>
-            <span className={`font-bold text-center leading-[1.05] break-words motion-safe:group-hover:scale-105 motion-safe:transition-transform ${ar.magnet && k === right ? 'motion-safe:animate-pulse' : ''}`}
+            <span className={`font-bold text-center leading-[1.05] break-words motion-safe:group-hover:scale-105 motion-safe:transition-transform `}
               style={{ fontSize: `calc(var(--u) * ${labelSize(text, w * 0.9, 5)})`, color: '#241c3d', transform: flip ? 'rotate(180deg)' : undefined, textShadow: '0 1px 0 #fff' }}>{text}</span>
           </button>
         );
       })}
-      {ghosts.map((g, i) => {
+      {clouds.map((g, i) => {
         const [gc, gr] = cellPos(m, g);
         const p = toWorld(gc, gr);
         const s = cs * 1.05;
         return (
           <span key={i} className="absolute pointer-events-none" style={{ ...pct(p.x - s / 2, p.y - s / 2 + (ar.ctx.still || frozen ? 0 : Math.sin(ar.t * 6 + g.hop) * cs * 0.06)), width: `calc(var(--u) * ${s})`, height: `calc(var(--u) * ${s})` }}>
-            <GhostCloud color={g.color} scared={giant} frozen={frozen} look={g.dir} t={ar.t} still={ar.ctx.still} />
+            <PuffCloud color={g.color} scared={giant} frozen={frozen} look={g.dir} t={ar.t} still={ar.ctx.still} />
           </span>
         );
       })}
-      <span className="absolute pointer-events-none" style={{ ...pct(R.x - rs / 2, R.y - rs / 2), width: `calc(var(--u) * ${rs})`, height: `calc(var(--u) * ${rs})`, opacity: blink ? 0.35 : 1, transition: 'width .4s, height .4s' }}>
-        {ar.shield && <span className="absolute -inset-[18%] rounded-full border-4 border-[#7fd6e3] bg-[#7fd6e3]/20" />}
+      <span className="absolute pointer-events-none" style={{ ...pct(R.x - rs / 2, R.y - rs / 2), width: `calc(var(--u) * ${rs})`, height: `calc(var(--u) * ${rs})`, transition: 'width .4s, height .4s' }}>
+        {(ar.shield || safe) && <span className="absolute -inset-[18%] rounded-full border-4 border-[#7fd6e3] bg-[#7fd6e3]/20" />}
         <span className="absolute inset-0 block" style={{ transform: fk < 1 ? `rotate(${fk * 720}deg)` : undefined }}>
           <RunnerArt color={color} face={runner.dir} hop={moving && !ar.ctx.still ? Math.abs(Math.sin(ar.t * 16)) : 0} />
         </span>
@@ -288,39 +297,49 @@ function Board({ m, ar, toWorld, rooms, dots, runner, ghosts, cellPos, giant, fr
   );
 }
 
-// The runner: a round sunny buddy in the player's color, with feet that
-// patter and a little bounce on every step.
+// The runner: a little kitten in a hoodie of the player's color, with feet
+// that patter and a bounce on every step.
 export function RunnerArt({ color, face, hop }: { color: string; face: Dir; hop: number }) {
   const left = face === 3;
   return (
     <svg viewBox="0 0 60 60" className="w-full h-full overflow-visible" aria-hidden="true">
-      <ellipse cx="30" cy="56" rx="16" ry="3.5" fill="rgba(0,0,0,0.2)" />
-      <g transform={`translate(0 ${-hop * 5}) ${left ? 'translate(60 0) scale(-1 1)' : ''}`}>
-        <ellipse cx="22" cy={50 + hop * 2} rx="6" ry="4" fill="#241c3d" /><ellipse cx="38" cy={50 - hop * 2} rx="6" ry="4" fill="#241c3d" />
-        <ellipse cx="30" cy="30" rx={21 + hop * 1.5} ry={21 - hop * 1.5} fill={color} stroke="#000" strokeWidth="3.5" />
-        <circle cx="37" cy="25" r="5.5" fill="#fff" stroke="#000" strokeWidth="2.2" /><circle cx="39" cy="25" r="2.6" fill="#000" />
-        <circle cx="25" cy="25" r="5" fill="#fff" stroke="#000" strokeWidth="2.2" /><circle cx="27" cy="25" r="2.4" fill="#000" />
-        <path d="M27 36 Q33 42 40 35" stroke="#000" strokeWidth="2.6" fill="#ef7d96" strokeLinecap="round" />
-        <path d="M14 18 Q20 8 30 9" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.6" />
+      <ellipse cx="30" cy="57" rx="14" ry="3" fill="rgba(0,0,0,0.2)" />
+      <g transform={`translate(0 ${-hop * 4}) ${left ? 'translate(60 0) scale(-1 1)' : ''}`}>
+        <ellipse cx="23" cy={54 + hop * 1.5} rx="5" ry="3.2" fill="#241c3d" /><ellipse cx="37" cy={54 - hop * 1.5} rx="5" ry="3.2" fill="#241c3d" />
+        <path d="M17 52 Q15 36 30 35 Q45 36 43 52Z" fill={color} stroke="#000" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M43 46 Q52 44 52 36" stroke="#f5a08c" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <path d="M14 14 L18 2 L26 11Z M46 14 L42 2 L34 11Z" fill="#f5a08c" stroke="#000" strokeWidth="2.6" strokeLinejoin="round" />
+        <path d="M17 11 L19 6 L22 10Z M43 11 L41 6 L38 10Z" fill="#ef7d96" />
+        <ellipse cx="30" cy="22" rx="17" ry="14" fill="#f5a08c" stroke="#000" strokeWidth="3" />
+        <ellipse cx="30" cy="27" rx="9" ry="6" fill="#fbfcf8" />
+        <circle cx="24" cy="20" r="2.8" fill="#000" /><circle cx="37" cy="20" r="2.8" fill="#000" />
+        <circle cx="25" cy="19" r="1" fill="#fff" /><circle cx="38" cy="19" r="1" fill="#fff" />
+        <path d="M29 24 l2 0 -1 1.6z" fill="#ef7d96" stroke="#000" strokeWidth="1" />
+        <path d="M27 28 Q30 30 33 28" stroke="#000" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+        <path d="M14 25 h-6 M14 28 h-5 M46 25 h6 M46 28 h5" stroke="#000" strokeWidth="1.2" strokeLinecap="round" />
       </g>
     </svg>
   );
 }
 
-// A silly cloud friend: wobbly bottom, googly eyes looking where it goes,
-// a tongue out. Scared and blue in Giant Mode, an ice cube when frozen.
-export function GhostCloud({ color, scared, frozen, look, t, still }: { color: string; scared: boolean; frozen: boolean; look: Dir; t: number; still: boolean }) {
-  const lx = [0, 2.5, 0, -2.5][look], ly = [-2.5, 0, 2.5, 0][look];
-  const w = still || frozen ? 0 : Math.sin(t * 10) * 2;
+// A silly puffy cloud friend: round bumps on top, a flat round base, googly
+// eyes looking where it goes. Scared and blue in Giant Mode, an ice cube
+// when frozen.
+export function PuffCloud({ color, scared, frozen, look, t, still }: { color: string; scared: boolean; frozen: boolean; look: Dir; t: number; still: boolean }) {
+  const lx = [0, 2, 0, -2][look], ly = [-2, 0, 2, 0][look];
+  const puff = still || frozen ? 0 : Math.sin(t * 5) * 0.8;
   return (
     <svg viewBox="0 0 60 60" className="w-full h-full overflow-visible" aria-hidden="true">
-      <path d={`M8 48 Q4 30 12 20 Q16 8 30 8 Q44 8 48 20 Q56 30 52 48 Q46 ${52 + w} 40 48 Q34 ${53 - w} 30 48 Q24 ${53 + w} 18 48 Q12 ${52 - w} 8 48Z`} fill={scared ? '#9fc3ff' : color} stroke="#241c3d" strokeWidth="3" strokeLinejoin="round" />
-      <circle cx="22" cy="26" r="6" fill="#fff" stroke="#241c3d" strokeWidth="2" /><circle cx={22 + lx} cy={26 + ly} r="2.8" fill="#241c3d" />
-      <circle cx="38" cy="26" r="6" fill="#fff" stroke="#241c3d" strokeWidth="2" /><circle cx={38 + lx} cy={26 + ly} r="2.8" fill="#241c3d" />
-      {scared ? <path d="M20 39 q3 -3 5 0 t5 0 t5 0 t5 0" stroke="#241c3d" strokeWidth="2.4" fill="none" strokeLinecap="round" />
-        : <><path d="M23 37 Q30 43 37 37" stroke="#241c3d" strokeWidth="2.4" fill="none" strokeLinecap="round" /><path d="M29 40 q2 6 5 0" fill="#ef7d96" stroke="#241c3d" strokeWidth="1.8" /></>}
-      {frozen && <rect x="2" y="4" width="56" height="50" rx="8" fill="rgba(190,235,255,0.55)" stroke="#7fc8f0" strokeWidth="3" />}
-      {frozen && <path d="M10 12 l8 0 M10 12 l0 8" stroke="#fff" strokeWidth="3" strokeLinecap="round" />}
+      <ellipse cx="30" cy="54" rx="20" ry="3" fill="rgba(0,0,0,0.15)" />
+      <path d={`M10 48 Q2 48 3 40 Q4 32 12 32 Q11 ${20 - puff} 22 ${19 - puff} Q28 ${10 - puff} 38 ${15 - puff} Q48 ${14 - puff} 49 25 Q58 27 57 38 Q57 48 49 48 Z`} fill={scared ? '#9fc3ff' : color} stroke="#241c3d" strokeWidth="3" strokeLinejoin="round" />
+      <path d="M14 30 Q16 24 22 24" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.8" />
+      <circle cx="23" cy="34" r="5.5" fill="#fff" stroke="#241c3d" strokeWidth="2" /><circle cx={23 + lx} cy={34 + ly} r="2.6" fill="#241c3d" />
+      <circle cx="37" cy="34" r="5.5" fill="#fff" stroke="#241c3d" strokeWidth="2" /><circle cx={37 + lx} cy={34 + ly} r="2.6" fill="#241c3d" />
+      <circle cx="17" cy="42" r="2.6" fill="#ef7d96" opacity="0.6" /><circle cx="43" cy="42" r="2.6" fill="#ef7d96" opacity="0.6" />
+      {scared ? <path d="M24 44 q3 -3 6 0 t6 0" stroke="#241c3d" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        : <path d="M25 42 Q30 46 35 42" stroke="#241c3d" strokeWidth="2.2" fill="none" strokeLinecap="round" />}
+      {frozen && <rect x="1" y="8" width="58" height="44" rx="8" fill="rgba(190,235,255,0.55)" stroke="#7fc8f0" strokeWidth="3" />}
+      {frozen && <path d="M8 15 l8 0 M8 15 l0 8" stroke="#fff" strokeWidth="3" strokeLinecap="round" />}
     </svg>
   );
 }
@@ -352,7 +371,7 @@ const def: LabDef = {
   how: [
     { icon: <CheckCircle weight="fill" />, text: 'Read the question at the top' },
     { icon: <ArrowFatRight weight="fill" />, text: 'Steer with the arrows, a swipe, or tap a room' },
-    { icon: <Cloud weight="fill" />, text: 'Dodge the silly clouds' },
+    { icon: <CloudIcon weight="fill" />, text: 'Dodge the silly clouds' },
     { icon: <Timer weight="fill" />, text: 'Reach as many right rooms as you can in time' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },

@@ -5,7 +5,7 @@ export const SURPRISES: Surprise[] = ['boost', 'spring', 'mud', 'mystery'];
 // The teacher's Rounds slider also sets the track: more rounds, a longer race,
 // so the race ends close to the last round.
 export function trackLength(rounds: number): number {
-  return Math.max(16, Math.min(48, Math.round(rounds * 2.4)));
+  return Math.max(14, Math.min(40, Math.round(rounds * 1.6)));
 }
 
 // Hidden surprise spaces for one lane: about one in six spaces, never on the
@@ -50,5 +50,5 @@ export function aheadOf(pos: Record<string, number>, order: string[], me: string
   return best;
 }
 
-// A turtle shell halves a roll (rounded up, at least one).
+// A sticky mud ball halves a roll (rounded up, at least one).
 export const shellRoll = (n: number) => Math.max(1, Math.ceil(n / 2));

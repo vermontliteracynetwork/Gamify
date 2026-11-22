@@ -112,7 +112,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
       {list.current.map((b) => {
         const r = b.r * giant * (ar.magnet && b.choice === ar.q?.correctIndex && !b.leave ? 1.25 : 1);
         const rest = ar.locked(b.id);
-        const right = ar.q && b.choice === ar.q.correctIndex && !b.leave;
         const hit = ar.t - b.hitAt < 0.5;
         const text = b.text;
         return (

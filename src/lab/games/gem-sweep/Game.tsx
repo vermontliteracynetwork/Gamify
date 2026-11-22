@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as RKeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { CheckCircle, Diamond, FlagPennant, Heart, Shovel } from '@phosphor-icons/react';
 import { TeamBadge } from '../../../engine/TeamBadge';
@@ -13,7 +13,8 @@ import { cleared, count, cpuDig, dig, emptyBoard, neighbors, place, shuffleRocks
 const IMG = '/lab/gem-sweep/';
 const LIVES = 3;
 const DIGS_RIGHT = 3, DIGS_MISS = 1;
-const NUM = ['', '#3557c7', '#2b8a3e', '#d6336c', '#6741d9', '#b35c1e', '#0b7285', '#241c3d', '#555'];
+// Gem Sweep's own digit colors, each at least 4.5:1 on the dug sand.
+const NUM = ['', '#0d5866', '#5130a8', '#a3243f', '#7a3d0c', '#241c3d', '#1e6b34', '#6b2a5e', '#3d3d3d'];
 const GEMS = ['diamond_blue', 'heart_pink', 'emerald_green', 'moon_purple', 'diamond_yellow'];
 
 function Rock({ grumpy = true, size = '100%' }: { grumpy?: boolean; size?: string }) {
@@ -61,7 +62,7 @@ function Art({ kind }: { kind: string }) {
 }
 
 const POWERS: LabPower[] = [
-  { id: 'detector', name: 'Gem Detector', desc: 'A radar finds a hidden rock and flags it for you.', enter: 'spin', art: <Art kind="detector" /> },
+  { id: 'detector', name: 'Rock Radar', desc: 'A radar finds a hidden rock and flags it for you.', enter: 'spin', art: <Art kind="detector" /> },
   { id: 'safe', name: 'Safe Shovel', desc: 'Your next dig can never hit a rock.', enter: 'drop', art: <Art kind="safe" /> },
   { id: 'scoop', name: 'Super Scoop', desc: 'Your next dig opens a big safe patch.', enter: 'zoom', art: <Art kind="scoop" /> },
   { id: 'xray', name: 'X-Ray Goggles', desc: 'Peek at every hidden rock for a moment.', enter: 'zoom', art: <Art kind="xray" /> },
@@ -93,6 +94,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [party, setParty] = useState(false);
   const [radar, setRadar] = useState(0);
   const [hover, setHover] = useState<number | null>(null);
+  const [hint, setHint] = useState<number | null>(null);
+  const [focus, setFocus] = useState(Math.floor(4 * 9 + 4));
+  const gridRef = useRef<HTMLDivElement>(null);
   const lives = useRef<Record<string, number>>({});
   const trophies = useRef<Record<string, number>>({});
   const [, force] = useState(0);
@@ -118,7 +122,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       const n = ok || x.solo ? DIGS_RIGHT : DIGS_MISS;
       digsRef.current = n; setDigs(n);
       if (ok) {
-        x.sfx.right();
+        // A right answer scores and lights up one safe square to dig.
+        x.sfx.right(); x.points(2); x.say('Right! +2');
+        giveHint();
         const p = await c.current.power(0.45, (pw) => boardRef.current.made || !['detector', 'xray', 'party'].includes(pw.id));
         if (!live) return;
         if (p) apply(p);
@@ -127,6 +133,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
     });
     return () => { live = false; };
   }, [ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function giveHint() {
+    const b = boardRef.current;
+    if (!b.made) { setHint(null); return; }
+    const safe = b.rock.map((r, i) => (!r && !b.open[i] && !b.flag[i] ? i : -1)).filter((i) => i >= 0);
+    const edge = safe.filter((i) => neighbors(b, i).some((j) => b.open[j] && !b.rock[j]));
+    const pool = edge.length ? edge : safe;
+    setHint(pool.length ? pool[Math.floor(Math.random() * pool.length)] : null);
+  }
 
   function held() {
     const x = c.current;
@@ -172,6 +187,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (modeRef.current !== 'dig') return;
     let b = boardRef.current;
     if (b.open[i]) return;
+    if (hint === i && !flagMode) setHint(null);
     if (flagMode && !x.cpu) {
       const flag = [...b.flag]; flag[i] = !flag[i];
       setBoard({ ...b, flag }); x.sfx.tap();
@@ -210,7 +226,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if (l <= 0) {
         lives.current[x.player.id] = LIVES;
         window.setTimeout(() => { c.current.say('Out of hearts! Hearts refill', 'oops'); }, 1300);
-        const lose = Math.min(3, x.player.score); if (lose) x.points(-lose);
       } else lives.current[x.player.id] = l;
       status(); force((n) => n + 1);
       if (cleared(b)) { boardDone(); return; }
@@ -251,6 +266,21 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }, [mode, digs, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canTap = mode === 'dig' && !ctx.cpu;
+  // Keyboard: one tab stop on the board, arrows move, Enter or Space digs, F flags.
+  function keys(e: RKeyboardEvent) {
+    const b = boardRef.current;
+    let f = focus;
+    if (e.key === 'ArrowRight') f = Math.min(b.cols * b.rows - 1, f + 1);
+    else if (e.key === 'ArrowLeft') f = Math.max(0, f - 1);
+    else if (e.key === 'ArrowDown') f = Math.min(b.cols * b.rows - 1, f + b.cols);
+    else if (e.key === 'ArrowUp') f = Math.max(0, f - b.cols);
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (canTap) tap(f); return; }
+    else if (e.key === 'f' || e.key === 'F') { if (canTap) { setFlagMode((v) => !v); ctx.sfx.tap(); } return; }
+    else return;
+    e.preventDefault();
+    setFocus(f);
+    (gridRef.current?.children[f] as HTMLElement | undefined)?.focus();
+  }
   return (
     <div className="absolute inset-0 flex flex-col gap-2">
       {/* Digs, flag mode, hearts and trophies. */}
@@ -281,13 +311,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* The dig site: a wooden frame around the meadow turf. */}
           <div className="absolute inset-0 rounded-[1.4rem] border-heavy border-border" style={{ background: 'linear-gradient(#e0a27a, #c47e55)', boxShadow: '0 10px 0 #000, 0 26px 44px rgba(36,28,61,0.35), inset 0 3px 0 rgba(255,255,255,0.35)' }} />
           <div className="absolute rounded-[0.9rem] border-bold border-border overflow-hidden grid"
-            style={{ inset: `${(0.4 / (board.rows + 0.8)) * 100}% ${(0.4 / (board.cols + 0.8)) * 100}%`, gridTemplateColumns: `repeat(${board.cols}, 1fr)`, gridTemplateRows: `repeat(${board.rows}, 1fr)` }} role="grid" aria-label="Dig site">
+            style={{ inset: `${(0.4 / (board.rows + 0.8)) * 100}% ${(0.4 / (board.cols + 0.8)) * 100}%`, gridTemplateColumns: `repeat(${board.cols}, 1fr)`, gridTemplateRows: `repeat(${board.rows}, 1fr)` }} role="grid" aria-label="Dig site. Arrow keys move, Enter digs, F flags" ref={gridRef} onKeyDown={keys}>
             {board.rock.map((_, i) => (
-              <Cell key={`${gen}-${i}`} i={i} b={board} ctx={ctx} order={order[i]} canTap={canTap && !board.open[i]} flagMode={flagMode}
+              <Cell key={`${gen}-${i}`} i={i} b={board} ctx={ctx} order={order[i]} canTap={canTap && !board.open[i]} flagMode={flagMode} hint={hint === i} focused={focus === i} onFocus={() => setFocus(i)}
                 xray={xray || party} dancing={party} dust={dust} puff={puffAt?.i === i ? puffAt.id : 0} hover={hover === i && ctx.cpu} onTap={() => tap(i)} />
             ))}
           </div>
-          {/* Gem Detector radar sweep. */}
+          {/* Rock Radar sweep. */}
           <AnimatePresence>
             {radar > 0 && !ctx.still && (
               <motion.div key={radar} className="absolute inset-0 pointer-events-none rounded-[1.4rem] overflow-hidden" initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: 1.2, duration: 0.4 }}>
@@ -312,8 +342,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   );
 }
 
-function Cell({ i, b, ctx, order, canTap, flagMode, xray, dancing, dust, puff, hover, onTap }: {
-  i: number; b: Board; ctx: LabCtx; order?: number; canTap: boolean; flagMode: boolean; xray: boolean; dancing: boolean; dust: boolean; puff: number; hover: boolean; onTap: () => void;
+function Cell({ i, b, ctx, order, canTap, flagMode, xray, dancing, dust, puff, hover, hint, focused, onFocus, onTap }: {
+  i: number; b: Board; ctx: LabCtx; order?: number; canTap: boolean; flagMode: boolean; xray: boolean; dancing: boolean; dust: boolean; puff: number; hover: boolean; hint: boolean; focused: boolean; onFocus: () => void; onTap: () => void;
 }) {
   const x = i % b.cols, y = Math.floor(i / b.cols);
   const dark = (x + y) % 2 === 0;
@@ -321,9 +351,9 @@ function Cell({ i, b, ctx, order, canTap, flagMode, xray, dancing, dust, puff, h
   const n = open && !b.rock[i] ? count(b, i) : 0;
   const delay = ctx.still ? 0 : (order ?? 0) * 0.03;
   return (
-    <button type="button" role="gridcell" onClick={onTap} disabled={!canTap}
-      aria-label={open ? (b.rock[i] ? 'Grumpy rock' : n ? `${n} rocks next to it` : 'Empty dug square') : b.flag[i] ? 'Flagged square' : 'Grass square'}
-      className="relative grid place-items-center disabled:cursor-default" style={{ background: dark ? '#f6e7c8' : '#efdcb6', containerType: 'size' }}>
+    <button type="button" role="gridcell" onClick={() => { if (canTap) onTap(); }} aria-disabled={!canTap} tabIndex={focused ? 0 : -1} onFocus={onFocus}
+      aria-label={open ? (b.rock[i] ? 'Grumpy rock' : n ? `${n} rocks next to it` : 'Empty dug square') : b.flag[i] ? 'Flagged square' : hint ? 'Safe square to dig' : 'Grass square'}
+      className={`relative grid place-items-center outline-none focus-visible:z-10 focus-visible:ring-4 focus-visible:ring-[#241c3d] focus-visible:ring-inset ${canTap ? '' : 'cursor-default'}`} style={{ background: dark ? '#f6e7c8' : '#efdcb6', containerType: 'size' }}>
       {/* Dug: a number, a gem or a rock. */}
       {open && (
         <motion.span className="absolute inset-0 grid place-items-center" initial={ctx.still ? false : { scale: 0.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 16, delay: delay + 0.08 }}>
@@ -349,6 +379,12 @@ function Cell({ i, b, ctx, order, canTap, flagMode, xray, dancing, dust, puff, h
               <motion.span className="absolute inset-[12%] inline-flex" initial={{ opacity: 0 }} animate={dancing && !ctx.still ? { opacity: 0.9, y: [0, -8, 0], rotate: [0, -10, 10, 0] } : { opacity: 0.75 }} transition={dancing ? { duration: 0.5, repeat: Infinity } : undefined}><Rock /></motion.span>
             )}
             {canTap && flagMode && !b.flag[i] && <span className="absolute inset-[30%] opacity-30"><Flag /></span>}
+            {hint && !b.flag[i] && (
+              <motion.span className="absolute inset-[8%] rounded-[18%] border-[3px] border-[#fdfd94] grid place-items-center" style={{ boxShadow: '0 0 0.6rem 0.2rem rgba(253,253,148,0.9)' }} aria-hidden="true"
+                initial={ctx.still ? false : { scale: 1.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 14 }}>
+                <Shovel weight="fill" size="45%" color="#241c3d" />
+              </motion.span>
+            )}
           </motion.span>
         )}
       </AnimatePresence>
@@ -396,7 +432,7 @@ const def: LabDef = {
   description: 'Dig the meadow, but watch out for grumpy rocks! Numbers tell how many rocks hide next door.',
   ways: ['solo', 'teams'],
   how: [
-    { icon: <CheckCircle weight="fill" />, text: 'Answer right for three digs' },
+    { icon: <CheckCircle weight="fill" />, text: 'Answer right for three digs and a safe hint' },
     { icon: <Shovel weight="fill" />, text: 'Dig a square. Numbers count the rocks next to it' },
     { icon: <FlagPennant weight="fill" />, text: 'Flag the rocks, dig the rest' },
     { icon: <Diamond weight="fill" />, text: 'Clear the board for a gem trophy' },

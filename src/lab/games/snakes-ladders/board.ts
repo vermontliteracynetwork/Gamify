@@ -5,6 +5,8 @@
 export const LADDERS: Record<number, number> = { 3: 22, 8: 30, 20: 41, 28: 55, 50: 69, 63: 81, 71: 92 };
 export const SNAKES: Record<number, number> = { 17: 4, 36: 15, 48: 26, 62: 43, 74: 53, 88: 67, 97: 78 };
 export const LAST = 100;
+// Which way each snake bends first, so crossing snakes sit apart.
+export const SNAKE_AMP: Record<number, number> = { 17: 40, 36: -44, 48: 40, 62: -40, 74: 44, 88: -46, 97: 46 };
 
 export interface Pt { x: number; y: number }
 
@@ -47,7 +49,7 @@ export function nextLadder(from: number, reach = 10): number | null {
 }
 
 // A snake's body: control points that wiggle side to side from head to tail.
-export function snakePoints(head: number, tail: number, amp = 46): Pt[] {
+export function snakePoints(head: number, tail: number, amp = SNAKE_AMP[head] ?? 46): Pt[] {
   const a = squareXY(head), b = squareXY(tail);
   const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
   const nx = -dy / d, ny = dx / d;
@@ -101,4 +103,12 @@ export function spread(i: number, of: number, r = 22): Pt {
   if (of <= 1) return { x: 0, y: 0 };
   const a = (i / of) * Math.PI * 2 + Math.PI;
   return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+}
+
+// Exact roll to win: a roll past the last square bounces back the extra.
+export function exactPath(from: number, roll: number): number[] {
+  const out: number[] = [];
+  let p = from, dir = 1;
+  for (let i = 0; i < roll; i++) { if (p + dir > LAST) dir = -1; p += dir; out.push(p); }
+  return out;
 }

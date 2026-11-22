@@ -3,9 +3,9 @@ import { aheadOf, hops, leaderId, makeSurprises, shellRoll, surpriseMove, trackL
 
 describe('track race', () => {
   it('sizes the track from the rounds', () => {
-    expect(trackLength(12)).toBe(29);
-    expect(trackLength(3)).toBe(16);
-    expect(trackLength(40)).toBe(48);
+    expect(trackLength(12)).toBe(19);
+    expect(trackLength(3)).toBe(14);
+    expect(trackLength(40)).toBe(40);
   });
   it('hops one space at a time and stops at the finish', () => {
     expect(hops(2, 3, 30)).toEqual([3, 4, 5]);
@@ -13,9 +13,9 @@ describe('track race', () => {
   });
   it('hides surprises away from the ends and never side by side', () => {
     for (let k = 0; k < 50; k++) {
-      const s = Object.keys(makeSurprises(29)).map(Number).sort((a, b) => a - b);
+      const s = Object.keys(makeSurprises(19)).map(Number).sort((a, b) => a - b);
       expect(s.length).toBeGreaterThanOrEqual(2);
-      s.forEach((x, i) => { expect(x).toBeGreaterThanOrEqual(3); expect(x).toBeLessThanOrEqual(26); if (i) expect(x - s[i - 1]).toBeGreaterThanOrEqual(2); });
+      s.forEach((x, i) => { expect(x).toBeGreaterThanOrEqual(3); expect(x).toBeLessThanOrEqual(16); if (i) expect(x - s[i - 1]).toBeGreaterThanOrEqual(2); });
     }
   });
   it('moves surprises inside the track', () => {
@@ -30,7 +30,7 @@ describe('track race', () => {
     expect(aheadOf(pos, ['a', 'b', 'c'], 'a')).toBe('c');
     expect(aheadOf(pos, ['a', 'b', 'c'], 'b')).toBeNull();
   });
-  it('halves a roll under a turtle shell', () => {
+  it('halves a roll under sticky mud', () => {
     expect(shellRoll(5)).toBe(3);
     expect(shellRoll(1)).toBe(1);
   });

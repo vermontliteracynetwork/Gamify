@@ -24,5 +24,5 @@ export function nextTile(word: string, slots: (number | null)[], letters: string
 
 export const spelled = (slots: (number | null)[], letters: string[]) => slots.map((s) => (s === null ? '' : letters[s])).join('');
 
-// Points for a word: one a letter, a bonus for long words.
-export const wordPoints = (word: string) => word.length + (word.length >= 6 ? 2 : 0);
+// Every finished word scores the same 3 points: effort pays, not word length.
+export const wordPoints = (_word: string) => 3;

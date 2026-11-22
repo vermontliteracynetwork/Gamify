@@ -30,8 +30,8 @@ export function pairTiles(qs: { id: string; prompt: string; answer: string }[], 
 }
 export const isPair = (a: PairTile, b: PairTile) => a.pair === b.pair && a.kind !== b.kind;
 
-// A quick tap earns up to two bonus points.
-export const speedBonus = (left: number, total: number) => (total <= 0 ? 0 : left / total > 0.66 ? 2 : left / total > 0.33 ? 1 : 0);
+// A quick tap (in the first half of the clock) earns one bonus point.
+export const speedBonus = (left: number, total: number) => (total <= 0 ? 0 : left / total > 0.5 ? 1 : 0);
 
 // Spots around an oval for a ring of tiles (0..1 of the board), starting at the top.
 export function ringSpots(n: number, rx = 0.36, ry = 0.36, turn = 0): { x: number; y: number }[] {

@@ -72,11 +72,15 @@ export function dirTo(m: Maze, from: number, to: number): Dir | null {
 // Answers for the rooms: shuffled, and the right one never in the room the
 // runner is standing in (so a new question is never answered by itself).
 export function dealZones(n: number, right: number, avoid: number, random: () => number = Math.random): number[] {
-  const rooms = n <= 2 ? [0, 3] : n === 3 ? [0, 1, 3] : [0, 1, 2, 3];
-  const choices = [...Array(n).keys()];
+  // Only four rooms: with more answers, the right one and three others.
+  let choices = [...Array(n).keys()];
   for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
+  if (choices.length > 4) choices = [right, ...choices.filter((c) => c !== right).slice(0, 3)];
+  for (let i = choices.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [choices[i], choices[j]] = [choices[j], choices[i]]; }
+  const k = choices.length;
+  const rooms = k <= 2 ? [0, 3] : k === 3 ? [0, 1, 3] : [0, 1, 2, 3];
   const out = [-1, -1, -1, -1];
-  rooms.forEach((z, k) => { out[z] = choices[k]; });
+  rooms.forEach((z, i) => { out[z] = choices[i]; });
   if (avoid >= 0 && out[avoid] === right) {
     const other = rooms.find((z) => z !== avoid)!;
     [out[avoid], out[other]] = [out[other], out[avoid]];

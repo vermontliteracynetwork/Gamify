@@ -1,9 +1,10 @@
 // Sort Rush rules, kept apart so they can be tested.
 export const LANES = [0.14, 0.38, 0.62, 0.86];
 
-// Points for one right sort: more on a combo, two times with Double Points.
+// Points for one right sort: one each, one bonus on a run of five or more,
+// two times with Double Points.
 export function scoreFor(combo: number, double = false): number {
-  const base = 1 + (combo >= 8 ? 2 : combo >= 4 ? 1 : 0);
+  const base = 1 + (combo >= 5 ? 1 : 0);
   return double ? base * 2 : base;
 }
 

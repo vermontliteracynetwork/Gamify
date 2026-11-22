@@ -20,7 +20,7 @@ const POWERS: LabPower[] = [
   { id: 'double', name: 'Double Ball', desc: 'Another ball rolls out for you right now.', enter: 'zoom', art: <Art kind="double" /> },
   { id: 'peek', name: 'Peek', desc: 'On your next ball, all but three squares fade away.', enter: 'zoom', art: <Art kind="peek" /> },
   { id: 'lucky', name: 'Lucky Ball', desc: 'A golden ball: three bonus points.', enter: 'spin', art: <Art kind="lucky" /> },
-  { id: 'sticky', name: 'Sticky Dauber', desc: 'Whoops! Your dauber sticks and splats the square next door too.', silly: true, art: <Art kind="sticky" /> },
+  { id: 'sticky', name: 'Sticky Dauber', desc: 'Your dauber is extra sticky: it splats the square next door too.', enter: 'wiggle', art: <Art kind="sticky" /> },
   { id: 'shuffle', name: 'Card Shuffle', desc: 'Whoops! Your open squares jump to new spots.', silly: true, art: <Art kind="shuffle" /> },
 ];
 
@@ -82,6 +82,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   const answerOf = (q: MultipleChoiceQuestion) => q.choices[q.correctIndex];
   const waitTap = () => new Promise<number>((r) => { tapWait.current = r; });
+  // The cage spin can be skipped with a tap.
+  const skipRef = useRef<(() => void) | null>(null);
+  const skippable = (ms: number) => new Promise<void>((r) => { const t = window.setTimeout(() => { skipRef.current = null; r(); }, ms); skipRef.current = () => { window.clearTimeout(t); skipRef.current = null; r(); }; });
   // Confetti from a square of the big card.
   const at = (i: number) => {
     const r = cardRef.current?.getBoundingClientRect();
@@ -145,9 +148,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setCall({ q, n, phase: 'spin', color: BALL_COLORS[n % BALL_COLORS.length] });
     x.sfx.wind();
     for (let k = 0; k < 8; k++) window.setTimeout(() => c.current.sfx.tick(), k * 120);
-    await sleep(1200);
+    await skippable(x.still ? 500 : 1200);
     setCall((cl) => (cl ? { ...cl, phase: 'roll' } : cl)); x.sfx.whoosh();
-    await sleep(800);
+    await skippable(x.still ? 300 : 800);
     setCall((cl) => (cl ? { ...cl, phase: 'ask' } : cl)); x.sfx.boing();
     if (peeks.current.has(id)) {
       peeks.current.delete(id); x.setHeld(id, []);
@@ -158,8 +161,17 @@ function Play({ ctx }: { ctx: LabCtx }) {
     return q;
   }
 
+  // A set with no usable answers ends kindly instead of stalling.
+  const empty = answers.length === 0;
+  useEffect(() => {
+    if (!empty) return;
+    const t = window.setTimeout(() => c.current.finish('This set needs questions'), 1600);
+    return () => window.clearTimeout(t);
+  }, [empty]);
+
   // Every turn: a ball for the current player.
   useEffect(() => {
+    if (empty) return;
     let live = true;
     void (async () => {
       const id = c.current.player.id;
@@ -262,10 +274,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   return (
     <div ref={rootRef} className="absolute inset-0 overflow-hidden">
-      {w > 0 && (
+      {empty && (
+        <div className="absolute inset-0 grid place-items-center"><p className="rounded-panel border-heavy border-border bg-white px-8 py-6 font-display text-3xl text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>This set needs questions</p></div>
+      )}
+      {w > 0 && !empty && (
         <div className={`absolute inset-0 flex ${land ? 'flex-row' : 'flex-col'} items-center justify-center`} style={{ gap }}>
           <div className="relative shrink-0 flex flex-col" style={{ width: callerW, height: callerH, gap }}>
-            <Caller call={call} still={ctx.still} land={land} cheer={cheer} onListen={() => call && speak(call.q.prompt, ctx.settings)} />
+            <Caller call={call} still={ctx.still} land={land} cheer={cheer} onListen={() => call && speak(call.q.prompt, ctx.settings)} onSkip={ctx.cpu ? undefined : () => skipRef.current?.()} />
             {land && others.length > 0 && (
               <div className="shrink-0 flex gap-3 justify-center flex-wrap" style={{ height: Math.min(h * 0.24, 150) }}>
                 {others.map((p) => <Mini key={p.id} card={cards[p.id]} marks={marks[p.id]} colorIndex={p.colorIndex} color={color(p.id)} size={Math.min(h * 0.24, 150) - 8} />)}
@@ -303,13 +318,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
 // The caller: a wire cage that spins, a ball that rolls out, and the
 // question on a big white card with a listen button.
-function Caller({ call, still, land, cheer, onListen }: { call: { q: MultipleChoiceQuestion; n: number; phase: Phase; color: string } | null; still: boolean; land: boolean; cheer: number; onListen: () => void }) {
+function Caller({ call, still, land, cheer, onListen, onSkip }: { call: { q: MultipleChoiceQuestion; n: number; phase: Phase; color: string } | null; still: boolean; land: boolean; cheer: number; onListen: () => void; onSkip?: () => void }) {
   const spinning = call?.phase === 'spin';
   const out = call && call.phase !== 'spin';
   const len = call?.q.prompt.length ?? 0;
   return (
     <div className={`relative flex-1 min-h-0 flex ${land ? 'flex-col' : 'flex-row'} gap-3`}>
-      <div className={`relative ${land ? 'h-[46%]' : 'w-[38%]'} shrink-0 flex items-center justify-center gap-2`}>
+      <div className={`relative ${land ? 'h-[52%]' : 'w-[38%]'} shrink-0 flex items-center justify-center gap-2`}>
+        {onSkip && call && call.phase !== 'ask' && <button type="button" onClick={onSkip} aria-label="Tap to skip the spin" title="Tap to skip the spin" className="absolute inset-0 z-10 rounded-panel" />}
         <div className="relative h-full aspect-square">
           <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" aria-hidden="true">
             <path d="M60 180 L80 120 M140 180 L120 120" stroke="#000" strokeWidth="12" strokeLinecap="round" />
@@ -355,9 +371,14 @@ function Caller({ call, still, land, cheer, onListen }: { call: { q: MultipleCho
                 {call.q.imageUrl && <img src={call.q.imageUrl} alt={call.q.imageAlt ?? ''} className="max-h-[30cqh] object-contain mx-auto" />}
                 <h2 className="m-0 font-bold leading-tight text-balance" style={{ fontSize: len < 30 ? 'clamp(1.3rem, 6cqmin, 3.2rem)' : len < 70 ? 'clamp(1.05rem, 3.8cqmin, 2.2rem)' : 'clamp(0.9rem, 2.8cqmin, 1.6rem)' }}>{call.q.prompt}</h2>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={onListen} aria-label="Listen" title="Listen" className="w-11 h-11 shrink-0 rounded-full border-std border-border bg-accent grid place-items-center motion-safe:hover:scale-110 motion-safe:transition-transform"><SpeakerHigh weight="fill" size={22} /></button>
+                  <button type="button" onClick={onListen} className="min-h-11 shrink-0 rounded-pill border-std border-border bg-accent px-3 inline-flex items-center gap-1.5 font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"><SpeakerHigh weight="fill" size={22} aria-hidden="true" />Listen</button>
                   <span className="text-sm font-bold text-muted inline-flex items-center gap-1"><HandTap weight="fill" size={18} aria-hidden="true" />Find it on the card</span>
                 </div>
+              </motion.div>
+            )}
+            {call?.phase !== 'ask' && (
+              <motion.div key="wait" className="w-full h-[70%] rounded-panel border-std border-dashed border-border/40 grid place-items-center text-center px-4 font-bold text-muted" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                {call ? 'Here comes a ball!' : 'Get your dauber ready'}
               </motion.div>
             )}
           </AnimatePresence>
@@ -372,7 +393,12 @@ function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, 
   shake: { i: number; n: number } | null; peek: number[] | null; flip: number; cheer: number; still: boolean; onTap: (i: number) => void;
 }) {
   const cell = size / 5;
-  const fs = (t: string) => { const n = t.length; return cell * (n <= 3 ? 0.34 : n <= 6 ? 0.25 : n <= 10 ? 0.19 : n <= 18 ? 0.15 : 0.12); };
+  // Big for short answers, at least about 14px, and smaller only when the longest word would not fit.
+  const fs = (t: string) => {
+    const n = t.length, word = Math.max(1, ...t.split(/\s+/).map((x) => x.length));
+    const want = Math.max(14, cell * (n <= 3 ? 0.34 : n <= 6 ? 0.26 : n <= 10 ? 0.2 : n <= 18 ? 0.17 : 0.14));
+    return Math.min(want, (cell * 0.86) / (word * 0.6));
+  };
   return (
     <div className="absolute inset-0 rounded-[6%] border-heavy border-border overflow-hidden" style={{ background: team, boxShadow: '0 8px 0 #000, 0 26px 40px rgba(36,28,61,0.35)' }}>
       <div className="absolute inset-x-0 top-0 flex items-center justify-around" style={{ height: size * 0.17 }}>
@@ -386,9 +412,9 @@ function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, 
           const on = marks[i];
           const k = kinds[i];
           const dim = peek && !peek.includes(i) && !on;
-          const can = canTap && !on && i !== FREE;
+          const can = canTap && !on && i !== FREE && !dim;
           return (
-            <motion.button key={`${i}-${flip}`} type="button" disabled={!can} onClick={() => onTap(i)} aria-label={i === FREE ? 'Free star' : `${v}${on ? ', daubed' : ''}`}
+            <motion.button key={`${i}-${flip}`} type="button" disabled={!can} onClick={() => onTap(i)} aria-label={i === FREE ? 'Free star' : `${v}${on ? ', daubed' : ''}${hint.includes(i) ? ', the right answer' : ''}`}
               className={`relative rounded-[14%] border-std border-border bg-surface grid place-items-center overflow-hidden px-[6%] text-center font-bold leading-[1.05] disabled:cursor-default ${can ? 'motion-safe:hover:scale-[1.06] hover:z-10 cursor-pointer' : ''}`}
               style={{ fontSize: fs(v), boxShadow: glow.includes(i) ? '0 0 0 4px #fdfd94, 0 0 18px 6px #fdfd94' : hint.includes(i) ? '0 0 0 4px #8fe3a0, 0 0 14px 4px #8fe3a0' : '0 3px 0 rgba(0,0,0,0.35)', opacity: dim ? 0.25 : 1, outline: free && can ? '3px dashed #241c3d' : undefined, outlineOffset: -5, transition: 'opacity 0.3s, transform 0.15s', overflowWrap: 'break-word', hyphens: 'none' }}
               initial={flip && !still ? { rotateY: 180 } : false} animate={shake?.i === i && !still ? { x: [0, -8, 8, -6, 6, 0], rotateY: 0 } : glow.includes(i) && !still ? { scale: [1, 1.08, 1], rotateY: 0 } : { rotateY: 0 }}
@@ -403,6 +429,11 @@ function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, 
                   </motion.span>
                 )}
               </AnimatePresence>
+              {hint.includes(i) && (
+                <motion.span aria-hidden="true" className="absolute -top-1 -right-1 z-[2] rounded-full border-std border-border bg-success grid place-items-center" style={{ width: cell * 0.36, height: cell * 0.36 }} initial={still ? false : { scale: 0 }} animate={{ scale: 1 }}>
+                  <svg viewBox="0 0 24 24" className="w-[70%] h-[70%]"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </motion.span>
+              )}
             </motion.button>
           );
         })}

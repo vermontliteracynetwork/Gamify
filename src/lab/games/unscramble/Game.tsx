@@ -23,12 +23,22 @@ const POWERS: LabPower[] = [
   { id: 'time', name: 'Extra Time', desc: 'Fifteen more seconds on the egg timer.', enter: 'spin', art: img('time') },
   { id: 'peek', name: 'Magic Peek', desc: 'The whole word glows on the shelf for a moment.', enter: 'zoom', art: <Art kind="peek" /> },
   { id: 'double', name: 'Double Points', desc: 'Your next word is worth double.', enter: 'spin', art: img('lightning') },
-  { id: 'tornado', name: 'Tornado Tiles', desc: 'Whoosh! A little tornado whirls through the next word and mixes the tiles again.', silly: true, art: img('tornado') },
-  { id: 'popcorn', name: 'Popcorn Tiles', desc: 'Pop pop! The next word\'s tiles bounce around like popcorn.', silly: true, art: <Art kind="popcorn" /> },
+  { id: 'tornado', name: 'Tornado Tiles', desc: 'Whoosh! A little tornado whirls through your next word and mixes the tiles again.', silly: true, art: img('tornado') },
+  { id: 'popcorn', name: 'Popcorn Tiles', desc: 'Pop pop! Your next word\'s tiles bounce like popcorn for a moment.', silly: true, art: <Art kind="popcorn" /> },
 ];
 
 const asQuestion = (w: WordPair): MultipleChoiceQuestion => ({ id: `us-${w.word}`, kind: 'mc', prompt: w.clue, choices: [w.word], correctIndex: 0 });
 const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+// The on-board timer choice, remembered per device. It starts from the
+// teacher's Timers setting (ctx.timeScale: 0 off, 1 normal, 1.5 relaxed).
+type Pace = 'relaxed' | 'none' | 'quick';
+const PACES: Pace[] = ['relaxed', 'none', 'quick'];
+const PACE_LABEL: Record<Pace, string> = { relaxed: 'Relaxed', none: 'No timer', quick: 'Quick' };
+const PACE_KEY = 'gamify:lab:unscramble:timer';
+const paceFrom = (scale: number): Pace => (scale === 0 ? 'none' : scale === 1 ? 'quick' : 'relaxed');
+function loadPace(scale: number): Pace { try { const v = localStorage.getItem(PACE_KEY) as Pace | null; return v && PACES.includes(v) ? v : paceFrom(scale); } catch { return paceFrom(scale); } }
+function savePace(v: Pace) { try { localStorage.setItem(PACE_KEY, v); } catch { /* private window */ } }
+const wordMs = (pace: Pace, len: number) => (pace === 'none' ? Infinity : pace === 'quick' ? (28 + len * 4) * 1000 : (90 + len * 5) * 1000);
 type Mode = 'turn' | 'play' | 'busy';
 
 function useAspect() {
@@ -76,6 +86,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const doubleRef = useRef(false);
   const setDouble = (v: boolean) => { doubleRef.current = v; setDoubleState(v); };
   const [watch, setWatch] = useState(0);
+  const [pace, setPaceState] = useState<Pace>(() => loadPace(ctx.timeScale));
+  const paceRef = useRef(pace); paceRef.current = pace;
   const [left, setLeft] = useState(1);
   const total = useRef(1), remain = useRef(1), paused = useRef(false);
   const pending = useRef<Record<string, LabPower[]>>({});
@@ -90,7 +102,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     pairRef.current = w; setPair(w); setGen((g) => g + 1);
     setTray(scramble(w.word)); setSlots(Array(w.word.length).fill(null)); setLocked(null);
     setBoom(false); setWon(false); setOwl(false); setPeek(false); setPopcorn(false); setDouble(false);
-    total.current = (28 + w.word.length * 4) * 1000; remain.current = total.current; setLeft(1);
+    total.current = wordMs(paceRef.current, w.word.length); remain.current = total.current; setLeft(1);
     if (x.taken > 0) clip('bloop');
     if (x.solo) void begin(); else setMode('turn');
   }, [ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -113,7 +125,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (p.id === 'peek') { setPeek(true); x.sfx.slideUp(); window.setTimeout(() => setPeek(false), 1800); }
     if (p.id === 'time') {
       setWatch((n) => n + 1); x.sfx.bell();
-      total.current += 15_000; remain.current = Math.min(total.current, remain.current + 15_000); setLeft(remain.current / total.current);
+      if (Number.isFinite(total.current)) { total.current += 15_000; remain.current = Math.min(total.current, remain.current + 15_000); setLeft(remain.current / total.current); }
     }
     if (p.id === 'first') {
       const w = pairRef.current.word, s = [...slotsRef.current];
@@ -135,19 +147,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
         setSlots(s); setTray(scramble(pairRef.current.word)); hop([...letters.keys()].filter((i) => !moved.includes(i)).concat(moved));
       }, 900);
     }
-    if (p.id === 'popcorn') { x.say('Popcorn Tiles!', 'oops'); x.sfx.boing(); setPopcorn(true); }
+    // Popcorn bounces for a couple of seconds, then the tiles sit still to be tapped.
+    if (p.id === 'popcorn') { x.say('Popcorn Tiles!', 'oops'); x.sfx.boing(); setPopcorn(true); window.setTimeout(() => setPopcorn(false), 2500); }
   }
-
-  // Popcorn tiles swap spots now and then.
-  useEffect(() => {
-    if (!popcorn || mode !== 'play') return;
-    const id = window.setInterval(() => {
-      const t = [...trayRef.current];
-      const a = Math.floor(Math.random() * t.length), b = Math.floor(Math.random() * t.length);
-      [t[a], t[b]] = [t[b], t[a]]; setTray(t); hop([t[a], t[b]]); c.current.sfx.pop();
-    }, 2600);
-    return () => window.clearInterval(id);
-  }, [popcorn, mode]);
 
   // The egg timer.
   useEffect(() => {
@@ -155,7 +157,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     let last = Date.now();
     const id = window.setInterval(() => {
       const now = Date.now(), dt = now - last; last = now;
-      if (paused.current) return;
+      if (paused.current || !Number.isFinite(total.current)) return;
       remain.current = Math.max(0, remain.current - dt);
       setLeft(remain.current / total.current);
       if (remain.current <= 0) void miss(true);
@@ -163,6 +165,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
     }, 100);
     return () => window.clearInterval(id);
   }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function changePace() {
+    const next = PACES[(PACES.indexOf(paceRef.current) + 1) % PACES.length];
+    paceRef.current = next; setPaceState(next); savePace(next); c.current.sfx.tick();
+    const share = Number.isFinite(total.current) ? remain.current / total.current : 1;
+    total.current = wordMs(next, pairRef.current.word.length);
+    remain.current = Number.isFinite(total.current) ? total.current * share : Infinity; setLeft(share);
+  }
 
   function tap(t: number) {
     if (modeRef.current !== 'play') return;
@@ -199,7 +209,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await wait(1500);
       const pw = await c.current.power(0.45);
       if (pw) {
-        if (pw.silly) silly.current.push(pw);
+        // Every power-up, silly ones too, waits for the earner's own next word.
+        if (pw.silly && x.solo) silly.current.push(pw);
         else if (x.solo) pending.current.solo = [...(pending.current.solo ?? []), pw];
         else { pending.current[x.player.id] = [...(pending.current[x.player.id] ?? []), pw]; x.setHeld(x.player.id, pending.current[x.player.id]); }
       }
@@ -214,7 +225,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current, w = pairRef.current;
     setMode('busy'); setOwl(false);
     if (!timeUp) { setShake((n) => n + 1); x.sfx.wrong(); }
-    else { x.sfx.whistle(); x.say("Time's up!", 'oops'); }
+    else { x.sfx.slideDown(); x.say("Let's look together"); }
     await wait(700);
     if (x.solo && !timeUp) {
       const keep = lockedRef.current;
@@ -233,7 +244,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       setSlots([...s]); hop([t]); x.sfx.note(i);
       await wait(180);
     }
-    x.say(`It was ${w.word}`, 'oops');
+    x.say(timeUp ? w.word : `It was ${w.word}`, timeUp ? 'good' : 'oops');
     await wait(2000);
     c.current.next();
   }
@@ -316,7 +327,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
         {/* The shelf and its slots. */}
         <div className="absolute rounded-[0.8rem] border-heavy border-border" style={{ left: `${x0 - 2.5}%`, width: `${step * (n - 1) + tileW + 5}%`, top: `${SLOT_Y + tileH / 2 + 0.5}%`, height: '3.4%', background: '#c98a52', boxShadow: '0 5px 0 #000' }} aria-hidden="true" />
-        <motion.div className="absolute inset-0 pointer-events-none" key={`shake-${shake}`} animate={shake && !ctx.still ? { x: [0, -10, 10, -7, 7, 0] } : undefined} transition={{ duration: 0.45 }} aria-hidden="true">
+        <motion.div className="absolute inset-0 pointer-events-none" key={`shake-${shake}`} animate={shake && ctx.shake ? { x: [0, -10, 10, -7, 7, 0] } : undefined} transition={{ duration: 0.45 }} aria-hidden="true">
           {letters.map((_, i) => (
             <div key={i} className="absolute rounded-[22%] border-[3px] border-dashed" style={{ left: `${spot(i).left}%`, top: `${SLOT_Y - tileH / 2}%`, width: `${tileW}%`, height: `${tileH}%`, borderColor: '#241c3d', background: 'rgba(251,252,248,0.5)' }}>
               <AnimatePresence>
@@ -352,7 +363,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 whileHover={mode === 'play' && !ctx.cpu && !ctx.still ? { scale: 1.08 } : undefined} whileTap={{ scale: 0.9 }}>
                 <motion.span key={k} className="grid place-items-center w-full h-full" initial={false}
                   animate={ctx.still ? undefined : popcorn && !inSlot ? { y: [0, -18, 0, -6, 0], scaleY: [1, 1.12, 0.86, 1] } : { y: [0, -26, 0], scaleX: [1, 0.9, 1.12, 1], scaleY: [1, 1.12, 0.86, 1] }}
-                  transition={popcorn && !inSlot ? { duration: 0.7 + (t % 3) * 0.15, repeat: Infinity, delay: t * 0.1 } : { duration: 0.42, ease: 'easeOut' }}>
+                  transition={popcorn && !inSlot ? { duration: 0.7 + (t % 3) * 0.15, repeat: 2, delay: t * 0.1 } : { duration: 0.42, ease: 'easeOut' }}>
                   {l}
                 </motion.span>
               </motion.button>
@@ -365,7 +376,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {owl && hint >= 0 && (
             <motion.div key="owl" className="absolute pointer-events-none z-10" style={{ width: `${tileW * 1.1}%`, height: `${tileW * 1.1 * ar}%` }}
               initial={ctx.still ? false : { left: '-10%', top: '-10%', rotate: -30 }} animate={{ left: `${posOf(hint).left - tileW * 0.05}%`, top: `${posOf(hint).top - tileH * 1.05}%`, rotate: 0, y: ctx.still ? 0 : [0, -6, 0] }}
-              exit={{ top: '-20%', opacity: 0 }} transition={{ type: 'spring', stiffness: 90, damping: 13, y: { duration: 0.8, repeat: Infinity } }}>
+              exit={{ top: '-20%', opacity: 0 }} transition={{ type: 'spring', stiffness: 90, damping: 13, y: { duration: 0.8, repeat: 2 } }}>
               <Art kind="owl" />
             </motion.div>
           )}
@@ -380,13 +391,18 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </AnimatePresence></div>
 
         {/* Shuffle and the egg timer sit beside the bowl. */}
-        <motion.button type="button" onClick={shuffle} disabled={mode !== 'play' || ctx.cpu} aria-label="Shuffle the tiles"
-          className="absolute rounded-full border-heavy border-border bg-accent grid place-items-center disabled:opacity-60"
+        <motion.button type="button" onClick={shuffle} disabled={mode !== 'play' || ctx.cpu} aria-label="Mix the tiles"
+          className="absolute rounded-full border-heavy border-border bg-accent flex flex-col items-center justify-center gap-[4%] disabled:opacity-60"
           style={{ left: `${50 - bowl.w / 2 - (wide ? 14 : 22)}%`, top: `${bowl.top + 6}%`, width: `${wide ? 10 : 17}%`, aspectRatio: '1', minWidth: 48, boxShadow: '0 5px 0 #000' }}
           whileHover={ctx.still ? undefined : { scale: 1.08, rotate: 20 }} whileTap={{ scale: 0.9, rotate: 180 }}>
-          <ArrowsClockwise weight="bold" className="w-[55%] h-[55%]" />
+          <ArrowsClockwise weight="bold" className="w-[42%] h-[42%]" aria-hidden="true" />
+          <span className="font-display leading-none" style={{ fontSize: `max(0.9rem, ${wide ? 2.6 : 3.4}cqh)` }}>Mix</span>
         </motion.button>
-        <EggTimer left={left} watch={watch} double={double} still={ctx.still} style={{ left: `${50 + bowl.w / 2 + (wide ? 4 : 5)}%`, top: `${bowl.top + 6}%`, width: `${wide ? 10 : 17}%` }} />
+        {pace !== 'none' && <EggTimer left={left} watch={watch} double={double} still={ctx.still} style={{ left: `${50 + bowl.w / 2 + (wide ? 4 : 5)}%`, top: `${bowl.top + 4}%`, width: `${wide ? 9 : 15}%` }} />}
+        <button type="button" onClick={changePace} className="absolute min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold leading-none whitespace-nowrap motion-safe:hover:scale-105 motion-safe:transition-transform"
+          style={{ right: '2%', bottom: '3%', fontSize: `max(0.8rem, ${wide ? 2.4 : 3}cqh)`, boxShadow: '0 3px 0 #000' }} aria-label={`Timer: ${PACE_LABEL[pace]}. Tap to change.`}>
+          Timer: {PACE_LABEL[pace]}
+        </button>
       </div>
       {mode === 'turn' && !ctx.solo && <TurnCard key={ctx.taken} player={ctx.player} onStart={() => void begin()} />}
     </div>
@@ -399,7 +415,7 @@ function EggTimer({ left, watch, double, still, style }: { left: number; watch: 
   const r = 40, len = 2 * Math.PI * r;
   return (
     <div className="absolute aspect-square" style={{ ...style, minWidth: 48 }} role="progressbar" aria-label="Time left" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(left * 100)}>
-      <motion.svg viewBox="0 0 100 100" className="w-full h-full" animate={low && !still ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }} transition={{ duration: 0.5, repeat: low ? Infinity : 0 }} style={{ filter: 'drop-shadow(0 5px 0 #000)' }}>
+      <motion.svg viewBox="0 0 100 100" className="w-full h-full" style={{ filter: 'drop-shadow(0 5px 0 #000)' }}>
         <circle cx="50" cy="50" r="46" fill="#fbfcf8" stroke="#000" strokeWidth="5" />
         <circle cx="50" cy="50" r={r} fill="none" stroke={low ? '#ef7d96' : '#f6c544'} strokeWidth="11" strokeDasharray={`${len * left} ${len}`} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dasharray .1s linear' }} />
         <path d="M38 30h24M38 70h24M41 31q0 14 9 19-9 5-9 19M59 31q0 14-9 19 9 5 9 19" stroke="#241c3d" strokeWidth="4" fill="none" strokeLinecap="round" />
@@ -412,7 +428,7 @@ function EggTimer({ left, watch, double, still, style }: { left: number; watch: 
           </motion.span>
         )}
       </AnimatePresence>
-      {double && <motion.span className="absolute -top-[18%] -right-[18%] w-[55%] aspect-square rounded-full border-heavy border-border bg-accent grid place-items-center font-display" style={{ fontSize: 'max(0.9rem, 2.6cqh)' }} initial={still ? false : { scale: 0 }} animate={{ scale: still ? 1 : [1, 1.12, 1] }} transition={{ duration: 1, repeat: Infinity }}>x2</motion.span>}
+      {double && <motion.span className="absolute -top-[18%] -right-[18%] w-[55%] aspect-square rounded-full border-heavy border-border bg-accent grid place-items-center font-display" style={{ fontSize: 'max(0.9rem, 2.6cqh)' }} initial={still ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>x2</motion.span>}
     </div>
   );
 }

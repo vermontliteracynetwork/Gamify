@@ -28,7 +28,7 @@ const POWERS: LabPower[] = [
   { id: 'double', name: 'Double Prize', desc: 'The prize you win counts two times.', enter: 'spin', art: <Art kind="double" /> },
   { id: 'rare', name: 'Rare Drop', desc: 'A sparkly super rare plush drops into the machine.', enter: 'drop', art: <Art kind="rare" /> },
   { id: 'tilt', name: 'Tilt Shake', desc: 'The machine wobbles and a prize tumbles into the chute for you.', enter: 'wiggle', art: <Art kind="tilt" /> },
-  { id: 'butter', name: 'Butter Fingers', desc: 'Oops! The claw is slippery this turn.', silly: true, art: <ImgArt src={`${A}/potion.webp`} ring="#fff6b0" /> },
+  { id: 'butter', name: 'Butter Fingers', desc: 'Oops! Butter drips off the claw, so it is a tiny bit slippery.', silly: true, art: <ImgArt src={`${A}/potion.webp`} ring="#fff6b0" /> },
   { id: 'tickle', name: 'Claw Tickle', desc: 'Hee hee! The claw giggles and wiggles to a new spot.', silly: true, art: <Art kind="tickle" /> },
 ];
 
@@ -86,6 +86,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const turn = useRef(0);
   const dropRef = useRef<(() => void) | null>(null);
   const hold = useRef(0);
+  const missed = useRef<Record<string, number>>({});
+  const aimSecs = ctx.timeScale ? AIM_SECS * ctx.timeScale : 0;
   const me = ctx.player;
   const players = ctx.turns.players;
   const alive = (t: number) => turn.current === t;
@@ -138,7 +140,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       setPile((l) => [...l, np]); x0.sfx.thud(); await sleep(400); x0.sfx.cheer();
     }
     if (p.id === 'tilt') {
-      x0.sfx.crash(); setShake((s) => s + 1); await sleep(700); if (!alive(t)) return drops;
+      x0.sfx.crash(); if (c.current.shake) setShake((s) => s + 1); await sleep(700); if (!alive(t)) return drops;
       const pick = [...pileRef.current].sort((a, b) => a.x - b.x)[0];
       if (pick) { setPile((l) => l.filter((q) => q.id !== pick.id)); await win(pick, t); }
     }
@@ -157,17 +159,23 @@ function Board({ ctx }: { ctx: LabCtx }) {
     setPhase('drop');
     const at = xRef.current;
     const reach = f.wide ? 0.15 : 0.09;
-    const target = under(pileRef.current, at, reach);
+    const pid = x0.player.id;
+    // Two misses in a row never happen: the second time a prize hops into the claw.
+    const lucky = (missed.current[pid] ?? 0) >= 1;
+    const target = under(pileRef.current, at, reach) ?? (lucky ? [...pileRef.current].sort((a, b) => Math.abs(a.x - at) - Math.abs(b.x - at) || b.row - a.row)[0] ?? null : null);
     const floorTop = 100 - ROW_Y[target ? target.row : 0] - (target ? PRIZE_H * 0.85 : PRIZE_H * 0.3);
     const down = Math.max(10, floorTop - 14);
     setOpen(true); x0.sfx.slideDown(); setDrop(1.3); setDepth(down);
     await sleep(1350); if (!alive(t)) return;
     setOpen(false); x0.sfx.thud();
     await sleep(380); if (!alive(t)) return;
-    const got = target && Math.random() < grabChance(target, at, f) ? target : null;
+    const got = target && (lucky || Math.random() < grabChance(target, at, f)) ? target : null;
+    if (got && lucky && Math.abs(got.x - at) > reach) x0.say('Lucky bounce!', 'good');
+    missed.current[pid] = got ? 0 : (missed.current[pid] ?? 0) + 1;
     if (got) { setPile((l) => l.filter((q) => q.id !== got.id)); setCarry(got); x0.sfx.tick(); }
     setDrop(1.2); setDepth(0); x0.sfx.slideUp();
-    if (got && Math.random() < slipChance(got, f)) {
+    if (got && !lucky && Math.random() < slipChance(got, f)) {
+      missed.current[pid] = 1;
       await sleep(620); if (!alive(t)) return;
       setCarry(null); setOpen(true); setFalling({ p: got, from: down * 0.5 });
       x0.sfx.boing(); x0.say('Oops! It slipped!', 'oops');
@@ -236,7 +244,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const up = (e: KeyboardEvent) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') hold.current = 0; };
     window.addEventListener('keydown', down); window.addEventListener('keyup', up);
     // A gentle auto drop so a turn never stalls.
-    const auto = window.setTimeout(() => pressDrop(), AIM_SECS * 1000);
+    const auto = aimSecs ? window.setTimeout(() => pressDrop(), aimSecs * 1000) : 0;
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.clearTimeout(auto); hold.current = 0; };
   }, [phase, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -269,7 +277,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
         {/* The cabinet. */}
         <motion.div key={shake} className="relative min-w-0 min-h-0 grid grid-rows-[auto_minmax(0,1fr)_auto] rounded-[1.6rem] border-heavy border-border p-[2.5%] gap-[2%]"
           style={{ background: 'linear-gradient(180deg, #ef7d96, #d9607e)', boxShadow: '0 8px 0 #000, inset 0 0 0 6px rgba(255,255,255,0.25)' }}
-          animate={shake && !ctx.still ? { rotate: [0, -3, 3, -2, 2, 0], x: [0, -10, 10, -6, 6, 0] } : undefined} transition={{ duration: 0.7 }}>
+          animate={shake && ctx.shake ? { rotate: [0, -3, 3, -2, 2, 0], x: [0, -10, 10, -6, 6, 0] } : undefined} transition={{ duration: 0.7 }}>
           <Marquee still={ctx.still} />
           <div className="relative min-h-0 grid place-items-center" style={{ containerType: 'size' }}>
             <div className="relative rounded-2xl border-heavy border-border overflow-clip" style={{ width: `min(100cqw, ${100 * GLASS_AR}cqh)`, aspectRatio: `${GLASS_AR}`, containerType: 'size', background: 'linear-gradient(180deg, #e6f8ff 0%, #cfeefc 70%, #b4c4fb 100%)' }}>
@@ -302,14 +310,22 @@ function Board({ ctx }: { ctx: LabCtx }) {
                 onPointerUp={() => { hold.current = 0; }} onPointerCancel={() => { hold.current = 0; }} onLostPointerCapture={() => { hold.current = 0; }}
                 className={`${d === 'left' ? 'order-1' : 'order-3'} w-[clamp(3.4rem,13cqmin,5rem)] aspect-square rounded-2xl border-heavy border-border bg-[#b4c4fb] grid place-items-center touch-none select-none disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform`}
                 style={{ boxShadow: '0 5px 0 #000' }}>
-                {d === 'left' ? <ArrowFatLeft weight="fill" className="w-[55%] h-[55%]" /> : <ArrowFatRight weight="fill" className="w-[55%] h-[55%]" />}
+                {d === 'left' ? <ArrowFatLeft weight="fill" className="w-[45%] h-[45%]" aria-hidden="true" /> : <ArrowFatRight weight="fill" className="w-[45%] h-[45%]" aria-hidden="true" />}
+                <span className="font-bold leading-none" style={{ fontSize: 'clamp(0.75rem, 2.6cqmin, 1rem)' }}>{d === 'left' ? 'Left' : 'Right'}</span>
               </button>
             ))}
             <motion.button type="button" disabled={!aiming} onClick={pressDrop} aria-label="Drop the claw"
-              className="order-2 w-[clamp(4rem,16cqmin,6.2rem)] aspect-square rounded-full border-heavy border-border grid place-items-center disabled:opacity-50 font-display text-white"
+              className="order-2 relative w-[clamp(4rem,16cqmin,6.2rem)] aspect-square rounded-full border-heavy border-border grid place-items-center disabled:opacity-50 font-display text-white"
               style={{ background: 'radial-gradient(circle at 35% 30%, #ff8a9e, #e23d5c 70%)', boxShadow: '0 6px 0 #000', fontSize: 'clamp(0.9rem, 3.4cqmin, 1.4rem)', WebkitTextStroke: '0.08em #000', paintOrder: 'stroke fill' }}
               animate={aiming && !ctx.still ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: 1, repeat: aiming ? Infinity : 0 }} whileTap={{ scale: 0.9, y: 4 }}>
               Drop
+              {/* The countdown: a ring that empties before a gentle auto drop. */}
+              {aiming && aimSecs > 0 && (
+                <svg viewBox="0 0 100 100" className="absolute -inset-[14%] w-[128%] h-[128%] -rotate-90 pointer-events-none" aria-hidden="true">
+                  <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="6" />
+                  <motion.circle key={`${ctx.taken}-${left}`} cx="50" cy="50" r="46" fill="none" stroke="#fdfd94" strokeWidth="6" strokeLinecap="round" initial={{ pathLength: 1 }} animate={{ pathLength: 0 }} transition={{ duration: aimSecs, ease: 'linear' }} />
+                </svg>
+              )}
             </motion.button>
             {left > 1 && phase === 'aim' && <span className="order-4 font-display text-white text-xl">x{left}</span>}
           </div>

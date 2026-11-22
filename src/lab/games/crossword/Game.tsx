@@ -91,13 +91,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const setCheck = (v: boolean) => { checkRef.current = v; setCheckState(v); };
   const [glow, setGlow] = useState(false);
   const [wobble, setWobble] = useState(false);
-  const wobbleNext = useRef(false);
+  const [showing, setShowing] = useState(false);
+  const misses = useRef<Record<number, number>>({});
+  const [helpOn, setHelpOn] = useState(false);
   const pending = useRef<Record<string, LabPower[]>>({});
   const color = (id: string | null) => (id ? TEAM_COLORS[(ctx.turns.players.find((p) => p.id === id)?.colorIndex ?? 0) % TEAM_COLORS.length] : '#e2dcfb');
   const open = (s = solvedRef.current) => puzRef.current.entries.map((_, i) => i).filter((i) => s[i] === undefined);
 
   function select(i: number, at?: number) {
     actRef.current = i; setActState(i); setDraft({});
+    setHelpOn((misses.current[i] ?? 0) >= 2);
     const e = puzRef.current.entries[i]; if (!e) return;
     const cells = cellsOf(e);
     const first = at ?? cells.findIndex(([r, cc]) => !fixedRef.current[key(r, cc)]);
@@ -108,10 +111,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
   useEffect(() => {
     const x = c.current;
     setDouble(false); setCheck(false); setGlow(false);
-    setWobble(wobbleNext.current); wobbleNext.current = false;
+    setWobble(false); setInk(null); setShowing(false); setHelpOn(false);
     if (x.taken > 0 && (x.solo || open().length === 0)) {
       setPuz(newPuzzle(() => c.current.words({ min: 3, max: 9 })));
-      setFixed({}); setSolved({}); clip('wipe'); x.say('New puzzle!');
+      setFixed({}); setSolved({}); misses.current = {}; clip('wipe'); x.say('New puzzle!');
     }
     select(open()[0] ?? 0);
     if (x.solo) setMode('play'); else setMode('turn');
@@ -153,7 +156,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       window.setTimeout(() => {
         setPotion(false);
         setSolved({ ...solvedRef.current, [i]: who });
-        x.points(e.word.length, who); x.say(`${e.word}!`);
+        x.points(3, who); x.say(`${e.word}! +3`);
         setWave({ id: Date.now(), keys: cells.map(([r, cc]) => key(r, cc)) });
         if (i === actRef.current || solvedRef.current[actRef.current] !== undefined) { const n = open()[0]; if (n !== undefined) select(n); }
         if (open().length === 0) { window.setTimeout(() => puzzleDone(), 600); }
@@ -163,7 +166,19 @@ function Play({ ctx }: { ctx: LabCtx }) {
       clip('splat'); x.say('Ink Spill!', 'oops');
       setInk({ id: Date.now(), x: 15 + Math.random() * 40, y: 10 + Math.random() * 40, left: 3 });
     }
-    if (p.id === 'wobble') { x.sfx.boing(); x.say('Wobbly Keys!', 'oops'); if (x.solo) setWobble(true); else wobbleNext.current = true; }
+    // Wobbly for three seconds only, then the keys hold still.
+    if (p.id === 'wobble') { x.sfx.boing(); x.say('Wobbly Keys!', 'oops'); setWobble(true); window.setTimeout(() => setWobble(false), 3000); }
+  }
+
+  // Solo help after two misses: one free letter in the chosen word.
+  function showLetter() {
+    const e = puzRef.current.entries[actRef.current]; if (!e || modeRef.current !== 'play') return;
+    const k = cellsOf(e).map(([r, cc]) => key(r, cc)).find((q) => !fixedRef.current[q]);
+    if (!k) return;
+    setFixed({ ...fixedRef.current, [k]: { l: puzRef.current.letters[k], by: null } });
+    const d = { ...draftRef.current }; delete d[k]; setDraft(d);
+    setStar({ id: Date.now(), k }); window.setTimeout(() => setStar(null), 1000);
+    c.current.sfx.coin(); afterFill();
   }
 
   // Typing into the chosen clue.
@@ -202,7 +217,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const cells = cellsOf(e).map(([r, cc]) => key(r, cc));
     const typed = cells.map((k) => fixedRef.current[k]?.l ?? draftRef.current[k] ?? '').join('');
     if (typed === e.word) {
-      const who = x.player.id, pts = e.word.length * (doubleRef.current ? 2 : 1);
+      // Every word is worth the same: 3 (double 6).
+      const who = x.player.id, pts = 3 * (doubleRef.current ? 2 : 1);
       if (doubleRef.current) setDouble(false);
       const f = { ...fixedRef.current };
       cells.forEach((k, j) => { f[k] = { l: e.word[j], by: f[k]?.by ?? who }; });
@@ -226,8 +242,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await wait(1200);
       const pw = await c.current.power(0.45, (p) => p.id !== 'word' || left.length > 1);
       if (pw) {
-        if (pw.silly) { fire(pw); await wait(1600); }
-        else { pending.current[who] = [...(pending.current[who] ?? []), pw]; c.current.setHeld(who, pending.current[who]); }
+        // Silly ones wait for the earner's own next turn, like the rest.
+        { pending.current[who] = [...(pending.current[who] ?? []), pw]; c.current.setHeld(who, pending.current[who]); }
       }
       if (!left.length) { x.sfx.cheer(); x.say('Puzzle done!', 'big'); x.burst(0.4, 0.4, 'big'); await wait(1600); }
       c.current.next();
@@ -243,8 +259,17 @@ function Play({ ctx }: { ctx: LabCtx }) {
       setCheck(false); setDraft(keep); x.say('Pencil Check! Try again');
       setCur(cells.findIndex((k) => !fixedRef.current[k] && !keep[k])); setMode('play'); return;
     }
-    if (x.solo) { setDraft(keep); setCur(cells.findIndex((k) => !fixedRef.current[k] && !keep[k])); x.say('Try again!', 'oops'); setMode('play'); return; }
-    setDraft({}); x.say('Not quite!', 'oops');
+    if (x.solo) {
+      misses.current[i] = (misses.current[i] ?? 0) + 1;
+      if (misses.current[i] >= 2) setHelpOn(true);
+      setDraft(keep); setCur(cells.findIndex((k) => !fixedRef.current[k] && !keep[k])); x.say('Try again!', 'oops'); setMode('play'); return;
+    }
+    // Teams: the right word shows for two seconds so everyone learns it.
+    const show: Record<string, string> = {};
+    cells.forEach((k, j) => { if (!fixedRef.current[k]) show[k] = e.word[j]; });
+    setDraft(show); setShowing(true); x.say(`It is ${e.word}`);
+    await wait(2000);
+    setShowing(false); setDraft({});
     if (!x.cpu) x.log(asQuestion(e), false);
     await wait(900);
     c.current.next();
@@ -339,10 +364,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   </motion.button>
                 ))}
                 {ri === 2 && (
-                  <motion.button type="button" onClick={() => canPlay && back()} disabled={!canPlay} aria-label="Delete a letter"
-                    className="h-full rounded-[0.6rem] border-std border-border grid place-items-center disabled:cursor-default" style={{ width: '14%', fontSize: 'max(1rem, 15cqh)', background: '#f5a08c', boxShadow: '0 4px 0 #000' }}
+                  <motion.button type="button" onClick={() => canPlay && back()} disabled={!canPlay} aria-label="Back: delete a letter"
+                    className="h-full rounded-[0.6rem] border-std border-border inline-flex items-center justify-center gap-[0.25em] font-heading font-bold disabled:cursor-default" style={{ width: '14%', fontSize: 'max(0.9rem, min(13cqh, 2.6cqw))', background: '#f5a08c', boxShadow: '0 4px 0 #000' }}
                     whileHover={canPlay && !ctx.still ? { scale: 1.06 } : undefined} whileTap={{ scale: 0.9, y: 3 }}>
-                    <Backspace weight="bold" style={{ width: '1.5em', height: '1.5em' }} />
+                    <Backspace weight="bold" style={{ width: '1.2em', height: '1.2em' }} aria-hidden="true" />Back
                   </motion.button>
                 )}
               </div>
@@ -370,10 +395,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
                         return (
                           <motion.button key={k} type="button" onClick={() => tapCell(r, cc)} disabled={!canPlay} aria-label={`Square ${numAt[k] ? `${numAt[k]} ` : ''}${f?.l ?? d ?? 'empty'}`}
                             className="relative m-[4%] rounded-[14%] border-border font-heading font-bold grid place-items-center disabled:cursor-default"
-                            style={{ borderWidth: 'max(2px, 0.5cqmin)', background: isBad ? '#ef7d96' : f ? color(f.by) : isCur ? '#fdfd94' : inAct ? '#fffbd0' : '#ffffff', boxShadow: isCur ? '0 0 0 3px #241c3d, 0 3px 0 #000' : '0 3px 0 #000', fontSize: `calc(min(100cqw / ${puz.cols}, 100cqh / ${puz.rows}) * 0.5)`, zIndex: isCur ? 2 : 1 }}
+                            style={{ borderWidth: 'max(2px, 0.5cqmin)', background: isBad ? '#ef7d96' : f ? color(f.by) : showing && inAct ? '#c8f0dc' : isCur ? '#fdfd94' : inAct ? '#fffbd0' : '#ffffff', boxShadow: isCur ? '0 0 0 3px #241c3d, 0 3px 0 #000' : '0 3px 0 #000', fontSize: `calc(min(100cqw / ${puz.cols}, 100cqh / ${puz.rows}) * 0.5)`, zIndex: isCur ? 2 : 1 }}
                             initial={ctx.still ? false : { scale: 0, rotate: -20 }}
-                            animate={isBad && !ctx.still ? { x: [0, -6, 6, -4, 4, 0], scale: 1, rotate: 0 } : waveAt >= 0 && !ctx.still ? { y: [0, -14, 0], scale: [1, 1.15, 1], rotate: 0 } : { scale: isCur && !ctx.still ? [1, 1.06, 1] : 1, rotate: 0, y: 0 }}
-                            transition={isBad ? { duration: 0.45 } : waveAt >= 0 ? { duration: 0.5, delay: waveAt * 0.07 } : isCur ? { scale: { duration: 1.2, repeat: Infinity } } : { type: 'spring', stiffness: 300, damping: 16, delay: (r + cc) * 0.03 }}
+                            animate={isBad && ctx.shake ? { x: [0, -6, 6, -4, 4, 0], scale: 1, rotate: 0 } : waveAt >= 0 && !ctx.still ? { y: [0, -14, 0], scale: [1, 1.15, 1], rotate: 0 } : { scale: 1, rotate: 0, y: 0 }}
+                            transition={isBad ? { duration: 0.45 } : waveAt >= 0 ? { duration: 0.5, delay: waveAt * 0.07 } : { type: 'spring', stiffness: 300, damping: 16, delay: (r + cc) * 0.03 }}
                             whileHover={canPlay && !ctx.still ? { scale: 1.08 } : undefined}>
                             {numAt[k] && <span className="absolute left-[8%] top-[2%] leading-none font-bold text-ink-night" style={{ fontSize: '0.42em' }}>{numAt[k]}</span>}
                             <AnimatePresence mode="popLayout">
@@ -402,6 +427,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                           onClick={() => { const n = ink.left - 1; clip('wipe'); c.current.sfx.swish(); if (n <= 0) { setInk(null); c.current.say('Squeaky clean!'); } else setInk({ ...ink, left: n }); }}
                           initial={ctx.still ? false : { scale: 0, rotate: -60 }} animate={{ scale: [0.4 + ink.left * 0.2, 0.3 + ink.left * 0.233], rotate: 0 }} exit={{ scale: 0, opacity: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 260, damping: 12 }}>
                           <Blob still={ctx.still} />
+                          <span className="absolute left-1/2 bottom-[4%] -translate-x-1/2 whitespace-nowrap rounded-pill border-std border-border bg-surface px-2 font-bold text-sm">Tap to wipe</span>
                         </motion.button>
                       )}
                     </AnimatePresence>
@@ -424,6 +450,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
                         <span className="flex gap-[0.12em]" aria-hidden="true">{[...e.word].map((_, j) => <span key={j} className="inline-block rounded-[0.12em] border-[2px] border-border" style={{ width: '0.42em', height: '0.42em', background: fixed[actCells[j]] || draft[actCells[j]] ? '#241c3d' : '#fff' }} />)}</span>
                       </span>
                       <span className="font-bold leading-snug text-balance" style={{ fontSize: `max(0.95rem, ${(wide ? 4.6 : 3.8) * (e.clue.length > 70 ? 0.72 : e.clue.length > 40 ? 0.86 : 1)}${S})` }}>{e.clue}</span>
+                      {helpOn && ctx.solo && solved[act] === undefined && (
+                        <button type="button" onClick={showLetter} disabled={!canPlay} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-accent font-bold motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}>Show a letter</button>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -438,7 +467,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                         className="rounded-full border-std border-border font-heading font-bold inline-flex items-center justify-center gap-[0.2em] leading-none disabled:cursor-default"
                         style={{ fontSize: `max(0.85rem, ${wide ? 3 : 2.9}${S})`, minHeight: 44, minWidth: 44, padding: '0 0.55em', background: by !== undefined ? color(by) : i === act ? '#fdfd94' : '#fbfcf8', boxShadow: i === act ? '0 0 0 3px #241c3d' : '0 3px 0 #000' }}
                         whileHover={canPlay && by === undefined && !ctx.still ? { scale: 1.08 } : undefined} whileTap={{ scale: 0.92 }}>
-                        {by !== undefined ? <CheckCircle weight="fill" aria-hidden="true" /> : null}{en.num}{en.dir === 'across' ? <ArrowRight weight="bold" aria-hidden="true" /> : <ArrowDown weight="bold" aria-hidden="true" />}
+                        {by !== undefined ? <CheckCircle weight="fill" aria-hidden="true" /> : null}{en.num} {en.dir}{en.dir === 'across' ? <ArrowRight weight="bold" aria-hidden="true" /> : <ArrowDown weight="bold" aria-hidden="true" />}
                       </motion.button>
                     </li>
                   );
@@ -465,14 +494,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
 function Badge({ children, still }: { children: ReactNode; still: boolean }) {
   return (
     <motion.span className="h-11 min-w-11 px-2 rounded-full border-heavy border-border bg-accent grid place-items-center font-display text-xl" style={{ boxShadow: '0 3px 0 #000' }}
-      initial={still ? false : { scale: 0, rotate: -180 }} animate={{ scale: still ? 1 : [1, 1.1, 1], rotate: 0 }} exit={{ scale: 0 }} transition={{ scale: { duration: 1, repeat: Infinity } }}>{children}</motion.span>
+      initial={still ? false : { scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>{children}</motion.span>
   );
 }
 
 // A cute ink blob with a face.
 function Blob({ still }: { still: boolean }) {
   return (
-    <motion.svg viewBox="0 0 100 100" className="w-full h-full" animate={still ? undefined : { scaleX: [1, 1.05, 0.97, 1], scaleY: [1, 0.96, 1.04, 1] }} transition={{ duration: 1.4, repeat: Infinity }} aria-hidden="true">
+    <motion.svg viewBox="0 0 100 100" className="w-full h-full" animate={still ? undefined : { scaleX: [1, 1.05, 0.97, 1], scaleY: [1, 0.96, 1.04, 1] }} transition={{ duration: 1.4, repeat: 1 }} aria-hidden="true">
       <path d="M50 8c10 0 12 10 22 9s16 9 13 18 8 14 4 24-14 6-16 15-14 14-24 10-14-8-22-6-16-8-14-18-10-14-4-24 2-12 12-16 19-12 29-12z" fill="#241c3d" stroke="#000" strokeWidth="3" />
       <circle cx="12" cy="86" r="5" fill="#241c3d" /><circle cx="90" cy="14" r="4" fill="#241c3d" /><circle cx="94" cy="80" r="3" fill="#241c3d" />
       <circle cx="38" cy="44" r="8" fill="#fff" /><circle cx="62" cy="44" r="8" fill="#fff" /><circle cx="40" cy="46" r="4" /><circle cx="64" cy="46" r="4" />

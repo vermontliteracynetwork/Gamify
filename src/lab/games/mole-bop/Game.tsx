@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Hammer, HandTap, Timer, CheckCircle } from '@phosphor-icons/react';
 import type { LabCtx, LabDef } from '../../types';
-import { ArcadeFrame, StarJar, arcadePowers, clip, labelSize, rand, squeak, synth, useArcade, type Arcade } from '../balloon-pop/arcade';
+import { ArcadeFrame, Rain, StarJar, arcadePowers, clip, labelSize, rand, squeak, synth, useArcade, type Arcade } from '../balloon-pop/arcade';
 import { makeBag } from '../balloon-pop/rules';
 import { holeGrid, maxUp, pickHole, upTime } from './rules';
 
@@ -13,7 +13,7 @@ import { holeGrid, maxUp, pickHole, upTime } from './rules';
 
 const POWERS = arcadePowers('mole-bop', {
   slow: { name: 'Slow-mo', desc: 'Moles move in slow motion for a while.' },
-  magnet: { name: 'Magnet', desc: 'The right mole wears a gold hat for two questions.' },
+  magnet: { name: 'Magnet', desc: 'For two questions the right mole stays up longer and looks bigger.' },
   shield: { name: 'Shield', desc: 'Your next wrong bop costs nothing.' },
   double: { name: 'Double Points', desc: 'Every right bop scores two for a while.' },
   time: { name: 'Extra Time', desc: 'Five more seconds on the clock.' },
@@ -23,7 +23,7 @@ const POWERS = arcadePowers('mole-bop', {
 });
 
 type State = 'down' | 'up' | 'bonk' | 'giggle';
-interface Mole { state: State; choice: number; until: number; key: number }
+interface Mole { state: State; choice: number; until: number; key: number; text: string }
 interface Swing { id: number; x: number; y: number }
 
 function Play({ ctx }: { ctx: LabCtx }) {
@@ -36,6 +36,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [swings, setSwings] = useState<Swing[]>([]);
 
   const { ar, box, floaters, bits, flash } = useArcade(ctx, {
+    onReset: () => { moles.current = []; popIn.current = 0.3; },
     onStart: () => { moles.current = []; popIn.current = 0.3; },
     onQuestion: (q) => {
       bag.current = makeBag(q.choices.length);
@@ -44,7 +45,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     },
     step: (dt, real, a) => {
       const holes = holeGrid(a.W);
-      if (moles.current.length !== holes.length) moles.current = holes.map(() => ({ state: 'down' as State, choice: 0, until: 0, key: 0 }));
+      if (moles.current.length !== holes.length) moles.current = holes.map(() => ({ state: 'down' as State, choice: 0, until: 0, key: 0, text: '' }));
       const ms = moles.current;
       for (const m of ms) {
         if (m.state === 'down') continue;
@@ -60,8 +61,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const h = pickHole(ms.map((m) => m.state !== 'down'), last.current);
         if (h >= 0) {
           last.current = h;
-          ms[h] = { state: 'up', choice: bag.current(), until: upTime(a.t), key: key.current++ };
-          if (!a.ctx.still) synth(a.ctx.settings, [{ f: 300, to: 620, len: 0.12, gain: 0.35 }]);
+          const choice = bag.current();
+          const help = a.magnet && choice === a.q.correctIndex ? 1.6 : 1;
+          ms[h] = { state: 'up', choice, until: upTime(a.t) * help, key: key.current++, text: a.q.choices[choice] ?? '' };
+          synth(a.ctx.settings, [{ f: 300, to: 620, len: 0.12, gain: 0.35 }]);
         }
         popIn.current = rand(0.45, 1.0);
       }
@@ -83,7 +86,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setSwings((l) => [...l.slice(-3), sw]);
     window.setTimeout(() => setSwings((l) => l.filter((v) => v !== sw)), 650);
     squeak(ctx.settings);
-    const res = a.answer(m.choice, h.x, h.y - h.size * 0.9);
+    const res = a.answer(m.choice, h.x, h.y - h.size * 0.9, m.key);
+    if (res === 'ignored') return;
     if (res === 'right') {
       clip('/lab/mole-bop/bonk.mp3', ctx.settings, 0.7);
       m.state = 'bonk'; m.until = 1.3;
@@ -104,13 +108,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <AnimatePresence>{swings.map((s) => <HammerSwing key={s.id} s={s} ar={ar} giant={giant} />)}</AnimatePresence>
       </>}>
       <Garden ar={ar} />
+      <Rain ar={ar} />
       {holes.map((h, i) => {
-        const m = moles.current[i] ?? { state: 'down', choice: 0, until: 0, key: 0 };
-        const text = ar.q?.choices[m.choice] ?? '';
+        const m = moles.current[i] ?? { state: 'down', choice: 0, until: 0, key: 0, text: '' };
+        const text = m.text;
+        const rest = ar.locked(m.key) && m.state !== 'bonk';
         const scale = giant ? 1.22 : 1;
         const sz = h.size * scale;
         const upNow = m.state !== 'down';
-        const gold = ar.magnet && m.choice === ar.q?.correctIndex && m.state === 'up';
+        const gold = false;
+        const help = ar.magnet && m.choice === ar.q?.correctIndex && m.state === 'up' ? 1.15 : 1;
         // Units: the hole line is at h.y; the mole and its sign rise 1.1 sizes above it.
         const top = h.y - sz * 1.1;
         return (
@@ -122,14 +129,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
             </svg>
             {/* The mole rises out of the hole (clipped at the hole's middle). */}
             <div className="absolute inset-x-0 top-0 overflow-hidden" style={{ height: `${(1.1 / 1.32) * 100}%` }}>
-              <motion.button type="button" disabled={ctx.cpu || !ar.running || !(m.state === 'up' || m.state === 'giggle')} aria-label={upNow ? `Mole: ${text}` : 'Empty hole'}
+              <motion.button type="button" disabled={ctx.cpu || !ar.running || rest || !(m.state === 'up' || m.state === 'giggle')} aria-label={upNow ? `Mole: ${text}` : 'Empty hole'}
                 onPointerDown={(e) => { e.preventDefault(); bop(i); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bop(i); } }}
                 className="absolute inset-0 group disabled:cursor-default focus-visible:outline-4 focus-visible:outline-black rounded-xl"
                 initial={false}
                 animate={m.state === 'down' ? { y: '105%' } : m.state === 'bonk' ? { y: ['0%', '0%', '105%'], scaleY: [0.55, 0.62, 0.8], scaleX: [1.25, 1.18, 1] } : m.state === 'giggle' && !ctx.still ? { y: '0%', rotate: [0, -8, 8, -6, 6, 0], scaleY: 1, scaleX: 1 } : { y: '0%', rotate: 0, scaleY: 1, scaleX: 1 }}
                 transition={m.state === 'bonk' ? { duration: 1.3, times: [0, 0.55, 1] } : m.state === 'down' ? { duration: 0.3, ease: 'easeIn' } : m.state === 'giggle' ? { duration: 0.7 } : { type: 'spring', stiffness: 300, damping: 14 }}
                 style={{ originY: 1 }}>
-                <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform origin-bottom">
+                <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform origin-bottom" style={{ opacity: rest ? 0.45 : 1, scale: help, transition: 'opacity .3s, scale .3s' }}>
                   <span className="absolute left-0 right-0 top-0 h-[30%] z-[1] grid place-items-center bg-[#fbfcf8] border-std border-border rounded-lg px-1 text-center font-bold leading-[1.05] break-words"
                     style={{ fontSize: `calc(var(--u) * ${labelSize(text, sz * 1.1, 4.8)})`, color: '#241c3d', boxShadow: '0 3px 0 #000', transform: `rotate(${(m.key % 5) - 2}deg)` }}>{upNow ? text : ''}</span>
                   <span className="absolute left-[28%] right-[28%] top-[28%] h-[12%] block" aria-hidden="true"><svg viewBox="0 0 40 20" preserveAspectRatio="none" className="w-full h-full"><rect x="2" y="0" width="5" height="20" fill="#c58f5a" stroke="#000" strokeWidth="1.5" /><rect x="33" y="0" width="5" height="20" fill="#c58f5a" stroke="#000" strokeWidth="1.5" /></svg></span>

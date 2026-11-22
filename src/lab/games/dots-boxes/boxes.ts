@@ -43,6 +43,12 @@ export const open = (lines: Lines, size: Size) => allLines(size).filter((l) => !
 // Unclaimed boxes with three sides drawn (for the paint bucket).
 export const threeSided = (lines: Lines, claimed: Record<string, unknown>, size: Size) => allBoxes(size).filter((b) => !claimed[b] && count(lines, b) === 3);
 
+// Unclaimed boxes with two or three sides drawn (for the paint bucket).
+export const paintable = (lines: Lines, claimed: Record<string, unknown>, size: Size) => allBoxes(size).filter((b) => !claimed[b] && count(lines, b) >= 2 && count(lines, b) < 4);
+
+// A line that hands nobody a box: it closes none and leaves no box with three sides.
+export const safe = (lines: Lines, l: string, size: Size) => !closes(lines, l, size).length && boxesOf(l, size).every((b) => count(lines, b) < 2);
+
 // Lines that can be erased or shaken: drawn, and not the side of a claimed box.
 export function loose(lines: Lines, claimed: Record<string, unknown>, size: Size): string[] {
   return Object.keys(lines).filter((l) => boxesOf(l, size).every((b) => !claimed[b]));
@@ -69,7 +75,7 @@ export function quake(lines: Lines, claimed: Record<string, unknown>, size: Size
   const from = loose(next, claimed, size).sort(() => rand() - 0.5).slice(0, n);
   for (const l of from) {
     const owner = next[l]; delete next[l];
-    const spots = open(next, size).filter((s) => s !== l && !closes(next, s, size).length);
+    const spots = open(next, size).filter((s) => s !== l && safe(next, s, size));
     if (!spots.length) { next[l] = owner; continue; }
     const to = spots[Math.floor(rand() * spots.length)];
     next[to] = owner; moved.push([l, to]);

@@ -264,7 +264,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* Goal posts from above. */}
           <path d="M176 44 V56 M176 50 H179" stroke="#f6c544" strokeWidth="1.2" strokeLinecap="round" />
           {/* The drive so far: a glowing trail in the team color. */}
-          <motion.rect initial={false} animate={{ width: Math.max(0, yx(yard) - yx(START_YARD)) }} transition={{ type: 'spring', stiffness: 70, damping: 14 }} x={yx(START_YARD)} y="47" height="6" rx="3" fill={color} opacity="0.55" />
+          <motion.rect initial={false} animate={{ width: Math.max(0, yx(yard) - yx(START_YARD)) }} transition={{ duration: 0.7 * P, ease: 'easeOut' }} x={yx(START_YARD)} y="47" height="6" rx="3" fill={color} opacity="0.55" />
           {/* The line of scrimmage. */}
           <motion.path initial={false} animate={{ x: yx(yard) - 20 }} transition={{ type: 'spring', stiffness: 80, damping: 14 }} d="M20 16 V84" stroke="#6aa9e9" strokeWidth="0.9" opacity="0.9" />
           {/* Sprinklers spray the field. */}

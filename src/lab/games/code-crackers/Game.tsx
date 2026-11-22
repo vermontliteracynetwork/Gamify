@@ -221,7 +221,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
 
   async function pick(slot: number) {
     if (mode !== 'pick' || openedRef.current.includes(slot)) return;
-    const t = turn.current, x = c.current, id = x.player.id;
+    const t = turn.current, x = c.current;
     setMode('busy'); setOpened((o) => [...o, slot]);
     x.sfx.zap(); shake(); say('opening the box...');
     await sleep(700); if (!alive(t)) return;

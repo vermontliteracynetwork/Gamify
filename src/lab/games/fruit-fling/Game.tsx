@@ -10,17 +10,17 @@ import { fly, GRAVITY, segmentHits, toss } from './rules';
 // game): fruits carrying answers are tossed up in arcs. Swipe (or tap) the
 // right one: it splits in two halves that tumble down, juice splashes and a
 // splat stays on the wall for a moment. Silly rubber chickens fly up too:
-// slice one and it squawks and costs a few seconds.
+// slice one and it squawks in a puff of feathers (it costs nothing).
 
 const POWERS = arcadePowers('fruit-fling', {
   slow: { name: 'Slow-mo', desc: 'Fruit flies in slow motion for a while.' },
-  magnet: { name: 'Magnet', desc: 'The right fruit glows gold and floats for two questions.' },
+  magnet: { name: 'Magnet', desc: 'For two questions the right fruit grows big and floats slowly.' },
   shield: { name: 'Shield', desc: 'Your next wrong slice or chicken costs nothing.' },
   double: { name: 'Double Points', desc: 'Every right slice scores two for a while.' },
   time: { name: 'Extra Time', desc: 'Five more seconds on the clock.' },
   freeze: { name: 'Freeze', desc: 'Every fruit hangs still in the air.' },
   giant: { name: 'Giant Fruit', desc: 'Fruit grows big and easy to slice.' },
-  chickens: { name: 'Rubber Chicken Rain', desc: 'Squawk! A flock of rubber chickens. Dodge them!' },
+  chickens: { name: 'Rubber Chicken Rain', desc: 'Squawk! A flock of rubber chickens flies up with the fruit.' },
 });
 
 interface Kind { id: string; skin: string; flesh: string; juice: string; leaf?: boolean }
@@ -43,6 +43,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const wave = useRef(0.4);
   const nid = useRef(1);
   const down = useRef(false);
+  const swipeWrong = useRef(false);
   const prev = useRef<[number, number] | null>(null);
   const [trail, setTrail] = useState<{ x: number; y: number; t: number }[]>([]);
   const [halves, setHalves] = useState<Half[]>([]);
@@ -59,6 +60,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   const { ar, box, floaters, bits, flash } = useArcade(ctx, {
+    onReset: () => { items.current = []; },
     onStart: () => { items.current = []; },
     onQuestion: (q) => {
       bag.current = makeBag(q.choices.length);
@@ -103,17 +105,18 @@ function Play({ ctx }: { ctx: LabCtx }) {
     },
   });
 
-  const radius = (it: Item) => (it.chicken ? 6.5 : 8.5) * (ar.on('giant') ? 1.4 : 1);
+  const radius = (it: Item) => (it.chicken ? 6.5 : 8.5) * (ar.on('giant') ? 1.4 : 1) * (ar.magnet && !it.chicken && it.choice === ar.q?.correctIndex ? 1.25 : 1);
 
   function slice(it: Item, a: Arcade = ar) {
     if (it.choice === -2 || it.choice === -1 && !it.chicken) return;
     if (it.chicken) {
-      if (a.hurt(it.x, it.y, 3)) { squawk(ctx.settings); a.bits(it.x, it.y, 10, 'feather'); }
+      squawk(ctx.settings); a.bits(it.x, it.y, 10, 'feather'); a.float(it.x, it.y, 'Squawk!', 'info');
       it.choice = -2;
       return;
     }
     if (a.ctx.cpu && !a.running) return;
-    const res = a.answer(it.choice, it.x, it.y);
+    if (a.locked(it.id)) return;
+    const res = a.answer(it.choice, it.x, it.y, it.id);
     if (res === 'right') {
       clip('/lab/fruit-fling/slice.mp3', ctx.settings, 0.8);
       ctx.sfx.splash();
@@ -131,7 +134,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   function trySlice(x0: number, y0: number, x1: number, y1: number) {
-    for (const it of items.current) if (it.choice !== -2 && segmentHits(x0, y0, x1, y1, it.x, it.y, radius(it))) { slice(it); if (!it.chicken) break; }
+    for (const it of items.current) {
+      if (it.choice === -2 || it.choice === -1 && !it.chicken || ar.locked(it.id) || !segmentHits(x0, y0, x1, y1, it.x, it.y, radius(it))) continue;
+      // One wrong fruit per swipe at most: a long swipe never boings twice.
+      const wrong = !it.chicken && it.choice !== ar.q?.correctIndex;
+      if (wrong && swipeWrong.current) continue;
+      if (wrong) swipeWrong.current = true;
+      slice(it);
+      if (!it.chicken) break;
+    }
   }
   function pt(e: RPointerEvent): [number, number] | null {
     if (!world.current || !e.clientX && !e.clientY) return null;
@@ -140,6 +151,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function onDown(e: RPointerEvent) {
     if (ctx.cpu || !ar.running) return;
     down.current = true;
+    swipeWrong.current = false;
     const p = pt(e); if (!p) return;
     prev.current = p;
     setTrail([{ x: p[0], y: p[1], t: performance.now() }]);
@@ -172,7 +184,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         {items.current.map((it) => {
           const r = radius(it);
           const text = it.chicken || it.choice < 0 ? '' : ar.q?.choices[it.choice] ?? '';
-          const gold = ar.magnet && !it.chicken && it.choice === ar.q?.correctIndex;
+          const rest = ar.locked(it.id);
           const knocked = ar.t - it.knock < 0.4;
           return (
             <button key={it.id} type="button" tabIndex={it.chicken || it.choice < 0 ? -1 : 0} disabled={ctx.cpu || !ar.running}
@@ -180,9 +192,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
               onPointerDown={(e) => { if (!e.clientX && !e.clientY) { e.stopPropagation(); slice(it); } }}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); slice(it); } }}
               className="absolute rounded-full focus-visible:outline-4 focus-visible:outline-black disabled:cursor-default"
-              style={{ left: `${((it.x - r) / ar.W) * 100}%`, top: `${it.y - r}%`, width: `calc(var(--u) * ${r * 2})`, height: `calc(var(--u) * ${r * 2})`, opacity: it.choice === -1 && !it.chicken ? 0.4 : 1, transition: 'width .3s, height .3s, opacity .3s' }}>
+              style={{ left: `${((it.x - r) / ar.W) * 100}%`, top: `${it.y - r}%`, width: `calc(var(--u) * ${r * 2})`, height: `calc(var(--u) * ${r * 2})`, opacity: it.choice === -1 && !it.chicken ? 0.4 : rest ? 0.45 : 1, transition: 'width .3s, height .3s, opacity .3s' }}>
               <span className="absolute inset-0 block" style={{ transform: `rotate(${it.rot}deg) scale(${knocked ? 0.85 : 1})`, transition: 'transform .1s' }}>
-                {it.chicken ? <ChickenArt flat /> : <FruitArt kind={it.kind} gold={gold} />}
+                {it.chicken ? <ChickenArt flat /> : <FruitArt kind={it.kind} />}
               </span>
               {text && (
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#fbfcf8] border-std border-border rounded-xl px-1.5 py-0.5 font-bold text-center leading-[1.05] break-words"
@@ -210,10 +222,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
 }
 
 // One round fruit: skin, shine, a stalk and sometimes a leaf.
-export function FruitArt({ kind, gold }: { kind: Kind; gold?: boolean }) {
+export function FruitArt({ kind }: { kind: Kind }) {
   return (
     <svg viewBox="0 0 100 100" className="w-full h-full overflow-visible" aria-hidden="true">
-      {gold && <circle cx="50" cy="52" r="56" fill="#fdfd94" opacity="0.85" className="motion-safe:animate-pulse" />}
       {kind.id === 'melon'
         ? <><ellipse cx="50" cy="54" rx="46" ry="40" fill={kind.skin} stroke="#000" strokeWidth="4" />{[30, 50, 70].map((x) => <path key={x} d={`M${x} 16 Q${x + (x - 50) * 0.3} 54 ${x} 92`} stroke="#2f8a4c" strokeWidth="5" fill="none" />)}</>
         : <circle cx="50" cy="54" r="42" fill={kind.skin} stroke="#000" strokeWidth="4" />}
@@ -284,7 +295,7 @@ const def: LabDef = {
   how: [
     { icon: <CheckCircle weight="fill" />, text: 'Read the question at the top' },
     { icon: <HandSwipeRight weight="fill" />, text: 'Swipe or tap the right fruit' },
-    { icon: <Knife weight="fill" />, text: 'Dodge the rubber chickens' },
+    { icon: <Knife weight="fill" />, text: 'Rubber chickens just squawk' },
     { icon: <Timer weight="fill" />, text: 'Slice as many as you can in time' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },

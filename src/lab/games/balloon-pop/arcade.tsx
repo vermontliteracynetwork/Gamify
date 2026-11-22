@@ -544,7 +544,7 @@ function ReadyCard({ ar, hint }: { ar: Arcade; hint: ReactNode }) {
 }
 
 // Effects that stay on screen while a power-up lasts.
-function Persist({ ar, rain }: { ar: Arcade; rain: boolean }) {
+function Persist({ ar }: { ar: Arcade; rain?: boolean }) {
   const still = ar.ctx.still;
   return (
     <div className="absolute inset-0 pointer-events-none">

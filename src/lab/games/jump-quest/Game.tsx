@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowFatUp, CaretLeft, CaretRight, Coins, FlagPennant, PersonSimpleRun, Question } from '@phosphor-icons/react';
+import { ArrowFatUp, CaretLeft, CaretRight, Coins, FlagPennant, Gift, PersonSimpleRun } from '@phosphor-icons/react';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
@@ -9,7 +9,7 @@ import { BASE, cpuInput, GROUND, grumbleTouch, makeLevel, step, T, VH, VW, type 
 // Jump Quest (Game Lab, classic arcade): a side-scrolling platformer. A
 // right answer starts a full run; run and jump across the land, grab coins,
 // stomp grumpy grumbles and bump mystery boxes: each one asks a question and
-// a right answer pops out a power-up. Reach the flag for a big bonus.
+// a right answer pops out a power-up. Reach the balloon gate for a big bonus.
 
 const RUN_LONG = 35, RUN_SHORT = 20;
 const IMG = '/lab/jump-quest/';
@@ -48,13 +48,13 @@ interface Part { x: number; y: number; vx: number; vy: number; life: number; max
 interface Float { x: number; y: number; text: string; life: number; color: string }
 interface World {
   t: number; left: number; lv: Level; b: Body; cam: number; face: number; squash: number; walk: number; blink: number; shield: number;
-  fx: Record<Fx, number>; parts: Part[]; floats: Float[]; coins: number; lastSafe: number; flag: number; levels: number; over: boolean; asking: boolean;
+  fx: Record<Fx, number>; parts: Part[]; floats: Float[]; coins: number; boxes: number; runLen: number; lastSafe: number; flag: number; levels: number; over: boolean; asking: boolean;
   popups: { x: number; y: number; vy: number; life: number }[];
 }
 const newBody = (lv: Level): Body => ({ x: lv.spawn.x, y: lv.spawn.y, w: 30, h: 36, vx: 0, vy: 0, onGround: false, coyote: 0, buffer: 0, jumping: false });
 function newWorld(): World {
   const lv = makeLevel();
-  return { t: 0, left: RUN_LONG, lv, b: newBody(lv), cam: 0, face: 1, squash: 0, walk: 0, blink: 0, shield: 0, fx: { spring: 0, magnet: 0, jetpack: 0, slow: 0, star: 0, double: 0, bouncy: 0, tiny: 0 }, parts: [], floats: [], coins: 0, lastSafe: lv.spawn.x, flag: 0, levels: 0, over: false, asking: false, popups: [] };
+  return { t: 0, left: RUN_LONG, boxes: 0, runLen: RUN_LONG, lv, b: newBody(lv), cam: 0, face: 1, squash: 0, walk: 0, blink: 0, shield: 0, fx: { spring: 0, magnet: 0, jetpack: 0, slow: 0, star: 0, double: 0, bouncy: 0, tiny: 0 }, parts: [], floats: [], coins: 0, lastSafe: lv.spawn.x, flag: 0, levels: 0, over: false, asking: false, popups: [] };
 }
 
 let coinSheet: HTMLImageElement | null = null;
@@ -95,8 +95,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     const ok = await x.ask();
     const w = world.current;
-    w.left = ok ? RUN_LONG : RUN_SHORT;
-    if (ok) { x.sfx.right(); x.say('Go go go!', 'big'); } else { x.sfx.wrong(); x.say('A short run!', 'oops'); }
+    // The Timers setting stretches the run; with no clock the run lasts to the gate.
+    w.runLen = (ok ? RUN_LONG : RUN_SHORT) * (x.timeScale || 1);
+    w.left = w.runLen;
+    if (ok) { x.sfx.right(); x.points(3); x.burst(0.5, 0.45); w.floats.push({ x: w.b.x + 15, y: w.b.y - 20, text: '+3', life: 0, color: '#fdfd94' }); x.say('Right! Go go go!', 'big'); }
+    else { x.sfx.wrong(); x.say(x.timeScale === 0 ? 'Go!' : 'A short run!', 'oops'); }
     setBusy(false);
     setPhase('run');
   }
@@ -147,7 +150,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const ok = await x.ask();
     if (w !== world.current) return;
     if (ok) {
-      x.sfx.right();
+      x.sfx.right(); x.points(3); w.boxes += 1;
+      w.floats.push({ x: s.x + s.w / 2, y: s.y - 30, text: '+3', life: 0, color: '#fdfd94' });
       w.popups.push({ x: s.x + s.w / 2, y: s.y, vy: -380, life: 0 });
       const p = await c.current.power(1);
       if (w !== world.current) return;
@@ -173,12 +177,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
     w.t += dt;
     if (w.flag > 0) {
       w.flag += dt;
+      if (w.flag > 2.2 && x.timeScale === 0) { w.flag = 0; finishRun(w); return; }
       if (w.flag > 2.2) { const lv = makeLevel(); w.lv = lv; w.b = newBody(lv); w.cam = 0; w.flag = 0; w.lastSafe = lv.spawn.x; x.sfx.whoosh(); }
       for (const p of w.parts) { p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
       w.parts = w.parts.filter((p) => p.life < p.max);
       return;
     }
-    w.left -= dt;
+    if (x.timeScale > 0) w.left -= dt;
     for (const k of Object.keys(w.fx) as Fx[]) if (w.fx[k] > 0) { w.fx[k] -= dt; if (w.fx[k] <= 0) { w.fx[k] = 0; held(w); } }
     w.blink = Math.max(0, w.blink - dt);
     const b = w.b;
@@ -243,7 +248,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         if (w.shield > 0) { w.shield = 0; held(w); x.sfx.boing(); puff(w, b.x + 15, b.y + 18, 14, '#7fd6e3', 'dot', 200); }
         else {
           x.sfx.bump(); x.say('Bonk!', 'oops');
-          if (w.coins > 0) { const lose = Math.min(2, w.coins); w.coins -= lose; x.points(-lose); w.floats.push({ x: b.x + 15, y: b.y - 10, text: `-${lose}`, life: 0, color: '#ffd2c2' }); }
+          w.floats.push({ x: b.x + 15, y: b.y - 10, text: 'Bonk!', life: 0, color: '#ffd2c2' });
         }
         b.vx = (b.x + b.w / 2 < g.x ? -1 : 1) * 380; b.vy = -420; w.blink = 1.2;
       }
@@ -252,7 +257,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     // The flag at the end.
     if (b.x + b.w > w.lv.flagX && w.flag === 0) {
       w.flag = 0.0001; w.levels += 1;
-      x.points(10); x.sfx.cheer(); x.say('Flag! +10', 'big');
+      // The gate bonus grows with every gift box answered right on the way.
+      const bonus = 5 + 3 * w.boxes; w.boxes = 0;
+      x.points(bonus); x.sfx.cheer(); x.say(`Balloon gate! +${bonus}`, 'big');
       x.burst(0.5, 0.4, 'big');
       puff(w, w.lv.flagX, GROUND - 160, 40, '#fdfd94', 'star', 300);
     }
@@ -264,10 +271,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (const f of w.floats) { f.life += dt; f.y -= 50 * dt; }
     w.floats = w.floats.filter((f) => f.life < 1);
 
-    if (w.left <= 0 && !w.over) {
+    if (x.timeScale > 0 && w.left <= 0 && !w.over) finishRun(w);
+  }
+
+  function finishRun(w: World) {
+    const x = c.current;
+    if (!w.over) {
       w.over = true;
       setPhase('over');
-      x.sfx.whistle(); x.say(`Time! ${w.coins} coins`, 'big');
+      x.sfx.whistle(); x.say(x.timeScale === 0 ? `Level done! ${w.coins} coins` : `Time! ${w.coins} coins`, "big");
       x.setHeld(x.player.id, []);
       window.setTimeout(() => { if (world.current === w) c.current.next(); }, 2400);
     }
@@ -301,15 +313,20 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (let x = 0; x <= VW; x += 8) g.lineTo(x, VH - 46 + Math.sin((x + cam * 0.9) * 0.05 + (still ? 0 : w.t * 3)) * 4);
     g.stroke();
     g.save(); g.translate(-Math.round(cam), 0);
-    // Flag.
+    // The balloon gate at the end: two balloon towers and a ribbon that snaps.
     const fx = w.lv.flagX;
-    g.fillStyle = '#241c3d'; g.fillRect(fx - 4, GROUND - 220, 8, 220);
-    g.strokeStyle = '#000'; g.lineWidth = 3; g.strokeRect(fx - 4, GROUND - 220, 8, 220);
-    g.fillStyle = '#fdfd94'; g.beginPath(); g.arc(fx, GROUND - 224, 10, 0, Math.PI * 2); g.fill(); g.stroke();
-    const fy = w.flag > 0 ? Math.min(150, w.flag * 120) : 0;
-    const wave = still ? 0 : Math.sin(w.t * 6) * 6;
-    g.fillStyle = '#ef7d96'; g.beginPath(); g.moveTo(fx + 4, GROUND - 210 + fy); g.quadraticCurveTo(fx + 40, GROUND - 200 + fy + wave, fx + 70, GROUND - 192 + fy); g.lineTo(fx + 4, GROUND - 170 + fy); g.closePath(); g.fill(); g.stroke();
-    star(g, fx + 28, GROUND - 192 + fy, 9, '#fdfd94');
+    const cols = ['#ef7d96', '#fdfd94', '#8fe3a0', '#7fd6e3', '#f5a08c', '#c58ce8'];
+    for (const side of [-1, 1]) for (let k = 0; k < 6; k++) {
+      const bx = fx + side * 54 + (still ? 0 : Math.sin(w.t * 2 + k + side) * 2), by = GROUND - 22 - k * 34;
+      g.fillStyle = cols[(k + (side > 0 ? 3 : 0)) % 6]; g.strokeStyle = '#000'; g.lineWidth = 3;
+      g.beginPath(); g.ellipse(bx, by, 17, 19, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,0.6)'; g.beginPath(); g.ellipse(bx - 6, by - 7, 4, 6, -0.4, 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = '#000'; g.lineWidth = 3; g.fillStyle = '#fdfd94';
+    g.beginPath(); g.roundRect(fx - 58, GROUND - 236, 116, 30, 14); g.fill(); g.stroke();
+    star(g, fx, GROUND - 221, 11, '#ef7d96');
+    if (w.flag === 0) { g.strokeStyle = '#ef7d96'; g.lineWidth = 7; g.beginPath(); g.moveTo(fx - 40, GROUND - 70); g.quadraticCurveTo(fx, GROUND - 60 + (still ? 0 : Math.sin(w.t * 3) * 3), fx + 40, GROUND - 70); g.stroke(); }
+    else { const k = Math.min(1, w.flag * 2); g.strokeStyle = '#ef7d96'; g.lineWidth = 7; g.beginPath(); g.moveTo(fx - 40, GROUND - 70); g.lineTo(fx - 40 + 6, GROUND - 70 + 50 * k); g.moveTo(fx + 40, GROUND - 70); g.lineTo(fx + 40 - 6, GROUND - 70 + 50 * k); g.stroke(); }
     // Solids.
     for (const s of w.lv.solids) {
       if (s.x > cam + VW + 50 || s.x + s.w < cam - 50) continue;
@@ -334,7 +351,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       grumble(g, gr.x, gr.y, gr.alive ? 0 : gr.squash, w.t, gr.vx, still);
     }
     // The runner.
-    if (!(w.blink > 0 && Math.floor(w.t * 14) % 2)) hero(g, w, c.current.player.colorIndex, still);
+    g.globalAlpha = w.blink > 0 ? 0.55 : 1;
+    hero(g, w, c.current.player.colorIndex, still);
+    g.globalAlpha = 1;
     // Particles and floating points.
     for (const p of w.parts) {
       const a = Math.max(0, 1 - p.life / p.max);
@@ -352,13 +371,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
     g.fillStyle = 'rgba(36,28,61,0.85)'; rr(g, 12, 12, 150, 44, 14); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 3; g.stroke();
     if (coinSheet?.complete && coinSheet.naturalWidth) g.drawImage(coinSheet, 0, 0, 64, 64, 20, 18, 32, 32);
     g.fillStyle = '#fdfd94'; g.font = 'bold 26px "Inclusive Sans", system-ui, sans-serif'; g.textAlign = 'left'; g.fillText(`${w.coins}`, 62, 35);
-    const total = phaseRef.current === 'ready' ? 1 : Math.max(0, w.left) / RUN_LONG;
+    const total = phaseRef.current === 'ready' || c.current.timeScale === 0 ? 1 : Math.max(0, w.left) / (RUN_LONG * (c.current.timeScale || 1));
     g.fillStyle = 'rgba(36,28,61,0.85)'; rr(g, VW - 232, 16, 220, 20, 10); g.fill(); g.stroke();
     g.fillStyle = w.left < 8 && phaseRef.current === 'run' ? '#ef7d96' : '#8fe3a0'; rr(g, VW - 228, 20, Math.max(0, 212 * Math.min(1, total)), 12, 6); g.fill();
     const trip = Math.min(1, b.x / w.lv.flagX);
     g.fillStyle = 'rgba(36,28,61,0.5)'; rr(g, VW / 2 - 120, 22, 240, 8, 4); g.fill();
     g.fillStyle = '#fbfcf8'; g.beginPath(); g.arc(VW / 2 - 120 + 240 * trip, 26, 8, 0, Math.PI * 2); g.fill(); g.stroke();
-    g.fillStyle = '#ef7d96'; g.fillRect(VW / 2 + 118, 12, 4, 18); g.fillRect(VW / 2 + 122, 12, 12, 8);
+    g.fillStyle = '#ef7d96'; g.beginPath(); g.ellipse(VW / 2 + 128, 22, 8, 9, 0, 0, Math.PI * 2); g.fill(); g.stroke();
     if (w.fx.slow > 0) { g.fillStyle = 'rgba(127,214,227,0.12)'; g.fillRect(0, 0, VW, VH); }
   }
 
@@ -417,8 +436,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </div>
       </div>
       <div className="shrink-0 flex items-center justify-center gap-3">
-        <Pad label="Run left" disabled={!live} onHold={(on) => { keys.current.l = on; }} bg="#b4c4fb"><CaretLeft weight="bold" size={30} /></Pad>
-        <Pad label="Run right" disabled={!live} onHold={(on) => { keys.current.r = on; }} bg="#b4c4fb"><CaretRight weight="bold" size={30} /></Pad>
+        <Pad label="Run left" disabled={!live} onHold={(on) => { keys.current.l = on; }} bg="#b4c4fb" wide><CaretLeft weight="bold" size={26} /><span className="font-display text-2xl">Left</span></Pad>
+        <Pad label="Run right" disabled={!live} onHold={(on) => { keys.current.r = on; }} bg="#b4c4fb" wide><span className="font-display text-2xl">Right</span><CaretRight weight="bold" size={26} /></Pad>
         <Pad label="Jump" disabled={!live} onHold={jump} bg="#fdfd94" wide><ArrowFatUp weight="fill" size={28} /><span className="font-display text-2xl">Jump</span></Pad>
       </div>
     </div>
@@ -429,7 +448,7 @@ function Pad({ label, disabled, onHold, children, bg, wide }: { label: string; d
   return (
     <button type="button" aria-label={label} disabled={disabled}
       onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onHold(true); }} onPointerUp={() => onHold(false)} onPointerCancel={() => onHold(false)} onLostPointerCapture={() => onHold(false)}
-      className={`min-h-14 ${wide ? 'min-w-[10rem] px-5 gap-2' : 'min-w-[5.5rem]'} rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50`}
+      className={`min-h-14 ${wide ? 'min-w-[8rem] px-4 gap-2' : 'min-w-[5.5rem]'} rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50`}
       style={{ boxShadow: '0 5px 0 #000', background: bg }}>
       {children}
     </button>
@@ -472,14 +491,17 @@ function boxTile(g: CanvasRenderingContext2D, x: number, y: number, w: number, k
     g.strokeStyle = '#000'; g.lineWidth = 3;
     g.beginPath(); g.roundRect(bx + 1, y + 1, T - 2, T - 2, 8); g.fill(); g.stroke();
     if (kind === 'q') {
-      g.fillStyle = '#ef7d96'; g.fillRect(bx + T / 2 - 4, y + 3, 8, T - 6); g.fillRect(bx + 3, y + T / 2 - 4, T - 6, 8);
-      const s = still ? 1 : 1 + Math.sin(t * 5 + bx) * 0.08;
-      g.save(); g.translate(bx + T / 2, y + T / 2); g.scale(s, s);
-      g.fillStyle = '#fbfcf8'; g.beginPath(); g.arc(0, 0, 12, 0, Math.PI * 2); g.fill(); g.stroke();
-      g.fillStyle = '#241c3d'; g.font = 'bold 18px "Inclusive Sans", system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 0, 1);
+      // A gift box: a ribbon cross, a bow on top and a star on the front.
+      g.fillStyle = '#ef7d96'; g.fillRect(bx + T / 2 - 4, y + 2, 8, T - 4); g.fillRect(bx + 2, y + T / 2 - 4, T - 4, 8);
+      const s = still ? 1 : 1 + Math.sin(t * 2.5 + bx) * 0.06;
+      g.save(); g.translate(bx + T / 2, y); g.scale(s, s);
+      g.fillStyle = '#ef7d96'; g.strokeStyle = '#000'; g.lineWidth = 2.5;
+      g.beginPath(); g.ellipse(-8, -4, 8, 5, -0.5, 0, Math.PI * 2); g.fill(); g.stroke();
+      g.beginPath(); g.ellipse(8, -4, 8, 5, 0.5, 0, Math.PI * 2); g.fill(); g.stroke();
       g.restore();
+      star(g, bx + T / 2, y + T / 2, 9, '#fbfcf8');
     } else if (kind === 'used') {
-      g.fillStyle = '#9d95b5'; g.beginPath(); g.arc(bx + T / 2, y + T / 2, 5, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = '#9d95b5'; g.lineWidth = 3; g.beginPath(); g.moveTo(bx + 8, y + 12); g.lineTo(bx + T - 8, y + 12); g.stroke();
     } else {
       g.strokeStyle = '#b4c4fb'; g.lineWidth = 3; g.beginPath(); g.roundRect(bx + 8, y + 8, T - 16, T - 16, 4); g.stroke();
     }
@@ -558,7 +580,7 @@ function Cover() {
       <rect x="-1" y="49" width="40" height="14" fill="#e8b08f" stroke="#000" strokeWidth="0.6" /><rect x="-1" y="48" width="40" height="3.4" rx="1.5" fill="#8fe3a0" stroke="#000" strokeWidth="0.6" />
       <rect x="50" y="49" width="51" height="14" fill="#e8b08f" stroke="#000" strokeWidth="0.6" /><rect x="50" y="48" width="51" height="3.4" rx="1.5" fill="#8fe3a0" stroke="#000" strokeWidth="0.6" />
       {[0, 1, 2].map((i) => <rect key={i} x={22 + i * 6} y="26" width="6" height="6" rx="1.4" fill={i === 1 ? '#fdfd94' : '#fbfcf8'} stroke="#000" strokeWidth="0.6" />)}
-      <text x="31" y="30.8" textAnchor="middle" fontSize="4.5" fontWeight="bold" fill="#241c3d">?</text>
+      <rect x="30.2" y="26" width="1.6" height="6" fill="#ef7d96" /><rect x="28" y="28.2" width="6" height="1.6" fill="#ef7d96" /><ellipse cx="29.6" cy="25.6" rx="1.6" ry="1" fill="#ef7d96" stroke="#000" strokeWidth="0.3" /><ellipse cx="32.4" cy="25.6" rx="1.6" ry="1" fill="#ef7d96" stroke="#000" strokeWidth="0.3" />
       {[[42, 30], [46, 27], [50, 26], [54, 27]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.6" fill="#f6c544" stroke="#000" strokeWidth="0.4" />)}
       <g transform="translate(38 36) rotate(-8)">
         <ellipse cx="0" cy="0" rx="4.4" ry="4.6" fill="#f6c544" stroke="#000" strokeWidth="0.6" />
@@ -566,8 +588,8 @@ function Cover() {
         <ellipse cx="1.6" cy="-1.8" rx="1.1" ry="1.4" fill="#fff" stroke="#000" strokeWidth="0.3" /><ellipse cx="3.4" cy="-1.8" rx="1" ry="1.3" fill="#fff" stroke="#000" strokeWidth="0.3" />
       </g>
       <g transform="translate(70 44)"><path d="M-5 0 a5 4.5 0 0 1 10 0z" fill="#7c6bd6" stroke="#000" strokeWidth="0.6" /><circle cx="-1.6" cy="-1.6" r="1" fill="#fff" /><circle cx="1.8" cy="-1.6" r="1" fill="#fff" /></g>
-      <rect x="88" y="18" width="1.6" height="31" fill="#241c3d" stroke="#000" strokeWidth="0.3" />
-      <path d="M89.6 19 q5 2 9 3 l-9 4z" fill="#ef7d96" stroke="#000" strokeWidth="0.5" />
+<ellipse cx="82" cy="46" rx="2.4" ry="2.7" fill="#ef7d96" stroke="#000" strokeWidth="0.4" /><ellipse cx="82" cy="41" rx="2.4" ry="2.7" fill="#fdfd94" stroke="#000" strokeWidth="0.4" /><ellipse cx="82" cy="36" rx="2.4" ry="2.7" fill="#8fe3a0" stroke="#000" strokeWidth="0.4" /><ellipse cx="82" cy="31" rx="2.4" ry="2.7" fill="#7fd6e3" stroke="#000" strokeWidth="0.4" /><ellipse cx="82" cy="26" rx="2.4" ry="2.7" fill="#f5a08c" stroke="#000" strokeWidth="0.4" /><ellipse cx="82" cy="21" rx="2.4" ry="2.7" fill="#c58ce8" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="46" rx="2.4" ry="2.7" fill="#fdfd94" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="41" rx="2.4" ry="2.7" fill="#8fe3a0" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="36" rx="2.4" ry="2.7" fill="#7fd6e3" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="31" rx="2.4" ry="2.7" fill="#f5a08c" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="26" rx="2.4" ry="2.7" fill="#c58ce8" stroke="#000" strokeWidth="0.4" /><ellipse cx="94" cy="21" rx="2.4" ry="2.7" fill="#ef7d96" stroke="#000" strokeWidth="0.4" />
+      <rect x="80" y="17" width="16" height="4" rx="2" fill="#fdfd94" stroke="#000" strokeWidth="0.4" />
     </svg>
   );
 }
@@ -575,13 +597,13 @@ function Cover() {
 const def: LabDef = {
   id: 'jump-quest',
   name: 'Jump Quest',
-  description: 'Run and jump across the land. Grab coins, bump mystery boxes for power-ups, and reach the flag!',
+  description: 'Run and jump across the land. Grab coins, bump gift boxes for power-ups, and reach the balloon gate!',
   ways: ['solo', 'teams'],
   how: [
     { icon: <PersonSimpleRun weight="fill" />, text: 'Answer right for a long run' },
     { icon: <Coins weight="fill" />, text: 'Jump for coins' },
-    { icon: <Question weight="bold" />, text: 'Bump a mystery box for a power-up' },
-    { icon: <FlagPennant weight="fill" />, text: 'Reach the flag' },
+    { icon: <Gift weight="fill" />, text: 'Bump a gift box: answer for a power-up' },
+    { icon: <FlagPennant weight="fill" />, text: 'Reach the balloon gate' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
   powers: POWERS,
@@ -591,12 +613,12 @@ const def: LabDef = {
     { id: 'background', label: 'Sky and hills', hint: 'Behind the level' },
     { id: 'ground', label: 'Ground', hint: 'The grassy ground' },
     { id: 'block', label: 'Block', hint: 'A plain block to stand on' },
-    { id: 'mystery', label: 'Mystery box', hint: 'Bump it for a question and a power-up' },
+    { id: 'gift', label: 'Gift box', hint: 'Bump it for a question and a power-up' },
     { id: 'cloud', label: 'Cloud', hint: 'A cloud you can stand on' },
     { id: 'coin', label: 'Coin', hint: 'What you collect' },
     { id: 'grumble', label: 'Grumble', hint: 'The grumpy walker you can stomp' },
     { id: 'hero', label: 'Runner', hint: 'The player (wears the team color)' },
-    { id: 'flag', label: 'Flag', hint: 'The end of the level' },
+    { id: 'gate', label: 'Balloon gate', hint: 'The end of the level' },
     ...POWERS.map((p) => ({ id: `power-${p.id}`, label: p.name, hint: p.desc })),
   ],
   Play,

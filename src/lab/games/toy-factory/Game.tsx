@@ -14,7 +14,7 @@ import { applyCard, bestCard, coinsPerTick, drawCards, MACHINES, MAX_LEVEL, rand
 
 const A = '/lab/toy-factory';
 const COIN = `${A}/coin.webp`;
-const EARN = 10;
+const EARN = 25; // right answers pay well next to what machines make
 
 const POWERS: LabPower[] = [
   { id: 'overtime', name: 'Overtime', desc: 'Your shift runs twice as long.', enter: 'spin', art: <ImgArt src={`${A}/time.webp`} ring="#e9eefe" /> },
@@ -91,7 +91,12 @@ function Board({ ctx }: { ctx: LabCtx }) {
     setPhase('ask'); setCards([]); setTurbo(false); setEvent(null);
     void x.ask().then(async (ok) => {
       if (!alive(t)) return;
-      if (!ok) { c.current.sfx.wrong(); c.current.say('Lights off this time', 'oops'); await sleep(1200); if (alive(t)) c.current.next(); return; }
+      if (!ok) {
+        // A miss still runs the machines you already have (no new card).
+        c.current.sfx.wrong(); await sleep(700); if (!alive(t)) return;
+        if (floorOf(c.current.player.id).length) { c.current.say('Your machines keep working', 'good'); await sleep(900); if (!alive(t)) return; await shift(t, SHIFT, 1); }
+        await sleep(600); if (alive(t)) c.current.next(); return;
+      }
       c.current.points(EARN); c.current.sfx.coin();
       setPhase('busy');
       await sleep(500); if (!alive(t)) return;
@@ -144,7 +149,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     if (p.id === 'helper') { x.sfx.boing(); await sleep(800); addMachine(id, 'robot'); x.sfx.build(); }
     if (p.id === 'turbo') { speed = 2; setTurbo(true); x.sfx.zap(); }
     if (p.id === 'mystery') { x.sfx.chest(); await sleep(800); addMachine(id, randomType(Math.random, 'rare')); x.sfx.build(); }
-    if (p.id === 'wrap') { secs = 0.6; for (let i = 0; i < 6; i++) { await sleep(150); x.sfx.pop(); } }
+    if (p.id === 'wrap') { secs = 4 / SHIFT; for (let i = 0; i < 6; i++) { await sleep(150); x.sfx.pop(); } }
     if (p.id === 'ducks') { for (let i = 0; i < 4; i++) { await sleep(220); x.sfx.chomp(); } }
     await sleep(1200);
     return { secs, speed };
@@ -160,6 +165,9 @@ function Board({ ctx }: { ctx: LabCtx }) {
     setRunning(id); setPhase('shift'); x.sfx.whistle();
     if (ev === 'surge') { setEvent('surge'); x.say('Power surge! 2x', 'big'); x.sfx.zap(); }
     if (ev === 'jam') { x.say('Gear jam!', 'oops'); }
+    // Relaxed timers stretch the shift but keep what it makes the same.
+    const ts = c.current.timeScale > 1 ? c.current.timeScale : 1;
+    secs *= ts; speed /= ts;
     const acc = floor.map(() => -Math.random() * 0.4);
     const start = performance.now();
     let last = start, jamLeft = ev === 'jam' ? 1.8 : 0, jamAt = 1.5, jamShown = false;
@@ -226,7 +234,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
         )}
       </AnimatePresence>
       <AnimatePresence>{fx && <PowerFx key={fx.id} kind={fx.kind} still={ctx.still} onDone={() => setFx(null)} />}</AnimatePresence>
-      <AnimatePresence>{event === 'surge' && !ctx.still && <motion.div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(253,253,148,0.25)' }} initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0.4, 1, 0.6] }} exit={{ opacity: 0 }} transition={{ duration: 0.8 }} />}</AnimatePresence>
+      <AnimatePresence>{event === 'surge' && !ctx.still && <motion.div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(253,253,148,0.35), rgba(253,253,148,0) 70%)' }} initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} exit={{ opacity: 0 }} transition={{ duration: 1.2, ease: 'easeInOut' }} />}</AnimatePresence>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
 import Die from './Die';
-import { above, alongPath, hopsFrom, LADDERS, LAST, landing, nextLadder, rungs, SNAKES, smoothPath, snakePoints, spread, squareXY, type Pt } from './board';
+import { above, alongPath, exactPath, hopsFrom, LADDERS, LAST, landing, nextLadder, rungs, SNAKES, smoothPath, snakePoints, spread, squareXY, type Pt } from './board';
 
 // Snakes and Ladders (Game Lab): the traditional 10 by 10 board, drawn as a
 // real wooden board with friendly cartoon snakes and wooden ladders. A right
@@ -25,7 +25,8 @@ const POWERS: LabPower[] = [
 type Fx = { k: 'hop' | 'shrug' | 'wiggle' | 'float' | 'slip' | 'win' | 'climb' | 'pogo'; n: number };
 type Vis = { pts: Pt[]; dur: number; mode: 'hop' | 'path' | 'slow' | 'rung' };
 // Where a piece waits before square 1: the start mat beside the board.
-const START: Pt = { x: -56, y: 927 };
+const START: Pt = { x: -79, y: 927 };
+const EXACT_KEY = 'gamify:lab:snakes-ladders:exact';
 const spot = (n: number): Pt => (n <= 0 ? START : squareXY(n));
 const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 const SNAKE_COLORS = [['#8fe3a0', '#c8f0dc'], ['#ef7d96', '#fbd3dc'], ['#c58ce8', '#ead2f7'], ['#f6c544', '#fdf0b0'], ['#f39a6b', '#fbd9c4'], ['#6aa9e9', '#cfe3f8'], ['#5cc3a0', '#c8f0dc']];
@@ -59,6 +60,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [winner, setWinner] = useState<string | null>(null);
   const [balloon, setBalloon] = useState<string | null>(null);
   const fitRef = useRef<HTMLDivElement>(null);
+  // Exact roll to win: picked on the board before the first roll, remembered on this device.
+  const [exact, setExactState] = useState(() => { try { return localStorage.getItem(EXACT_KEY) === '1'; } catch { return false; } });
+  const setExact = (v: boolean) => { setExactState(v); try { localStorage.setItem(EXACT_KEY, v ? '1' : '0'); } catch { /* private window */ } };
+  const started = useRef(false);
+  const [showExact, setShowExact] = useState(true);
   const { w } = useBox(fitRef);
   const name = (id: string) => players.find((p) => p.id === id)?.name ?? '';
 
@@ -80,6 +86,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
     sync();
   }
 
+  // Exact roll: hop up to the last square, then bounce back the extra.
+  async function bounce(id: string, path: number[]) {
+    c.current.say('Too far! Bounce back', 'oops');
+    for (const p of path) {
+      setPos(id, p); show(id, { pts: [spot(p)], dur: 0, mode: 'hop' }); setFx(id, 'hop'); c.current.sfx.jump();
+      await sleep(340);
+    }
+    sync();
+  }
+
   async function climb(id: string, from: number, to: number) {
     const x = c.current;
     setClimbing(from); playClip('/lab/snakes-ladders/climb.mp3', x.settings, 0.7); x.say('Up the ladder!');
@@ -89,7 +105,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await sleep(210);
     }
     setPos(id, to); sync(); setClimbing(null);
-    x.burst((squareXY(to).x + 110) / 1140 * 0.6 + 0.1, 0.4);
+    x.burst((squareXY(to).x + 130) / 1160 * 0.6 + 0.1, 0.4);
     await sleep(300);
   }
 
@@ -107,7 +123,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     playClip('/lab/snakes-ladders/slide.mp3', x.settings, 0.8); x.sfx.slideDown();
     show(id, { pts: path, dur: ctx.still ? 0 : 1.6, mode: 'path' }); setFx(id, 'slip');
     await sleep(ctx.still ? 200 : 1700);
-    setPos(id, tail); show(id, { pts: [squareXY(tail)], dur: 0, mode: 'slow' }); sync(); setGulp(null);
+    // The piece settles beside any others on the tail square with a soft spring.
+    setPos(id, tail); show(id, { pts: [squareXY(tail)], dur: 0, mode: 'hop' }); sync(); setGulp(null);
   }
 
   async function land(id: string) {
@@ -136,6 +153,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       x.sfx.oops(); setFx(me, 'slip');
       const to = Math.max(0, posRef.current[me] - 2);
       setPos(me, to); show(me, { pts: [spot(to)], dur: 0.7, mode: 'slow' }); await sleep(900); sync();
+      if (to > 0) await land(me);
       return false;
     }
     if (p.id === 'wiggle') {
@@ -146,6 +164,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         setPos(id, to); show(id, { pts: [spot(to)], dur: 0.8, mode: 'slow' }); setFx(id, 'wiggle');
       }
       await sleep(1100); sync();
+      for (const id of order) if (posRef.current[id] > 0) await land(id);
       return false;
     }
     if (p.id === 'balloon') {
@@ -177,8 +196,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if (!live) return;
       if (!ok) { c.current.sfx.wrong(); setFx(me, 'shrug'); await sleep(800); if (live) c.current.next(); return; }
       const p = await c.current.power(0.45, (pw) => {
-        if (pw.id === 'boost') return !!nextLadder(posRef.current[me]);
-        if (pw.id === 'balloon') return !!above(posRef.current[me]);
+        const behind = order.some((id) => posRef.current[id] > posRef.current[me]);
+        if (pw.id === 'boost') return behind && !!nextLadder(posRef.current[me]);
+        if (pw.id === 'balloon') return behind && !!above(posRef.current[me]);
         if (pw.id === 'socks') return posRef.current[me] >= 2;
         if (pw.id === 'charm') return !charms.current.has(me);
         return true;
@@ -190,7 +210,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const vals = await roll(p?.id === 'double' ? 2 : 1);
         if (!live) return;
         setDie(null);
-        await walk(me, hopsFrom(posRef.current[me], vals.reduce((a, b) => a + b, 0)).length);
+        started.current = true; setShowExact(false);
+        const sum = vals.reduce((a, b) => a + b, 0);
+        if (exact && posRef.current[me] + sum > LAST) await bounce(me, exactPath(posRef.current[me], sum));
+        else await walk(me, hopsFrom(posRef.current[me], sum).length);
         if (p?.id === 'pogo' && posRef.current[me] < LAST) { c.current.say('Boing boing boing!'); await walk(me, hopsFrom(posRef.current[me], 3).length, true); }
         if (!live) return;
         if (posRef.current[me] < LAST) await land(me);
@@ -204,8 +227,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }, [ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Board coordinates (0..1000 inside a frame) to pixels.
-  const k = w / 1140;
-  const px = (v: number) => (v + 110) * k;
+  const k = w / 1160;
+  const px = (v: number) => (v + 130) * k;
   const py = (v: number) => (v + 30) * k;
   const token = Math.round(w * (players.length > 3 ? 0.062 : 0.074));
   const snakes = useMemo(() => Object.entries(SNAKES).map(([h, t], i) => ({ head: +h, tail: +t, pts: snakePoints(+h, +t), color: SNAKE_COLORS[i % SNAKE_COLORS.length] })), []);
@@ -217,16 +240,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   return (
     <div className="absolute inset-0 grid place-items-center">
-      <div ref={fitRef} className="relative lab-fit" style={{ '--ar': 1140 / 1060 } as React.CSSProperties}>
-        <svg viewBox="-110 -30 1140 1060" className="absolute inset-0 w-full h-full" aria-label="Snakes and Ladders board" role="img">
+      <div ref={fitRef} className="relative lab-fit" style={{ '--ar': 1160 / 1060 } as React.CSSProperties}>
+        <svg viewBox="-130 -30 1160 1060" className="absolute inset-0 w-full h-full" aria-label="Snakes and Ladders board" role="img">
           <defs>
             <linearGradient id="sl-wood" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stopColor="#d9a46b" /><stop offset="1" stopColor="#b07a44" /></linearGradient>
             <radialGradient id="sl-shine" cx="0.3" cy="0.2" r="0.9"><stop offset="0" stopColor="#fff" stopOpacity="0.25" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></radialGradient>
           </defs>
           {/* The start mat beside square 1, where every piece waits. */}
-          <rect x={-104} y={852} width={96} height={150} rx={22} fill="#000" opacity={0.3} transform="translate(5 7)" />
-          <rect x={-104} y={852} width={96} height={150} rx={22} fill="#8fe3a0" stroke="#000" strokeWidth={5} />
-          <path d="M-80 990 h40 v-12 l20 18 -20 18 v-12 h-40z" fill="#fbfcf8" stroke="#000" strokeWidth={3} strokeLinejoin="round" transform="translate(0 -122)" />
+          <rect x={-126} y={846} width={94} height={150} rx={22} fill="#000" opacity={0.3} transform="translate(4 6)" />
+          <rect x={-126} y={846} width={94} height={150} rx={22} fill="#8fe3a0" stroke="#000" strokeWidth={5} />
+          <path d="M-102 990 h40 v-12 l20 18 -20 18 v-12 h-40z" fill="#fbfcf8" stroke="#000" strokeWidth={3} strokeLinejoin="round" transform="translate(0 -122)" />
           <rect x={-26} y={-22} width={1052} height={1052} rx={40} fill="#000" opacity={0.35} />
           <rect x={-28} y={-28} width={1056} height={1056} rx={40} fill="url(#sl-wood)" stroke="#000" strokeWidth={6} />
           {Array.from({ length: 100 }, (_, i) => {
@@ -236,7 +259,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
             return (
               <g key={n}>
                 <rect x={x - 50} y={y - 50} width={100} height={100} fill={fill} stroke="#241c3d" strokeOpacity={0.25} strokeWidth={1.5} />
-                <text x={x - 40} y={y - 22} fontSize={n === 100 ? 26 : 24} fill="#241c3d" fillOpacity={0.7} style={{ fontFamily: 'var(--font-display)' }}>{n}</text>
               </g>
             );
           })}
@@ -245,6 +267,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <g transform={`translate(${squareXY(100).x} ${squareXY(100).y + 10})`}><path d="M-30 18 L-24 -16 L-10 2 L0 -26 L10 2 L24 -16 L30 18z" fill="#f6c544" stroke="#000" strokeWidth={4} strokeLinejoin="round" /></g>
           {Object.entries(LADDERS).map(([a, b]) => <LadderArt key={a} from={+a} to={+b} glow={climbing === +a} still={ctx.still} />)}
           {snakes.map((s, i) => <SnakeArt key={s.head} {...s} i={i} still={ctx.still} asleep={asleep === s.head} gulp={gulp === s.head} />)}
+          {/* Square numbers on top, with a light halo so snakes and ladders never hide them. */}
+          {Array.from({ length: 100 }, (_, i) => { const { x, y } = squareXY(i + 1); return <text key={i} x={x - 44} y={y - 18} fontSize={w < 560 ? 36 : 30} fill="#241c3d" stroke="#fbfcf8" strokeWidth={6} strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: 'var(--font-display)' }} pointerEvents="none">{i + 1}</text>; })}
         </svg>
         {w > 0 && players.map((p) => {
           const v = vis[p.id];
@@ -254,7 +278,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           const xs = v.pts.map((q) => px(q.x + off.x) - token / 2);
           const ys = v.pts.map((q) => py(q.y + off.y) - token / 2);
           const f = fx[p.id];
-          const t = ctx.still ? { duration: 0 } : v.mode === 'path' ? { duration: v.dur, ease: 'easeInOut' as const } : v.mode === 'slow' ? { duration: v.dur, ease: 'easeInOut' as const } : v.mode === 'rung' ? { duration: v.dur, ease: 'easeOut' as const } : { type: 'spring' as const, stiffness: 300, damping: 24 };
+          const t = ctx.still ? { duration: 0 } : v.mode === 'path' ? { duration: v.dur, ease: 'linear' as const, times: v.pts.map((_, i) => i / Math.max(1, v.pts.length - 1)) } : v.mode === 'slow' ? { duration: v.dur, ease: 'easeInOut' as const } : v.mode === 'rung' ? { duration: v.dur, ease: 'easeOut' as const } : { type: 'spring' as const, stiffness: 300, damping: 24 };
           return (
             <motion.div key={p.id} className="absolute left-0 top-0 pointer-events-none" style={{ width: token, height: token, zIndex: p.id === ctx.player.id ? 12 : 10 }}
               initial={false} animate={{ x: xs.length > 1 ? xs : xs[0], y: ys.length > 1 ? ys : ys[0] }} transition={t}>
@@ -276,6 +300,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {die && w > 0 && <Die key={die.key} base="/lab/snakes-ladders/die" count={die.count} cpu={ctx.cpu} still={ctx.still} sfx={ctx.sfx} size={Math.round(w * (die.count > 1 ? 0.26 : 0.32))} onDone={(v) => die.resolve(v)} />}
         </AnimatePresence>
       </div>
+      {showExact && ctx.taken === 0 && (
+        <button type="button" onClick={() => { ctx.sfx.tap(); setExact(!exact); }} aria-pressed={exact}
+          className="absolute left-2 top-2 z-20 min-h-11 rounded-pill border-std border-border bg-surface px-3 inline-flex items-center gap-2 font-bold text-sm motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: 'var(--shadow-sticker)' }}
+          title="On: you must land on 100 exactly. A roll past it bounces back.">
+          <span className={`w-9 h-5 rounded-pill border-std border-border relative transition-colors ${exact ? 'bg-success' : 'bg-surface-2'}`}><span className={`absolute top-0.5 w-3 h-3 rounded-full bg-ink-night transition-all ${exact ? 'left-5' : 'left-0.5'}`} /></span>
+          Exact roll to win
+        </button>
+      )}
     </div>
   );
 }
@@ -332,7 +364,7 @@ function SnakeArt({ head, tail, pts, color, i, still, asleep, gulp }: { head: nu
       <path d={d} stroke="#fff" strokeOpacity={0.35} strokeWidth={6} fill="none" strokeLinecap="round" transform="translate(-7 -7)" />
       <g transform={`translate(${end.x} ${end.y}) rotate(${tAng})`}><path d="M-6 -15 Q30 -4 38 0 Q30 4 -6 15z" fill={color[0]} stroke="#000" strokeWidth={4} strokeLinejoin="round" /></g>
       <g transform={`translate(${h.x} ${h.y}) rotate(${ang})`}>
-        <motion.g animate={still ? undefined : gulp ? { scale: [1, 1.35, 1] } : { rotate: [0, 6, -4, 0] }} transition={gulp ? { duration: 0.5 } : { duration: 2.6 + i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
+        <motion.g animate={still || !gulp ? undefined : { scale: [1, 1.35, 1], rotate: [0, 10, -8, 0] }} transition={{ duration: 0.6 }}>
           {!asleep && <motion.path d="M30 0 L52 0 M52 0 l8 -6 M52 0 l8 6" stroke="#e5635f" strokeWidth={5} strokeLinecap="round" fill="none"
             animate={still ? undefined : { scaleX: [0, 1, 1, 0, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.4, times: [0, 0.1, 0.25, 0.35, 1] }} style={{ originX: '30px' }} />}
           <ellipse cx={0} cy={0} rx={38} ry={32} fill={color[0]} stroke="#000" strokeWidth={5} />
@@ -398,7 +430,7 @@ const def: LabDef = {
     { icon: <DiceFive weight="fill" />, text: 'Right? Tap the die to roll' },
     { icon: <Ladder weight="fill" />, text: 'Climb ladders, dodge snakes, reach 100' },
   ],
-  rounds: { label: 'Rounds', min: 6, max: 40, default: 15 },
+  rounds: { label: 'Rounds', min: 10, max: 50, default: 28 },
   powers: POWERS,
   background: 'radial-gradient(120% 90% at 50% 10%, #c9d2ff 0%, #9aa8f2 60%, #7d8be0 100%)',
   cover: <Cover />,

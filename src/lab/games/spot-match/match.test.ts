@@ -17,9 +17,9 @@ describe('spot the match', () => {
     expect(isPair(q, q)).toBe(false);
   });
   it('fast taps earn a bonus', () => {
-    expect(speedBonus(10, 12)).toBe(2);
-    expect(speedBonus(5, 12)).toBe(1);
-    expect(speedBonus(1, 12)).toBe(0);
+    expect(speedBonus(10, 12)).toBe(1);
+    expect(speedBonus(5, 12)).toBe(0);
+    expect(speedBonus(1, 0)).toBe(0);
   });
   it('ring spots start at the top', () => {
     const s = ringSpots(4);

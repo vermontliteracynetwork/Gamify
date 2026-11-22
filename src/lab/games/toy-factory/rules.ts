@@ -26,7 +26,7 @@ export const coinsPerTick = (m: Machine, surge = 1) => Math.round(MACHINES[m.typ
 const byRarity = (r: Rarity) => (Object.keys(MACHINES) as MachineType[]).filter((t) => MACHINES[t].rarity === r);
 export function randomType(rand: () => number = Math.random, min: Rarity = 'common'): MachineType {
   const r = rand();
-  const rarity: Rarity = min === 'epic' || r < 0.1 ? 'epic' : min === 'rare' || r < 0.4 ? 'rare' : 'common';
+  const rarity: Rarity = min === 'epic' || r < 0.05 ? 'epic' : min === 'rare' || r < 0.4 ? 'rare' : 'common';
   const list = byRarity(rarity);
   return list[Math.floor(rand() * list.length)];
 }

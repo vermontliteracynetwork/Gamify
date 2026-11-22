@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { AirplaneTilt, ArrowFatDown, ArrowFatUp, CheckCircle, Cloud, Timer } from '@phosphor-icons/react';
 import type { LabCtx, LabDef } from '../../types';
-import { ArcadeFrame, StarJar, arcadePowers, clip, labelSize, rand, shuffle, useArcade, worldPoint, type Arcade } from '../balloon-pop/arcade';
+import { ArcadeFrame, Rain, StarJar, arcadePowers, clip, labelSize, rand, shuffle, useArcade, worldPoint, type Arcade } from '../balloon-pop/arcade';
 import { inCloud, lanes, steer } from './rules';
 
 // Sky Flyer (Game Lab, inspired by the classic classroom airplane game): a
@@ -12,7 +12,7 @@ import { inCloud, lanes, steer } from './rules';
 
 const POWERS = arcadePowers('sky-flyer', {
   slow: { name: 'Slow-mo', desc: 'The clouds drift in slowly for a while.' },
-  magnet: { name: 'Magnet', desc: 'The right cloud glows gold and pulls your plane for two questions.' },
+  magnet: { name: 'Magnet', desc: 'For two questions the right cloud puffs up big and easy to hit.' },
   shield: { name: 'Shield', desc: 'Your next wrong cloud costs nothing.' },
   double: { name: 'Double Points', desc: 'Every right cloud scores two for a while.' },
   time: { name: 'Extra Time', desc: 'Five more seconds on the clock.' },
@@ -49,6 +49,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   const { ar, box, floaters, bits, flash } = useArcade(ctx, {
+    onReset: () => { clouds.current = []; },
     onStart: () => { clouds.current = []; plane.current = { y: 58, vy: 0, loop: -9, wob: -9 }; smoke.current = []; },
     onQuestion: () => {
       for (const c of clouds.current) c.choice = -1;
@@ -65,10 +66,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       waveIn.current -= dt;
       if (!live.length && waveIn.current <= 0) { wave(a); waveIn.current = 1.2; }
       // Steering: keys and buttons first, then a held finger, a tapped cloud,
-      // the magnet or the computer.
+      // or the computer.
       let tgt = target.current;
-      const right = clouds.current.find((c) => a.q && c.choice === a.q.correctIndex && !c.hit && c.x > px - 6);
-      if (a.magnet && right && input.current === 0 && !holding.current) tgt = right.lane;
       if (a.ctx.cpu && live.length) {
         if (cpuLane.current === null) {
           const ok = a.ctx.cpuRight();
@@ -85,7 +84,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       for (const c of clouds.current) {
         if (c.hit || c.choice < 0) continue;
         const cy = c.lane + Math.sin(a.t * 2 + c.bob) * 1.2;
-        if (inCloud(px + 6, p.y, c.x, cy, 9 * giant, 6.5 * giant)) {
+        const big = giant * (a.magnet && c.choice === a.q?.correctIndex ? 1.3 : 1);
+        if (inCloud(px + 6, p.y, c.x, cy, 9 * big, 6.5 * big)) {
           c.hit = true; c.hitAt = a.t;
           const res = a.answer(c.choice, c.x, cy);
           if (res === 'right') {
@@ -124,7 +124,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const [, y] = worldPoint(e, world.current, ar);
     target.current = y;
   }
+  // A keyboard press (Enter or Space) on a pad nudges the plane a lane's worth.
+  const nudge = (d: number) => { if (ctx.cpu) return; target.current = Math.max(20, Math.min(95, plane.current.y + d * 16)); };
   const btn = (d: number) => ({
+    onClick: (e: { detail: number }) => { if (e.detail === 0) nudge(d); },
     onPointerDown: (e: RPointerEvent) => { e.stopPropagation(); input.current = d; target.current = null; setK((k) => k + 1); },
     onPointerUp: () => { input.current = 0; }, onPointerLeave: () => { input.current = 0; }, onPointerCancel: () => { input.current = 0; },
   });
@@ -147,9 +150,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <div className="absolute right-[1.5%] bottom-[4%] grid gap-3 z-10">
             {([-1, 1] as const).map((d) => (
               <button key={d} type="button" aria-label={d < 0 ? 'Fly up' : 'Fly down'} {...btn(d)}
-                className="rounded-full border-heavy border-border bg-accent grid place-items-center motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform"
-                style={{ width: 'max(3.2rem, calc(var(--u) * 12))', height: 'max(3.2rem, calc(var(--u) * 12))', boxShadow: '0 4px 0 #000' }}>
-                {d < 0 ? <ArrowFatUp weight="fill" size="55%" aria-hidden="true" /> : <ArrowFatDown weight="fill" size="55%" aria-hidden="true" />}
+                className="rounded-full border-heavy border-border bg-accent grid place-items-center content-center gap-0.5 font-bold leading-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform"
+                style={{ width: 'max(3.6rem, calc(var(--u) * 13))', height: 'max(3.6rem, calc(var(--u) * 13))', boxShadow: '0 4px 0 #000', fontSize: 'max(0.8125rem, calc(var(--u) * 2.8))' }}>
+                {d < 0 ? <ArrowFatUp weight="fill" size="45%" aria-hidden="true" /> : <ArrowFatDown weight="fill" size="45%" aria-hidden="true" />}
+                <span>{d < 0 ? 'Up' : 'Down'}</span>
               </button>
             ))}
           </div>
@@ -158,6 +162,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       <div ref={world} className="absolute inset-0" onPointerDown={(e) => { holding.current = true; hold(e); }} onPointerMove={(e) => { if (holding.current) hold(e); }}
         onPointerUp={() => { holding.current = false; }} onPointerLeave={() => { holding.current = false; }}>
         <Scenery ar={ar} scroll={scroll.current} />
+        <Rain ar={ar} />
         {smoke.current.map((s, i) => {
           const age = ar.t - s.t;
           const r = 1.4 + age * 3.2;
@@ -165,9 +170,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
         })}
         {clouds.current.map((c) => {
           const cy = c.lane + (ctx.still ? 0 : Math.sin(ar.t * 2 + c.bob) * 1.2);
-          const w = 20 * giant, h = 13 * giant;
+          const big = giant * (ar.magnet && c.choice === ar.q?.correctIndex && !c.hit ? 1.3 : 1);
+          const w = 20 * big, h = 13 * big;
           const text = c.choice >= 0 ? ar.q?.choices[c.choice] ?? '' : '';
-          const gold = ar.magnet && c.choice === ar.q?.correctIndex && !c.hit;
           const hitT = ar.t - c.hitAt;
           const burst = c.hit && hitT < 0.5 && c.choice === ar.q?.correctIndex;
           return (
@@ -177,7 +182,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               className="absolute group disabled:cursor-default focus-visible:outline-4 focus-visible:outline-black rounded-[40%]"
               style={{ left: `${((c.x - w / 2) / ar.W) * 100}%`, top: `${cy - h / 2}%`, width: `calc(var(--u) * ${w})`, height: `calc(var(--u) * ${h})`, opacity: c.choice < 0 ? 0.45 : c.hit && !burst ? 0.6 : 1, transition: 'width .3s, height .3s, opacity .3s' }}>
               <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform" style={{ transform: c.hit && hitT < 0.4 ? `scale(${1.2 - hitT}, ${0.8 + hitT})` : undefined }}>
-                <CloudArt gold={gold} />
+                <CloudArt />
               </span>
               {text && (
                 <span className="absolute inset-[18%_12%_14%] grid place-items-center text-center font-bold leading-[1.05] break-words"
@@ -214,10 +219,10 @@ export function PlaneArt({ color, t, still }: { color: string; t: number; still:
   );
 }
 
-export function CloudArt({ gold }: { gold?: boolean }) {
+export function CloudArt() {
+  const gold = false;
   return (
     <svg viewBox="0 0 100 64" className="w-full h-full overflow-visible" aria-hidden="true">
-      {gold && <ellipse cx="50" cy="34" rx="58" ry="40" fill="#fdfd94" opacity="0.85" className="motion-safe:animate-pulse" />}
       <path d="M14 60 Q-2 60 2 44 Q6 30 20 32 Q20 10 42 12 Q54 -2 70 10 Q90 6 92 26 Q102 30 98 46 Q96 60 82 60Z" fill={gold ? '#fff8c0' : '#fbfcf8'} stroke="#241c3d" strokeWidth="3.5" strokeLinejoin="round" />
       <path d="M20 54 Q50 60 82 54" stroke="#c9d2ff" strokeWidth="4" fill="none" strokeLinecap="round" />
     </svg>

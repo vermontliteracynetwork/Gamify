@@ -1,8 +1,8 @@
-// Block Drop rules: a well of 10 x 20 cells and falling four-square pieces,
+// Block Drop rules: a jar 8 cells wide and 20 tall and falling four-square pieces,
 // kept apart from the drawing so they can be tested. A cell is 0 (empty), a
 // candy color 1..7, or BOMB.
 
-export const COLS = 10;
+export const COLS = 8;
 export const ROWS = 20;
 export const BOMB = 8;
 export type Grid = number[][]; // [row][col], row 0 at the top
@@ -131,9 +131,5 @@ export function bestPlace(g: Grid, p: Piece, sharp = true, rand: () => number = 
   return best;
 }
 
-// A bag of all seven shapes, shuffled, so droughts never happen.
-export function bag(rand: () => number = Math.random): number[] {
-  const b = [0, 1, 2, 3, 4, 5, 6];
-  for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
-  return b;
-}
+// The next piece: any of the seven shapes, picked at random.
+export const randomPiece = (rand: () => number = Math.random) => Math.floor(rand() * 7);

@@ -4,11 +4,12 @@ export type Side = 'left' | 'right';
 export const dir = (s: Side) => (s === 'left' ? -1 : 1);
 export const clamp = (n: number) => Math.max(-1, Math.min(1, n));
 
-// How far one pull moves the flag: a base with some luck, more with extra
+// How far one pull moves the flag (sized so a default game plays about two
+// or three tugs): a base with some luck, more with up to two extra
 // pullers, half when the other team has Super Grip.
 export function pullSize({ extra = 0, gripped = false, rand = Math.random }: { extra?: number; gripped?: boolean; rand?: () => number } = {}): number {
-  const base = 0.2 + rand() * 0.12;
-  return base * (1 + 0.4 * extra) * (gripped ? 0.5 : 1);
+  const base = 0.3 + rand() * 0.15;
+  return base * (1 + 0.3 * Math.min(2, extra)) * (gripped ? 0.5 : 1);
 }
 
 export function pull(pos: number, side: Side, size: number): number {

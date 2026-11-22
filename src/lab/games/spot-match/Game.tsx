@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CirclesFour, HandTap, MagnifyingGlass, Timer } from '@phosphor-icons/react';
+import { Check, CirclesFour, HandTap, MagnifyingGlass, Timer, X as XIcon } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../../../data/types';
 import type { LabCtx, LabDef, LabPower } from '../../types';
 import { isPair, pairTiles, ringSpots, ringTiles, shuffle, speedBonus, type PairTile, type Tile } from './match';
@@ -72,6 +72,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const dbl = useRef(0);
   const pending = useRef<{ spot?: boolean; remove?: boolean; spin?: boolean }>({});
   const [fx, setFx] = useState<{ kind: string; id: number } | null>(null);
+  const lockUntil = useRef(0);
+  const helpedQ = useRef(false);
+  const ts = () => c.current.timeScale;
+  const timed = () => c.current.timeScale > 0;
+  function flash(kind: string, ms: number) {
+    const id = Date.now() + Math.random();
+    setFx({ kind, id });
+    window.setTimeout(() => setFx((f) => (f?.id === id ? null : f)), ms);
+  }
   const [score, setScore] = useState(0);
   const box = useRef<HTMLDivElement>(null);
   const tall = useTall(box);
@@ -92,7 +101,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const k = mode === 'mix' ? (x.round % 2 === 1 ? 'ring' : 'pairs') : mode;
     setKind(k); kindRef.current = k;
     setScore(0); setFound(null); setSel(null); setMatched([]); matchedRef.current = [];
-    dbl.current = 0; frozen.current = 0; jelly.current = 0; pending.current = {};
+    dbl.current = 0; frozen.current = 0; jelly.current = 0; pending.current = {}; lockUntil.current = 0; setFx(null); setLit(null); setShake(null);
     x.setHeld(x.player.id, []);
     if (k === 'ring') { setQi(0); qiRef.current = 0; setupRing(); } else setupPairs();
     setPhase('ready');
@@ -112,13 +121,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setQ(nq); qRef.current = nq;
     setTiles(t); tilesRef.current = t;
     setWrong([]); setFound(null); setLit(null);
-    first.current = true;
-    total.current = RING_TIME; setLeft(RING_TIME); leftRef.current = RING_TIME;
+    first.current = true; helpedQ.current = false;
+    total.current = RING_TIME * (ts() || 1); setLeft(total.current); leftRef.current = total.current;
     const p = pending.current; pending.current = {};
     const wrongs = t.filter((v) => !v.right).map((v) => v.id);
-    if (p.remove) setGone(shuffle(wrongs).slice(0, 2)); else setGone([]);
-    if (p.spot) { const r = t.find((v) => v.right)!.id; setLit([r, shuffle(wrongs)[0]]); }
-    if (p.spin) setFx({ kind: 'spin', id: Date.now() });
+    if (p.remove) { setGone(shuffle(wrongs).slice(0, 2)); helpedQ.current = true; } else setGone([]);
+    if (p.spot) { helpedQ.current = true; const r = t.find((v) => v.right)!.id; setLit([r, shuffle(wrongs)[0]]); }
+    if (p.spin) flash('spin', 1400); else setFx(null);
   }
 
   function setupPairs() {
@@ -133,14 +142,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const t = pairTiles(list.map((v) => ({ id: v.id, prompt: v.prompt, answer: v.choices[v.correctIndex] ?? '' })));
     setPtiles(t); ptRef.current = t;
     tried.current = new Set();
-    total.current = PAIR_TIME; setLeft(PAIR_TIME); leftRef.current = PAIR_TIME;
+    total.current = PAIR_TIME * (ts() || 1); setLeft(total.current); leftRef.current = total.current;
   }
 
   // The clock.
   useEffect(() => {
     if (phase !== 'run') return;
     const id = window.setInterval(() => {
-      if (phaseRef.current !== 'run' || Date.now() < frozen.current) return;
+      if (!timed() || phaseRef.current !== 'run' || Date.now() < frozen.current) return;
       const n = Math.max(0, leftRef.current - 0.1);
       leftRef.current = n; setLeft(n);
       if (n <= 3 && Math.abs(n - Math.round(n)) < 0.05 && n > 0) c.current.sfx.tick();
@@ -155,7 +164,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (kindRef.current === 'ring') {
       const b = qRef.current; if (b) x.log(b, false);
       setFound(tilesRef.current.find((t) => t.right)?.id ?? null);
-      x.sfx.oops(); x.say('Time!', 'oops');
+      x.sfx.whoosh(); x.say('Here it is!');
       window.setTimeout(() => nextQ(), 1500);
     } else {
       for (const [id, v] of pq.current) if (!matchedRef.current.includes(id)) x.log(v, false);
@@ -195,11 +204,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
       return true;
     });
     if (!p) return;
-    setFx({ kind: p.id, id: Date.now() });
+    if (p.id !== 'spin') flash(p.id, 1500);
     if (p.id === 'freeze') { frozen.current = Date.now() + 6000 + (isRing ? 700 : 0); x.sfx.freeze(); }
     if (p.id === 'double') { dbl.current = 3; x.setHeld(x.player.id, [p]); x.sfx.coin(); }
     if (p.id === 'star') { gain(3); x.sfx.chest(); x.burst(0.75, 0.15); }
-    if (p.id === 'jelly') { jelly.current = Date.now() + 5000; x.sfx.boing(); }
+    if (p.id === 'jelly') { jelly.current = Date.now() + 2500; x.sfx.boing(); }
     if (isRing) {
       if (p.id === 'spot') pending.current.spot = true;
       if (p.id === 'remove') pending.current.remove = true;
@@ -212,7 +221,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       x.sfx.magnet();
       const open = [...pq.current.keys()].filter((id) => !matchedRef.current.includes(id));
       const pick = open[Math.floor(Math.random() * open.length)];
-      setLit(ptRef.current.filter((t) => t.pair === pick).map((t) => t.id));
+      setLit(ptRef.current.filter((t) => t.pair === pick).map((t) => t.id)); tried.current.add(pick);
       window.setTimeout(() => setLit(null), 2600);
     }
     if (p.id === 'remove') {
@@ -228,19 +237,21 @@ function Play({ ctx }: { ctx: LabCtx }) {
   // Ring: tap a pad.
   async function tapRing(t: Tile) {
     const x = c.current;
-    if (phaseRef.current !== 'run' || wrong.includes(t.id) || gone.includes(t.id)) return;
+    if (phaseRef.current !== 'run' || wrong.includes(t.id) || gone.includes(t.id) || Date.now() < lockUntil.current) return;
     if (!t.right) {
+      // A miss: an X on the pad, a short rest, and a little time off the clock.
       setWrong((w) => [...w, t.id]); first.current = false;
-      leftRef.current = Math.max(0.5, leftRef.current - 2); setLeft(leftRef.current);
+      lockUntil.current = Date.now() + 700;
+      if (timed()) { leftRef.current = Math.max(0.5, leftRef.current - 2); setLeft(leftRef.current); }
       x.sfx.boing(); return;
     }
     setPhase('pause');
     setFound(t.id);
     const b = qRef.current!;
-    x.log(b, first.current);
-    const pts = gain(1 + (first.current ? speedBonus(leftRef.current, total.current) : 0));
+    x.log(b, first.current && !helpedQ.current);
+    const pts = gain(1 + (first.current && timed() ? speedBonus(leftRef.current, total.current) : 0));
     x.sfx.coin(); x.sfx.note(qiRef.current + 2);
-    if (pts >= 3) x.say(pts >= 4 ? 'Super fast!' : 'Quick!');
+    if (pts >= 2) x.say('Quick!');
     const spot = ringSpots(tilesRef.current.length)[tilesRef.current.findIndex((v) => v.id === t.id)];
     x.burst(0.08 + spot.x * 0.62, 0.15 + spot.y * 0.75);
     await wait(700);
@@ -257,7 +268,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     gain(2); x.sfx.coin(); x.sfx.note(m.length + 2);
     if (m.length >= pq.current.size) {
       setPhase('pause');
-      const bonus = Math.ceil(leftRef.current / 8);
+      const bonus = timed() ? Math.min(2, Math.ceil(leftRef.current / (12 * ts()))) : 0;
       if (bonus > 0) { gain(bonus); x.say(`All matched! +${bonus}`, 'big'); } else x.say('All matched!', 'big');
       x.burst(0.45, 0.4, 'big'); x.sfx.cheer();
       window.setTimeout(() => { setPhase('over'); window.setTimeout(() => c.current.next(), 1600); }, 900);
@@ -267,7 +278,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
   async function tapPair(t: PairTile) {
     const x = c.current;
-    if (phaseRef.current !== 'run' || matchedRef.current.includes(t.pair)) return;
+    if (phaseRef.current !== 'run' || matchedRef.current.includes(t.pair) || Date.now() < lockUntil.current) return;
     const s = selRef.current;
     if (s == null) { setSel(t.id); x.sfx.tap(); return; }
     if (s === t.id) { setSel(null); return; }
@@ -279,7 +290,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if ((phaseRef.current as Phase) === 'pause' && matchedRef.current.length < pq.current.size) setPhase('run');
     } else {
       tried.current.add(a.pair); tried.current.add(t.pair);
+      // Not a pair: both get an X and everyone waits a second.
       setShake({ ids: [a.id, t.id], id: Date.now() });
+      lockUntil.current = Date.now() + 1000;
+      window.setTimeout(() => setShake((v) => (v && Date.now() - v.id >= 900 ? null : v)), 1000);
       x.sfx.boing();
     }
   }
@@ -317,7 +331,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const canTap = phase === 'run' && !ctx.cpu;
   const prompt = q?.prompt ?? '';
   const spots = ringSpots(tiles.length, 0.4, 0.38, fx?.kind === 'spin' ? 0.6 : 0);
-  const pad = tall ? 22 : 19;
+  const pad = (tall ? 22 : 19) + (tiles.some((t) => t.text.length > 9) ? 4 : 0);
   const cols = tall ? 2 : 4;
 
   return (
@@ -329,16 +343,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <div className="absolute top-[calc(var(--u)*2)] inset-x-[calc(var(--u)*3)] h-[calc(var(--u)*8)] flex items-center gap-[calc(var(--u)*2)] z-10">
           <span className="relative w-[calc(var(--u)*8)] h-[calc(var(--u)*8)] rounded-full border-std border-border grid place-items-center shrink-0" style={{ background: isFrozen ? '#c9ecff' : '#fbfcf8' }} aria-hidden="true">
             <Timer weight="fill" className="w-[60%] h-[60%]" />
-            {isFrozen && !still && <motion.span className="absolute inset-0 rounded-full border-[calc(var(--u)*0.6)] border-[#6aa9e9]" animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1, repeat: Infinity }} />}
+            {isFrozen && !still && <motion.span className="absolute inset-0 rounded-full border-[calc(var(--u)*0.6)] border-[#6aa9e9]" animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 2, repeat: Infinity }} />}
           </span>
-          <div className="relative flex-1 h-[calc(var(--u)*4)] rounded-full border-std border-border bg-surface overflow-hidden" role="timer" aria-label={`${Math.ceil(left)} seconds left`}>
+          <div className="relative flex-1 h-[calc(var(--u)*4)] rounded-full border-std border-border bg-surface overflow-hidden" role="timer" aria-label={`${Math.ceil(left)} seconds left`} style={{ visibility: timed() ? 'visible' : 'hidden' }}>
             <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${(left / total.current) * 100}%`, background: isFrozen ? '#7fd6e3' : left / total.current < 0.25 ? '#e5635f' : left / total.current < 0.5 ? '#f6c544' : '#8fe3a0', transition: 'width 0.1s linear' }} />
           </div>
           <span className="shrink-0 flex gap-[calc(var(--u)*1)]" aria-label={kind === 'ring' ? `Question ${qi + 1} of ${RING_QS}` : `${matched.length} of ${ptiles.length / 2} pairs`}>
             {Array.from({ length: kind === 'ring' ? RING_QS : ptiles.length / 2 }, (_, i) => {
               const done = kind === 'ring' ? i < qi : i < matched.length;
               const now = kind === 'ring' && i === qi;
-              return <motion.span key={i} className="w-[calc(var(--u)*4)] h-[calc(var(--u)*4)] rounded-full border-std border-border" style={{ background: done ? '#8fe3a0' : now ? '#fdfd94' : '#fbfcf8' }} animate={now && !still ? { scale: [1, 1.2, 1] } : { scale: 1 }} transition={{ duration: 1, repeat: now ? Infinity : 0 }} />;
+              return <motion.span key={i} className="w-[calc(var(--u)*4)] h-[calc(var(--u)*4)] rounded-full border-std border-border" style={{ background: done ? '#8fe3a0' : now ? '#fdfd94' : '#fbfcf8' }} animate={now && !still ? { scale: [1, 1.2, 1] } : { scale: 1 }} transition={{ duration: 2, repeat: now ? Infinity : 0 }} />;
             })}
           </span>
           {score > 0 && <motion.span key={score} className="shrink-0 font-display text-[calc(var(--u)*5)] px-[calc(var(--u)*2)] rounded-full border-std border-border bg-accent" initial={still ? false : { scale: 1.6 }} animate={{ scale: 1 }}>+{score}</motion.span>}
@@ -351,7 +365,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               style={{ x: '-50%', y: '-50%', boxShadow: '0 calc(var(--u)*0.9) 0 #000, 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,0,0,0.2)' }}
               initial={still ? false : { scale: 0.3, rotate: -10, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 220, damping: 14 }}>
               <span className="absolute -top-[calc(var(--u)*3.5)] left-1/2 -translate-x-1/2 w-[calc(var(--u)*7)] h-[calc(var(--u)*7)] rounded-full border-std border-border bg-accent grid place-items-center" aria-hidden="true"><MagnifyingGlass weight="bold" className="w-[55%] h-[55%]" /></span>
-              <p className="m-0 font-bold leading-snug text-balance" style={{ fontSize: `calc(var(--u)*${prompt.length > 80 ? 3 : prompt.length > 40 ? 3.8 : 4.8})` }}>{prompt}</p>
+              <p className="m-0 font-bold leading-snug text-balance" style={{ fontSize: `calc(var(--u)*${prompt.length > 80 ? 4 : prompt.length > 40 ? 4.4 : 5})` }}>{prompt}</p>
             </motion.div>
             <motion.div className="absolute inset-0" animate={still || phase !== 'run' ? undefined : { rotate: fx?.kind === 'spin' ? [0, 720] : [0, 6, 0, -6, 0] }} transition={fx?.kind === 'spin' ? { duration: 1.2 } : { duration: 14, repeat: Infinity, ease: 'easeInOut' }}>
               {tiles.map((t, i) => {
@@ -365,13 +379,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
                         className="absolute rounded-full grid place-items-center disabled:cursor-default"
                         style={{ left: `${s.x * 100}%`, top: `${s.y * 100}%`, width: `calc(var(--u)*${pad})`, height: `calc(var(--u)*${pad})`, x: '-50%', y: '-50%' }}
                         initial={still ? false : { scale: 0, rotate: -200 }}
-                        animate={isFound ? { scale: [1, 1.35, 1.2], rotate: 0 } : isWrong && !still ? { scale: 0.85, rotate: [0, -14, 14, -8, 0], opacity: 0.55 } : isJelly ? { scaleX: [1, 1.15, 0.9, 1.1, 1], scaleY: [1, 0.85, 1.1, 0.9, 1], rotate: 0 } : { scale: 1, rotate: 0, opacity: dim ? 0.35 : 1 }}
+                        animate={isFound ? { scale: [1, 1.35, 1.2], rotate: 0 } : isWrong ? { scale: 0.85, rotate: ctx.shake ? [0, -10, 10, -6, 0] : 0, opacity: 0.6 } : isJelly ? { scaleX: [1, 1.06, 0.96, 1.04, 1], scaleY: [1, 0.94, 1.04, 0.96, 1], rotate: 0 } : { scale: 1, rotate: 0, opacity: dim ? 0.35 : 1 }}
                         exit={still ? { opacity: 0 } : { scale: 0, y: '-150%', opacity: 0, rotate: 90 }}
-                        transition={isJelly ? { duration: 0.7, repeat: 6 } : { type: 'spring', stiffness: 260, damping: 13, delay: isFound || isWrong ? 0 : i * 0.06 }}
+                        transition={isJelly ? { duration: 0.8, repeat: 2 } : { type: 'spring', stiffness: 260, damping: 13, delay: isFound || isWrong ? 0 : i * 0.06 }}
                         whileHover={canTap && !isWrong && !still ? { scale: 1.08 } : undefined} whileTap={canTap ? { scale: 0.94 } : undefined}
                         aria-label={`Pad: ${t.text}`}>
                         <LilyPad good={isFound} lit={!!lit?.includes(t.id) && !dim} turn={t.id * 53 + qi * 31} />
-                        <span className="relative font-bold leading-tight text-balance px-[18%] text-[#13301f]" style={{ fontSize: `calc(var(--u)*${t.text.length > 18 ? 2.4 : t.text.length > 9 ? 3 : 5})` }}>{t.text}</span>
+                        {isFound && <Mark good />}
+                        {isWrong && <Mark good={false} />}
+                        <span className="relative font-bold leading-tight text-balance px-[14%] text-[#13301f]" style={{ fontSize: `calc(var(--u)*${t.text.length > 9 ? 4 : 5})` }}>{t.text}</span>
                       </motion.button>
                     )}
                   </AnimatePresence>
@@ -394,13 +410,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   className={`relative grid place-items-center min-h-0 disabled:cursor-default ${t.kind === 'q' ? 'rounded-[calc(var(--u)*2.5)] border-bold border-border' : 'rounded-full aspect-square h-full max-w-full justify-self-center self-center'}`}
                   style={t.kind === 'q' ? { background: '#fbfcf8', boxShadow: picked || glow ? '0 0 0 calc(var(--u)*0.9) #fdfd94, 0 calc(var(--u)*0.8) 0 #000' : '0 calc(var(--u)*0.8) 0 #000' } : undefined}
                   initial={still ? false : { scale: 0, rotate: -120 }}
-                  animate={done ? { scale: 0, opacity: 0, rotate: 180, y: -30 } : shaking ? { x: [0, -10, 10, -6, 0], scale: 1, rotate: 0 } : isJelly ? { scaleX: [1, 1.12, 0.92, 1.08, 1], scaleY: [1, 0.88, 1.08, 0.92, 1] } : { scale: picked ? 1.08 : 1, rotate: 0, opacity: 1 }}
-                  transition={isJelly && !done ? { duration: 0.7, repeat: 6 } : { type: 'spring', stiffness: 240, damping: 14, delay: done || shaking ? 0 : i * 0.05 }}
+                  animate={done ? { scale: 0, opacity: 0, rotate: 180, y: -30 } : shaking ? { x: ctx.shake ? [0, -8, 8, -4, 0] : 0, scale: 1, rotate: 0 } : isJelly ? { scaleX: [1, 1.05, 0.96, 1.04, 1], scaleY: [1, 0.95, 1.04, 0.96, 1] } : { scale: picked ? 1.08 : 1, rotate: 0, opacity: 1 }}
+                  transition={isJelly && !done ? { duration: 0.8, repeat: 2 } : { type: 'spring', stiffness: 240, damping: 14, delay: done || shaking ? 0 : i * 0.05 }}
                   whileHover={canTap && !done && !still ? { scale: 1.05 } : undefined}
                   aria-label={`${t.kind === 'q' ? 'Question' : 'Answer'}: ${t.text}`} aria-pressed={picked}>
                   {t.kind === 'a' && <LilyPad good={picked} lit={!!glow} turn={t.id * 67} />}
+                  {shaking && <Mark good={false} />}
                   <span className={`relative font-bold leading-tight text-balance ${t.kind === 'a' ? 'px-[18%] text-[#13301f]' : 'px-[calc(var(--u)*2)]'}`}
-                    style={{ fontSize: `calc(var(--u)*${t.text.length > 60 ? 2.6 : t.text.length > 24 ? 3.4 : t.kind === 'a' && t.text.length < 8 ? 6 : 4.6})` }}>{t.text}</span>
+                    style={{ fontSize: `calc(var(--u)*${t.text.length > 60 ? 4 : t.text.length > 24 ? 4.2 : t.kind === 'a' && t.text.length < 8 ? 6 : 4.8})` }}>{t.text}</span>
                 </motion.button>
               );
             })}
@@ -412,7 +429,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {fx && !still && ['star', 'freeze', 'spot', 'remove'].includes(fx.kind) && (
             <motion.span key={fx.id} className="absolute left-[40%] top-[30%] w-[20%] [&>svg]:w-full pointer-events-none z-20"
               initial={{ scale: 0, rotate: -90, opacity: 0 }} animate={fx.kind === 'star' ? { scale: [0, 1.2, 0.6], rotate: 0, x: ['0%', '0%', '180%'], y: ['0%', '0%', '-160%'], opacity: [0, 1, 0] } : { scale: [0, 1.2, 1], rotate: 0, opacity: [0, 1, 0] }}
-              transition={{ duration: 1.4 }} onAnimationComplete={() => setFx((f) => (f?.kind === 'spin' ? f : null))}>
+              exit={{ opacity: 0 }} transition={{ duration: 1.4 }}>
               <Art kind={fx.kind} />
             </motion.span>
           )}
@@ -444,7 +461,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   {kind === 'ring' ? <><MagnifyingGlass weight="bold" className="w-[calc(var(--u)*5)] h-[calc(var(--u)*5)]" aria-hidden="true" />Find the match</> : <><CirclesFour weight="fill" className="w-[calc(var(--u)*5)] h-[calc(var(--u)*5)]" aria-hidden="true" />Match the pairs</>}
                 </span>
                 <motion.button type="button" onClick={go} disabled={ctx.cpu} className="min-w-[calc(var(--u)*34)] min-h-[calc(var(--u)*16)] rounded-full border-heavy border-border bg-accent font-display text-[calc(var(--u)*9)] disabled:cursor-default"
-                  style={{ boxShadow: '0 calc(var(--u)*1) 0 #000' }} animate={still ? undefined : { scale: [1, 1.07, 1] }} transition={{ duration: 1, repeat: Infinity }} whileHover={still ? undefined : { scale: 1.1 }} whileTap={{ scale: 0.94 }}>
+                  style={{ boxShadow: '0 calc(var(--u)*1) 0 #000' }} animate={still ? undefined : { scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }} whileHover={still ? undefined : { scale: 1.1 }} whileTap={{ scale: 0.94 }}>
                   Go!
                 </motion.button>
               </div>
@@ -453,6 +470,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+// A check or an X on a tile, so right and wrong never hang on color alone.
+function Mark({ good }: { good: boolean }) {
+  return (
+    <span className="absolute -top-[6%] -right-[6%] z-[1] w-[34%] max-w-[calc(var(--u)*8)] aspect-square rounded-full border-std border-border grid place-items-center" style={{ background: good ? '#9fe7a0' : '#f5a08c' }} aria-hidden="true">
+      {good ? <Check weight="bold" className="w-[62%] h-[62%]" /> : <XIcon weight="bold" className="w-[58%] h-[58%]" />}
+    </span>
   );
 }
 

@@ -1,6 +1,6 @@
-// Letter Lock rules, kept apart so they can be tested: a five-letter word,
-// green for the right letter in the right spot, yellow for a letter that is
-// in the word somewhere else, gray for a letter that is not in it.
+// Letter Lock rules, kept apart so they can be tested: a 4 to 6 letter word,
+// 'g' for the right letter in the right spot, 'y' for a letter that is in
+// the word somewhere else, 'x' for a letter that is not in it.
 
 export type Mark = 'g' | 'y' | 'x';
 
@@ -29,5 +29,5 @@ export function keyMarks(rows: { word: string; marks: Mark[] }[]): Record<string
 // A word that would have earned the same colors on every guess so far.
 export const fits = (word: string, rows: { word: string; marks: Mark[] }[]) => rows.every((r) => grade(r.word, word).join('') === r.marks.join(''));
 
-// Fewer tries score more: 6 for the first row down to 1.
-export const crackPoints = (tries: number) => Math.max(1, 7 - tries);
+// Fewer tries score more: 6 for the first row, never under 3 (effort pays).
+export const crackPoints = (tries: number) => Math.max(3, 7 - tries);

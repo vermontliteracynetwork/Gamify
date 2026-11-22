@@ -42,19 +42,45 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const box = useRef<HTMLDivElement>(null);
   const tall = useTall(box);
   const players = ctx.turns.players;
-  const L = players[0], R = players[1] ?? players[0];
+  // Solo: you against a friendly computer team the game plays itself.
+  const FRIEND = { id: 'tug-friends', name: 'Computer team', colorIndex: players[0]?.colorIndex === 1 ? 2 : 1, kind: 'cpu' as const, score: 0 };
+  const L = players[0], R = ctx.solo ? FRIEND : players[1] ?? players[0];
   const sideOf = (id: string): Side => (id === L.id ? 'left' : 'right');
   const me = sideOf(ctx.player.id);
   const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
+  const pulling = useRef(false);
+  const extraLeft = useRef<Record<Side, number>>({ left: 0, right: 0 });
+
+  function flash(kind: string, side: Side, ms = 2600) {
+    const fid = Date.now() + Math.random();
+    setFx({ kind, side, id: fid });
+    window.setTimeout(() => setFx((f) => (f?.id === fid ? null : f)), ms);
+  }
+  function heaveOf(side: Side) {
+    const id = Date.now();
+    setHeave({ side, id });
+    window.setTimeout(() => setHeave((h) => (h?.id === id ? null : h)), 1100);
+  }
+
+  // End the turn; on the very last one, name the team the flag is nearer to.
+  function endTurn(delay: number, title?: string) {
+    window.setTimeout(() => {
+      const x = c.current;
+      const last = x.taken + 1 >= x.rounds * x.turns.players.length;
+      if (!last) { x.next(); return; }
+      const p = posRef.current;
+      x.finish(title ?? (Math.abs(p) < 0.05 ? 'The flag ends in the middle!' : `The flag ends nearer ${p < 0 ? L.name : R.name}!`));
+    }, delay);
+  }
 
   // Every turn: a question; right earns a pull (and maybe a power-up).
   useEffect(() => {
     let live = true;
     const x = c.current;
-    setMode('wait'); setPulls(1); pullsRef.current = 1;
+    setMode('wait'); setPulls(1); pullsRef.current = 1; pulling.current = false;
     void x.ask().then(async (ok) => {
       if (!live) return;
-      if (!ok) { x.sfx.wrong(); const fid = Date.now(); setFx({ kind: 'slip', side: sideOf(x.player.id), id: fid }); window.setTimeout(() => setFx((f) => (f?.id === fid ? null : f)), 1200); window.setTimeout(() => live && c.current.next(), 900); return; }
+      if (!ok) { x.sfx.wrong(); flash('slip', sideOf(x.player.id), 1200); window.setTimeout(() => { if (live) void friendTurn(); }, 900); return; }
       const p = await c.current.power(0.45, (pw) => (pw.id !== 'wind' || Math.abs(posRef.current) > 0.25));
       if (!live) return;
       if (p) { const done = await fire(p); if (done || !live) return; }
@@ -63,26 +89,39 @@ function Play({ ctx }: { ctx: LabCtx }) {
     return () => { live = false; };
   }, [ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Solo: the friendly computer team takes its pull after yours.
+  async function friendTurn() {
+    if (!c.current.solo) { endTurn(0); return; }
+    await wait(700);
+    if (Math.random() < 0.55) {
+      heaveOf('right'); c.current.sfx.kick();
+      const size = pullSize({ extra: extraRef.current.right, gripped: gripRef.current.right ? false : gripRef.current.left }) * 0.8;
+      if (gripRef.current.left) setGrip((g) => ({ ...g, left: false }));
+      if (move(pull(posRef.current, 'right', size))) return;
+    } else c.current.say('They slipped!');
+    endTurn(1100);
+  }
+
   // Returns true when the power-up already ended the turn (a win).
   async function fire(p: LabPower): Promise<boolean> {
     const x = c.current, side = sideOf(x.player.id), other: Side = side === 'left' ? 'right' : 'left';
-    const fid = Date.now();
-    setFx({ kind: p.id, side, id: fid });
-    window.setTimeout(() => setFx((f) => (f?.id === fid ? null : f)), 2600);
+    flash(p.id, side);
     if (p.id === 'grip') { setGrip((g) => ({ ...g, [side]: true })); x.setHeld(x.player.id, [p]); x.sfx.magnet(); }
-    if (p.id === 'extra') { setExtra((e) => ({ ...e, [side]: e[side] + 1 })); x.sfx.jump(); await wait(900); }
+    if (p.id === 'extra') {
+      setExtra((e) => ({ ...e, [side]: Math.min(2, e[side] + 1) }));
+      extraLeft.current[side] = 2;
+      x.sfx.jump(); await wait(900);
+    }
     if (p.id === 'double') { setPulls(2); pullsRef.current = 2; x.sfx.whoosh(); x.say('Pull two times!'); }
     if (p.id === 'muscles') { x.points(2); x.sfx.thud(); x.burst(side === 'left' ? 0.25 : 0.65, 0.5); }
     if (p.id === 'banana') {
       x.sfx.boing(); await wait(700); x.sfx.slideDown();
-      setHeave({ side: other, id: Date.now() });
+      heaveOf(other);
       return move(pull(posRef.current, side, 0.18), 'Whoops!');
     }
-    if (p.id === 'tickle') {
-      x.sfx.boing(); await wait(1100);
-      return move(Math.max(-0.9, Math.min(0.9, posRef.current + (Math.random() * 0.3 - 0.15))), 'Hee hee!');
-    }
-    if (p.id === 'wind') { x.sfx.wind(); await wait(900); return move(gust(posRef.current), 'Whoosh!'); }
+    // Silly ones never pay out: the tickle only wiggles, the gust blows the leader back.
+    if (p.id === 'tickle') { x.sfx.boing(); await wait(1100); x.say('Hee hee!'); }
+    if (p.id === 'wind') { x.sfx.wind(); await wait(900); move(gust(posRef.current), 'Whoosh!'); }
     return false;
   }
 
@@ -91,44 +130,49 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setPos(to); posRef.current = to;
     const w = winner(to);
     if (w) { win(w); return true; }
-    if (msg) c.current.say(msg, 'oops');
+    if (msg) c.current.say(msg);
     return false;
   }
 
   function win(w: Side) {
     const x = c.current, loser: Side = w === 'left' ? 'right' : 'left';
     setMode('busy');
-    x.points(3, w === 'left' ? L.id : R.id);
+    const wp = w === 'left' ? L : R;
+    if (!(x.solo && w === 'right')) x.points(3, wp.id);
     setWins((n) => ({ ...n, [w]: n[w] + 1 }));
     x.sfx.cheer(); x.say('Tug won!', 'big'); x.burst(w === 'left' ? 0.25 : 0.65, 0.4, 'big');
-    window.setTimeout(() => { setFall(loser); c.current.sfx.splash(); window.setTimeout(() => c.current.sfx.splash(), 300); c.current.say('Splat!', 'oops'); }, 700);
+    // The other team plops into the mud, splashes everyone, and gets a high five.
+    window.setTimeout(() => { setFall(loser); c.current.sfx.splash(); window.setTimeout(() => c.current.sfx.splash(), 300); }, 700);
+    window.setTimeout(() => { c.current.say('High five!'); c.current.sfx.bell(); }, 1900);
     window.setTimeout(() => {
       setFall(null); setPos(0); posRef.current = 0;
-      setExtra({ left: 0, right: 0 }); setGrip({ left: false, right: false });
+      setExtra({ left: 0, right: 0 }); extraLeft.current = { left: 0, right: 0 }; setGrip({ left: false, right: false });
       players.forEach((p) => c.current.setHeld(p.id, []));
       c.current.sfx.slideUp();
-      window.setTimeout(() => c.current.next(), 700);
+      endTurn(700, `${wp.name} won the last tug!`);
     }, 3300);
   }
 
   async function doPull() {
     const x = c.current;
-    if (mode !== 'pull') return;
+    if (mode !== 'pull' || pulling.current) return;
+    pulling.current = true;
     setMode('busy');
     const side = sideOf(x.player.id), other: Side = side === 'left' ? 'right' : 'left';
     for (let k = 0; k < pullsRef.current; k++) {
       const gripped = gripRef.current[other];
-      if (gripped) { setGrip((g) => ({ ...g, [other]: false })); x.setHeld(other === 'left' ? L.id : R.id, []); }
-      setHeave({ side, id: Date.now() });
+      if (gripped) { setGrip((g) => ({ ...g, [other]: false })); if (!(x.solo && other === 'right')) x.setHeld(other === 'left' ? L.id : R.id, []); }
+      heaveOf(side);
       x.sfx.kick(); window.setTimeout(() => c.current.sfx.swish(), 120);
       const size = pullSize({ extra: extraRef.current[side], gripped });
       x.points(1);
-      if (gripped) x.say('Sticky grip!', 'oops');
-      else if (size > 0.29) x.say('Mega pull!');
+      if (extraLeft.current[side] > 0) { extraLeft.current[side] -= 1; if (!extraLeft.current[side]) setExtra((e) => ({ ...e, [side]: 0 })); }
+      if (gripped) x.say('Sticky grip!');
+      else if (size > 0.4) x.say('Mega pull!');
       if (move(pull(posRef.current, side, size))) return;
       await wait(1000);
     }
-    window.setTimeout(() => c.current.next(), 700);
+    window.setTimeout(() => void friendTurn(), 500);
   }
 
   // The computer pulls on its own; Space or Enter pulls too.
@@ -172,14 +216,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* The two lines and the mud. */}
           {[200 - LINE, 200 + LINE].map((x) => <path key={x} d={`M${x - 3} 140h6l4 85h-14z`} fill="#fbfcf8" stroke="#000" strokeWidth="1" />)}
           <ellipse cx="200" cy="182" rx="50" ry="15" fill="url(#tt-mud)" stroke="#000" strokeWidth="2" />
-          {!still && [0, 1, 2].map((i) => <motion.circle key={i} cx={180 + i * 18} cy={182 + (i % 2) * 4} r="2.4" fill="#c8956a" stroke="#000" strokeWidth="0.8" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.6 }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />)}
+          {!still && [0, 1, 2].map((i) => <motion.circle key={i} cx={180 + i * 18} cy={182 + (i % 2) * 4} r="2.4" fill="#c8956a" stroke="#000" strokeWidth="0.8" animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }} transition={{ duration: 3, repeat: Infinity, delay: i * 1 }} style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />)}
 
           {/* Rope, flag and both teams slide together. */}
           <motion.g initial={false} animate={{ x: pos * LINE }} transition={{ type: 'spring', stiffness: 70, damping: 11, mass: 1.3 }}>
             <motion.path d={wiggle ? 'M-100 150 Q-40 140 20 150 T140 150 T260 150 T380 150 T500 150' : 'M-100 150 Q-40 150 20 150 T140 150 T260 150 T380 150 T500 150'} stroke="#c8956a" strokeWidth="5" fill="none" strokeLinecap="round"
               animate={wiggle ? { d: ['M-100 150 Q-40 140 20 150 T140 150 T260 150 T380 150 T500 150', 'M-100 150 Q-40 160 20 150 T140 150 T260 150 T380 150 T500 150', 'M-100 150 Q-40 140 20 150 T140 150 T260 150 T380 150 T500 150'] } : undefined} transition={{ duration: 0.3, repeat: 3 }} />
             <path d="M-100 150H500" stroke="#8a5a3b" strokeWidth="1.2" strokeDasharray="3 5" opacity={wiggle ? 0 : 1} />
-            <motion.g style={{ transformOrigin: '200px 150px' }} animate={still ? undefined : { rotate: [-6, 6, -6] }} transition={{ duration: 1.4, repeat: Infinity }}>
+            <motion.g style={{ transformOrigin: '200px 150px' }} animate={still ? undefined : { rotate: [-6, 6, -6] }} transition={{ duration: 2.6, repeat: Infinity }}>
               <path d="M194 148h12v26l-6-6-6 6z" fill="#ef7d96" stroke="#000" strokeWidth="1.8" strokeLinejoin="round" />
               <path d="M194 156h12" stroke="#fdfd94" strokeWidth="3" />
               <circle cx="200" cy="150" r="3.2" fill="#fdfd94" stroke="#000" strokeWidth="1.4" />
@@ -219,11 +263,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
           const on = ctx.player.id === p.id;
           return (
             <motion.div key={side} className={`absolute ${tall ? 'top-[70%]' : 'top-[calc(var(--u)*15)]'} ${side === 'left' ? (tall ? 'left-[calc(var(--u)*6)]' : 'left-[calc(var(--u)*3)]') : (tall ? 'right-[calc(var(--u)*6)]' : 'right-[calc(var(--u)*3)]')} grid justify-items-center gap-[calc(var(--u)*1)]`}
-              animate={on && !still ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: 1.4, repeat: on ? Infinity : 0 }}>
+              animate={on && !still ? { scale: [1, 1.08, 1] } : { scale: 1 }} transition={{ duration: 2.4, repeat: on ? Infinity : 0 }}>
               <span className="rounded-full p-[calc(var(--u)*0.8)]" style={{ boxShadow: on ? '0 0 0 calc(var(--u)*0.8) #fdfd94, 0 0 calc(var(--u)*4) #fdfd94' : undefined }}><TeamBadge colorIndex={p.colorIndex} size={tall ? 64 : 44} /></span>
               <span className="flex gap-[calc(var(--u)*0.6)]" aria-label={`${p.name}: ${wins[side]} tugs won`}>
                 {Array.from({ length: Math.max(3, wins[side]) }, (_, i) => (
-                  <motion.svg key={i} viewBox="0 0 40 40" className="w-[calc(var(--u)*4.4)] h-[calc(var(--u)*4.4)]" initial={false} animate={{ scale: i < wins[side] ? [1.6, 1] : 1 }} aria-hidden="true">
+                  <motion.svg key={i} viewBox="0 0 40 40" className="w-[calc(var(--u)*6.5)] h-[calc(var(--u)*6.5)]" initial={false} animate={{ scale: i < wins[side] ? [1.6, 1] : 1 }} aria-hidden="true">
                     <path d="M20 4l4.6 10 10.8 1-8.2 7.2 2.6 10.6L20 27l-9.8 5.8 2.6-10.6L4.6 15l10.8-1z" fill={i < wins[side] ? '#f6c544' : '#fbfcf8'} stroke="#000" strokeWidth="2.5" strokeLinejoin="round" />
                   </motion.svg>
                 ))}
@@ -239,7 +283,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               className={`absolute left-1/2 ${tall ? 'top-[74%]' : 'top-[calc(var(--u)*16)]'} min-w-[calc(var(--u)*30)] min-h-[calc(var(--u)*14)] px-[calc(var(--u)*4)] rounded-full border-heavy border-border bg-accent font-display text-[calc(var(--u)*7)] inline-flex items-center justify-center gap-[calc(var(--u)*2)] disabled:cursor-default`}
               style={{ boxShadow: '0 calc(var(--u)*0.9) 0 #000', x: '-50%' }}
               initial={still ? { opacity: 0 } : { scale: 0, y: 40 }} animate={{ scale: still ? 1 : [1, 1.07, 1], y: 0, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}
-              transition={{ scale: { duration: 0.9, repeat: Infinity }, y: { type: 'spring', stiffness: 300, damping: 14 } }}
+              transition={{ scale: { duration: 1.8, repeat: Infinity }, y: { type: 'spring', stiffness: 300, damping: 14 } }}
               whileHover={still ? undefined : { scale: 1.1 }} whileTap={{ scale: 0.92 }}>
               {me === 'left' && <span aria-hidden="true">&larr;</span>}<HandGrabbing weight="fill" className="w-[calc(var(--u)*7)] h-[calc(var(--u)*7)]" style={{ transform: me === 'left' ? 'scaleX(-1)' : undefined }} />Pull!{pulls > 1 ? ' x2' : ''}{me === 'right' && <span aria-hidden="true">&rarr;</span>}
             </motion.button>
@@ -349,7 +393,7 @@ const def: LabDef = {
   id: 'team-tug',
   name: 'Team Tug',
   description: 'A tug of war over a mud puddle. Every right answer is a big pull. Pull the flag to your side to win!',
-  ways: ['teams'],
+  ways: ['teams', 'solo'],
   minTeams: 2,
   maxTeams: 2,
   how: [

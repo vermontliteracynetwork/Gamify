@@ -45,7 +45,7 @@ const POWERS: LabPower[] = [
   { id: 'freeze', name: 'Freeze Ray', desc: 'Everything freezes still for a few seconds.', enter: 'spin', art: <Art kind="freeze" /> },
   { id: 'extra', name: 'Extra Hops', desc: 'Four more hops this turn.', enter: 'spin', art: <Art kind="extra" /> },
   { id: 'star', name: 'Star Shower', desc: 'Stars rain down on the rows ahead. Grab them!', enter: 'drop', art: <Art kind="star" /> },
-  { id: 'mirror', name: 'Moonwalk', desc: 'Whoops! Left and right swap this turn.', silly: true, art: <Art kind="mirror" /> },
+  { id: 'mirror', name: 'Moonwalk', desc: 'Whoops! Left and right swap for three hops.', silly: true, art: <Art kind="mirror" /> },
   { id: 'hiccup', name: 'Hiccup Hop', desc: 'Whoops! Your next hop is a hiccup in place.', silly: true, art: <Art kind="hiccup" /> },
 ];
 
@@ -55,7 +55,7 @@ interface World {
   t: number; sim: number; left: number; hops: number; row: number; col: number; best: number;
   hop: { from: [number, number]; to: [number, number]; t: number; tiny?: boolean } | null; face: number; squash: number;
   cam: number; jet: { from: number; to: number; t: number } | null; dead: number; shield: number;
-  fx: { slow: number; freeze: number; super: boolean; mirror: boolean; hiccup: boolean }; parts: Part[]; floats: { x: number; y: number; text: string; life: number }[];
+  fx: { slow: number; freeze: number; super: boolean; mirror: number; hiccup: boolean }; parts: Part[]; floats: { x: number; y: number; text: string; life: number }[];
   warned: Set<number>; over: boolean; cpuWait: number; seen: Set<WorldName>;
 }
 const positions = new Map<string, Pos>();
@@ -65,8 +65,8 @@ const bonus = new Set<string>();
 function newWorld(id: string): World {
   const p = positions.get(id) ?? { row: 0, col: Math.floor(COLS / 2), best: 0 };
   return {
-    t: 0, sim: 0, left: TURN_TIME, hops: 0, row: p.row, col: p.col, best: p.best, hop: null, face: 1, squash: 0, cam: p.row - 2.5, jet: null, dead: 0, shield: 0,
-    fx: { slow: 0, freeze: 0, super: false, mirror: false, hiccup: false }, parts: [], floats: [], warned: new Set(), over: false, cpuWait: 0.6, seen: new Set([worldOf(p.row)]),
+    t: 0, sim: simClock, left: TURN_TIME, hops: 0, row: p.row, col: p.col, best: p.best, hop: null, face: 1, squash: 0, cam: p.row - 2.5, jet: null, dead: 0, shield: 0,
+    fx: { slow: 0, freeze: 0, super: false, mirror: 0, hiccup: false }, parts: [], floats: [], warned: new Set(), over: false, cpuWait: 0.6, seen: new Set([worldOf(p.row)]),
   };
 }
 let simClock = 0; // the world keeps one clock so lanes look the same for every team
@@ -100,8 +100,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const ok = await x.ask();
     const w = world.current;
     w.hops = ok ? HOPS_RIGHT : HOPS_MISS;
+    w.left = TURN_TIME * (x.timeScale || 1);
     if (ok) {
-      x.sfx.right();
+      x.sfx.right(); x.points(2); x.say('Right! +2');
       paused.current = true;
       const p = await c.current.power(0.45);
       paused.current = false;
@@ -114,7 +115,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   function held(w: World) {
     const x = c.current;
-    x.setHeld(x.player.id, POWERS.filter((p) => (p.id === 'shield' && w.shield > 0) || (p.id === 'super' && w.fx.super) || (p.id === 'mirror' && w.fx.mirror) || (p.id === 'hiccup' && w.fx.hiccup) || (p.id === 'slow' && w.fx.slow > 0) || (p.id === 'freeze' && w.fx.freeze > 0)));
+    x.setHeld(x.player.id, POWERS.filter((p) => (p.id === 'shield' && w.shield > 0) || (p.id === 'super' && w.fx.super) || (p.id === 'mirror' && w.fx.mirror > 0) || (p.id === 'hiccup' && w.fx.hiccup) || (p.id === 'slow' && w.fx.slow > 0) || (p.id === 'freeze' && w.fx.freeze > 0)));
   }
 
   function apply(w: World, p: LabPower) {
@@ -127,7 +128,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       case 'freeze': w.fx.freeze = 5; x.sfx.freeze(); break;
       case 'extra': w.hops += 4; x.sfx.coin(); break;
       case 'star': for (let r = w.row + 1; r <= w.row + 7; r++) bonus.add(`${r}:${Math.floor(Math.random() * COLS)}`); x.sfx.chest(); break;
-      case 'mirror': w.fx.mirror = true; x.sfx.whoosh(); break;
+      case 'mirror': w.fx.mirror = 3; x.sfx.whoosh(); break;
       case 'hiccup': w.fx.hiccup = true; x.sfx.boing(); break;
     }
     x.say(`${p.name}!`, p.silly ? 'oops' : 'good');
@@ -148,7 +149,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     if (w.hop || w.jet || w.dead > 0 || w.hops <= 0 || w.over) return;
     let d = dir;
-    if (w.fx.mirror && (d === 'left' || d === 'right')) d = d === 'left' ? 'right' : 'left';
+    if (w.fx.mirror > 0 && (d === 'left' || d === 'right')) d = d === 'left' ? 'right' : 'left';
     const col = Math.round(w.col);
     let to: [number, number] = [w.row, col];
     if (w.fx.hiccup) { w.fx.hiccup = false; held(w); w.hops -= 1; setHops(w.hops); w.hop = { from: [w.row, w.col], to: [w.row, w.col], t: 0, tiny: true }; x.sfx.blip(16); w.floats.push({ x: sx(w.col) + 32, y: sy(w, w.row) - 10, text: 'hic!', life: 0 }); return; }
@@ -157,6 +158,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (d === 'left') { if (col <= 0) return; to = [w.row, col - 1]; w.face = -1; }
     if (d === 'right') { if (col >= COLS - 1) return; to = [w.row, col + 1]; w.face = 1; }
     w.hop = { from: [w.row, w.col], to, t: 0 };
+    if (w.fx.mirror > 0) { w.fx.mirror -= 1; if (!w.fx.mirror) held(w); }
     w.hops -= 1; setHops(w.hops);
     x.sfx.jump();
   }
@@ -195,13 +197,19 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (how === 'splash') { x.sfx.splash(); x.say('Splash!', 'oops'); puff(w, px, py, 16, '#fbfcf8', false, 200); }
     else if (l.kind === 'rail') { x.sfx.whistle(); x.sfx.crash(); x.say('Choo choo! Poof!', 'oops'); puff(w, px, py, 22, '#fbfcf8', true, 300); }
     else { x.sfx.crash(); window.setTimeout(() => c.current.sfx.boing(), 120); x.say(l.kind === 'hay' ? 'Hay bonk!' : l.kind === 'ice' ? 'Penguin bump!' : 'Space bonk!', 'oops'); puff(w, px, py, 18, '#fdfd94', true, 240); }
-    w.dead = 1.2; w.hops = 0; setHops(0);
+    w.dead = 1.2;
   }
 
   function endTurn(w: World) {
     const x = c.current;
     if (w.over) return;
     w.over = true;
+    // The hopper never waits on a log or a track: it hops to the nearest safe lane.
+    const up = safeAbove(w.row), down = safeBelow(w.row);
+    const snap = up - w.row < w.row - down ? up : down;
+    if (snap !== w.row) { w.hop = null; w.row = snap; w.squash = 1; x.sfx.jump(); }
+    w.col = Math.round(Math.min(COLS - 1, Math.max(0, w.col)));
+    if (w.row > w.best) { x.points(w.row - w.best); w.best = w.row; }
     positions.set(x.player.id, { row: w.row, col: Math.round(Math.min(COLS - 1, Math.max(0, w.col))), best: w.best });
     setPhase('over');
     x.setHeld(x.player.id, []);
@@ -216,7 +224,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     w.fx.freeze = Math.max(0, w.fx.freeze - dt); w.fx.slow = Math.max(0, w.fx.slow - dt);
     if ((wasF && w.fx.freeze === 0) || (wasS && w.fx.slow === 0)) held(w);
     simClock += dt * scale; w.sim = simClock;
-    w.left -= dt;
+    if (x.timeScale > 0) w.left -= dt;
     w.squash *= Math.pow(0.002, dt);
     for (const p of w.parts) { p.life += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
     w.parts = w.parts.filter((p) => p.life < p.max);
@@ -234,7 +242,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
     if (w.dead > 0) {
       w.dead -= dt;
-      if (w.dead <= 0) { w.row = safeBelow(w.row); w.col = Math.round(Math.min(COLS - 1, Math.max(0, w.col))); w.squash = 1; endTurn(w); }
+      if (w.dead <= 0) { w.row = safeBelow(w.row); w.col = Math.round(Math.min(COLS - 1, Math.max(0, w.col))); w.squash = 1; x.sfx.boing(); if (w.hops <= 0) endTurn(w); }
       return;
     }
     if (w.jet) {
@@ -264,7 +272,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         if (m !== 'wait') hopTo(w, m);
       }
     }
-    if ((w.hops <= 0 && !w.hop) || w.left <= 0) { if (w.left <= 0) x.say('Time!', 'big'); endTurn(w); }
+    if ((w.hops <= 0 && !w.hop) || (x.timeScale > 0 && w.left <= 0)) { if (x.timeScale > 0 && w.left <= 0) x.say('Time!', 'big'); endTurn(w); }
   }
 
   // ---- Drawing ----
@@ -277,16 +285,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (let r = first; r < first + VROWS + 2; r++) {
       if (r < 0) { drawLaneBg(g, lane(0), sy(w, r)); continue; }
       drawLane(g, lane(r), sy(w, r), w, still);
-    }
-    // Other teams' best rows (small markers on the left edge).
-    for (const p of c.current.turns.players) {
-      const pos = positions.get(p.id);
-      if (!pos || p.id === c.current.player.id) continue;
-      const y = sy(w, pos.best) + 32;
-      if (y < -20 || y > H + 20) continue;
-      g.fillStyle = TEAM_COLORS[p.colorIndex % TEAM_COLORS.length]; g.strokeStyle = '#000'; g.lineWidth = 3;
-      g.beginPath(); g.arc(30, y, 14, 0, Math.PI * 2); g.fill(); g.stroke();
-      g.beginPath(); g.moveTo(44, y); g.lineTo(58, y - 6); g.lineTo(58, y + 6); g.closePath(); g.fill(); g.stroke();
     }
     // The hopper.
     let hx = sx(w.col), hy = sy(w, w.row), lift = 0;
@@ -321,7 +319,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     g.fillStyle = 'rgba(36,28,61,0.85)'; g.strokeStyle = '#000'; g.lineWidth = 3;
     g.beginPath(); g.roundRect(W - 150, 10, 140, 46, 14); g.fill(); g.stroke();
     g.fillStyle = '#fdfd94'; g.font = 'bold 26px "Inclusive Sans", system-ui, sans-serif'; g.textAlign = 'center'; g.fillText(`Row ${w.best}`, W - 80, 34);
-    const frac = phaseRef.current === 'play' ? Math.max(0, w.left) / TURN_TIME : 1;
+    const frac = phaseRef.current === 'play' && c.current.timeScale > 0 ? Math.max(0, w.left) / (TURN_TIME * c.current.timeScale) : 1;
     g.fillStyle = 'rgba(36,28,61,0.85)'; g.beginPath(); g.roundRect(14, 14, 180, 18, 9); g.fill(); g.stroke();
     g.fillStyle = w.left < 8 && phaseRef.current === 'play' ? '#ef7d96' : '#8fe3a0'; g.beginPath(); g.roundRect(17, 17, 174 * frac, 12, 6); g.fill();
   }
@@ -414,7 +412,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     // The warning light at the edge of the tracks.
     if (l.kind === 'rail') {
       const warn = trainWarn(l, t);
-      const on = warn && Math.floor(w.t * 6) % 2 === 0;
+      const on = warn;
       g.fillStyle = '#241c3d'; g.fillRect(CELL / 2 - 4, y + 18, 8, 40);
       g.fillStyle = on ? '#ef4b4b' : '#6b6385'; g.strokeStyle = '#000'; g.lineWidth = 3; g.beginPath(); g.arc(CELL / 2, y + 16, 12, 0, Math.PI * 2); g.fill(); g.stroke();
       if (on) { g.fillStyle = 'rgba(239,75,75,0.3)'; g.beginPath(); g.arc(CELL / 2, y + 16, 22, 0, Math.PI * 2); g.fill(); }
@@ -515,10 +513,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </div>
       </div>
       <div className="shrink-0 flex items-center justify-center gap-2 sm:gap-3">
-        <Pad label="Hop left" disabled={!live} onPress={() => hopTo(world.current, 'left')} bg="#b4c4fb"><CaretLeft weight="bold" size={28} /></Pad>
-        <Pad label="Hop back" disabled={!live} onPress={() => hopTo(world.current, 'down')} bg="#e9eefe"><CaretDown weight="bold" size={24} /></Pad>
-        <Pad label="Hop up" disabled={!live} onPress={() => hopTo(world.current, 'up')} bg="#fdfd94" wide><CaretUp weight="bold" size={30} /><span className="font-display text-2xl">Hop</span></Pad>
-        <Pad label="Hop right" disabled={!live} onPress={() => hopTo(world.current, 'right')} bg="#b4c4fb"><CaretRight weight="bold" size={28} /></Pad>
+        <Pad label="Hop left" disabled={!live} onPress={() => hopTo(world.current, 'left')} bg="#b4c4fb"><CaretLeft weight="bold" size={24} /><Word>Left</Word></Pad>
+        <Pad label="Hop back" disabled={!live} onPress={() => hopTo(world.current, 'down')} bg="#e9eefe"><CaretDown weight="bold" size={22} /><Word>Back</Word></Pad>
+        <Pad label="Hop up" disabled={!live} onPress={() => hopTo(world.current, 'up')} bg="#fdfd94" wide><CaretUp weight="bold" size={28} /><span className="font-display text-2xl">Up</span></Pad>
+        <Pad label="Hop right" disabled={!live} onPress={() => hopTo(world.current, 'right')} bg="#b4c4fb"><Word>Right</Word><CaretRight weight="bold" size={24} /></Pad>
       </div>
     </div>
   );
@@ -527,12 +525,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
 function Pad({ label, disabled, onPress, children, bg, wide }: { label: string; disabled: boolean; onPress: () => void; children: ReactNode; bg: string; wide?: boolean }) {
   return (
     <button type="button" aria-label={label} title={label} disabled={disabled} onPointerDown={onPress}
-      className={`min-h-14 ${wide ? 'min-w-[9rem] px-5 gap-2' : 'min-w-[4.5rem]'} rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50`}
+      className={`min-h-14 ${wide ? 'min-w-[8rem] px-5 gap-2' : 'min-w-[4.5rem] px-3 gap-1'} rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50`}
       style={{ boxShadow: '0 5px 0 #000', background: bg }}>
       {children}
     </button>
   );
 }
+
+const Word = ({ children }: { children: ReactNode }) => <span className="font-bold text-base leading-none">{children}</span>;
 
 function starShape(g: CanvasRenderingContext2D, x: number, y: number, r: number, color: string) {
   g.fillStyle = color; g.strokeStyle = '#000'; g.lineWidth = 2.5;

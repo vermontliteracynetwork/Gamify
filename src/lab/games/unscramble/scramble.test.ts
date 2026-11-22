@@ -17,8 +17,8 @@ describe('word scramble', () => {
     expect(nextTile('CAT', [2, 1, 0], letters)).toBe(-1);
     expect(spelled([2, 1, 0], letters)).toBe('CAT');
   });
-  it('scores long words a little more', () => {
+  it('scores every word the same', () => {
     expect(wordPoints('CAT')).toBe(3);
-    expect(wordPoints('GARDEN')).toBe(8);
+    expect(wordPoints('GARDEN')).toBe(3);
   });
 });

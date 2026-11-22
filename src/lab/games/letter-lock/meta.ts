@@ -1,3 +1,3 @@
 import type { LabMeta } from '../../registry';
 
-export const meta: LabMeta = { id: 'letter-lock', name: 'Letter Lock', family: 'Word games', blurb: 'Guess the five-letter word. The tile colors show how close you are.', order: 13 };
+export const meta: LabMeta = { id: 'letter-lock', name: 'Letter Lock', family: 'Word games', blurb: 'A word from your set locks the vault. Read the clue and crack the code.', order: 13 };

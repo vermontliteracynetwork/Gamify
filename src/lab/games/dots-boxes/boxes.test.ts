@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allLines, boxesOf, closes, cpuLine, loose, quake, sizeFor, threeSided } from './boxes';
+import { allLines, boxesOf, closes, count, cpuLine, loose, paintable, quake, safe, sizeFor, threeSided } from './boxes';
 
 const S = sizeFor(2); // 3 by 4
 
@@ -33,5 +33,12 @@ describe('box builder', () => {
     const q = quake(lines, claimed, S, 3);
     expect(Object.keys(q.lines).length).toBe(6);
     expect(q.lines['h-0-0']).toBe('a');
+    for (const [, to] of q.moved) for (const b of boxesOf(to, S)) expect(count(q.lines, b)).toBeLessThan(3);
+  });
+  it('paints boxes with two or more sides and knows safe lines', () => {
+    const lines = { 'h-0-0': 'a', 'v-0-0': 'b' };
+    expect(paintable(lines, {}, S)).toEqual(['0-0']);
+    expect(safe(lines, 'h-1-0', S)).toBe(false);
+    expect(safe(lines, 'h-3-3', S)).toBe(true);
   });
 });

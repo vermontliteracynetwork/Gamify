@@ -20,6 +20,6 @@ describe('letter lock', () => {
     expect(fits('TRAIN', rows)).toBe(false);
   });
   it('scores fewer tries higher', () => {
-    expect(crackPoints(1)).toBe(6); expect(crackPoints(6)).toBe(1); expect(crackPoints(8)).toBe(1);
+    expect(crackPoints(1)).toBe(6); expect(crackPoints(4)).toBe(3); expect(crackPoints(8)).toBe(3);
   });
 });

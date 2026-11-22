@@ -4,7 +4,8 @@
 export const ANIMALS = ['rabbit', 'fox', 'frog', 'owl', 'squirrel', 'badger', 'bat', 'boar', 'dog', 'monkey', 'tiger', 'rooster', 'dragon'] as const;
 export type Animal = (typeof ANIMALS)[number];
 export type Rarity = 'common' | 'rare' | 'super';
-export const VALUE: Record<Rarity, number> = { common: 10, rare: 25, super: 60 };
+// Rare prizes are worth at most three common ones (skill beats luck).
+export const VALUE: Record<Rarity, number> = { common: 10, rare: 20, super: 30 };
 const GRIP: Record<Rarity, number> = { common: 0.92, rare: 0.78, super: 0.62 };
 const SLIP: Record<Rarity, number> = { common: 0.1, rare: 0.2, super: 0.3 };
 
@@ -52,7 +53,7 @@ export function grabChance(p: Prize, x: number, o: GrabOpts = {}): number {
   const aim = 1 - (d / reach) ** 2 * 0.7;
   return Math.min(1, aim * GRIP[p.rarity] * (o.wide ? 1.1 : 1) * (o.grip ? 1.2 : 1));
 }
-export const slipChance = (p: Prize, o: GrabOpts = {}) => (o.grip ? 0 : Math.min(0.6, SLIP[p.rarity] * (o.butter ? 2.2 : 1)));
+export const slipChance = (p: Prize, o: GrabOpts = {}) => (o.grip ? 0 : Math.min(0.6, SLIP[p.rarity] + (o.butter ? 0.1 : 0)));
 
 // The computer aims at the best prize it can reach, a little off when unlucky.
 export function cpuAim(pile: Prize[], sharp: boolean, rand: () => number = Math.random): number {

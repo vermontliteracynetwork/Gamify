@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { CheckCircle, PencilSimpleLine, SquaresFour } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { allBoxes, closes, cpuLine, loose, open, quake, sizeFor, threeSided, type Lines } from './boxes';
+import { allBoxes, closes, cpuLine, loose, open, paintable, quake, safe, sides, sizeFor, type Lines } from './boxes';
 
 // Box Builder (Game Lab, dots and boxes): a right answer lets a team draw one
 // line between two dots. Closing a box fills it with the team's color and
@@ -13,7 +13,7 @@ import { allBoxes, closes, cpuLine, loose, open, quake, sizeFor, threeSided, typ
 
 const POWERS: LabPower[] = [
   { id: 'two', name: 'Two Lines', desc: 'Draw two lines this turn.', enter: 'drop', art: <Art kind="two" /> },
-  { id: 'bucket', name: 'Paint Bucket', desc: 'Pour paint on a box with three sides and it is yours.', enter: 'spin', art: <Art kind="bucket" /> },
+  { id: 'bucket', name: 'Paint Bucket', desc: 'Pour paint on a box with two or three sides and it is yours.', enter: 'spin', art: <Art kind="bucket" /> },
   { id: 'eraser', name: 'Eraser', desc: 'Rub out any line that is not part of a box.', enter: 'zoom', art: <Art kind="eraser" /> },
   { id: 'gold', name: 'Golden Box', desc: 'A gold box appears. Whoever closes it gets 3 points.', enter: 'spin', art: <Art kind="gold" /> },
   { id: 'star', name: 'Star Stamp', desc: 'Two bonus points right now.', enter: 'drop', art: <Art kind="star" /> },
@@ -51,7 +51,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const setMode = (m: Mode) => { modeRef.current = m; setModeState(m); };
   const left = useRef(0);
   const [sprite, setSprite] = useState<Sprite | null>(null);
-  const [shake, setShake] = useState(0);
+  const quakeFx = useAnimationControls();
   const [erasing, setErasing] = useState<string | null>(null);
   const fitRef = useRef<HTMLDivElement>(null);
   const me = ctx.player;
@@ -73,7 +73,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const x = c.current;
         const top = [...x.turns.players].sort((a, b) => b.score - a.score);
         x.sfx.cheer(); x.say('Board full!', 'big');
-        window.setTimeout(() => c.current.finish(top[0] && top[1] && top[0].score === top[1].score ? undefined : `${top[0].name} built the most boxes!`), 1800);
+        window.setTimeout(() => c.current.finish(top[0] && top[1] && top[0].score === top[1].score ? undefined : `${top[0].name} has the most points!`), 1800);
         return;
       }
       c.current.next();
@@ -127,7 +127,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if (pick) { setGold(pick); x.sfx.chest(); x.say('A golden box!'); await sleep(900); }
     }
     if (p?.id === 'quake') {
-      x.sfx.crash(); setShake((k) => k + 1); x.say('Earthquake!', 'oops');
+      x.sfx.crash(); x.say('Earthquake!', 'oops');
+      if (!ctx.still && ctx.shake) void quakeFx.start({ x: [0, -14, 12, -10, 8, -4, 0], rotate: [0, -1.5, 1.2, -1, 0.6, 0], transition: { duration: 0.7 } });
       await sleep(400);
       const q = quake(linesRef.current, claimedRef.current, size, 3);
       setLines(q.lines);
@@ -135,8 +136,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
     }
     if (p?.id === 'wobbly') {
       x.sfx.boing(); x.say('Wobbly pencil!', 'oops');
+      // It never hands the other team a box: a line that closes one for you, or a safe one.
       const o = open(linesRef.current, size);
-      const target = o[Math.floor(Math.random() * o.length)];
+      const good = o.filter((l) => closes(linesRef.current, l, size).length || safe(linesRef.current, l, size));
+      const from = good.length ? good : o;
+      const target = from[Math.floor(Math.random() * from.length)];
       if (target) {
         const m = mid(target);
         const path = [0, 1, 2].map(() => ({ x: Math.random() * C * 100, y: Math.random() * R * 100 })).concat([m]);
@@ -163,7 +167,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       if (!live) return;
       if (!ok) { c.current.sfx.wrong(); window.setTimeout(() => live && c.current.next(), 600); return; }
       const p = await c.current.power(0.4, (pw) => {
-        if (pw.id === 'bucket') return threeSided(linesRef.current, claimedRef.current, size).length > 0;
+        if (pw.id === 'bucket') return paintable(linesRef.current, claimedRef.current, size).length > 0;
         if (pw.id === 'eraser') return loose(linesRef.current, claimedRef.current, size).length > 0;
         if (pw.id === 'quake') return loose(linesRef.current, claimedRef.current, size).length >= 2;
         if (pw.id === 'gold') return !goldRef.current && allBoxes(size).some((b) => !claimedRef.current[b]);
@@ -181,12 +185,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setMode('busy');
     setSprite({ kind: 'bucket', x: cc * 100 + 50, y: r * 100 + 50, n: Date.now() }); x.sfx.splash();
     await sleep(800);
-    const missing = ['h-' + r + '-' + cc, 'h-' + (r + 1) + '-' + cc, 'v-' + r + '-' + cc, 'v-' + r + '-' + (cc + 1)].find((s) => !linesRef.current[s]);
-    if (missing) {
-      const also = closes(linesRef.current, missing, size).filter((k) => k !== b);
-      setLines({ ...linesRef.current, [missing]: id });
-      claim([b, ...also], id);
-    }
+    // Paint draws every missing side; any other box those lines close is yours too.
+    const missing = ['h-' + r + '-' + cc, 'h-' + (r + 1) + '-' + cc, 'v-' + r + '-' + cc, 'v-' + r + '-' + (cc + 1)].filter((s) => !linesRef.current[s]);
+    const next = { ...linesRef.current };
+    for (const m of missing) next[m] = id;
+    const also = allBoxes(size).filter((k) => k !== b && !claimedRef.current[k] && sides(k).every((l) => next[l]));
+    setLines(next);
+    claim([b, ...also], id);
     await sleep(500); setSprite(null);
     if (full()) { endTurn(); return; }
     left.current = 1; setMode('draw');
@@ -210,7 +215,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (modeRef.current === 'erase' && linesRef.current[l] && loose(linesRef.current, claimedRef.current, size).includes(l)) void rub(l);
   }
   function tapBox(b: string) {
-    if (modeRef.current === 'bucket' && threeSided(linesRef.current, claimedRef.current, size).includes(b)) void pour(b);
+    if (modeRef.current === 'bucket' && paintable(linesRef.current, claimedRef.current, size).includes(b)) void pour(b);
   }
 
   // The computer draws its own lines, after a little think.
@@ -219,7 +224,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const id = window.setTimeout(() => {
       const x = c.current;
       if (modeRef.current === 'draw') { const l = cpuLine(linesRef.current, size, x.cpuRight()); if (l) tapLine(l); }
-      else if (modeRef.current === 'bucket') { const t = threeSided(linesRef.current, claimedRef.current, size); if (t[0]) tapBox(t[0]); }
+      else if (modeRef.current === 'bucket') { const t = paintable(linesRef.current, claimedRef.current, size); if (t[0]) tapBox(t[0]); }
       else { const lo = loose(linesRef.current, claimedRef.current, size); if (lo.length) tapLine(lo[Math.floor(Math.random() * lo.length)]); }
     }, 1400 + Math.random() * 600);
     return () => window.clearTimeout(id);
@@ -227,12 +232,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   const canTap = !ctx.cpu && (mode === 'draw' || mode === 'erase' || mode === 'bucket');
   const looseNow = mode === 'erase' ? loose(lines, claimed, size) : [];
-  const three = mode === 'bucket' ? threeSided(lines, claimed, size) : [];
+  const three = mode === 'bucket' ? paintable(lines, claimed, size) : [];
 
   return (
     <div className="absolute inset-0 grid place-items-center">
-      <motion.div key={shake} className="relative lab-fit" style={{ '--ar': VW / VH } as React.CSSProperties}
-        animate={shake && !ctx.still ? { x: [0, -14, 12, -10, 8, -4, 0], rotate: [0, -1.5, 1.2, -1, 0.6, 0] } : undefined} transition={{ duration: 0.7 }}>
+      <motion.div className="relative lab-fit" style={{ '--ar': VW / VH } as React.CSSProperties} animate={quakeFx}>
         <div ref={fitRef} className="absolute inset-[2%]">
           {/* The paper: a pinned sheet of graph paper on the desk. */}
           <div className="absolute inset-0 rounded-[2.5%] border-heavy border-border overflow-hidden" style={{ background: '#fbfcf8', boxShadow: '0 8px 0 #000, 0 26px 40px rgba(36,28,61,0.35)', transform: 'rotate(-0.6deg)' }}>
@@ -253,13 +257,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
             const target = three.includes(b) && canTap;
             const p = pct(cc * 100 + 6, r * 100 + 6);
             return (
-              <button key={b} type="button" disabled={!target} onClick={() => tapBox(b)} aria-label={owner ? `Box of ${players.find((q) => q.id === owner)?.name}` : target ? 'Box with three sides: pour paint' : 'Empty box'}
+              <button key={b} type="button" disabled={!target} onClick={() => tapBox(b)} aria-label={owner ? `Box of ${players.find((q) => q.id === owner)?.name}` : target ? 'Pour paint on this box' : 'Empty box'}
                 className="absolute grid place-items-center rounded-[10%] disabled:cursor-default motion-safe:enabled:hover:scale-105 motion-safe:transition-transform"
                 style={{ ...p, width: `${(88 / VW) * 100}%`, height: `${(88 / VH) * 100}%`, outline: target ? `4px dashed ${color(me.id)}` : undefined, outlineOffset: -6 }}>
                 {isGold && !owner && (
                   <motion.span className="absolute inset-0 rounded-[10%] border-std border-border grid place-items-center" style={{ background: 'linear-gradient(135deg, #fff6b0, #f6c544 60%, #e0a92a)' }}
                     initial={ctx.still ? false : { scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 12 }}>
-                    <motion.svg viewBox="0 0 100 100" className="w-[55%] h-[55%]" animate={ctx.still ? undefined : { rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}>
+                    <motion.svg viewBox="0 0 100 100" className="w-[55%] h-[55%]" animate={ctx.still ? undefined : { rotate: 360 }} transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}>
                       <path d="M50 8l11 27 29 2-22 19 7 28-25-15-25 15 7-28-22-19 29-2z" fill="#fffbe0" stroke="#000" strokeWidth="5" strokeLinejoin="round" />
                     </motion.svg>
                   </motion.span>
@@ -298,14 +302,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* The gaps to tap. */}
           {(mode === 'draw' ? open(lines, size) : mode === 'erase' ? looseNow : []).map((l) => {
             const m = mid(l), hz = l[0] === 'h';
-            const w = hz ? 74 : 40, h = hz ? 40 : 74;
+            const w = hz ? 74 : 52, h = hz ? 52 : 74;
             return (
               <button key={l} type="button" disabled={!canTap} onClick={() => tapLine(l)} aria-label={mode === 'erase' ? 'Erase this line' : 'Draw a line here'}
                 className="group absolute grid place-items-center rounded-full disabled:cursor-default"
                 style={{ ...pct(m.x - w / 2, m.y - h / 2), width: `${(w / VW) * 100}%`, height: `${(h / VH) * 100}%` }}>
                 <span className={`block rounded-full transition-all duration-150 ${mode === 'erase' ? 'opacity-70 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-60 group-focus-visible:opacity-60'} group-hover:scale-110`}
                   style={{ width: hz ? '100%' : '28%', height: hz ? '28%' : '100%', background: mode === 'erase' ? 'repeating-linear-gradient(45deg, #fff 0 6px, #ef7d96 6px 12px)' : color(me.id), border: '2px solid #000' }} />
-                {mode === 'draw' && canTap && !ctx.still && <span aria-hidden="true" className="absolute rounded-full border-2 border-dashed border-border-soft group-hover:opacity-0 motion-safe:animate-pulse" style={{ width: hz ? '82%' : '8%', height: hz ? '8%' : '82%' }} />}
+                {mode === 'draw' && canTap && <span aria-hidden="true" className="absolute rounded-full border-2 border-dashed border-border-soft group-hover:opacity-0 group-focus-visible:opacity-0" style={{ width: hz ? '82%' : '6%', height: hz ? '6%' : '82%' }} />}
               </button>
             );
           })}
@@ -316,7 +320,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </div>
         {(mode === 'bucket' || mode === 'erase') && canTap && (
           <motion.p className="absolute -top-1 inset-x-0 text-center font-display text-2xl text-white pointer-events-none" style={{ WebkitTextStroke: '0.1em #000', paintOrder: 'stroke fill' }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-live="polite">
-            {mode === 'bucket' ? 'Tap a box with three sides' : 'Tap a line to rub it out'}
+            {mode === 'bucket' ? 'Tap a box to pour paint' : 'Tap a line to rub it out'}
           </motion.p>
         )}
       </motion.div>
@@ -396,7 +400,7 @@ function Cover() {
 const def: LabDef = {
   id: 'dots-boxes',
   name: 'Box Builder',
-  description: 'Answer right to draw a line between two dots. Close a box to fill it and draw again. Most boxes wins.',
+  description: 'Answer right to draw a line between two dots. Close a box to fill it and draw again. Most points wins.',
   ways: ['teams'],
   minTeams: 2,
   maxTeams: 4,

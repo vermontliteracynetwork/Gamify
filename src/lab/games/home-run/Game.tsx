@@ -588,7 +588,7 @@ function Firework({ x, y, color, delay, still }: { x: number; y: number; color: 
   if (still) return <circle cx={x} cy={y} r="4" fill={color} opacity="0.8" />;
   return (
     <g>
-      <motion.line x1={x} x2={x} y1={y + 30} y2={y + 30} stroke={color} strokeWidth="0.6" initial={{ opacity: 0 }} animate={{ y2: [y + 30, y], opacity: [0, 1, 0] }} transition={{ duration: 0.4, delay }} />
+      <motion.line x1={x} x2={x} y1={y + 30} y2={y + 30} stroke={color} strokeWidth="0.6" initial={{ opacity: 0, y2: y + 30 }} animate={{ y2: [y + 30, y], opacity: [0, 1, 0] }} transition={{ duration: 0.4, delay }} />
       <motion.g initial={{ scale: 0, opacity: 0 }} animate={{ scale: [0, 1, 1.15], opacity: [0, 1, 0] }} transition={{ duration: 1.3, delay: delay + 0.35, times: [0, 0.35, 1] }}>
         {Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; return <line key={i} x1={x + Math.cos(a) * 2} y1={y + Math.sin(a) * 2} x2={x + Math.cos(a) * 7} y2={y + Math.sin(a) * 7} stroke={color} strokeWidth="0.9" strokeLinecap="round" />; })}
         <circle cx={x} cy={y} r="1.4" fill="#fff" />

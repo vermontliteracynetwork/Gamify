@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bag, bestPlace, cells, clearRows, COLS, dropped, emptyGrid, explode, fits, fullRows, height, merge, rotate, ROWS, spawn, squish } from './rules';
+import { bestPlace, randomPiece, cells, clearRows, COLS, dropped, emptyGrid, explode, fits, fullRows, height, merge, rotate, ROWS, spawn, squish } from './rules';
 
 describe('block drop', () => {
   it('spawns pieces that fit and fall to the floor', () => {
@@ -31,21 +31,22 @@ describe('block drop', () => {
   it('bombs blow a 3x3 hole and squish fills holes', () => {
     let g = emptyGrid();
     for (let y = ROWS - 3; y < ROWS; y++) g[y] = Array(COLS).fill(2);
-    g = explode(g, 4, ROWS - 2);
-    expect(g[ROWS - 2][4]).toBe(0);
-    expect(g[ROWS - 2][6]).toBe(2);
+    g = explode(g, 3, ROWS - 2);
+    expect(g[ROWS - 2][3]).toBe(0);
+    expect(g[ROWS - 2][5]).toBe(2);
     g = emptyGrid(); g[5][2] = 1;
     expect(squish(g)[ROWS - 1][2]).toBe(1);
   });
   it('the computer fills a gap that clears a line', () => {
     const g = emptyGrid();
-    g[ROWS - 1] = [1, 1, 1, 1, 1, 1, 0, 0, 0, 0];
+    g[ROWS - 1] = [1, 1, 1, 1, 0, 0, 0, 0];
     const p = spawn(0);
     const place = bestPlace(g, p);
     const land = dropped(g, { ...p, ...place });
     expect(fullRows(merge(g, land)).length).toBe(1);
   });
-  it('a bag holds every shape once', () => {
-    expect([...bag()].sort()).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  it('picks any of the seven shapes', () => {
+    expect(randomPiece(() => 0)).toBe(0);
+    expect(randomPiece(() => 0.999)).toBe(6);
   });
 });

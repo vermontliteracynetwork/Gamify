@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ArrowArcRight, ArrowDown, ArrowLineDown, Broom, CaretLeft, CaretRight, CheckCircle, Rows, SquaresFour } from '@phosphor-icons/react';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { bag, BOMB, bestPlace, cells, clearRows, COLS, dropped, emptyGrid, explode, fits, fullRows, height, LINE_POINTS, merge, move, rotate, ROWS, SHAPES, spawn, squish, type Grid, type Piece } from './rules';
+import { BOMB, bestPlace, cells, clearRows, COLS, dropped, emptyGrid, explode, fits, fullRows, height, LINE_POINTS, merge, move, rotate, ROWS, randomPiece, SHAPES, spawn, squish, type Grid, type Piece } from './rules';
 
 // Block Drop (Game Lab, classic arcade): a falling-block puzzle with round
 // candy blocks. Turn and slide the pieces to fill rows; full rows flash and
@@ -14,7 +14,8 @@ import { bag, BOMB, bestPlace, cells, clearRows, COLS, dropped, emptyGrid, explo
 const RUN_LONG = 45, RUN_SHORT = 25;
 const C = 30; // a cell in world pixels
 const WX = 214, WY = 20; // the well's corner
-const W = 700, H = 640;
+const W = 680, H = 640;
+const PIECES_NO_CLOCK = 30; // with no clock, a turn is this many pieces
 // Gumball spots in the machine's globe, filled from the bottom (one per row cleared).
 const BALLS: [number, number][] = (() => {
   const out: [number, number][] = [];
@@ -51,7 +52,7 @@ const POWERS: LabPower[] = [
   { id: 'double', name: 'Double Points', desc: 'Rows count double for the rest of this turn.', enter: 'spin', art: <Icon kind="double" /> },
   { id: 'squish', name: 'Gravity Squish', desc: 'Every block drops down to fill the holes.', enter: 'drop', art: <Icon kind="squish" /> },
   { id: 'time', name: 'Extra Time', desc: 'Ten more seconds to drop.', enter: 'spin', art: <Icon kind="time" /> },
-  { id: 'mirror', name: 'Mirror Mode', desc: 'Whoops! Left and right swap for a bit.', silly: true, art: <Icon kind="mirror" /> },
+  { id: 'mirror', name: 'Mirror Mode', desc: 'Whoops! Pieces turn the other way for a bit.', silly: true, art: <Icon kind="mirror" /> },
   { id: 'hiccup', name: 'Hiccups', desc: 'Whoops! The falling piece hiccups up now and then.', silly: true, art: <Icon kind="hiccup" /> },
 ];
 type Fx = 'slow' | 'double' | 'mirror' | 'hiccup';
@@ -62,15 +63,15 @@ interface World {
   drop: number; lock: number; left: number; lines: number; sinceQ: number; heightAsked: boolean;
   flash: { rows: number[]; t: number } | null; fall: number[]; parts: Part[]; floats: { x: number; y: number; text: string; life: number }[];
   fx: Record<Fx, number>; shake: number; laser: number; hic: number; soft: boolean; over: boolean; t: number;
-  cpuPlan: { rot: number; x: number } | null; cpuWait: number; score: number;
+  cpuPlan: { rot: number; x: number } | null; cpuWait: number; score: number; runLen: number; pieces: number; turnLines: number;
 }
 const boards = new Map<string, { grid: Grid; lines: number }>();
 
 function newWorld(id: string): World {
   const saved = boards.get(id);
   return {
-    grid: saved?.grid ?? emptyGrid(), piece: null, vx: 0, vy: 0, queue: [...bag(), ...bag()], forced: [], drop: 0, lock: 0, left: RUN_LONG, lines: saved?.lines ?? 0, sinceQ: 0, heightAsked: false,
-    flash: null, fall: Array(ROWS).fill(0), parts: [], floats: [], fx: { slow: 0, double: 0, mirror: 0, hiccup: 0 }, shake: 0, laser: 0, hic: 1.5, soft: false, over: false, t: 0, cpuPlan: null, cpuWait: 0.5, score: 0,
+    grid: saved?.grid ?? emptyGrid(), piece: null, vx: 0, vy: 0, queue: Array.from({ length: 6 }, () => randomPiece()), forced: [], drop: 0, lock: 0, left: RUN_LONG, lines: saved?.lines ?? 0, sinceQ: 0, heightAsked: false,
+    flash: null, fall: Array(ROWS).fill(0), parts: [], floats: [], fx: { slow: 0, double: 0, mirror: 0, hiccup: 0 }, shake: 0, laser: 0, hic: 1.5, soft: false, over: false, t: 0, cpuPlan: null, cpuWait: 0.5, score: 0, runLen: RUN_LONG, pieces: 0, turnLines: 0,
   };
 }
 
@@ -106,8 +107,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     const ok = await x.ask();
     const w = world.current;
-    w.left = ok ? RUN_LONG : RUN_SHORT;
-    if (ok) { x.sfx.right(); x.say('Drop!', 'big'); } else { x.sfx.wrong(); x.say('A short turn!', 'oops'); }
+    w.runLen = (ok ? RUN_LONG : RUN_SHORT) * (x.timeScale || 1);
+    w.left = w.runLen; w.pieces = 0; w.turnLines = 0;
+    if (ok) { x.sfx.right(); x.points(3); x.burst(0.5, 0.45); x.say('Right! +3', 'big'); } else { x.sfx.wrong(); x.say('A short turn!', 'oops'); }
     nextPiece(w);
     setPhase('play');
     busy.current = false;
@@ -119,7 +121,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   function nextPiece(w: World) {
-    if (w.queue.length < 8) w.queue.push(...bag());
+    while (w.queue.length < 4) w.queue.push(randomPiece());
     const kind = w.forced.length ? w.forced.shift()! : w.queue.shift()!;
     const p = spawn(kind);
     held(w);
@@ -129,10 +131,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   function toppedOut(w: World) {
     const x = c.current;
-    for (let y = 0; y < ROWS; y++) for (let k = 0; k < COLS; k++) if (w.grid[y][k]) sparks(w, WX + k * C + C / 2, WY + y * C + C / 2, CANDY[(w.grid[y][k] - 1) % 7], 2);
-    w.grid = emptyGrid(); w.shake = 0.6;
-    x.sfx.crash(); x.say('Poof! Fresh jar', 'oops');
-    if (w.score > 0) { const lose = Math.min(3, w.score); x.points(-lose); w.score -= lose; }
+    // A gentle reset: the top half of the jar puffs away, the rest stays.
+    const grid = w.grid.map((r) => [...r]);
+    for (let y = 0; y < ROWS / 2 + 2; y++) for (let k = 0; k < COLS; k++) if (grid[y][k]) { sparks(w, WX + k * C + C / 2, WY + y * C + C / 2, CANDY[(grid[y][k] - 1) % 7] ?? '#241c3d', 2); grid[y][k] = 0; }
+    w.grid = grid; w.shake = 0.4;
+    x.sfx.wind(); x.say('Poof! Room to drop', 'oops');
     w.piece = null;
     window.setTimeout(() => { if (world.current === w && !w.over) nextPiece(w); }, 700);
   }
@@ -149,6 +152,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current;
     const p = w.piece!;
     w.piece = null;
+    w.pieces += 1;
     if (p.kind === 7) {
       const [bx, by] = cells(p)[0];
       w.grid = explode(w.grid, bx, by);
@@ -177,7 +181,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     let pts = LINE_POINTS[Math.min(4, n)];
     if (w.fx.double > 0) pts *= 2;
     x.points(pts); w.score += pts;
-    w.lines += n; w.sinceQ += n;
+    w.lines += n; w.sinceQ += n; w.turnLines += n;
     w.floats.push({ x: WX + (COLS * C) / 2, y: WY + rows[0] * C, text: `+${pts}`, life: 0 });
     if (n >= 4) { x.say('Candy crunch!', 'big'); x.burst(0.4, 0.5, 'big'); x.sfx.cheer(); }
     else if (n >= 2) { x.say(`${n} rows!`); x.sfx.coin(); }
@@ -190,6 +194,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (w.sinceQ >= 4) { w.sinceQ -= 4; void questionBreak(w, 'Four rows! Question time'); return; }
     if (height(w.grid) >= 15 && !w.heightAsked) { w.heightAsked = true; void questionBreak(w, 'So tall! Question time'); return; }
     if (height(w.grid) < 12) w.heightAsked = false;
+    if (c.current.timeScale === 0 && w.pieces >= PIECES_NO_CLOCK) { endTurn(w); return; }
     nextPiece(w);
   }
 
@@ -203,10 +208,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const ok = await c.current.ask();
     if (w !== world.current) return;
     if (ok) {
-      c.current.sfx.right();
+      c.current.sfx.right(); c.current.points(3); w.score += 3;
+      w.floats.push({ x: WX + (COLS * C) / 2, y: WY + 200, text: '+3', life: 0 });
       offerChoice(w);
       await new Promise<void>((r) => { choiceDone.current = r; });
-      const p = await c.current.power(0.45);
+      const p = await c.current.power(0.45, (pw) => c.current.timeScale !== 0 || pw.id !== 'time');
       if (w !== world.current) return;
       if (p) apply(w, p);
     } else c.current.sfx.wrong();
@@ -215,7 +221,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   function offerChoice(w: World) {
-    const picks = bag().slice(0, 3);
+    const picks: number[] = []; while (picks.length < 3) { const k = randomPiece(); if (!picks.includes(k)) picks.push(k); }
     setOffer(picks);
     setChoice('main');
     if (c.current.cpu) window.setTimeout(() => { if (world.current === w) pickMain(Math.random() < 0.5 && height(w.grid) > 0 ? 'clear' : 'piece', picks[0]); }, 1400);
@@ -260,7 +266,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const rows = fullRows(w.grid); if (rows.length) w.flash = { rows, t: 0 };
         break;
       }
-      case 'time': w.left += 10; w.floats.push({ x: 430, y: 200, text: '+10s', life: 0 }); x.sfx.tick(); break;
+      case 'time': w.left += 10; w.runLen = Math.max(w.runLen, w.left); w.floats.push({ x: 430, y: 200, text: '+10s', life: 0 }); x.sfx.tick(); break;
       case 'mirror': w.fx.mirror = 8; x.sfx.whoosh(); break;
       case 'hiccup': w.fx.hiccup = 8; x.sfx.boing(); break;
     }
@@ -271,13 +277,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
   // ---- Controls ----
   function act(a: 'left' | 'right' | 'rot' | 'rotBack' | 'hard' | 'soft' | 'softOff', fromCpu = false) {
     const w = world.current, x = c.current;
+    if (a === 'softOff') { w.soft = false; return; }
     if (phaseRef.current !== 'play' || paused.current || !w.piece || w.flash || (x.cpu && !fromCpu)) return;
-    let dir = a === 'left' ? -1 : a === 'right' ? 1 : 0;
-    if (w.fx.mirror > 0 && !fromCpu) dir = -dir;
+    const dir = a === 'left' ? -1 : a === 'right' ? 1 : 0;
+    // Mirror Mode only turns pieces the other way.
+    if (w.fx.mirror > 0 && !fromCpu && (a === 'rot' || a === 'rotBack')) a = a === 'rot' ? 'rotBack' : 'rot';
     if (dir) { const m = move(w.grid, w.piece, dir, 0); if (m) { w.piece = m; x.sfx.tick(); if (w.lock > 0) w.lock = Math.max(0, w.lock - 0.1); } else x.sfx.bump(); }
     if (a === 'rot' || a === 'rotBack') { const r = rotate(w.grid, w.piece, a === 'rot' ? 1 : -1); if (r) { w.piece = r; x.sfx.blip(7); } }
     if (a === 'soft') w.soft = true;
-    if (a === 'softOff') w.soft = false;
     if (a === 'hard') {
       const d = dropped(w.grid, w.piece);
       const dist = d.y - w.piece.y;
@@ -299,8 +306,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (const f of w.floats) { f.life += dt; f.y -= 40 * dt; }
     w.floats = w.floats.filter((f) => f.life < 1.1);
     if (w.flash) { w.flash.t += dt; if (w.flash.t > 0.32) { const rows = w.flash.rows; w.flash = null; finishClear(w, rows); } return; }
-    w.left -= dt;
-    if (w.left <= 0 && !w.over) { endTurn(w); return; }
+    if (x.timeScale > 0) w.left -= dt;
+    if (x.timeScale > 0 && w.left <= 0 && !w.over) { endTurn(w); return; }
     const p = w.piece;
     if (!p) return;
     // The computer works out a spot, then turns and slides there step by step.
@@ -316,7 +323,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         else { w.cpuWait = 0.3; act('hard', true); return; }
       }
     }
-    const every = (w.fx.slow > 0 ? 1.4 : Math.max(0.22, 0.75 - w.lines * 0.012)) / (w.soft ? 8 : 1);
+    const every = (w.fx.slow > 0 ? 1.4 : Math.max(0.4, 0.75 - Math.min(20, w.turnLines) * 0.015)) / (w.soft ? 8 : 1);
     w.drop += dt;
     if (w.fx.hiccup > 0) { w.hic -= dt; if (w.hic <= 0) { w.hic = 1.2 + Math.random(); const up = move(w.grid, p, 0, -1); if (up && up.y >= 0) { w.piece = up; x.sfx.blip(14); w.floats.push({ x: WX + (p.x + 1) * C, y: WY + p.y * C, text: 'hic!', life: 0 }); } } }
     const cur = w.piece!;
@@ -347,7 +354,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       g.beginPath(); g.arc(px + s / 2, py + s / 2 + 2, s * 0.4, 0, Math.PI * 2); g.fill(); g.stroke();
       g.fillStyle = 'rgba(255,255,255,0.5)'; g.beginPath(); g.arc(px + s * 0.38, py + s * 0.45, 3, 0, Math.PI * 2); g.fill();
       g.strokeStyle = '#000'; g.beginPath(); g.moveTo(px + s * 0.6, py + s * 0.2); g.quadraticCurveTo(px + s * 0.7, py, px + s * 0.85, py + 2); g.stroke();
-      g.fillStyle = Math.floor(performance.now() / 120) % 2 ? '#fdfd94' : '#ef7d96'; g.beginPath(); g.arc(px + s * 0.86, py + 2, 4, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(253,253,148,0.5)'; g.beginPath(); g.arc(px + s * 0.86, py + 2, 7, 0, Math.PI * 2); g.fill(); g.fillStyle = '#ef7d96'; g.beginPath(); g.arc(px + s * 0.86, py + 2, 4, 0, Math.PI * 2); g.fill();
       g.globalAlpha = 1; return;
     }
     const i = (v - 1) % 7;
@@ -361,7 +368,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function draw(g: CanvasRenderingContext2D, w: World) {
     const still = c.current.still;
     g.save();
-    if (w.shake > 0 && !still) g.translate((Math.random() - 0.5) * 14 * w.shake, (Math.random() - 0.5) * 14 * w.shake);
+    if (w.shake > 0 && c.current.shake) g.translate((Math.random() - 0.5) * 14 * w.shake, (Math.random() - 0.5) * 14 * w.shake);
     // The sweet shop wall: stripes and a shelf.
     g.fillStyle = '#fbe3ea'; g.fillRect(-20, -20, W + 40, H + 40);
     g.fillStyle = '#f7cfdb'; for (let x = -20; x < W + 20; x += 40) g.fillRect(x, -20, 20, H + 40);
@@ -375,8 +382,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (let y = 0; y < ROWS; y++) for (let k = 0; k < COLS; k++) {
       const v = w.grid[y][k]; if (!v) continue;
       const flashing = w.flash?.rows.includes(y);
-      if (flashing && Math.floor(w.flash!.t * 20) % 2) { g.fillStyle = '#fff'; g.beginPath(); g.roundRect(WX + k * C + 1, WY + y * C + 1, C - 2, C - 2, 8); g.fill(); continue; }
       block(g, WX + k * C, WY + (y + w.fall[y]) * C, v);
+      // A full row glows white once (one smooth fade, no flashing).
+      if (flashing) { g.fillStyle = `rgba(255,255,255,${Math.min(0.85, w.flash!.t * 3)})`; g.beginPath(); g.roundRect(WX + k * C + 1, WY + y * C + 1, C - 2, C - 2, 8); g.fill(); }
     }
     // The ghost (where it will land) and the falling piece.
     if (w.piece && phaseRef.current === 'play') {
@@ -413,10 +421,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
     label(g, 'Question', px + 75, WY + 318);
     for (let i = 0; i < 4; i++) { g.fillStyle = i < w.sinceQ ? CANDY[i] : '#e9eefe'; g.strokeStyle = '#000'; g.lineWidth = 2.5; g.beginPath(); g.roundRect(px + 16 + i * 31, WY + 340, 26, 26, 7); g.fill(); g.stroke(); }
     panel(g, px, WY + 398, 150, 70);
-    label(g, 'Time', px + 75, WY + 420);
-    const frac = phaseRef.current === 'ready' ? 1 : Math.max(0, w.left) / RUN_LONG;
+    const noClock = c.current.timeScale === 0;
+    label(g, noClock ? 'Pieces' : 'Time', px + 75, WY + 420);
+    const frac = phaseRef.current === 'ready' ? 1 : noClock ? Math.max(0, PIECES_NO_CLOCK - w.pieces) / PIECES_NO_CLOCK : Math.max(0, w.left) / w.runLen;
     g.fillStyle = '#e9eefe'; g.beginPath(); g.roundRect(px + 14, WY + 436, 122, 18, 9); g.fill(); g.stroke();
-    g.fillStyle = w.left < 8 && phaseRef.current === 'play' ? '#ef7d96' : '#8fe3a0'; g.beginPath(); g.roundRect(px + 16, WY + 438, Math.max(0, 118 * Math.min(1, frac)), 14, 7); g.fill();
+    g.fillStyle = !noClock && w.left < 8 && phaseRef.current === 'play' ? '#ef7d96' : '#8fe3a0'; g.beginPath(); g.roundRect(px + 16, WY + 438, Math.max(0, 118 * Math.min(1, frac)), 14, 7); g.fill();
     // The gumball machine fills up with a gumball for every row cleared.
     g.fillStyle = 'rgba(0,0,0,0.2)'; g.beginPath(); g.ellipse(100, 600, 80, 12, 0, 0, Math.PI * 2); g.fill();
     g.fillStyle = '#ef7d96'; g.strokeStyle = '#000'; g.lineWidth = 4;
@@ -442,7 +451,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       gg.fillStyle = '#fbfcf8'; gg.strokeStyle = '#000'; gg.lineWidth = 3; gg.beginPath(); gg.roundRect(x, y, ww, hh, 14); gg.fill(); gg.stroke();
     }
     function label(gg: CanvasRenderingContext2D, t: string, x: number, y: number) {
-      gg.font = 'bold 15px "Inclusive Sans", system-ui, sans-serif'; gg.fillStyle = '#5b5577'; gg.textAlign = 'center'; gg.textBaseline = 'middle'; gg.fillText(t.toUpperCase(), x, y);
+      gg.font = 'bold 23px "Inclusive Sans", system-ui, sans-serif'; gg.fillStyle = '#4a4466'; gg.textAlign = 'center'; gg.textBaseline = 'middle'; gg.fillText(t.toUpperCase(), x, y);
     }
     function mini(gg: CanvasRenderingContext2D, k: number, cx: number, cy: number, a: number) {
       const cs = cells({ kind: k, rot: 0, x: 0, y: 0 });
@@ -532,15 +541,17 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </div>
       </div>
       <div className="shrink-0 flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-        <Pad label="Slide left" disabled={!live} onPress={() => act('left')} repeat bg="#b4c4fb"><CaretLeft weight="bold" size={28} /></Pad>
-        <Pad label="Turn" disabled={!live} onPress={() => act('rot')} bg="#fdfd94"><ArrowArcRight weight="bold" size={28} /></Pad>
-        <Pad label="Slide right" disabled={!live} onPress={() => act('right')} repeat bg="#b4c4fb"><CaretRight weight="bold" size={28} /></Pad>
-        <Pad label="Drop faster" disabled={!live} onPress={() => act('soft')} onRelease={() => act('softOff')} bg="#8fe3a0"><ArrowDown weight="bold" size={28} /></Pad>
-        <Pad label="Drop now" disabled={!live} onPress={() => act('hard')} bg="#ef7d96"><ArrowLineDown weight="bold" size={28} /></Pad>
+        <Pad label="Slide left" disabled={!live} onPress={() => act('left')} repeat bg="#b4c4fb"><CaretLeft weight="bold" size={24} /><Word>Left</Word></Pad>
+        <Pad label="Turn" disabled={!live} onPress={() => act('rot')} bg="#fdfd94"><ArrowArcRight weight="bold" size={24} /><Word>Turn</Word></Pad>
+        <Pad label="Slide right" disabled={!live} onPress={() => act('right')} repeat bg="#b4c4fb"><Word>Right</Word><CaretRight weight="bold" size={24} /></Pad>
+        <Pad label="Drop faster" disabled={!live} onPress={() => act('soft')} onRelease={() => act('softOff')} bg="#8fe3a0"><ArrowDown weight="bold" size={24} /><Word>Slow drop</Word></Pad>
+        <Pad label="Drop now" disabled={!live} onPress={() => act('hard')} bg="#ef7d96"><ArrowLineDown weight="bold" size={24} /><Word>Drop</Word></Pad>
       </div>
     </div>
   );
 }
+
+const Word = ({ children }: { children: ReactNode }) => <span className="font-bold text-base leading-none whitespace-nowrap">{children}</span>;
 
 function ChoiceButton({ onClick, disabled, bg, icon, children }: { onClick: () => void; disabled: boolean; bg: string; icon: ReactNode; children: ReactNode }) {
   return (
@@ -568,7 +579,7 @@ function Pad({ label, disabled, onPress, onRelease, repeat, children, bg }: { la
     <button type="button" aria-label={label} title={label} disabled={disabled}
       onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); onPress(); if (repeat) timer.current = window.setTimeout(() => { timer.current = window.setInterval(onPress, 70); }, 220); }}
       onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
-      className="min-h-14 min-w-[4.5rem] rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50"
+      className="min-h-14 min-w-[4.5rem] px-3 gap-1.5 rounded-panel border-heavy border-border inline-flex items-center justify-center touch-none select-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform disabled:opacity-50"
       style={{ boxShadow: '0 5px 0 #000', background: bg }}>
       {children}
     </button>
@@ -585,9 +596,9 @@ function Cover() {
       <path d="M8 58 L11 36 L21 36 L24 58z" fill="#ef7d96" stroke="#000" strokeWidth="0.8" />
       <circle cx="16" cy="26" r="11" fill="#e9eefe" stroke="#000" strokeWidth="0.8" />
       {[[12, 31], [16, 32], [20, 31], [10, 27], [14, 28], [18, 28], [22, 27], [13, 24], [17, 24]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.8" fill={CANDY[i % 7]} stroke="#000" strokeWidth="0.3" />)}
-      <rect x="28" y="3" width="44" height="55" rx="4" fill="#2c2452" stroke="#000" strokeWidth="1" />
-      {[...g, ...fall].map(([x, y, k], i) => <rect key={i} x={30 + x * 4} y={12 + y * 4.4} width="3.8" height="4.2" rx="1" fill={CANDY[(k - 1) % 7]} stroke="#000" strokeWidth="0.4" />)}
-      <rect x="29.5" y="51.2" width="41" height="1.6" fill="#fff" opacity="0.8" />
+      <rect x="32" y="3" width="36" height="55" rx="4" fill="#2c2452" stroke="#000" strokeWidth="1" />
+      {[...g, ...fall].filter(([x]) => x < 8).map(([x, y, k], i) => <rect key={i} x={34 + x * 4} y={12 + y * 4.4} width="3.8" height="4.2" rx="1" fill={CANDY[(k - 1) % 7]} stroke="#000" strokeWidth="0.4" />)}
+      <rect x="33.5" y="51.2" width="33" height="1.6" fill="#fff" opacity="0.8" />
       <rect x="0" y="58" width="100" height="4" fill="#d4906d" />
       <rect x="76" y="10" width="18" height="16" rx="3" fill="#fbfcf8" stroke="#000" strokeWidth="0.8" />
       {[[80, 15], [84, 15], [88, 15], [84, 19]].map(([x, y], i) => <rect key={i} x={x} y={y} width="3.8" height="3.8" rx="1" fill="#c58ce8" stroke="#000" strokeWidth="0.4" />)}
@@ -603,7 +614,7 @@ const def: LabDef = {
   how: [
     { icon: <CheckCircle weight="fill" />, text: 'Answer right for a long turn' },
     { icon: <ArrowArcRight weight="bold" />, text: 'Turn and slide the pieces' },
-    { icon: <Rows weight="fill" />, text: 'Fill a row to make it burst' },
+    { icon: <Rows weight="fill" />, text: "Fill a row to make it burst" },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
   powers: POWERS,

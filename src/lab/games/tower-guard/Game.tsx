@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowFatUp, CheckCircle, Play as PlayIcon, Trophy, X } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
+import { TeamBadge } from '../../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
 import {
@@ -262,7 +263,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
             );
           })}
           {/* The cake at the end of the path. */}
-          <Cake at={tp(CAKE)} hp={cake} shield={shield} bite={bite} still={ctx.still} />
+          <Cake at={tp(CAKE)} hp={cake} shield={shield} bite={bite} still={!ctx.shake} />
           {/* Towers. */}
           {s.towers.map((tw) => <TowerArt key={tw.id} tw={tw} at={tp(SPOTS[tw.spot])} color={color(tw.owner)} recoil={s.t - tw.fired < 0.2 && phase === 'wave'} still={ctx.still} />)}
           {/* Blobs. */}
@@ -294,6 +295,11 @@ function Board({ ctx }: { ctx: LabCtx }) {
             );
           })}
         </svg>
+        {/* Each tower wears its team's badge (shape and color, not color alone). */}
+        {s.towers.map((tw) => {
+          const owner = players.find((p) => p.id === tw.owner);
+          return owner ? <span key={`b${tw.id}`} className="absolute pointer-events-none" style={{ ...pct(SPOTS[tw.spot]), translate: "-10% 10%" }} aria-hidden="true"><TeamBadge colorIndex={owner.colorIndex} size={Math.round(Math.max(20, Math.min(34, size.w / 40)))} /></span> : null;
+        })}
         {/* Tap targets for building. */}
         {build && SPOTS.map((sp, i) => {
           const tw = s.towers.find((v) => v.spot === i);
@@ -344,7 +350,7 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
   return (
     <motion.div className="absolute z-10" style={{ left: `clamp(9rem, ${pos.left}, calc(100% - 9rem))`, top: pos.top, translate: flip ? '-50% 3.2rem' : '-50% calc(-100% - 3.2rem)' }}
       initial={still ? false : { scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 20 }}>
-      <div className="relative flex gap-2 rounded-panel border-heavy border-border bg-surface p-2 pr-12" style={{ boxShadow: '0 5px 0 #000' }}>
+      <div className="relative flex gap-2 rounded-panel border-heavy border-border bg-surface p-2" style={{ boxShadow: '0 5px 0 #000' }}>
         {menu.kind === 'place' ? types.map((t) => {
           const cost = free ? 0 : TOWERS[t].cost;
           return (
@@ -360,10 +366,10 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
             className="rounded-2xl border-std border-border bg-accent px-3 py-1 flex items-center gap-2 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform">
             <svg viewBox="-50 -70 100 110" className="w-14 h-14"><TowerBody type={menu.tower.type} level={menu.tower.level + 1} color="#b4c4fb" /></svg>
             <span className="grid justify-items-start"><span className="font-bold text-sm leading-none inline-flex items-center gap-1"><ArrowFatUp weight="fill" size={18} aria-hidden="true" />Upgrade</span>
-            <span className="inline-flex items-center gap-1 font-display text-xl"><img src={COIN} alt="" className="w-6 h-6" />{upgradeCost(menu.tower.level)}</span>
+            <span className="inline-flex items-center gap-1 font-display text-xl"><img src={COIN} alt="" className="w-6 h-6" />{upgradeCost(menu.tower.level)}</span></span>
           </button>
         )}
-        <button type="button" onClick={onClose} aria-label="Close" className="absolute top-1.5 right-1.5 w-10 h-10 rounded-full border-std border-border bg-surface-2 grid place-items-center"><X weight="bold" size={18} /></button>
+        <button type="button" onClick={onClose} className="self-stretch min-w-[3.4rem] rounded-2xl border-std border-border bg-surface-2 grid place-items-center content-center gap-0.5 px-2 font-bold text-sm motion-safe:hover:scale-105 motion-safe:transition-transform"><X weight="bold" size={20} aria-hidden="true" />Close</button>
       </div>
     </motion.div>
   );

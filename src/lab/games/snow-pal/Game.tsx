@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { CheckCircle, Keyboard, Snowflake } from '@phosphor-icons/react';
+import { Check, Keyboard, Snowflake, X as XIcon } from '@phosphor-icons/react';
+import type { MultipleChoiceQuestion } from '../../../data/types';
 import type { LabCtx, LabDef, LabPower } from '../../types';
 import type { WordPair } from '../../words';
 import { ALPHABET, cpuLetter, hidden, hits, lost as lostOf, PIECES, solved, VOWELS } from './rules';
@@ -26,16 +27,29 @@ function readLook(): Look {
 function saveLook(l: Look) { try { localStorage.setItem(LOOK_KEY, l); } catch { /* storage blocked */ } }
 
 const POWERS: LabPower[] = [
-  { id: 'cocoa', name: 'Hot Cocoa', desc: 'Freeze one melted piece back on.', enter: 'drop', art: <Art kind="cocoa" /> },
+  { id: 'cocoa', name: 'Hot Cocoa', desc: 'One lost piece comes back.', enter: 'drop', art: <Art kind="cocoa" /> },
   { id: 'vowel', name: 'Vowel Finder', desc: 'The vowels in the word light up.', enter: 'zoom', art: <Art kind="vowel" /> },
   { id: 'plow', name: 'Snowplow', desc: 'The plow digs up one letter for you.', enter: 'spin', art: <Art kind="plow" /> },
   { id: 'double', name: 'Double Points', desc: 'Your letters count two times this turn.', enter: 'spin', art: <Art kind="double" /> },
-  { id: 'extra', name: 'Snow Day', desc: 'Guess two letters this turn.', enter: 'drop', art: <Art kind="extra" /> },
+  { id: 'extra', name: 'Snow Day', desc: 'Your next miss this turn costs nothing.', enter: 'drop', art: <Art kind="extra" /> },
   { id: 'sneeze', name: 'Sneeze', desc: 'Achoo! Everything wobbles. Hold on!', silly: true, art: <Art kind="sneeze" /> },
   { id: 'brain', name: 'Brain Freeze', desc: 'Brrr! The keys froze. Tap the ice to crack it.', silly: true, art: <Art kind="brain" /> },
 ];
 
-type Mode = 'look' | 'wait' | 'pick' | 'busy';
+// What a lost piece is called in each look.
+const LOOK_WORDS: Record<Look, { lose: string; gone: string; back: string }> = {
+  snow: { lose: 'A piece melted', gone: 'All melted! A new friend', back: 'Frozen back on!' },
+  ice: { lose: 'A stripe melted', gone: 'All melted! A new treat', back: 'Frozen back on!' },
+  sand: { lose: 'A tower washed away', gone: 'All washed away! A new castle', back: 'Built back up!' },
+  balloon: { lose: 'A balloon floated off', gone: 'All floated off! New balloons', back: 'A balloon came back!' },
+};
+
+// Each team (or the solo player) works on its own word.
+interface WordState { pair: WordPair; guessed: string[]; refrozen: number }
+const asQuestion = (p: WordPair): MultipleChoiceQuestion => ({ id: `word-${p.word}`, kind: 'mc', prompt: p.clue, choices: [p.word], correctIndex: 0 });
+const HITS_PER_TURN = 3;
+
+type Mode = 'look' | 'pick' | 'busy';
 
 function Play({ ctx }: { ctx: LabCtx }) {
   const c = useRef(ctx); c.current = ctx;
@@ -43,44 +57,51 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [started, setStarted] = useState(false);
   const words = useRef<WordPair[]>([]);
   const wi = useRef(0);
-  const [pair, setPair] = useState<WordPair | null>(null);
-  const pairRef = useRef(pair); pairRef.current = pair;
-  const [guessed, setGuessed] = useState<string[]>([]);
-  const guessedRef = useRef(guessed); guessedRef.current = guessed;
-  const [refrozen, setRefrozen] = useState(0);
-  const refrozenRef = useRef(0); refrozenRef.current = refrozen;
+  const states = useRef<Record<string, WordState>>({});
+  const [, setVersion] = useState(0);
+  const bump = () => setVersion((v) => v + 1);
   const [mode, setMode] = useState<Mode>('look');
   const modeRef = useRef(mode); modeRef.current = mode;
-  const [left, setLeft] = useState(1);
-  const leftRef = useRef(1); leftRef.current = left;
   const [glow, setGlow] = useState(false);
   const [double, setDouble] = useState(false);
   const doubleRef = useRef(false); doubleRef.current = double;
-  const [sneeze, setSneeze] = useState(0);
+  const freeMiss = useRef(false);
+  const turnHits = useRef(0);
+  const [sneezing, setSneezing] = useState(false);
   const [ice, setIce] = useState(0); // taps left to crack the frozen keys
   const [dance, setDance] = useState(false);
   const [plow, setPlow] = useState(0);
   const [plowing, setPlowing] = useState(false);
+  const plowingRef = useRef(false);
   const [cocoa, setCocoa] = useState(0);
   const [reveal, setReveal] = useState(false);
   const [last, setLast] = useState<{ letter: string; hit: boolean; id: number } | null>(null);
-  const soloCount = useRef(0); // letters since the last question (solo)
+  const me = ctx.player.id;
+  const cur = states.current[me];
+  const pair = cur?.pair ?? null;
+  const guessed = cur?.guessed ?? [];
   const word = pair?.word ?? '';
-  const lost = lostOf(word, guessed, refrozen);
+  const lost = lostOf(word, guessed, cur?.refrozen ?? 0);
+  const lw = LOOK_WORDS[look];
 
-  function newWord() {
+  const get = () => states.current[c.current.player.id];
+  function put(patch: Partial<WordState>) {
+    const id = c.current.player.id, s = states.current[id];
+    if (!s) return;
+    states.current[id] = { ...s, ...patch };
+    bump();
+  }
+  function newWord(id: string) {
     if (!words.current.length || wi.current >= words.current.length) { words.current = c.current.words({ min: 3, max: 9 }); wi.current = 0; }
-    const p = words.current[wi.current++];
-    setPair(p); pairRef.current = p;
-    setGuessed([]); guessedRef.current = [];
-    setRefrozen(0); refrozenRef.current = 0;
+    states.current[id] = { pair: words.current[wi.current++], guessed: [], refrozen: 0 };
     setReveal(false); setDance(false); setGlow(false); setLast(null);
+    bump();
   }
 
   function pickLook(l: Look) {
     setLook(l); saveLook(l);
     c.current.sfx.pop();
-    if (!started) { newWord(); setStarted(true); }
+    setStarted(true);
   }
 
   // The computer team picks the remembered look on its own.
@@ -90,112 +111,112 @@ function Play({ ctx }: { ctx: LabCtx }) {
     return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Every turn. Teams: a question first; right earns a letter guess.
-  // Solo: the letters are the play, with a question every few letters.
+  // Every turn: the team's own word and its clue are the question. A right
+  // letter keeps the turn going (up to three); a miss passes it on. Solo:
+  // the letters are the play, one word a round.
   useEffect(() => {
     if (!started) return;
-    let live = true;
     const x = c.current;
-    if (!pairRef.current) newWord();
-    setDouble(false); x.setHeld(x.player.id, []);
-    setMode('wait'); setGlow(false);
-    soloCount.current = 0;
-    void x.ask().then(async (ok) => {
-      if (!live) return;
-      if (!ok) { x.sfx.wrong(); window.setTimeout(() => live && c.current.next(), 600); return; }
-      await earn();
-      if (!live) return;
-      if (x.solo) { setLeft(99); leftRef.current = 99; }
-      setMode('pick');
-    });
-    return () => { live = false; };
+    if (!states.current[x.player.id]) newWord(x.player.id);
+    setDouble(false); setGlow(false); setReveal(false); setDance(false); setLast(null); setIce(0);
+    freeMiss.current = false; turnHits.current = 0;
+    x.setHeld(x.player.id, []);
+    setMode('busy');
+    const id = window.setTimeout(() => setMode('pick'), 500);
+    return () => window.clearTimeout(id);
   }, [ctx.taken, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // After a right answer: maybe a power-up, which then fires.
+  function endTurn(delay = 1100) { setMode('busy'); window.setTimeout(() => c.current.next(), delay); }
+
   async function earn() {
-    const x = c.current;
-    if (!x.solo) { setLeft(1); leftRef.current = 1; }
-    const w = pairRef.current?.word ?? '';
-    const g = guessedRef.current;
-    const p = await x.power(0.45, (pw) => {
-      if (pw.id === 'cocoa') return lostOf(w, g, refrozenRef.current) > 0;
+    const x = c.current, s = get(); if (!s) return;
+    const w = s.pair.word, g = s.guessed;
+    setMode('busy');
+    const p = await x.power(0.35, (pw) => {
+      if (pw.id === 'cocoa') return lostOf(w, g, s.refrozen) > 0;
       if (pw.id === 'vowel') return hidden(w, g).some((l) => VOWELS.has(l));
-      if (pw.id === 'plow') return hidden(w, g).length > 1;
-      if (pw.id === 'extra') return !x.solo;
+      if (pw.id === 'plow') return hidden(w, g).length > 1 && !plowingRef.current;
       return true;
     });
-    if (!p) return;
-    fire(p);
+    if (p) fire(p);
+    if (modeRef.current === 'busy') setMode('pick');
   }
 
   function fire(p: LabPower) {
     const x = c.current;
-    if (p.id === 'cocoa') { setCocoa((n) => n + 1); x.sfx.freeze(); window.setTimeout(() => { setRefrozen((n) => n + 1); x.sfx.build(); x.say('Good as new!'); }, 700); }
+    if (p.id === 'cocoa') { setCocoa((n) => n + 1); x.sfx.freeze(); window.setTimeout(() => { const s = get(); if (s) put({ refrozen: s.refrozen + 1 }); c.current.sfx.build(); c.current.say(LOOK_WORDS[look].back); }, 700); }
     if (p.id === 'vowel') { setGlow(true); x.sfx.magnet(); }
     if (p.id === 'plow') {
-      setPlow((n) => n + 1); setPlowing(true); x.sfx.whoosh();
+      setPlow((n) => n + 1); setPlowing(true); plowingRef.current = true; x.sfx.whoosh();
+      const w0 = get()?.pair.word;
       window.setTimeout(() => {
-        const w = pairRef.current?.word ?? '';
-        const h = hidden(w, guessedRef.current);
+        plowingRef.current = false;
+        const s = get();
+        if (!s || s.pair.word !== w0) return;
+        const h = hidden(s.pair.word, s.guessed);
         const l = h[Math.floor(Math.random() * h.length)];
-        if (!l) return;
-        const g = [...guessedRef.current, l]; setGuessed(g); guessedRef.current = g;
-        c.current.points(hits(w, l)); c.current.sfx.bell();
+        if (!l || h.length < 2) return;
+        put({ guessed: [...s.guessed, l] });
+        c.current.points(hits(s.pair.word, l)); c.current.sfx.bell();
         setLast({ letter: l, hit: true, id: Date.now() });
       }, 900);
     }
     if (p.id === 'double') { setDouble(true); x.setHeld(x.player.id, [p]); x.sfx.coin(); }
-    if (p.id === 'extra') { setLeft(2); leftRef.current = 2; x.sfx.chest(); x.say('Two letters!'); }
-    if (p.id === 'sneeze') { setSneeze((n) => n + 1); x.sfx.boing(); x.say('Achoo!', 'oops'); }
+    if (p.id === 'extra') { freeMiss.current = true; x.setHeld(x.player.id, [p]); x.sfx.chest(); }
+    if (p.id === 'sneeze') { setSneezing(true); window.setTimeout(() => setSneezing(false), 700); x.sfx.boing(); x.say('Achoo!', 'oops'); }
     if (p.id === 'brain') { setIce(3); x.sfx.freeze(); }
   }
 
   function guess(l: string) {
-    const x = c.current;
-    if (modeRef.current !== 'pick' || ice > 0 || guessedRef.current.includes(l) || !pairRef.current) return;
-    const w = pairRef.current.word;
-    const g = [...guessedRef.current, l]; setGuessed(g); guessedRef.current = g;
+    const x = c.current, s = get();
+    if (modeRef.current !== 'pick' || ice > 0 || !s || s.guessed.includes(l)) return;
+    const w = s.pair.word;
+    const g = [...s.guessed, l];
     const n = hits(w, l);
+    let refrozen = s.refrozen;
     setLast({ letter: l, hit: n > 0, id: Date.now() });
     if (n > 0) {
-      const pts = n * (doubleRef.current ? 2 : 1);
-      x.points(pts); x.sfx.note(4 + g.filter((k) => w.includes(k)).length); x.sfx.coin();
+      x.points(n * (doubleRef.current ? 2 : 1)); x.sfx.note(4 + g.filter((k) => w.includes(k)).length); x.sfx.coin();
       if (n > 1) x.say(`${n} ${l}s!`);
+    } else if (freeMiss.current) {
+      freeMiss.current = false; refrozen += 1; x.setHeld(x.player.id, []);
+      x.sfx.bump(); x.say('Snow Day! No piece lost');
     } else {
       x.sfx.slideDown(); window.setTimeout(() => c.current.sfx.splash(), 250);
     }
-    // The word is done: a dance, or a gentle melt and a new friend.
+    put({ guessed: g, refrozen });
+    // The word is done: a dance, or a gentle "all gone" and a new one.
     if (solved(w, g)) {
       setMode('busy'); setDance(true);
-      const bonus = 3 + (x.solo ? PIECES - lostOf(w, g, refrozenRef.current) : 0);
-      x.points(bonus); x.sfx.cheer(); x.say('You saved it!', 'big'); x.burst(0.3, 0.4, 'big');
-      window.setTimeout(() => { setDance(false); pairRef.current = null; if (c.current.next()) setPair(null); }, 2800);
+      const bonus = 3 + (x.solo ? PIECES - lostOf(w, g, refrozen) : 0);
+      x.points(bonus); x.log(asQuestion(s.pair), true);
+      x.sfx.cheer(); x.say('You saved it!', 'big'); x.burst(0.3, 0.4, 'big');
+      window.setTimeout(() => { setDance(false); delete states.current[c.current.player.id]; c.current.next(); }, 2800);
       return;
     }
-    if (lostOf(w, g, refrozenRef.current) >= PIECES) {
+    if (lostOf(w, g, refrozen) >= PIECES) {
       setMode('busy'); setReveal(true);
-      x.sfx.oops(); x.say('All melted! New friend', 'oops');
-      window.setTimeout(() => { pairRef.current = null; if (c.current.next()) setPair(null); }, 3000);
+      x.log(asQuestion(s.pair), false);
+      x.sfx.oops(); x.say(LOOK_WORDS[look].gone);
+      window.setTimeout(() => { delete states.current[c.current.player.id]; c.current.next(); }, 3000);
       return;
     }
-    if (x.solo) {
-      soloCount.current += 1;
-      if (soloCount.current >= 3) {
-        soloCount.current = 0; setMode('wait');
-        window.setTimeout(() => { void c.current.ask().then(async () => { await earn(); setMode('pick'); }); }, 700);
-      }
+    if (n > 0) {
+      turnHits.current += 1;
+      if (!x.solo && turnHits.current >= HITS_PER_TURN) { x.say('Great turn!'); endTurn(1300); return; }
+      void earn();
       return;
     }
-    const k = leftRef.current - 1; setLeft(k); leftRef.current = k;
-    if (k <= 0) { setMode('busy'); window.setTimeout(() => c.current.next(), 1100); }
+    if (refrozen === s.refrozen) x.say(LOOK_WORDS[look].lose, 'oops');
+    if (!x.solo) endTurn(1300);
   }
 
   // The computer guesses on its own, after a little think.
   useEffect(() => {
-    if (!ctx.cpu || mode !== 'pick') return;
+    if (!ctx.cpu || mode !== 'pick' || !pair) return;
     const id = window.setTimeout(() => {
       if (ice > 0) { setIce(0); c.current.sfx.crash(); return; }
-      guess(cpuLetter(word, guessedRef.current, c.current.cpuRight()));
+      guess(cpuLetter(word, get()?.guessed ?? [], c.current.cpuRight()));
     }, 1600 + Math.random() * 900);
     return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
@@ -225,13 +246,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const canPick = mode === 'pick' && !ctx.cpu;
   const glowSet = useMemo(() => (glow ? new Set(hidden(word, guessed).filter((l) => VOWELS.has(l))) : new Set<string>()), [glow, word, guessed]);
   const clue = pair?.clue ?? '';
-  const clueSize = clue.length > 90 ? 3.4 : clue.length > 50 ? 4.2 : 5.2;
+  const clueSize = clue.length > 90 ? 4 : clue.length > 50 ? 4.4 : 5.2;
   const letterSize = word.length > 7 ? 7.5 : 9;
 
   return (
     <div ref={box} className="absolute inset-0 grid place-items-center">
       <motion.div className="relative lab-fit" style={{ '--ar': tall ? 0.8 : mid ? 1.25 : 1.5, '--u': tall ? '0.66cqw' : mid ? '0.8cqw' : '1cqh', containerType: 'size' } as CSSProperties}
-        animate={sneeze && !still ? { x: [0, -14, 12, -8, 6, 0], rotate: [0, -1.5, 1.2, -0.8, 0] } : undefined} transition={{ duration: 0.7 }} key={`s${sneeze}`}>
+        animate={sneezing && ctx.shake ? { x: [0, -12, 10, -6, 4, 0], rotate: [0, -1.2, 1, -0.6, 0] } : { x: 0, rotate: 0 }} transition={{ duration: 0.7 }}>
         {/* The scene: the friend in its world. */}
         <div className={`absolute left-0 top-0 ${tall ? "w-full h-[44%]" : "w-[47%] h-[64%]"} rounded-[calc(var(--u)*3)] border-heavy border-border overflow-hidden bg-[#cfe6ff]`} style={{ boxShadow: '0 calc(var(--u)*1) 0 #000, 0 calc(var(--u)*3) calc(var(--u)*5) rgba(36,28,61,0.3)' }}>
           <svg viewBox={tall ? '-90 0 380 185' : '0 0 200 185'} preserveAspectRatio={tall ? 'xMidYMax meet' : 'xMidYMid slice'} className="w-full h-full" style={{ overflow: 'visible' }} aria-label={`${LOOKS.find((l) => l.id === look)?.name}: ${PIECES - lost} pieces left`} role="img">
@@ -259,14 +280,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 <motion.span key={`${word}-${i}`} className="relative grid place-items-center rounded-[calc(var(--u)*1.6)] border-std border-border bg-surface"
                   style={{ width: `calc(var(--u)*${letterSize})`, height: `calc(var(--u)*${letterSize * 1.2})`, boxShadow: '0 calc(var(--u)*0.6) 0 #000' }}
                   initial={still ? false : { y: -40, opacity: 0, rotate: -12 }} animate={dance && !still ? { y: [0, -14, 0], rotate: [0, i % 2 ? 8 : -8, 0], opacity: 1 } : { y: 0, opacity: 1, rotate: 0 }}
-                  transition={dance ? { duration: 0.5, repeat: Infinity, delay: i * 0.06 } : { type: 'spring', stiffness: 260, damping: 14, delay: i * 0.05 }}>
+                  transition={dance ? { duration: 0.6, repeat: 3, delay: i * 0.06 } : { type: 'spring', stiffness: 260, damping: 14, delay: i * 0.05 }}>
                   <AnimatePresence>
                     {open && (
                       <motion.span key="l" className="font-display leading-none" style={{ fontSize: `calc(var(--u)*${letterSize * 0.75})`, color: guessed.includes(ch) ? '#241c3d' : '#c0465e' }}
                         initial={still ? false : { scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 400, damping: 12 }}>{ch}</motion.span>
                     )}
                   </AnimatePresence>
-                  {sneeze > 0 && !still && <motion.span className="absolute inset-0" key={`w${sneeze}`} animate={{ rotate: [0, 15, -15, 10, 0] }} transition={{ duration: 0.6, delay: i * 0.04, repeat: 3 }} />}
                 </motion.span>
               );
             })}
@@ -285,7 +305,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
               </motion.span>
             ))}
             {double && <motion.span className="ml-[calc(var(--u)*1)] font-display text-[calc(var(--u)*5)] px-[calc(var(--u)*1.5)] rounded-full border-std border-border bg-accent" initial={still ? false : { scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}>x2</motion.span>}
-            {!ctx.solo && left > 1 && mode === 'pick' && <motion.span className="ml-[calc(var(--u)*1)] font-display text-[calc(var(--u)*5)] px-[calc(var(--u)*1.5)] rounded-full border-std border-border bg-mint-soft" initial={still ? false : { scale: 0 }} animate={{ scale: 1 }}>+{left}</motion.span>}
           </div>
         </div>
 
@@ -299,11 +318,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <motion.button key={l} type="button" disabled={!canPick || used || ice > 0} onClick={() => guess(l)} aria-label={`Letter ${l}${used ? (hit ? ', in the word' : ', not in the word') : ''}`}
                 className={`relative rounded-[calc(var(--u)*1.6)] border-std border-border font-display leading-none grid place-items-center disabled:cursor-default ${hit ? 'bg-[#9fe7a0]' : used ? 'bg-[#cdd7fb] text-[#7383ad]' : 'bg-surface'}`}
                 style={{ fontSize: 'calc(var(--u)*6.4)', boxShadow: used ? 'none' : '0 calc(var(--u)*0.6) 0 #000' }}
-                animate={sneeze && !still ? { rotate: [0, (i % 3 - 1) * 14, 0], y: [0, -6, 0] } : last?.letter === l && !still ? (last.hit ? { scale: [1, 1.3, 1], y: [0, -8, 0] } : { x: [0, -6, 6, -4, 0] }) : { scale: 1, y: used ? 'calc(var(--u)*0.5)' : 0 }}
-                transition={{ duration: 0.45, delay: sneeze ? i * 0.02 : 0 }}
+                animate={sneezing && !still ? { rotate: [0, (i % 3 - 1) * 12, 0], y: [0, -5, 0] } : last?.letter === l && !still ? (last.hit ? { scale: [1, 1.3, 1], y: [0, -8, 0] } : { x: [0, -6, 6, -4, 0] }) : { scale: 1, y: used ? 'calc(var(--u)*0.5)' : 0 }}
+                transition={{ duration: 0.45, delay: sneezing ? i * 0.02 : 0 }}
                 whileHover={canPick && !used && !still ? { scale: 1.08 } : undefined} whileTap={canPick && !used ? { scale: 0.92, y: 4 } : undefined}>
                 {l}
-                {glowing && <motion.span aria-hidden="true" className="absolute -inset-[calc(var(--u)*0.6)] rounded-[calc(var(--u)*1.8)] border-[calc(var(--u)*0.7)] border-[#f6c544]" animate={still ? undefined : { opacity: [0.4, 1, 0.4], scale: [1, 1.06, 1] }} transition={{ duration: 1, repeat: Infinity }} />}
+                {used && <span className="absolute top-[calc(var(--u)*0.4)] right-[calc(var(--u)*0.4)] w-[38%] aspect-square rounded-full border-thin border-border grid place-items-center" style={{ background: hit ? '#fbfcf8' : '#f5a08c' }} aria-hidden="true">{hit ? <Check weight="bold" className="w-[70%] h-[70%]" /> : <XIcon weight="bold" className="w-[64%] h-[64%]" />}</span>}
+                {glowing && <motion.span aria-hidden="true" className="absolute -inset-[calc(var(--u)*0.6)] rounded-[calc(var(--u)*1.8)] border-[calc(var(--u)*0.7)] border-[#f6c544]" animate={still ? undefined : { opacity: [0.4, 1, 0.4], scale: [1, 1.06, 1] }} transition={{ duration: 2, repeat: Infinity }} />}
               </motion.button>
             );
           })}
@@ -616,13 +636,13 @@ function Cover() {
 const def: LabDef = {
   id: 'snow-pal',
   name: 'Save the Snow Pal',
-  description: 'Read the clue and guess the letters of the word. Every miss melts a piece, so save your friend!',
+  description: 'Read the clue and guess the letters of the word. Every miss loses a piece of your friend, so save it!',
   ways: ['teams', 'solo'],
   uses: 'words',
   how: [
-    { icon: <CheckCircle weight="fill" />, text: 'Answer right to earn a letter' },
+    { icon: <Snowflake weight="fill" />, text: 'Read the clue' },
     { icon: <Keyboard weight="fill" />, text: 'Tap a letter in the word' },
-    { icon: <Snowflake weight="fill" />, text: 'A miss melts a piece' },
+    { icon: <XIcon weight="bold" />, text: 'A miss loses a piece, so save your friend' },
   ],
   rounds: { label: 'Rounds', min: 3, max: 20, default: 10 },
   powers: POWERS,

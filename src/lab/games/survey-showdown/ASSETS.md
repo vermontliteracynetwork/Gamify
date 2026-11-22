@@ -1,4 +1,4 @@
-# Survey Showdown: assets
+# Top Answers: assets
 
 Every picture in this game (the Classic scene, characters, board pieces, power-up pictures and the cover) is drawn in code as SVG in `Game.tsx`, made from scratch for Gamify. No image files are copied into `public/lab/survey-showdown/`.
 

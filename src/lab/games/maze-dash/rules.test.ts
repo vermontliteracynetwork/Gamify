@@ -41,6 +41,7 @@ describe('maze dash rules', () => {
     }
     expect(dealZones(2, 0, -1).filter((v) => v >= 0)).toHaveLength(2);
     expect(dealZones(3, 0, -1).filter((v) => v >= 0)).toHaveLength(3);
+    for (let k = 0; k < 100; k++) { const six = dealZones(6, 5, 0); expect(six).toContain(5); expect(six[0]).not.toBe(5); expect(new Set(six).size).toBe(4); }
   });
   it('a wandering cloud never walks through a wall', () => {
     const m = makeMaze(13, 9);
