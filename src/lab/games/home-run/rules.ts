@@ -9,6 +9,8 @@ export const HIT_NAMES: Record<Hit, string> = { 0: 'Strike!', 1: 'Single!', 2: '
 export const MAX_PITCHES = 5;
 // Where the ball crosses the plate along the pitch (0 at the mound, 1 at the mitt).
 export const CROSS = 0.8;
+// How far off (ms) a swing can be and still hit, kind for young players.
+export const SWING_WINDOW = 360;
 
 // How a swing lands, from how far off the timing was (ms from the moment the
 // ball crosses the plate). Close swings hit harder; a little luck moves the
@@ -16,12 +18,12 @@ export const CROSS = 0.8;
 export function swingResult(errMs: number | null, opts: { giant?: boolean; rally?: boolean; rand?: () => number } = {}): { hit: Hit; caught: boolean } {
   const rand = opts.rand ?? Math.random;
   if (errMs === null) return { hit: 0, caught: false };
-  const e = errMs / (opts.giant ? 1.7 : 1);
+  const e = errMs / (opts.giant ? 1.6 : 1);
   let hit: Hit;
-  if (e <= 55) hit = 4;
-  else if (e <= 115) hit = rand() < 0.3 ? 4 : 3;
-  else if (e <= 185) hit = 2;
-  else if (e <= 270) hit = 1;
+  if (e <= 95) hit = 4;
+  else if (e <= 170) hit = rand() < 0.3 ? 4 : 3;
+  else if (e <= 260) hit = 2;
+  else if (e <= SWING_WINDOW) hit = 1;
   else return { hit: 0, caught: false };
   // A lucky bounce or a so-so hop.
   const luck = rand();
@@ -51,6 +53,6 @@ export const inningOver = (outs: number, maxOuts: number, pitches: number) => ou
 // The computer's swing: off by a little when it is sharp, else a weak swing
 // or no swing at all.
 export function cpuSwing(sharp: boolean, rand: () => number = Math.random): number | null {
-  if (sharp) return rand() * 120;
-  return rand() < 0.5 ? 190 + rand() * 120 : null;
+  if (sharp) return rand() * 170;
+  return rand() < 0.5 ? 270 + rand() * 120 : null;
 }

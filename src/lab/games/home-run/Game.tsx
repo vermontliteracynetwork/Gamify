@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Baseball, CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { CROSS, cpuSwing, HIT_NAMES, inningOver, openBase, swingResult, type Hit } from './rules';
+import { advance, CROSS, cpuSwing, HIT_NAMES, inningOver, MAX_PITCHES, openBase, SWING_WINDOW, swingResult, type Hit } from './rules';
 
-// Home Run Derby (Game Lab, inspired by classroom quiz-board baseball games):
+// Big Hit Baseball (Game Lab, inspired by classroom quiz-board baseball games):
 // a right answer brings a pitch; the batter taps as the ball crosses the
 // plate. Good timing (and a little luck) makes a single, double, triple or a
 // home run; runners hop around the bases and every run fills a seat in the
@@ -18,7 +18,7 @@ const ART = '/lab/home-run';
 const POWERS: LabPower[] = [
   { id: 'giant', name: 'Giant Bat', desc: 'Your bat grows huge. Hits are easier this pitch.', enter: 'zoom', art: <Art kind="giant" /> },
   { id: 'slow', name: 'Slow Pitch', desc: 'The next pitch floats in nice and slow.', enter: 'drop', art: <Art kind="slow" /> },
-  { id: 'rally', name: 'Rally Cap', desc: 'Caps inside out! Your next hit goes one base farther.', enter: 'spin', art: <Art kind="rally" /> },
+  { id: 'rally', name: 'Rally Cap', desc: 'Everyone flips their caps for luck. Your next hit goes one base farther.', enter: 'spin', art: <Art kind="rally" /> },
   { id: 'fireworks', name: 'Fireworks', desc: 'Every run counts double for the rest of this inning.', enter: 'zoom', art: <Art kind="fireworks" /> },
   { id: 'pinch', name: 'Pinch Runner', desc: 'A speedy runner zooms onto a base for you.', enter: 'wiggle', art: <Art kind="pinch" /> },
   { id: 'stretch', name: 'Seventh-inning Stretch', desc: 'Everybody stretches! You get one extra out this inning.', enter: 'drop', art: <Art kind="stretch" /> },
@@ -39,6 +39,7 @@ const NEUTRAL = ['#e9eefe', '#cdd5f7', '#f4e7c8', '#d8e8df', '#efd9e4'];
 const depth = (y: number) => 0.62 + ((y - 30) / 60) * 0.55;
 
 interface Runner { key: number; at: number; color: string }
+const NO_FX = { giant: false, rally: false, stretch: 0, pinch: 0, twice: false };
 interface Fan { x: number; y: number; skin: string; color: string | null }
 interface Flight { key: number; pts: { x: number; y: number; s: number }[]; ground: { x: number; y: number }[]; dur: number }
 interface Pitch { u: number; kind: 'normal' | 'slow' | 'gum' | 'fast'; glow: boolean }
@@ -47,7 +48,7 @@ function makeFans(): Fan[] {
   const out: Fan[] = [];
   [13, 18.5, 24].forEach((y, row) => {
     for (let x = 4 + (row % 2) * 2.2; x < 157; x += 4.4) {
-      if (x > 56 && x < 104 && y < 22) continue;
+      if (x > 46 && x < 114 && y < 23) continue;
       out.push({ x, y, skin: SKINS[Math.floor(Math.random() * SKINS.length)], color: Math.random() < 0.38 ? NEUTRAL[Math.floor(Math.random() * NEUTRAL.length)] : null });
     }
   });
@@ -74,7 +75,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [stretching, setStretching] = useState(false);
   const [wave, setWave] = useState(0);
   const [fireworks, setFireworks] = useState<{ key: number; x: number; y: number; color: string; delay: number }[]>([]);
-  const [fx, setFx] = useState({ giant: false, rally: false, slowShow: 0, stretch: 0, bubble: 0, sneeze: 0, pinch: 0, twice: false });
+  const [fx, setFx] = useState(NO_FX);
+  // A power-up's own moment on the field (stopwatch, gum bubble, sneeze), shown only while it happens.
+  const [flash, setFlash] = useState<{ kind: 'slow' | 'bubble' | 'sneeze'; key: number } | null>(null);
+  const showFlash = (kind: 'slow' | 'bubble' | 'sneeze', ms: number) => { const key = keyN.current++; setFlash({ kind, key }); window.setTimeout(() => setFlash((f) => (f?.key === key ? null : f)), ms * P); };
   const [popText, setPopText] = useState<{ key: number; text: string; x: number; y: number } | null>(null);
   const swingRef = useRef<number | null>(null);
   const live = useRef(0);
@@ -102,7 +106,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   function status() {
     c.current.setStatus(
-      <span className="flex items-center justify-center gap-2" aria-label={`${outsRef.current} of ${maxRef.current} outs`}>
+      <span role="img" className="flex items-center justify-center gap-2" aria-label={`${outsRef.current} of ${maxRef.current} outs`}>
         <span className="text-sm uppercase tracking-wider text-muted">Outs</span>
         {Array.from({ length: maxRef.current }, (_, i) => <span key={i} className="w-5 h-5 rounded-full border-std border-border" style={{ background: i < outsRef.current ? '#ef7d96' : '#fbfcf8' }} />)}
       </span>,
@@ -113,9 +117,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     outsRef.current = 0; maxRef.current = 3; pitchesRef.current = 0;
     mods.current = { fireworks: false, rally: false };
     setOuts(0); setMaxOuts(3); setPitches(0); putRunners([]); setFlight(null); setChase(null);
-    setFx((f) => ({ ...f, giant: false, rally: false, twice: false }));
+    setFx(NO_FX); setFlash(null); setStretching(false);
     setPhase('wait'); held(); status();
-    await wait(500);
+    c.current.say('Your turn to bat!', 'good');
+    await wait(1300);
     while (alive(id)) {
       setPhase('wait');
       const ok = await c.current.ask();
@@ -157,7 +162,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (!p) return 'normal';
     switch (p.id) {
       case 'giant': setFx((f) => ({ ...f, giant: true })); x.sfx.boing(); await wait(700); return 'normal';
-      case 'slow': setFx((f) => ({ ...f, slowShow: f.slowShow + 1 })); x.sfx.slideDown(); await wait(1100); return 'slow';
+      case 'slow': showFlash('slow', 1500); x.sfx.slideDown(); await wait(1100); return 'slow';
       case 'rally': mods.current.rally = true; setFx((f) => ({ ...f, rally: true })); setWave((w) => w + 1); x.sfx.cheer(); held(); await wait(1200); return 'normal';
       case 'fireworks': mods.current.fireworks = true; setFx((f) => ({ ...f, twice: true })); boom(5); held(); await wait(1500); return 'normal';
       case 'stretch': maxRef.current += 1; setMaxOuts(maxRef.current); setFx((f) => ({ ...f, stretch: f.stretch + 1 })); setStretching(true); window.setTimeout(() => setStretching(false), 1500); setWave((w) => w + 1); x.sfx.slideUp(); window.setTimeout(() => c.current.sfx.whistle(), 500); held(); status(); await wait(1600); return 'normal';
@@ -166,8 +171,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         if (b !== null) { putRunners([...runnersRef.current, { key: keyN.current++, at: b, color: TEAM_COLORS[x.player.colorIndex % TEAM_COLORS.length] }]); setFx((f) => ({ ...f, pinch: f.pinch + 1 })); x.sfx.whoosh(); }
         await wait(1200); return 'normal';
       }
-      case 'gum': setFx((f) => ({ ...f, bubble: f.bubble + 1 })); window.setTimeout(() => playClip(`${ART}/gum-pop.mp3`, c.current.settings), 900); await wait(1300); return 'gum';
-      case 'sneeze': setFx((f) => ({ ...f, sneeze: f.sneeze + 1 })); x.sfx.oops(); await wait(1200); return 'fast';
+      case 'gum': showFlash('bubble', 1000); window.setTimeout(() => playClip(`${ART}/gum-pop.mp3`, c.current.settings), 900); await wait(1300); return 'gum';
+      case 'sneeze': showFlash('sneeze', 1400); x.sfx.slideUp(); window.setTimeout(() => { c.current.sfx.pop(); c.current.sfx.thud(); }, 480); await wait(1300); return 'fast';
       default: return 'normal';
     }
   }
@@ -185,7 +190,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       const base = (kind === 'slow' ? 2300 : kind === 'fast' ? 950 : kind === 'gum' ? 1650 : 1350) * (0.92 + Math.random() * 0.16) * Math.max(1, P * 0.85);
       const start = performance.now();
       const crossAt = start + base * CROSS;
-      const win = 270 * (giant ? 1.7 : 1);
+      const win = SWING_WINDOW * (giant ? 1.6 : 1);
       swingRef.current = null;
       const x = c.current;
       x.sfx.whoosh();
@@ -238,7 +243,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       c.current.sfx.thud();
       await wait(350);
       setPitch(null);
-      await out(err === null ? 'Strike!' : 'Whiff! Strike!');
+      await out(err === null ? 'Strike!' : 'Swing and miss!');
       return;
     }
     // Crack! The ball flies.
@@ -304,10 +309,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
       putRunners(list);
       c.current.sfx.jump();
       await wait(480);
-      const home = list.filter((r) => r.at >= 4);
-      if (home.length) {
+      // advance() counts who crossed home on this step.
+      const { runs } = advance(list.map((r) => r.at - 1), 1, false);
+      if (runs) {
         list = list.filter((r) => r.at < 4);
-        for (const _ of home) score(color);
+        for (let k = 0; k < runs; k++) score(color);
         await wait(250);
         putRunners(list);
       }
@@ -330,6 +336,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   const still = ctx.still;
+  const full = ctx.settings.motion === 'full';
   const canSwing = phase === 'pitch' && !ctx.cpu;
   const ballPos = pitch ? pitchPos(pitch) : null;
 
@@ -340,8 +347,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <svg viewBox="0 0 160 100" className="absolute inset-0 w-full h-full" role="img" aria-label="Baseball field">
           <FieldArt />
           {/* The stands: every run seats two fans in the team's color. */}
-          <g key={`w${wave}`} className={still ? '' : 'hr-wave'}>
-            {fans.map((f, i) => <FanArt key={`${i}-${f.color}`} f={f} rally={fx.rally} still={still} />)}
+          <g className={still || !wave ? '' : wave % 2 ? 'hr-wave-a' : 'hr-wave-b'}>
+            {fans.map((f, i) => <FanArt key={i} f={f} rally={fx.rally} still={still} />)}
           </g>
           <BoardSign outs={outs} maxOuts={maxOuts} pitches={pitches} color={myColor} twice={fx.twice} />
           {/* Fireworks over the stands. */}
@@ -351,7 +358,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
             <motion.g key={i} initial={false} animate={chase?.i === i ? { x: chase.x, y: chase.catch ? [0, -4, 0] : chase.y } : { x: 0, y: 0 }} transition={{ duration: 0.9 * P, ease: 'easeOut' }}>
               <g transform={`translate(${f.x} ${f.y})`}>
                 <motion.g key={fx.stretch} animate={still || !fx.stretch ? undefined : { scaleY: [1, 1.35, 1.35, 1], rotate: [0, -6, 6, 0] }} transition={{ duration: 1.4 }} style={{ originY: 1 }}>
-                  <g className={still ? '' : 'hr-sway'} style={{ animationDelay: `${i * 0.3}s` }}><Kid shirt="#fbfcf8" cap="#ef7d96" skin={SKINS[i % SKINS.length]} s={f.s} glove arms={stretching ? 'up' : 'down'} /></g>
+                  <g className={full ? 'hr-sway' : ''} style={{ animationDelay: `${i * 0.3}s` }}><FielderArt skin={SKINS[i % SKINS.length]} s={f.s} stretch={stretching} /></g>
                 </motion.g>
               </g>
             </motion.g>
@@ -364,7 +371,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 <motion.g key={r.key} initial={still ? false : fx.pinch && r.at > 0 ? { x: 150, y: 80, opacity: 0 } : { x: b.x, y: b.y, opacity: 0 }}
                   animate={{ x: b.x - 2, y: b.y, opacity: 1 }} exit={{ opacity: 0, scale: 1.6, y: b.y - 10 }} transition={{ duration: 0.45 * P, ease: 'easeInOut' }}>
                   <motion.g key={r.at} animate={still ? undefined : { y: [0, -3.5, 0] }} transition={{ duration: 0.45 * P }}>
-                    <Kid shirt={r.color} cap="#241c3d" skin={SKINS[r.key % SKINS.length]} s={depth(b.y) * 1.05} run />
+                    <RunnerArt shirt={r.color} skin={SKINS[r.key % SKINS.length]} s={depth(b.y) * 1.05} />
                   </motion.g>
                 </motion.g>
               );
@@ -372,23 +379,23 @@ function Play({ ctx }: { ctx: LabCtx }) {
           </AnimatePresence>
           {/* The pitcher on the mound. */}
           <g transform={`translate(${MOUND.x} ${MOUND.y})`}>
-            <motion.g key={fx.sneeze} animate={still || !fx.sneeze ? undefined : { x: [0, -1, 1.5, -1.5, 0], rotate: [0, -8, 10, 0] }} transition={{ duration: 0.6, delay: 0.4 }}>
-              <Kid shirt="#fbfcf8" cap="#ef7d96" skin="#d9a37a" s={1.05} glove pitcher={phase === 'windup' && !still} />
+            <motion.g key={flash?.kind === 'sneeze' ? flash.key : 'p'} animate={still || flash?.kind !== 'sneeze' ? undefined : { x: [0, -1, 1.5, -1.5, 0], rotate: [0, -8, 10, 0] }} transition={{ duration: 0.6, delay: 0.4 }}>
+              <PitcherArt windup={phase === 'windup' && !still} />
             </motion.g>
             <AnimatePresence>
-              {fx.bubble > 0 && phase !== 'pitch' && (
-                <motion.circle key={`b${fx.bubble}`} cx="0" cy="-10" r="5" fill="#ff9ccf" stroke="#000" strokeWidth="0.4" fillOpacity="0.85" initial={{ scale: 0 }} animate={{ scale: [0, 1.2, 1.6] }} exit={{ scale: 2.4, opacity: 0 }} transition={{ duration: 0.9 }} />
+              {flash?.kind === 'bubble' && (
+                <motion.circle key={`b${flash.key}`} cx="0" cy="-10" r="5" fill="#ff9ccf" stroke="#000" strokeWidth="0.4" fillOpacity="0.85" initial={{ scale: 0 }} animate={{ scale: [0, 1.2, 1.6] }} exit={{ scale: 2.4, opacity: 0 }} transition={{ duration: 0.9 }} />
               )}
             </AnimatePresence>
           </g>
           <AnimatePresence>
-            {fx.slowShow > 0 && phase === 'busy' && (
-              <motion.image key={`s${fx.slowShow}`} href={`${ART}/stopwatch.webp`} x={MOUND.x - 9} y={MOUND.y - 34} width="18" height="18" initial={{ scale: 0, rotate: -90, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ opacity: 0, y: MOUND.y - 44 }} transition={{ type: 'spring', stiffness: 200, damping: 12 }} />
+            {flash?.kind === 'slow' && (
+              <motion.image key={`s${flash.key}`} href={`${ART}/stopwatch.webp`} x={MOUND.x - 9} y={MOUND.y - 34} width="18" height="18" initial={{ scale: 0, rotate: -90, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ opacity: 0, y: MOUND.y - 44 }} transition={{ type: 'spring', stiffness: 200, damping: 12 }} />
             )}
           </AnimatePresence>
-          <SneezeCloud n={fx.sneeze} show={phase === 'busy' || phase === 'wait'} />
+          <SneezeCloud n={flash?.kind === 'sneeze' ? flash.key : 0} show={flash?.kind === 'sneeze'} />
           {/* The strike zone at the plate glows when it is time to swing. */}
-          <ellipse cx={HOME.x} cy={HOME.y - 2} rx={pitch?.glow ? 6.5 : 5.5} ry={pitch?.glow ? 3.2 : 2.6} fill={pitch?.glow ? '#fdfd94' : 'none'} fillOpacity="0.55" stroke={phase === 'pitch' ? '#fdfd94' : 'transparent'} strokeWidth="0.8" strokeDasharray={pitch?.glow ? undefined : '1.5 1'} />
+          <ellipse cx={HOME.x} cy={HOME.y - 2} rx={pitch?.glow ? 6.5 : 5.5} ry={pitch?.glow ? 3.2 : 2.6} fill={pitch?.glow ? '#fdfd94' : 'none'} fillOpacity="0.75" stroke={phase === 'pitch' ? '#241c3d' : 'transparent'} strokeWidth={pitch?.glow ? 1 : 0.7} strokeDasharray={pitch?.glow ? undefined : '1.5 1'} />
           {/* The catcher's mitt peeking in at the bottom. */}
           <g transform={`translate(${HOME.x} 99)`}><ellipse rx="7" ry="5" fill="#a0603a" stroke="#000" strokeWidth="0.6" /><path d="M-4 -2 Q0 -5 4 -2" stroke="#6b3b20" strokeWidth="0.8" fill="none" /></g>
           {/* The pitch. */}
@@ -403,7 +410,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           )}
           {/* The batter: the team's own color, bat ready. */}
           <g transform={`translate(${HOME.x - 10} ${HOME.y + 2})`}>
-            <Kid shirt={myColor} cap="#241c3d" skin={SKINS[ctx.player.colorIndex % SKINS.length]} s={1.75} />
+            <BatterArt shirt={myColor} skin={SKINS[ctx.player.colorIndex % SKINS.length]} />
             <g transform="translate(-3.5 -11)">
               <motion.g key={swingKey} initial={false} animate={swingKey && !still ? { rotate: [-115, 20, 150, 150, -115] } : { rotate: -115 }} transition={{ duration: 1.1, times: [0, 0.16, 0.32, 0.8, 1] }}>
                 <circle r="26" fill="none" />
@@ -437,7 +444,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {(phase === 'pitch' || phase === 'windup') && !ctx.cpu && (
             <motion.div className="absolute right-[3%] bottom-[5%] pointer-events-none grid justify-items-center gap-1" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 15 }}>
               <motion.span className="w-[clamp(3.5rem,9cqw,6rem)] aspect-square rounded-full border-heavy border-border grid place-items-center" style={{ background: phase === 'pitch' ? '#fdfd94' : '#fbfcf8', boxShadow: '0 5px 0 #000' }}
-                animate={still ? undefined : { scale: [1, 1.08, 1] }} transition={{ duration: 0.7, repeat: Infinity }}>
+                animate={full ? { scale: [1, 1.08, 1] } : undefined} transition={{ duration: 0.7, repeat: Infinity }}>
                 <HandTap weight="fill" className="w-1/2 h-1/2" />
               </motion.span>
               <span className="font-display text-[clamp(1.1rem,2.6cqw,1.8rem)] text-white leading-none" style={{ WebkitTextStroke: '0.12em #000', paintOrder: 'stroke fill' }}>Swing!</span>
@@ -466,35 +473,61 @@ function pitchPos(p: Pitch) {
 const CSS = `
 .hr-sway { animation: hr-sway 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes hr-sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg) translateY(-0.4px); } }
-.hr-wave > g { animation: hr-wave 1.4s ease-in-out 1 both; }
-@keyframes hr-wave { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-2.6px); } }
-html[data-motion="still"] .hr-sway, html[data-motion="still"] .hr-wave > g { animation: none; }
+.hr-wave-a > g { animation: hr-wave-a 1.4s ease-in-out 1 both; }
+.hr-wave-b > g { animation: hr-wave-b 1.4s ease-in-out 1 both; }
+@keyframes hr-wave-a { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-2.6px); } }
+@keyframes hr-wave-b { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-2.6px); } }
+html[data-motion="still"] .hr-sway, html[data-motion="still"] .hr-wave-a > g, html[data-motion="still"] .hr-wave-b > g { animation: none; }
 `;
 
-// A little ballplayer, drawn at the feet.
-function Kid({ shirt, cap, skin, s = 1, glove, arms = 'down', run, pitcher }: { shirt: string; cap: string; skin: string; s?: number; glove?: boolean; arms?: 'up' | 'down'; run?: boolean; pitcher?: boolean }) {
+// The ballplayers, one drawing per role so a theme can skin each one.
+// Every one is drawn at its feet.
+interface BodyProps { shirt: string; cap: string; skin: string; arms?: 'up' | 'down' | 'none'; legs?: 'stand' | 'run'; glove?: boolean; children?: ReactNode }
+function Body({ shirt, cap, skin, arms = 'down', legs = 'stand', glove, children }: BodyProps) {
   return (
-    <g transform={`scale(${s})`}>
+    <>
       <ellipse cy="0.2" rx="2.6" ry="0.7" fill="#000" opacity="0.2" />
-      <path d={run ? 'M-1.4 0 L-0.6 -3.6 M1.8 -0.6 L0.8 -3.6' : 'M-1.3 0 L-0.9 -3.6 M1.3 0 L0.9 -3.6'} stroke="#241c3d" strokeWidth="1.3" strokeLinecap="round" />
-      {arms === 'up'
-        ? <path d="M-2.4 -7.6 L-3.6 -12 M2.4 -7.6 L3.6 -12" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />
-        : <path d="M-2.4 -7.6 L-3.4 -4.6 M2.4 -7.6 L3.4 -4.6" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />}
+      <path d={legs === 'run' ? 'M-1.4 0 L-0.6 -3.6 M1.8 -0.6 L0.8 -3.6' : 'M-1.3 0 L-0.9 -3.6 M1.3 0 L0.9 -3.6'} stroke="#241c3d" strokeWidth="1.3" strokeLinecap="round" />
+      {arms === 'up' && <path d="M-2.4 -7.6 L-3.6 -12 M2.4 -7.6 L3.6 -12" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />}
+      {arms === 'down' && <path d="M-2.4 -7.6 L-3.4 -4.6 M2.4 -7.6 L3.4 -4.6" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />}
       <rect x="-2.6" y="-8.6" width="5.2" height="5.4" rx="1.8" fill={shirt} stroke="#000" strokeWidth="0.45" />
       {glove && arms === 'down' && <circle cx="-3.6" cy="-4.4" r="1.3" fill="#a0603a" stroke="#000" strokeWidth="0.35" />}
-      {pitcher && (
-        <g transform="translate(2.4 -7.6)">
-          <motion.g animate={{ rotate: [0, -160, -200, 20] }} transition={{ duration: 1, times: [0, 0.5, 0.75, 1] }}>
-            <circle r="4" fill="none" />
-            <path d="M0 0 L2.6 -2.4" stroke={skin} strokeWidth="1.2" strokeLinecap="round" /><circle cx="2.8" cy="-2.6" r="0.9" fill="#fff" stroke="#000" strokeWidth="0.3" />
-          </motion.g>
-        </g>
-      )}
+      {children}
       <circle cy="-10.8" r="2.5" fill={skin} stroke="#000" strokeWidth="0.45" />
       <circle cx="-0.8" cy="-10.7" r="0.33" fill="#000" /><circle cx="0.8" cy="-10.7" r="0.33" fill="#000" />
       <path d="M-0.7 -9.6 Q0 -9.1 0.7 -9.6" stroke="#000" strokeWidth="0.3" fill="none" strokeLinecap="round" />
       <path d="M-2.5 -11.3 a2.5 2.5 0 0 1 5 0 z" fill={cap} stroke="#000" strokeWidth="0.4" />
       <path d="M-0.2 -11.4 h3.4" stroke={cap} strokeWidth="0.9" strokeLinecap="round" />
+    </>
+  );
+}
+// Batter: the team's color with a helmet; the bat is its own piece.
+function BatterArt({ shirt, skin }: { shirt: string; skin: string }) {
+  return <g transform="scale(1.75)"><Body shirt={shirt} cap="#241c3d" skin={skin} /><path d="M-2.7 -11.2 v1.6" stroke="#241c3d" strokeWidth="1" /></g>;
+}
+// Fielder: white uniform, coral cap and a glove; arms go up for a stretch.
+function FielderArt({ skin, s, stretch }: { skin: string; s: number; stretch: boolean }) {
+  return <g transform={`scale(${s})`}><Body shirt="#fbfcf8" cap="#ef7d96" skin={skin} glove arms={stretch ? 'up' : 'down'} /></g>;
+}
+// Runner: the team's color, mid-stride.
+function RunnerArt({ shirt, skin, s }: { shirt: string; skin: string; s: number }) {
+  return <g transform={`scale(${s})`}><Body shirt={shirt} cap="#241c3d" skin={skin} legs="run" /></g>;
+}
+// Pitcher: winds the throwing arm all the way round before a pitch.
+function PitcherArt({ windup }: { windup: boolean }) {
+  const skin = '#d9a37a';
+  return (
+    <g transform="scale(1.05)">
+      <Body shirt="#fbfcf8" cap="#ef7d96" skin={skin} glove>
+        {windup && (
+          <g transform="translate(2.4 -7.6)">
+            <motion.g animate={{ rotate: [0, -160, -200, 20] }} transition={{ duration: 1, times: [0, 0.5, 0.75, 1] }}>
+              <circle r="4" fill="none" />
+              <path d="M0 0 L2.6 -2.4" stroke={skin} strokeWidth="1.2" strokeLinecap="round" /><circle cx="2.8" cy="-2.6" r="0.9" fill="#fff" stroke="#000" strokeWidth="0.3" />
+            </motion.g>
+          </g>
+        )}
+      </Body>
     </g>
   );
 }
@@ -502,26 +535,29 @@ function Kid({ shirt, cap, skin, s = 1, glove, arms = 'down', run, pitcher }: { 
 function FanArt({ f, rally, still }: { f: Fan; rally: boolean; still: boolean }) {
   if (!f.color) return <rect x={f.x - 1.5} y={f.y - 1} width="3" height="2.6" rx="0.8" fill="#8d96e0" stroke="#5b63b5" strokeWidth="0.3" />;
   return (
-    <g style={{ animationDelay: `${f.x * 0.009}s` }}><motion.g initial={still ? false : { scale: 0, y: -4 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 10 }}>
-      <path d={`M${f.x - 1.9} ${f.y + 1.8} q0 -2.4 1.9 -2.4 q1.9 0 1.9 2.4 z`} fill={f.color} stroke="#000" strokeWidth="0.3" />
-      <circle cx={f.x} cy={f.y - 1.4} r="1.3" fill={f.skin} stroke="#000" strokeWidth="0.3" />
-      {rally && <path d={`M${f.x - 1.2} ${f.y - 2.4} L${f.x} ${f.y - 4.4} L${f.x + 1.2} ${f.y - 2.4} z`} fill="#ef7d96" stroke="#000" strokeWidth="0.25" />}
-    </motion.g></g>
+    <g style={{ animationDelay: `${f.x * 0.009}s` }}>
+      {/* Only a fan who just took a seat pops in (keyed by its color). */}
+      <motion.g key={f.color} initial={still ? false : { scale: 0, y: -4 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 10 }}>
+        <path d={`M${f.x - 1.9} ${f.y + 1.8} q0 -2.4 1.9 -2.4 q1.9 0 1.9 2.4 z`} fill={f.color} stroke="#000" strokeWidth="0.3" />
+        <circle cx={f.x} cy={f.y - 1.4} r="1.3" fill={f.skin} stroke="#000" strokeWidth="0.3" />
+        {rally && <path d={`M${f.x - 1.2} ${f.y - 2.4} L${f.x} ${f.y - 4.4} L${f.x + 1.2} ${f.y - 2.4} z`} fill="#ef7d96" stroke="#000" strokeWidth="0.25" />}
+      </motion.g>
+    </g>
   );
 }
 
-// The board in the stands: outs and pitches left as lights.
+// The board in the stands: whose turn (helmet), outs and pitches left as lights.
 function BoardSign({ outs, maxOuts, pitches, color, twice }: { outs: number; maxOuts: number; pitches: number; color: string; twice: boolean }) {
   return (
     <g>
-      <rect x="58" y="1.5" width="44" height="19" rx="2" fill="#241c3d" stroke="#000" strokeWidth="0.6" />
-      <rect x="60" y="3.2" width="9" height="9" rx="1.5" fill={color} stroke="#fdfd94" strokeWidth="0.5" />
-      <path d="M61.6 10 Q61.6 4.6 64.5 4.6 Q67.4 4.6 67.4 9 L68.4 9.6 L61.6 10 Z" fill="#241c3d" /><circle cx="63.4" cy="7.6" r="0.8" fill={color} />
-      <text x="72" y="7.6" fontSize="3.1" fill="#fdfd94" fontWeight="700" letterSpacing="0.2">OUTS</text>
-      {Array.from({ length: maxOuts }, (_, i) => <circle key={i} cx={73 + i * 4.2} cy="10.6" r="1.5" fill={i < outs ? '#ef7d96' : '#3a3160'} stroke="#000" strokeWidth="0.3" />)}
-      <text x="72" y="15.6" fontSize="3.1" fill="#fdfd94" fontWeight="700" letterSpacing="0.2">PITCHES</text>
-      {Array.from({ length: 5 }, (_, i) => <circle key={i} cx={73 + i * 4.2} cy="18.4" r="1.3" fill={i < 5 - pitches ? '#fbfcf8' : '#3a3160'} stroke="#000" strokeWidth="0.3" />)}
-      {twice && <text x="64.5" y="18.4" fontSize="4" textAnchor="middle" fill="#fdfd94" fontWeight="800">2x</text>}
+      <rect x="48" y="1" width="64" height="21" rx="2" fill="#241c3d" stroke="#000" strokeWidth="0.6" />
+      <rect x="50.5" y="3" width="13" height="13" rx="1.8" fill={color} stroke="#fdfd94" strokeWidth="0.5" />
+      <path d="M52.4 13.6 Q52.4 5.6 57 5.6 Q61.6 5.6 61.6 12 L63 12.8 L52.4 13.6 Z" fill="#241c3d" /><circle cx="55.4" cy="9.6" r="1.1" fill={color} />
+      {twice && <text x="57" y="20.6" fontSize="4.4" textAnchor="middle" fill="#fdfd94" fontWeight="800">2x</text>}
+      <text x="66" y="9" fontSize="4.4" fill="#fdfd94" fontWeight="700">OUTS</text>
+      {Array.from({ length: maxOuts }, (_, i) => <circle key={i} cx={88 + i * 5} cy="7.6" r="1.9" fill={i < outs ? '#ef7d96' : '#3a3160'} stroke="#000" strokeWidth="0.3" />)}
+      <text x="66" y="18.6" fontSize="4.4" fill="#fdfd94" fontWeight="700">PITCH</text>
+      {Array.from({ length: MAX_PITCHES }, (_, i) => <circle key={i} cx={88 + i * 4.8} cy="17.2" r="1.6" fill={i < MAX_PITCHES - pitches ? '#fbfcf8' : '#3a3160'} stroke="#000" strokeWidth="0.3" />)}
     </g>
   );
 }
@@ -638,7 +674,7 @@ function Cover() {
 
 const def: LabDef = {
   id: 'home-run',
-  name: 'Home Run Derby',
+  name: 'Big Hit Baseball',
   description: 'Answer right to get a pitch. Tap as the ball crosses the plate to hit it out of the park.',
   ways: ['teams', 'solo'],
   minTeams: 1,

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Basketball, CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
+import { Basketball, Check, CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { aimAt, BALL_R, cpuAim, FLOOR, landErr, RELEASE_Y, RIM, simulate, SPOTS, type Flight, type SpotId } from './rules';
+import { AIM_PERIOD, AIM_TOL, aimAt, BALL_R, cpuAim, FLOOR, kindAngle, RELEASE_Y, RIM, simulate, SPOTS, type Flight, type SpotId } from './rules';
 
 // Hoop Shot (Game Lab, inspired by classroom quiz-board basketball games):
 // a right answer earns a shot. Pick the close spot (2 points) or the far one
@@ -59,6 +59,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const live = useRef(0);
   const color = TEAM_COLORS[ctx.player.colorIndex % TEAM_COLORS.length];
   const rimR = mods.giant ? 7.4 : 4.6;
+  // The on-target window for people (the computer aims by its own level); Giant Hoop widens it.
+  const tolFor = (pick: SpotId) => AIM_TOL[pick] * (modsRef.current.giant ? 1.6 : 1);
   const still = ctx.still;
 
   useEffect(() => {
@@ -96,7 +98,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     for (let i = 0; i < 3; i++) { window.setTimeout(() => alive(id) && c.current.sfx.thud(), i * 260 * P); }
     await wait(900);
     if (!alive(id)) return;
-    const ideal = pick === 'two' ? 64 + Math.random() * 6 : 56 + Math.random() * 4;
+    const ideal = pick === 'two' ? 65 + Math.random() * 6 : 58 + Math.random() * 6;
     const angle = await aimPhase(id, pick, ideal);
     if (!alive(id) || angle === null) return;
     await shoot(id, pick, angle, ideal);
@@ -121,7 +123,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function aimPhase(id: number, pick: SpotId, ideal: number): Promise<number | null> {
     setPhase('aim');
     const m = modsRef.current;
-    const period = (m.moon ? 4 : m.squeaky ? 1.7 : 2.8) * Math.max(1, P * 0.9);
+    // Close is kinder than far; Moon Ball slows the arrow, Squeaky Sneakers speed it up a little.
+    const period = AIM_PERIOD[pick] * (m.moon ? 1.4 : m.squeaky ? 0.8 : 1) * Math.max(1, P * 0.9);
+    const tol = tolFor(pick);
     const from = { x: SPOTS[pick].x + 2, y: RELEASE_Y };
     const g = m.moon ? 36 : 86;
     const x = c.current;
@@ -137,7 +141,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const now = performance.now();
         current = aimAt((now - start) / 1000, period);
         setAim(current);
-        setOnTarget(Math.abs(landErr({ from, angle: current, ideal, gravity: g, rimR })) < (modsRef.current.giant ? 3.6 : 1.7));
+        setOnTarget(Math.abs(current - ideal) <= tol);
         if (cpuTarget !== null && now > cpuAfter && (Math.abs(current - cpuTarget) < 1.2 || now > cpuAfter + 5000)) { done = true; resolve(current); return; }
         requestAnimationFrame(step);
       };
@@ -176,8 +180,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const m = modsRef.current;
     setJump((n) => n + 1);
     c.current.sfx.whoosh();
-    const shot = { from: { x: SPOTS[pick].x + 2, y: RELEASE_Y }, angle, ideal, gravity: m.moon ? 36 : 86, rimR };
-    const f = simulate(shot, { wobbly: m.wobbly });
+    const tol = tolFor(pick);
+    const shot = { from: { x: SPOTS[pick].x + 2, y: RELEASE_Y }, angle: kindAngle(angle, ideal, tol), ideal, gravity: m.moon ? 36 : 86, rimR };
+    let f = simulate(shot, { wobbly: m.wobbly });
+    // A glowing arrow always scores (the wobbly rim can still bounce it about).
+    if (!f.made && Math.abs(angle - ideal) <= tol) f = simulate({ ...shot, angle: ideal }, { wobbly: false });
     await playFlight(f, 1 / Math.max(1, P * 0.8));
     if (!alive(id)) return;
     setPhase('busy');
@@ -242,7 +249,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
   // Space or Enter shoots.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.key === ' ' || e.key === 'Enter') && phaseRef.current === 'aim' && !c.current.cpu && e.target === document.body) { e.preventDefault(); input.current?.(null); }
+      if (e.key !== ' ' && e.key !== 'Enter') return;
+      const t = e.target as HTMLElement | null;
+      if (t?.closest('input, textarea, select, [contenteditable="true"], [role="dialog"]')) return;
+      if (phaseRef.current === 'aim' && !c.current.cpu) { e.preventDefault(); input.current?.(null); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -278,13 +288,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
             <motion.g key={`j${jump}`} animate={still || !jump ? undefined : { y: [0, -5, 0] }} transition={{ duration: 0.55 }}>
               <g transform={`translate(0 ${FEET})`} className={mods.squeaky && !still ? 'hs-slip' : ''}>
                 <Kid shirt={color} skin={SKINS[ctx.player.colorIndex % SKINS.length]} s={KID_S} arms={phase === 'aim' || phase === 'fly' || dunking ? 'up' : 'down'} />
+                {mods.squeaky && <path d="M-6 -1.5 l-3.4 -1.6 M-6.4 0.6 l-3.6 0.4 M6 -1.5 l3.4 -1.6 M6.4 0.6 l3.6 0.4" stroke="#241c3d" strokeWidth="0.7" strokeLinecap="round" />}
               </g>
             </motion.g>
           </motion.g>
           {/* The ball. */}
           {ballAt && (
             <g style={{ transform: `translate(${ballAt.x}px, ${ballAt.y}px)`, transition: phase === 'fly' ? 'none' : `transform ${0.45 * P}s cubic-bezier(.3,1.25,.5,1)` }}>
-              {mods.hot && !still && <circle r={BALL_R * 1.7} fill="#f39a6b" opacity="0.45" className="hs-flame" />}
+              {mods.hot && <circle r={BALL_R * 1.7} fill="#f39a6b" opacity="0.45" className={still ? '' : 'hs-flame'} />}
               <g transform={`rotate(${ballAt.spin})`}>
                 <image href={mods.moon ? `${ART}/moon.webp` : `${ART}/basketball.webp`} x={-BALL_R} y={-BALL_R} width={BALL_R * 2} height={BALL_R * 2} />
               </g>
@@ -297,13 +308,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <NetArt r={rimR} />
             </motion.g>
             <path d={`M${RIM.x - rimR} ${RIM.y} A ${rimR} 1.6 0 0 0 ${RIM.x + rimR} ${RIM.y}`} stroke="#ef6a3a" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+            {mods.wobbly && <path d={`M${RIM.x - rimR - 1} ${RIM.y - 2.6} q1.2 -1.4 2.4 0 t2.4 0 t2.4 0 t2.4 0 t2.4 0`} stroke="#ff8fc8" strokeWidth="0.8" fill="none" strokeLinecap="round" />}
           </motion.g>
           {/* The aim arrow: glows mint when the shot is on target. */}
           {phase === 'aim' && (
             <g transform={`translate(${SPOTS[spot].x + 2} ${RELEASE_Y})`}>
               <path d="M18 0 A 18 18 0 0 0 3.1 -17.7" stroke="#fbfcf8" strokeOpacity="0.55" strokeWidth="2.4" fill="none" strokeLinecap="round" />
               <g transform={`rotate(${-aim})`}>
-                <path d="M3 -1.1 L15 -1.1 L15 -2.8 L20 0 L15 2.8 L15 1.1 L3 1.1 Z" fill={onTarget ? '#8fe3a0' : '#fdfd94'} stroke="#000" strokeWidth="0.6" strokeLinejoin="round" style={{ filter: onTarget ? 'drop-shadow(0 0 2px #8fe3a0)' : undefined }} />
+                <path d="M3 -1.1 L15 -1.1 L15 -2.8 L20 0 L15 2.8 L15 1.1 L3 1.1 Z" fill={onTarget ? '#8fe3a0' : '#fdfd94'} stroke="#000" strokeWidth={onTarget ? 0.9 : 0.6} strokeLinejoin="round" style={{ filter: onTarget ? 'drop-shadow(0 0 2px #8fe3a0)' : undefined }} />
+                {/* A check mark rides the arrow while it is on target (shape, not just color). */}
+                {onTarget && <g transform="translate(24 0)"><circle r="3.6" fill="#fbfcf8" stroke="#000" strokeWidth="0.6" /><path d="M-1.7 0 L-0.4 1.4 L1.9 -1.4" stroke="#241c3d" strokeWidth="0.9" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>}
               </g>
             </g>
           )}
@@ -340,8 +354,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-heavy border-border grid place-items-center gap-0 disabled:cursor-default motion-safe:hover:scale-110 motion-safe:transition-transform"
                 style={{ left: `${(SPOTS[s].x / 160) * 100}%`, top: `${(FEET + 3) / 100 * 100}%`, width: '11%', minWidth: '3.2rem', aspectRatio: '1', background: s === 'two' ? '#fdfd94' : '#8fe3a0', boxShadow: '0 5px 0 #000' }}
                 initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 13, delay: s === 'two' ? 0 : 0.1 }}>
+                <span className="font-display text-[clamp(1.2rem,3cqw,2.2rem)] leading-none">{SPOTS[s].points}</span>
                 <span className="flex flex-wrap justify-center gap-[0.1rem] w-[80%]">
-                  {Array.from({ length: SPOTS[s].points }, (_, i) => <img key={i} src={`${ART}/basketball.webp`} alt="" className="w-[34%] aspect-square" />)}
+                  {Array.from({ length: SPOTS[s].points }, (_, i) => <img key={i} src={`${ART}/basketball.webp`} alt="" className="w-[30%] aspect-square" />)}
                 </span>
               </motion.button>
             )}
@@ -354,9 +369,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
             <motion.div className="absolute right-[3%] bottom-[4%] pointer-events-none grid justify-items-center gap-1" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
               <motion.span className="w-[clamp(3.5rem,9cqw,6rem)] aspect-square rounded-full border-heavy border-border grid place-items-center" style={{ background: onTarget ? '#8fe3a0' : '#fdfd94', boxShadow: '0 5px 0 #000' }}
                 animate={still ? undefined : { scale: onTarget ? 1.12 : 1 }}>
-                <HandTap weight="fill" className="w-1/2 h-1/2" />
+                {onTarget ? <Check weight="bold" className="w-1/2 h-1/2" /> : <HandTap weight="fill" className="w-1/2 h-1/2" />}
               </motion.span>
-              <span className="font-display text-[clamp(1.1rem,2.6cqw,1.8rem)] text-white leading-none" style={{ WebkitTextStroke: '0.12em #000', paintOrder: 'stroke fill' }}>Shoot!</span>
+              <span className="font-display text-[clamp(1.1rem,2.6cqw,1.8rem)] text-white leading-none" style={{ WebkitTextStroke: '0.12em #000', paintOrder: 'stroke fill' }}>{onTarget ? 'Now!' : 'Shoot!'}</span>
             </motion.div>
           )}
         </AnimatePresence>

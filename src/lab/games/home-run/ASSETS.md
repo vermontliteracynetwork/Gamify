@@ -1,4 +1,4 @@
-# Home Run Derby assets
+# Big Hit Baseball assets
 
 | File | From | License |
 |---|---|---|

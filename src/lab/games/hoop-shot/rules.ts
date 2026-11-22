@@ -88,3 +88,18 @@ export function cpuAim(ideal: number, sharp: boolean, rand: () => number = Math.
 
 // The swinging aim arrow: from 30 to 80 degrees and back.
 export const aimAt = (t: number, period: number) => 55 + 25 * Math.sin((t / period) * Math.PI * 2);
+
+// Kind aiming for young players: the close spot forgives more than the far
+// one, and its arrow swings slower.
+export const AIM_TOL: Record<SpotId, number> = { two: 5, three: 3.5 };
+export const AIM_PERIOD: Record<SpotId, number> = { two: 4, three: 3.2 };
+
+// Inside the window the ball flies at (almost) the ideal angle: a sure
+// basket, sometimes with a rim rattle. Just outside it is pulled halfway in,
+// so near misses can still bounce in. Far off flies as aimed.
+export function kindAngle(angle: number, ideal: number, tol: number, rand: () => number = Math.random): number {
+  const d = angle - ideal;
+  if (Math.abs(d) <= tol) return ideal - rand() * 0.6;
+  if (Math.abs(d) <= tol * 2) return ideal + d * 0.5;
+  return angle;
+}
