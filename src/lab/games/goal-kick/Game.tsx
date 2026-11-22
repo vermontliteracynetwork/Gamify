@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { AnimatePresence, motion, useAnimate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion/react';
 import { CheckCircle, HandTap, SoccerBall, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
@@ -207,12 +207,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
       <div className="relative lab-fit rounded-[1.4rem] border-heavy border-border overflow-hidden" style={{ ['--ar' as string]: 1.6, boxShadow: '0 8px 0 #000, 0 24px 44px rgba(36,28,61,0.35)' }}>
         <svg viewBox="0 0 160 100" className="absolute inset-0 w-full h-full" role="img" aria-label="Soccer goal">
           <PitchArt />
-          <g key={`ch${cheer}`} className={still ? '' : 'gk-cheer'}><Crowd /></g>
+          <g className={still || !cheer ? '' : cheer % 2 ? 'gk-cheer' : 'gk-cheer-b'}><Crowd /></g>
           {/* The net, rippling where a goal lands. */}
-          <motion.g key={`net${ripple?.key ?? 0}`} animate={still || !ripple ? undefined : { scale: [1, 1.05, 0.98, 1.01, 1] }} transition={{ duration: 0.7 }}
-            style={ripple ? { originX: (ripple.x - GOAL.l) / (GOAL.r - GOAL.l), originY: (ripple.y - GOAL.t) / (GOAL.b - GOAL.t) } : undefined}>
+          <Pulse n={ripple?.key ?? 0} off={still} run={{ scale: [1, 1.05, 0.98, 1.01, 1] }} transition={{ duration: 0.7 }}
+            style={ripple ? { transformOrigin: `${((ripple.x - GOAL.l) / (GOAL.r - GOAL.l)) * 100}% ${((ripple.y - GOAL.t) / (GOAL.b - GOAL.t)) * 100}%` } : undefined}>
             <NetArt />
-          </motion.g>
+          </Pulse>
           {ripple && !still && (
             <motion.ellipse key={`r${ripple.key}`} cx={ripple.x} cy={ripple.y} rx="3" ry="2" fill="none" stroke="#fbfcf8" strokeWidth="0.8" initial={{ scale: 0.4, opacity: 1 }} animate={{ scale: 4, opacity: 0 }} transition={{ duration: 0.8 }} />
           )}
@@ -238,9 +238,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
           )}
           {/* The penalty spot and the kicker, seen from behind. */}
           <ellipse cx={SPOT.x} cy={SPOT.y + 4} rx="3" ry="1" fill="#fbfcf8" opacity="0.9" />
-          <motion.g key={`k${runUp}`} initial={false} animate={still || !runUp ? { x: 60, y: 98 } : { x: [56, 64, 71, 71], y: [100, 99, 98, 98] }} transition={{ duration: 0.75 * P, times: [0, 0.5, 0.85, 1] }}>
-            <Kicker shirt={color} skin={SKINS[ctx.player.colorIndex % SKINS.length]} kick={runUp > 0} />
-          </motion.g>
+          <g transform="translate(60 98)"><Pulse n={runUp} off={still} run={{ x: [-4, 4, 11, 11], y: [2, 1, 0, 0] }} transition={{ duration: 0.75 * P, times: [0, 0.5, 0.85, 1] }}>
+            <Kicker shirt={color} skin={SKINS[ctx.player.colorIndex % SKINS.length]} kick={runUp} />
+          </Pulse></g>
           {ballIdle && (
             <motion.g animate={full ? { y: [0, -0.4, 0] } : undefined} transition={{ duration: 1.6, repeat: Infinity }}>
               {(mods.double ? [-6, 6] : [0]).map((dx) => (
@@ -324,8 +324,18 @@ function goaliePose(dive: Zone | null, going: boolean) {
   return { x: (t.x - 80) * 0.85, y: row(dive) === 0 ? -12 : -2, r: c === 0 ? -68 : 68 };
 }
 
+// Plays a one-off move on a stable wrapper each time `n` goes up, without
+// remounting what is inside (so nothing else replays its entrance).
+function Pulse({ n, run, transition, off, style, children }: { n: number; run: DOMKeyframesDefinition; transition?: AnimationOptions; off?: boolean; style?: CSSProperties; children: ReactNode }) {
+  const [scope, animate] = useAnimate<SVGGElement>();
+  useEffect(() => { if (n && !off && scope.current) void animate(scope.current, run, transition); }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <g ref={scope} style={{ transformBox: 'fill-box', transformOrigin: 'center', ...style }}>{children}</g>;
+}
+
 const CSS = `
 .gk-cheer > g { animation: gk-cheer 0.5s ease-in-out 3 both; }
+.gk-cheer-b > g { animation: gk-cheer-b 0.5s ease-in-out 3 both; }
+@keyframes gk-cheer-b { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 .gk-cheer > g:nth-child(2n) { animation-delay: 0.15s; }
 @keyframes gk-cheer { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 .gk-sway { animation: gk-sway 1.1s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
@@ -355,12 +365,12 @@ function Keeper({ sleepy, reach }: { sleepy: boolean; reach: boolean }) {
   );
 }
 
-function Kicker({ shirt, skin, kick }: { shirt: string; skin: string; kick: boolean }) {
+function Kicker({ shirt, skin, kick }: { shirt: string; skin: string; kick: number }) {
   return (
     <g transform="scale(2.4)">
       <ellipse cy="0.3" rx="3" ry="0.8" fill="#000" opacity="0.25" />
       <path d="M-1.3 0 L-1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" />
-      <motion.path d="M1.3 0 L1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" initial={{ d: 'M1.3 0 L1 -3.6' }} animate={kick ? { d: ['M1.3 0 L1 -3.6', 'M-0.2 0.6 L1 -3.6', 'M4 -1.6 L1 -3.6', 'M1.3 0 L1 -3.6'] } : undefined} transition={{ duration: 0.75, times: [0, 0.6, 0.8, 1] }} />
+      <motion.path key={kick} d="M1.3 0 L1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" initial={{ d: 'M1.3 0 L1 -3.6' }} animate={kick > 0 ? { d: ['M1.3 0 L1 -3.6', 'M-0.2 0.6 L1 -3.6', 'M4 -1.6 L1 -3.6', 'M1.3 0 L1 -3.6'] } : undefined} transition={{ duration: 0.75, times: [0, 0.6, 0.8, 1] }} />
       <rect x="-2.3" y="-4.8" width="4.6" height="1.8" rx="0.6" fill="#241c3d" />
       <path d="M-2.4 -7.6 L-3.6 -4.6 M2.4 -7.6 L3.6 -4.6" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />
       <rect x="-2.6" y="-8.8" width="5.2" height="4.4" rx="1.4" fill={shirt} stroke="#000" strokeWidth="0.45" />

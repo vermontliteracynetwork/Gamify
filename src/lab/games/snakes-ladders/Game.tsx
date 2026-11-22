@@ -121,8 +121,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     await sleep(500);
     const path = alongPath(snakePoints(head, tail));
     playClip('/lab/snakes-ladders/slide.mp3', x.settings, 0.8); x.sfx.slideDown();
-    show(id, { pts: path, dur: ctx.still ? 0 : 1.6, mode: 'path' }); setFx(id, 'slip');
-    await sleep(ctx.still ? 200 : 1700);
+    show(id, { pts: path, dur: x.still ? 0 : 1.6, mode: 'path' }); setFx(id, 'slip');
+    await sleep(x.still ? 200 : 1700);
     // The piece settles beside any others on the tail square with a soft spring.
     setPos(id, tail); show(id, { pts: [squareXY(tail)], dur: 0, mode: 'hop' }); sync(); setGulp(null);
   }
@@ -198,8 +198,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       const p = await c.current.power(0.45, (pw) => {
         const behind = order.some((id) => posRef.current[id] > posRef.current[me]);
         if (pw.id === 'boost') return behind && !!nextLadder(posRef.current[me]);
-        if (pw.id === 'balloon') return behind && !!above(posRef.current[me]);
-        if (pw.id === 'socks') return posRef.current[me] >= 2;
+        if (pw.id === 'balloon') { const up = above(posRef.current[me]); return behind && !!up && !SNAKES[up]; }
+        if (pw.id === 'socks') return posRef.current[me] >= 2 && !LADDERS[posRef.current[me] - 2];
         if (pw.id === 'charm') return !charms.current.has(me);
         return true;
       });
@@ -267,8 +267,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <g transform={`translate(${squareXY(100).x} ${squareXY(100).y + 10})`}><path d="M-30 18 L-24 -16 L-10 2 L0 -26 L10 2 L24 -16 L30 18z" fill="#f6c544" stroke="#000" strokeWidth={4} strokeLinejoin="round" /></g>
           {Object.entries(LADDERS).map(([a, b]) => <LadderArt key={a} from={+a} to={+b} glow={climbing === +a} still={ctx.still} />)}
           {snakes.map((s, i) => <SnakeArt key={s.head} {...s} i={i} still={ctx.still} asleep={asleep === s.head} gulp={gulp === s.head} />)}
-          {/* Square numbers on top, with a light halo so snakes and ladders never hide them. */}
-          {Array.from({ length: 100 }, (_, i) => { const { x, y } = squareXY(i + 1); return <text key={i} x={x - 44} y={y - 18} fontSize={w < 560 ? 36 : 30} fill="#241c3d" stroke="#fbfcf8" strokeWidth={6} strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: 'var(--font-display)' }} pointerEvents="none">{i + 1}</text>; })}
+          {/* No numbers on squares: each row wears its own colors and a faint arrow shows where the path turns up. */}
+          {Array.from({ length: 9 }, (_, r) => { const x = r % 2 ? 50 : 950, y = 950 - r * 100; return <path key={r} d={`M${x} ${y - 6} v-82 m-14 14 l14 -14 14 14`} stroke="#241c3d" strokeOpacity={0.28} strokeWidth={7} fill="none" strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />; })}
         </svg>
         {w > 0 && players.map((p) => {
           const v = vis[p.id];
@@ -366,7 +366,7 @@ function SnakeArt({ head, tail, pts, color, i, still, asleep, gulp }: { head: nu
       <g transform={`translate(${h.x} ${h.y}) rotate(${ang})`}>
         <motion.g animate={still || !gulp ? undefined : { scale: [1, 1.35, 1], rotate: [0, 10, -8, 0] }} transition={{ duration: 0.6 }}>
           {!asleep && <motion.path d="M30 0 L52 0 M52 0 l8 -6 M52 0 l8 6" stroke="#e5635f" strokeWidth={5} strokeLinecap="round" fill="none"
-            animate={still ? undefined : { scaleX: [0, 1, 1, 0, 0] }} transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.4, times: [0, 0.1, 0.25, 0.35, 1] }} style={{ originX: '30px' }} />}
+            animate={still ? undefined : { scaleX: [0, 1, 1, 0, 0] }} transition={{ duration: 3.6, repeat: Infinity, delay: i * 0.7, times: [0, 0.06, 0.14, 0.2, 1] }} style={{ originX: '30px' }} />}
           <ellipse cx={0} cy={0} rx={38} ry={32} fill={color[0]} stroke="#000" strokeWidth={5} />
           <ellipse cx={-6} cy={-12} rx={18} ry={8} fill="#fff" opacity={0.35} />
           {asleep ? (
@@ -430,7 +430,7 @@ const def: LabDef = {
     { icon: <DiceFive weight="fill" />, text: 'Right? Tap the die to roll' },
     { icon: <Ladder weight="fill" />, text: 'Climb ladders, dodge snakes, reach 100' },
   ],
-  rounds: { label: 'Rounds', min: 10, max: 50, default: 28 },
+  rounds: { label: 'Rounds', min: 20, max: 60, default: 40 },
   powers: POWERS,
   background: 'radial-gradient(120% 90% at 50% 10%, #c9d2ff 0%, #9aa8f2 60%, #7d8be0 100%)',
   cover: <Cover />,

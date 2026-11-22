@@ -293,7 +293,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <span className="absolute -right-[4%] -bottom-[3%] z-10" aria-hidden="true"><TeamBadge colorIndex={me.colorIndex} size={Math.round(cardW * 0.13)} /></span>
               <Card card={cards[me.id]} marks={marks[me.id]} kinds={kinds[me.id] ?? {}} team={color(me.id)} colorIndex={me.colorIndex} size={cardW}
                 canTap={!ctx.cpu && (mode === 'call' || mode === 'free')} free={mode === 'free'} glow={glow} hint={hint} shake={shake} peek={mode === 'call' ? peekSet : null}
-                flip={flip} cheer={cheer} still={ctx.still} onTap={tap} />
+                flip={flip} cheer={cheer} still={ctx.still} shakeOn={ctx.shake} onTap={tap} />
               <AnimatePresence>
                 {sprite && (
                   <motion.div key={sprite.n} className="absolute pointer-events-none z-20" style={{ width: cardW / 4, height: cardW / 4 }}
@@ -325,7 +325,7 @@ function Caller({ call, still, land, cheer, onListen, onSkip }: { call: { q: Mul
   return (
     <div className={`relative flex-1 min-h-0 flex ${land ? 'flex-col' : 'flex-row'} gap-3`}>
       <div className={`relative ${land ? 'h-[52%]' : 'w-[38%]'} shrink-0 flex items-center justify-center gap-2`}>
-        {onSkip && call && call.phase !== 'ask' && <button type="button" onClick={onSkip} aria-label="Tap to skip the spin" title="Tap to skip the spin" className="absolute inset-0 z-10 rounded-panel" />}
+        {onSkip && call && call.phase !== 'ask' && <button type="button" onClick={onSkip} aria-label="Skip the spin" title="Skip the spin" className="absolute inset-0 z-10 rounded-panel flex items-end justify-center pb-1"><span className="rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" style={{ boxShadow: '0 2px 0 #000' }}>Skip</span></button>}
         <div className="relative h-full aspect-square">
           <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" aria-hidden="true">
             <path d="M60 180 L80 120 M140 180 L120 120" stroke="#000" strokeWidth="12" strokeLinecap="round" />
@@ -337,7 +337,7 @@ function Caller({ call, still, land, cheer, onListen, onSkip }: { call: { q: Mul
               {[[78, 70, '#ef7d96'], [118, 64, '#6aa9e9'], [96, 110, '#f6c544'], [130, 102, '#8fe3a0'], [70, 108, '#c58ce8'], [104, 84, '#f39a6b']].map(([x, y, f], i) => (
                 <motion.circle key={i} cx={x as number} cy={y as number} r="13" fill={f as string} stroke="#000" strokeWidth="3"
                   animate={still ? undefined : spinning ? { x: [0, 14, -12, 0], y: [0, -16, 10, 0] } : { x: 0, y: [0, -2, 0] }}
-                  transition={{ duration: spinning ? 0.3 : 2 + i * 0.2, repeat: spinning ? 3 : Infinity }} />
+                  transition={{ duration: spinning ? 0.3 : 3.2 + i * 0.3, repeat: spinning ? 3 : Infinity, ease: 'easeInOut' }} />
               ))}
             </motion.g>
             <circle cx="100" cy="92" r="9" fill="#fdfd94" stroke="#000" strokeWidth="4" />
@@ -388,16 +388,16 @@ function Caller({ call, still, land, cheer, onListen, onSkip }: { call: { q: Mul
   );
 }
 
-function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, hint, shake, peek, flip, cheer, still, onTap }: {
+function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, hint, shake, peek, flip, cheer, still, shakeOn, onTap }: {
   card: string[]; marks: boolean[]; kinds: Record<number, Mark>; team: string; colorIndex: number; size: number; canTap: boolean; free: boolean; glow: number[]; hint: number[];
-  shake: { i: number; n: number } | null; peek: number[] | null; flip: number; cheer: number; still: boolean; onTap: (i: number) => void;
+  shake: { i: number; n: number } | null; peek: number[] | null; flip: number; cheer: number; still: boolean; shakeOn: boolean; onTap: (i: number) => void;
 }) {
   const cell = size / 5;
-  // Big for short answers, at least about 14px, and smaller only when the longest word would not fit.
+  // Big for short answers and never under about 14px; long answers wrap instead of shrinking.
   const fs = (t: string) => {
-    const n = t.length, word = Math.max(1, ...t.split(/\s+/).map((x) => x.length));
+    const n = t.length;
     const want = Math.max(14, cell * (n <= 3 ? 0.34 : n <= 6 ? 0.26 : n <= 10 ? 0.2 : n <= 18 ? 0.17 : 0.14));
-    return Math.min(want, (cell * 0.86) / (word * 0.6));
+    return want;
   };
   return (
     <div className="absolute inset-0 rounded-[6%] border-heavy border-border overflow-hidden" style={{ background: team, boxShadow: '0 8px 0 #000, 0 26px 40px rgba(36,28,61,0.35)' }}>
@@ -416,8 +416,8 @@ function Card({ card, marks, kinds, team, colorIndex, size, canTap, free, glow, 
           return (
             <motion.button key={`${i}-${flip}`} type="button" disabled={!can} onClick={() => onTap(i)} aria-label={i === FREE ? 'Free star' : `${v}${on ? ', daubed' : ''}${hint.includes(i) ? ', the right answer' : ''}`}
               className={`relative rounded-[14%] border-std border-border bg-surface grid place-items-center overflow-hidden px-[6%] text-center font-bold leading-[1.05] disabled:cursor-default ${can ? 'motion-safe:hover:scale-[1.06] hover:z-10 cursor-pointer' : ''}`}
-              style={{ fontSize: fs(v), boxShadow: glow.includes(i) ? '0 0 0 4px #fdfd94, 0 0 18px 6px #fdfd94' : hint.includes(i) ? '0 0 0 4px #8fe3a0, 0 0 14px 4px #8fe3a0' : '0 3px 0 rgba(0,0,0,0.35)', opacity: dim ? 0.25 : 1, outline: free && can ? '3px dashed #241c3d' : undefined, outlineOffset: -5, transition: 'opacity 0.3s, transform 0.15s', overflowWrap: 'break-word', hyphens: 'none' }}
-              initial={flip && !still ? { rotateY: 180 } : false} animate={shake?.i === i && !still ? { x: [0, -8, 8, -6, 6, 0], rotateY: 0 } : glow.includes(i) && !still ? { scale: [1, 1.08, 1], rotateY: 0 } : { rotateY: 0 }}
+              style={{ fontSize: fs(v), boxShadow: glow.includes(i) ? '0 0 0 4px #fdfd94, 0 0 18px 6px #fdfd94' : hint.includes(i) ? '0 0 0 4px #8fe3a0, 0 0 14px 4px #8fe3a0' : '0 3px 0 rgba(0,0,0,0.35)', opacity: dim ? 0.25 : 1, outline: free && can ? '3px dashed #241c3d' : undefined, outlineOffset: -5, transition: 'opacity 0.3s, transform 0.15s', overflowWrap: 'anywhere', hyphens: 'none' }}
+              initial={flip && !still ? { rotateY: 180 } : false} animate={shake?.i === i && !still && shakeOn ? { x: [0, -8, 8, -6, 6, 0], rotateY: 0 } : glow.includes(i) && !still ? { scale: [1, 1.08, 1], rotateY: 0 } : { rotateY: 0 }}
               transition={shake?.i === i ? { duration: 0.5 } : glow.includes(i) ? { duration: 0.6, repeat: 3 } : { duration: 0.5, delay: (i % 5) * 0.04 }}>
               {i === FREE ? (
                 <span className="w-[78%] h-[78%]"><svg viewBox="0 0 100 100" className="w-full h-full"><StarShape /></svg></span>

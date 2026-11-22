@@ -228,7 +228,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       else { const lo = loose(linesRef.current, claimedRef.current, size); if (lo.length) tapLine(lo[Math.floor(Math.random() * lo.length)]); }
     }, 1400 + Math.random() * 600);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mode, ctx.taken, lines, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canTap = !ctx.cpu && (mode === 'draw' || mode === 'erase' || mode === 'bucket');
   const looseNow = mode === 'erase' ? loose(lines, claimed, size) : [];
@@ -302,14 +302,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* The gaps to tap. */}
           {(mode === 'draw' ? open(lines, size) : mode === 'erase' ? looseNow : []).map((l) => {
             const m = mid(l), hz = l[0] === 'h';
-            const w = hz ? 74 : 52, h = hz ? 52 : 74;
+            const w = hz ? 74 : 60, h = hz ? 60 : 74;
             return (
               <button key={l} type="button" disabled={!canTap} onClick={() => tapLine(l)} aria-label={mode === 'erase' ? 'Erase this line' : 'Draw a line here'}
                 className="group absolute grid place-items-center rounded-full disabled:cursor-default"
                 style={{ ...pct(m.x - w / 2, m.y - h / 2), width: `${(w / VW) * 100}%`, height: `${(h / VH) * 100}%` }}>
-                <span className={`block rounded-full transition-all duration-150 ${mode === 'erase' ? 'opacity-70 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-60 group-focus-visible:opacity-60'} group-hover:scale-110`}
+                <span className={`block rounded-full transition-all duration-150 ${mode === 'erase' ? 'opacity-70 group-hover:opacity-100' : (canTap ? 'opacity-35' : 'opacity-0') + ' group-hover:opacity-80 group-focus-visible:opacity-80'} group-hover:scale-110`}
                   style={{ width: hz ? '100%' : '28%', height: hz ? '28%' : '100%', background: mode === 'erase' ? 'repeating-linear-gradient(45deg, #fff 0 6px, #ef7d96 6px 12px)' : color(me.id), border: '2px solid #000' }} />
-                {mode === 'draw' && canTap && <span aria-hidden="true" className="absolute rounded-full border-2 border-dashed border-border-soft group-hover:opacity-0 group-focus-visible:opacity-0" style={{ width: hz ? '82%' : '6%', height: hz ? '6%' : '82%' }} />}
               </button>
             );
           })}
@@ -318,9 +317,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
             {sprite && <SpriteFx key={sprite.n} s={sprite} pct={pct} still={ctx.still} />}
           </AnimatePresence>
         </div>
-        {(mode === 'bucket' || mode === 'erase') && canTap && (
+        {(mode === 'bucket' || mode === 'erase' || mode === 'draw') && canTap && (
           <motion.p className="absolute -top-1 inset-x-0 text-center font-display text-2xl text-white pointer-events-none" style={{ WebkitTextStroke: '0.1em #000', paintOrder: 'stroke fill' }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-live="polite">
-            {mode === 'bucket' ? 'Tap a box to pour paint' : 'Tap a line to rub it out'}
+            {mode === 'bucket' ? 'Tap a box to pour paint' : mode === 'erase' ? 'Tap a line to rub it out' : 'Tap a line'}
           </motion.p>
         )}
       </motion.div>

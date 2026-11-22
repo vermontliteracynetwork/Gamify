@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { AnimatePresence, motion, useAnimate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion/react';
 import { Basketball, Check, CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
@@ -270,29 +270,30 @@ function Play({ ctx }: { ctx: LabCtx }) {
       <div className="relative lab-fit rounded-[1.4rem] border-heavy border-border overflow-hidden" style={{ ['--ar' as string]: 1.6, boxShadow: '0 8px 0 #000, 0 24px 44px rgba(36,28,61,0.35)' }}>
         <svg viewBox="0 0 160 100" className="absolute inset-0 w-full h-full" role="img" aria-label="Basketball court">
           <GymArt />
-          <g key={`ch${cheer}`} className={still ? '' : 'hs-cheer'}><Crowd /></g>
+          <g className={still || !cheer ? '' : cheer % 2 ? 'hs-cheer' : 'hs-cheer-b'}><Crowd /></g>
           {/* The hoop: pole, backboard, rim and net. */}
-          <motion.g key={`sh${shake}`} animate={still || !shake || !ctx.shake ? undefined : { x: [0, 1.2, -1, 0.6, 0] }} transition={{ duration: 0.4 }}>
+          <Pulse n={shake} off={still || !ctx.shake} run={{ x: [0, 1.2, -1, 0.6, 0] }} transition={{ duration: 0.4 }}>
             <rect x="144" y="30" width="3" height="58" fill="#5b5f7a" stroke="#000" strokeWidth="0.5" />
             <rect x="143" y="62" width="5" height="22" rx="1.5" fill="#ef7d96" stroke="#000" strokeWidth="0.5" />
             <path d="M139 30 h6" stroke="#5b5f7a" strokeWidth="2" />
             <rect x="116" y="16" width="25" height="20" rx="1.2" fill="#fbfcf8" fillOpacity="0.92" stroke="#000" strokeWidth="0.7" />
             <rect x="123" y="25" width="10" height="8" fill="none" stroke="#ef7d96" strokeWidth="0.9" />
-          </motion.g>
-          <motion.g key={`rim${rimHit}`} animate={still ? undefined : mods.wobbly ? { rotate: [0, -6, 5, -4, 3, 0], scaleX: [1, 1.08, 0.94, 1.05, 1] } : rimHit ? { rotate: [0, dunking ? 14 : 3, -2, 0] } : undefined} transition={mods.wobbly ? { duration: 0.9, repeat: Infinity } : { duration: 0.45 }}>
+          </Pulse>
+          <motion.g animate={!still && mods.wobbly ? { rotate: [0, -6, 5, -4, 3, 0], scaleX: [1, 1.08, 0.94, 1.05, 1] } : { rotate: 0, scaleX: 1 }} transition={mods.wobbly ? { duration: 0.9, repeat: Infinity } : { duration: 0.3 }}>
+          <Pulse n={rimHit} off={still} run={{ rotate: [0, dunking ? 14 : 3, -2, 0] }} transition={{ duration: 0.45 }}>
             <circle cx={RIM.x} cy={RIM.y} r={rimR + 0.8} fill="none" />
             <path d={`M${RIM.x - rimR} ${RIM.y} A ${rimR} 1.6 0 0 1 ${RIM.x + rimR} ${RIM.y}`} stroke="#c2532c" strokeWidth="0.9" fill="none" />
-          </motion.g>
+          </Pulse></motion.g>
           {/* Hot hand flames trailing the ball. */}
           {trail.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={BALL_R * (0.4 + i * 0.12)} fill={i % 2 ? '#f6c544' : '#f39a6b'} opacity={0.25 + i * 0.12} />)}
           {/* The shooter, in the team's color. */}
           <motion.g initial={false} animate={{ x: shooterX, y: dunking ? RIM.y + 18 - FEET : 0 }} transition={dunking ? { duration: 0.8 * P, ease: [0.3, 1.4, 0.5, 1] } : { type: 'spring', stiffness: 60, damping: 14 }}>
-            <motion.g key={`j${jump}`} animate={still || !jump ? undefined : { y: [0, -5, 0] }} transition={{ duration: 0.55 }}>
+            <Pulse n={jump} off={still} run={{ y: [0, -5, 0] }} transition={{ duration: 0.55 }}>
               <g transform={`translate(0 ${FEET})`} className={mods.squeaky && !still ? 'hs-slip' : ''}>
                 <Kid shirt={color} skin={SKINS[ctx.player.colorIndex % SKINS.length]} s={KID_S} arms={phase === 'aim' || phase === 'fly' || dunking ? 'up' : 'down'} />
                 {mods.squeaky && <path d="M-6 -1.5 l-3.4 -1.6 M-6.4 0.6 l-3.6 0.4 M6 -1.5 l3.4 -1.6 M6.4 0.6 l3.6 0.4" stroke="#241c3d" strokeWidth="0.7" strokeLinecap="round" />}
               </g>
-            </motion.g>
+            </Pulse>
           </motion.g>
           {/* The ball. */}
           {ballAt && (
@@ -304,14 +305,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
             </g>
           )}
           {/* The front of the rim and the net, in front of the ball. */}
-          <motion.g key={`rf${rimHit}`} animate={still ? undefined : mods.wobbly ? { rotate: [0, -6, 5, -4, 3, 0], scaleX: [1, 1.08, 0.94, 1.05, 1] } : rimHit ? { rotate: [0, dunking ? 14 : 3, -2, 0] } : undefined} transition={mods.wobbly ? { duration: 0.9, repeat: Infinity } : { duration: 0.45 }}>
+          <motion.g animate={!still && mods.wobbly ? { rotate: [0, -6, 5, -4, 3, 0], scaleX: [1, 1.08, 0.94, 1.05, 1] } : { rotate: 0, scaleX: 1 }} transition={mods.wobbly ? { duration: 0.9, repeat: Infinity } : { duration: 0.3 }}>
+          <Pulse n={rimHit} off={still} run={{ rotate: [0, dunking ? 14 : 3, -2, 0] }} transition={{ duration: 0.45 }}>
             <circle cx={RIM.x} cy={RIM.y} r={rimR + 0.8} fill="none" />
-            <motion.g key={`n${net}`} animate={still || !net ? undefined : { scaleY: [1, 1.4, 0.85, 1.1, 1], skewX: [0, 6, -4, 2, 0] }} transition={{ duration: 0.7 }} style={{ originY: 0 }}>
+            <Pulse n={net} off={still} run={{ scaleY: [1, 1.4, 0.85, 1.1, 1], skewX: [0, 6, -4, 2, 0] }} transition={{ duration: 0.7 }} style={{ transformOrigin: '50% 0%' }}>
               <NetArt r={rimR} />
-            </motion.g>
+            </Pulse>
             <path d={`M${RIM.x - rimR} ${RIM.y} A ${rimR} 1.6 0 0 0 ${RIM.x + rimR} ${RIM.y}`} stroke="#ef6a3a" strokeWidth="1.1" fill="none" strokeLinecap="round" />
             {mods.wobbly && <path d={`M${RIM.x - rimR - 1} ${RIM.y - 2.6} q1.2 -1.4 2.4 0 t2.4 0 t2.4 0 t2.4 0 t2.4 0`} stroke="#ff8fc8" strokeWidth="0.8" fill="none" strokeLinecap="round" />}
-          </motion.g>
+          </Pulse></motion.g>
           {/* The aim arrow: glows mint when the shot is on target. */}
           {phase === 'aim' && (
             <g transform={`translate(${SPOTS[spot].x + 2} ${RELEASE_Y})`}>
@@ -326,9 +328,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {/* The team mascot, courtside. */}
           {mods.mascot && (
             <motion.g initial={{ x: 175, y: 0 }} animate={{ x: 150, y: 0 }} transition={{ type: 'spring', stiffness: 90, damping: 12 }}>
-              <motion.g key={mascotJump} animate={still ? undefined : { y: [0, -14, 0], rotate: [0, -10, 0] }} transition={{ duration: 0.8 }}>
+              <Pulse n={mascotJump} off={still} run={{ y: [0, -14, 0], rotate: [0, -10, 0] }} transition={{ duration: 0.8 }}>
                 <Mascot />
-              </motion.g>
+              </Pulse>
             </motion.g>
           )}
           <AnimatePresence>
@@ -382,8 +384,18 @@ function Play({ ctx }: { ctx: LabCtx }) {
   );
 }
 
+// Plays a one-off move on a stable wrapper each time `n` goes up, without
+// remounting what is inside (so nothing else replays its entrance).
+function Pulse({ n, run, transition, off, style, children }: { n: number; run: DOMKeyframesDefinition; transition?: AnimationOptions; off?: boolean; style?: CSSProperties; children: ReactNode }) {
+  const [scope, animate] = useAnimate<SVGGElement>();
+  useEffect(() => { if (n && !off && scope.current) void animate(scope.current, run, transition); }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <g ref={scope} style={{ transformBox: 'fill-box', transformOrigin: 'center', ...style }}>{children}</g>;
+}
+
 const CSS = `
 .hs-cheer > g { animation: hs-cheer 0.5s ease-in-out 3 both; }
+.hs-cheer-b > g { animation: hs-cheer-b 0.5s ease-in-out 3 both; }
+@keyframes hs-cheer-b { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2.2px); } }
 .hs-cheer > g:nth-child(3n) { animation-delay: 0.12s; }
 .hs-cheer > g:nth-child(3n+1) { animation-delay: 0.24s; }
 @keyframes hs-cheer { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2.2px); } }

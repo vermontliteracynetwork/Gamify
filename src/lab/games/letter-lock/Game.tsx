@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimate } from 'motion/react';
 import { Backspace, KeyReturn, LockKey, Palette, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TurnCard } from '../../../engine/ShareQuestion';
@@ -30,7 +30,12 @@ const POWERS: LabPower[] = [
   { id: 'jumble', name: 'Jumbled Keyboard', desc: 'Whoops! Your keys hop out of order for your next guess.', silly: true, art: <Art kind="jumble" /> },
 ];
 
-const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+const QWERTY = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+// ABC order is the default for young readers; the choice is remembered.
+const ABC = ['ABCDEFGHIJ', 'KLMNOPQRS', 'TUVWXYZ'];
+const ROWS = QWERTY;
+const ORDER_KEY = 'gamify:lab:letter-lock:keys';
+function loadOrder(): 'abc' | 'qwerty' { try { return localStorage.getItem(ORDER_KEY) === 'qwerty' ? 'qwerty' : 'abc'; } catch { return 'abc'; } }
 // Its own look: mint for the right spot, pale yellow with a sun for in the
 // word, soft gray with a dash for not in it (never color alone).
 const FILL: Record<Mark, string> = { g: '#8fe3a0', y: '#fdfd94', x: '#d3d5e0' };
@@ -107,6 +112,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [pressed, setPressed] = useState<{ l: string; id: number } | null>(null);
   const pending = useRef<Record<string, LabPower[]>>({});
   const fresh = useRef(true);
+  const [shakeRef, animateShake] = useAnimate();
+  const [keyOrder, setKeyOrder] = useState(loadOrder);
+  const flipOrder = () => { const n = keyOrder === 'abc' ? 'qwerty' : 'abc'; setKeyOrder(n); try { localStorage.setItem(ORDER_KEY, n); } catch { /* private window */ } };
+  // Shake the vault (a stable wrapper, never remounted), only when allowed.
+  useEffect(() => {
+    if (!shake || !c.current.shake || !shakeRef.current) return;
+    void animateShake(shakeRef.current, { x: [0, -10, 10, -6, 6, 0] }, { duration: 0.4 });
+  }, [shake]); // eslint-disable-line react-hooks/exhaustive-deps
   const vaults = useRef<Record<string, VaultState>>({});
   const owner = useRef<string | null>(null);
   const genRef = useRef(0); genRef.current = gen;
@@ -173,7 +186,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       out.forEach((l, i) => window.setTimeout(() => { setGone((g) => new Set([...g, l])); clip('puff'); }, 300 + i * 350));
     }
     // Only ever on the earner's own guess (it fires at the start of their turn).
-    if (p.id === 'jumble') { x.sfx.boing(); x.say('Jumbled Keyboard!', 'oops'); setOrder(jumbled()); }
+    if (p.id === 'jumble') { x.sfx.boing(); x.say('Jumbled Keyboard!', 'oops'); setOrder(jumbled()); window.setTimeout(() => setOrder(null), 3000); }
   }
 
   // Typing a guess. Free green letters stay put.
@@ -214,7 +227,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       return;
     }
     const newGreen = marks.some((m, i) => m === 'g' && !before.has(i));
-    if (newGreen) x.sfx.coin();
+    // Effort pays: one point for every new letter in its right spot.
+    const greens = marks.filter((m, i) => m === 'g' && !before.has(i)).length;
+    if (newGreen) { x.sfx.coin(); x.points(greens); }
     await afterGuess(newGreen);
   }
 
@@ -230,7 +245,15 @@ function Play({ ctx }: { ctx: LabCtx }) {
       }
     }
     if (x.solo && !openRef.current) { setMode('play'); return; }
+    await revealIfLast();
     c.current.next();
+  }
+  // The very last turn of the game: an uncracked word is shown, never left a secret.
+  async function revealIfLast() {
+    const x = c.current;
+    if (openRef.current || x.taken + 1 < x.rounds * x.turns.players.length) return;
+    setOpen(true); x.say(`The word was ${pairRef.current.word}`); x.sfx.slideDown();
+    await wait(2600);
   }
   const openRef = useRef(open); openRef.current = open;
 
@@ -255,10 +278,13 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await wait(1400);
       const sharp = c.current.cpuRight();
       const ok = pool.filter((w) => fits(w, rowsRef.current) && Object.entries(givenRef.current).every(([i, l]) => w[+i] === l));
-      const list = sharp && ok.length ? ok : pool.filter((w) => !goneRef.current.has(w[0]));
+      const allowed = pool.filter((w) => ![...w].some((l) => goneRef.current.has(l)));
+      const list = sharp && ok.length ? ok : allowed.length ? allowed : pool;
       let word = list[Math.floor(Math.random() * list.length)] ?? pairRef.current.word;
       if (sharp && !ok.length) word = pairRef.current.word;
-      for (const i of freeSpots()) { if (!live) return; type(word[i]); await wait(380); }
+      // Any removed letter is swapped for one still on the keys, so the guess always completes.
+      const free = [...ROWS.join('')].filter((l) => !goneRef.current.has(l));
+      for (const i of freeSpots()) { if (!live) return; const l = goneRef.current.has(word[i]) ? free[Math.floor(Math.random() * free.length)] : word[i]; type(l); await wait(380); }
       await wait(500);
       if (live) void submit();
     })();
@@ -269,7 +295,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const current = (() => { const g = given, free = spots.filter((i) => g[i] === undefined); return spots.map((i) => g[i] ?? input[free.indexOf(i)] ?? ''); })();
   const canPlay = mode === 'play' && !ctx.cpu;
   const full = current.every(Boolean);
-  const keys = order ?? [...ROWS.join('')];
+  const keys = order ?? [...(keyOrder === 'abc' ? ABC : QWERTY).join('')];
   const keyRows = [keys.slice(0, 10), keys.slice(10, 19), keys.slice(19)];
   const keyboard = (
             <div className="relative shrink-0 grid gap-[3%] rounded-[1.4rem] border-heavy border-border px-[2%] py-[2.4%]" role="group" aria-label="Letter keys"
@@ -293,6 +319,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 </div>
               ))}
               <div className="flex justify-center gap-[2%] min-h-0">
+                <button type="button" onClick={() => { flipOrder(); c.current.sfx.tick(); }} aria-label={`Key order: ${keyOrder === 'abc' ? 'A B C' : 'keyboard'}. Tap to change.`}
+                  className="h-full rounded-[0.6rem] border-std border-border font-heading font-bold bg-surface-2 whitespace-nowrap" style={{ width: '22%', fontSize: 'max(0.8rem, min(9cqh, 3.6cqw))', boxShadow: '0 4px 0 #000' }}>
+                  {keyOrder === 'abc' ? 'ABC' : 'QWERTY'}
+                </button>
                 <motion.button type="button" onClick={() => canPlay && back()} disabled={!canPlay} aria-label="Back: delete a letter"
                   className="h-full rounded-[0.6rem] border-std border-border inline-flex items-center justify-center gap-[0.3em] font-display disabled:cursor-default" style={{ width: '26%', fontSize: 'max(0.95rem, min(13cqh, 5.4cqw))', background: '#f5a08c', boxShadow: '0 4px 0 #000' }}
                   whileHover={canPlay && !ctx.still ? { scale: 1.05 } : undefined} whileTap={{ scale: 0.92, y: 3 }}>
@@ -312,8 +342,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <div className="absolute inset-0 flex flex-col gap-[2%]">
           <div className={`flex-1 min-h-0 min-w-0 flex ${wide ? 'flex-row' : 'flex-col'} gap-[2%]`}>
           {/* The vault door with the tile rows. */}
-          <motion.div className="relative min-w-0 min-h-0" style={layout === 'wide' ? { width: `${80 / ar}%` } : layout === 'mid' ? { width: '44%' } : { height: '62%' }} key={`shake-${shake}`}
-            animate={shake && ctx.shake ? { x: [0, -10, 10, -6, 6, 0] } : undefined} transition={{ duration: 0.4 }}>
+          <motion.div className="relative min-w-0 min-h-0" style={layout === 'wide' ? { width: `${80 / ar}%` } : layout === 'mid' ? { width: '44%' } : { height: '62%' }} ref={shakeRef}>
             <Vault open={open} still={ctx.still} gen={gen} />
             <div className="absolute inset-[11%_12%_6%_12%]" style={{ containerType: 'size' }}>
               <div className="absolute inset-0 grid place-items-center" style={{ perspective: 900 }}>
@@ -398,7 +427,7 @@ function ClueCard({ pair, open, still, wide, double, len }: { pair: WordPair; op
         <motion.div key={`clue-${pair.word}-${open}`} className="grid gap-[0.35em] justify-items-center" initial={still ? false : { rotateY: 90, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 16 }}>
           {open ? <span className="font-display leading-none rounded-full border-std border-border px-[0.5em] py-[0.1em]" style={{ fontSize: `max(1.1rem, ${wide ? 5 : 5.5}${U})`, background: '#8fe3a0' }}>{pair.word}</span>
             : <span className="inline-flex items-center gap-[0.4em] font-bold text-muted" style={{ fontSize: `max(0.85rem, ${wide ? 2.6 : 3}${U})` }}><span className="inline-flex" style={{ width: '2.2em', height: '1.5em' }}><Art kind="envelope" /></span>{len} letters</span>}
-          <span className="font-bold leading-snug text-balance" style={{ fontSize: `max(0.95rem, ${(wide ? 3.8 : 4) * (pair.clue.length > 60 ? 0.78 : 1)}${U})` }}>{pair.clue}</span>
+          <span className="font-bold leading-snug text-balance" style={{ fontSize: `max(0.95rem, ${(wide ? 5 : 5) * (pair.clue.length > 60 ? 0.7 : pair.clue.length > 35 ? 0.85 : 1)}${U})` }}>{pair.clue}</span>
         </motion.div>
       </AnimatePresence>
       {double && <motion.span className="absolute top-2 right-2 h-11 min-w-11 rounded-full border-heavy border-border bg-accent grid place-items-center font-display text-xl" initial={still ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>x2</motion.span>}
@@ -492,7 +521,7 @@ const def: LabDef = {
   how: [
     { icon: <LockKey weight="fill" />, text: 'Read the clue and type a word' },
     { icon: <Palette weight="fill" />, text: 'Check: right spot. Sun: in the word. Dash: not in it' },
-    { icon: <Trophy weight="fill" />, text: 'Crack it in fewer tries for more points' },
+    { icon: <Trophy weight="fill" />, text: 'Find the word to win' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 12, default: 4 },
   powers: POWERS,

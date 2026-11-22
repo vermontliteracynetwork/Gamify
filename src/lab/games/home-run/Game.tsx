@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type CSSProperties } from 'react';
+import { AnimatePresence, motion, useAnimate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion/react';
 import { Baseball, CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
@@ -366,9 +366,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {FIELDERS.map((f, i) => (
             <motion.g key={i} initial={false} animate={chase?.i === i ? { x: chase.x, y: chase.catch ? [0, -4, 0] : chase.y } : { x: 0, y: 0 }} transition={{ duration: 0.9 * P, ease: 'easeOut' }}>
               <g transform={`translate(${f.x} ${f.y})`}>
-                <motion.g key={fx.stretch} animate={still || !fx.stretch ? undefined : { scaleY: [1, 1.35, 1.35, 1], rotate: [0, -6, 6, 0] }} transition={{ duration: 1.4 }} style={{ originY: 1 }}>
+                <Pulse n={fx.stretch} off={still} run={{ scaleY: [1, 1.35, 1.35, 1], rotate: [0, -6, 6, 0] }} transition={{ duration: 1.4 }} style={{ transformOrigin: '50% 100%' }}>
                   <g className={full ? 'hr-sway' : ''} style={{ animationDelay: `${i * 0.3}s` }}><FielderArt skin={SKINS[i % SKINS.length]} s={f.s} stretch={stretching} /></g>
-                </motion.g>
+                </Pulse>
               </g>
             </motion.g>
           ))}
@@ -379,18 +379,18 @@ function Play({ ctx }: { ctx: LabCtx }) {
               return (
                 <motion.g key={r.key} initial={still ? false : fx.pinch && r.at > 0 ? { x: 150, y: 80, opacity: 0 } : { x: b.x, y: b.y, opacity: 0 }}
                   animate={{ x: b.x - 2, y: b.y, opacity: 1 }} exit={{ opacity: 0, scale: 1.6, y: b.y - 10 }} transition={{ duration: 0.45 * P, ease: 'easeInOut' }}>
-                  <motion.g key={r.at} animate={still ? undefined : { y: [0, -3.5, 0] }} transition={{ duration: 0.45 * P }}>
+                  <Pulse n={r.at + 1} off={still} run={{ y: [0, -3.5, 0] }} transition={{ duration: 0.45 * P }}>
                     <RunnerArt shirt={r.color} skin={SKINS[r.key % SKINS.length]} s={depth(b.y) * 1.05} />
-                  </motion.g>
+                  </Pulse>
                 </motion.g>
               );
             })}
           </AnimatePresence>
           {/* The pitcher on the mound. */}
           <g transform={`translate(${MOUND.x} ${MOUND.y})`}>
-            <motion.g key={flash?.kind === 'sneeze' ? flash.key : 'p'} animate={still || flash?.kind !== 'sneeze' ? undefined : { x: [0, -1, 1.5, -1.5, 0], rotate: [0, -8, 10, 0] }} transition={{ duration: 0.6, delay: 0.4 }}>
+            <Pulse n={flash?.kind === 'sneeze' ? flash.key : 0} off={still} run={{ x: [0, -1, 1.5, -1.5, 0], rotate: [0, -8, 10, 0] }} transition={{ duration: 0.6, delay: 0.4 }}>
               <PitcherArt windup={phase === 'windup' && !still} />
-            </motion.g>
+            </Pulse>
             <AnimatePresence>
               {flash?.kind === 'bubble' && (
                 <motion.circle key={`b${flash.key}`} cx="0" cy="-10" r="5" fill="#ff9ccf" stroke="#000" strokeWidth="0.4" fillOpacity="0.85" initial={{ scale: 0 }} animate={{ scale: [0, 1.2, 1.6] }} exit={{ scale: 2.4, opacity: 0 }} transition={{ duration: 0.9 }} />
@@ -421,14 +421,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <g transform={`translate(${HOME.x - 10} ${HOME.y + 2})`}>
             <BatterArt shirt={myColor} skin={SKINS[ctx.player.colorIndex % SKINS.length]} />
             <g transform="translate(-3.5 -11)">
-              <motion.g key={swingKey} initial={false} animate={swingKey && !still ? { rotate: [-115, 20, 150, 150, -115] } : { rotate: -115 }} transition={{ duration: 1.1, times: [0, 0.16, 0.32, 0.8, 1] }}>
+              <Pulse n={swingKey} off={still} run={{ rotate: [0, 135, 265, 265, 0] }} transition={{ duration: 1.1, times: [0, 0.16, 0.32, 0.8, 1] }}>
                 <circle r="26" fill="none" />
+                <g transform="rotate(-115)">
                 <motion.g animate={{ scale: fx.giant ? 1.7 : 1 }} transition={{ type: 'spring', stiffness: 260, damping: 9 }}>
                   <circle r="15" fill="none" />
                   <path d="M0 -0.8 L13 -1.6 Q14.6 0 13 1.6 L0 0.8 Z" fill={fx.giant ? '#f6c544' : '#c98a4f'} stroke="#000" strokeWidth="0.5" />
                   <rect x="-1" y="-0.9" width="2" height="1.8" rx="0.6" fill="#241c3d" />
                 </motion.g>
-              </motion.g>
+                </g>
+              </Pulse>
             </g>
           </g>
           {/* The hit ball and its shadow. */}
@@ -477,6 +479,14 @@ function pitchPos(p: Pitch) {
   if (gy > 97) gy = 97;
   y = Math.min(y, 98);
   return { x, y, gy, s: 0.55 + u * 1.05 };
+}
+
+// Plays a one-off move on a stable wrapper each time `n` goes up, without
+// remounting what is inside (so nothing else replays its entrance).
+function Pulse({ n, run, transition, off, style, children }: { n: number; run: DOMKeyframesDefinition; transition?: AnimationOptions; off?: boolean; style?: CSSProperties; children: ReactNode }) {
+  const [scope, animate] = useAnimate<SVGGElement>();
+  useEffect(() => { if (n && !off && scope.current) void animate(scope.current, run, transition); }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <g ref={scope} style={{ transformBox: 'fill-box', transformOrigin: 'center', ...style }}>{children}</g>;
 }
 
 const CSS = `

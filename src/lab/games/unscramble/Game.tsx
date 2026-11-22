@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimate } from 'motion/react';
 import { ArrowsClockwise, BowlFood, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TurnCard } from '../../../engine/ShareQuestion';
@@ -86,7 +86,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const doubleRef = useRef(false);
   const setDouble = (v: boolean) => { doubleRef.current = v; setDoubleState(v); };
   const [watch, setWatch] = useState(0);
-  const [pace, setPaceState] = useState<Pace>(() => loadPace(ctx.timeScale));
+  const [pace, setPaceState] = useState<Pace>(() => (ctx.timeScale === 0 ? 'none' : loadPace(ctx.timeScale)));
+  const [shakeRef, animateShake] = useAnimate();
+  const lastTap = useRef(0);
   const paceRef = useRef(pace); paceRef.current = pace;
   const [left, setLeft] = useState(1);
   const total = useRef(1), remain = useRef(1), paused = useRef(false);
@@ -139,6 +141,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
       setSlots(s); setLocked(0); x.sfx.coin(); afterPlace();
     }
     if (p.id === 'tornado') {
+      // Wait until nobody has placed a tile for a second, then whirl.
+      const go = () => { if (Date.now() - lastTap.current < 1000) { window.setTimeout(go, 300); return; } whirl(); };
+      const whirl = () => {
       x.say('Tornado Tiles!', 'oops'); x.sfx.wind(); setTwister((n) => n + 1);
       window.setTimeout(() => {
         const keep = lockedRef.current;
@@ -146,6 +151,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const moved = slotsRef.current.filter((v, i) => v !== null && i !== keep) as number[];
         setSlots(s); setTray(scramble(pairRef.current.word)); hop([...letters.keys()].filter((i) => !moved.includes(i)).concat(moved));
       }, 900);
+      };
+      go();
     }
     // Popcorn bounces for a couple of seconds, then the tiles sit still to be tapped.
     if (p.id === 'popcorn') { x.say('Popcorn Tiles!', 'oops'); x.sfx.boing(); setPopcorn(true); window.setTimeout(() => setPopcorn(false), 2500); }
@@ -161,10 +168,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
       remain.current = Math.max(0, remain.current - dt);
       setLeft(remain.current / total.current);
       if (remain.current <= 0) void miss(true);
-      else if (remain.current < 5000 && Math.floor(remain.current / 1000) !== Math.floor((remain.current + dt) / 1000)) c.current.sfx.tick();
+      else if (remain.current < 5000 && Math.floor(remain.current / 1000) !== Math.floor((remain.current + dt) / 1000)) clip('hop', 0.12);
     }, 100);
     return () => window.clearInterval(id);
   }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Shake the tiles (a stable layer, never remounted), only when allowed.
+  useEffect(() => {
+    if (!shake || !c.current.shake || !shakeRef.current) return;
+    void animateShake(shakeRef.current, { x: [0, -10, 10, -7, 7, 0] }, { duration: 0.45 });
+  }, [shake]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function changePace() {
     const next = PACES[(PACES.indexOf(paceRef.current) + 1) % PACES.length];
@@ -175,6 +188,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
 
   function tap(t: number) {
+    lastTap.current = Date.now();
     if (modeRef.current !== 'play') return;
     const s = [...slotsRef.current], at = s.indexOf(t);
     if (at >= 0) {
@@ -207,7 +221,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await wait(c.current.still ? 200 : 650);
       setBoom(true); x.sfx.pop(); x.burst(0.42, 0.42, 'big'); x.say(`${w.word}! +${pts}`, 'big');
       await wait(1500);
-      const pw = await c.current.power(0.45);
+      // No Extra Time when there is no timer.
+      const pw = await c.current.power(0.45, (p) => p.id !== 'time' || paceRef.current !== 'none');
       if (pw) {
         // Every power-up, silly ones too, waits for the earner's own next word.
         if (pw.silly && x.solo) silly.current.push(pw);
@@ -327,7 +342,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
         {/* The shelf and its slots. */}
         <div className="absolute rounded-[0.8rem] border-heavy border-border" style={{ left: `${x0 - 2.5}%`, width: `${step * (n - 1) + tileW + 5}%`, top: `${SLOT_Y + tileH / 2 + 0.5}%`, height: '3.4%', background: '#c98a52', boxShadow: '0 5px 0 #000' }} aria-hidden="true" />
-        <motion.div className="absolute inset-0 pointer-events-none" key={`shake-${shake}`} animate={shake && ctx.shake ? { x: [0, -10, 10, -7, 7, 0] } : undefined} transition={{ duration: 0.45 }} aria-hidden="true">
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           {letters.map((_, i) => (
             <div key={i} className="absolute rounded-[22%] border-[3px] border-dashed" style={{ left: `${spot(i).left}%`, top: `${SLOT_Y - tileH / 2}%`, width: `${tileW}%`, height: `${tileH}%`, borderColor: '#241c3d', background: 'rgba(251,252,248,0.5)' }}>
               <AnimatePresence>
@@ -335,7 +350,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               </AnimatePresence>
             </div>
           ))}
-        </motion.div>
+        </div>
         {/* The empty spots on the counter. */}
         {letters.map((_, i) => (
           <div key={`spot-${i}`} className="absolute rounded-[22%]" aria-hidden="true" style={{ left: `${spot(i).left + tileW * 0.08}%`, top: `${TRAY_Y + tileH * 0.32}%`, width: `${tileW * 0.84}%`, height: `${tileH * 0.25}%`, background: 'rgba(36,28,61,0.18)', filter: 'blur(2px)' }} />
@@ -348,7 +363,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         </motion.div>
 
         {/* The letter tiles. */}
-        <div className="absolute inset-0" role="group" aria-label="Letter tiles">
+        <div ref={shakeRef} className="absolute inset-0" role="group" aria-label="Letter tiles">
           {letters.map((l, t) => {
             const p = posOf(t), inSlot = slots.includes(t), gold = locked !== null && slots[locked] === t;
             const k = hops[t] ?? 0;
@@ -399,10 +414,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <span className="font-display leading-none" style={{ fontSize: `max(0.9rem, ${wide ? 2.6 : 3.4}cqh)` }}>Mix</span>
         </motion.button>
         {pace !== 'none' && <EggTimer left={left} watch={watch} double={double} still={ctx.still} style={{ left: `${50 + bowl.w / 2 + (wide ? 4 : 5)}%`, top: `${bowl.top + 4}%`, width: `${wide ? 9 : 15}%` }} />}
-        <button type="button" onClick={changePace} className="absolute min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold leading-none whitespace-nowrap motion-safe:hover:scale-105 motion-safe:transition-transform"
+        {ctx.timeScale !== 0 && <button type="button" onClick={changePace} className="absolute min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold leading-none whitespace-nowrap motion-safe:hover:scale-105 motion-safe:transition-transform"
           style={{ right: '2%', bottom: '3%', fontSize: `max(0.8rem, ${wide ? 2.4 : 3}cqh)`, boxShadow: '0 3px 0 #000' }} aria-label={`Timer: ${PACE_LABEL[pace]}. Tap to change.`}>
           Timer: {PACE_LABEL[pace]}
-        </button>
+        </button>}
       </div>
       {mode === 'turn' && !ctx.solo && <TurnCard key={ctx.taken} player={ctx.player} onStart={() => void begin()} />}
     </div>

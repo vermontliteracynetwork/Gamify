@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { AnimatePresence, motion, useAnimate, type AnimationOptions, type DOMKeyframesDefinition } from 'motion/react';
 import { CheckCircle, Football, HandTap, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { pace } from '../../../engine/pace';
@@ -255,7 +255,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       <div className="relative lab-fit rounded-[1.4rem] border-heavy border-border overflow-hidden" style={{ ['--ar' as string]: 1.8, boxShadow: '0 8px 0 #000, 0 24px 44px rgba(36,28,61,0.35)' }}>
         <svg viewBox="0 0 180 100" className="absolute inset-0 w-full h-full" role="img" aria-label="Football field">
           <FieldArt />
-          <g key={`ch${cheer}`} className={still ? '' : 'td-cheer'}><Crowd /></g>
+          <g className={still || !cheer ? '' : cheer % 2 ? 'td-cheer' : 'td-cheer-b'}><Crowd /></g>
           {/* The end zone you drive toward wears your team color. */}
           <rect x="160" y="16" width="14" height="68" fill={color} opacity="0.9" />
           <path d="M160 16 h14 v68 h-14 z" fill="url(#td-stripes)" />
@@ -277,21 +277,21 @@ function Play({ ctx }: { ctx: LabCtx }) {
             const def = a.startsWith('D');
             const isCarrier = a === carrier && paths;
             return (
-              <motion.g key={`${a}-${paths?.key ?? 'f'}`} initial={false} animate={pp ? { x: pp.map((p) => p.x), y: pp.map((p) => p.y) } : { x: F[a].x, y: F[a].y }} transition={pp ? tr() : { type: 'spring', stiffness: 70, damping: 13 }}>
-                <motion.g key={`d${dance}`} animate={dance && a === 'WR' || dance && a === 'RB' ? (still ? undefined : { rotate: [0, 360, 360, 720], scale: [1, 1.4, 1, 1.3, 1] }) : undefined} transition={{ duration: 2.2 }}>
+              <motion.g key={a} initial={false} animate={pp ? { x: pp.map((p) => p.x), y: pp.map((p) => p.y) } : { x: F[a].x, y: F[a].y }} transition={pp ? tr() : { type: 'spring', stiffness: 70, damping: 13 }}>
+                <Pulse n={a === 'WR' || a === 'RB' ? dance : 0} off={still} run={{ rotate: [0, 360, 360, 720], scale: [1, 1.4, 1, 1.3, 1] }} transition={{ duration: 2.2 }}>
                   {/* The ball carrier wears a yellow ring and an arrow pointing the way. */}
                   {(isCarrier || (!paths && a === 'QB')) && <g><circle r="4.4" fill="none" stroke="#fdfd94" strokeWidth="0.9" /><circle r="4.4" fill="none" stroke="#000" strokeWidth="0.3" strokeDasharray="1 1" /><path d="M5.4 -1.6 L8 0 L5.4 1.6 Z" fill="#fdfd94" stroke="#000" strokeWidth="0.3" /></g>}
                   {isCarrier && (mods.turbo || mods.juke) && <g className={still ? '' : 'td-zip'}>{[-2, 0, 2].map((dy) => <path key={dy} d={`M-12 ${dy} h${mods.turbo ? 6 : 4}`} stroke={mods.turbo ? '#f6c544' : '#fbfcf8'} strokeWidth="0.7" strokeLinecap="round" />)}</g>}
                   {/* Little running hops with a squash on each step. */}
-                  <motion.g animate={pp && !still && a !== 'L1' && a !== 'L2' ? { y: [0, -0.9, 0], scaleY: [1, 0.88, 1] } : undefined} transition={{ duration: 0.28, repeat: pp ? Math.ceil((paths?.dur ?? 1) / 0.28) - 1 : 0 }}>
+                  <Pulse n={a !== 'L1' && a !== 'L2' ? paths?.key ?? 0 : 0} off={still} run={{ y: [0, -0.9, 0], scaleY: [1, 0.88, 1] }} transition={{ duration: 0.28, repeat: Math.ceil((paths?.dur ?? 1) / 0.28) - 1 }}>
                     <PlayerTop color={def ? '#241c3d' : color} stripe={def ? '#ef7d96' : '#fbfcf8'} flip={def} />
-                  </motion.g>
-                </motion.g>
+                  </Pulse>
+                </Pulse>
               </motion.g>
             );
           })}
           {/* The ball. */}
-          <motion.g key={`ball-${paths?.key ?? 'f'}-${wobble}`} initial={false}
+          <motion.g initial={false}
             animate={paths ? { x: paths.p.ball.map((p) => p.x), y: paths.p.ball.map((p) => p.y), scale: paths.p.ball.map((p) => p.s), rotate: paths.p.ball.map((_, i) => i * (hail ? 120 : 40)) } : wobble && !still ? { x: [F.QB.x + 2, F.QB.x + 5, F.QB.x - 2, F.QB.x + 2], y: [MID, MID - 6, MID + 3, MID], rotate: [0, 200, 380, 720] } : { x: F.QB.x + 2, y: MID, rotate: 0 }}
             transition={paths ? tr() : wobble ? { duration: 1.1 } : { type: 'spring', stiffness: 70, damping: 13 }}>
             {hail && <circle r="4.2" fill="#fdfd94" opacity="0.55" />}
@@ -364,8 +364,18 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
 const PLAY_NAMES: Record<PlayId, string> = { run: 'Run', short: 'Short pass', bomb: 'Long throw' };
 
+// Plays a one-off move on a stable wrapper each time `n` goes up, without
+// remounting what is inside (so nothing else replays its entrance).
+function Pulse({ n, run, transition, off, style, children }: { n: number; run: DOMKeyframesDefinition; transition?: AnimationOptions; off?: boolean; style?: CSSProperties; children: ReactNode }) {
+  const [scope, animate] = useAnimate<SVGGElement>();
+  useEffect(() => { if (n && !off && scope.current) void animate(scope.current, run, transition); }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <g ref={scope} style={{ transformBox: 'fill-box', transformOrigin: 'center', ...style }}>{children}</g>;
+}
+
 const CSS = `
 .td-cheer > g { animation: td-cheer 0.45s ease-in-out 4 both; }
+.td-cheer-b > g { animation: td-cheer-b 0.45s ease-in-out 4 both; transform-box: fill-box; transform-origin: center; }
+@keyframes td-cheer-b { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
 .td-cheer > g:nth-child(2n) { animation-delay: 0.12s; }
 @keyframes td-cheer { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
 .td-cheer > g { transform-box: fill-box; transform-origin: center; }

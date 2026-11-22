@@ -3,11 +3,11 @@
 // snaking back and forth, square 100 top left. Coordinates are 0..1000.
 
 export const LADDERS: Record<number, number> = { 2: 22, 8: 33, 16: 45, 43: 78, 52: 89, 66: 95 };
-export const SNAKES: Record<number, number> = { 37: 4, 47: 14, 61: 40, 71: 50, 87: 54, 97: 64, 99: 79 };
+export const SNAKES: Record<number, number> = { 37: 4, 47: 14, 61: 40, 71: 50, 87: 54, 97: 64 };
 export const LAST = 100;
 // Each snake keeps to its own column (ladders have theirs), so nothing crosses;
 // the snakes on the board's edges wiggle a little less.
-export const SNAKE_AMP: Record<number, number> = { 37: 40, 47: -40, 61: 28, 71: -28, 87: 40, 97: -40, 99: 40 };
+export const SNAKE_AMP: Record<number, number> = { 37: 40, 47: -40, 61: 28, 71: -28, 87: 40, 97: -40 };
 
 export interface Pt { x: number; y: number }
 
