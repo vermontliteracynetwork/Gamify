@@ -166,6 +166,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       await wait(1700);
     }
     if (!alive(id)) return;
+    c.current.setHeld(c.current.player.id, []);
     c.current.next();
   }
 
@@ -177,6 +178,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   // Each power-up does its own thing on the field. Returns extra plays.
   async function usePower(p: LabPower): Promise<number> {
     const x = c.current;
+    // This play's power-up stays listed (a still picture) until the play is over.
+    if (p.id !== 'golden' && p.id !== 'fumble' && p.id !== 'mascot') x.setHeld(x.player.id, [p]);
     switch (p.id) {
       case 'juke': setMods({ juke: true }); x.sfx.zap(); break;
       case 'turbo': setMods({ turbo: true }); x.sfx.zap(); window.setTimeout(() => c.current.sfx.whoosh(), 200); break;

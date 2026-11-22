@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { advanceBall, cpuPlay, fieldGoalChance, runPlay } from './rules';
+import { advanceBall, cpuPlay, expectedGain, fieldGoalChance, runPlay } from './rules';
 
 const seq = (...v: number[]) => { let i = 0; return () => v[i++ % v.length]; };
 
@@ -28,5 +28,10 @@ describe('touchdown drive', () => {
   it('the computer runs near the goal and throws deep when far', () => {
     expect(cpuPlay(95, 3, true)).toBe('run');
     expect(cpuPlay(20, 2, true)).toBe('bomb');
+  });
+  it('a long throw is not much better than a short pass on average', () => {
+    const short = expectedGain('short'), long = expectedGain('bomb');
+    expect(Math.abs(long - short)).toBeLessThan(2.5);
+    expect(expectedGain('run')).toBeLessThan(short);
   });
 });

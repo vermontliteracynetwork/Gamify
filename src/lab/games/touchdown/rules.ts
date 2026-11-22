@@ -11,7 +11,7 @@ export interface PlayResult { yards: number; complete: boolean; picked: boolean 
 export interface PlayMods { juke?: boolean; turbo?: boolean; sprinkler?: boolean; rand?: () => number }
 
 // Run: short and safe. Short pass: a good gain, sometimes dropped. Long
-// bomb: a huge gain, often incomplete, now and then picked off.
+// throw: a huge gain, often incomplete, now and then caught by the other team.
 export function runPlay(id: PlayId, m: PlayMods = {}): PlayResult {
   const rand = m.rand ?? Math.random;
   const between = (a: number, b: number) => Math.round(a + rand() * (b - a));
@@ -20,7 +20,8 @@ export function runPlay(id: PlayId, m: PlayMods = {}): PlayResult {
   else if (id === 'short') r = rand() < 0.25 ? { yards: 0, complete: false, picked: false } : { yards: between(6, 16), complete: true, picked: false };
   else {
     const roll = rand();
-    r = roll < 0.06 ? { yards: 0, complete: false, picked: true } : roll < 0.5 ? { yards: 0, complete: false, picked: false } : { yards: between(22, 45), complete: true, picked: false };
+    // About as many yards on average as a short pass, but all or nothing.
+    r = roll < 0.06 ? { yards: 0, complete: false, picked: true } : roll < 0.7 ? { yards: 0, complete: false, picked: false } : { yards: between(22, 40), complete: true, picked: false };
   }
   // A juke never fails and slips past for extra yards.
   if (m.juke) r = { yards: Math.max(r.yards, id === 'run' ? 6 : id === 'short' ? 10 : 25) + 8, complete: true, picked: false };
@@ -47,4 +48,11 @@ export function cpuPlay(yard: number, left: number, sharp: boolean, rand: () => 
   if (toGo <= 9) return 'run';
   if (toGo > left * 12) return 'bomb';
   return rand() < 0.5 ? 'short' : 'run';
+}
+
+// Average yards a play gains, for checking balance.
+export function expectedGain(id: PlayId, n = 6000): number {
+  let sum = 0;
+  for (let i = 0; i < n; i++) sum += runPlay(id).yards;
+  return sum / n;
 }

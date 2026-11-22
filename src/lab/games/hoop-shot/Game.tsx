@@ -107,6 +107,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   async function usePower(p: LabPower | null) {
     const x = c.current;
     if (!p) return;
+    // The power-up stays listed (a still picture) until this turn ends.
+    if (p.id !== 'dunk') x.setHeld(x.player.id, [p]);
     switch (p.id) {
       case 'hot': setMods({ hot: true }); x.sfx.zap(); window.setTimeout(() => c.current.sfx.whoosh(), 250); break;
       case 'giant': setMods({ giant: true }); x.sfx.boing(); break;
@@ -208,6 +210,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     await wait(1800);
     if (!alive(id)) return;
     setBall(null); setTrail([]);
+    c.current.setHeld(c.current.player.id, []);
     c.current.next();
   }
 
@@ -230,6 +233,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     await wait(1200);
     if (!alive(id)) return;
     setBall(null);
+    c.current.setHeld(c.current.player.id, []);
     c.current.next();
   }
 

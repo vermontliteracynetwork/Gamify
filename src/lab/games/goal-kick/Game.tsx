@@ -94,6 +94,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   async function usePower(p: LabPower | null) {
     const x = c.current;
     if (!p) return;
+    // The power-up stays listed (a still picture) until this turn ends.
+    if (p.id !== 'dunk') x.setHeld(x.player.id, [p]);
     switch (p.id) {
       case 'banana': setMods({ banana: true }); x.sfx.slideUp(); break;
       case 'sleepy': setMods({ sleepy: true }); x.sfx.slideDown(); break;
@@ -127,7 +129,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
     let aims = picks;
     if (m.butter) { aims = picks.map(() => ZONES[Math.floor(Math.random() * 6)]); }
     if (m.windy) { aims = picks.map((z) => windPush(z)); }
-    const others = x.turns.players.filter((p) => p.id !== x.player.id);
     // The goalie is the same fair keeper for everyone (about a third saved);
     // the computer's level only changes where the computer aims.
     const level: GoalieLevel = 'none';
@@ -184,6 +185,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setPhase('busy');
     await wait(2000);
     if (!alive(id)) return;
+    c.current.setHeld(c.current.player.id, []);
     c.current.next();
   }
 
