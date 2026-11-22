@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'design-connectors', kind: 'setup', added: '2026-11-22', title: 'Reconnect Figma and Canva, and send your design websites',
+    why: 'Claudia reviews every Game Lab game with the design plugins. The design review and accessibility checks ran; the Figma and Canva connectors could not connect from the cloud session (the network blocked them), and no list of design websites was found in the chat, the repo or the dev plan.',
+    how: 'In claude.ai Settings, Connectors: reconnect Figma and Canva (or allow their hosts in the cloud environment). Paste the design websites you want Claudia to study into the chat or the dev plan doc.' },
   { id: 'vln-llc', kind: 'legal', added: '2026-10-26', title: 'Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26)',
     why: 'Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it.',
     how: 'Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC\'s trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC\'s name.' },

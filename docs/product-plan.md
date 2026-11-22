@@ -1180,6 +1180,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 103 | **Your voice, your lesson.** Record a question in your own voice (or add a sound clip), make any question true or false in one tap, and give a set a short teach card that is shown and read aloud before the game starts. | Pre-readers hear their own teacher; every game starts with the skill, not just the score | Market research, 2026-11-01 |
 
 | 104 | **A classic board game on the smart board.** A real tabletop race board: answer, roll, hop square by square. A spinning forward or back wheel, a tornado that swirls every piece, and a die your class can redraw on one page. | Familiar board-game fun with a question on every turn; "your class designs the dice" | Teacher, 2026-11-08 |
+| 105 | **Thirty-plus game styles, one question set.** One set plays as baseball, a sprint race, bingo, a word search, a snow friend word game, a survey show, a treasure quest, a toy factory, a claw machine, a pixel space shooter and more, each with goofy power-ups that have their own animation and sound. | Every quiz-game style a class loves, in one place, no rebuilding the set | Game Lab, 2026-11-22 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1253,3 +1254,5 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 61 | **Fish facts science warm-up with Cast and Catch** | Project the game, cast together, and read each fish fact aloud; students keep a class fish book of the kinds found and research one that is still hiding. | Cast and Catch, Live or Solo, any set | Golden Rule pass, 2026-11-01; grades K-5 |
 | 62 | **Teach, Then Play** | Write a one-line teach card for the skill ("A noun is a person, place or thing"), record the questions in your own voice, then play any game; the card is read aloud before the first turn. | Teach cards, recorded questions | Development, 2026-11-01; K-3 |
 - Board Game review race (2026-11-08): teams answer to roll; use Lose a turn and Roll again squares to talk about chance and fairness, then let students design their own die faces (counting dots stays the same).
+- Same set, five games (2026-11-22): run one vocabulary set as a word search, then a word scramble, then a snow friend word game, then Letter Lock, and talk about which game made the words stick (spelling, meaning, letter patterns).
+- Survey Showdown as a discussion starter (2026-11-22): after each board, ask why the top answer is the top answer.
