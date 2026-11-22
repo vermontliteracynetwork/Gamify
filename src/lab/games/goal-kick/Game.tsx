@@ -360,7 +360,7 @@ function Kicker({ shirt, skin, kick }: { shirt: string; skin: string; kick: bool
     <g transform="scale(2.4)">
       <ellipse cy="0.3" rx="3" ry="0.8" fill="#000" opacity="0.25" />
       <path d="M-1.3 0 L-1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" />
-      <motion.path d="M1.3 0 L1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" animate={kick ? { d: ['M1.3 0 L1 -3.6', 'M-0.2 0.6 L1 -3.6', 'M4 -1.6 L1 -3.6', 'M1.3 0 L1 -3.6'] } : undefined} transition={{ duration: 0.75, times: [0, 0.6, 0.8, 1] }} />
+      <motion.path d="M1.3 0 L1 -3.6" stroke={skin} strokeWidth="1.3" strokeLinecap="round" initial={{ d: 'M1.3 0 L1 -3.6' }} animate={kick ? { d: ['M1.3 0 L1 -3.6', 'M-0.2 0.6 L1 -3.6', 'M4 -1.6 L1 -3.6', 'M1.3 0 L1 -3.6'] } : undefined} transition={{ duration: 0.75, times: [0, 0.6, 0.8, 1] }} />
       <rect x="-2.3" y="-4.8" width="4.6" height="1.8" rx="0.6" fill="#241c3d" />
       <path d="M-2.4 -7.6 L-3.6 -4.6 M2.4 -7.6 L3.6 -4.6" stroke={skin} strokeWidth="1.1" strokeLinecap="round" />
       <rect x="-2.6" y="-8.8" width="5.2" height="4.4" rx="1.4" fill={shirt} stroke="#000" strokeWidth="0.45" />

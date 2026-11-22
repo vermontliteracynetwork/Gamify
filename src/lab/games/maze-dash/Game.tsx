@@ -354,9 +354,9 @@ function Cover() {
       <text x="17" y="55.5" textAnchor="middle" fontSize="4" fontWeight="700" fill="#241c3d">jump</text><text x="83" y="55.5" textAnchor="middle" fontSize="4" fontWeight="700" fill="#241c3d">six</text>
       <path d="M26 15v22M26 37h14M40 26v22M54 15v14M54 29h12M66 40v19M74 37h-8M8 37h10M84 26v12" stroke="#241c3d" strokeWidth="2.6" strokeLinecap="round" />
       <path d="M26 15v22M26 37h14M40 26v22M54 15v14M54 29h12M66 40v19M74 37h-8M8 37h10M84 26v12" stroke="#5cc37a" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="47" cy="40" r="3.6" fill="#f6c544" stroke="#000" strokeWidth="0.7" /><circle cx="48.5" cy="39" r="0.8" />
-      <path d="M58 46 q-1 -6 4 -7 q5 1 4 7 q-1 1 -2 0 q-1 1 -2 0 q-1 1 -2 0z" fill="#ffd6e0" stroke="#241c3d" strokeWidth="0.6" />
-      {[30, 34, 38, 44, 50].map((x) => <circle key={x} cx={x} cy="31" r="0.7" fill="#f6c544" />)}
+      <g transform="translate(40 32) scale(0.13)"><RunnerArt color="#5cc3a0" face={1} hop={0} /></g>
+      <g transform="translate(56 38) scale(0.13)"><PuffCloud color="#ffd6e0" scared={false} frozen={false} look={3} t={0} still /></g>
+      {[[34, 31], [37, 32], [40, 31]].map(([x, y]) => <ellipse key={x} cx={x} cy={y} rx="0.7" ry="0.9" fill="#a7744a" opacity="0.6" />)}
     </svg>
   );
 }
