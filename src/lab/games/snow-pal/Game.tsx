@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, Keyboard, Snowflake, X as XIcon } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../../../data/types';
+import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
 import type { WordPair } from '../../words';
 import { ALPHABET, cpuLetter, hidden, hits, lost as lostOf, PIECES, solved, VOWELS } from './rules';
@@ -82,7 +83,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const guessed = cur?.guessed ?? [];
   const word = pair?.word ?? '';
   const lost = lostOf(word, guessed, cur?.refrozen ?? 0);
-  const lw = LOOK_WORDS[look];
 
   const get = () => states.current[c.current.player.id];
   function put(patch: Partial<WordState>) {
@@ -270,7 +270,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         {/* The clue, the word and how many pieces are left. */}
         <div className={`absolute right-0 ${tall ? "top-[46%] w-full h-[28%]" : "top-0 w-[51%] h-[64%]"} grid grid-rows-[auto_1fr_auto] gap-[calc(var(--u)*2)]`}>
           <div className="rounded-[calc(var(--u)*3)] border-bold border-border bg-surface px-[calc(var(--u)*2.5)] py-[calc(var(--u)*2)] flex items-center gap-[calc(var(--u)*2)] min-h-[calc(var(--u)*22)]" style={{ boxShadow: '0 calc(var(--u)*0.8) 0 #000' }}>
-            <span className="shrink-0 w-[calc(var(--u)*9)] h-[calc(var(--u)*9)] rounded-full border-std border-border bg-accent grid place-items-center" aria-hidden="true"><Snowflake weight="fill" className="w-[60%] h-[60%]" /></span>
+            {ctx.solo ? <span className="shrink-0 w-[calc(var(--u)*9)] h-[calc(var(--u)*9)] rounded-full border-std border-border bg-accent grid place-items-center" aria-hidden="true"><Snowflake weight="fill" className="w-[60%] h-[60%]" /></span>
+              : <span className="shrink-0 rounded-full" style={{ boxShadow: '0 0 0 calc(var(--u)*0.7) #fdfd94' }} title={`${ctx.player.name}'s word`}><TeamBadge colorIndex={ctx.player.colorIndex} size={40} /></span>}
             <p className="font-bold leading-snug text-balance m-0" style={{ fontSize: `calc(var(--u)*${clueSize})` }} aria-live="polite">{clue}</p>
           </div>
           <div className="relative flex flex-wrap items-center justify-center content-center gap-[calc(var(--u)*1.4)]" aria-label="The word">
