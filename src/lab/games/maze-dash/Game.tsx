@@ -206,7 +206,7 @@ function Pad({ style, go }: { style: CSSProperties; go: (d: Dir) => void }) {
   const b = (d: Dir, label: string, Icon: typeof ArrowFatUp, area: string) => (
     <button type="button" aria-label={label} onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); go(d); }} onClick={(e) => { if (e.detail === 0) go(d); }}
       className="rounded-2xl border-heavy border-border bg-accent grid place-items-center motion-safe:hover:scale-105 motion-safe:active:scale-90 motion-safe:transition-transform"
-      style={{ gridArea: area, boxShadow: '0 4px 0 #000', fontSize: 'max(0.8125rem, calc(var(--u) * 2.6))' }}><span className="grid justify-items-center gap-0.5 font-bold leading-none"><Icon weight="fill" size="1.6em" aria-hidden="true" />{label}</span></button>
+      style={{ gridArea: area, boxShadow: '0 4px 0 #000', fontSize: 'max(13px, calc(var(--u) * 2.6))' }}><span className="grid justify-items-center gap-0.5 font-bold leading-none"><Icon weight="fill" size="1.6em" aria-hidden="true" />{label}</span></button>
   );
   return (
     <div className="absolute z-10 grid gap-1.5" style={{ ...style, width: 'max(10.5rem, calc(var(--u) * 27))', height: 'max(10.5rem, calc(var(--u) * 27))', gridTemplateAreas: '". u ." "l . r" ". d ."', gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, 1fr)' }}>

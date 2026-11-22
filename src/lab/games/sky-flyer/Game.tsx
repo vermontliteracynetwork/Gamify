@@ -151,7 +151,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
             {([-1, 1] as const).map((d) => (
               <button key={d} type="button" aria-label={d < 0 ? 'Fly up' : 'Fly down'} {...btn(d)}
                 className="rounded-full border-heavy border-border bg-accent grid place-items-center content-center gap-0.5 font-bold leading-none motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform"
-                style={{ width: 'max(3.6rem, calc(var(--u) * 13))', height: 'max(3.6rem, calc(var(--u) * 13))', boxShadow: '0 4px 0 #000', fontSize: 'max(0.8125rem, calc(var(--u) * 2.8))' }}>
+                style={{ width: 'max(3.6rem, calc(var(--u) * 13))', height: 'max(3.6rem, calc(var(--u) * 13))', boxShadow: '0 4px 0 #000', fontSize: 'max(13px, calc(var(--u) * 2.8))' }}>
                 {d < 0 ? <ArrowFatUp weight="fill" size="45%" aria-hidden="true" /> : <ArrowFatDown weight="fill" size="45%" aria-hidden="true" />}
                 <span>{d < 0 ? 'Up' : 'Down'}</span>
               </button>

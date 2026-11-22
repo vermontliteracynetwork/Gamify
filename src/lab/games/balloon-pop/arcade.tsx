@@ -484,7 +484,7 @@ function Banner({ ar }: { ar: Arcade }) {
               <SpeakerHigh weight="fill" size={22} aria-hidden="true" />
             </button>
           )}
-          <h2 className="flex-1 min-w-0 font-bold text-center leading-tight text-balance m-0" style={{ fontSize: `max(1rem, calc(var(--u) * ${long ? 3.6 : 4.8}))`, color: '#241c3d' }} aria-live="polite">
+          <h2 className="flex-1 min-w-0 font-bold text-center leading-tight text-balance m-0" style={{ fontSize: `max(16px, calc(var(--u) * ${long ? 3.6 : 4.8}))`, color: '#241c3d' }} aria-live="polite">
             {q ? q.prompt : ' '}
           </h2>
           {q?.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="h-[85%] w-auto rounded-lg border-std border-border object-contain bg-white" />}
@@ -508,7 +508,7 @@ function FxChips({ ar }: { ar: Arcade }) {
   return (
     <div className="absolute right-0 flex gap-1.5 justify-end flex-wrap" style={{ top: 'calc(var(--u) * 16.5)' }}>
       {tags.map((s) => (
-        <motion.span key={s} layout initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-full border-std border-border bg-accent font-bold px-2.5 py-0.5 whitespace-nowrap" style={{ fontSize: 'max(0.8125rem, calc(var(--u) * 2.8))', boxShadow: '0 2px 0 #000' }}>{s}</motion.span>
+        <motion.span key={s} layout initial={{ scale: 0 }} animate={{ scale: 1 }} className="rounded-full border-std border-border bg-accent font-bold px-2.5 py-0.5 whitespace-nowrap" style={{ fontSize: 'max(13px, calc(var(--u) * 2.8))', boxShadow: '0 2px 0 #000' }}>{s}</motion.span>
       ))}
     </div>
   );
