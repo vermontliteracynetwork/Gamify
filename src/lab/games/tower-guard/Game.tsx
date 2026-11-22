@@ -32,7 +32,7 @@ const POWERS: LabPower[] = [
   { id: 'shield', name: 'Sprinkle Shield', desc: 'The cake ignores the next 3 bites.', enter: 'drop', art: <ImgArt src={`${A}/shield.webp`} ring="#ffd9e6" /> },
   { id: 'tornado', name: 'Tornado', desc: 'Blows the blobs back to the start of the path.', enter: 'spin', art: <ImgArt src={`${A}/tornado.webp`} ring="#e2e8f5" /> },
   { id: 'party', name: 'Blob Party', desc: 'The blobs put on party hats and dance for a while.', silly: true, art: <Art kind="party" /> },
-  { id: 'sugar', name: 'Sugar Rush', desc: 'Oops! The blobs ate candy and march faster this wave.', silly: true, art: <Art kind="sugar" /> },
+  { id: 'sugar', name: 'Sugar Rush', desc: 'The blobs ate candy! They march faster, but every pop counts double.', silly: true, art: <Art kind="sugar" /> },
 ];
 
 type Phase = 'ask' | 'build' | 'wave' | 'busy';
@@ -155,7 +155,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       const s = sim.current, x = c.current, f = flags.current;
       const n = Math.floor(x.taken / Math.max(1, x.turns.players.length)) + 1;
       startWave(s, n);
-      s.freezeUntil = f.freeze ? 4 : 0; s.partyUntil = f.party ? 3.5 : 0; s.speed = f.sugar ? 1.3 : 1;
+      s.freezeUntil = f.freeze ? 4 : 0; s.partyUntil = f.party ? 3.5 : 0; s.speed = f.sugar ? 1.3 : 1; s.bonus = f.sugar ? 2 : 1;
       s.turbo = f.turbo ? x.player.id : null; s.mega = f.mega ? { d: -300, owner: x.player.id } : null; s.tornadoAt = f.tornado ? 5 : null;
       x.sfx.whistle(); x.say(`Wave ${n}!`, 'big');
       let last = performance.now(), raf = 0, bitten = 0;
@@ -191,20 +191,22 @@ function Board({ ctx }: { ctx: LabCtx }) {
   function place(spot: number, type: TowerType) {
     const x = c.current, id = x.player.id;
     const cost = free.current.has(id) ? 0 : TOWERS[type].cost;
-    if ((coinsRef.current[id] ?? 0) < cost || sim.current.towers.some((tw) => tw.spot === spot)) return;
+    if ((coinsRef.current[id] ?? 0) < cost || sim.current.towers.some((tw) => tw.spot === spot)) return false;
     free.current.delete(id);
     addCoins(id, -cost);
     const s = sim.current;
     s.towers = [...s.towers, { id: s.nextId++, spot, type, level: 1, owner: id, cool: 0, fired: 0 }];
     setMenu(null); x.sfx.build(); x.burst(...burstAt(spot), 'small'); setTick((k) => k + 1);
+    return true;
   }
   function upgrade(towerId: number) {
     const x = c.current, id = x.player.id;
     const tw = sim.current.towers.find((v) => v.id === towerId);
-    if (!tw || tw.level >= MAX_LEVEL || (coinsRef.current[id] ?? 0) < upgradeCost(tw.level)) return;
+    if (!tw || tw.level >= MAX_LEVEL || (coinsRef.current[id] ?? 0) < upgradeCost(tw.level)) return false;
     addCoins(id, -upgradeCost(tw.level));
     sim.current.towers = sim.current.towers.map((v) => (v.id === towerId ? { ...v, level: v.level + 1 } : v));
     setMenu(null); x.sfx.power(); x.burst(...burstAt(tw.spot), 'small'); setTick((k) => k + 1);
+    return true;
   }
   const burstAt = (spot: number): [number, number] => {
     const r = ref.current?.getBoundingClientRect(); const [px, py] = tp(SPOTS[spot]);
@@ -220,11 +222,17 @@ function Board({ ctx }: { ctx: LabCtx }) {
     if (!ctx.cpu || phase !== 'build') return;
     const tid = window.setTimeout(() => {
       const x = c.current, id = x.player.id;
-      const coinsNow = free.current.has(id) ? 99 : coinsRef.current[id] ?? 0;
-      const move = cpuBuild(sim.current, id, coinsNow);
+      // A Free Tower goes on an open spot first; then real coins decide.
+      if (free.current.has(id)) {
+        const open = SPOTS.map((_, i) => i).filter((i) => !sim.current.towers.some((tw) => tw.spot === i));
+        const types = Object.keys(TOWERS) as TowerType[];
+        if (open.length) { const spot = open[Math.floor(Math.random() * open.length)]; setMenu({ kind: 'place', spot }); window.setTimeout(() => { if (!place(spot, types[Math.floor(Math.random() * types.length)])) go(); }, 700); return; }
+        free.current.delete(id);
+      }
+      const move = cpuBuild(sim.current, id, coinsRef.current[id] ?? 0);
       if (!move) { go(); return; }
-      if (move.kind === 'place') { setMenu({ kind: 'place', spot: move.spot }); window.setTimeout(() => place(move.spot, move.type), 700); }
-      else upgrade(move.id);
+      if (move.kind === 'place') { setMenu({ kind: 'place', spot: move.spot }); window.setTimeout(() => { if (!place(move.spot, move.type)) go(); }, 700); }
+      else if (!upgrade(move.id)) go();
     }, 1500);
     return () => window.clearTimeout(tid);
   }); // eslint-disable-line react-hooks/exhaustive-deps
@@ -309,7 +317,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
             <button key={i} type="button" onClick={() => { c.current.sfx.tap(); setMenu(tw ? { kind: 'upgrade', tower: tw } : { kind: 'place', spot: i }); }}
               aria-label={tw ? `Upgrade your ${TOWERS[tw.type].name}` : `Build on spot ${i + 1}`}
               className="absolute w-[9%] aspect-square -translate-x-1/2 -translate-y-1/2 rounded-full motion-safe:hover:scale-110 motion-safe:transition-transform focus-visible:outline-4 focus-visible:outline-[#241c3d]" style={pct(sp)}>
-              {tw && <span className="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-accent border-std border-border grid place-items-center"><ArrowFatUp weight="fill" size={20} /></span>}
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-[-18%] whitespace-nowrap rounded-full bg-accent border-std border-border px-2 inline-flex items-center gap-1 font-bold text-sm leading-tight" style={{ boxShadow: '0 2px 0 #000' }}>{tw && <ArrowFatUp weight="fill" size={14} aria-hidden="true" />}{tw ? 'Upgrade' : 'Build'}</span>
             </button>
           );
         })}
@@ -358,7 +366,7 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
               className="w-[5.2rem] rounded-2xl border-std border-border bg-white p-1 grid justify-items-center gap-0.5 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform">
               <svg viewBox="-50 -70 100 110" className="w-14 h-14"><TowerBody type={t} level={1} color="#b4c4fb" /></svg>
               <span className="font-bold text-sm leading-none">{TOWERS[t].short}</span>
-              <span className="inline-flex items-center gap-1 font-display text-lg"><img src={COIN} alt="" className="w-5 h-5" />{cost}</span>
+              <span className="inline-flex items-center gap-1 font-display text-lg"><img src={COIN} alt="" className="w-5 h-5" />{coins < cost ? `Need ${cost}` : cost}</span>
             </button>
           );
         }) : (
@@ -366,7 +374,7 @@ function BuildMenu({ menu, pos, coins, free, still, cpu, flip, onPlace, onUpgrad
             className="rounded-2xl border-std border-border bg-accent px-3 py-1 flex items-center gap-2 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform">
             <svg viewBox="-50 -70 100 110" className="w-14 h-14"><TowerBody type={menu.tower.type} level={menu.tower.level + 1} color="#b4c4fb" /></svg>
             <span className="grid justify-items-start"><span className="font-bold text-sm leading-none inline-flex items-center gap-1"><ArrowFatUp weight="fill" size={18} aria-hidden="true" />Upgrade</span>
-            <span className="inline-flex items-center gap-1 font-display text-xl"><img src={COIN} alt="" className="w-6 h-6" />{upgradeCost(menu.tower.level)}</span></span>
+            <span className="inline-flex items-center gap-1 font-display text-xl"><img src={COIN} alt="" className="w-6 h-6" />{coins < upgradeCost(menu.tower.level) ? `Need ${upgradeCost(menu.tower.level)}` : upgradeCost(menu.tower.level)}</span></span>
           </button>
         )}
         <button type="button" onClick={onClose} className="self-stretch min-w-[3.4rem] rounded-2xl border-std border-border bg-surface-2 grid place-items-center content-center gap-0.5 px-2 font-bold text-sm motion-safe:hover:scale-105 motion-safe:transition-transform"><X weight="bold" size={20} aria-hidden="true" />Close</button>
@@ -476,7 +484,7 @@ function PowerFx({ kind, still, cakePos }: { kind: string; still: boolean; cakeP
   if (kind === 'coins') return <motion.div {...base}>{Array.from({ length: 18 }, (_, i) => <motion.img key={i} src={COIN} alt="" className="absolute w-[5%]" style={{ left: `${(i * 5.7) % 96}%` }} initial={{ top: '-8%' }} animate={{ top: '105%', rotate: 540 }} transition={{ delay: (i % 6) * 0.1, duration: 1.1, ease: 'easeIn' }} />)}</motion.div>;
   if (kind === 'free') return <motion.div {...base}><motion.svg viewBox="-50 -80 100 120" className={center} initial={{ y: -400 }} animate={{ y: 0 }} transition={{ type: 'spring', stiffness: 180, damping: 11 }}><TowerBody type="bubble" level={2} color="#fdfd94" /></motion.svg></motion.div>;
   if (kind === 'mega') return <motion.div {...base}><motion.div className={center} animate={{ scale: [0.2, 1.3, 1], rotate: [0, 20, 0] }} transition={{ duration: 1 }}>{art}</motion.div></motion.div>;
-  if (kind === 'turbo') return <motion.div {...base}><motion.div className="absolute inset-0 bg-white" animate={{ opacity: [0, 0.8, 0, 0.5, 0] }} transition={{ duration: 0.6 }} /><motion.div className={center} animate={{ y: [-300, 0], rotate: [0, -10, 10, 0] }} transition={{ duration: 0.7 }}>{art}</motion.div></motion.div>;
+  if (kind === 'turbo') return <motion.div {...base}><motion.div className="absolute inset-0" style={{ background: 'radial-gradient(circle, rgba(253,253,148,0.5), rgba(253,253,148,0) 70%)' }} initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.4, ease: 'easeInOut' }} /><motion.div className={center} animate={{ y: [-300, 0], rotate: [0, -10, 10, 0] }} transition={{ duration: 0.7 }}>{art}</motion.div></motion.div>;
   if (kind === 'shield') return <motion.div {...base}><motion.div className="absolute w-[18%] aspect-square -translate-x-1/2 -translate-y-1/2" style={cakePos} initial={{ scale: 3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 160, damping: 12 }}>{art}</motion.div></motion.div>;
   if (kind === 'tornado' || kind === 'tornadoRun') return <motion.div {...base}><motion.img src={`${A}/tornado.webp`} alt="" className="absolute top-[20%] h-[50%]" initial={{ left: '100%' }} animate={{ left: '-30%', rotate: [0, -8, 8, -8, 0] }} transition={{ duration: 1.5, ease: 'easeInOut' }} /></motion.div>;
   if (kind === 'party') return <motion.div {...base}>{Array.from({ length: 24 }, (_, i) => <motion.span key={i} className="absolute w-3 h-5 rounded-sm" style={{ left: `${(i * 4.3) % 100}%`, background: ['#fdfd94', '#ef7d96', '#8fe3a0', '#b4c4fb'][i % 4] }} initial={{ top: '-5%' }} animate={{ top: '100%', rotate: 720 }} transition={{ delay: (i % 8) * 0.08, duration: 1.5 }} />)}<motion.div className={center} animate={{ rotate: [0, -15, 15, -15, 15, 0], scale: [0.5, 1.1, 1] }} transition={{ duration: 1.2 }}>{art}</motion.div></motion.div>;

@@ -53,7 +53,7 @@ export function grabChance(p: Prize, x: number, o: GrabOpts = {}): number {
   const aim = 1 - (d / reach) ** 2 * 0.7;
   return Math.min(1, aim * GRIP[p.rarity] * (o.wide ? 1.1 : 1) * (o.grip ? 1.2 : 1));
 }
-export const slipChance = (p: Prize, o: GrabOpts = {}) => (o.grip ? 0 : Math.min(0.6, SLIP[p.rarity] + (o.butter ? 0.1 : 0)));
+export const slipChance = (p: Prize, o: GrabOpts = {}) => (o.grip ? 0 : Math.min(0.6, SLIP[p.rarity]) /* Butter Fingers is only for show */);
 
 // The computer aims at the best prize it can reach, a little off when unlucky.
 export function cpuAim(pile: Prize[], sharp: boolean, rand: () => number = Math.random): number {

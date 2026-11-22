@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { CheckCircle, Drop, Heart, Leaf, Lightning, LockKey, Moon, Star, Trophy, type Icon } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
@@ -15,6 +15,8 @@ const A = '/lab/code-crackers';
 const GEMS = ['green', 'blue', 'pink', 'purple', 'yellow'].map((c) => `${A}/gem-${c}.webp`);
 const GLOW = '#3dff9a';
 const BOXES = 5;
+const FLAT = 10; // crystals for every right answer
+const TRY = 2; // crystals for trying after a miss
 
 const POWERS: LabPower[] = [
   { id: 'scan', name: 'Peek Scan', desc: 'See inside every box before you pick.', enter: 'zoom', art: <Art kind="scan" /> },
@@ -91,7 +93,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const [seeAll, setSeeAll] = useState(false);
   const [line, setLine] = useState('> starting up...');
   const [peekCodes, setPeekCodes] = useState(false);
-  const [glitch, setGlitch] = useState(0);
+  const wobble = useAnimationControls();
   const [fx, setFx] = useState<{ id: number; kind: string } | null>(null);
   const [pop, setPop] = useState<{ id: number; slot: number; text: string; good: boolean } | null>(null);
   const [targets, setTargets] = useState<string[]>([]);
@@ -100,7 +102,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const wallsRef = useRef(walls); wallsRef.current = walls;
   const decoders = useRef(new Set<string>());
   const [codes] = useState(() => new Map<string, Code>());
-  const [flow, setFlow] = useState<{ id: number; from: string; to: string } | null>(null);
+  const [flow, setFlow] = useState<{ id: number; from: string; to: string; n: number } | null>(null);
   const [robot, setRobot] = useState<'idle' | 'happy' | 'sad' | 'spin' | 'hic'>('idle');
   const turn = useRef(0);
   const picks = useRef(1);
@@ -116,7 +118,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const alive = (t: number) => turn.current === t;
   useEffect(() => () => { turn.current = -1; }, []);
   const say = (s: string) => setLine(`> ${s}`);
-  const shake = () => { if (c.current.shake) setGlitch((g) => g + 1); };
+  const shake = () => { if (c.current.shake) void wobble.start({ x: [0, -5, 4, 0], opacity: [1, 0.85, 1, 1], transition: { duration: 0.6, ease: 'easeInOut' } }); };
   const mood = (m: typeof robot, ms = 1400) => { setRobot(m); window.setTimeout(() => setRobot('idle'), ms); };
   const others = () => { const s = scores(), id = c.current.player.id; return Object.entries(s).filter(([k, v]) => k !== id && v > 0).map(([k]) => k); };
   const hackOn = () => { let on = false; void c.current.power(0, (p) => { if (p.id === 'hackbox') on = true; return false; }); return on; };
@@ -125,18 +127,14 @@ function Board({ ctx }: { ctx: LabCtx }) {
   useEffect(() => {
     const t = ++turn.current;
     const x = c.current;
-    setMode('wait'); setOpened([]); setSeeAll(false); setTargets([]); setCrack(null);
+    setMode('wait'); setOpened([]); setSeeAll(false); setTargets([]); setCrack(null); setPeekCodes(false);
     picks.current = 1; triple.current = false;
     say(`${x.player.name}: answer to open a box`);
     void x.ask().then(async (ok) => {
       if (!alive(t)) return;
-      if (!ok) { c.current.sfx.wrong(); say('not this time. next team!'); mood('sad'); await sleep(900); if (alive(t)) c.current.next(); return; }
-      // Code boxes are a memory game: every team's code shows for a moment.
-      if (hackOn() && others().length) {
-        setMode('busy'); setPeekCodes(true); c.current.sfx.bell(); say('look at every code. remember them!');
-        await sleep(3400); if (!alive(t)) return;
-        setPeekCodes(false);
-      }
+      if (!ok) { c.current.sfx.wrong(); say(`not this time. +${TRY} crystals for trying`); mood('sad'); await sleep(600); if (!alive(t)) return; c.current.points(TRY); c.current.sfx.coin(); await sleep(1100); if (alive(t)) c.current.next(); return; }
+      c.current.points(FLAT); c.current.sfx.coin(); c.current.say(`+${FLAT} crystals!`, 'good'); mood('happy');
+      await sleep(800); if (!alive(t)) return;
       setBoxes(fresh()); setMode('busy'); c.current.sfx.blip(0); shake();
       say('new mystery boxes!');
       await sleep(600); if (!alive(t)) return;
@@ -176,6 +174,11 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const x = c.current, id = x.player.id;
     const list = others();
     if (!list.length) { say('no crystals to borrow'); return; }
+    // A memory game: every team's code shows for a moment before the crack
+    // (with no clock, the codes stay up during the crack).
+    const ts = x.timeScale;
+    setMode('busy'); setPeekCodes(true); x.sfx.bell(); say('look at every code. remember them!');
+    if (ts) { await sleep(3400 * ts); if (!alive(t)) return; setPeekCodes(false); }
     playClip(`${A}/hack.mp3`, x.settings, 0.5); shake(); mood('spin', 1200);
     say('crack a code: pick a team'); x.say('Crack the code!', 'big');
     let target = list[0];
@@ -187,7 +190,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const tName = c.current.turns.players.find((p) => p.id === target)?.name ?? '';
     if (wallsRef.current.includes(target)) {
       setWalls((w) => w.filter((v) => v !== target)); c.current.setHeld(target, (c.current.held[target] ?? []).filter((h) => h.id !== 'firewall'));
-      say(`${tName}'s wall kept them safe!`); c.current.sfx.thud(); c.current.say('Wall!', 'oops'); await sleep(1600); return;
+      say(`${tName}'s wall kept them safe!`); c.current.sfx.thud(); c.current.say('Wall!', 'oops'); await sleep(1600); setPeekCodes(false); return;
     }
     const real = codes.get(target)!;
     const two = decoders.current.has(id);
@@ -210,13 +213,13 @@ function Board({ ctx }: { ctx: LabCtx }) {
       s[target] -= n; s[id] += n; c.current.setScores(s);
       playClip(`${A}/unlock.mp3`, c.current.settings, 0.5);
       c.current.say(`You cracked it! +${n}`, 'big'); say(`borrowed ${n} crystals`); mood('happy');
-      setFlow({ id: ++uid, from: target, to: id }); c.current.burst(0.5, 0.6);
+      setFlow({ id: ++uid, from: target, to: id, n }); c.current.burst(0.5, 0.6);
       codes.set(target, makeCode()); // a cracked code changes
     } else {
       c.current.sfx.boing(); shake(); c.current.say('Not that code!', 'oops'); say('wrong code. it stays locked'); mood('sad');
     }
     await sleep(1700);
-    setCrack(null);
+    setCrack(null); setPeekCodes(false);
   }
 
   async function pick(slot: number) {
@@ -228,7 +231,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const b = boxesRef.current[slot].b;
     const show = (text: string, good: boolean) => setPop({ id: ++uid, slot, text, good });
     if (b.kind === 'crystals' || b.kind === 'mega') {
-      const n = b.n * (triple.current ? 3 : 1);
+      // Speed Boost triples, but never adds more than 40 extra.
+      const n = triple.current ? Math.min(b.n * 3, b.n + 40) : b.n;
       x.points(n); x.sfx.coin(); show(`+${n}`, true); say(`found ${n} crystals!`); mood('happy');
       if (b.kind === 'mega') { x.say('Mega crystals!', 'big'); x.sfx.cheer(); x.burst(0.45, 0.4, 'big'); } else x.burst(0.2 + slot * 0.15, 0.4);
       await sleep(1300);
@@ -267,7 +271,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   return (
     <div ref={ref} className="absolute inset-0 rounded-panel border-heavy border-border overflow-clip" style={{ background: 'radial-gradient(120% 90% at 50% 0%, #2f2756 0%, #1b1533 70%)', boxShadow: '0 8px 0 #000, 0 24px 40px rgba(36,28,61,0.3)' }}>
       <LabRoom still={ctx.still} />
-      <motion.div key={glitch} className="absolute inset-0 flex flex-col gap-[2%] p-[2.5%]" animate={glitch && ctx.shake ? { x: [0, -5, 4, 0], opacity: [1, 0.85, 1] } : undefined} transition={{ duration: 0.6, ease: 'easeInOut' }}>
+      <motion.div className="absolute inset-0 flex flex-col gap-[2%] p-[2.5%]" animate={wobble}>
         {/* The terminal line. */}
         <div className="shrink-0 rounded-xl border-std border-[#000] px-4 py-2 font-mono font-bold flex items-center gap-2" style={{ background: '#0c1a14', color: GLOW, boxShadow: `0 0 18px ${GLOW}55, inset 0 0 12px ${GLOW}33`, fontSize: 'clamp(0.95rem, 3cqmin, 1.6rem)' }} aria-live="polite">
           <span className="min-w-0 leading-snug break-words">{typed}</span>
@@ -294,7 +298,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
           <div className="flex-1 min-w-0 h-full flex items-end justify-around gap-[2%]">
             {players.map((p) => (
               <Server key={p.id} code={peekCodes ? codes.get(p.id) : undefined} crystals={p.score} max={maxScore} colorIndex={p.colorIndex} name={p.name} active={p.id === me.id} wall={walls.includes(p.id)} still={ctx.still}
-                target={targets.includes(p.id)} flowing={flow ? (flow.from === p.id ? 'out' : flow.to === p.id ? 'in' : null) : null} flowKey={flow?.id ?? 0}
+                target={targets.includes(p.id)} flowing={flow ? (flow.from === p.id ? 'out' : flow.to === p.id ? 'in' : null) : null} flowKey={flow?.id ?? 0} flowN={flow?.n ?? 0}
                 onTarget={() => { const r = chooseRef.current; chooseRef.current = null; c.current.sfx.tap(); r?.(p.id); }} />
             ))}
           </div>
@@ -304,7 +308,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   );
 }
 
-const worth = (b: DataBox) => (b.kind === 'mega' ? 100 : b.kind === 'crystals' ? b.n : b.kind === 'hack' ? 30 : b.kind === 'empty' ? 0 : -10);
+const worth = (b: DataBox) => (b.kind === 'mega' ? 100 : b.kind === 'crystals' ? b.n : b.kind === 'hack' ? 30 : b.kind === 'empty' ? 0 : 1);
 
 // A glitching data box: it flickers, then cracks open to show what is inside.
 function DataBoxButton({ slot, box, open, show, can, still, waiting, pop, onPick }: { slot: number; box: DataBox; open: boolean; show: boolean; can: boolean; still: boolean; waiting: boolean; pop: { id: number; text: string; good: boolean } | null; onPick: () => void }) {
@@ -385,8 +389,8 @@ function CrackPanel({ crack, still, can, name, colorIndex, onPick }: { crack: Cr
 }
 
 // A team's server rack: a crystal tower grows inside its glass.
-function Server({ code, crystals, max, colorIndex, name, active, wall, still, target, flowing, flowKey, onTarget }: {
-  code?: Code; crystals: number; max: number; colorIndex: number; name: string; active: boolean; wall: boolean; still: boolean; target: boolean; flowing: 'in' | 'out' | null; flowKey: number; onTarget: () => void;
+function Server({ code, crystals, max, colorIndex, name, active, wall, still, target, flowing, flowKey, flowN, onTarget }: {
+  code?: Code; crystals: number; max: number; colorIndex: number; name: string; active: boolean; wall: boolean; still: boolean; target: boolean; flowing: 'in' | 'out' | null; flowKey: number; flowN: number; onTarget: () => void;
 }) {
   const gems = Math.min(12, Math.ceil((crystals / max) * 12));
   return (
@@ -407,7 +411,8 @@ function Server({ code, crystals, max, colorIndex, name, active, wall, still, ta
           {Array.from({ length: 6 }, (_, i) => <span key={i} className="rounded-sm border-2 border-[#000]" style={{ background: '#1f8f5a', opacity: 0.8 }} />)}
         </motion.div>}
         <AnimatePresence>
-          {flowing && !still && <motion.span key={flowKey} className="absolute inset-0" style={{ background: flowing === 'in' ? `${GLOW}55` : '#ef7d9655' }} initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0, 1, 0] }} exit={{ opacity: 0 }} transition={{ duration: 1.4 }} />}
+          {flowing && <motion.span key={flowKey} className="absolute inset-0 grid place-items-center font-display" style={{ background: flowing === 'in' ? `${GLOW}44` : '#ef7d9644', color: flowing === 'in' ? '#fdfd94' : '#ffd2c2', fontSize: 'clamp(1.2rem, 22cqw, 2.6rem)', WebkitTextStroke: '0.1em #000', paintOrder: 'stroke fill' }}
+            initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 1, 0] }} exit={{ opacity: 0 }} transition={{ duration: 2, times: [0, 0.15, 0.75, 1] }}>{flowing === 'in' ? `+${flowN}` : `-${flowN}`}</motion.span>}
         </AnimatePresence>
       </div>
       <span className="flex items-center gap-1.5 min-w-0">
@@ -480,7 +485,7 @@ function PowerFx({ kind, still, onDone }: { kind: string; still: boolean; onDone
   if (kind === 'overclock') return <motion.div {...base}><motion.div className={center} animate={{ rotate: [0, 720], scale: [0.5, 1.2, 1] }} transition={{ duration: 1.2 }}>{art}</motion.div>{Array.from({ length: 8 }, (_, i) => <motion.span key={i} className="absolute left-1/2 top-1/2 w-2 h-8 rounded-full" style={{ background: '#fdfd94', rotate: `${i * 45}deg` }} initial={{ x: 0, y: 0, opacity: 1 }} animate={{ x: Math.cos((i * Math.PI) / 4) * 160, y: Math.sin((i * Math.PI) / 4) * 160, opacity: 0 }} transition={{ delay: 0.5, duration: 0.7 }} />)}</motion.div>;
   if (kind === 'twobox') return <motion.div {...base}>{[-1, 1].map((d) => <motion.div key={d} className="absolute left-1/2 top-1/2 w-[16cqmin] h-[16cqmin] -ml-[8cqmin] -mt-[8cqmin]" initial={{ x: 0, y: 40, scale: 0 }} animate={{ x: d * 120, y: [40, -60, 0], scale: 1, rotate: d * 20 }} transition={{ duration: 0.9, ease: 'easeOut' }}><Art kind="box" /></motion.div>)}</motion.div>;
   if (kind === 'rain') return <motion.div {...base}>{Array.from({ length: 16 }, (_, i) => <motion.img key={i} src={GEMS[i % GEMS.length]} alt="" className="absolute w-[7cqmin]" style={{ left: `${4 + (i * 6) % 92}%` }} initial={{ top: '-10%', rotate: 0 }} animate={{ top: '110%', rotate: 360 }} transition={{ delay: (i % 6) * 0.12, duration: 1.1, ease: 'easeIn' }} />)}</motion.div>;
-  if (kind === 'autohack') return <motion.div {...base}><motion.div className="absolute inset-0" style={{ background: `repeating-linear-gradient(0deg, ${GLOW}33 0 4px, transparent 4px 12px)` }} animate={{ x: [0, -20, 14, -6, 0], opacity: [0, 1, 0.6, 1, 0] }} transition={{ duration: 1 }} /><motion.div className={center} animate={{ scale: [0.4, 1.2, 1], rotate: [0, -10, 10, 0] }} transition={{ duration: 0.8 }}>{art}</motion.div></motion.div>;
+  if (kind === 'autohack') return <motion.div {...base}><motion.div className="absolute inset-0" style={{ background: `repeating-linear-gradient(0deg, ${GLOW}22 0 4px, transparent 4px 12px)` }} initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.4, ease: 'easeInOut' }} /><motion.div className={center} animate={{ scale: [0.4, 1.2, 1], rotate: [0, -10, 10, 0] }} transition={{ duration: 0.8 }}>{art}</motion.div></motion.div>;
   if (kind === 'firewall') return <motion.div {...base}><div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 grid grid-cols-4 gap-1 w-[34cqmin]">{Array.from({ length: 12 }, (_, i) => <motion.span key={i} className="aspect-[2/1] rounded-sm border-[3px] border-black" style={{ background: '#1f8f5a' }} initial={{ y: -300, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: (11 - i) * 0.06, type: 'spring', stiffness: 260, damping: 14 }} />)}</div></motion.div>;
   if (kind === 'decoder') return <motion.div {...base}><motion.div className={center} animate={{ x: [-120, 120, -60, 0], rotate: [0, 20, -20, 0] }} transition={{ duration: 1.4 }}>{art}</motion.div></motion.div>;
   if (kind === 'cat') return <motion.div {...base}><motion.div className="absolute bottom-[2%] w-[24cqmin] h-[18cqmin]" initial={{ left: '-25%' }} animate={{ left: '105%', y: [0, -8, 0, -8, 0, -8, 0] }} transition={{ duration: 1.8, ease: 'linear' }}><Art kind="cat" /></motion.div>{['k', 'j', ';', 'm', 'w', '#', 'z'].map((ch, i) => <motion.span key={i} className="absolute font-mono font-black text-3xl" style={{ color: GLOW, left: `${10 + i * 12}%`, top: '30%' }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: [0, 1, 0], y: -30 }} transition={{ delay: 0.2 + i * 0.18, duration: 0.7 }}>{ch}</motion.span>)}</motion.div>;

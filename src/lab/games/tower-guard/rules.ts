@@ -64,12 +64,12 @@ export interface Sim {
   queue: { at: number; kind: number }[];
   wave: number; nextId: number;
   // Wave effects from power-ups.
-  freezeUntil: number; partyUntil: number; speed: number; turbo: string | null;
+  freezeUntil: number; partyUntil: number; speed: number; bonus: number; turbo: string | null;
   mega: { d: number; owner: string } | null; tornadoAt: number | null;
 }
 
 export function newSim(): Sim {
-  return { t: 0, blobs: [], towers: [], shots: [], poofs: [], queue: [], wave: 0, nextId: 1, freezeUntil: 0, partyUntil: 0, speed: 1, turbo: null, mega: null, tornadoAt: null };
+  return { t: 0, blobs: [], towers: [], shots: [], poofs: [], queue: [], wave: 0, nextId: 1, freezeUntil: 0, partyUntil: 0, speed: 1, bonus: 1, turbo: null, mega: null, tornadoAt: null };
 }
 
 export function startWave(s: Sim, n: number, rand: () => number = Math.random) {
@@ -96,7 +96,7 @@ export function step(s: Sim, dt: number, rand: () => number = Math.random): Step
     const k = BLOBS[b.kind];
     b.d += k.speed * MARCH * s.speed * (b.slowUntil > s.t ? 0.45 : 1) * dt;
   }
-  const pop = (b: Blob, owner: string) => { b.hp = 0; out.pops.push({ owner, points: BLOBS[b.kind].points, at: pointAt(b.d) }); s.poofs.push({ id: s.nextId++, at: pointAt(b.d), t0: s.t, size: BLOBS[b.kind].size, points: BLOBS[b.kind].points }); };
+  const pop = (b: Blob, owner: string) => { b.hp = 0; out.pops.push({ owner, points: BLOBS[b.kind].points * s.bonus, at: pointAt(b.d) }); s.poofs.push({ id: s.nextId++, at: pointAt(b.d), t0: s.t, size: BLOBS[b.kind].size, points: BLOBS[b.kind].points * s.bonus }); };
   // The mega bubble rolls down the path and pops what it touches.
   if (s.mega) {
     s.mega.d += 420 * dt;

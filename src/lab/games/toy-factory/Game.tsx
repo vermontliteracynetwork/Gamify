@@ -24,7 +24,7 @@ const POWERS: LabPower[] = [
   { id: 'helper', name: 'Robot Helper', desc: 'A free Robot Builder joins your floor.', enter: 'drop', art: <Art kind="helper" /> },
   { id: 'turbo', name: 'Turbo Belt', desc: 'Your machines work twice as fast this shift.', enter: 'zoom', art: <Art kind="turbo" /> },
   { id: 'mystery', name: 'Mystery Crate', desc: 'A surprise rare machine joins your floor.', enter: 'drop', art: <ImgArt src={`${A}/mystery.webp`} ring="#fff6b0" /> },
-  { id: 'wrap', name: 'Bubble Wrap', desc: 'Pop pop pop! Everyone stops to pop bubble wrap, so your shift is shorter.', silly: true, art: <Art kind="wrap" /> },
+  { id: 'wrap', name: 'Bubble Wrap', desc: 'Pop pop pop! Everyone stops to pop bubble wrap and you get 10 coins.', silly: true, art: <Art kind="wrap" /> },
   { id: 'ducks', name: 'Duck Flood', desc: 'Quack! Rubber ducks flood the floor and waddle away.', silly: true, art: <Art kind="ducks" /> },
 ];
 
@@ -79,10 +79,9 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const setFloor = (id: string, f: Machine[]) => setFloors((m) => { const n = { ...m, [id]: f }; floorsRef.current = n; return n; });
   const addMachine = (id: string, type: MachineType) => {
     const f = floorOf(id);
-    if (f.length < SLOTS) { const nid = uid++; setFloor(id, [...f, { id: nid, type, level: 1 }]); setFresh(nid); return true; }
-    const low = [...f].filter((m) => m.level < MAX_LEVEL).sort((a, b) => a.level - b.level)[0];
-    if (low) { setFloor(id, f.map((m) => (m.id === low.id ? { ...m, level: m.level + 1 } : m))); setFresh(low.id); }
-    return !!low;
+    // A full floor has no room: the caller pays coins instead.
+    if (f.length >= SLOTS) return false;
+    const nid = uid++; setFloor(id, [...f, { id: nid, type, level: 1 }]); setFresh(nid); return true;
   };
 
   useEffect(() => {
@@ -146,10 +145,10 @@ function Board({ ctx }: { ctx: LabCtx }) {
       s[id] += got; c.current.setScores(s); x.sfx.coin(); x.say(`+${got} coins!`);
     }
     if (p.id === 'truck') { x.sfx.whoosh(); await sleep(1100); if (!alive(t)) return { secs, speed }; x.points(50); x.sfx.coin(); x.burst(0.4, 0.5); }
-    if (p.id === 'helper') { x.sfx.boing(); await sleep(800); addMachine(id, 'robot'); x.sfx.build(); }
+    if (p.id === 'helper') { x.sfx.boing(); await sleep(800); if (!addMachine(id, 'robot')) { x.points(30); x.say('+30 coins!', 'good'); } x.sfx.build(); }
     if (p.id === 'turbo') { speed = 2; setTurbo(true); x.sfx.zap(); }
-    if (p.id === 'mystery') { x.sfx.chest(); await sleep(800); addMachine(id, randomType(Math.random, 'rare')); x.sfx.build(); }
-    if (p.id === 'wrap') { secs = 4 / SHIFT; for (let i = 0; i < 6; i++) { await sleep(150); x.sfx.pop(); } }
+    if (p.id === 'mystery') { x.sfx.chest(); await sleep(800); if (!addMachine(id, randomType(Math.random, 'rare'))) { x.points(30); x.say('+30 coins!', 'good'); } x.sfx.build(); }
+    if (p.id === 'wrap') { for (let i = 0; i < 6; i++) { await sleep(150); x.sfx.pop(); } x.points(10); x.sfx.coin(); x.say('+10 for popping!', 'good'); }
     if (p.id === 'ducks') { for (let i = 0; i < 4; i++) { await sleep(220); x.sfx.chomp(); } }
     await sleep(1200);
     return { secs, speed };

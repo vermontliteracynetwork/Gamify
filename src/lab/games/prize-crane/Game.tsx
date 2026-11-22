@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
 import { ArrowFatLeft, ArrowFatRight, CheckCircle, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
@@ -28,7 +28,7 @@ const POWERS: LabPower[] = [
   { id: 'double', name: 'Double Prize', desc: 'The prize you win counts two times.', enter: 'spin', art: <Art kind="double" /> },
   { id: 'rare', name: 'Rare Drop', desc: 'A sparkly super rare plush drops into the machine.', enter: 'drop', art: <Art kind="rare" /> },
   { id: 'tilt', name: 'Tilt Shake', desc: 'The machine wobbles and a prize tumbles into the chute for you.', enter: 'wiggle', art: <Art kind="tilt" /> },
-  { id: 'butter', name: 'Butter Fingers', desc: 'Oops! Butter drips off the claw, so it is a tiny bit slippery.', silly: true, art: <ImgArt src={`${A}/potion.webp`} ring="#fff6b0" /> },
+  { id: 'butter', name: 'Butter Fingers', desc: 'Oops! Butter drips off the claw. Yuck, but it still grabs fine.', silly: true, art: <ImgArt src={`${A}/potion.webp`} ring="#fff6b0" /> },
   { id: 'tickle', name: 'Claw Tickle', desc: 'Hee hee! The claw giggles and wiggles to a new spot.', silly: true, art: <Art kind="tickle" /> },
 ];
 
@@ -78,7 +78,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const phaseRef = useRef(phase); phaseRef.current = phase;
   const [shelves, setShelves] = useState<Record<string, Won[]>>({});
   const [fx, setFx] = useState<{ id: number; kind: string } | null>(null);
-  const [shake, setShake] = useState(0);
+  const shakeCtl = useAnimationControls();
   const [tickle, setTickle] = useState(false);
   const [left, setLeft] = useState(1);
   const flags = useRef<Flags>(noFlags());
@@ -140,7 +140,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       setPile((l) => [...l, np]); x0.sfx.thud(); await sleep(400); x0.sfx.cheer();
     }
     if (p.id === 'tilt') {
-      x0.sfx.crash(); if (c.current.shake) setShake((s) => s + 1); await sleep(700); if (!alive(t)) return drops;
+      x0.sfx.crash(); if (c.current.shake) void shakeCtl.start({ rotate: [0, -3, 3, -2, 2, 0], x: [0, -10, 10, -6, 6, 0], transition: { duration: 0.7 } }); await sleep(700); if (!alive(t)) return drops;
       const pick = [...pileRef.current].sort((a, b) => a.x - b.x)[0];
       if (pick) { setPile((l) => l.filter((q) => q.id !== pick.id)); await win(pick, t); }
     }
@@ -275,9 +275,9 @@ function Board({ ctx }: { ctx: LabCtx }) {
       <Arcade still={ctx.still} />
       <div className="absolute inset-[2.5%] grid gap-[2.5%]" style={wide ? { gridTemplateColumns: 'minmax(0,1.7fr) minmax(0,1fr)' } : { gridTemplateRows: 'minmax(0,2.4fr) minmax(0,1fr)' }}>
         {/* The cabinet. */}
-        <motion.div key={shake} className="relative min-w-0 min-h-0 grid grid-rows-[auto_minmax(0,1fr)_auto] rounded-[1.6rem] border-heavy border-border p-[2.5%] gap-[2%]"
+        <motion.div className="relative min-w-0 min-h-0 grid grid-rows-[auto_minmax(0,1fr)_auto] rounded-[1.6rem] border-heavy border-border p-[2.5%] gap-[2%]"
           style={{ background: 'linear-gradient(180deg, #ef7d96, #d9607e)', boxShadow: '0 8px 0 #000, inset 0 0 0 6px rgba(255,255,255,0.25)' }}
-          animate={shake && ctx.shake ? { rotate: [0, -3, 3, -2, 2, 0], x: [0, -10, 10, -6, 6, 0] } : undefined} transition={{ duration: 0.7 }}>
+          animate={shakeCtl}>
           <Marquee still={ctx.still} />
           <div className="relative min-h-0 grid place-items-center" style={{ containerType: 'size' }}>
             <div className="relative rounded-2xl border-heavy border-border overflow-clip" style={{ width: `min(100cqw, ${100 * GLASS_AR}cqh)`, aspectRatio: `${GLASS_AR}`, containerType: 'size', background: 'linear-gradient(180deg, #e6f8ff 0%, #cfeefc 70%, #b4c4fb 100%)' }}>
@@ -311,7 +311,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
                 className={`${d === 'left' ? 'order-1' : 'order-3'} w-[clamp(3.4rem,13cqmin,5rem)] aspect-square rounded-2xl border-heavy border-border bg-[#b4c4fb] grid place-items-center touch-none select-none disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:active:scale-95 motion-safe:transition-transform`}
                 style={{ boxShadow: '0 5px 0 #000' }}>
                 {d === 'left' ? <ArrowFatLeft weight="fill" className="w-[45%] h-[45%]" aria-hidden="true" /> : <ArrowFatRight weight="fill" className="w-[45%] h-[45%]" aria-hidden="true" />}
-                <span className="font-bold leading-none" style={{ fontSize: 'clamp(0.75rem, 2.6cqmin, 1rem)' }}>{d === 'left' ? 'Left' : 'Right'}</span>
+                <span className="font-bold leading-none" style={{ fontSize: 'clamp(0.95rem, 3.2cqmin, 1.3rem)' }}>{d === 'left' ? 'Left' : 'Right'}</span>
               </button>
             ))}
             <motion.button type="button" disabled={!aiming} onClick={pressDrop} aria-label="Drop the claw"
@@ -373,6 +373,18 @@ function PrizeImg({ p }: { p: Prize }) {
   return <img src={`${A}/${p.animal}.webp`} alt="" aria-hidden="true" className="w-full drop-shadow-[0_4px_0_rgba(0,0,0,0.35)]" draggable={false} />;
 }
 
+// Rare prizes wear a star badge (one star rare, two super), not only a glow.
+function RareBadge({ r }: { r: Rarity }) {
+  if (r === 'common') return null;
+  return (
+    <span className="absolute -top-[12%] -right-[12%] flex" aria-label={r === 'super' ? 'Super rare' : 'Rare'}>
+      {Array.from({ length: r === 'super' ? 2 : 1 }, (_, i) => (
+        <svg key={i} viewBox="0 0 20 20" className="w-[clamp(0.9rem,3.2cqmin,1.6rem)] -ml-1" aria-hidden="true"><path d="M10 1l2.6 6 6.4.6-4.8 4.2 1.4 6.3L10 14.8 4.4 18.1l1.4-6.3L1 7.6l6.4-.6z" fill={r === 'super' ? '#f6c544' : '#7fd6e3'} stroke="#000" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+      ))}
+    </span>
+  );
+}
+
 const SPARK: Record<Rarity, string | null> = { common: null, rare: '#6aa9e9', super: '#f6c544' };
 function PrizeArt({ p, still, glow, style, drop }: { p: Prize; still: boolean; glow: boolean; style: CSSProperties; drop?: boolean }) {
   const s = SPARK[p.rarity];
@@ -381,6 +393,7 @@ function PrizeArt({ p, still, glow, style, drop }: { p: Prize; still: boolean; g
       {s && <motion.span className="absolute -inset-[12%] rounded-full" style={{ background: `radial-gradient(circle, ${s}88, transparent 65%)` }} animate={still ? undefined : { scale: [0.9, 1.15, 0.9], opacity: [0.6, 1, 0.6] }} transition={{ duration: 1.4, repeat: Infinity }} />}
       {glow && <span className="absolute -inset-[8%] rounded-2xl border-[4px] border-dashed border-[#ef4b4b]" />}
       <PrizeImg p={p} />
+      <RareBadge r={p.rarity} />
       {s && !still && [0, 1, 2].map((i) => (
         <motion.svg key={i} viewBox="0 0 20 20" className="absolute w-[30%]" style={{ left: `${[-10, 70, 30][i]}%`, top: `${[-10, 0, -30][i]}%` }} animate={{ scale: [0, 1, 0], rotate: [0, 90] }} transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.4 }}>
           <path d="M10 0l2.5 7.5L20 10l-7.5 2.5L10 20l-2.5-7.5L0 10l7.5-2.5z" fill="#fff" stroke={s} strokeWidth="1.5" />
@@ -405,6 +418,7 @@ function Shelf({ won, colorIndex, name, active, still }: { won: Won[]; colorInde
             initial={still ? false : { scale: 0, y: -60, rotate: -40 }} animate={{ scale: 1, y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 240, damping: 12 }}>
             {w.p.rarity !== 'common' && <span className="absolute -inset-[10%] rounded-full" style={{ background: `radial-gradient(circle, ${SPARK[w.p.rarity]}aa, transparent 65%)` }} />}
             <PrizeImg p={w.p} />
+            <RareBadge r={w.p.rarity} />
           </motion.div>
         ))}
       </div>
@@ -417,7 +431,7 @@ function Marquee({ still }: { still: boolean }) {
   return (
     <div className="relative rounded-xl border-std border-border px-3 py-1 text-center" style={{ background: '#241c3d' }}>
       <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none" aria-hidden="true">
-        {Array.from({ length: 12 }, (_, i) => <motion.span key={i} className="w-2.5 h-2.5 rounded-full border border-black" style={{ background: i % 2 ? '#fdfd94' : '#8fe3a0' }} animate={still ? undefined : { opacity: [1, 0.25, 1] }} transition={{ duration: 0.9, repeat: Infinity, delay: (i % 2) * 0.45 }} />)}
+        {Array.from({ length: 12 }, (_, i) => <motion.span key={i} className="w-2.5 h-2.5 rounded-full border border-black" style={{ background: i % 2 ? '#fdfd94' : '#8fe3a0' }} animate={still ? undefined : { opacity: [1, 0.7, 1] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: (i % 2) * 2 }} />)}
       </div>
       <span className="relative font-display text-white leading-none" style={{ fontSize: 'clamp(1.1rem, 3cqmin, 2rem)', WebkitTextStroke: '0.1em #000', paintOrder: 'stroke fill' }}>Prize Crane</span>
     </div>

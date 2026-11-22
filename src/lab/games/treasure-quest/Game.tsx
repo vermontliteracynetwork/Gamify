@@ -291,7 +291,7 @@ function ChestButton({ slot, box, open, faded, show, peeked, glow, can, still, s
     <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Treasure chest ${slot + 1}`}
       className="relative w-full aspect-[6/5] max-h-full mx-auto disabled:cursor-default focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#241c3d] rounded-2xl"
       style={{ opacity: faded ? 0.75 : 1 }}
-      animate={still || open ? { rotate: 0, scale: 1 } : sneeze ? { scale: [1, 1.18, 0.9, 1], rotate: [0, -6, 6, 0] } : can ? { rotate: [0, -4, 4, -2, 0, 0], y: [0, -6, 0, 0, 0, 0] } : waiting ? { rotate: [0, -1.5, 1.5, 0] } : { rotate: 0 }}
+      animate={still || open ? { rotate: 0, scale: 1 } : sneeze ? { scale: [1, 1.18, 0.9, 1], rotate: [0, -6, 6, 0] } : can ? { rotate: [0, -4, 4, -2, 0, 0], y: [0, -6, 0, 0, 0, 0] } : waiting ? { rotate: 0 } : { rotate: 0 }}
       transition={sneeze && !open ? { duration: 0.6 } : can ? { duration: 0.7, repeat: Infinity, repeatDelay: 2.4 + seed * 2, ease: 'easeInOut' } : { duration: 2.4, repeat: Infinity, repeatDelay: 1.5 + seed, ease: 'easeInOut' }}
       whileHover={can && !still ? { scale: 1.06 } : undefined} whileTap={can && !still ? { scale: 0.95 } : undefined}>
       {/* Shadow on the sand. */}
@@ -456,7 +456,7 @@ function PowerFx({ kind, still, wide, peek, onDone }: { kind: string; still: boo
   );
   if (kind === 'rush') return (
     <motion.div {...fade} animate={{ opacity: 1 }} className="absolute inset-0 pointer-events-none">
-      <motion.div className="absolute inset-0 bg-white" initial={{ opacity: 0 }} animate={{ opacity: [0, 0.9, 0, 0.6, 0] }} transition={{ duration: 0.6 }} />
+      <motion.div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 30%, rgba(253,253,148,0.55), rgba(253,253,148,0) 70%)' }} initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.4, ease: 'easeInOut' }} />
       <motion.img src={`${A}/lightning.webp`} alt="" className="absolute left-1/2 top-0 h-[55%] -translate-x-1/2" initial={{ y: '-100%' }} animate={{ y: '0%' }} transition={{ duration: 0.25 }} />
     </motion.div>
   );
