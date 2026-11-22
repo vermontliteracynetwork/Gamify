@@ -28,7 +28,7 @@ const IMG = '/lab/block-drop/';
 
 function Icon({ kind }: { kind: string }) {
   const ring = (f: string) => <circle cx="50" cy="50" r="44" fill={f} stroke="#000" strokeWidth="5" />;
-  const candy = (x: number, y: number, f: string, s = 16) => <rect x={x} y={y} width={s} height={s} rx="4" fill={f} stroke="#000" strokeWidth="3" />;
+  const candy = (x: number, y: number, f: string, s = 16) => <rect key={`${x}-${y}`} x={x} y={y} width={s} height={s} rx="4" fill={f} stroke="#000" strokeWidth="3" />;
   return (
     <svg viewBox="0 0 100 100" aria-hidden="true">
       {kind === 'bomb' && <>{ring('#fdfd94')}<circle cx="46" cy="58" r="22" fill="#241c3d" stroke="#000" strokeWidth="4" /><circle cx="38" cy="50" r="5" fill="#fff" opacity="0.6" /><path d="M58 38q6-10 14-8" stroke="#000" strokeWidth="4" fill="none" /><path d="M74 22l3 7 7 1-6 4 2 7-6-4-6 4 2-7-6-4 7-1z" fill="#ef7d96" stroke="#000" strokeWidth="2" /></>}
