@@ -4,7 +4,7 @@ import { ArrowsLeftRight, CheckCircle, Coins, HandGrabbing, Trophy } from '@phos
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { applyChest, DOUBLE_CAP, heapRows, needsTarget, randomOther, rollChests, type Chest } from './rules';
+import { applyChest, heapRows, needsTarget, randomOther, rollChests, type Chest } from './rules';
 
 // Treasure Quest (Game Lab, inspired by the general idea of chest-picking
 // quiz games): answer right, then pick one of three wobbling chests on a

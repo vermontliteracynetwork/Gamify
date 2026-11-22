@@ -60,7 +60,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const color = TEAM_COLORS[ctx.player.colorIndex % TEAM_COLORS.length];
   const rimR = mods.giant ? 7.4 : 4.6;
   // The on-target window for people (the computer aims by its own level); Giant Hoop widens it.
-  const tolFor = (pick: SpotId) => AIM_TOL[pick] * (modsRef.current.giant ? 1.6 : 1);
+  const tolFor = (pick: SpotId) => { const t = c.current.timeScale; return AIM_TOL[pick] * (modsRef.current.giant ? 1.6 : 1) * (t === 0 ? 1.25 : Math.max(1, t * 0.85)); };
   const still = ctx.still;
 
   useEffect(() => {
@@ -272,7 +272,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <GymArt />
           <g key={`ch${cheer}`} className={still ? '' : 'hs-cheer'}><Crowd /></g>
           {/* The hoop: pole, backboard, rim and net. */}
-          <motion.g key={`sh${shake}`} animate={still || !shake ? undefined : { x: [0, 1.2, -1, 0.6, 0] }} transition={{ duration: 0.4 }}>
+          <motion.g key={`sh${shake}`} animate={still || !shake || !ctx.shake ? undefined : { x: [0, 1.2, -1, 0.6, 0] }} transition={{ duration: 0.4 }}>
             <rect x="144" y="30" width="3" height="58" fill="#5b5f7a" stroke="#000" strokeWidth="0.5" />
             <rect x="143" y="62" width="5" height="22" rx="1.5" fill="#ef7d96" stroke="#000" strokeWidth="0.5" />
             <path d="M139 30 h6" stroke="#5b5f7a" strokeWidth="2" />

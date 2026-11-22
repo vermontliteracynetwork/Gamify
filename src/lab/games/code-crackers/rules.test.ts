@@ -15,8 +15,9 @@ describe('code crackers', () => {
     }
     expect(codeChoices(makeCode(), 2)).toHaveLength(2);
   });
-  it('never hacks when no one has crystals, no virus at zero', () => {
-    for (let i = 0; i < 300; i++) expect(['hack', 'virus']).not.toContain(rollBox({ others: false, mine: 0 }).kind);
+  it('never hacks when no one has crystals or hacks are off, no virus at zero', () => {
+    for (let i = 0; i < 300; i++) expect(['hack', 'virus']).not.toContain(rollBox({ others: false, mine: 0, hack: true }).kind);
+    for (let i = 0; i < 300; i++) expect(rollBox({ others: true, mine: 10 }).kind).not.toBe('hack');
   });
   it('borrows and nibbles fairly', () => {
     expect(borrowOf(100)).toBe(25);

@@ -194,9 +194,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function throwPitch(kind: Pitch['kind'], giant: boolean): Promise<number | null> {
     return new Promise((resolve) => {
       const base = (kind === 'slow' ? 2300 : kind === 'fast' ? 950 : kind === 'gum' ? 1650 : 1350) * (0.92 + Math.random() * 0.16) * Math.max(1, P * 0.85);
+      const x0 = c.current;
       const start = performance.now();
       const crossAt = start + base * CROSS;
-      const win = SWING_WINDOW * (giant ? 1.6 : 1);
+      // A relaxed Timers setting (or no clock) widens the swing window a little.
+      const relax = x0.timeScale === 0 ? 1.3 : Math.max(1, x0.timeScale * 0.9);
+      const win = SWING_WINDOW * (giant ? 1.6 : 1) * relax;
       swingRef.current = null;
       const x = c.current;
       x.sfx.whoosh();
@@ -211,8 +214,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
         const u = Math.min(1, (now - start) / base);
         setPitch({ u, kind, glow: Math.abs(now - crossAt) < win * 0.5 });
         const sw = swingRef.current;
-        if (sw !== null && Math.abs(sw - crossAt) <= win && now >= crossAt - 4) { done = true; resolve(Math.abs(sw - crossAt)); return; }
-        if (u >= 1) { done = true; resolve(sw !== null ? Math.abs(sw - crossAt) + win : null); return; }
+        if (sw !== null && Math.abs(sw - crossAt) <= win && now >= crossAt - 4) { done = true; resolve(Math.abs(sw - crossAt) / relax); return; }
+        if (u >= 1) { done = true; resolve(sw !== null ? (Math.abs(sw - crossAt) + win) / relax : null); return; }
         requestAnimationFrame(step);
       };
       requestAnimationFrame(step);

@@ -43,12 +43,13 @@ export function codeChoices(real: Code, n = 4, rand: () => number = Math.random)
   return out;
 }
 
-export interface RollOpts { others: boolean; mine: number }
+// `hack`: hack boxes are switched on in setup (they start off).
+export interface RollOpts { others: boolean; mine: number; hack?: boolean }
 export function rollBox(o: RollOpts, rand: () => number = Math.random): DataBox {
   const list: [number, () => DataBox][] = [
     [56, () => ({ kind: 'crystals', n: 10 + 5 * Math.floor(rand() * 7) })],
     [8, () => ({ kind: 'mega', n: 60 + 10 * Math.floor(rand() * 4) })],
-    [o.others ? 20 : 0, () => ({ kind: 'hack' })],
+    [o.others && o.hack ? 20 : 0, () => ({ kind: 'hack' })],
     [o.mine > 0 ? 6 : 0, () => ({ kind: 'virus' })],
     [10, () => ({ kind: 'empty' })],
   ];

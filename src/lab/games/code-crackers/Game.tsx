@@ -4,7 +4,7 @@ import { CheckCircle, Drop, Heart, Leaf, Lightning, LockKey, Moon, Star, Trophy,
 import { playClip } from '../../../engine/music';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import type { LabCtx, LabDef, LabPower } from '../../types';
-import { borrowOf, codeChoices, makeCode, rollBoxes, sameCode, virusOf, type Code, type DataBox, type Sym } from './rules';
+import { borrowOf, codeChoices, makeCode, rollBoxes, sameCode, type Code, type DataBox, type Sym } from './rules';
 
 // Code Crackers (Game Lab, inspired by the general idea of hacking-themed
 // quiz games): a friendly computer lab with a cute robot. Answer right, then
@@ -17,15 +17,17 @@ const GLOW = '#3dff9a';
 const BOXES = 5;
 
 const POWERS: LabPower[] = [
-  { id: 'scan', name: 'X-Ray Scan', desc: 'See inside every box before you pick.', enter: 'zoom', art: <Art kind="scan" /> },
-  { id: 'overclock', name: 'Overclock', desc: 'Crystals from your box count triple.', enter: 'spin', art: <ImgArt src={`${A}/lightning.webp`} /> },
+  { id: 'scan', name: 'Peek Scan', desc: 'See inside every box before you pick.', enter: 'zoom', art: <Art kind="scan" /> },
+  { id: 'overclock', name: 'Speed Boost', desc: 'Crystals from your box count three times.', enter: 'spin', art: <ImgArt src={`${A}/lightning.webp`} /> },
   { id: 'twobox', name: 'Lucky Byte', desc: 'Open two boxes this turn.', enter: 'drop', art: <Art kind="twobox" /> },
   { id: 'rain', name: 'Crystal Rain', desc: '20 crystals rain into your server.', enter: 'drop', art: <Art kind="rain" /> },
-  { id: 'autohack', name: 'Auto-Hack', desc: 'Skip the boxes and hack a team right now.', takes: true, enter: 'zoom', art: <Art kind="autohack" /> },
-  { id: 'firewall', name: 'Firewall', desc: 'Blocks the next hack on your crystals.', enter: 'drop', art: <Art kind="firewall" /> },
-  { id: 'decoder', name: 'Decoder', desc: 'Your next hack shows only two codes.', enter: 'spin', art: <ImgArt src={`${A}/mystery.webp`} /> },
+  { id: 'autohack', name: 'Quick Crack', desc: 'Skip the boxes and crack a team\'s code right now.', takes: true, enter: 'zoom', art: <Art kind="autohack" /> },
+  { id: 'firewall', name: 'Wall', desc: 'A wall keeps your crystals safe from the next code crack.', enter: 'drop', art: <Art kind="firewall" /> },
+  { id: 'decoder', name: 'Code Helper', desc: 'Your next code crack shows only two codes.', enter: 'spin', art: <ImgArt src={`${A}/mystery.webp`} /> },
   { id: 'cat', name: 'Cat on the Keys', desc: 'A cat walks on the keyboard and scrambles the boxes.', silly: true, art: <Art kind="cat" /> },
-  { id: 'hiccup', name: 'Robot Hiccups', desc: 'Hic! Byte the robot drops 5 of your crystals.', silly: true, art: <Art kind="hiccup" /> },
+  { id: 'hiccup', name: 'Robot Hiccups', desc: 'Hic! Byte drops a crystal, then catches it again.', silly: true, art: <Art kind="hiccup" /> },
+  // Switched on in setup (starts off): some boxes let you crack a team's code.
+  { id: 'hackbox', name: 'Code Boxes', desc: 'Some boxes let you crack a team\'s code to borrow crystals.', takes: true, enter: 'zoom', art: <Art kind="autohack" /> },
 ];
 const FIREWALL = POWERS.find((p) => p.id === 'firewall')!;
 const DECODER = POWERS.find((p) => p.id === 'decoder')!;
@@ -64,7 +66,7 @@ function useTyped(text: string, still: boolean) {
   useEffect(() => {
     if (still) { setN(text.length); return; }
     setN(0);
-    const id = window.setInterval(() => setN((k) => { if (k >= text.length) { window.clearInterval(id); return k; } return k + 1; }), 38);
+    const id = window.setInterval(() => setN((k) => { if (k >= text.length) { window.clearInterval(id); return k; } return k + 1; }), 18);
     return () => window.clearInterval(id);
   }, [text, still]);
   return text.slice(0, n);
@@ -87,7 +89,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const [opened, setOpened] = useState<number[]>([]);
   const openedRef = useRef(opened); openedRef.current = opened;
   const [seeAll, setSeeAll] = useState(false);
-  const [line, setLine] = useState('> booting up...');
+  const [line, setLine] = useState('> starting up...');
+  const [peekCodes, setPeekCodes] = useState(false);
   const [glitch, setGlitch] = useState(0);
   const [fx, setFx] = useState<{ id: number; kind: string } | null>(null);
   const [pop, setPop] = useState<{ id: number; slot: number; text: string; good: boolean } | null>(null);
@@ -116,7 +119,8 @@ function Board({ ctx }: { ctx: LabCtx }) {
   const shake = () => { if (!c.current.still) setGlitch((g) => g + 1); };
   const mood = (m: typeof robot, ms = 1400) => { setRobot(m); window.setTimeout(() => setRobot('idle'), ms); };
   const others = () => { const s = scores(), id = c.current.player.id; return Object.entries(s).filter(([k, v]) => k !== id && v > 0).map(([k]) => k); };
-  const fresh = () => { const s = scores(), id = c.current.player.id; return rollBoxes({ others: others().length > 0, mine: s[id] ?? 0 }, BOXES).map((b) => ({ id: ++uid, b })); };
+  const hackOn = () => { let on = false; void c.current.power(0, (p) => { if (p.id === 'hackbox') on = true; return false; }); return on; };
+  const fresh = () => { const s = scores(), id = c.current.player.id; return rollBoxes({ others: others().length > 0, mine: s[id] ?? 0, hack: hackOn() }, BOXES).map((b) => ({ id: ++uid, b })); };
 
   useEffect(() => {
     const t = ++turn.current;
@@ -126,11 +130,11 @@ function Board({ ctx }: { ctx: LabCtx }) {
     say(`${x.player.name}: answer to unlock a box`);
     void x.ask().then(async (ok) => {
       if (!alive(t)) return;
-      if (!ok) { c.current.sfx.wrong(); say('access paused. next team!'); mood('sad'); await sleep(900); if (alive(t)) c.current.next(); return; }
+      if (!ok) { c.current.sfx.wrong(); say('not this time. next team!'); mood('sad'); await sleep(900); if (alive(t)) c.current.next(); return; }
       setBoxes(fresh()); setMode('busy'); c.current.sfx.blip(0); shake();
-      say('new data boxes found!');
+      say('new mystery boxes!');
       await sleep(600); if (!alive(t)) return;
-      const p = await c.current.power(0.45, (pw) => pw.id !== 'hiccup' || (scores()[c.current.player.id] ?? 0) >= 5);
+      const p = await c.current.power(0.45, (pw) => pw.id !== 'hackbox');
       if (!alive(t)) return;
       if (p) { const go = await fire(p, t); if (!alive(t) || go === 'done') return; }
       say(picks.current > 1 ? 'pick two boxes' : 'pick a data box');
@@ -141,15 +145,15 @@ function Board({ ctx }: { ctx: LabCtx }) {
   async function fire(p: LabPower, t: number): Promise<'go' | 'done'> {
     const x = c.current, id = x.player.id;
     setFx({ id: ++uid, kind: p.id });
-    if (p.id === 'scan') { say('x-ray scan running...'); x.sfx.slideDown(); await sleep(900); setSeeAll(true); x.sfx.bell(); await sleep(700); }
-    if (p.id === 'overclock') { triple.current = true; say('overclock: crystals x3!'); x.sfx.zap(); mood('spin', 1600); await sleep(1500); }
-    if (p.id === 'twobox') { picks.current = 2; say('lucky byte: two picks'); x.sfx.note(2); await sleep(250); x.sfx.note(4); await sleep(900); }
+    if (p.id === 'scan') { say('peeking inside...'); x.sfx.slideDown(); await sleep(900); setSeeAll(true); x.sfx.bell(); await sleep(700); }
+    if (p.id === 'overclock') { triple.current = true; say('speed boost: crystals x3!'); x.sfx.zap(); mood('spin', 1600); await sleep(1500); }
+    if (p.id === 'twobox') { picks.current = 2; say('lucky byte: pick two boxes'); x.sfx.note(2); await sleep(250); x.sfx.note(4); await sleep(900); }
     if (p.id === 'rain') {
-      say('crystal rain incoming!'); for (let i = 0; i < 5; i++) { await sleep(180); x.sfx.blip(i * 2); }
+      say('crystal rain!'); for (let i = 0; i < 5; i++) { await sleep(180); x.sfx.blip(i * 2); }
       if (!alive(t)) return 'done'; x.points(20); x.sfx.coin(); mood('happy'); await sleep(700);
     }
-    if (p.id === 'firewall') { setWalls((w) => [...new Set([...w, id])]); x.setHeld(id, [...(x.held[id] ?? []).filter((h) => h.id !== 'firewall'), FIREWALL]); say('firewall up!'); x.sfx.build(); await sleep(1300); }
-    if (p.id === 'decoder') { decoders.current.add(id); x.setHeld(id, [...(x.held[id] ?? []).filter((h) => h.id !== 'decoder'), DECODER]); say('decoder saved for your next hack'); x.sfx.power(); await sleep(1300); }
+    if (p.id === 'firewall') { setWalls((w) => [...new Set([...w, id])]); x.setHeld(id, [...(x.held[id] ?? []).filter((h) => h.id !== 'firewall'), FIREWALL]); say('your wall is up!'); x.sfx.build(); await sleep(1300); }
+    if (p.id === 'decoder') { decoders.current.add(id); x.setHeld(id, [...(x.held[id] ?? []).filter((h) => h.id !== 'decoder'), DECODER]); say('code helper saved for your next hack'); x.sfx.power(); await sleep(1300); }
     if (p.id === 'cat') {
       say('kjhsdf;;;mew;;;'); x.sfx.chomp(); await sleep(600); if (!alive(t)) return 'done';
       x.sfx.boing(); shake(); setBoxes((b) => { const f = fresh(); return [...b].reverse().map((bx, i) => ({ id: bx.id, b: f[i].b })); }); await sleep(1300);
@@ -167,17 +171,17 @@ function Board({ ctx }: { ctx: LabCtx }) {
     const list = others();
     if (!list.length) { say('no crystals to borrow'); return; }
     playClip(`${A}/hack.mp3`, x.settings, 0.5); shake(); mood('spin', 1200);
-    say('hack mode: pick a server'); x.say('Hack!', 'big');
+    say('crack a code: pick a team'); x.say('Crack the code!', 'big');
     let target = list[0];
     if (list.length > 1) {
-      if (c.current.cpu) { await sleep(1300); target = [...list].sort((a, b) => scores()[b] - scores()[a])[0]; }
+      if (c.current.cpu) { await sleep(1300); target = list[Math.floor(Math.random() * list.length)]; }
       else { setTargets(list); setMode('target'); target = await new Promise<string>((r) => { chooseRef.current = r; }); setTargets([]); }
     }
     if (!alive(t)) return;
     const tName = c.current.turns.players.find((p) => p.id === target)?.name ?? '';
     if (wallsRef.current.includes(target)) {
       setWalls((w) => w.filter((v) => v !== target)); c.current.setHeld(target, (c.current.held[target] ?? []).filter((h) => h.id !== 'firewall'));
-      say(`${tName}'s firewall blocked it!`); c.current.sfx.thud(); c.current.say('Firewall!', 'oops'); await sleep(1600); return;
+      say(`${tName}'s wall kept them safe!`); c.current.sfx.thud(); c.current.say('Wall!', 'oops'); await sleep(1600); return;
     }
     const real = codes.get(target)!;
     const two = decoders.current.has(id);
@@ -203,7 +207,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       setFlow({ id: ++uid, from: target, to: id }); c.current.burst(0.5, 0.6);
       codes.set(target, makeCode()); // a cracked code changes
     } else {
-      c.current.sfx.boing(); shake(); c.current.say('Access denied!', 'oops'); say('wrong code. it stays locked'); mood('sad');
+      c.current.sfx.boing(); shake(); c.current.say('Not that code!', 'oops'); say('wrong code. it stays locked'); mood('sad');
     }
     await sleep(1700);
     setCrack(null);
@@ -213,7 +217,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
     if (mode !== 'pick' || openedRef.current.includes(slot)) return;
     const t = turn.current, x = c.current, id = x.player.id;
     setMode('busy'); setOpened((o) => [...o, slot]);
-    x.sfx.zap(); shake(); say('decrypting...');
+    x.sfx.zap(); shake(); say('opening the box...');
     await sleep(700); if (!alive(t)) return;
     const b = boxesRef.current[slot].b;
     const show = (text: string, good: boolean) => setPop({ id: ++uid, slot, text, good });
@@ -223,9 +227,9 @@ function Board({ ctx }: { ctx: LabCtx }) {
       if (b.kind === 'mega') { x.say('Mega crystals!', 'big'); x.sfx.cheer(); x.burst(0.45, 0.4, 'big'); } else x.burst(0.2 + slot * 0.15, 0.4);
       await sleep(1300);
     } else if (b.kind === 'virus') {
-      const n = virusOf(scores()[id]); x.points(-n); x.sfx.oops(); show(`-${n}`, false); say('a silly virus nibbled some crystals'); mood('sad'); await sleep(1300);
+      x.sfx.boing(); show('Silly bug!', false); say('a silly bug wiggles... and gives the crystals back'); mood('hic', 1200); await sleep(1300);
     } else if (b.kind === 'empty') {
-      x.sfx.slideDown(); show('Empty', false); say('404: nothing here'); mood('sad'); await sleep(1200);
+      x.sfx.slideDown(); show('Empty', false); say('empty box. try again next time'); mood('sad'); await sleep(1200);
     } else if (b.kind === 'hack') {
       show('Hack!', true); await sleep(500); await hack(t);
     }
@@ -342,7 +346,7 @@ function Contents({ b }: { b: DataBox }) {
   }
   if (b.kind === 'hack') return <Art kind="autohack" />;
   if (b.kind === 'virus') return <Art kind="virus" />;
-  return <span className="font-mono font-black text-center leading-none" style={{ color: '#ef7d96', fontSize: 'clamp(1rem, 3.6cqmin, 2rem)' }}>404</span>;
+  return <span className="font-mono font-black text-center leading-none" style={{ color: '#ef7d96', fontSize: 'clamp(1rem, 3.6cqmin, 2rem)' }}>Empty</span>;
 }
 
 // Crack the code: four code cards (two with a Decoder), one is right.

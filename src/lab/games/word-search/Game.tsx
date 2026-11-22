@@ -27,9 +27,23 @@ const POWERS: LabPower[] = [
   { id: 'jelly', name: 'Jelly Letters', desc: 'Wibble wobble! Every letter turns to jelly for the next turn.', silly: true, art: <Art kind="jelly" /> },
 ];
 
-const WORD_POINTS = 2;
+// Every word is worth the same (effort pays, not word length).
+const WORD_POINTS = 3;
 const MARKERS = ['#fdfd94', '#8fe3a0', '#f5a08c', '#b4c4fb', '#ef7d96', '#9fe0f0', '#f6c544', '#d9b8f5'];
-const TEAM_TURN_MS = 60_000;
+// The on-board timer choice, remembered per device (default Relaxed).
+type Pace = 'relaxed' | 'none' | 'quick';
+const PACES: Pace[] = ['relaxed', 'none', 'quick'];
+const PACE_LABEL: Record<Pace, string> = { relaxed: 'Relaxed', none: 'No timer', quick: 'Quick' };
+const PACE_KEY = 'gamify:lab:word-search:timer';
+// Starts from the teacher's Timers setting (ctx.timeScale: 0 off, 1 normal, 1.5 relaxed).
+const paceFrom = (scale: number): Pace => (scale === 0 ? 'none' : scale === 1 ? 'quick' : 'relaxed');
+function loadPace(scale: number): Pace { try { const v = localStorage.getItem(PACE_KEY) as Pace | null; return v && PACES.includes(v) ? v : paceFrom(scale); } catch { return paceFrom(scale); } }
+function savePace(v: Pace) { try { localStorage.setItem(PACE_KEY, v); } catch { /* private window */ } }
+function turnMs(pace: Pace, solo: boolean, words: number) {
+  if (pace === 'none') return Infinity;
+  if (solo) return pace === 'quick' ? Math.min(150_000, Math.max(60_000, words * 18_000)) : Math.max(180_000, words * 40_000);
+  return pace === 'quick' ? 60_000 : 120_000;
+}
 const asQuestion = (p: Placed): MultipleChoiceQuestion => ({ id: `ws-${p.word}`, kind: 'mc', prompt: p.clue, choices: [p.word], correctIndex: 0 });
 const same = (a: Cell | null, b: Cell | null) => !!a && !!b && a[0] === b[0] && a[1] === b[1];
 
@@ -51,7 +65,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const c = useRef(ctx); c.current = ctx;
   const clip = (f: string, level = 0.7) => playClip(`${A}/${f}.mp3`, c.current.settings, level);
   const [box, wide] = useWide();
-  const fresh = () => { const w = c.current.words({ min: 3, max: 10 }); return makeSearch(w, sizeFor(w.slice(0, 9))); };
+  // The grid never gets so many cells that one is under 44px.
+  const cap = () => {
+    const r = box.current?.getBoundingClientRect();
+    const bw = r?.width || window.innerWidth * 0.7, bh = r?.height || window.innerHeight - 120;
+    const side = (bw / Math.max(1, bh) > 1.15 ? Math.min(bh, bw / 1.75) : Math.min(bw, bh * 0.56)) * 0.86;
+    return Math.max(6, Math.min(11, Math.floor(side / 44)));
+  };
+  const fresh = () => { const w = c.current.words({ min: 3, max: 10 }); const n = Math.min(cap(), sizeFor(w.slice(0, 9))); return makeSearch(w.filter((x) => x.word.length <= n), n); };
   const [search, setSearch] = useState<Search>(fresh);
   const sRef = useRef(search); sRef.current = search;
   const [found, setFound] = useState<Record<string, string>>({}); // word -> player id
@@ -74,7 +95,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const doubleRef = useRef(false);
   const setDouble = (v: boolean) => { doubleRef.current = v; setDoubleState(v); };
   const [jelly, setJelly] = useState(false);
-  const jellyNext = useRef(false);
+  const [cluesOnly, setCluesOnly] = useState(false);
+  const [pace, setPaceState] = useState<Pace>(() => loadPace(ctx.timeScale));
+  const paceRef = useRef(pace); paceRef.current = pace;
+  const [shown, setShown] = useState<Placed | null>(null);
   const [magnet, setMagnet] = useState<Placed | null>(null);
   const [revealAll, setRevealAll] = useState(false);
   // The timer bar: solo races the whole puzzle, teams get a turn each.
@@ -96,12 +120,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
   useEffect(() => {
     const x = c.current;
     setStart(null); setEnd(null); setGlass(null); setBeam(null); setDouble(false); setMagnet(null); setRevealAll(false); setCpuHunt(null);
-    setJelly(jellyNext.current); jellyNext.current = false;
+    setJelly(false); setShown(null);
     if (x.solo || unfound().length === 0) {
       if (x.taken > 0 || unfound().length === 0) { const s = fresh(); sRef.current = s; setSearch(s); foundRef.current = {}; setFound({}); setLastClue(null); }
     }
     if (x.solo) {
-      total.current = Math.min(150_000, Math.max(60_000, sRef.current.placed.length * 18_000));
+      total.current = turnMs(paceRef.current, true, sRef.current.placed.length);
       remain.current = total.current; setLeft(1);
       if (x.taken > 0) { clip('swipe'); x.say('New puzzle!'); }
       setMode('play');
@@ -110,7 +134,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   async function beginTurn() {
     const x = c.current;
-    total.current = TEAM_TURN_MS; remain.current = TEAM_TURN_MS; setLeft(1);
+    total.current = turnMs(paceRef.current, false, 0); remain.current = total.current; setLeft(1);
     const list = pending.current[x.player.id] ?? [];
     pending.current[x.player.id] = [];
     x.setHeld(x.player.id, []);
@@ -133,11 +157,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
     }
     if (p.id === 'rain') {
       x.sfx.wind(); x.say('Letter Rain!', 'oops'); setShake((n) => n + 1);
+      setStart(null); setEnd(null); dragging.current = false;
+      paused.current = true; window.setTimeout(() => { paused.current = false; }, 2300);
       setDrops(Array.from({ length: 16 }, (_, i) => ({ id: Date.now() + i, l: 'ABCDEFGHIJKLMNOPRSTUW'[Math.floor(Math.random() * 21)], x: 4 + Math.random() * 92, d: Math.random() * 0.7, r: Math.random() * 300 - 150 })));
       window.setTimeout(() => { setSearch((s) => { const n = reroll(s); sRef.current = n; return n; }); x.sfx.thud(); }, 800);
       window.setTimeout(() => setDrops([]), 2200);
     }
-    if (p.id === 'jelly') { x.sfx.boing(); x.say('Jelly Letters!', 'oops'); jellyNext.current = true; if (x.solo) { setJelly(true); jellyNext.current = false; } }
+    // Jelly lasts three seconds, then the letters hold still for aiming.
+    if (p.id === 'jelly') { x.sfx.boing(); x.say('Jelly Letters!', 'oops'); setJelly(true); window.setTimeout(() => setJelly(false), 3000); }
   }
 
   // The timer bar ticks while a player is hunting (never under a card).
@@ -146,7 +173,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     let last = Date.now();
     const id = window.setInterval(() => {
       const now = Date.now(), dt = now - last; last = now;
-      if (paused.current) return;
+      if (paused.current || !Number.isFinite(total.current)) return;
       if (frozenUntil.current > now) return;
       if (frozenUntil.current) { frozenUntil.current = 0; setFrozen(false); }
       remain.current = Math.max(0, remain.current - dt);
@@ -159,12 +186,17 @@ function Play({ ctx }: { ctx: LabCtx }) {
   function timeUp() {
     const x = c.current;
     setMode('busy'); setStart(null); setEnd(null);
-    x.sfx.whistle(); x.say("Time's up!", 'oops');
+    // A gentle stop: no whistle, the words are shown so everyone learns them.
+    x.sfx.slideDown(); x.say("Let's look together");
     if (x.solo) {
       for (const p of unfound()) x.log(asQuestion(p), false);
       setRevealAll(true);
-      window.setTimeout(() => c.current.next(), 3200);
-    } else window.setTimeout(() => c.current.next(), 1600);
+      window.setTimeout(() => c.current.next(), 4200);
+    } else {
+      const open = unfound(), p = open[Math.floor(Math.random() * open.length)];
+      if (p) { setShown(p); setLastClue(p); }
+      window.setTimeout(() => { setShown(null); c.current.next(); }, 3200);
+    }
   }
 
   // A word is circled.
@@ -202,8 +234,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
     await wait(1200);
     const pw = await c.current.power(0.45, (pw) => pw.id !== 'magnet' || left > 1);
     if (pw) {
-      if (pw.silly) { fire(pw); await wait(1800); }
-      else { const id = c.current.player.id; pending.current[id] = [...(pending.current[id] ?? []), pw]; c.current.setHeld(id, pending.current[id]); }
+      // Silly ones too wait for the earner's own next turn.
+      { const id = c.current.player.id; pending.current[id] = [...(pending.current[id] ?? []), pw]; c.current.setHeld(id, pending.current[id]); }
     }
     if (left === 0) { x.sfx.cheer(); x.say('Grid cleared!', 'big'); x.burst(0.4, 0.4, 'big'); await wait(1600); }
     c.current.next();
@@ -320,14 +352,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <div className={`absolute inset-0 flex ${wide ? 'flex-row' : 'flex-col'} gap-[2.2%]`}>
           {/* The clipboard and its puzzle page. */}
           <motion.div className="relative shrink-0 aspect-square" style={wide ? { height: '100%' } : { width: '100%' }}
-            animate={ctx.still || !shake ? undefined : { x: [0, -14, 12, -9, 7, -3, 0], rotate: [0, -1.5, 1.2, -0.8, 0.4, 0] }} key={`shake-${shake}`} transition={{ duration: 0.8 }}>
+            animate={!ctx.shake || !shake ? undefined : { x: [0, -14, 12, -9, 7, -3, 0], rotate: [0, -1.5, 1.2, -0.8, 0.4, 0] }} key={`shake-${shake}`} transition={{ duration: 0.8 }}>
             <Clipboard />
             <div className="absolute left-[6%] right-[6%] top-[12.5%] bottom-[5%]">
               <div ref={gridRef} role="grid" aria-label="Letter grid" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onKeyDown={key}
                 className="absolute inset-0 grid touch-none select-none" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, gridTemplateRows: `repeat(${n}, 1fr)`, cursor: canPlay ? 'pointer' : 'default' }}>
                 {/* Found words, circled in the finder's color. */}
                 <svg viewBox={`0 0 ${n} ${n}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-                  {search.placed.filter((p) => found[p.word] || revealAll).map((p) => {
+                  {search.placed.filter((p) => found[p.word] || revealAll || shown?.word === p.word).map((p) => {
                     const cells = cellsOf(p), l = capsule(cells[0], cells[cells.length - 1]);
                     const fill = found[p.word] ? markOf(p.word) : '#ffffff';
                     return (
@@ -366,7 +398,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   {glass && (
                     <motion.div key="glass" className="absolute pointer-events-none" style={{ width: `${(100 / n) * 2.2}%`, height: `${(100 / n) * 2.2}%`, left: `${((glass[1] + 0.5) / n) * 100}%`, top: `${((glass[0] + 0.5) / n) * 100}%`, translateX: '-34%', translateY: '-34%' }}
                       initial={ctx.still ? { opacity: 0 } : { x: '-260%', y: '-200%', rotate: -40, opacity: 0 }} animate={{ x: 0, y: ctx.still ? 0 : [0, -4, 0], rotate: 0, opacity: 1 }} exit={{ opacity: 0, scale: 0.6 }}
-                      transition={{ x: { type: 'spring', stiffness: 60, damping: 12 }, y: { duration: 1.6, repeat: Infinity }, rotate: { type: 'spring', stiffness: 60, damping: 12 } }}>
+                      transition={{ x: { type: 'spring', stiffness: 60, damping: 12 }, y: { duration: 1.2, repeat: 2 }, rotate: { type: 'spring', stiffness: 60, damping: 12 } }}>
                       <Art kind="glass-on" />
                     </motion.div>
                   )}
@@ -503,17 +535,16 @@ function Timer({ left, frozen, double, still, solo, hide, h }: { left: number; f
   return (
     <div className="relative shrink-0 min-h-7 flex items-center gap-2" style={{ opacity: hide ? 0.4 : 1, height: h }} aria-label={solo ? 'Time left for the puzzle' : 'Time left for this turn'} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(left * 100)}>
       <span className="shrink-0 h-full aspect-square rounded-full border-heavy border-border grid place-items-center" style={{ background: frozen ? '#bfe6ff' : '#fbfcf8', boxShadow: '0 4px 0 #000' }} aria-hidden="true">
-        <motion.svg viewBox="0 0 20 20" className="w-[70%] h-[70%]" animate={still || frozen ? undefined : { rotate: [0, 8, -8, 0] }} transition={{ duration: 1, repeat: Infinity }}><circle cx="10" cy="11" r="7.5" fill="#fff" stroke="#000" strokeWidth="2" /><path d="M10 11V6.5M10 11l3 2" stroke="#000" strokeWidth="2" strokeLinecap="round" /><rect x="8" y="0.8" width="4" height="2.6" rx="1" /></motion.svg>
+        <motion.svg viewBox="0 0 20 20" className="w-[70%] h-[70%]" ><circle cx="10" cy="11" r="7.5" fill="#fff" stroke="#000" strokeWidth="2" /><path d="M10 11V6.5M10 11l3 2" stroke="#000" strokeWidth="2" strokeLinecap="round" /><rect x="8" y="0.8" width="4" height="2.6" rx="1" /></motion.svg>
       </span>
       <div className="relative flex-1 h-full rounded-full border-heavy border-border bg-surface overflow-hidden" style={{ boxShadow: '0 4px 0 #000' }}>
         <motion.div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${left * 100}%`, background: frozen ? 'repeating-linear-gradient(45deg,#bfe6ff 0 10px,#e8f7ff 10px 20px)' : low ? '#ef7d96' : 'linear-gradient(180deg,#fdfd94,#f6c544)', borderRight: '3px solid #000', transition: 'width .1s linear, background .3s' }}
-          animate={low && !still ? { opacity: [1, 0.55, 1] } : { opacity: 1 }} transition={{ duration: 0.6, repeat: low ? Infinity : 0 }} />
-        {frozen && !still && <motion.span className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)' }} animate={{ x: ['-100%', '100%'] }} transition={{ duration: 1.2, repeat: Infinity }} />}
+          />
       </div>
       <AnimatePresence>
         {double && (
           <motion.span key="x2" className="shrink-0 h-full aspect-square rounded-full border-heavy border-border bg-accent grid place-items-center font-display" style={{ fontSize: `calc(${h} * 0.42)` }}
-            initial={still ? false : { scale: 0, rotate: -180 }} animate={{ scale: still ? 1 : [1, 1.12, 1], rotate: 0 }} exit={{ scale: 0 }} transition={{ scale: { duration: 1, repeat: Infinity } }}>x2</motion.span>
+            initial={still ? false : { scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>x2</motion.span>
         )}
       </AnimatePresence>
     </div>
@@ -541,8 +572,6 @@ function Clipboard() {
       <rect x="1.5" y="3" width="97" height="95.5" rx="6" fill="#f5a08c" stroke="#000" strokeWidth="1.2" />
       <rect x="1.5" y="3" width="97" height="95.5" rx="6" fill="url(#ws-wood)" opacity="0.35" />
       <rect x="4.5" y="9" width="91" height="87" rx="2.5" fill="#fbfcf8" stroke="#000" strokeWidth="0.8" />
-      {Array.from({ length: 11 }, (_, i) => <line key={i} x1="5" x2="95" y1={14 + i * 7.6} y2={14 + i * 7.6} stroke="#cdd7fb" strokeWidth="0.35" />)}
-      <line x1="8" x2="8" y1="9.4" y2="95.6" stroke="#f5a08c" strokeWidth="0.35" opacity="0.7" />
       <path d="M36 0.8h28a3 3 0 0 1 3 3V8a2 2 0 0 1-2 2H35a2 2 0 0 1-2-2V3.8a3 3 0 0 1 3-3z" fill="#241c3d" stroke="#000" strokeWidth="0.8" />
       <rect x="45" y="2.6" width="10" height="2.4" rx="1.2" fill="#b4c4fb" />
       <circle cx="39" cy="5.4" r="1.2" fill="#b4c4fb" /><circle cx="61" cy="5.4" r="1.2" fill="#b4c4fb" />
