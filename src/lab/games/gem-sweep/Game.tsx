@@ -387,7 +387,7 @@ function Cell({ i, b, ctx, order, canTap, flagMode, xray, dancing, dust, puff, h
             <svg viewBox="0 0 40 40" className="absolute inset-0 w-full h-full opacity-60" aria-hidden="true"><path d={`M${8 + (i % 3) * 4} 30l3-8 3 8M${22 + (i % 2) * 5} 28l2-6 3 6`} stroke="#3f9a59" strokeWidth="2.4" fill="none" strokeLinecap="round" /></svg>
             {b.flag[i] && <motion.span className="absolute inset-0 grid place-items-center" initial={ctx.still ? false : { y: -30, scale: 1.4, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12 }}><Flag /></motion.span>}
             {xray && b.rock[i] && !b.flag[i] && (
-              <motion.span className="absolute inset-[12%] inline-flex" initial={{ opacity: 0 }} animate={dancing && !ctx.still ? { opacity: 0.9, y: [0, -8, 0], rotate: [0, -10, 10, 0] } : { opacity: 0.75 }} transition={dancing ? { duration: 0.5, repeat: Infinity } : undefined}><Rock /></motion.span>
+              <motion.span className="absolute inset-[12%] inline-flex" initial={{ opacity: 0 }} animate={dancing && !ctx.still ? { opacity: 0.9, y: [0, -8, 0], rotate: [0, -10, 10, 0] } : { opacity: 0.75 }} transition={dancing ? { duration: 1, repeat: Infinity } : undefined}><Rock /></motion.span>
             )}
             {canTap && flagMode && !b.flag[i] && <span className="absolute inset-[30%] opacity-30"><Flag /></span>}
             {hint && !b.flag[i] && (

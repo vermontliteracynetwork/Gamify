@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowFatUp, CaretLeft, CaretRight, Coins, FlagPennant, Gift, PersonSimpleRun } from '@phosphor-icons/react';
+import { ArrowFatUp, CaretLeft, CaretRight, Balloon, Coins, Gift, PersonSimpleRun } from '@phosphor-icons/react';
 import { TeamBadge } from '../../../engine/TeamBadge';
 import { TEAM_COLORS } from '../../../engine/turns';
 import type { LabCtx, LabDef, LabPower } from '../../types';
@@ -612,7 +612,7 @@ const def: LabDef = {
     { icon: <PersonSimpleRun weight="fill" />, text: 'Answer right for a long run' },
     { icon: <Coins weight="fill" />, text: 'Jump for coins' },
     { icon: <Gift weight="fill" />, text: 'Bump a gift box: answer for a power-up' },
-    { icon: <FlagPennant weight="fill" />, text: 'Reach the balloon gate' },
+    { icon: <Balloon weight="fill" />, text: 'Reach the balloon gate' },
   ],
   rounds: { label: 'Rounds', min: 1, max: 10, default: 3 },
   powers: POWERS,

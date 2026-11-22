@@ -399,7 +399,7 @@ const CSS = `
 .hs-cheer > g:nth-child(3n) { animation-delay: 0.12s; }
 .hs-cheer > g:nth-child(3n+1) { animation-delay: 0.24s; }
 @keyframes hs-cheer { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2.2px); } }
-.hs-flame { animation: hs-flame 0.18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.hs-flame { animation: hs-flame 1.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
 @keyframes hs-flame { from { transform: scale(0.9); } to { transform: scale(1.15); } }
 .hs-slip { animation: hs-slip 0.35s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes hs-slip { from { transform: translateX(-1px) rotate(-4deg); } to { transform: translateX(1px) rotate(4deg); } }

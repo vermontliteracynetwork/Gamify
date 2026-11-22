@@ -379,8 +379,8 @@ const CSS = `
 .td-cheer > g:nth-child(2n) { animation-delay: 0.12s; }
 @keyframes td-cheer { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
 .td-cheer > g { transform-box: fill-box; transform-origin: center; }
-.td-zip { animation: td-zip 0.2s linear infinite alternate; }
-@keyframes td-zip { from { opacity: 0.4; } to { opacity: 1; } }
+.td-zip { animation: td-zip 1.2s ease-in-out infinite alternate; }
+@keyframes td-zip { from { opacity: 0.75; } to { opacity: 1; } }
 html[data-motion="still"] .td-cheer > g, html[data-motion="still"] .td-zip { animation: none; }
 `;
 

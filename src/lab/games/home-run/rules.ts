@@ -1,4 +1,4 @@
-// Home Run Derby rules, kept apart so they can be tested.
+// Big Hit Baseball rules, kept apart so they can be tested.
 
 // 0 is a miss (a strike, so an out); 1 to 4 bases is a single to a home run.
 export type Hit = 0 | 1 | 2 | 3 | 4;

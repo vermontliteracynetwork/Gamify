@@ -530,6 +530,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                       {offer.map((k) => (
                         <button key={k} type="button" onClick={() => pickPiece(k)} aria-label="Pick this piece" className="aspect-square rounded-panel border-heavy border-border bg-surface grid place-items-center motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 5px 0 #000' }}>
                           <PieceArt kind={k} />
+                          <span className="font-bold text-sm">Pick</span>
                         </button>
                       ))}
                     </div>

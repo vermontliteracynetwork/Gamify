@@ -271,7 +271,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 transition={how === 'instant' || ctx.still ? { duration: 0 } : how === 'slow' ? { duration: 0.8, ease: 'easeInOut' } : how === 'fast' ? { duration: 0.17, ease: 'easeOut' } : { type: 'spring', stiffness: 320, damping: 24 }}>
                 <span className="absolute left-[10%] right-[10%] bottom-[-12%] h-[22%] rounded-full bg-black/30" aria-hidden="true" />
                 {rocket === p.id && !ctx.still && (
-                  <motion.svg viewBox="0 0 60 30" className="absolute right-[78%] top-[38%] w-[90%]" animate={{ scaleX: [0.8, 1.2, 0.9], opacity: [0.8, 1, 0.8] }} transition={{ duration: 0.18, repeat: Infinity }} style={{ originX: 1 }} aria-hidden="true">
+                  <motion.svg viewBox="0 0 60 30" className="absolute right-[78%] top-[38%] w-[90%]" animate={{ scaleX: [0.8, 1.2, 0.9], opacity: [0.8, 1, 0.8] }} transition={{ duration: 0.9, repeat: Infinity, repeatType: 'mirror' }} style={{ originX: 1 }} aria-hidden="true">
                     <path d="M60 15 Q30 -2 0 15 Q30 32 60 15z" fill="#f6c544" stroke="#000" strokeWidth="2.5" /><path d="M60 15 Q40 6 22 15 Q40 24 60 15z" fill="#ef7d96" />
                   </motion.svg>
                 )}
