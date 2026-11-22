@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import Title from '../ui/Title';
 import Loading from '../ui/Loading';
 import LabGame from './LabGame';
@@ -54,5 +54,8 @@ export function LabPlay() {
   }, [id]);
   if (def === 'missing') return <main className="p-10 text-center font-bold">That game is not in the Game Lab. <Link to="/lab">See all games</Link></main>;
   if (!def) return <Loading />;
-  return <LabGame key={def.id} def={def} />;
+  // The app's page transition starts with initial={false}, which stops every
+  // mount animation in a game opened from a link; a fresh presence here
+  // turns them back on.
+  return <AnimatePresence><LabGame key={def.id} def={def} /></AnimatePresence>;
 }
