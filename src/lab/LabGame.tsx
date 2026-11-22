@@ -194,7 +194,7 @@ export default function LabGame({ def }: { def: LabDef }) {
         )}
         {playing && ctx && (
           <div className="grid lg:grid-cols-[minmax(0,1fr)_16rem] gap-3 items-stretch">
-            <section className="lab-board relative min-w-0 h-[calc(100dvh-11rem)] lg:h-[calc(100dvh-5.5rem)]" aria-label={def.name}>
+            <section className="lab-board relative min-w-0 h-[calc(100dvh-11.25rem)] lg:h-[calc(100dvh-5.5rem)]" aria-label={def.name}>
               <Play key={runId} ctx={ctx} />
             </section>
             <div className="order-first lg:order-none pr-44 lg:pr-0 min-w-0 grid content-start gap-3 lg:h-[calc(100dvh-5.5rem)] lg:pt-14 lg:grid-rows-[auto_auto_1fr]">
