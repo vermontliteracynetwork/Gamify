@@ -193,7 +193,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (!ctx.cpu || mode !== 'pick' || !board) return;
     const id = window.setTimeout(() => pick(cpuPick(board.list, usedRef.current, board.slots, c.current.cpuRight())), 2000 + Math.random() * 1200);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ctx.cpu, mode, board, ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const still = ctx.still;
   const b = board;

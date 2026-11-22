@@ -48,13 +48,13 @@ interface Part { x: number; y: number; vx: number; vy: number; life: number; max
 interface Float { x: number; y: number; text: string; life: number; color: string }
 interface World {
   t: number; left: number; lv: Level; b: Body; cam: number; face: number; squash: number; walk: number; blink: number; shield: number;
-  fx: Record<Fx, number>; parts: Part[]; floats: Float[]; coins: number; boxes: number; runLen: number; lastSafe: number; flag: number; levels: number; over: boolean; asking: boolean;
+  fx: Record<Fx, number>; parts: Part[]; floats: Float[]; coins: number; boxes: number; runLen: number; cpuTime: number; stuck: number; lastSafe: number; flag: number; levels: number; over: boolean; asking: boolean;
   popups: { x: number; y: number; vy: number; life: number }[];
 }
 const newBody = (lv: Level): Body => ({ x: lv.spawn.x, y: lv.spawn.y, w: 30, h: 36, vx: 0, vy: 0, onGround: false, coyote: 0, buffer: 0, jumping: false });
 function newWorld(): World {
   const lv = makeLevel();
-  return { t: 0, left: RUN_LONG, boxes: 0, runLen: RUN_LONG, lv, b: newBody(lv), cam: 0, face: 1, squash: 0, walk: 0, blink: 0, shield: 0, fx: { spring: 0, magnet: 0, jetpack: 0, slow: 0, star: 0, double: 0, bouncy: 0, tiny: 0 }, parts: [], floats: [], coins: 0, lastSafe: lv.spawn.x, flag: 0, levels: 0, over: false, asking: false, popups: [] };
+  return { t: 0, left: RUN_LONG, boxes: 0, runLen: RUN_LONG, cpuTime: 0, stuck: 0, lv, b: newBody(lv), cam: 0, face: 1, squash: 0, walk: 0, blink: 0, shield: 0, fx: { spring: 0, magnet: 0, jetpack: 0, slow: 0, star: 0, double: 0, bouncy: 0, tiny: 0 }, parts: [], floats: [], coins: 0, lastSafe: lv.spawn.x, flag: 0, levels: 0, over: false, asking: false, popups: [] };
 }
 
 let coinSheet: HTMLImageElement | null = null;
@@ -192,7 +192,14 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (b.h !== wantH) { b.y += b.h - wantH; b.x += (b.w - wantW) / 2; b.h = wantH; b.w = wantW; }
 
     let input: Input;
-    if (x.cpu) input = cpuInput(b, w.lv);
+    if (x.cpu) {
+      input = cpuInput(b, w.lv);
+      // A computer run with no clock still ends: after a minute it is done.
+      w.cpuTime += dt;
+      if (x.timeScale === 0 && w.cpuTime > 60) { finishRun(w); return; }
+      // Stuck at a wall? Back up a step and jump.
+      if (Math.abs(b.vx) < 5 && b.onGround && w.cpuTime > 1) { w.stuck += dt; if (w.stuck > 0.6) { input = { dir: -1, jump: true, jumpPressed: true }; w.stuck = 0; } } else w.stuck = 0;
+    }
     else input = { dir: (keys.current.r ? 1 : 0) - (keys.current.l ? 1 : 0), jump: keys.current.jump, jumpPressed: keys.current.pressed };
     keys.current.pressed = false;
     if (input.dir) w.face = input.dir;
@@ -372,8 +379,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (coinSheet?.complete && coinSheet.naturalWidth) g.drawImage(coinSheet, 0, 0, 64, 64, 20, 18, 32, 32);
     g.fillStyle = '#fdfd94'; g.font = 'bold 26px "Inclusive Sans", system-ui, sans-serif'; g.textAlign = 'left'; g.fillText(`${w.coins}`, 62, 35);
     const total = phaseRef.current === 'ready' || c.current.timeScale === 0 ? 1 : Math.max(0, w.left) / (RUN_LONG * (c.current.timeScale || 1));
-    g.fillStyle = 'rgba(36,28,61,0.85)'; rr(g, VW - 232, 16, 220, 20, 10); g.fill(); g.stroke();
-    g.fillStyle = w.left < 8 && phaseRef.current === 'run' ? '#ef7d96' : '#8fe3a0'; rr(g, VW - 228, 20, Math.max(0, 212 * Math.min(1, total)), 12, 6); g.fill();
+    if (c.current.timeScale > 0) {
+      g.fillStyle = 'rgba(36,28,61,0.85)'; rr(g, VW - 232, 16, 220, 20, 10); g.fill(); g.stroke();
+      g.fillStyle = w.left < 8 && phaseRef.current === 'run' ? '#ef7d96' : '#8fe3a0'; rr(g, VW - 228, 20, Math.max(0, 212 * Math.min(1, total)), 12, 6); g.fill();
+    }
     const trip = Math.min(1, b.x / w.lv.flagX);
     g.fillStyle = 'rgba(36,28,61,0.5)'; rr(g, VW / 2 - 120, 22, 240, 8, 4); g.fill();
     g.fillStyle = '#fbfcf8'; g.beginPath(); g.arc(VW / 2 - 120 + 240 * trip, 26, 8, 0, Math.PI * 2); g.fill(); g.stroke();

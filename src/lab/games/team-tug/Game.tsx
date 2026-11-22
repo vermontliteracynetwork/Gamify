@@ -180,7 +180,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (!ctx.cpu || mode !== 'pull') return;
     const id = window.setTimeout(() => void doPull(), 1400 + Math.random() * 800);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ctx.cpu, mode, ctx.taken]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const on = (e: KeyboardEvent) => { if (!c.current.cpu && (e.key === ' ' || e.key === 'Enter') && mode === 'pull') { e.preventDefault(); void doPull(); } };
     window.addEventListener('keydown', on);
@@ -317,8 +317,8 @@ function Puller({ x, s, color, heave, fall, grip, still, slip, flex, i, arrive }
   const effort = heave > 0;
   return (
     <motion.g initial={arrive && !still ? { x: -s * 160, opacity: 0 } : false} animate={{ x: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 90, damping: 14 }}>
-      <motion.g key={`h${heave}-${slip}-${fall}-${flex}`} style={{ transformOrigin: `${x}px 192px` }} initial={false}
-        animate={fall && !still ? { rotate: [lean, s * 50, s * 80], y: [0, -6, 8] } : still ? { rotate: lean } : effort ? { rotate: [lean, lean - s * 16, lean - s * 10, lean], x: [0, -s * 4, 0] } : slip ? { rotate: [lean, -lean, lean], x: [0, s * 6, 0] } : flex ? { rotate: lean, scale: [1, 1.25, 1, 1.2, 1], y: [0, -8, 0, -6, 0] } : { rotate: [lean, lean - s * 2, lean] }}
+      <motion.g style={{ transformOrigin: `${x}px 192px` }} initial={false}
+        animate={fall && !still ? { rotate: [lean, s * 50, s * 80], y: [0, -6, 8] } : still ? { rotate: lean } : effort ? { rotate: [lean, lean - s * (heave % 2 ? 16 : 15), lean - s * 10, lean], x: [0, -s * 4, 0] } : slip ? { rotate: [lean, -lean, lean], x: [0, s * 6, 0] } : flex ? { rotate: lean, scale: [1, 1.25, 1, 1.2, 1], y: [0, -8, 0, -6, 0] } : { rotate: [lean, lean - s * 2, lean], scale: 1, y: 0, x: 0 }}
         transition={fall ? { duration: 0.9, delay: 0.2 + i * 0.08 } : effort ? { duration: 0.9, delay: i * 0.05 } : slip ? { duration: 0.6 } : flex ? { duration: 1.2, delay: i * 0.08 } : { duration: 2 + i * 0.3, repeat: Infinity }}>
         <ellipse cx={x} cy="193" rx="10" ry="3" fill="#000" opacity="0.18" />
         <path d={`M${x - 5} 178l-3 14M${x + 5} 178l3 14`} stroke="#241c3d" strokeWidth="4" strokeLinecap="round" />

@@ -109,7 +109,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (started || !ctx.cpu) return;
     const id = window.setTimeout(() => pickLook(look), 1800);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [started, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Every turn: the team's own word and its clue are the question. A right
   // letter keeps the turn going (up to three); a miss passes it on. Solo:
@@ -219,7 +219,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       guess(cpuLetter(word, get()?.guessed ?? [], c.current.cpuRight()));
     }, 1600 + Math.random() * 900);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ctx.cpu, mode, ctx.taken, ice, guessed.length, word]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard letters work too.
   useEffect(() => {
@@ -319,7 +319,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <motion.button key={l} type="button" disabled={!canPick || used || ice > 0} onClick={() => guess(l)} aria-label={`Letter ${l}${used ? (hit ? ', in the word' : ', not in the word') : ''}`}
                 className={`relative rounded-[calc(var(--u)*1.6)] border-std border-border font-display leading-none grid place-items-center disabled:cursor-default ${hit ? 'bg-[#9fe7a0]' : used ? 'bg-[#cdd7fb] text-[#7383ad]' : 'bg-surface'}`}
                 style={{ fontSize: 'calc(var(--u)*6.4)', boxShadow: used ? 'none' : '0 calc(var(--u)*0.6) 0 #000' }}
-                animate={sneezing && !still ? { rotate: [0, (i % 3 - 1) * 12, 0], y: [0, -5, 0] } : last?.letter === l && !still ? (last.hit ? { scale: [1, 1.3, 1], y: [0, -8, 0] } : { x: [0, -6, 6, -4, 0] }) : { scale: 1, y: used ? 'calc(var(--u)*0.5)' : 0 }}
+                animate={sneezing && !still ? { rotate: [0, (i % 3 - 1) * 12, 0], y: [0, -5, 0] } : last?.letter === l && !still ? (last.hit ? { scale: [1, 1.3, 1], y: [0, -8, 0] } : ctx.shake ? { x: [0, -6, 6, -4, 0] } : { scale: [1, 0.92, 1] }) : { scale: 1, y: used ? 'calc(var(--u)*0.5)' : 0 }}
                 transition={{ duration: 0.45, delay: sneezing ? i * 0.02 : 0 }}
                 whileHover={canPick && !used && !still ? { scale: 1.08 } : undefined} whileTap={canPick && !used ? { scale: 0.92, y: 4 } : undefined}>
                 {l}
@@ -333,7 +333,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <motion.button type="button" key="ice" onClick={crack} aria-label={`Frozen keys. Tap ${ice} times to crack the ice`}
                 className="absolute inset-0 rounded-[calc(var(--u)*3)] border-bold border-border grid place-items-center font-display text-[calc(var(--u)*8)] text-[#241c3d]"
                 style={{ background: 'linear-gradient(135deg, rgba(220,240,255,0.92), rgba(160,205,245,0.92))', backdropFilter: 'blur(2px)' }}
-                initial={still ? { opacity: 0 } : { scaleY: 0, opacity: 0 }} animate={{ scaleY: 1, opacity: 1, x: ice < 3 && !still ? [0, -6, 6, 0] : 0 }} exit={still ? { opacity: 0 } : { scale: 1.2, opacity: 0, rotate: 4 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>
+                initial={still ? { opacity: 0 } : { scaleY: 0, opacity: 0 }} animate={{ scaleY: 1, opacity: 1, x: ice < 3 && ctx.shake ? (ice % 2 ? [0, -6, 6, 0] : [0, 6, -6, 0]) : 0 }} exit={still ? { opacity: 0 } : { scale: 1.2, opacity: 0, rotate: 4 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }}>
                 <svg viewBox="0 0 300 80" className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" aria-hidden="true">
                   {ice <= 2 && <path d="M150 0 L140 30 L160 45 L150 80" stroke="#fff" strokeWidth="2.5" fill="none" />}
                   {ice <= 1 && <path d="M60 0 L75 35 L55 60 L70 80 M240 0 L225 40 L250 80" stroke="#fff" strokeWidth="2.5" fill="none" />}

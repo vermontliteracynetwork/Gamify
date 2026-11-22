@@ -94,7 +94,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const [party, setParty] = useState(false);
   const [radar, setRadar] = useState(0);
   const [hover, setHover] = useState<number | null>(null);
-  const [hint, setHint] = useState<number | null>(null);
+  const [hint, setHintState] = useState<number | null>(null);
+  const hintRef = useRef<number | null>(null);
+  const setHint = (h: number | null) => { hintRef.current = h; setHintState(h); };
   const [focus, setFocus] = useState(Math.floor(4 * 9 + 4));
   const gridRef = useRef<HTMLDivElement>(null);
   const lives = useRef<Record<string, number>>({});
@@ -187,7 +189,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (modeRef.current !== 'dig') return;
     let b = boardRef.current;
     if (b.open[i]) return;
-    if (hint === i && !flagMode) setHint(null);
+    if (hintRef.current === i && !flagMode) setHint(null);
     if (flagMode && !x.cpu) {
       const flag = [...b.flag]; flag[i] = !flag[i];
       setBoard({ ...b, flag }); x.sfx.tap();
@@ -253,17 +255,26 @@ function Play({ ctx }: { ctx: LabCtx }) {
     window.setTimeout(() => { c.current.setHeld(c.current.player.id, []); c.current.next(); }, 2600);
   }
 
-  // The computer digs on its own, one square at a time.
+  // The computer digs on its own, one square at a time (a hint square first).
+  // If a dig is refused, the tick moves on so the computer never stalls.
+  const [cpuTick, setCpuTick] = useState(0);
   useEffect(() => {
     if (!ctx.cpu || mode !== 'dig') return;
+    let inner = 0;
     const id = window.setTimeout(() => {
       const b = boardRef.current;
-      const pick = b.made ? cpuDig(b, c.current.cpuRight()) : Math.floor((b.rows / 2) * b.cols + b.cols / 2);
+      const h = hintRef.current;
+      const pick = h !== null && !b.open[h] ? h : b.made ? cpuDig(b, c.current.cpuRight()) : Math.floor((b.rows / 2) * b.cols + b.cols / 2);
       setHover(pick);
-      window.setTimeout(() => tap(pick), 500);
+      inner = window.setTimeout(() => {
+        const before = digsRef.current;
+        if (pick === undefined || pick < 0) { spendDig(); return; }
+        tap(pick);
+        if (digsRef.current === before && modeRef.current === 'dig') setCpuTick((n) => n + 1);
+      }, 500);
     }, 1200);
-    return () => window.clearTimeout(id);
-  }, [mode, digs, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { window.clearTimeout(id); window.clearTimeout(inner); };
+  }, [mode, digs, ctx.cpu, cpuTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canTap = mode === 'dig' && !ctx.cpu;
   // Keyboard: one tab stop on the board, arrows move, Enter or Space digs, F flags.

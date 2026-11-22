@@ -28,7 +28,11 @@ const POWERS: LabPower[] = [
   { id: 'wobble', name: 'Wobbly Keys', desc: 'Wibble wobble! The letter keys dance for the next turn.', silly: true, art: <Art kind="wobble" /> },
 ];
 
-const ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+const QWERTY = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+// ABC order is the default for young readers; the choice is remembered.
+const ABC = ['ABCDEFGHIJ', 'KLMNOPQRS', 'TUVWXYZ'];
+const ORDER_KEY = 'gamify:lab:crossword:keys';
+function loadOrder(): 'abc' | 'qwerty' { try { return localStorage.getItem(ORDER_KEY) === 'qwerty' ? 'qwerty' : 'abc'; } catch { return 'abc'; } }
 const asQuestion = (e: Entry): MultipleChoiceQuestion => ({ id: `cw-${e.word}`, kind: 'mc', prompt: e.clue, choices: [e.word], correctIndex: 0 });
 const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 type Mode = 'turn' | 'play' | 'busy';
@@ -43,7 +47,7 @@ function useWide(at = 1.1) {
     ro.observe(el); return () => ro.disconnect();
   }, []);
   // Short, wide windows put the keys beside the puzzle instead of under it.
-  return [ref, aspect > at, aspect > 1.85] as const;
+  return [ref, aspect > at, aspect > 1.85, aspect] as const;
 }
 
 function newPuzzle(words: () => { word: string; clue: string }[]): Puzzle {
@@ -56,13 +60,26 @@ function newPuzzle(words: () => { word: string; clue: string }[]): Puzzle {
 function Play({ ctx }: { ctx: LabCtx }) {
   const c = useRef(ctx); c.current = ctx;
   const clip = (f: string, level = 0.7) => playClip(`${A}/${f}.mp3`, c.current.settings, level);
-  const [box, wide, xwide] = useWide();
+  const [box, wide, xwide, aspect] = useWide();
   const [puz, setPuzState] = useState<Puzzle>(() => newPuzzle(() => ctx.words({ min: 3, max: 9 })));
   const puzRef = useRef(puz);
   const setPuz = (p: Puzzle) => { puzRef.current = p; setPuzState(p); };
   const [fixed, setFixedState] = useState<Record<string, Fixed>>({});
   const fixedRef = useRef(fixed);
-  const setFixed = (f: Record<string, Fixed>) => { fixedRef.current = f; setFixedState(f); };
+  const setFixed = (f: Record<string, Fixed>) => { fixedRef.current = f; setFixedState(f); autoSolve(); };
+  const [order, setOrderState] = useState(loadOrder);
+  const ROWS = order === 'abc' ? ABC : QWERTY;
+  const flipOrder = () => { const n = order === 'abc' ? 'qwerty' : 'abc'; setOrderState(n); try { localStorage.setItem(ORDER_KEY, n); } catch { /* private window */ } };
+  const doneRef = useRef(false);
+  // Any word whose squares are all filled in (by crossings or reveals) is
+  // solved for free, so nobody (the computer included) is left stuck.
+  function autoSolve() {
+    const s = { ...solvedRef.current }; let changed = false;
+    puzRef.current.entries.forEach((e, i) => { if (s[i] === undefined && cellsOf(e).every(([r, cc]) => fixedRef.current[key(r, cc)])) { s[i] = ''; changed = true; } });
+    if (!changed) return;
+    setSolved(s);
+    if (modeRef.current === 'play') { const n = open(s)[0]; if (n === undefined) void puzzleDone(); else if (s[actRef.current] !== undefined) select(n); }
+  }
   const [solved, setSolvedState] = useState<Record<number, string>>({});
   const solvedRef = useRef(solved);
   const setSolved = (s: Record<number, string>) => { solvedRef.current = s; setSolvedState(s); };
@@ -114,7 +131,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     setWobble(false); setInk(null); setShowing(false); setHelpOn(false);
     if (x.taken > 0 && (x.solo || open().length === 0)) {
       setPuz(newPuzzle(() => c.current.words({ min: 3, max: 9 })));
-      setFixed({}); setSolved({}); misses.current = {}; clip('wipe'); x.say('New puzzle!');
+      setFixed({}); setSolved({}); misses.current = {}; doneRef.current = false; clip('wipe'); x.say('New puzzle!');
     }
     select(open()[0] ?? 0);
     if (x.solo) setMode('play'); else setMode('turn');
@@ -277,6 +294,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
 
   async function puzzleDone() {
     const x = c.current;
+    if (doneRef.current) return;
+    doneRef.current = true;
     setMode('busy'); x.sfx.cheer(); x.say('Puzzle done!', 'big'); x.burst(0.4, 0.4, 'big');
     await wait(2600);
     c.current.next();
@@ -347,6 +366,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   };
 
   const S = wide ? 'cqh' : 'cqw';
+  const ar = xwide ? 2.05 : wide ? Math.min(1.85, Math.max(1.3, aspect)) : 0.72;
   // The big letter keys.
   const keys = (
           <div className="relative shrink-0 grid gap-[3%] rounded-[1.4rem] border-heavy border-border px-[1.5%] py-[1.6%]" role="group" aria-label="Letter keys"
@@ -376,11 +396,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
   );
   return (
     <div ref={box} className="absolute inset-0 grid place-items-center">
-      <div className="lab-fit relative" style={{ '--ar': xwide ? 2.05 : wide ? 1.5 : 0.72, containerType: 'size' } as CSSProperties}>
+      <div className="lab-fit relative" style={{ '--ar': ar, containerType: 'size' } as CSSProperties}>
         <div className="absolute inset-0 flex flex-col gap-[2%]">
           <div className={`flex-1 min-h-0 flex ${wide ? 'flex-row' : 'flex-col'} gap-[2%]`}>
             {/* The corkboard with the puzzle pinned on it. */}
-            <div className="relative min-w-0 min-h-0" style={xwide ? { width: '47%' } : wide ? { width: '57%' } : { flex: 1 }}>
+            <div className="relative min-w-0 min-h-0" style={xwide ? { width: '47%' } : wide ? { width: `${Math.min(62, 90 / ar)}%` } : { flex: 1 }}>
               <Cork />
               <div className="absolute inset-[4.5%]" style={{ containerType: 'size' }}>
                 <div className="absolute inset-0 grid place-items-center">
@@ -394,7 +414,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                         const isBad = bad?.keys.includes(k), waveAt = wave?.keys.indexOf(k) ?? -1;
                         return (
                           <motion.button key={k} type="button" onClick={() => tapCell(r, cc)} disabled={!canPlay} aria-label={`Square ${numAt[k] ? `${numAt[k]} ` : ''}${f?.l ?? d ?? 'empty'}`}
-                            className="relative m-[4%] rounded-[14%] border-border font-heading font-bold grid place-items-center disabled:cursor-default"
+                            className="relative m-[2.5%] rounded-[14%] border-border font-heading font-bold grid place-items-center disabled:cursor-default"
                             style={{ borderWidth: 'max(2px, 0.5cqmin)', background: isBad ? '#ef7d96' : f ? color(f.by) : showing && inAct ? '#c8f0dc' : isCur ? '#fdfd94' : inAct ? '#fffbd0' : '#ffffff', boxShadow: isCur ? '0 0 0 3px #241c3d, 0 3px 0 #000' : '0 3px 0 #000', fontSize: `calc(min(100cqw / ${puz.cols}, 100cqh / ${puz.rows}) * 0.5)`, zIndex: isCur ? 2 : 1 }}
                             initial={ctx.still ? false : { scale: 0, rotate: -20 }}
                             animate={isBad && ctx.shake ? { x: [0, -6, 6, -4, 4, 0], scale: 1, rotate: 0 } : waveAt >= 0 && !ctx.still ? { y: [0, -14, 0], scale: [1, 1.15, 1], rotate: 0 } : { scale: 1, rotate: 0, y: 0 }}
@@ -427,7 +447,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                           onClick={() => { const n = ink.left - 1; clip('wipe'); c.current.sfx.swish(); if (n <= 0) { setInk(null); c.current.say('Squeaky clean!'); } else setInk({ ...ink, left: n }); }}
                           initial={ctx.still ? false : { scale: 0, rotate: -60 }} animate={{ scale: [0.4 + ink.left * 0.2, 0.3 + ink.left * 0.233], rotate: 0 }} exit={{ scale: 0, opacity: 0, rotate: 90 }} transition={{ type: 'spring', stiffness: 260, damping: 12 }}>
                           <Blob still={ctx.still} />
-                          <span className="absolute left-1/2 bottom-[4%] -translate-x-1/2 whitespace-nowrap rounded-pill border-std border-border bg-surface px-2 font-bold text-sm">Tap to wipe</span>
+                          <span className="absolute left-1/2 bottom-[4%] -translate-x-1/2 whitespace-nowrap rounded-pill border-std border-border bg-surface px-3 py-1 font-bold text-lg">Tap to wipe</span>
                         </motion.button>
                       )}
                     </AnimatePresence>
@@ -445,7 +465,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                     <motion.div key={`${puz.entries.length}-${act}`} className="grid gap-[0.6em] min-h-0" initial={ctx.still ? false : { x: 30, opacity: 0, rotate: 2 }} animate={{ x: 0, opacity: 1, rotate: 0 }} exit={{ x: -30, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 20 }}>
                       <span className="flex items-center gap-2 font-display leading-none" style={{ fontSize: `max(1.1rem, ${wide ? 5 : 4.4}${S})` }}>
                         <span className="inline-flex items-center gap-1 rounded-full border-std border-border px-[0.45em] py-[0.12em]" style={{ background: solved[act] !== undefined ? color(solved[act]) : '#fdfd94' }}>
-                          {e.num}{e.dir === 'across' ? <ArrowRight weight="bold" aria-label="across" /> : <ArrowDown weight="bold" aria-label="down" />}
+                          {e.num} {e.dir}{e.dir === 'across' ? <ArrowRight weight="bold" aria-hidden="true" /> : <ArrowDown weight="bold" aria-hidden="true" />}
                         </span>
                         <span className="flex gap-[0.12em]" aria-hidden="true">{[...e.word].map((_, j) => <span key={j} className="inline-block rounded-[0.12em] border-[2px] border-border" style={{ width: '0.42em', height: '0.42em', background: fixed[actCells[j]] || draft[actCells[j]] ? '#241c3d' : '#fff' }} />)}</span>
                       </span>
@@ -472,6 +492,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
                     </li>
                   );
                 })}
+                <li>
+                  <button type="button" onClick={() => { flipOrder(); ctx.sfx.tick(); }} aria-label={`Key order: ${order === 'abc' ? 'A B C' : 'keyboard'}. Tap to change.`}
+                    className="rounded-full border-std border-border font-heading font-bold leading-none bg-surface-2 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ fontSize: `max(0.85rem, ${wide ? 2.6 : 2.6}${S})`, minHeight: 44, padding: '0 0.7em', boxShadow: '0 3px 0 #000' }}>
+                    Keys: {order === 'abc' ? 'ABC' : 'QWERTY'}
+                  </button>
+                </li>
               </ul>
               {xwide && keys}
               <div className="absolute -top-[0.2rem] right-[0.4rem] flex gap-1">

@@ -2,11 +2,12 @@
 // tested. The board is the traditional 10 by 10: square 1 bottom left, rows
 // snaking back and forth, square 100 top left. Coordinates are 0..1000.
 
-export const LADDERS: Record<number, number> = { 3: 22, 8: 30, 20: 41, 28: 55, 50: 69, 63: 81, 71: 92 };
-export const SNAKES: Record<number, number> = { 17: 4, 36: 15, 48: 26, 62: 43, 74: 53, 88: 67, 97: 78 };
+export const LADDERS: Record<number, number> = { 2: 22, 8: 33, 16: 45, 43: 78, 52: 89, 66: 95 };
+export const SNAKES: Record<number, number> = { 37: 4, 47: 14, 61: 40, 71: 50, 87: 54, 97: 64, 99: 79 };
 export const LAST = 100;
-// Which way each snake bends first, so crossing snakes sit apart.
-export const SNAKE_AMP: Record<number, number> = { 17: 40, 36: -44, 48: 40, 62: -40, 74: -44, 88: 46, 97: 46 };
+// Each snake keeps to its own column (ladders have theirs), so nothing crosses;
+// the snakes on the board's edges wiggle a little less.
+export const SNAKE_AMP: Record<number, number> = { 37: 40, 47: -40, 61: 28, 71: -28, 87: 40, 97: -40, 99: 40 };
 
 export interface Pt { x: number; y: number }
 

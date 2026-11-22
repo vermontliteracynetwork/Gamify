@@ -92,7 +92,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (started || !ctx.cpu) return;
     const id = window.setTimeout(() => pickMode(mode), 1800);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [started, ctx.cpu]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A new turn: ring or pairs, then Go!
   useEffect(() => {
@@ -318,7 +318,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
       }
     }, 1300 + Math.random() * 1400);
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ctx.cpu, phase, kind, qi, sel, matched.length, wrong.length, turn, shake]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => { if (!c.current.cpu && (e.key === ' ' || e.key === 'Enter') && phaseRef.current === 'ready' && started) { e.preventDefault(); go(); } };

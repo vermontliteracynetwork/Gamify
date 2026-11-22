@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as RPointerEvent, type KeyboardEvent as RKeyboardEvent, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useAnimate } from 'motion/react';
 import { CheckCircle, HandTap, MagnifyingGlass, Trophy } from '@phosphor-icons/react';
 import { playClip } from '../../../engine/music';
 import { TurnCard } from '../../../engine/ShareQuestion';
@@ -35,6 +35,7 @@ type Pace = 'relaxed' | 'none' | 'quick';
 const PACES: Pace[] = ['relaxed', 'none', 'quick'];
 const PACE_LABEL: Record<Pace, string> = { relaxed: 'Relaxed', none: 'No timer', quick: 'Quick' };
 const PACE_KEY = 'gamify:lab:word-search:timer';
+const CLUES_KEY = 'gamify:lab:word-search:clues-only';
 // Starts from the teacher's Timers setting (ctx.timeScale: 0 off, 1 normal, 1.5 relaxed).
 const paceFrom = (scale: number): Pace => (scale === 0 ? 'none' : scale === 1 ? 'quick' : 'relaxed');
 function loadPace(scale: number): Pace { try { const v = localStorage.getItem(PACE_KEY) as Pace | null; return v && PACES.includes(v) ? v : paceFrom(scale); } catch { return paceFrom(scale); } }
@@ -69,7 +70,8 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const cap = () => {
     const r = box.current?.getBoundingClientRect();
     const bw = r?.width || window.innerWidth * 0.7, bh = r?.height || window.innerHeight - 120;
-    const side = (bw / Math.max(1, bh) > 1.15 ? Math.min(bh, bw / 1.75) : Math.min(bw, bh * 0.56)) * 0.86;
+    // The letter grid is about 0.82 of the clipboard's side.
+    const side = (bw / Math.max(1, bh) > 1.15 ? Math.min(bh, bw / 1.75) : Math.min(bw, bh * 0.56)) * 0.82;
     return Math.max(6, Math.min(11, Math.floor(side / 44)));
   };
   const fresh = () => { const w = c.current.words({ min: 3, max: 10 }); const n = Math.min(cap(), sizeFor(w.slice(0, 9))); return makeSearch(w.filter((x) => x.word.length <= n), n); };
@@ -95,8 +97,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const doubleRef = useRef(false);
   const setDouble = (v: boolean) => { doubleRef.current = v; setDoubleState(v); };
   const [jelly, setJelly] = useState(false);
-  const [cluesOnly, setCluesOnly] = useState(false);
-  const [pace, setPaceState] = useState<Pace>(() => loadPace(ctx.timeScale));
+  // Clues only (words hidden) is the default, remembered on the device.
+  const [cluesOnly, setCluesOnlyState] = useState(() => { try { return localStorage.getItem(CLUES_KEY) !== 'off'; } catch { return true; } });
+  const setCluesOnly = (v: boolean) => { setCluesOnlyState(v); try { localStorage.setItem(CLUES_KEY, v ? 'on' : 'off'); } catch { /* private window */ } };
+  const [shakeRef, animateShake] = useAnimate();
+  const [pace, setPaceState] = useState<Pace>(() => (ctx.timeScale === 0 ? 'none' : loadPace(ctx.timeScale)));
   const paceRef = useRef(pace); paceRef.current = pace;
   const [shown, setShown] = useState<Placed | null>(null);
   const [magnet, setMagnet] = useState<Placed | null>(null);
@@ -156,7 +161,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     const x = c.current, open = unfound();
     if (!p.silly) x.say(`${p.name} is on!`);
     if (p.id === 'magnify' && open.length) { const t = open[Math.floor(Math.random() * open.length)]; setGlass([t.r, t.c]); x.sfx.slideUp(); }
-    if (p.id === 'flash' && open.length) { const t = open[Math.floor(Math.random() * open.length)]; setBeam(t.r); x.sfx.zap(); }
+    if (p.id === 'flash' && open.length) { const t = open[Math.floor(Math.random() * open.length)]; setBeam(t.r); x.sfx.zap(); window.setTimeout(() => setBeam(null), 4000); }
     if (p.id === 'freeze') { frozenUntil.current = Date.now() + 10_000; setFrozen(true); x.sfx.freeze(); }
     if (p.id === 'double') { setDouble(true); x.sfx.coin(); }
     if (p.id === 'magnet' && open.length) {
@@ -175,6 +180,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
     // Jelly lasts three seconds, then the letters hold still for aiming.
     if (p.id === 'jelly') { x.sfx.boing(); x.say('Jelly Letters!', 'oops'); setJelly(true); window.setTimeout(() => setJelly(false), 3000); }
   }
+
+  // Shake the clipboard (a stable wrapper, never remounted), only when allowed.
+  useEffect(() => {
+    if (!shake || !c.current.shake || !shakeRef.current) return;
+    void animateShake(shakeRef.current, { x: [0, -14, 12, -9, 7, -3, 0], rotate: [0, -1.5, 1.2, -0.8, 0.4, 0] }, { duration: 0.8 });
+  }, [shake]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The timer bar ticks while a player is hunting (never under a card).
   useEffect(() => {
@@ -198,7 +209,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
     // A gentle stop: no whistle, the words are shown so everyone learns them.
     x.sfx.slideDown(); x.say("Let's look together");
     if (x.solo) {
-      for (const p of unfound()) x.log(asQuestion(p), false);
+      // No blame: words never tried are not logged as misses.
       setRevealAll(true);
       window.setTimeout(() => c.current.next(), 4200);
     } else {
@@ -361,7 +372,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
         <div className={`absolute inset-0 flex ${wide ? 'flex-row' : 'flex-col'} gap-[2.2%]`}>
           {/* The clipboard and its puzzle page. */}
           <motion.div className="relative shrink-0 aspect-square" style={wide ? { height: '100%' } : { width: '100%' }}
-            animate={!ctx.shake || !shake ? undefined : { x: [0, -14, 12, -9, 7, -3, 0], rotate: [0, -1.5, 1.2, -0.8, 0.4, 0] }} key={`shake-${shake}`} transition={{ duration: 0.8 }}>
+            ref={shakeRef}>
             <Clipboard />
             <div className="absolute left-[6%] right-[6%] top-[12.5%] bottom-[5%]">
               <div ref={gridRef} role="grid" aria-label="Letter grid" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onKeyDown={key}
@@ -460,14 +471,16 @@ function Play({ ctx }: { ctx: LabCtx }) {
           <div className="relative flex-1 min-w-0 min-h-0 flex flex-col gap-[2.5%]">
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex-1 min-w-0">{pace !== 'none' ? <Timer left={left} frozen={frozen} double={double} still={ctx.still} solo={ctx.solo} hide={mode === 'turn'} h={wide ? '6.5cqh' : '5cqw'} /> : double ? <span className="inline-grid place-items-center h-11 w-11 rounded-full border-heavy border-border bg-accent font-display">x2</span> : null}</div>
+              {ctx.timeScale !== 0 && (
               <button type="button" onClick={() => changePace()} className="shrink-0 min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold leading-none motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ fontSize: 'max(0.8rem, min(2.2cqh, 2.6cqw))', boxShadow: '0 3px 0 #000' }} aria-label={`Timer: ${PACE_LABEL[pace]}. Tap to change.`}>
                 Timer: {PACE_LABEL[pace]}
               </button>
+              )}
             </div>
             <div className="relative flex-1 min-h-0 rounded-[1.4rem] border-heavy border-border bg-surface px-[4%] py-[3%] flex flex-col gap-[2%]" style={{ boxShadow: '0 6px 0 #000, 0 18px 30px rgba(36,28,61,0.25)' }}>
               <div className="flex items-center justify-between gap-2 shrink-0">
                 <p className="flex items-center gap-2 font-heading font-bold uppercase tracking-wider text-muted m-0" style={{ fontSize: `max(0.75rem, ${wide ? '2.1cqh' : '2.3cqw'})` }}><MagnifyingGlass weight="bold" aria-hidden="true" /> Find these words</p>
-                <button type="button" onClick={() => { setCluesOnly((v) => !v); ctx.sfx.tick(); }} aria-pressed={cluesOnly}
+                <button type="button" onClick={() => { setCluesOnly(!cluesOnly); ctx.sfx.tick(); }} aria-pressed={cluesOnly}
                   className="min-h-11 px-3 rounded-pill border-std border-border font-bold leading-none motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ fontSize: `max(0.8rem, ${wide ? '2.1cqh' : '2.4cqw'})`, background: cluesOnly ? '#fdfd94' : '#fbfcf8', boxShadow: '0 3px 0 #000' }}>
                   {cluesOnly ? 'Show words' : 'Clues only'}
                 </button>
@@ -477,7 +490,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                   const by = found[p.word], hot = lastClue?.word === p.word;
                   const fs = wide ? 'max(0.9rem, 3.5cqh)' : 'max(0.9rem, 3.4cqw)';
                   return (
-                    <motion.li key={`${p.word}-${search.grid[0].join('')}`} className="relative flex items-center gap-[0.6em] rounded-[0.8rem] px-[0.4em] py-[0.15em]" style={{ fontSize: fs, background: hot ? 'rgba(253,253,148,0.55)' : 'transparent' }}
+                    <motion.li key={p.word} className="relative flex items-center gap-[0.6em] rounded-[0.8rem] px-[0.4em] py-[0.15em]" style={{ fontSize: fs, background: hot ? 'rgba(253,253,148,0.55)' : 'transparent' }}
                       initial={ctx.still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1, scale: by && hot && !ctx.still ? [1, 1.06, 1] : 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
                       <span className="shrink-0 rounded-full border-std border-border grid place-items-center" style={{ width: '1.2em', height: '1.2em', background: by ? markOf(p.word) : '#fff' }} aria-hidden="true">
                         {by && <CheckCircle weight="fill" size="1em" color="#241c3d" />}

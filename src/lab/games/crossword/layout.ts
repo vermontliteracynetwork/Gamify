@@ -27,8 +27,9 @@ function fits(grid: Map<string, string>, w: string, dir: Dir, r: number, c: numb
   return cross;
 }
 
-export function makePuzzle(words: WordPair[], rand: () => number = Math.random, max = 7): Puzzle {
-  const list = words.filter((w) => w.word.length >= 3 && w.word.length <= 9).slice(0, max + 6).sort((a, b) => b.word.length - a.word.length);
+// `side` caps the puzzle at about 9 squares each way, so squares stay big.
+export function makePuzzle(words: WordPair[], rand: () => number = Math.random, max = 7, side = 9): Puzzle {
+  const list = words.filter((w) => w.word.length >= 3 && w.word.length <= side).slice(0, max + 6).sort((a, b) => b.word.length - a.word.length);
   const grid = new Map<string, string>();
   const placed: Raw[] = [];
   const put = (p: Raw) => { cellsOf(p).forEach(([y, x], i) => grid.set(key(y, x), p.word[i])); placed.push(p); };
@@ -48,6 +49,7 @@ export function makePuzzle(words: WordPair[], rand: () => number = Math.random, 
           const all = [...grid.keys()].map((k) => k.split(',').map(Number)).concat(cellsOf({ ...w, dir, r, c }));
           const h = Math.max(...all.map((a) => a[0])) - Math.min(...all.map((a) => a[0])) + 1;
           const wd = Math.max(...all.map((a) => a[1])) - Math.min(...all.map((a) => a[1])) + 1;
+          if (h > side || wd > side) continue;
           const score = cross * 10 - Math.max(h, wd) * 2 - Math.abs(h - wd) + rand() * 3;
           if (score > bestScore) { bestScore = score; best = { ...w, dir, r, c }; }
         }

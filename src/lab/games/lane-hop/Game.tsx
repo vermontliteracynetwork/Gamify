@@ -56,7 +56,7 @@ interface World {
   hop: { from: [number, number]; to: [number, number]; t: number; tiny?: boolean } | null; face: number; squash: number;
   cam: number; jet: { from: number; to: number; t: number } | null; dead: number; shield: number;
   fx: { slow: number; freeze: number; super: boolean; mirror: number; hiccup: boolean }; parts: Part[]; floats: { x: number; y: number; text: string; life: number }[];
-  warned: Set<number>; over: boolean; cpuWait: number; seen: Set<WorldName>;
+  warned: Set<number>; over: boolean; cpuWait: number; cpuWaits: number; cpuTime: number; seen: Set<WorldName>;
 }
 const positions = new Map<string, Pos>();
 const collected = new Set<string>();
@@ -66,7 +66,7 @@ function newWorld(id: string): World {
   const p = positions.get(id) ?? { row: 0, col: Math.floor(COLS / 2), best: 0 };
   return {
     t: 0, sim: simClock, left: TURN_TIME, hops: 0, row: p.row, col: p.col, best: p.best, hop: null, face: 1, squash: 0, cam: p.row - 2.5, jet: null, dead: 0, shield: 0,
-    fx: { slow: 0, freeze: 0, super: false, mirror: 0, hiccup: false }, parts: [], floats: [], warned: new Set(), over: false, cpuWait: 0.6, seen: new Set([worldOf(p.row)]),
+    fx: { slow: 0, freeze: 0, super: false, mirror: 0, hiccup: false }, parts: [], floats: [], warned: new Set(), over: false, cpuWait: 0.6, cpuWaits: 0, cpuTime: 0, seen: new Set([worldOf(p.row)]),
   };
 }
 let simClock = 0; // the world keeps one clock so lanes look the same for every team
@@ -268,8 +268,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
       w.cpuWait -= dt;
       if (w.cpuWait <= 0) {
         w.cpuWait = 0.45 + Math.random() * 0.3;
-        const m = cpuMove(w.row, Math.round(w.col), w.sim, x.cpuRight());
-        if (m !== 'wait') hopTo(w, m);
+        // After a few waits in a row the computer hops anyway, so its turn always ends.
+        let m = cpuMove(w.row, Math.round(w.col), w.sim, x.cpuRight());
+        w.cpuWaits = m === 'wait' ? w.cpuWaits + 1 : 0;
+        if (w.cpuWaits > 5) { m = 'up'; w.cpuWaits = 0; }
+        if (m !== 'wait') { const before = w.hops; hopTo(w, m); if (w.hops === before && !w.hop) hopTo(w, 'up'); }
       }
     }
     if ((w.hops <= 0 && !w.hop) || (x.timeScale > 0 && w.left <= 0)) { if (x.timeScale > 0 && w.left <= 0) x.say('Time!', 'big'); endTurn(w); }
@@ -320,8 +323,10 @@ function Play({ ctx }: { ctx: LabCtx }) {
     g.beginPath(); g.roundRect(W - 150, 10, 140, 46, 14); g.fill(); g.stroke();
     g.fillStyle = '#fdfd94'; g.font = 'bold 26px "Inclusive Sans", system-ui, sans-serif'; g.textAlign = 'center'; g.fillText(`Row ${w.best}`, W - 80, 34);
     const frac = phaseRef.current === 'play' && c.current.timeScale > 0 ? Math.max(0, w.left) / (TURN_TIME * c.current.timeScale) : 1;
-    g.fillStyle = 'rgba(36,28,61,0.85)'; g.beginPath(); g.roundRect(14, 14, 180, 18, 9); g.fill(); g.stroke();
-    g.fillStyle = w.left < 8 && phaseRef.current === 'play' ? '#ef7d96' : '#8fe3a0'; g.beginPath(); g.roundRect(17, 17, 174 * frac, 12, 6); g.fill();
+    if (c.current.timeScale > 0) {
+      g.fillStyle = 'rgba(36,28,61,0.85)'; g.beginPath(); g.roundRect(14, 14, 180, 18, 9); g.fill(); g.stroke();
+      g.fillStyle = w.left < 8 && phaseRef.current === 'play' ? '#ef7d96' : '#8fe3a0'; g.beginPath(); g.roundRect(17, 17, 174 * frac, 12, 6); g.fill();
+    }
   }
 
   function drawLaneBg(g: CanvasRenderingContext2D, l: Lane, y: number) {
