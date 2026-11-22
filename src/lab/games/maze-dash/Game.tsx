@@ -3,7 +3,7 @@ import { ArrowFatDown, ArrowFatLeft, ArrowFatRight, ArrowFatUp, CheckCircle, Clo
 import type { LabCtx, LabDef } from '../../types';
 import { ArcadeFrame, StarJar, arcadePowers, clip, labelSize, useArcade, type Arcade } from '../balloon-pop/arcade';
 import { TEAM_COLORS } from '../../../engine/turns';
-import { canGo, dealZones, dirTo, ghostDir, makeMaze, path, step, zoneOf, type Dir, type Maze } from './rules';
+import { canGo, dealZones, dirTo, cloudDir, makeMaze, path, step, zoneOf, type Dir, type Maze } from './rules';
 
 // Maze Dash (Game Lab, inspired by the classic maze-chase arcade game): a
 // hedge maze with an answer room in each corner. Steer the little runner
@@ -157,7 +157,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   }
   function moveCloud(m: Maze, g: Cloud, d: number, lean: number) {
     if (d <= 0) return;
-    if (g.to === null) { const w = ghostDir(m, g.at, g.came, runner.current.at, lean); g.dir = w; g.to = step(m, g.at, w); g.t = 0; }
+    if (g.to === null) { const w = cloudDir(m, g.at, g.came, runner.current.at, lean); g.dir = w; g.to = step(m, g.at, w); g.t = 0; }
     g.t += d;
     if (g.t >= 1) { g.at = g.to!; g.came = g.dir; g.to = null; g.t = 0; }
   }
@@ -231,7 +231,6 @@ function Board({ m, ar, toWorld, rooms, steps, runner, clouds, cellPos, giant, f
     if (i % m.cols === m.cols - 1 && m.walls[i] & 2) d += `M${x0 + cs} ${y0}v${cs}`;
     if (Math.floor(i / m.cols) === m.rows - 1 && m.walls[i] & 4) d += `M${x0} ${y0 + cs}h${cs}`;
   }
-  const right = ar.q ? rooms.indexOf(ar.q.correctIndex) : -1;
   // After a cloud bump the runner tumbles back to the start in an arc.
   let [rc, rr] = cellPos(m, runner);
   const fk = runner.fly ? (ar.t - runner.fly.t) / FLY : 1;

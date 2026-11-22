@@ -90,7 +90,7 @@ export function dealZones(n: number, right: number, avoid: number, random: () =>
 
 // A wandering cloud picks its next way at a crossing: never straight back
 // unless stuck; leaning toward (or away from) the runner.
-export function ghostDir(m: Maze, at: number, came: Dir | null, toward: number, lean: number, random: () => number = Math.random): Dir {
+export function cloudDir(m: Maze, at: number, came: Dir | null, toward: number, lean: number, random: () => number = Math.random): Dir {
   const back = came === null ? -1 : (came + 2) % 4;
   let ds = ([0, 1, 2, 3] as Dir[]).filter((d) => canGo(m, at, d) && d !== back);
   if (!ds.length) ds = ([0, 1, 2, 3] as Dir[]).filter((d) => canGo(m, at, d));

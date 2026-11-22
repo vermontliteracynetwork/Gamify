@@ -475,7 +475,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <ul className="list-none m-0 p-0 flex-1 min-h-0 grid content-evenly gap-[1.5%]" aria-label="Words to find">
                 {search.placed.map((p) => {
                   const by = found[p.word], hot = lastClue?.word === p.word;
-                  const fs = wide ? 'max(0.9rem, 3.1cqh)' : 'max(0.9rem, 3.3cqw)';
+                  const fs = wide ? 'max(0.9rem, 3.5cqh)' : 'max(0.9rem, 3.4cqw)';
                   return (
                     <motion.li key={`${p.word}-${search.grid[0].join('')}`} className="relative flex items-center gap-[0.6em] rounded-[0.8rem] px-[0.4em] py-[0.15em]" style={{ fontSize: fs, background: hot ? 'rgba(253,253,148,0.55)' : 'transparent' }}
                       initial={ctx.still ? false : { x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1, scale: by && hot && !ctx.still ? [1, 1.06, 1] : 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canGo, dealZones, dirTo, ghostDir, makeMaze, path, step, zoneOf, type Dir } from './rules';
+import { canGo, dealZones, dirTo, cloudDir, makeMaze, path, step, zoneOf, type Dir } from './rules';
 
 function reach(m: ReturnType<typeof makeMaze>) {
   const seen = new Set([m.start]); const q = [m.start];
@@ -46,6 +46,6 @@ describe('maze dash rules', () => {
   it('a wandering cloud never walks through a wall', () => {
     const m = makeMaze(13, 9);
     let at = m.start, came: Dir | null = null;
-    for (let k = 0; k < 300; k++) { const d = ghostDir(m, at, came, 0, 0.5); expect(canGo(m, at, d)).toBe(true); at = step(m, at, d); came = d; }
+    for (let k = 0; k < 300; k++) { const d = cloudDir(m, at, came, 0, 0.5); expect(canGo(m, at, d)).toBe(true); at = step(m, at, d); came = d; }
   });
 });
