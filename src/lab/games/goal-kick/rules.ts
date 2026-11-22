@@ -10,7 +10,10 @@ export const zonePoints = (z: Zone) => (z === 0 || z === 2 ? 3 : 2);
 
 export type GoalieLevel = 'easy' | 'medium' | 'hard' | 'none';
 // How often the goalie guesses the right zone.
-export const GUESS: Record<GoalieLevel, number> = { easy: 0.14, medium: 0.2, hard: 0.3, none: 0.18 };
+export const GUESS: Record<GoalieLevel, number> = { easy: 0.22, medium: 0.3, hard: 0.38, none: 0.3 };
+// Top corners score more but are riskier: the post, and a long goalie reach.
+export const POST_CHANCE = 0.22;
+export const CORNER_REACH = 0.4;
 
 export type Outcome = 'goal' | 'save' | 'post';
 
@@ -23,13 +26,16 @@ export function goalieDive(kick: Zone, level: GoalieLevel, rand: () => number = 
 }
 
 // The goalie saves a ball in its zone, and a fingertip save sometimes reaches
-// a neighbor in the same row. Top corners sometimes ping off the post.
+// a neighbor in the same row. Top corners ping off the post more often, and
+// a goalie diving low on that side can still stretch up to them.
 export function kickOutcome(kick: Zone, dive: Zone | null, opts: { tiny?: boolean; rand?: () => number } = {}): Outcome {
   const rand = opts.rand ?? Math.random;
-  if ((kick === 0 || kick === 2) && rand() < 0.12) return 'post';
+  const corner = kick === 0 || kick === 2;
+  if (corner && rand() < POST_CHANCE) return 'post';
   if (dive === null) return 'goal';
   if (dive === kick) return opts.tiny && rand() < 0.5 ? 'goal' : 'save';
   if (!opts.tiny && row(dive) === row(kick) && Math.abs(col(dive) - col(kick)) === 1 && rand() < 0.15) return 'save';
+  if (!opts.tiny && corner && col(dive) === col(kick) && rand() < CORNER_REACH) return 'save';
   return 'goal';
 }
 
@@ -45,4 +51,11 @@ export function cpuKick(level: 'easy' | 'medium' | 'hard', rand: () => number = 
   if (rand() < corner) return rand() < 0.5 ? 0 : 2;
   const rest: Zone[] = [1, 3, 4, 5];
   return rest[Math.floor(rand() * rest.length)];
+}
+
+// The share of kicks that end up saved or off the post, for checking balance.
+export function saveRate(kick: Zone, level: GoalieLevel, n = 4000, rand: () => number = Math.random): number {
+  let miss = 0;
+  for (let i = 0; i < n; i++) if (kickOutcome(kick, goalieDive(kick, level, rand), { rand }) !== 'goal') miss++;
+  return miss / n;
 }

@@ -126,8 +126,6 @@ function Play({ ctx }: { ctx: LabCtx }) {
     // Close is kinder than far; Moon Ball slows the arrow, Squeaky Sneakers speed it up a little.
     const period = AIM_PERIOD[pick] * (m.moon ? 1.4 : m.squeaky ? 0.8 : 1) * Math.max(1, P * 0.9);
     const tol = tolFor(pick);
-    const from = { x: SPOTS[pick].x + 2, y: RELEASE_Y };
-    const g = m.moon ? 36 : 86;
     const x = c.current;
     const cpuTarget = x.cpu ? Math.min(79, Math.max(31, cpuAim(ideal, x.cpuRight()))) : null;
     const cpuAfter = performance.now() + 1100 + Math.random() * 1200;

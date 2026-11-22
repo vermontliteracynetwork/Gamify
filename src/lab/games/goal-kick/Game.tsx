@@ -55,6 +55,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
   const keyN = useRef(1);
   const color = TEAM_COLORS[ctx.player.colorIndex % TEAM_COLORS.length];
   const still = ctx.still;
+  const full = ctx.settings.motion === 'full';
 
   useEffect(() => {
     const id = ++live.current;
@@ -127,7 +128,9 @@ function Play({ ctx }: { ctx: LabCtx }) {
     if (m.butter) { aims = picks.map(() => ZONES[Math.floor(Math.random() * 6)]); }
     if (m.windy) { aims = picks.map((z) => windPush(z)); }
     const others = x.turns.players.filter((p) => p.id !== x.player.id);
-    const level: GoalieLevel = !x.cpu && others.some((p) => p.kind === 'cpu') ? x.cpuLevel : 'none';
+    // The goalie is the same fair keeper for everyone (about a third saved);
+    // the computer's level only changes where the computer aims.
+    const level: GoalieLevel = 'none';
     // The run-up.
     setRunUp((n) => n + 1);
     await wait(650);
@@ -216,10 +219,11 @@ function Play({ ctx }: { ctx: LabCtx }) {
             <circle cx="80" cy="44" r="22" fill="none" />
             <g transform="translate(80 58)">
               <motion.g animate={{ scale: mods.tiny ? 0.5 : 1 }} transition={{ type: 'spring', stiffness: 200, damping: 10 }} style={{ originY: 1 }}>
-                <g className={still || mods.sleepy || phase !== 'pick' && phase !== 'wait' ? '' : 'gk-sway'}><Keeper sleepy={mods.sleepy} reach={dive !== null && phase !== 'wait'} /></g>
+                <g className={!full || mods.sleepy || phase !== 'pick' && phase !== 'wait' ? '' : 'gk-sway'}><Keeper sleepy={mods.sleepy} reach={dive !== null && phase !== 'wait'} /></g>
               </motion.g>
             </g>
           </motion.g>
+          {mods.sleepy && still && <text x="92" y="24" fontSize="6" fontWeight="900" fill="#241c3d">z z</text>}
           {mods.sleepy && !still && [0, 1, 2].map((i) => (
             <motion.text key={i} x="88" y="28" fontSize="5" fontWeight="900" fill="#241c3d" initial={{ opacity: 0 }} animate={{ opacity: [0, 1, 0], x: [88, 92 + i * 3, 96 + i * 4], y: [28, 22 - i * 3, 16 - i * 4] }} transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.7 }}>z</motion.text>
           ))}
@@ -236,7 +240,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
             <Kicker shirt={color} skin={SKINS[ctx.player.colorIndex % SKINS.length]} kick={runUp > 0} />
           </motion.g>
           {ballIdle && (
-            <motion.g animate={still ? undefined : { y: [0, -0.4, 0] }} transition={{ duration: 1.6, repeat: Infinity }}>
+            <motion.g animate={full ? { y: [0, -0.4, 0] } : undefined} transition={{ duration: 1.6, repeat: Infinity }}>
               {(mods.double ? [-6, 6] : [0]).map((dx) => (
                 <g key={dx}><ellipse cx={SPOT.x + dx} cy={SPOT.y + 4.4} rx="4" ry="1.1" fill="#000" opacity="0.25" /><image href={`${ART}/soccer.webp`} x={SPOT.x + dx - 4.5} y={SPOT.y - 4.5} width="9" height="9" /></g>
               ))}
@@ -268,7 +272,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <span className="absolute left-0 top-0 bottom-0 w-[0.2rem] rounded-full bg-[#5b5f7a] border border-border" />
               <motion.span className="absolute left-[0.2rem] w-[80%] h-[52%] border-std border-border flex items-center justify-center"
                 style={{ background: TEAM_COLORS[p.colorIndex % TEAM_COLORS.length], clipPath: 'polygon(0 0, 100% 10%, 88% 50%, 100% 90%, 0 100%)' }}
-                initial={false} animate={{ top: `${48 - 48 * Math.min(1, p.score / top)}%`, rotate: still ? 0 : [0, 2, -1, 0] }} transition={{ top: { type: 'spring', stiffness: 70, damping: 12 }, rotate: { duration: 2, repeat: Infinity } }}>
+                initial={false} animate={{ top: `${48 - 48 * Math.min(1, p.score / top)}%`, rotate: full ? [0, 2, -1, 0] : 0 }} transition={{ top: { type: 'spring', stiffness: 70, damping: 12 }, rotate: { duration: 2, repeat: Infinity } }}>
                 <TeamBadge colorIndex={p.colorIndex} size={18} />
               </motion.span>
             </div>
@@ -283,9 +287,12 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 className="absolute grid place-items-center rounded-[0.9rem] border-[0.2rem] border-dashed disabled:cursor-default motion-safe:hover:scale-[1.06] motion-safe:transition-transform"
                 style={{ left: `${((GOAL.l + col(z) * 28 + 2) / 160) * 100}%`, top: `${GOAL.t + row(z) * 19 + 1.5}%`, width: `${(24 / 160) * 100}%`, height: '16%', borderColor: on ? '#000' : '#241c3d', background: on ? 'rgba(253,253,148,0.85)' : 'rgba(251,252,248,0.62)', boxShadow: '0 0 0 0.15rem #fdfd94' }}
                 initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: z * 0.05 }}>
-                <span className="flex gap-[0.15rem] w-[78%] justify-center">
-                  {Array.from({ length: zonePoints(z) }, (_, i) => <img key={i} src={`${ART}/soccer.webp`} alt="" className="w-[30%] aspect-square drop-shadow-[0_2px_0_rgba(0,0,0,0.5)]" />)}
+                <span className="flex items-center gap-[0.15rem] w-[86%] justify-center">
+                  <span className="font-display text-[clamp(1.1rem,2.6cqw,2rem)] leading-none mr-[0.2rem]">{zonePoints(z)}</span>
+                  {Array.from({ length: zonePoints(z) }, (_, i) => <img key={i} src={`${ART}/soccer.webp`} alt="" className="w-[24%] aspect-square drop-shadow-[0_2px_0_rgba(0,0,0,0.5)]" />)}
                 </span>
+                {/* The key that picks this spot. */}
+                {human && <kbd className="absolute top-[4%] left-[5%] text-[0.7rem] font-bold leading-none px-1 py-0.5 rounded bg-surface border border-border-soft text-muted">{z + 1}</kbd>}
               </motion.button>
             );
           })}
@@ -294,7 +301,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
           {phase === 'pick' && human && (
             <motion.div className="absolute right-[3%] bottom-[4%] pointer-events-none grid justify-items-center gap-1" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
               <motion.span className="w-[clamp(3.2rem,8cqw,5.5rem)] aspect-square rounded-full border-heavy border-border grid place-items-center bg-accent" style={{ boxShadow: '0 5px 0 #000' }}
-                animate={still ? undefined : { y: [0, -4, 0] }} transition={{ duration: 0.9, repeat: Infinity }}>
+                animate={full ? { y: [0, -4, 0] } : undefined} transition={{ duration: 0.9, repeat: Infinity }}>
                 <HandTap weight="fill" className="w-1/2 h-1/2" />
               </motion.span>
               <span className="font-display text-[clamp(1rem,2.3cqw,1.6rem)] text-white leading-none text-center" style={{ WebkitTextStroke: '0.12em #000', paintOrder: 'stroke fill' }}>{mods.double && picked.length === 1 ? 'One more!' : 'Pick a spot!'}</span>

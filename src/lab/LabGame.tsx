@@ -43,7 +43,8 @@ export default function LabGame({ def }: { def: LabDef }) {
   const sfx = useMemo(() => makeSfx(settings), [settings]);
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: def.ways[0] as 'teams' | 'solo' | 'versus', off: [] as string[] });
+  // Steal and swap style power-ups start switched off (teacher, 2026-11-01).
+  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: def.ways[0] as 'teams' | 'solo' | 'versus', off: def.powers.filter((p) => p.takes).map((p) => p.id) as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);

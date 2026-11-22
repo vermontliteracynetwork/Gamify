@@ -82,7 +82,7 @@ export function simulate(s: Shot, opts: { wobbly?: boolean; rand?: () => number 
 
 // The computer's aim: close to ideal when sharp, else a few degrees off.
 export function cpuAim(ideal: number, sharp: boolean, rand: () => number = Math.random): number {
-  const off = sharp ? (rand() - 0.5) * 3 : (rand() < 0.5 ? -1 : 1) * (4 + rand() * 9);
+  const off = sharp ? (rand() - 0.5) * 3 : (rand() < 0.5 ? -1 : 1) * (6 + rand() * 9);
   return ideal + off;
 }
 
