@@ -43,11 +43,15 @@ export default function LabGame({ def }: { def: LabDef }) {
   const sfx = useMemo(() => makeSfx(settings), [settings]);
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: def.ways[0], off: [] as string[] });
+  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: def.ways[0] as 'teams' | 'solo' | 'versus', off: [] as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
   const solo = setup.who === 'solo' || !def.ways.includes('teams');
+  // Every Share game also plays Versus (teacher, 2026-10-24): two players on
+  // one device, or one player against the computer.
+  const ways = [...def.ways, ...(def.ways.includes('teams') ? ['versus' as const] : [])];
+  const versus = !solo && setup.who === 'versus';
   const { ask: soloAsk, element: soloElement, missed: soloMissed } = useAsk({ gameId: def.id, mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
@@ -183,9 +187,9 @@ export default function LabGame({ def }: { def: LabDef }) {
         {phase === 'setup' && (
           <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} pages={[
             ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-            ...(def.ways.length > 1 ? [{ id: 'way', title: 'How will you play?', content: <ChoiceRow label="Who plays" value={setup.who} onChange={(v) => change({ who: v })} options={def.ways.map((w) => ({ value: w, label: w === 'teams' ? t('pd.teams') : t('mm.solo') }))} /> }] : []),
+            ...(ways.length > 1 ? [{ id: 'way', title: 'How will you play?', content: <ChoiceRow label="Who plays" value={setup.who} onChange={(v) => change({ who: v })} options={ways.map((w) => ({ value: w, label: w === 'teams' ? t('pd.teams') : w === 'versus' ? 'Versus: two players or the computer' : t('mm.solo') }))} /> }] : []),
             { id: 'options', title: t('setup.options'), content: <Slider label={def.rounds.label} min={def.rounds.min} max={def.rounds.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} /> },
-            ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup mode="share" min={def.minTeams ?? 1} max={def.maxTeams ?? 8} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
+            ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key={versus ? 'versus' : 'share'} mode={versus ? 'versus' : 'share'} min={versus ? 2 : def.minTeams ?? 1} max={versus ? 2 : def.maxTeams ?? 8} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
             ...(def.powers.length ? [{ id: 'powers', title: t('tb.powers'), content: (
               <PowerUpCards hint={t('pu.switchHint')} onChange={(id, on) => change({ off: on ? setup.off.filter((x) => x !== id) : [...new Set([...setup.off, id])] })}
                 cards={def.powers.map((p) => ({ id: p.id, name: p.name, hint: p.desc, art: <span className="w-12 h-12 inline-flex [&>svg]:w-full [&>svg]:h-full">{p.art}</span>, on: !setup.off.includes(p.id) }))} />
@@ -196,6 +200,13 @@ export default function LabGame({ def }: { def: LabDef }) {
           <div className="grid lg:grid-cols-[minmax(0,1fr)_16rem] gap-3 items-stretch">
             <section className="lab-board relative min-w-0 h-[calc(100dvh-11.25rem)] lg:h-[calc(100dvh-5.5rem)]" aria-label={def.name}>
               <Play key={runId} ctx={ctx} />
+              {/* Small screens: held power-ups and the status float over the board's bottom corner. */}
+              {(status || myHeld.length > 0) && (
+                <div className="lg:hidden absolute left-2 bottom-2 z-10 flex items-center gap-2 pointer-events-none">
+                  {status && <div className="score-card px-3 py-1.5 font-bold text-sm">{status}</div>}
+                  {myHeld.map((p, i) => <span key={`${p.id}-${i}`} title={p.name} className="score-card w-11 h-11 p-1 inline-flex [&>svg]:w-full [&>svg]:h-full">{p.art}</span>)}
+                </div>
+              )}
             </section>
             <div className="order-first lg:order-none pr-44 lg:pr-0 min-w-0 grid content-start gap-3 lg:h-[calc(100dvh-5.5rem)] lg:pt-14 lg:grid-rows-[auto_auto_1fr]">
               <ScoreBoard turns={turns!} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={def.rounds.label} />
