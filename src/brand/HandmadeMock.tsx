@@ -109,7 +109,7 @@ function KidEdges({ still }: { still: boolean }) {
     <div className="absolute inset-0" aria-hidden="true" style={{ background: '#fffdf6' }}>
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice">
         <g filter="url(#nd-crayon)">
-          <path d={hatch(640, 300, 9)} stroke="#8fc3ff" strokeWidth="5" opacity="0.5" />
+          <path d={hatch(640, 300, 9)} stroke="#8fc3ff" strokeWidth="5" opacity="0.9" />
           {[[ND.coral, 210], [ND.yellow, 186], [ND.green, 162], [ND.cobalt, 138]].map(([c, r]) => (
             <path key={r as number} d={`M${-60} 330 a${r} ${r} 0 0 1 ${(r as number) * 2} 0`} stroke={c as string} strokeWidth="18" fill="none" transform="translate(40 0)" />
           ))}

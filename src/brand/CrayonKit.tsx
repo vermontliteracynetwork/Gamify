@@ -16,16 +16,16 @@ import { ND } from './buddies';
 // One family, five rules: a 100 x 100 grid with a 6-unit margin; chunky
 // silhouettes; one main color plus one accent from the brand palette; a
 // scribble fill in the deep shade of the same color and an edge in that deep
-// shade (never black ink on art); one white crayon shine at the top left. The
+// shade (never black ink on art); one white crayon shine at the top left.
+// Solid, opaque, punchy fills (teacher, 2026-11-23: "more solid, punchier
+// brighter colors that are less transparent"): texture is a light overlay in
+// the strokes and edges and never makes a color look faded. The
 // die is the one exception: it is tapped, so it keeps an ink edge.
 
 const deep: Record<string, string> = {
   [ND.cobalt]: ND.cobaltDeep, [ND.pink]: ND.pinkDeep, [ND.green]: ND.greenDeep, [ND.tangerine]: ND.tangDeep,
   [ND.violet]: ND.violetDeep, [ND.yellow]: '#c98f00', [ND.mint]: '#1f8f7c', [ND.coral]: '#b8322f',
 };
-const ICE = '#a9d8ff';
-const STEEL = '#dfe3ea';
-const LIGHT_COBALT = '#6f97ff';
 
 // Waxy crayon: wobbly edges (displacement) and paper tooth (tiny holes).
 function CrayonFilter({ id, seed, sticker }: { id: string; seed: number; sticker?: boolean }) {
@@ -34,7 +34,7 @@ function CrayonFilter({ id, seed, sticker }: { id: string; seed: number; sticker
       <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
       <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.6" xChannelSelector="R" yChannelSelector="G" result="wob" />
       <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed={seed + 7} result="n" />
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -2.6 0 0 0 2.05" result="tooth" />
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -4 0 0 0 3.55" result="tooth" />
       <feComposite in="wob" in2="tooth" operator="in" result="art" />
       {sticker && (
         <>
@@ -63,14 +63,14 @@ const cleanId = (s: string) => s.replace(/[^a-zA-Z0-9]/g, '');
 
 // One filled crayon shape: base wax, scribble strokes in the deep shade,
 // a hand-drawn edge in the same deep shade.
-function Wax({ d, color, edge, rule, hatch = 0.38, width = 3.2 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
+function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.2 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
   const clip = 'c' + cleanId(useId());
   const e = edge ?? deep[color] ?? ND.ink;
   return (
     <g>
       <clipPath id={clip}><path d={d} clipRule={rule} /></clipPath>
-      <path d={d} fill={color} fillRule={rule} opacity={0.94} />
-      <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke={e} strokeWidth="2.1" opacity={hatch} fill="none" strokeLinejoin="round" />
+      <path d={d} fill={color} fillRule={rule} />
+      <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke={e} strokeWidth="1.9" opacity={hatch} fill="none" strokeLinejoin="round" />
       <path d={d} fill="none" fillRule={rule} stroke={e} strokeWidth={width} strokeLinejoin="round" />
     </g>
   );
@@ -78,7 +78,7 @@ function Wax({ d, color, edge, rule, hatch = 0.38, width = 3.2 }: { d: string; c
 function Line({ d, color, w = 5, o = 1 }: { d: string; color: string; w?: number; o?: number }) {
   return <path d={d} stroke={color} strokeWidth={w} opacity={o} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
 }
-const Shine = ({ d }: { d: string }) => <Line d={d} color="#ffffff" w={4.5} o={0.75} />;
+const Shine = ({ d }: { d: string }) => <Line d={d} color="#ffffff" w={5} />;
 const circ = (cx: number, cy: number, r: number) => `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
 const rr = (x: number, y: number, w: number, h: number, r: number) =>
   `M${x + r} ${y} H${x + w - r} Q${x + w} ${y} ${x + w} ${y + r} V${y + h - r} Q${x + w} ${y + h} ${x + w - r} ${y + h} H${x + r} Q${x} ${y + h} ${x} ${y + h - r} V${y + r} Q${x} ${y} ${x + r} ${y} Z`;
@@ -129,7 +129,7 @@ function DieTumble({ frame }: { frame: number }) {
   ];
   return (
     <g>
-      <Line d={frame % 2 ? 'M4 70 C2 58 4 46 10 38 M96 26 C98 36 96 46 92 52' : 'M6 26 C4 36 6 46 10 54 M94 64 C98 56 98 46 94 38'} color={ND.quiet} w={3.5} o={0.55} />
+      <Line d={frame % 2 ? 'M4 70 C2 58 4 46 10 38 M96 26 C98 36 96 46 92 52' : 'M6 26 C4 36 6 46 10 54 M94 64 C98 56 98 46 94 38'} color={ND.quiet} w={4} />
       <g transform={`rotate(${f.rot} 50 53)`}>
         {faces.map((fc, k) => (
           <g key={k}>
@@ -150,8 +150,8 @@ export type PowerId =
 const ART: Record<PowerId, () => ReactNode> = {
   magnet: () => (<>
     <Wax d="M14 18 H42 V56 C42 62 46 66 50 66 C54 66 58 62 58 56 V18 H86 V56 C86 78 70 92 50 92 C30 92 14 78 14 56 Z" color={ND.coral} />
-    <Wax d="M14 18 H42 V34 H14 Z" color={STEEL} edge="#8a90a6" />
-    <Wax d="M58 18 H86 V34 H58 Z" color={STEEL} edge="#8a90a6" />
+    <Wax d="M14 18 H42 V34 H14 Z" color={ND.paper} edge={ND.quiet} />
+    <Wax d="M58 18 H86 V34 H58 Z" color={ND.paper} edge={ND.quiet} />
     <Shine d="M22 44 V62" />
     <Line d="M22 11 L17 4 M34 11 L38 4 M66 11 L62 4 M78 11 L83 4" color={ND.tangerine} w={4} />
   </>),
@@ -167,11 +167,11 @@ const ART: Record<PowerId, () => ReactNode> = {
   </>),
   shield: () => (<>
     <Wax d="M50 8 L86 21 V48 C86 71 70 85 50 93 C30 85 14 71 14 48 V21 Z" color={ND.cobalt} />
-    <Wax d="M50 8 L14 21 V48 C14 71 30 85 50 93 Z" color={LIGHT_COBALT} edge={ND.cobaltDeep} />
+    <Wax d="M50 8 L14 21 V48 C14 71 30 85 50 93 Z" color={ND.mint} edge={ND.cobaltDeep} />
     <Shine d="M24 28 V46" />
   </>),
   freeze: () => (<>
-    <Wax d={rr(14, 12, 72, 76, 14)} color={ICE} edge={ND.cobaltDeep} hatch={0.25} />
+    <Wax d={rr(14, 12, 72, 76, 14)} color={ND.mint} edge={ND.cobaltDeep} hatch={0.25} />
     <Line d="M50 26 V74 M29 38 L71 62 M29 62 L71 38" color={ND.cobaltDeep} w={5} />
     <Line d="M43 29 L50 36 L57 29 M43 71 L50 64 L57 71" color={ND.cobaltDeep} w={4} />
     <Shine d="M24 22 H38" />
@@ -187,7 +187,7 @@ const ART: Record<PowerId, () => ReactNode> = {
   'slow-mo': () => (<>
     <Wax d="M6 84 C6 74 18 72 30 74 H76 C82 68 84 62 84 54 C92 54 96 66 92 76 C89 83 84 88 74 88 H10 C7 88 6 86 6 84 Z" color={ND.green} />
     <Wax d={circ(46, 50, 28)} color={ND.violet} />
-    <Line d="M46 50 C46 44 54 44 54 50 C54 58 40 58 40 50 C40 39 61 39 61 50 C61 64 33 64 33 50" color="#ffffff" w={4.5} o={0.9} />
+    <Line d="M46 50 C46 44 54 44 54 50 C54 58 40 58 40 50 C40 39 61 39 61 50 C61 64 33 64 33 50" color="#ffffff" w={4.5} />
     <Line d="M85 56 L82 40 M90 58 L96 44" color={ND.greenDeep} w={4} />
   </>),
   'one-more': () => (<>
@@ -198,7 +198,7 @@ const ART: Record<PowerId, () => ReactNode> = {
   hint: () => (<>
     <Wax d="M58 64 L66 56 L92 80 C94 82 94 86 92 88 L88 92 C86 94 82 94 80 92 Z" color={ND.tangerine} />
     <Wax d={`${circ(40, 40, 32)} ${circ(40, 40, 22)}`} color={ND.cobalt} rule="evenodd" />
-    <Wax d={circ(40, 40, 22)} color="#e7efff" edge={ND.cobaltDeep} hatch={0.12} width={2} />
+    <Wax d={circ(40, 40, 22)} color={ND.paper} edge={ND.cobaltDeep} hatch={0.12} width={2} />
     <Line d="M28 36 C30 30 34 27 40 26" color="#ffffff" w={5} />
     <Line d="M84 6 V24 M75 15 H93" color={ND.tangerine} w={4} />
   </>),
@@ -209,7 +209,7 @@ const ART: Record<PowerId, () => ReactNode> = {
   </>),
   tornado: () => (<>
     <Wax d="M10 16 C26 4 74 4 90 16 C90 26 78 30 72 34 C74 41 66 47 60 50 C62 57 55 62 51 66 C53 73 49 81 44 92 C39 83 39 74 42 68 C35 64 33 58 37 52 C29 48 25 42 29 36 C18 31 10 26 10 16 Z" color={ND.violet} />
-    <Line d="M22 17 C40 24 62 24 80 16 M33 36 C46 41 60 39 67 34 M41 54 C47 56 53 55 56 51" color="#ffffff" w={4.5} o={0.9} />
+    <Line d="M22 17 C40 24 62 24 80 16 M33 36 C46 41 60 39 67 34 M41 54 C47 56 53 55 56 51" color="#ffffff" w={4.5} />
   </>),
   lightning: () => (<>
     <Wax d="M58 4 L18 54 H44 L32 96 L84 40 H57 L70 4 Z" color={ND.yellow} />
@@ -238,7 +238,7 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M41 4 H59 L50 22 Z" color={ND.ink} edge={ND.ink} hatch={0} />
   </>),
   potion: () => (<>
-    <Wax d="M40 14 H60 V36 C76 42 86 54 86 67 C86 83 70 93 50 93 C30 93 14 83 14 67 C14 54 24 42 40 36 Z" color="#f3f8ff" edge="#1f8f7c" hatch={0.1} />
+    <Wax d="M40 14 H60 V36 C76 42 86 54 86 67 C86 83 70 93 50 93 C30 93 14 83 14 67 C14 54 24 42 40 36 Z" color={ND.paper} edge="#1f8f7c" hatch={0.1} />
     <Wax d="M15 62 C30 55 70 69 85 60 C86 63 86 65 86 67 C86 83 70 93 50 93 C30 93 14 83 14 67 Z" color={ND.green} />
     <Wax d="M37 4 H63 V17 H37 Z" color={ND.tangerine} />
     <Line d="M38 76 V76.5 M56 82 V82.5 M64 70 V70.5" color="#ffffff" w={6} />
@@ -378,7 +378,7 @@ export function DiceDemo({ count }: { count: 1 | 2 }) {
   const label = phase === 'waiting' ? `${shows} Tap to go on.` : phase === 'rolling' ? 'Rolling' : count === 2 ? 'Roll the dice' : 'Roll the die';
   return (
     <div className="grid justify-items-center gap-4">
-      <div className="flex items-end gap-6 min-h-[13rem] pt-16">
+      <div className="flex items-end gap-6 min-h-[11rem] pt-12">
         {values.map((v, k) => (
           <div key={k} className="grid">
             <RollingDie value={v} phase={phase} delay={k * 0.14} dir={k ? -1 : 1} size={size} still={still} onTap={tap} label={label} />
@@ -415,10 +415,10 @@ export function CrayonKitSection() {
         ))}
       </div>
       <div className="grid gap-2">
-        <h3 className="font-heading font-bold text-lg">At 48px on the ground and on game stages</h3>
+        <h3 className="font-heading font-bold text-lg">At 48px on the cream ground, and on color-block stages with the white sticker edge</h3>
         {[ND.cream, ND.cobalt, ND.pink, ND.green].map((bg) => (
           <div key={bg} className="rounded-[1.25rem] px-4 py-3 flex flex-wrap gap-3" style={{ background: bg }}>
-            {UNIVERSAL_POWERS.map((p) => <CrayonPowerUp key={p.id} id={p.id} size={48} title={p.name} />)}
+            {UNIVERSAL_POWERS.map((p) => <CrayonPowerUp key={p.id} id={p.id} size={48} title={p.name} sticker={bg !== ND.cream} />)}
           </div>
         ))}
       </div>

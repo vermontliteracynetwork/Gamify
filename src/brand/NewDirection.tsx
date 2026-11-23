@@ -95,7 +95,7 @@ function Block({ title, note, children }: { title: string; note?: string; childr
 // crayon power-ups. Photos here are neutral placeholders, clearly marked. ----------
 function Grain() {
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none mix-blend-multiply opacity-[0.18]" aria-hidden="true">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none mix-blend-multiply opacity-[0.1]" aria-hidden="true">
       <filter id="nd-grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" /><feColorMatrix values="0 0 0 0 0.11  0 0 0 0 0.1  0 0 0 0 0.2  0 0 0 0.55 0" /></filter>
       <rect width="100%" height="100%" filter="url(#nd-grain)" />
     </svg>
@@ -174,10 +174,10 @@ function MixedMedia({ still }: { still: boolean }) {
           <span className="absolute left-0 top-0 bottom-0 w-6" style={{ background: 'repeating-conic-gradient(#ec6fa8 0 25%, #fffaf0 0 50%) 0 0 / 12px 12px' }} aria-hidden="true" />
           <div className="relative pl-6 grid gap-3">
             <div className="flex items-center gap-2"><span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: ND.green, color: ND.ink }}>Theme</span><span className="font-heading font-bold">Paper Garden</span></div>
-            <div className="relative max-w-[24rem]"><Tape className="-top-3 right-8 z-10" rotate={8} /><PhotoSticker label="Cut paper flowers, glued and photographed" rotate={2}><div className="flex gap-1"><CrayonPowerUp id="potion" size={52} /><CrayonPowerUp id="magnet" size={52} /></div></PhotoSticker></div>
+            <div className="relative max-w-[24rem]"><Tape className="-top-3 right-8 z-10" rotate={8} /><PhotoSticker label="Cut paper power-ups, glued and photographed" rotate={2}><div className="flex gap-1"><CrayonPowerUp id="potion" size={52} /><CrayonPowerUp id="magnet" size={52} /></div></PhotoSticker></div>
             <p className="text-sm font-semibold" style={{ color: ND.quiet }}>For board games. 12 pieces. Made by a class.</p>
           </div>
-          <HandNote text="our flowers" className="right-4 bottom-4" />
+          <HandNote text="we made these" className="right-4 bottom-4" />
         </div>
       </div>
       <div className="rounded-[1.5rem] p-4 flex flex-wrap items-end justify-around gap-4" style={{ background: ND.paper }}>

@@ -50,7 +50,7 @@ export function PaperDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="11" result="warp" />
           <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.5" xChannelSelector="R" yChannelSelector="G" result="shape" />
           <feTurbulence type="fractalNoise" baseFrequency="0.9 0.22" numOctaves="2" seed="5" result="strokes" />
-          <feColorMatrix in="strokes" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.7 0 0 0 -0.78" result="light" />
+          <feColorMatrix in="strokes" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.9 0 0 0 -0.55" result="light" />
           <feComposite in="light" in2="shape" operator="in" result="hl" />
           <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="21" result="tooth" />
           <feColorMatrix in="tooth" type="matrix" values="0 0 0 0 0.11  0 0 0 0 0.1  0 0 0 0 0.2  0.55 0 0 0 -0.2" result="dk" />
@@ -68,7 +68,7 @@ export function PaperDefs() {
           <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="1" seed="2" result="wob" />
           <feDisplacementMap in="SourceGraphic" in2="wob" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="line" />
           <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="6" result="wax" />
-          <feColorMatrix in="wax" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -0.6" result="mask" />
+          <feColorMatrix in="wax" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -0.4" result="mask" />
           <feComposite in="line" in2="mask" operator="in" />
         </filter>
         <filter id="nd-clay" x="-15%" y="-15%" width="130%" height="140%">
@@ -102,7 +102,7 @@ export function Paper({ color, children, className = '', rx = 22, tilt = 0, lift
 export function Washi({ className = '', color = '#ffd52e', rotate = -6, w = '5rem' }: { className?: string; color?: string; rotate?: number; w?: string }) {
   return (
     <span aria-hidden="true" className={`absolute h-6 pointer-events-none ${className}`}
-      style={{ width: w, opacity: 0.82, transform: `rotate(${rotate}deg)`, background: `repeating-linear-gradient(90deg, ${color} 0 7px, color-mix(in srgb, ${color} 70%, white) 7px 11px)`,
+      style={{ width: w, opacity: 0.96, transform: `rotate(${rotate}deg)`, background: `repeating-linear-gradient(90deg, ${color} 0 7px, color-mix(in srgb, ${color} 70%, white) 7px 11px)`,
         clipPath: 'polygon(0 0, 4% 12%, 0 25%, 4% 38%, 0 50%, 4% 62%, 0 75%, 4% 88%, 0 100%, 100% 100%, 96% 88%, 100% 75%, 96% 62%, 100% 50%, 96% 38%, 100% 25%, 96% 12%, 100% 0)' }} />
   );
 }

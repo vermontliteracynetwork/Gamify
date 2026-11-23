@@ -14,7 +14,7 @@ import { CrayonDie, CrayonPowerUp } from './CrayonKit';
 // tappables, Grow Year and Inclusive Sans). Original drawings in code only.
 
 const GY = { fontFamily: "'Grow Year', 'Segoe UI', system-ui, sans-serif" };
-const STRIPES = ['#f7a8c8', '#ffd86b', '#8fd19e', '#9cc4ff', '#ffb27a', '#c7b2ff'];
+const STRIPES = ['#ec6fa8', '#ffd52e', '#12a150', '#1f5fff', '#ff6a1a', '#8b5cf6'];
 
 function PaperPatterns() {
   return (
@@ -22,38 +22,38 @@ function PaperPatterns() {
       <defs>
         <pattern id="pm-gingham" width="26" height="26" patternUnits="userSpaceOnUse">
           <rect width="26" height="26" fill="#fff8de" />
-          <rect width="13" height="26" fill="#ffd86b" opacity="0.5" />
-          <rect width="26" height="13" fill="#ffd86b" opacity="0.5" />
+          <rect width="13" height="26" fill="#ffd52e" />
+          <rect width="26" height="13" fill="#ffd52e" />
         </pattern>
         <pattern id="pm-stripes" width="80" height={STRIPES.length * 24} patternUnits="userSpaceOnUse">
           <rect width="80" height={STRIPES.length * 24} fill="#fffaf0" />
-          {STRIPES.map((c, i) => <path key={c} d={`M-4 ${i * 24 + 8} q20 -3 44 0 t44 0 v8 q-20 3 -44 0 t-44 0 z`} fill={c} opacity="0.78" />)}
+          {STRIPES.map((c, i) => <path key={c} d={`M-4 ${i * 24 + 8} q20 -3 44 0 t44 0 v8 q-20 3 -44 0 t-44 0 z`} fill={c} />)}
         </pattern>
         <pattern id="pm-starprint" width="46" height="46" patternUnits="userSpaceOnUse">
-          <rect width="46" height="46" fill="#a9d0f5" />
+          <rect width="46" height="46" fill="#3fd0b6" />
           <polygon points={star(10, 11, 6, 2.8, 5)} fill="#ffd52e" />
           <polygon points={star(33, 20, 5, 2.3, 5, -70)} fill="#ec6fa8" />
           <polygon points={star(18, 36, 5.5, 2.5, 5, -100)} fill="#ffffff" />
           <polygon points={star(40, 41, 4, 1.8, 5)} fill="#ff6a1a" />
         </pattern>
         <pattern id="pm-pinstripe" width="18" height="18" patternUnits="userSpaceOnUse">
-          <rect width="18" height="18" fill="#5f86c9" /><rect x="0" width="5" height="18" fill="#86a9e3" />
+          <rect width="18" height="18" fill="#1f5fff" /><rect x="0" width="5" height="18" fill="#5b8bff" />
         </pattern>
         <pattern id="pm-dots" width="34" height="34" patternUnits="userSpaceOnUse">
           <rect width="34" height="34" fill="#fbf3e6" />
-          <circle cx="8" cy="8" r="6" fill="#ec6fa8" opacity="0.7" /><circle cx="25" cy="25" r="6" fill="#8fd19e" opacity="0.8" />
+          <circle cx="8" cy="8" r="6" fill="#ec6fa8" /><circle cx="25" cy="25" r="6" fill="#12a150" />
         </pattern>
         <pattern id="pm-plaid" width="48" height="48" patternUnits="userSpaceOnUse">
           <rect width="48" height="48" fill="#fff6d6" />
-          <rect x="6" width="10" height="48" fill="#f7a8c8" opacity="0.55" /><rect y="6" width="48" height="10" fill="#f7a8c8" opacity="0.55" />
-          <rect x="30" width="5" height="48" fill="#8fd19e" opacity="0.6" /><rect y="30" width="48" height="5" fill="#9cc4ff" opacity="0.6" />
+          <rect x="6" width="10" height="48" fill="#ec6fa8" /><rect y="6" width="48" height="10" fill="#ec6fa8" />
+          <rect x="30" width="5" height="48" fill="#12a150" /><rect y="30" width="48" height="5" fill="#1f5fff" />
         </pattern>
         <pattern id="pm-pinkstripe" width="30" height="30" patternUnits="userSpaceOnUse">
-          <rect width="30" height="30" fill="#e2558f" /><rect y="18" width="30" height="5" fill="#f7a8c8" /><rect y="25" width="30" height="2" fill="#8fd19e" />
+          <rect width="30" height="30" fill="#ec6fa8" /><rect y="18" width="30" height="5" fill="#ec6fa8" /><rect y="25" width="30" height="2" fill="#12a150" />
         </pattern>
         <pattern id="pm-checker" width="40" height="40" patternUnits="userSpaceOnUse">
           <rect width="40" height="40" fill="#fffaf0" />
-          <rect width="20" height="20" fill="#f7a8c8" /><rect x="20" y="20" width="20" height="20" fill="#f7a8c8" />
+          <rect width="20" height="20" fill="#ec6fa8" /><rect x="20" y="20" width="20" height="20" fill="#ec6fa8" />
         </pattern>
       </defs>
     </svg>
@@ -191,9 +191,6 @@ function Sunburst() {
         {Array.from({ length: 28 }, (_, i) => { const a = (i / 28) * Math.PI * 2; return <path key={i} d={`M${80 + 36 * Math.cos(a)} ${80 + 36 * Math.sin(a)} L${80 + 120 * Math.cos(a)} ${80 + 120 * Math.sin(a)}`} stroke={rays[i % rays.length]} strokeWidth="6" strokeLinecap="round" />; })}
       </g>
       <circle cx="80" cy="80" r="32" fill="#ffb347" filter="url(#nd-pencil)" />
-      <path d="M64 76 q5 5 10 0 M86 76 q5 5 10 0" stroke={ND.ink} strokeWidth="2.6" fill="none" strokeLinecap="round" />
-      <path d="M74 88 q6 5 12 0" stroke={ND.ink} strokeWidth="2.6" fill="none" strokeLinecap="round" />
-      <ellipse cx="62" cy="88" rx="5" ry="3.2" fill="#f7a8c8" /><ellipse cx="98" cy="88" rx="5" ry="3.2" fill="#f7a8c8" />
     </svg>
   );
 }
