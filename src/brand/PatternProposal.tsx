@@ -24,7 +24,7 @@ const pick = <T,>(r: R, a: T[]) => a[Math.floor(r() * a.length)];
 function spots(r: R, w: number, h: number, cols: number, rows: number, jitter = 0.75) {
   const cw = w / cols, ch = h / rows, out: { x: number; y: number }[] = [];
   for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-    const ox = (j % 2) * cw * 0.5; // offset rows like bricks so no lines form
+    const ox = rows % 2 === 0 && j % 2 ? cw * 0.5 : 0; // offset rows like bricks so no lines form
     out.push({ x: (i + 0.5) * cw + ox + (r() - 0.5) * cw * jitter, y: (j + 0.5) * ch + (r() - 0.5) * ch * jitter });
   }
   return out;
@@ -75,7 +75,7 @@ const colorer = (r: R, list: string[]) => { const order = [...list].sort(() => r
 function cutPaper(seed: number, list: string[], calm: boolean) {
   const r = rand(seed), col = colorer(r, list), W = 240;
   return spots(r, W, W, calm ? 4 : 6, calm ? 4 : 6).map(({ x, y }) => {
-    const c = col(), s = (calm ? 0.8 : 1) * (12 + r() * 12), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
+    const c = col(), s = (calm ? 0.8 : 1) * (10 + r() * 10), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
     const shape = kind === 'blob' ? `<path d="${blobD(r, s * 1.15)}" fill="${c}"/>`
       : kind === 'moon' ? `<path d="M${f(-s)} 0 A${f(s)} ${f(s)} 0 0 1 ${f(s)} 0 Z" fill="${c}"/>`
       : kind === 'tri' ? `<polygon points="0,${f(-s)} ${f(s * 0.95)},${f(s * 0.7)} ${f(-s * 0.95)},${f(s * 0.7)}" fill="${c}" stroke="${c}" stroke-width="5" stroke-linejoin="round"/>`
@@ -89,13 +89,13 @@ function cutPaper(seed: number, list: string[], calm: boolean) {
 
 // ---------------------------------------------------------------- 2 Doodle scatter
 function doodle(seed: number, calm: boolean) {
-  const r = rand(seed), col = colorer(r, calm ? PASTEL : [PP.gamify, PP.blush, PP.butter, PP.blueCrystal, PP.mint, PP.peach, PP.periwinkle, PP.sky, PP.pink, PP.lemon]);
+  const r = rand(seed), col = colorer(r, calm ? PASTEL : [PP.gamify, PP.blush, PP.butter, PP.blueCrystal, PP.mint, PP.peach, PP.lavender, PP.aqua, PP.sage]);
   const ink = `fill="none" stroke="${I}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"`, W = 260;
   return spots(r, W, W, calm ? 4 : 6, calm ? 4 : 6).map(({ x, y }) => {
-    const kind = calm ? pick(r, ['blob', 'dots', 'arc']) : pick(r, ['blob', 'blob', 'blob', 'arc', 'sun', 'wave', 'loop', 'dots', 'tri', 'plus']);
+    const kind = calm ? pick(r, ['blob', 'dots', 'arc']) : pick(r, ['blob', 'blob', 'blob', 'blob', 'arc', 'sun', 'wave', 'loop', 'dots', 'tri', 'plus']);
     let g = '';
     if (kind === 'blob') {
-      const s = 10 + r() * 9, d = blobD(r, s);
+      const s = 13 + r() * 9, d = blobD(r, s);
       // the ink outline is offset and turned so it does not line up with the fill
       g = `<path d="${d}" fill="${col()}"/>` + (calm ? '' : `<path d="${d}" transform="translate(${f(3 + r() * 3)} ${f(-2 - r() * 3)}) rotate(${f(6 + r() * 10)})" ${ink}/>`);
     } else if (kind === 'arc') g = `<path d="M-12 0 A12 12 0 0 1 12 0" ${ink}/>`;
@@ -104,20 +104,20 @@ function doodle(seed: number, calm: boolean) {
     else if (kind === 'loop') g = `<path d="${LOOP}" transform="scale(0.8)" ${ink}/>`;
     else if (kind === 'dots') g = [[0, 0], [7, 3], [2, 8], [-6, 5]].slice(0, calm ? 3 : 4).map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.1" fill="${calm ? PP.quiet : I}"${calm ? ' opacity="0.45"' : ''}/>`).join('');
     else if (kind === 'tri') g = `<polygon points="0,-8 7,5 -7,5" fill="${col()}"/><polygon points="2,-10 9,3 -5,3" ${ink}/>`;
-    else g = `<path d="M-6 0 H6 M0 -6 V6" ${ink} stroke-width="3"/>`;
+    else g = `<path d="M-6 0 H6 M0 -6 V6" fill="none" stroke="${I}" stroke-width="3" stroke-linecap="round"/>`;
     return at(x, y, r() * 360, g);
   }).join('');
 }
 
 // ---------------------------------------------------------------- 3 Squiggle lines
 function squiggle(seed: number, list: string[], calm: boolean) {
-  const r = rand(seed), col = colorer(r, list), sw = calm ? 4 : 6.5, W = 260;
-  return spots(r, W, W, calm ? 3 : 5, calm ? 3 : 5).map(({ x, y }) => {
+  const r = rand(seed), col = colorer(r, list), sw = calm ? 4 : 6, W = 260;
+  return spots(r, W, W, calm ? 3 : 6, calm ? 3 : 6).map(({ x, y }) => {
     const c = col(), kind = pick(r, ['wave', 'wave', 'loop', 'flower', 'flower', 'zig', 'coil']);
     const line = `fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
-    const g = kind === 'wave' ? `<path d="${wave(48 + r() * 18, 8)}" ${line}/>`
-      : kind === 'loop' ? `<path d="${LOOP}" transform="scale(1.15)" ${line}/>`
-      : kind === 'flower' ? `<path d="${flowerD(15 + r() * 5, pick(r, [5, 6, 8]))}" ${line}/>` + (calm ? '' : `<circle r="3.5" fill="${col()}"/>`)
+    const g = kind === 'wave' ? `<path d="${wave(40 + r() * 14, 7)}" ${line}/>`
+      : kind === 'loop' ? `<path d="${LOOP}" transform="scale(0.95)" ${line}/>`
+      : kind === 'flower' ? `<path d="${flowerD(12 + r() * 4, pick(r, [5, 6, 8]))}" ${line}/>` + (calm ? '' : `<circle r="3.5" fill="${col()}"/>`)
       : kind === 'zig' ? `<path d="M-24 4 L-14 -6 L-4 4 L6 -6 L16 4 L24 -4" ${line}/>`
       : `<path d="M-20 0 c0 -10 12 -10 12 0 s12 10 12 0 s12 -10 12 0" ${line}/>`;
     return at(x, y, r() * 360, g);
@@ -127,7 +127,7 @@ function squiggle(seed: number, list: string[], calm: boolean) {
 // ---------------------------------------------------------------- 4 Confetti doodles
 function confetti(seed: number, calm: boolean) {
   const r = rand(seed), col = colorer(r, calm ? PASTEL : BRIGHT), W = 200;
-  return spots(r, W, W, calm ? 3 : 5, calm ? 3 : 5).map(({ x, y }) => {
+  return spots(r, W, W, calm ? 3 : 6, calm ? 3 : 6).map(({ x, y }) => {
     const c = col(), ed = calm ? '' : ` stroke="${I}" stroke-width="1.8" stroke-linejoin="round"`, kind = pick(r, ['spark', 'star', 'dot', 'squig', 'spark']);
     const s = 0.7 + r() * 0.6;
     const g = kind === 'spark' ? `<path d="${sparkleD}" transform="scale(${f(s)})" fill="${c}"${calm ? '' : ` stroke="${I}" stroke-width="${f(1.8 / s)}" stroke-linejoin="round"`}/>`
@@ -140,9 +140,9 @@ function confetti(seed: number, calm: boolean) {
 
 // ---------------------------------------------------------------- 5 Quiet doodle ground
 // The only pattern allowed behind text: marks are pastel at low opacity on
-// cream, at or under 1.15:1 against the ground (WCAG text stays on cream).
+// cream, at or under 1.14:1 against the ground (WCAG text stays on cream).
 function quiet(seed: number, calm: boolean) {
-  const r = rand(seed), col = colorer(r, [PP.gamify, PP.blueCrystal, PP.lavender]), W = 200;
+  const r = rand(seed), col = colorer(r, [PP.blueCrystal, PP.lavender, PP.blush, PP.mint]), W = 200;
   const marks = spots(r, W, W, calm ? 3 : 4, calm ? 3 : 4).map(({ x, y }) => {
     const c = col(), line = `fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"`;
     const kind = calm ? 'dot' : pick(r, ['blob', 'wave', 'dot', 'arc', 'spark']);
@@ -150,7 +150,7 @@ function quiet(seed: number, calm: boolean) {
       : kind === 'arc' ? `<path d="M-8 0 A8 8 0 0 1 8 0" ${line}/>` : kind === 'spark' ? `<path d="${sparkleD}" transform="scale(0.7)" fill="${c}"/>` : `<circle r="3" fill="${c}"/>`;
     return at(x, y, r() * 360, g);
   }).join('');
-  return `<g opacity="${calm ? 0.4 : 0.55}">${marks}</g>`;
+  return `<g opacity="${calm ? 0.45 : 0.65}">${marks}</g>`;
 }
 
 // ---------------------------------------------------------------- trims (kept for the mockups)
@@ -183,7 +183,7 @@ export const PATTERNS: Pattern[] = [
     calmNote: '9 pastel marks, no ink.',
     make: (c) => tile(`con${c}`, 200, 200, PP.cream, () => confetti(89, c)) },
   { id: 'quiet', name: 'Quiet doodle ground', use: 'Site ground behind menus, teacher pages, start menus, results box backdrop',
-    rules: 'The only pattern allowed behind text. Pastel marks at 55% on cream, 1.15:1 or less against the ground. Tile 200px.',
+    rules: 'The only pattern allowed behind text. Pastel marks at 65% on cream, 1.14:1 or less against the ground (computed). Tile 200px.',
     calmNote: 'Dots only, fainter.',
     make: (c) => tile(`qui${c}`, 200, 200, PP.cream, () => quiet(101, c)) },
   { id: 'checker', name: 'Board checker', use: 'Game boards and grids, under pieces only (board zone)',
