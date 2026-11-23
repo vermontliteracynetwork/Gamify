@@ -21,7 +21,7 @@ import { STARTER, StickerArt } from './Stickers';
 
 const I = PP.ink;
 const Q = PP.quiet;
-const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
+const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' }; // Grow Year headings are ALL CAPS (teacher, 2026-11-23).
 // One flat card: a single 2px ink outline and the normal sticker shadow. No washi tape and no
 // stacked or offset paper layers (teacher, 2026-11-23: "the attatched tape, multilayer card is an
 // example of something i do not like and need immediately removed").
