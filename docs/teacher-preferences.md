@@ -219,3 +219,4 @@ line that fits, and add each new preference the same turn she says it.
 - Ways to play (2026-11-23): keep the game types as they are (Live, Share, Solo, Versus: names, icons and colors) in the new brand direction.
 - No Versus category (2026-11-23): Versus is merged into Share (two players on one screen) and Solo (one player against the computer); only Live, Share and Solo show anywhere. Live means a class screen IN ADDITION TO each student's own device screen (like the Question Tracker's big screen).
 - Brand art (2026-11-23): no characters/mascots. Instead a consistent set of power-ups shared across games (not every game has every one; magnet and double dice are common) drawn in one crayon/pencil hand-drawn style, and one consistent hand-drawn die in the Board Game format (one side shown at a time), plus a double dice roll with two dice side by side.
+- Tagline (2026-11-23): keep "Every Question Becomes a Game" as Gamify's headline/tagline.
