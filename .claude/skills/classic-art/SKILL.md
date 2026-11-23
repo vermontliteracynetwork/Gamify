@@ -51,14 +51,41 @@ the handmade themes teachers and kids make (clean core, handmade edges).
 ## Drawn in code, generated or bought
 - Preferred: draw in SVG using the shared kit parts so every piece shares the
   same filters, stroke widths and palette.
-- AI-generated images (Canva, Figma, other tools): use the fixed style prompt
-  below plus 3 kit pieces as references, then redraw or trace into the kit if it
-  drifts. Record the tool and its license in `docs/asset-ledger.md`.
-  Style prompt: "simple children's crayon and colored pencil drawing, waxy
-  scribble fill, slightly wobbly hand-drawn edges, flat on a transparent
-  background, cream-friendly bright palette (pink, cobalt blue, green,
-  tangerine, violet, teal, sunny yellow), no outlines, no text, no faces,
-  centered, one object".
+- AI-generated images (teacher, 2026-11-23: "add a rule of the style for the ai
+  generated assets so the same style applies to the classic theme (texture, line
+  art, colors)"). Every AI-made Classic asset follows the AI style rule below, is
+  generated with 3 kit pieces (CrayonKit power-ups, dice, stickers) attached as
+  style references, and passes the check before it ships. If it drifts, redraw or
+  trace it into the kit. Record the tool and its license in `docs/asset-ledger.md`.
+
+  **AI style rule (same as the code-drawn kit):**
+  - Texture: smooth, flat, solid fills; no grain, paper tooth, gradients, shading,
+    gloss or 3D; at most a faint hint of hand scribble inside a fill.
+  - Line art: one dark ink outline (#1D1A33) around every shape, about 4% of the
+    object's width, slightly wobbly like a felt-tip pen, rounded ends and corners;
+    inner details in the same ink, thinner. Never a sketchy or doubled pencil line.
+  - Shapes: simple, chunky, a little lopsided; one object, centered, readable at
+    48px; no faces, characters or mascots unless she asks; no text unless asked.
+  - Colors: only the palette pairs (Gamify purple #7A88FE / #B4C4FB, Grape
+    #6A45F0 / Lavender #DDD6FF, Sky #4BA3E8 / Blue crystal #BFDFF3, Pink #F055A5 /
+    Blush #FFD3E6, Lemon #FABE37 / Butter #FFF1B8, Orange #FF9B28 / Peach #FFD9B3,
+    Kelly #22B04A / Mint #C8F0DC, Teal #1FB5A8 / Aqua #C9F1EE, Lime #CCD537 / Sage
+    #E8F0B4, Ink #1D1A33, Cream #F6F0E4, Paper #FFFAF0); brights for the object,
+    pastels for patches; solid and opaque, never washed out.
+  - Background: transparent; optional pastel blob patch behind the object, and up
+    to three tiny doodle marks (sparkle, dot, star) only when asked.
+
+  **Style prompt (paste as is, then name the object):** "flat hand-drawn
+  children's sticker illustration of ONE [object], smooth solid flat colors, no
+  texture, no gradient, no shading, thick dark navy ink outline (#1D1A33) with a
+  slight hand-drawn wobble and rounded ends, simple chunky slightly lopsided
+  shapes, centered, transparent background, colors only from: #7A88FE, #6A45F0,
+  #4BA3E8, #F055A5, #FABE37, #FF9B28, #22B04A, #1FB5A8, #CCD537 with pastels
+  #B4C4FB, #DDD6FF, #BFDFF3, #FFD3E6, #FFF1B8, #FFD9B3, #C8F0DC, #C9F1EE,
+  #E8F0B4, no text, no face, no characters, no pencil or crayon marks".
+  Negative prompt where the tool has one: "photo, 3D, realistic, gradient,
+  shading, glossy, texture, grain, sketch lines, pencil, crayon strokes, text,
+  watermark, face, eyes, character".
 - Bought packs (for example crayon clipart from a marketplace): only with a
   license that allows use in a commercial website/app; one pack style per set
   so they never mix; recorded in the ledger before use.
