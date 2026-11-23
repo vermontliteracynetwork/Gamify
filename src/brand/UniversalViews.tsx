@@ -134,17 +134,15 @@ function Wizard({ step, total, title, children, last }: { step: number; total: n
         <MenuTop />
         <Paper className="flex-1 min-h-0" tape={PP.blush} pad={28}>
           <div className="h-full flex flex-col gap-5">
-            <div className="flex items-end justify-between gap-6">
-              <div className="grid gap-2">
-                <span className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>Step {step} of {total}</span>
-                <h2 className="text-[46px]" style={GY}>{title}</h2>
-              </div>
+            <div className="grid justify-items-center gap-3 text-center">
+              <span className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>Step {step} of {total}</span>
+              <h2 className="text-[46px]" style={GY}>{title}</h2>
               <ol className="flex gap-2 list-none p-0 m-0" aria-label="Steps">
                 {Array.from({ length: total }, (_, i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < step - 1 ? PP.periwinkle : i === step - 1 ? PP.lemon : PP.paper, border: `2.5px solid ${I}`, boxShadow: i === step - 1 ? `0 0 0 4px ${PP.butter}` : undefined }} />)}
               </ol>
             </div>
-            <div className="flex-1 min-h-0 relative">{children}</div>
-            <div className="flex justify-between items-center">
+            <div className="flex-1 min-h-0 relative flex flex-col items-center justify-center">{children}</div>
+            <div className="flex justify-center gap-5 items-center">
               <SecondBtn><ArrowLeft weight="bold" size={20} />Back</SecondBtn>
               <MainBtn>{last ? <><Play weight="fill" size={24} />Play</> : <>Next<ArrowRight weight="bold" size={24} /></>}</MainBtn>
             </div>
@@ -195,13 +193,13 @@ function V1() {
             <div className="relative w-[300px] h-[300px] grid place-items-center"><BlobPatch color={PP.gamify} size={320} /><span className="relative"><CrayonDie value={5} size={210} /></span></div>
           </div>
         </Paper>
-        <div className="flex flex-col gap-7 pt-10">
-          <div className="grid gap-4">
+        <div className="flex flex-col items-center text-center gap-7 pt-10">
+          <div className="grid gap-4 justify-items-center">
             <h1 className="text-[84px]" style={GY}>Board Game</h1>
             <p className="font-semibold text-[24px] leading-snug" style={{ color: PP.quiet }}>Answer, roll the die and race to the finish.</p>
             <div className="flex gap-2">{([['Share', PP.gamify], ['Live', PP.aqua], ['Solo', PP.butter]] as const).map(([m, c]) => <span key={m} className="px-4 py-1.5 rounded-full font-bold text-[18px]" style={{ background: c, border: `2.5px solid ${I}` }}>{m}</span>)}</div>
           </div>
-          <div className="grid gap-3">
+          <div className="grid gap-3 w-[420px]">
             {steps.map(([s, ic], i) => (
               <div key={s} className="flex items-center gap-4 font-bold text-[24px]">
                 <span className="w-14 h-14 rounded-full grid place-items-center text-[28px] shrink-0" style={{ ...GY, background: [PP.butter, PP.blush, PP.aqua][i], border: `3px solid ${I}` }}>{i + 1}</span>
@@ -246,15 +244,15 @@ function V3() {
   ] as const;
   return (
     <Wizard step={2} total={5} title="Question set">
-      <div className="flex items-center gap-4 mb-5">
+      <div className="w-full flex items-center justify-center gap-4 mb-5">
         <Seg opts={['My sets', 'Public sets']} pick={0} h={52} size={18} />
-        <span className="flex-1 h-[52px] px-5 rounded-full flex items-center gap-3 font-semibold text-[18px]" style={{ background: PP.paper, border: `3px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} />Search sets</span>
+        <span className="w-[440px] h-[52px] px-5 rounded-full flex items-center gap-3 font-semibold text-[18px]" style={{ background: PP.paper, border: `3px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} />Search sets</span>
       </div>
-      <div className="grid grid-cols-3 gap-5">
+      <div className="w-full grid grid-cols-3 gap-5">
         {sets.map(([name, sub, gr, n, c, q], i) => (
           <div key={name} className="relative flex overflow-hidden" style={{ ...card, boxShadow: i === 0 ? `${SEL}, 0 4px 0 ${I}` : card.boxShadow }}>
             <span className="w-3 shrink-0" style={{ background: c, borderRight: `2.5px solid ${I}` }} />
-            <div className="p-4 grid gap-2 min-w-0">
+            <div className="flex-1 p-4 grid gap-2 min-w-0 justify-items-center text-center">
               <b className="text-[21px] leading-tight">{name}</b>
               <span className="text-[15px] font-semibold truncate" style={{ color: PP.quiet }}>{q}</span>
               <div className="flex gap-1.5 text-[14px] font-bold whitespace-nowrap">{[sub, `Grades ${gr}`, `${n} questions`].map((x) => <span key={x} className="px-2.5 py-0.5 rounded-full" style={{ border: `2px solid ${I}` }}>{x}</span>)}</div>
@@ -267,15 +265,15 @@ function V3() {
   );
 }
 function Group({ title, children }: { title: string; children: ReactNode }) {
-  return <div className="p-6 grid gap-6 content-start" style={{ ...card, background: PP.cream }}><h3 className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>{title}</h3>{children}</div>;
+  return <div className="p-6 grid gap-5 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}><h3 className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>{title}</h3>{children}</div>;
 }
 function Row({ label, children }: { label: string; children: ReactNode }) {
-  return <div className="flex items-center justify-between gap-4 min-h-[56px]"><b className="text-[22px]">{label}</b>{children}</div>;
+  return <div className="grid justify-items-center gap-3"><b className="text-[22px]">{label}</b>{children}</div>;
 }
 function V4() {
   return (
     <Wizard step={3} total={5} title="Options">
-      <div className="grid grid-cols-2 gap-6 h-full content-center">
+      <div className="w-full grid grid-cols-2 gap-6 content-center">
         <Group title="The game">
           <Row label="Rounds">
             <span className="relative w-[300px] h-5 rounded-full" style={{ background: PP.blueCrystal, border: `3px solid ${I}` }}>
@@ -302,15 +300,15 @@ function V4() {
 function V5() {
   return (
     <Wizard step={4} total={5} title="Teams">
-      <div className="grid gap-5 h-full content-start">
-        <div className="flex items-center gap-4 font-bold text-[20px]"><span>How many teams?</span><Seg opts={['2', '3', '4']} pick={2} /></div>
+      <div className="w-full grid gap-6 content-center">
+        <div className="flex items-center justify-center gap-4 font-bold text-[20px]"><span>How many teams?</span><Seg opts={['2', '3', '4']} pick={2} /></div>
         <div className="grid grid-cols-4 gap-5">
           {TEAMS.map((t, i) => (
             <div key={t.name} className="relative" style={{ ...card, transform: `rotate(${[-1, 0.8, -0.6, 1][i]}deg)` }}>
               <div className="h-[72px] grid place-items-center rounded-t-[17px]" style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><span className="w-14 h-14 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={38} /></span></div>
               <div className="p-4 grid gap-3">
-                <span className="h-12 px-4 rounded-xl flex items-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
-                <div className="flex flex-wrap gap-1.5 text-[16px] font-bold">{['Ava', 'Leo', 'Mia'].map((n) => <span key={n} className="px-3 py-1 rounded-full" style={{ background: t.soft, border: `2px solid ${I}` }}>{n}</span>)}
+                <span className="h-12 px-4 rounded-xl flex items-center justify-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
+                <div className="flex flex-wrap justify-center gap-1.5 text-[16px] font-bold">{['Ava', 'Leo', 'Mia'].map((n) => <span key={n} className="px-3 py-1 rounded-full" style={{ background: t.soft, border: `2px solid ${I}` }}>{n}</span>)}
                   <span className="px-3 py-1 rounded-full inline-flex items-center gap-1" style={{ border: `2px dashed ${PP.quiet}`, color: PP.quiet }}><Plus weight="bold" size={14} />Add</span></div>
               </div>
             </div>
@@ -334,6 +332,7 @@ function V6() {
     <Stage pad={40}>
       <div className="h-full flex flex-col items-center gap-5">
         <div className="w-full"><MenuTop /></div>
+        <div className="flex-1 flex flex-col items-center justify-center gap-6">
         <div className="relative px-8 py-2 rounded-2xl" style={{ background: PP.paper, border: `3px solid ${I}`, transform: 'rotate(-1deg)' }}>
           <Tape x="50%" y={-14} color={PP.blush} w={90} />
           <span className="text-[15px] font-bold uppercase tracking-widest mr-3" style={{ color: PP.quiet }}>Step 5 of 5</span><span className="text-[42px] align-middle" style={GY}>Power-ups</span>
@@ -349,7 +348,8 @@ function V6() {
             </div>
           ))}
         </div>
-        <div className="flex gap-5 mt-auto items-center"><SecondBtn><ArrowLeft weight="bold" size={20} />Back</SecondBtn><MainBtn big><Play weight="fill" size={28} />Play</MainBtn></div>
+        <div className="flex gap-5 items-center"><SecondBtn><ArrowLeft weight="bold" size={20} />Back</SecondBtn><MainBtn big><Play weight="fill" size={28} />Play</MainBtn></div>
+        </div>
       </div>
     </Stage>
   );
@@ -439,7 +439,7 @@ function V9() {
                 <Badge t={t} size={34} /><b className="flex-1 text-[19px] truncate">{t.name}</b><span className="text-[34px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
               </div>
             ))}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-2xl text-[15px] font-bold" style={{ background: PP.paper, border: `2.5px dashed ${I}` }}><CrayonPowerUp id="shield" size={40} />Shield waits for Team Sky's next turn</div>
+            <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-2xl text-[15px] font-bold text-center" style={{ background: PP.paper, border: `2.5px dashed ${I}` }}><CrayonPowerUp id="shield" size={40} />Shield waits for Team Sky's next turn</div>
           </div>
         </Paper>
       </div>
@@ -484,9 +484,9 @@ function V11() {
       <Board dim />
       <div className="absolute inset-0 grid place-items-center">
         <Paper pad={28} className="w-[880px]" tape={PP.mint}>
-          <div className="flex items-center justify-between mb-5"><h2 className="text-[52px]" style={GY}>Settings</h2><Round label="Close"><X weight="bold" size={24} /></Round></div>
+          <div className="relative flex items-center justify-center mb-5"><h2 className="text-[52px]" style={GY}>Settings</h2><span className="absolute right-0"><Round label="Close"><X weight="bold" size={24} /></Round></span></div>
           <div className="grid grid-cols-[220px_1fr] gap-6">
-            <div className="grid gap-2 content-start">{['Sound', 'Motion', 'Reading', 'Tools'].map((o, i) => <span key={o} className="h-14 px-5 rounded-2xl flex items-center font-bold text-[20px]" style={i === 1 ? PICK : { border: `2.5px solid transparent` }}>{o}</span>)}</div>
+            <div className="grid gap-2 content-start">{['Sound', 'Motion', 'Reading', 'Tools'].map((o, i) => <span key={o} className="h-14 px-5 rounded-2xl flex items-center justify-center font-bold text-[20px]" style={i === 1 ? PICK : { border: `2.5px solid transparent` }}>{o}</span>)}</div>
             <div className="grid gap-3">
               <div className="flex items-center gap-5 p-5 rounded-[22px]" style={{ background: PP.blueCrystal, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
                 <span className="relative w-16 h-16 grid place-items-center shrink-0"><BlobPatch color={PP.paper} size={70} /><span className="relative"><Doodle kind="heart" color={PP.lavender} size={34} /></span></span>
@@ -547,9 +547,9 @@ function V12b() {
         </Paper>
         <Paper pad={28} tape={PP.aqua}>
           <div className="h-full flex flex-col gap-5">
-            <div className="flex items-center justify-between"><h2 className="text-[52px]" style={GY}>Lobby</h2><span className="flex items-center gap-2 px-4 h-12 rounded-full font-bold text-[22px]" style={{ background: PP.mint, border: `3px solid ${I}` }}><UsersThree weight="bold" size={26} />12 here</span></div>
-            <div className="flex flex-wrap gap-3 content-start flex-1">{names.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}`, transform: `rotate(${[-2, 1, -1, 2, 0, -1.5][i % 6]}deg)` }}>{n}</span>)}</div>
-            <div className="flex justify-end"><MainBtn big><Play weight="fill" size={28} />Start</MainBtn></div>
+            <div className="grid justify-items-center gap-3"><h2 className="text-[52px]" style={GY}>Lobby</h2><span className="flex items-center gap-2 px-4 h-12 rounded-full font-bold text-[22px]" style={{ background: PP.mint, border: `3px solid ${I}` }}><UsersThree weight="bold" size={26} />12 here</span></div>
+            <div className="flex flex-wrap justify-center gap-3 content-center flex-1">{names.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}`, transform: `rotate(${[-2, 1, -1, 2, 0, -1.5][i % 6]}deg)` }}>{n}</span>)}</div>
+            <div className="flex justify-center"><MainBtn big><Play weight="fill" size={28} />Start</MainBtn></div>
           </div>
         </Paper>
       </div>

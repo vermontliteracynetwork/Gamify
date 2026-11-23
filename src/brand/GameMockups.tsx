@@ -20,6 +20,8 @@ const I = PP.ink;
 const quiet = PATTERNS.find((p) => p.id === 'quiet')!.make(false);
 const paper: CSSProperties = { background: PP.paper, border: `3px solid ${I}`, borderRadius: 20, boxShadow: `0 4px 0 ${I}` };
 type Team = (typeof TEAMS)[number];
+// Solo against the computer (former Versus games): two sides, named You and Computer.
+const VS: Team[] = [{ ...TEAMS[0], name: 'You' } as unknown as Team, { ...TEAMS[3], name: 'Computer' } as unknown as Team];
 const PASTEL_OF: Record<string, string> = { [PP.periwinkle]: PP.gamify, [PP.sky]: PP.blueCrystal, [PP.pink]: PP.blush, [PP.lemon]: PP.butter };
 
 // ---------- shared mockup parts ----------
@@ -131,7 +133,7 @@ function GSCard({ c }: { c: (typeof GS_CARDS)[number] }) {
   );
 }
 // Celebration: the Prize Bag card pops off the board.
-function GSPop({ scale = 1 }: { scale?: number }) {
+function GSPop({ scale = 1, who = 'Team Sky' }: { scale?: number; who?: string }) {
   return (
     <div className="absolute inset-0 grid place-items-center z-10 pointer-events-none">
       <div className="relative" style={{ transform: `scale(${scale}) rotate(-3deg)` }}>
@@ -139,7 +141,7 @@ function GSPop({ scale = 1 }: { scale?: number }) {
         <div className="w-[240px] p-4 grid justify-items-center gap-1 text-center" style={{ ...paper, borderRadius: 24, boxShadow: `0 0 0 8px ${PP.lemon}, 0 0 0 11px ${I}, 0 12px 0 ${I}` }}>
           <div className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.peach} size={124} /><span className="relative"><CrayonPowerUp id="treasure-chest" size={100} /></span></div>
           <b className="font-display text-4xl leading-none">Prize Bag!</b>
-          <span className="font-bold text-lg">+100 for Team Sky</span>
+          <span className="font-bold text-lg">+100 for {who}</span>
         </div>
       </div>
     </div>
@@ -148,22 +150,23 @@ function GSPop({ scale = 1 }: { scale?: number }) {
 const GS_SCORES = [70, 160, 50, 10];
 const GS_HELD = [undefined, undefined, GS_POWERS.double, undefined];
 
-function GameShowLaptop() {
+function GameShowLaptop({ vs }: { vs?: boolean }) {
+  const teams = vs ? VS : TEAMS;
   return (
     <div className="w-full h-full relative overflow-hidden">
       <StudioBack w={1000} h={625} />
       <Corner dark />
       <div className="absolute left-[96px] top-[52px] w-[600px] grid justify-items-center gap-3">
-        <TurnPill t={TEAMS[1]} text="Team Sky, pick a card!" />
+        <TurnPill t={vs ? VS[0] : TEAMS[1]} text={vs ? 'Your turn: pick a card!' : 'Team Sky, pick a card!'} />
         <Marquee bulbs={18}>
           <div className="grid grid-cols-4 gap-2.5">{GS_CARDS.map((c, i) => <GSCard key={i} c={c} />)}</div>
         </Marquee>
       </div>
       <div className="absolute right-[96px] top-[118px] w-[196px] grid gap-2.5">
-        {TEAMS.map((t, i) => <Score key={t.name} t={t} pts={GS_SCORES[i]} now={i === 1} held={GS_HELD[i]} compact />)}
+        {teams.map((t, i) => <Score key={t.name} t={t} pts={vs ? [150, 90][i] : GS_SCORES[i]} now={vs ? i === 0 : i === 1} held={vs ? (i === 1 ? GS_POWERS.double : undefined) : GS_HELD[i]} compact />)}
         <span className="mt-1 text-sm font-bold px-3 py-1.5 rounded-xl text-center" style={{ background: PP.butter, border: `2px solid ${I}` }}>Fill a row for +10</span>
       </div>
-      <div className="absolute left-[96px] top-[118px] w-[600px] h-[420px]"><GSPop scale={0.82} /></div>
+      <div className="absolute left-[96px] top-[118px] w-[600px] h-[420px]"><GSPop scale={0.82} who={vs ? 'you' : 'Team Sky'} /></div>
     </div>
   );
 }
@@ -222,7 +225,7 @@ function Square({ kind, i, s }: { kind: Kind; i: number; s: number }) {
     </span>
   );
 }
-function BoardGrid({ w, h, celebrate }: { w: number; h: number; celebrate?: boolean }) {
+function BoardGrid({ w, h, celebrate, pawns = PAWNS }: { w: number; h: number; celebrate?: boolean; pawns?: typeof PAWNS }) {
   const L = layout(N, w, h);
   const s = L.size;
   const ox = (w - L.cols * s) / 2, oy = (h - L.rows * s) / 2;
@@ -230,8 +233,8 @@ function BoardGrid({ w, h, celebrate }: { w: number; h: number; celebrate?: bool
   return (
     <div className="relative" style={{ width: w, height: h }}>
       {L.cells.map((_, k) => <span key={k} className="absolute" style={{ ...pos(k), width: s, height: s }}><Square kind={KINDS[k]} i={k} s={s} /></span>)}
-      {PAWNS.map((p, j) => {
-        const same = PAWNS.filter((q) => q.at === p.at).indexOf(p);
+      {pawns.map((p, j) => {
+        const same = pawns.filter((q) => q.at === p.at).indexOf(p);
         return <span key={j} className="absolute z-[2]" style={{ left: pos(p.at).left + s * 0.14 + same * s * 0.2, top: pos(p.at).top - s * 0.28, filter: p.t === 1 && celebrate ? `drop-shadow(0 0 0 ${PP.lemon})` : undefined }}><CrayonPawn color={TEAMS[p.t].color} size={s * 0.72} /></span>;
       })}
       {celebrate && (() => { const p = pos(15); return (
@@ -243,10 +246,10 @@ function BoardGrid({ w, h, celebrate }: { w: number; h: number; celebrate?: bool
     </div>
   );
 }
-function DieCard({ big }: { big?: boolean }) {
+function DieCard({ big, who }: { big?: boolean; who?: Team }) {
   return (
     <div className="p-4 grid justify-items-center gap-3 text-center" style={paper}>
-      <span className="font-display text-2xl font-bold flex items-center gap-2"><Badge t={TEAMS[1]} size={30} />Team Sky</span>
+      <span className="font-display text-2xl font-bold flex items-center gap-2"><Badge t={who ?? TEAMS[1]} size={30} />{who ? 'Your turn' : 'Team Sky'}</span>
       <div className="relative grid place-items-center" style={{ width: big ? 150 : 128, height: big ? 150 : 128 }}><BlobPatch color={PP.blueCrystal} size={big ? 150 : 128} /><span className="relative"><CrayonDie value={3} size={big ? 112 : 96} /></span></div>
       <MainBtn wide>Roll</MainBtn>
     </div>
@@ -262,25 +265,25 @@ function Tray() {
   );
 }
 const BG_SCORES = ['12 to go', '24 to go', '19 to go', '32 to go'];
-function MiniRace({ compact }: { compact?: boolean }) {
-  return <>{TEAMS.map((t, i) => (
-    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === 1 ? `0 0 0 4px ${PP.lemon}, 0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
+function MiniRace({ compact, teams = TEAMS, now = 1 }: { compact?: boolean; teams?: readonly Team[]; now?: number }) {
+  return <>{teams.map((t, i) => (
+    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === now ? `0 0 0 4px ${PP.lemon}, 0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
       <CrayonPawn color={t.color} size={26} /><b className="flex-1 truncate text-sm">{t.name}</b><span className="text-sm font-bold" style={{ color: PP.quiet }}>{BG_SCORES[i]}</span>
     </div>
   ))}</>;
 }
-function BoardLaptop() {
+function BoardLaptop({ vs }: { vs?: boolean }) {
   return (
     <div className="w-full h-full relative overflow-hidden">
       <ParkBack w={1000} h={625} />
       <Corner dark />
       <div className="absolute left-6 top-[74px] w-[690px] h-[520px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}>
-        <BoardGrid w={650} h={480} celebrate />
+        <BoardGrid w={650} h={480} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
       </div>
       <div className="absolute right-6 top-[74px] w-[250px] grid gap-2.5">
-        <DieCard />
+        <DieCard who={vs ? VS[0] : undefined} />
         <Tray />
-        <MiniRace compact />
+        <MiniRace compact teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} />
       </div>
     </div>
   );
@@ -434,7 +437,7 @@ function Disc({ p, s }: { p: number; s: number }) {
     </svg>
   );
 }
-function F4Board({ s }: { s: number }) {
+function F4Board({ s, win = true }: { s: number; win?: boolean }) {
   return (
     <div className="relative">
       {/* the next piece waits over its column */}
@@ -446,35 +449,35 @@ function F4Board({ s }: { s: number }) {
           </span>
         )))}
         {/* celebration: the winning line gets a lemon band and a burst */}
-        <svg className="absolute pointer-events-none" style={{ left: 16, top: 16 }} width={s * 7} height={s * 6} aria-hidden="true">
+        {win && <svg className="absolute pointer-events-none" style={{ left: 16, top: 16 }} width={s * 7} height={s * 6} aria-hidden="true">
           <path d={WIN.map(([r, c], i) => `${i ? 'L' : 'M'}${c * s + s / 2} ${r * s + s / 2}`).join(' ')} stroke={I} strokeWidth={s * 0.3} strokeLinecap="round" fill="none" />
           <path d={WIN.map(([r, c], i) => `${i ? 'L' : 'M'}${c * s + s / 2} ${r * s + s / 2}`).join(' ')} stroke={PP.lemon} strokeWidth={s * 0.18} strokeLinecap="round" fill="none" />
-        </svg>
+        </svg>}
       </div>
       <span className="absolute h-6 rounded-b-xl" style={{ left: 24, width: 26, bottom: -22, background: PP.skyDeep, border: `3px solid ${I}` }} />
       <span className="absolute h-6 rounded-b-xl" style={{ right: 24, width: 26, bottom: -22, background: PP.skyDeep, border: `3px solid ${I}` }} />
     </div>
   );
 }
-function F4Player({ i, now, held }: { i: number; now?: boolean; held?: { id: PowerId; name: string } }) {
+function F4Player({ i, now, held, name, note = 'Winner!' }: { i: number; now?: boolean; held?: { id: PowerId; name: string }; name?: string; note?: string }) {
   return (
     <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={{ ...paper, boxShadow: now ? `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` : paper.boxShadow }}>
       <Disc p={i + 1} s={54} />
-      <b className="font-display text-2xl">{['Ava', 'Leo'][i]}</b>
-      {now && <span className="font-bold text-sm">Winner!</span>}
+      <b className="font-display text-2xl">{name ?? ['Ava', 'Leo'][i]}</b>
+      {now && <span className="font-bold text-sm">{note}</span>}
       {held && <span title={held.name} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 2 }}><CrayonPowerUp id={held.id} size={40} sticker /></span>}
     </div>
   );
 }
-function FourLaptop() {
+function FourLaptop({ vs }: { vs?: boolean }) {
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
-      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} held={{ id: 'swap', name: 'Pop Out' }} /></div>
-      <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} now /></div>
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><F4Board s={64} /></div>
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[546px] z-10"><Burst text="Four in a row! Leo wins!" size="text-3xl" /></div>
-      <Confetti marks={[['sparkle', PP.lemon, 250, 560, 34], ['star', PP.pink, 730, 556, 28], ['dot', PP.sky, 220, 520, 16], ['heart', PP.pink, 760, 520, 24]]} />
+      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} note="Your turn: drop a piece" held={{ id: 'swap', name: 'Pop Out' }} /></div>
+      <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} name={vs ? 'Computer' : undefined} now={!vs} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><F4Board s={64} win={!vs} /></div>
+      {!vs && <div className="absolute w-max left-1/2 -translate-x-1/2 top-[546px] z-10"><Burst text="Four in a row! Leo wins!" size="text-3xl" /></div>}
+      {!vs && <Confetti marks={[['sparkle', PP.lemon, 250, 560, 34], ['star', PP.pink, 730, 556, 28], ['dot', PP.sky, 220, 520, 16], ['heart', PP.pink, 760, 520, 24]]} />}
     </PatternStage>
   );
 }
@@ -614,13 +617,13 @@ function Lane({ w, h }: { w: number; h: number }) {
   );
 }
 const FRAMES = [['X', '7 /', '9'], ['8 1', 'X', ''], ['6 2', '5 3', '']];
-function FrameBoard({ compact }: { compact?: boolean }) {
+function FrameBoard({ compact, solo }: { compact?: boolean; solo?: boolean }) {
   return (
     <div className="grid gap-1.5 p-2.5" style={{ ...paper, borderRadius: 18 }}>
-      {['Ava', 'Mia', 'Leo'].map((n, i) => (
+      {(solo ? ['You'] : ['Ava', 'Mia', 'Leo']).map((n, i) => (
         <div key={n} className="grid items-center gap-1.5" style={{ gridTemplateColumns: `${compact ? 30 : 34}px 1fr repeat(3, ${compact ? 40 : 46}px) ${compact ? 40 : 48}px` }}>
           <Ball c={BALLS[i]} s={compact ? 28 : 32} />
-          <b className={`truncate ${compact ? 'text-sm' : 'text-base'}`} style={i === 1 ? { background: PP.lemon, borderRadius: 8, padding: '0 6px' } : undefined}>{n}</b>
+          <b className={`truncate ${compact ? 'text-sm' : 'text-base'}`} style={i === 1 || solo ? { background: PP.lemon, borderRadius: 8, padding: '0 6px' } : undefined}>{n}</b>
           {FRAMES[i].map((f, j) => <span key={j} className="h-9 rounded-lg grid place-items-center font-display text-lg" style={{ background: PP.paper, border: `2px solid ${I}` }}>{f}</span>)}
           <span className="font-display text-2xl text-right tabular-nums">{[46, 38, 16][i]}</span>
         </div>
@@ -638,18 +641,18 @@ function AlleyWall({ children }: { children: ReactNode }) {
     </div>
   );
 }
-function RollPill() {
-  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />Mia rolls!</div>;
+function RollPill({ who = 'Mia rolls!' }: { who?: string }) {
+  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />{who}</div>;
 }
-function BowlingLaptop() {
+function BowlingLaptop({ solo }: { solo?: boolean }) {
   return (
     <AlleyWall>
       <Corner dark />
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[26px]"><Lane w={330} h={575} /></div>
-      <div className="absolute left-[30px] top-[250px] w-[300px]"><FrameBoard compact /></div>
+      <div className="absolute left-[30px] top-[250px] w-[300px]"><FrameBoard compact solo={solo} /></div>
       <div className="absolute right-[30px] top-[250px] w-[300px] grid gap-3">
-        <RollPill />
-        <HeldTray items={BW_HELD} label="Mia's power-ups" row />
+        {!solo && <RollPill />}
+        <HeldTray items={BW_HELD} label={solo ? 'Power-ups' : "Mia's power-ups"} row />
       </div>
     </AlleyWall>
   );
@@ -713,13 +716,13 @@ function ClassScreen() {
   );
 }
 const ANS = [['A', 'cat', PP.periwinkle], ['B', 'Cat', PP.sky], ['C', 'CAT', PP.pink], ['D', 'caT', PP.lemon]] as const;
-function StudentDevice() {
+function StudentDevice({ solo }: { solo?: boolean }) {
   return (
     <div className="w-full h-full relative" style={{ ...quiet, padding: 32 }}>
       <Corner />
       <div className="mt-16 flex items-center gap-3 px-5 py-3" style={{ ...paper, borderRadius: 18 }}>
-        <Doodle kind="star" color={PP.lemon} size={52} /><b className="font-display text-4xl">You added 4 stars</b>
-        <span className="flex-1" /><span className="font-bold" style={{ color: PP.quiet }}>Class sky: 18 of 30</span>
+        <Doodle kind="star" color={PP.lemon} size={52} /><b className="font-display text-4xl">{solo ? 'My sky: 4 stars' : 'You added 4 stars'}</b>
+        <span className="flex-1" />{!solo && <span className="font-bold" style={{ color: PP.quiet }}>Class sky: 18 of 30</span>}
       </div>
       <div className="mt-8 p-8 grid gap-6" style={{ ...paper, borderRadius: 26 }}>
         <span className="font-bold text-xl" style={{ color: PP.quiet }}>Question 5 of 10</span>
