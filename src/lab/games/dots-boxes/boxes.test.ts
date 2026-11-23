@@ -23,8 +23,12 @@ describe('box builder', () => {
   it('the computer takes a box, else plays safe', () => {
     const lines = { 'h-0-0': 'a', 'h-1-0': 'b', 'v-0-0': 'a' };
     expect(cpuLine(lines, S)).toBe('v-0-1');
-    const safe = cpuLine({ 'h-0-0': 'a' }, S)!;
-    expect(boxesOf(safe, S).every((b) => b !== '0-0')).toBe(true);
+    // Safe: the line never leaves a box one side from closing.
+    const start = { 'h-0-0': 'a', 'v-0-0': 'b' };
+    for (let k = 0; k < 40; k++) {
+      const safe = cpuLine(start, S)!;
+      expect(boxesOf(safe, S).every((b) => count({ ...start, [safe]: 'a' }, b) < 3)).toBe(true);
+    }
   });
   it('an earthquake moves loose lines without closing boxes', () => {
     const lines = { 'h-0-0': 'a', 'h-1-0': 'b', 'v-0-0': 'a', 'v-0-1': 'b', 'h-3-3': 'a', 'v-2-4': 'b' };
