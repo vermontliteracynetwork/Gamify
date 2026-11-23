@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import { playClip } from '../engine/music';
@@ -15,8 +15,11 @@ import { ND } from './buddies';
 //
 // One family, five rules: a 100 x 100 grid with a 6-unit margin; chunky
 // silhouettes; one main color plus one accent from the brand palette; a
-// scribble fill in the deep shade of the same color and an edge in that deep
-// shade (never black ink on art); one white crayon shine at the top left.
+// scribble fill in the deep shade of the same color; one white crayon shine at
+// the top left. Doodle style (teacher refs, 2026-11-23): a thick, slightly
+// wobbly ink outline (#1d1a33) with rounded ends around every shape, inner
+// details in the same ink but thinner; on cards the art sits on a soft crayon
+// blob patch with a little doodle confetti, never a frame.
 // Solid, opaque, punchy fills (teacher, 2026-11-23: "more solid, punchier
 // brighter colors that are less transparent"): texture is a light overlay in
 // the strokes and edges and never makes a color look faded. The
@@ -62,21 +65,23 @@ const SCRIBBLE = (() => {
 const cleanId = (s: string) => s.replace(/[^a-zA-Z0-9]/g, '');
 
 // One filled crayon shape: base wax, scribble strokes in the deep shade,
-// a hand-drawn edge in the same deep shade.
-function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.2 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
+// a felt-tip ink outline (edge only tints the scribble).
+function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.8 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
   const clip = 'c' + cleanId(useId());
-  const e = edge ?? deep[color] ?? ND.ink;
+  const e = edge && edge !== ND.ink ? edge : deep[color] ?? ND.quiet;
   return (
     <g>
       <clipPath id={clip}><path d={d} clipRule={rule} /></clipPath>
       <path d={d} fill={color} fillRule={rule} />
       <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke={e} strokeWidth="1.9" opacity={hatch} fill="none" strokeLinejoin="round" />
-      <path d={d} fill="none" fillRule={rule} stroke={e} strokeWidth={width} strokeLinejoin="round" />
+      <path d={d} fill="none" fillRule={rule} stroke={ND.ink} strokeWidth={width} strokeLinejoin="round" strokeLinecap="round" />
     </g>
   );
 }
-function Line({ d, color, w = 5, o = 1 }: { d: string; color: string; w?: number; o?: number }) {
-  return <path d={d} stroke={color} strokeWidth={w} opacity={o} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
+// ink: an ink outline under a colored line, so thick lines read as shapes.
+function Line({ d, color, w = 5, o = 1, ink }: { d: string; color: string; w?: number; o?: number; ink?: boolean }) {
+  const line = <path d={d} stroke={color} strokeWidth={w} opacity={o} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
+  return ink ? <g><path d={d} stroke={ND.ink} strokeWidth={w + 8} fill="none" strokeLinecap="round" strokeLinejoin="round" />{line}</g> : line;
 }
 const Shine = ({ d }: { d: string }) => <Line d={d} color="#ffffff" w={5} />;
 const circ = (cx: number, cy: number, r: number) => `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
@@ -129,7 +134,7 @@ function DieTumble({ frame }: { frame: number }) {
   ];
   return (
     <g>
-      <Line d={frame % 2 ? 'M4 70 C2 58 4 46 10 38 M96 26 C98 36 96 46 92 52' : 'M6 26 C4 36 6 46 10 54 M94 64 C98 56 98 46 94 38'} color={ND.quiet} w={4} />
+      <Line d={frame % 2 ? 'M4 70 C2 58 4 46 10 38 M96 26 C98 36 96 46 92 52' : 'M6 26 C4 36 6 46 10 54 M94 64 C98 56 98 46 94 38'} color={ND.ink} w={3.6} />
       <g transform={`rotate(${f.rot} 50 53)`}>
         {faces.map((fc, k) => (
           <g key={k}>
@@ -153,7 +158,7 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M14 18 H42 V34 H14 Z" color={ND.paper} edge={ND.quiet} />
     <Wax d="M58 18 H86 V34 H58 Z" color={ND.paper} edge={ND.quiet} />
     <Shine d="M22 44 V62" />
-    <Line d="M22 11 L17 4 M34 11 L38 4 M66 11 L62 4 M78 11 L83 4" color={ND.tangerine} w={4} />
+    <Line d="M22 11 L17 4 M34 11 L38 4 M66 11 L62 4 M78 11 L83 4" color={ND.ink} w={3.6} />
   </>),
   'double-dice': () => (<>
     <g transform="translate(4 14) rotate(-12 26 26) scale(0.52)"><DieFace value={5} /></g>
@@ -182,13 +187,13 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d={circ(46, 58, 25)} color={ND.paper} edge={ND.tangDeep} hatch={0.1} />
     <Line d="M46 58 V40 M46 58 L59 65" color={ND.ink} w={5} />
     <Wax d={circ(79, 24, 16)} color={ND.green} />
-    <Line d="M79 15 V33 M70 24 H88" color="#ffffff" w={5.5} />
+    <Line d="M79 15 V33 M70 24 H88" color="#ffffff" w={5.5} ink />
   </>),
   'slow-mo': () => (<>
     <Wax d="M6 84 C6 74 18 72 30 74 H76 C82 68 84 62 84 54 C92 54 96 66 92 76 C89 83 84 88 74 88 H10 C7 88 6 86 6 84 Z" color={ND.green} />
     <Wax d={circ(46, 50, 28)} color={ND.violet} />
     <Line d="M46 50 C46 44 54 44 54 50 C54 58 40 58 40 50 C40 39 61 39 61 50 C61 64 33 64 33 50" color="#ffffff" w={4.5} />
-    <Line d="M85 56 L82 40 M90 58 L96 44" color={ND.greenDeep} w={4} />
+    <Line d="M85 56 L82 40 M90 58 L96 44" color={ND.ink} w={3.6} />
   </>),
   'one-more': () => (<>
     <Wax d={circ(50, 50, 42)} color={ND.green} />
@@ -200,7 +205,7 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d={`${circ(40, 40, 32)} ${circ(40, 40, 22)}`} color={ND.cobalt} rule="evenodd" />
     <Wax d={circ(40, 40, 22)} color={ND.paper} edge={ND.cobaltDeep} hatch={0.12} width={2} />
     <Line d="M28 36 C30 30 34 27 40 26" color="#ffffff" w={5} />
-    <Line d="M84 6 V24 M75 15 H93" color={ND.tangerine} w={4} />
+    <Line d="M84 6 C85 12 87 14 93 15 C87 16 85 18 84 24 C83 18 81 16 75 15 C81 14 83 12 84 6 Z" color={ND.ink} w={3} />
   </>),
   'second-chance': () => (<>
     <Wax d="M50 90 C28 74 8 60 8 38 C8 23 19 12 32 12 C40 12 46 17 50 25 C54 17 60 12 68 12 C81 12 92 23 92 38 C92 60 72 74 50 90 Z" color={ND.pink} />
@@ -245,9 +250,9 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Shine d="M24 56 C26 50 30 46 34 44" />
   </>),
   swap: () => (<>
-    <Line d="M18 50 C18 30 34 18 54 18" color={ND.cobalt} w={13} />
+    <Line d="M18 50 C18 30 34 18 54 18" color={ND.cobalt} w={12} ink />
     <Wax d="M50 4 L76 18 L50 32 Z" color={ND.cobalt} />
-    <Line d="M82 50 C82 70 66 82 46 82" color={ND.pink} w={13} />
+    <Line d="M82 50 C82 70 66 82 46 82" color={ND.pink} w={12} ink />
     <Wax d="M50 96 L24 82 L50 68 Z" color={ND.pink} />
   </>),
 };
@@ -282,6 +287,46 @@ export function CrayonPawn({ color, size = 48 }: { color: string; size?: number 
     </Shell>
   );
 }
+
+// ---------- Doodle world: blob patch and confetti (teacher refs, 2026-11-23) ----------
+// Solid pastel of each piece's main color (opaque, never a see-through tint).
+const PASTEL: Record<PowerId, string> = {
+  magnet: '#ffd3cf', 'double-dice': '#cfdcff', 'double-points': '#fff0a6', shield: '#cfdcff', freeze: '#c6f2e9',
+  'extra-time': '#ffd8c0', 'slow-mo': '#e4d8ff', 'one-more': '#c9efd5', hint: '#cfdcff', 'second-chance': '#ffd3e6',
+  tornado: '#e4d8ff', lightning: '#fff0a6', 'mystery-box': '#ffd3e6', 'treasure-chest': '#ffd8c0', 'spin-wheel': '#fff0a6',
+  potion: '#c9efd5', swap: '#ffd3e6',
+};
+const BLOBS = [
+  'M50 6 C72 4 94 20 95 46 C96 72 78 95 50 94 C24 93 4 76 6 50 C7 26 26 8 50 6 Z',
+  'M46 5 C70 2 97 18 94 48 C92 76 74 96 47 95 C20 94 3 72 5 46 C7 22 24 7 46 5 Z',
+  'M54 4 C78 7 96 28 94 54 C92 80 70 96 44 93 C18 90 4 70 7 44 C10 18 30 2 54 4 Z',
+];
+// A soft crayon patch behind a subject: no outline, scribble grain, lopsided.
+export function BlobPatch({ color, variant = 0, size }: { color: string; variant?: number; size: number }) {
+  const f = 'b' + cleanId(useId()); const clip = 'k' + cleanId(useId());
+  const d = BLOBS[variant % BLOBS.length];
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true" className="absolute inset-0 m-auto" style={{ transform: `rotate(${(variant % 5) * 17 - 30}deg)` }}>
+      <defs><CrayonFilter id={f} seed={variant + 3} /><clipPath id={clip}><path d={d} /></clipPath></defs>
+      <g filter={`url(#${f})`}>
+        <path d={d} fill={color} />
+        <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke="#ffffff" strokeWidth="2.4" opacity="0.35" fill="none" />
+      </g>
+    </svg>
+  );
+}
+export type DoodleKind = 'sparkle' | 'star' | 'dot' | 'heart' | 'squiggle';
+const DOODLE: Record<DoodleKind, (c: string) => ReactNode> = {
+  sparkle: (c) => <path d="M12 1 C13 8 16 11 23 12 C16 13 13 16 12 23 C11 16 8 13 1 12 C8 11 11 8 12 1 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
+  star: (c) => <path d={starPath(12, 12.5, 10.5, 5)} fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
+  dot: (c) => <circle cx="12" cy="12" r="4.5" fill={c} stroke={ND.ink} strokeWidth="1.8" />,
+  heart: (c) => <path d="M12 21 C6 17 2 13 2 8.5 C2 5 4.5 3 7.5 3 C9.5 3 11 4.5 12 6.5 C13 4.5 14.5 3 16.5 3 C19.5 3 22 5 22 8.5 C22 13 18 17 12 21 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
+  squiggle: () => <path d="M2 14 C5 6 8 6 10 12 C12 18 15 18 17 11 C18 7 20 6 22 8" fill="none" stroke={ND.ink} strokeWidth="2.4" strokeLinecap="round" />,
+};
+export function Doodle({ kind, color = ND.yellow, size = 18, className, style }: { kind: DoodleKind; color?: string; size?: number; className?: string; style?: CSSProperties }) {
+  return <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" overflow="visible" className={className} style={style}>{DOODLE[kind](color)}</svg>;
+}
+const CONFETTI: [DoodleKind, string][] = [['sparkle', ND.yellow], ['dot', ND.pink], ['star', ND.mint], ['heart', ND.coral], ['sparkle', ND.paper], ['dot', ND.cobalt]];
 
 export const UNIVERSAL_POWERS: { id: PowerId; name: string; job: string; games: string; optional?: boolean }[] = [
   { id: 'double-points', name: 'Double Points', job: 'Your next points count twice.', games: '22 games, the most used (Golden Pin, Double Star, Golden Hook, Double Tips, Double Coins...)' },
@@ -400,10 +445,18 @@ export function DiceDemo({ count }: { count: 1 | 2 }) {
 export function CrayonKitSection() {
   return (
     <div className="grid gap-8">
+      <p className="flex items-center gap-2 font-heading font-bold" aria-hidden="true">
+        <Doodle kind="sparkle" /><Doodle kind="star" color={ND.mint} size={16} /><Doodle kind="dot" color={ND.pink} size={10} /><Doodle kind="heart" color={ND.coral} size={15} /><Doodle kind="squiggle" size={22} />
+      </p>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-3">
-        {UNIVERSAL_POWERS.map((p) => (
+        {UNIVERSAL_POWERS.map((p, i) => (
           <div key={p.id} className="rounded-[1.5rem] p-4 grid justify-items-center content-start gap-1 text-center" style={{ background: ND.paper }}>
-            <CrayonPowerUp id={p.id} size={112} title={p.name} />
+            <span className="relative grid place-items-center" style={{ width: 132, height: 132 }}>
+              <BlobPatch color={PASTEL[p.id]} variant={i} size={132} />
+              <span className="relative"><CrayonPowerUp id={p.id} size={104} title={p.name} /></span>
+              <Doodle kind={CONFETTI[i % 6][0]} color={CONFETTI[i % 6][1]} size={16} className="absolute" style={{ top: 2, right: 4 }} />
+              <Doodle kind={CONFETTI[(i + 3) % 6][0]} color={CONFETTI[(i + 3) % 6][1]} size={11} className="absolute" style={{ bottom: 8, left: 2 }} />
+            </span>
             <span className="flex items-center gap-2 pt-1">
               <span className="font-heading font-bold text-lg leading-tight">{p.name}</span>
               <CrayonPowerUp id={p.id} size={32} />
@@ -423,7 +476,7 @@ export function CrayonKitSection() {
         ))}
       </div>
       <div className="grid gap-3">
-        <h3 className="font-heading font-bold text-lg">The die: six faces, one side at a time</h3>
+        <h3 className="font-heading font-bold text-lg flex items-center gap-2">The die: six faces, one side at a time <Doodle kind="sparkle" size={18} /><Doodle kind="dot" color={ND.pink} size={10} /></h3>
         <div className="rounded-[1.5rem] p-4 flex flex-wrap gap-4 items-center" style={{ background: ND.paper }}>
           {[1, 2, 3, 4, 5, 6].map((n) => <CrayonDie key={n} value={n} size={88} title={`Die face ${n}`} />)}
           <span className="w-px self-stretch" style={{ background: '#e4dccb' }} aria-hidden="true" />
