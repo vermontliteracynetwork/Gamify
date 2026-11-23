@@ -28,12 +28,14 @@ const pick = <T,>(r: R, a: T[]) => a[Math.floor(r() * a.length)];
 // spread is even: no clumps, no bald spots, no touching.
 type Item = { ext: number; draw: (c: string) => string; spin?: boolean };
 function scatter(r: R, W: number, H: number, make: () => Item, colors: string[], o: { gapK: number; max: number; tries?: number }) {
-  const pool = Array.from({ length: o.max * 3 }, make).sort((a, b) => b.ext - a.ext);
-  const avgD = (pool.reduce((s, p) => s + p.ext, 0) / pool.length) * 2, gap = o.gapK * avgD;
-  const bigT = pool[Math.floor(pool.length * 0.3)].ext;
+  const raw = Array.from({ length: o.max * 3 }, make);
+  const bigT = [...raw].sort((a, b) => b.ext - a.ext)[Math.floor(raw.length * 0.35)].ext;
+  // big marks first (in random kind order), then the rest fill the holes
+  const pool = [...raw.filter((p) => p.ext >= bigT), ...raw.filter((p) => p.ext < bigT)];
+  const avgD = (raw.reduce((s, p) => s + p.ext, 0) / raw.length) * 2, gap = o.gapK * avgD;
   const placed: (Item & { x: number; y: number; rot: number; c: string })[] = [];
   const dist = (ax: number, ay: number, bx: number, by: number) => { let dx = Math.abs(ax - bx), dy = Math.abs(ay - by); dx = Math.min(dx, W - dx); dy = Math.min(dy, H - dy); return Math.hypot(dx, dy); };
-  const need = (a: Item, b: Item) => a.ext + b.ext + gap + (a.ext >= bigT && b.ext >= bigT ? gap * 0.9 : 0);
+  const need = (a: Item, b: Item) => a.ext + b.ext + gap + (a.ext >= bigT && b.ext >= bigT ? gap * 0.5 : 0);
   for (const it of pool) {
     if (placed.length >= o.max) break;
     for (let t = 0; t < (o.tries ?? 120); t++) {
@@ -94,7 +96,7 @@ const PASTEL = [PP.gamify, PP.lavender, PP.blueCrystal, PP.blush, PP.butter, PP.
 function cutPaper(seed: number, list: string[], calm: boolean) {
   const r = rand(seed);
   const make = (): Item => {
-    const s = (calm ? 0.85 : 1) * (8 + r() * 12), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
+    const s = (calm ? 0.85 : 1) * (11 + r() * 15), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
     const d = kind === 'blob' ? blobD(r, s * 0.8) : '';
     const draw = (c: string) => kind === 'blob' ? `<path d="${d}" fill="${c}"/>`
       : kind === 'moon' ? `<path d="M${f(-s)} ${f(s * 0.4)} A${f(s)} ${f(s)} 0 0 1 ${f(s)} ${f(s * 0.4)} Z" fill="${c}"/>`
@@ -115,7 +117,7 @@ function doodle(seed: number, calm: boolean) {
   const make = (): Item => {
     const kind = calm ? pick(r, ['blob', 'blob', 'dots', 'arc']) : pick(r, ['blob', 'blob', 'blob', 'arc', 'sun', 'wave', 'loop', 'dots', 'tri', 'plus']);
     if (kind === 'blob') {
-      const s = 11 + r() * 9, d = blobD(r, s), dx = 3 + r() * 3, dy = -2 - r() * 3, rot = 6 + r() * 10;
+      const s = 13 + r() * 10, d = blobD(r, s), dx = 3 + r() * 3, dy = -2 - r() * 3, rot = 6 + r() * 10;
       // the ink outline is offset and turned so it does not line up with the fill
       return { ext: s * 1.2 + (calm ? 0 : 5), draw: (c) => `<path d="${d}" fill="${c}"/>` + (calm ? '' : `<path d="${d}" transform="translate(${f(dx)} ${f(dy)}) rotate(${f(rot)})" ${ink}/>`) };
     }
@@ -179,8 +181,8 @@ const wobbleSquare = (x: number, y: number, s: number, c: string) => `<path d="M
 type Pattern = { id: string; name: string; use: string; rules: string; calmNote: string; make: (calm: boolean) => CSSProperties; group?: 'main' | 'trim' };
 export const PATTERNS: Pattern[] = [
   { id: 'cutpaper', name: 'Cut-paper toss', use: 'Game covers, banners, Blog headers, social post frames, lobby edges',
-    rules: 'Busy: never behind words. Words sit on a solid paper panel with a 24px clear margin. Tile 240px, 36 shapes, no outline.',
-    calmNote: '16 smaller pastel shapes.',
+    rules: 'Busy: never behind words. Words sit on a solid paper panel with a 24px clear margin. Tile 240px, no outline, evenly spaced (gap about 0.6x a shape).',
+    calmNote: 'Fewer, smaller pastel shapes, wider gaps.',
     make: (c) => tile(`cut${c}`, 240, 240, PP.paper, () => cutPaper(11, c ? PASTEL : BRIGHT, c)) },
   { id: 'cutpaper-pastel', name: 'Cut-paper toss, pastel', use: 'Game stage grounds around the board zone, waiting screens, sticker sheets',
     rules: 'Blocks out the board zone with a solid panel. Tile 240px.',
@@ -192,7 +194,7 @@ export const PATTERNS: Pattern[] = [
     make: (c) => tile(`doo${c}`, 260, 260, PP.cream, () => doodle(37, c)) },
   { id: 'squiggle', name: 'Squiggle lines', use: 'Section bands, Blog post art, social story backgrounds, print covers',
     rules: 'Thick rounded lines, loops and curly flower outlines. Never behind words; put a solid panel on top. Tile 260px.',
-    calmNote: '9 thin pastel lines.',
+    calmNote: 'Fewer, thinner pastel lines.',
     make: (c) => tile(`squ${c}`, 260, 260, PP.paper, () => squiggle(53, c ? PASTEL : BRIGHT, c)) },
   { id: 'squiggle-pastel', name: 'Squiggle lines, pastel', use: 'Teacher page headers, empty states, studio canvas trims',
     rules: 'Pastel lines on cream. A heading may sit on a solid chip above it. Tile 260px.',
@@ -200,7 +202,7 @@ export const PATTERNS: Pattern[] = [
     make: (c) => tile(`squp${c}`, 260, 260, PP.cream, () => c ? `<g opacity="0.55">${squiggle(71, PASTEL, true)}</g>` : squiggle(71, PASTEL, false)) },
   { id: 'confetti', name: 'Confetti doodles', use: 'Edges only: celebrations, results decoration, lobby, social posts',
     rules: 'Never behind words: keep 24px clear of any text. Tile 200px, ink-edged sparkles, stars and dots.',
-    calmNote: '9 pastel marks, no ink.',
+    calmNote: 'Fewer pastel marks, no ink.',
     make: (c) => tile(`con${c}`, 200, 200, PP.cream, () => confetti(89, c)) },
   { id: 'quiet', name: 'Quiet doodle ground', use: 'Site ground behind menus, teacher pages, start menus, results box backdrop',
     rules: 'The only pattern allowed behind text. Pastel marks at 65% on cream, 1.14:1 or less against the ground (computed). Tile 200px.',
