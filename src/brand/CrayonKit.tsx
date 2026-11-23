@@ -106,14 +106,15 @@ const PIPS: Record<number, [number, number][]> = {
   6: [[30, 25], [70, 25], [30, 50], [70, 50], [30, 75], [70, 75]],
 };
 // A hand-drawn pip: a slightly lopsided blob, not a perfect circle.
-const pip = (x: number, y: number, r: number) => `M${x - r} ${y} C${x - r} ${y - r * 1.05} ${x + r * 0.95} ${y - r * 1.1} ${x + r} ${y - r * 0.1} C${x + r * 1.05} ${y + r} ${x - r * 0.9} ${y + r * 1.1} ${x - r} ${y} Z`;
+// Smooth die (teacher, 2026-11-23: "improve dice design so it more closely
+// matches the new, less textured design"): flat paper face, a solid
+// Gamify-purple pastel base for depth, one ink outline, round solid pips.
 function DieFace({ value }: { value: number }) {
   return (
     <g>
-      <path d={rr(8, 13, 84, 82, 20)} fill="#cdbfa6" />
-      <Wax d={rr(8, 7, 84, 82, 20)} color={ND.paper} edge={ND.ink} hatch={0.12} width={3.6} />
-      <Shine d="M20 22 C22 17 26 15 32 15" />
-      {PIPS[value].map(([x, y], k) => <Wax key={k} d={pip(x, y - 2, value === 1 ? 12 : 8.5)} color={value === 1 ? ND.pink : ND.ink} edge={value === 1 ? ND.pinkDeep : ND.ink} hatch={0.3} width={2} />)}
+      <path d={rr(8, 14, 84, 82, 22)} fill="#b4c4fb" stroke={ND.ink} strokeWidth={3.6} strokeLinejoin="round" />
+      <Wax d={rr(8, 6, 84, 82, 22)} color="#fffaf0" edge={ND.ink} hatch={0} width={3.6} />
+      {PIPS[value].map(([x, y], k) => <circle key={k} cx={x} cy={y - 3} r={value === 1 ? 11 : 8} fill={value === 1 ? ND.pink : ND.ink} stroke={value === 1 ? ND.ink : 'none'} strokeWidth={value === 1 ? 2.4 : 0} />)}
     </g>
   );
 }
@@ -127,9 +128,9 @@ function faceMatrix(o: [number, number], u: [number, number], v: [number, number
 function DieTumble({ frame }: { frame: number }) {
   const f = TUMBLE[frame % TUMBLE.length];
   const faces: { d: string; fill: string; m: string; n: number }[] = [
-    { d: 'M16 32 L50 16 L84 32 L50 48 Z', fill: ND.paper, m: faceMatrix([16, 32], [34, -16], [34, 16]), n: f.faces[0] },
-    { d: 'M16 32 L50 48 L50 90 L16 74 Z', fill: '#efe5d2', m: faceMatrix([16, 32], [34, 16], [0, 42]), n: f.faces[1] },
-    { d: 'M50 48 L84 32 L84 74 L50 90 Z', fill: '#e2d5bd', m: faceMatrix([50, 48], [34, -16], [0, 42]), n: f.faces[2] },
+    { d: 'M16 32 L50 16 L84 32 L50 48 Z', fill: '#fffaf0', m: faceMatrix([16, 32], [34, -16], [34, 16]), n: f.faces[0] },
+    { d: 'M16 32 L50 48 L50 90 L16 74 Z', fill: '#dfe5fd', m: faceMatrix([16, 32], [34, 16], [0, 42]), n: f.faces[1] },
+    { d: 'M50 48 L84 32 L84 74 L50 90 Z', fill: '#b4c4fb', m: faceMatrix([50, 48], [34, -16], [0, 42]), n: f.faces[2] },
   ];
   return (
     <g>
@@ -137,8 +138,8 @@ function DieTumble({ frame }: { frame: number }) {
       <g transform={`rotate(${f.rot} 50 53)`}>
         {faces.map((fc, k) => (
           <g key={k}>
-            <Wax d={fc.d} color={fc.fill} edge={ND.ink} hatch={0.12} width={3.4} />
-            <g transform={fc.m}>{PIPS[fc.n].map(([x, y], j) => <path key={j} d={pip(x, y, fc.n === 1 ? 13 : 9.5)} fill={fc.n === 1 ? ND.pink : ND.ink} />)}</g>
+            <Wax d={fc.d} color={fc.fill} edge={ND.ink} hatch={0} width={3.4} />
+            <g transform={fc.m}>{PIPS[fc.n].map(([x, y], j) => <circle key={j} cx={x} cy={y} r={fc.n === 1 ? 12 : 9} fill={fc.n === 1 ? ND.pink : ND.ink} />)}</g>
           </g>
         ))}
       </g>

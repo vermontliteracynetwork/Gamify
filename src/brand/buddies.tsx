@@ -98,13 +98,11 @@ export function Paper({ color, children, className = '', rx = 22, tilt = 0, lift
   );
 }
 
-// Washi tape: see-through, faint stripes, zigzag torn ends.
-export function Washi({ className = '', color = '#ffd52e', rotate = -6, w = '5rem' }: { className?: string; color?: string; rotate?: number; w?: string }) {
-  return (
-    <span aria-hidden="true" className={`absolute h-6 pointer-events-none ${className}`}
-      style={{ width: w, opacity: 0.96, transform: `rotate(${rotate}deg)`, background: `repeating-linear-gradient(90deg, ${color} 0 7px, color-mix(in srgb, ${color} 70%, white) 7px 11px)`,
-        clipPath: 'polygon(0 0, 4% 12%, 0 25%, 4% 38%, 0 50%, 4% 62%, 0 75%, 4% 88%, 0 100%, 100% 100%, 96% 88%, 100% 75%, 96% 62%, 100% 50%, 96% 38%, 100% 25%, 96% 12%, 100% 0)' }} />
-  );
+// Washi tape is retired (teacher, 2026-11-23: "the attatched tape, multilayer
+// card is an example of something i do not like and need immediately removed").
+// Kept as a no-op so older mockups still build; it draws nothing.
+export function Washi(_props: { className?: string; color?: string; rotate?: number; w?: string }) {
+  return null;
 }
 
 // Crayon doodles: sparkles, a swirl, an arrow and dots, drawn in wax.
