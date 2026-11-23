@@ -29,8 +29,8 @@ export const TEAM: TeamAgent[] = [
   },
   {
     id: 'design-chair', name: 'Design Chair', role: 'Brand, voice, Brand Kit, sound, templates, social media', file: '.claude/agents/design-chair.md', color: '#c58ce8',
-    status: 'waiting', updated: '2026-11-23', reportsTo: CEO_ID,
-    workingOn: ['Gamify Brand Kit doc and the live /brand page', 'Universal sound pack (sound board picks)', 'Piece templates and sizes for every game'],
+    status: 'working', updated: '2026-11-23', reportsTo: CEO_ID,
+    workingOn: ['New direction: playful flat shapes for the site and Classic themes (from your moodboards)', 'Gamify Brand Kit doc and the live /brand page', 'Universal sound pack (sound board picks)', 'Piece templates and sizes for every game'],
     needsYou: [
       { text: 'Approve or change the Brand Kit: colors, fonts, icons, motion, template sizes', link: BRAND_KIT },
       { text: 'Pick sounds on the sound board and send your picks', link: '/brand' },
