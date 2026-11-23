@@ -9,6 +9,9 @@ import { useSettings } from '../settings/SettingsContext';
 // Every drawing below is original, made in code. Mirrors the Brand Kit doc tab
 // "Direction: playful flat shapes (2026-11-23)".
 
+// Grow Year by name: outside h1 the app maps .font-display to the heading font.
+const GY = { fontFamily: "'Grow Year', 'Segoe UI', system-ui, sans-serif" };
+
 export const ND = {
   cream: '#f6f0e4', paper: '#fffaf0', ink: '#1d1a33', quiet: '#57506e',
   pink: '#ec6fa8', cobalt: '#1f5fff', green: '#12a150', yellow: '#ffd52e', tangerine: '#ff6a1a',
@@ -121,7 +124,7 @@ export function Buddy({ id, size = 96, color, limbs = false, title }: { id: Budd
       body = (<><polygon points={star(60, 60, 52, 38, 14)} fill={c} stroke={c} strokeWidth="5" strokeLinejoin="round" /><Face x={60} y={60} color={fc} cheeks={ND.tangerine + '77'} /></>);
       break;
     case 'wiggle':
-      body = (<><path d="M18 92 V48 C18 22 46 22 46 46 C46 22 74 22 74 46 C74 22 102 22 102 48 V92" stroke={c} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" /><rect x="18" y="56" width="84" height="36" rx="16" fill={c} /><Face x={60} y={70} s={0.9} color={fc} cheeks={ch} /></>);
+      body = (<><path d="M16 98 V56 C16 26 46 26 46 52 C46 30 74 30 74 52 C74 26 104 26 104 56 V98 Z" fill={c} stroke={c} strokeWidth="10" strokeLinejoin="round" /><Face x={60} y={74} s={0.9} color={fc} cheeks={ch} /></>);
       break;
     case 'pebble':
       body = (<><rect x="16" y="20" width="88" height="82" rx="30" fill={c} transform="rotate(-5 60 60)" /><Face x={60} y={60} color={fc} happy cheeks={ch} /></>);
@@ -247,7 +250,7 @@ function HandNote({ text, color = ND.pinkDeep, className = '' }: { text: string;
   return (
     <span className={`absolute flex items-end gap-1 ${className}`} aria-hidden="true">
       <svg viewBox="0 0 50 40" className="w-10 h-8"><path d="M46 6 C30 4 14 14 8 32 M8 32 l-2 -12 M8 32 l10 -6" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      <span className="font-display text-xl leading-none" style={{ color, transform: 'rotate(-6deg)' }}>{text}</span>
+      <span className="text-xl leading-none" style={{ ...GY, color, transform: 'rotate(-6deg)' }}>{text}</span>
     </span>
   );
 }
@@ -265,6 +268,7 @@ function LoopSticker({ id, color, still, label }: { id: BuddyId; color?: string;
   );
 }
 function MixedMedia({ still }: { still: boolean }) {
+  // GIF-style loops follow the GIFs sensory setting (Calm sets it to Still).
   return (
     <div className="grid gap-5">
       <div className="grid wide:grid-cols-[1.3fr_1fr] gap-5">
@@ -272,7 +276,7 @@ function MixedMedia({ still }: { still: boolean }) {
         <div className="relative rounded-[1.75rem] overflow-hidden p-6 pb-10 min-h-[22rem]" style={{ background: ND.cobalt }}>
           <Grain />
           <TornPaper color={ND.paper} className="relative inline-block max-w-[22rem]" seed={3}>
-            <span className="font-display text-3xl leading-tight"><span style={{ color: ND.pinkDeep }}>Made</span> <span style={{ color: ND.greenDeep }}>by</span> <span style={{ color: ND.cobaltDeep }}>teachers</span> <span style={{ color: ND.tangDeep }}>and kids</span></span>
+            <span className="text-3xl leading-tight" style={GY}><span style={{ color: ND.pinkDeep }}>Made</span> <span style={{ color: ND.greenDeep }}>by</span> <span style={{ color: ND.cobaltDeep }}>teachers</span> <span style={{ color: ND.tangDeep }}>and kids</span></span>
           </TornPaper>
           <div className="relative grid grid-cols-3 gap-4 mt-6 items-start">
             <div className="relative"><Tape className="-top-3 left-6 z-10" /><PhotoSticker label="Clay board pieces" rotate={-4}><Buddy id="pebble" size={64} color="#d98a5f" /></PhotoSticker></div>
@@ -298,7 +302,7 @@ function MixedMedia({ still }: { still: boolean }) {
         <LoopSticker id="ray" still={still} label="Big moment loop" />
         <LoopSticker id="zip" still={still} label="Power-up loop" />
         <LoopSticker id="bloop" still={still} label="Waiting loop" />
-        <p className="text-xs font-semibold max-w-[16rem]" style={{ color: ND.quiet }}>GIF-style sticker loops: short, soft, never faster than 2 flashes a second, and still in the Still setting.</p>
+        <p className="text-xs font-semibold max-w-[16rem]" style={{ color: ND.quiet }}>GIF-style sticker loops: lively by default. Calm mode and the GIFs setting (Moving or Still pictures) hold them still. No flashing 3 or more times a second, no full-screen strobes.</p>
       </div>
     </div>
   );
@@ -307,13 +311,13 @@ function MixedMedia({ still }: { still: boolean }) {
 const WORD = 'Gamify';
 const WORD_COLORS = [ND.cobalt, ND.pink, ND.green, ND.tangerine, ND.violet, ND.cobalt];
 function Wordmark({ size = '2.5rem' }: { size?: string }) {
-  return <span className="font-display leading-none" style={{ fontSize: size }} aria-label="Gamify">{WORD.split('').map((l, i) => <span key={i} aria-hidden="true" style={{ color: WORD_COLORS[i] }}>{l}</span>)}</span>;
+  return <span className="leading-none" style={{ ...GY, fontSize: size }} aria-label="Gamify">{WORD.split('').map((l, i) => <span key={i} aria-hidden="true" style={{ color: WORD_COLORS[i] }}>{l}</span>)}</span>;
 }
 function GMark({ size = 72 }: { size?: number }) {
   return (
     <svg viewBox="0 0 120 120" width={size} height={size} aria-hidden="true">
       <path d="M96 40 A42 42 0 1 0 102 66 H64" stroke={ND.cobalt} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <Face x={44} y={50} s={0.6} color="#ffffff" cheeks={null} />
+      <Face x={19} y={60} s={0.5} color="#ffffff" cheeks={null} />
     </svg>
   );
 }
@@ -328,7 +332,7 @@ function Seal({ size = 120 }: { size?: number }) {
   );
 }
 function GMarkPaths() {
-  return <><path d="M96 40 A42 42 0 1 0 102 66 H64" stroke={ND.cobalt} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" /><Face x={44} y={50} s={0.6} color="#ffffff" cheeks={null} /></>;
+  return <><path d="M96 40 A42 42 0 1 0 102 66 H64" stroke={ND.cobalt} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" /><Face x={19} y={60} s={0.5} color="#ffffff" cheeks={null} /></>;
 }
 
 const DONTS: [string, string][] = [
@@ -360,7 +364,7 @@ export default function NewDirection() {
           </nav>
           <div className="grid wide:grid-cols-[1.05fr_1fr] gap-8 px-6 sm:px-10 pb-10 pt-4 items-center">
             <div className="grid gap-5 content-center">
-              <h3 className="font-display leading-[1.02] text-[clamp(2.6rem,5.2vw,4.6rem)]" style={{ color: ND.ink }}>
+              <h3 className="leading-[1.02] text-[clamp(2.6rem,5.2vw,4.6rem)]" style={{ ...GY, color: ND.ink }}>
                 Any lesson, <span style={{ color: ND.cobaltDeep }}>a game</span> your class will cheer for
               </h3>
               <svg viewBox="0 0 220 16" className="w-56 -mt-3" aria-hidden="true"><path d="M4 10 q14 -10 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0" stroke={ND.pink} strokeWidth="5" fill="none" strokeLinecap="round" /></svg>
@@ -375,8 +379,8 @@ export default function NewDirection() {
               <div className="rounded-[1.75rem] grid place-items-center" style={{ background: ND.cobalt }}><Buddy id="twinkle" size={110} color={ND.yellow} /></div>
               <div className="rounded-[1.75rem] grid place-items-center" style={{ background: ND.green }}><Buddy id="puff" size={120} color={ND.paper} /></div>
               <div className="rounded-[1.75rem] grid place-items-center relative overflow-hidden" style={{ background: ND.cream }}>
-                <div className="absolute inset-0"><Doodles /></div>
-                <Buddy id="hartie" size={96} />
+                <div className="absolute inset-x-0 top-0 h-1/2"><Doodles /></div>
+                <span className="mt-16"><Buddy id="hartie" size={96} /></span>
               </div>
             </div>
           </div>
@@ -428,7 +432,7 @@ export default function NewDirection() {
           <GMark size={96} />
           <Seal size={128} />
           <div className="grid justify-items-center gap-1"><GMark size={64} /><Wordmark size="2.25rem" /></div>
-          <div className="rounded-[1.5rem] px-6 py-4" style={{ background: ND.cobalt }}><span className="font-display text-4xl" style={{ color: '#ffffff' }}>Gamify</span></div>
+          <div className="rounded-[1.5rem] px-6 py-4" style={{ background: ND.cobalt }}><span className="text-4xl" style={{ ...GY, color: '#ffffff' }}>Gamify</span></div>
         </div>
       </Block>
 
@@ -441,7 +445,7 @@ export default function NewDirection() {
 
       <Block title="Type" note="Kept: Grow Year (logo, titles, scores) and Inclusive Sans. Optional third font: Fredoka or Baloo 2 (both OFL), not installed yet, so not shown.">
         <div className="rounded-[1.5rem] p-6 grid gap-4" style={{ background: ND.paper }}>
-          <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Grow Year: solid letters, never outlined</p><p className="font-display text-5xl" style={{ color: ND.pinkDeep }}>Three in a row!</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Grow Year: solid letters, never outlined</p><p className="text-5xl" style={{ ...GY, color: ND.pinkDeep }}>Three in a row!</p></div>
           <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Inclusive Sans bold: headings and buttons</p><p className="font-heading font-bold text-2xl">Pick your question set</p></div>
           <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Inclusive Sans: body</p><p className="text-lg max-w-prose">Answer the question, then tap the board to make your move. Right answers can bring a surprise power-up.</p></div>
         </div>
@@ -464,7 +468,7 @@ export default function NewDirection() {
               <div key={n as string} className="flex items-center gap-3 rounded-[1.25rem] px-3 py-2" style={{ background: i === 0 ? ND.cream : 'transparent', boxShadow: i === 0 ? `inset 0 0 0 2px ${ND.cobalt}` : undefined }}>
                 <Buddy id={id as BuddyId} size={40} color={c as string} />
                 <span className="font-bold flex-1">{n as string}</span>
-                <span className="font-display text-3xl tabular-nums">{s as number}</span>
+                <span className="text-3xl tabular-nums" style={GY}>{s as number}</span>
               </div>
             ))}
             <span className="text-xs font-semibold" style={{ color: ND.quiet }}>Ring shows whose turn it is.</span>
@@ -483,17 +487,17 @@ export default function NewDirection() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
           {([['Board games', ND.pink, 'sunny', ND.yellow], ['Word games', ND.cobalt, 'wiggle', ND.yellow], ['Arcade', ND.green, 'zip', ND.paper]] as [string, string, BuddyId, string][]).map(([t, bg, id, bc]) => (
-            <div key={t} className="rounded-[1.75rem] p-5 min-h-40 grid content-between relative overflow-hidden" style={{ background: bg }}>
-              <span className="font-display text-3xl" style={{ color: bg === ND.cobalt ? '#ffffff' : ND.ink }}>{t}</span>
+            <div key={t} className="rounded-[1.75rem] p-5 pr-20 min-h-40 grid content-between relative overflow-hidden" style={{ background: bg }}>
+              <span className="text-3xl" style={{ ...GY, color: bg === ND.cobalt ? '#ffffff' : ND.ink }}>{t}</span>
               <span className="flex items-center gap-1 font-bold" style={{ color: bg === ND.cobalt ? '#ffffff' : ND.ink }}><Star weight="fill" size={18} />Classic theme family</span>
-              <span className="absolute -right-3 -bottom-3"><Buddy id={id} size={96} color={bc} /></span>
+              <span className="absolute right-3 top-3"><Buddy id={id} size={64} color={bc} /></span>
             </div>
           ))}
         </div>
       </Block>
 
-      <Block title="Mixed media layer" note="Photo stickers with white edges, torn paper, tape, hand-lettered notes and soft grain on top of the flat buddies. The star is the themes teachers and kids make by hand. Photos below are placeholders; only owned, licensed or permission-given photos ever ship.">
-        <MixedMedia still={still} />
+      <Block title="Mixed media layer" note="Photo stickers with white edges, torn paper, tape, hand-lettered notes and soft grain on top of the flat buddies. The star is the themes teachers and kids make by hand. Photos below are placeholders; only owned, licensed or permission-given photos ever ship. Teacher search: GIFs from GIPHY (Powered by GIPHY) and photos from Unsplash (with credit), pending the GIPHY production key and attorney review.">
+        <MixedMedia still={still || settings.gifs === 'still'} />
       </Block>
 
       <Block title="Classic game board (sketch)" note="The board zone stays Paper; only the frame wears a color block and a strip of the Buddy sheet. Pieces are buddies.">
