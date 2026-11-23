@@ -3,7 +3,8 @@ import { ArrowRight, ArrowsClockwise, Check, CornersOut, DeviceTablet, FlagCheck
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
-import { Badge, Laptop, MainBtn, TEAMS, Tablet } from './UniversalViews';
+import { Laptop, MainBtn, Tablet } from './UniversalViews';
+import { Badge, ParkBack, StudioBack, TEAMS, TURN_GLOW, TurnGlow, PURPLE_GROUND } from './mockKit';
 import { layout } from '../games/castle-quest/board';
 
 // Game mockups (PROPOSAL, teacher 2026-11-23: "mockups of all the games with a
@@ -36,14 +37,14 @@ function Corner({ dark }: { dark?: boolean }) {
 }
 function TurnPill({ t, text }: { t: Team; text: string }) {
   return (
-    <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` }}>
+    <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `${TURN_GLOW}, 0 4px 0 ${I}` }}>
       <Badge t={t} size={34} />{text}
     </div>
   );
 }
 function Score({ t, pts, now, held, compact }: { t: Team; pts: number; now?: boolean; held?: { id: PowerId; name: string }; compact?: boolean }) {
   return (
-    <div className={`flex items-center gap-2.5 ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} rounded-2xl`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: now ? `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` : `0 3px 0 ${I}` }}>
+    <div className={`flex items-center gap-2.5 ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} rounded-2xl`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: now ? `${TURN_GLOW}, 0 4px 0 ${I}` : `0 3px 0 ${I}` }}>
       <Badge t={t} size={compact ? 28 : 32} />
       <b className={`flex-1 truncate ${compact ? 'text-base' : 'text-lg'}`}>{t.name}</b>
       {held && <span title={`Holds ${held.name}`} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 1 }}><CrayonPowerUp id={held.id} size={compact ? 30 : 34} sticker /></span>}
@@ -73,35 +74,6 @@ const GS_CARDS: ({ by: number; pts?: number; power?: string } | null)[] = [
   { by: 2, power: 'double' }, null, null, { by: 0, pts: 40 },
 ];
 
-function StudioBack({ w, h }: { w: number; h: number }) {
-  const c = w * 0.085;
-  const curtain = (flip: boolean) => {
-    const x = (v: number) => (flip ? w - v : v);
-    return (
-      <g>
-        <path d={`M${x(0)} 0 L${x(c)} 0 C${x(c - 14)} ${h * 0.28} ${x(c + 16)} ${h * 0.55} ${x(c - 4)} ${h * 0.84} L${x(c * 0.2)} ${h * 0.9} L${x(0)} ${h * 0.9} Z`} fill={PP.pink} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-        {[0.3, 0.62].map((f) => <path key={f} d={`M${x(c * f)} 8 C${x(c * f - 6)} ${h * 0.3} ${x(c * f + 8)} ${h * 0.6} ${x(c * f - 2)} ${h * 0.86}`} fill="none" stroke={I} strokeWidth="2.4" strokeLinecap="round" />)}
-        <rect x={flip ? w - c - 4 : -6} y={h * 0.5} width={c + 10} height="14" rx="7" fill={PP.lemon} stroke={I} strokeWidth="3" />
-      </g>
-    );
-  };
-  const n = Math.round(w / 70);
-  const scallops = Array.from({ length: n }, (_, i) => { const a = (i * w) / n, b = ((i + 1) * w) / n; return <path key={i} d={`M${a} 24 Q${(a + b) / 2} 62 ${b} 24 Z`} fill={PP.pink} stroke={I} strokeWidth="4" strokeLinejoin="round" />; });
-  const floor = h * 0.86;
-  return (
-    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
-      <rect width={w} height={h} fill={PP.grape} />
-      {/* spotlight beams, opaque lavender, behind everything else */}
-      <path d={`M${w * 0.2} 0 L${w * 0.28} 0 L${w * 0.46} ${floor} L${w * 0.08} ${floor} Z`} fill={PP.lavender} opacity="1" />
-      <path d={`M${w * 0.72} 0 L${w * 0.8} 0 L${w * 0.92} ${floor} L${w * 0.54} ${floor} Z`} fill={PP.lavender} />
-      <path d={`M0 ${floor} C${w * 0.3} ${floor - 8} ${w * 0.7} ${floor + 6} ${w} ${floor - 4} L${w} ${h} L0 ${h} Z`} fill={PP.lemon} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-      {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${(w / 9) * i + 20} ${floor + 14} l14 ${h - floor - 22}`} stroke={PP.orange} strokeWidth="5" strokeLinecap="round" />)}
-      {curtain(false)}{curtain(true)}
-      {scallops}
-      <rect x="-4" y="-4" width={w + 8} height="30" fill={PP.pink} stroke={I} strokeWidth="4" />
-    </svg>
-  );
-}
 function Marquee({ children, bulbs }: { children: ReactNode; bulbs: number }) {
   return (
     <div className="relative w-full rounded-[26px] p-[18px]" style={{ background: PP.periwinkle, border: `4px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>
@@ -197,22 +169,10 @@ type Kind = 'regular' | 'lose' | 'again' | 'start' | 'finish';
 const N = 40;
 const KINDS: Kind[] = Array.from({ length: N }, (_, i) => (i === 0 ? 'start' : i === N - 1 ? 'finish' : [9, 26].includes(i) ? 'lose' : [15, 33].includes(i) ? 'again' : 'regular'));
 const SQ = [PP.gamify, PP.blueCrystal, PP.blush, PP.butter];
+
+
 const PAWNS = [{ t: 0, at: 12 }, { t: 1, at: 15 }, { t: 2, at: 20 }, { t: 3, at: 7 }];
 
-function ParkBack({ w, h }: { w: number; h: number }) {
-  const cloud = (x: number, y: number, s: number) => <path d={`M${x} ${y} c${-8 * s} 0 ${-12 * s} ${-10 * s} ${-4 * s} ${-14 * s} c${2 * s} ${-12 * s} ${18 * s} ${-14 * s} ${22 * s} ${-4 * s} c${8 * s} ${-8 * s} ${22 * s} ${-2 * s} ${20 * s} ${8 * s} c${8 * s} ${2 * s} ${8 * s} ${10 * s} 0 ${10 * s} Z`} fill={PP.paper} stroke={I} strokeWidth="3.5" strokeLinejoin="round" />;
-  return (
-    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
-      <rect width={w} height={h} fill={PP.sky} />
-      <circle cx={w * 0.9} cy={h * 0.12} r={Math.min(w, h) * 0.07} fill={PP.lemon} stroke={I} strokeWidth="4" />
-      <path d={`M${w * 0.9 - 18} ${h * 0.12 - 16} q6 -8 14 -8`} stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" />
-      {cloud(w * 0.08, h * 0.12, 2.2)}{cloud(w * 0.55, h * 0.07, 1.6)}{cloud(w * 0.78, h * 0.3, 1.3)}
-      <path d={`M0 ${h * 0.62} C${w * 0.25} ${h * 0.5} ${w * 0.45} ${h * 0.56} ${w * 0.6} ${h * 0.6} C${w * 0.78} ${h * 0.5} ${w * 0.92} ${h * 0.52} ${w} ${h * 0.58} L${w} ${h} L0 ${h} Z`} fill={PP.lime} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-      <path d={`M0 ${h * 0.78} C${w * 0.3} ${h * 0.7} ${w * 0.6} ${h * 0.82} ${w} ${h * 0.72} L${w} ${h} L0 ${h} Z`} fill={PP.kelly} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-      {Array.from({ length: 12 }, (_, i) => { const x = (w / 12) * i + 30, y = h * 0.86 + ((i * 29) % 50); return <g key={i}><path d={`M${x} ${y} v18`} stroke={I} strokeWidth="3" strokeLinecap="round" /><circle cx={x} cy={y} r="7" fill={[PP.pink, PP.paper, PP.lemon][i % 3]} stroke={I} strokeWidth="2.5" /></g>; })}
-    </svg>
-  );
-}
 function Square({ kind, i, s }: { kind: Kind; i: number; s: number }) {
   const fill = kind === 'start' ? PP.mint : kind === 'finish' ? PP.lemon : kind === 'lose' ? I : kind === 'again' ? PP.paper : SQ[i % 4];
   const icon = s * 0.5;
@@ -235,7 +195,7 @@ function BoardGrid({ w, h, celebrate, pawns = PAWNS }: { w: number; h: number; c
       {L.cells.map((_, k) => <span key={k} className="absolute" style={{ ...pos(k), width: s, height: s }}><Square kind={KINDS[k]} i={k} s={s} /></span>)}
       {pawns.map((p, j) => {
         const same = pawns.filter((q) => q.at === p.at).indexOf(p);
-        return <span key={j} className="absolute z-[2]" style={{ left: pos(p.at).left + s * 0.14 + same * s * 0.2, top: pos(p.at).top - s * 0.28, filter: p.t === 1 && celebrate ? `drop-shadow(0 0 0 ${PP.lemon})` : undefined }}><CrayonPawn color={TEAMS[p.t].color} size={s * 0.72} /></span>;
+        return <span key={j} className="absolute z-[2]" style={{ left: pos(p.at).left + s * 0.14 + same * s * 0.2, top: pos(p.at).top - s * 0.28, filter: p.t === 1 && celebrate ? 'drop-shadow(0 0 6px #fabe37) drop-shadow(0 0 14px rgba(250,190,55,0.55))' : undefined }}><CrayonPawn color={TEAMS[p.t].color} size={s * 0.72} /></span>;
       })}
       {celebrate && (() => { const p = pos(15); return (
         <span className="absolute z-[3] pointer-events-none" style={{ left: p.left + s / 2, top: p.top + s + 4 }}>
@@ -267,7 +227,7 @@ function Tray() {
 const BG_SCORES = ['12 to go', '24 to go', '19 to go', '32 to go'];
 function MiniRace({ compact, teams = TEAMS, now = 1 }: { compact?: boolean; teams?: readonly Team[]; now?: number }) {
   return <>{teams.map((t, i) => (
-    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === now ? `0 0 0 4px ${PP.lemon}, 0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
+    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === now ? `${TURN_GLOW}, 0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
       <CrayonPawn color={t.color} size={26} /><b className="flex-1 truncate text-sm">{t.name}</b><span className="text-sm font-bold" style={{ color: PP.quiet }}>{BG_SCORES[i]}</span>
     </div>
   ))}</>;
@@ -461,7 +421,7 @@ function F4Board({ s, win = true }: { s: number; win?: boolean }) {
 }
 function F4Player({ i, now, held, name, note = 'Winner!' }: { i: number; now?: boolean; held?: { id: PowerId; name: string }; name?: string; note?: string }) {
   return (
-    <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={{ ...paper, boxShadow: now ? `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` : paper.boxShadow }}>
+    <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={{ ...paper, boxShadow: now ? `${TURN_GLOW}, 0 4px 0 ${I}` : paper.boxShadow }}>
       <Disc p={i + 1} s={54} />
       <b className="font-display text-2xl">{name ?? ['Ava', 'Leo'][i]}</b>
       {now && <span className="font-bold text-sm">{note}</span>}
@@ -642,7 +602,7 @@ function AlleyWall({ children }: { children: ReactNode }) {
   );
 }
 function RollPill({ who = 'Mia rolls!' }: { who?: string }) {
-  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />{who}</div>;
+  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `${TURN_GLOW}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />{who}</div>;
 }
 function BowlingLaptop({ solo }: { solo?: boolean }) {
   return (
@@ -748,24 +708,18 @@ function StudentDevice({ solo }: { solo?: boolean }) {
 // go buttons with ink text. Every menu is centered (teacher, 2026-11-23);
 // question text stays left-aligned in its card.
 const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
-function Tape({ color = PP.butter, rot = -4 }: { color?: string; rot?: number }) {
-  return <span aria-hidden="true" className="absolute z-10 left-1/2 -top-3.5" style={{ width: 110, height: 30, background: color, opacity: 0.85, transform: `translateX(-50%) rotate(${rot}deg)`, borderLeft: '2px dashed rgba(29,26,51,0.25)', borderRight: '2px dashed rgba(29,26,51,0.25)' }} />;
-}
-function Sheet({ children, w, layer = PP.gamify, tape = PP.blush, pad = 28 }: { children: ReactNode; w: number; layer?: string; tape?: string; pad?: number }) {
+function Sheet({ children, w, pad = 28 }: { children: ReactNode; w: number; layer?: string; pad?: number }) {
   return (
     <div className="relative mx-auto" style={{ width: w }}>
-      <span aria-hidden="true" className="absolute inset-0 rounded-[30px]" style={{ background: layer, border: `3px solid ${I}`, transform: 'translate(10px, 10px) rotate(1.6deg)' }} />
       <div className="relative rounded-[30px] grid justify-items-center text-center gap-4" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: pad }}>{children}</div>
-      <Tape color={tape} />
     </div>
   );
 }
-function Menu({ children, band = 'cutpaper', tall }: { children: ReactNode; band?: string; tall?: boolean }) {
-  const b = tall ? 90 : 56;
+// Universal menus wear the site's purple ground, no pattern bands (teacher, 2026-11-23).
+function Menu({ children, tall }: { children: ReactNode; band?: string; tall?: boolean }) {
+  const b = tall ? 60 : 36;
   return (
-    <div className="w-full h-full relative" style={quiet}>
-      <div aria-hidden="true" className="absolute inset-x-0 top-0" style={{ height: b, ...pat(band), borderBottom: `3px solid ${I}` }} />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0" style={{ height: b, ...pat(band), borderTop: `3px solid ${I}` }} />
+    <div className="w-full h-full relative" style={PURPLE_GROUND}>
       <div className="absolute inset-x-0 grid place-items-center" style={{ top: b, bottom: b }}>{children}</div>
     </div>
   );
@@ -804,7 +758,7 @@ function Pills({ opts, pick }: { opts: string[]; pick: number }) {
 function Welcome({ name, art, steps }: { name: string; art: ReactNode; steps: [string, string, string] }) {
   return (
     <Menu>
-      <Sheet w={640} tape={PP.aqua}>
+      <Sheet w={640}>
         <Title size={60}>{name}</Title>
         <div className="relative w-40 h-40 grid place-items-center"><BlobPatch color={PP.blush} size={170} /><span className="relative">{art}</span></div>
         <ol className="grid gap-2 w-full max-w-[440px]">
@@ -819,7 +773,7 @@ function Welcome({ name, art, steps }: { name: string; art: ReactNode; steps: [s
 function Ways({ ways, pick, share }: { ways: Way[]; pick: Way; share?: 'code' | 'here' | 'none' }) {
   return (
     <Menu>
-      <Sheet w={ways.length === 3 ? 820 : 640} tape={PP.butter}>
+      <Sheet w={ways.length === 3 ? 820 : 640}>
         <Title size={46}>How will you play?</Title>
         <div className="flex justify-center gap-5">
           {ways.map((w) => { const M = MODE[w]; const on = w === pick; return (
@@ -837,7 +791,7 @@ function Ways({ ways, pick, share }: { ways: Way[]; pick: Way; share?: 'code' | 
 function Options({ rows }: { rows: [string, string[], number][] }) {
   return (
     <Menu band="squiggle">
-      <Sheet w={660} tape={PP.aqua}>
+      <Sheet w={660}>
         <Title size={46}>Options</Title>
         {rows.map(([l, o, p]) => <div key={l} className="grid gap-2 justify-items-center"><b className="text-2xl">{l}</b><Pills opts={o} pick={p} /></div>)}
         <MainBtn><Play weight="fill" size={20} />Play</MainBtn>
@@ -849,7 +803,7 @@ function Options({ rows }: { rows: [string, string[], number][] }) {
 function ShareCode() {
   return (
     <Menu>
-      <Sheet w={600} tape={PP.butter}>
+      <Sheet w={600}>
         <Title size={44}>Share a join code</Title>
         <span className="font-semibold text-2xl" style={{ color: PP.quiet }}>Open the Join page on the screen you want to play on and type:</span>
         <span className="px-6 py-2 rounded-2xl tracking-[0.2em]" style={{ ...GY, fontSize: 84, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
@@ -861,7 +815,7 @@ function ShareCode() {
 function JoinCode({ name = 'Join the game', sub = 'Type the game code your teacher gave you.' }: { name?: string; sub?: string }) {
   return (
     <Menu tall>
-      <Sheet w={720} tape={PP.aqua} pad={44}>
+      <Sheet w={720} pad={44}>
         <Title size={76}>{name}</Title>
         <span className="font-semibold text-3xl" style={{ color: PP.quiet }}>{sub}</span>
         <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[92px] h-[112px] rounded-2xl grid place-items-center" style={{ ...GY, fontSize: 68, background: i === 4 ? PP.blueCrystal : PP.paper, border: `${i === 4 ? 4 : 3}px solid ${I}` }}>{d}</span>)}</div>
@@ -874,7 +828,7 @@ function JoinCode({ name = 'Join the game', sub = 'Type the game code your teach
 function ClassHow() {
   return (
     <Menu>
-      <Sheet w={760} tape={PP.butter}>
+      <Sheet w={760}>
         <Title size={46}>How the class plays</Title>
         <div className="flex justify-center gap-5">
           {[['Together', 'Fill one sky as a class', PP.blueCrystal, true], ['Compete', 'A leaderboard of names and points', PP.blush, false]].map(([n, l, c, on]) => (
@@ -895,13 +849,11 @@ function Lobby() {
     <div className="w-full h-full relative" style={{ ...pat('confetti'), padding: 28 }}>
       <div className="h-full grid grid-cols-[1fr_1.25fr] gap-6">
         <div className="relative p-6 grid content-center justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28 }}>
-          <Tape color={PP.aqua} />
           <b className="text-lg uppercase tracking-wider" style={{ color: PP.quiet }}>Go to the Join page and type</b>
           <span className="tracking-widest px-4 py-2 rounded-2xl" style={{ ...GY, fontSize: 76, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
           <span className="font-bold flex items-center gap-2"><DeviceTablet weight="bold" size={22} />Every student on their own device</span>
         </div>
         <div className="relative p-6 flex flex-col items-center gap-4 text-center" style={{ ...paper, borderRadius: 28 }}>
-          <Tape color={PP.blush} />
           <Title size={44}>Lobby</Title>
           <span className="font-bold flex items-center gap-1.5"><UsersThree weight="bold" size={22} />12 here</span>
           <div className="flex flex-wrap justify-center gap-2 content-start flex-1">{NAMES.map((n, i) => <span key={n} className="px-3 py-1.5 rounded-full font-bold text-lg h-fit" style={{ background: [PP.gamify, PP.aqua, PP.blush, PP.butter][i % 4], border: `2.5px solid ${I}` }}>{n}</span>)}</div>
@@ -914,7 +866,7 @@ function Lobby() {
 function NameAndWait() {
   return (
     <Menu tall>
-      <Sheet w={720} tape={PP.butter} pad={40}>
+      <Sheet w={720} pad={40}>
         <Title size={54}>Pick your game name</Title>
         <span className="px-6 py-3 rounded-2xl" style={{ ...GY, fontSize: 72, background: PP.butter, border: `3px solid ${I}` }}>Zippy Comet</span>
         <div className="flex gap-3"><Second><CrayonDie value={4} size={34} />Roll a new name</Second><MainBtn big>Play</MainBtn></div>
@@ -949,9 +901,9 @@ function Results({ game, title, winner, stats, missed = 2 }: { game: ReactNode; 
     <Dim over={
       <div className="relative w-[560px]">
         <Confetti marks={[['sparkle', PP.lemon, -40, 10, 36], ['star', PP.pink, 560, -10, 30], ['heart', PP.pink, -30, 300, 24], ['sparkle', PP.paper, 570, 280, 28], ['dot', PP.sky, 530, 150, 16]]} />
-        <Sheet w={560} tape={PP.pink} layer={PP.butter} pad={24}>
+        <Sheet w={560} layer={PP.butter} pad={24}>
           <Title size={48}>{title}</Title>
-          <div className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.butter} size={136} /><span className="relative scale-[0.8]">{winner}</span></div>
+          <TurnGlow round className="w-28 h-28 place-items-center rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, borderRadius: 9999 }}><span className="w-28 h-28 grid place-items-center"><span className="scale-[0.7]">{winner}</span></span></TurnGlow>
           <div className="flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold text-lg" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
           <div className="flex flex-wrap justify-center gap-3"><MainBtn><ArrowsClockwise weight="bold" size={20} />Play again</MainBtn><Second>New game</Second><Second>Review {missed} missed</Second></div>
         </Sheet>

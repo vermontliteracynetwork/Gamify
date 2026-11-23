@@ -22,8 +22,10 @@ import { STARTER, StickerArt } from './Stickers';
 const I = PP.ink;
 const Q = PP.quiet;
 const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
-// Cards carry no ink outline (brand decision 2026-11-23); tappables get the 2px ink edge and press shade.
-const CARD: CSSProperties = { background: PP.paper, borderRadius: 18, boxShadow: '0 1px 0 rgba(29,26,51,0.08), 0 6px 18px rgba(29,26,51,0.07)' };
+// One flat card: a single 2px ink outline and the normal sticker shadow. No washi tape and no
+// stacked or offset paper layers (teacher, 2026-11-23: "the attatched tape, multilayer card is an
+// example of something i do not like and need immediately removed").
+const CARD: CSSProperties = { background: PP.paper, borderRadius: 18, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` };
 const NAMES = ['Ava', 'Ben', 'Carmen', 'Dev', 'Elle', 'Finn', 'Grace', 'Hugo', 'Isla', 'Jamal', 'Kai', 'Lena', 'Milo', 'Nora', 'Omar', 'Priya', 'Quinn', 'Rosa', 'Sam', 'Theo', 'Uma', 'Vic', 'Wren', 'Zoe'];
 const SKIN = [PP.gamify, PP.blueCrystal, PP.blush, PP.butter, PP.mint, PP.peach, PP.aqua, PP.lavender, PP.sage];
 
@@ -49,11 +51,11 @@ function Card({ title, tip, right, children, className = '', style, pad = 18 }: 
   );
 }
 // The plain-language takeaway plus one next step, under every chart.
-function Takeaway({ text, action, icon }: { text: string; action: string; icon?: ReactNode }) {
+function Takeaway({ text, action, icon, stack }: { text: string; action: string; icon?: ReactNode; stack?: boolean }) {
   return (
-    <div className="mt-auto flex items-center gap-3 rounded-[12px] px-3 py-2" style={{ background: PP.butter }}>
+    <div className={`mt-auto flex ${stack ? 'flex-wrap' : ''} items-center gap-3 rounded-[12px] px-3 py-2`} style={{ background: PP.butter }}>
       <Lightbulb weight="bold" size={18} className="shrink-0" />
-      <p className="m-0 flex-1 text-[14px] font-bold leading-snug">{text}</p>
+      <p className="m-0 flex-1 min-w-0 text-[14px] font-bold leading-snug">{text}</p>
       <Btn small main>{icon ?? <ArrowRight weight="bold" size={16} />}{action}</Btn>
     </div>
   );
@@ -88,7 +90,7 @@ const NAV: { id: NavId; label: string; icon: typeof House }[] = [
 function Rail({ active, live }: { active: NavId; live?: boolean }) {
   return (
     <nav aria-label="Teacher pages" className="w-[232px] shrink-0 h-full flex flex-col gap-1.5 px-4 py-5" style={{ background: PP.paper, borderRight: '1px solid rgba(29,26,51,0.1)' }}>
-      <span className="text-[30px] px-3 py-1.5 rounded-[14px] self-start mb-3" style={{ ...GY, background: PP.periwinkle, boxShadow: `0 3px 0 ${PP.grapeDeep}`, transform: 'rotate(-2deg)' }}>Gamify</span>
+      <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto self-start mb-3" draggable="false" />
       <span className="h-12 rounded-full font-bold inline-flex items-center justify-center gap-2 text-[15px] mb-3" style={{ background: PP.periwinkle, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${PP.grapeDeep}` }}><Plus weight="bold" size={18} />Create an Activity</span>
       {NAV.map((n) => {
         const on = n.id === active;
@@ -112,15 +114,14 @@ function Shell({ active, title, sub, actions, children, live, crumb }: { active:
     <div className="w-full h-full flex text-[15px]" style={{ background: PP.cream, color: I, fontFamily: 'var(--font-heading)' }}>
       <Rail active={active} live={live} />
       <main className="flex-1 min-w-0 h-full flex flex-col gap-4 px-8 py-5">
-        <header className="flex items-center gap-4 h-[60px] shrink-0">
-          <div className="grid gap-1 min-w-0">
+        <header className="flex items-center gap-4 min-h-[60px] shrink-0">
+          <div className="grid gap-1 min-w-0 flex-1">
             {crumb && <span className="text-[13px] font-bold" style={{ color: Q }}>{crumb}</span>}
-            <h1 className="m-0 text-[34px] whitespace-nowrap" style={GY}>{title}</h1>
+            <h1 className="m-0 text-[32px] whitespace-nowrap overflow-hidden text-ellipsis" style={GY}>{title}</h1>
+            {sub && <span className="text-[14px] font-semibold truncate" style={{ color: Q }}>{sub}</span>}
           </div>
-          {sub && <span className="text-[14px] font-semibold self-end pb-1" style={{ color: Q }}>{sub}</span>}
-          <span className="flex-1" />
           {actions}
-          <span className="h-10 w-[220px] rounded-full px-3 inline-flex items-center gap-2 text-[14px] font-semibold" style={{ background: PP.paper, border: '2px solid rgba(29,26,51,0.18)', color: Q }}><MagnifyingGlass weight="bold" size={16} />Search students, sets</span>
+          <span className="h-10 w-[150px] shrink-0 rounded-full px-3 inline-flex items-center gap-2 text-[14px] font-semibold" style={{ background: PP.paper, border: '2px solid rgba(29,26,51,0.18)', color: Q }}><MagnifyingGlass weight="bold" size={16} />Search</span>
         </header>
         <div className="flex-1 min-h-0">{children}</div>
       </main>
@@ -142,17 +143,17 @@ const skillColor = (p: number) => (p >= 80 ? PP.kelly : p >= 60 ? PP.lemon : PP.
 function Home() {
   return (
     <Shell active="home" title="Good morning" sub="Monday, November 23">
-      <div className="h-full grid gap-4" style={{ gridTemplateColumns: '1fr 1fr 340px', gridTemplateRows: '190px 260px 1fr' }}>
+      <div className="h-full grid gap-4" style={{ gridTemplateColumns: '1fr 1fr 340px', gridTemplateRows: '212px 250px 1fr' }}>
         <Card className="col-span-2" style={{ background: PP.gamify }} pad={22}>
           <span className="text-[13px] font-bold uppercase tracking-wider" style={{ color: PP.grapeDeep }}>Today&apos;s next step</span>
           <p className="m-0 mt-2 text-[24px] font-bold leading-snug max-w-[620px]">12 students missed commas in a list on Friday. A 5 minute reteach game is ready.</p>
           <div className="mt-auto flex gap-3 items-center"><Btn main><ArrowCounterClockwise weight="bold" size={18} />Start the reteach Activity</Btn><Btn><ChartBar weight="bold" size={18} />See Friday&apos;s report</Btn><span className="text-[13px] font-semibold" style={{ color: Q }}>Same game, the 6 comma questions, only the 12 students</span></div>
         </Card>
-        <Card title="Quick start" className="row-span-1">
-          <div className="grid gap-2">
+        <Card title="Quick start" pad={16}>
+          <div className="grid gap-1.5">
             {[[Broadcast, 'Play live on the big screen'], [LinkSimple, 'Share a code'], [CalendarBlank, 'Send as homework'], [ArrowCounterClockwise, 'Play Friday\'s Activity again']].map(([Ic, l]) => {
               const C = Ic as typeof House;
-              return <span key={l as string} className="h-[30px] rounded-[10px] px-2 inline-flex items-center gap-2.5 text-[14px] font-bold" style={{ background: PP.cream }}><C weight="bold" size={17} />{l as string}<ArrowRight weight="bold" size={14} className="ml-auto" /></span>;
+              return <span key={l as string} className="h-[29px] rounded-[10px] px-2 inline-flex items-center gap-2.5 text-[14px] font-bold" style={{ background: PP.cream }}><C weight="bold" size={17} />{l as string}<ArrowRight weight="bold" size={14} className="ml-auto" /></span>;
             })}
           </div>
         </Card>
@@ -163,8 +164,8 @@ function Home() {
             <Stat label="Minutes playing" value="148" delta="+21" bg={PP.cream} />
             <Stat label="Remembered a week later" value="81%" tip="Questions answered right, then right again 7 or more days later." bg={PP.cream} />
           </div>
-          <div className="mt-3 flex-1 min-h-0 grid grid-cols-[1fr_260px] gap-4 items-center">
-            <ChartContainer label="Right on first try rose from 48 percent to 72 percent over five weeks" height={110} config={{ first: { label: 'Right on first try', color: PP.grape } }}>
+          <div className="mt-2 flex-1 min-h-0 grid grid-cols-[1fr_260px] gap-4 items-center">
+            <ChartContainer label="Right on first try rose from 48 percent to 72 percent over five weeks" height={92} config={{ first: { label: 'Right on first try', color: PP.grape } }}>
               <LineChart data={WEEKS} margin={{ top: 8, right: 12, left: -18, bottom: 0 }}>
                 <XAxis dataKey="w" {...AXIS} /><YAxis domain={[40, 80]} {...AXIS} ticks={[40, 60, 80]} />
                 <Line dataKey="first" stroke="var(--color-first)" strokeWidth={3} dot={{ r: 4, fill: PP.paper, strokeWidth: 2.5 }} isAnimationActive={false} />
@@ -314,12 +315,17 @@ function ClassView() {
             <span className="mt-auto pt-2 text-[13px] font-bold" style={{ color: Q }}>Showing 11 of 24, sorted by name</span>
           </Card>
           <div className="grid gap-3 content-start">
+            <div className="rounded-[18px] p-4 grid gap-2" style={{ border: `2.5px dashed ${Q}` }}>
+              <b className="text-[15px] flex items-center gap-2"><Lightbulb weight="bold" size={18} />Suggested from reports</b>
+              <span className="text-[14px] font-semibold leading-snug">Omar, Hugo, Rosa and Theo are under 50% on apostrophes (L.2.2c).</span>
+              <span className="flex gap-2"><Btn small main><UsersThree weight="bold" size={14} />Make this group</Btn><Btn small>Not now</Btn></span>
+            </div>
             <Card title="Groups" tip="Groups are yours to name. Students never see group names." right={<Btn small><Plus weight="bold" size={14} />New group</Btn>}>
               <div className="grid gap-2">
                 {[['Commas practice', ['Hugo', 'Omar', 'Rosa', 'Theo'], PP.blush], ['Reading support', ['Lena', 'Milo', 'Vic'], PP.blueCrystal], ['Ready for a challenge', ['Ava', 'Ben', 'Carmen', 'Dev', 'Elle'], PP.mint]].map(([g, kids, bg]) => (
                   <div key={g as string} className="rounded-[12px] p-3 grid gap-2" style={{ background: bg as string }}>
                     <div className="flex items-center"><b className="text-[15px]">{g as string}</b><span className="ml-auto text-[13px] font-bold">{(kids as string[]).length} students</span></div>
-                    <div className="flex -space-x-1.5">{(kids as string[]).map((k, i) => <span key={k} className="rounded-full" style={{ boxShadow: `0 0 0 2px ${bg as string}` }}><Avatar name={k} i={i + 3} size={28} /></span>)}</div>
+                    <div className="flex gap-1">{(kids as string[]).map((k, i) => <Avatar key={k} name={k} i={i + 3} size={28} />)}</div>
                     <div className="flex gap-2"><Btn small>Assign a set</Btn><Btn small>Group report</Btn></div>
                   </div>
                 ))}
@@ -347,6 +353,7 @@ function CreateActivity() {
               </li>
             ))}
           </ol>
+          <div className="mt-4 grid gap-2"><b className="text-[13px]" style={{ color: Q }}>Who plays</b><div className="flex flex-wrap gap-2">{['Hugo', 'Omar', 'Rosa', 'Theo'].map((k, i) => <span key={k} className="h-9 pl-1 pr-3 rounded-full inline-flex items-center gap-2 font-bold text-[14px]" style={{ background: PP.cream }}><Avatar name={k} i={i + 3} size={28} />{k}</span>)}</div></div>
           <div className="mt-auto rounded-[12px] p-3 text-[13px] font-semibold leading-snug" style={{ background: PP.blueCrystal }}>Supports carry over: Omar hears every question read aloud, Hugo gets 3 tries.</div>
         </Card>
         <div className="flex flex-col gap-4 min-h-0">
@@ -376,6 +383,10 @@ function CreateActivity() {
                   </div>
                 );
               })}
+            </div>
+            <div className="mt-6 rounded-[14px] p-4 grid gap-2.5" style={{ background: PP.cream }}>
+              <span className="flex items-center gap-2"><b className="text-[15px]">Game options</b><Tip text="Set in the How and Game steps. Change any of them here before you start." /><span className="ml-auto text-[14px] font-bold" style={{ color: PP.grapeDeep }}>Change</span></span>
+              <div className="flex flex-wrap gap-2">{['10 rounds', '2 tries per question', 'Timer off', '4 power-ups on', 'Classic theme', 'Teach card first', 'Shuffle answers'].map((o) => <Chip key={o} bg={PP.paper} strong>{o}</Chip>)}</div>
             </div>
             <div className="mt-auto flex items-center justify-center gap-6 text-[14px] font-semibold" style={{ color: Q }}>
               <span className="inline-flex items-center gap-2"><Check weight="bold" size={16} />Projector set to Extend, not Mirror <Tip text="Mirror shows your private class view to the room. Extend keeps it on your laptop only." /></span>
@@ -420,7 +431,7 @@ function LiveView() {
                 const warn = s.state === 'stuck' || s.state === 'guess';
                 return (
                   <li key={s.n} className="rounded-[12px] px-2.5 py-2 grid gap-1" style={{ background: bg, border: warn ? `2px solid ${I}` : '2px solid rgba(29,26,51,0.08)' }}>
-                    <span className="flex items-center gap-2"><Avatar name={s.n} i={i} size={26} /><b className="text-[14px] flex-1 truncate">{s.n}</b>{warn ? <Warning weight="bold" size={16} /> : s.state === 'done' ? <CheckCircle weight="bold" size={16} /> : <LockSimple weight="bold" size={15} style={{ opacity: 0.35 }} />}</span>
+                    <span className="flex items-center gap-2"><Avatar name={s.n} i={i} size={26} /><b className="text-[14px] flex-1 truncate">{s.n}</b>{warn ? <Warning weight="bold" size={16} /> : s.state === 'done' ? <CheckCircle weight="bold" size={16} /> : null}</span>
                     <span className="flex items-center gap-1">{Array.from({ length: 6 }, (_, k) => <span key={k} className="h-2 flex-1 rounded-full" style={{ background: k < s.right ? PP.kelly : k < s.done ? PP.pink : 'rgba(29,26,51,0.12)' }} />)}</span>
                     <span className="text-[12px] font-bold" style={{ color: warn ? I : Q }}>{s.state === 'stuck' ? `Stuck on Q${s.done + 1}, ${s.sec}s` : label}{s.state === 'ok' || s.state === 'done' ? `, ${s.right} of ${s.done} right` : ''}</span>
                   </li>
@@ -439,7 +450,7 @@ function LiveView() {
             <Card title="Hardest question right now" pad={14}>
               <p className="m-0 text-[14px] font-bold leading-snug">Q4: Which sentence uses commas in a list?</p>
               <p className="m-0 mt-1 text-[13px] font-semibold" style={{ color: Q }}>9 picked &quot;apples bananas, and grapes&quot;</p>
-              <div className="mt-2.5"><Takeaway text="Pause and teach it now?" action="Show teach card" /></div>
+              <div className="mt-2.5"><Takeaway stack text="Pause and teach it now?" action="Show teach card" /></div>
             </Card>
             <Card title="Hugo, stuck 74s" pad={14}>
               <div className="flex flex-wrap gap-2"><Btn small><ChatCircleText weight="bold" size={14} />You&apos;ve got this</Btn><Btn small><Lightbulb weight="bold" size={14} />Send a hint</Btn><Btn small><Snowflake weight="bold" size={14} />Freeze, I&apos;m coming</Btn></div>
@@ -487,16 +498,17 @@ function Sets() {
   );
 }
 function SetEditor() {
-  const QLIST = ['Which word needs a capital letter?', 'Pick the sentence with the right punctuation.', 'Which name is written the right way?', 'Which sentence uses commas in a list?', 'Where does the period go?', 'Pick the question.'];
+  const QLIST = ['Which word needs a capital letter?', 'Pick the sentence with the right punctuation.', 'Which name is written the right way?', 'Which sentence uses commas in a list?', 'Where does the period go?', 'Pick the question.', 'Which day needs a capital letter?', 'Find the sentence that ends right.', 'Which name is written the right way?', 'Pick the list with the right commas.'];
   return (
     <Shell active="sets" crumb="Question sets" title="Commas and capitals" sub="Saved" actions={<><Btn><DownloadSimple weight="bold" size={18} />CSV</Btn><Btn main>Use in an Activity<ArrowRight weight="bold" size={18} /></Btn></>}>
       <div className="h-full grid grid-cols-[290px_1fr_290px] gap-4">
         <Card title="10 questions" tip="The colored bar is how your classes did. It fills in after a game." pad={12}>
-          <ol className="list-none m-0 p-0 grid gap-1.5">
+          <ol className="list-none m-0 p-0 grid gap-1">
             {QLIST.map((q, i) => (
-              <li key={q} className="rounded-[10px] p-2 grid grid-cols-[24px_1fr] gap-2" style={i === 3 ? { background: PP.gamify, boxShadow: `inset 4px 0 0 ${PP.grape}` } : { background: PP.cream }}>
+              <li key={i} className="rounded-[10px] px-2 py-1.5 grid grid-cols-[20px_1fr_46px] items-center gap-2" style={i === 3 ? { background: PP.gamify, boxShadow: `inset 4px 0 0 ${PP.grape}` } : { background: PP.cream }}>
                 <b className="text-[14px]">{i + 1}</b>
-                <span className="grid gap-1"><span className="text-[13px] font-bold leading-snug line-clamp-2">{q}</span><span className="flex items-center gap-1.5"><Meter pct={QS[i].pct} color={skillColor(QS[i].pct)} w={90} /><span className="text-[12px] font-bold">{QS[i].pct}%</span></span></span>
+                <span className="text-[13px] font-bold leading-snug">{q}</span>
+                <span className="h-6 rounded-full text-[12px] font-bold grid place-items-center" style={{ background: skillColor(QS[i].pct) }}>{QS[i].pct}%</span>
               </li>
             ))}
           </ol>
@@ -556,13 +568,14 @@ function ClassReport() {
         </div>
         <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-3">
           <Card title="Accuracy over time" tip="Each point is one week. Right includes answers that were right on a retry." pad={14}>
-            <ChartContainer label="Right and right on first try, weekly, both rising" height={150} config={{ right: { label: 'Right', color: PP.sky }, first: { label: 'Right on first try', color: PP.grape } }}>
+            <ChartContainer label="Right and right on first try, weekly, both rising" height={136} config={{ right: { label: 'Right', color: PP.sky }, first: { label: 'Right on first try', color: PP.grape } }}>
               <LineChart data={WEEKS} margin={{ top: 6, right: 14, left: -18, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="rgba(29,26,51,0.08)" /><XAxis dataKey="w" {...AXIS} /><YAxis domain={[40, 90]} ticks={[40, 60, 80]} {...AXIS} />
                 <Line dataKey="right" stroke="var(--color-right)" strokeWidth={3} dot={{ r: 3.5 }} isAnimationActive={false} />
                 <Line dataKey="first" stroke="var(--color-first)" strokeWidth={3} strokeDasharray="6 4" dot={{ r: 3.5 }} isAnimationActive={false} />
               </LineChart>
             </ChartContainer>
+            <div className="flex gap-4 text-[13px] font-bold mb-1.5"><span className="inline-flex items-center gap-1.5"><span className="w-5 h-[3px]" style={{ background: PP.sky }} />Right</span><span className="inline-flex items-center gap-1.5"><span className="w-5 border-t-[3px] border-dashed" style={{ borderColor: PP.grape }} />Right on first try</span></div>
             <Takeaway text="First-try answers grew 24 points in 5 weeks. Keep the weekly game routine." action="Repeat Friday's Activity" />
           </Card>
           <Card title="By skill (Common Core)" tip="Right on first try for every question tagged with that standard." pad={14}>
@@ -610,18 +623,18 @@ function ClassReport() {
 function ActivityReport() {
   const RET = QS.slice(0, 8).map((d, i) => ({ q: d.q, first: d.pct, retry: Math.min(100, d.pct + [6, 9, 10, 31, 8, 14, 18, 4][i]) }));
   return (
-    <Shell active="reports" crumb="Reports, Activities" title="Commas and capitals" sub="Game Show, Live, Fri Nov 20, 22 players, 14 minutes" actions={<><Btn><ArrowCounterClockwise weight="bold" size={18} />Play again</Btn><Btn main><Printer weight="bold" size={18} />Print or PDF</Btn></>}>
+    <Shell active="reports" crumb="Reports, Activities" title="Commas and capitals" sub="Game Show, Live, Fri Nov 20, 22 players" actions={<><Btn><ArrowCounterClockwise weight="bold" size={18} />Play again</Btn><Btn main><Printer weight="bold" size={18} />Print or PDF</Btn></>}>
       <div className="h-full grid grid-cols-[1fr_360px] gap-3">
         <div className="grid gap-3 min-h-0" style={{ gridTemplateRows: '1fr 1fr' }}>
           <Card title="Per question" tip="First try: right with the first answer. After retry: right by the last try." pad={14}>
             <table className="w-full text-[14px] border-collapse">
               <thead><tr className="text-left text-[13px]" style={{ color: Q }}>{['#', 'Question', 'First try', 'After retry', 'Most common wrong answer', 'Avg time'].map((h) => <th key={h} className="font-bold pb-1">{h}</th>)}</tr></thead>
               <tbody>
-                {[['Q4', 'Which sentence uses commas in a list?', 41, 72, 'apples bananas, and grapes (9)', '14s'], ['Q9', 'Which name is written the right way?', 58, 70, 'jamal (5)', '11s'], ['Q7', 'Where does the period go?', 64, 82, 'after "the" (4)', '9s'], ['Q2', 'Pick the sentence with the right punctuation.', 82, 91, 'no period (2)', '7s']].map(([q, p, f, r, w, t]) => (
+                {[['Q4', 'Which sentence uses commas in a list?', 41, 72, 'apples bananas, and grapes (9)', '14s'], ['Q9', 'Which name is written the right way?', 58, 70, 'jamal (5)', '11s'], ['Q7', 'Where does the period go?', 64, 82, 'after "the" (4)', '9s'], ['Q6', 'Pick the question.', 70, 84, 'no question mark (5)', '8s'], ['Q2', 'Pick the sentence with the right punctuation.', 82, 91, 'no period (2)', '7s']].map(([q, p, f, r, w, t]) => (
                   <tr key={q as string} style={{ borderTop: '1px solid rgba(29,26,51,0.08)', background: q === 'Q4' ? PP.blush : undefined }}>
-                    <td className="py-1.5 pl-1 font-bold">{q}</td><td className="font-semibold">{p}</td>
-                    <td><span className="inline-flex items-center gap-1.5"><Meter pct={f as number} color={skillColor(f as number)} w={56} /><b>{f}%</b></span></td>
-                    <td className="font-bold">{r}%</td><td className="font-semibold">{w}</td><td className="font-semibold">{t}</td>
+                    <td className="py-1.5 pl-1.5 pr-3 font-bold">{q}</td><td className="font-semibold pr-3">{p}</td>
+                    <td className="pr-3"><span className="inline-flex items-center gap-1.5"><Meter pct={f as number} color={skillColor(f as number)} w={56} /><b>{f}%</b></span></td>
+                    <td className="font-bold pr-3">{r}%</td><td className="font-semibold pr-3">{w}</td><td className="font-semibold">{t}</td>
                   </tr>
                 ))}
               </tbody>
@@ -629,7 +642,7 @@ function ActivityReport() {
             <Takeaway text="Q4 was the hardest; 9 students chose the answer missing the first comma." action="Reteach set from Q4 and Q9" icon={<ArrowCounterClockwise weight="bold" size={16} />} />
           </Card>
           <Card title="Retry growth" tip="How many more were right after a second or third try. Big jumps mean the feedback taught something." pad={14}>
-            <ChartContainer label="First try versus after retry for each question; question 4 grew most, 41 to 72 percent" height={118} config={{ first: { label: 'First try', color: PP.periwinkle }, retry: { label: 'After retry', color: PP.kelly } }}>
+            <ChartContainer label="First try versus after retry for each question; question 4 grew most, 41 to 72 percent" height={205} config={{ first: { label: 'First try', color: PP.periwinkle }, retry: { label: 'After retry', color: PP.kelly } }}>
               <BarChart data={RET} margin={{ top: 4, right: 8, left: -22, bottom: 0 }} barGap={2}>
                 <XAxis dataKey="q" {...AXIS} /><YAxis domain={[0, 100]} ticks={[0, 50, 100]} {...AXIS} />
                 <Bar dataKey="first" fill="var(--color-first)" stroke={I} strokeWidth={1.5} radius={[4, 4, 0, 0]} isAnimationActive={false} />
@@ -643,14 +656,14 @@ function ActivityReport() {
         <Card title="Per student" tip="Sorted by need. Only you see this; nothing is ranked on a student screen." pad={14}>
           <ul className="list-none m-0 p-0 grid gap-1">
             {[['Omar', 3, 10, -1], ['Hugo', 4, 10, 1], ['Theo', 5, 10, 2], ['Rosa', 5, 10, 1], ['Quinn', 0, 0, 0], ['Milo', 6, 10, 2], ['Lena', 7, 10, 1], ['Kai', 7, 10, 3], ['Isla', 8, 10, 1], ['Grace', 9, 10, 0], ['Ava', 10, 10, 0]].map(([n, r, of, g], i) => (
-              <li key={n as string} className="grid grid-cols-[28px_1fr_92px_56px] items-center gap-2 py-1 text-[14px]" style={{ borderTop: i ? '1px solid rgba(29,26,51,0.06)' : undefined }}>
+              <li key={n as string} className="grid grid-cols-[28px_1fr_92px_56px] items-center gap-2 py-[7px] text-[14px]" style={{ borderTop: i ? '1px solid rgba(29,26,51,0.06)' : undefined }}>
                 <Avatar name={n as string} i={i} size={26} /><b>{n as string}</b>
                 {of ? <span className="inline-flex items-center gap-1.5"><Meter pct={((r as number) / (of as number)) * 100} color={skillColor(((r as number) / (of as number)) * 100)} w={50} /><b>{r}/{of}</b></span> : <span className="font-bold" style={{ color: Q }}>Absent</span>}
                 <span className="text-[13px] font-bold inline-flex items-center gap-0.5" style={{ color: (g as number) > 0 ? '#15703a' : (g as number) < 0 ? '#9b2c2c' : Q }}>{(g as number) > 0 ? <><ArrowCounterClockwise weight="bold" size={13} />+{g}</> : (g as number) < 0 ? 'No retry' : ''}</span>
               </li>
             ))}
           </ul>
-          <Takeaway text="Omar, Hugo, Theo and Rosa got 5 or fewer right." action="Group these 4" icon={<UsersThree weight="bold" size={16} />} />
+          <Takeaway stack text="Omar, Hugo, Theo and Rosa got 5 or fewer right." action="Group these 4" icon={<UsersThree weight="bold" size={16} />} />
         </Card>
       </div>
     </Shell>
@@ -663,7 +676,7 @@ function StudentReport() {
       <div className="h-full grid grid-cols-[1fr_380px] gap-3">
         <div className="grid gap-3 min-h-0" style={{ gridTemplateRows: '1fr 230px' }}>
           <Card title="Growth over time" tip="Right on first try each week. Compared with Omar's own start, never with classmates." pad={16}>
-            <ChartContainer label="Omar right on first try rose from 38 to 57 percent over five weeks" height={210} config={{ p: { label: 'Right on first try', color: PP.grape } }}>
+            <ChartContainer label="Omar right on first try rose from 38 to 57 percent over five weeks" height={300} config={{ p: { label: 'Right on first try', color: PP.grape } }}>
               <LineChart data={growth} margin={{ top: 10, right: 16, left: -18, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="rgba(29,26,51,0.08)" /><XAxis dataKey="w" {...AXIS} /><YAxis domain={[20, 80]} ticks={[20, 50, 80]} {...AXIS} />
                 <ReferenceLine y={38} stroke={Q} strokeDasharray="4 4" label={{ value: 'His start', position: 'insideBottomRight', fill: Q, fontSize: 12, fontWeight: 700 }} />
@@ -683,12 +696,12 @@ function StudentReport() {
         </div>
         <div className="grid gap-3 min-h-0" style={{ gridTemplateRows: 'auto 1fr' }}>
           <Card title="Stickers earned" tip="Stickers come from playing and trying, never from scores, so every student can earn them." pad={16}>
-            <div className="grid grid-cols-4 gap-2 justify-items-center">{STARTER.slice(0, 4).map((s) => <StickerArt key={s.id} s={s} size={70} />)}</div>
-            <span className="text-[13px] font-bold mt-2" style={{ color: Q }}>4 of 12 in the Starter collection</span>
+            <div className="grid grid-cols-4 gap-2 justify-items-center">{STARTER.filter((s) => ['first', 'plays', 'days', 'homework'].includes(s.id)).map((s) => <StickerArt key={s.id} s={s} size={70} />)}</div>
+            <span className="text-[13px] font-bold mt-2" style={{ color: Q }}>Placeholders: student stickers are not designed yet (class Starter art shown)</span>
           </Card>
           <Card title="Recent play" pad={16}>
             <ul className="list-none m-0 p-0 grid gap-2 text-[14px]">
-              {[['Fri Nov 20', 'Commas and capitals', 'Game Show', '3 of 10', '12 min'], ['Thu Nov 19', 'Past tense verbs', 'Bowling, homework', '7 of 12', '9 min'], ['Mon Nov 16', 'Apostrophes', 'Board Game', '3 of 8', '11 min']].map(([d, s, g, r, m]) => (
+              {[['Fri Nov 20', 'Commas and capitals', 'Game Show', '3 of 10', '12 min'], ['Thu Nov 19', 'Past tense verbs', 'Bowling, homework', '7 of 12', '9 min'], ['Mon Nov 16', 'Apostrophes', 'Board Game', '3 of 8', '11 min'], ['Fri Nov 13', 'Commas and capitals', 'Bubble Pop, code', '4 of 10', '10 min'], ['Wed Nov 11', 'Past tense verbs', 'Match Three', '6 of 12', '8 min']].map(([d, s, g, r, m]) => (
                 <li key={d} className="rounded-[10px] p-2.5 grid gap-0.5" style={{ background: PP.cream }}><span className="flex"><b>{s}</b><span className="ml-auto font-bold">{r}</span></span><span className="text-[13px] font-semibold" style={{ color: Q }}>{d}, {g}, {m}</span></li>
               ))}
             </ul>
@@ -705,31 +718,32 @@ function SmallGroup() {
     <Shell active="reports" crumb="Reports, Small groups" title="Commas practice" sub="4 students, 3 sessions a week, 15 minutes" actions={<><Btn><PencilSimple weight="bold" size={18} />Session note</Btn><Btn main><GameController weight="bold" size={18} />Start a group session</Btn></>}>
       <div className="h-full flex flex-col gap-3">
         <div className="flex items-center gap-3 rounded-[14px] px-4 py-3" style={{ background: PP.gamify }}>
-          <Target weight="bold" size={22} /><b className="text-[15px]">Goal: 80% right on first try on L.1.2c commas in a list by Fri Dec 18</b><Tip text="Your goal, written the way you track it (for example an IEP or intervention plan). Gamify only shows progress toward it." />
-          <span className="flex-1" /><span className="text-[14px] font-bold">5 of 9 sessions done</span>
+          <Target weight="bold" size={22} className="shrink-0" /><b className="text-[15px] min-w-0">Goal: 80% right on first try on L.1.2c commas in a list by Fri Dec 18</b><Tip text="Your goal, written the way you track it (for example an IEP or intervention plan). Gamify only shows progress toward it." />
+          <span className="flex-1" /><span className="text-[14px] font-bold whitespace-nowrap">5 of 9 sessions done</span>
         </div>
-        <div className="flex-1 min-h-0 grid grid-cols-4 gap-3">
+        <div className="flex-1 min-h-0 grid grid-cols-4 gap-3 items-start">
           {KIDS.map(([n, pts], i) => {
-            const data = pts.map((p, k) => ({ s: `S${k + 1}`, p }));
+            const data = [...pts, null, null, null, null].map((p, k) => ({ s: `S${k + 1}`, p, aim: Math.round(pts[0] + ((80 - pts[0]) * k) / 8) }));
             const last = pts[pts.length - 1];
             const on = last >= 60;
             return (
               <Card key={n} pad={14}>
                 <div className="flex items-center gap-2.5 mb-1"><Avatar name={n} i={i + 2} size={36} /><b className="text-[18px]">{n}</b><span className="ml-auto"><Chip bg={on ? PP.mint : PP.peach} strong>{on ? 'On track' : 'Below aim line'}</Chip></span></div>
-                <ChartContainer label={`${n}, right on first try per session, now ${last} percent`} height={170} config={{ p: { label: 'Right on first try', color: PP.grape } }}>
+                <ChartContainer label={`${n}, right on first try per session, now ${last} percent`} height={405} config={{ p: { label: 'Right on first try', color: PP.grape } }}>
                   <LineChart data={data} margin={{ top: 10, right: 8, left: -26, bottom: 0 }}>
                     <XAxis dataKey="s" {...AXIS} /><YAxis domain={[20, 100]} ticks={[20, 50, 80]} {...AXIS} />
                     <ReferenceLine y={80} stroke={PP.kelly} strokeWidth={2} strokeDasharray="5 4" />
-                    <Line data={[{ s: 'S1', p: pts[0] }, { s: 'S5', p: pts[0] + (80 - pts[0]) * (4 / 8) }]} dataKey="p" stroke={Q} strokeWidth={1.5} strokeDasharray="2 4" dot={false} isAnimationActive={false} />
+                    <Line dataKey="aim" stroke={Q} strokeWidth={1.5} strokeDasharray="2 4" dot={false} isAnimationActive={false} />
                     <Line dataKey="p" stroke="var(--color-p)" strokeWidth={3} dot={{ r: 4, fill: PP.paper, strokeWidth: 2.5 }} isAnimationActive={false} />
                   </LineChart>
                 </ChartContainer>
-                <div className="grid gap-1 text-[13px] font-semibold mt-1">
+                <div className="flex gap-3 text-[12px] font-bold" style={{ color: Q }}><span>Green dashes: goal 80%</span><span>Dots: aim line</span></div>
+                <div className="grid gap-1 text-[13px] font-semibold mt-2">
                   <span className="flex"><span style={{ color: Q }}>Now</span><b className="ml-auto">{last}%</b></span>
                   <span className="flex"><span style={{ color: Q }}>Minutes this week</span><b className="ml-auto">{[38, 41, 44, 29][i]}</b></span>
                   <span className="flex"><span style={{ color: Q }}>Most common slip</span><b className="ml-auto">{['No first comma', 'Comma before and', 'No first comma', 'Extra commas'][i]}</b></span>
                 </div>
-                <div className="mt-auto pt-2"><Btn small>{on ? 'Keep the plan' : 'Try a 1:1 session'}<ArrowRight weight="bold" size={14} /></Btn></div>
+                <div className="pt-3"><Btn small>{on ? 'Keep the plan' : 'Try a 1:1 session'}<ArrowRight weight="bold" size={14} /></Btn></div>
               </Card>
             );
           })}
@@ -743,9 +757,9 @@ function PrintReport() {
   return (
     <div className="w-full h-full grid place-items-center relative" style={{ background: '#d9d5e3' }}>
       <div className="absolute top-4 inset-x-0 flex justify-center gap-3"><Btn main><Printer weight="bold" size={18} />Print</Btn><Btn><DownloadSimple weight="bold" size={18} />Save as PDF</Btn><Btn>Letter</Btn><Btn>Class, Nov 1 to 23</Btn></div>
-      <article className="w-[620px] h-[800px] mt-14 px-11 py-9 flex flex-col gap-3 text-[11.5px]" style={{ background: '#fff', boxShadow: '0 10px 30px rgba(29,26,51,0.25)', fontFamily: 'var(--font-heading)' }}>
+      <article className="w-[580px] h-[750px] mt-12 px-10 py-8 flex flex-col gap-3 text-[11.5px]" style={{ background: '#fff', boxShadow: '0 10px 30px rgba(29,26,51,0.25)', fontFamily: 'var(--font-heading)' }}>
         <header className="flex items-end pb-2.5" style={{ borderBottom: `3px solid ${PP.periwinkle}` }}>
-          <div className="grid gap-0.5"><span className="text-[24px]" style={GY}>Gamify</span><b className="text-[15px]">Class progress report: Room 12, Grade 2</b><span className="font-semibold" style={{ color: Q }}>November 1 to 23, 2026. 24 students, 11 Activities</span></div>
+          <div className="grid gap-0.5"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto self-start mb-1" draggable="false" /><b className="text-[15px]">Class progress report: Room 12, Grade 2</b><span className="font-semibold" style={{ color: Q }}>November 1 to 23, 2026. 24 students, 11 Activities</span></div>
         </header>
         <section className="grid grid-cols-4 gap-2">{[['Right', '79%'], ['First try', '72%'], ['Kept a week', '81%'], ['Minutes', '612']].map(([k, v]) => <div key={k} className="rounded-[8px] p-2" style={{ background: PP.cream }}><span className="font-bold" style={{ color: Q }}>{k}</span><b className="block text-[18px]">{v}</b></div>)}</section>
         <section><b className="text-[13px]">At a glance</b><p className="m-0 mt-1 leading-snug font-semibold">The class answered 2,418 questions. Right on first try rose from 48% to 72%. Capital letters for names and end punctuation are mastered. Commas in a list (L.1.2c) is the focus for December.</p></section>
@@ -753,10 +767,11 @@ function PrintReport() {
           <b className="text-[13px]">Skills</b>
           <div className="grid gap-1 mt-1">{SKILLS.map((s) => <div key={s.code} className="grid grid-cols-[52px_170px_1fr_34px] items-center gap-2"><b>{s.code}</b><span className="font-semibold">{s.name}</span><span className="h-2.5 rounded-full" style={{ background: PP.cream }}><span className="block h-full rounded-full" style={{ width: `${s.pct}%`, background: skillColor(s.pct) }} /></span><b className="text-right">{s.pct}%</b></div>)}</div>
         </section>
-        <section className="flex-1 min-h-0">
+        <section className="flex-1 min-h-0 overflow-hidden">
           <b className="text-[13px]">Students</b>
           <table className="w-full mt-1 border-collapse"><thead><tr className="text-left" style={{ color: Q }}>{['Student', 'Questions', 'First try', 'Trend', 'Focus'].map((h) => <th key={h} className="font-bold pb-0.5">{h}</th>)}</tr></thead>
-            <tbody>{NAMES.slice(0, 12).map((n, i) => <tr key={n} style={{ borderTop: '1px solid #eee' }}><td className="py-[3px] font-bold">{n}</td><td>{[118, 104, 99, 96, 120, 88, 92, 61, 101, 97, 90, 86][i]}</td><td>{[94, 90, 86, 83, 80, 78, 75, 47, 71, 69, 66, 64][i]}%</td><td>{i === 7 ? 'Down' : 'Up'}</td><td className="font-semibold">{i < 4 ? 'Challenge set' : 'Commas in a list'}</td></tr>)}</tbody></table>
+            <tbody>{NAMES.slice(0, 4).map((n, i) => <tr key={n} style={{ borderTop: '1px solid #eee' }}><td className="py-[3px] font-bold">{n}</td><td>{[118, 104, 99, 96, 120, 88, 92, 61, 101, 97, 90, 86][i]}</td><td>{[94, 90, 86, 83, 80, 78, 75, 47, 71, 69, 66, 64][i]}%</td><td>{i === 7 ? 'Down' : 'Up'}</td><td className="font-semibold">{i < 4 ? 'Challenge set' : 'Commas in a list'}</td></tr>)}</tbody></table>
+          <p className="m-0 mt-1 font-bold" style={{ color: Q }}>20 more students on page 2</p>
         </section>
         <section><b className="text-[13px]">Questions to practice</b><p className="m-0 mt-1 font-semibold">Q4 commas in a list (41%), Q9 names (58%), Q7 period place (64%).</p></section>
         <footer className="pt-2 font-semibold leading-snug" style={{ borderTop: '1px solid #ddd', color: Q }}><b>How it is measured.</b> Right on first try counts a question right only when the first answer was right. Kept a week: right, then right again 7 or more days later. Students are never ranked. Page 1 of 2.</footer>
@@ -772,7 +787,7 @@ function Achievements() {
     <Shell active="achievements" title="Achievements" sub="Stickers your class has earned together" actions={<Btn main><Broadcast weight="bold" size={18} />Show on the big screen</Btn>}>
       <div className="h-full flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          {['Starter collection', 'Winter challenge'].map((t, i) => <span key={t} className="h-10 px-4 rounded-full font-bold text-[14px] inline-flex items-center gap-1.5" style={i === 0 ? { background: PP.gamify, border: `2px solid ${I}` } : { background: PP.paper }}>{i === 1 && <LockSimple weight="bold" size={14} />}{t}{i === 1 && <span className="font-semibold" style={{ color: Q }}>, opens Dec 1</span>}</span>)}
+          {['Starter collection', 'Winter challenge'].map((t, i) => <span key={t} className="h-10 px-4 rounded-full font-bold text-[14px] inline-flex items-center gap-1.5" style={i === 0 ? { background: PP.gamify, border: `2px solid ${I}` } : { background: PP.paper }}>{i === 1 && <LockSimple weight="bold" size={14} />}{t}{i === 1 && <span className="font-semibold" style={{ color: Q }}>opens Dec 1</span>}</span>)}
           <span className="flex-1" /><b className="text-[15px]">7 of 12 earned</b><Meter pct={58} color={PP.lemon} w={180} />
         </div>
         <Card className="flex-1" pad={22}>
@@ -781,7 +796,7 @@ function Achievements() {
               const got = earned.has(s.id);
               return (
                 <div key={s.id} className="grid justify-items-center text-center gap-1.5">
-                  <StickerArt s={s} size={128} locked={!got} />
+                  <StickerArt s={s} size={140} locked={!got} />
                   <span className="text-[13px] font-bold leading-snug">{s.earn}</span>
                   <Chip bg={got ? PP.mint : PP.cream} strong>{got ? <><Check weight="bold" size={12} />Earned</> : 'Not yet'}</Chip>
                 </div>
@@ -802,7 +817,7 @@ function FirstRun() {
         <Card pad={28} className="items-center text-center">
           <span className="text-[13px] font-bold uppercase tracking-wider" style={{ color: Q }}>Get started, 1 of 3 done</span>
           <span className="w-[320px] h-3 rounded-full overflow-hidden mt-2" style={{ background: PP.cream }}><span className="block h-full rounded-full" style={{ width: '33%', background: PP.periwinkle }} /></span>
-          <ol className="list-none m-0 p-0 grid gap-3 mt-6 w-[620px] text-left">
+          <div className="flex-1 grid place-items-center"><ol className="list-none m-0 p-0 grid gap-3 w-[640px] text-left">
             {[['Add your class', 'Paste names, one per line. No student emails.', true], ['Pick a question set', 'Write your own, import a spreadsheet, or use a Public set.', false], ['Start your first Activity', 'Play on the big screen, share a code, or send homework.', false]].map(([t, d, done], i) => (
               <li key={t as string} className="rounded-[16px] p-4 flex items-center gap-4" style={{ background: done ? PP.mint : i === 1 ? PP.gamify : PP.cream, boxShadow: i === 1 ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}` : undefined }}>
                 <span className="w-11 h-11 rounded-full grid place-items-center font-bold text-[18px] shrink-0" style={{ background: done ? PP.kelly : PP.paper, border: `2px solid ${I}` }}>{done ? <Check weight="bold" size={20} /> : i + 1}</span>
@@ -810,11 +825,11 @@ function FirstRun() {
                 {i === 1 && <Btn main>Pick a set<ArrowRight weight="bold" size={16} /></Btn>}
               </li>
             ))}
-          </ol>
-          <div className="mt-auto flex items-center gap-3"><span className="text-[14px] font-semibold" style={{ color: Q }}>Want to see what reports look like first?</span><Btn><ChartBar weight="bold" size={18} />Open the example report</Btn></div>
+          </ol></div>
+          <div className="flex items-center gap-3"><span className="text-[14px] font-semibold" style={{ color: Q }}>Want to see what reports look like first?</span><Btn><ChartBar weight="bold" size={18} />Open the example report</Btn></div>
         </Card>
         <div className="grid gap-4 content-start">
-          {[[ChartBar, 'Reports fill in after your first game', 'Every question your class answers shows up here: what they got, what they missed, and what to teach next.'], [Warning, 'Needs attention is empty', 'When a student is stuck or a question trips up the class, it shows here, privately.'], [StickerIcon, 'No stickers yet', 'Your class earns the first one, Good job!, the first time they play.']].map(([Ic, t, d]) => {
+          {[[ChartBar, 'Reports fill in after your first game', 'Every question your class answers shows up here: what they got, what they missed, and what to teach next.'], [Warning, 'Needs attention is empty', 'When a student is stuck or a question trips up the class, it shows here, privately.'], [StickerIcon, 'No stickers yet', 'Your class earns the first one, First game!, the first time they play.']].map(([Ic, t, d]) => {
             const C = Ic as typeof House;
             return (
               <div key={t as string} className="rounded-[18px] p-5 grid justify-items-center text-center gap-2" style={{ border: `2.5px dashed ${Q}` }}>
