@@ -1,14 +1,15 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import {
-  ArrowRight, Broadcast, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
+  ArrowLeft, ArrowRight, Broadcast, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
   PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Television, Toolbox, User, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
-import { BlobPatch, CrayonDie, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
+import { BlobPatch, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { Badge, LakeBack, MenuStep, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, TEAMS, TurnGlow } from './mockKit';
+import { Badge, Fit, Laptop, MainBtn, MenuStep, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
+import { GAME_COVERS } from './GameMockups';
 
-export { Badge, TEAMS };
+export { Badge, Laptop, MainBtn, Tablet, TEAMS };
 
 // Universal views (PROPOSAL, teacher 2026-11-23). Round 3 rules: no washi
 // tape; every universal screen sits on the site's purple ground; the scoreboard
@@ -26,42 +27,6 @@ const SEL = `0 0 0 4px ${PP.paper}, 0 0 0 8px ${I}`;
 const PICK: CSSProperties = { background: PP.mint, color: I, boxShadow: `inset 0 0 0 3px ${I}` };
 const LIFT = `0 6px 0 ${I}`;
 const card: CSSProperties = { background: PP.paper, border: `3px solid ${I}`, borderRadius: 20, boxShadow: `0 4px 0 ${I}` };
-
-// ---------- frames ----------
-function Scaled({ w, h, children }: { w: number; h: number; children: ReactNode }) {
-  const box = useRef<HTMLDivElement>(null);
-  const [k, setK] = useState(0.5);
-  useLayoutEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setK(el.clientWidth / w));
-    ro.observe(el);
-    setK(el.clientWidth / w);
-    return () => ro.disconnect();
-  }, [w]);
-  return (
-    <div ref={box} className="relative w-full overflow-hidden" style={{ aspectRatio: `${w} / ${h}` }}>
-      <div className="absolute top-0 left-0 origin-top-left" style={{ width: w, height: h, transform: `scale(${k})`, color: I }}>{children}</div>
-    </div>
-  );
-}
-export function Laptop({ children, w = 1000 }: { children: ReactNode; w?: number }) {
-  return (
-    <div className="grid justify-items-center">
-      <div className="w-full rounded-t-[1.1rem] p-[2.2%] pb-[2.6%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
-        <div className="rounded-[0.35rem] overflow-hidden"><Scaled w={w} h={w * 0.625}>{children}</Scaled></div>
-      </div>
-      <div className="w-[103%] h-3 rounded-b-[0.9rem]" style={{ background: '#c9c4d6', border: `2px solid ${I}`, borderTop: 'none' }} />
-    </div>
-  );
-}
-export function Tablet({ children }: { children: ReactNode }) {
-  return (
-    <div className="w-full max-w-[21rem] mx-auto rounded-[1.6rem] p-[4%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
-      <div className="rounded-[0.7rem] overflow-hidden"><Scaled w={820} h={1180}>{children}</Scaled></div>
-    </div>
-  );
-}
 
 // ---------- paper parts: one flat card, one ink outline, the sticker shadow (teacher, 2026-11-23: no tape, no stacked sheets) ----------
 function Paper({ children, className = '', style, pad = 32 }: { children: ReactNode; className?: string; style?: CSSProperties; layer?: string; tilt?: number; pad?: number }) {
@@ -88,12 +53,6 @@ function Tools({ size = 52, access = true }: { size?: number; access?: boolean }
       <Round size={size} label="Full screen"><CornersOut weight="bold" size={s} /></Round>
       <Round size={size} label="Close"><X weight="bold" size={s} /></Round>
     </div>
-  );
-}
-export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
-  return (
-    <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
-      style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
   );
 }
 function SecondBtn({ children, h = 56 }: { children: ReactNode; h?: number }) {
@@ -164,32 +123,47 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
 
 // ---------- views ----------
 function V1() {
-  // Her original live welcome layout, right column spaced evenly (teacher, 2026-11-23).
-  return (
-    <WelcomeScreen name="Board Game" desc="Answer, roll the die and race to the finish." modes={['Share', 'Live', 'Solo']}
-      steps={[[<Check key="a" weight="bold" size={22} />, 'Answer the question'], [<Star key="b" weight="bold" size={22} />, 'Roll the die'], [<ArrowRight key="c" weight="bold" size={22} />, 'Move to the finish']]}
-      cover={<div className="relative w-full h-full grid place-items-center"><ParkBack w={790} h={490} /><span className="relative"><CrayonDie value={5} size={200} /></span></div>} />
-  );
+  // Her original live welcome layout, the right column a full-height column spread evenly (teacher, 2026-11-23).
+  const g = GAME_COVERS[1];
+  return <WelcomeScreen name={g.name} desc={g.desc} modes={g.modes} cover={g.cover}
+    steps={[[<Check key="a" weight="bold" size={24} />, g.steps[0]], [<Star key="b" weight="bold" size={24} />, g.steps[1]], [<ArrowRight key="c" weight="bold" size={24} />, g.steps[2]]]} />;
 }
-function V2() {
-  const ways = [
-    { id: 'Share', hint: 'Play together on one screen', icon: <Television weight="bold" size={104} />, bg: PP.gamify, on: true },
-    { id: 'Live', hint: 'Play together on your own devices', icon: <Broadcast weight="bold" size={104} />, bg: PP.aqua },
-    { id: 'Solo', hint: 'Play on your own', icon: <User weight="bold" size={104} />, bg: PP.butter },
-  ];
+// An option group as one card on the purple ground (no white panel behind the step).
+function OptCard({ label, children }: { label: string; children: ReactNode }) {
+  return <div className="px-8 py-5 grid justify-items-center gap-3 rounded-[24px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}><b className="text-[22px]">{label}</b>{children}</div>;
+}
+const WAYS = [
+  { id: 'Share', hint: 'Play together on one screen', icon: <Television weight="bold" size={104} />, bg: PP.gamify },
+  { id: 'Live', hint: 'Play together on your own devices', icon: <Broadcast weight="bold" size={104} />, bg: PP.aqua },
+  { id: 'Solo', hint: 'Play on your own', icon: <User weight="bold" size={104} />, bg: PP.butter },
+];
+// Settings show only under the way they belong to (teacher, 2026-11-23).
+function V2({ pick = 'Share' }: { pick?: 'Share' | 'Solo' }) {
   return (
     <Wizard step={1} total={5} title="How will you play?">
-      <div className="flex flex-col items-center gap-7">
+      <div className="flex flex-col items-center gap-9">
         <div className="flex gap-8">
-          {ways.map((w) => (
-            <div key={w.id} className="relative w-[260px] h-[250px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: w.on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: w.on ? 'translateY(-6px)' : undefined }}>
+          {WAYS.map((w) => { const on = w.id === pick; return (
+            <div key={w.id} className="relative w-[268px] h-[262px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
               <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: w.bg, borderBottom: `3px solid ${I}` }}>{w.icon}</span>
               <span className="px-4 py-3 text-center"><b className="text-[32px] block" style={GY}>{w.id}</b><span className="text-[17px] font-semibold">{w.hint}</span></span>
-              {w.on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
-            </div>
-          ))}
+              {on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
+            </div>); })}
         </div>
-        <div className="flex items-center gap-4 font-bold text-[20px]"><span>How do you share?</span><Seg opts={['Same device', 'Share a join code']} pick={0} /></div>
+        {pick === 'Share'
+          ? <OptCard label="How do you share?"><Seg opts={['Same device', 'Share a join code']} pick={0} /></OptCard>
+          : <OptCard label="Who do you play against?"><Seg opts={['Just me', 'The computer']} pick={1} /></OptCard>}
+      </div>
+    </Wizard>
+  );
+}
+function ShareCode() {
+  return (
+    <Wizard step={1} total={5} title="Share a join code">
+      <div className="grid justify-items-center gap-6">
+        <span className="font-bold text-[26px]">Open the Join page on the screen you want to play on and type</span>
+        <span className="px-10 py-4 rounded-[26px] tracking-[0.2em]" style={{ ...GY, fontSize: 120, background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>472 915</span>
+        <span className="font-bold text-[22px] flex items-center gap-2 px-5 h-12 rounded-full" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}><Television weight="bold" size={26} />Same game and question set, on one shared screen</span>
       </div>
     </Wizard>
   );
@@ -239,7 +213,7 @@ function V3() {
 }
 // No section kicker labels (teacher, 2026-11-23); only the real field labels.
 function Group({ children }: { title?: string; children: ReactNode }) {
-  return <div className="p-6 grid gap-8 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}>{children}</div>;
+  return <div className="p-7 grid gap-8 content-start justify-items-center text-center" style={{ ...card, borderRadius: 24, boxShadow: `0 5px 0 ${I}` }}>{children}</div>;
 }
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return <div className="grid justify-items-center gap-3"><b className="text-[22px]">{label}</b>{children}</div>;
@@ -301,13 +275,13 @@ const SETUP: { id: PowerId; name: string; job: string; on: boolean; soft: string
   { id: 'mystery-box', name: 'Mystery Box', job: 'Opens a surprise power-up.', on: true, soft: PP.blush },
 ];
 function V6() {
-  // Back inside the white panel (teacher, 2026-11-23: every start menu the same; this replaces the 11-13 "no white box" rule).
+  // Straight on the purple ground, no white panel (teacher, 2026-11-23, newest).
   return (
     <Wizard step={5} total={5} title="Power-ups" last>
-      <div className="grid grid-cols-3 gap-x-6 gap-y-5">
+      <div className="grid grid-cols-3 gap-x-8 gap-y-7">
         {SETUP.map((c) => (
-          <div key={c.id} className="relative w-[290px] h-[168px] grid justify-items-center content-center gap-1.5 text-center rounded-[22px]"
-            style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` } : { background: '#fff', border: `3px dashed ${I}` }}>
+          <div key={c.id} className="relative w-[320px] h-[196px] grid justify-items-center content-center gap-2 text-center rounded-[24px]"
+            style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` } : { background: PP.cream, border: `3px dashed ${I}` }}>
             <span className="relative w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><BlobPatch color={c.soft} size={84} /><span className="relative"><CrayonPowerUp id={c.id} size={66} /></span></span>
             <b className="text-[22px] leading-tight">{c.name}</b>
             <span className="text-[16px] font-semibold leading-snug" style={{ color: PP.quiet }}>{c.job}</span>
@@ -504,20 +478,61 @@ function V11b() {
     </div>
   );
 }
+// ---------- student join and name pick, iPad first (820 x 1180) ----------
+function TabletStage({ children }: { children: ReactNode }) {
+  return (
+    <div className="w-full h-full relative" style={PURPLE_GROUND}>
+      <img src="/brand/gamify-wordmark.png" alt="Gamify" className="absolute left-9 top-9 h-11 w-auto" draggable={false} />
+      <span className="absolute right-9 top-8"><Round size={60} label="Accessibility"><PersonArmsSpread weight="bold" size={28} /></Round></span>
+      <div className="absolute inset-x-10 top-[130px] bottom-[60px] flex flex-col items-center justify-center gap-9 text-center">{children}</div>
+    </div>
+  );
+}
 function V12() {
   return (
-    <Stage>
-      <div className="flex-1 grid place-items-center">
-        <Paper pad={44} className="w-[720px]" layer={PP.aqua} tilt={-1.5}>
-          <div className="grid justify-items-center gap-5 text-center">
-            <h1 className="text-[72px]" style={GY}>Join the game</h1>
-            <p className="font-semibold text-[22px]" style={{ color: PP.quiet }}>Type the game code your teacher gave you.</p>
-            <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[84px] h-[100px] rounded-2xl grid place-items-center text-[60px]" style={{ ...GY, background: i === 4 ? PP.butter : PP.paper, border: `3px solid ${I}`, boxShadow: i === 4 ? `0 0 0 5px ${PP.lemon}` : `0 4px 0 ${I}`, marginLeft: i === 3 ? 18 : 0 }}>{d}</span>)}</div>
-            <div className="flex gap-4 items-center"><SecondBtn h={60}><SpeakerHigh weight="bold" size={22} />Hear my code</SecondBtn><MainBtn big>Go<ArrowRight weight="bold" size={28} /></MainBtn></div>
-          </div>
-        </Paper>
+    <TabletStage>
+      <h1 className="text-[88px]" style={GY}>Join the game</h1>
+      <p className="font-bold text-[30px] leading-snug">Type the game code your teacher gave you.</p>
+      <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[104px] h-[128px] rounded-[22px] grid place-items-center text-[76px]" style={{ ...GY, background: i === 4 ? PP.butter : PP.paper, border: `3px solid ${I}`, boxShadow: i === 4 ? `0 0 0 6px ${PP.lemon}` : `0 5px 0 ${I}`, marginLeft: i === 3 ? 22 : 0 }}>{d}</span>)}</div>
+      <div className="grid grid-cols-3 gap-4">{['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'x'].map((k, i) => k === '' ? <span key={i} /> : <span key={i} className="w-[150px] h-[96px] rounded-[22px] grid place-items-center text-[48px]" style={{ ...GY, background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>{k === 'x' ? <ArrowLeft weight="bold" size={44} /> : k}</span>)}</div>
+      <div className="flex gap-4 items-center"><SecondBtn h={72}><SpeakerHigh weight="bold" size={28} />Hear my code</SecondBtn><MainBtn big>Go<ArrowRight weight="bold" size={30} /></MainBtn></div>
+    </TabletStage>
+  );
+}
+function V12n() {
+  const names = ['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen', 'June', 'Kai'];
+  return (
+    <TabletStage>
+      <h1 className="text-[80px]" style={GY}>Tap your name</h1>
+      <div className="grid grid-cols-2 gap-4 w-full">
+        {names.map((n, i) => (
+          <span key={n} className="relative h-[92px] rounded-[24px] flex items-center justify-center font-bold text-[36px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: i === 2 ? `${SEL}, 0 5px 0 ${I}` : `0 5px 0 ${I}` }}>
+            {n}{i === 2 && <span className="absolute -top-3 -right-3"><Check40 size={44} /></span>}
+          </span>
+        ))}
       </div>
-    </Stage>
+      <MainBtn big><Play weight="fill" size={30} />That&apos;s me!</MainBtn>
+    </TabletStage>
+  );
+}
+// ---------- Live setup (teacher): only under Live ----------
+function ClassHow() {
+  const ways = [['Together', 'Fill one goal as a class', PP.blueCrystal, true], ['Compete', 'A leaderboard of names and points', PP.blush, false]] as const;
+  return (
+    <Wizard step={4} total={5} title="How the class plays">
+      <div className="grid justify-items-center gap-9">
+        <div className="flex justify-center gap-8">
+          {ways.map(([n, l, c, on]) => (
+            <div key={n} className="relative w-[340px] h-[230px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
+              <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: c, borderBottom: `3px solid ${I}` }}>{on ? <UsersThree weight="bold" size={84} /> : <Star weight="bold" size={84} />}</span>
+              <span className="px-4 py-3 text-center"><b className="text-[34px] block" style={GY}>{n}</b><span className="text-[18px] font-semibold">{l}</span></span>
+              {on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
+            </div>
+          ))}
+        </div>
+        <OptCard label="The game ends"><Seg opts={['When I stop it', 'After a number right', 'After some minutes']} pick={0} /></OptCard>
+      </div>
+    </Wizard>
   );
 }
 // ---------- lobbies ----------
@@ -529,9 +544,9 @@ function V12b() {
   return (
     <MenuStep title="Race lobby" step={6} total={6} go={<MainBtn big><Play weight="fill" size={28} />Start the race</MainBtn>}>
       <CodeChip />
-      <div className="w-full grid grid-cols-4 gap-5 mt-6">
+      <div className="w-full grid grid-cols-4 gap-5 mt-7">
         {TEAMS.map((t, i) => (
-          <div key={t.name} className="flex flex-col items-center gap-3 pt-5 rounded-[26px]" style={{ background: t.soft, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+          <div key={t.name} className="flex flex-col items-center gap-3 pt-5 pb-5 rounded-[26px]" style={{ background: t.soft, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
             <span className="w-[76px] h-[76px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={50} /></span>
             <b className="text-[24px]">{t.name}</b>
             {NAMES.slice(i * 3, i * 3 + 3).map((n) => <span key={n} className="w-[200px] h-12 rounded-full grid place-items-center font-bold text-[21px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{n}</span>)}
@@ -546,36 +561,13 @@ function V12c() {
   return (
     <MenuStep title="Team lobby" step={6} total={6} go={<MainBtn big><Play weight="fill" size={28} />Start together</MainBtn>}>
       <CodeChip />
-      <div className="w-[960px] mt-7 p-7 rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}>
-        <div className="grid justify-items-center gap-5 text-center">
-          <span className="flex items-center gap-3 text-[30px] font-bold"><Star weight="fill" size={40} color={PP.lemon} />Our goal: fill the sky with 60 stars</span>
-          <span className="w-[640px] h-7 rounded-full" style={{ background: PP.cream, border: `3px solid ${I}` }} />
-          <div className="flex flex-wrap justify-center gap-3 max-w-[820px]">{NAMES.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{n}</span>)}</div>
-        </div>
+      <div className="mt-7 px-9 py-6 grid justify-items-center gap-4 rounded-[26px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+        <span className="flex items-center gap-3 text-[30px] font-bold"><Star weight="fill" size={40} color={PP.lemon} />Our goal: fill the sky with 60 stars</span>
+        <span className="flex items-center gap-4"><span className="w-[560px] h-7 rounded-full overflow-hidden" style={{ background: PP.blueCrystal, border: `3px solid ${I}` }}><span className="block h-full w-[4%]" style={{ background: PP.lemon, borderRight: `3px solid ${I}` }} /></span><b className="text-[22px] tabular-nums">0 of 60</b></span>
       </div>
+      <div className="flex flex-wrap justify-center gap-3 max-w-[900px] mt-7">{NAMES.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{n}</span>)}</div>
     </MenuStep>
   );
-}
-// A Live game's own student waiting screen, in its theme.
-function Waiting({ back, title, line, you }: { back: ReactNode; title: string; line: string; you: ReactNode }) {
-  return (
-    <div className="w-full h-full relative">
-      {back}
-      <div className="absolute inset-0 grid place-items-center px-10">
-        <Paper pad={40} className="w-full" layer={PP.gamify}>
-          <div className="grid justify-items-center gap-5 text-center">
-            <TurnGlow round still><span className="w-[150px] h-[150px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}>{you}</span></TurnGlow>
-            <h2 className="text-[72px]" style={GY}>{title}</h2>
-            <p className="font-bold text-[30px] leading-snug">{line}</p>
-            <span className="flex gap-3" aria-label="Waiting">{[0, 1, 2].map((d) => <span key={d} className="w-5 h-5 rounded-full" style={{ background: [PP.periwinkle, PP.lemon, PP.pink][d], border: `2.5px solid ${I}` }} />)}</span>
-          </div>
-        </Paper>
-      </div>
-    </div>
-  );
-}
-function StarArt({ size = 96 }: { size?: number }) {
-  return <Doodle kind="star" color={PP.lemon} size={size} />;
 }
 
 function V13() {
@@ -599,37 +591,34 @@ function V13() {
   );
 }
 
-const VIEWS: { n: string; name: string; view: ReactNode; problem: string; changed: string; tablet?: boolean }[] = [
-  { n: '1', name: 'Welcome', view: <V1 />, problem: 'The welcome had become a step panel, not her original page.',
-    changed: 'Back to her original welcome: cover big on the left, the right column exactly as tall as it and spaced evenly (title level with the cover top and the corner buttons, description and ways to play, the white How to play card, the start button level with the cover bottom).' },
-  { n: '2', name: 'Ways to play', view: <V2 />, problem: 'Tape on the panel; icons were filled while the Icons tab says bold.',
-    changed: 'Purple ground, bold icons, the picked card lifts with an ink ring and green check, the share question under the cards.' },
-  { n: '3', name: 'Question set picker', view: <V3 />, problem: 'Small cards with little to choose by.', changed: 'Tabs, search, subject and grade filters; recently used first; each card shows the subject color, grades, question count, the first question and when it was last used; picked = ink ring and green check; nothing under 15px.' },
-  { n: '4', name: 'Options', view: <V4 />, problem: 'Section kickers like \"The game\" and \"Help for players\".', changed: 'Kickers removed; two plain groups with only the real field labels (Rounds, Board size, Timer, Read aloud).' },
-  { n: '5', name: 'Teams and players', view: <V5 />, problem: 'Tilted cards.', changed: 'Straight cards, no tilt anywhere in menus; a shape and color on each team and a dashed Add chip.' },
-  { n: '6', name: 'Power-up setup cards', view: <V6 />, problem: 'The step title sat on a taped chip.', changed: 'Back inside the same white panel as every start menu (her 2026-11-23 rule replaces the earlier no-white-box rule); off cards dashed, never crossed out.' },
-  { n: '7', name: 'Power-up pop card', view: <V7 />, problem: 'Tape on the card.', changed: 'One flat paper card with soft sun rays, over the game (Board Game park here).' },
-  { n: '8', name: 'Question screen (laptop)', view: <QLaptop theme="park" />, problem: 'Several near-identical question screens, and the team, tools and Listen were spread around the screen.',
-    changed: 'One question screen for every game; only the background changes (Board Game park here). Her page 2 header inside the card: the current team left; tools, settings, full screen, close and Listen right; question text left; A to D tiles.' },
-  { n: '9a', name: 'Top tracker: solo, share, live', view: <V9a />, problem: 'One thin strip of dashes, a dash per turn, buttons of mixed sizes.',
-    changed: 'Three variants top to bottom (solo with no player icon, share with the turn glow, live with the class goal), labels removed from the screen. Who or what on the left, Round X of Y over one chunky segment per round in the middle, three 48px icon buttons on the right.' },
-  { n: '9b', name: 'Scoreboard and held power-ups', view: <V9b />, problem: 'The scoreboard sat on a panel and held power-ups were a line of text.',
-    changed: 'No panel: team rows sit on the stage, the current team wears the turn glow, held power-ups are 1:1 square cards centered under it.' },
-  { n: '10', name: 'Results box', view: <V10 />, problem: 'The winner had its own sun badge, different from the turn glow.',
-    changed: 'The winner wears the exact turn glow (TURN_GLOW: 6px lemon ring, 24px soft halo, 1.6 s breathe); no tape; two sticker accents.' },
-  { n: '11', name: 'Settings and Calm', view: <V11 />, problem: 'Tape; title off center.', changed: 'Centered title with the close button at the right, side tabs, Calm mode first and biggest.' },
-  { n: '11b', name: 'Pause', view: <V11b />, problem: 'Tape on the card.', changed: 'A plain calm card with the bold pause icon on a pastel blob.' },
-  { n: '12', name: 'Join code', view: <V12 />, problem: 'Pattern bands and tape.', changed: 'Purple ground, one centered card, 84px digit boxes in two groups of three.' },
-  { n: '12b', name: 'Lobby: competitive', view: <V12b />, problem: 'One lobby for every game; nothing showed who you play against.',
-    changed: 'Teams line up in their colors and shapes, names joining under each, the code and count on one chip, Start the race.' },
-  { n: '12c', name: 'Lobby: cooperative', view: <V12c />, problem: 'A shared-goal game looked like a race.',
-    changed: 'One class goal on top, an empty goal bar, every name joining one group, Start together.' },
-  { n: '13', name: 'Teach card', view: <V13 />, problem: 'Tape and a stacked sheet.', changed: 'One flat card over the game: the picture on a pastel blob, the skill line at 38px, a 68px Let\u2019s play.' },
+type V = { n: string; name: string; view: ReactNode; note: string; tablet?: boolean };
+// Every shared screen, in the order a class meets them (teacher, 2026-11-23:
+// "all these screens would be considered universal and should be moved to universal page").
+const VIEWS: V[] = [
+  { n: '1', name: 'Welcome', view: <V1 />, note: 'Her original layout: the cover (a real miniature of the game in play) big on the left; the right column exactly as tall, spread evenly: the title row with the corner buttons, the description and ways to play, the How to play card, a 72px start button level with the cover bottom.' },
+  { n: '2a', name: 'How will you play? (Share picked)', view: <V2 pick="Share" />, note: 'No white panel: the cards sit on the purple ground. "How do you share?" shows only because Share is picked.' },
+  { n: '2b', name: 'How will you play? (Solo picked)', view: <V2 pick="Solo" />, note: 'Solo shows only its own setting: who you play against.' },
+  { n: '3', name: 'Share a join code', view: <ShareCode />, note: 'Only after Share and "Share a join code": the code big on one paper card.' },
+  { n: '4', name: 'Question set', view: <V3 />, note: 'Tabs, search, subject and grade filters, recent first; each card shows subject, grades, count, the first question and when it was used.' },
+  { n: '5', name: 'Options', view: <V4 />, note: 'Each option group is its own card on the ground; only real field labels.' },
+  { n: '6', name: 'Teams and players', view: <V5 />, note: 'Straight cards, a shape and color on each team.' },
+  { n: '7', name: 'Power-up setup', view: <V6 />, note: 'The cards on the purple ground, centered; off cards dashed.' },
+  { n: '8', name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
+  { n: '9a', name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
+  { n: '9b', name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
+  { n: '10', name: 'Question screen (laptop)', view: <QLaptop theme="park" />, note: 'The ONE question screen; games only swap the background (Board Game park here).' },
+  { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left, Round X of Y in the middle, icon buttons right.' },
+  { n: '11b', name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team wears the turn glow; held power-ups are square cards.' },
+  { n: '12', name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
+  { n: '13', name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },
+  { n: '14', name: 'Settings and Calm', view: <V11 />, note: 'Calm mode first and biggest.' },
+  { n: '15', name: 'Pause', view: <V11b />, note: 'A plain calm card.' },
+  { n: '16', name: 'Teach card', view: <V13 />, note: 'The skill line at 38px, Let’s play.' },
 ];
-const TABLETS: { n: string; name: string; view: ReactNode; problem: string; changed: string }[] = [
-  { n: '8', name: 'Question screen (iPad portrait)', view: <QTablet theme="park" />, problem: 'Words were small for a finger.', changed: 'The same card stacked in one column with the same header row; 84px letters and 46px answers.' },
-  { n: '12d', name: 'Waiting: Question Tracker (Live student)', view: <Waiting back={<SkyBack w={820} h={1180} stars={18} />} title="You're in, Ava!" line="Your teacher will start soon. Your stars will light up the sky." you={<StarArt size={100} />} />, problem: 'Live students waited on a plain screen.', changed: 'The game’s own night sky, the student’s star in the turn glow, waiting dots.' },
-  { n: '12e', name: 'Waiting: Cast and Catch (Live student)', view: <Waiting back={<LakeBack w={820} h={1180} />} title="You're in, Leo!" line="Your teacher will start soon. Get your line ready." you={<Doodle kind="dot" color={PP.pink} size={90} />} />, problem: 'Same plain waiting screen as every game.', changed: 'The lake and boat from the game, the bobber in the turn glow, waiting dots.' },
+const TABLETS: V[] = [
+  { n: '17', name: 'Student join (iPad)', view: <V12 />, note: '104px digit boxes and a 150 x 96 keypad for small fingers; Hear my code.' },
+  { n: '18', name: 'Student name pick (iPad)', view: <V12n />, note: 'Class list names as big tap cards; picked = ink ring and green check.' },
+  { n: '10i', name: 'Question screen (iPad portrait)', view: <QTablet theme="park" />, note: 'The same card in one column; 84px letters, 46px answers.' },
 ];
 
 export default function UniversalViews() {
@@ -637,26 +626,37 @@ export default function UniversalViews() {
     <section className="grid gap-6">
       <div className="grid gap-1 justify-items-center text-center">
         <h2 className="font-heading text-2xl">Universal views <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">Round 3: the site&apos;s purple ground on every screen, no tape, one turn glow (also on the winner), a clearer top tracker, the scoreboard on the stage with square power-up cards, competitive and cooperative lobbies, and each game&apos;s theme around the question card. Everything centered except question text and the A to D letters. Preview only.</p>
+        <p className="text-sm font-semibold text-muted max-w-prose">Every shared screen, the same in every game: the welcome, the start menus (no white panel, cards on the purple ground, settings only under the way they belong to), join, lobbies, the one question screen, trackers, results, settings, pause and the teach card. Each game&apos;s themable views are on Game mockups. Preview only.</p>
       </div>
       <div className="grid gap-8 lg:grid-cols-2">
         {VIEWS.map((v) => (
           <figure key={v.n} className="m-0 grid gap-3 content-start">
             <figcaption className="font-heading text-lg text-center">{v.n}. {v.name}</figcaption>
             <Laptop w={1280}>{v.view}</Laptop>
-            <p className="text-sm font-semibold text-muted text-center"><b>Before:</b> {v.problem}</p>
-            <p className="text-sm font-semibold -mt-2 text-center"><b>What changed:</b> {v.changed}</p>
+            <p className="text-sm font-semibold text-center">{v.note}</p>
           </figure>
         ))}
+      </div>
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {TABLETS.map((v) => (
           <figure key={v.n} className="m-0 grid gap-3 content-start">
             <figcaption className="font-heading text-lg text-center">{v.n}. {v.name}</figcaption>
             <Tablet>{v.view}</Tablet>
-            <p className="text-sm font-semibold text-muted text-center"><b>Before:</b> {v.problem}</p>
-            <p className="text-sm font-semibold -mt-2 text-center"><b>What changed:</b> {v.changed}</p>
+            <p className="text-sm font-semibold text-center">{v.note}</p>
           </figure>
         ))}
       </div>
+      <figure className="m-0 grid gap-3">
+        <figcaption className="font-heading text-lg text-center">1b. Welcome covers: each game in play</figcaption>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {GAME_COVERS.map((g) => (
+            <div key={g.id} className="grid gap-1.5">
+              <div className="rounded-[1rem] overflow-hidden border-2 border-black"><Fit w={720} h={648}><div className="relative w-full h-full">{g.cover}</div></Fit></div>
+              <b className="text-sm text-center">{g.name}</b>
+            </div>
+          ))}
+        </div>
+      </figure>
     </section>
   );
 }

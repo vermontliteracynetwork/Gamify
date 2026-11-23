@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, ArrowRight, CornersOut, GearSix, PersonArmsSpread, Play, X } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
@@ -119,17 +119,64 @@ export function LakeBack({ w, h }: { w: number; h: number }) {
   );
 }
 
-// ---------- THE start menu (teacher, 2026-11-23: "all intiail menus for every
-// game need to be the same, white middle background and purple classic
-// bakground"). One layout for every game's welcome, ways to play, question
-// set, options, teams, power-ups, Live setup and lobby: the purple ground, the
-// wordmark and icon buttons on top, one white panel of the same size and place
-// on every step, a header row (Grow Year caps title left, step tracker right,
-// no "Step X of Y" text), content centered, the same Back and Next footer.
-// Drawn at 1280 x 800 and scaled to the frame's canvas (1000 or 1280 wide).
+// ---------- device frames (shared by Universal views, Game mockups, Teacher portal) ----------
+function Scaled({ w, h, children }: { w: number; h: number; children: ReactNode }) {
+  const box = useRef<HTMLDivElement>(null);
+  const [k, setK] = useState(0.5);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setK(el.clientWidth / w));
+    ro.observe(el);
+    setK(el.clientWidth / w);
+    return () => ro.disconnect();
+  }, [w]);
+  return (
+    <div ref={box} className="relative w-full overflow-hidden" style={{ aspectRatio: `${w} / ${h}` }}>
+      <div className="absolute top-0 left-0 origin-top-left" style={{ width: w, height: h, transform: `scale(${k})`, color: I }}>{children}</div>
+    </div>
+  );
+}
+export function Laptop({ children, w = 1000 }: { children: ReactNode; w?: number }) {
+  return (
+    <div className="grid justify-items-center">
+      <div className="w-full rounded-t-[1.1rem] p-[2.2%] pb-[2.6%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
+        <div className="rounded-[0.35rem] overflow-hidden"><Scaled w={w} h={w * 0.625}>{children}</Scaled></div>
+      </div>
+      <div className="w-[103%] h-3 rounded-b-[0.9rem]" style={{ background: '#c9c4d6', border: `2px solid ${I}`, borderTop: 'none' }} />
+    </div>
+  );
+}
+export function Tablet({ children }: { children: ReactNode }) {
+  return (
+    <div className="w-full max-w-[21rem] mx-auto rounded-[1.6rem] p-[4%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
+      <div className="rounded-[0.7rem] overflow-hidden"><Scaled w={820} h={1180}>{children}</Scaled></div>
+    </div>
+  );
+}
+// A cover or any art drawn at (w x h) and scaled to fill its box.
+export function Fit({ w, h, children }: { w: number; h: number; children: ReactNode }) {
+  return <Scaled w={w} h={h}>{children}</Scaled>;
+}
+export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
+  return (
+    <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
+      style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
+  );
+}
+
+// ---------- THE start menu (teacher, 2026-11-23, newest: "improve the format
+// so no white background, just the card buttons like the game types and power
+// ups against the putple background. only show setting toggles and such when
+// the specific game type relebant to them is selected"). One layout for every
+// game's ways to play, question set, options, teams, power-ups, Live setup and
+// lobby: the purple ground, the wordmark and icon buttons on top, the header
+// row (Grow Year caps title left, step tracker right, no "Step X of Y" text),
+// the choice cards straight on the ground, centered, the same Back and Next
+// footer. No white panel. Drawn at 1280 x 800 and scaled to the frame's canvas.
 const MK_GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
-function MkRound({ children, label }: { children: ReactNode; label: string }) {
-  return <span aria-label={label} className="w-[52px] h-[52px] rounded-full grid place-items-center" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
+function MkRound({ children, label, size = 52 }: { children: ReactNode; label: string; size?: number }) {
+  return <span aria-label={label} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
 export function MenuGo({ children }: { children: ReactNode }) {
   return <span className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>;
@@ -148,56 +195,55 @@ export function MenuStep({ title, step, total, children, go, back = true, canvas
             <MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Close"><X weight="bold" size={24} /></MkRound>
           </div>
         </div>
-        <section className="absolute left-[80px] right-[80px] top-[112px] bottom-[40px] rounded-[30px] flex flex-col px-9 pt-7 pb-7 gap-5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+        <div className="absolute left-[80px] right-[80px] top-[108px] bottom-[36px] flex flex-col gap-6">
           <div className="flex items-center justify-between gap-6">
-            <h2 className="text-[46px]" style={MK_GY}>{title}</h2>
+            <h2 className="text-[50px]" style={MK_GY}>{title}</h2>
             <ol className="flex gap-2 list-none p-0 m-0" aria-label={`Step ${step} of ${total}`}>
               {Array.from({ length: total }, (_, i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < step - 1 ? PP.periwinkle : i === step - 1 ? PP.lemon : '#fff', border: `2.5px solid ${I}` }} />)}
             </ol>
           </div>
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
           <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
-        </section>
+        </div>
       </div>
     </div>
   );
 }
 
 // ---------- THE game welcome (teacher, 2026-11-23: "revert to original welcome
-// page, just space out the right text better"). The live GameWelcome layout:
-// the cover big on the left; the right column exactly as tall as the cover,
-// spaced evenly: the title (level with the cover top, corner buttons to its
-// right), the description and ways to play, the white How to play card, and a
-// full-width start button whose bottom lines up with the cover bottom.
+// page, just space out the right text better"). Her original GameWelcome
+// layout at 1280 x 800: the cover big on the left (about 60% of the width);
+// the right column exactly as tall as the cover, a full-height column spread
+// evenly (justify-between): the Grow Year title row level with the cover top
+// (corner buttons at its right), the description and ways to play, the white
+// How to play card, and a full-width 72px start button whose bottom lines up
+// with the cover bottom.
 export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up and play', canvas = 1280 }: { name: string; desc: string; modes: string[]; steps: [ReactNode, string][]; cover: ReactNode; go?: string; canvas?: number }) {
   const chip = [PP.gamify, PP.aqua, PP.butter];
-  // 1280 x 800: cover 790 x 490 (100:62, shown whole), right column 390 wide and exactly
-  // as tall as the cover, justify-between so the groups spread evenly (about 26px apart).
-  const title = Math.min(56, Math.floor(390 / (name.length * 0.62)));
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
-        <div className="absolute left-8 right-8 top-7 flex items-center justify-between">
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto" draggable={false} />
-          <div className="flex gap-3"><MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={24} /></MkRound></div>
-        </div>
-        <div className="absolute left-8 top-[175px] flex gap-9">
-          <div className="w-[790px] h-[490px] rounded-[28px] overflow-hidden grid place-items-center shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
-          <div className="w-[390px] h-[490px] flex flex-col justify-between">
-            <h1 className="leading-none whitespace-nowrap" style={{ ...MK_GY, fontSize: title }}>{name}</h1>
-            <div className="grid gap-2.5">
-              <p className="font-semibold text-[20px] leading-snug">{desc}</p>
-              <div className="flex gap-2">{modes.map((m, i) => <span key={m} className="px-4 py-0.5 rounded-full font-bold text-[18px]" style={{ background: chip[i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="absolute left-10 top-7 h-10 w-auto" draggable={false} />
+        <div className="absolute left-10 right-10 top-[108px] bottom-[44px] flex gap-10">
+          <div className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
+          <div className="flex-1 min-w-0 h-full flex flex-col justify-between">
+            <div className="flex items-start gap-4">
+              <h1 className="flex-1 min-w-0" style={{ ...MK_GY, fontSize: 64, lineHeight: 0.95 }}>{name}</h1>
+              <div className="flex gap-3 pt-1"><MkRound label="Full screen" size={56}><CornersOut weight="bold" size={26} /></MkRound><MkRound label="Settings" size={56}><GearSix weight="bold" size={26} /></MkRound></div>
             </div>
-            <div className="rounded-[24px] px-6 py-4 grid gap-3" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: '0 3px 0 rgba(29,26,51,0.14), 0 12px 24px rgba(29,26,51,0.10)' }}>
-              <h2 className="text-[16px] font-bold" style={{ color: PP.quiet }}>How to play</h2>
+            <div className="grid gap-4">
+              <p className="font-semibold text-[22px] leading-snug">{desc}</p>
+              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: chip[i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
+            </div>
+            <div className="rounded-[26px] px-7 py-5 grid gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+              <h2 className="text-[26px]" style={MK_GY}>How to play</h2>
               {steps.map(([ic, t], i) => (
-                <div key={t} className="flex items-center gap-4 font-bold text-[20px]">
-                  <span className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}
+                <div key={t} className="flex items-center gap-4 font-bold text-[22px] leading-tight">
+                  <span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}
                 </div>
               ))}
             </div>
-            <span className="w-full min-h-[66px] rounded-full font-display font-bold text-[28px] inline-flex items-center justify-center gap-3" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}><Play weight="fill" size={30} />{go}</span>
+            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}><Play weight="fill" size={32} />{go}</span>
           </div>
         </div>
       </div>
