@@ -46,7 +46,9 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   const page = pages[i];
   // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
-  const cardsOnly = ['way', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers');
+  // Power-up pages have no white box behind the cards (teacher, 2026-11-23).
+  const isCards = (id: string) => ['way', 'players', 'teams', 'board', 'powers'].includes(id) || id.endsWith('-powers');
+  const cardsOnly = isCards(page.id);
   const items = itemsOf(page.content);
   const body = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
@@ -117,7 +119,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
-          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${['way', 'questions', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${['way', 'questions', 'players', 'teams', 'board'].includes(page.id) || page.id.endsWith('-powers') ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
+          <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${page.id === 'questions' || cardsOnly ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${page.id === 'questions' || cardsOnly ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
       <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">

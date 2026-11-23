@@ -34,12 +34,12 @@ export function PowerUpCards({ cards, hint, onChange }: { cards: PowerCard[]; hi
     <div ref={box} className="grid gap-2 min-w-0 w-full">
       {/* No heading or line of help: the step title says Power-ups and
           the check on each card says on or off (teacher, 2026-11-16). */}
-      <div role="group" aria-label={hint} className="grid gap-2.5 justify-center" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `minmax(${Math.round(size * 0.78)}px, auto)` }}>
+      <div role="group" aria-label={hint} className="flex flex-wrap gap-2.5 justify-center mx-auto" style={{ maxWidth: cols * size + (cols - 1) * 10 }}>
         {cards.map((c) => (
           <button key={c.id} type="button" role="switch" aria-checked={c.on} onClick={() => onChange(c.id, !c.on)}
             aria-label={c.hint ? `${c.name}: ${c.hint}` : c.name}
-            className={`relative rounded-input border-bold tile-wiggle p-2.5 pt-3 grid justify-items-center content-start gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 ${c.on ? 'border-border bg-mint-soft' : 'border-dashed border-border-soft bg-surface-2'}`}
-            style={c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : undefined}>
+            className={`relative rounded-input border-bold tile-wiggle p-2.5 pt-3 grid justify-items-center content-center gap-1 text-center motion-safe:transition-all motion-safe:active:scale-95 shrink-0 ${c.on ? 'border-border bg-mint-soft' : 'border-dashed border-border-soft bg-surface-2'}`}
+            style={{ width: size, minHeight: Math.round(size * 0.78), ...(c.on ? { boxShadow: '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.12)' } : {}) }}>
             <span className={`${c.on ? 'pu-bob' : 'grayscale opacity-45'}`}>{c.art}</span>
             <span className={`font-bold text-lg leading-tight text-balance break-words ${c.on ? '' : 'text-muted'}`}>{c.name}</span>
             {/* Small words, so the cards stay near 4:3 (teacher, 2026-11-16). */}
