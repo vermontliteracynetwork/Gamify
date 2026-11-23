@@ -24,8 +24,8 @@ function spots(list: TeamAgent[]): Record<string, { x: number; y: number }> {
   const out: Record<string, { x: number; y: number }> = { [CEO_ID]: { x: 50, y: 50 } };
   const others = list.filter((a) => a.id !== CEO_ID);
   others.forEach((a, i) => {
-    const ang = (-Math.PI / 2) + (i / others.length) * Math.PI * 2 + 0.35;
-    out[a.id] = { x: 50 + Math.cos(ang) * 36, y: 50 + Math.sin(ang) * 36 };
+    const ang = (-Math.PI / 2) + (i / others.length) * Math.PI * 2 + 0.5;
+    out[a.id] = { x: 50 + Math.cos(ang) * 34, y: 50 + Math.sin(ang) * 30 };
   });
   return out;
 }
@@ -68,7 +68,7 @@ export default function TeamCard() {
                 className="absolute -translate-x-1/2 -translate-y-1/2 grid justify-items-center gap-1"
                 style={{ left: `${pos[a.id].x}%`, top: `${pos[a.id].y}%` }}
                 initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: i * 0.05, type: 'spring', stiffness: 260, damping: 18 }} whileHover={{ scale: 1.06 }}>
-                <span className="relative rounded-full grid place-items-center" style={{ width: `${big}vw`, height: `${big}vw`, minWidth: 56, minHeight: 56, maxWidth: 120, maxHeight: 120, background: a.id === CEO_ID ? '#fff' : a.color, boxShadow: on ? '0 0 0 4px #fff, 0 0 0 7px #5b4bc4' : '0 6px 16px rgba(36,28,61,0.18)' }}>
+                <span className="relative rounded-full grid place-items-center" style={{ width: `${big}vw`, height: `${big}vw`, minWidth: 56, minHeight: 56, maxWidth: 104, maxHeight: 104, background: a.id === CEO_ID ? '#fff' : a.color, boxShadow: on ? '0 0 0 4px #fff, 0 0 0 7px #5b4bc4' : '0 6px 16px rgba(36,28,61,0.18)' }}>
                   <Ic weight={a.id === CEO_ID ? 'bold' : 'fill'} size={a.id === CEO_ID ? 34 : 30} color={a.id === CEO_ID ? '#1f7a45' : '#241c3d'} />
                   {a.needsYou.length > 0 && <span className="absolute -top-1 -right-1 min-w-6 h-6 px-1.5 rounded-full text-xs font-bold text-white grid place-items-center" style={{ background: '#c0392b' }}>{a.needsYou.length}</span>}
                 </span>
