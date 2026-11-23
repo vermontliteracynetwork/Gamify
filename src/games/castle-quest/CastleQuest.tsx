@@ -36,6 +36,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
+import ShareHow from '../ShareHow';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import { BoardArt, boardGround, C, CHICLE, Die2D, SQUARE_COLORS, WOBBLE } from './boardArt';
@@ -413,7 +414,7 @@ export default function CastleQuest() {
       {phase === 'theme' && <ThemeScreen gameName={castleQuestManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players)} pages={[
-          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
+          { id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} />{!versus && <ShareHow gameId="castle-quest" setId={setId} />}</div> },
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -424,7 +425,7 @@ export default function CastleQuest() {
             </>
           ) },
           versus
-            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" vsComputer min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
         ]} />
       )}

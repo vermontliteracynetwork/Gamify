@@ -25,6 +25,7 @@ import Title from '../ui/Title';
 import SetPicker from '../games/SetPicker';
 import SetupWizard from '../games/SetupWizard';
 import WayToPlay from '../games/WayToPlay';
+import ShareHow from '../games/ShareHow';
 import { useSavedSetup } from '../games/useSavedSetup';
 import { makeSfx } from './sfx';
 import { LAB_MODES } from './registry';
@@ -196,7 +197,7 @@ export default function LabGame({ def }: { def: LabDef }) {
         {phase === 'welcome' && <LabWelcome def={def} still={still} onStart={() => setPhase('setup')} />}
         {phase === 'setup' && (
           <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} pages={[
-            ...(ways.length > 1 ? [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={ways} value={way} onChange={(m) => change({ who: m })} /> }] : []),
+            ...(ways.length > 1 ? [{ id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={ways} value={way} onChange={(m) => change({ who: m })} />{way === 'share' && <ShareHow gameId={`lab/${def.id}`} setId={setId} />}</div> }] : []),
             ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
             
             { id: 'options', title: t('setup.options'), content: <Slider label={def.rounds.label} min={def.rounds.min} max={def.rounds.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} /> },

@@ -31,6 +31,7 @@ import { useSignedIn } from '../../auth/session';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import WayToPlay from '../WayToPlay';
+import ShareHow from '../ShareHow';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
@@ -371,7 +372,7 @@ export default function Bowling() {
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={begin} pages={[
           // Pick the way to play first (teacher, 2026-10-31); students arrive with theirs set.
-          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} /> }]),
+          ...(!teacher ? [] : [{ id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={['share', 'versus', 'solo']} value={solo ? 'solo' : setup.who === 'versus' ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'solo' ? 'solo' : m === 'versus' ? 'versus' : 'teams' })} />{!solo && <ShareHow gameId="bowling" setId={setId} />}</div> }]),
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>

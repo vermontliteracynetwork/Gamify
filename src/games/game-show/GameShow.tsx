@@ -30,6 +30,7 @@ import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import WayToPlay from '../WayToPlay';
+import ShareHow from '../ShareHow';
 import { gameShowManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -387,7 +388,7 @@ export default function GameShow() {
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players, team.level)} pages={[
           // Teams on the big screen, or two players head to head (teacher, 2026-10-31).
-          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
+          { id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} />{!versus && <ShareHow gameId="game-show" setId={setup.setIds[0]} />}</div> },
           { id: 'board', title: t('setup.board'), content: (
             <PictureChoice label={t('tb.board')} value={board}
               onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
@@ -412,7 +413,7 @@ export default function GameShow() {
           ) },
           versus
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
-              <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
+              <TeamSetup key="versus" mode="versus" vsComputer min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
             ) }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
               <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />

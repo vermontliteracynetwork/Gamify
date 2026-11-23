@@ -26,6 +26,7 @@ import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
+import WayToPlay from '../WayToPlay';
 import { fourInARowManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
@@ -49,7 +50,7 @@ export default function FourInARow() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', powerUps: true, powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', way: 'share' as 'share' | 'solo', powerUps: true, powerOff: [] as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
@@ -260,11 +261,20 @@ export default function FourInARow() {
       )}
 
       {phase === 'setup' && (
-        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.where === 'other' && team.players[1]?.kind !== 'cpu' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
+        <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => (setup.way === 'share' && setup.where === 'other' && team.players[1]?.kind !== 'cpu' ? void hostTwoDevices() : begin(team.players, team.level))} pages={[
+          // Share or Solo (teacher, 2026-11-23): Share is two players, on the
+          // same device or with a join code; Solo is against the computer.
+          { id: 'way', title: t('way.title'), content: (
+            <div className="grid gap-6 justify-items-center">
+              <WayToPlay modes={['share', 'solo']} value={setup.way} onChange={(m) => change({ way: m as 'share' | 'solo' })} />
+              {setup.way === 'share' && <ChoiceRow label={t('fr.where')} value={setup.where} onChange={(v) => change({ where: v })}
+                options={[{ value: 'here', label: t('fr.where.here') }, { value: 'other', label: t('fr.where.other') }]} />}
+            </div>
+          ) },
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             // Each player's team picture is their piece (teacher, 2026-11-06):
             // one picture, picked on the player card, the same on the board.
-            <TeamSetup key={theme.id} mode="versus" min={2} max={2} embedded characters={discs.length >= 2 ? discs : undefined}
+            <TeamSetup key={`${theme.id}-${setup.way}`} mode="versus" vsComputer={setup.way === 'solo'} min={2} max={2} embedded characters={discs.length >= 2 ? discs : undefined}
               onChange={(players, level) => {
                 setTeam({ players, level });
                 if (discs.length >= 2) {
@@ -276,8 +286,6 @@ export default function FourInARow() {
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
-              {team.players[1]?.kind !== 'cpu' && <ChoiceRow label={t('fr.where')} value={setup.where} onChange={(v) => change({ where: v })}
-                options={[{ value: 'here', label: t('fr.where.here') }, { value: 'other', label: t('fr.where.other') }]} />}
               <ChoiceRow label={t('fr.first')} value={setup.first} onChange={(v) => change({ first: v })}
                 options={[{ value: 'p1', label: t('fr.first.p1') }, { value: 'p2', label: t('fr.first.p2') }, { value: 'random', label: t('fr.first.random') }]} />
               <Slider label={t('fr.perTurn')} hint={t('fr.perTurnHint')} min={1} max={3} value={setup.perTurn} onChange={(v) => change({ perTurn: v })} />

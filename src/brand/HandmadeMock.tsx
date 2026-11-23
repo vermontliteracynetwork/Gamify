@@ -1,7 +1,8 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Check } from '@phosphor-icons/react';
-import { Buddy, CrayonSparkle, ND, Paper, Washi } from './buddies';
+import { CrayonSparkle, ND, Paper, Washi } from './buddies';
+import { CrayonPawn, CrayonPowerUp } from './CrayonKit';
 
 // "Clean core, handmade edges" (proposal, teacher 2026-11-23): one mock game
 // screen worn two ways. The core (score board, board play zone, question card,
@@ -68,9 +69,9 @@ function ClassicEdges({ still }: { still: boolean }) {
         <circle cx="16" cy="120" r="5" fill={ND.cobalt} /><circle cx="40" cy="134" r="3.5" fill={ND.paper} />
       </svg>
       <motion.span className="absolute -left-2 -bottom-4" animate={still ? undefined : { y: [0, -6, 0], rotate: [-8, -4, -8] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }} style={{ rotate: -8 }}>
-        <Buddy id="sunny" size={84} />
+        <CrayonPowerUp id="double-points" size={84} />
       </motion.span>
-      <span className="absolute right-3 -bottom-2"><Buddy id="puff" size={62} color={ND.paper} /></span>
+      <span className="absolute right-3 -bottom-2"><CrayonPowerUp id="shield" size={62} /></span>
       <div className="absolute left-4 top-3">
         <Paper color={ND.paper} rx={8} tilt={-3} className="px-4 py-1.5">
           <span className="text-xl leading-none" style={{ ...GY, color: ND.ink }}>Three in a Row</span>
@@ -81,10 +82,10 @@ function ClassicEdges({ still }: { still: boolean }) {
   );
 }
 const classicSkin: Skin = {
-  tokenA: <Buddy id="pebble" size={40} color={ND.cobalt} />,
-  tokenB: <Buddy id="hartie" size={40} />,
-  iconA: <Buddy id="pebble" size={26} color={ND.cobalt} />,
-  iconB: <Buddy id="hartie" size={26} />,
+  tokenA: <CrayonPawn color={ND.cobalt} size={40} />,
+  tokenB: <CrayonPawn color={ND.pink} size={40} />,
+  iconA: <CrayonPawn color={ND.cobalt} size={26} />,
+  iconB: <CrayonPawn color={ND.pink} size={26} />,
 };
 
 // ---------- Example kid theme: crayon drawing with clay pieces ----------
@@ -170,7 +171,7 @@ export default function HandmadeMock({ still }: { still: boolean }) {
       </div>
       <div className="grid wide:grid-cols-2 gap-5">
         <Mock tag="Classic" edges={<ClassicEdges still={still} />} skin={classicSkin} zone={zone}
-          label="Classic, made by hand: cut construction paper, tape, crayon doodles, cut-paper buddies at the edges. The board zone and question stay plain." />
+          label="Classic, made by hand: cut construction paper, tape, crayon doodles, crayon power-ups at the edges. The board zone and question stay plain." />
         <Mock tag="Example kid theme" edges={<KidEdges still={still} />} skin={kidSkin} zone={zone}
           label="Example kid theme (drawn in code): a crayon drawing with clay pieces. Same core, so every theme reads the same way." />
       </div>
