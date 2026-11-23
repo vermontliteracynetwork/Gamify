@@ -20,8 +20,10 @@ the handmade themes teachers and kids make (clean core, handmade edges).
 3. Use the piece's template size and safe area (Brand Kit section 6).
 
 ## The style rules
-- Medium: waxy crayon fill (scribble texture) and colored-pencil lines; slightly
-  wobbly, uneven edges; visible strokes. Never glossy, gradients-only, 3D or photo.
+- Medium (teacher, 2026-11-23: "more smooth design, still handdrawn but less
+  pencil/crayon marks"): smooth, flat, solid fills with a hand-drawn, slightly
+  wobbly ink outline; at most a faint hint of scribble (about 10% opacity), no
+  grain or paper tooth, no visible pencil strokes. Never glossy, gradients-only, 3D or photo.
 - Solid, opaque, punchy fills (teacher, 2026-11-23: "more solid, punchier
   brighter colors that are less transparent"): full-strength brand colors, no
   low-opacity layers or washed-out tints; dense waxy coverage, with texture only
@@ -30,8 +32,8 @@ the handmade themes teachers and kids make (clean core, handmade edges).
 - On color-block stages a power-up wears the white sticker edge so it never
   disappears into a stage of its own color.
 - Shapes: simple, chunky, readable at 48px and 128px; one idea per piece.
-- Palette: the brand palette only (cream ground; pink, cobalt, green, tangerine,
-  violet, teal, sunny yellow as accent, ink). No other colors.
+- Palette: the brand palette only, each bright with its pastel pair (see the palette
+  proposal on /brand; main is Gamify purple #7A88FE / #B4C4FB). No other colors.
 - Line (teacher refs, 2026-11-23, replaces "no heavy outlines"): one thick dark
   ink outline (#1d1a33 or a deep brown) around every shape, slightly wobbly, with
   rounded ends, like a felt-tip doodle; inner details in the same ink, thinner.

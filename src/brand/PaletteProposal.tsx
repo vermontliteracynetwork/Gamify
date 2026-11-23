@@ -11,33 +11,37 @@ export const PP = {
   blueCrystal: '#bfdff3', sky: '#4ba3e8', skyDeep: '#1f6fb8',
   pink: '#f055a5', lemon: '#fabe37', orange: '#ff9b28', kelly: '#22b04a', lime: '#ccd537',
   lavender: '#ddd6ff', blush: '#ffd3e6', butter: '#fff1b8', aqua: '#c9f1ee', sage: '#e8f0b4',
+  gamify: '#b4c4fb', peach: '#ffd9b3', mint: '#c8f0dc', teal: '#1fb5a8',
   ink: '#1d1a33', cream: '#f6f0e4', paper: '#fffaf0', quiet: '#57506e',
 };
 
 type Swatch = { name: string; hex: string; role: string; text: string; ratio: string };
+// Every bright color has its pastel (teacher, 2026-11-23). The main purple
+// stays today's Gamify purple, the periwinkle the site already wears.
 const GROUPS: { title: string; items: Swatch[] }[] = [
-  { title: 'Main purple', items: [
-    { name: 'Grape', hex: PP.grape, role: 'Main brand color: main button, logo block, selected', text: '#ffffff', ratio: 'White 5.6:1 (AA)' },
-    { name: 'Grape deep', hex: PP.grapeDeep, role: 'Button shadow, purple text on cream', text: '#ffffff', ratio: 'White 8.2:1, 7.3:1 on cream' },
-    { name: 'Periwinkle', hex: PP.periwinkle, role: 'Second purple, links today\'s site ground', text: PP.ink, ratio: 'Ink 5.4:1' },
+  { title: 'Main purple (today\'s Gamify purple, kept)', items: [
+    { name: 'Gamify purple', hex: PP.periwinkle, role: 'Main brand color: main button, selected, logo block', text: PP.ink, ratio: 'Ink 5.4:1 (white fails)' },
+    { name: 'Gamify purple pastel', hex: PP.gamify, role: 'Site ground today, menu panels, blob patch', text: PP.ink, ratio: 'Ink 11.5:1' },
+    { name: 'Grape', hex: PP.grape, role: 'Deep purple: button shadow, purple text, white-text buttons', text: '#ffffff', ratio: 'White 5.6:1' },
+    { name: 'Lavender', hex: PP.lavender, role: 'Pastel of Grape: patch behind purple art', text: PP.ink, ratio: 'Ink 12.1:1' },
   ] },
   { title: 'Light blue (new)', items: [
-    { name: 'Blue crystal', hex: PP.blueCrystal, role: 'Light blue: panels, question card header, calm ground', text: PP.ink, ratio: 'Ink 12.1:1' },
-    { name: 'Sky', hex: PP.sky, role: 'Solid light blue accent: info, freeze', text: PP.ink, ratio: 'Ink 6.2:1 (never white text)' },
+    { name: 'Sky', hex: PP.sky, role: 'Bright light blue: info, freeze', text: PP.ink, ratio: 'Ink 6.2:1 (never white text)' },
+    { name: 'Blue crystal', hex: PP.blueCrystal, role: 'Pastel of Sky: panels, question card header', text: PP.ink, ratio: 'Ink 12.1:1' },
   ] },
-  { title: 'Bright accents', items: [
+  { title: 'Bright accents, each beside its pastel', items: [
     { name: 'Pink punch', hex: PP.pink, role: 'Lead block, celebrations', text: PP.ink, ratio: 'Ink 5.3:1' },
+    { name: 'Blush', hex: PP.blush, role: 'Pastel of Pink punch', text: PP.ink, ratio: 'Ink 12.6:1' },
     { name: 'Lemon drop', hex: PP.lemon, role: 'Stars, rewards, points', text: PP.ink, ratio: 'Ink 10.0:1' },
+    { name: 'Butter', hex: PP.butter, role: 'Pastel of Lemon drop', text: PP.ink, ratio: 'Ink 14.9:1' },
     { name: 'Orange paloma', hex: PP.orange, role: 'Timers, warm accent', text: PP.ink, ratio: 'Ink 8.0:1' },
+    { name: 'Peach', hex: PP.peach, role: 'Pastel of Orange paloma', text: PP.ink, ratio: 'Ink 13.5:1' },
     { name: 'Kelly green', hex: PP.kelly, role: 'Right, done, go', text: PP.ink, ratio: 'Ink 5.9:1' },
+    { name: 'Mint', hex: PP.mint, role: 'Pastel of Kelly green', text: PP.ink, ratio: 'Ink 13.6:1' },
+    { name: 'Teal', hex: PP.teal, role: 'Water, cool accent', text: PP.ink, ratio: 'Ink 6.6:1' },
+    { name: 'Aqua', hex: PP.aqua, role: 'Pastel of Teal', text: PP.ink, ratio: 'Ink 13.9:1' },
     { name: 'Lime wedge', hex: PP.lime, role: 'Small accent only', text: PP.ink, ratio: 'Ink 10.5:1' },
-  ] },
-  { title: 'Pastel tints (crayon blob patches behind art)', items: [
-    { name: 'Lavender', hex: PP.lavender, role: 'Patch behind purple art', text: PP.ink, ratio: 'Ink 12.1:1' },
-    { name: 'Blush', hex: PP.blush, role: 'Patch behind pink art', text: PP.ink, ratio: 'Ink 12.6:1' },
-    { name: 'Butter', hex: PP.butter, role: 'Patch behind yellow art', text: PP.ink, ratio: 'Ink 14.9:1' },
-    { name: 'Aqua', hex: PP.aqua, role: 'Patch behind blue and green art', text: PP.ink, ratio: 'Ink 13.9:1' },
-    { name: 'Sage', hex: PP.sage, role: 'Patch behind lime art', text: PP.ink, ratio: 'Ink 14.1:1' },
+    { name: 'Sage', hex: PP.sage, role: 'Pastel of Lime wedge', text: PP.ink, ratio: 'Ink 14.1:1' },
   ] },
   { title: 'Ink and paper', items: [
     { name: 'Ink', hex: PP.ink, role: 'All text, faces, control edge', text: '#ffffff', ratio: 'White 16.8:1' },
@@ -63,13 +67,13 @@ const ROW: [PowerId, string][] = [['double-points', PP.butter], ['freeze', PP.aq
 
 export default function PaletteProposal() {
   return (
-    <section className="grid gap-4 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.grape}` }} aria-labelledby="pp-title">
+    <section className="grid gap-4 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.periwinkle}` }} aria-labelledby="pp-title">
       <div className="flex flex-wrap items-center gap-3">
         <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, color: PP.ink, border: `2px solid ${PP.ink}` }}>Proposal, not live</span>
         <h2 id="pp-title" className="font-heading text-xl" style={{ color: PP.ink }}>Palette update (proposal)</h2>
       </div>
       <p className="text-sm font-semibold max-w-prose" style={{ color: PP.quiet }}>
-        Your request of 2026-11-23: purple stays the main color and a light blue joins it. Built from your three references (Violet Syrup, Blue Crystal, the bright crayon and kidcore palettes). Solid and punchy, ink text on every light color, white text only on Grape and Ink. Nothing on the site uses this until you approve.
+        Your requests of 2026-11-23: today's Gamify purple stays the main color, a light blue joins it, and every bright color has its pastel. Built from your three references (Violet Syrup, Blue Crystal, the bright crayon and kidcore palettes). Ink text on every color except Grape and Ink. Nothing on the site uses this until you approve.
       </p>
       {GROUPS.map((g) => (
         <div key={g.title} className="grid gap-2">
@@ -82,7 +86,7 @@ export default function PaletteProposal() {
         <h3 className="font-heading font-bold">Mockup strip</h3>
         <div className="grid gap-4 wide:grid-cols-[auto_1fr_auto] items-center rounded-[1.5rem] p-4" style={{ background: PP.cream }}>
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.grape, color: '#fff', border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
+            <button type="button" className="rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.periwinkle, color: PP.ink, border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
               <Play weight="fill" aria-hidden="true" /> Play
             </button>
             <button type="button" className="rounded-full px-5 min-h-14 text-lg font-bold" style={{ background: PP.blueCrystal, color: PP.ink, border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.sky}` }}>Settings</button>
@@ -95,7 +99,7 @@ export default function PaletteProposal() {
             </div>
             <div className="px-4 py-3 text-lg font-bold">Which word needs a capital letter?</div>
             <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-              {[['monday', PP.grape, '#fff'], ['apple', PP.pink, PP.ink], ['run', PP.sky, PP.ink], ['blue', PP.kelly, PP.ink]].map(([t, bg, fg]) => (
+              {[['monday', PP.periwinkle, PP.ink], ['apple', PP.pink, PP.ink], ['run', PP.sky, PP.ink], ['blue', PP.kelly, PP.ink]].map(([t, bg, fg]) => (
                 <span key={t} className="rounded-[0.9rem] px-3 py-2 font-bold text-center" style={{ background: bg, color: fg, border: `2px solid ${PP.ink}` }}>{t}</span>
               ))}
             </div>

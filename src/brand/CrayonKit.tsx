@@ -35,10 +35,9 @@ function CrayonFilter({ id, seed, sticker }: { id: string; seed: number; sticker
   return (
     <filter id={id} x="-12%" y="-12%" width="124%" height="124%">
       <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
-      <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.6" xChannelSelector="R" yChannelSelector="G" result="wob" />
-      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed={seed + 7} result="n" />
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -4 0 0 0 3.55" result="tooth" />
-      <feComposite in="wob" in2="tooth" operator="in" result="art" />
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="wob" />
+      {/* Smooth fills (teacher, 2026-11-23: "more smooth design, still handdrawn but less pencil/crayon marks"): no grain holes. */}
+      <feMerge result="art"><feMergeNode in="wob" /></feMerge>
       {sticker && (
         <>
           <feMorphology in="art" operator="dilate" radius="4" result="fat" />
@@ -73,7 +72,7 @@ function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.8 }: { d: string; co
     <g>
       <clipPath id={clip}><path d={d} clipRule={rule} /></clipPath>
       <path d={d} fill={color} fillRule={rule} />
-      <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke={e} strokeWidth="1.9" opacity={hatch} fill="none" strokeLinejoin="round" />
+      <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke={e} strokeWidth="1.6" opacity={hatch * 0.3} fill="none" strokeLinejoin="round" />
       <path d={d} fill="none" fillRule={rule} stroke={ND.ink} strokeWidth={width} strokeLinejoin="round" strokeLinecap="round" />
     </g>
   );
@@ -316,7 +315,6 @@ export function BlobPatch({ color, variant = 0, size }: { color: string; variant
       <defs><CrayonFilter id={f} seed={variant + 3} /><clipPath id={clip}><path d={d} /></clipPath></defs>
       <g filter={`url(#${f})`}>
         <path d={d} fill={color} />
-        <path d={SCRIBBLE} clipPath={`url(#${clip})`} stroke="#ffffff" strokeWidth="2.4" opacity="0.35" fill="none" />
       </g>
     </svg>
   );
