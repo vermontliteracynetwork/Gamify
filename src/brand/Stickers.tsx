@@ -3,16 +3,19 @@ import { Lock, MonitorPlay, Snowflake } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 
 // Sticker collections (PROPOSAL, teacher 2026-11-23): Classic die-cut stickers
-// that decorate the site and fill a collect-em-all Achievement page. First
-// collection: "really basic sticker style and little captions like good job".
-// Style: classic-art (smooth flat fills, wobbly ink outline, no grain), the
-// palette proposal (PP), a thick white die-cut edge with a soft shadow, and a
-// caption in Grow Year curving along the bottom. Her reference objects had
-// faces; brand art has none (standing rule), so these are plain objects and
-// "faces on stickers?" is an open question for her. All art is drawn here in
-// code (original, nothing to license). Preview on /brand only.
+// that decorate the site and fill a collect-em-all Achievement page.
+// Redo (teacher, 2026-11-23): "original stickers should have a variety of fun
+// unique shape edges and one sticker image with the label for each ... in
+// circle with a white sticker edge border around each. match the classic
+// color pallete". Each sticker: one solid palette bright (PP), a fun edge
+// (circle, scallop, flower, burst, cloud, square, shield, stamp, heart,
+// hexagon, sun, blob), a thick white die-cut border with a soft shadow, ONE
+// big image (classic-art: flat fill, wobbly ink line), and the earn rule as a
+// short label curving along the top arc in Grow Year. Her reference star had a
+// face; brand art has none, so faces stay an open question. Drawn in code
+// (original, nothing to license). Preview on /brand only.
 
-type Sticker = { id: string; caption: string; earn: string; art: () => ReactNode; ground: string };
+type Img = { id: string; caption: string; earn: string; art: () => ReactNode; ground: string };
 
 const INK = PP.ink;
 const SW = 4.5;
@@ -37,9 +40,8 @@ function star(cx: number, cy: number, o: number, i: number) {
 const band = (cx: number, cy: number, r1: number, r2: number) =>
   `M${cx - r2} ${cy} A${r2} ${r2} 0 0 1 ${cx + r2} ${cy} L${cx + r1} ${cy} A${r1} ${r1} 0 0 0 ${cx - r1} ${cy} Z`;
 
-// The Starter collection: her earn list first (first game, 5 plays, days,
-// every game, themes, students), then the extra teacher firsts.
-export const STARTER: Sticker[] = [
+// The drawings (one big simple image per sticker), on a 100 x 100 grid.
+const IMAGES: Img[] = [
   { id: 'star', caption: 'Good job!', earn: 'Played your first game', ground: PP.butter, art: () => <><P d={star(50, 54, 44, 21)} fill={PP.lemon} /><Shine d="M34 40 L40 33" /></> },
   { id: 'heart', caption: 'Love it!', earn: 'Played one game 5 times', ground: PP.blush, art: () => <><P d="M50 88 C26 72 8 56 8 36 C8 22 18 12 31 12 C40 12 46 18 50 26 C54 18 60 12 69 12 C82 12 92 22 92 36 C92 56 74 72 50 88 Z" fill={PP.pink} /><Shine d="M22 32 C23 26 27 22 32 21" /></> },
   { id: 'sun', caption: 'Bright day!', earn: 'Played on 5 days this month', ground: PP.peach, art: () => <>{[0, 45, 90, 135, 180, 225, 270, 315].map((a) => { const r = (a * Math.PI) / 180; return <g key={a}><L d={`M${50 + 31 * Math.cos(r)} ${52 + 31 * Math.sin(r)} L${50 + 43 * Math.cos(r)} ${52 + 43 * Math.sin(r)}`} w={13} /><L d={`M${50 + 31 * Math.cos(r)} ${52 + 31 * Math.sin(r)} L${50 + 43 * Math.cos(r)} ${52 + 43 * Math.sin(r)}`} color={PP.orange} w={5} /></g>; })}<C cx={50} cy={52} r={24} fill={PP.lemon} /><Shine d="M38 44 C40 39 44 36 48 35" /></> },
@@ -54,26 +56,99 @@ export const STARTER: Sticker[] = [
   { id: 'crayon', caption: 'Creative!', earn: 'Made your own theme', ground: PP.gamify, art: () => <g transform="rotate(-35 50 50)"><P d="M26 36 H70 L92 50 L70 64 H26 C20 64 16 60 16 56 V44 C16 40 20 36 26 36 Z" fill={PP.periwinkle} /><P d="M70 36 L92 50 L70 64 Z" fill={PP.paper} /><P d="M84 45 L92 50 L84 55 Z" fill={PP.periwinkle} w={3} /><L d="M32 36 V64 M60 36 V64" w={3.5} /><L d="M38 46 C42 42 46 54 52 48" color="#ffffff" w={4} /></g> },
 ];
 
-// One die-cut sticker: thick white edge, soft shadow, wobbly ink object, caption on an arc.
+const IMG = Object.fromEntries(IMAGES.map((i) => [i.id, i.art])) as Record<string, () => ReactNode>;
+
+// ---------- Sticker edges (teacher, 2026-11-23: "a variety of fun unique shape edges") ----------
+// All centered on (60, 60) in a 120 grid; every edge keeps at least a 45-unit
+// clear radius so the label on the top arc never leaves the color.
+const R = (a: number) => (a * Math.PI) / 180;
+function polar(fn: (t: number) => number, n = 180) {
+  let d = '';
+  for (let k = 0; k < n; k++) { const t = (k / n) * 2 * Math.PI; const r = fn(t); d += `${k ? 'L' : 'M'}${(60 + r * Math.cos(t)).toFixed(1)} ${(60 + r * Math.sin(t)).toFixed(1)} `; }
+  return d + 'Z';
+}
+function points(n: number, outer: number, inner: number, rot = -90) {
+  let d = '';
+  for (let k = 0; k < n * 2; k++) { const r = k % 2 ? inner : outer; const a = R(rot + (k * 180) / n); d += `${k ? 'L' : 'M'}${(60 + r * Math.cos(a)).toFixed(1)} ${(60 + r * Math.sin(a)).toFixed(1)} `; }
+  return d + 'Z';
+}
+function stamp() {
+  const side = 100, x0 = 10, per = side * 4, n = 400, teeth = 44; let d = '';
+  for (let k = 0; k < n; k++) {
+    const u = (k / n) * per; const e = Math.floor(u / side); const f = u - e * side;
+    const [x, y, nx, ny] = e === 0 ? [x0 + f, x0, 0, -1] : e === 1 ? [x0 + side, x0 + f, 1, 0] : e === 2 ? [x0 + side - f, x0 + side, 0, 1] : [x0, x0 + side - f, -1, 0];
+    const o = 3.2 * Math.cos((u / per) * teeth * 2 * Math.PI);
+    d += `${k ? 'L' : 'M'}${(x + nx * o).toFixed(1)} ${(y + ny * o).toFixed(1)} `;
+  }
+  return d + 'Z';
+}
+type Edge = 'circle' | 'scallop' | 'flower' | 'burst' | 'cloud' | 'square' | 'shield' | 'stamp' | 'heart' | 'hexagon' | 'sun' | 'blob';
+const EDGE: Record<Edge, string> = {
+  circle: polar(() => 53),
+  scallop: polar((t) => 52 + 3.5 * Math.cos(14 * t)),
+  flower: polar((t) => 52 + 7 * Math.cos(6 * t)),
+  burst: points(18, 58, 50),
+  cloud: polar((t) => 49 + 7 * Math.abs(Math.cos(4 * t + 0.4))),
+  square: 'M34 8 H86 Q112 8 112 34 V86 Q112 112 86 112 H34 Q8 112 8 86 V34 Q8 8 34 8 Z',
+  shield: 'M60 5 C78 13 94 13 110 10 V58 C110 88 88 106 60 117 C32 106 10 88 10 58 V10 C26 13 42 13 60 5 Z',
+  stamp: stamp(),
+  heart: 'M60 24 C66 8 86 2 102 12 C118 24 116 52 102 70 C90 86 74 98 60 112 C46 98 30 86 18 70 C4 52 2 24 18 12 C34 2 54 8 60 24 Z',
+  hexagon: points(3, 58, 58, 0).replace(/Z$/, '') + 'Z',
+  sun: points(12, 59, 48),
+  blob: polar((t) => 52 + 3.5 * Math.sin(3 * t + 1) + 2.5 * Math.cos(5 * t)),
+};
+
+type Sticker = { id: string; label: string; earn: string; edge: Edge; fill: string; text: string; img: string };
+// Starter collection: her earn list first (themes, first game, 5 plays, days,
+// students, every game), then the extra teacher firsts. White text only on
+// Grape (5.6:1); every other bright takes ink text (WCAG 2.1 AA).
+export const STARTER: Sticker[] = [
+  { id: 'themes', label: 'TRIED 5 THEMES!', earn: 'Tried 5 new themes', edge: 'circle', fill: PP.grape, text: '#ffffff', img: 'star' },
+  { id: 'first', label: 'FIRST GAME!', earn: 'Played your first game', edge: 'burst', fill: PP.pink, text: INK, img: 'rocket' },
+  { id: 'plays', label: '5 PLAYS!', earn: 'Played one game 5 times', edge: 'heart', fill: PP.orange, text: INK, img: 'flower' },
+  { id: 'days', label: '5 DAYS!', earn: 'Played on 5 days this month (any 5, not in a row)', edge: 'scallop', fill: PP.sky, text: INK, img: 'sun' },
+  { id: 'students', label: '10 STUDENTS!', earn: 'Added 10 students', edge: 'flower', fill: PP.lime, text: INK, img: 'heart' },
+  { id: 'set', label: 'FIRST SET!', earn: 'Made your first question set', edge: 'square', fill: PP.lemon, text: INK, img: 'apple' },
+  { id: 'homework', label: 'HOMEWORK!', earn: 'Sent your first homework link', edge: 'stamp', fill: PP.teal, text: INK, img: 'melon' },
+  { id: 'live', label: 'LIVE GAME!', earn: 'Ran your first Live game', edge: 'cloud', fill: PP.periwinkle, text: INK, img: 'rainbow' },
+  { id: 'every', label: 'EVERY GAME!', earn: 'Tried every game', edge: 'hexagon', fill: PP.kelly, text: INK, img: 'bulb' },
+  { id: 'rounds', label: '100 ROUNDS!', earn: 'Played 100 rounds', edge: 'sun', fill: PP.orange, text: INK, img: 'balloon' },
+  { id: 'calm', label: 'CALM MODE!', earn: 'Used Calm mode in a game', edge: 'shield', fill: PP.grape, text: '#ffffff', img: 'moon' },
+  { id: 'theme', label: 'MY THEME!', earn: 'Made your own theme', edge: 'blob', fill: PP.lemon, text: INK, img: 'crayon' },
+];
+
+// The label rides the top arc: 230 degrees on radius 34 (the heart, whose top dips, uses a lower, tighter arc).
+function arc(cx: number, cy: number, r: number, span: number) {
+  const a1 = R(270 - span / 2), a2 = R(270 + span / 2);
+  return `M${(cx + r * Math.cos(a1)).toFixed(1)} ${(cy + r * Math.sin(a1)).toFixed(1)} A${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${(cx + r * Math.cos(a2)).toFixed(1)} ${(cy + r * Math.sin(a2)).toFixed(1)}`;
+}
+
+// One die-cut sticker: thick white edge with a soft shadow, a solid bright
+// shape with a wobbly ink line, one big image, the label curving along the top.
 export function StickerArt({ s, size = 120, locked }: { s: Sticker; size?: number | string; locked?: boolean }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const heart = s.edge === 'heart';
+  const path = heart ? arc(60, 68, 27, 200) : arc(60, 60, 32, 230);
+  const len = heart ? 94 : 128;
+  const fs = Math.min(16, len / (s.label.length * 0.6));
+  const d = EDGE[s.edge];
   return (
-    <svg viewBox="0 0 120 120" width={size} height={size} role="img" aria-label={locked ? `${s.caption} sticker, not earned yet` : `${s.caption} sticker`}
+    <svg viewBox="-7 -7 134 134" width={size} height={size} role="img" aria-label={locked ? `${s.label} sticker, not earned yet` : `${s.label} sticker`}
       style={locked ? { filter: 'grayscale(1)', opacity: 0.35 } : undefined}>
       <defs>
         <filter id={`w${id}`} x="-10%" y="-10%" width="120%" height="120%">
           <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed={s.id.length * 7} result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G" />
         </filter>
-        <filter id={`s${id}`} x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="0" dy="2.5" stdDeviation="2" floodColor={INK} floodOpacity="0.25" /></filter>
-        <path id={`a${id}`} d="M18 86 Q60 116 102 86" />
+        <filter id={`s${id}`} x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="0" dy="2.5" stdDeviation="2" floodColor={INK} floodOpacity="0.28" /></filter>
+        <path id={`a${id}`} d={path} />
       </defs>
-      {/* die-cut edge, a little lopsided like hand-cut vinyl */}
-      <path d="M60 3 C88 3 117 24 116 60 C115 92 91 117 60 116 C29 115 4 93 5 59 C6 27 30 3 60 3 Z" fill="#ffffff" filter={`url(#s${id})`} />
-      <path d="M60 11 C84 11 108 29 107 59 C106 87 86 107 60 107 C34 107 13 88 13 59 C13 31 35 11 60 11 Z" fill={s.ground} />
-      <g filter={`url(#w${id})`} transform="translate(31 13) scale(0.58)">{s.art()}</g>
-      <text fontFamily="var(--font-display)" fontSize="15" fill={INK} stroke="#ffffff" strokeWidth="4" paintOrder="stroke" strokeLinejoin="round">
-        <textPath href={`#a${id}`} startOffset="50%" textAnchor="middle">{s.caption}</textPath>
+      <path d={d} fill="#ffffff" stroke="#ffffff" strokeWidth="13" strokeLinejoin="round" filter={`url(#s${id})`} />
+      <path d={d} fill={s.fill} />
+      <path d={d} fill="none" stroke={INK} strokeWidth="2.6" strokeLinejoin="round" filter={`url(#w${id})`} />
+      <g filter={`url(#w${id})`} transform={heart ? 'translate(39 56) scale(0.42)' : 'translate(33 44) scale(0.54)'}>{IMG[s.img]()}</g>
+      <text fontFamily="var(--font-display)" fontSize={fs.toFixed(1)} fill={s.text} letterSpacing="0.4">
+        <textPath href={`#a${id}`} startOffset="50%" textAnchor="middle">{s.label}</textPath>
       </text>
     </svg>
   );
@@ -91,7 +166,7 @@ function StickerSheet() {
             <figure className="grid justify-items-center gap-1"><StickerArt s={s} size={96} /><figcaption className="text-xs font-bold">Earned</figcaption></figure>
             <figure className="grid justify-items-center gap-1"><StickerArt s={s} size={96} locked /><figcaption className="text-xs font-bold">Not yet</figcaption></figure>
           </div>
-          <p className="text-sm font-bold">{s.caption}</p>
+          <p className="text-sm font-bold">{s.label}</p>
           <p className="text-sm font-semibold" style={quiet}>How to earn: {s.earn}</p>
         </div>
       ))}
@@ -99,10 +174,10 @@ function StickerSheet() {
   );
 }
 
-const EARNED = new Set(['star', 'heart', 'sun', 'rainbow', 'apple', 'balloon', 'moon']);
+const EARNED = new Set(['themes', 'first', 'plays', 'days', 'set', 'live', 'calm']);
 
 function AchievementMock() {
-  const [pick, setPick] = useState('bulb');
+  const [pick, setPick] = useState('every');
   const sel = STARTER.find((s) => s.id === pick) ?? STARTER[0];
   const got = STARTER.filter((s) => EARNED.has(s.id)).length;
   return (
@@ -124,13 +199,13 @@ function AchievementMock() {
           <div className="h-3 rounded-full overflow-hidden" style={{ background: PP.lavender, border: `2px solid ${INK}` }} role="progressbar" aria-valuenow={got} aria-valuemin={0} aria-valuemax={STARTER.length} aria-label="Starter collection progress">
             <div className="h-full" style={{ width: `${(got / STARTER.length) * 100}%`, background: PP.kelly }} />
           </div>
-          <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(5.5rem, 1fr))' }}>
+          <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))' }}>
             {STARTER.map((s) => {
               const has = EARNED.has(s.id);
               return (
                 <button key={s.id} type="button" onClick={() => setPick(s.id)} aria-pressed={pick === s.id}
                   className="rounded-[1rem] p-1 grid justify-items-center relative"
-                  style={{ background: pick === s.id ? PP.butter : 'transparent', border: `2px solid ${pick === s.id ? INK : 'transparent'}`, maxWidth: '6.5rem' }}>
+                  style={{ background: pick === s.id ? PP.butter : 'transparent', border: `2px solid ${pick === s.id ? INK : 'transparent'}`, maxWidth: '8rem' }}>
                   <StickerArt s={s} size="100%" locked={!has} />
                   {!has && <Lock size={18} weight="bold" className="absolute top-1 right-1" aria-hidden />}
                 </button>
@@ -141,7 +216,7 @@ function AchievementMock() {
         <div className="grid gap-3 content-start">
           <section className="rounded-[1.25rem] p-4 grid justify-items-center gap-2 text-center" style={card} aria-live="polite">
             <StickerArt s={sel} size={128} locked={!EARNED.has(sel.id)} />
-            <p className="font-heading font-bold text-lg">{sel.caption}</p>
+            <p className="font-heading font-bold text-lg">{sel.label}</p>
             <p className="text-sm font-semibold">{EARNED.has(sel.id) ? `Earned: ${sel.earn}` : `How to earn: ${sel.earn}`}</p>
           </section>
           <section className="rounded-[1.25rem] p-4 grid gap-2" style={{ background: PP.blueCrystal, border: `2px dashed ${INK}` }} aria-label="Winter collection, coming">
@@ -168,7 +243,7 @@ export default function Stickers() {
         <h2 id="st-title" className="font-heading text-xl">Sticker collections (proposal)</h2>
       </div>
       <p className="text-sm font-semibold max-w-prose" style={quiet}>
-        Your request of 2026-11-23: Classic stickers in collect-em-all collections, a page to see and share what the class earned, and see-through stickers that say how to earn them. Starter collection: 12 basic die-cut stickers with short captions. Your reference stickers had faces; these have none (no faces in brand art), so that is a question for you. Full brainstorm: docs/stickers.md.
+        Your request of 2026-11-23: Classic stickers in collect-em-all collections, a page to see and share what the class earned, and see-through stickers that say how to earn them. Starter collection: 12 round-ish die-cut stickers, each a different fun edge, one solid palette bright, one big image and its label curving along the top (your reference, 2026-11-23). Your reference star had a face; these have none (no faces in brand art), so that is a question for you. Full brainstorm: docs/stickers.md.
       </p>
       <h3 className="font-heading font-bold text-lg">Starter collection: earned and not yet</h3>
       <StickerSheet />

@@ -11,6 +11,17 @@ job for 'Tried 5 new themes!'". Her reference: a sheet of 11 die-cut "good
 job" stickers (thick white edge, flat bright object, curved hand-lettered
 caption).
 
+**Look (teacher redo, 2026-11-23):** "original stickers should have a variety
+of fun unique shape edges and one sticker image with the label for each. lets
+do stickers like this in circle with a white sticker edge border around each.
+match the classic color pallete". Each sticker is one solid palette bright, a
+fun edge (all 12 different), a thick white die-cut border with a soft shadow,
+ONE big image (flat fill, wobbly ink line, no face), and its label: the earn
+rule in short capitals curving along the top arc in Grow Year. White text only
+on Grape (5.6:1); ink text on every other bright (WCAG 2.1 AA). Labels stay at
+12 characters or fewer where possible so they render at 11 px or more on a
+96 px sticker (the smallest size on iPad).
+
 Status: **Proposal.** Mockup on `/brand`, Stickers tab (`src/brand/Stickers.tsx`).
 Nothing ships until she approves. Research names marked *(memory)* are from
 established literature known before this session, not pages opened today.
@@ -57,20 +68,20 @@ Not a points economy and not a leaderboard.
 Her list first, then additions. These are the Starter collection in the mockup
 (first 12) plus candidates for later collections.
 
-| Sticker caption | How to earn | Note |
+| Label (top arc) | Edge, fill, image | How to earn |
 |---|---|---|
-| Good job! (star) | Played your first game | Endowed progress: most teachers earn it on day one |
-| Love it! (heart) | Played one game 5 times | |
-| Bright day! (sun) | Played on 5 days this month | Forgiving, not "in a row" |
-| Explorer! (rainbow) | Tried 5 new themes | Her example |
-| Growing! (flower) | Added 10 students | |
-| Great start! (apple) | Made your first question set | |
-| So sweet! (watermelon) | Sent your first homework link | |
-| Hooray! (balloon) | Ran your first Live game | |
-| Brilliant! (light bulb) | Tried every game | Her "tried all games" |
-| Blast off! (rocket) | Played 100 rounds | |
-| So calm! (moon) | Used Calm mode in a game | Rewards an accessibility setting: signals that Calm is normal, not a lesser mode |
-| Creative! (crayon) | Made your own theme | |
+| TRIED 5 THEMES! | circle, Grape (white text), star | Tried 5 new themes (her example) |
+| FIRST GAME! | star burst, Pink, rocket | Played your first game (endowed progress: most earn it day one) |
+| 5 PLAYS! | heart, Orange, flower | Played one game 5 times |
+| 5 DAYS! | scallop, Sky, sun | Played on 5 days this month, any 5, not in a row |
+| 10 STUDENTS! | flower, Lime, heart | Added 10 students |
+| FIRST SET! | rounded square, Lemon, apple | Made your first question set |
+| HOMEWORK! | stamp edge, Teal, watermelon | Sent your first homework link |
+| LIVE GAME! | cloud, Gamify purple, rainbow | Ran your first Live game |
+| EVERY GAME! | hexagon, Kelly, light bulb | Tried every game |
+| 100 ROUNDS! | sun with rays, Orange, balloon | Played 100 rounds |
+| CALM MODE! | shield, Grape (white text), moon | Used Calm mode (signals Calm is normal, not lesser) |
+| MY THEME! | blob, Lemon, crayon | Made your own theme |
 
 More ideas: first Activity; first choice board; every question type tried;
 recorded a question in your own voice; wrote a teach card; 10 / 50 rounds;
@@ -141,8 +152,7 @@ side. Never ranked, never shown on the class screen with names.
 ## 8. Achievement page design
 
 - **Grid by collection.** Each collection is a card: name, "7 of 12", a short
-  kelly-green progress bar, then a grid of stickers (84 px on laptop, at least
-  72 px on iPad, each a 44 px+ tap target, WCAG 2.5.5).
+  kelly-green progress bar, then a grid of stickers (at least 96 px on laptop and iPad so labels stay 11 px or more; each a 44 px+ tap target, WCAG 2.5.5).
 - **Locked:** sticker at 35% opacity, grayscale, with a small lock; the
   "How to earn: ..." caption stays full-strength ink so it passes WCAG 2.1 AA
   (the see-through art is decoration, the words carry the meaning, 1.4.1).
