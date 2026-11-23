@@ -55,7 +55,7 @@ export const STARTER: Sticker[] = [
 ];
 
 // One die-cut sticker: thick white edge, soft shadow, wobbly ink object, caption on an arc.
-export function StickerArt({ s, size = 120, locked }: { s: Sticker; size?: number; locked?: boolean }) {
+export function StickerArt({ s, size = 120, locked }: { s: Sticker; size?: number | string; locked?: boolean }) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
   return (
     <svg viewBox="0 0 120 120" width={size} height={size} role="img" aria-label={locked ? `${s.caption} sticker, not earned yet` : `${s.caption} sticker`}
@@ -130,8 +130,8 @@ function AchievementMock() {
               return (
                 <button key={s.id} type="button" onClick={() => setPick(s.id)} aria-pressed={pick === s.id}
                   className="rounded-[1rem] p-1 grid justify-items-center relative"
-                  style={{ background: pick === s.id ? PP.butter : 'transparent', border: `2px solid ${pick === s.id ? INK : 'transparent'}`, minHeight: '5.5rem' }}>
-                  <StickerArt s={s} size={84} locked={!has} />
+                  style={{ background: pick === s.id ? PP.butter : 'transparent', border: `2px solid ${pick === s.id ? INK : 'transparent'}`, maxWidth: '6.5rem' }}>
+                  <StickerArt s={s} size="100%" locked={!has} />
                   {!has && <Lock size={18} weight="bold" className="absolute top-1 right-1" aria-hidden />}
                 </button>
               );
