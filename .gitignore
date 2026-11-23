@@ -12,3 +12,4 @@ pw-alt.config.ts
 pw-board.config.ts
 pw-dev.config.ts
 test-results-dev
+.tmp-*
