@@ -4,12 +4,10 @@ import { ChalkboardTeacher, ChatCircleDots, HouseSimple, SignOut, X } from '@pho
 import { setTeacher, useSignedIn } from '../auth/session';
 import { t } from '../i18n';
 import { TellGamify } from './TellGamify';
+import { useIsOwner } from '../owner/useIsOwner';
 
 // Persistent top nav on every screen, so there's always a way back to the
 // game list from inside a game.
-// Owner accounts (usernames) that see the Developer Portal pill when signed in.
-const OWNER_NAMES = ['vtliteracynetwork', 'kayden'];
-
 export default function NavBar() {
   const [tellOpen, setTellOpen] = useState(false);
   const path = useLocation().pathname;
@@ -18,6 +16,7 @@ export default function NavBar() {
   const inGame = path.startsWith('/games/');
   const role = path.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
+  const isOwner = useIsOwner();
   const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-10 tap rounded-pill border-std border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border`}>
@@ -31,9 +30,6 @@ export default function NavBar() {
           <Link to="/pricing" className="nav-grow hidden sm:flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.pricing')}</Link>
           <Link to="/research" className="nav-grow hidden md:flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.research')}</Link>
           <Link to="/blog" className="nav-grow hidden md:flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.ideas')}</Link>
-          {/* The owner's way in (teacher, 2026-11-23): a red pill left of Join.
-              /owner still asks for the owner account and its two-step code. */}
-          <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>
           <Link to="/join" className={pill}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>
@@ -55,8 +51,8 @@ export default function NavBar() {
             className="w-9 h-9 tap-round rounded-full border-std border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
             <ChatCircleDots weight="bold" size={18} />
           </button>
-          {/* Signed in as the owner: the same red Developer Portal pill. */}
-          {teacher && !student && !path.startsWith('/games/') && OWNER_NAMES.includes((teacher.username ?? teacher.name).toLowerCase()) && <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>}
+          {/* Only the owner's own account ever sees this (teacher, 2026-11-23); it opens the developer dashboard. */}
+          {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>}
           {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
           {!student && <Link to="/play" className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.allGames')}</span></Link>}
           {teacher && !student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden sm:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}

@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'owner-email', kind: 'setup', added: '2026-11-23', title: 'Set VITE_OWNER_EMAIL in Vercel so only your account sees the Developer Portal',
+    why: 'The red Developer Portal button now shows only for the owner account; nobody else sees it. It already works for the account marked as owner in Supabase; the email setting makes sure your email login counts too, without putting your email in the code.',
+    how: 'Vercel, Gamify project, Settings, Environment Variables: add VITE_OWNER_EMAIL with your login email (Production and Preview), then redeploy.' },
   { id: 'gif-search', kind: 'legal', added: '2026-11-23', title: 'Add the GIPHY and Unsplash API keys in Vercel (GIF and photo search), then the attorney check',
     why: 'Teachers could add GIFs and photos to question sets and themes from a built-in search, like other quiz sites. GIPHY requires "Powered by GIPHY" shown wherever it is used, a production key for more than 100 searches an hour, and its own terms; loading GIFs from GIPHY on student screens sends requests to a third party, which the student privacy promise has to cover.',
     how: 'The search is built (question editor: Find a GIF or photo). Switch it on: make a free GIPHY developer account and an Unsplash developer app, then add GIPHY_API_KEY and UNSPLASH_ACCESS_KEY in Vercel (Gamify project, Environment Variables) and redeploy. Then apply for GIPHY and Unsplash production access (they check the attribution the app already shows). Ask the attorney to read both API terms and the student-privacy angle (students load the picked picture from GIPHY or Unsplash).' },
