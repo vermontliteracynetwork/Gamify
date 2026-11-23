@@ -140,7 +140,7 @@ export default function IconSet() {
         <Panel key={g.title} title={g.title}>
           <div className="w-full grid gap-3 justify-center" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(10rem, 10rem))' }}>
             {g.jobs.map((j) => (
-              <div key={j.name} className="grid justify-items-center gap-1.5 p-3 rounded-[1rem] text-center" style={{ background: PP.cream, border: `2px solid ${I}` }}>
+              <div key={j.name} className="grid justify-items-center content-start gap-1.5 p-3 rounded-[1rem] text-center" style={{ background: PP.cream, border: `2px solid ${I}` }}>
                 <IconBtn icon={j.icon} label={j.name} />
                 <b className="leading-tight">{j.name}</b>
                 <span className="text-xs font-semibold leading-snug" style={{ color: PP.quiet }}>{j.use}</span>

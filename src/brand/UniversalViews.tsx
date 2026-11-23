@@ -226,7 +226,7 @@ function V2() {
           {ways.map((w) => (
             <div key={w.id} className="relative w-[260px] h-[250px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: w.on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: w.on ? 'translateY(-6px)' : undefined }}>
               <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: w.bg, borderBottom: `3px solid ${I}` }}>{w.icon}</span>
-              <span className="px-4 py-3"><b className="text-[32px] block" style={GY}>{w.id}</b><span className="text-[17px] font-semibold">{w.hint}</span></span>
+              <span className="px-4 py-3 text-center"><b className="text-[32px] block" style={GY}>{w.id}</b><span className="text-[17px] font-semibold">{w.hint}</span></span>
               {w.on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
             </div>
           ))}
@@ -265,7 +265,7 @@ function V3() {
   );
 }
 function Group({ title, children }: { title: string; children: ReactNode }) {
-  return <div className="p-6 grid gap-5 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}><h3 className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>{title}</h3>{children}</div>;
+  return <div className="p-6 grid gap-8 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}><h3 className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>{title}</h3>{children}</div>;
 }
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return <div className="grid justify-items-center gap-3"><b className="text-[22px]">{label}</b>{children}</div>;
