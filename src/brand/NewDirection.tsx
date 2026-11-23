@@ -5,6 +5,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { LogoMark, LogoWord, ND, Paper, PaperDefs, Washi } from './buddies';
 import { CrayonDie, CrayonKitSection, CrayonPawn, CrayonPowerUp, type PowerId } from './CrayonKit';
 import HandmadeMock from './HandmadeMock';
+import { ModeBadge } from '../games/ModeBadge';
 import PlayfulMock from './PlayfulMock';
 
 // "New direction" (proposal, teacher 2026-11-23): playful flat shapes from her
@@ -303,6 +304,12 @@ export default function NewDirection() {
         </div>
       </Block>
 
+      <Block title="Ways to play (kept as they are)" note="Your decision, 2026-11-23: three ways only, with their names, icons and colors. Versus is not a category anywhere.">
+        <div className="grid gap-2 max-w-[36rem]">
+          <ModeBadge mode="share" withHint /><ModeBadge mode="live" withHint /><ModeBadge mode="solo" withHint />
+        </div>
+      </Block>
+
       <Block title="Patterns and doodles" note="The power-up sheet is the main texture, at the edges only. Doodles: sparkles, a swirl, an arrow, dots. One squiggle may underline a word.">
         <div className="grid sm:grid-cols-[2fr_1fr] gap-4">
           <div className="rounded-[1.5rem] h-48 overflow-hidden" style={{ background: ND.cream, boxShadow: `inset 0 0 0 2px ${ND.paper}` }}><PowerSheet /></div>
@@ -341,7 +348,7 @@ export default function NewDirection() {
             <span className="text-xs font-semibold" style={{ color: ND.quiet }}>Ring shows whose turn it is.</span>
           </div>
           <div className="grid gap-3">
-            <div className="rounded-[1.75rem] p-5 text-center font-heading font-bold text-[clamp(1.4rem,3vw,2.2rem)]" style={{ background: ND.paper }}>Which word starts with a capital letter?</div>
+            <div className="rounded-[1.75rem] p-5 text-left font-heading font-bold text-[clamp(1.4rem,3vw,2.2rem)]" style={{ background: ND.paper }}>Which word starts with a capital letter?</div>
             <div className="grid grid-cols-2 gap-3">
               {([['A', ND.pink, 'Monday'], ['B', ND.yellow, 'apple'], ['C', ND.green, 'blue'], ['D', ND.mint, 'run']] as [string, string, string][]).map(([letter, bg, w]) => (
                 <button key={w} type="button" className="min-h-20 rounded-[1.25rem] flex items-center gap-3 px-4 font-bold text-2xl motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform"

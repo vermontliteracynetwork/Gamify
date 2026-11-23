@@ -161,7 +161,7 @@ function WelcomeCard() {
 }
 
 // A hand-lettered phrase with a little face in every "o", letters in brand colors.
-function FaceWord({ text }: { text: string }) {
+function CrayonWord({ text }: { text: string }) {
   const colors = [ND.cobaltDeep, ND.pinkDeep, ND.greenDeep, ND.tangDeep, ND.violetDeep];
   let k = 0;
   return (
@@ -172,8 +172,7 @@ function FaceWord({ text }: { text: string }) {
         if (l.toLowerCase() === 'o') return (
           <svg key={i} viewBox="0 0 40 40" className="inline-block w-[0.62em] h-[0.62em] mx-[0.03em] align-[-0.02em]" aria-hidden="true">
             <circle cx="20" cy="20" r="16" fill="none" stroke={c} strokeWidth="6" />
-            <circle cx="15" cy="18" r="2.4" fill={c} /><circle cx="25" cy="18" r="2.4" fill={c} />
-            <path d="M14.5 24 q5.5 5 11 0" stroke={c} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+            <path d="M31 9 l2 -5 M34 13 l5 -2" stroke={ND.yellow} strokeWidth="3" strokeLinecap="round" />
           </svg>
         );
         return <span key={i} aria-hidden="true" className="inline-block" style={{ ...GY, color: c, transform: `rotate(${[-4, 3, -2, 5][i % 4]}deg)` }}>{l}</span>;
@@ -249,9 +248,9 @@ function ScrapbookBand() {
       <Swatch fill="url(#pm-pinstripe)" tilt={-1.5} label="Sunburst card: lobby and big moments">
         <div className="relative w-40 h-40 rotate-[3deg]" style={{ boxShadow: '0 6px 14px rgba(29,26,51,0.2)' }}><Sunburst /><Washi className="-top-3 left-10" rotate={-6} color={ND.yellow} w="4rem" /></div>
       </Swatch>
-      <Swatch fill="url(#pm-dots)" tilt={1} label="Hand-lettered praise, faces in the letters">
+      <Swatch fill="url(#pm-dots)" tilt={1} label="Hand-lettered praise, a crayon O with a sparkle">
         <div className="relative rounded-[10px] px-4 py-5 text-center text-[2.1rem]" style={{ background: '#fffaf0', boxShadow: '0 6px 14px rgba(29,26,51,0.16)' }}>
-          <FaceWord text="Good job, you!" />
+          <CrayonWord text="Good job, you!" />
           <Washi className="-top-3 right-6" rotate={8} color={ND.mint} w="3.5rem" />
         </div>
       </Swatch>

@@ -39,12 +39,14 @@ function Core({ skin, zone }: { skin: Skin; zone: boolean }) {
           ))}
         </div>
         <div className="grid gap-2.5">
-          <div className="rounded-[1.25rem] px-3 py-4 text-center font-heading font-bold text-[1.05rem] leading-snug" style={{ background: '#ffffff', color: ND.ink, ...z }}>
+          <div className="rounded-[1.25rem] px-4 py-4 text-left font-heading font-bold text-[1.05rem] leading-snug" style={{ background: '#ffffff', color: ND.ink, ...z }}>
             Which word needs a capital letter?
           </div>
           <div className="grid grid-cols-2 gap-2 rounded-[1rem]" style={z}>
-            {([[ND.pink, 'monday'], [ND.yellow, 'apple'], [ND.green, 'blue'], [ND.mint, 'run']] as [string, string][]).map(([bg, w]) => (
-              <button key={w} type="button" tabIndex={-1} className="min-h-12 rounded-[1rem] px-3 font-bold text-lg text-left" style={{ ...edge(bg), color: ND.ink }}>{w}</button>
+            {([[ND.pink, 'monday'], [ND.yellow, 'apple'], [ND.green, 'blue'], [ND.mint, 'run']] as [string, string][]).map(([bg, w], i) => (
+              <button key={w} type="button" tabIndex={-1} className="min-h-12 rounded-[1rem] px-2 font-bold text-lg text-left flex items-center gap-2" style={{ ...edge(bg), color: ND.ink }}>
+                <span className="w-7 h-7 shrink-0 rounded-full grid place-items-center text-sm" style={{ background: ND.paper }}>{'ABCD'[i]}</span>{w}
+              </button>
             ))}
           </div>
           <button type="button" tabIndex={-1} className="min-h-12 rounded-full font-bold text-lg inline-flex items-center justify-center gap-2" style={{ ...edge(ND.cobalt), color: '#ffffff', ...z }}>
@@ -88,13 +90,12 @@ const classicSkin: Skin = {
   iconB: <CrayonPawn color={ND.pink} size={26} />,
 };
 
-// ---------- Example kid theme: crayon drawing with clay pieces ----------
+// ---------- Example kid theme: crayon drawing with clay pieces (no faces) ----------
 function Clay({ color, size = 40 }: { color: string; size?: number }) {
   return (
     <svg viewBox="0 0 60 60" width={size} height={size} aria-hidden="true" overflow="visible">
       <ellipse cx="30" cy="32" rx="21" ry="19" fill={color} filter="url(#nd-clay)" />
       <ellipse cx="22" cy="23" rx="7" ry="4.5" fill="#ffffff" opacity="0.4" transform="rotate(-25 22 23)" />
-      <circle cx="24" cy="32" r="3" fill={ND.ink} /><circle cx="37" cy="32" r="3" fill={ND.ink} />
     </svg>
   );
 }
