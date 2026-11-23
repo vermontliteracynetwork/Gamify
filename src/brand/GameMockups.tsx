@@ -4,7 +4,7 @@ import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
 import { Laptop, MainBtn, Tablet } from './UniversalViews';
-import { Badge, ParkBack, StudioBack, TEAMS, TURN_GLOW, TurnGlow, PURPLE_GROUND, MenuStep } from './mockKit';
+import { Badge, ParkBack, StudioBack, TEAMS, TURN_GLOW, TurnGlow, PURPLE_GROUND, MenuStep, WelcomeScreen } from './mockKit';
 import { layout } from '../games/castle-quest/board';
 
 // Game mockups (PROPOSAL, teacher 2026-11-23: "mockups of all the games with a
@@ -273,7 +273,7 @@ function PatternStage({ id, children }: { id: string; children: ReactNode }) {
 function Stat({ label, value, icon }: { label: string; value: ReactNode; icon?: ReactNode }) {
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>
-      {icon}<span className="grid leading-none"><span className="text-xs font-bold uppercase tracking-wider" style={{ color: PP.quiet }}>{label}</span><b className="font-display text-2xl tabular-nums">{value}</b></span>
+      {icon}<span className="grid leading-none"><span className="text-[13px] font-bold" style={{ color: PP.quiet }}>{label}</span><b className="font-display text-2xl tabular-nums">{value}</b></span>
     </div>
   );
 }
@@ -490,7 +490,7 @@ function BubbleBoard({ w }: { w: number }) {
           <path d={`M${w / 2} ${h - 24 - s * 1.6} L${w * 0.3} ${rowH * 7.4}`} stroke={I} strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
         </svg>
         <span className="absolute -translate-x-1/2" style={{ left: w / 2, top: h - 24 - s * 2.3 }}><Bubble k={1} s={s * 1.5} /></span>
-        <span className="absolute grid justify-items-center" style={{ left: w / 2 + s * 1.8, top: h - 24 - s * 1.8 }}><b className="text-xs uppercase" style={{ color: PP.quiet }}>Next</b><Bubble k={3} s={s} /></span>
+        <span className="absolute grid justify-items-center" style={{ left: w / 2 + s * 1.8, top: h - 24 - s * 1.8 }}><b className="text-[13px]" style={{ color: PP.quiet }}>Next</b><Bubble k={3} s={s} /></span>
         <span className="absolute -translate-x-1/2" style={{ left: w * 0.5, top: rowH * 8.6 }}><Burst text="Pop! +40" color={PP.lemon} /></span>
       </div>
     </div>
@@ -662,7 +662,6 @@ function ClassScreen() {
       <div className="absolute left-[200px] top-[520px]"><Burst text="Three gold stars in a row!" size="text-2xl" color={PP.butter} /></div>
       <div className="absolute right-[24px] top-[92px] w-[224px] grid gap-3">
         <div className="p-4 grid gap-2 text-center" style={paper}>
-          <b className="text-sm uppercase tracking-wider" style={{ color: PP.quiet }}>Class goal</b>
           <span className="font-display text-5xl font-bold leading-none tabular-nums">18<span className="text-2xl"> of 30</span></span>
           <span className="h-5 rounded-full overflow-hidden" style={{ background: PP.paper, border: `2.5px solid ${I}` }}><span className="block h-full" style={{ width: '60%', background: PP.lemon, borderRight: `2.5px solid ${I}` }} /></span>
           <span className="font-bold">Fill the sky together!</span>
@@ -756,17 +755,23 @@ function Pills({ opts, pick }: { opts: string[]; pick: number }) {
 }
 
 // ---------- 1. Welcome ----------
-// Every start menu is the one shared MenuStep (teacher, 2026-11-23): purple ground, the same white panel, header and footer.
+// Her original welcome layout for every game (teacher, 2026-11-23: "revert to original welcome page, just space out the right text better").
+const WELCOME_INFO: Record<string, [string, string[]]> = {
+  'Game Show': ['Answer to pick a surprise card. Most points wins.', ['Share', 'Solo']],
+  'Board Game': ['Answer, roll the die and race to the finish.', ['Share', 'Solo']],
+  'Match Three': ['Swap pieces to make rows of three. Answer for more moves.', ['Solo']],
+  'Four in a Row': ['Answer, then drop your piece. Four in a line wins.', ['Share', 'Solo']],
+  'Bubble Pop': ['Answer to load bubbles, then aim and pop.', ['Solo']],
+  'Bowling': ['Answer right to roll. Most pins wins.', ['Share', 'Solo']],
+  'Question Tracker': ['Every right answer adds a star until the sky is full.', ['Live', 'Solo']],
+};
+const STEP_ICONS = [<Check key="a" weight="bold" size={22} />, <Play key="b" weight="bold" size={22} />, <FlagCheckered key="c" weight="bold" size={22} />];
 function Welcome({ name, art, steps }: { name: string; art: ReactNode; steps: [string, string, string] }) {
+  const [desc, modes] = WELCOME_INFO[name] ?? ['', ['Share', 'Solo']];
   return (
-    <MenuStep canvas={1000} title={name} step={1} total={4} back={false} go={<MainBtn big><Play weight="fill" size={24} />Start</MainBtn>}>
-      <div className="flex items-center justify-center gap-14">
-        <div className="relative w-[260px] h-[260px] grid place-items-center rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}><BlobPatch color={PP.blush} size={220} /><span className="relative scale-150">{art}</span></div>
-        <ol className="grid gap-4 list-none p-0 m-0">
-          {steps.map((st, i) => <li key={st} className="flex items-center gap-4 font-bold text-[26px]"><span className="w-12 h-12 rounded-full grid place-items-center shrink-0" style={{ ...GY, fontSize: 26, background: [PP.gamify, PP.butter, PP.mint][i], border: `3px solid ${I}` }}>{i + 1}</span>{st}</li>)}
-        </ol>
-      </div>
-    </MenuStep>
+    <WelcomeScreen canvas={1000} name={name} desc={desc} modes={modes} go="Start"
+      steps={steps.map((st, i) => [STEP_ICONS[i], st] as [ReactNode, string])}
+      cover={<div className="w-full h-full grid place-items-center" style={{ background: PP.cream }}><div className="relative w-[300px] h-[300px] grid place-items-center"><BlobPatch color={PP.blush} size={300} /><span className="relative scale-[2]">{art}</span></div></div>} />
   );
 }
 // ---------- 2. How will you play? ----------
@@ -840,7 +845,7 @@ function Lobby() {
     <MenuStep canvas={1000} title="Lobby" step={4} total={4} go={<MainBtn><Play weight="fill" size={22} />Start</MainBtn>}>
       <div className="w-full grid grid-cols-[1fr_1.3fr] gap-8 items-center">
         <div className="grid justify-items-center gap-3">
-          <b className="text-[19px] uppercase tracking-wider" style={{ color: PP.quiet }}>Go to the Join page and type</b>
+          <b className="text-[21px]">Go to the Join page and type</b>
           <span className="tracking-widest px-5 py-2 rounded-2xl" style={{ ...GY, fontSize: 88, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
           <span className="font-bold text-[19px] flex items-center gap-2"><DeviceTablet weight="bold" size={24} />Every student on their own device</span>
         </div>

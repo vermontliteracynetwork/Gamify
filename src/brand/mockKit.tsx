@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, CornersOut, GearSix, PersonArmsSpread, X } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, CornersOut, GearSix, PersonArmsSpread, Play, X } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 
 // Shared parts for the Brand page mockups (PROPOSAL, 2026-11-23): the team
@@ -142,7 +142,7 @@ export function MenuStep({ title, step, total, children, go, back = true, canvas
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
         <div className="absolute left-10 right-10 top-7 flex items-center justify-between">
-          <span className="inline-flex items-center px-5 h-[56px] rounded-full" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" draggable={false} /></span>
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto" draggable={false} />
           <div className="flex gap-3">
             <MkRound label="Accessibility"><PersonArmsSpread weight="bold" size={24} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={24} /></MkRound>
             <MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Close"><X weight="bold" size={24} /></MkRound>
@@ -158,6 +158,48 @@ export function MenuStep({ title, step, total, children, go, back = true, canvas
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
           <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+// ---------- THE game welcome (teacher, 2026-11-23: "revert to original welcome
+// page, just space out the right text better"). The live GameWelcome layout:
+// the cover big on the left; the right column exactly as tall as the cover,
+// spaced evenly: the title (level with the cover top, corner buttons to its
+// right), the description and ways to play, the white How to play card, and a
+// full-width start button whose bottom lines up with the cover bottom.
+export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up and play', canvas = 1280 }: { name: string; desc: string; modes: string[]; steps: [ReactNode, string][]; cover: ReactNode; go?: string; canvas?: number }) {
+  const chip = [PP.gamify, PP.aqua, PP.butter];
+  // 1280 x 800: cover 790 x 490 (100:62, shown whole), right column 390 wide and exactly
+  // as tall as the cover, justify-between so the groups spread evenly (about 18px apart).
+  const title = Math.min(60, Math.floor(390 / (name.length * 0.62)));
+  return (
+    <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
+      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
+        <div className="absolute left-8 right-8 top-7 flex items-center justify-between">
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto" draggable={false} />
+          <div className="flex gap-3"><MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={24} /></MkRound></div>
+        </div>
+        <div className="absolute left-8 top-[150px] flex gap-9">
+          <div className="w-[790px] h-[490px] rounded-[28px] overflow-hidden grid place-items-center shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
+          <div className="w-[390px] h-[490px] flex flex-col justify-between">
+            <h1 className="leading-none whitespace-nowrap" style={{ ...MK_GY, fontSize: title }}>{name}</h1>
+            <div className="grid gap-3">
+              <p className="font-semibold text-[21px] leading-snug">{desc}</p>
+              <div className="flex gap-2">{modes.map((m, i) => <span key={m} className="px-4 py-1 rounded-full font-bold text-[18px]" style={{ background: chip[i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
+            </div>
+            <div className="rounded-[24px] px-6 py-[18px] grid gap-3.5" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: '0 3px 0 rgba(29,26,51,0.14), 0 12px 24px rgba(29,26,51,0.10)' }}>
+              <h2 className="text-[16px] font-bold" style={{ color: PP.quiet }}>How to play</h2>
+              {steps.map(([ic, t], i) => (
+                <div key={t} className="flex items-center gap-4 font-bold text-[21px]">
+                  <span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}
+                </div>
+              ))}
+            </div>
+            <span className="w-full min-h-[70px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}><Play weight="fill" size={30} />{go}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

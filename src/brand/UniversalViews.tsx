@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
-  ArrowRight, Broadcast, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
+  ArrowRight, Broadcast, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
   PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Television, Toolbox, User, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonDie, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { Badge, LakeBack, MenuStep, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, TEAMS, TurnGlow } from './mockKit';
+import { Badge, LakeBack, MenuStep, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, TEAMS, TurnGlow } from './mockKit';
 
 export { Badge, TEAMS };
 
@@ -105,7 +105,7 @@ function Check40({ size = 40 }: { size?: number }) {
 function Seg({ opts, pick, h = 56, size = 20 }: { opts: string[]; pick: number; h?: number; size?: number }) {
   return (
     <span className="inline-flex p-1.5 rounded-full font-bold gap-1" style={{ background: PP.cream, border: `3px solid ${I}`, fontSize: size }}>
-      {opts.map((o, i) => <span key={o} className="px-6 rounded-full inline-flex items-center gap-2" style={{ minHeight: h - 12, ...(i === pick ? PICK : {}) }}>{i === pick && <Check weight="bold" size={size * 0.8} />}{o}</span>)}
+      {opts.map((o, i) => <span key={o} className="px-6 rounded-full inline-flex items-center gap-2 whitespace-nowrap" style={{ minHeight: h - 12, ...(i === pick ? PICK : {}) }}>{i === pick && <Check weight="bold" size={size * 0.8} />}{o}</span>)}
     </span>
   );
 }
@@ -154,7 +154,7 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
     <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 rounded-full" style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
       <div className="justify-self-start">{left}</div>
       <div className="grid justify-items-center gap-1.5">
-        <b className="uppercase tracking-widest" style={{ fontSize: 15 * k }}>Round 2 of 3</b>
+        <b style={{ fontSize: 17 * k }}>Round 2 of 3</b>
         <RoundMeter round={2} rounds={3} part={0.5} w={k < 1 ? 190 : 360} />
       </div>
       <div className="justify-self-end"><Tools size={48 * k} access={false} /></div>
@@ -164,23 +164,11 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
 
 // ---------- views ----------
 function V1() {
-  const steps: string[] = ['Answer the question', 'Roll the die', 'Move to the finish'];
+  // Her original live welcome layout, right column spaced evenly (teacher, 2026-11-23).
   return (
-    <MenuStep title="Board Game" step={1} total={6} back={false} go={<MainBtn big><Play weight="fill" size={30} />Set up and play</MainBtn>}>
-      <div className="w-full grid grid-cols-[1fr_1fr] gap-10 items-center">
-        <div className="justify-self-end relative w-[380px] h-[300px] grid place-items-center rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}>
-          <BlobPatch color={PP.gamify} size={260} /><span className="relative"><CrayonDie value={5} size={180} /></span>
-        </div>
-        <div className="justify-self-start flex flex-col items-center text-center gap-5">
-          <p className="font-semibold text-[24px] leading-snug">Answer, roll the die and race to the finish.</p>
-          <div className="flex gap-2">{([['Share', PP.gamify], ['Live', PP.aqua], ['Solo', PP.butter]] as const).map(([m, c]) => <span key={m} className="px-4 py-1.5 rounded-full font-bold text-[18px]" style={{ background: c, border: `2.5px solid ${I}` }}>{m}</span>)}</div>
-          <div className="grid gap-3">{steps.map((st, k) => (
-            <div key={st} className="flex items-center gap-4 font-bold text-[23px]">
-              <span className="w-12 h-12 rounded-full grid place-items-center text-[26px] shrink-0" style={{ ...GY, background: [PP.butter, PP.blush, PP.aqua][k], border: `3px solid ${I}` }}>{k + 1}</span>{st}
-            </div>))}</div>
-        </div>
-      </div>
-    </MenuStep>
+    <WelcomeScreen name="Board Game" desc="Answer, roll the die and race to the finish." modes={['Share', 'Live', 'Solo']}
+      steps={[[<Check key="a" weight="bold" size={22} />, 'Answer the question'], [<Star key="b" weight="bold" size={22} />, 'Roll the die'], [<ArrowRight key="c" weight="bold" size={22} />, 'Move to the finish']]}
+      cover={<div className="relative w-full h-full grid place-items-center"><ParkBack w={790} h={490} /><span className="relative"><CrayonDie value={5} size={200} /></span></div>} />
   );
 }
 function V2() {
@@ -206,36 +194,52 @@ function V2() {
     </Wizard>
   );
 }
+const SETS = [
+  { name: 'Capital letters', sub: 'ELA', gr: 'K-2', n: 12, c: PP.pink, soft: PP.blush, q: 'Which word needs a capital letter?', used: 'Used today' },
+  { name: 'Short vowels', sub: 'ELA', gr: 'K-1', n: 16, c: PP.periwinkle, soft: PP.gamify, q: 'Which word has a short a sound?', used: 'Used yesterday' },
+  { name: 'Add within 20', sub: 'Math', gr: '1-2', n: 20, c: PP.lemon, soft: PP.butter, q: 'What is 8 + 5?', used: 'Used 3 days ago' },
+  { name: 'Punctuation', sub: 'ELA', gr: '2-3', n: 10, c: PP.sky, soft: PP.blueCrystal, q: 'Which sentence ends with a question mark?', used: 'Used last week' },
+  { name: 'Plants and seeds', sub: 'Science', gr: '2-4', n: 14, c: PP.kelly, soft: PP.mint, q: 'What does a seed need to grow?', used: 'Made Nov 2' },
+  { name: 'Place value', sub: 'Math', gr: '2-3', n: 18, c: PP.orange, soft: PP.peach, q: 'What is the value of the 4 in 46?', used: 'Made Oct 28' },
+];
+function Chip({ children, on }: { children: ReactNode; on?: boolean }) {
+  return <span className="px-3.5 h-10 rounded-full inline-flex items-center gap-1.5 font-bold text-[16px] whitespace-nowrap" style={on ? { ...PICK } : { background: '#fff', border: `2px solid ${I}` }}>{on && <Check weight="bold" size={14} />}{children}</span>;
+}
 function V3() {
-  const sets = [
-    ['Capital letters', 'ELA', 'K-2', 12, PP.pink, 'Which word needs a capital letter?'], ['Short vowels', 'ELA', 'K-1', 16, PP.periwinkle, 'Which word has a short a?'],
-    ['Add within 20', 'Math', '1-2', 20, PP.lemon, 'What is 8 + 5?'], ['Punctuation', 'ELA', '2-3', 10, PP.sky, 'Which sentence ends with a question mark?'],
-    ['Plants and seeds', 'Science', '2-4', 14, PP.kelly, 'What does a seed need to grow?'], ['Place value', 'Math', '2-3', 18, PP.orange, 'What is the value of the 4 in 46?'],
-  ] as const;
+  // Laptop dense but legible (13px floor): tabs, search, subject and grade filters, recent first,
+  // cards with subject color, grade, count, the first question and when it was last used.
   return (
     <Wizard step={2} total={5} title="Question set">
-      <div className="w-full flex items-center justify-center gap-4 mb-5">
-        <Seg opts={['My sets', 'Public sets']} pick={0} h={52} size={18} />
-        <span className="w-[440px] h-[52px] px-5 rounded-full flex items-center gap-3 font-semibold text-[18px]" style={{ background: PP.paper, border: `3px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} />Search sets</span>
-      </div>
-      <div className="w-full grid grid-cols-3 gap-5">
-        {sets.map(([name, sub, gr, n, c, q], i) => (
-          <div key={name} className="relative flex overflow-hidden" style={{ ...card, boxShadow: i === 0 ? `${SEL}, 0 4px 0 ${I}` : card.boxShadow }}>
-            <span className="w-3 shrink-0" style={{ background: c, borderRight: `2.5px solid ${I}` }} />
-            <div className="flex-1 p-4 grid gap-2 min-w-0 justify-items-center text-center">
-              <b className="text-[21px] leading-tight">{name}</b>
-              <span className="text-[15px] font-semibold truncate max-w-full" style={{ color: PP.quiet }}>{q}</span>
-              <div className="flex gap-1.5 text-[14px] font-bold whitespace-nowrap">{[sub, `Grades ${gr}`, `${n} questions`].map((x) => <span key={x} className="px-2.5 py-0.5 rounded-full" style={{ border: `2px solid ${I}` }}>{x}</span>)}</div>
+      <div className="w-full grid gap-4">
+        <div className="flex items-center justify-center gap-3">
+          <Seg opts={['My sets', 'Public sets']} pick={0} h={52} size={18} />
+          <span className="w-[240px] h-[52px] px-5 rounded-full flex items-center gap-3 font-semibold text-[18px]" style={{ background: '#fff', border: `2.5px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} />Search sets</span>
+          <span className="flex gap-1.5"><Chip on>All subjects</Chip><Chip>ELA</Chip><Chip>Math</Chip><Chip>Science</Chip></span>
+          <Chip>All grades<CaretDown weight="bold" size={14} /></Chip>
+        </div>
+        <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-4">
+          {SETS.map((x, i) => (
+            <div key={x.name} className="relative rounded-[20px] overflow-hidden flex flex-col" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: i === 0 ? `${SEL}, 0 4px 0 ${I}` : `0 4px 0 ${I}` }}>
+              <div className="h-[40px] pl-4 pr-12 flex items-center justify-between gap-2 whitespace-nowrap" style={{ background: x.soft, borderBottom: `2.5px solid ${I}` }}>
+                <span className="flex items-center gap-2 font-bold text-[16px]"><span className="w-4 h-4 rounded-full" style={{ background: x.c, border: `2px solid ${I}` }} />{x.sub}</span>
+                <span className="font-bold text-[15px]">{x.used}</span>
+              </div>
+              <div className="px-4 pt-2.5 pb-3 grid gap-1.5 text-left min-w-0">
+                <b className="text-[22px] leading-tight">{x.name}</b>
+                <span className="text-[16px] font-semibold px-3 py-1.5 rounded-xl truncate" style={{ background: PP.cream, color: I }}>{x.q}</span>
+                <span className="flex gap-2 text-[15px] font-bold"><span className="px-2.5 py-0.5 rounded-full" style={{ border: `2px solid ${I}` }}>Grades {x.gr}</span><span className="px-2.5 py-0.5 rounded-full" style={{ border: `2px solid ${I}` }}>{x.n} questions</span></span>
+              </div>
+              {i === 0 && <span className="absolute top-1.5 right-1.5"><Check40 size={34} /></span>}
             </div>
-            {i === 0 && <span className="absolute top-2 right-2"><Check40 size={34} /></span>}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </Wizard>
   );
 }
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return <div className="p-6 grid gap-8 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}><h3 className="text-[15px] font-bold uppercase tracking-widest" style={{ color: PP.quiet }}>{title}</h3>{children}</div>;
+// No section kicker labels (teacher, 2026-11-23); only the real field labels.
+function Group({ children }: { title?: string; children: ReactNode }) {
+  return <div className="p-6 grid gap-8 content-start justify-items-center text-center" style={{ ...card, background: PP.cream }}>{children}</div>;
 }
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return <div className="grid justify-items-center gap-3"><b className="text-[22px]">{label}</b>{children}</div>;
@@ -273,8 +277,8 @@ function V5() {
       <div className="w-full grid gap-6 justify-items-center">
         <div className="flex items-center justify-center gap-4 font-bold text-[20px]"><span>How many teams?</span><Seg opts={['2', '3', '4']} pick={2} /></div>
         <div className="w-full grid grid-cols-4 gap-5">
-          {TEAMS.map((t, i) => (
-            <div key={t.name} className="relative" style={{ ...card, transform: `rotate(${[-1, 0.8, -0.6, 1][i]}deg)` }}>
+          {TEAMS.map((t) => (
+            <div key={t.name} className="relative" style={card}>
               <div className="h-[72px] grid place-items-center rounded-t-[17px]" style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><span className="w-14 h-14 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={38} /></span></div>
               <div className="p-4 grid gap-3">
                 <span className="h-12 px-4 rounded-xl flex items-center justify-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
@@ -301,9 +305,9 @@ function V6() {
   return (
     <Wizard step={5} total={5} title="Power-ups" last>
       <div className="grid grid-cols-3 gap-x-6 gap-y-5">
-        {SETUP.map((c, i) => (
+        {SETUP.map((c) => (
           <div key={c.id} className="relative w-[290px] h-[168px] grid justify-items-center content-center gap-1.5 text-center rounded-[22px]"
-            style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}`, transform: `rotate(${[-1, 0.6, -0.4, 0.8, 0, -0.8][i]}deg)` } : { background: '#fff', border: `3px dashed ${I}` }}>
+            style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` } : { background: '#fff', border: `3px dashed ${I}` }}>
             <span className="relative w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><BlobPatch color={c.soft} size={84} /><span className="relative"><CrayonPowerUp id={c.id} size={66} /></span></span>
             <b className="text-[22px] leading-tight">{c.name}</b>
             <span className="text-[16px] font-semibold leading-snug" style={{ color: PP.quiet }}>{c.job}</span>
@@ -340,42 +344,46 @@ function V7() {
 const ANS = [['A', 'the dog ran.', PP.periwinkle, PP.gamify], ['B', 'The dog ran.', PP.sky, PP.blueCrystal], ['C', 'The dog ran', PP.pink, PP.blush], ['D', 'the dog ran', PP.lemon, PP.butter]] as const;
 function QCard({ tablet }: { tablet?: boolean }) {
   const big = !!tablet;
+  const b = big ? 60 : 52, ic = big ? 26 : 22;
   return (
-    <Paper pad={big ? 30 : 26} layer={PP.blueCrystal} className={big ? 'w-full flex-1 min-h-0' : 'w-[1000px]'}>
-      <div className="h-full flex flex-col gap-5">
-        <div className="flex items-start gap-4">
-          <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: big ? 64 : 56, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={big ? 28 : 24} />Listen</span>
-          <Round size={big ? 60 : 52} label="Tools"><Toolbox weight="bold" size={big ? 26 : 22} /></Round>
-        </div>
-        <h2 className="font-bold text-left leading-snug" style={{ fontSize: big ? 54 : 38 }}>Which one starts with a capital letter and ends with punctuation?</h2>
-        <div className="grid gap-4 flex-1" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
-          {ANS.map(([l, txt, c, bg]) => (
-            <div key={l} className="flex items-center gap-5 px-5 rounded-[22px] font-bold" style={{ minHeight: big ? 120 : 104, fontSize: big ? 46 : 36, background: bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-              <span className="shrink-0 rounded-full grid place-items-center" style={{ ...GY, width: big ? 84 : 68, height: big ? 84 : 68, fontSize: big ? 46 : 38, background: c, border: `3px solid ${I}` }}>{l}</span>{txt}
-            </div>
-          ))}
-        </div>
+    <div className={`${big ? 'w-full flex-1 min-h-0' : 'w-[1120px] h-full'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 30 : 28 }}>
+      {/* Her page 2 header: the current team left; tools, settings, full screen, close, then Listen on the right. */}
+      <div className="flex items-center gap-3">
+        <span className="flex items-center gap-3 flex-1 min-w-0"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: b, height: b, background: '#fff', border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={b * 0.62} /></span></TurnGlow><b className="truncate" style={{ fontSize: big ? 30 : 26 }}>Team Sky</b></span>
+        <Round size={b} label="Tools"><Toolbox weight="bold" size={ic} /></Round>
+        <Round size={b} label="Settings"><GearSix weight="bold" size={ic} /></Round>
+        <Round size={b} label="Full screen"><CornersOut weight="bold" size={ic} /></Round>
+        <Round size={b} label="Close"><X weight="bold" size={ic} /></Round>
+        <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: b, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={ic} />Listen</span>
       </div>
-    </Paper>
+      <h2 className="font-bold text-left leading-snug" style={{ fontSize: big ? 54 : 42 }}>Which one starts with a capital letter and ends with punctuation?</h2>
+      <div className="grid gap-4 flex-1" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
+        {ANS.map(([l, txt, c, bg]) => (
+          <div key={l} className="flex items-center gap-5 px-5 rounded-[22px] font-bold" style={{ fontSize: big ? 46 : 40, background: bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+            <span className="shrink-0 rounded-full grid place-items-center" style={{ ...GY, width: big ? 84 : 76, height: big ? 84 : 76, fontSize: big ? 46 : 40, background: c, border: `3px solid ${I}` }}>{l}</span>{txt}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 type ThemeId = 'gameshow' | 'park' | 'sky';
 function ThemeBack({ id, w, h }: { id: ThemeId; w: number; h: number }) {
   return id === 'gameshow' ? <StudioBack w={w} h={h} /> : id === 'park' ? <ParkBack w={w} h={h} /> : <SkyBack w={w} h={h} />;
 }
-function QLaptop({ theme, mode }: { theme: ThemeId; mode: Mode }) {
+function QLaptop({ theme }: { theme: ThemeId }) {
   return (
     <div className="w-full h-full relative">
       <ThemeBack id={theme} w={1280} h={800} />
-      <div className="absolute inset-0 flex flex-col items-center gap-5 px-10 pt-9 pb-8"><Tracker mode={mode} /><QCard /></div>
+      <div className="absolute inset-0 flex flex-col items-center px-10 py-10"><QCard /></div>
     </div>
   );
 }
-function QTablet({ theme, mode }: { theme: ThemeId; mode: Mode }) {
+function QTablet({ theme }: { theme: ThemeId }) {
   return (
     <div className="w-full h-full relative">
       <ThemeBack id={theme} w={820} h={1180} />
-      <div className="absolute inset-0 flex flex-col items-center gap-6 px-7 pt-8 pb-12"><Tracker mode={mode} k={0.85} /><QCard tablet /></div>
+      <div className="absolute inset-0 flex flex-col items-center px-7 pt-10 pb-12"><QCard tablet /></div>
     </div>
   );
 }
@@ -386,10 +394,7 @@ function V9a() {
     <Stage pad={48}>
       <div className="w-full flex-1 flex flex-col justify-center gap-9">
         {(['solo', 'share', 'live'] as const).map((m) => (
-          <div key={m} className="grid gap-2 justify-items-center">
-            <b className="text-[15px] uppercase tracking-widest">{m === 'solo' ? 'Solo: your points, no player icon' : m === 'share' ? 'Share: whose turn, with the turn glow' : 'Live: the class goal'}</b>
-            <Tracker mode={m} />
-          </div>
+          <Tracker key={m} mode={m} />
         ))}
       </div>
     </Stage>
@@ -595,23 +600,19 @@ function V13() {
 }
 
 const VIEWS: { n: string; name: string; view: ReactNode; problem: string; changed: string; tablet?: boolean }[] = [
-  { n: '1', name: 'Welcome', view: <V1 />, problem: 'Washi tape and pattern bands made the menu busy; the cream ground did not match the site.',
-    changed: 'The one shared start menu: purple ground, the same white panel, the game name as the Grow Year header with the step tracker, a 68px Set up and play.' },
+  { n: '1', name: 'Welcome', view: <V1 />, problem: 'The welcome had become a step panel, not her original page.',
+    changed: 'Back to her original welcome: cover big on the left, the right column exactly as tall as it and spaced evenly (title level with the cover top and the corner buttons, description and ways to play, the white How to play card, the start button level with the cover bottom).' },
   { n: '2', name: 'Ways to play', view: <V2 />, problem: 'Tape on the panel; icons were filled while the Icons tab says bold.',
     changed: 'Purple ground, bold icons, the picked card lifts with an ink ring and green check, the share question under the cards.' },
-  { n: '3', name: 'Question set picker', view: <V3 />, problem: 'Cream ground and tape.', changed: 'Purple ground, centered tabs and search, teacher-dense set cards with a preview line.' },
-  { n: '4', name: 'Options', view: <V4 />, problem: 'Tape; rows were label-left.', changed: 'Two centered groups with the label above each control.' },
-  { n: '5', name: 'Teams and players', view: <V5 />, problem: 'Tape on every team card.', changed: 'Flat tilted paper cards with a shape and color on each team and a dashed Add chip.' },
+  { n: '3', name: 'Question set picker', view: <V3 />, problem: 'Small cards with little to choose by.', changed: 'Tabs, search, subject and grade filters; recently used first; each card shows the subject color, grades, question count, the first question and when it was last used; picked = ink ring and green check; nothing under 15px.' },
+  { n: '4', name: 'Options', view: <V4 />, problem: 'Section kickers like \"The game\" and \"Help for players\".', changed: 'Kickers removed; two plain groups with only the real field labels (Rounds, Board size, Timer, Read aloud).' },
+  { n: '5', name: 'Teams and players', view: <V5 />, problem: 'Tilted cards.', changed: 'Straight cards, no tilt anywhere in menus; a shape and color on each team and a dashed Add chip.' },
   { n: '6', name: 'Power-up setup cards', view: <V6 />, problem: 'The step title sat on a taped chip.', changed: 'Back inside the same white panel as every start menu (her 2026-11-23 rule replaces the earlier no-white-box rule); off cards dashed, never crossed out.' },
   { n: '7', name: 'Power-up pop card', view: <V7 />, problem: 'Tape on the card.', changed: 'One flat paper card with soft sun rays, over the game (Board Game park here).' },
-  { n: '8a', name: 'Question screen: Game Show (laptop)', view: <QLaptop theme="gameshow" mode="share" />, problem: 'The question sat on a pattern, not in the game.',
-    changed: 'The Game Show studio is the background around the standard paper card; question text left, A to D letters on the left.' },
-  { n: '8b', name: 'Question screen: Board Game (laptop)', view: <QLaptop theme="park" mode="share" />, problem: 'Same card on every game, so kids lost where they were.',
-    changed: 'The Board Game park around the same card, with the Share tracker showing whose turn it is.' },
-  { n: '8c', name: 'Question screen: Question Tracker (laptop)', view: <QLaptop theme="sky" mode="live" />, problem: 'No Live version.',
-    changed: 'The night sky around the card and the Live tracker showing the class goal.' },
+  { n: '8', name: 'Question screen (laptop)', view: <QLaptop theme="park" />, problem: 'Several near-identical question screens, and the team, tools and Listen were spread around the screen.',
+    changed: 'One question screen for every game; only the background changes (Board Game park here). Her page 2 header inside the card: the current team left; tools, settings, full screen, close and Listen right; question text left; A to D tiles.' },
   { n: '9a', name: 'Top tracker: solo, share, live', view: <V9a />, problem: 'One thin strip of dashes, a dash per turn, buttons of mixed sizes.',
-    changed: 'Three zones: who or what on the left, Round X of Y over one chunky segment per round in the middle, three 48px icon buttons on the right.' },
+    changed: 'Three variants top to bottom (solo with no player icon, share with the turn glow, live with the class goal), labels removed from the screen. Who or what on the left, Round X of Y over one chunky segment per round in the middle, three 48px icon buttons on the right.' },
   { n: '9b', name: 'Scoreboard and held power-ups', view: <V9b />, problem: 'The scoreboard sat on a panel and held power-ups were a line of text.',
     changed: 'No panel: team rows sit on the stage, the current team wears the turn glow, held power-ups are 1:1 square cards centered under it.' },
   { n: '10', name: 'Results box', view: <V10 />, problem: 'The winner had its own sun badge, different from the turn glow.',
@@ -626,8 +627,7 @@ const VIEWS: { n: string; name: string; view: ReactNode; problem: string; change
   { n: '13', name: 'Teach card', view: <V13 />, problem: 'Tape and a stacked sheet.', changed: 'One flat card over the game: the picture on a pastel blob, the skill line at 38px, a 68px Let\u2019s play.' },
 ];
 const TABLETS: { n: string; name: string; view: ReactNode; problem: string; changed: string }[] = [
-  { n: '8d', name: 'Question screen: Board Game (iPad)', view: <QTablet theme="park" mode="share" />, problem: 'Words were small for a finger.', changed: 'Same card stacked in one column, 84px letters and 46px answers, the park all around.' },
-  { n: '8e', name: 'Question screen: Question Tracker (iPad)', view: <QTablet theme="sky" mode="live" />, problem: 'No Live student view.', changed: 'The night sky around the card with the class goal in the tracker.' },
+  { n: '8', name: 'Question screen (iPad portrait)', view: <QTablet theme="park" />, problem: 'Words were small for a finger.', changed: 'The same card stacked in one column with the same header row; 84px letters and 46px answers.' },
   { n: '12d', name: 'Waiting: Question Tracker (Live student)', view: <Waiting back={<SkyBack w={820} h={1180} stars={18} />} title="You're in, Ava!" line="Your teacher will start soon. Your stars will light up the sky." you={<StarArt size={100} />} />, problem: 'Live students waited on a plain screen.', changed: 'The game’s own night sky, the student’s star in the turn glow, waiting dots.' },
   { n: '12e', name: 'Waiting: Cast and Catch (Live student)', view: <Waiting back={<LakeBack w={820} h={1180} />} title="You're in, Leo!" line="Your teacher will start soon. Get your line ready." you={<Doodle kind="dot" color={PP.pink} size={90} />} />, problem: 'Same plain waiting screen as every game.', changed: 'The lake and boat from the game, the bobber in the turn glow, waiting dots.' },
 ];
