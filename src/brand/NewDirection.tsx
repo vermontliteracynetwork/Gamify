@@ -7,6 +7,7 @@ import { CrayonDie, CrayonKitSection, CrayonPawn, CrayonPowerUp, type PowerId } 
 import HandmadeMock from './HandmadeMock';
 import { ModeBadge } from '../games/ModeBadge';
 import PlayfulMock from './PlayfulMock';
+import PaletteProposal from './PaletteProposal';
 
 // "New direction" (proposal, teacher 2026-11-23): playful flat shapes from her
 // moodboards, kept clearly different from the main competitor's look. Preview
@@ -205,6 +206,7 @@ export default function NewDirection() {
   return (
     <div className="relative rounded-[2rem] p-5 sm:p-8 grid gap-10 overflow-x-clip" style={{ background: ND.cream, color: ND.ink }}>
       <PaperDefs />
+      <PaletteProposal />
       <Block title="Playful mixed style mockup" note="Your references of 2026-11-23: kids' crayon drawings, soft pencil stickers, a scrapbook collage (no characters: power-ups and pieces carry the art). A home page hero and one game welcome card. Mess at the edges, a clean reading zone in the middle.">
         <PlayfulMock still={still} />
       </Block>
