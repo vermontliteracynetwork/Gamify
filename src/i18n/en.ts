@@ -2432,6 +2432,8 @@ export const en = {
   'checkin.results': 'Check-in Results',
   'checkin.back': 'Back to the class',
   'owner.beta': 'Beta and surveys',
+  'owner.team': 'Agent team',
+  'nav.devPortal': 'Developer Portal',
   'owner.surveys': 'Teacher surveys',
   'owner.going': 'How it is going',
   'owner.recommend': 'Recommend score',
