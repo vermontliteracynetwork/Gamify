@@ -112,9 +112,11 @@ const PIPS: Record<number, [number, number][]> = {
 function DieFace({ value }: { value: number }) {
   return (
     <g>
-      <path d={rr(8, 14, 84, 82, 22)} fill="#b4c4fb" stroke={ND.ink} strokeWidth={3.6} strokeLinejoin="round" />
-      <Wax d={rr(8, 6, 84, 82, 22)} color="#fffaf0" edge={ND.ink} hatch={0} width={3.6} />
-      {PIPS[value].map(([x, y], k) => <circle key={k} cx={x} cy={y - 3} r={value === 1 ? 11 : 8} fill={value === 1 ? ND.pink : ND.ink} stroke={value === 1 ? ND.ink : 'none'} strokeWidth={value === 1 ? 2.4 : 0} />)}
+      {/* One simple face (teacher, 2026-11-23: "simple face so that it can easily be
+          redesigned in themes"): a rounded square and its pips, nothing else, so a theme
+          swaps the face color, the pip color or the whole face picture. */}
+      <Wax d={rr(8, 8, 84, 84, 22)} color="#fffaf0" edge={ND.ink} hatch={0} width={3.6} />
+      {PIPS[value].map(([x, y], k) => <circle key={k} cx={x} cy={y} r={value === 1 ? 11 : 8} fill={value === 1 ? ND.pink : ND.ink} stroke={value === 1 ? ND.ink : 'none'} strokeWidth={value === 1 ? 2.4 : 0} />)}
     </g>
   );
 }
