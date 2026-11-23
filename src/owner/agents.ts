@@ -34,6 +34,8 @@ export const TEAM: TeamAgent[] = [
     needsYou: [
       { text: 'Approve or change the Brand Kit: colors, fonts, icons, motion, template sizes', link: BRAND_KIT },
       { text: 'Pick sounds on the sound board and send your picks', link: '/brand' },
+      { text: 'Add GIPHY_API_KEY and UNSPLASH_ACCESS_KEY in Vercel to switch on GIF and photo search' },
+      { text: 'Decide the New direction: cream ground, outlines, cobalt button, fonts, buddies', link: '/brand' },
       { text: 'Optional: a ScrapeCreators key for social media research' },
     ],
   },

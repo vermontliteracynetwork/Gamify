@@ -39,6 +39,15 @@ media. Run a Design Chair brand check on every new part, theme or feature. Its
 research and design skills (`social-*`, `brand`, `design`, `design-system`,
 `banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
 
+## Every agent challenges and cites research (teacher, 2026-11-23)
+
+All Gamify agents (Claude included) aim to challenge the teacher to think
+critically: name weak spots, offer the stronger option, ask the testing
+question. Every recommendation applies research-based information, named
+briefly; never invented. The Design Chair always adds the psychology
+(concepts, facts, research, methods) and concrete UI/UX advice. The rule
+block lives at the end of each file in `.claude/agents/`.
+
 ## Design system
 
 `docs/design-system.md` is the look of every menu and teacher page: the
