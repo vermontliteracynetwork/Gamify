@@ -2,22 +2,19 @@ import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { GearSix, Play, SpeakerHigh, Star } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
+import { Buddy, BUDDIES, Face, ND, Paper, PaperDefs, Washi, type BuddyId } from './buddies';
+import HandmadeMock from './HandmadeMock';
 
 // "New direction" (proposal, teacher 2026-11-23): playful flat shapes from her
 // moodboards, kept clearly different from the main competitor's look. Preview
 // only: nothing here is used outside the Brand page until she approves.
 // Every drawing below is original, made in code. Mirrors the Brand Kit doc tab
-// "Direction: playful flat shapes (2026-11-23)".
+// "Direction: playful flat shapes (2026-11-23)", section "Clean core, handmade
+// edges": the art is cut paper, tape and crayon; the controls stay clean.
 
 // Grow Year by name: outside h1 the app maps .font-display to the heading font.
 const GY = { fontFamily: "'Grow Year', 'Segoe UI', system-ui, sans-serif" };
 
-export const ND = {
-  cream: '#f6f0e4', paper: '#fffaf0', ink: '#1d1a33', quiet: '#57506e',
-  pink: '#ec6fa8', cobalt: '#1f5fff', green: '#12a150', yellow: '#ffd52e', tangerine: '#ff6a1a',
-  violet: '#8b5cf6', mint: '#3fd0b6', coral: '#f0524f',
-  cobaltDeep: '#1748c9', pinkDeep: '#b3236a', violetDeep: '#6233d6', greenDeep: '#0b7a3c', tangDeep: '#b84300',
-};
 
 const PALETTE: { name: string; hex: string; role: string; text: string; pair: string }[] = [
   { name: 'Cream', hex: ND.cream, role: 'Ground', text: ND.ink, pair: 'Ink 14.8:1' },
@@ -37,115 +34,6 @@ const DEEP: [string, string, string][] = [
   ['Green deep', ND.greenDeep, '4.8:1 on cream'], ['Tangerine deep', ND.tangDeep, '4.8:1 on cream'], ['Quiet text', ND.quiet, '6.7:1 on cream'],
 ];
 
-// ---------- Faces: two dot eyes (or happy ^^), a small smile, rosy cheeks. ----------
-function Face({ x, y, s = 1, color = ND.ink, happy = false, cheeks = '#ffffff66' }: { x: number; y: number; s?: number; color?: string; happy?: boolean; cheeks?: string | null }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${s})`}>
-      {happy ? (
-        <>
-          <path d="M-14 -2 q4 -6 8 0" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M6 -2 q4 -6 8 0" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
-        </>
-      ) : (
-        <>
-          <ellipse cx="-10" cy="-3" rx="3.2" ry="4.2" fill={color} />
-          <ellipse cx="10" cy="-3" rx="3.2" ry="4.2" fill={color} />
-        </>
-      )}
-      <path d="M-6 6 q6 6 12 0" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
-      {cheeks && <><ellipse cx="-17" cy="5" rx="4.5" ry="3" fill={cheeks} /><ellipse cx="17" cy="5" rx="4.5" ry="3" fill={cheeks} /></>}
-    </g>
-  );
-}
-
-function star(cx: number, cy: number, outer: number, inner: number, points: number, rot = -90) {
-  const pts: string[] = [];
-  for (let i = 0; i < points * 2; i++) {
-    const r = i % 2 ? inner : outer;
-    const a = ((rot + (i * 180) / points) * Math.PI) / 180;
-    pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
-  }
-  return pts.join(' ');
-}
-
-// ---------- The Gamify buddies: 12 flat shapes, no outlines. ----------
-type BuddyId = 'sunny' | 'twinkle' | 'bloop' | 'asta' | 'hartie' | 'piece' | 'puff' | 'archie' | 'ray' | 'wiggle' | 'pebble' | 'zip';
-export const BUDDIES: { id: BuddyId; name: string; shape: string; color: string; use: string }[] = [
-  { id: 'sunny', name: 'Sunny', shape: 'Flower', color: ND.yellow, use: 'Lead mascot' },
-  { id: 'twinkle', name: 'Twinkle', shape: 'Star', color: ND.tangerine, use: 'Points, power-up' },
-  { id: 'bloop', name: 'Bloop', shape: 'Blob', color: ND.mint, use: 'Team icon' },
-  { id: 'asta', name: 'Asta', shape: 'Asterisk', color: ND.pink, use: 'Team icon, sparkle' },
-  { id: 'hartie', name: 'Hartie', shape: 'Heart', color: ND.coral, use: 'Kind words, team icon' },
-  { id: 'piece', name: 'Piece', shape: 'Puzzle piece', color: ND.green, use: 'Match and sort games' },
-  { id: 'puff', name: 'Puff', shape: 'Cloud', color: '#9fc2ff', use: 'Answer target, Calm' },
-  { id: 'archie', name: 'Archie', shape: 'Arch', color: ND.violet, use: 'Board frames' },
-  { id: 'ray', name: 'Ray', shape: 'Sunburst', color: ND.yellow, use: 'Big moments, power-up' },
-  { id: 'wiggle', name: 'Wiggle', shape: 'Wavy M', color: ND.cobalt, use: 'Team icon, word games' },
-  { id: 'pebble', name: 'Pebble', shape: 'Soft square', color: ND.tangerine, use: 'Board token, tiles' },
-  { id: 'zip', name: 'Zip', shape: 'Lightning bolt', color: ND.cobalt, use: 'Power-ups' },
-];
-
-export function Buddy({ id, size = 96, color, limbs = false, title }: { id: BuddyId; size?: number; color?: string; limbs?: boolean; title?: string }) {
-  const c = color ?? BUDDIES.find((b) => b.id === id)!.color;
-  const dark = c === ND.cobalt || c === ND.violet || c === ND.cobaltDeep;
-  const fc = dark ? '#ffffff' : ND.ink;
-  const ch = dark ? '#ffffff55' : '#ffffff88';
-  let body: ReactNode;
-  switch (id) {
-    case 'sunny':
-      body = (<>
-        {Array.from({ length: 7 }, (_, i) => { const a = (i / 7) * Math.PI * 2 - Math.PI / 2; return <circle key={i} cx={60 + 27 * Math.cos(a)} cy={54 + 27 * Math.sin(a)} r="19" fill={c} />; })}
-        <circle cx="60" cy="54" r="28" fill={c} />
-        <Face x={60} y={54} s={0.9} color={fc} cheeks={ND.tangerine + '88'} />
-      </>);
-      break;
-    case 'twinkle':
-      body = (<><polygon points={star(60, 62, 46, 22, 5)} fill={c} stroke={c} strokeWidth="12" strokeLinejoin="round" /><Face x={60} y={64} s={0.85} color={fc} cheeks={ch} /></>);
-      break;
-    case 'bloop':
-      body = (<><path d="M60 14 C88 12 106 34 104 60 C102 88 84 106 58 104 C30 102 14 84 16 58 C18 32 34 16 60 14 Z" fill={c} /><Face x={60} y={58} color={fc} happy cheeks={ch} /></>);
-      break;
-    case 'asta':
-      body = (<>{[0, 60, 120].map((r) => <rect key={r} x="48" y="10" width="24" height="100" rx="12" fill={c} transform={`rotate(${r} 60 60)`} />)}<circle cx="60" cy="60" r="22" fill={c} /><Face x={60} y={60} s={0.8} color={fc} cheeks={ch} /></>);
-      break;
-    case 'hartie':
-      body = (<><path d="M60 104 C30 84 12 66 14 44 C16 26 30 18 42 18 C52 18 58 26 60 32 C62 26 68 18 78 18 C90 18 104 26 106 44 C108 66 90 84 60 104 Z" fill={c} /><Face x={60} y={52} color={fc} happy cheeks={ch} /></>);
-      break;
-    case 'piece':
-      body = (<><rect x="22" y="34" width="68" height="68" rx="12" fill={c} /><circle cx="56" cy="30" r="14" fill={c} /><circle cx="94" cy="68" r="14" fill={c} /><Face x={56} y={70} color={fc} cheeks={ch} /></>);
-      break;
-    case 'puff':
-      body = (<><circle cx="40" cy="66" r="24" fill={c} /><circle cx="64" cy="50" r="30" fill={c} /><circle cx="86" cy="68" r="22" fill={c} /><rect x="30" y="64" width="64" height="26" rx="13" fill={c} /><Face x={62} y={66} color={fc} happy cheeks={ch} /></>);
-      break;
-    case 'archie':
-      body = (<><path d="M30 100 V62 a30 30 0 0 1 60 0 V100" stroke={c} strokeWidth="30" fill="none" strokeLinecap="round" /><Face x={60} y={42} s={0.8} color={fc} cheeks={ch} /></>);
-      break;
-    case 'ray':
-      body = (<><polygon points={star(60, 60, 52, 38, 14)} fill={c} stroke={c} strokeWidth="5" strokeLinejoin="round" /><Face x={60} y={60} color={fc} cheeks={ND.tangerine + '77'} /></>);
-      break;
-    case 'wiggle':
-      body = (<><path d="M16 98 V56 C16 26 46 26 46 52 C46 30 74 30 74 52 C74 26 104 26 104 56 V98 Z" fill={c} stroke={c} strokeWidth="10" strokeLinejoin="round" /><Face x={60} y={74} s={0.9} color={fc} cheeks={ch} /></>);
-      break;
-    case 'pebble':
-      body = (<><rect x="16" y="20" width="88" height="82" rx="30" fill={c} transform="rotate(-5 60 60)" /><Face x={60} y={60} color={fc} happy cheeks={ch} /></>);
-      break;
-    case 'zip':
-      body = (<><polygon points="68,8 26,66 56,66 46,112 94,46 62,46 76,8" fill={c} stroke={c} strokeWidth="8" strokeLinejoin="round" /><Face x={60} y={56} s={0.75} color={fc} cheeks={null} /></>);
-      break;
-  }
-  return (
-    <svg viewBox="0 0 120 120" width={size} height={size} role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true} overflow="visible">
-      {body}
-      {limbs && (
-        <g stroke="#ffffff" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M50 92 L46 114 L38 116" /><path d="M70 92 L74 114 L82 116" />
-          <path d="M30 70 L14 82 L10 74" />
-          <path d="M90 66 L106 54" /><path d="M106 54 L106 44" /><path d="M104 56 h8 M104 61 h7" />
-        </g>
-      )}
-    </svg>
-  );
-}
 
 // ---------- Doodles ----------
 function Sparkle({ x, y, s = 1, c }: { x: number; y: number; s?: number; c: string }) {
@@ -175,7 +63,7 @@ function BuddySheet({ className = '' }: { className?: string }) {
 }
 function Doodles() {
   return (
-    <svg viewBox="0 0 240 120" className="w-full h-full" aria-hidden="true">
+    <svg viewBox="0 0 240 120" className="w-full h-full" aria-hidden="true" filter="url(#nd-crayon)">
       <Sparkle x={30} y={30} s={1.6} c={ND.yellow} />
       <Sparkle x={210} y={92} s={1.2} c={ND.pink} />
       <path d="M70 34 q10 -16 20 0 t20 0 t20 0" stroke={ND.cobalt} strokeWidth="5" fill="none" strokeLinecap="round" />
@@ -218,8 +106,8 @@ function Grain() {
     </svg>
   );
 }
-function Tape({ className = '', color = '#ffd52ecc', rotate = -6 }: { className?: string; color?: string; rotate?: number }) {
-  return <span aria-hidden="true" className={`absolute h-6 w-20 ${className}`} style={{ background: color, transform: `rotate(${rotate}deg)`, clipPath: 'polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 50%)' }} />;
+function Tape({ className = '', color = '#ffd52e', rotate = -6 }: { className?: string; color?: string; rotate?: number }) {
+  return <Washi className={`${className}`} color={color.slice(0, 7)} rotate={rotate} />;
 }
 function torn(w: number, h: number, seed: number) {
   let d = `M0 0 H${w} V${h - 8}`;
@@ -349,10 +237,28 @@ export default function NewDirection() {
   const [picked, setPicked] = useState<number | null>(null);
   const wiggle = still ? undefined : { rotate: [0, -8, 6, -3, 0], scale: [1, 1.08, 1] };
   return (
-    <div className="rounded-[2rem] p-5 sm:p-8 grid gap-10" style={{ background: ND.cream, color: ND.ink }}>
+    <div className="relative rounded-[2rem] p-5 sm:p-8 grid gap-10 overflow-x-clip" style={{ background: ND.cream, color: ND.ink }}>
+      <PaperDefs />
       <p className="font-semibold max-w-prose" style={{ color: ND.quiet }}>
-        A proposal from your moodboards (2026-11-23): flat joyful shapes, no outlines on art, cream ground, and a set of Gamify buddies. Nothing on the site uses this yet. Full rules are in the Brand Kit doc tab "Direction: playful flat shapes".
+        A proposal from your moodboards and your note of 2026-11-23: very modern and simple in function, playful scrapbook and mixed media around it. Classic is made by hand (cut paper, tape, crayon) so a kid's clay, crayon or fabric theme sits naturally beside it. Nothing on the site uses this yet. Full rules are in the Brand Kit doc tab "Direction: playful flat shapes", section "Clean core, handmade edges".
       </p>
+
+      <Block title="Clean core, handmade edges (mockup)" note="One rule for every screen. What kids read, answer and tap is modern and plain, the same in every game. Frames, backgrounds, covers, celebrations and the gallery are made by hand.">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="rounded-[1.5rem] p-5 grid gap-1.5 content-start" style={{ background: '#ffffff' }}>
+            <span className="font-heading font-bold text-lg">Clean core (never themed)</span>
+            {['Question card, answer tiles, main button', 'Board play zone, score board, timer', 'Menu controls, settings, teacher forms', 'Flat fill, ink text at 7:1 or more, no tilt, no tape, no texture', 'Same place in every game'].map((t) => <span key={t} className="font-semibold">{t}</span>)}
+          </div>
+          <Paper color={ND.paper} rx={24} tilt={-0.6}>
+            <div className="p-5 grid gap-1.5 content-start">
+              <span className="font-heading font-bold text-lg">Handmade edges (the theme's to change)</span>
+              {['Frames, backgrounds, game covers', 'Celebrations, results decorations, lobby', 'Gallery, Blog guides, marketing', 'Cut paper, grain, crayon, tape, stickers, photos', 'Tilt up to 4 degrees, outside the reading zone'].map((t) => <span key={t} className="font-semibold" style={{ color: ND.quiet }}>{t}</span>)}
+            </div>
+            <Washi className="-top-2 right-10" rotate={6} color={ND.pink} />
+          </Paper>
+        </div>
+        <HandmadeMock still={still} />
+      </Block>
 
       {/* Mock hero for the home page */}
       <Block title="Home page hero (mockup)" note="Real layout widths. Cream page, one color-block collage, a solid headline with no outline or shadow.">
@@ -375,13 +281,13 @@ export default function NewDirection() {
               </div>
             </div>
             <div className="grid grid-cols-2 grid-rows-2 gap-3 aspect-[1.1] w-full max-w-[32rem] justify-self-center">
-              <div className="rounded-[1.75rem] grid place-items-center relative" style={{ background: ND.pink }}><Buddy id="sunny" size={150} limbs title="Sunny, the Gamify flower buddy" /></div>
-              <div className="rounded-[1.75rem] grid place-items-center" style={{ background: ND.cobalt }}><Buddy id="twinkle" size={110} color={ND.yellow} /></div>
-              <div className="rounded-[1.75rem] grid place-items-center" style={{ background: ND.green }}><Buddy id="puff" size={120} color={ND.paper} /></div>
-              <div className="rounded-[1.75rem] grid place-items-center relative overflow-hidden" style={{ background: ND.cream }}>
+              <Paper color={ND.pink} rx={26} tilt={-1.5} className="grid"><span className="h-full grid place-items-center"><Buddy id="sunny" size={150} limbs title="Sunny, the Gamify flower buddy" /></span></Paper>
+              <Paper color={ND.cobalt} rx={26} tilt={1.5} className="grid"><span className="h-full grid place-items-center"><Buddy id="twinkle" size={110} color={ND.yellow} /></span><Washi className="-top-2 left-1/3" rotate={-5} color={ND.mint} /></Paper>
+              <Paper color={ND.green} rx={26} tilt={1} className="grid"><span className="h-full grid place-items-center"><Buddy id="puff" size={120} color={ND.paper} /></span></Paper>
+              <Paper color={ND.cream} rx={26} tilt={-1} className="grid overflow-visible">
                 <div className="absolute inset-x-0 top-0 h-1/2"><Doodles /></div>
-                <span className="mt-16"><Buddy id="hartie" size={96} /></span>
-              </div>
+                <span className="h-full grid place-items-center pt-16"><Buddy id="hartie" size={96} /></span>
+              </Paper>
             </div>
           </div>
         </div>
@@ -414,14 +320,18 @@ export default function NewDirection() {
         </div>
       </Block>
 
-      <Block title="The Gamify buddies" note="Twelve flat shapes, no outlines. Two dot eyes or happy eyes, a small smile, rosy cheeks. No googly eyes, tongues or teeth. Point at one to see it wiggle.">
+      <Block title="The Gamify buddies" note="Twelve cut construction-paper shapes, no outlines: uneven cut edges, paper grain, a soft lift. Two dot eyes or happy eyes, a small smile, rosy cheeks. No googly eyes, tongues or teeth. Point at one to see it wiggle.">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] gap-3">
           {BUDDIES.map((b, i) => (
             <motion.button key={b.id} type="button" onClick={() => setPicked(i)} whileHover={wiggle} transition={{ duration: 0.5 }}
-              className="rounded-[1.5rem] p-3 grid justify-items-center gap-1 text-center" style={{ background: picked === i ? ND.paper : '#ffffff80' }} aria-pressed={picked === i}>
-              <Buddy id={b.id} size={84} title={`${b.name}, ${b.shape}`} />
-              <span className="font-heading font-bold">{b.name}</span>
-              <span className="text-xs font-semibold" style={{ color: ND.quiet }}>{b.shape}: {b.use}</span>
+              className="grid text-center" aria-pressed={picked === i}>
+              <Paper color={picked === i ? '#ffffff' : ND.paper} rx={18} tilt={[-1.5, 1, -0.5, 1.5][i % 4]} className="p-3 grid justify-items-center gap-1">
+                <span className="grid justify-items-center gap-1">
+                  <Buddy id={b.id} size={84} title={`${b.name}, ${b.shape}`} />
+                  <span className="font-heading font-bold">{b.name}</span>
+                  <span className="text-xs font-semibold" style={{ color: ND.quiet }}>{b.shape}: {b.use}</span>
+                </span>
+              </Paper>
             </motion.button>
           ))}
         </div>
@@ -487,11 +397,14 @@ export default function NewDirection() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
           {([['Board games', ND.pink, 'sunny', ND.yellow], ['Word games', ND.cobalt, 'wiggle', ND.yellow], ['Arcade', ND.green, 'zip', ND.paper]] as [string, string, BuddyId, string][]).map(([t, bg, id, bc]) => (
-            <div key={t} className="rounded-[1.75rem] p-5 pr-20 min-h-40 grid content-between relative overflow-hidden" style={{ background: bg }}>
-              <span className="text-3xl" style={{ ...GY, color: bg === ND.cobalt ? '#ffffff' : ND.ink }}>{t}</span>
-              <span className="flex items-center gap-1 font-bold" style={{ color: bg === ND.cobalt ? '#ffffff' : ND.ink }}><Star weight="fill" size={18} />Classic theme family</span>
+            <Paper key={t} color={bg} rx={26} className="min-h-40">
+              <div className="p-5 pr-20 min-h-40 grid content-between">
+                <span className="text-3xl" style={{ ...GY, color: bg === ND.cobalt ? '#ffffff' : ND.ink }}>{t}</span>
+                <span className="flex items-center gap-1 font-bold" style={{ color: bg === ND.cobalt ? '#ffffff' : ND.ink }}><Star weight="fill" size={18} />Classic theme family</span>
+              </div>
               <span className="absolute right-3 top-3"><Buddy id={id} size={64} color={bc} /></span>
-            </div>
+              <Washi className="-top-2 left-6" rotate={-4} color={ND.yellow} w="3.5rem" />
+            </Paper>
           ))}
         </div>
       </Block>
@@ -500,8 +413,9 @@ export default function NewDirection() {
         <MixedMedia still={still || settings.gifs === 'still'} />
       </Block>
 
-      <Block title="Classic game board (sketch)" note="The board zone stays Paper; only the frame wears a color block and a strip of the Buddy sheet. Pieces are buddies.">
-        <div className="rounded-[1.75rem] p-4 sm:p-6 grid gap-3 relative overflow-hidden" style={{ background: ND.pink }}>
+      <Block title="Classic game board (sketch)" note="The board zone stays plain; only the frame is cut paper with a strip of the Buddy sheet. Pieces are cut-paper buddies.">
+        <div className="rounded-[1.75rem] p-4 sm:p-6 grid gap-3 relative overflow-hidden" style={{ background: ND.cream }}>
+          <Paper color={ND.pink} lift={false} rx={28} className="absolute inset-1" />
           <div className="absolute inset-x-0 top-0 h-14 opacity-90"><BuddySheet /></div>
           <div className="relative rounded-[1.5rem] p-4 grid grid-cols-6 gap-2 mt-10" style={{ background: ND.paper }}>
             {Array.from({ length: 12 }, (_, i) => (
