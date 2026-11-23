@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { motion } from 'motion/react';
+import { ArrowLeft, ArrowRight, CornersOut, GearSix, PersonArmsSpread, X } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 
 // Shared parts for the Brand page mockups (PROPOSAL, 2026-11-23): the team
@@ -115,5 +116,49 @@ export function LakeBack({ w, h }: { w: number; h: number }) {
       <path d={`M0 ${water - 4} C${w * 0.3} ${water - 10} ${w * 0.7} ${water + 4} ${w} ${water - 6}`} stroke={I} strokeWidth="4" fill="none" />
       <path d={`M-10 ${h * 0.8} L${w * 0.32} ${h * 0.8} L${w * 0.26} ${h + 10} L-10 ${h + 10} Z`} fill="#a0683a" stroke={I} strokeWidth="4" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// ---------- THE start menu (teacher, 2026-11-23: "all intiail menus for every
+// game need to be the same, white middle background and purple classic
+// bakground"). One layout for every game's welcome, ways to play, question
+// set, options, teams, power-ups, Live setup and lobby: the purple ground, the
+// wordmark and icon buttons on top, one white panel of the same size and place
+// on every step, a header row (Grow Year caps title left, step tracker right,
+// no "Step X of Y" text), content centered, the same Back and Next footer.
+// Drawn at 1280 x 800 and scaled to the frame's canvas (1000 or 1280 wide).
+const MK_GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
+function MkRound({ children, label }: { children: ReactNode; label: string }) {
+  return <span aria-label={label} className="w-[52px] h-[52px] rounded-full grid place-items-center" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
+}
+export function MenuGo({ children }: { children: ReactNode }) {
+  return <span className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>;
+}
+export function MenuBack() {
+  return <span className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 whitespace-nowrap" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><ArrowLeft weight="bold" size={20} />Back</span>;
+}
+export function MenuStep({ title, step, total, children, go, back = true, canvas = 1280 }: { title: string; step: number; total: number; children: ReactNode; go?: ReactNode; back?: boolean; canvas?: number }) {
+  return (
+    <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
+      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
+        <div className="absolute left-10 right-10 top-7 flex items-center justify-between">
+          <span className="inline-flex items-center px-5 h-[56px] rounded-full" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" draggable={false} /></span>
+          <div className="flex gap-3">
+            <MkRound label="Accessibility"><PersonArmsSpread weight="bold" size={24} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={24} /></MkRound>
+            <MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Close"><X weight="bold" size={24} /></MkRound>
+          </div>
+        </div>
+        <section className="absolute left-[80px] right-[80px] top-[112px] bottom-[40px] rounded-[30px] flex flex-col px-9 pt-7 pb-7 gap-5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="flex items-center justify-between gap-6">
+            <h2 className="text-[46px]" style={MK_GY}>{title}</h2>
+            <ol className="flex gap-2 list-none p-0 m-0" aria-label={`Step ${step} of ${total}`}>
+              {Array.from({ length: total }, (_, i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < step - 1 ? PP.periwinkle : i === step - 1 ? PP.lemon : '#fff', border: `2.5px solid ${I}` }} />)}
+            </ol>
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
+          <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
+        </section>
+      </div>
+    </div>
   );
 }

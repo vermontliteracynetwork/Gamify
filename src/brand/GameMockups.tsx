@@ -4,7 +4,7 @@ import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
 import { Laptop, MainBtn, Tablet } from './UniversalViews';
-import { Badge, ParkBack, StudioBack, TEAMS, TURN_GLOW, TurnGlow, PURPLE_GROUND } from './mockKit';
+import { Badge, ParkBack, StudioBack, TEAMS, TURN_GLOW, TurnGlow, PURPLE_GROUND, MenuStep } from './mockKit';
 import { layout } from '../games/castle-quest/board';
 
 // Game mockups (PROPOSAL, teacher 2026-11-23: "mockups of all the games with a
@@ -756,61 +756,53 @@ function Pills({ opts, pick }: { opts: string[]; pick: number }) {
 }
 
 // ---------- 1. Welcome ----------
+// Every start menu is the one shared MenuStep (teacher, 2026-11-23): purple ground, the same white panel, header and footer.
 function Welcome({ name, art, steps }: { name: string; art: ReactNode; steps: [string, string, string] }) {
   return (
-    <Menu>
-      <Sheet w={640}>
-        <Title size={60}>{name}</Title>
-        <div className="relative w-40 h-40 grid place-items-center"><BlobPatch color={PP.blush} size={170} /><span className="relative">{art}</span></div>
-        <ol className="grid gap-2 w-full max-w-[440px]">
-          {steps.map((st, i) => <li key={st} className="flex items-center justify-center gap-3 font-bold text-2xl"><span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.gamify, PP.butter, PP.mint][i], border: `2.5px solid ${I}` }}>{i + 1}</span>{st}</li>)}
+    <MenuStep canvas={1000} title={name} step={1} total={4} back={false} go={<MainBtn big><Play weight="fill" size={24} />Start</MainBtn>}>
+      <div className="flex items-center justify-center gap-14">
+        <div className="relative w-[260px] h-[260px] grid place-items-center rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}><BlobPatch color={PP.blush} size={220} /><span className="relative scale-150">{art}</span></div>
+        <ol className="grid gap-4 list-none p-0 m-0">
+          {steps.map((st, i) => <li key={st} className="flex items-center gap-4 font-bold text-[26px]"><span className="w-12 h-12 rounded-full grid place-items-center shrink-0" style={{ ...GY, fontSize: 26, background: [PP.gamify, PP.butter, PP.mint][i], border: `3px solid ${I}` }}>{i + 1}</span>{st}</li>)}
         </ol>
-        <MainBtn big><Play weight="fill" size={24} />Start</MainBtn>
-      </Sheet>
-    </Menu>
+      </div>
+    </MenuStep>
   );
 }
 // ---------- 2. How will you play? ----------
 function Ways({ ways, pick, share }: { ways: Way[]; pick: Way; share?: 'code' | 'here' | 'none' }) {
   return (
-    <Menu>
-      <Sheet w={ways.length === 3 ? 820 : 640}>
-        <Title size={46}>How will you play?</Title>
-        <div className="flex justify-center gap-5">
+    <MenuStep canvas={1000} title="How will you play?" step={2} total={4}>
+      <div className="grid justify-items-center gap-7">
+        <div className="flex justify-center gap-6">
           {ways.map((w) => { const M = MODE[w]; const on = w === pick; return (
-            <span key={w} className="relative w-[220px] p-4 rounded-[24px] grid justify-items-center gap-2" style={{ background: M.color, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}` : `0 4px 0 ${I}` }}>
-              <M.Icon weight="bold" size={54} /><b className="font-display text-4xl">{M.name}</b><span className="font-semibold text-lg">{M.line}</span>{on && <Tick />}
+            <span key={w} className="relative w-[260px] p-5 rounded-[24px] grid justify-items-center gap-2" style={{ background: M.color, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 4px #fff, 0 0 0 8px ${I}` : `0 4px 0 ${I}` }}>
+              <M.Icon weight="bold" size={64} /><b className="text-[40px]" style={GY}>{M.name}</b><span className="font-semibold text-[19px]">{M.line}</span>{on && <Tick />}
             </span>); })}
         </div>
-        {share && share !== 'none' && <div className="grid gap-2 justify-items-center"><b className="text-2xl">How do you share?</b><Pills opts={['Same device', 'Share a join code']} pick={share === 'code' ? 1 : 0} /></div>}
-        <MainBtn>Next<ArrowRight weight="bold" size={20} /></MainBtn>
-      </Sheet>
-    </Menu>
+        {share && share !== 'none' && <div className="grid gap-2 justify-items-center"><b className="text-[24px]">How do you share?</b><Pills opts={['Same device', 'Share a join code']} pick={share === 'code' ? 1 : 0} /></div>}
+      </div>
+    </MenuStep>
   );
 }
 // ---------- 3. Options (brief) ----------
 function Options({ rows }: { rows: [string, string[], number][] }) {
   return (
-    <Menu band="squiggle">
-      <Sheet w={660}>
-        <Title size={46}>Options</Title>
-        {rows.map(([l, o, p]) => <div key={l} className="grid gap-2 justify-items-center"><b className="text-2xl">{l}</b><Pills opts={o} pick={p} /></div>)}
-        <MainBtn><Play weight="fill" size={20} />Play</MainBtn>
-      </Sheet>
-    </Menu>
+    <MenuStep canvas={1000} title="Options" step={3} total={4} go={<MainBtn><Play weight="fill" size={22} />Play</MainBtn>}>
+      <div className="grid gap-7 justify-items-center">{rows.map(([l, o, p]) => <div key={l} className="grid gap-2 justify-items-center"><b className="text-[24px]">{l}</b><Pills opts={o} pick={p} /></div>)}</div>
+    </MenuStep>
   );
 }
 // ---------- Share by join code: this screen shows the code, the other shared screen types it ----------
 function ShareCode() {
   return (
-    <Menu>
-      <Sheet w={600}>
-        <Title size={44}>Share a join code</Title>
-        <span className="font-semibold text-2xl" style={{ color: PP.quiet }}>Open the Join page on the screen you want to play on and type:</span>
-        <span className="px-6 py-2 rounded-2xl tracking-[0.2em]" style={{ ...GY, fontSize: 84, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
-        <span className="font-bold text-xl flex items-center gap-2"><ProjectorScreen weight="bold" size={26} />Same game, same question set, one shared screen</span>
-      </Sheet>
-    </Menu>
+    <MenuStep canvas={1000} title="Share a join code" step={3} total={4}>
+      <div className="grid justify-items-center gap-5">
+        <span className="font-semibold text-[24px]" style={{ color: PP.quiet }}>Open the Join page on the screen you want to play on and type:</span>
+        <span className="px-8 py-3 rounded-2xl tracking-[0.2em]" style={{ ...GY, fontSize: 96, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
+        <span className="font-bold text-[21px] flex items-center gap-2"><ProjectorScreen weight="bold" size={28} />Same game, same question set, one shared screen</span>
+      </div>
+    </MenuStep>
   );
 }
 function JoinCode({ name = 'Join the game', sub = 'Type the game code your teacher gave you.' }: { name?: string; sub?: string }) {
@@ -828,40 +820,36 @@ function JoinCode({ name = 'Join the game', sub = 'Type the game code your teach
 // ---------- Live: teacher setup, lobby, student name and wait ----------
 function ClassHow() {
   return (
-    <Menu>
-      <Sheet w={760}>
-        <Title size={46}>How the class plays</Title>
-        <div className="flex justify-center gap-5">
+    <MenuStep canvas={1000} title="How the class plays" step={3} total={4} go={<MainBtn>Open the live lobby<ArrowRight weight="bold" size={22} /></MainBtn>}>
+      <div className="grid justify-items-center gap-7">
+        <div className="flex justify-center gap-6">
           {[['Together', 'Fill one sky as a class', PP.blueCrystal, true], ['Compete', 'A leaderboard of names and points', PP.blush, false]].map(([n, l, c, on]) => (
-            <span key={n as string} className="relative w-[250px] p-4 rounded-[24px] grid justify-items-center gap-1" style={{ background: c as string, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}` : `0 4px 0 ${I}` }}>
-              <b className="font-display text-4xl">{n as string}</b><span className="font-semibold text-lg">{l as string}</span>{on && <Tick />}
+            <span key={n as string} className="relative w-[290px] p-5 rounded-[24px] grid justify-items-center gap-1" style={{ background: c as string, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 4px #fff, 0 0 0 8px ${I}` : `0 4px 0 ${I}` }}>
+              <b className="text-[40px]" style={GY}>{n as string}</b><span className="font-semibold text-[19px]">{l as string}</span>{on && <Tick />}
             </span>
           ))}
         </div>
-        <div className="grid gap-2 justify-items-center"><b className="text-2xl">The game ends</b><Pills opts={['When I stop it', 'After a number right', 'After some minutes']} pick={0} /></div>
-        <MainBtn>Open the live lobby<ArrowRight weight="bold" size={20} /></MainBtn>
-      </Sheet>
-    </Menu>
+        <div className="grid gap-2 justify-items-center"><b className="text-[24px]">The game ends</b><Pills opts={['When I stop it', 'After a number right', 'After some minutes']} pick={0} /></div>
+      </div>
+    </MenuStep>
   );
 }
 const NAMES = ['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen'];
 function Lobby() {
   return (
-    <div className="w-full h-full relative" style={{ ...pat('confetti'), padding: 28 }}>
-      <div className="h-full grid grid-cols-[1fr_1.25fr] gap-6">
-        <div className="relative p-6 grid content-center justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28 }}>
-          <b className="text-lg uppercase tracking-wider" style={{ color: PP.quiet }}>Go to the Join page and type</b>
-          <span className="tracking-widest px-4 py-2 rounded-2xl" style={{ ...GY, fontSize: 76, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
-          <span className="font-bold flex items-center gap-2"><DeviceTablet weight="bold" size={22} />Every student on their own device</span>
+    <MenuStep canvas={1000} title="Lobby" step={4} total={4} go={<MainBtn><Play weight="fill" size={22} />Start</MainBtn>}>
+      <div className="w-full grid grid-cols-[1fr_1.3fr] gap-8 items-center">
+        <div className="grid justify-items-center gap-3">
+          <b className="text-[19px] uppercase tracking-wider" style={{ color: PP.quiet }}>Go to the Join page and type</b>
+          <span className="tracking-widest px-5 py-2 rounded-2xl" style={{ ...GY, fontSize: 88, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
+          <span className="font-bold text-[19px] flex items-center gap-2"><DeviceTablet weight="bold" size={24} />Every student on their own device</span>
         </div>
-        <div className="relative p-6 flex flex-col items-center gap-4 text-center" style={{ ...paper, borderRadius: 28 }}>
-          <Title size={44}>Lobby</Title>
-          <span className="font-bold flex items-center gap-1.5"><UsersThree weight="bold" size={22} />12 here</span>
-          <div className="flex flex-wrap justify-center gap-2 content-start flex-1">{NAMES.map((n, i) => <span key={n} className="px-3 py-1.5 rounded-full font-bold text-lg h-fit" style={{ background: [PP.gamify, PP.aqua, PP.blush, PP.butter][i % 4], border: `2.5px solid ${I}` }}>{n}</span>)}</div>
-          <MainBtn><Play weight="fill" size={20} />Start</MainBtn>
+        <div className="grid justify-items-center gap-4">
+          <span className="font-bold text-[21px] flex items-center gap-1.5"><UsersThree weight="bold" size={24} />12 here</span>
+          <div className="flex flex-wrap justify-center gap-2.5">{NAMES.map((n, i) => <span key={n} className="px-4 py-2 rounded-full font-bold text-[21px]" style={{ background: [PP.gamify, PP.aqua, PP.blush, PP.butter][i % 4], border: `2.5px solid ${I}` }}>{n}</span>)}</div>
         </div>
       </div>
-    </div>
+    </MenuStep>
   );
 }
 function NameAndWait() {

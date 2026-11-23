@@ -1,13 +1,12 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
-  ArrowLeft, ArrowRight, Broadcast, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
+  ArrowRight, Broadcast, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
   PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Television, Toolbox, User, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
-import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { Badge, LakeBack, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, TEAMS, TurnGlow } from './mockKit';
+import { Badge, LakeBack, MenuStep, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, TEAMS, TurnGlow } from './mockKit';
 
 export { Badge, TEAMS };
 
@@ -20,7 +19,6 @@ export { Badge, TEAMS };
 // Static, wired to nothing; no live screen changes until she approves.
 
 const I = PP.ink;
-const pat = (id: string, calm = false) => PATTERNS.find((p) => p.id === id)!.make(calm);
 // Grow Year headings are ALL CAPS (teacher, 2026-11-23).
 const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
 // Selected = ink ring plus a Kelly check, never the go color (teacher, 2026-11-23).
@@ -92,13 +90,6 @@ function Tools({ size = 52, access = true }: { size?: number; access?: boolean }
     </div>
   );
 }
-// The site's real wordmark (teacher, 2026-11-23: "keep this gamify logo as the main"), on a light chip so it reads.
-function Logo() {
-  return <span className="inline-flex items-center px-5 h-[60px] rounded-full" style={{ background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-9 w-auto" draggable={false} /></span>;
-}
-function MenuTop() {
-  return <div className="w-full flex items-center justify-between"><Logo /><Tools /></div>;
-}
 export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
   return (
     <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
@@ -119,27 +110,7 @@ function Seg({ opts, pick, h = 56, size = 20 }: { opts: string[]; pick: number; 
   );
 }
 function Wizard({ step, total, title, children, last }: { step: number; total: number; title: string; children: ReactNode; last?: boolean }) {
-  return (
-    <Stage>
-      <MenuTop />
-      <Paper className="w-full flex-1 min-h-0 mt-6" pad={28}>
-        <div className="h-full flex flex-col items-center gap-5">
-          {/* The one header exception (teacher, 2026-11-23): title left, step tracker right, no "Step X of Y" text. */}
-          <div className="w-full flex items-center justify-between gap-6">
-            <h2 className="text-[46px]" style={GY}>{title}</h2>
-            <ol className="flex gap-2 list-none p-0 m-0" aria-label={`Step ${step} of ${total}`}>
-              {Array.from({ length: total }, (_, i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < step - 1 ? PP.periwinkle : i === step - 1 ? PP.lemon : PP.paper, border: `2.5px solid ${I}` }} />)}
-            </ol>
-          </div>
-          <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center">{children}</div>
-          <div className="flex justify-center gap-5 items-center">
-            <SecondBtn><ArrowLeft weight="bold" size={20} />Back</SecondBtn>
-            <MainBtn>{last ? <><Play weight="fill" size={24} />Play</> : <>Next<ArrowRight weight="bold" size={24} /></>}</MainBtn>
-          </div>
-        </div>
-      </Paper>
-    </Stage>
-  );
+  return <MenuStep title={title} step={step + 1} total={total + 1} go={last ? <MainBtn><Play weight="fill" size={24} />Play</MainBtn> : undefined}>{children}</MenuStep>;
 }
 // A game stage stand-in (Board Game, Classic park) so overlays sit on a real theme.
 function Board({ dim, w = 1280, h = 800 }: { dim?: boolean; w?: number; h?: number }) {
@@ -195,28 +166,21 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
 function V1() {
   const steps: string[] = ['Answer the question', 'Roll the die', 'Move to the finish'];
   return (
-    <Stage pad={44}>
-      <div className="w-full flex justify-end"><Tools /></div>
-      <div className="w-full flex-1 grid grid-cols-[1.1fr_1fr] gap-12 items-center">
-        <Paper layer={PP.butter} tilt={-2} pad={0} className="h-[540px]">
-          <div className="relative h-full rounded-[27px] overflow-hidden grid place-items-center" style={pat('cutpaper-pastel')}>
-            <div className="relative w-[300px] h-[300px] grid place-items-center"><BlobPatch color={PP.gamify} size={320} /><span className="relative"><CrayonDie value={5} size={210} /></span></div>
-          </div>
-        </Paper>
-        <div className="flex flex-col items-center text-center gap-7">
-          <h1 className="text-[84px]" style={GY}>Board Game</h1>
-          <p className="font-semibold text-[24px] leading-snug" style={{ color: I }}>Answer, roll the die and race to the finish.</p>
+    <MenuStep title="Board Game" step={1} total={6} back={false} go={<MainBtn big><Play weight="fill" size={30} />Set up and play</MainBtn>}>
+      <div className="w-full grid grid-cols-[1fr_1fr] gap-10 items-center">
+        <div className="justify-self-end relative w-[380px] h-[300px] grid place-items-center rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}>
+          <BlobPatch color={PP.gamify} size={260} /><span className="relative"><CrayonDie value={5} size={180} /></span>
+        </div>
+        <div className="justify-self-start flex flex-col items-center text-center gap-5">
+          <p className="font-semibold text-[24px] leading-snug">Answer, roll the die and race to the finish.</p>
           <div className="flex gap-2">{([['Share', PP.gamify], ['Live', PP.aqua], ['Solo', PP.butter]] as const).map(([m, c]) => <span key={m} className="px-4 py-1.5 rounded-full font-bold text-[18px]" style={{ background: c, border: `2.5px solid ${I}` }}>{m}</span>)}</div>
-          <Paper pad={22} className="w-[440px]" layer={PP.blush}>
-            <div className="grid gap-3">{steps.map((s, i) => (
-              <div key={s} className="flex items-center justify-center gap-4 font-bold text-[23px]">
-                <span className="w-12 h-12 rounded-full grid place-items-center text-[26px] shrink-0" style={{ ...GY, background: [PP.butter, PP.blush, PP.aqua][i], border: `3px solid ${I}` }}>{i + 1}</span>{s}
-              </div>))}</div>
-          </Paper>
-          <MainBtn wide big><Play weight="fill" size={30} />Set up and play</MainBtn>
+          <div className="grid gap-3">{steps.map((st, k) => (
+            <div key={st} className="flex items-center gap-4 font-bold text-[23px]">
+              <span className="w-12 h-12 rounded-full grid place-items-center text-[26px] shrink-0" style={{ ...GY, background: [PP.butter, PP.blush, PP.aqua][k], border: `3px solid ${I}` }}>{k + 1}</span>{st}
+            </div>))}</div>
         </div>
       </div>
-    </Stage>
+    </MenuStep>
   );
 }
 function V2() {
@@ -333,26 +297,21 @@ const SETUP: { id: PowerId; name: string; job: string; on: boolean; soft: string
   { id: 'mystery-box', name: 'Mystery Box', job: 'Opens a surprise power-up.', on: true, soft: PP.blush },
 ];
 function V6() {
-  // Her rules: no white box, cards centered straight on the ground (2026-11-13, 11-23).
+  // Back inside the white panel (teacher, 2026-11-23: every start menu the same; this replaces the 11-13 "no white box" rule).
   return (
-    <Stage>
-      <MenuTop />
-      <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <div className="w-[948px] flex items-center justify-between"><span className="text-[46px]" style={GY}>Power-ups</span><ol className="flex gap-2 list-none p-0 m-0" aria-label="Step 5 of 5">{[0, 1, 2, 3, 4].map((i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < 4 ? PP.periwinkle : PP.lemon, border: `2.5px solid ${I}` }} />)}</ol></div>
-        <div className="grid grid-cols-3 gap-x-6 gap-y-5">
-          {SETUP.map((c, i) => (
-            <div key={c.id} className="relative w-[300px] h-[176px] grid justify-items-center content-center gap-1.5 text-center rounded-[22px]"
-              style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, transform: `rotate(${[-1, 0.6, -0.4, 0.8, 0, -0.8][i]}deg)` } : { background: 'rgba(255,250,240,0.55)', border: `3px dashed ${I}` }}>
-              <span className="relative w-[80px] h-[80px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><BlobPatch color={c.soft} size={88} /><span className="relative"><CrayonPowerUp id={c.id} size={70} /></span></span>
-              <b className="text-[23px] leading-tight">{c.name}</b>
-              <span className="text-[16px] font-semibold leading-snug" style={{ color: PP.quiet }}>{c.job}</span>
-              <span className="absolute -top-3.5 -right-3.5">{c.on ? <Check40 /> : <span className="w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><X weight="bold" size={18} /></span>}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-5 items-center"><SecondBtn><ArrowLeft weight="bold" size={20} />Back</SecondBtn><MainBtn big><Play weight="fill" size={28} />Play</MainBtn></div>
+    <Wizard step={5} total={5} title="Power-ups" last>
+      <div className="grid grid-cols-3 gap-x-6 gap-y-5">
+        {SETUP.map((c, i) => (
+          <div key={c.id} className="relative w-[290px] h-[168px] grid justify-items-center content-center gap-1.5 text-center rounded-[22px]"
+            style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}`, transform: `rotate(${[-1, 0.6, -0.4, 0.8, 0, -0.8][i]}deg)` } : { background: '#fff', border: `3px dashed ${I}` }}>
+            <span className="relative w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><BlobPatch color={c.soft} size={84} /><span className="relative"><CrayonPowerUp id={c.id} size={66} /></span></span>
+            <b className="text-[22px] leading-tight">{c.name}</b>
+            <span className="text-[16px] font-semibold leading-snug" style={{ color: PP.quiet }}>{c.job}</span>
+            <span className="absolute -top-3.5 -right-3.5">{c.on ? <Check40 /> : <span className="w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><X weight="bold" size={18} /></span>}</span>
+          </div>
+        ))}
       </div>
-    </Stage>
+    </Wizard>
   );
 }
 function V7() {
@@ -563,9 +522,9 @@ function CodeChip() {
 const NAMES = ['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen'];
 function V12b() {
   return (
-    <Stage>
-      <div className="grid justify-items-center gap-2"><h2 className="text-[56px]" style={GY}>Race lobby</h2><CodeChip /></div>
-      <div className="w-full flex-1 grid grid-cols-4 gap-5 mt-8">
+    <MenuStep title="Race lobby" step={6} total={6} go={<MainBtn big><Play weight="fill" size={28} />Start the race</MainBtn>}>
+      <CodeChip />
+      <div className="w-full grid grid-cols-4 gap-5 mt-6">
         {TEAMS.map((t, i) => (
           <div key={t.name} className="flex flex-col items-center gap-3 pt-5 rounded-[26px]" style={{ background: t.soft, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
             <span className="w-[76px] h-[76px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={50} /></span>
@@ -574,24 +533,22 @@ function V12b() {
           </div>
         ))}
       </div>
-      <div className="mt-6"><MainBtn big><Play weight="fill" size={28} />Start the race</MainBtn></div>
-    </Stage>
+    </MenuStep>
   );
 }
 function V12c() {
   const soft = [PP.gamify, PP.aqua, PP.blush, PP.butter, PP.mint, PP.peach];
   return (
-    <Stage>
-      <div className="grid justify-items-center gap-2"><h2 className="text-[56px]" style={GY}>Team lobby</h2><CodeChip /></div>
-      <Paper pad={28} className="w-[960px] mt-9" layer={PP.butter}>
+    <MenuStep title="Team lobby" step={6} total={6} go={<MainBtn big><Play weight="fill" size={28} />Start together</MainBtn>}>
+      <CodeChip />
+      <div className="w-[960px] mt-7 p-7 rounded-[26px]" style={{ background: PP.cream, border: `3px solid ${I}` }}>
         <div className="grid justify-items-center gap-5 text-center">
           <span className="flex items-center gap-3 text-[30px] font-bold"><Star weight="fill" size={40} color={PP.lemon} />Our goal: fill the sky with 60 stars</span>
           <span className="w-[640px] h-7 rounded-full" style={{ background: PP.cream, border: `3px solid ${I}` }} />
           <div className="flex flex-wrap justify-center gap-3 max-w-[820px]">{NAMES.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{n}</span>)}</div>
         </div>
-      </Paper>
-      <div className="mt-8"><MainBtn big><Play weight="fill" size={28} />Start together</MainBtn></div>
-    </Stage>
+      </div>
+    </MenuStep>
   );
 }
 // A Live game's own student waiting screen, in its theme.
@@ -639,13 +596,13 @@ function V13() {
 
 const VIEWS: { n: string; name: string; view: ReactNode; problem: string; changed: string; tablet?: boolean }[] = [
   { n: '1', name: 'Welcome', view: <V1 />, problem: 'Washi tape and pattern bands made the menu busy; the cream ground did not match the site.',
-    changed: 'The site purple ground, no tape, everything centered: 84px title, the three steps on a paper card, a 68px start.' },
+    changed: 'The one shared start menu: purple ground, the same white panel, the game name as the Grow Year header with the step tracker, a 68px Set up and play.' },
   { n: '2', name: 'Ways to play', view: <V2 />, problem: 'Tape on the panel; icons were filled while the Icons tab says bold.',
     changed: 'Purple ground, bold icons, the picked card lifts with an ink ring and green check, the share question under the cards.' },
   { n: '3', name: 'Question set picker', view: <V3 />, problem: 'Cream ground and tape.', changed: 'Purple ground, centered tabs and search, teacher-dense set cards with a preview line.' },
   { n: '4', name: 'Options', view: <V4 />, problem: 'Tape; rows were label-left.', changed: 'Two centered groups with the label above each control.' },
   { n: '5', name: 'Teams and players', view: <V5 />, problem: 'Tape on every team card.', changed: 'Flat tilted paper cards with a shape and color on each team and a dashed Add chip.' },
-  { n: '6', name: 'Power-up setup cards', view: <V6 />, problem: 'The step title sat on a taped chip.', changed: 'Cards straight on the purple ground, no box or chip; off cards are dashed and faded, never crossed out.' },
+  { n: '6', name: 'Power-up setup cards', view: <V6 />, problem: 'The step title sat on a taped chip.', changed: 'Back inside the same white panel as every start menu (her 2026-11-23 rule replaces the earlier no-white-box rule); off cards dashed, never crossed out.' },
   { n: '7', name: 'Power-up pop card', view: <V7 />, problem: 'Tape on the card.', changed: 'One flat paper card with soft sun rays, over the game (Board Game park here).' },
   { n: '8a', name: 'Question screen: Game Show (laptop)', view: <QLaptop theme="gameshow" mode="share" />, problem: 'The question sat on a pattern, not in the game.',
     changed: 'The Game Show studio is the background around the standard paper card; question text left, A to D letters on the left.' },
