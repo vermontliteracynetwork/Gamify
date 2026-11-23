@@ -217,3 +217,20 @@ export function Washi({ className = '', color = '#ffd52e', rotate = -6, w = '5re
 export function CrayonSparkle({ x, y, s = 1, c }: { x: number; y: number; s?: number; c: string }) {
   return <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -12 L0 12 M-12 0 L12 0 M-7 -7 L7 7 M-7 7 L7 -7" stroke={c} strokeWidth="3.5" strokeLinecap="round" fill="none" />;
 }
+
+// ---------- The Gamify logo (teacher, 2026-11-23: "keep the main g as the logo
+// and the grow year font"). The existing files only, never redrawn:
+// /brand/gamify-mark.png (the G joystick) and /brand/gamify-wordmark.png.
+// tone 'white' recolors the same file for dark blocks (as the site already
+// does with a mask); sticker adds a white die-cut edge around the same mark.
+export function LogoMark({ h = 64, tone, sticker = false }: { h?: number; tone?: 'white'; sticker?: boolean }) {
+  const w = (h * 378) / 512;
+  if (tone === 'white') return <span role="img" aria-label="Gamify" className="inline-block shrink-0" style={{ width: w, height: h, background: '#ffffff', WebkitMask: 'url(/brand/gamify-mark.png) center / contain no-repeat', mask: 'url(/brand/gamify-mark.png) center / contain no-repeat' }} />;
+  return <img src="/brand/gamify-mark.png" alt="Gamify" width={w} height={h} draggable={false} className="shrink-0"
+    style={sticker ? { filter: 'drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 3px 4px rgba(29,26,51,0.25))' } : undefined} />;
+}
+export function LogoWord({ h = 36, tone }: { h?: number; tone?: 'white' }) {
+  const w = (h * 821) / 273;
+  if (tone === 'white') return <span role="img" aria-label="Gamify" className="inline-block shrink-0" style={{ width: w, height: h, background: '#ffffff', WebkitMask: 'url(/brand/gamify-wordmark.png) center / contain no-repeat', mask: 'url(/brand/gamify-wordmark.png) center / contain no-repeat' }} />;
+  return <img src="/brand/gamify-wordmark.png" alt="Gamify" width={w} height={h} draggable={false} className="shrink-0" />;
+}

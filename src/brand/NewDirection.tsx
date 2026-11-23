@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { GearSix, Play, SpeakerHigh, Star } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
-import { Buddy, BUDDIES, Face, ND, Paper, PaperDefs, Washi, type BuddyId } from './buddies';
+import { Buddy, BUDDIES, LogoMark, LogoWord, ND, Paper, PaperDefs, Washi, type BuddyId } from './buddies';
 import HandmadeMock from './HandmadeMock';
 import PlayfulMock from './PlayfulMock';
 
@@ -197,39 +197,12 @@ function MixedMedia({ still }: { still: boolean }) {
   );
 }
 
-const WORD = 'Gamify';
-const WORD_COLORS = [ND.cobalt, ND.pink, ND.green, ND.tangerine, ND.violet, ND.cobalt];
-function Wordmark({ size = '2.5rem' }: { size?: string }) {
-  return <span className="leading-none" style={{ ...GY, fontSize: size }} aria-label="Gamify">{WORD.split('').map((l, i) => <span key={i} aria-hidden="true" style={{ color: WORD_COLORS[i] }}>{l}</span>)}</span>;
-}
-function GMark({ size = 72 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 120 120" width={size} height={size} aria-hidden="true">
-      <path d="M96 40 A42 42 0 1 0 102 66 H64" stroke={ND.cobalt} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <Face x={19} y={60} s={0.5} color="#ffffff" cheeks={null} />
-    </svg>
-  );
-}
-function Seal({ size = 120 }: { size?: number }) {
-  return (
-    <svg viewBox="0 0 160 160" width={size} height={size} aria-hidden="true">
-      <circle cx="80" cy="80" r="76" fill={ND.pink} />
-      <defs><path id="nd-seal" d="M80 80 m-56 0 a56 56 0 1 1 112 0 a56 56 0 1 1 -112 0" /></defs>
-      <text fontFamily="var(--font-heading)" fontWeight="700" fontSize="15" letterSpacing="3" fill={ND.ink}><textPath href="#nd-seal">PLAY TO LEARN * GAMIFY * PLAY TO LEARN *</textPath></text>
-      <g transform="translate(46 46) scale(0.57)"><GMarkPaths /></g>
-    </svg>
-  );
-}
-function GMarkPaths() {
-  return <><path d="M96 40 A42 42 0 1 0 102 66 H64" stroke={ND.cobalt} strokeWidth="26" fill="none" strokeLinecap="round" strokeLinejoin="round" /><Face x={19} y={60} s={0.5} color="#ffffff" cheeks={null} /></>;
-}
-
 const DONTS: [string, string][] = [
   ['Cream ground; pink, cobalt and green blocks lead', 'Yellow ground with purple type and purple buttons'],
   ['Solid flat headline letters, no outline, no shadow', 'Outlined headline text with an offset drop shadow'],
   ['Flat buddies with dot eyes and white line-art limbs', 'Black-outlined, googly-eyed cartoon animals and "WOW" bursts'],
   ['A tidy Buddy sheet at the edges', 'Scattered confetti dashes and worm squiggles as the main texture'],
-  ['Our own mark: the G buddy, seal and wordmark', 'A bubbly outlined logo with a smiley in a letter'],
+  ['Our own logo: the G joystick mark and the Grow Year wordmark, kept as they are', 'A bubbly outlined logo with a smiley in a letter'],
 ];
 
 export default function NewDirection() {
@@ -269,7 +242,7 @@ export default function NewDirection() {
       <Block title="Home page hero (mockup)" note="Real layout widths. Cream page, one color-block collage, a solid headline with no outline or shadow.">
         <div className="rounded-[2rem] overflow-hidden" style={{ background: ND.paper }}>
           <nav className="flex items-center gap-4 px-6 py-4">
-            <GMark size={44} /><Wordmark size="2rem" />
+            <LogoWord h={34} />
             <span className="ml-auto hidden sm:flex gap-5 font-bold" style={{ color: ND.ink }}><span>Games</span><span>Blog</span><span>Pricing</span></span>
             <NDButton bg={ND.paper} fg={ND.ink}>Sign in</NDButton>
           </nav>
@@ -342,12 +315,13 @@ export default function NewDirection() {
         </div>
       </Block>
 
-      <Block title="Logo system" note="Gamify's own mark: the G buddy, a round seal and the wordmark. Multicolor letters only in the logo.">
+      <Block title="Logo (kept as is)" note="Your decision, 2026-11-23: the G joystick stays the logo and Grow Year stays the title font. The existing files, never redrawn: on cream, on color blocks, white on cobalt, and as a sticker on scrapbook pages.">
         <div className="flex flex-wrap items-center gap-6 rounded-[1.5rem] p-6" style={{ background: ND.paper }}>
-          <GMark size={96} />
-          <Seal size={128} />
-          <div className="grid justify-items-center gap-1"><GMark size={64} /><Wordmark size="2.25rem" /></div>
-          <div className="rounded-[1.5rem] px-6 py-4" style={{ background: ND.cobalt }}><span className="text-4xl" style={{ ...GY, color: '#ffffff' }}>Gamify</span></div>
+          <LogoMark h={96} />
+          <LogoWord h={48} />
+          <div className="rounded-[1.5rem] px-6 py-4 flex items-center gap-3" style={{ background: ND.cobalt }}><LogoMark h={56} tone="white" /><LogoWord h={36} tone="white" /></div>
+          <div className="rounded-[1.5rem] px-6 py-4 flex items-center gap-3" style={{ background: ND.pink }}><LogoMark h={56} /><LogoWord h={36} /></div>
+          <Paper color="url(#pm-gingham)" rx={10} tilt={-3} className="w-32 h-32 grid place-items-center"><span className="h-full grid place-items-center"><LogoMark h={84} sticker /></span><Washi className="-top-2 left-8" rotate={-6} color={ND.mint} w="3.5rem" /></Paper>
         </div>
       </Block>
 
