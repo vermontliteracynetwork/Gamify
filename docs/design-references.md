@@ -50,6 +50,33 @@ Purposes below are from memory of what each gallery collects; confirm on first v
 | 10 | ogimage.gallery | Link preview (Open Graph) images for shared links |
 
 ### The teacher's own references (always first)
+- Figma Community files she sent (2026-11-23, "look at these references"), not yet
+  opened: www.figma.com is blocked in this session's network and the Figma MCP
+  only reads files in her own drafts (community IDs are not file keys). To study
+  them she clicks "Open in Figma" (duplicates to drafts) and sends the new
+  /design/ link. License: check the badge on each page (Figma Community files are
+  usually CC BY 4.0: learn freely; reuse an asset only with credit in
+  `docs/asset-ledger.md`). Nothing below is learned yet; fill in after opening.
+  1. App landing page website designs: https://www.figma.com/community/file/1555219763027861261
+     Look for: hero hierarchy, feature rows, device frames, CTA placement for the
+     teacher marketing site. Not to copy: their layout grid wholesale, stock art.
+  2. Educational kids game: https://www.figma.com/community/file/1084493668769923289/educational-kids-game
+     Look for: answer-tile sizes, feedback screens, reward pacing, K-3 icon
+     language. Not to copy: characters, mascots, art style.
+  3. Create an addictive kids game: https://www.figma.com/community/file/1701970611524033344/create-an-addictive-kids-game
+     Look for: progress and reward loops, juice on taps. Challenge: "addictive"
+     is the wrong goal for a classroom (self-determination theory: competence
+     and autonomy, not compulsion); take the feedback craft, leave out streak
+     pressure, variable-ratio loot or anything that aims a habit loop at kids.
+  4. Community file about a competitor's game site (sent 2026-11-23): https://www.figma.com/community/file/1580288797193116053/blooket-play-free-educational-learning-games
+     Not opened (figma.com blocked). Study only for flow and UX: join by code,
+     lobby wait, game picker, results. It is a third-party community file that
+     likely contains another company's trademarks and art, so nothing from it is
+     ever used as an asset, and its name never appears in customer-facing text.
+     Stay distinct: our cream and Grape palette (not their colors), our doodle and
+     crayon objects with no characters (not collectible mascots), tap-your-name
+     lobby (not avatar pick), results that celebrate accuracy and the class goal
+     (not a ranked leaderboard first), no random reward drops.
 - Moodboards she sent (2026-11-23): playful flat shapes, scrapbook and mixed media,
   crayon and sticker art, a teacher scrapbook collage.
 - Doodle illustration refs (2026-11-23): thick wobbly ink outline, solid grainy
@@ -78,6 +105,50 @@ Purposes below are from memory of what each gallery collects; confirm on first v
 - Research named in recommendations: WCAG 2.1, cognitive load, dual coding,
   seductive details, self-determination theory, Gestalt grouping, UDL.
 
+### Stronger references (2026-11-23)
+Opened this session (the network allowed only developer.apple.com and
+developer.android.com; see Blocked hosts). Ranked by how much they should change
+Gamify's kit.
+
+| # | Source (opened) | What Gamify should learn | Do not copy |
+|---|---|---|---|
+| 1 | Material 3 Expressive research, https://developer.android.com/design/ui/wear/guides/get-started/benefits | Expressive variants won on preference (about 100% up) and aesthetics (up to 170% up), but "a strong minority" preferred calmer versions and "no amount of emotion can compensate for a lack of clarity": keep Calm as a first-class mode, test both | Google's shapes, colors, Roboto Flex look |
+| 2 | Apple HIG, Designing for games, https://developer.apple.com/design/human-interface-guidelines/designing-for-games | Minimum text table (iPadOS default 17 pt, minimum 11 pt), 44 x 44 pt buttons, menus legible at 16:10, 19.5:9 and 4:3, "teach through play", great defaults so kids start at once | Apple system look, Liquid Glass |
+| 3 | Apple HIG, Accessibility, https://developer.apple.com/design/human-interface-guidelines/accessibility | Text must enlarge to 200%; 4.5:1 minimum; shape or icon besides color (red-green, blue-orange pairs fail) | |
+| 4 | App Store Review Guidelines 1.3 Kids Category, https://developer.apple.com/app-store/review/guidelines/ | No links out, purchases or distractions for kids except behind a parent gate; no third-party analytics or ads: matches our student-page rules; cite it in sales talk | |
+| 5 | Apple HIG, Motion, https://developer.apple.com/design/human-interface-guidelines/motion | Motion optional and never the only signal; avoid motion on frequent UI taps; avoid sustained oscillation near 0.2 Hz (check our idle bob speed) | |
+| 6 | Apple HIG, Feedback, https://developer.apple.com/design/human-interface-guidelines/feedback | Match feedback size to importance; pair color, text, sound and haptics; confirm only big moments: a reward-size ladder for the kit | |
+| 7 | Apple HIG, Branding, https://developer.apple.com/design/human-interface-guidelines/branding | Brand color only on primary actions and status; logo not repeated in-app; custom font for headings, plain font for body (our Grow Year plus Inclusive Sans split) | |
+| 8 | Apple HIG, Playing audio, https://developer.apple.com/design/human-interface-guidelines/playing-audio | Sound is non-essential: obey device silent and volume, silence game music and effects on mute, pause on headphone unplug | |
+| 9 | Apple HIG, Writing, https://developer.apple.com/design/human-interface-guidelines/writing | Voice fixed, tone varies by moment; verbs on buttons; not "too cute or clever" with labels; consistent step words (Get started, Next, Done) | |
+| 10 | Apple HIG, Inclusion, https://developer.apple.com/design/human-interface-guidelines/inclusion | Say "you", not "the player"; define any term first; inclusive is more than inoffensive | |
+| 11 | Apple HIG, Onboarding, https://developer.apple.com/design/human-interface-guidelines/onboarding | Context tips over one long tour; skippable tutorials not shown again; let people play before any rating or purchase ask | |
+| 12 | Apple HIG, Playing haptics, https://developer.apple.com/design/human-interface-guidelines/playing-haptics | One cause, one haptic, always the same; short; optional. Same rule for our sound slots | |
+| 13 | Apple HIG, Color, https://developer.apple.com/design/human-interface-guidelines/color | One color, one meaning; test in bright and dim rooms (projector test) | |
+| 14 | Apple HIG, Layout, https://developer.apple.com/design/human-interface-guidelines/layout | Most important item top and leading; group by space and containers; progressive disclosure for teacher options | |
+| 15 | Apple HIG, Game controls, https://developer.apple.com/design/human-interface-guidelines/game-controls | Prefer touching game pieces directly over on-screen joysticks; keep buttons out of edge and system zones | |
+| 16 | Apple Design Awards 2026, https://developer.apple.com/design/awards/ | Sago Mini Jinja's Garden (ages 3 to 6) won Interaction and was an Inclusivity finalist: study its tap-first, wordless interaction (watch store video only) | Its characters, art and sounds |
+| 17 | Material 3 Expressive design language, https://developer.android.com/design/ui/wear/guides/get-started/design-language | Shape as meaning (rounder = friendlier, shape morph on press), a Numerals type role for big scores, grouped containers for hierarchy | Their icon set and shapes |
+| 18 | Android accessibility foundations, https://developer.android.com/design/ui/mobile/guides/foundations/accessibility | 48 dp touch targets even past the visual edge; never gesture-only actions | |
+| 19 | Apple HIG, App icons, https://developer.apple.com/design/human-interface-guidelines/app-icons | Crisp vector edges, layered foreground on a simple ground: rules for the Gamify home-screen icon and favicon | |
+
+To open when the hosts are allowed (from search results only, not cited as read):
+Duolingo design system illustration and shape language (design.duolingo.com,
+blog.duolingo.com), NN/g kids cognition and children's UX report (nngroup.com),
+Google's expressive research write-up (design.google), Game UI Database
+(gameuidatabase.com), Smashing Magazine "A Practical Guide To Designing For
+Children" (2024), W3C WCAG 2.2 Understanding pages, CAST UDL guidelines,
+Khan Academy Wonder Blocks (GitHub), Toca Boca, PBS Kids, Lingokids, Webby and
+Kidscreen winners, Pinterest moodboards, her three Figma Community files.
+
+Blocked hosts this session: www.figma.com, design.duolingo.com, blog.duolingo.com,
+www.nngroup.com, design.google, m3.material.io, www.gameuidatabase.com, w3.org,
+smashingmagazine.com, tocaboca.com, pbskids.org, sagomini.com, lingokids.com,
+khanacademy.org, webbyawards.com, kidscreen.com, pinterest.com, dribbble.com,
+behance.net, medium.com, webaim.org, cast.org, wikipedia.org, api.github.com
+(403), plus land-book.com and supahero.io from earlier. Ask for these to be
+allowed in the session's network settings.
+
 ## Reference log
 
 Add one row per brainstorm or mockup: what was designed, the sources opened,
@@ -93,3 +164,5 @@ what each taught, and where the result lives.
 | 2026-11-23 | Game mockups batch 1 of 4: Game Show and Board Game in the improved universal Classic theme (laptop 16:10 and iPad portrait, in play) | Each game's real code (game-show manifest, cards.ts, GameShow.tsx; castle-quest manifest, board.ts `layout()`, boardArt.tsx); `docs/teacher-preferences.md`; `classic-art` and `golden-rule`; the palette, pattern, crayon kit and universal views proposals; Gestalt figure-ground, dual coding, WCAG 2.1 1.4.1 (from memory); galleries not opened this session | Same game redrawn, not a new one: busy world at the edges with the board zone blocked out (studio stage; paper-craft park); calm pastel board, bright pieces; shape plus color for teams; no numbers on spaces; one lemon glow means your turn. Gap: the kit has no Prize Bag, so the mockup borrows Treasure Chest | `/brand` Game mockups tab (`src/brand/GameMockups.tsx`); next batch Match Three and Four in a Row |
 | 2026-11-23 | Sticker collections and Achievement page (Starter collection of 12 die-cut stickers, earned and locked states, Achievement page mockup, Winter teaser) | Her die-cut "good job" sticker sheet (11 stickers); `classic-art` (flat fills, wobbly ink outline, no faces); palette proposal (PP); `ui-ux-pro-max` and `design-system` token rules; self-determination theory, overjustification effect, endowed progress, loss aversion, WCAG 2.1 1.4.1 and 2.5.5 (all from memory); galleries not opened this session | Thick white edge plus soft shadow reads as a sticker at 84 px; caption on an arc in Grow Year with a white halo stays legible; locked = 35% gray art but full-strength words; faces dropped per the no-faces rule (open question) | `/brand` Stickers tab (`src/brand/Stickers.tsx`); `docs/stickers.md` |
 | 2026-11-23 | Game mockups batch 2: Match Three, Four in a Row, Bubble Pop, Bowling, Question Tracker (Live: class screen on the laptop, a student device on the iPad) | Each game's manifest and engine (match-three, four-in-a-row board.ts 7 x 6, bubble-pop board.ts 19 columns, bowling lane.ts, practice StarQuiz/Sky); the redone universal patterns (cut-paper toss, doodle scatter, squiggles, confetti, checker, quiet ground); `classic-art`, `golden-rule`, `docs/teacher-preferences.md`; WCAG 2.1 1.4.1, 1.4.11, 2.5.5, goal-gradient effect, self-determination theory, cognitive load (from memory); galleries not opened | Patterns only as stage grounds and edges, words always on paper; a shape or mark on every piece as well as a color; solo games show no player icon; Live splits the shared goal (class sky) from the personal task (question card). Gaps: the kit has no fireball, prize bag, gem, key or bubble bundle art, so the mockups borrow lightning, treasure chest, swap and one-more | `/brand` Game mockups tab (`src/brand/GameMockups.tsx`), all seven games |
+| 2026-11-23 | Stronger references and Brand Kit completeness audit | 19 Apple and Android pages listed in "Stronger references"; her three Figma Community files (not opened: figma.com blocked) | Calm must stay a first-class mode (M3 research); 17 pt default and 11 pt minimum text, 44 pt and 48 dp targets; one color one meaning; sound obeys mute; kids pages match Apple Kids Category rules | `docs/brand-kit-audit.md`; Brand Kit doc Direction tab "Brand Kit completeness audit" |
+| 2026-11-23 | Competitor community file logged (flow and UX only) | Figma Community file about a competitor's game site (not opened: figma.com blocked) | Use for join, lobby, picker and results flow only; may contain another company's trademarks, so no asset, name, layout or look is used | `docs/design-references.md` teacher refs item 4 |
