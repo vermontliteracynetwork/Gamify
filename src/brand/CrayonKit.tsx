@@ -157,7 +157,6 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M14 18 H42 V56 C42 62 46 66 50 66 C54 66 58 62 58 56 V18 H86 V56 C86 78 70 92 50 92 C30 92 14 78 14 56 Z" color={ND.coral} />
     <Wax d="M14 18 H42 V34 H14 Z" color={ND.paper} edge={ND.quiet} />
     <Wax d="M58 18 H86 V34 H58 Z" color={ND.paper} edge={ND.quiet} />
-    <Shine d="M22 44 V62" />
     <Line d="M22 11 L17 4 M34 11 L38 4 M66 11 L62 4 M78 11 L83 4" color={ND.ink} w={3.6} />
   </>),
   'double-dice': () => (<>
@@ -166,7 +165,6 @@ const ART: Record<PowerId, () => ReactNode> = {
   </>),
   'double-points': () => (<>
     <Wax d={starPath(50, 54, 46, 22)} color={ND.yellow} />
-    <Shine d="M44 22 L40 32" />
     <Line d="M32 47 L44 63 M44 47 L32 63" color={ND.ink} w={5.5} />
     <Line d="M50 49 C51 41 65 41 65 49 C65 55 55 58 50 64 H66" color={ND.ink} w={5.5} />
   </>),
@@ -179,46 +177,53 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d={rr(14, 12, 72, 76, 14)} color={ND.mint} edge={ND.cobaltDeep} hatch={0.25} />
     <Line d="M50 26 V74 M29 38 L71 62 M29 62 L71 38" color={ND.cobaltDeep} w={5} />
     <Line d="M43 29 L50 36 L57 29 M43 71 L50 64 L57 71" color={ND.cobaltDeep} w={4} />
-    <Shine d="M24 22 H38" />
   </>),
   'extra-time': () => (<>
-    <Wax d="M38 6 H58 V20 H38 Z" color={ND.tangerine} />
-    <Wax d={circ(46, 58, 35)} color={ND.tangerine} />
-    <Wax d={circ(46, 58, 25)} color={ND.paper} edge={ND.tangDeep} hatch={0.1} />
-    <Line d="M46 58 V40 M46 58 L59 65" color={ND.ink} w={5} />
-    <Wax d={circ(79, 24, 16)} color={ND.green} />
-    <Line d="M79 15 V33 M70 24 H88" color="#ffffff" w={5.5} ink />
+    <Wax d="M42 6 H58 V20 H42 Z" color={ND.tangerine} />
+    <Wax d={circ(50, 57, 36)} color={ND.tangerine} />
+    <Wax d={circ(50, 57, 26)} color={ND.paper} edge={ND.tangDeep} hatch={0.1} />
+    <Line d="M50 57 V39 M50 57 L63 64" color={ND.ink} w={5} />
   </>),
   'slow-mo': () => (<>
     <Wax d="M6 84 C6 74 18 72 30 74 H76 C82 68 84 62 84 54 C92 54 96 66 92 76 C89 83 84 88 74 88 H10 C7 88 6 86 6 84 Z" color={ND.green} />
-    <Wax d={circ(46, 50, 28)} color={ND.violet} />
-    <Line d="M46 50 C46 44 54 44 54 50 C54 58 40 58 40 50 C40 39 61 39 61 50 C61 64 33 64 33 50" color="#ffffff" w={4.5} />
+    <Wax d="M18 72 C12 58 16 36 32 26 C48 16 70 22 76 40 C82 58 72 74 54 76 Z" color={ND.violet} />
+    <Wax d="M26 70 C22 58 26 44 38 38 C50 32 64 38 66 50 C68 62 60 70 50 71 Z" color={ND.pink} edge={ND.violet} hatch={0.25} width={3.4} />
+    <Line d="M48 56 C46 52 50 49 53 51 C57 54 54 60 49 61 C42 62 38 56 40 50 C42 43 51 40 57 44" color={ND.ink} w={4} />
     <Line d="M85 56 L82 40 M90 58 L96 44" color={ND.ink} w={3.6} />
+    <Wax d={circ(82, 38, 3.6)} color={ND.ink} edge={ND.ink} hatch={0} width={1.5} />
+    <Wax d={circ(96, 42, 3.6)} color={ND.ink} edge={ND.ink} hatch={0} width={1.5} />
   </>),
   'one-more': () => (<>
     <Wax d={circ(50, 50, 42)} color={ND.green} />
     <Line d="M50 27 V73 M27 50 H73" color="#ffffff" w={11} />
-    <Shine d="M20 40 C22 32 26 26 32 22" />
   </>),
   hint: () => (<>
     <Wax d="M58 64 L66 56 L92 80 C94 82 94 86 92 88 L88 92 C86 94 82 94 80 92 Z" color={ND.tangerine} />
     <Wax d={`${circ(40, 40, 32)} ${circ(40, 40, 22)}`} color={ND.cobalt} rule="evenodd" />
     <Wax d={circ(40, 40, 22)} color={ND.paper} edge={ND.cobaltDeep} hatch={0.12} width={2} />
     <Line d="M28 36 C30 30 34 27 40 26" color="#ffffff" w={5} />
-    <Line d="M84 6 C85 12 87 14 93 15 C87 16 85 18 84 24 C83 18 81 16 75 15 C81 14 83 12 84 6 Z" color={ND.ink} w={3} />
   </>),
   'second-chance': () => (<>
     <Wax d="M50 90 C28 74 8 60 8 38 C8 23 19 12 32 12 C40 12 46 17 50 25 C54 17 60 12 68 12 C81 12 92 23 92 38 C92 60 72 74 50 90 Z" color={ND.pink} />
-    <Line d="M37 54 C34 43 41 34 51 34 C60 34 66 41 66 49 C66 57 59 63 51 63" color="#ffffff" w={6} />
-    <Line d="M29 47 L37 56 L45 48" color="#ffffff" w={6} />
+    <Line d="M50 25 L44 38 L55 48 L45 60 L54 72 L50 90" color={ND.ink} w={4} />
+    <g transform="rotate(-28 50 49)">
+      <Wax d={rr(24, 40, 52, 18, 8)} color="#f6d2a8" edge="#c98a52" hatch={0.2} width={3.6} />
+      <Wax d={rr(42, 41.5, 16, 15, 3)} color="#fbe6cc" edge="#c98a52" hatch={0.1} width={2.4} />
+      <Line d="M31 46 V46.5 M31 52 V52.5 M68 46 V46.5 M68 52 V52.5" color="#c98a52" w={3} />
+    </g>
   </>),
   tornado: () => (<>
-    <Wax d="M10 16 C26 4 74 4 90 16 C90 26 78 30 72 34 C74 41 66 47 60 50 C62 57 55 62 51 66 C53 73 49 81 44 92 C39 83 39 74 42 68 C35 64 33 58 37 52 C29 48 25 42 29 36 C18 31 10 26 10 16 Z" color={ND.violet} />
-    <Line d="M22 17 C40 24 62 24 80 16 M33 36 C46 41 60 39 67 34 M41 54 C47 56 53 55 56 51" color="#ffffff" w={4.5} />
+    <Line d="M42 92 C38 86 40 80 44 76" color={ND.violet} w={7} ink />
+    <Wax d={rr(36, 68, 20, 11, 5.5)} color={ND.violet} width={4} />
+    <Wax d={rr(36, 57, 32, 13, 6.5)} color={ND.violet} width={4} />
+    <Wax d={rr(28, 44, 48, 15, 7.5)} color={ND.violet} width={4} />
+    <Wax d={rr(20, 29, 62, 17, 8.5)} color={ND.violet} width={4} />
+    <Wax d={rr(8, 10, 84, 21, 10.5)} color={ND.violet} width={4} />
+    <Line d="M18 20 C34 15 58 15 74 18 M30 37 C42 34 56 34 66 36 M38 51 C46 49 56 49 62 51" color="#ffffff" w={3.6} o={0.9} />
+    <Line d="M4 46 H14 M2 58 H20 M84 62 H96 M80 74 H92" color={ND.ink} w={3.2} />
   </>),
   lightning: () => (<>
     <Wax d="M58 4 L18 54 H44 L32 96 L84 40 H57 L70 4 Z" color={ND.yellow} />
-    <Shine d="M55 14 L38 38" />
   </>),
   'mystery-box': () => (<>
     <Wax d="M50 32 C38 12 20 20 32 32 Z" color={ND.yellow} />
@@ -226,8 +231,10 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M16 44 H84 V84 C84 88 82 90 78 90 H22 C18 90 16 88 16 84 Z" color={ND.pink} />
     <Wax d="M10 31 H90 V46 H10 Z" color={ND.pink} />
     <Wax d="M43 31 H57 V46 H43 Z" color={ND.yellow} />
-    <Line d="M40 59 C40 50 61 50 61 58 C61 65 51 65 51 73" color="#ffffff" w={7} />
-    <Line d="M51 83 V83.5" color="#ffffff" w={8} />
+    <g transform="translate(50.5 67) scale(0.68) translate(-50.5 -67)">
+      <Line d="M40 59 C40 50 61 50 61 58 C61 65 51 65 51 73" color="#ffffff" w={8} />
+      <Line d="M51 83 V83.5" color="#ffffff" w={9} />
+    </g>
   </>),
   'treasure-chest': () => (<>
     <Wax d="M10 50 V38 C10 24 27 16 50 16 C73 16 90 24 90 38 V50 Z" color={ND.tangerine} />
@@ -235,7 +242,6 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M8 45 H92 V56 H8 Z" color={ND.yellow} />
     <Wax d="M41 44 H59 V66 C59 69 57 71 54 71 H46 C43 71 41 69 41 66 Z" color={ND.yellow} />
     <Line d="M50 55 V62" color={ND.ink} w={4.5} />
-    <Shine d="M20 34 C24 28 30 25 38 23" />
   </>),
   'spin-wheel': () => (<>
     {[ND.pink, ND.cobalt, ND.green, ND.yellow, ND.tangerine, ND.mint].map((c, k) => <Wax key={c} d={wedge(50, 56, 38, -90 + k * 60, -30 + k * 60)} color={c} hatch={0.3} width={2.6} />)}
