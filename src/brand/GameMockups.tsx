@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { ArrowsClockwise, Check, CornersOut, FlagCheckered, GearSix, HourglassHigh, Play, X } from '@phosphor-icons/react';
+import { ArrowRight, ArrowsClockwise, Check, CornersOut, DeviceTablet, FlagCheckered, GearSix, HourglassHigh, Lightning, Play, ProjectorScreen, SpeakerHigh, User, UsersThree, X } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
@@ -741,6 +741,321 @@ function StudentDevice({ solo }: { solo?: boolean }) {
   );
 }
 
+// ================= every view (teacher, 2026-11-23: "show me every view:
+// lobby, teacher screen, student, share, etc. for all games") =================
+// Menus wear the universal views look: quiet ground with a busy band only at
+// the top and bottom edge, taped paper panels, Grow Year titles, Gamify purple
+// go buttons with ink text. Every menu is centered (teacher, 2026-11-23);
+// question text stays left-aligned in its card.
+const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
+function Tape({ color = PP.butter, rot = -4 }: { color?: string; rot?: number }) {
+  return <span aria-hidden="true" className="absolute z-10 left-1/2 -top-3.5" style={{ width: 110, height: 30, background: color, opacity: 0.85, transform: `translateX(-50%) rotate(${rot}deg)`, borderLeft: '2px dashed rgba(29,26,51,0.25)', borderRight: '2px dashed rgba(29,26,51,0.25)' }} />;
+}
+function Sheet({ children, w, layer = PP.gamify, tape = PP.blush, pad = 28 }: { children: ReactNode; w: number; layer?: string; tape?: string; pad?: number }) {
+  return (
+    <div className="relative mx-auto" style={{ width: w }}>
+      <span aria-hidden="true" className="absolute inset-0 rounded-[30px]" style={{ background: layer, border: `3px solid ${I}`, transform: 'translate(10px, 10px) rotate(1.6deg)' }} />
+      <div className="relative rounded-[30px] grid justify-items-center text-center gap-4" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: pad }}>{children}</div>
+      <Tape color={tape} />
+    </div>
+  );
+}
+function Menu({ children, band = 'cutpaper', tall }: { children: ReactNode; band?: string; tall?: boolean }) {
+  const b = tall ? 90 : 56;
+  return (
+    <div className="w-full h-full relative" style={quiet}>
+      <div aria-hidden="true" className="absolute inset-x-0 top-0" style={{ height: b, ...pat(band), borderBottom: `3px solid ${I}` }} />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0" style={{ height: b, ...pat(band), borderTop: `3px solid ${I}` }} />
+      <div className="absolute inset-x-0 grid place-items-center" style={{ top: b, bottom: b }}>{children}</div>
+    </div>
+  );
+}
+function Title({ children, size = 52 }: { children: ReactNode; size?: number }) {
+  return <h2 style={{ ...GY, fontSize: size }}>{children}</h2>;
+}
+function Second({ children }: { children: ReactNode }) {
+  return <span className="min-h-12 px-6 rounded-full font-bold text-lg inline-flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
+}
+function Dim({ children, over }: { children: ReactNode; over: ReactNode }) {
+  return (
+    <div className="w-full h-full relative">
+      {children}
+      <div className="absolute inset-0 z-30" style={{ background: 'rgba(29,26,51,0.5)' }} />
+      <div className="absolute inset-0 z-40 grid place-items-center">{over}</div>
+    </div>
+  );
+}
+const MODE = {
+  share: { name: 'Share', line: 'Play together on one screen', color: PP.butter, Icon: ProjectorScreen },
+  live: { name: 'Live', line: 'Play together on your own devices', color: PP.blueCrystal, Icon: DeviceTablet },
+  solo: { name: 'Solo', line: 'Play on your own', color: PP.mint, Icon: User },
+} as const;
+type Way = keyof typeof MODE;
+const Tick = () => <span className="absolute -top-3 -right-3 w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.kelly, border: `3px solid ${I}` }}><Check weight="bold" size={22} color="#fff" /></span>;
+function Pills({ opts, pick }: { opts: string[]; pick: number }) {
+  return (
+    <div className="inline-flex gap-1.5 p-1.5 rounded-full" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>
+      {opts.map((o, i) => <span key={o} className="px-5 py-2 rounded-full font-bold text-xl" style={i === pick ? { background: PP.mint, boxShadow: `inset 0 0 0 2.5px ${I}` } : undefined}>{o}</span>)}
+    </div>
+  );
+}
+
+// ---------- 1. Welcome ----------
+function Welcome({ name, art, steps }: { name: string; art: ReactNode; steps: [string, string, string] }) {
+  return (
+    <Menu>
+      <Sheet w={640} tape={PP.aqua}>
+        <Title size={60}>{name}</Title>
+        <div className="relative w-40 h-40 grid place-items-center"><BlobPatch color={PP.blush} size={170} /><span className="relative">{art}</span></div>
+        <ol className="grid gap-2 w-full max-w-[440px]">
+          {steps.map((st, i) => <li key={st} className="flex items-center justify-center gap-3 font-bold text-2xl"><span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.gamify, PP.butter, PP.mint][i], border: `2.5px solid ${I}` }}>{i + 1}</span>{st}</li>)}
+        </ol>
+        <MainBtn big><Play weight="fill" size={24} />Start</MainBtn>
+      </Sheet>
+    </Menu>
+  );
+}
+// ---------- 2. How will you play? ----------
+function Ways({ ways, pick, share }: { ways: Way[]; pick: Way; share?: 'code' | 'here' | 'none' }) {
+  return (
+    <Menu>
+      <Sheet w={ways.length === 3 ? 820 : 640} tape={PP.butter}>
+        <Title size={46}>How will you play?</Title>
+        <div className="flex justify-center gap-5">
+          {ways.map((w) => { const M = MODE[w]; const on = w === pick; return (
+            <span key={w} className="relative w-[220px] p-4 rounded-[24px] grid justify-items-center gap-2" style={{ background: M.color, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}` : `0 4px 0 ${I}` }}>
+              <M.Icon weight="bold" size={54} /><b className="font-display text-4xl">{M.name}</b><span className="font-semibold text-lg">{M.line}</span>{on && <Tick />}
+            </span>); })}
+        </div>
+        {share && share !== 'none' && <div className="grid gap-2 justify-items-center"><b className="text-2xl">How do you share?</b><Pills opts={['Same device', 'Share a join code']} pick={share === 'code' ? 1 : 0} /></div>}
+        <MainBtn>Next<ArrowRight weight="bold" size={20} /></MainBtn>
+      </Sheet>
+    </Menu>
+  );
+}
+// ---------- 3. Options (brief) ----------
+function Options({ rows }: { rows: [string, string[], number][] }) {
+  return (
+    <Menu band="squiggle">
+      <Sheet w={660} tape={PP.aqua}>
+        <Title size={46}>Options</Title>
+        {rows.map(([l, o, p]) => <div key={l} className="grid gap-2 justify-items-center"><b className="text-2xl">{l}</b><Pills opts={o} pick={p} /></div>)}
+        <MainBtn><Play weight="fill" size={20} />Play</MainBtn>
+      </Sheet>
+    </Menu>
+  );
+}
+// ---------- Share by join code: this screen shows the code, the other shared screen types it ----------
+function ShareCode() {
+  return (
+    <Menu>
+      <Sheet w={600} tape={PP.butter}>
+        <Title size={44}>Share a join code</Title>
+        <span className="font-semibold text-2xl" style={{ color: PP.quiet }}>Open the Join page on the screen you want to play on and type:</span>
+        <span className="px-6 py-2 rounded-2xl tracking-[0.2em]" style={{ ...GY, fontSize: 84, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
+        <span className="font-bold text-xl flex items-center gap-2"><ProjectorScreen weight="bold" size={26} />Same game, same question set, one shared screen</span>
+      </Sheet>
+    </Menu>
+  );
+}
+function JoinCode({ name = 'Join the game', sub = 'Type the game code your teacher gave you.' }: { name?: string; sub?: string }) {
+  return (
+    <Menu tall>
+      <Sheet w={660} tape={PP.aqua} pad={40}>
+        <Title size={64}>{name}</Title>
+        <span className="font-semibold text-2xl" style={{ color: PP.quiet }}>{sub}</span>
+        <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[76px] h-[92px] rounded-2xl grid place-items-center" style={{ ...GY, fontSize: 56, background: i === 4 ? PP.blueCrystal : PP.paper, border: `${i === 4 ? 4 : 3}px solid ${I}` }}>{d}</span>)}</div>
+        <div className="flex gap-3"><Second><SpeakerHigh weight="bold" size={22} />Hear my code</Second><MainBtn big>Go<ArrowRight weight="bold" size={24} /></MainBtn></div>
+      </Sheet>
+    </Menu>
+  );
+}
+// ---------- Live: teacher setup, lobby, student name and wait ----------
+function ClassHow() {
+  return (
+    <Menu>
+      <Sheet w={760} tape={PP.butter}>
+        <Title size={46}>How the class plays</Title>
+        <div className="flex justify-center gap-5">
+          {[['Together', 'Fill one sky as a class', PP.blueCrystal, true], ['Compete', 'A leaderboard of names and points', PP.blush, false]].map(([n, l, c, on]) => (
+            <span key={n as string} className="relative w-[250px] p-4 rounded-[24px] grid justify-items-center gap-1" style={{ background: c as string, border: `3px solid ${I}`, boxShadow: on ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}` : `0 4px 0 ${I}` }}>
+              <b className="font-display text-4xl">{n as string}</b><span className="font-semibold text-lg">{l as string}</span>{on && <Tick />}
+            </span>
+          ))}
+        </div>
+        <div className="grid gap-2 justify-items-center"><b className="text-2xl">The game ends</b><Pills opts={['When I stop it', 'After a number right', 'After some minutes']} pick={0} /></div>
+        <MainBtn>Open the live lobby<ArrowRight weight="bold" size={20} /></MainBtn>
+      </Sheet>
+    </Menu>
+  );
+}
+const NAMES = ['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen'];
+function Lobby() {
+  return (
+    <div className="w-full h-full relative" style={{ ...pat('confetti'), padding: 28 }}>
+      <div className="h-full grid grid-cols-[1fr_1.25fr] gap-6">
+        <div className="relative p-6 grid content-center justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28 }}>
+          <Tape color={PP.aqua} />
+          <b className="text-lg uppercase tracking-wider" style={{ color: PP.quiet }}>Go to the Join page and type</b>
+          <span className="tracking-widest px-4 py-2 rounded-2xl" style={{ ...GY, fontSize: 76, background: PP.blueCrystal, border: `3px solid ${I}` }}>472915</span>
+          <span className="font-bold flex items-center gap-2"><DeviceTablet weight="bold" size={22} />Every student on their own device</span>
+        </div>
+        <div className="relative p-6 flex flex-col items-center gap-4 text-center" style={{ ...paper, borderRadius: 28 }}>
+          <Tape color={PP.blush} />
+          <Title size={44}>Lobby</Title>
+          <span className="font-bold flex items-center gap-1.5"><UsersThree weight="bold" size={22} />12 here</span>
+          <div className="flex flex-wrap justify-center gap-2 content-start flex-1">{NAMES.map((n, i) => <span key={n} className="px-3 py-1.5 rounded-full font-bold text-lg h-fit" style={{ background: [PP.gamify, PP.aqua, PP.blush, PP.butter][i % 4], border: `2.5px solid ${I}` }}>{n}</span>)}</div>
+          <MainBtn><Play weight="fill" size={20} />Start</MainBtn>
+        </div>
+      </div>
+    </div>
+  );
+}
+function NameAndWait() {
+  return (
+    <Menu tall>
+      <Sheet w={660} tape={PP.butter} pad={40}>
+        <Title size={60}>Pick your game name</Title>
+        <span className="px-6 py-3 rounded-2xl" style={{ ...GY, fontSize: 56, background: PP.butter, border: `3px solid ${I}` }}>Zippy Comet</span>
+        <div className="flex gap-3"><Second><CrayonDie value={4} size={34} />Roll a new name</Second><MainBtn big>Play</MainBtn></div>
+        <div className="w-full pt-5 grid justify-items-center gap-2" style={{ borderTop: `3px dashed ${PP.gamify}` }}>
+          <b className="font-display text-3xl">You are in!</b>
+          <span className="font-semibold text-xl flex items-center gap-2" style={{ color: PP.quiet }}><HourglassHigh weight="fill" size={24} />Wait for your teacher to start.</span>
+        </div>
+      </Sheet>
+    </Menu>
+  );
+}
+// ---------- Power-up moment (over the dimmed game) ----------
+function PowerMoment({ game, id, name, job, picks }: { game: ReactNode; id: PowerId; name: string; job: string; picks?: string[] }) {
+  return (
+    <Dim over={
+      <div className="relative">
+        <Confetti marks={[['sparkle', PP.lemon, -44, -24, 34], ['star', PP.pink, 400, -20, 30], ['dot', PP.sky, -30, 230, 16], ['heart', PP.pink, 410, 250, 24]]} />
+        <div className="w-[400px] p-6 grid justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28, boxShadow: `0 0 0 8px ${PP.butter}, 0 0 0 11px ${I}, 0 12px 0 ${I}` }}>
+          <div className="relative w-36 h-36 grid place-items-center"><BlobPatch color={PP.lavender} size={160} /><span className="relative"><CrayonPowerUp id={id} size={120} /></span></div>
+          <Title size={48}>{name}</Title>
+          <span className="font-bold text-xl">{job}</span>
+          {picks ? <div className="flex flex-wrap justify-center gap-2">{picks.map((p, i) => <span key={p} className="px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Badge t={TEAMS[[0, 2, 3][i] ?? 0]} size={24} />{p}</span>)}</div>
+            : <MainBtn><Lightning weight="fill" size={20} />Use it</MainBtn>}
+        </div>
+      </div>
+    }>{game}</Dim>
+  );
+}
+// ---------- Results box (see-through over the game) ----------
+function Results({ game, title, winner, stats, missed = 2 }: { game: ReactNode; title: string; winner: ReactNode; stats: string[]; missed?: number }) {
+  return (
+    <Dim over={
+      <div className="relative w-[560px]">
+        <Confetti marks={[['sparkle', PP.lemon, -40, 10, 36], ['star', PP.pink, 560, -10, 30], ['heart', PP.pink, -30, 300, 24], ['sparkle', PP.paper, 570, 280, 28], ['dot', PP.sky, 530, 150, 16]]} />
+        <Sheet w={560} tape={PP.pink} layer={PP.butter}>
+          <Title size={54}>{title}</Title>
+          <div className="relative w-36 h-36 grid place-items-center"><BlobPatch color={PP.butter} size={170} /><span className="relative">{winner}</span></div>
+          <div className="flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
+          <div className="flex flex-wrap justify-center gap-3"><MainBtn><ArrowsClockwise weight="bold" size={20} />Play again</MainBtn><Second>New game</Second><Second>Review {missed} missed</Second></div>
+        </Sheet>
+      </div>
+    }>{game}</Dim>
+  );
+}
+
+// ---------- the view list for each game ----------
+type View = { name: string; device: 'laptop' | 'tablet'; node: ReactNode; note: string };
+const ALL_VIEWS: Record<string, { ways: string; views: View[] }> = {
+  'game-show': {
+    ways: 'Share (same device, or a join code that opens it on another shared screen) and Solo against the computer.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Game Show" art={<CrayonPowerUp id="treasure-chest" size={120} />} steps={['Answer the question', 'Pick a surprise card', 'Most points wins']} />, note: 'Centered: title, picture, three steps, one purple Start.' },
+      { name: 'How will you play?', device: 'laptop', node: <Ways ways={['share', 'solo']} pick="share" share="code" />, note: 'Only Share and Solo; Share asks same device or join code.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Board', ['Surprise cards', 'Category grid'], 0], ['Cards', ['4 x 3', '4 x 4', '5 x 4', '5 x 5', '6 x 6'], 0], ['Tries', ['1', '3', 'Until right'], 0]]} />, note: 'One rule per row, picks in mint.' },
+      { name: 'Share: join code', device: 'laptop', node: <ShareCode />, note: 'Teacher laptop shows the code.' },
+      { name: 'Share: other screen joins', device: 'tablet', node: <JoinCode sub="Type the code to open the game on this screen." />, note: 'The shared screen types it and the game opens.' },
+      { name: 'Share: in play (teams)', device: 'laptop', node: <GameShowLaptop />, note: 'The in-play mockup above.' },
+      { name: 'Solo: you vs computer', device: 'laptop', node: <GameShowLaptop vs />, note: 'Two sides, You and Computer; same board.' },
+      { name: 'Power-up: Swap Spinner', device: 'laptop', node: <PowerMoment game={<GameShowLaptop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, note: 'Picks a team with shape badges, never color alone.' },
+      { name: 'Results', device: 'laptop', node: <Results game={<GameShowLaptop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} stats={['160 points', '7 cards', '1 row filled']} />, note: 'See-through box over the board.' },
+    ],
+  },
+  'castle-quest': {
+    ways: 'Share (same device or a join code) and Solo against the computer.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Board Game" art={<CrayonDie value={5} size={120} />} steps={['Answer right to roll', 'Move that many squares', 'First to the finish wins']} />, note: 'Her one-side die is the picture.' },
+      { name: 'How will you play?', device: 'laptop', node: <Ways ways={['share', 'solo']} pick="share" share="here" />, note: 'Share picked, same device.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Trail', ['Short', 'Medium', 'Long', 'Extra long'], 1], ['Power-ups', ['On', 'Off'], 0]]} />, note: 'Trail length in words, not square counts.' },
+      { name: 'Share: join code', device: 'laptop', node: <ShareCode />, note: 'Same as every Share game.' },
+      { name: 'Share: other screen joins', device: 'tablet', node: <JoinCode sub="Type the code to open the game on this screen." />, note: 'Opens the board on the shared screen.' },
+      { name: 'Share: in play', device: 'laptop', node: <BoardLaptop />, note: 'The in-play mockup above.' },
+      { name: 'Solo: you vs computer', device: 'laptop', node: <BoardLaptop vs />, note: 'Two pawns; your turn card says Your turn.' },
+      { name: 'Power-up: Tornado', device: 'laptop', node: <PowerMoment game={<BoardLaptop />} id="tornado" name="Tornado" job="Whoosh! Every player lands on a new square." />, note: 'Found on a hidden square.' },
+      { name: 'Results', device: 'laptop', node: <Results game={<BoardLaptop />} title="Team Sky wins!" winner={<CrayonPawn color={PP.sky} size={110} />} stats={['First to the finish', '14 turns']} />, note: 'The winner\'s pawn on the stage.' },
+    ],
+  },
+  'match-three': {
+    ways: 'Solo only, so there is no How will you play? page.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Match Three" art={<span className="flex gap-1"><Gem k={2} s={52} /><Gem k={2} s={52} /><Gem k={2} s={52} /></span>} steps={['Swap two pieces', 'Make a row of 3', 'Answer to get more moves']} />, note: 'Three matching hearts show the goal.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Rounds', ['1', '3', '5', '10'], 1], ['Moves each round', ['3', '5', '8'], 0], ['Board', ['6 x 6', '7 x 7', '8 x 8'], 1]]} />, note: 'Short words, big pills.' },
+      { name: 'Solo: in play (laptop)', device: 'laptop', node: <MatchThreeLaptop />, note: 'No player icon.' },
+      { name: 'Solo: in play (iPad)', device: 'tablet', node: <MatchThreeTablet />, note: 'Student device.' },
+      { name: 'Power-up: Fireball', device: 'laptop', node: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
+      { name: 'Results', device: 'tablet', node: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<StarGoal got={2} />} stats={['260 points', '9 matches']} />, note: 'Stars, not a rank.' },
+    ],
+  },
+  'four-in-a-row': {
+    ways: 'Share (two players, one device) and Solo against the computer. No join code in this game today.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Four in a Row" art={<span className="flex"><Disc p={1} s={60} /><Disc p={2} s={60} /><Disc p={1} s={60} /></span>} steps={['Answer the question', 'Drop your piece', 'Four in a line wins']} />, note: 'Both pieces with their marks.' },
+      { name: 'How will you play?', device: 'laptop', node: <Ways ways={['share', 'solo']} pick="solo" share="none" />, note: 'Solo means you vs the computer here.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Computer', ['Easy', 'Medium', 'Hard'], 1], ['Power-ups', ['On', 'Off'], 0]]} />, note: 'Computer level only for Solo.' },
+      { name: 'Share: in play', device: 'laptop', node: <FourLaptop />, note: 'The in-play mockup above.' },
+      { name: 'Solo: you vs computer', device: 'laptop', node: <FourLaptop vs />, note: 'Your piece waits over its column.' },
+      { name: 'Power-up: Pop Out', device: 'laptop', node: <PowerMoment game={<FourLaptop vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, note: 'Kit has no key art; swap stands in.' },
+      { name: 'Results', device: 'laptop', node: <Results game={<FourLaptop />} title="Leo wins!" winner={<Disc p={2} s={110} />} stats={['Four in a row', '11 drops']} />, note: 'The winning piece on the stage.' },
+    ],
+  },
+  'bubble-pop': {
+    ways: 'Solo only, so there is no How will you play? page.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Bubble Pop" art={<span className="flex gap-1"><Bubble k={1} s={56} /><Bubble k={1} s={56} /><Bubble k={1} s={56} /></span>} steps={['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop']} />, note: 'Three matching bubbles show the goal.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Question breaks', ['2', '4', '6', '10'], 1], ['Bubbles each break', ['3', '5'], 0]]} />, note: 'Same panel as every game.' },
+      { name: 'Solo: in play (laptop)', device: 'laptop', node: <BubbleLaptop />, note: 'No player icon.' },
+      { name: 'Solo: in play (iPad)', device: 'tablet', node: <BubbleTablet />, note: 'Student device.' },
+      { name: 'Power-up: Mystery Box', device: 'laptop', node: <PowerMoment game={<BubbleLaptop />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, note: 'Opens with a bob and a pop.' },
+      { name: 'Results', device: 'tablet', node: <Results game={<BubbleTablet />} title="340 points!" winner={<Bubble k={4} s={110} />} stats={['31 bubbles popped', 'Best combo x4']} />, note: 'Your points, not a rank.' },
+    ],
+  },
+  bowling: {
+    ways: 'Share (same device or a join code) and Solo, alone or against the computer.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Bowling" art={<Ball c={PP.pink} s={120} />} steps={['Answer right to roll', 'Aim and add spin', 'Most pins wins']} />, note: 'Your ball is your icon.' },
+      { name: 'How will you play?', device: 'laptop', node: <Ways ways={['share', 'solo']} pick="share" share="here" />, note: 'Share and Solo.' },
+      { name: 'Options', device: 'laptop', node: <Options rows={[['Frames', ['1', '3', '5', '10'], 1], ['Players', ['Teams', 'Each player'], 1]]} />, note: 'Frames in plain numbers.' },
+      { name: 'Share: join code', device: 'laptop', node: <ShareCode />, note: 'Opens the lane on the shared screen.' },
+      { name: 'Share: in play', device: 'laptop', node: <BowlingLaptop />, note: 'The in-play mockup above.' },
+      { name: 'Solo: in play', device: 'tablet', node: <BowlingTablet />, note: 'Same lane on a student iPad.' },
+      { name: 'Solo: alone', device: 'laptop', node: <BowlingLaptop solo />, note: 'One row on the frame board, no turn pill.' },
+      { name: 'Power-up: Bumper Rails', device: 'laptop', node: <PowerMoment game={<BowlingLaptop />} id="shield" name="Bumper Rails" job="No gutter ball on your next roll." />, note: 'Shield art carries the job.' },
+      { name: 'Results', device: 'laptop', node: <Results game={<BowlingLaptop />} title="Ava wins!" winner={<Ball c={PP.periwinkle} s={110} />} stats={['46 pins', '1 strike', '1 spare']} />, note: 'The winning ball on the stage.' },
+    ],
+  },
+  'star-quiz': {
+    ways: 'Live (class screen plus each student\'s device) and Solo. No power-ups in this game.',
+    views: [
+      { name: 'Welcome', device: 'laptop', node: <Welcome name="Question Tracker" art={<Doodle kind="star" color={PP.lemon} size={120} />} steps={['Answer a question', 'Right adds a star', 'Fill the whole sky']} />, note: 'One star says it all.' },
+      { name: 'How will you play?', device: 'laptop', node: <Ways ways={['live', 'solo']} pick="live" />, note: 'Live and Solo only.' },
+      { name: 'Teacher: how the class plays', device: 'laptop', node: <ClassHow />, note: 'Together or Compete, and when it ends.' },
+      { name: 'Class screen: lobby', device: 'laptop', node: <Lobby />, note: 'Code huge, names pop in, Start.' },
+      { name: 'Student: join', device: 'tablet', node: <JoinCode />, note: 'One box per digit, Hear my code.' },
+      { name: 'Student: name and wait', device: 'tablet', node: <NameAndWait />, note: 'Roll a name, then wait.' },
+      { name: 'Class screen: in play', device: 'laptop', node: <ClassScreen />, note: 'The shared sky and class goal.' },
+      { name: 'Student: in play', device: 'tablet', node: <StudentDevice />, note: 'Question left-aligned in its card.' },
+      { name: 'Solo: in play', device: 'tablet', node: <StudentDevice solo />, note: 'My sky, no class count.' },
+      { name: 'Class screen: results', device: 'laptop', node: <Results game={<ClassScreen />} title="We filled the sky!" winner={<Doodle kind="star" color={PP.lemon} size={110} />} stats={['30 stars', '12 players', '9 gold stars']} missed={4} />, note: 'One class win, no ranks in Together.' },
+    ],
+  },
+};
+
 // ================= the tab =================
 const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; lines: [string, string, string] }[] = [
   {
@@ -801,15 +1116,37 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   },
 ];
 
+function ViewStrip({ id }: { id: string }) {
+  const v = ALL_VIEWS[id];
+  if (!v) return null;
+  return (
+    <div className="grid gap-3">
+      <p className="text-sm font-semibold"><b>Every view.</b> Ways it plays: {v.ways}</p>
+      <div className="flex flex-wrap gap-5 items-start">
+        {v.views.map((x, n) => (
+          <figure key={x.name} className={`m-0 grid gap-1.5 content-start ${x.device === 'laptop' ? 'flex-1 basis-[22rem] min-w-[18rem] max-w-[27rem]' : 'w-[12rem]'}`}>
+            <figcaption className="font-heading text-sm">{n + 1}. {x.name} <span className="font-semibold text-muted">({x.device === 'laptop' ? 'laptop or big screen' : 'iPad'})</span></figcaption>
+            {x.device === 'laptop' ? <Laptop>{x.node}</Laptop> : <Tablet>{x.node}</Tablet>}
+            <span className="text-xs font-semibold text-muted">{x.note}</span>
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function GameMockups() {
   return (
     <section className="grid gap-8">
       <div className="grid gap-1">
         <h2 className="font-heading text-2xl">Game mockups <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">The seven live games in the improved universal Classic theme. All seven: Game Show, Board Game, Match Three, Four in a Row, Bubble Pop, Bowling and Question Tracker. Same boards, pieces and power-ups as today, redrawn in the kit. Preview only: no game changes until you approve.</p>
+        <p className="text-sm font-semibold text-muted max-w-prose">The seven live games in the improved universal Classic theme, each with every view it really has: welcome, ways to play, options, join code or lobby, class screen, student device, Share and Solo play, a power-up and results. Menus are centered; question text stays left in its card. Preview only: no game changes until you approve.</p>
       </div>
+      <nav aria-label="Jump to a game" className="flex flex-wrap gap-2">
+        {GAMES.map((g) => <a key={g.id} href={`#gm-${g.id}`} className="px-3 py-1.5 rounded-full font-bold text-sm border-2 border-black bg-[#fffaf0] hover:bg-[#fdfd94]">{g.name.split(' (')[0]} <span className="text-muted">{(ALL_VIEWS[g.id]?.views.length ?? 0)} views</span></a>)}
+      </nav>
       {GAMES.map((g) => (
-        <article key={g.id} className="grid gap-4">
+        <article key={g.id} id={`gm-${g.id}`} className="grid gap-4 scroll-mt-24 pt-6 border-t-2 border-black/20">
           <h3 className="font-heading text-xl">{g.name}</h3>
           <div className="grid gap-6 lg:grid-cols-[1fr_17rem] items-start">
             <figure className="m-0 grid gap-2"><Laptop>{g.laptop}</Laptop><figcaption className="text-sm font-bold text-muted">Laptop 16:10, in play</figcaption></figure>
@@ -818,6 +1155,7 @@ export default function GameMockups() {
           <ul className="grid gap-1.5 text-sm font-semibold max-w-[70rem] list-disc pl-5">
             {g.lines.map((l) => <li key={l}>{l}</li>)}
           </ul>
+          <ViewStrip id={g.id} />
         </article>
       ))}
     </section>
