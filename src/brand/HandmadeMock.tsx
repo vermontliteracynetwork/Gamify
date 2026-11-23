@@ -75,7 +75,7 @@ function ClassicEdges({ still }: { still: boolean }) {
         <Paper color={ND.paper} rx={8} tilt={-3} className="px-4 py-1.5">
           <span className="text-xl leading-none" style={{ ...GY, color: ND.ink }}>Three in a Row</span>
         </Paper>
-        <Washi className="-top-2 left-[35%]" rotate={4} w="4rem" color={ND.mint} />
+        <Washi className="-top-3 -left-5" rotate={-28} w="3.5rem" color={ND.mint} />
       </div>
     </div>
   );
@@ -107,7 +107,7 @@ function KidEdges({ still }: { still: boolean }) {
     <div className="absolute inset-0" aria-hidden="true" style={{ background: '#fffdf6' }}>
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid slice">
         <g filter="url(#nd-crayon)">
-          <path d={hatch(640, 300, 9)} stroke="#8fc3ff" strokeWidth="5" opacity="0.75" />
+          <path d={hatch(640, 300, 9)} stroke="#8fc3ff" strokeWidth="5" opacity="0.5" />
           {[[ND.coral, 210], [ND.yellow, 186], [ND.green, 162], [ND.cobalt, 138]].map(([c, r]) => (
             <path key={r as number} d={`M${-60} 330 a${r} ${r} 0 0 1 ${(r as number) * 2} 0`} stroke={c as string} strokeWidth="18" fill="none" transform="translate(40 0)" />
           ))}

@@ -4,6 +4,7 @@ import { GearSix, Play, SpeakerHigh, Star } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
 import { Buddy, BUDDIES, Face, ND, Paper, PaperDefs, Washi, type BuddyId } from './buddies';
 import HandmadeMock from './HandmadeMock';
+import PlayfulMock from './PlayfulMock';
 
 // "New direction" (proposal, teacher 2026-11-23): playful flat shapes from her
 // moodboards, kept clearly different from the main competitor's look. Preview
@@ -239,6 +240,10 @@ export default function NewDirection() {
   return (
     <div className="relative rounded-[2rem] p-5 sm:p-8 grid gap-10 overflow-x-clip" style={{ background: ND.cream, color: ND.ink }}>
       <PaperDefs />
+      <Block title="Playful mixed style mockup" note="Your references of 2026-11-23: kids' crayon drawings, soft pencil sticker characters, a scrapbook collage. A home page hero and one game welcome card. Mess at the edges, a clean reading zone in the middle.">
+        <PlayfulMock still={still} />
+      </Block>
+
       <p className="font-semibold max-w-prose" style={{ color: ND.quiet }}>
         A proposal from your moodboards and your note of 2026-11-23: very modern and simple in function, playful scrapbook and mixed media around it. Classic is made by hand (cut paper, tape, crayon) so a kid's clay, crayon or fabric theme sits naturally beside it. Nothing on the site uses this yet. Full rules are in the Brand Kit doc tab "Direction: playful flat shapes", section "Clean core, handmade edges".
       </p>

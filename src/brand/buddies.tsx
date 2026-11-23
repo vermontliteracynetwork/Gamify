@@ -34,7 +34,7 @@ export function Face({ x, y, s = 1, color = ND.ink, happy = false, cheeks = '#ff
   );
 }
 
-function star(cx: number, cy: number, outer: number, inner: number, points: number, rot = -90) {
+export function star(cx: number, cy: number, outer: number, inner: number, points: number, rot = -90) {
   const pts: string[] = [];
   for (let i = 0; i < points * 2; i++) {
     const r = i % 2 ? inner : outer;
@@ -63,7 +63,9 @@ export const BUDDIES: { id: BuddyId; name: string; shape: string; color: string;
 
 // paper (default): Classic is made by hand (2026-11-23), so each buddy is a cut
 // construction-paper shape: uneven edge, paper grain, a soft lift. Needs <PaperDefs /> on the page.
-export function Buddy({ id, size = 96, color, limbs = false, title, paper = true }: { id: BuddyId; size?: number; color?: string; limbs?: boolean; title?: string; paper?: boolean }) {
+export function Buddy({ id, size = 96, color, limbs = false, title, paper = true, look, sticker = false }: { id: BuddyId; size?: number; color?: string; limbs?: boolean; title?: string; paper?: boolean; look?: 'pencil'; sticker?: boolean }) {
+  // look 'pencil': colored-pencil grain in the fill; sticker: a white die-cut edge.
+  const fx = look === 'pencil' ? 'url(#nd-pencil)' : paper ? 'url(#nd-paper)' : undefined;
   const c = color ?? BUDDIES.find((b) => b.id === id)!.color;
   const dark = c === ND.cobalt || c === ND.violet || c === ND.cobaltDeep;
   const fc = dark ? '#ffffff' : ND.ink;
@@ -113,7 +115,7 @@ export function Buddy({ id, size = 96, color, limbs = false, title, paper = true
   }
   return (
     <svg viewBox="0 0 120 120" width={size} height={size} role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true} overflow="visible">
-      <g filter={paper ? 'url(#nd-paper)' : undefined}>{body}</g>
+      <g filter={sticker ? 'url(#nd-sticker)' : undefined}><g filter={fx}>{body}</g></g>
       {limbs && (
         <g stroke="#ffffff" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
           <path d="M50 92 L46 114 L38 116" /><path d="M70 92 L74 114 L82 116" />
@@ -150,6 +152,24 @@ export function PaperDefs() {
           <feComposite in="specks" in2="cut" operator="in" result="grain" />
           <feMerge><feMergeNode in="cut" /><feMergeNode in="grain" /></feMerge>
         </filter>
+        <filter id="nd-pencil" x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="11" result="warp" />
+          <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.5" xChannelSelector="R" yChannelSelector="G" result="shape" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.9 0.22" numOctaves="2" seed="5" result="strokes" />
+          <feColorMatrix in="strokes" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.7 0 0 0 -0.78" result="light" />
+          <feComposite in="light" in2="shape" operator="in" result="hl" />
+          <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="21" result="tooth" />
+          <feColorMatrix in="tooth" type="matrix" values="0 0 0 0 0.11  0 0 0 0 0.1  0 0 0 0 0.2  0.55 0 0 0 -0.2" result="dk" />
+          <feComposite in="dk" in2="shape" operator="in" result="grain" />
+          <feMerge><feMergeNode in="shape" /><feMergeNode in="hl" /><feMergeNode in="grain" /></feMerge>
+        </filter>
+        <filter id="nd-sticker" x="-15%" y="-15%" width="130%" height="135%">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="fat" />
+          <feFlood floodColor="#ffffff" />
+          <feComposite in2="fat" operator="in" result="edge" />
+          <feDropShadow in="edge" dx="0" dy="2.5" stdDeviation="2" floodColor="#1d1a33" floodOpacity="0.22" result="lifted" />
+          <feMerge><feMergeNode in="lifted" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
         <filter id="nd-crayon" x="-5%" y="-5%" width="110%" height="110%">
           <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="1" seed="2" result="wob" />
           <feDisplacementMap in="SourceGraphic" in2="wob" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="line" />
@@ -175,7 +195,7 @@ export function PaperDefs() {
 // content on top stays crisp (text is never run through the filter).
 export function Paper({ color, children, className = '', rx = 22, tilt = 0, lift = true, style }: { color: string; children?: ReactNode; className?: string; rx?: number; tilt?: number; lift?: boolean; style?: CSSProperties }) {
   return (
-    <div className={`relative ${className}`} style={{ transform: tilt ? `rotate(${tilt}deg)` : undefined, ...style }}>
+    <div className={`${/\babsolute\b/.test(className) ? '' : 'relative '}${className}`} style={{ transform: tilt ? `rotate(${tilt}deg)` : undefined, ...style }}>
       <svg className="absolute inset-[3px] w-[calc(100%-6px)] h-[calc(100%-6px)]" overflow="visible" aria-hidden="true">
         <rect width="100%" height="100%" rx={rx} fill={color} filter={lift ? 'url(#nd-paper)' : 'url(#nd-paper-flat)'} />
       </svg>
