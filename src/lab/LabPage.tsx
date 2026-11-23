@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import Title from '../ui/Title';
 import Loading from '../ui/Loading';
 import LabGame from './LabGame';
-import { FAMILIES, LAB_GAMES, LAB_MODES, LIVE_PLAN, loadLabGame } from './registry';
+import { FAMILIES, LAB_GAMES, LAB_MODES, loadLabGame } from './registry';
 import { MODE_COLORS, MODE_ICONS, ModeDot } from '../games/ModeBadge';
 import { ALL_MODES, type PlayMode } from '../data/types';
 import { t } from '../i18n';
@@ -24,14 +24,14 @@ export function LabIndex() {
           <p className="font-semibold text-muted">New games in Classic, on the preview only. Tap one to play.</p>
         </header>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Ways to play">
-          {ALL_MODES.map((m) => {
+          {ALL_MODES.filter((m) => LAB_GAMES.some((g) => (LAB_MODES[g.id] ?? []).includes(m))).map((m) => {
             const Icon = MODE_ICONS[m];
             const on = mode === m;
             return (
               <button key={m} type="button" aria-pressed={on} onClick={() => setMode(on ? null : m)}
                 className={`min-h-11 px-4 rounded-pill border-std border-border inline-flex items-center gap-2 font-bold motion-safe:hover:scale-[1.03] motion-safe:transition-transform ${on ? '' : 'bg-surface'}`}
                 style={on ? { background: MODE_COLORS[m], boxShadow: 'var(--shadow-sticker)' } : undefined}>
-                <Icon weight="bold" size={18} aria-hidden="true" />{t(`mode.${m}`)}{m === 'live' && <span className="text-xs font-semibold text-muted">(planned)</span>}
+                <Icon weight="bold" size={18} aria-hidden="true" />{t(`mode.${m}`)}
               </button>
             );
           })}
@@ -49,7 +49,6 @@ export function LabIndex() {
                       <span className="font-display text-2xl leading-tight">{g.name}</span>
                       <span className="text-sm font-semibold text-muted leading-snug">{g.blurb}</span>
                       <span className="flex gap-1.5 pt-1">{(LAB_MODES[g.id] ?? []).map((m) => <ModeDot key={m} mode={m} small />)}</span>
-                      {mode === 'live' && <span className="text-xs font-semibold leading-snug">{LIVE_PLAN[g.id]}</span>}
                     </Link>
                   </motion.li>
                 ))}

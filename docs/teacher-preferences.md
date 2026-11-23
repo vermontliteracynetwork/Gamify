@@ -204,3 +204,4 @@ line that fits, and add each new preference the same turn she says it.
 - Public launch target: Monday 2026-11-30 (2026-11-23).
 - Universal UI sounds (2026-11-23, her picks): a soft click on every UI tap; a blip when something can't be tapped yet (like closing a menu that needs Confirm first); level up for every right answer (replaces the up chime).
 - Game Lab ways to play (2026-11-23): each game lists only the ways it really plays (real-time arcade games are Solo and Live; turn games are Share and Versus); the way is picked on the first setup page with the standard How will you play? cards.
+- Live in the Lab (2026-11-23): show Live only for games that have a real student-facing live view (class goals, class races); none are built yet, so Live is hidden there for now. Focus next: fine-tuning the brand kit.
