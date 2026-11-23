@@ -5,8 +5,8 @@ import { ArrowLeft, ArrowRight, Check, CornersOut, GearSix, Lightning, PersonArm
 import ScoreBoard from '../engine/ScoreBoard';
 import { TeamBadge } from '../engine/TeamBadge';
 import { startTurns } from '../engine/turns';
-import { ALL_MODES } from '../data/types';
-import { ModeBadge } from '../games/ModeBadge';
+
+import { ModeBadge, SHOWN_MODES } from '../games/ModeBadge';
 import { LabPowerCard } from '../lab/LabGame';
 import { makeSfx } from '../lab/sfx';
 import { useSettings } from '../settings/SettingsContext';
@@ -144,7 +144,7 @@ function StyleSheet() {
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-2">{ALL_MODES.map((m) => <ModeBadge key={m} mode={m} />)}</div>
+        <div className="flex flex-wrap gap-2">{SHOWN_MODES.map((m) => <ModeBadge key={m} mode={m} />)}</div>
         <div className="flex flex-wrap gap-2">{Array.from({ length: 10 }, (_, i) => <TeamBadge key={i} colorIndex={i} size={44} />)}</div>
       </Section>
 

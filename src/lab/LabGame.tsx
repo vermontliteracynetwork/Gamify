@@ -53,10 +53,13 @@ export default function LabGame({ def }: { def: LabDef }) {
   const game = useGamePool(picked);
   // The ways this game plays (teacher, 2026-11-23: specific per game, picked
   // on the first setup page). Live is planned and not offered here yet.
-  const ways = (LAB_MODES[def.id] ?? ['share']).filter((m): m is 'share' | 'versus' | 'solo' => m !== 'live' && (m === 'solo' ? def.ways.includes('solo') : def.ways.includes('teams')));
-  const way = ways.includes(setup.who as 'share') ? (setup.who as 'share' | 'versus' | 'solo') : setup.who === 'teams' && ways.includes('share') ? 'share' : ways[0] ?? 'solo';
-  const solo = way === 'solo';
-  const versus = way === 'versus';
+  // No Versus category (teacher, 2026-11-23): Share is teams or two players on
+  // one screen; Solo is one player, or one player against the computer when
+  // the game is a turn game with no solo of its own.
+  const ways = (LAB_MODES[def.id] ?? ['share']).filter((m): m is 'share' | 'solo' => (m === 'share' && def.ways.includes('teams')) || (m === 'solo' && (def.ways.includes('solo') || def.ways.includes('teams'))));
+  const way: 'share' | 'solo' = ways.includes(setup.who as 'share') ? (setup.who as 'share' | 'solo') : ways[0] ?? 'solo';
+  const versus = way === 'solo' && !def.ways.includes('solo');
+  const solo = way === 'solo' && !versus;
   const { ask: soloAsk, element: soloElement, missed: soloMissed } = useAsk({ gameId: def.id, mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
@@ -197,7 +200,7 @@ export default function LabGame({ def }: { def: LabDef }) {
             ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
             
             { id: 'options', title: t('setup.options'), content: <Slider label={def.rounds.label} min={def.rounds.min} max={def.rounds.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} /> },
-            ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key={versus ? 'versus' : 'share'} mode={versus ? 'versus' : 'share'} min={versus ? 2 : def.minTeams ?? 1} max={versus ? 2 : def.maxTeams ?? 8} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
+            ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key={versus ? 'versus' : 'share'} vsComputer={versus} mode={versus ? 'versus' : 'share'} min={versus ? 2 : def.minTeams ?? 1} max={versus ? 2 : def.maxTeams ?? 8} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
             ...(def.powers.length ? [{ id: 'powers', title: t('tb.powers'), content: (
               <PowerUpCards hint={t('pu.switchHint')} onChange={(id, on) => change({ off: on ? setup.off.filter((x) => x !== id) : [...new Set([...setup.off, id])] })}
                 cards={def.powers.map((p) => ({ id: p.id, name: p.name, hint: p.desc, art: <span className="w-12 h-12 inline-flex [&>svg]:w-full [&>svg]:h-full">{p.art}</span>, on: !setup.off.includes(p.id) }))} />

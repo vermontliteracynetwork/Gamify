@@ -8,7 +8,7 @@ import { ArrowRight, LockSimple, Sparkle } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
 
 import { GameCover } from '../games/covers';
-import { ModeDot } from '../games/ModeBadge';
+import { ModeDot, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { useTier } from '../data/hooks';
 import { useTeacher } from '../auth/session';
@@ -55,7 +55,7 @@ export default function Home() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {GAMES.filter((g) => !mode || g.modes.includes(mode)).map((game, i) => (
+        {GAMES.filter((g) => !mode || shownModes(g.modes).includes(mode)).map((game, i) => (
           <motion.div
             key={game.id}
             initial={reduce ? false : { opacity: 0, y: 20 }}
@@ -75,7 +75,7 @@ export default function Home() {
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <h2 className="font-display text-xl font-bold text-text"><Title text={game.name} /></h2>
                 {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
-<div className="flex gap-1.5">{game.modes.map((m) => <ModeDot key={m} mode={m} small />)}</div>
+<div className="flex gap-1.5">{shownModes(game.modes).map((m) => <ModeDot key={m} mode={m} small />)}</div>
                 <p className="text-muted text-xs leading-snug">{game.description}</p>
                 <div className="mt-auto flex items-center gap-1.5 text-sm font-bold text-accent-ink">
                   {t('home.play')}

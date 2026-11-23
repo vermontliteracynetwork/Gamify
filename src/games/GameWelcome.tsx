@@ -4,7 +4,7 @@ import { Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import { GameCover } from './covers';
-import { ModeBadge } from './ModeBadge';
+import { ModeBadge, shownModes } from './ModeBadge';
 import type { GameManifest } from './types';
 import Title from '../ui/Title';
 
@@ -63,7 +63,7 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
         <div className="grid gap-[clamp(0.4rem,1.6vh,1rem)]">
           <h1 className="hidden wide:flex title-bubble text-fit-title pr-44 min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
           {game.description && <p className="text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
-          <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} />)}</div>
+          <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
         <section aria-label={t('welcome.how')} className="min-h-0">
           {/* White with a little depth, on every game (teacher, 2026-11-16). */}

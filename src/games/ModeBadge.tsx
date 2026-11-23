@@ -8,6 +8,16 @@ import type { StringKey } from '../i18n/en';
 export const MODE_ICONS: Record<PlayMode, Icon> = { live: DeviceTablet, share: ProjectorScreen, solo: User, versus: Users };
 export const MODE_COLORS: Record<PlayMode, string> = { live: '#9fd8f0', share: '#fdfd94', solo: '#a3e6b8', versus: '#ed9d75' };
 
+// The ways to play people see (teacher, 2026-11-23: "remove versus as a
+// category entirely"): Live, Share and Solo. A game's Versus is shown as
+// Share (two players on one screen) and Solo (one player against the
+// computer); Live means a class screen IN ADDITION TO each student's own.
+export const SHOWN_MODES: PlayMode[] = ['live', 'share', 'solo'];
+export function shownModes(modes: PlayMode[]): PlayMode[] {
+  const set = new Set(modes.flatMap((m) => (m === 'versus' ? ['share', 'solo'] : [m])) as PlayMode[]);
+  return SHOWN_MODES.filter((m) => set.has(m));
+}
+
 export function ModeBadge({ mode, withHint = false }: { mode: PlayMode; withHint?: boolean }) {
   const Icon = MODE_ICONS[mode];
   return (

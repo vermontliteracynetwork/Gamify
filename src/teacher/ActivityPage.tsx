@@ -7,7 +7,7 @@ import { makeGameCode, makeLobbyCode, type GameCode, type LobbyPick } from '../d
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import { GameCover } from '../games/covers';
-import { ModeDot } from '../games/ModeBadge';
+import { ModeDot, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
@@ -139,7 +139,7 @@ export default function ActivityPage() {
                     className={`${card(on)} overflow-hidden disabled:opacity-40`}>
                     <span className="relative block"><GameCover gameId={g.id} className="aspect-[16/10]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
                     <span className="p-2 grid gap-1"><span className="font-display text-lg">{g.name}</span>{/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
-<span className="flex gap-1.5">{g.modes.map((m) => <ModeDot key={m} mode={m} small />)}</span></span>
+<span className="flex gap-1.5">{shownModes(g.modes).map((m) => <ModeDot key={m} mode={m} small />)}</span></span>
                   </button>
                 );
               })}
