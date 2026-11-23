@@ -20,14 +20,34 @@ type R = () => number;
 const f = (n: number) => n.toFixed(1);
 const pick = <T,>(r: R, a: T[]) => a[Math.floor(r() * a.length)];
 
-// Jittered grid: even coverage (no clumps, no bald spots), still irregular.
-function spots(r: R, w: number, h: number, cols: number, rows: number, jitter = 0.75) {
-  const cw = w / cols, ch = h / rows, out: { x: number; y: number }[] = [];
-  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
-    const ox = rows % 2 === 0 && j % 2 ? cw * 0.5 : 0; // offset rows like bricks so no lines form
-    out.push({ x: (i + 0.5) * cw + ox + (r() - 0.5) * cw * jitter, y: (j + 0.5) * ch + (r() - 0.5) * ch * jitter });
+// Spacing (teacher, 2026-11-23: "improve the spacing of the shapes"):
+// Poisson-disc style placement on a wrapping tile. Each mark has a radius
+// (ext); two marks never come closer than ext + ext + gap, measured across
+// the tile edges too, and two big marks keep an extra gap. Big marks go down
+// first, then smaller ones fill the holes until nothing more fits, so the
+// spread is even: no clumps, no bald spots, no touching.
+type Item = { ext: number; draw: (c: string) => string; spin?: boolean };
+function scatter(r: R, W: number, H: number, make: () => Item, colors: string[], o: { gapK: number; max: number; tries?: number }) {
+  const pool = Array.from({ length: o.max * 3 }, make).sort((a, b) => b.ext - a.ext);
+  const avgD = (pool.reduce((s, p) => s + p.ext, 0) / pool.length) * 2, gap = o.gapK * avgD;
+  const bigT = pool[Math.floor(pool.length * 0.3)].ext;
+  const placed: (Item & { x: number; y: number; rot: number; c: string })[] = [];
+  const dist = (ax: number, ay: number, bx: number, by: number) => { let dx = Math.abs(ax - bx), dy = Math.abs(ay - by); dx = Math.min(dx, W - dx); dy = Math.min(dy, H - dy); return Math.hypot(dx, dy); };
+  const need = (a: Item, b: Item) => a.ext + b.ext + gap + (a.ext >= bigT && b.ext >= bigT ? gap * 0.9 : 0);
+  for (const it of pool) {
+    if (placed.length >= o.max) break;
+    for (let t = 0; t < (o.tries ?? 120); t++) {
+      const x = r() * W, y = r() * H;
+      if (placed.every((p) => dist(x, y, p.x, p.y) >= need(it, p))) {
+        // colour: one not worn by any near neighbour
+        const near = new Set(placed.filter((p) => dist(x, y, p.x, p.y) < need(it, p) + avgD * 1.2).map((p) => p.c));
+        const free = colors.filter((c) => !near.has(c));
+        placed.push({ ...it, x, y, rot: it.spin === false ? 0 : r() * 360, c: pick(r, free.length ? free : colors) });
+        break;
+      }
+    }
   }
-  return out;
+  return placed.map((p) => at(p.x, p.y, p.rot, p.draw(p.c))).join('');
 }
 
 // Organic blob: random radii joined with a smooth closed curve.
@@ -69,90 +89,90 @@ const I = PP.ink;
 const BRIGHT = [PP.periwinkle, PP.grape, PP.sky, PP.pink, PP.lemon, PP.orange, PP.kelly, PP.teal, PP.lime];
 const PASTEL = [PP.gamify, PP.lavender, PP.blueCrystal, PP.blush, PP.butter, PP.peach, PP.mint, PP.aqua, PP.sage];
 // Colors walk the list in a shuffled order so neighbours rarely match.
-const colorer = (r: R, list: string[]) => { const order = [...list].sort(() => r() - 0.5); let i = 0; return () => order[i++ % order.length]; };
 
 // ---------------------------------------------------------------- 1 Cut-paper toss
 function cutPaper(seed: number, list: string[], calm: boolean) {
-  const r = rand(seed), col = colorer(r, list), W = 240;
-  return spots(r, W, W, calm ? 4 : 6, calm ? 4 : 6).map(({ x, y }) => {
-    const c = col(), s = (calm ? 0.8 : 1) * (10 + r() * 10), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
-    const shape = kind === 'blob' ? `<path d="${blobD(r, s * 1.15)}" fill="${c}"/>`
-      : kind === 'moon' ? `<path d="M${f(-s)} 0 A${f(s)} ${f(s)} 0 0 1 ${f(s)} 0 Z" fill="${c}"/>`
-      : kind === 'tri' ? `<polygon points="0,${f(-s)} ${f(s * 0.95)},${f(s * 0.7)} ${f(-s * 0.95)},${f(s * 0.7)}" fill="${c}" stroke="${c}" stroke-width="5" stroke-linejoin="round"/>`
-      : kind === 'plus' ? `<path d="M${f(-s * 0.3)} ${f(-s)} h${f(s * 0.6)} v${f(s * 0.7)} h${f(s * 0.7)} v${f(s * 0.6)} h${f(-s * 0.7)} v${f(s * 0.7)} h${f(-s * 0.6)} v${f(-s * 0.7)} h${f(-s * 0.7)} v${f(-s * 0.6)} h${f(s * 0.7)} Z" fill="${c}" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`
-      : kind === 'bar' ? `<rect x="${f(-s * 1.2)}" y="${f(-s * 0.32)}" width="${f(s * 2.4)}" height="${f(s * 0.64)}" rx="${f(s * 0.32)}" fill="${c}"/>`
-      : kind === 'ring' ? `<circle r="${f(s * 0.7)}" fill="none" stroke="${c}" stroke-width="${f(s * 0.42)}"/>`
-      : `<circle r="${f(s * 0.55)}" fill="${c}"/>`;
-    return at(x, y, r() * 360, shape);
-  }).join('');
+  const r = rand(seed);
+  const make = (): Item => {
+    const s = (calm ? 0.85 : 1) * (8 + r() * 12), kind = pick(r, ['blob', 'blob', 'moon', 'tri', 'plus', 'bar', 'dot', 'ring']);
+    const d = kind === 'blob' ? blobD(r, s * 0.8) : '';
+    const draw = (c: string) => kind === 'blob' ? `<path d="${d}" fill="${c}"/>`
+      : kind === 'moon' ? `<path d="M${f(-s)} ${f(s * 0.4)} A${f(s)} ${f(s)} 0 0 1 ${f(s)} ${f(s * 0.4)} Z" fill="${c}"/>`
+      : kind === 'tri' ? `<polygon points="0,${f(-s * 0.9)} ${f(s * 0.85)},${f(s * 0.6)} ${f(-s * 0.85)},${f(s * 0.6)}" fill="${c}" stroke="${c}" stroke-width="4" stroke-linejoin="round"/>`
+      : kind === 'plus' ? `<path d="M${f(-s * 0.3)} ${f(-s * 0.9)} h${f(s * 0.6)} v${f(s * 0.6)} h${f(s * 0.6)} v${f(s * 0.6)} h${f(-s * 0.6)} v${f(s * 0.6)} h${f(-s * 0.6)} v${f(-s * 0.6)} h${f(-s * 0.6)} v${f(-s * 0.6)} h${f(s * 0.6)} Z" fill="${c}" stroke="${c}" stroke-width="3" stroke-linejoin="round"/>`
+      : kind === 'bar' ? `<rect x="${f(-s)}" y="${f(-s * 0.28)}" width="${f(s * 2)}" height="${f(s * 0.56)}" rx="${f(s * 0.28)}" fill="${c}"/>`
+      : kind === 'ring' ? `<circle r="${f(s * 0.68)}" fill="none" stroke="${c}" stroke-width="${f(s * 0.4)}"/>`
+      : `<circle r="${f(s * 0.6)}" fill="${c}"/>`;
+    return { ext: kind === 'dot' ? s * 0.6 : s, draw };
+  };
+  return scatter(r, 240, 240, make, list, { gapK: calm ? 0.9 : 0.6, max: calm ? 14 : 60 });
 }
 
 // ---------------------------------------------------------------- 2 Doodle scatter
 function doodle(seed: number, calm: boolean) {
-  const r = rand(seed), col = colorer(r, calm ? PASTEL : [PP.gamify, PP.blush, PP.butter, PP.blueCrystal, PP.mint, PP.peach, PP.lavender, PP.aqua, PP.sage]);
-  const ink = `fill="none" stroke="${I}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"`, W = 260;
-  return spots(r, W, W, calm ? 4 : 6, calm ? 4 : 6).map(({ x, y }) => {
-    const kind = calm ? pick(r, ['blob', 'dots', 'arc']) : pick(r, ['blob', 'blob', 'blob', 'blob', 'arc', 'sun', 'wave', 'loop', 'dots', 'tri', 'plus']);
-    let g = '';
+  const r = rand(seed), ink = `fill="none" stroke="${I}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"`;
+  const fills = calm ? PASTEL : [PP.gamify, PP.blush, PP.butter, PP.blueCrystal, PP.mint, PP.peach, PP.lavender, PP.aqua, PP.sage];
+  const make = (): Item => {
+    const kind = calm ? pick(r, ['blob', 'blob', 'dots', 'arc']) : pick(r, ['blob', 'blob', 'blob', 'arc', 'sun', 'wave', 'loop', 'dots', 'tri', 'plus']);
     if (kind === 'blob') {
-      const s = 13 + r() * 9, d = blobD(r, s);
+      const s = 11 + r() * 9, d = blobD(r, s), dx = 3 + r() * 3, dy = -2 - r() * 3, rot = 6 + r() * 10;
       // the ink outline is offset and turned so it does not line up with the fill
-      g = `<path d="${d}" fill="${col()}"/>` + (calm ? '' : `<path d="${d}" transform="translate(${f(3 + r() * 3)} ${f(-2 - r() * 3)}) rotate(${f(6 + r() * 10)})" ${ink}/>`);
-    } else if (kind === 'arc') g = `<path d="M-12 0 A12 12 0 0 1 12 0" ${ink}/>`;
-    else if (kind === 'sun') g = `<circle r="5.5" fill="${PP.lemon}"/><circle r="5.5" transform="translate(2 -1.5)" ${ink}/>` + Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4; return `<path d="M${f(Math.cos(a) * 10)} ${f(Math.sin(a) * 10)} L${f(Math.cos(a) * 15)} ${f(Math.sin(a) * 15)}" ${ink}/>`; }).join('');
-    else if (kind === 'wave') g = `<path d="${wave(34, 6)}" ${ink}/>`;
-    else if (kind === 'loop') g = `<path d="${LOOP}" transform="scale(0.8)" ${ink}/>`;
-    else if (kind === 'dots') g = [[0, 0], [7, 3], [2, 8], [-6, 5]].slice(0, calm ? 3 : 4).map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.1" fill="${calm ? PP.quiet : I}"${calm ? ' opacity="0.45"' : ''}/>`).join('');
-    else if (kind === 'tri') g = `<polygon points="0,-8 7,5 -7,5" fill="${col()}"/><polygon points="2,-10 9,3 -5,3" ${ink}/>`;
-    else g = `<path d="M-6 0 H6 M0 -6 V6" fill="none" stroke="${I}" stroke-width="3" stroke-linecap="round"/>`;
-    return at(x, y, r() * 360, g);
-  }).join('');
+      return { ext: s * 1.2 + (calm ? 0 : 5), draw: (c) => `<path d="${d}" fill="${c}"/>` + (calm ? '' : `<path d="${d}" transform="translate(${f(dx)} ${f(dy)}) rotate(${f(rot)})" ${ink}/>`) };
+    }
+    if (kind === 'arc') return { ext: 12, draw: () => `<path d="M-12 4 A12 12 0 0 1 12 4" ${ink}/>` };
+    if (kind === 'sun') return { ext: 15, draw: () => `<circle r="5.5" fill="${PP.lemon}"/><circle r="5.5" transform="translate(2 -1.5)" ${ink}/>` + Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4; return `<path d="M${f(Math.cos(a) * 10)} ${f(Math.sin(a) * 10)} L${f(Math.cos(a) * 15)} ${f(Math.sin(a) * 15)}" ${ink}/>`; }).join('') };
+    if (kind === 'wave') return { ext: 15, draw: () => `<path d="${wave(30, 6)}" ${ink}/>` };
+    if (kind === 'loop') return { ext: 16, draw: () => `<path d="${LOOP}" transform="scale(0.68)" ${ink}/>` };
+    if (kind === 'dots') return { ext: 8, draw: () => [[-3, -3], [4, 0], [-1, 5], [-7, 3]].slice(0, calm ? 3 : 4).map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.1" fill="${calm ? PP.quiet : I}"${calm ? ' opacity="0.45"' : ''}/>`).join('') };
+    if (kind === 'tri') return { ext: 10, draw: (c) => `<polygon points="0,-8 7,5 -7,5" fill="${c}"/><polygon points="2,-10 9,3 -5,3" ${ink}/>` };
+    return { ext: 7, draw: () => `<path d="M-6 0 H6 M0 -6 V6" fill="none" stroke="${I}" stroke-width="3" stroke-linecap="round"/>` };
+  };
+  return scatter(r, 260, 260, make, fills, { gapK: calm ? 0.9 : 0.6, max: calm ? 14 : 60 });
 }
 
 // ---------------------------------------------------------------- 3 Squiggle lines
 function squiggle(seed: number, list: string[], calm: boolean) {
-  const r = rand(seed), col = colorer(r, list), sw = calm ? 4 : 6, W = 260;
-  return spots(r, W, W, calm ? 3 : 6, calm ? 3 : 6).map(({ x, y }) => {
-    const c = col(), kind = pick(r, ['wave', 'wave', 'loop', 'flower', 'flower', 'zig', 'coil']);
-    const line = `fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
-    const g = kind === 'wave' ? `<path d="${wave(40 + r() * 14, 7)}" ${line}/>`
-      : kind === 'loop' ? `<path d="${LOOP}" transform="scale(0.95)" ${line}/>`
-      : kind === 'flower' ? `<path d="${flowerD(12 + r() * 4, pick(r, [5, 6, 8]))}" ${line}/>` + (calm ? '' : `<circle r="3.5" fill="${col()}"/>`)
-      : kind === 'zig' ? `<path d="M-24 4 L-14 -6 L-4 4 L6 -6 L16 4 L24 -4" ${line}/>`
-      : `<path d="M-20 0 c0 -10 12 -10 12 0 s12 10 12 0 s12 -10 12 0" ${line}/>`;
-    return at(x, y, r() * 360, g);
-  }).join('');
+  const r = rand(seed), sw = calm ? 4 : 6;
+  const make = (): Item => {
+    const kind = pick(r, ['wave', 'wave', 'loop', 'flower', 'flower', 'zig', 'coil']);
+    const line = (c: string) => `fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
+    if (kind === 'wave') { const len = 34 + r() * 14; return { ext: len / 2 + 3, draw: (c) => `<path d="${wave(len, 7)}" ${line(c)}/>` }; }
+    if (kind === 'loop') return { ext: 22, draw: (c) => `<path d="${LOOP}" transform="scale(0.88)" ${line(c)}/>` };
+    if (kind === 'flower') { const rad = 10 + r() * 5, pet = pick(r, [5, 6, 8]); return { ext: rad + 3, draw: (c) => `<path d="${flowerD(rad, pet)}" ${line(c)}/>` + (calm ? '' : `<circle r="3.2" fill="${c}"/>`) }; }
+    if (kind === 'zig') return { ext: 22, draw: (c) => `<path d="M-20 4 L-12 -5 L-4 4 L4 -5 L12 4 L20 -4" ${line(c)}/>` };
+    return { ext: 20, draw: (c) => `<path d="M-18 0 c0 -9 11 -9 11 0 s11 9 11 0 s11 -9 11 0" ${line(c)}/>` };
+  };
+  return scatter(r, 260, 260, make, list, { gapK: calm ? 0.8 : 0.5, max: calm ? 10 : 60 });
 }
 
 // ---------------------------------------------------------------- 4 Confetti doodles
 function confetti(seed: number, calm: boolean) {
-  const r = rand(seed), col = colorer(r, calm ? PASTEL : BRIGHT), W = 200;
-  return spots(r, W, W, calm ? 3 : 6, calm ? 3 : 6).map(({ x, y }) => {
-    const c = col(), ed = calm ? '' : ` stroke="${I}" stroke-width="1.8" stroke-linejoin="round"`, kind = pick(r, ['spark', 'star', 'dot', 'squig', 'spark']);
-    const s = 0.7 + r() * 0.6;
-    const g = kind === 'spark' ? `<path d="${sparkleD}" transform="scale(${f(s)})" fill="${c}"${calm ? '' : ` stroke="${I}" stroke-width="${f(1.8 / s)}" stroke-linejoin="round"`}/>`
-      : kind === 'star' ? `<polygon points="${starPts(8 * s)}" fill="${c}"${ed}/>`
-      : kind === 'dot' ? `<circle r="${f(4.5 * s)}" fill="${c}"${ed}/>`
-      : `<path d="${wave(26, 5)}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`;
-    return at(x, y, r() * 360, g);
-  }).join('');
+  const r = rand(seed), ed = calm ? '' : ` stroke="${I}" stroke-width="1.8" stroke-linejoin="round"`;
+  const make = (): Item => {
+    const kind = pick(r, ['spark', 'star', 'dot', 'squig', 'spark']), s = 0.7 + r() * 0.6;
+    if (kind === 'spark') return { ext: 10 * s, draw: (c) => `<path d="${sparkleD}" transform="scale(${f(s)})" fill="${c}"${calm ? '' : ` stroke="${I}" stroke-width="${f(1.8 / s)}" stroke-linejoin="round"`}/>` };
+    if (kind === 'star') return { ext: 8 * s, draw: (c) => `<polygon points="${starPts(8 * s)}" fill="${c}"${ed}/>` };
+    if (kind === 'dot') return { ext: 4.5 * s, draw: (c) => `<circle r="${f(4.5 * s)}" fill="${c}"${ed}/>` };
+    return { ext: 14, draw: (c) => `<path d="${wave(24, 5)}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/>` };
+  };
+  return scatter(r, 200, 200, make, calm ? PASTEL : BRIGHT, { gapK: calm ? 1.2 : 0.8, max: calm ? 10 : 60 });
 }
 
 // ---------------------------------------------------------------- 5 Quiet doodle ground
 // The only pattern allowed behind text: marks are pastel at low opacity on
 // cream, at or under 1.14:1 against the ground (WCAG text stays on cream).
 function quiet(seed: number, calm: boolean) {
-  const r = rand(seed), col = colorer(r, [PP.blueCrystal, PP.lavender, PP.blush, PP.mint]), W = 200;
-  const marks = spots(r, W, W, calm ? 3 : 4, calm ? 3 : 4).map(({ x, y }) => {
-    const c = col(), line = `fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"`;
+  const r = rand(seed), line = (c: string) => `fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"`;
+  const make = (): Item => {
     const kind = calm ? 'dot' : pick(r, ['blob', 'wave', 'dot', 'arc', 'spark']);
-    const g = kind === 'blob' ? `<path d="${blobD(r, 7)}" fill="${c}"/>` : kind === 'wave' ? `<path d="${wave(24, 4)}" ${line}/>`
-      : kind === 'arc' ? `<path d="M-8 0 A8 8 0 0 1 8 0" ${line}/>` : kind === 'spark' ? `<path d="${sparkleD}" transform="scale(0.7)" fill="${c}"/>` : `<circle r="3" fill="${c}"/>`;
-    return at(x, y, r() * 360, g);
-  }).join('');
-  return `<g opacity="${calm ? 0.45 : 0.65}">${marks}</g>`;
+    if (kind === 'blob') { const d = blobD(r, 6); return { ext: 8, draw: (c) => `<path d="${d}" fill="${c}"/>` }; }
+    if (kind === 'wave') return { ext: 12, draw: (c) => `<path d="${wave(22, 4)}" ${line(c)}/>` };
+    if (kind === 'arc') return { ext: 9, draw: (c) => `<path d="M-8 3 A8 8 0 0 1 8 3" ${line(c)}/>` };
+    if (kind === 'spark') return { ext: 7, draw: (c) => `<path d="${sparkleD}" transform="scale(0.7)" fill="${c}"/>` };
+    return { ext: 3, draw: (c) => `<circle r="3" fill="${c}"/>` };
+  };
+  return `<g opacity="${calm ? 0.45 : 0.65}">${scatter(r, 200, 200, make, [PP.blueCrystal, PP.lavender, PP.blush, PP.mint], { gapK: calm ? 2.5 : 1.6, max: calm ? 9 : 22 })}</g>`;
 }
-
 // ---------------------------------------------------------------- trims (kept for the mockups)
 const wobbleSquare = (x: number, y: number, s: number, c: string) => `<path d="M${x + 1} ${y + 1} C${x + s * 0.4} ${y - 0.5} ${x + s * 0.7} ${y + 1.5} ${x + s - 1} ${y + 1} C${x + s + 0.5} ${y + s * 0.4} ${x + s - 1.5} ${y + s * 0.7} ${x + s - 1} ${y + s - 1} C${x + s * 0.6} ${y + s + 0.5} ${x + s * 0.3} ${y + s - 1.5} ${x + 1} ${y + s - 1} C${x - 0.5} ${y + s * 0.6} ${x + 1.5} ${y + s * 0.3} ${x + 1} ${y + 1} Z" fill="${c}"/>`;
 
