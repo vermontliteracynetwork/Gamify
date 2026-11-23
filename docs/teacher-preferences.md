@@ -224,3 +224,7 @@ line that fits, and add each new preference the same turn she says it.
 - Brand mockups (2026-11-23): no buddies; answer tiles keep their letters; question text left-aligned.
 - Classic theme assets (2026-11-23): one simple pencil/crayon hand-drawn style for every Classic asset, enforced by the classic-art skill.
 - Asset color (2026-11-23): solid, punchy, bright colors that are not see-through; crayon texture never makes a color look faded.
+- Tagline (2026-11-23): keep "Every Question Becomes a Game" in Grow Year as Gamify's tagline; it leads the home hero and the brand mockups.
+- Question card mockups (2026-11-23): question text is left-aligned; answer tiles keep the A, B, C, D letter in a circle at the left, like the live question screen.
+- Asset color (2026-11-23, "more solid, punchier brighter colors that are less transparent"): solid, opaque, full-strength brand colors on every asset and mockup; texture is a light overlay only and never makes a color look faded.
+- No characters anywhere in brand mockups (2026-11-23): no buddies, faces on objects or mascots; use the crayon power-ups, dice, doodles and paper pieces.

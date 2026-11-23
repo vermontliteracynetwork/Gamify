@@ -22,6 +22,13 @@ the handmade themes teachers and kids make (clean core, handmade edges).
 ## The style rules
 - Medium: waxy crayon fill (scribble texture) and colored-pencil lines; slightly
   wobbly, uneven edges; visible strokes. Never glossy, gradients-only, 3D or photo.
+- Solid, opaque, punchy fills (teacher, 2026-11-23: "more solid, punchier
+  brighter colors that are less transparent"): full-strength brand colors, no
+  low-opacity layers or washed-out tints; dense waxy coverage, with texture only
+  as a light overlay in the strokes and at the edges. Texture never makes a
+  color look faded. Pencil lines are strong (about 4 units on the 100 grid).
+- On color-block stages a power-up wears the white sticker edge so it never
+  disappears into a stage of its own color.
 - Shapes: simple, chunky, readable at 48px and 128px; one idea per piece.
 - Palette: the brand palette only (cream ground; pink, cobalt, green, tangerine,
   violet, teal, sunny yellow as accent, ink). No other colors.
