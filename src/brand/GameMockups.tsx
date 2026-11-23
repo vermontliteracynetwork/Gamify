@@ -707,7 +707,8 @@ function StudentDevice({ solo }: { solo?: boolean }) {
 // the top and bottom edge, taped paper panels, Grow Year titles, Gamify purple
 // go buttons with ink text. Every menu is centered (teacher, 2026-11-23);
 // question text stays left-aligned in its card.
-const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
+// Grow Year headings are ALL CAPS (teacher, 2026-11-23).
+const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
 function Sheet({ children, w, pad = 28 }: { children: ReactNode; w: number; layer?: string; pad?: number }) {
   return (
     <div className="relative mx-auto" style={{ width: w }}>

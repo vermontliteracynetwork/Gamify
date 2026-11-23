@@ -21,7 +21,8 @@ export { Badge, TEAMS };
 
 const I = PP.ink;
 const pat = (id: string, calm = false) => PATTERNS.find((p) => p.id === id)!.make(calm);
-const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1 };
+// Grow Year headings are ALL CAPS (teacher, 2026-11-23).
+const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
 // Selected = ink ring plus a Kelly check, never the go color (teacher, 2026-11-23).
 const SEL = `0 0 0 4px ${PP.paper}, 0 0 0 8px ${I}`;
 const PICK: CSSProperties = { background: PP.mint, color: I, boxShadow: `inset 0 0 0 3px ${I}` };
@@ -176,14 +177,14 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
   const left = mode === 'solo'
     ? <span className="flex items-baseline gap-2"><span style={{ ...GY, fontSize: 56 * k }} className="tabular-nums">120</span><b style={{ fontSize: 18 * k, color: PP.quiet }}>points</b></span>
     : mode === 'share'
-      ? <span className="flex items-center gap-3"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: 52 * k, height: 52 * k, background: PP.paper, border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={34 * k} /></span></TurnGlow><b style={{ fontSize: 24 * k }}>Team Sky&apos;s turn</b></span>
-      : <span className="flex items-center gap-3"><Star weight="fill" size={40 * k} color={PP.lemon} /><span className="grid"><b style={{ fontSize: 24 * k }}>38 of 60 stars</b><span className="font-bold" style={{ fontSize: 15 * k, color: PP.quiet }}>Class goal: fill the sky</span></span></span>;
+      ? <span className="flex items-center gap-3"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: 52 * k, height: 52 * k, background: PP.paper, border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={34 * k} /></span></TurnGlow><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>Team Sky&apos;s turn</b></span>
+      : <span className="flex items-center gap-3"><Star weight="fill" size={40 * k} color={PP.lemon} /><span className="grid"><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>38 of 60 stars</b>{k >= 1 && <span className="font-bold" style={{ fontSize: 15 * k, color: PP.quiet }}>Class goal: fill the sky</span>}</span></span>;
   return (
     <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 rounded-full" style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
       <div className="justify-self-start">{left}</div>
       <div className="grid justify-items-center gap-1.5">
         <b className="uppercase tracking-widest" style={{ fontSize: 15 * k }}>Round 2 of 3</b>
-        <RoundMeter round={2} rounds={3} part={0.5} w={(k > 1 ? 260 : 360) * k} />
+        <RoundMeter round={2} rounds={3} part={0.5} w={k < 1 ? 190 : 360} />
       </div>
       <div className="justify-self-end"><Tools size={48 * k} access={false} /></div>
     </div>
@@ -415,7 +416,7 @@ function QTablet({ theme, mode }: { theme: ThemeId; mode: Mode }) {
   return (
     <div className="w-full h-full relative">
       <ThemeBack id={theme} w={820} h={1180} />
-      <div className="absolute inset-0 flex flex-col items-center gap-6 px-7 pt-8 pb-12"><Tracker mode={mode} k={0.9} /><QCard tablet /></div>
+      <div className="absolute inset-0 flex flex-col items-center gap-6 px-7 pt-8 pb-12"><Tracker mode={mode} k={0.85} /><QCard tablet /></div>
     </div>
   );
 }
@@ -624,7 +625,7 @@ function V13() {
           <Paper pad={40} className="w-[780px]">
             <div className="grid justify-items-center gap-4 text-center">
               <span className="inline-flex items-center gap-2 px-5 h-11 rounded-full font-bold text-[19px]" style={{ background: PP.butter, border: `3px solid ${I}` }}><Lightbulb weight="bold" size={22} />Before we play</span>
-              <div className="relative w-[230px] h-[170px] grid place-items-center"><BlobPatch color={PP.gamify} size={200} /><span className="relative text-[130px]" style={GY}>Aa</span></div>
+              <div className="relative w-[230px] h-[170px] grid place-items-center"><BlobPatch color={PP.gamify} size={200} /><span className="relative text-[130px]" style={{ ...GY, textTransform: 'none' }}>Aa</span></div>
               <p className="font-bold text-[38px] leading-snug">A sentence starts with a capital letter and ends with punctuation.</p>
               <div className="flex gap-4 items-center"><SecondBtn h={60}><SpeakerHigh weight="bold" size={22} />Listen</SecondBtn><MainBtn big><Play weight="fill" size={26} />Let&apos;s play!</MainBtn></div>
             </div>
