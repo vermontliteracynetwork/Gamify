@@ -861,10 +861,10 @@ function ShareCode() {
 function JoinCode({ name = 'Join the game', sub = 'Type the game code your teacher gave you.' }: { name?: string; sub?: string }) {
   return (
     <Menu tall>
-      <Sheet w={660} tape={PP.aqua} pad={40}>
-        <Title size={64}>{name}</Title>
-        <span className="font-semibold text-2xl" style={{ color: PP.quiet }}>{sub}</span>
-        <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[76px] h-[92px] rounded-2xl grid place-items-center" style={{ ...GY, fontSize: 56, background: i === 4 ? PP.blueCrystal : PP.paper, border: `${i === 4 ? 4 : 3}px solid ${I}` }}>{d}</span>)}</div>
+      <Sheet w={720} tape={PP.aqua} pad={44}>
+        <Title size={76}>{name}</Title>
+        <span className="font-semibold text-3xl" style={{ color: PP.quiet }}>{sub}</span>
+        <div className="flex gap-3">{['4', '7', '2', '9', '', ''].map((d, i) => <span key={i} className="w-[92px] h-[112px] rounded-2xl grid place-items-center" style={{ ...GY, fontSize: 68, background: i === 4 ? PP.blueCrystal : PP.paper, border: `${i === 4 ? 4 : 3}px solid ${I}` }}>{d}</span>)}</div>
         <div className="flex gap-3"><Second><SpeakerHigh weight="bold" size={22} />Hear my code</Second><MainBtn big>Go<ArrowRight weight="bold" size={24} /></MainBtn></div>
       </Sheet>
     </Menu>
@@ -914,13 +914,13 @@ function Lobby() {
 function NameAndWait() {
   return (
     <Menu tall>
-      <Sheet w={660} tape={PP.butter} pad={40}>
-        <Title size={60}>Pick your game name</Title>
-        <span className="px-6 py-3 rounded-2xl" style={{ ...GY, fontSize: 56, background: PP.butter, border: `3px solid ${I}` }}>Zippy Comet</span>
+      <Sheet w={720} tape={PP.butter} pad={40}>
+        <Title size={54}>Pick your game name</Title>
+        <span className="px-6 py-3 rounded-2xl" style={{ ...GY, fontSize: 72, background: PP.butter, border: `3px solid ${I}` }}>Zippy Comet</span>
         <div className="flex gap-3"><Second><CrayonDie value={4} size={34} />Roll a new name</Second><MainBtn big>Play</MainBtn></div>
         <div className="w-full pt-5 grid justify-items-center gap-2" style={{ borderTop: `3px dashed ${PP.gamify}` }}>
-          <b className="font-display text-3xl">You are in!</b>
-          <span className="font-semibold text-xl flex items-center gap-2" style={{ color: PP.quiet }}><HourglassHigh weight="fill" size={24} />Wait for your teacher to start.</span>
+          <b className="font-display text-5xl">You are in!</b>
+          <span className="font-semibold text-2xl flex items-center gap-2" style={{ color: PP.quiet }}><HourglassHigh weight="fill" size={24} />Wait for your teacher to start.</span>
         </div>
       </Sheet>
     </Menu>
@@ -949,10 +949,10 @@ function Results({ game, title, winner, stats, missed = 2 }: { game: ReactNode; 
     <Dim over={
       <div className="relative w-[560px]">
         <Confetti marks={[['sparkle', PP.lemon, -40, 10, 36], ['star', PP.pink, 560, -10, 30], ['heart', PP.pink, -30, 300, 24], ['sparkle', PP.paper, 570, 280, 28], ['dot', PP.sky, 530, 150, 16]]} />
-        <Sheet w={560} tape={PP.pink} layer={PP.butter}>
-          <Title size={54}>{title}</Title>
-          <div className="relative w-36 h-36 grid place-items-center"><BlobPatch color={PP.butter} size={170} /><span className="relative">{winner}</span></div>
-          <div className="flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
+        <Sheet w={560} tape={PP.pink} layer={PP.butter} pad={24}>
+          <Title size={48}>{title}</Title>
+          <div className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.butter} size={136} /><span className="relative scale-[0.8]">{winner}</span></div>
+          <div className="flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold text-lg" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
           <div className="flex flex-wrap justify-center gap-3"><MainBtn><ArrowsClockwise weight="bold" size={20} />Play again</MainBtn><Second>New game</Second><Second>Review {missed} missed</Second></div>
         </Sheet>
       </div>
@@ -996,8 +996,8 @@ const ALL_VIEWS: Record<string, { ways: string; views: View[] }> = {
     views: [
       { name: 'Welcome', device: 'laptop', node: <Welcome name="Match Three" art={<span className="flex gap-1"><Gem k={2} s={52} /><Gem k={2} s={52} /><Gem k={2} s={52} /></span>} steps={['Swap two pieces', 'Make a row of 3', 'Answer to get more moves']} />, note: 'Three matching hearts show the goal.' },
       { name: 'Options', device: 'laptop', node: <Options rows={[['Rounds', ['1', '3', '5', '10'], 1], ['Moves each round', ['3', '5', '8'], 0], ['Board', ['6 x 6', '7 x 7', '8 x 8'], 1]]} />, note: 'Short words, big pills.' },
-      { name: 'Solo: in play (laptop)', device: 'laptop', node: <MatchThreeLaptop />, note: 'No player icon.' },
-      { name: 'Solo: in play (iPad)', device: 'tablet', node: <MatchThreeTablet />, note: 'Student device.' },
+      { name: 'Solo: in play', device: 'laptop', node: <MatchThreeLaptop />, note: 'No player icon.' },
+      { name: 'Solo: on a student iPad', device: 'tablet', node: <MatchThreeTablet />, note: 'Student device.' },
       { name: 'Power-up: Fireball', device: 'laptop', node: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
       { name: 'Results', device: 'tablet', node: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<StarGoal got={2} />} stats={['260 points', '9 matches']} />, note: 'Stars, not a rank.' },
     ],
@@ -1019,8 +1019,8 @@ const ALL_VIEWS: Record<string, { ways: string; views: View[] }> = {
     views: [
       { name: 'Welcome', device: 'laptop', node: <Welcome name="Bubble Pop" art={<span className="flex gap-1"><Bubble k={1} s={56} /><Bubble k={1} s={56} /><Bubble k={1} s={56} /></span>} steps={['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop']} />, note: 'Three matching bubbles show the goal.' },
       { name: 'Options', device: 'laptop', node: <Options rows={[['Question breaks', ['2', '4', '6', '10'], 1], ['Bubbles each break', ['3', '5'], 0]]} />, note: 'Same panel as every game.' },
-      { name: 'Solo: in play (laptop)', device: 'laptop', node: <BubbleLaptop />, note: 'No player icon.' },
-      { name: 'Solo: in play (iPad)', device: 'tablet', node: <BubbleTablet />, note: 'Student device.' },
+      { name: 'Solo: in play', device: 'laptop', node: <BubbleLaptop />, note: 'No player icon.' },
+      { name: 'Solo: on a student iPad', device: 'tablet', node: <BubbleTablet />, note: 'Student device.' },
       { name: 'Power-up: Mystery Box', device: 'laptop', node: <PowerMoment game={<BubbleLaptop />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, note: 'Opens with a bob and a pop.' },
       { name: 'Results', device: 'tablet', node: <Results game={<BubbleTablet />} title="340 points!" winner={<Bubble k={4} s={110} />} stats={['31 bubbles popped', 'Best combo x4']} />, note: 'Your points, not a rank.' },
     ],
