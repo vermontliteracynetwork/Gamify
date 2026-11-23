@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'gif-search', kind: 'legal', added: '2026-11-23', title: 'GIF and photo search for teachers: GIPHY key, attorney check',
+    why: 'Teachers could add GIFs and photos to question sets and themes from a built-in search, like other quiz sites. GIPHY requires "Powered by GIPHY" shown wherever it is used, a production key for more than 100 searches an hour, and its own terms; loading GIFs from GIPHY on student screens sends requests to a third party, which the student privacy promise has to cover.',
+    how: 'Make a free GIPHY developer account and request a production key (the app has to show the attribution first). Ask the attorney to read the GIPHY API terms and the student-privacy angle. Unsplash (free photos, attribution required) is the photo option.' },
   { id: 'scrapecreators', kind: 'money', added: '2026-11-23', title: 'Optional: a ScrapeCreators API key for social media research',
     why: 'The Design Chair\'s social research skills (competitor posts, trends, comment mining, Pinterest) read public social data through the paid ScrapeCreators API. Without a key it uses public web search, which sees less.',
     how: 'If you want it: make an account at scrapecreators.com, then give the key when Claude asks for it in a session (it is saved as a secure network secret, never in the code).' },
