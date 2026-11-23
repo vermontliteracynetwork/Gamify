@@ -30,7 +30,7 @@ type Pattern = { id: string; name: string; use: string; rules: string; calmNote:
 const I = PP.ink;
 export const PATTERNS: Pattern[] = [
   { id: 'quiet', name: 'Quiet doodle ground', use: 'Site ground behind menus, teacher pages, start menus, results box backdrop',
-    rules: 'The only pattern allowed behind text. Marks at 1.1:1 or less against cream. Tile 160px.',
+    rules: 'The only pattern allowed behind text. Marks at 1.15:1 or less against cream (these are 1.13:1). Tile 160px.',
     calmNote: 'Dots only, fainter.',
     make: (c) => tile(160, 160, PP.cream, c
       ? `<g opacity="0.45">${dot(30, 40, 3, PP.lavender)}${dot(110, 120, 3, PP.blueCrystal)}${dot(120, 30, 2.5, PP.lavender)}</g>`
@@ -88,7 +88,7 @@ export default function PatternProposal() {
       <div className="grid gap-3 sm:grid-cols-2 wide:grid-cols-4">
         {PATTERNS.map((p) => (
           <div key={p.id} className="rounded-[1.25rem] overflow-hidden" style={{ background: PP.paper, border: `2px solid ${PP.ink}` }}>
-            <div className="h-28" style={p.make(calm)} role="img" aria-label={`${p.name} pattern${calm ? ', Calm version' : ''}`} />
+            <div className="h-40" style={p.make(calm)} role="img" aria-label={`${p.name} pattern${calm ? ', Calm version' : ''}`} />
             <div className="px-3 py-2 grid gap-0.5 text-sm">
               <span className="font-bold">{p.name}</span>
               <span className="font-semibold" style={{ color: PP.quiet }}>{p.use}</span>
