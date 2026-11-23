@@ -18,44 +18,46 @@ export function loadLabGame(id: string): Promise<LabDef> | null {
   return load ? load().then((m) => m.default) : null;
 }
 
-// Ways to play (Gamify's game types): Share and Versus for every team game,
-// Solo where the game has a solo mode, and a planned Live format for each
-// game (teacher, 2026-11-23: be creative about how they can be live,
-// collaborative and competitive). Live is planned, not built yet.
+// Each game's own ways to play (teacher, 2026-11-23: "not all games can be
+// every game type"): Share = teams take turns on one screen, Versus = two
+// players or the computer on one device, Solo = one player, Live = every
+// student on their own device with the big screen (planned, not built yet).
+// Real-time arcade games are Solo and Live only; turn games are Share and
+// Versus. The setup's first page offers only these.
 export const LAB_MODES: Record<string, PlayMode[]> = {
-  'balloon-pop': ['share', 'versus', 'solo', 'live'],
+  'balloon-pop': ['solo', 'live'],
   'bingo': ['share', 'versus', 'solo', 'live'],
-  'block-drop': ['share', 'versus', 'solo', 'live'],
-  'code-crackers': ['share', 'versus', 'solo', 'live'],
+  'block-drop': ['solo', 'live'],
+  'code-crackers': ['share', 'versus', 'live'],
   'crossword': ['share', 'versus', 'solo', 'live'],
-  'dots-boxes': ['share', 'versus', 'live'],
-  'fruit-fling': ['share', 'versus', 'solo', 'live'],
-  'gem-sweep': ['share', 'versus', 'solo', 'live'],
-  'goal-kick': ['share', 'versus', 'solo', 'live'],
-  'home-run': ['share', 'versus', 'solo', 'live'],
-  'hoop-shot': ['share', 'versus', 'solo', 'live'],
-  'jump-quest': ['share', 'versus', 'solo', 'live'],
-  'lane-hop': ['share', 'versus', 'solo', 'live'],
+  'dots-boxes': ['share', 'versus'],
+  'fruit-fling': ['solo', 'live'],
+  'gem-sweep': ['solo', 'live'],
+  'goal-kick': ['share', 'versus', 'solo'],
+  'home-run': ['share', 'versus', 'solo'],
+  'hoop-shot': ['share', 'versus', 'solo'],
+  'jump-quest': ['solo', 'live'],
+  'lane-hop': ['solo', 'live'],
   'letter-lock': ['share', 'versus', 'solo', 'live'],
-  'maze-dash': ['share', 'versus', 'solo', 'live'],
-  'mole-bop': ['share', 'versus', 'solo', 'live'],
-  'pixel-blaster': ['share', 'versus', 'solo', 'live'],
+  'maze-dash': ['solo', 'live'],
+  'mole-bop': ['solo', 'live'],
+  'pixel-blaster': ['solo', 'live'],
   'prize-crane': ['share', 'versus', 'solo', 'live'],
-  'sky-flyer': ['share', 'versus', 'solo', 'live'],
+  'sky-flyer': ['solo', 'live'],
   'snakes-ladders': ['share', 'versus', 'live'],
-  'snow-pal': ['share', 'versus', 'solo', 'live'],
-  'sort-rush': ['share', 'versus', 'solo', 'live'],
-  'spot-match': ['share', 'versus', 'solo', 'live'],
-  'survey-showdown': ['share', 'versus', 'live'],
-  'team-tug': ['share', 'versus', 'solo', 'live'],
-  'tic-tac-toe': ['share', 'versus', 'live'],
-  'touchdown': ['share', 'versus', 'solo', 'live'],
-  'tower-guard': ['share', 'versus', 'solo', 'live'],
-  'toy-factory': ['share', 'versus', 'solo', 'live'],
+  'snow-pal': ['share', 'solo', 'live'],
+  'sort-rush': ['solo', 'live'],
+  'spot-match': ['solo', 'live'],
+  'survey-showdown': ['share', 'live'],
+  'team-tug': ['share', 'versus', 'live'],
+  'tic-tac-toe': ['share', 'versus'],
+  'touchdown': ['share', 'versus'],
+  'tower-guard': ['share', 'solo', 'live'],
+  'toy-factory': ['share', 'solo', 'live'],
   'track-race': ['share', 'versus', 'live'],
-  'treasure-quest': ['share', 'versus', 'solo', 'live'],
-  'unscramble': ['share', 'versus', 'solo', 'live'],
-  'word-search': ['share', 'versus', 'solo', 'live'],
+  'treasure-quest': ['share', 'versus', 'live'],
+  'unscramble': ['share', 'solo', 'live'],
+  'word-search': ['share', 'solo', 'live'],
 };
 export const LIVE_PLAN: Record<string, string> = {
   'balloon-pop': 'Class race: every student plays on their own device; the big screen shows the class progress',

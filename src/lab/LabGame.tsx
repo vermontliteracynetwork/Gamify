@@ -19,13 +19,16 @@ import { t } from '../i18n';
 import { GameTopRow, SettingsPanel } from '../settings/SettingsPanel';
 import { useSettings } from '../settings/SettingsContext';
 import { useGamePool } from '../student/session';
-import { ChoiceRow, Slider } from '../ui/fields';
+import { Slider } from '../ui/fields';
 import PopText from '../ui/PopText';
 import Title from '../ui/Title';
 import SetPicker from '../games/SetPicker';
 import SetupWizard from '../games/SetupWizard';
+import WayToPlay from '../games/WayToPlay';
 import { useSavedSetup } from '../games/useSavedSetup';
 import { makeSfx } from './sfx';
+import { LAB_MODES } from './registry';
+import { ModeBadge } from '../games/ModeBadge';
 import type { LabCtx, LabDef, LabPower } from './types';
 import { wordsFrom } from './words';
 
@@ -44,15 +47,16 @@ export default function LabGame({ def }: { def: LabDef }) {
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   // Steal and swap style power-ups start switched off (teacher, 2026-11-01).
-  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: def.ways[0] as 'teams' | 'solo' | 'versus', off: def.powers.filter((p) => p.takes).map((p) => p.id) as string[] });
+  const [setup, change] = useSavedSetup(`lab:${def.id}`, { setId: LIBRARY[0].id, rounds: def.rounds.default, who: '' as string, off: def.powers.filter((p) => p.takes).map((p) => p.id) as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
-  const solo = setup.who === 'solo' || !def.ways.includes('teams');
-  // Every Share game also plays Versus (teacher, 2026-10-24): two players on
-  // one device, or one player against the computer.
-  const ways = [...def.ways, ...(def.ways.includes('teams') ? ['versus' as const] : [])];
-  const versus = !solo && setup.who === 'versus';
+  // The ways this game plays (teacher, 2026-11-23: specific per game, picked
+  // on the first setup page). Live is planned and not offered here yet.
+  const ways = (LAB_MODES[def.id] ?? ['share']).filter((m): m is 'share' | 'versus' | 'solo' => m !== 'live' && (m === 'solo' ? def.ways.includes('solo') : def.ways.includes('teams')));
+  const way = ways.includes(setup.who as 'share') ? (setup.who as 'share' | 'versus' | 'solo') : setup.who === 'teams' && ways.includes('share') ? 'share' : ways[0] ?? 'solo';
+  const solo = way === 'solo';
+  const versus = way === 'versus';
   const { ask: soloAsk, element: soloElement, missed: soloMissed } = useAsk({ gameId: def.id, mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const deck = useMemo(() => makeDeck(game.pool), [game.pool]);
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
@@ -189,8 +193,9 @@ export default function LabGame({ def }: { def: LabDef }) {
         {phase === 'welcome' && <LabWelcome def={def} still={still} onStart={() => setPhase('setup')} />}
         {phase === 'setup' && (
           <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} pages={[
+            ...(ways.length > 1 ? [{ id: 'way', title: t('way.title'), content: <WayToPlay modes={ways} value={way} onChange={(m) => change({ who: m })} /> }] : []),
             ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
-            ...(ways.length > 1 ? [{ id: 'way', title: 'How will you play?', content: <ChoiceRow label="Who plays" value={setup.who} onChange={(v) => change({ who: v })} options={ways.map((w) => ({ value: w, label: w === 'teams' ? t('pd.teams') : w === 'versus' ? 'Versus: two players or the computer' : t('mm.solo') }))} /> }] : []),
+            
             { id: 'options', title: t('setup.options'), content: <Slider label={def.rounds.label} min={def.rounds.min} max={def.rounds.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} /> },
             ...(solo ? [] : [{ id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key={versus ? 'versus' : 'share'} mode={versus ? 'versus' : 'share'} min={versus ? 2 : def.minTeams ?? 1} max={versus ? 2 : def.maxTeams ?? 8} embedded onChange={(players, level) => setTeam({ players, level })} /> }]),
             ...(def.powers.length ? [{ id: 'powers', title: t('tb.powers'), content: (
@@ -293,6 +298,7 @@ function LabWelcome({ def, still, onStart }: { def: LabDef; still: boolean; onSt
         <div className="grid gap-2">
           <h1 className="title-bubble text-fit-title leading-none pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={def.name} /></h1>
           <p className="text-fit-body font-semibold text-muted leading-snug max-w-prose">{def.description}</p>
+          <div className="flex flex-wrap gap-2">{(LAB_MODES[def.id] ?? []).filter((m) => m !== 'live').map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
         <div className="rounded-panel border-std border-border-soft bg-white px-6 py-4 grid gap-3" style={{ boxShadow: '0 3px 0 rgba(36,28,61,0.14), 0 12px 24px rgba(36,28,61,0.10)' }}>
           <h2 className="text-xs font-bold uppercase tracking-wider text-muted">{t('welcome.how')}</h2>

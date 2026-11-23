@@ -203,3 +203,4 @@ line that fits, and add each new preference the same turn she says it.
 - Live (2026-11-23): students on their own devices, the main game on the projector or whiteboard, and a teacher-only view (proposed name Class View) with each student's progress and questions answered, assigning different question sets, choosing or opening themes; on Plus, freeze a student's screen with a message.
 - Public launch target: Monday 2026-11-30 (2026-11-23).
 - Universal UI sounds (2026-11-23, her picks): a soft click on every UI tap; a blip when something can't be tapped yet (like closing a menu that needs Confirm first); level up for every right answer (replaces the up chime).
+- Game Lab ways to play (2026-11-23): each game lists only the ways it really plays (real-time arcade games are Solo and Live; turn games are Share and Versus); the way is picked on the first setup page with the standard How will you play? cards.
