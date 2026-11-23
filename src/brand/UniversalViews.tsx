@@ -43,7 +43,7 @@ function Scaled({ w, h, children }: { w: number; h: number; children: ReactNode 
     </div>
   );
 }
-function Laptop({ children }: { children: ReactNode }) {
+export function Laptop({ children }: { children: ReactNode }) {
   return (
     <div className="grid justify-items-center">
       <div className="w-full rounded-t-[1.1rem] p-[2.2%] pb-[2.6%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
@@ -53,7 +53,7 @@ function Laptop({ children }: { children: ReactNode }) {
     </div>
   );
 }
-function Tablet({ children }: { children: ReactNode }) {
+export function Tablet({ children }: { children: ReactNode }) {
   return (
     <div className="w-full max-w-[21rem] mx-auto rounded-[1.6rem] p-[4%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
       <div className="rounded-[0.7rem] overflow-hidden"><Scaled w={820} h={1180}>{children}</Scaled></div>
@@ -78,7 +78,7 @@ function Corner() {
     </div>
   );
 }
-function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
+export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
   return (
     <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-16 text-3xl' : 'min-h-12 text-xl'} px-8 rounded-full font-display font-bold inline-flex items-center justify-center gap-2`}
       style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${PP.grapeDeep}` }}>{children}</span>
@@ -109,13 +109,13 @@ function Wizard({ step, total, title, children, last }: { step: number; total: n
   );
 }
 // Shape plus color for every team, so color is never the only cue (WCAG 1.4.1).
-const TEAMS = [
+export const TEAMS = [
   { name: 'Team Purple', color: PP.periwinkle, shape: 'circle', text: I },
   { name: 'Team Sky', color: PP.sky, shape: 'star', text: I },
   { name: 'Team Pink', color: PP.pink, shape: 'triangle', text: I },
   { name: 'Team Lemon', color: PP.lemon, shape: 'square', text: I },
 ] as const;
-function Badge({ t, size = 40 }: { t: (typeof TEAMS)[number]; size?: number }) {
+export function Badge({ t, size = 40 }: { t: (typeof TEAMS)[number]; size?: number }) {
   const d = t.shape === 'circle' ? <circle cx="20" cy="20" r="16" /> : t.shape === 'star'
     ? <path d="M20 3 L25 15 L38 15 L27.5 23 L31.5 36 L20 28 L8.5 36 L12.5 23 L2 15 L15 15 Z" />
     : t.shape === 'triangle' ? <path d="M20 4 L37 35 L3 35 Z" /> : <rect x="5" y="5" width="30" height="30" rx="6" />;
