@@ -8,7 +8,7 @@ import { useMySets } from '../data/hooks';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { makeDeck } from '../engine/picker';
 import ResultsModal from '../engine/ResultsModal';
-import ScoreBoard from '../engine/ScoreBoard';
+import ScoreBoard, { RoundMeter } from '../engine/ScoreBoard';
 import ShareQuestion from '../engine/ShareQuestion';
 import TeamSetup from '../engine/TeamSetup';
 import { POP_IN } from '../engine/pace';
@@ -217,7 +217,17 @@ export default function LabGame({ def }: { def: LabDef }) {
               )}
             </section>
             <div className="order-first lg:order-none pr-44 lg:pr-0 min-w-0 grid content-start gap-3 lg:h-[calc(100dvh-5.5rem)] lg:pt-14 lg:grid-rows-[auto_auto_1fr]">
-              <ScoreBoard turns={turns!} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={def.rounds.label} />
+              {/* Solo games need no player icon (teacher, 2026-11-23): just the score and the rounds. */}
+              {solo ? (
+                <div className="grid gap-3 lg:contents">
+                  <div className="score-card px-4 py-3 flex lg:grid items-center lg:justify-items-center gap-3" aria-label={t('share.points', { count: turns!.players[0].score })}>
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted">Score</span>
+                    <motion.span key={turns!.players[0].score} className="font-display text-4xl lg:text-6xl tabular-nums leading-none" initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }}>{turns!.players[0].score}</motion.span>
+                    <span className="lg:hidden ml-auto text-sm font-bold tabular-nums">{round}/{setup.rounds}</span>
+                  </div>
+                  <div className="hidden lg:block"><RoundMeter round={`${round}/${setup.rounds}`} label={def.rounds.label} /></div>
+                </div>
+              ) : <ScoreBoard turns={turns!} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={def.rounds.label} />}
               {status && <div className="hidden lg:block score-card p-3 text-center font-bold">{status}</div>}
               {myHeld.length > 0 && (
                 <ul className="hidden lg:grid gap-2 list-none m-0 p-0 content-start" aria-label="Power-ups held">

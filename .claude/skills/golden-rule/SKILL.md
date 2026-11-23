@@ -53,6 +53,10 @@ MUST HAVE; one miss means the game is not done.
   scrolling, fits iPad portrait and landscape, laptop, smart board; menus and
   results in the standard Gamify look; zero console errors.
 - **Licensed.** Every asset in docs/asset-ledger.md before it ships.
+- **Ways to play picked first.** A game that plays more than one way (Share,
+  Versus, Solo, Live) asks which in the setup menu before play, offering only
+  its own ways. Solo games show no player icon (teacher, 2026-11-23).
+- **Brand aligned.** Passes the Design Chair's brand check (`.claude/agents/design-chair.md`, the Gamify Brand Kit).
 
 ## Before calling it done
 1. Run it in a real browser at every size and play a full game.

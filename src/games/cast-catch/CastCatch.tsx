@@ -36,7 +36,6 @@ import ThemeScreen from '../ThemeScreen';
 import { castCatchManifest } from './manifest';
 import { BoatAndRod, FishArt, LakeFloor, rodTipAt, sceneBackground, Sky, SWIMMERS } from './sceneArt';
 import { useSavedSetup } from '../useSavedSetup';
-import { TeamBadge } from '../../engine/TeamBadge';
 import { castQuality, catchFish, catchItem, FISH, itemEffect, pointsFor, type FishKind } from './fish';
 
 
@@ -331,7 +330,7 @@ export default function CastCatch() {
             {/* Catch of the day: the fish worth triple this game. */}
             {phase === 'play' && <span className="inline-flex items-center gap-1.5 bg-[#fff3b0] border-std border-border rounded-pill pl-2 pr-3 min-h-10 font-bold text-sm" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.daily', { name: daily.name })} title={t('cc.daily', { name: daily.name })}><FishArt fish={daily} size={36} theme={theme} />x3</span>}
             {/* The player's icon beside the scores (teacher, 2026-11-13). */}
-            {pieceImage(theme, 'player') ? <img src={pieceImage(theme, 'player')} alt="" aria-hidden="true" className="w-11 h-11 rounded-full border-std border-border bg-surface object-contain" style={{ boxShadow: 'var(--shadow-sticker)' }} /> : <span className="rounded-full" style={{ boxShadow: 'var(--shadow-sticker)' }}><TeamBadge colorIndex={0} size={44} /></span>}
+            {/* Solo games show no player icon (teacher, 2026-11-23). */}
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={byCasts ? t('cc.castsLeft', { count: castsLeft }) : t('cc.timeLeft', { s: left })}>{byCasts ? <><Waves weight="bold" size={20} />{castsLeft}</> : <><Timer weight="bold" size={20} />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</>}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>

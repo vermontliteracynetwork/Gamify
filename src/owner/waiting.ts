@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'scrapecreators', kind: 'money', added: '2026-11-23', title: 'Optional: a ScrapeCreators API key for social media research',
+    why: 'The Design Chair\'s social research skills (competitor posts, trends, comment mining, Pinterest) read public social data through the paid ScrapeCreators API. Without a key it uses public web search, which sees less.',
+    how: 'If you want it: make an account at scrapecreators.com, then give the key when Claude asks for it in a session (it is saved as a secure network secret, never in the code).' },
   { id: 'design-connectors', kind: 'setup', added: '2026-11-22', title: 'Reconnect Figma and Canva, and send your design websites',
     why: 'Claudia reviews every Game Lab game with the design plugins. The design review and accessibility checks ran; the Figma and Canva connectors could not connect from the cloud session (the network blocked them), and no list of design websites was found in the chat, the repo or the dev plan.',
     how: 'In claude.ai Settings, Connectors: reconnect Figma and Canva (or allow their hosts in the cloud environment). Paste the design websites you want Claudia to study into the chat or the dev plan doc.' },

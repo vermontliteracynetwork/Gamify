@@ -37,3 +37,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Design Chair skills (2026-11-23)
+
+- **ScrapeCreators social media research skills**
+  (https://github.com/ScrapeCreators/social-media-research-skills), MIT License,
+  Copyright (c) 2026 ScrapeCreators. Vendored as `.claude/skills/social-*`
+  (renamed with a `social-` prefix). They call the paid ScrapeCreators API and
+  need `SCRAPECREATORS_API_KEY`; without it the Design Chair uses public web
+  search instead.
+- **UI UX Pro Max** (https://github.com/nextlevelbuilder/ui-ux-pro-max-skill),
+  MIT License, Copyright (c) 2024 Next Level Builder. Vendored as
+  `.claude/skills/{brand,design,design-system,banner-design,ui-ux-pro-max}`.
+  The `ui-styling` (bundled font files) and `slides` skills were left out.
+  Some scripts in `design` call outside image APIs that need their own keys;
+  they are not set up here.
+
+Development tooling only; none of it ships to users. Gamify's approved Brand
+Kit wins over any of their defaults.

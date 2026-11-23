@@ -32,6 +32,13 @@ asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
 `.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
 Golden Rule, the three lenses or Claudia.
 
+The **Design Chair** (`.claude/agents/design-chair.md`, teacher 2026-11-23) owns
+language and voice, the Gamify Brand Kit (https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv
+and `/brand`) and its continuous alignment, sound, templates and, later, social
+media. Run a Design Chair brand check on every new part, theme or feature. Its
+research and design skills (`social-*`, `brand`, `design`, `design-system`,
+`banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
+
 ## Design system
 
 `docs/design-system.md` is the look of every menu and teacher page: the

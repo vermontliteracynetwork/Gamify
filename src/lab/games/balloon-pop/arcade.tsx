@@ -526,10 +526,13 @@ function ReadyCard({ ar, hint }: { ar: Arcade; hint: ReactNode }) {
   return (
     <motion.div className="absolute inset-0 z-30 grid place-items-center bg-ink-night/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <motion.div className="grid justify-items-center gap-[calc(var(--u)*3)]" initial={still ? false : { scale: 0.6, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 1.2, opacity: 0 }} transition={{ type: 'spring', stiffness: 200, damping: 15 }}>
-        <span className="relative grid place-items-center" style={{ width: 'calc(var(--u) * 34)', height: 'calc(var(--u) * 34)' }}>
-          <span aria-hidden="true" className="absolute inset-0 rounded-full pu-rays" />
-          <span className={still ? '' : 'pu-bob'}><TeamBadge colorIndex={p.colorIndex} size={Math.round(ar.u * 20)} /></span>
-        </span>
+        {/* Solo games show no player icon (teacher, 2026-11-23). */}
+        {!ar.ctx.solo && (
+          <span className="relative grid place-items-center" style={{ width: 'calc(var(--u) * 34)', height: 'calc(var(--u) * 34)' }}>
+            <span aria-hidden="true" className="absolute inset-0 rounded-full pu-rays" />
+            <span className={still ? '' : 'pu-bob'}><TeamBadge colorIndex={p.colorIndex} size={Math.round(ar.u * 20)} /></span>
+          </span>
+        )}
         <span className="bg-surface border-std border-border rounded-full px-4 py-1.5 font-bold flex items-center gap-2" style={{ fontSize: 'calc(var(--u) * 3.6)' }}>{hint}</span>
         {!ar.ctx.cpu && (
           <motion.button type="button" onClick={() => ar.start()} autoFocus className="min-h-16 px-10 rounded-panel border-heavy border-border bg-accent font-display inline-flex items-center gap-3"
@@ -648,7 +651,7 @@ export function StarJar({ ar, style, cap = 12 }: { ar: Arcade; style?: CSSProper
         <path d="M14 40 Q10 60 12 100" stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.8" />
         {full && <motion.circle cx="44" cy="70" r="50" fill="none" stroke="#fdfd94" strokeWidth="5" animate={ar.ctx.still ? undefined : { opacity: [0.2, 0.9, 0.2], scale: [0.95, 1.05, 0.95] }} transition={{ duration: 1.2, repeat: Infinity }} />}
       </svg>
-      <span className="absolute -top-[18%] left-1/2 -translate-x-1/2"><TeamBadge colorIndex={ar.ctx.player.colorIndex} size={Math.round(ar.u * 6)} /></span>
+      {!ar.ctx.solo && <span className="absolute -top-[18%] left-1/2 -translate-x-1/2"><TeamBadge colorIndex={ar.ctx.player.colorIndex} size={Math.round(ar.u * 6)} /></span>}
     </div>
   );
 }
