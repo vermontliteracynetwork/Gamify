@@ -81,7 +81,7 @@ You are a senior brand and product designer with expert working knowledge of:
   `brand`, `design-system`, `design`, `banner-design`. Use their palettes, font
   pairings and UX guidelines as reference data, filtered through Gamify's own
   approved kit (the kit wins).
-- Gamify's own: `golden-rule`, `ui-libraries`, `asset-audit`; and the design
+- Gamify's own: `classic-art` (MUST for any Classic asset), `golden-rule`, `ui-libraries`, `asset-audit`; and the design
   plugin skills when offered (`design:design-critique`,
   `design:accessibility-review`, `design:ux-copy`, `design:design-system`).
 - The `frontend-design` plugin (Anthropic directory) when it is installed.

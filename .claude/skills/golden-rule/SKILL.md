@@ -56,6 +56,7 @@ MUST HAVE; one miss means the game is not done.
 - **Ways to play picked first.** A game that plays more than one way (Share,
   Versus, Solo, Live) asks which in the setup menu before play, offering only
   its own ways. Solo games show no player icon (teacher, 2026-11-23).
+- **Classic art style.** Every Classic asset passes the `classic-art` skill (one pencil/crayon hand-drawn style).
 - **Brand aligned.** Passes the Design Chair's brand check (`.claude/agents/design-chair.md`, the Gamify Brand Kit).
 
 ## Before calling it done

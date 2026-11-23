@@ -35,7 +35,8 @@ Golden Rule, the three lenses or Claudia.
 The **Design Chair** (`.claude/agents/design-chair.md`, teacher 2026-11-23) owns
 language and voice, the Gamify Brand Kit (https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv
 and `/brand`) and its continuous alignment, sound, templates and, later, social
-media. Run a Design Chair brand check on every new part, theme or feature. Its
+media. Run a Design Chair brand check on every new part, theme or feature, and the
+`classic-art` skill before making any Classic asset (one pencil/crayon style). Its
 research and design skills (`social-*`, `brand`, `design`, `design-system`,
 `banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
 
