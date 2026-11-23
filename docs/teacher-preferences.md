@@ -223,3 +223,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game types (2026-11-23, her definitions): Share = play together on one screen; Live = play together on your own devices; Solo = play on your own. Former Versus games show under Share and Solo. Picking Share then asks: same device, or share a join code. Picking Solo in a former Versus game means playing against the computer.
 - Brand mockups (2026-11-23): no buddies; answer tiles keep their letters; question text left-aligned.
 - Classic theme assets (2026-11-23): one simple pencil/crayon hand-drawn style for every Classic asset, enforced by the classic-art skill.
+- Asset color (2026-11-23): solid, punchy, bright colors that are not see-through; crayon texture never makes a color look faded.
