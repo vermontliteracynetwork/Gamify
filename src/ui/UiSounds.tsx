@@ -5,6 +5,7 @@ import { useSettings } from '../settings/SettingsContext';
 // The universal UI sounds (teacher, 2026-11-23): a soft click on every tap of
 // a button, link, tab or switch, and a blip when something can't be tapped
 // yet (a turned-off button, like closing a menu that needs Confirm first).
+// Tabs swipe, Close/Cancel/Back play the cancel sound, pop-ups play open.
 const TAPPABLE = 'button, a[href], [role="button"], [role="switch"], [role="tab"], [role="radio"], [role="checkbox"], [role="menuitem"], summary, select, input[type="checkbox"], input[type="radio"]';
 
 export default function UiSounds() {
@@ -17,7 +18,10 @@ export default function UiSounds() {
       if (!el) el = [...document.querySelectorAll('button:disabled, [aria-disabled="true"]')].find((x) => { const r = x.getBoundingClientRect(); return r.width > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; }) ?? null;
       if (!el) return;
       const off = (el as HTMLButtonElement).disabled || el.getAttribute('aria-disabled') === 'true';
-      playEffect(off ? 'blip' : 'tap', settings);
+      const role = el.getAttribute('role');
+      const name = `${el.getAttribute('aria-label') ?? ''} ${el.textContent ?? ''}`.trim();
+      // Tabs swipe; Close, Cancel and Back sound like going back; the rest click.
+      playEffect(off ? 'blip' : role === 'tab' ? 'swipe' : /^close\b/i.test(name) && el.closest('[role="dialog"]') ? 'close' : /^(close|cancel|back|not now|no thanks)\b/i.test(name) ? 'cancel' : 'tap', settings);
     };
     document.addEventListener('pointerdown', onDown, true);
     return () => document.removeEventListener('pointerdown', onDown, true);

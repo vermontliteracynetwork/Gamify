@@ -21,3 +21,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Turn on the natural read-aloud voice, optional (2026-10-27).** Make an OpenAI API key and add it in Vercel as OPENAI_API_KEY (Production), then redeploy. Only on-screen words are sent. Without it, read-aloud uses the device voice.
 
 
+- (2026-11-23, legal, optional) Confirm the JDSherbert UI sound pack license covers a web app (email JDSherbert for a one-line OK, or the attorney list). Credit is on the Credits page; files are used unchanged.

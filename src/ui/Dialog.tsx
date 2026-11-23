@@ -1,4 +1,5 @@
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, type ReactNode } from 'react';
+import { playEffect } from '../engine/feedback';
 import { motion } from 'motion/react';
 import { X } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
@@ -18,6 +19,9 @@ export default function Dialog({ title, sub, onClose, closeLabel, size = 'md', c
 }) {
   const { settings } = useSettings();
   const id = useId();
+  // The pop-up sound when a box opens (UI pack, teacher 2026-11-23).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { playEffect('open', settings); }, []);
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/40" style={{ zIndex }} role="dialog" aria-modal="true" aria-labelledby={id}>
       <DialogFocus onClose={onClose} />
