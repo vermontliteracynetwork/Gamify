@@ -32,8 +32,15 @@ the handmade themes teachers and kids make (clean core, handmade edges).
 - Shapes: simple, chunky, readable at 48px and 128px; one idea per piece.
 - Palette: the brand palette only (cream ground; pink, cobalt, green, tangerine,
   violet, teal, sunny yellow as accent, ink). No other colors.
-- Line: pencil line in a darker shade of the fill, or ink #1d1a33 for small
-  details; no heavy black outlines on art. Tappable controls keep their thin 2px edge.
+- Line (teacher refs, 2026-11-23, replaces "no heavy outlines"): one thick dark
+  ink outline (#1d1a33 or a deep brown) around every shape, slightly wobbly, with
+  rounded ends, like a felt-tip doodle; inner details in the same ink, thinner.
+  Tappable controls keep their thin 2px edge.
+- Doodle world (same refs): a soft crayon blob patch of color behind a subject
+  instead of a frame; tiny doodle confetti around it (four-point sparkles, small
+  stars, dots, hearts, mini rainbows, squiggles, motion or steam lines); shapes
+  rounded and a little lopsided; fills flat and solid with a light grain or
+  gouache tooth inside; pastels allowed beside the brights; hand-lettered labels.
 - No characters or mascots, no faces on objects unless the teacher asks; no
   known characters, brands or logos; nothing resembling a famous game.
 - One white or cream highlight scribble on round things, top left.
