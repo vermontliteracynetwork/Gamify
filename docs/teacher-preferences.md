@@ -202,3 +202,4 @@ line that fits, and add each new preference the same turn she says it.
 - Game Lab sorted by Gamify's ways to play (Share, Versus, Solo, Live); every game gets a creative Live format, collaborative or competitive (2026-11-23).
 - Live (2026-11-23): students on their own devices, the main game on the projector or whiteboard, and a teacher-only view (proposed name Class View) with each student's progress and questions answered, assigning different question sets, choosing or opening themes; on Plus, freeze a student's screen with a message.
 - Public launch target: Monday 2026-11-30 (2026-11-23).
+- Universal UI sounds (2026-11-23, her picks): a soft click on every UI tap; a blip when something can't be tapped yet (like closing a menu that needs Confirm first); level up for every right answer (replaces the up chime).

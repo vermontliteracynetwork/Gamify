@@ -15,6 +15,7 @@ import JoinPage from './public/JoinPage';
 
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { SessionSupports } from './student/session';
+import UiSounds from './ui/UiSounds';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
 import { UpgradeHost } from './billing/Upgrade';
@@ -267,6 +268,7 @@ export default function App() {
         <Supports />
         <PreviewBanner />
         <HoverTips />
+        <UiSounds />
         <div id="main-content" tabIndex={-1} className="outline-none flex-1 flex flex-col">
           <AnimatedRoutes />
         </div>
