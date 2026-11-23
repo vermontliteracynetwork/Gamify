@@ -5,6 +5,8 @@ export type Level = 0 | 1 | 2 | 3 | 4 | 5; // 0 = off
 export type Motion = 'full' | 'gentle' | 'still';
 export type Celebrations = 'big' | 'small' | 'off';
 export type Backgrounds = 'moving' | 'still' | 'plain';
+// GIFs play, or show as still pictures (teacher, 2026-11-23: a sensory setting; Calm turns them still).
+export type Gifs = 'moving' | 'still';
 export type TextSize = 'normal' | 'large' | 'larger';
 export type Timers = 'off' | 'relaxed' | 'normal';
 export type Speed = 'slow' | 'normal' | 'fast';
@@ -20,6 +22,7 @@ export interface PlayerSettings {
   motion: Motion;
   celebrations: Celebrations;
   backgrounds: Backgrounds;
+  gifs?: Gifs;
   screenShake: boolean;
   dim: boolean;
   textSize: TextSize;
@@ -52,6 +55,7 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
   motion: 'full',
   celebrations: 'big',
   backgrounds: 'moving',
+  gifs: 'moving',
   screenShake: false,
   dim: false,
   textSize: 'normal',
@@ -73,8 +77,8 @@ export const DEFAULT_SETTINGS: PlayerSettings = {
 // One tap Calm mode: everything soothing at once, still adjustable after.
 export function applyCalm(s: PlayerSettings, on: boolean): PlayerSettings {
   return on
-    ? { ...s, calm: true, motion: 'still', celebrations: 'small', backgrounds: 'plain', screenShake: false, music: 0, effects: Math.min(s.effects, 2) as Level, timers: 'off' }
-    : { ...s, calm: false, motion: 'full', celebrations: 'big', backgrounds: 'moving' };
+    ? { ...s, calm: true, motion: 'still', celebrations: 'small', backgrounds: 'plain', gifs: 'still', screenShake: false, music: 0, effects: Math.min(s.effects, 2) as Level, timers: 'off' }
+    : { ...s, calm: false, motion: 'full', celebrations: 'big', backgrounds: 'moving', gifs: 'moving' };
 }
 
 export type PresetId = 'calm' | 'quiet' | 'little-reader' | 'low-vision' | 'hearing' | 'quick-start';

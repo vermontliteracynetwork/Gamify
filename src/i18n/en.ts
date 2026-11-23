@@ -137,6 +137,7 @@ export const en = {
   'settings.motion': 'Motion',
   'settings.celebrations': 'Celebrations',
   'settings.backgrounds': 'Backgrounds',
+  'settings.gifs': 'GIFs',
   'settings.screenShake': 'Screen shake',
   'settings.dim': 'Dim the screen',
   'settings.reading': 'Seeing and reading',

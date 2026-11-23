@@ -194,6 +194,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
             <Choice label={t('settings.motion')} value={s.motion} options={['full', 'gentle', 'still']} onChange={(v) => set('motion', v)} />
             <Choice label={t('settings.celebrations')} value={s.celebrations} options={['big', 'small', 'off']} onChange={(v) => set('celebrations', v)} />
             <Choice label={t('settings.backgrounds')} value={s.backgrounds} options={['moving', 'still', 'plain']} onChange={(v) => set('backgrounds', v)} />
+            <Choice label={t('settings.gifs')} value={s.gifs ?? 'moving'} options={['moving', 'still']} onChange={(v) => set('gifs', v)} />
             <Toggle label={t('settings.screenShake')} value={s.screenShake} onChange={(v) => set('screenShake', v)} />
             <Toggle label={t('settings.dim')} value={s.dim} onChange={(v) => set('dim', v)} />
           </>

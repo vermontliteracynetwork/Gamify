@@ -14,6 +14,7 @@ import { playClip } from '../engine/music';
 import { Button, Tabs } from '../ui/kit';
 import PopText from '../ui/PopText';
 import Title from '../ui/Title';
+import NewDirection from './NewDirection';
 
 // The Brand page (preview, teacher 2026-11-23): the brand kit shown live, with
 // the real colors, type, parts, motion and every sound, so it can be approved
@@ -38,7 +39,7 @@ const PATTERNS: [string, string][] = [
 ];
 
 export default function BrandPage() {
-  const [tab, setTab] = useState<'style' | 'sounds'>('style');
+  const [tab, setTab] = useState<'style' | 'sounds' | 'direction'>('style');
   return (
     <div className="brand-menu min-h-[calc(100dvh-4rem)]">
       <main className="max-w-[84rem] mx-auto px-4 sm:px-8 pt-6 pb-16 grid gap-6">
@@ -46,8 +47,8 @@ export default function BrandPage() {
           <h1 className="title-bubble text-4xl" style={{ color: 'var(--text)' }}><Title text="Brand Kit" /></h1>
           <p className="font-semibold text-muted">The Gamify look, motion and sound, live. Preview only.</p>
         </header>
-        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }]} /></div>
-        {tab === 'style' ? <StyleSheet /> : <SoundBoard />}
+        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }]} /></div>
+        {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : <NewDirection />}
       </main>
     </div>
   );
