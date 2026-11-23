@@ -23,7 +23,7 @@ function PaperPatterns() {
         <pattern id="pm-gingham" width="26" height="26" patternUnits="userSpaceOnUse">
           <rect width="26" height="26" fill="#fff8de" />
           <rect width="13" height="26" fill="#ffd52e" />
-          <rect width="26" height="13" fill="#ffd52e" />
+          <rect width="26" height="13" fill="#ffd52e" /><rect width="13" height="13" fill="#ff6a1a" />
         </pattern>
         <pattern id="pm-stripes" width="80" height={STRIPES.length * 24} patternUnits="userSpaceOnUse">
           <rect width="80" height={STRIPES.length * 24} fill="#fffaf0" />
@@ -37,7 +37,7 @@ function PaperPatterns() {
           <polygon points={star(40, 41, 4, 1.8, 5)} fill="#ff6a1a" />
         </pattern>
         <pattern id="pm-pinstripe" width="18" height="18" patternUnits="userSpaceOnUse">
-          <rect width="18" height="18" fill="#1f5fff" /><rect x="0" width="5" height="18" fill="#5b8bff" />
+          <rect width="18" height="18" fill="#1f5fff" /><rect x="0" width="3" height="18" fill="#fffaf0" />
         </pattern>
         <pattern id="pm-dots" width="34" height="34" patternUnits="userSpaceOnUse">
           <rect width="34" height="34" fill="#fbf3e6" />
@@ -49,7 +49,7 @@ function PaperPatterns() {
           <rect x="30" width="5" height="48" fill="#12a150" /><rect y="30" width="48" height="5" fill="#1f5fff" />
         </pattern>
         <pattern id="pm-pinkstripe" width="30" height="30" patternUnits="userSpaceOnUse">
-          <rect width="30" height="30" fill="#ec6fa8" /><rect y="18" width="30" height="5" fill="#ec6fa8" /><rect y="25" width="30" height="2" fill="#12a150" />
+          <rect width="30" height="30" fill="#ec6fa8" /><rect y="18" width="30" height="5" fill="#fffaf0" /><rect y="25" width="30" height="2" fill="#12a150" />
         </pattern>
         <pattern id="pm-checker" width="40" height="40" patternUnits="userSpaceOnUse">
           <rect width="40" height="40" fill="#fffaf0" />
