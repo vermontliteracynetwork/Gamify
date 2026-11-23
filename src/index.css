@@ -165,6 +165,10 @@ h2, h3, .font-display {
   font-weight: 700;
 }
 h1.font-display { font-family: var(--font-display); font-weight: 400; }
+/* Grow Year headings are all capitals (teacher, 2026-11-23: "for headings with
+   grow year font, i prefer capitiizlizing every letter rather than sentence case"). */
+h1:not(.font-body), .title-bubble { text-transform: uppercase; }
+.dev-dash h1 { text-transform: none; }
 /* Question and answer text reads in the body font, even in a heading
    (teacher, 2026-10-24: "questions should be in standard font"). */
 h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-synthesis: weight style; letter-spacing: normal; }
