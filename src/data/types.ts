@@ -11,6 +11,10 @@ export interface MultipleChoiceQuestion {
   correctIndex: number;
   imageUrl?: string;
   imageAlt?: string;
+  // Credit a picture's source asks for ("Photo by ... on Unsplash", "GIF via GIPHY").
+  imageCredit?: string;
+  // A still frame for GIFs (the GIFs: Still pictures setting).
+  imageStill?: string;
   // A picture beside an answer's letter, by answer position (null = none).
   choiceImages?: (string | null)[];
   choiceAlts?: (string | null)[];

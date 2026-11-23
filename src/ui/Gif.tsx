@@ -8,7 +8,9 @@ import { useSettings } from '../settings/SettingsContext';
 // drawn from the GIF itself.
 export default function Gif({ src, still, alt, className = '' }: { src: string; still?: string; alt: string; className?: string }) {
   const { settings } = useSettings();
-  const paused = settings.gifs === 'still';
+  // Only animated pictures (GIFs) pause; photos and drawings show as they are.
+  const animated = /\.gif(\?|$)|giphy\.com|^data:image\/gif/i.test(src);
+  const paused = animated && settings.gifs === 'still';
   const [frame, setFrame] = useState<string | null>(null);
   const tried = useRef('');
   useEffect(() => {

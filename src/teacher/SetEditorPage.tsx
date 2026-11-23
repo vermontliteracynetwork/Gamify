@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, CheckSquare, Lightbulb, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, Table, Plus, Trash, X } from '@phosphor-icons/react';
+import { Check, CheckSquare, Lightbulb, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, MagnifyingGlass, Table, Plus, Trash, X } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { getLibrarySet } from '../data/library';
@@ -17,6 +17,7 @@ import { newSet } from './QuestionSetsPage';
 import SetDetailsPanel from './SetDetailsPanel';
 import Title from '../ui/Title';
 import CaptionedImage from '../ui/CaptionedImage';
+import MediaSearch from '../ui/MediaSearch';
 import QuestionVoice from './QuestionVoice';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -173,6 +174,7 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
   const started = q.prompt.trim() !== '' || q.choices.some((c) => c.trim());
   const fileRef = useRef<HTMLInputElement>(null);
   const [pictureError, setPictureError] = useState('');
+  const [searching, setSearching] = useState(false);
 
   function setChoice(k: number, value: string) {
     const choices = [...q.choices];
@@ -271,9 +273,11 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
           {q.choices.length < MAX_CHOICES && (
             <Button variant="ghost" onClick={() => onChange({ choices: [...q.choices, ''] })}><Plus weight="bold" size={16} />{t('editor.addAnswer')}</Button>
           )}
-          {!q.imageUrl && (
+          {!q.imageUrl && (<>
             <Button variant="ghost" onClick={() => fileRef.current?.click()}><ImageIcon weight="bold" size={16} />{t('editor.addPicture')}</Button>
-          )}
+            <Button variant="ghost" onClick={() => setSearching(true)}><MagnifyingGlass weight="bold" size={16} />Find a GIF or photo</Button>
+            {searching && <MediaSearch onClose={() => setSearching(false)} onPick={(m) => { setSearching(false); onChange({ imageUrl: m.url, imageAlt: m.alt, imageCredit: m.credit, imageStill: m.still }); }} />}
+          </>)}
           {/* True or false in one tap (market gaps, 2026-11-01). */}
           {!(q.choices.length === 2 && q.choices[0] === t('editor.true') && q.choices[1] === t('editor.false')) && (
             <Button variant="ghost" aria-label={t('editor.trueFalseN', { n })} onClick={() => onChange({ choices: [t('editor.true'), t('editor.false')], correctIndex: q.correctIndex === 1 ? 1 : 0, choiceImages: undefined, choiceAlts: undefined })}>

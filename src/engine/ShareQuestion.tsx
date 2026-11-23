@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
+import Gif from '../ui/Gif';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect, speakQuestion } from './feedback';
 import { setAnswerer } from './answerer';
@@ -136,7 +137,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
 
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
+        {q.imageUrl && <figure className="m-0 grid justify-items-center"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
         <h2 className={`w-full max-w-[90rem] mx-auto text-center font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
 
         <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
