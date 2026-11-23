@@ -365,7 +365,7 @@ function Gem({ k, s, special }: { k: number; s: number; special?: 'row' | 'rainb
     </svg>
   );
 }
-const M3 = Array.from({ length: 49 }, (_, i) => { const r = Math.floor(i / 7), c = i % 7; return (r * 4 + c * 5 + ((r * c) % 4)) % 6; });
+const M3 = Array.from({ length: 49 }, (_, i) => { const r = Math.floor(i / 7), c = i % 7; return (c + 2 * r) % 6; });
 [16, 17, 18].forEach((i) => { M3[i] = 2; }); // the match that is popping
 const M3_SPECIAL: Record<number, 'row' | 'rainbow'> = { 31: 'row', 40: 'rainbow' };
 function M3Board({ s }: { s: number }) {
@@ -403,8 +403,8 @@ function MatchThreeTablet() {
     <PatternStage id="cutpaper-pastel">
       <Corner />
       <div className="absolute inset-x-8 top-[84px] grid gap-3"><SoloStrip score={260}><Stat label="Moves" value={2} /><StarGoal got={2} /></SoloStrip></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[230px]"><M3Board s={100} /></div>
-      <div className="absolute inset-x-8 top-[980px]"><HeldTray items={M3_HELD} row /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><M3Board s={102} /></div>
+      <div className="absolute inset-x-8 top-[1010px]"><HeldTray items={M3_HELD} row /></div>
     </PatternStage>
   );
 }
@@ -461,7 +461,7 @@ function F4Player({ i, now, held }: { i: number; now?: boolean; held?: { id: Pow
     <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={{ ...paper, boxShadow: now ? `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` : paper.boxShadow }}>
       <Disc p={i + 1} s={54} />
       <b className="font-display text-2xl">{['Ava', 'Leo'][i]}</b>
-      {now && <span className="font-bold text-sm">Your turn: drop a piece</span>}
+      {now && <span className="font-bold text-sm">Winner!</span>}
       {held && <span title={held.name} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 2 }}><CrayonPowerUp id={held.id} size={40} sticker /></span>}
     </div>
   );
@@ -470,11 +470,11 @@ function FourLaptop() {
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
-      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} now held={{ id: 'swap', name: 'Pop Out' }} /></div>
-      <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} /></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[118px]"><F4Board s={64} /></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[28px] z-10"><Burst text="Four in a row! Ava wins!" size="text-3xl" /></div>
-      <Confetti marks={[['sparkle', PP.lemon, 250, 70, 34], ['star', PP.pink, 720, 60, 28], ['dot', PP.sky, 230, 130, 16], ['heart', PP.pink, 760, 120, 24]]} />
+      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} held={{ id: 'swap', name: 'Pop Out' }} /></div>
+      <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} now /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><F4Board s={64} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[546px] z-10"><Burst text="Four in a row! Leo wins!" size="text-3xl" /></div>
+      <Confetti marks={[['sparkle', PP.lemon, 250, 560, 34], ['star', PP.pink, 730, 556, 28], ['dot', PP.sky, 220, 520, 16], ['heart', PP.pink, 760, 520, 24]]} />
     </PatternStage>
   );
 }
@@ -482,9 +482,9 @@ function FourTablet() {
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[90px] z-10"><Burst text="Four in a row! Ava wins!" size="text-4xl" /></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} /></div>
-      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} now held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[90px] z-10"><Burst text="Four in a row! Leo wins!" size="text-4xl" /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} /></div>
+      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} now /></div>
       <Confetti marks={[['sparkle', PP.lemon, 80, 170, 40], ['star', PP.pink, 700, 180, 34], ['dot', PP.sky, 120, 240, 18]]} />
     </PatternStage>
   );
@@ -528,7 +528,7 @@ function BubbleBoard({ w }: { w: number }) {
         </svg>
         <span className="absolute -translate-x-1/2" style={{ left: w / 2, top: h - 24 - s * 2.3 }}><Bubble k={1} s={s * 1.5} /></span>
         <span className="absolute grid justify-items-center" style={{ left: w / 2 + s * 1.8, top: h - 24 - s * 1.8 }}><b className="text-xs uppercase" style={{ color: PP.quiet }}>Next</b><Bubble k={3} s={s} /></span>
-        <span className="absolute -translate-x-1/2" style={{ left: w * 0.5, top: rowH * 3.4 }}><Burst text="Pop! +40" color={PP.lemon} /></span>
+        <span className="absolute -translate-x-1/2" style={{ left: w * 0.5, top: rowH * 8.6 }}><Burst text="Pop! +40" color={PP.lemon} /></span>
       </div>
     </div>
   );
@@ -538,7 +538,7 @@ function BubbleLaptop() {
   return (
     <PatternStage id="doodle">
       <Corner />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[22px]"><BubbleBoard w={430} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[22px]"><BubbleBoard w={430} /></div>
       <div className="absolute left-[40px] top-[120px] w-[200px] grid gap-3">
         <SoloStrip score={340} />
         <Stat label="Bubbles left" value={3} />
@@ -553,7 +553,7 @@ function BubbleTablet() {
     <PatternStage id="doodle">
       <Corner />
       <div className="absolute inset-x-8 top-[84px]"><SoloStrip score={340}><Stat label="Bubbles" value={3} /><HeldTray items={BP_HELD} label="Ready" row /></SoloStrip></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[220px]"><BubbleBoard w={700} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><BubbleBoard w={700} /></div>
     </PatternStage>
   );
 }
@@ -638,14 +638,17 @@ function AlleyWall({ children }: { children: ReactNode }) {
     </div>
   );
 }
+function RollPill() {
+  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 0 0 5px ${PP.lemon}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />Mia rolls!</div>;
+}
 function BowlingLaptop() {
   return (
     <AlleyWall>
       <Corner dark />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[26px]"><Lane w={330} h={575} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[26px]"><Lane w={330} h={575} /></div>
       <div className="absolute left-[30px] top-[250px] w-[300px]"><FrameBoard compact /></div>
       <div className="absolute right-[30px] top-[250px] w-[300px] grid gap-3">
-        <TurnPill t={{ ...TEAMS[2], name: 'Team Pink' } as Team} text="Mia rolls!" />
+        <RollPill />
         <HeldTray items={BW_HELD} label="Mia's power-ups" row />
       </div>
     </AlleyWall>
@@ -655,8 +658,8 @@ function BowlingTablet() {
   return (
     <AlleyWall>
       <Corner dark />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[76px]"><Lane w={470} h={770} /></div>
-      <div className="absolute inset-x-6 top-[870px] grid grid-cols-[1fr_230px] gap-3 items-start"><FrameBoard /><HeldTray items={BW_HELD} label="Mia's power-ups" /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[76px]"><Lane w={520} h={800} /></div>
+      <div className="absolute inset-x-8 top-[900px] grid gap-3"><div className="flex gap-3 items-center"><RollPill /><span className="flex-1" /><HeldTray items={BW_HELD} label="Mia's power-ups" row /></div><FrameBoard /></div>
     </AlleyWall>
   );
 }
@@ -667,7 +670,7 @@ function BowlingTablet() {
 // colors) while each student answers on their own device. It has no
 // power-ups today; first-try streaks turn stars gold (the "combo").
 const SKY_N = 30, SKY_GOT = 18;
-const SKY_PTS = Array.from({ length: SKY_N }, (_, i) => { const r = Math.sin(i * 12.9898) * 43758.5453; const f2 = r - Math.floor(r); const col = i % 6, row = Math.floor(i / 6); return [0.07 + col * 0.17 + (f2 - 0.5) * 0.08, 0.12 + row * 0.17 + ((f2 * 7) % 1 - 0.5) * 0.08]; });
+const SKY_PTS = Array.from({ length: SKY_N }, (_, i) => { const r = Math.sin(i * 12.9898) * 43758.5453; const f2 = r - Math.floor(r); const col = i % 6, row = Math.floor(i / 6); return [Math.min(0.88, 0.07 + col * 0.155 + (f2 - 0.5) * 0.06), 0.12 + row * 0.17 + ((f2 * 7) % 1 - 0.5) * 0.08]; });
 function ClassSky({ w, h, small }: { w: number; h: number; small?: boolean }) {
   const s = small ? 26 : Math.min(w, h) * 0.085;
   return (
@@ -693,7 +696,7 @@ function ClassScreen() {
         <span className="font-bold" style={{ color: PP.quiet }}>Join code</span><b className="font-display text-3xl tracking-widest">472915</b>
       </div>
       <div className="absolute left-[28px] top-[92px]"><ClassSky w={700} h={505} /></div>
-      <div className="absolute left-[262px] top-[300px]"><Burst text="Three gold stars in a row!" size="text-2xl" color={PP.butter} /></div>
+      <div className="absolute left-[200px] top-[520px]"><Burst text="Three gold stars in a row!" size="text-2xl" color={PP.butter} /></div>
       <div className="absolute right-[24px] top-[92px] w-[224px] grid gap-3">
         <div className="p-4 grid gap-2 text-center" style={paper}>
           <b className="text-sm uppercase tracking-wider" style={{ color: PP.quiet }}>Class goal</b>
@@ -714,23 +717,23 @@ function StudentDevice() {
   return (
     <div className="w-full h-full relative" style={{ ...quiet, padding: 32 }}>
       <Corner />
-      <div className="mt-16 flex items-center gap-3 px-4 py-2" style={{ ...paper, borderRadius: 18 }}>
-        <Doodle kind="star" color={PP.lemon} size={40} /><b className="font-display text-3xl">You added 4 stars</b>
+      <div className="mt-16 flex items-center gap-3 px-5 py-3" style={{ ...paper, borderRadius: 18 }}>
+        <Doodle kind="star" color={PP.lemon} size={52} /><b className="font-display text-4xl">You added 4 stars</b>
         <span className="flex-1" /><span className="font-bold" style={{ color: PP.quiet }}>Class sky: 18 of 30</span>
       </div>
-      <div className="mt-6 p-7 grid gap-5" style={{ ...paper, borderRadius: 26 }}>
-        <span className="font-bold" style={{ color: PP.quiet }}>Question 5 of 10</span>
-        <p className="font-display text-4xl leading-snug text-left">Which word starts a sentence the right way?</p>
-        <div className="grid gap-3">
+      <div className="mt-8 p-8 grid gap-6" style={{ ...paper, borderRadius: 26 }}>
+        <span className="font-bold text-xl" style={{ color: PP.quiet }}>Question 5 of 10</span>
+        <p className="font-display text-5xl leading-snug text-left">Which word starts a sentence the right way?</p>
+        <div className="grid gap-4">
           {ANS.map(([l, w, c], i) => (
-            <span key={l} className="flex items-center gap-4 px-4 min-h-[88px] rounded-2xl text-left" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: i === 1 ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}, 0 4px 0 ${I}` : `0 4px 0 ${I}` }}>
-              <span className="w-14 h-14 rounded-full grid place-items-center font-display text-3xl font-bold" style={{ background: c, border: `3px solid ${I}` }}>{l}</span>
-              <b className="font-display text-4xl flex-1">{w}</b>{i === 1 && <span className="w-12 h-12 rounded-full grid place-items-center" style={{ background: PP.kelly, border: `3px solid ${I}` }}><Check weight="bold" size={28} color="#fff" /></span>}
+            <span key={l} className="flex items-center gap-4 px-4 min-h-[116px] rounded-2xl text-left" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: i === 1 ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}, 0 4px 0 ${I}` : `0 4px 0 ${I}` }}>
+              <span className="w-16 h-16 rounded-full grid place-items-center font-display text-4xl font-bold" style={{ background: c, border: `3px solid ${I}` }}>{l}</span>
+              <b className="font-display text-5xl flex-1">{w}</b>{i === 1 && <span className="w-12 h-12 rounded-full grid place-items-center" style={{ background: PP.kelly, border: `3px solid ${I}` }}><Check weight="bold" size={28} color="#fff" /></span>}
             </span>
           ))}
         </div>
       </div>
-      <div className="mt-6 grid justify-items-center"><Burst text="Yes! A star for the sky!" size="text-3xl" color={PP.lemon} rot={-3} /></div>
+      <div className="mt-10 grid justify-items-center"><Burst text="Yes! A star for the sky!" size="text-4xl" color={PP.lemon} rot={-3} /></div>
     </div>
   );
 }
@@ -764,7 +767,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   {
     id: 'four-in-a-row', name: 'Four in a Row (Share, Solo vs computer)', laptop: <FourLaptop />, tablet: <FourTablet />,
     lines: [
-      'New: a sky blue crayon frame on legs with paper holes, standing on the pastel squiggle ground; Gamify purple pieces with a dot and lemon pieces with a star; the next piece waits over its column; the win line gets a lemon band and a burst.',
+      'New: a sky blue crayon frame on legs with paper holes, standing on the pastel squiggle ground; Gamify purple pieces with a dot and lemon pieces with a star; the next piece waits over its column; Leo\'s win line gets a lemon band and a burst.',
       'Why: a mark inside each piece keeps the two sides apart without color (WCAG 1.4.1); the waiting piece shows what a tap will do before it happens (feedforward); the player whose turn it is glows lemon, the same cue as every game.',
       'Pieces (theme template): Background 1600 x 1200, Board 1000 x 860 (frame with holes), Player 1 and Player 2 pieces 128 x 128, Team icon 256 x 256 (up to 10), Power-up 256 x 256 (Double Drop, Pop Out; up to 4), Cover 600 x 600, Title 1200 x 360.',
     ],
@@ -789,7 +792,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     id: 'star-quiz', name: 'Question Tracker (Live: class screen and a student device)', laptop: <ClassScreen />, tablet: <StudentDevice />,
     lines: [
       'New: the class screen is one big Blue crystal sky over a mint hill that fills with lemon stars (gold for a first-try streak), with the join code, the class goal bar and who is playing; the student device shows the question card, left-aligned, with A to D letter tiles and a running count of the stars they gave the sky.',
-      'Why: one shared goal builds relatedness and lowers social comparison (self-determination theory); empty stars are dashed outlines so the goal is visible from the back row (goal-gradient effect); answers are 88px tall for small fingers (WCAG 2.5.5).',
+      'Why: one shared goal builds relatedness and lowers social comparison (self-determination theory); empty stars are dashed outlines so the goal is visible from the back row (goal-gradient effect); answers are about 116px tall for small fingers (WCAG 2.5.5).',
       'Pieces (theme template): Background 1600 x 1000 (the scene that fills), six Items 256 x 256 (a star, a fish...), Cover 600 x 600, Title 1200 x 360. No power-ups in this game today.',
     ],
   },
