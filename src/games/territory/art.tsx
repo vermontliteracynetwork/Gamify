@@ -3,10 +3,12 @@ import { useId, type CSSProperties, type ReactNode } from 'react';
 // Territory's Classic art (teacher, 2026-11-24): a 2D living room in the
 // Classic style, drawn in code (no files, no licenses): smooth flat fills, one
 // slightly wobbly dark ink outline, palette pairs (src/brand/PaletteProposal).
-// The animals are the game pieces, so they have simple faces (dot eyes, a
-// tiny nose); never an expression of pain. The cat and mouse colors she asked
-// for (brown, gray and white mice; gray and siamese cats) need a few natural
-// fur colors beside the palette: FUR below.
+// Since 2026-11-24 it redraws her own Canva Territory pack (wall, baseboard,
+// checker floor, arched mouse door, gray tabby, orange tabby, fluffy orange
+// cat, brown, gray and white mice) as original code-drawn shapes; her files
+// are reference only and never ship. The animals are the game pieces, so they
+// have simple faces (dot eyes, a tiny nose); never an expression of pain. The
+// fur colors need a few natural tones beside the palette: FUR below.
 
 export const INK = '#1d1a33';
 const P = {
@@ -14,8 +16,8 @@ const P = {
   pink: '#f055a5', blush: '#ffd3e6', teal: '#1fb5a8', aqua: '#c9f1ee', kelly: '#22b04a', mint: '#c8f0dc',
   sky: '#4ba3e8', crystal: '#bfdff3', purple: '#7a88fe', gamify: '#b4c4fb', grape: '#6a45f0', lavender: '#ddd6ff',
 };
-// Natural fur (her request: brown, gray and white mice; gray, black, siamese cats).
-const FUR = { brown: '#b47a4e', brownDeep: '#7a4a2c', gray: '#a9a4ba', grayDeep: '#6e6884', black: '#34304a', point: '#6b4a3a' };
+// Natural fur (her pack: brown, gray and white mice; gray and orange tabbies).
+const FUR = { brown: '#b47a4e', brownDeep: '#7a4a2c', gray: '#a9a4ba', grayDeep: '#5f5a76', ginger: '#d9690c', taupe: '#c9ac90', slate: '#8f93a8' };
 
 // Team colors: Cats wear Orange with Peach, Mice wear Gamify purple with its pastel.
 export const SIDE_COLOR = { defender: P.orange, invader: P.purple } as const;
@@ -41,91 +43,144 @@ function Svg({ box, children, className, style, label }: { box: string; children
   );
 }
 
-// ---- Cats (defenders): six original looks ---------------------------------
-// Three defenders and three invaders, each drawn on a square 1:1 piece
-// (teacher, 2026-11-24).
-export const CAT_LOOKS = ['Orange tabby', 'Black cat', 'Gray cat'] as const;
+// ---- Cats (defenders): gray tabby, orange tabby, fluffy orange -----------
+// Her Canva pack (teacher, 2026-11-24) is the layout reference only: these are
+// original shapes drawn here in the Classic style, walking side view, facing
+// right (Stage flips them with `face`), on a square 100 x 100 piece, feet on y = 94.
+export const CAT_LOOKS = ['Gray tabby', 'Orange tabby', 'Fluffy orange cat'] as const;
 const CAT = [
-  { body: P.orange, ear: P.peach, eye: INK },
-  { body: FUR.black, ear: P.blush, eye: P.lemon },
-  { body: FUR.gray, ear: P.blush, eye: INK },
+  { body: FUR.gray, stripe: FUR.grayDeep, ear: P.blush, chest: P.paper, paw: P.paper },
+  { body: P.orange, stripe: FUR.ginger, ear: P.blush, chest: P.paper, paw: P.paper },
+  { body: P.orange, stripe: FUR.ginger, ear: P.blush, chest: P.peach, paw: P.orange },
 ];
-// A sitting cat seen from the front, 100 x 100, feet on y = 96.
+// A leg as an outlined tube: ink first, then the fur, then a paw tip.
+function Leg({ d, fur, paw, w = 9 }: { d: string; fur: string; paw: string; w?: number }) {
+  return (
+    <>
+      <path d={d} fill="none" stroke={INK} strokeWidth={w + 4} />
+      <path d={d} fill="none" stroke={fur} strokeWidth={w} />
+      <path d={d} fill="none" stroke={paw} strokeWidth={w} pathLength={10} strokeDasharray="2.4 7.6" strokeDashoffset={-7.6} />
+    </>
+  );
+}
 export function CatArt({ look = 0, className, style, label }: { look?: number; className?: string; style?: CSSProperties; label?: string }) {
-  const c = CAT[look % CAT.length];
   const k = look % CAT.length;
-  const line = k === 1 ? '#110f1f' : INK;
+  const c = CAT[k];
+  const clip = 'c' + cleanId(useId());
+  const fluffy = k === 2;
+  if (fluffy) {
+    return (
+      <Svg box="0 0 100 100" className={className} style={style} label={label}>
+        {/* a big plume tail, swept up behind, with a fluffy edge */}
+        <path d="M26 58 C14 56 6 46 6 34 C4 26 8 18 14 14 C16 8 24 4 30 8 C36 6 40 12 36 16 C38 20 34 24 30 24 C26 30 26 38 30 44 C34 50 34 56 26 58 Z" fill={c.body} strokeWidth="3.8" />
+        <path d="M14 36 C12 28 14 20 20 16 M22 44 C18 40 18 34 20 30" fill="none" strokeWidth="2.2" stroke={c.stripe} />
+        {/* far legs, short and thick */}
+        <Leg d="M32 72 L28 90" fur={FUR.ginger} paw={FUR.ginger} w={12} />
+        <Leg d="M62 72 L64 90" fur={FUR.ginger} paw={FUR.ginger} w={12} />
+        {/* the fluffy body: a cloud with a scalloped edge */}
+        <path d="M20 64 C14 58 18 48 26 48 C28 40 40 38 46 42 C52 36 64 38 68 44 C76 44 82 52 78 60 C82 68 74 76 66 74 C60 80 48 80 42 76 C34 80 24 76 24 70 C18 70 16 66 20 64 Z" fill={c.body} strokeWidth="4" />
+        <path d="M30 56 C32 52 36 50 40 51 M44 62 C46 58 50 56 54 57 M28 68 C30 65 33 64 36 65" fill="none" strokeWidth="2.2" stroke={c.stripe} />
+        {/* near legs, short and fluffy */}
+        <Leg d="M40 74 L38 92" fur={c.body} paw={c.paw} w={12} />
+        <Leg d="M70 72 L72 92" fur={c.body} paw={c.paw} w={12} />
+        {/* the ruff and the round flat face, turned to us */}
+        <path d="M62 60 C56 54 58 44 64 42 C70 36 84 36 88 44 C94 48 92 58 86 62 C80 68 68 68 62 60 Z" fill={c.chest} strokeWidth="3.4" />
+        <path d="M60 34 L60 14 L72 24 Z M92 34 L94 14 L80 24 Z" fill={c.body} strokeWidth="3.6" />
+        <path d="M62 28 L62 19 L68 24 Z M90 28 L91 19 L84 24 Z" fill={c.ear} strokeWidth="0" />
+        <path d="M76 20 C66 20 58 26 58 36 C58 46 66 52 76 52 C86 52 94 46 94 36 C94 26 86 20 76 20 Z" fill={c.body} strokeWidth="4" />
+        <path d="M60 30 C56 32 56 36 59 38 M92 30 C96 32 96 36 93 38" fill="none" strokeWidth="2.4" />
+        <circle cx="69" cy="35" r="3.4" fill={INK} strokeWidth="0" />
+        <circle cx="83" cy="35" r="3.4" fill={INK} strokeWidth="0" />
+        <circle cx="68" cy="33.8" r="1.1" fill={P.paper} strokeWidth="0" />
+        <circle cx="82" cy="33.8" r="1.1" fill={P.paper} strokeWidth="0" />
+        <path d="M73.5 41 L78.5 41 L76 43.6 Z" fill={P.pink} strokeWidth="1.4" />
+        <path d="M76 43.6 C75 46 73 46.4 71.6 45.6 M76 43.6 C77 46 79 46.4 80.4 45.6" fill="none" strokeWidth="1.8" />
+        <path d="M66 42 L56 41 M66 45 L57 47 M86 42 L96 41 M86 45 L95 47" fill="none" strokeWidth="1.3" />
+        <path d="M64 28 C66 25 69 23 72 23" fill="none" strokeWidth="2.4" stroke={P.paper} opacity="0.9" />
+      </Svg>
+    );
+  }
   return (
     <Svg box="0 0 100 100" className={className} style={style} label={label}>
-      {/* tail */}
-      <path d="M70 88 C90 86 94 70 86 58 C83 54 79 56 81 60 C86 68 84 79 68 80" fill={k === 5 ? FUR.point : c.body} strokeWidth="3.6" stroke={line} />
-      {/* body */}
-      <path d="M30 96 C24 80 28 60 50 58 C72 60 76 80 70 96 Z" fill={c.body} strokeWidth="4" stroke={line} />
-      {k === 3 && <path d="M33 92 C30 80 36 70 46 72 C46 82 42 90 33 92 Z" fill={P.orange} strokeWidth="0" />}
-      {k === 3 && <path d="M58 66 C68 66 72 76 69 84 C62 82 56 74 58 66 Z" fill={FUR.black} strokeWidth="0" />}
-      {k === 4 && <><circle cx="40" cy="80" r="5" fill={FUR.gray} strokeWidth="0" /><circle cx="60" cy="72" r="4" fill={FUR.gray} strokeWidth="0" /><circle cx="56" cy="88" r="3" fill={FUR.gray} strokeWidth="0" /></>}
-      {k === 0 && <path d="M38 70 L44 72 M36 80 L44 81 M62 70 L56 72 M64 80 L56 81" fill="none" strokeWidth="2.4" stroke="#c4600a" />}
-      {/* chest and paws */}
-      <path d="M42 96 C42 86 45 80 50 80 C55 80 58 86 58 96" fill={k === 1 ? '#4a4566' : P.paper} strokeWidth="2.6" stroke={line} />
-      <path d="M36 96 C36 91 44 91 44 96 M56 96 C56 91 64 91 64 96" fill={k === 5 ? FUR.point : c.body} strokeWidth="3" stroke={line} />
+      <defs><clipPath id={clip}><path d="M16 54 C16 42 30 38 48 40 C62 41 72 44 74 54 C76 66 64 70 46 70 C28 70 16 66 16 54 Z" /></clipPath></defs>
+      {/* tail, raised with a curl at the tip */}
+      <path d="M20 50 C10 42 8 26 14 14 C16 9 22 9 22 14" fill="none" stroke={INK} strokeWidth="11" />
+      <path d="M20 50 C10 42 8 26 14 14 C16 9 22 9 22 14" fill="none" stroke={c.body} strokeWidth="6.4" />
+      <path d="M20 50 C10 42 8 26 14 14 C16 9 22 9 22 14" fill="none" stroke={c.stripe} strokeWidth="6.4" strokeDasharray="3 6" strokeLinecap="butt" />
+      {/* far legs, a step behind */}
+      <Leg d="M28 66 L22 90" fur={c.stripe} paw={c.paw} />
+      <Leg d="M60 66 L58 90" fur={c.stripe} paw={c.paw} />
+      {/* body with stripes */}
+      <path d="M16 54 C16 42 30 38 48 40 C62 41 72 44 74 54 C76 66 64 70 46 70 C28 70 16 66 16 54 Z" fill={c.body} strokeWidth="4" />
+      <g clipPath={`url(#${clip})`} fill="none" stroke={c.stripe} strokeWidth="4.2">
+        <path d="M26 38 C24 48 26 56 30 62 M36 37 C34 48 36 56 40 64 M46 38 C44 48 46 56 50 66 M56 39 C54 48 56 56 60 64" />
+      </g>
+      <path d="M58 70 C58 60 64 52 72 52 C74 60 70 68 66 70 Z" fill={c.chest} strokeWidth="2.6" />
+      {/* near legs, mid stride */}
+      <Leg d="M34 68 L40 92" fur={c.body} paw={c.paw} />
+      <Leg d="M66 66 L74 90" fur={c.body} paw={c.paw} />
       {/* ears */}
-      <path d="M27 34 L24 10 L44 24 Z" fill={c.body} strokeWidth="4" stroke={line} />
-      <path d="M73 34 L76 10 L56 24 Z" fill={c.body} strokeWidth="4" stroke={line} />
-      <path d="M29 28 L28 17 L37 24 Z M71 28 L72 17 L63 24 Z" fill={c.ear} strokeWidth="0" />
-      {/* head */}
-      <path d="M50 18 C72 18 80 32 78 44 C76 58 64 64 50 64 C36 64 24 58 22 44 C20 32 28 18 50 18 Z" fill={c.body} strokeWidth="4" stroke={line} />
-      {k === 3 && <path d="M50 19 C64 19 74 26 77 36 C66 36 56 30 50 19 Z" fill={P.orange} strokeWidth="0" />}
-      {k === 3 && <path d="M24 40 C26 28 34 22 40 21 C40 30 34 38 24 40 Z" fill={FUR.black} strokeWidth="0" />}
-      {k === 4 && <circle cx="64" cy="32" r="6" fill={FUR.gray} strokeWidth="0" />}
-      {k === 5 && <path d="M38 44 C38 36 62 36 62 44 C62 56 56 60 50 60 C44 60 38 56 38 44 Z" fill={FUR.point} strokeWidth="0" />}
-      {k === 0 && <path d="M44 22 L46 30 M50 20 L50 29 M56 22 L54 30" fill="none" strokeWidth="2.4" stroke="#c4600a" />}
-      {/* face: dot eyes, small nose, a little smile, whiskers */}
-      <circle cx="40" cy="42" r="3.6" fill={c.eye} strokeWidth={c.eye === INK ? 0 : 1.6} stroke={line} />
-      <circle cx="60" cy="42" r="3.6" fill={c.eye} strokeWidth={c.eye === INK ? 0 : 1.6} stroke={line} />
-      {c.eye !== INK && <><circle cx="40" cy="42" r="1.4" fill={INK} strokeWidth="0" /><circle cx="60" cy="42" r="1.4" fill={INK} strokeWidth="0" /></>}
-      <path d="M47 49 L53 49 L50 52 Z" fill={P.pink} strokeWidth="1.6" stroke={line} />
-      <path d="M50 52 C49 55 46 56 44 55 M50 52 C51 55 54 56 56 55" fill="none" strokeWidth="2" stroke={k === 1 ? P.paper : line} />
-      <path d="M33 50 L22 48 M33 53 L23 55 M67 50 L78 48 M67 53 L77 55" fill="none" strokeWidth="1.6" stroke={k === 1 ? P.paper : line} />
-      {/* one cream shine, top left */}
-      <path d="M32 30 C34 26 38 24 41 24" fill="none" strokeWidth="2.6" stroke={P.paper} opacity={k === 3 || k === 4 ? 0 : 0.9} />
+      <path d="M62 30 L60 10 L74 20 Z M88 28 L92 10 L78 18 Z" fill={c.body} strokeWidth="3.6" />
+      <path d="M63.5 25 L63 15 L70 20 Z M87 24 L89 15 L82 19 Z" fill={c.ear} strokeWidth="0" />
+      {/* head, turned a little toward us */}
+      <path d="M76 16 C66 16 58 22 58 32 C58 42 66 48 76 48 C86 48 94 42 94 32 C94 22 86 16 76 16 Z" fill={c.body} strokeWidth="4" />
+      <path d="M70 18 L72 24 M76 17 L76 23 M82 18 L80 24" fill="none" strokeWidth="2.4" stroke={c.stripe} />
+      <path d="M68 42 C68 36 72 34 77 34 C82 34 88 36 88 42 C86 47 70 47 68 42 Z" fill={c.chest} strokeWidth="0" />
+      <circle cx="70" cy="30" r="3.2" fill={INK} strokeWidth="0" />
+      <circle cx="84" cy="30" r="3.2" fill={INK} strokeWidth="0" />
+      <circle cx="69" cy="29" r="1" fill={P.paper} strokeWidth="0" />
+      <circle cx="83" cy="29" r="1" fill={P.paper} strokeWidth="0" />
+      <path d="M74.5 36 L79.5 36 L77 38.6 Z" fill={P.pink} strokeWidth="1.4" />
+      <path d="M77 38.6 C76 41 74 41.4 72.6 40.6 M77 38.6 C78 41 80 41.4 81.4 40.6" fill="none" strokeWidth="1.8" />
+      <path d="M68 37 L58 36 M68 40 L59 42 M86 37 L96 36 M86 40 L95 42" fill="none" strokeWidth="1.3" />
+      <path d="M62 26 C64 22 67 20 70 20" fill="none" strokeWidth="2.4" stroke={P.paper} opacity="0.9" />
     </Svg>
   );
 }
 
 // ---- Mice (invaders): brown, gray and white -------------------------------
+// Running side view, facing right (Stage flips them to run left), feet near the bottom.
 export const MOUSE_LOOKS = ['Brown mouse', 'Gray mouse', 'White mouse'] as const;
-const MOUSE = [FUR.brown, FUR.gray, P.paper];
-// A little mouse in side view, facing left, on a square 100 x 100 piece, feet near the bottom.
+const MOUSE = [FUR.taupe, FUR.slate, P.paper];
 export function MouseArt({ look = 0, className, style, label }: { look?: number; className?: string; style?: CSSProperties; label?: string }) {
   const body = MOUSE[look % MOUSE.length];
   return (
-    <Svg box="-2 -28 104 104" className={className} style={style} label={label}>
-      <path d="M72 52 C86 54 92 44 96 34" fill="none" strokeWidth="3.4" stroke={P.pink} />
-      <path d="M72 52 C86 54 92 44 96 34" fill="none" strokeWidth="1" stroke={INK} opacity="0.5" />
-      <path d="M14 50 C14 34 30 24 50 24 C68 24 80 36 78 50 C77 60 68 64 50 64 L24 64 C17 64 14 58 14 50 Z" fill={body} strokeWidth="3.8" />
-      <path d="M8 48 C10 40 18 34 26 34" fill="none" strokeWidth="0" />
-      {/* head and nose */}
-      <path d="M4 50 C6 42 16 36 26 38 L30 56 C20 58 8 56 4 50 Z" fill={body} strokeWidth="3.4" />
-      <circle cx="4.5" cy="49.5" r="3" fill={P.pink} strokeWidth="1.6" />
+    <Svg box="0 0 100 100" className={className} style={style} label={label}>
+      {/* long pink tail, curving back and up */}
+      <path d="M24 76 C12 76 8 66 4 56 C2 50 6 46 10 48" fill="none" stroke={INK} strokeWidth="6.4" />
+      <path d="M24 76 C12 76 8 66 4 56 C2 50 6 46 10 48" fill="none" stroke={P.blush} strokeWidth="3" />
+      {/* back feet, stretched out behind */}
+      <path d="M30 84 C24 88 18 90 14 90" fill="none" stroke={INK} strokeWidth="6.4" />
+      <path d="M30 84 C24 88 18 90 14 90" fill="none" stroke={P.blush} strokeWidth="3" />
+      {/* the round body, a teardrop with the point at the nose */}
+      <path d="M20 74 C18 60 32 52 50 52 C64 52 74 58 84 66 C90 70 92 74 88 77 C80 82 66 86 48 86 C30 86 22 82 20 74 Z" fill={body} strokeWidth="3.8" />
+      <circle cx="90" cy="74.5" r="3" fill={P.pink} strokeWidth="1.6" />
+      {/* front feet, reaching forward */}
+      <path d="M66 84 C72 88 76 90 80 90" fill="none" stroke={INK} strokeWidth="6.4" />
+      <path d="M66 84 C72 88 76 90 80 90" fill="none" stroke={P.blush} strokeWidth="3" />
       {/* big round ear */}
-      <circle cx="30" cy="26" r="12" fill={body} strokeWidth="3.6" />
-      <circle cx="30" cy="26" r="6.5" fill={P.blush} strokeWidth="0" />
-      <circle cx="16" cy="45" r="2.6" fill={INK} strokeWidth="0" />
-      <path d="M8 52 L-2 50 M8 54 L-1 57" fill="none" strokeWidth="1.4" />
-      {/* feet */}
-      <path d="M30 64 L28 68 M60 64 L62 68" fill="none" strokeWidth="3" />
-      <path d="M42 32 C48 29 56 29 60 31" fill="none" strokeWidth="2.4" stroke={P.paper} opacity={look === 2 ? 0 : 0.85} />
+      <circle cx="62" cy="50" r="11" fill={body} strokeWidth="3.6" />
+      <circle cx="62.5" cy="50.5" r="6" fill={P.blush} strokeWidth="0" />
+      <circle cx="76" cy="66" r="2.6" fill={INK} strokeWidth="0" />
+      <circle cx="75.3" cy="65.2" r="0.8" fill={P.paper} strokeWidth="0" />
+      <path d="M86 71 L96 68 M86 73 L97 74" fill="none" strokeWidth="1.2" />
+      <path d="M34 60 C40 56 48 55 54 56" fill="none" strokeWidth="2.4" stroke={P.paper} opacity={look % MOUSE.length === 2 ? 0 : 0.85} />
     </Svg>
   );
 }
 
-// ---- The mouse hole (entrance): a small arch in the baseboard --------------
+// ---- The entrance: an arched wooden mouse door in the baseboard -----------
+// Standing a little open, so the dark hole behind shows where mice come from.
 export function HoleArt({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <Svg box="0 0 100 90" className={className} style={style}>
-      <path d="M8 88 L8 46 C8 18 28 4 50 4 C72 4 92 18 92 46 L92 88 Z" fill={FUR.brownDeep} strokeWidth="5" />
-      <path d="M20 88 L20 48 C20 26 34 16 50 16 C66 16 80 26 80 48 L80 88 Z" fill="#241f38" strokeWidth="3.4" />
-      <path d="M26 44 C28 32 36 24 44 22" fill="none" strokeWidth="3" stroke={FUR.brown} />
+      <path d="M12 89 L12 44 C12 18 30 4 50 4 C70 4 88 18 88 44 L88 89 Z" fill={FUR.brownDeep} strokeWidth="4.6" />
+      <path d="M20 89 L20 46 C20 26 34 13 50 13 C66 13 80 26 80 46 L80 89 Z" fill="#241f38" strokeWidth="3" />
+      <path d="M30 89 L30 40 C30 24 40 14 52 13 C66 14 80 26 80 46 L80 89 Z" fill={FUR.brown} strokeWidth="3.8" />
+      <path d="M46 16 V87 M62 16 V87" fill="none" strokeWidth="2.2" stroke={FUR.brownDeep} />
+      <path d="M38 34 C40 26 44 20 50 18" fill="none" strokeWidth="2.6" stroke={P.peach} opacity="0.8" />
+      <path d="M38 52 C34 54 34 60 37 62" fill="none" strokeWidth="5.4" />
+      <path d="M38 52 C34 54 34 60 37 62" fill="none" strokeWidth="2.4" stroke={P.lemon} />
     </Svg>
   );
 }
@@ -150,117 +205,66 @@ export function PoofArt({ className, style }: { className?: string; style?: CSSP
   );
 }
 
-// ---- The living room ------------------------------------------------------
-// Wallpaper: butter with peach stripes and little lemon four-point flowers.
-const WALLPAPER = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='120' height='120' fill='${P.butter}'/><rect x='0' width='22' height='120' fill='${P.peach}'/><rect x='60' width='22' height='120' fill='${P.peach}'/><g fill='${P.lemon}' stroke='${INK}' stroke-width='2' stroke-linejoin='round'><path d='M41 14 C42 20 44 22 50 23 C44 24 42 26 41 32 C40 26 38 24 32 23 C38 22 40 20 41 14 Z'/><path d='M101 74 C102 80 104 82 110 83 C104 84 102 86 101 92 C100 86 98 84 92 83 C98 82 100 80 101 74 Z'/></g><circle cx='41' cy='84' r='3' fill='${P.pink}'/><circle cx='101' cy='24' r='3' fill='${P.pink}'/></svg>`)}")`;
-// Floor: peach planks with soft orange seams.
-const FLOOR = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><rect width='240' height='60' fill='#f7c58f'/><path d='M0 30 H240 M0 59 H240' stroke='#d9935a' stroke-width='3'/><path d='M70 0 V30 M190 0 V30 M20 30 V60 M140 30 V60' stroke='#d9935a' stroke-width='3'/></svg>`)}")`;
+// ---- The room (her layout): a blue wall, a wooden baseboard and a butter
+// and peach checker-tile floor seen in a little perspective.
+const WALL = P.crystal;
+// The checker floor: rows grow toward the front, columns run to one point.
+const FLOOR_TILES = (() => {
+  const N = 7, W = 160, H = 40, vx = 80, vy = -70, cw = 14;
+  const ys = Array.from({ length: N + 1 }, (_, k) => H * (k / N) ** 1.35);
+  const xAt = (xb: number, y: number) => vx + (xb - vx) * (y - vy) / (H - vy);
+  const cells: string[] = [];
+  for (let k = 0; k < N; k++) for (let j = -14; j < 14; j++) {
+    if ((j + k) % 2 === 0) continue;
+    const a = vx + j * cw, b = a + cw, y0 = ys[k], y1 = ys[k + 1];
+    cells.push(`M${xAt(a, y0).toFixed(2)} ${y0.toFixed(2)}L${xAt(b, y0).toFixed(2)} ${y0.toFixed(2)}L${xAt(b, y1).toFixed(2)} ${y1.toFixed(2)}L${xAt(a, y1).toFixed(2)} ${y1.toFixed(2)}Z`);
+  }
+  return { W, H, d: cells.join('') };
+})();
+function Floor() {
+  return (
+    <svg viewBox={`0 0 ${FLOOR_TILES.W} ${FLOOR_TILES.H}`} preserveAspectRatio="none" className="absolute inset-0 w-full h-full" aria-hidden="true">
+      <rect width={FLOOR_TILES.W} height={FLOOR_TILES.H} fill={P.butter} />
+      <path d={FLOOR_TILES.d} fill={P.peach} />
+    </svg>
+  );
+}
 
-export const WALL_BOTTOM = 59; // % from the top where the floor starts
-// The room's own width and height inside its box (16 x 10, fitted).
-const RW = 'min(100cqw, 160cqh)';
-const RH = 'min(100cqh, 62.5cqw)';
-
+// One small window, where scared cats hop out (logic EXIT is about 18%, 22%).
 function Window() {
   return (
     <Svg box="0 0 200 180">
-      <rect x="10" y="10" width="180" height="150" rx="10" fill={P.paper} strokeWidth="6" />
-      <rect x="26" y="26" width="148" height="118" rx="4" fill={P.crystal} strokeWidth="4" />
-      <circle cx="140" cy="60" r="18" fill={P.lemon} strokeWidth="4" />
-      <path d="M40 112 C52 96 70 96 80 108 C92 94 112 96 118 112 Z" fill={P.paper} strokeWidth="3.4" />
-      <path d="M100 26 V144 M26 85 H174" fill="none" strokeWidth="4" />
-      <path d="M2 164 H198" fill="none" strokeWidth="8" />
-      {/* curtains */}
-      <path d="M0 4 C14 40 4 120 16 172 L-12 172 L-12 4 Z" fill={P.pink} strokeWidth="5" />
-      <path d="M200 4 C186 40 196 120 184 172 L212 172 L212 4 Z" fill={P.pink} strokeWidth="5" />
-    </Svg>
-  );
-}
-function Couch() {
-  return (
-    <Svg box="0 0 300 150">
-      <path d="M26 40 C26 18 40 12 60 12 L240 12 C260 12 274 18 274 40 L274 96 L26 96 Z" fill={P.teal} strokeWidth="6" />
-      <path d="M40 70 C40 58 50 54 64 54 L236 54 C250 54 260 58 260 70 L260 112 L40 112 Z" fill={P.aqua} strokeWidth="5" />
-      <path d="M150 56 V110" fill="none" strokeWidth="4" />
-      <path d="M8 66 C8 52 18 48 30 48 C42 48 50 54 50 66 L50 128 L8 128 Z" fill={P.teal} strokeWidth="6" />
-      <path d="M292 66 C292 52 282 48 270 48 C258 48 250 54 250 66 L250 128 L292 128 Z" fill={P.teal} strokeWidth="6" />
-      <path d="M50 112 H250 V128 H50 Z" fill={P.teal} strokeWidth="5" />
-      <path d="M24 128 L20 146 M276 128 L280 146" fill="none" strokeWidth="7" />
-      <path d="M64 30 C82 26 104 26 118 30" fill="none" strokeWidth="4" stroke={P.aqua} />
-      {/* a cushion */}
-      <path d="M70 58 C66 40 76 30 96 34 C116 36 122 46 118 60 C104 64 84 64 70 58 Z" fill={P.lemon} strokeWidth="4" />
-    </Svg>
-  );
-}
-function Lamp() {
-  return (
-    <Svg box="0 0 80 240">
-      <path d="M14 70 L26 12 L54 12 L66 70 Z" fill={P.lemon} strokeWidth="5" />
-      <path d="M40 70 V222" fill="none" strokeWidth="6" />
-      <path d="M18 230 C18 218 62 218 62 230 Z" fill={P.grape} strokeWidth="5" />
-      <path d="M30 24 L26 50" fill="none" strokeWidth="3.4" stroke={P.paper} />
-    </Svg>
-  );
-}
-function Plant() {
-  return (
-    <Svg box="0 0 120 200">
-      <path d="M60 130 C40 100 18 96 8 70 C30 72 50 90 60 120 Z" fill={P.kelly} strokeWidth="4" />
-      <path d="M60 126 C66 90 60 50 72 20 C88 52 78 96 62 126 Z" fill={P.kelly} strokeWidth="4" />
-      <path d="M62 128 C80 104 100 100 114 80 C100 112 84 124 64 132 Z" fill={P.kelly} strokeWidth="4" />
-      <path d="M60 120 C58 100 50 90 40 84" fill="none" strokeWidth="2.6" />
-      <path d="M28 130 L92 130 L84 194 L36 194 Z" fill={P.orange} strokeWidth="5" />
-      <path d="M24 122 H96 V138 H24 Z" fill={P.orange} strokeWidth="5" />
-    </Svg>
-  );
-}
-function Frame() {
-  return (
-    <Svg box="0 0 140 110">
-      <rect x="6" y="6" width="128" height="98" rx="8" fill={P.grape} strokeWidth="5" />
-      <rect x="20" y="20" width="100" height="70" rx="4" fill={P.mint} strokeWidth="3.4" />
-      <path d="M20 80 C40 56 56 56 70 70 C84 50 104 52 120 72 L120 90 L20 90 Z" fill={P.kelly} strokeWidth="3" />
-      <circle cx="98" cy="38" r="9" fill={P.lemon} strokeWidth="3" />
-    </Svg>
-  );
-}
-function Rug() {
-  return (
-    <Svg box="0 0 400 120">
-      <ellipse cx="200" cy="60" rx="194" ry="54" fill={P.pink} strokeWidth="6" />
-      <ellipse cx="200" cy="60" rx="150" ry="38" fill={P.blush} strokeWidth="4" />
-      <ellipse cx="200" cy="60" rx="96" ry="22" fill={P.pink} strokeWidth="3.4" />
+      <rect x="12" y="10" width="176" height="150" rx="10" fill={P.paper} strokeWidth="6" />
+      <rect x="28" y="26" width="144" height="118" rx="4" fill={P.aqua} strokeWidth="4" />
+      <circle cx="138" cy="60" r="16" fill={P.lemon} strokeWidth="4" />
+      <path d="M42 112 C54 98 70 98 80 108 C92 96 110 98 116 112 Z" fill={P.paper} strokeWidth="3.4" />
+      <path d="M100 26 V144 M28 85 H172" fill="none" strokeWidth="4" />
+      <path d="M4 164 H196" fill="none" strokeWidth="8" stroke={FUR.brown} />
+      <path d="M4 164 H196" fill="none" strokeWidth="2" />
     </Svg>
   );
 }
 
+export const WALL_BOTTOM = 59; // % from the top where the floor starts
+// The room's own height inside its box (16 x 10, fitted).
+const RH = 'min(100cqh, 62.5cqw)';
+
 // The whole room, always 16 x 10 so every spot lands on the floor; it fits
-// inside its box (container units) and the box around it wears the floor.
-// A theme's background picture replaces the drawn room.
+// inside its box (container units) and the wall, baseboard and floor run the
+// full width of the box. A theme's background picture replaces the drawn room.
 export function RoomArt({ background, entrance, className = '', children }: { background?: string; entrance?: string; className?: string; children?: ReactNode }) {
-  const at = (l: number, t: number, w: number): CSSProperties => ({ position: 'absolute', left: `${l}%`, top: `${t}%`, width: `${w}%` });
+  const line = (pct: number) => `calc(50% + ${(pct - 50) / 100} * ${RH})`;
   return (
-    <div className={`${/\b(absolute|fixed)\b/.test(className) ? '' : 'relative'} grid place-items-center overflow-hidden ${className}`} style={{ containerType: 'size', background: '#f7c58f' }}>
-      {/* The wall, baseboard and floor run the full width, so past the
-          room's edges there is no dead space. */}
+    <div className={`${/\b(absolute|fixed)\b/.test(className) ? '' : 'relative'} grid place-items-center overflow-hidden ${className}`} style={{ containerType: 'size', background: background ? P.butter : WALL }}>
       {!background && (
         <>
-          <div className="absolute inset-x-0 top-0" style={{ height: `calc(50% + ${(WALL_BOTTOM - 50) / 100} * ${RH})`, backgroundImage: WALLPAPER, backgroundSize: `calc(0.075 * ${RW}) auto`, backgroundPosition: 'center top' }} />
-          <div className="absolute inset-x-0 bottom-0" style={{ top: `calc(50% + ${(WALL_BOTTOM - 50) / 100} * ${RH})`, backgroundImage: FLOOR, backgroundSize: `calc(0.15 * ${RW}) auto`, backgroundPosition: 'center top', borderTop: `0.3rem solid ${INK}` }} />
-          <div className="absolute inset-x-0" style={{ top: `calc(50% + ${(WALL_BOTTOM - 55) / 100} * ${RH})`, height: `calc(0.05 * ${RH})`, background: P.paper, borderTop: `0.25rem solid ${INK}` }} />
+          <div className="absolute inset-x-0 bottom-0 overflow-hidden" style={{ top: line(WALL_BOTTOM) }}><Floor /></div>
+          {/* the baseboard: a wooden band with a cap on top */}
+          <div className="absolute inset-x-0" style={{ top: line(WALL_BOTTOM - 4.5), height: `calc(0.045 * ${RH})`, background: FUR.brown, borderTop: `0.22rem solid ${INK}`, borderBottom: `0.22rem solid ${INK}`, boxShadow: `inset 0 0.3rem 0 ${FUR.brownDeep}` }} />
         </>
       )}
-      <div className="relative overflow-hidden" style={{ width: 'min(100cqw, 160cqh)', aspectRatio: '16 / 10', background: background ? `#f7c58f center / cover no-repeat url("${background}")` : undefined }}>
-        {!background && (
-          <>
-            <div style={at(7, 6, 19)}><Window /></div>
-            <div style={at(37, 12, 11)}><Frame /></div>
-            <div style={at(22, 36, 30)}><Couch /></div>
-            <div style={at(55, 35, 5)}><Lamp /></div>
-            <div style={at(89, 35.5, 9)}><Plant /></div>
-            <div style={at(20, 66, 58)}><Rug /></div>
-          </>
-        )}
+      <div className="relative overflow-hidden" style={{ width: 'min(100cqw, 160cqh)', aspectRatio: '16 / 10', background: background ? `${P.butter} center / cover no-repeat url("${background}")` : undefined }}>
+        {!background && <div className="absolute" style={{ left: '10%', top: '8%', width: '16%' }}><Window /></div>}
         {/* The entrance always shows, so invaders have somewhere to come from. */}
         <div className="absolute" style={{ left: '76.5%', top: '49%', width: '7%', aspectRatio: '100 / 90' }}>
           {entrance ? <img src={entrance} alt="" className="w-full h-full object-contain" draggable="false" /> : <HoleArt className="w-full h-full" />}
