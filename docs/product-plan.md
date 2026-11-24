@@ -245,8 +245,8 @@ theme, designed on Bubble Pop's template. The theme picker inside each
 game shows only that game's themes.
 
 ### Theme tiers (matches section 5)
-- **Free:** the house default theme to play; every other theme can be
-  **previewed but not played**; no Theme Builder.
+- **Free:** plays every theme already made (the whole library;
+  owner, 2026-11-24) and can create a theme only for Game Show.
 - **Plus:** full theme library, playable, plus seasonal drops (fall,
   winter, spring, field day; secular by default, specific holidays only
   when a teacher chooses them).
@@ -1191,6 +1191,8 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 110 | **Question Tracker theme ideas: seashells on a beach, birds on wires.** Every right answer adds a seashell to the sand along the shore, or a little bird that lands on the telephone wires until the wires are full, the same fill-the-scene idea as the night sky of stars. | New calm scenes for the class-goal game without a new game to learn | Teacher, 2026-11-24 |
 | 111 | **Pinterest as a main channel.** Tall pins of every game in the Classic look, free theme templates, sticker sheets and pattern papers as printables, seasonal classroom sets a month early, each linking to a Blog post or theme guide. | The site's look is made to be saved and shared by teachers planning their rooms | Teacher, 2026-11-24 |
 | 112 | **Sculpt it, snap it, play it.** Physical design: classes make theme pieces from clay, modeling dough, textured paint, recycled things or leaves and sticks, take a photo or scan, and Gamify fits it into the game. Digital design works too. | The one feature no other quiz game platform has: students' real, hands-on work becomes the game; strong visuals for Pinterest and Reels (hands and pieces, no faces) | Owner, 2026-11-24 |
+| 113 | **Pay the way that fits: monthly, 3 months, 6 months or yearly.** Every paid plan renews at the interval you pick, and longer terms save more (about 10%, 15% and 20%). | Removes the "I can't pay a year up front" objection for teachers paying out of pocket | Owner, 2026-11-24 |
+| 114 | **Founding Subscriber launch offer.** Subscribe during the beta and get 15% off your first 12 months (predicted terms). | Turns beta-season interest into paid plans from teachers who don't want to test | Owner, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

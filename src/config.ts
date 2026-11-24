@@ -34,7 +34,10 @@ const UNLIMITED = Number.POSITIVE_INFINITY;
 export const TIERS: Record<Tier, TierLimits> = {
   free: {
     hasClasses: false, classrooms: 1, studentsPerClassroom: 30, savedQuestionSets: 3, assignedSetsPerStudent: 1,
-    allGames: false, themesPlayable: false, themeBuilder: 'trial', liveMonitorAndLock: false,
+    // Free plays every theme already made (owner, 2026-11-24: "free plan should
+    // have access to use all themes created, just can only create a theme for
+    // game show").
+    allGames: false, themesPlayable: true, themeBuilder: 'trial', liveMonitorAndLock: false,
     reportHistoryDays: 30, homeworkDaysAhead: 14,
   },
   plus: {
@@ -61,6 +64,42 @@ export const TIERS: Record<Tier, TierLimits> = {
 // Placeholders: nothing charges until Stage 7 is approved.
 // Homeschool $8 a month, same as Plus (teacher, 2026-10-26).
 export const PRICES_USD_PER_YEAR: Record<Exclude<Tier, 'free'>, number> = { plus: 96, pro: 180, homeschool: 96 };
+
+// Billing intervals (owner, 2026-11-24): "allow also monthly subscriptions
+// though discount at 3 month, 6 month, and 1 year. those are renewing at
+// those intervals as well." Each plan renews at the interval chosen, at the
+// same price, until it is canceled. Monthly prices and the 3- and 6-month
+// discounts are predicted (Plus $10 and Pro $19 a month, about 10% and 15%
+// off); yearly keeps the prices set on 2026-10-24. Owner to confirm.
+export type Billing = 'month' | 'quarter' | 'half' | 'year';
+export const BILLINGS: { id: Billing; months: number }[] = [
+  { id: 'month', months: 1 }, { id: 'quarter', months: 3 }, { id: 'half', months: 6 }, { id: 'year', months: 12 },
+];
+export const PRICES_USD: Record<Exclude<Tier, 'free'>, Record<Billing, number>> = {
+  plus: { month: 10, quarter: 27, half: 51, year: PRICES_USD_PER_YEAR.plus },
+  pro: { month: 19, quarter: 51, half: 97, year: PRICES_USD_PER_YEAR.pro },
+  homeschool: { month: 10, quarter: 27, half: 51, year: PRICES_USD_PER_YEAR.homeschool },
+};
+export const billingMonths = (b: Billing) => BILLINGS.find((x) => x.id === b)!.months;
+// Percent saved against paying month to month for the same length of time.
+export function billingSavings(tier: Exclude<Tier, 'free'>, b: Billing): number {
+  const full = PRICES_USD[tier].month * billingMonths(b);
+  return Math.round((1 - PRICES_USD[tier][b] / full) * 100);
+}
+
+// The launch campaign (owner, 2026-11-24): a discount for people who want a
+// paid plan during the beta test but do not want to be beta testers. Predicted
+// terms, owner to confirm: 15% off every payment for the first 12 months, any
+// plan and any billing interval, for subscriptions started before the beta
+// closes. Beta testers get their own offer instead (src/beta/spec.ts); the
+// two never stack. Applied with a Stripe promotion code once Stripe is set up.
+export const LAUNCH_OFFER = {
+  name: 'Founding Subscriber',
+  code: 'FOUNDING15',
+  discount: 0.15,
+  firstMonths: 12,
+  active: true,
+} as const;
 
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).

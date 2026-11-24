@@ -431,4 +431,5 @@ creative. Start small, learn, then scale what works.
   (2026-11-24).
 - Price talk always leads with value (standing sales rule, 2026-10-25).
 - English only (2026-10-26). No other company's brand anywhere (standing legal rule).
+- Offers (2026-11-24): paid plans bill monthly, every 3 months, every 6 months or yearly, and renew at that interval; always say "renews every [interval] until you cancel" next to a price. The launch campaign is the Founding Subscriber offer for people who subscribe during the beta without being testers (terms in src/config.ts, LAUNCH_OFFER; predicted 15% off the first 12 months, waiting for her OK). It never stacks with the beta tester offer, and student pages never show it.
 - Themes (2026-11-24): never the word Canva anywhere a customer sees it ("we're going to get sued"); themes are digital design or physical design; promote photo and scan uploads and 3-D materials (clay, modeling dough, textured paint, recycled goods, leaves and sticks), not only pencils and crayons. See Theme language in section 4.

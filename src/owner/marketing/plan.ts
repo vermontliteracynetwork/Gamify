@@ -71,6 +71,10 @@ export const CAMPAIGNS: Campaign[] = [
     goal: 'Try: 4 beta classrooms by January 15 (Waiting on you: pilots).',
     buyer: 'sped', message: 'Built by a teacher for students with high support needs, so it works for everyone.', offer: 'Join the beta test (free while testing; disclosed in every post a beta teacher makes)',
     start: '2026-12-01', end: '2027-01-15', channels: ['instagram', 'facebook'], budget: 'Organic only.' },
+  { id: 'c-founding', name: 'Founding Subscriber launch offer', status: 'planning',
+    goal: 'Buy: paid subscriptions during the beta from teachers who want Gamify now but not the beta tester asks. Target to set with the owner (proposed: 25 paid plans before the beta closes).',
+    buyer: 'k5-teachers', message: 'Be one of the first: your class designs the games, and you lock in the founding price.', offer: '15% off every payment for the first 12 months, any plan (Plus, Pro, Homeschool) and any billing (monthly, 3 months, 6 months, yearly); code FOUNDING15. Never stacks with the beta tester offer. Predicted terms, owner to confirm.',
+    start: 'When Stripe checkout is live', end: 'When the beta closes (10 testers approved)', channels: ['instagram', 'facebook', 'pinterest', 'tiktok', 'meta-ads', 'google-ads'], budget: 'Organic first; paid test after the domain and Stripe (owner approves every dollar).' },
 ];
 
 const T = (date: string) => `${date}T09:00:00`;
@@ -147,6 +151,7 @@ export const POSTS: Post[] = [
 
 export const ACTIVITY: Activity[] = [
   { at: T('2026-11-24'), by: 'Marketing Director', what: 'Team set up: the marketing bible, the lessons file, 6 team members and 8 skills. Planner opened.' },
+  { at: T('2026-11-24'), by: 'Marketing Director', what: 'Planning the Founding Subscriber launch offer (15% off the first 12 months, any plan and billing, during the beta; predicted terms, waiting for your OK).' },
   { at: T('2026-11-24'), by: 'Marketing Director', what: 'Drafted two campaigns for December and January: Whole class vs the teacher, and Join the beta test.' },
   { at: T('2026-11-24'), by: 'Brand Copywriter', what: 'Wrote hooks and captions for p-0001 to p-0005 in the brand voice.' },
   { at: T('2026-11-24'), by: 'Social Planner', what: 'Placed 5 posts across TikTok, Instagram, Pinterest and Facebook for the first two weeks of December.' },
