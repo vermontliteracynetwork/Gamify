@@ -11,20 +11,20 @@ plus the hand-off from the "Game recreations" session).
 
 ## A. Game mockups on /brand (Game mockups tab)
 
-1. [ ] **Power-ups always on top.** "power ups should always be top layer, never
+1. [x] **Power-ups always on top.** "power ups should always be top layer, never
    cut off by frame borders." Every power-up card and icon, in every mockup and
    view, sits above frames and borders and is never clipped (e.g. the Swap
    Spinner arrows over the card edge).
-2. [ ] **Board side panel order.** "stack in this order: leaderboard players,
+2. [x] **Board side panel order.** "stack in this order: leaderboard players,
    power up, die. remove how many squares to go." Board Game: players first,
    then the held power-ups, then the die; no "12 to go" text on the rows.
-3. [ ] **Match Three strip.** "for match three, put meter on top, adding in the
+3. [x] **Match Three strip.** "for match three, put meter on top, adding in the
    moves following my designs. xp as a number on the top of the rigth followed
    by power ups that are center aligned to the xp text." The meter (with the
    moves in it, per her earlier tracker designs) across the top; the score
    (XP) as a number at the top right; the held power-ups under it, centered on
    the score text.
-4. [ ] **Same standard for every solo board game.** "follow same standard of
+4. [x] **Same standard for every solo board game.** "follow same standard of
    design that i just explained for match three for the bubble shooter game and
    all other solo game board games like this in the future." Bubble Pop first;
    becomes a Brand Kit rule for all future solo board games.
@@ -82,7 +82,7 @@ Approved: Home.
 
 18. [ ] **Link generously.** "add lots of buttons and links to other pages
     within the gamify site. like when help pages are noted and such."
-19. [ ] **Never break a word across lines.** "never break up text within a word
+19. [x] **Never break a word across lines.** "never break up text within a word
     to drop part of the word to the next line." No hyphenation or mid-word
     wrapping anywhere (CSS rule plus a check).
 

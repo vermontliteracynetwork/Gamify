@@ -70,9 +70,6 @@ function PhoneChips({ teams, pts, now, names }: { teams: readonly Team[]; pts: (
     </div>
   );
 }
-function PPill({ children }: { children: ReactNode }) {
-  return <span className="inline-flex items-center gap-3 px-3.5 h-[52px] rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
-}
 
 // ================= Game Show =================
 // The real game: a grid of surprise cards (4 x 3 here, 12 cards), teams take
@@ -689,110 +686,94 @@ const BOWL: BowlRow[] = [
   { name: 'Leo', ball: BALLS[2], f: [['6', '2'], ['5', '3'], ['', 'X']], t: [8, 16, null] },
 ];
 const BOWL_SOLO: BowlRow[] = [{ name: 'You', ball: BALLS[0], f: [['', 'X'], ['9', '/'], ['7', '2'], ['8', '-']], t: [20, 37, 46, 54] }];
-function FrameSheet({ rows, now, frame, cell }: { rows: BowlRow[]; now: number; frame: number; cell: number }) {
-  const nameW = cell * 2.1, box = cell * 0.4, row = cell * 0.84;
-  const edge = `2.5px solid ${I}`;
-  const cols = `${nameW}px repeat(9, ${cell}px) ${cell * 1.4}px ${cell * 1.15}px`;
-  return (
-    <div className="grid" style={{ gridTemplateColumns: cols, border: `3px solid ${I}`, borderRadius: 16, overflow: 'hidden', boxShadow: `0 4px 0 ${I}`, background: PP.paper }}>
-      <span style={{ borderBottom: edge }} />
-      {Array.from({ length: 10 }, (_, i) => <b key={i} className="grid place-items-center tabular-nums" style={{ fontSize: cell * 0.27, height: cell * 0.42, borderLeft: edge, borderBottom: edge, background: i === frame - 1 ? PP.butter : PP.cream }}>{i + 1}</b>)}
-      <b className="grid place-items-center" style={{ fontSize: Math.max(13, cell * 0.24), borderLeft: edge, borderBottom: edge, background: PP.cream }}>Total</b>
-      {rows.map((r, ri) => (
-        <div key={r.name} className="contents">
-          <span className="flex items-center gap-2 px-2 min-w-0" style={{ height: row, borderTop: ri ? edge : undefined, background: ri === now ? TURN_SHADE : undefined }}>
-            <Ball c={r.ball} s={cell * 0.5} /><b className="truncate" style={{ fontSize: cell * 0.3 }}>{r.name}</b>
-          </span>
-          {Array.from({ length: 10 }, (_, fi) => {
-            const rolls = r.f[fi] ?? (fi === 9 ? ['', '', ''] : ['', '']);
-            const marks = fi === 9 && rolls.length < 3 ? [...rolls, ''] : rolls;
-            return (
-              <span key={fi} className="grid" style={{ gridTemplateRows: `${box}px 1fr`, height: row, borderLeft: edge, borderTop: ri ? edge : undefined, background: fi === frame - 1 && ri === now ? PP.butter : undefined }}>
-                <span className="flex justify-end">{marks.map((m, mi) => <span key={mi} className="grid place-items-center font-display font-bold" style={{ width: box, height: box, fontSize: box * 0.72, borderLeft: mi || fi === 9 ? edge : undefined, borderBottom: edge, ...(mi === 0 && fi < 9 ? { borderLeft: edge } : {}) }}>{m}</span>)}</span>
-                <span className="grid place-items-center font-display tabular-nums" style={{ fontSize: cell * 0.32 }}>{r.t[fi] ?? ''}</span>
-              </span>
-            );
-          })}
-          <span className="grid place-items-center tabular-nums" style={{ ...GY, fontSize: cell * 0.42, borderLeft: edge, borderTop: ri ? edge : undefined }}><GText>{[...r.t].reverse().find((x) => x != null) ?? 0}</GText></span>
-        </div>
-      ))}
-    </div>
-  );
-}
 // The universal top tracker for bowling: whose roll left, Frame X of 10 middle, icon buttons right.
 // The universal top strip for bowling (teacher, 2026-11-24): whose roll left
 // (just the name on Butter), the ten-frame meter in the middle with no words
 // (the sheet shades the frame too), the tool group right.
-function FrameTracker({ frame, solo, k = 1 }: { frame: number; solo?: boolean; k?: number }) {
+const BW_HELD: { id: PowerId; name: string }[] = [{ id: 'magnet', name: 'Pin Magnet' }, { id: 'shield', name: 'Bumper Rails' }];
+// Whose roll: the ball and the name on a plain paper chip (teacher, 2026-11-24:
+// no Butter in the top strip; the sheet row carries the Butter turn shading).
+// Bowling redesign (teacher, 2026-11-24: "massive improvements needed for
+// bowling layout and design", pointing to how popular classroom bowling games
+// read): the lane is the hero, big and centered with big pins; a simple
+// player list at the left (ball, name, total in Grow Year; Butter = whose
+// turn); the turn player's ten frames as a small two-row strip under their
+// card, so the standard score sheet stays without a wall of boxes; power-ups
+// right; the frame meter alone in the top strip. Built from scratch.
+function BowlCard({ r, now, frame, w, compact }: { r: BowlRow; now: boolean; frame: number; w: number; compact?: boolean }) {
+  const total = [...r.t].reverse().find((x) => x != null) ?? 0;
+  const box = compact ? 26 : 30;
   return (
-    <div className="absolute inset-x-0 flex items-center justify-between z-20" style={{ top: 14 * k, padding: `0 ${20 * k}px` }}>
-      {solo
-        ? <span className="inline-flex items-baseline gap-2 px-5 py-1 rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><b style={{ ...GY, fontSize: 36 * k }} className="tabular-nums"><GText>54</GText></b><b style={{ fontSize: 16 * k, color: PP.quiet }}>pins</b></span>
-        : <RollPill />}
-      <span className="absolute left-1/2 -translate-x-1/2"><Meter segments={10} done={frame - 1} part={0.5} width={k > 1 ? 200 : 300} label={`Frame ${frame} of 10`} /></span>
+    <div className="grid gap-2 rounded-[22px] p-2.5" style={{ width: w, background: now ? TURN_SHADE : PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+      <div className="flex items-center gap-2.5 min-w-0">
+        <Ball c={r.ball} s={compact ? 34 : 40} />
+        <b className="flex-1 truncate" style={{ fontSize: compact ? 18 : 20 }}>{r.name}</b>
+        <span className="tabular-nums leading-none" style={{ ...GY, fontSize: compact ? 30 : 36 }}><GText>{total}</GText></span>
+      </div>
+      {now && (
+        <div className="grid grid-cols-5 gap-1 justify-items-center" aria-label={`${r.name}'s frames`}>
+          {Array.from({ length: 10 }, (_, fi) => {
+            // Each box shows X for a strike, / for a spare, or the frame's running total.
+            const rolls = r.f[fi] ?? [];
+            const mark = rolls.includes('X') ? 'X' : rolls.includes('/') ? '/' : r.t[fi] != null ? String(r.t[fi]) : '';
+            return (
+              <span key={fi} className="grid place-items-center rounded-lg font-display font-bold tabular-nums" style={{ width: box, height: box, fontSize: box * (mark.length > 1 ? 0.42 : 0.52), background: fi === frame - 1 ? PP.lemon : PP.paper, border: `2px solid ${I}` }}>{mark}</span>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+function BowlBoard({ rows, now, frame, w, row, compact }: { rows: BowlRow[]; now: number; frame: number; w: number; row?: boolean; compact?: boolean }) {
+  return <div className={`flex ${row ? 'flex-row items-start justify-center' : 'flex-col'} gap-2.5`}>{rows.map((r, i) => <BowlCard key={r.name} r={r} now={i === now} frame={frame} w={w} compact={compact} />)}</div>;
+}
+function BowlTop({ frame, k = 1 }: { frame: number; k?: number }) {
+  return (
+    <div className="absolute inset-x-0 flex items-center justify-end z-20" style={{ top: 14 * k, padding: `0 ${20 * k}px` }}>
+      <span className="absolute left-1/2 -translate-x-1/2"><Meter segments={10} done={frame - 1} part={0.5} width={k > 1 ? 260 : 320} label={`Frame ${frame} of 10`} /></span>
       <GameTools />
     </div>
   );
 }
-const BW_HELD: { id: PowerId; name: string }[] = [{ id: 'magnet', name: 'Pin Magnet' }, { id: 'shield', name: 'Bumper Rails' }];
-// Whose roll: the ball and the name on a plain paper chip (teacher, 2026-11-24:
-// no Butter in the top strip; the sheet row carries the Butter turn shading).
-function RollPill({ who = 'Mia', size = 24 }: { who?: string; size?: number }) {
-  return <span className="inline-flex items-center gap-2.5 rounded-full font-bold whitespace-nowrap" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, padding: `${size * 0.2}px ${size * 0.9}px ${size * 0.2}px ${size * 0.35}px`, fontSize: size }}><Ball c={BALLS[1]} s={size * 1.6} />{who}</span>;
-}
 function BowlingLaptop({ solo }: { solo?: boolean }) {
+  const frame = solo ? 5 : 4;
   return (
-    <AlleyStage w={1000} h={625} top={290}>
-      <FrameTracker frame={solo ? 5 : 4} solo={solo} />
-      <div className="absolute left-1/2 -translate-x-1/2" style={{ top: solo ? 104 : 76 }}><FrameSheet rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={solo ? 5 : 4} cell={52} /></div>
-      <div className="absolute right-[18px] top-[360px]"><HeldTray items={BW_HELD} size={84} /></div>
+    <AlleyStage w={1000} h={625} top={150}>
+      <BowlTop frame={frame} />
+      <div className="absolute left-4 top-[84px] z-10"><BowlBoard rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={frame} w={220} /></div>
+      <div className="absolute right-5 top-[96px] z-10"><HeldTray items={BW_HELD} size={80} /></div>
     </AlleyStage>
   );
 }
 function BowlingTablet({ solo }: { solo?: boolean }) {
   if (usePhone()) return <BowlingPhone solo={solo} />;
+  const frame = solo ? 5 : 4;
   return (
-    <AlleyStage w={820} h={1180} top={420} wide>
-      <FrameTracker frame={solo ? 5 : 4} solo={solo} k={1.15} />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[96px]"><FrameSheet rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={solo ? 5 : 4} cell={53} /></div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-[316px]"><HeldTray items={BW_HELD} row size={80} /></div>
+    <AlleyStage w={820} h={1180} top={470} wide>
+      <BowlTop frame={frame} k={1.15} />
+      <div className="absolute inset-x-5 top-[100px] z-10"><BowlBoard rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={frame} w={240} row /></div>
+      <div className="absolute inset-x-5 top-[330px] z-10 grid justify-items-center"><HeldTray items={BW_HELD} row size={76} /></div>
     </AlleyStage>
   );
 }
 // Phone sheet: five frames at a time (the half with the current frame) and the
 // total, so every mark stays 14px or more; the ten-frame meter above shows the
 // whole game.
-function FrameSheetPhone({ rows, now, frame }: { rows: BowlRow[]; now: number; frame: number }) {
-  const from = frame <= 5 ? 0 : 5, cell = 46, box = 21;
-  const edge = `2.5px solid ${I}`;
-  return (
-    <div className="grid" style={{ gridTemplateColumns: `${cell * 1.6}px repeat(5, ${cell}px) ${cell * 1.3}px`, border: `3px solid ${I}`, borderRadius: 14, overflow: 'hidden', boxShadow: `0 4px 0 ${I}`, background: PP.paper }}>
-      <span style={{ borderBottom: edge }} />
-      {Array.from({ length: 5 }, (_, i) => <b key={i} className="grid place-items-center tabular-nums text-[14px]" style={{ height: 24, borderLeft: edge, borderBottom: edge, background: from + i === frame - 1 ? PP.butter : PP.cream }}>{from + i + 1}</b>)}
-      <b className="grid place-items-center text-[14px]" style={{ borderLeft: edge, borderBottom: edge, background: PP.cream }}>Total</b>
-      {rows.map((r, ri) => (
-        <div key={r.name} className="contents">
-          <span className="flex items-center gap-1.5 px-1.5 min-w-0" style={{ height: 42, borderTop: ri ? edge : undefined, background: ri === now ? TURN_SHADE : undefined }}><Ball c={r.ball} s={22} /><b className="truncate text-[16px]">{r.name}</b></span>
-          {Array.from({ length: 5 }, (_, k) => { const fi = from + k; const rolls = r.f[fi] ?? (fi === 9 ? ['', '', ''] : ['', '']); return (
-            <span key={fi} className="grid" style={{ gridTemplateRows: `${box}px 1fr`, height: 42, borderLeft: edge, borderTop: ri ? edge : undefined, background: fi === frame - 1 && ri === now ? PP.butter : undefined }}>
-              <span className="flex justify-end">{rolls.map((m, mi) => <span key={mi} className="grid place-items-center font-display font-bold text-[14px]" style={{ width: box, height: box, borderLeft: edge, borderBottom: edge }}>{m}</span>)}</span>
-              <span className="grid place-items-center font-display tabular-nums text-[15px] leading-none">{r.t[fi] ?? ''}</span>
-            </span>); })}
-          <span className="grid place-items-center tabular-nums" style={{ ...GY, fontSize: 20, borderLeft: edge, borderTop: ri ? edge : undefined }}><GText>{[...r.t].reverse().find((x) => x != null) ?? 0}</GText></span>
-        </div>
-      ))}
-    </div>
-  );
-}
 function BowlingPhone({ solo }: { solo?: boolean }) {
   const frame = solo ? 5 : 4;
   return (
-    <AlleyStage w={390} h={844} top={solo ? 300 : 360} wide>
-      <PTop left={solo ? <PPill><b style={{ ...GY, fontSize: 32 }} className="tabular-nums"><GText>54</GText></b><b className="text-[16px]" style={{ color: PP.quiet }}>pins</b></PPill> : <RollPill size={20} />} />
-      <div className="absolute inset-x-3 top-[72px] z-10 grid justify-items-center gap-2.5">
+    <AlleyStage w={390} h={844} top={solo ? 380 : 430} wide>
+      <PTop />
+      <div className="absolute inset-x-3 top-[70px] z-10 grid justify-items-center gap-2.5">
         <Meter segments={10} done={frame - 1} part={0.5} width="100%" label={`Frame ${frame} of 10`} />
-        <FrameSheetPhone rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={frame} />
-        <HeldTray items={BW_HELD} row size={58} />
+        {solo ? <BowlCard r={BOWL_SOLO[0]} now frame={frame} w={366} compact /> : (
+          <div className="grid gap-2 w-full">
+            <BowlCard r={BOWL[1]} now frame={frame} w={366} compact />
+            <div className="grid grid-cols-2 gap-2">{[BOWL[0], BOWL[2]].map((r) => <BowlCard key={r.name} r={r} now={false} frame={frame} w={179} compact />)}</div>
+          </div>
+        )}
+        <HeldTray items={BW_HELD} row size={56} />
       </div>
     </AlleyStage>
   );
@@ -1339,7 +1320,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   {
     id: 'bowling', name: 'Bowling (Share, Solo)', laptop: <BowlingLaptop />, tablet: <BowlingTablet />,
     lines: [
-      'New: a one-point perspective lane seen from behind the ball: peach boards narrowing to a full ten-pin triangle, lavender gutters each side, orange aim arrows and dots, the ball at the bottom with a dotted aim arrow to the head pin; a standard ten-frame sheet (two roll boxes a frame, three in the 10th, X, / and -, running totals) and a Frame X of 10 tracker.',
+      'New (teacher, 2026-11-24: "massive improvements needed for bowling"): the lane is the hero, big and centered with the full ten-pin triangle; a simple player list at the left (ball, name, total), Butter on whose turn it is, and only that player\'s ten frames as a small two-row strip (X, / or the running total); power-ups at the right; the frame meter alone in the top strip.',
       'Why: the familiar bowler\'s view needs no teaching (recognition over recall); the lane is the brightest, simplest shape so eyes go to it first (visual hierarchy); a real score sheet teaches how bowling is scored, and frames, not rounds, match what kids see at a real alley.',
       'Pieces (theme template): Background 1000 x 1300 (alley wall), Lane 800 x 1000, Pin 64 x 200, Ball 256 x 256 (up to 10, each player\'s icon), Power-up 256 x 256 (7 Classic), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the alley wall on the top 31%, the lane, pins and ball filling the rest.',
     ],
