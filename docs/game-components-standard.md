@@ -292,6 +292,31 @@ the mockup shows "12 to go" rows. A race with no visible standing removes the
 goal-gradient pull for the kids behind; one quiet row per team may help more
 than it clutters.
 
+## 3.6 Phone (390 x 844, teacher 2026-11-24: "phones need a layout")
+
+Every game and universal view has its own phone layout on `/brand`, drawn at
+real size (390 x 844) through `DeviceSet` / `useFrame()` / `usePhone()` in
+`src/brand/mockKit.tsx`; never the iPad portrait design scaled down.
+
+| Part | Phone rule | Why |
+|---|---|---|
+| Text | Never below 13px at real size; questions 21 to 28px, answers 22px | Apple HIG 11pt floor plus WCAG 1.4.4 (from memory); a 6-year-old reads at arm's length |
+| Touch | Every tap target 44px or more (rounds stay 44px, her approval) | Apple HIG 44pt, WCAG 2.5.5 |
+| Scrolling | None inside a game screen; boards size to the width | her rule (2026-10-24) |
+| Zone A | One top row: who or what left (score pill, roll chip, meter or join code), then `PhoneTools`: the Hint (in-play only) and one Menu round holding Settings (accessibility inside), Full screen and Close | five rounds plus a score do not fit 390px; Hick's law, fewer choices at once |
+| Zone B | The scoreboard collapses to one compact row of chips (team badge plus score; names only for two sides); the active player's chip is Butter. Power-up cards become a small row of squares (`PowerCard` 52 to 66, so 68 to 86px) | the rail docks under the board (section 3.1) |
+| Board | As wide as the screen allows (Game Show 3 x 4 cards, Board Game path 346px, Match Three 47px cells, Four in a Row 44px holes, Bubble Pop 330px, Bowling sheet shows the five frames around the current one plus the total, the ten-frame meter shows the whole game) | figure-ground; the board is the figure |
+| Question card | 358px wide: icon and name (plain, two lines allowed), Settings, the Listen pill; the question in a fixed 200px block; four answers in one column, 60px tall | one column keeps reading order and big targets |
+| Overlays | Power-up, results, settings and pause cards are 330 to 350px wide; titles fit one line (`FitTitle`), long ones wrap to two balanced lines; results buttons: Play again full width, New game and Review side by side | nothing cut off, nothing scaled below 13px |
+| Start menus | Stacked and centered ("stack center"): title, meter, Settings, Full screen and Close centered under it; cards in one column (row cards) or a 2-up grid; Back and Next share a row, a long start button wraps above Back | Gestalt common region; one column on narrow screens |
+| Site top bar | Logo plus one Menu button (the welcome puts its Full screen and Settings rounds in that row, so the title gets its own line) | her rule (top bar on every start menu) |
+| Join | No keypad of ours: six code boxes with a blinking caret and the device's own number keyboard sliding up; Go above it | her rule (2026-11-24) |
+
+Shared parts added for this: `PhoneTools`, `usePhone`, `FitTitle`, `IconBadge`
+(one center for icon and background, optical nudges for the lightbulb, play,
+star and heart), `PowerCard` at 1.3x with separate art and name areas, and
+`MenuGo disabled` for card-choice steps (Next is off until a card is picked).
+
 ## Sources
 
 Opened this session: none (every web host failed to resolve). Search results

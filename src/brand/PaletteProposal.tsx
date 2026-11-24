@@ -7,23 +7,25 @@ import { CrayonPowerUp, type PowerId } from './CrayonKit';
 // uses these until she approves. Contrast ratios are WCAG 2.1, computed.
 
 export const PP = {
-  grape: '#6a45f0', grapeDeep: '#4b2fc9', periwinkle: '#7a88fe',
+  // Teacher, 2026-11-24 (newest): "remove the gamify purples and replace with the
+  // grape and lavender". The old keys stay as aliases so every part follows:
+  // periwinkle is now Grape and gamify is now Lavender.
+  grape: '#6a45f0', grapeDeep: '#4b2fc9', periwinkle: '#6a45f0',
   blueCrystal: '#bfdff3', sky: '#4ba3e8', skyDeep: '#1f6fb8',
   pink: '#f055a5', lemon: '#fabe37', orange: '#ff9b28', kelly: '#22b04a', lime: '#ccd537',
   lavender: '#ddd6ff', blush: '#ffd3e6', butter: '#fff1b8', aqua: '#c9f1ee', sage: '#e8f0b4',
-  gamify: '#b4c4fb', peach: '#ffd9b3', mint: '#c8f0dc', teal: '#1fb5a8',
+  gamify: '#ddd6ff', peach: '#ffd9b3', mint: '#c8f0dc', teal: '#1fb5a8',
   ink: '#1d1a33', cream: '#f6f0e4', paper: '#fffaf0', quiet: '#57506e',
 };
 
 type Swatch = { name: string; hex: string; role: string; text: string; ratio: string };
-// Every bright color has its pastel (teacher, 2026-11-23). The main purple
-// stays today's Gamify purple, the periwinkle the site already wears.
+// Every bright color has its pastel (teacher, 2026-11-23). The main purple is
+// Grape with its pastel Lavender (teacher, 2026-11-24).
 const GROUPS: { title: string; items: Swatch[] }[] = [
-  { title: 'Main purple (today\'s Gamify purple, kept)', items: [
-    { name: 'Gamify purple', hex: PP.periwinkle, role: 'Main brand color: main button, selected, logo block', text: PP.ink, ratio: 'Ink 5.4:1 (white fails)' },
-    { name: 'Gamify purple pastel', hex: PP.gamify, role: 'Site ground today, menu panels, blob patch', text: PP.ink, ratio: 'Ink 11.5:1' },
-    { name: 'Grape', hex: PP.grape, role: 'Deep purple: button shadow, purple text, white-text buttons', text: '#ffffff', ratio: 'White 5.6:1' },
-    { name: 'Lavender', hex: PP.lavender, role: 'Pastel of Grape: patch behind purple art', text: PP.ink, ratio: 'Ink 12.1:1' },
+  { title: 'Main purple (teacher, 2026-11-24: Grape and Lavender replace the Gamify purples)', items: [
+    { name: 'Grape', hex: PP.grape, role: 'Main brand color: Team Purple, answer A, meters, links; white text only', text: '#ffffff', ratio: 'White 5.6:1 (ink fails)' },
+    { name: 'Grape deep', hex: PP.grapeDeep, role: 'Shadows under Grape, purple text on paper', text: '#ffffff', ratio: 'White 8.3:1' },
+    { name: 'Lavender', hex: PP.lavender, role: 'Pastel of Grape: the page ground, menu chips, team pastel', text: PP.ink, ratio: 'Ink 13.9:1' },
   ] },
   { title: 'Light blue (new)', items: [
     { name: 'Sky', hex: PP.sky, role: 'Bright light blue: info, freeze', text: PP.ink, ratio: 'Ink 6.2:1 (never white text)' },
@@ -42,6 +44,16 @@ const GROUPS: { title: string; items: Swatch[] }[] = [
     { name: 'Aqua', hex: PP.aqua, role: 'Pastel of Teal', text: PP.ink, ratio: 'Ink 13.9:1' },
     { name: 'Lime wedge', hex: PP.lime, role: 'Small accent only', text: PP.ink, ratio: 'Ink 10.5:1' },
     { name: 'Sage', hex: PP.sage, role: 'Pastel of Lime wedge', text: PP.ink, ratio: 'Ink 14.1:1' },
+  ] },
+  // Art Director request (2026-11-24): natural colors for wood, fur and floors in Classic art. Proposed only.
+  { title: 'Nature tones (proposed, waiting on her)', items: [
+    { name: 'Wood', hex: '#c47a45', role: 'Wood floors, frames, furniture', text: PP.ink, ratio: 'Ink 5.0:1' },
+    { name: 'Wood deep', hex: '#8a4f2a', role: 'Pair of Wood: grain, shadow side', text: '#ffffff', ratio: 'White 6.5:1 (ink fails)' },
+    { name: 'Mouse brown', hex: '#c9ac90', role: 'Brown mice, fur', text: PP.ink, ratio: 'Ink 7.8:1' },
+    { name: 'Mouse brown deep', hex: '#8f7258', role: 'Pair of Mouse brown: ears, shadow', text: '#ffffff', ratio: 'White 4.5:1 (art only, not for small text)' },
+    { name: 'Gray', hex: '#aaa6bb', role: 'Gray mice and cats, stone', text: PP.ink, ratio: 'Ink 7.1:1' },
+    { name: 'Gray deep', hex: '#5f5a76', role: 'Pair of Gray: shadow side', text: '#ffffff', ratio: 'White 6.5:1 (ink fails)' },
+    { name: 'Tan', hex: '#ecd9bd', role: 'The tan gingham pattern', text: PP.ink, ratio: 'Ink 12.2:1' },
   ] },
   { title: 'Ink and paper', items: [
     { name: 'Ink', hex: PP.ink, role: 'All text, faces, control edge', text: '#ffffff', ratio: 'White 16.8:1' },
@@ -86,7 +98,7 @@ export default function PaletteProposal() {
         <h3 className="font-heading font-bold">Mockup strip</h3>
         <div className="grid gap-4 wide:grid-cols-[auto_1fr_auto] items-center rounded-[1.5rem] p-4" style={{ background: PP.cream }}>
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.periwinkle, color: PP.ink, border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
+            <button type="button" className="rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.periwinkle, color: '#ffffff', border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
               <Play weight="fill" aria-hidden="true" /> Play
             </button>
             <button type="button" className="rounded-full px-5 min-h-14 text-lg font-bold" style={{ background: PP.blueCrystal, color: PP.ink, border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.sky}` }}>Settings</button>
@@ -99,7 +111,7 @@ export default function PaletteProposal() {
             </div>
             <div className="px-4 py-3 text-lg font-bold">Which word needs a capital letter?</div>
             <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-              {[['monday', PP.periwinkle, PP.ink], ['apple', PP.pink, PP.ink], ['run', PP.sky, PP.ink], ['blue', PP.kelly, PP.ink]].map(([t, bg, fg]) => (
+              {[['monday', PP.periwinkle, '#ffffff'], ['apple', PP.pink, PP.ink], ['run', PP.sky, PP.ink], ['blue', PP.kelly, PP.ink]].map(([t, bg, fg]) => (
                 <span key={t} className="rounded-[0.9rem] px-3 py-2 font-bold text-center" style={{ background: bg, color: fg, border: `2px solid ${PP.ink}` }}>{t}</span>
               ))}
             </div>

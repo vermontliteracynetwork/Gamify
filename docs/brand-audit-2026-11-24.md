@@ -8,7 +8,7 @@ aligned with what i have said for the universal components".
 Scope: every `/brand` tab (Universal views, Game components, Game mockups with
 Territory, Stickers, Icons, Public pages, Teacher portal, New direction) at
 every device frame (big screen 1600 x 900, laptop 1280 x 800, iPad landscape
-1180 x 820, iPad portrait 820 x 1180, phone 430 x 932; public pages at 1280,
+1180 x 820, iPad portrait 820 x 1180, phone 430 x 932 (390 x 844 since the phone round); public pages at 1280,
 820 and 390 wide). Proposals only; no live game, engine or page changed.
 
 ## Method
@@ -50,10 +50,20 @@ every device frame (big screen 1600 x 900, laptop 1280 x 800, iPad landscape
    "Join code" label and "Fill the sky together!" tip line on the Question
    Tracker class screen, "Class goal: fill the sky" helper line in the top
    tracker, "Three gold stars in a row!". ALL FIXED.
-7. **Phones (OPEN).** On the phone frame, 27 of 30 game views and 12 of 22
-   universal views still have text under 13px (7 to 12px), because they show the
-   iPad portrait design scaled to 52%. Fixing it needs a phone layout per game
-   (rail B as a one-row dock, a 2-column card grid). See "Left open".
+7. **Phones (FIXED 2026-11-24, teacher: "phones need a layout").** Before: on
+   the 430 x 932 phone frame 27 of 30 game views and 12 of 22 universal views
+   had text under 13px (7 to 12px), because they showed the iPad portrait
+   design scaled to 52%. Now the phone frame is 390 x 844 and every view draws
+   its own phone layout at real size (`usePhone()` in `src/brand/mockKit.tsx`;
+   the rules are section 3.6 of `docs/game-components-standard.md`). Re-measured
+   the same way (Playwright, device scale 2, every phone frame on Universal
+   views and Game mockups, text size at real CSS size, 44px check on every
+   Settings, Close, Hint, Menu, Full screen, Listen and Remove round, cut-off
+   check): **0 of 30 game views and 0 of 23 universal views** under 13px (two
+   power-up names measure 12.8px, which is 13px less sub-pixel rounding),
+   **0** rounds under 44px (the Teams remove x grew from 36 to 44px), **0**
+   frames with anything cut off, no console errors from these files.
+   Screenshots (session scratchpad): `ph/uv-00..22.png`, `ph/gm-00..29.png`, welcomes `ph/wel-*.png`.
 
 ## Results by rule
 
@@ -86,12 +96,12 @@ every device frame (big screen 1600 x 900, laptop 1280 x 800, iPad landscape
 | 25 | No tip lines under scoreboards; tips behind the lightbulb, tap to close, shown once | Fixed | QT goal card line, tracker helper line | Removed; tips card spec says it shows by itself once at the first turn |
 | 26 | Lobbies show only the join code in a white pill | Fixed | QT and Territory class screens | Code only, white pill |
 | 27 | Every mockup on big screen, laptop, iPad landscape AND portrait, phone | Pass | all DeviceSets | none |
-| 28 | Text never below about 13px on student screens at real size | Pass on big screen, laptop, both iPads; OPEN on phones | 27 game views, 12 universal views on the phone frame | see Left open. Teacher portal: 11.5 to 12px at its 1000px design, which is 15px on a real 1280 laptop (pass for a teacher page) |
+| 28 | Text never below about 13px on student screens at real size | Pass on every device including phones (fixed 2026-11-24) | was: 27 game views, 12 universal views on the phone frame | phone layouts (finding 7). Teacher portal: 11.5 to 12px at its 1000px design, which is 15px on a real 1280 laptop (pass for a teacher page) |
 | 29 | Touch targets 44px+ | Fixed | Swap Spinner team chips were about 40px; tools were 36px | 52px chips, 44px tools; public pages: 44px+ pills, 46 to 60px buttons |
 | 30 | Nothing cut off or running past its box | Pass (0 of 303 frames after fixes) | was: question set iPad portrait, home hero on phone | reflows above |
 | 31 | No scrolling on game screens | Pass | fixed frames | none (public web pages scroll, as web pages do) |
 | 32 | No overlap | Fixed | Bubble Pop board under the tools, Question Tracker stars under the tools, Bowling iPad meter against the tools, results stickers over the title | moved |
-| 33 | No dead bands | Fixed for iPad portrait; minor open | phone frames of game views (ratio 0.46 vs 0.69) and Territory's 16:10 room in a 16:9 frame show bands filled with the matching ground color | phone layouts (open) |
+| 33 | No dead bands | Fixed for iPad portrait and phones; minor open | Territory's 16:10 room in a 16:9 frame shows bands filled with its scenery; on a phone Match Three and Bubble Pop spread board and cards evenly over the tall screen | phone layouts done |
 | 34 | No characters, faces or mascots | Pass with one approved exception | Territory cats and mice have simple dot faces (the live game pieces she asked for) | none |
 | 35 | No blood or harm | Pass | Territory: caught mice poof in stars, the scared cat leaps out unhurt | none |
 | 36 | Student pages: no prices, buy words or upgrade prompts | Pass | Join page shows only the logo and "Teachers: Log in" (no Pricing link); Live student screens | none |
@@ -117,11 +127,11 @@ every device frame (big screen 1600 x 900, laptop 1280 x 800, iPad landscape
 
 ## Left open (needs her decision or a later round)
 
-1. **Phone game layouts.** Do phones matter for games? Today's research rule
-   (WCAG 1.4.4, Apple's 11pt floor, from memory) says text this small fails. If
-   yes: each game needs a phone layout (board full width, rail B as one-row
-   dock under it, power cards 64px). If phones are only for homework Solo,
-   do Solo games first (Match Three, Bubble Pop, Question Tracker Solo).
+1. **Phone game layouts: DONE** (finding 7). Still worth a look on a real
+   phone: Bubble Pop keeps the real 19-bubble rows, so each bubble is about
+   17px on a phone (aiming is one drag, not a tap per bubble, so it passes the
+   44px rule, but small for K-1 eyes); the Bowling sheet shows five frames at
+   a time.
 2. **New direction tab** still shows superseded proposals (grain overlay, older
    cobalt palette blocks). Recommend archiving them once she approves the kit,
    so nobody copies an old rule.

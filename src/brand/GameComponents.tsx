@@ -1,13 +1,13 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowClockwise, ArrowRight, Check, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, SpeakerHigh, X } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowRight, Check, CornersOut, GearSix, Lightbulb, Play, SpeakerHigh, X } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect, type Effect } from '../engine/feedback';
 import { playClip, ANSWER_SOUNDS, POWER_SOUNDS } from '../engine/music';
 import { PP } from './PaletteProposal';
-import { BlobPatch, CrayonDie, CrayonPowerUp, type PowerId } from './CrayonKit';
+import { CrayonDie, CrayonPowerUp, type PowerId } from './CrayonKit';
 // Power-up art never sits on a circle or blob backing (teacher, 2026-11-24); BlobPatch stays only behind the tips lightbulb.
-import { Badge, cpuName, DieWiggle, GO_YELLOW, Meter, PURPLE_GROUND, TEAMS, TurnGlow } from './mockKit';
+import { Badge, cpuName, DieWiggle, GO_YELLOW, IconBadge, Meter, PURPLE_GROUND, TEAMS, TurnGlow } from './mockKit';
 
 // Game components (PROPOSAL, teacher 2026-11-24: "add a section in brand for
 // the universal game components", then "a full universal standard with
@@ -80,9 +80,9 @@ function Part({ n, name, use, sizes, states, motion: mo, sound, onReplay, onSoun
 function TopStrip({ onHint }: { onHint?: () => void }) {
   return (
     <div className="w-full max-w-[48rem] grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-2 pr-3 rounded-full" style={{ ...PAPER, minHeight: '4rem' }}>
-      <span className="justify-self-start flex items-center gap-2.5 pl-1.5 pr-4 py-1 rounded-full" style={{ background: PP.butter }}><Badge t={TEAMS[1]} size={36} /><b className="whitespace-nowrap">Team Sky</b></span>
+      <span className="justify-self-start flex items-center gap-2.5 pl-1.5"><Badge t={TEAMS[1]} size={36} /><b className="whitespace-nowrap">Team Sky</b></span>
       <Meter segments={3} done={1} part={0.5} width={180} label="Round 2 of 3" />
-      <span className="justify-self-end flex gap-[14px]"><Round label="Accessibility"><PersonArmsSpread weight="bold" size={20} /></Round><Round label="Hint" onClick={onHint}><Lightbulb weight="bold" size={20} /></Round><Round label="Settings"><GearSix weight="bold" size={20} /></Round><Round label="Full screen"><CornersOut weight="bold" size={20} /></Round><Round label="Close"><X weight="bold" size={20} /></Round></span>
+      <span className="justify-self-end flex gap-2"><Round label="Hint" onClick={onHint}><Lightbulb weight="bold" size={20} /></Round><Round label="Settings"><GearSix weight="bold" size={20} /></Round><Round label="Full screen"><CornersOut weight="bold" size={20} /></Round><Round label="Close"><X weight="bold" size={20} /></Round></span>
     </div>
   );
 }
@@ -119,9 +119,10 @@ function PowerCards({ calm, onUse }: { calm: Calm; onUse: (p: (typeof HELD)[numb
     <div className="flex gap-2.5">
       {HELD.map((h, i) => (
         <motion.button key={h.id} type="button" onClick={() => onUse(h)} {...enter(calm, i * 0.12)} whileTap={calm ? undefined : { scale: 0.95 }}
-          className="w-[5rem] h-[5rem] grid justify-items-center content-center gap-0.5 rounded-[1rem]" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === 1 ? 'none' : `0 3px 0 ${I}`, borderStyle: i === 1 ? 'dashed' : 'solid' }} aria-label={`${h.name}${i === 1 ? ', not now' : ''}`}>
-          <span className={calm || i === 1 ? '' : 'pu-bob'} style={{ opacity: i === 1 ? 0.45 : 1 }}><CrayonPowerUp id={h.id} size={40} /></span>
-          <span className="text-[0.8125rem] font-bold leading-tight text-center px-1" style={{ opacity: i === 1 ? 0.6 : 1 }}>{h.name}</span>
+          className="w-[6.5rem] h-[6.5rem] flex flex-col items-center px-1 py-2 rounded-[1rem] overflow-hidden" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === 1 ? 'none' : `0 3px 0 ${I}`, borderStyle: i === 1 ? 'dashed' : 'solid' }} aria-label={`${h.name}${i === 1 ? ', not now' : ''}`}>
+          {/* 1.3x card (teacher, 2026-11-24): art in its own padded area, the name in a two-line area; nothing crosses the edge. */}
+          <span className="flex-1 min-h-0 w-full grid place-items-center"><span className={calm || i === 1 ? '' : 'pu-bob'} style={{ opacity: i === 1 ? 0.45 : 1 }}><CrayonPowerUp id={h.id} size={40} /></span></span>
+          <span className="w-full h-[2.1rem] grid place-items-center text-[0.8125rem] font-bold leading-[1.1] text-center" style={{ opacity: i === 1 ? 0.6 : 1 }}>{h.name}</span>
         </motion.button>
       ))}
     </div>
@@ -144,7 +145,7 @@ function PopCard({ calm, onClose }: { calm: Calm; onClose: () => void }) {
 function HintCard({ calm, onClose }: { calm: Calm; onClose: () => void }) {
   return (
     <Card calm={calm} w="22rem">
-      <span className="relative w-20 h-20 grid place-items-center"><BlobPatch color={PP.butter} size={84} /><Lightbulb className="relative" weight="bold" size={44} /></span>
+      <IconBadge size={84} bg={PP.butter} shape="blob" optical="bulb"><Lightbulb weight="bold" size={44} /></IconBadge>
       <b className="text-[1.75rem]" style={GY}>Tips</b>
       <ul className="m-0 p-0 list-none grid gap-1.5 font-bold text-lg"><li>Fill a row for +10.</li><li>Cards can hide power-ups.</li></ul>
       <GoBtn onClick={onClose}>Got it</GoBtn>
@@ -203,7 +204,7 @@ function Tiles({ calm, k }: { calm: Calm; k: number }) {
             animate={calm ? { opacity: faded ? 0.4 : 1 } : right ? { scale: [1, 1.08, 1] } : faded ? { x: [0, -4, 4, -4, 0], opacity: 0.4 } : { scale: 1, opacity: 1 }}
             transition={{ duration: calm ? 0.15 : 0.35 }}
             className="min-h-[5rem] rounded-[1.25rem] flex items-center gap-3 px-3 font-bold text-xl text-left" style={{ background: right ? PP.mint : bg, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
-            <span className="w-12 h-12 shrink-0 rounded-full grid place-items-center text-xl" style={{ ...GY, background: right ? PP.kelly : c, border: `3px solid ${I}` }}>{right ? <Check weight="bold" size={22} /> : l}</span>{t}
+            <span className="w-12 h-12 shrink-0 rounded-full grid place-items-center text-xl" style={{ ...GY, background: right ? PP.kelly : c, color: !right && c === PP.grape ? '#ffffff' : I, border: `3px solid ${I}` }}>{right ? <Check weight="bold" size={22} /> : l}</span>{t}
           </motion.button>
         );
       })}
@@ -302,7 +303,7 @@ export default function GameComponents() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Part n={1} name="Top strip" wide use="Zone A on every game: who or what (just the team or player name on a Butter chip, never 'Team Sky's turn'; the score; or the class goal), the meter with no Round X of Y words, and the tools in one order. Try the lightbulb." sizes="4rem tall laptop and iPad, 4.5rem big screen, 3.5rem short laptop; team icon 2.25rem; buttons 44px (the touch minimum) with 14px between, in one order: Accessibility, Hint, Settings, Full screen, Close." states="Solo score, Share team chip (Butter = their turn), Live class goal; last round: the meter marker pulses once." motion="Fades up on game start (0.7 s ease-out); the chip shading moves to the next player over 0.4 s; no idle motion." sound="None." onReplay={() => replay('top')}>
+        <Part n={1} name="Top strip" wide use="Zone A on every game: who or what (just the team or player name, no Butter chip: Butter is only the scoreboard row; never 'Team Sky's turn'; the score; or the class goal), the meter at the exact center (a 1fr | meter | 1fr grid) with no Round X of Y words, and the tools in one order. Try the lightbulb." sizes="4rem tall laptop and iPad, 4.5rem big screen, 3.5rem short laptop; team icon 2.25rem; buttons 44px (the touch minimum) with 8px between, in one order: Hint, Settings, Full screen, Close (the hint only on in-play strips; accessibility lives inside Settings)." states="Solo score, Share team name and badge, Live class goal; last round: the meter marker pulses once." motion="Fades up on game start (0.7 s ease-out); the chip shading moves to the next player over 0.4 s; no idle motion." sound="None." onReplay={() => replay('top')}>
           <div className="w-full grid gap-4 justify-items-center">
             <motion.div key={k('top')} {...enter(calm)} className="w-full grid place-items-center"><TopStrip onHint={() => { playEffect('open', settings); setHint(true); }} /></motion.div>
             <AnimatePresence>{hint && <motion.div key="hint" className="w-full grid place-items-center"><HintCard calm={calm} onClose={() => { playEffect('close', settings); setHint(false); }} /></motion.div>}</AnimatePresence>

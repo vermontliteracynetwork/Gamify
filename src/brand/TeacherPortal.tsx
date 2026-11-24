@@ -33,7 +33,7 @@ const SKIN = [PP.gamify, PP.blueCrystal, PP.blush, PP.butter, PP.mint, PP.peach,
 function Btn({ children, main, small }: { children: ReactNode; main?: boolean; small?: boolean }) {
   return (
     <span className={`${small ? 'h-9 px-3.5 text-[14px]' : 'h-11 px-5 text-[15px]'} rounded-full font-bold inline-flex items-center gap-2 whitespace-nowrap shrink-0`}
-      style={{ background: main ? PP.periwinkle : PP.paper, color: I, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${main ? PP.grapeDeep : I}` }}>{children}</span>
+      style={{ background: main ? PP.periwinkle : PP.paper, color: main ? '#ffffff' : I, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${main ? PP.grapeDeep : I}` }}>{children}</span>
   );
 }
 function Tip({ text }: { text: string }) {
@@ -91,7 +91,7 @@ function Rail({ active, live }: { active: NavId; live?: boolean }) {
   return (
     <nav aria-label="Teacher pages" className="w-[232px] shrink-0 h-full flex flex-col gap-1.5 px-4 py-5" style={{ background: PP.paper, borderRight: '1px solid rgba(29,26,51,0.1)' }}>
       <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto self-start mb-3" draggable="false" />
-      <span className="h-12 rounded-full font-bold inline-flex items-center justify-center gap-2 text-[15px] mb-3" style={{ background: PP.periwinkle, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${PP.grapeDeep}` }}><Plus weight="bold" size={18} />Create an Activity</span>
+      <span className="h-12 rounded-full font-bold inline-flex items-center justify-center gap-2 text-[15px] mb-3" style={{ background: PP.periwinkle, color: '#ffffff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${PP.grapeDeep}` }}><Plus weight="bold" size={18} />Create an Activity</span>
       {NAV.map((n) => {
         const on = n.id === active;
         const Ic = n.icon;

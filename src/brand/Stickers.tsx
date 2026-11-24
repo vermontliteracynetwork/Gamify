@@ -110,7 +110,7 @@ export const STARTER: Sticker[] = [
   { id: 'students', label: '10 STUDENTS!', earn: 'Added 10 students', edge: 'flower', fill: PP.lime, text: INK, img: 'heart' },
   { id: 'set', label: 'FIRST SET!', earn: 'Made your first question set', edge: 'square', fill: PP.lemon, text: INK, img: 'apple' },
   { id: 'homework', label: 'HOMEWORK!', earn: 'Sent your first homework link', edge: 'stamp', fill: PP.teal, text: INK, img: 'melon' },
-  { id: 'live', label: 'LIVE GAME!', earn: 'Ran your first Live game', edge: 'cloud', fill: PP.periwinkle, text: INK, img: 'rainbow' },
+  { id: 'live', label: 'LIVE GAME!', earn: 'Ran your first Live game', edge: 'cloud', fill: PP.periwinkle, text: '#ffffff', img: 'rainbow' },
   { id: 'every', label: 'EVERY GAME!', earn: 'Tried every game', edge: 'hexagon', fill: PP.kelly, text: INK, img: 'bulb' },
   { id: 'rounds', label: '100 ROUNDS!', earn: 'Played 100 rounds', edge: 'sun', fill: PP.orange, text: INK, img: 'balloon' },
   { id: 'calm', label: 'CALM MODE!', earn: 'Used Calm mode in a game', edge: 'shield', fill: PP.grape, text: '#ffffff', img: 'moon' },
@@ -185,7 +185,7 @@ function AchievementMock() {
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <h3 className="font-display text-3xl" style={{ color: INK }}>Achievements</h3>
         <div className="flex gap-2 text-sm font-bold">
-          <span className="rounded-full px-3 py-1.5" style={{ background: PP.periwinkle, border: `2px solid ${INK}` }}>Class stickers</span>
+          <span className="rounded-full px-3 py-1.5" style={{ background: PP.periwinkle, color: '#ffffff', border: `2px solid ${INK}` }}>Class stickers</span>
           <span className="rounded-full px-3 py-1.5" style={card}>Student sticker books</span>
           <span className="rounded-full px-3 py-1.5 inline-flex items-center gap-1.5" style={card}><MonitorPlay size={18} weight="bold" aria-hidden />Show on screen</span>
         </div>

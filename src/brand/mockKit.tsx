@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, SpeakerHigh, Television, Toolbox, User, X, type Icon } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, Lightbulb, List, PersonArmsSpread, Play, SpeakerHigh, Television, User, X, type Icon } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { CrayonPowerUp, type PowerId } from './CrayonKit';
 
@@ -94,11 +94,21 @@ export function TurnChip({ icon, name, size = 22 }: { icon: ReactNode; name: str
   return <span className="inline-flex items-center gap-2.5 rounded-full font-bold whitespace-nowrap" style={{ background: TURN_SHADE, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, padding: `${size * 0.2}px ${size * 0.9}px ${size * 0.2}px ${size * 0.35}px`, fontSize: size }}>{icon}{name}</span>;
 }
 // One power-up as its own square card (teacher, 2026-11-24): no tray panel,
-// no label above, no helper text, no circle behind the art.
+// no label above, no helper text, no circle behind the art. Teacher, 2026-11-24
+// ("make the power up cards larger so they dont cut out anything"): the card is
+// 1.3x the old size; the art sits in its own top area at 40% of the card with
+// padding all round (the crayon strokes run a little past their box, so the
+// area leaves room for them), and the name has its own area that holds two
+// lines with room to spare. Nothing ever crosses the card edge.
+export const POWER_CARD_GROW = 1.3;
 export function PowerCard({ id, name, size = 80 }: { id: PowerId; name: string; size?: number }) {
+  const side = Math.round(size * POWER_CARD_GROW);
+  const fs = Math.max(13, Math.round(side * 0.125));
+  const pad = Math.round(side * 0.09);
   return (
-    <span aria-label={name} className="grid justify-items-center content-center gap-0.5 rounded-[14px] text-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
-      <CrayonPowerUp id={id} size={size * 0.5} /><span className="font-bold leading-[1.05] px-1" style={{ fontSize: Math.max(13, size * 0.17) }}>{name}</span>
+    <span aria-label={name} className="flex flex-col items-center rounded-[16px] text-center shrink-0 overflow-hidden" style={{ width: side, height: side, padding: `${pad}px ${Math.round(pad * 0.6)}px`, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
+      <span className="flex-1 min-h-0 w-full grid place-items-center"><CrayonPowerUp id={id} size={Math.round(side * 0.4)} /></span>
+      <span className="w-full grid place-items-center font-bold" style={{ height: fs * 2.3, fontSize: fs, lineHeight: 1.1 }}><span>{name}</span></span>
     </span>
   );
 }
@@ -107,22 +117,60 @@ export function HintIcon({ size = 20 }: { size?: number }) { return <Lightbulb w
 
 // THE in-game tool group (teacher, 2026-11-24: "smaller round buttons with more
 // room", a lightbulb hint "beside settings" in every game). One order in every
-// game and mockup: Accessibility, Hint, Settings, Full screen, Close. 44px is the
+// game and mockup: Hint, Settings, Full screen, Close (teacher, 2026-11-24:
+// accessibility lives inside Settings on every screen; the hint is only on
+// in-play strips; 8px apart so the meter can sit at the exact center). 44px is the
 // smallest touch target we allow (Apple HIG 44pt, WCAG 2.5.5), with 14px between.
 export const TOOL_SIZE = 44;
-export function GameTools({ size = TOOL_SIZE, access = true, close = true, hint = true, gap }: { size?: number; access?: boolean; close?: boolean; hint?: boolean; gap?: number }) {
+export function GameTools({ size = TOOL_SIZE, access = false, close = true, hint = true, gap }: { size?: number; access?: boolean; close?: boolean; hint?: boolean; gap?: number }) {
   const s = Math.round(size * 0.45);
   const items: [Icon, string][] = [...(access ? [[PersonArmsSpread, 'Accessibility'] as [Icon, string]] : []), ...(hint ? [[Lightbulb, 'Hint'] as [Icon, string]] : []), [GearSix, 'Settings'], [CornersOut, 'Full screen'], ...(close ? [[X, 'Close'] as [Icon, string]] : [])];
   return (
-    <span className="flex shrink-0" style={{ gap: gap ?? Math.round(size * 0.32) }}>
+    <span className="flex shrink-0" style={{ gap: gap ?? 8 }}>
       {items.map(([Ic, l]) => <span key={l} aria-label={l} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Ic weight="bold" size={s} /></span>)}
     </span>
   );
 }
 
+// THE icon badge (teacher, 2026-11-24: "always center icons against
+// backgrounds by pixel and sight so they are always even"). One box of exactly
+// `size`; the background (circle or soft blob) fills that box edge to edge and
+// shares its center with the icon (grid place-items center, no stray offsets,
+// no rotation, no oversize backing). Then an optical nudge for lopsided glyphs,
+// as a fraction of the size: a lightbulb's glass is heavier than its base, a
+// play triangle's mass sits left of its box, a star's points pull it up.
+export type Optical = 'none' | 'bulb' | 'play' | 'star' | 'heart';
+const NUDGE: Record<Optical, [number, number]> = { none: [0, 0], bulb: [0, 0.03], play: [0.05, 0], star: [0, 0.025], heart: [0, 0.03] };
+// A soft blob, symmetric about the center so it can never look off to one side.
+const SOFT_BLOB = 'M50 4 C74 4 96 18 96 50 C96 82 74 96 50 96 C26 96 4 82 4 50 C4 18 26 4 50 4 Z';
+export function IconBadge({ size, bg, shape = 'circle', ring, optical = 'none', children, label }: { size: number; bg: string; shape?: 'circle' | 'blob'; ring?: boolean; optical?: Optical; children: ReactNode; label?: string }) {
+  const [nx, ny] = NUDGE[optical];
+  return (
+    <span aria-label={label} aria-hidden={label ? undefined : true} className="relative inline-grid place-items-center shrink-0" style={{ width: size, height: size }}>
+      {shape === 'circle'
+        ? <span className="absolute inset-0 rounded-full" style={{ background: bg, border: ring ? `3px solid ${I}` : undefined }} />
+        : <svg viewBox="0 0 100 100" width={size} height={size} className="absolute inset-0" aria-hidden="true"><path d={SOFT_BLOB} fill={bg} stroke={ring ? I : 'none'} strokeWidth={ring ? 3 : 0} /></svg>}
+      <span className="relative grid place-items-center" style={{ transform: nx || ny ? `translate(${(nx * size).toFixed(1)}px, ${(ny * size).toFixed(1)}px)` : undefined }}>{children}</span>
+    </span>
+  );
+}
+
+// Phones (teacher, 2026-11-24, "phones need a layout"): five tools do not fit
+// beside a score at 390px, so a phone shows the Hint (the one tool kids reach
+// in play) and one Menu button holding Settings (with accessibility inside),
+// Full screen and Close. Still 44px rounds.
+export function PhoneTools({ hint = true }: { hint?: boolean }) {
+  const items: [Icon, string][] = [...(hint ? [[Lightbulb, 'Hint'] as [Icon, string]] : []), [List, 'Menu: settings, full screen, close']];
+  return (
+    <span className="flex shrink-0" style={{ gap: 8 }}>
+      {items.map(([Ic, l]) => <span key={l} aria-label={l} className="rounded-full grid place-items-center shrink-0" style={{ width: TOOL_SIZE, height: TOOL_SIZE, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Ic weight="bold" size={20} /></span>)}
+    </span>
+  );
+}
 // ---------- THE question card (teacher, 2026-11-23/24) ----------
 // One design for every game; games only swap the background around it. Inside
-// the card: the player or team left on Butter, the tools, then Listen right; the
+// the card: the player or team icon and name left (plain, no Butter), then only Settings
+// (accessibility inside) and Listen (teacher, 2026-11-24), then Listen right; the
 // question left-aligned in a fixed generous block whose font steps down for long
 // questions; four A to D tiles of ONE fixed size.
 export const SHORT_Q = 'Which one starts with a capital letter?';
@@ -130,6 +178,8 @@ export const LONG_Q = 'Read the sentence: "my dog likes to run in the park." Whi
 const Q_ANS = [['A', 'the dog ran.', PP.periwinkle, PP.gamify], ['B', 'The dog ran.', PP.sky, PP.blueCrystal], ['C', 'The dog ran', PP.pink, PP.blush], ['D', 'the dog ran', PP.lemon, PP.butter]] as const;
 function qSize(q: string, big: boolean) { const n = q.length; return big ? (n <= 60 ? 54 : n <= 110 ? 44 : 36) : (n <= 60 ? 46 : n <= 110 ? 36 : 30); }
 export function QuestionCard({ tablet, q = SHORT_Q, who, answers, right }: { tablet?: boolean; q?: string; who?: { icon: ReactNode; name: string }; answers?: readonly (readonly [string, string, string, string])[]; right?: number }) {
+  const phone = useFrame().kind === 'phone';
+  if (phone) return <QuestionCardPhone q={q} who={who} answers={answers ?? Q_ANS} right={right} />;
   const big = !!tablet;
   const b = big ? 60 : 52, ic = big ? 26 : 22;
   const ans = answers ?? Q_ANS;
@@ -137,8 +187,9 @@ export function QuestionCard({ tablet, q = SHORT_Q, who, answers, right }: { tab
   return (
     <div className={`${big ? 'w-[697px]' : 'w-[1088px]'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 28 : 26 }}>
       <div className="flex items-center gap-3">
-        <span className="flex-1 min-w-0 flex"><span className="flex items-center gap-3 min-w-0 rounded-full pl-1.5 pr-5 py-1" style={{ background: TURN_SHADE }}>{who ? who.icon : <Badge t={TEAMS[1]} size={b * 0.9} />}<b className="truncate" style={{ fontSize: big ? 30 : 26 }}>{who ? who.name : 'Team Sky'}</b></span></span>
-        {round(Toolbox, 'Tools')}{round(Lightbulb, 'Hint')}{round(GearSix, 'Settings')}{round(CornersOut, 'Full screen')}{round(X, 'Close')}
+        {/* Just the player icon (no circle) and the name as plain text: no yellow pill (teacher, 2026-11-24); Butter is only for the scoreboard row. No hint here (it stays in the board's tool group). */}
+        <span className="flex-1 min-w-0 flex items-center gap-3">{who ? who.icon : <Badge t={TEAMS[1]} size={b * 0.9} />}<b className="truncate" style={{ fontSize: big ? 30 : 26 }}>{who ? who.name : 'Team Sky'}</b></span>
+        {round(GearSix, 'Settings')}
         <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: b, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={ic} />Listen</span>
       </div>
       <div className="flex items-center" style={{ height: big ? 330 : 200 }}>
@@ -147,7 +198,33 @@ export function QuestionCard({ tablet, q = SHORT_Q, who, answers, right }: { tab
       <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
         {ans.map(([l, txt, c, bg], i) => (
           <div key={l} className="flex items-center gap-4 px-4 rounded-[20px] font-bold" style={{ height: big ? 92 : 84, fontSize: big ? 38 : 32, background: right === i ? PP.mint : bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-            <span className="shrink-0 rounded-full grid place-items-center" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase', width: big ? 64 : 58, height: big ? 64 : 58, fontSize: big ? 36 : 32, background: right === i ? PP.kelly : c, border: `3px solid ${I}` }}>{l}</span>{txt}
+            <span className="shrink-0 rounded-full grid place-items-center" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase', width: big ? 64 : 58, height: big ? 64 : 58, fontSize: big ? 36 : 32, background: right === i ? PP.kelly : c, color: right !== i && c === PP.grape ? '#ffffff' : I, border: `3px solid ${I}` }}>{l}</span>{txt}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// The phone question card (390 x 844): 358px wide, the player icon and name,
+// Settings (accessibility inside) and the Listen pill (44px rounds); the question 28/24/21px in a fixed 200px
+// block, left aligned; answers in one column, 60px tall, 22px text.
+function qPhone(q: string) { const n = q.length; return n <= 60 ? 28 : n <= 110 ? 24 : 21; }
+function QuestionCardPhone({ q, who, answers, right }: { q: string; who?: { icon: ReactNode; name: string }; answers: readonly (readonly [string, string, string, string])[]; right?: number }) {
+  const round = (Ic: Icon, l: string) => <span key={l} aria-label={l} className="rounded-full grid place-items-center shrink-0" style={{ width: TOOL_SIZE, height: TOOL_SIZE, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Ic weight="bold" size={20} /></span>;
+  return (
+    <div className="w-[358px] rounded-[24px] flex flex-col gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}`, padding: 14 }}>
+      <div className="flex items-center gap-2">
+        <span className="flex-1 min-w-0 flex items-center gap-2">{who ? who.icon : <Badge t={TEAMS[1]} size={36} />}<b className="text-[17px] leading-tight line-clamp-2">{who ? who.name : 'Team Sky'}</b></span>
+        {round(GearSix, 'Settings')}<span className="h-11 px-3.5 rounded-full inline-flex items-center gap-1.5 font-bold text-[18px] shrink-0" style={{ background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={20} />Listen</span>
+      </div>
+      <div className="flex items-center" style={{ height: 200 }}>
+        <h2 className="font-bold text-left leading-snug" style={{ fontSize: qPhone(q) }}>{q}</h2>
+      </div>
+      <div className="grid gap-2.5">
+        {answers.map(([l, txt, c, bg], i) => (
+          <div key={l} className="flex items-center gap-3 px-2.5 rounded-[16px] font-bold" style={{ height: 60, fontSize: 22, background: right === i ? PP.mint : bg, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+            <span className="shrink-0 rounded-full grid place-items-center" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase', width: 42, height: 42, fontSize: 24, background: right === i ? PP.kelly : c, color: right !== i && c === PP.grape ? '#ffffff' : I, border: `3px solid ${I}` }}>{l}</span>{txt}
           </div>
         ))}
       </div>
@@ -181,9 +258,10 @@ export function Meter({ segments = 1, done = 0, part = 1, width = 360, label }: 
 }
 
 // The site's purple ground, the same marble as App.tsx's AmbientBackground
-// (periwinkle #B4C4FB with soft lighter and darker blobs).
-const SWIRL = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><filter id="m"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="140" xChannelSelector="R" yChannelSelector="G"/></filter><g filter="url(#m)"><rect width="800" height="800" fill="#b4c4fb"/><circle cx="150" cy="150" r="180" fill="#c8d4fc"/><circle cx="650" cy="220" r="220" fill="#a3b6f7"/><circle cx="300" cy="600" r="240" fill="#c8d4fc"/><circle cx="700" cy="700" r="180" fill="#a3b6f7"/></g></svg>`);
-export const PURPLE_GROUND: CSSProperties = { backgroundColor: '#b4c4fb', backgroundImage: `url("data:image/svg+xml,${SWIRL}")`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat' };
+// (teacher, 2026-11-24: now Lavender #DDD6FF with soft lighter #EAE5FF and
+// deeper #C9BFFB blobs, so it still reads as the site ground).
+const SWIRL = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><filter id="m"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.012" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="140" xChannelSelector="R" yChannelSelector="G"/></filter><g filter="url(#m)"><rect width="800" height="800" fill="#ddd6ff"/><circle cx="150" cy="150" r="180" fill="#eae5ff"/><circle cx="650" cy="220" r="220" fill="#c9bffb"/><circle cx="300" cy="600" r="240" fill="#eae5ff"/><circle cx="700" cy="700" r="180" fill="#c9bffb"/></g></svg>`);
+export const PURPLE_GROUND: CSSProperties = { backgroundColor: '#ddd6ff', backgroundImage: `url("data:image/svg+xml,${SWIRL}")`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat' };
 
 // ---------- game theme backs (Classic), drawn in code ----------
 export function StudioBack({ w, h }: { w: number; h: number }) {
@@ -271,11 +349,12 @@ export function LakeBack({ w, h }: { w: number; h: number }) {
 export type FrameKind = 'board' | 'laptop' | 'ipadL' | 'ipadP' | 'phone';
 export const FRAMES: Record<FrameKind, { w: number; h: number; label: string }> = {
   board: { w: 1600, h: 900, label: 'Big screen 16:9' }, laptop: { w: 1280, h: 800, label: 'Laptop 16:10' },
-  ipadL: { w: 1180, h: 820, label: 'iPad landscape' }, ipadP: { w: 820, h: 1180, label: 'iPad portrait' }, phone: { w: 430, h: 932, label: 'Phone' },
+  ipadL: { w: 1180, h: 820, label: 'iPad landscape' }, ipadP: { w: 820, h: 1180, label: 'iPad portrait' }, phone: { w: 390, h: 844, label: 'Phone 390 x 844' },
 };
 type FrameInfo = { kind: FrameKind; w: number; h: number; portrait: boolean; adaptive: boolean };
 const FrameCtx = createContext<FrameInfo>({ kind: 'laptop', w: 1280, h: 800, portrait: false, adaptive: false });
 export const useFrame = () => useContext(FrameCtx);
+export const usePhone = () => useContext(FrameCtx).kind === 'phone';
 
 // Scales its child (natural size) down to fit the box; used by reflowing views
 // in portrait so nothing is cut off or runs past its box.
@@ -286,12 +365,14 @@ export function AutoFit({ children, width }: { children: ReactNode; width?: numb
   // sits centered, so it spills on both sides), the width grows just enough,
   // then the whole thing scales to fit. Phones get real-size text where it fits.
   const [ww, setWw] = useState(width);
-  useLayoutEffect(() => { setWw(width); }, [width]);
+  const grows = useRef(0);
+  useLayoutEffect(() => { grows.current = 0; setWw(width); }, [width]);
   useLayoutEffect(() => {
     const b = box.current, c = inner.current; if (!b || !c) return;
     const fit = () => {
       const cw = c.offsetWidth, ch = c.offsetHeight; if (!cw || !ch) return;
-      if (ww && c.scrollWidth > cw + 1) { setWw(cw + 2 * (c.scrollWidth - cw)); return; }
+      // Grow at most a few times: content that widens with its box (a w-full row) would chase it forever.
+      if (ww && c.scrollWidth > cw + 1 && grows.current < 3) { grows.current += 1; setWw(cw + 2 * (c.scrollWidth - cw)); return; }
       setK(Math.min(1, b.clientWidth / cw, b.clientHeight / ch));
     };
     const ro = new ResizeObserver(fit); ro.observe(b); ro.observe(c); fit();
@@ -320,13 +401,18 @@ function Screen({ kind, land, port, landSize, portSize, adaptive, ground }: { ki
   let body: ReactNode;
   if (adaptive) {
     body = <FrameCtx.Provider value={{ kind, w: f.w, h: f.h, portrait, adaptive: true }}><div className="w-full h-full relative">{portrait && port ? port : land}</div></FrameCtx.Provider>;
+  } else if (kind === 'phone') {
+    // Phones get their own layout at real size (teacher, 2026-11-24, "phones
+    // need a layout"): the portrait view is drawn at 390 x 844 with usePhone()
+    // true, so each view swaps in its phone design; never a scaled-down iPad.
+    body = <FrameCtx.Provider value={{ kind, w: f.w, h: f.h, portrait: true, adaptive: false }}><div className="w-full h-full relative overflow-hidden" style={ground}>{port ?? land}</div></FrameCtx.Provider>;
   } else {
     const [dw, dh] = portrait && port ? portSize : landSize;
     const k = Math.min(f.w / dw, f.h / dh);
     body = (
-      <div className="w-full h-full relative overflow-hidden" style={ground}>
+      <FrameCtx.Provider value={{ kind, w: dw, h: dh, portrait, adaptive: false }}><div className="w-full h-full relative overflow-hidden" style={ground}>
         <div className="absolute" style={{ width: dw, height: dh, left: (f.w - dw * k) / 2, top: (f.h - dh * k) / 2, transform: `scale(${k})`, transformOrigin: 'top left' }}>{portrait && port ? port : land}</div>
-      </div>
+      </div></FrameCtx.Provider>
     );
   }
   return <Lazy ratio={f.w / f.h} device={`${kind}:${f.w}`}><Scaled w={f.w} h={f.h}>{body}</Scaled></Lazy>;
@@ -411,7 +497,7 @@ export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: b
   const yellow = true;
   return (
     <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
-      style={yellow ? { background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` } : { background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
+      style={yellow ? { background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` } : { background: PP.periwinkle, color: '#ffffff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
   );
 }
 
@@ -456,8 +542,10 @@ const MK_GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 40
 function MkRound({ children, label, size = 46 }: { children: ReactNode; label: string; size?: number }) {
   return <span aria-label={label} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
-export function MenuGo({ children }: { children: ReactNode }) {
-  return <span className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{children}</span>;
+// Next stays off (the blip state, teacher 2026-11-23 sounds) until a card is
+// picked on a card-choice step (teacher, 2026-11-24): pale, no lift, still 60px.
+export function MenuGo({ children, disabled }: { children: ReactNode; disabled?: boolean }) {
+  return <span aria-disabled={disabled || undefined} className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={disabled ? { background: '#efeee6', color: '#57506e', border: `3px dashed ${I}`, boxShadow: 'none', transform: 'translateY(6px)' } : { background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{children}</span>;
 }
 export function MenuBack() {
   return <span className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 whitespace-nowrap" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><ArrowLeft weight="bold" size={20} />Back</span>;
@@ -475,16 +563,23 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
         {/* The white top bar with the logo, then one even row: title left, step
             meter in the middle, round buttons right (teacher, 2026-11-24). */}
         <div style={{ margin: `-${phone ? 20 : 28}px -${px}px 0` }}><SiteBarSmall phone={phone} /></div>
-        <div className={`mt-5 ${phone ? 'grid gap-3' : 'grid grid-cols-[1fr_auto_1fr] items-center gap-4'}`}>
-          <h2 className="text-left" style={{ ...MK_GY, fontSize: phone ? 28 : 38 }}>{title}</h2>
+        {/* Phone (teacher, 2026-11-24, "stack center"): title, meter and round buttons stacked and centered. */}
+        <div className={`mt-5 ${phone ? 'grid gap-3 justify-items-center text-center' : 'grid grid-cols-[1fr_auto_1fr] items-center gap-4'}`}>
+          <h2 className={phone ? 'text-center' : 'text-left'} style={{ ...MK_GY, fontSize: phone ? 30 : 38 }}>{title}</h2>
           <Meter segments={total} done={step - 1} part={1} width={total * (phone ? 34 : 44)} label={`Step ${step} of ${total}`} />
-          <div className={`flex ${phone ? 'gap-1.5' : 'gap-3 justify-self-end'}`}>
-            <MkRound size={phone ? 44 : 48} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 44 : 48} label="Settings"><GearSix weight="bold" size={phone ? 18 : 22} /></MkRound>
-            <MkRound size={phone ? 44 : 48} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 44 : 48} label="Close"><X weight="bold" size={phone ? 18 : 22} /></MkRound>
+          <div className={`flex ${phone ? 'gap-2 justify-center' : 'gap-2 justify-self-end'}`}>
+            <MkRound size={phone ? 44 : 48} label="Settings"><GearSix weight="bold" size={phone ? 20 : 22} /></MkRound>
+            <MkRound size={phone ? 44 : 48} label="Full screen"><CornersOut weight="bold" size={phone ? 20 : 22} /></MkRound><MkRound size={phone ? 44 : 48} label="Close"><X weight="bold" size={phone ? 20 : 22} /></MkRound>
           </div>
         </div>
-        <div className="flex-1 min-h-0 my-5"><AutoFit width={phone ? 460 : f.w - 2 * px}>{children}</AutoFit></div>
-        <div style={{ height: 72 }}><AutoFit>{footer}</AutoFit></div>
+        <div className="flex-1 min-h-0 my-5"><AutoFit width={f.w - 2 * px}>{children}</AutoFit></div>
+        {/* On a phone an extra button (Add team) takes its own row above Back and Next, so all stay 56px+ and real size. */}
+        {phone && extra
+          ? <div className="grid gap-3 justify-items-center"><div>{extra}</div><div className="flex justify-center gap-4 items-center">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div></div>
+          : phone
+            // Back and Next share a row when they fit; a long start button (Start the race) wraps above Back. Both stay real size.
+            ? <div className="flex flex-wrap-reverse justify-center items-center gap-3">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
+          : <div style={{ height: 72 }}><AutoFit>{footer}</AutoFit></div>}
       </div>
     );
   }
@@ -498,9 +593,10 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
             <h2 className="text-[40px] text-left" style={MK_GY}>{title}</h2>
             <Meter segments={total} done={step - 1} part={1} width={total * 52} label={`Step ${step} of ${total}`} />
-            <div className="flex gap-3 justify-self-end">
-              <MkRound label="Accessibility"><PersonArmsSpread weight="bold" size={22} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={22} /></MkRound>
-              <MkRound label="Full screen"><CornersOut weight="bold" size={22} /></MkRound><MkRound label="Close"><X weight="bold" size={22} /></MkRound>
+            <div className="flex gap-2 justify-self-end">
+              {/* 50px in the 1280 design so they stay 44px+ when it is fit to an iPad landscape (0.92). */}
+              <MkRound label="Settings" size={50}><GearSix weight="bold" size={22} /></MkRound>
+              <MkRound label="Full screen" size={50}><CornersOut weight="bold" size={22} /></MkRound><MkRound label="Close" size={50}><X weight="bold" size={22} /></MkRound>
             </div>
           </div>
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
@@ -519,31 +615,73 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
 // (corner buttons at its right), the description and ways to play, the white
 // How to play card, and a full-width 72px start button whose bottom lines up
 // with the cover bottom.
+// A Grow Year title on ONE line (teacher, 2026-11-24: "have the white buttons
+// above the title text so the title can be in one row"): starts at `max` and
+// shrinks to fit its column; only a name too long even at `min` wraps, onto
+// two balanced lines at `min`.
+export function FitTitle({ children, max, min, center, style }: { children: string; max: number; min: number; center?: boolean; style?: CSSProperties }) {
+  const box = useRef<HTMLHeadingElement>(null);
+  const [fs, setFs] = useState(max); const [wrap, setWrap] = useState(false);
+  useLayoutEffect(() => {
+    const el = box.current; if (!el) return;
+    const fit = () => {
+      const w = el.clientWidth; if (!w) return;
+      // Measure on a hidden copy so React's own inline styles are never touched.
+      const probe = el.cloneNode(true) as HTMLElement;
+      probe.style.cssText += `;position:absolute;visibility:hidden;white-space:nowrap;width:auto;font-size:${max}px`;
+      el.parentElement?.appendChild(probe);
+      const natural = probe.scrollWidth; probe.remove();
+      const k = Math.floor((max * w) / Math.max(natural, 1));
+      if (k >= min) { setFs(Math.min(max, k)); setWrap(false); } else { setFs(min); setWrap(true); }
+    };
+    fit(); const ro = new ResizeObserver(fit); ro.observe(el);
+    document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [children, max, min]);
+  return <h1 ref={box} className={`w-full ${center ? 'text-center' : 'text-left'}`} style={{ ...MK_GY, fontSize: fs, lineHeight: wrap ? 1.05 : 0.95, whiteSpace: wrap ? 'normal' : 'nowrap', textWrap: 'balance', ...style } as CSSProperties}>{children}</h1>;
+}
+// The welcome, newest (teacher, 2026-11-24): the right column, as tall as the
+// cover and spread evenly: the round buttons top right (level with the cover
+// top), the title on one line across the full column, the description right
+// under it (24px, two or three lines), the ways to play, How to play, and the
+// yellow start button level with the cover bottom. One left edge for all.
 export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up and play', canvas = 1280 }: { name: string; desc: string; modes: string[]; steps: [ReactNode, string][]; cover: ReactNode; go?: string; canvas?: number }) {
   const f = useFrame();
+  const chips = (sz: number) => <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 inline-flex items-center rounded-full font-bold" style={{ height: sz * 2.4, fontSize: sz, background: (WAYS_STYLE[m as keyof typeof WAYS_STYLE]?.soft) ?? [PP.gamify, PP.aqua, PP.butter][i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>;
+  const how = (big: number) => (
+    <div className="rounded-[26px] px-6 py-4 grid gap-3" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+      <h2 style={{ ...MK_GY, fontSize: big + 4 }}>How to play</h2>
+      {steps.map(([ic, t], i) => <div key={t} className="flex items-center gap-4 font-bold leading-tight" style={{ fontSize: big }}><IconBadge size={40} bg={[PP.butter, PP.blush, PP.aqua][i % 3]} ring>{ic}</IconBadge>{t}</div>)}
+    </div>
+  );
+  const start = (h: number, fs: number) => <span className="w-full rounded-full font-display font-bold inline-flex items-center justify-center gap-3" style={{ height: h, fontSize: fs, background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={fs + 2} />{go}</span>;
   if (f.adaptive && f.portrait) {
-    // Portrait: the same parts stacked, cover on top at its own shape, then
-    // the title, description and ways, How to play and the yellow start button.
+    // Portrait and phone: the round buttons share the white top bar's row, so
+    // the title gets its own full line under the cover.
     const phone = f.w < 600, px = phone ? 20 : 40, cw = f.w - 2 * px;
+    const coverW = Math.min(cw, f.h * (phone ? 0.34 : 0.4) * 720 / 648);
+    const rs = 44;
     return (
-      <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 40}px` }}>
-        {/* The site's white top bar runs across the welcome in portrait too (teacher, 2026-11-24). */}
-        <div style={{ margin: `-${phone ? 20 : 28}px -${px}px 0` }}><SiteBarSmall phone={phone} /></div>
-        <div className="mt-4 flex justify-end gap-3"><MkRound label="Full screen" size={44}><CornersOut weight="bold" size={20} /></MkRound><MkRound label="Settings" size={44}><GearSix weight="bold" size={20} /></MkRound></div>
-        <div aria-hidden="true" className="mt-3 mx-auto rounded-[24px] overflow-hidden relative shrink-0" style={{ width: Math.min(cw, f.h * 0.4 * 720 / 648), height: Math.min(cw, f.h * 0.4 * 720 / 648) * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
-          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(Math.min(cw, f.h * 0.4 * 720 / 648) - 6) / 720})` }}>{cover}</div>
+      <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `0 ${px}px ${phone ? 20 : 40}px` }}>
+        <div style={{ margin: `0 -${px}px` }}>
+          <div className="flex items-center shrink-0" style={{ padding: `0 ${phone ? 14 : 40}px 0 ${px}px`, height: phone ? 60 : 68, background: '#fbfcf8', borderBottom: '3px solid #000' }}>
+            <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-6' : 'h-8'} w-auto`} draggable={false} />
+            <span className="ml-auto flex gap-2.5">
+              <MkRound label="Full screen" size={rs}><CornersOut weight="bold" size={20} /></MkRound><MkRound label="Settings" size={rs}><GearSix weight="bold" size={20} /></MkRound>
+              {phone ? <MkRound label="Menu" size={rs}><List weight="bold" size={20} /></MkRound> : <span className="flex items-center gap-3 ml-3">{['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold text-[15px]">{l}</span>)}</span>}
+            </span>
+          </div>
         </div>
-        <div className="flex-1 min-h-0 mt-5">
-          <AutoFit width={phone ? 420 : cw}>
-            <div className="w-full grid gap-5">
-              <h1 style={{ ...MK_GY, fontSize: 60, lineHeight: 0.95 }}>{name}</h1>
-              <p className="font-semibold text-[22px] leading-snug">{desc}</p>
-              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: (WAYS_STYLE[m as keyof typeof WAYS_STYLE]?.soft) ?? [PP.gamify, PP.aqua, PP.butter][i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
-              <div className="rounded-[26px] px-7 py-5 grid gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-                <h2 className="text-[26px]" style={MK_GY}>How to play</h2>
-                {steps.map(([ic, t], i) => <div key={t} className="flex items-center gap-4 font-bold text-[22px] leading-tight"><span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}</div>)}
-              </div>
-              <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
+        <div aria-hidden="true" className="mt-4 mx-auto rounded-[24px] overflow-hidden relative shrink-0" style={{ width: coverW, height: coverW * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(coverW - 6) / 720})` }}>{cover}</div>
+        </div>
+        <div className="flex-1 min-h-0 mt-4">
+          <AutoFit width={cw}>
+            <div className="w-full grid gap-4">
+              <div className="grid gap-2"><FitTitle max={phone ? 52 : 64} min={phone ? 32 : 44}>{name}</FitTitle><p className="font-semibold leading-snug" style={{ fontSize: phone ? 20 : 24 }}>{desc}</p></div>
+              {chips(phone ? 17 : 18)}
+              {how(phone ? 19 : 22)}
+              {start(phone ? 64 : 72, phone ? 26 : 30)}
             </div>
           </AutoFit>
         </div>
@@ -557,23 +695,14 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
         <div className="absolute left-10 right-10 top-[100px] bottom-[44px] flex gap-10">
           <div aria-hidden="true" className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
           <div className="flex-1 min-w-0 h-full flex flex-col justify-between">
-            <div className="flex items-start gap-4">
-              <h1 className="flex-1 min-w-0" style={{ ...MK_GY, fontSize: 64, lineHeight: 0.95 }}>{name}</h1>
-              <div className="flex gap-3 pt-1"><MkRound label="Full screen" size={56}><CornersOut weight="bold" size={26} /></MkRound><MkRound label="Settings" size={56}><GearSix weight="bold" size={26} /></MkRound></div>
+            <div className="flex justify-end gap-3"><MkRound label="Full screen" size={52}><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Settings" size={52}><GearSix weight="bold" size={24} /></MkRound></div>
+            <div className="grid gap-3">
+              <FitTitle max={72} min={48}>{name}</FitTitle>
+              <p className="font-semibold text-[24px] leading-snug">{desc}</p>
             </div>
-            <div className="grid gap-4">
-              <p className="font-semibold text-[22px] leading-snug">{desc}</p>
-              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: (WAYS_STYLE[m as keyof typeof WAYS_STYLE]?.soft) ?? [PP.gamify, PP.aqua, PP.butter][i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
-            </div>
-            <div className="rounded-[26px] px-7 py-5 grid gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-              <h2 className="text-[26px]" style={MK_GY}>How to play</h2>
-              {steps.map(([ic, t], i) => (
-                <div key={t} className="flex items-center gap-4 font-bold text-[22px] leading-tight">
-                  <span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}
-                </div>
-              ))}
-            </div>
-            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
+            {chips(18)}
+            {how(22)}
+            {start(72, 30)}
           </div>
         </div>
       </div>

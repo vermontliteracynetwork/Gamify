@@ -3,7 +3,7 @@ import { ArrowRight, ArrowsClockwise, FlagCheckered, HourglassHigh, Play, UsersT
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
-import { Badge, MainBtn, ParkBack, StudioBack, TEAMS, TurnGlow, Meter, DeviceSet, Fit, cpuName, DieWiggle, GameTools, PowerCard, QuestionCard, TurnChip, TURN_SHADE } from './mockKit';
+import { AutoFit, Badge, MainBtn, ParkBack, StudioBack, TEAMS, TurnGlow, Meter, DeviceSet, Fit, FitTitle, cpuName, DieWiggle, GameTools, PhoneTools, PowerCard, QuestionCard, TURN_SHADE, usePhone } from './mockKit';
 import { layout } from '../games/castle-quest/board';
 // Territory's own Classic art, imported as is (read only; the live game owns it).
 import { CatArt, MouseArt, PoofArt, RoomArt, SIDE_PASTEL } from '../games/territory/art';
@@ -48,6 +48,31 @@ function Score({ t, pts, now, compact }: { t: Team; pts: number; now?: boolean; 
 function Confetti({ marks }: { marks: [DoodleKind, string, number, number, number][] }) {
   return <>{marks.map(([k, c, x, y, s], i) => <Doodle key={i} kind={k} color={c} size={s} className="absolute pointer-events-none" style={{ left: x, top: y, transform: `rotate(${(i * 37) % 50 - 25}deg)` }} />)}</>;
 }
+// ---------- phone parts (teacher, 2026-11-24, "phones need a layout") ----------
+// Every game on a 390 x 844 phone: one top row (who or what left, the Hint and
+// one Menu round right), the board as big as the width allows, then the
+// scoreboard as one compact row of chips (the current one shaded Butter) and
+// the power-up cards as a small row of squares. Nothing scrolls.
+function PTop({ left, hint = true }: { left?: ReactNode; hint?: boolean }) {
+  return <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between gap-2"><span className="min-w-0">{left}</span><PhoneTools hint={hint} /></div>;
+}
+function PStack({ children, top = 70, gap = 12 }: { children: ReactNode; top?: number; gap?: number }) {
+  return <div className="absolute inset-x-3 bottom-4 flex flex-col items-center justify-evenly" style={{ top, gap }}>{children}</div>;
+}
+function PhoneChips({ teams, pts, now, names }: { teams: readonly Team[]; pts: (number | string)[]; now: number; names?: boolean }) {
+  return (
+    <div className="w-full grid gap-1.5" style={{ gridTemplateColumns: `repeat(${teams.length}, minmax(0, 1fr))` }}>
+      {teams.map((t, i) => (
+        <span key={t.name} aria-label={`${t.name} ${pts[i]}`} className="h-[48px] min-w-0 rounded-full flex items-center justify-center gap-1.5 px-1.5" style={{ background: i === now ? TURN_SHADE : PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
+          <Badge t={t} size={28} />{names && <b className="truncate text-[15px]">{t.name}</b>}<span className="font-display text-[20px] tabular-nums whitespace-nowrap">{pts[i]}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+function PPill({ children }: { children: ReactNode }) {
+  return <span className="inline-flex items-center gap-3 px-3.5 h-[52px] rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
+}
 
 // ================= Game Show =================
 // The real game: a grid of surprise cards (4 x 3 here, 12 cards), teams take
@@ -78,12 +103,12 @@ function Marquee({ children, bulbs }: { children: ReactNode; bulbs: number }) {
     </div>
   );
 }
-function GSCard({ c }: { c: (typeof GS_CARDS)[number] }) {
+function GSCard({ c, art = 58 }: { c: (typeof GS_CARDS)[number]; art?: number }) {
   if (!c) {
     return (
       <span className="relative rounded-[14px] grid place-items-center overflow-hidden" style={{ aspectRatio: '300 / 220', background: PP.butter, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
         <span className="absolute inset-[7px] rounded-[9px]" style={{ border: `2px dashed ${PP.orange}` }} />
-        <Doodle kind="sparkle" color={PP.lemon} size={46} />
+        <Doodle kind="sparkle" color={PP.lemon} size={Math.round(art * 0.8)} />
       </span>
     );
   }
@@ -91,8 +116,8 @@ function GSCard({ c }: { c: (typeof GS_CARDS)[number] }) {
   const pw = c.power ? GS_POWERS[c.power] : undefined;
   return (
     <span className="relative rounded-[14px] grid place-items-center" style={{ aspectRatio: '300 / 220', background: PASTEL_OF[t.color], border: `3px solid ${I}` }}>
-      <span className="absolute top-1.5 left-1.5"><Badge t={t} size={22} /></span>
-      {pw ? <CrayonPowerUp id={pw.id} size={58} /> : <b className="font-display text-4xl tabular-nums">+{c.pts}</b>}
+      <span className="absolute top-1 left-1"><Badge t={t} size={art < 50 ? 17 : 22} /></span>
+      {pw ? <CrayonPowerUp id={pw.id} size={art} /> : <b className={`font-display tabular-nums ${art < 50 ? 'text-[26px] pl-2 pt-1' : 'text-4xl'}`}>+{c.pts}</b>}
     </span>
   );
 }
@@ -135,6 +160,7 @@ function GameShowLaptop({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
   );
 }
 function GameShowTablet({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
+  if (usePhone()) return <GameShowPhone vs={vs} noPop={noPop} />;
   const teams = vs ? VS : TEAMS;
   return (
     <div className="w-full h-full relative overflow-hidden">
@@ -149,6 +175,21 @@ function GameShowTablet({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
         <span className="flex gap-3 justify-center"><PowerCard id="double-points" name="Double Star" size={96} /></span>
       </div>
       {!noPop && <div className="absolute inset-x-[60px] top-[150px] h-[740px]"><GSPop scale={1.2} /></div>}
+    </div>
+  );
+}
+function GameShowPhone({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
+  const teams = vs ? VS : TEAMS;
+  return (
+    <div className="w-full h-full relative overflow-hidden">
+      <StudioBack w={390} h={844} />
+      <PTop left={<Meter segments={3} done={1} part={0.5} width={150} label="Round 2 of 3" />} />
+      <PStack>
+        <PhoneChips teams={teams} pts={vs ? [150, 90] : GS_SCORES} now={vs ? 0 : 1} names={vs} />
+        <div className="w-full"><Marquee bulbs={9}><div className="grid grid-cols-3 gap-2">{GS_CARDS.map((c, i) => <GSCard key={i} c={c} art={44} />)}</div></Marquee></div>
+        <PowerCard id="double-points" name="Double Star" size={64} />
+      </PStack>
+      {!noPop && <div className="absolute inset-0 z-30"><GSPop /></div>}
     </div>
   );
 }
@@ -192,7 +233,8 @@ function BoardGrid({ w, h, celebrate, pawns = PAWNS }: { w: number; h: number; c
         return <span key={j} className="absolute z-[2]" style={{ left: pos(p.at).left + s * 0.14 + same * s * 0.2, top: pos(p.at).top - s * 0.28, filter: p.t === 1 && celebrate ? 'drop-shadow(0 0 6px #fabe37) drop-shadow(0 0 14px rgba(250,190,55,0.55))' : undefined }}><CrayonPawn color={TEAMS[p.t].color} size={s * 0.72} /></span>;
       })}
       {celebrate && (() => { const p = pos(15); return (
-        <span className="absolute z-[3] pointer-events-none" style={{ left: p.left + s / 2, top: p.top + s + 4 }}>
+        // Kept inside the board: the burst's center never comes closer than 100px to an edge.
+        <span className="absolute z-[3] pointer-events-none" style={{ left: Math.min(Math.max(p.left + s / 2, 100), w - 100), top: p.top + s + 4 }}>
           <span className="absolute whitespace-nowrap inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-2xl" style={{ ...GY, background: PP.lemon, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, transform: 'translate(-50%, 0)' }}><ArrowsClockwise weight="bold" size={24} />Roll again!</span>
           <Confetti marks={[['sparkle', PP.lemon, -s * 1.7, s * 0.05, 26], ['star', PP.pink, s * 1.35, s * 0.1, 22], ['sparkle', PP.paper, s * 1.5, s * 0.65, 20], ['dot', PP.sky, -s * 1.5, s * 0.7, 14]]} />
         </span>
@@ -233,6 +275,7 @@ function BoardLaptop({ vs }: { vs?: boolean }) {
   );
 }
 function BoardTablet({ vs }: { vs?: boolean }) {
+  if (usePhone()) return <BoardPhone vs={vs} />;
   return (
     <div className="w-full h-full relative overflow-hidden">
       <ParkBack w={820} h={1180} />
@@ -243,6 +286,26 @@ function BoardTablet({ vs }: { vs?: boolean }) {
       <div className="absolute inset-x-6 top-[806px] grid grid-cols-[250px_1fr] gap-4">
         <DieCard />
         <div className="grid gap-2 content-start"><Tray size={88} /><MiniRace teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} /></div>
+      </div>
+    </div>
+  );
+}
+function BoardPhone({ vs }: { vs?: boolean }) {
+  const teams = vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS;
+  return (
+    <div className="w-full h-full relative overflow-hidden">
+      <ParkBack w={390} h={844} />
+      <PTop />
+      <div className="absolute top-[68px] inset-x-2.5 bottom-3 flex flex-col justify-evenly gap-3">
+        <div className="grid place-items-center py-3" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 24, boxShadow: `0 5px 0 ${I}` }}>
+          <BoardGrid w={346} h={430} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
+        </div>
+        {/* Race rows as chips: the team badge (shape plus color) and how far to go; Butter = whose turn. */}
+        <div className="grid grid-cols-2 gap-2">{teams.map((t, i) => (
+          <span key={t.name} aria-label={`${t.name}, ${BG_SCORES[i]}`} className="h-[44px] rounded-full flex items-center justify-center gap-2 px-2" style={{ background: i === (vs ? 0 : 1) ? TURN_SHADE : PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}>
+            <Badge t={t as Team} size={26} />{vs && <b className="truncate text-[14px]">{t.name}</b>}<span className="text-[14px] font-bold whitespace-nowrap">{BG_SCORES[i]}</span>
+          </span>))}</div>
+        <div className="flex items-center justify-center gap-5"><DieWiggle><CrayonDie value={3} size={100} /></DieWiggle><Tray size={62} /></div>
       </div>
     </div>
   );
@@ -271,8 +334,8 @@ function SoloStrip({ score, children }: { score: number; children?: ReactNode })
     </div>
   );
 }
-function StarGoal({ got }: { got: number }) {
-  return <span className="flex gap-1" aria-label={`${got} of 3 stars`}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={i < got ? PP.lemon : PP.paper} size={30} />)}</span>;
+function StarGoal({ got, size = 30 }: { got: number; size?: number }) {
+  return <span className="flex gap-1" aria-label={`${got} of 3 stars`}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={i < got ? PP.lemon : PP.paper} size={size} />)}</span>;
 }
 // Power-ups as single square cards; the old label prop is ignored (teacher, 2026-11-24: no tray, no label).
 function HeldTray({ items, row, size = 80 }: { items: { id: PowerId; name: string }[]; label?: string; row?: boolean; size?: number }) {
@@ -312,18 +375,20 @@ function Gem({ k, s, special }: { k: number; s: number; special?: 'row' | 'rainb
 const M3 = Array.from({ length: 49 }, (_, i) => { const r = Math.floor(i / 7), c = i % 7; return (c + 2 * r) % 6; });
 [16, 17, 18].forEach((i) => { M3[i] = 2; }); // the match that is popping
 const M3_SPECIAL: Record<number, 'row' | 'rainbow'> = { 31: 'row', 40: 'rainbow' };
-function M3Board({ s }: { s: number }) {
+function M3Board({ s, bare }: { s: number; bare?: boolean }) {
   return (
     <div className="relative p-3 rounded-[24px]" style={{ ...pat('checker'), border: `4px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
       <div className="grid grid-cols-7 relative" style={{ width: s * 7, height: s * 7 }}>
         {M3.map((k, i) => {
-          const pop = i >= 16 && i <= 18;
+          const pop = !bare && i >= 16 && i <= 18;
           return <span key={i} className="grid place-items-center" style={pop ? { transform: 'scale(1.18)', filter: `drop-shadow(0 0 0 ${PP.lemon})` } : undefined}><Gem k={k} s={s * 0.86} special={M3_SPECIAL[i]} /></span>;
         })}
         {/* celebration: three hearts popping, a ring of sparkles and the points */}
+        {!bare && <>
         <span className="absolute rounded-full pointer-events-none" style={{ left: s * 1.9, top: s * 2.05, width: s * 3.2, height: s * 0.9, border: `4px solid ${I}`, boxShadow: `0 0 0 6px ${PP.lemon}` }} />
         <span className="absolute" style={{ left: s * 3.5, top: s * 1.1, transform: 'translateX(-50%)' }}><Burst text="Match! +30" /></span>
         <Confetti marks={[['sparkle', PP.lemon, s * 1.3, s * 1.9, s * 0.45], ['sparkle', PP.paper, s * 5.2, s * 2.6, s * 0.4], ['dot', PP.pink, s * 5.3, s * 1.8, s * 0.22], ['star', PP.kelly, s * 1.4, s * 2.9, s * 0.32]]} />
+        </>}
       </div>
     </div>
   );
@@ -343,12 +408,25 @@ function MatchThreeLaptop() {
   );
 }
 function MatchThreeTablet() {
+  if (usePhone()) return <MatchThreePhone />;
   return (
     <PatternStage id="cutpaper-pastel">
       <Corner />
       <div className="absolute inset-x-8 top-[84px] grid gap-3"><SoloStrip score={260}><Stat label="Moves" value={2} /><StarGoal got={2} /></SoloStrip></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><M3Board s={102} /></div>
       <div className="absolute inset-x-8 top-[1000px] grid justify-items-center"><HeldTray items={M3_HELD} row size={100} /></div>
+    </PatternStage>
+  );
+}
+function MatchThreePhone() {
+  return (
+    <PatternStage id="cutpaper-pastel">
+      <PTop left={<PPill><span className="font-display text-[34px] font-bold leading-none tabular-nums">260</span><StarGoal got={2} /></PPill>} />
+      <PStack>
+        <div className="flex items-center gap-3"><Stat label="Moves left" value={2} /><Meter segments={3} done={1} part={0.5} width={150} label="Round 2 of 3" /></div>
+        <M3Board s={47} />
+        <HeldTray items={M3_HELD} row size={66} />
+      </PStack>
     </PatternStage>
   );
 }
@@ -373,7 +451,7 @@ function Disc({ p, s }: { p: number; s: number }) {
     <svg width={s} height={s} aria-hidden="true">
       <circle cx={s / 2} cy={s / 2} r={s * 0.44} fill={P.color} stroke={I} strokeWidth={3.5} />
       <circle cx={s / 2} cy={s / 2} r={s * 0.3} fill="none" stroke={I} strokeWidth={2} opacity="0.35" />
-      {P.mark === 'dot' ? <circle cx={s / 2} cy={s / 2} r={s * 0.1} fill={I} /> : <path d={`M${s / 2} ${s * 0.32} l${s * 0.05} ${s * 0.11} l${s * 0.12} ${s * 0.01} l-${s * 0.09} ${s * 0.08} l${s * 0.03} ${s * 0.12} l-${s * 0.11} -${s * 0.07} l-${s * 0.11} ${s * 0.07} l${s * 0.03} -${s * 0.12} l-${s * 0.09} -${s * 0.08} l${s * 0.12} -${s * 0.01} Z`} fill={I} />}
+      {P.mark === 'dot' ? <circle cx={s / 2} cy={s / 2} r={s * 0.1} fill={P.color === PP.grape ? '#ffffff' : I} /> : <path d={`M${s / 2} ${s * 0.32} l${s * 0.05} ${s * 0.11} l${s * 0.12} ${s * 0.01} l-${s * 0.09} ${s * 0.08} l${s * 0.03} ${s * 0.12} l-${s * 0.11} -${s * 0.07} l-${s * 0.11} ${s * 0.07} l${s * 0.03} -${s * 0.12} l-${s * 0.09} -${s * 0.08} l${s * 0.12} -${s * 0.01} Z`} fill={I} />}
       {shine(s)}
     </svg>
   );
@@ -424,6 +502,7 @@ function FourLaptop({ vs }: { vs?: boolean }) {
   );
 }
 function FourTablet({ vs }: { vs?: boolean }) {
+  if (usePhone()) return <FourPhone vs={vs} />;
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
@@ -431,6 +510,22 @@ function FourTablet({ vs }: { vs?: boolean }) {
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} win={!vs} /></div>
       <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
       {!vs && <Confetti marks={[['sparkle', PP.lemon, 80, 170, 40], ['star', PP.pink, 700, 180, 34], ['dot', PP.sky, 120, 240, 18]]} />}
+    </PatternStage>
+  );
+}
+function FourPhone({ vs }: { vs?: boolean }) {
+  const card = (i: number, now: boolean, name: string) => (
+    <div className="h-[64px] min-w-0 flex items-center gap-2 px-3" style={{ ...paper, borderRadius: 18, background: now ? TURN_SHADE : PP.paper }}><Disc p={i + 1} s={42} /><b className="truncate text-[20px]" style={GY}>{name}</b></div>
+  );
+  return (
+    <PatternStage id="squiggle-pastel">
+      <PTop />
+      <PStack>
+        {!vs && <Burst text="Four in a row! Leo wins!" size="text-xl" />}
+        <div className="pt-12"><F4Board s={44} win={!vs} /></div>
+        <div className="w-full grid grid-cols-2 gap-3 mt-3">{card(0, !!vs, vs ? 'You' : 'Ava')}{card(1, !vs, vs ? cpuName(1) : 'Leo')}</div>
+        <PowerCard id="swap" name="Pop Out" size={60} />
+      </PStack>
     </PatternStage>
   );
 }
@@ -452,13 +547,13 @@ function Bubble({ k, s }: { k: number; s: number }) {
 const BCOLS = 19, BROWS = 7;
 const BGRID = Array.from({ length: BROWS }, (_, r) => Array.from({ length: r % 2 ? BCOLS - 1 : BCOLS }, (_, c) => (Math.floor(c / 2) + r * 2 + (c % 3 === 0 ? 1 : 0)) % 6));
 const BPOP = new Set(['6-8', '6-9', '5-9', '6-10']); // the cluster that just popped
-function BubbleBoard({ w }: { w: number }) {
+function BubbleBoard({ w, bare }: { w: number; bare?: boolean }) {
   const s = w / BCOLS, rowH = s * 0.87, h = w * 1.3;
   return (
     <div className="relative rounded-[24px] overflow-hidden" style={{ width: w + 24, height: h, padding: 12, background: PP.blueCrystal, border: `4px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
       <div className="relative" style={{ width: w, height: h - 24 }}>
         {BGRID.flatMap((row, r) => row.map((k, c) => {
-          const popped = BPOP.has(`${r}-${c}`);
+          const popped = !bare && BPOP.has(`${r}-${c}`);
           return (
             <span key={`${r}-${c}`} className="absolute" style={{ left: c * s + (r % 2 ? s / 2 : 0), top: r * rowH }}>
               {popped ? <Doodle kind="sparkle" color={PP.paper} size={s * 0.9} /> : <Bubble k={k} s={s} />}
@@ -472,8 +567,8 @@ function BubbleBoard({ w }: { w: number }) {
           <path d={`M${w / 2} ${h - 24 - s * 1.6} L${w * 0.3} ${rowH * 7.4}`} stroke={I} strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" />
         </svg>
         <span className="absolute -translate-x-1/2" style={{ left: w / 2, top: h - 24 - s * 2.3 }}><Bubble k={1} s={s * 1.5} /></span>
-        <span className="absolute grid justify-items-center" style={{ left: w / 2 + s * 1.8, top: h - 24 - s * 1.8 }}><b className="text-[13px]" style={{ color: PP.quiet }}>Next</b><Bubble k={3} s={s} /></span>
-        <span className="absolute -translate-x-1/2" style={{ left: w * 0.5, top: rowH * 8.6 }}><Burst text="Pop! +40" color={PP.lemon} /></span>
+        {!bare && <span className="absolute grid justify-items-center" style={{ left: w / 2 + s * 1.8, top: h - 24 - s * 1.8 }}><b className="text-[13px]" style={{ color: PP.quiet }}>Next</b><Bubble k={3} s={s} /></span>}
+        {!bare && <span className="absolute -translate-x-1/2" style={{ left: w * 0.5, top: rowH * 8.6 }}><Burst text="Pop! +40" color={PP.lemon} /></span>}
       </div>
     </div>
   );
@@ -494,11 +589,23 @@ function BubbleLaptop() {
   );
 }
 function BubbleTablet() {
+  if (usePhone()) return <BubblePhone />;
   return (
     <PatternStage id="doodle">
       <Corner />
       <div className="absolute inset-x-8 top-[84px]"><SoloStrip score={340}><Stat label="Bubbles" value={3} /><HeldTray items={BP_HELD} row size={76} /></SoloStrip></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><BubbleBoard w={700} /></div>
+    </PatternStage>
+  );
+}
+function BubblePhone() {
+  return (
+    <PatternStage id="doodle">
+      <PTop left={<PPill><span className="font-display text-[34px] font-bold leading-none tabular-nums">340</span><span className="grid leading-none"><span className="text-[13px] font-bold" style={{ color: PP.quiet }}>Bubbles</span><b className="font-display text-2xl tabular-nums">3</b></span></PPill>} />
+      <PStack>
+        <BubbleBoard w={330} />
+        <HeldTray items={BP_HELD} row size={66} />
+      </PStack>
     </PatternStage>
   );
 }
@@ -583,7 +690,7 @@ function FrameSheet({ rows, now, frame, cell }: { rows: BowlRow[]; now: number; 
     <div className="grid" style={{ gridTemplateColumns: cols, border: `3px solid ${I}`, borderRadius: 16, overflow: 'hidden', boxShadow: `0 4px 0 ${I}`, background: PP.paper }}>
       <span style={{ borderBottom: edge }} />
       {Array.from({ length: 10 }, (_, i) => <b key={i} className="grid place-items-center tabular-nums" style={{ fontSize: cell * 0.27, height: cell * 0.42, borderLeft: edge, borderBottom: edge, background: i === frame - 1 ? PP.butter : PP.cream }}>{i + 1}</b>)}
-      <b className="grid place-items-center" style={{ fontSize: cell * 0.24, borderLeft: edge, borderBottom: edge, background: PP.cream }}>Total</b>
+      <b className="grid place-items-center" style={{ fontSize: Math.max(13, cell * 0.24), borderLeft: edge, borderBottom: edge, background: PP.cream }}>Total</b>
       {rows.map((r, ri) => (
         <div key={r.name} className="contents">
           <span className="flex items-center gap-2 px-2 min-w-0" style={{ height: row, borderTop: ri ? edge : undefined, background: ri === now ? TURN_SHADE : undefined }}>
@@ -621,8 +728,10 @@ function FrameTracker({ frame, solo, k = 1 }: { frame: number; solo?: boolean; k
   );
 }
 const BW_HELD: { id: PowerId; name: string }[] = [{ id: 'magnet', name: 'Pin Magnet' }, { id: 'shield', name: 'Bumper Rails' }];
-function RollPill({ who = 'Mia' }: { who?: string }) {
-  return <TurnChip icon={<Ball c={BALLS[1]} s={40} />} name={who} size={24} />;
+// Whose roll: the ball and the name on a plain paper chip (teacher, 2026-11-24:
+// no Butter in the top strip; the sheet row carries the Butter turn shading).
+function RollPill({ who = 'Mia', size = 24 }: { who?: string; size?: number }) {
+  return <span className="inline-flex items-center gap-2.5 rounded-full font-bold whitespace-nowrap" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, padding: `${size * 0.2}px ${size * 0.9}px ${size * 0.2}px ${size * 0.35}px`, fontSize: size }}><Ball c={BALLS[1]} s={size * 1.6} />{who}</span>;
 }
 function BowlingLaptop({ solo }: { solo?: boolean }) {
   return (
@@ -634,11 +743,50 @@ function BowlingLaptop({ solo }: { solo?: boolean }) {
   );
 }
 function BowlingTablet({ solo }: { solo?: boolean }) {
+  if (usePhone()) return <BowlingPhone solo={solo} />;
   return (
     <AlleyStage w={820} h={1180} top={420} wide>
       <FrameTracker frame={solo ? 5 : 4} solo={solo} k={1.15} />
       <div className="absolute left-1/2 -translate-x-1/2 top-[96px]"><FrameSheet rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={solo ? 5 : 4} cell={53} /></div>
       <div className="absolute left-1/2 -translate-x-1/2 top-[316px]"><HeldTray items={BW_HELD} row size={80} /></div>
+    </AlleyStage>
+  );
+}
+// Phone sheet: five frames at a time (the half with the current frame) and the
+// total, so every mark stays 14px or more; the ten-frame meter above shows the
+// whole game.
+function FrameSheetPhone({ rows, now, frame }: { rows: BowlRow[]; now: number; frame: number }) {
+  const from = frame <= 5 ? 0 : 5, cell = 46, box = 21;
+  const edge = `2.5px solid ${I}`;
+  return (
+    <div className="grid" style={{ gridTemplateColumns: `${cell * 1.6}px repeat(5, ${cell}px) ${cell * 1.3}px`, border: `3px solid ${I}`, borderRadius: 14, overflow: 'hidden', boxShadow: `0 4px 0 ${I}`, background: PP.paper }}>
+      <span style={{ borderBottom: edge }} />
+      {Array.from({ length: 5 }, (_, i) => <b key={i} className="grid place-items-center tabular-nums text-[14px]" style={{ height: 24, borderLeft: edge, borderBottom: edge, background: from + i === frame - 1 ? PP.butter : PP.cream }}>{from + i + 1}</b>)}
+      <b className="grid place-items-center text-[14px]" style={{ borderLeft: edge, borderBottom: edge, background: PP.cream }}>Total</b>
+      {rows.map((r, ri) => (
+        <div key={r.name} className="contents">
+          <span className="flex items-center gap-1.5 px-1.5 min-w-0" style={{ height: 42, borderTop: ri ? edge : undefined, background: ri === now ? TURN_SHADE : undefined }}><Ball c={r.ball} s={22} /><b className="truncate text-[16px]">{r.name}</b></span>
+          {Array.from({ length: 5 }, (_, k) => { const fi = from + k; const rolls = r.f[fi] ?? (fi === 9 ? ['', '', ''] : ['', '']); return (
+            <span key={fi} className="grid" style={{ gridTemplateRows: `${box}px 1fr`, height: 42, borderLeft: edge, borderTop: ri ? edge : undefined, background: fi === frame - 1 && ri === now ? PP.butter : undefined }}>
+              <span className="flex justify-end">{rolls.map((m, mi) => <span key={mi} className="grid place-items-center font-display font-bold text-[14px]" style={{ width: box, height: box, borderLeft: edge, borderBottom: edge }}>{m}</span>)}</span>
+              <span className="grid place-items-center font-display tabular-nums text-[15px] leading-none">{r.t[fi] ?? ''}</span>
+            </span>); })}
+          <span className="grid place-items-center tabular-nums" style={{ ...GY, fontSize: 20, borderLeft: edge, borderTop: ri ? edge : undefined }}>{[...r.t].reverse().find((x) => x != null) ?? 0}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+function BowlingPhone({ solo }: { solo?: boolean }) {
+  const frame = solo ? 5 : 4;
+  return (
+    <AlleyStage w={390} h={844} top={solo ? 300 : 360} wide>
+      <PTop left={solo ? <PPill><b style={{ ...GY, fontSize: 32 }} className="tabular-nums">54</b><b className="text-[16px]" style={{ color: PP.quiet }}>pins</b></PPill> : <RollPill size={20} />} />
+      <div className="absolute inset-x-3 top-[72px] z-10 grid justify-items-center gap-2.5">
+        <Meter segments={10} done={frame - 1} part={0.5} width="100%" label={`Frame ${frame} of 10`} />
+        <FrameSheetPhone rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={frame} />
+        <HeldTray items={BW_HELD} row size={58} />
+      </div>
     </AlleyStage>
   );
 }
@@ -741,8 +889,20 @@ function SkyGoal({ got = SKY_GOT }: { got?: number }) {
     </div>
   );
 }
-function ClassScreen({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+function ClassScreen({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   return (
+    phone ? (
+    <SkyScene w={w} h={h} holes={[[0, 0, w, 330], [0, h - 300, w, h]]}>
+      <PTop left={<span className="px-4 h-[48px] inline-flex items-center rounded-full" style={{ ...paper, borderRadius: 999 }}><b className="font-display text-2xl tracking-widest">472915</b></span>} />
+      <div className="absolute inset-x-3 top-[76px]"><SkyGoal /></div>
+      <div className="absolute inset-x-3 bottom-[84px] p-3 grid gap-2" style={paper}>
+        <b className="text-base flex items-center gap-1.5"><UsersThree weight="bold" size={20} />12 playing</b>
+        <div className="flex flex-wrap gap-1.5">{['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen'].map((n, i) => <span key={n} className="px-2.5 py-0.5 rounded-full text-[15px] font-bold" style={{ background: [PP.gamify, PP.aqua, PP.blush, PP.butter][i % 4], border: `2px solid ${I}` }}>{n}</span>)}</div>
+      </div>
+      <div className="absolute left-3 bottom-5"><Burst text="Three in a row!" size="text-xl" color={PP.butter} /></div>
+    </SkyScene>
+    ) :
     <SkyScene w={w} h={h} holes={[[0, 0, 300, 84], [w - 330, 0, w, 90], [w - 270, 0, w, h], [20, h - 150, 470, h - 60]]}>
       <Corner dark />
       <div className="absolute left-[24px] top-[18px] flex items-center gap-3 px-5 py-2 rounded-full" style={{ ...paper, borderRadius: 999 }}>
@@ -762,28 +922,30 @@ function ClassScreen({ w = 1000, h = 625 }: { w?: number; h?: number }) {
 const SKY_ANS = [['A', 'cat', PP.periwinkle, PP.gamify], ['B', 'Cat', PP.sky, PP.blueCrystal], ['C', 'CAT', PP.pink, PP.blush], ['D', 'caT', PP.lemon, PP.butter]] as const;
 // The student's device: the one universal question card (mockKit QuestionCard),
 // the game's own sky around it, the student's name on Butter in the card.
-function StudentDevice({ solo, w = 820, h = 1180 }: { solo?: boolean; w?: number; h?: number }) {
+function StudentDevice({ solo, w: w0 = 820, h: h0 = 1180 }: { solo?: boolean; w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   const port = h > w;
   const k = port ? 1 : Math.min((w - 80) / 1088, (h - 150) / 528);
   return (
-    <SkyScene w={w} h={h} got={solo ? 4 : 9} holes={port ? [[40, 80, w - 40, 1020]] : [[40, 20, w - 40, h - 70]]}>
-      <div className="absolute left-1/2" style={{ top: port ? 90 : 24, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
-        <QuestionCard tablet={port} q="Which word starts a sentence the right way?" who={{ icon: <NightStar kind={2} color={PP.lemon} size={port ? 54 : 46} />, name: solo ? 'My sky' : 'Ava' }} answers={SKY_ANS} right={1} />
+    <SkyScene w={w} h={h} got={solo ? 4 : 9} holes={phone ? [[10, 16, w - 10, 640]] : port ? [[40, 80, w - 40, 1020]] : [[40, 20, w - 40, h - 70]]}>
+      <div className="absolute left-1/2" style={{ top: phone ? 24 : port ? 90 : 24, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
+        <QuestionCard tablet={port} q="Which word starts a sentence the right way?" who={{ icon: <NightStar kind={2} color={PP.lemon} size={phone ? 38 : port ? 54 : 46} />, name: solo ? 'My sky' : 'Ava' }} answers={SKY_ANS} right={1} />
       </div>
-      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: port ? 1040 : h - 80 }}><Burst text={solo ? 'Yes! A star for your sky!' : 'Yes! A star for the class sky!'} size={port ? 'text-4xl' : 'text-3xl'} color={PP.lemon} /></div>
+      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: phone ? h - 92 : port ? 1040 : h - 80 }}><Burst text={solo ? 'Yes! A star for your sky!' : 'Yes! A star for the class sky!'} size={phone ? 'text-xl' : port ? 'text-4xl' : 'text-3xl'} color={PP.lemon} /></div>
     </SkyScene>
   );
 }
 // The Live student waiting screen, in the game's own sky.
-function SkyWaiting({ w = 820, h = 1180 }: { w?: number; h?: number }) {
-  const port = h > w, cw = Math.min(w - 80, 740), ch = port ? 560 : 440;
+function SkyWaiting({ w: w0 = 820, h: h0 = 1180 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
+  const port = h > w, cw = Math.min(w - (phone ? 48 : 80), 740), ch = phone ? 460 : port ? 560 : 440;
   const l = (w - cw) / 2, t = (h - ch) / 2;
   return (
     <SkyScene w={w} h={h} got={14} holes={[[l - 20, t - 20, l + cw + 20, t + ch + 20]]}>
-      <div className="absolute p-10 grid justify-items-center content-center gap-5 text-center" style={{ left: l, top: t, width: cw, height: ch, ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
-        <NightStar kind={2} color={PP.lemon} size={port ? 140 : 100} />
-        <h2 style={{ ...GY, fontSize: port ? 64 : 54 }}>You&apos;re in, Ava!</h2>
-        <p className="font-bold leading-snug" style={{ fontSize: port ? 28 : 24 }}>Your teacher will start soon. Your stars will light up the sky.</p>
+      <div className={`absolute ${phone ? 'p-6' : 'p-10'} grid justify-items-center content-center gap-5 text-center`} style={{ left: l, top: t, width: cw, height: ch, ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
+        <NightStar kind={2} color={PP.lemon} size={phone ? 110 : port ? 140 : 100} />
+        <h2 style={{ ...GY, fontSize: phone ? 40 : port ? 64 : 54 }}>You&apos;re in, Ava!</h2>
+        <p className="font-bold leading-snug" style={{ fontSize: phone ? 22 : port ? 28 : 24 }}>Your teacher will start soon. Your stars will light up the sky.</p>
         <span className="flex gap-3" aria-label="Waiting">{[0, 1, 2].map((d) => <span key={d} className="w-5 h-5 rounded-full" style={{ background: [PP.periwinkle, PP.lemon, PP.pink][d], border: `2.5px solid ${I}` }} />)}</span>
       </div>
     </SkyScene>
@@ -812,6 +974,15 @@ function Animals({ cats = [], mice = [] }: { cats?: (Spot & { look: number })[];
 // code in a white pill), the class goal or the two team counts, and the tools.
 function RoomStrip({ w, center }: { w: number; center: ReactNode }) {
   const port = w < 900;
+  if (w < 600) return (
+    <div className="absolute inset-x-0 top-0 z-20 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="px-4 h-[48px] inline-flex items-center rounded-full" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><b className="font-display text-2xl tracking-widest">472915</b></span>
+        <PhoneTools />
+      </div>
+      <div className="mt-4 grid justify-items-center">{center}</div>
+    </div>
+  );
   return (
     <div className="absolute inset-x-0 top-0 z-20" style={{ padding: port ? '14px 20px' : '16px 20px' }}>
       <div className="flex items-start justify-between">
@@ -842,7 +1013,8 @@ function TeamCounts() {
     </div>
   );
 }
-function TerritoryCoop({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+function TerritoryCoop({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   return (
     <div className="relative overflow-hidden" style={{ width: w, height: h }}>
       <RoomArt className="absolute inset-0">
@@ -852,11 +1024,12 @@ function TerritoryCoop({ w = 1000, h = 625 }: { w?: number; h?: number }) {
         <span style={at({ l: 41, t: 64, w: 10 })}><PoofArt className="w-full h-auto block" /></span>
       </RoomArt>
       <RoomStrip w={w} center={<CoopGoal />} />
-      <div className="absolute left-5 bottom-5 z-20"><Burst text="Caught one!" size="text-2xl" /></div>
+      <div className="absolute left-5 bottom-5 z-20"><Burst text="Caught one!" size={phone ? 'text-xl' : 'text-2xl'} /></div>
     </div>
   );
 }
-function TerritoryComp({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+function TerritoryComp({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   return (
     <div className="relative overflow-hidden" style={{ width: w, height: h }}>
       <RoomArt className="absolute inset-0">
@@ -866,27 +1039,30 @@ function TerritoryComp({ w = 1000, h = 625 }: { w?: number; h?: number }) {
         <span className="absolute" style={{ left: '18.5%', top: '20%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
       </RoomArt>
       <RoomStrip w={w} center={<TeamCounts />} />
-      <div className="absolute left-5 bottom-5 z-20"><Burst text="A mouse scared a cat away!" size="text-2xl" color={PP.paper} /></div>
+      <div className={`absolute z-20 ${phone ? 'left-3 bottom-4' : 'left-5 bottom-5'}`}><Burst text="A mouse scared a cat away!" size={phone ? 'text-lg' : 'text-2xl'} color={PP.paper} /></div>
     </div>
   );
 }
 const ROOM_ANS = [['A', 'Their', PP.periwinkle, PP.gamify], ['B', 'There', PP.sky, PP.blueCrystal], ['C', "They're", PP.pink, PP.blush], ['D', 'Thier', PP.lemon, PP.butter]] as const;
 // The student's own device: the one question card over the room, their team and animal in the card.
-function TerritoryStudent({ w = 820, h = 1180 }: { w?: number; h?: number }) {
+function TerritoryStudent({ w: w0 = 820, h: h0 = 1180 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   const port = h > w;
   const k = port ? 1 : Math.min((w - 80) / 1088, (h - 120) / 528);
+  const top = phone ? 24 : port ? 90 : 30;
   return (
     <div className="relative overflow-hidden" style={{ width: w, height: h }}>
       <RoomArt className="absolute inset-0"><Animals cats={COOP_CATS.slice(0, 2)} mice={COOP_MICE.slice(0, 2)} /></RoomArt>
-      <div className="absolute left-1/2" style={{ top: port ? 90 : 30, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
-        <QuestionCard tablet={port} q="Which word fits? ___ dog is fast." who={{ icon: <CatArt look={2} className={port ? 'w-[54px] h-[54px]' : 'w-[46px] h-[46px]'} />, name: 'Ava, Team Cats' }} answers={ROOM_ANS} right={0} />
+      <div className="absolute left-1/2" style={{ top, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
+        <QuestionCard tablet={port} q="Which word fits? ___ dog is fast." who={{ icon: <CatArt look={2} className={phone ? 'w-[38px] h-[38px]' : port ? 'w-[54px] h-[54px]' : 'w-[46px] h-[46px]'} />, name: 'Ava, Team Cats' }} answers={ROOM_ANS} right={0} />
       </div>
-      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: port ? 1040 : h - 76 }}><Burst text="Yes! A cat is on the way!" size={port ? 'text-4xl' : 'text-3xl'} /></div>
+      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: phone ? h - 92 : port ? 1040 : h - 76 }}><Burst text="Yes! A cat is on the way!" size={phone ? 'text-xl' : port ? 'text-4xl' : 'text-3xl'} /></div>
     </div>
   );
 }
 // The end: the room filled with the winner's color, then the one winner box.
-function TerritoryEnd({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+function TerritoryEnd({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+  const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   const many: (Spot & { look: number })[] = Array.from({ length: 14 }, (_, i) => ({ l: 6 + ((i * 37) % 86), t: 60 + ((i * 23) % 28), w: 5, look: i % 3 }));
   return (
     <Results wash={PP.gamify} title="Team Mice wins!" winner={<MouseArt look={0} className="w-[120px] h-auto" />} score="12 mice in the room" missed={3}
@@ -925,6 +1101,17 @@ function Dim({ children, over, wash }: { children: ReactNode; over: ReactNode; w
 }
 // ---------- Power-up moment (over the dimmed game) ----------
 function PowerMoment({ game, id, name, job, picks }: { game: ReactNode; id: PowerId; name: string; job: string; picks?: string[] }) {
+  if (usePhone()) return (
+    <Dim over={
+      <div className="w-[340px] p-5 grid justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 26, boxShadow: `0 6px 0 ${I}` }}>
+        <div className="w-28 h-28 grid place-items-center"><CrayonPowerUp id={id} size={100} /></div>
+        <FitTitle center max={42} min={28}>{name}</FitTitle>
+        <span className="font-bold text-[19px] leading-snug">{job}</span>
+        {picks ? <div className="grid gap-2 w-full">{picks.map((p, i) => <span key={p} className="min-h-[52px] px-4 rounded-full font-bold text-[18px] flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Badge t={TEAMS[[0, 2, 3][i] ?? 0]} size={28} />{p}</span>)}</div>
+          : <MainBtn>Continue<ArrowRight weight="bold" size={22} /></MainBtn>}
+      </div>
+    }>{game}</Dim>
+  );
   return (
     <Dim over={
       <div className="relative">
@@ -945,6 +1132,17 @@ function PowerMoment({ game, id, name, job, picks }: { game: ReactNode; id: Powe
 // backing in THE glow, then only the score or XP, centered, in Grow Year a
 // little smaller than the title; no stat chips.
 function Results({ game, title, winner, score, missed = 2, wash }: { game: ReactNode; title: string; winner: ReactNode; score: string; missed?: number; wash?: string }) {
+  if (usePhone()) return (
+    <Dim wash={wash} over={
+      <Sheet w={350} pad={20}>
+        <FitTitle center max={42} min={28}>{title}</FitTitle>
+        <span className="my-2"><TurnGlow>{winner}</TurnGlow></span>
+        <b className="text-[32px] tabular-nums" style={GY}>{score}</b>
+        <div className="grid gap-2.5 w-full"><MainBtn wide><ArrowsClockwise weight="bold" size={20} />Play again</MainBtn>
+          <div className="grid grid-cols-2 gap-2">{['New game', `Review ${missed} missed`].map((t) => <span key={t} className="min-h-[52px] px-2 rounded-full font-bold text-[17px] leading-tight grid place-items-center text-center" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{t}</span>)}</div></div>
+      </Sheet>
+    }>{game}</Dim>
+  );
   return (
     <Dim wash={wash} over={
       <div className="relative w-[560px]">
@@ -987,7 +1185,7 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause. Solo only, so no How will you play.',
     views: [
       { name: 'Power-up: Fireball', land: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, port: <PowerMoment game={<MatchThreeTablet />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
-      { name: 'Celebration', land: <Results game={<MatchThreeLaptop />} title="You got 2 stars!" winner={<span className="scale-[2] inline-grid"><StarGoal got={2} /></span>} score="260 points" />, port: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<span className="scale-[2] inline-grid"><StarGoal got={2} /></span>} score="260 points" />, note: 'Stars, not a rank.' },
+      { name: 'Celebration', land: <Results game={<MatchThreeLaptop />} title="You got 2 stars!" winner={<StarGoal got={2} size={60} />} score="260 points" />, port: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<StarGoal got={2} size={60} />} score="260 points" />, note: 'Stars, not a rank.' },
     ],
   },
   'four-in-a-row': {
@@ -1036,26 +1234,57 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
 // cut from its in-play art at the welcome cover size (720 x 648).
 // The whole in-play screen, nothing cropped, as a framed screen on a pastel mat
 // with doodle confetti in the bands above and below.
-const MAT_MARKS: [DoodleKind, string, number, number, number][] = [['sparkle', PP.lemon, 40, 30, 44], ['star', PP.pink, 170, 54, 30], ['dot', PP.sky, 300, 26, 18], ['heart', PP.pink, 430, 44, 30], ['sparkle', PP.paper, 560, 22, 36], ['star', PP.lemon, 650, 50, 34], ['dot', PP.kelly, 90, 572, 18], ['sparkle', PP.lemon, 220, 580, 40], ['star', PP.sky, 380, 566, 32], ['heart', PP.pink, 520, 584, 28], ['sparkle', PP.paper, 640, 570, 38]];
-function Cover({ children, mat }: { children: ReactNode; mat: string }) {
+// Cover TEMPLATES (teacher, 2026-11-24: "cover images should just show the
+// main game boards ... these need to be templates where the layout can be
+// redone with the future themes"). One layout for every game at 720 x 648:
+// the theme's background fills the whole cover; the theme's main board sits
+// centered in the safe area (48px in from every edge), scaled to fit. No top
+// strip, buttons, scoreboard, power-ups, banners or words. A future theme
+// passes its own background and board pieces and its cover redraws itself.
+type CoverPieces = { back: ReactNode; board: ReactNode };
+function CoverTemplate({ back, board }: CoverPieces) {
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ width: 720, height: 648, background: mat }}>
-      {MAT_MARKS.map(([k, c, x, y, sz], i) => <span key={i} className="absolute" style={{ left: x, top: y }}><Doodle kind={k} color={c} size={sz} /></span>)}
-      <div className="absolute left-[24px] top-[110px] w-[672px] h-[420px] rounded-[20px] overflow-hidden" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
-        <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1000, height: 625, transform: 'scale(0.672)' }}>{children}</div>
-      </div>
+    <div className="absolute inset-0 overflow-hidden" style={{ width: 720, height: 648 }}>
+      <div className="absolute inset-0">{back}</div>
+      <div className="absolute" style={{ inset: 48 }}><AutoFit>{board}</AutoFit></div>
     </div>
   );
 }
+const ground = (id: string) => <div className="w-full h-full" style={pat(id)} />;
+function GameShowCover({ back = <StudioBack w={720} h={648} /> }: { back?: ReactNode }) {
+  return <CoverTemplate back={back} board={<div className="w-[560px]"><Marquee bulbs={16}><div className="grid grid-cols-4 gap-2.5">{GS_CARDS.map((c, i) => <GSCard key={i} c={c} />)}</div></Marquee></div>} />;
+}
+function BoardCover({ back = <ParkBack w={720} h={648} /> }: { back?: ReactNode }) {
+  return <CoverTemplate back={back} board={<div className="p-4" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}><BoardGrid w={560} h={460} pawns={[{ t: 0, at: 12 }, { t: 1, at: 15 }, { t: 3, at: 7 }]} /></div>} />;
+}
+function MatchThreeCover({ back = ground('cutpaper-pastel') }: { back?: ReactNode }) {
+  return <CoverTemplate back={back} board={<M3Board s={66} bare />} />;
+}
+function FourCover({ back = ground('squiggle-pastel') }: { back?: ReactNode }) {
+  return <CoverTemplate back={back} board={<div className="pb-6"><F4Board s={66} win={false} /></div>} />;
+}
+function BubbleCover({ back = ground('doodle') }: { back?: ReactNode }) {
+  return <CoverTemplate back={back} board={<BubbleBoard w={400} bare />} />;
+}
+function BowlingCover() {
+  // The lane is the board and its own background: the alley wall, lane, pins and ball.
+  return <div className="absolute inset-0" style={{ width: 720, height: 648 }}><AlleyStage w={720} h={648} top={200} wide /></div>;
+}
+function TerritoryCover() {
+  return <div className="absolute inset-0" style={{ width: 720, height: 648 }}><RoomArt className="absolute inset-0"><Animals cats={COOP_CATS.slice(0, 3)} mice={COOP_MICE} /></RoomArt></div>;
+}
+function SkyCover() {
+  return <div className="absolute inset-0" style={{ width: 720, height: 648 }}><SkyScene w={720} h={648} got={26} /></div>;
+}
 export const GAME_COVERS: { id: string; name: string; desc: string; modes: string[]; steps: [string, string, string]; cover: ReactNode }[] = [
-  { id: 'game-show', name: 'Game Show', desc: 'Answer to pick a surprise card. Most points wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Pick a surprise card', 'Most points wins'], cover: <Cover mat={PP.blush}><GameShowLaptop noPop /></Cover> },
-  { id: 'castle-quest', name: 'Board Game', desc: 'Answer, roll the die and race to the finish.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Move that many squares', 'First to the finish wins'], cover: <Cover mat={PP.mint}><BoardLaptop /></Cover> },
-  { id: 'match-three', name: 'Match Three', desc: 'Swap pieces to make rows of three. Answer for more moves.', modes: ['Solo'], steps: ['Swap two pieces', 'Make a row of 3', 'Answer for more moves'], cover: <Cover mat={PP.butter}><MatchThreeLaptop /></Cover> },
-  { id: 'four-in-a-row', name: 'Four in a Row', desc: 'Answer, then drop your piece. Four in a line wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Drop your piece', 'Four in a line wins'], cover: <Cover mat={PP.blueCrystal}><FourLaptop /></Cover> },
-  { id: 'bubble-pop', name: 'Bubble Pop', desc: 'Answer to load bubbles, then aim and pop.', modes: ['Solo'], steps: ['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop'], cover: <Cover mat={PP.aqua}><BubbleLaptop /></Cover> },
-  { id: 'bowling', name: 'Bowling', desc: 'Answer right to roll. Knock down the most pins.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Aim and add spin', 'Most pins wins'], cover: <Cover mat={PP.lavender}><BowlingLaptop /></Cover> },
-  { id: 'territory', name: 'Territory', desc: 'Mice sneak into the living room. Every right answer sends a cat to catch one.', modes: ['Live'], steps: ['Answer on your device', 'Right sends a cat', 'Catch them all, or win the room'], cover: <Cover mat={PP.peach}><TerritoryCoop /></Cover> },
-  { id: 'star-quiz', name: 'Question Tracker', desc: 'Every right answer adds a star until the sky is full.', modes: ['Live', 'Solo'], steps: ['Answer a question', 'Right adds a star', 'Fill the whole sky'], cover: <Cover mat={NIGHT}><ClassScreen /></Cover> },
+  { id: 'game-show', name: 'Game Show', desc: 'Answer to pick a surprise card. Most points wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Pick a surprise card', 'Most points wins'], cover: <GameShowCover /> },
+  { id: 'castle-quest', name: 'Board Game', desc: 'Answer, roll the die and race to the finish.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Move that many squares', 'First to the finish wins'], cover: <BoardCover /> },
+  { id: 'match-three', name: 'Match Three', desc: 'Swap pieces to make rows of three. Answer for more moves.', modes: ['Solo'], steps: ['Swap two pieces', 'Make a row of 3', 'Answer for more moves'], cover: <MatchThreeCover /> },
+  { id: 'four-in-a-row', name: 'Four in a Row', desc: 'Answer, then drop your piece. Four in a line wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Drop your piece', 'Four in a line wins'], cover: <FourCover /> },
+  { id: 'bubble-pop', name: 'Bubble Pop', desc: 'Answer to load bubbles, then aim and pop.', modes: ['Solo'], steps: ['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop'], cover: <BubbleCover /> },
+  { id: 'bowling', name: 'Bowling', desc: 'Answer right to roll. Knock down the most pins.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Aim and add spin', 'Most pins wins'], cover: <BowlingCover /> },
+  { id: 'territory', name: 'Territory', desc: 'Mice sneak into the living room. Every right answer sends a cat to catch one.', modes: ['Live'], steps: ['Answer on your device', 'Right sends a cat', 'Catch them all, or win the room'], cover: <TerritoryCover /> },
+  { id: 'star-quiz', name: 'Question Tracker', desc: 'Every right answer adds a star until the sky is full.', modes: ['Live', 'Solo'], steps: ['Answer a question', 'Right adds a star', 'Fill the whole sky'], cover: <SkyCover /> },
 ];
 
 // ================= the tab =================
@@ -1065,7 +1294,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a flat crayon TV studio (pink curtains, lavender spotlights, lemon stage) around a purple bulb marquee; card backs are butter with a sparkle, never a number; won cards turn the team\'s pastel with its shape badge; power-ups are the shared crayon set.',
       'Why: the busy art stays on the edges and the board is calm (figure-ground), so 25 kids find the cards at a glance; shape plus color names each team (WCAG 1.4.1); Butter shading on the score row means "your turn" everywhere, with no turn banner.',
-      'Pieces (theme template): Background 1920 x 1080 (board zone blocked out, about the middle 60%), Card back 300 x 220, Grid square 300 x 180, Team icon 256 x 256 (up to 10), Power-up 256 x 256 (4 Classic, up to 6), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1920 x 1080 (board zone blocked out, about the middle 60%), Card back 300 x 220, Grid square 300 x 180, Team icon 256 x 256 (up to 10), Power-up 256 x 256 (4 Classic, up to 6), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the studio background edge to edge, the card board (4 x 3 cards in the marquee) centered in the 48px safe area.',
     ],
   },
   {
@@ -1073,7 +1302,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a paper-craft park (sky, clouds, two hills, flowers) with the board on a quiet paper mat; four pastel regular squares in turn, ink Lose a turn and paper Roll again squares, no numbers; bright crayon pawns; her one-side die on its own, tapped to roll, with a hover wiggle.',
       'Why: pastel squares with bright pawns keep the pieces the figure and the trail the ground, so "where am I?" reads in one look; icons, not words, mark the special squares for pre-readers (dual coding).',
-      'Pieces (theme template): Background 1600 x 1200 (board zone blocked out), 4 regular squares, Lose, Roll again, Start and Finish 256 x 256 each, Die 1536 x 256 (six sides in a row), Team piece 256 x 256 (up to 10), Power-up 256 x 256 (6 Classic), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1600 x 1200 (board zone blocked out), 4 regular squares, Lose, Roll again, Start and Finish 256 x 256 each, Die 1536 x 256 (six sides in a row), Team piece 256 x 256 (up to 10), Power-up 256 x 256 (6 Classic), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the park background, the path of squares on its mat with three pawns, centered in the 48px safe area.',
     ],
   },
   {
@@ -1081,7 +1310,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a pastel cut-paper desk around a checker board; the six pieces are six shapes (circle, star, heart, diamond, triangle, square) in six brights; line and rainbow pieces read by their stripes and rings; score, moves and the three-star goal on one paper strip, no player icon.',
       'Why: shape plus color lets color-blind players and pre-readers find matches (WCAG 1.4.1, dual coding); the star goal makes progress visible (goal-gradient effect); busy pattern only outside the board.',
-      'Pieces (theme template): Background 1600 x 1200, Board 900 x 900, six Pieces 128 x 128, four special pieces 128 x 128 (sideways line, up and down line, bomb, rainbow), Power-up 256 x 256 (5 Classic, up to 6), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1600 x 1200, Board 900 x 900, six Pieces 128 x 128, four special pieces 128 x 128 (sideways line, up and down line, bomb, rainbow), Power-up 256 x 256 (5 Classic, up to 6), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the stage pattern edge to edge, the 7 x 7 board of pieces centered in the 48px safe area.',
     ],
   },
   {
@@ -1089,7 +1318,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a sky blue crayon frame on legs with paper holes, standing on the pastel squiggle ground; Gamify purple pieces with a dot and lemon pieces with a star; the next piece waits over its column; Leo\'s win line gets a lemon band and a burst.',
       'Why: a mark inside each piece keeps the two sides apart without color (WCAG 1.4.1); the waiting piece shows what a tap will do before it happens (feedforward); the player whose turn it is is shaded Butter, the same cue as every game.',
-      'Pieces (theme template): Background 1600 x 1200, Board 1000 x 860 (frame with holes), Player 1 and Player 2 pieces 128 x 128, Team icon 256 x 256 (up to 10), Power-up 256 x 256 (Double Drop, Pop Out; up to 4), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1600 x 1200, Board 1000 x 860 (frame with holes), Player 1 and Player 2 pieces 128 x 128, Team icon 256 x 256 (up to 10), Power-up 256 x 256 (Double Drop, Pop Out; up to 4), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the stage pattern, the frame with a few pieces centered in the 48px safe area.',
     ],
   },
   {
@@ -1097,7 +1326,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a doodle-scatter wall around a Blue crystal board (no more navy) with the real 19-bubble rows; ink-edged bright bubbles with a shine, every other color with a center dot; a dotted aim line, the next bubble beside the shooter, a dashed pink danger line.',
       'Why: the light board lifts contrast for every bubble on a projector (WCAG 1.4.11 non-text contrast); the aim line and next bubble cut planning load (cognitive load); score and bubbles left sit outside the play area, no player icon.',
-      'Pieces (theme template): Background 1600 x 1200, Board 1000 x 1300, six Bubbles 128 x 128, Power-up 256 x 256 (4 Classic, up to 6), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1600 x 1200, Board 1000 x 1300, six Bubbles 128 x 128, Power-up 256 x 256 (4 Classic, up to 6), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the stage pattern, the bubble board (rows and the shooter, no labels) centered in the 48px safe area.',
     ],
   },
   {
@@ -1105,7 +1334,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: a one-point perspective lane seen from behind the ball: peach boards narrowing to a full ten-pin triangle, lavender gutters each side, orange aim arrows and dots, the ball at the bottom with a dotted aim arrow to the head pin; a standard ten-frame sheet (two roll boxes a frame, three in the 10th, X, / and -, running totals) and a Frame X of 10 tracker.',
       'Why: the familiar bowler\'s view needs no teaching (recognition over recall); the lane is the brightest, simplest shape so eyes go to it first (visual hierarchy); a real score sheet teaches how bowling is scored, and frames, not rounds, match what kids see at a real alley.',
-      'Pieces (theme template): Background 1000 x 1300 (alley wall), Lane 800 x 1000, Pin 64 x 200, Ball 256 x 256 (up to 10, each player\'s icon), Power-up 256 x 256 (7 Classic), Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template): Background 1000 x 1300 (alley wall), Lane 800 x 1000, Pin 64 x 200, Ball 256 x 256 (up to 10, each player\'s icon), Power-up 256 x 256 (7 Classic), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the alley wall on the top 31%, the lane, pins and ball filling the rest.',
     ],
   },
   {
@@ -1113,7 +1342,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New: the live game\'s own Classic living room (butter striped wallpaper, a white baseboard with the arched mouse hole, peach planks, teal couch, pink rug) with its six cat looks and brown, gray and white mice; the Cooperative screen shows the class goal (a cat, 14 of 20 caught, the one meter), the Competitive screen the two team counts on Peach (Cats) and Gamify pastel (Mice); just the join code in a white pill; the one tool group with the hint.',
       'Why: one shared goal on the projector builds relatedness (self-determination theory) and the meter shows how close the class is (goal-gradient effect); a caught mouse poofs in stars and a scared cat leaps out the window, so the stakes feel playful and nothing is ever hurt; each team is an animal plus a color (WCAG 1.4.1).',
-      'Pieces (theme template, from its manifest): Room 1600 x 1000 (bottom 40% is the floor), Entrance 200 x 180, six Defenders 256 x 256, three Invaders 256 x 180, Poof 256 x 256, Cover 600 x 600, Title 1200 x 360.',
+      'Pieces (theme template, from its manifest): Room 1600 x 1000 (bottom 40% is the floor), Entrance 200 x 180, six Defenders 256 x 256, three Invaders 256 x 180, Poof 256 x 256, Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the room centered with its scenery around it, three cats and three mice, the mouse hole showing.',
     ],
   },
   {
@@ -1121,7 +1350,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     lines: [
       'New (teacher, 2026-11-24: her favorite live version, kept as original as possible): the whole stage is her deep navy night sky with soft cloud bands, white twinkles and glints, filling with her six star shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat rounded, shooting star) in flat Lemon, Butter and a touch of Orange, no outlines, many sizes and turns (glowing orange for a first-try streak); the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
       'Why: one shared goal builds relatedness and lowers social comparison (self-determination theory); the goal bar shows how close the class is without empty placeholder shapes (goal-gradient effect); answers are about 112px tall for small fingers (WCAG 2.5.5).',
-      'Pieces (theme template): Background 1600 x 1000 (the scene that fills), six Items 256 x 256 (a star, a fish...), Cover 600 x 600, Title 1200 x 360. No power-ups in this game today.',
+      'Pieces (theme template): Background 1600 x 1000 (the scene that fills), six Items 256 x 256 (a star, a fish...), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the night sky edge to edge filled with 26 items. No power-ups in this game today.',
     ],
   },
 ];
@@ -1166,9 +1395,9 @@ export default function GameMockups() {
           <div className="grid gap-8 lg:grid-cols-[18rem_1fr] items-start">
             {/* Welcome cover (teacher, 2026-11-24: covers live here, not on Universal views). */}
             <figure className="m-0 grid gap-2 content-start">
-              <figcaption className="font-heading text-sm">Welcome cover</figcaption>
+              <figcaption className="font-heading text-sm">Welcome cover (template)</figcaption>
               {(() => { const c = GAME_COVERS.find((x) => x.id === g.id); return c ? <div className="rounded-[1rem] overflow-hidden border-2 border-black"><Fit w={720} h={648}><div className="relative w-full h-full">{c.cover}</div></Fit></div> : null; })()}
-              <span className="text-xs font-semibold text-muted">A real miniature of the game in play, 720 x 648 on the welcome page.</span>
+              <span className="text-xs font-semibold text-muted">Cover template, 720 x 648: the theme background edge to edge, the main board centered in the 48px safe area; no strip, buttons or words.</span>
             </figure>
             <figure className="m-0 grid gap-2 content-start">
               <figcaption className="font-heading text-sm">In play</figcaption>
