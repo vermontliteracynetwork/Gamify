@@ -2,13 +2,13 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import {
-  ArrowLeft, ArrowRight, CaretDown, Check, CornersOut, GearSix, MagnifyingGlass, Pause,
-  Lightbulb, PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Toolbox, UsersThree, X,
+  ArrowLeft, ArrowRight, CaretDown, Check, MagnifyingGlass, Pause,
+  PersonArmsSpread, Play, Plus, SpeakerHigh, Star, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { AutoFit, Badge, DeviceSet, Laptop, MainBtn as BaseBtn, MenuStep, Meter, useFrame, MORE_TEAMS, type Team, WAYS_STYLE, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
+import { AutoFit, GameTools, QuestionCard, SHORT_Q, LONG_Q, Badge, DeviceSet, Laptop, MainBtn as BaseBtn, MenuStep, Meter, useFrame, MORE_TEAMS, type Team, WAYS_STYLE, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
 import { GAME_COVERS } from './GameMockups';
 
 export { Badge, Laptop, BaseBtn as MainBtn, Tablet, TEAMS };
@@ -50,16 +50,7 @@ function Round({ children, label, size = 52 }: { children: ReactNode; label: str
 }
 // In-game groups add the lightbulb hint beside Settings (teacher, 2026-11-24); tips open in a card, never as lines on the board.
 function Tools({ size = 52, access = true, hint }: { size?: number; access?: boolean; hint?: boolean }) {
-  const s = Math.round(size * 0.46);
-  return (
-    <div className={`flex ${hint ? 'gap-4' : 'gap-3'}`}>
-      {access && <Round size={size} label="Accessibility"><PersonArmsSpread weight="bold" size={s} /></Round>}
-      {hint && <Round size={size} label="Hint"><Lightbulb weight="bold" size={s} /></Round>}
-      <Round size={size} label="Settings"><GearSix weight="bold" size={s} /></Round>
-      <Round size={size} label="Full screen"><CornersOut weight="bold" size={s} /></Round>
-      <Round size={size} label="Close"><X weight="bold" size={s} /></Round>
-    </div>
-  );
+  return <GameTools size={size} access={access} hint={!!hint} gap={14} />;
 }
 function SecondBtn({ children, h = 56 }: { children: ReactNode; h?: number }) {
   return <span className="px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 shrink-0 whitespace-nowrap" style={{ minHeight: h, background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>{children}</span>;
@@ -108,17 +99,17 @@ type Mode = 'solo' | 'share' | 'live';
 function RoundMeter({ round, rounds, part, w = 360 }: { round: number; rounds: number; part: number; w?: number }) {
   return <Meter segments={rounds} done={round - 1} part={part} width={w} label={`Round ${round} of ${rounds}`} />;
 }
-function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
+function Tracker({ mode, k = 1, narrow }: { mode: Mode; k?: number; narrow?: boolean }) {
   const left = mode === 'solo'
     ? <span className="flex items-baseline gap-2"><span style={{ ...GY, fontSize: 56 * k }} className="tabular-nums">120</span><b style={{ fontSize: 18 * k, color: PP.quiet }}>points</b></span>
     : mode === 'share'
       ? <span className="flex items-center gap-3 rounded-full pr-5" style={{ background: PP.butter, padding: `${4 * k}px ${20 * k}px ${4 * k}px ${8 * k}px` }}><Badge t={TEAMS[1]} size={48 * k} /><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>Team Sky</b></span>
-      : <span className="flex items-center gap-3"><Star weight="fill" size={40 * k} color={PP.lemon} /><span className="grid"><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>38 of 60 stars</b>{k >= 1 && <span className="font-bold" style={{ fontSize: 15 * k, color: PP.quiet }}>Class goal: fill the sky</span>}</span></span>;
+      : <span className="flex items-center gap-3"><Star weight="fill" size={40 * k} color={PP.lemon} /><span className="grid"><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>38 of 60 stars</b></span></span>;
   return (
-    <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 rounded-full" style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
+    <div className={`w-full grid grid-cols-[1fr_auto_1fr] items-center ${narrow ? "gap-3 px-4" : "gap-6 px-6"} rounded-full`} style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
       <div className="justify-self-start">{left}</div>
-      <RoundMeter round={2} rounds={3} part={0.5} w={k < 1 ? 190 : 360} />
-      <div className="justify-self-end"><Tools size={42 * k} access={false} hint /></div>
+      <RoundMeter round={2} rounds={3} part={0.5} w={narrow ? 150 : k < 1 ? 190 : 300} />
+      <div className="justify-self-end"><Tools size={44} hint /></div>
     </div>
   );
 }
@@ -144,13 +135,15 @@ function V2({ pick: first = 'Solo' }: { pick?: 'Share' | 'Solo' }) {
   return (
     <Wizard step={1} total={5} title="How will you play?">
       <div className="flex flex-col items-center gap-9">
+        {/* On touch (no hover) the picked card shows its line; hover devices show it on hover (teacher, 2026-11-24). */}
+        <style>{'@media (hover: none) { .way-on .way-hint { display: block } .way-on b { font-size: 30px } }'}</style>
         <div className="flex gap-8">
           {WAYS.map((w) => { const on = w.id === pick; return (
-            <button type="button" key={w.id} onClick={() => setPick(w.id)} className="group relative w-[268px] h-[262px] rounded-[24px] flex flex-col text-left" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
+            <button type="button" key={w.id} onClick={() => setPick(w.id)} className={`group relative ${on ? 'way-on' : ''} w-[268px] h-[262px] rounded-[24px] flex flex-col text-left`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
               <span className="flex-1 w-full grid place-items-center rounded-t-[21px]" style={{ background: w.soft, borderBottom: `3px solid ${I}` }}><span className="w-[128px] h-[128px] rounded-full grid place-items-center" style={{ background: w.bright, border: `3px solid ${I}` }}><w.icon weight="bold" size={80} /></span></span>
               <span className="w-full h-[78px] px-4 grid place-content-center text-center">
                 <b className="block text-[40px] leading-none group-hover:text-[30px] transition-[font-size] duration-200" style={GY}>{w.id}</b>
-                <span className="text-[17px] font-semibold hidden group-hover:block">{w.hint}</span>
+                <span className="way-hint text-[17px] font-semibold hidden group-hover:block">{w.hint}</span>
               </span>
               {on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
             </button>); })}
@@ -184,17 +177,20 @@ function Chip({ children, on }: { children: ReactNode; on?: boolean }) {
 function V3() {
   // Laptop dense but legible (13px floor): tabs, search, subject and grade filters, recent first,
   // cards with subject color, grade, count, the first question and when it was last used.
+  // Portrait reflows: filters wrap, two columns on an iPad, one on a phone (no cut-off cards).
+  const f = useFrame(); const port = f.adaptive && f.portrait, phone = port && f.w < 600;
+  const sets = phone ? SETS.slice(0, 3) : SETS;
   return (
     <Wizard step={2} total={5} title="Question set">
       <div className="w-full grid gap-4">
-        <div className="flex items-center justify-center gap-3">
+        <div className={`flex items-center justify-center gap-3 ${port ? 'flex-wrap' : ''}`}>
           <Seg opts={['My sets', 'Public sets']} pick={0} h={52} size={18} />
           <span className="w-[240px] h-[52px] px-5 rounded-full flex items-center gap-3 font-semibold text-[18px]" style={{ background: '#fff', border: `2.5px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} />Search sets</span>
           <span className="flex gap-1.5"><Chip on>All subjects</Chip><Chip>ELA</Chip><Chip>Math</Chip><Chip>Science</Chip></span>
           <Chip>All grades<CaretDown weight="bold" size={14} /></Chip>
         </div>
-        <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-4">
-          {SETS.map((x, i) => (
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${phone ? 1 : port ? 2 : 3}, minmax(0, 1fr))` }}>
+          {sets.map((x, i) => (
             <div key={x.name} className="relative rounded-[20px] overflow-hidden flex flex-col" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: i === 0 ? `${SEL}, 0 4px 0 ${I}` : `0 4px 0 ${I}` }}>
               <div className="h-[40px] pl-4 pr-12 flex items-center justify-between gap-2 whitespace-nowrap" style={{ background: x.soft, borderBottom: `2.5px solid ${I}` }}>
                 <span className="flex items-center gap-2 font-bold text-[16px]"><span className="w-4 h-4 rounded-full" style={{ background: x.c, border: `2px solid ${I}` }} />{x.sub}</span>
@@ -299,11 +295,13 @@ const SETUP: { id: PowerId; name: string; job: string; on: boolean; soft: string
 ];
 function V6() {
   // Straight on the purple ground, no white panel (teacher, 2026-11-23, newest).
+  // Portrait reflows to two columns at real size (iPad first), smaller cards on a phone.
+  const f = useFrame(); const port = f.adaptive && f.portrait, phone = port && f.w < 600;
   return (
     <Wizard step={5} total={5} title="Power-ups" last>
-      <div className="grid grid-cols-3 gap-x-8 gap-y-7">
+      <div className={`grid ${port ? 'grid-cols-2' : 'grid-cols-3'} ${phone ? 'gap-x-5 gap-y-5' : 'gap-x-8 gap-y-7'}`}>
         {SETUP.map((c) => (
-          <div key={c.id} className="relative w-[320px] h-[196px] grid justify-items-center content-center gap-2 text-center rounded-[24px]"
+          <div key={c.id} className={`relative ${phone ? 'w-[200px] h-[180px] px-2' : 'w-[320px] h-[196px]'} grid justify-items-center content-center gap-2 text-center rounded-[24px]`}
             style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` } : { background: PP.cream, border: `3px dashed ${I}` }}>
             <span className="w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><CrayonPowerUp id={c.id} size={72} /></span>
             <b className="text-[22px] leading-tight">{c.name}</b>
@@ -325,7 +323,7 @@ function V7() {
           <Paper layer={PP.butter} pad={0} className="w-[540px]">
             <div className="relative px-10 pt-12 pb-10 grid justify-items-center gap-3 text-center">
               <span className="absolute top-4 right-4"><Round label="Close"><X weight="bold" size={24} /></Round></span>
-              <div className="relative w-[210px] h-[210px] grid place-items-center"><BlobPatch color={PP.butter} size={220} /><span className="relative"><CrayonPowerUp id="double-points" size={176} /></span></div>
+              <div className="relative w-[210px] h-[210px] grid place-items-center"><span className="relative"><CrayonPowerUp id="double-points" size={176} /></span></div>
               <b className="text-[56px] whitespace-nowrap" style={GY}>Double Points!</b>
               <span className="font-bold text-[24px] leading-snug">Your next points count twice.</span>
             </div>
@@ -338,41 +336,8 @@ function V7() {
 }
 
 // ---------- question screen: the game's theme around the standard card ----------
-const ANS = [['A', 'the dog ran.', PP.periwinkle, PP.gamify], ['B', 'The dog ran.', PP.sky, PP.blueCrystal], ['C', 'The dog ran', PP.pink, PP.blush], ['D', 'the dog ran', PP.lemon, PP.butter]] as const;
-// Teacher, 2026-11-24: thinner answer tiles at ONE fixed size; the question
-// gets a fixed generous block and its font steps down for long questions; the
-// card is about 85% of the frame so more of the theme shows around it.
-const SHORT_Q = 'Which one starts with a capital letter?';
-const LONG_Q = 'Read the sentence: "my dog likes to run in the park." Which one fixes it with a capital letter at the start and punctuation at the end?';
-function qSize(q: string, big: boolean) { const n = q.length; return big ? (n <= 60 ? 54 : n <= 110 ? 44 : 36) : (n <= 60 ? 46 : n <= 110 ? 36 : 30); }
-function QCard({ tablet, q = SHORT_Q }: { tablet?: boolean; q?: string }) {
-  const big = !!tablet;
-  const b = big ? 60 : 52, ic = big ? 26 : 22;
-  return (
-    <div className={`${big ? 'w-[697px]' : 'w-[1088px]'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 28 : 26 }}>
-      {/* Her page 2 header: the current team left; tools, settings, full screen, close, then Listen on the right. */}
-      <div className="flex items-center gap-3">
-        <span className="flex-1 min-w-0 flex"><span className="flex items-center gap-3 min-w-0 rounded-full pl-1.5 pr-5 py-1" style={{ background: PP.butter }}><Badge t={TEAMS[1]} size={b * 0.9} /><b className="truncate" style={{ fontSize: big ? 30 : 26 }}>Team Sky</b></span></span>
-        <Round size={b} label="Tools"><Toolbox weight="bold" size={ic} /></Round>
-        <Round size={b} label="Hint"><Lightbulb weight="bold" size={ic} /></Round>
-        <Round size={b} label="Settings"><GearSix weight="bold" size={ic} /></Round>
-        <Round size={b} label="Full screen"><CornersOut weight="bold" size={ic} /></Round>
-        <Round size={b} label="Close"><X weight="bold" size={ic} /></Round>
-        <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: b, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={ic} />Listen</span>
-      </div>
-      <div className="flex items-center" style={{ height: big ? 330 : 200 }}>
-        <h2 className="font-bold text-left leading-snug" style={{ fontSize: qSize(q, big) }}>{q}</h2>
-      </div>
-      <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
-        {ANS.map(([l, txt, c, bg]) => (
-          <div key={l} className="flex items-center gap-4 px-4 rounded-[20px] font-bold" style={{ height: big ? 92 : 84, fontSize: big ? 38 : 32, background: bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-            <span className="shrink-0 rounded-full grid place-items-center" style={{ ...GY, width: big ? 64 : 58, height: big ? 64 : 58, fontSize: big ? 36 : 32, background: c, border: `3px solid ${I}` }}>{l}</span>{txt}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+// The one question card now lives in mockKit (QuestionCard), shared with the game mockups.
+const QCard = QuestionCard;
 type ThemeId = 'gameshow' | 'park' | 'sky';
 function ThemeBack({ id, w, h }: { id: ThemeId; w: number; h: number }) {
   return id === 'gameshow' ? <StudioBack w={w} h={h} /> : id === 'park' ? <ParkBack w={w} h={h} /> : <SkyBack w={w} h={h} />;
@@ -397,12 +362,12 @@ function QTablet({ theme, q }: { theme: ThemeId; q?: string }) {
 }
 
 // ---------- tracker variants and the scoreboard ----------
-function V9a() {
+function V9a({ narrow }: { narrow?: boolean }) {
   return (
-    <Stage pad={48}>
+    <Stage pad={narrow ? 40 : 48}>
       <div className="w-full flex-1 flex flex-col justify-center gap-9">
         {(['solo', 'share', 'live'] as const).map((m) => (
-          <Tracker key={m} mode={m} />
+          <Tracker key={m} mode={m} narrow={narrow} />
         ))}
       </div>
     </Stage>
@@ -411,6 +376,35 @@ function V9a() {
 const HELD: { id: PowerId; name: string; soft: string }[] = [{ id: 'shield', name: 'Shield', soft: PP.blueCrystal }, { id: 'double-points', name: 'Double Points', soft: PP.butter }];
 function V9b() {
   const f = useFrame();
+  if (f.adaptive && f.portrait) {
+    // Portrait (teacher, 2026-11-24: iPad first): the rail docks under the board;
+    // rows two by two, then the square power-up cards, all at real size.
+    return (
+      <div className="w-full h-full relative">
+        <ParkBack w={f.w} h={f.h} />
+        <div className="absolute inset-0"><AutoFit><div className="relative w-[820px] h-[1180px] flex flex-col items-center gap-6 px-10 pt-8 pb-8">
+          <Tracker mode="share" narrow />
+          <div className="w-full flex-1 min-h-0 grid grid-cols-6 grid-rows-5 gap-2 p-3 rounded-[24px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+            {Array.from({ length: 30 }, (_, i) => <span key={i} className="rounded-xl" style={{ background: [PP.paper, PP.butter, PP.gamify, PP.aqua][i % 4], border: `2.5px solid ${I}` }} />)}
+          </div>
+          <div className="w-full grid grid-cols-2 gap-3">
+            {TEAMS.map((t, i) => (
+              <div key={t.name} className="flex items-center gap-3 px-4 h-[64px] rounded-full" style={{ background: i === 1 ? PP.butter : PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+                <Badge t={t} size={44} /><b className="flex-1 text-[20px] truncate">{t.name}</b><span className="text-[34px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4 justify-center">
+            {HELD.map((h) => (
+              <div key={h.id} className="w-[120px] aspect-square grid justify-items-center content-center gap-1 text-center rounded-[20px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+                <CrayonPowerUp id={h.id} size={60} /><b className="text-[16px] leading-tight">{h.name}</b>
+              </div>
+            ))}
+          </div>
+        </div></AutoFit></div>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-full relative">
       <ParkBack w={f.adaptive ? f.w : 1280} h={f.adaptive ? f.h : 800} />
@@ -444,29 +438,25 @@ function V9b() {
     </div>
   );
 }
+// The results box is THE winner box from Game components (teacher, 2026-11-24):
+// title, the winner's icon (no circle) in THE glow, then only the score centered
+// under it in Grow Year a little smaller than the title; no podium, no stat chips.
 function V10() {
   return (
     <div className="w-full h-full relative">
       <Board dim />
       <Over>
         <div className="relative">
-          <Paper layer={PP.blush} tilt={-1.5} pad={0} className="w-[820px]">
-            <div className="px-10 pt-9 pb-9 grid justify-items-center gap-6 text-center">
-              <h2 className="relative z-10 text-[80px]" style={GY}>Great game!</h2>
-              <div className="flex items-end gap-6">
-                {[1, 0, 2].map((i) => { const t = TEAMS[i]; return (
-                  <div key={t.name} className="grid justify-items-center gap-3">
-                    {i === 0
-                      ? <TurnGlow><Badge t={t} size={120} /></TurnGlow>
-                      : <Badge t={t} size={60} />}
-                    <span className="relative w-[150px] rounded-t-[20px] grid place-items-center text-[44px]" style={{ ...GY, height: [150, 110, 80][i], background: i === 0 ? PP.periwinkle : t.soft, border: `3px solid ${I}` }}>{i + 1}</span>
-                  </div>); })}
-              </div>
-              <div className="relative z-10 flex gap-4 justify-center items-center"><MainBtn big><Play weight="fill" size={26} />Play again</MainBtn><SecondBtn>New game</SecondBtn><SecondBtn>Review</SecondBtn><SecondBtn><Star weight="bold" size={20} />Rate</SecondBtn></div>
+          <Paper pad={0} className="w-[760px]">
+            <div className="px-10 pt-10 pb-10 grid justify-items-center gap-5 text-center">
+              <h2 className="relative z-10 text-[64px]" style={GY}>Team Purple wins!</h2>
+              <span className="my-4"><TurnGlow><Badge t={TEAMS[0]} size={150} /></TurnGlow></span>
+              <b className="relative z-10 text-[52px] tabular-nums" style={GY}>160 points</b>
+              <div className="relative z-10 flex gap-4 justify-center items-center"><MainBtn big><Play weight="fill" size={26} />Play again</MainBtn><SecondBtn>New game</SecondBtn><SecondBtn>Review 3 missed</SecondBtn></div>
             </div>
           </Paper>
-          <Corner id="star" x="-56px" y="30px" rot={-14} />
-          <Corner id="balloon" x="768px" y="140px" rot={12} />
+          <Corner id="star" x="-64px" y="-48px" rot={0} />
+          <Corner id="balloon" x="716px" y="-48px" rot={0} />
         </div>
       </Over>
     </div>
@@ -638,7 +628,7 @@ const VIEWS: V[] = [
   { n: '8', fit: true, name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
   { n: '9a', fit: true, name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
   { n: '9b', fit: true, name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
-  { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left (the team name only, shaded), the meter in the middle with no words, icon buttons right with the hint beside Settings.' },
+  { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, port: <V9a narrow />, note: 'Who or what left (the team name only, shaded), the meter in the middle with no words, icon buttons right with the hint beside Settings.' },
   { n: '11b', fit: true, name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team is shaded Butter (no glow, no banner); power-ups are single square cards; tips live behind the lightbulb.' },
   { n: '12', fit: true, name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
   { n: '13', fit: true, name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },

@@ -103,8 +103,9 @@ function Grain() {
     </svg>
   );
 }
-function Tape({ className = '', color = '#ffd52e', rotate = -6 }: { className?: string; color?: string; rotate?: number }) {
-  return <Washi className={`${className}`} color={color.slice(0, 7)} rotate={rotate} />;
+// No washi tape anywhere (teacher, 2026-11-23, urgent): Tape draws nothing.
+function Tape(_props: { className?: string; color?: string; rotate?: number }) {
+  return null;
 }
 function torn(w: number, h: number, seed: number) {
   let d = `M0 0 H${w} V${h - 8}`;
@@ -122,7 +123,7 @@ function TornPaper({ color, children, className = '', seed = 1 }: { color: strin
 // A photo sticker: a white die-cut edge around a photo. Placeholder art only.
 function PhotoSticker({ label, children, rotate = 0, className = '' }: { label: string; children: ReactNode; rotate?: number; className?: string }) {
   return (
-    <figure className={`relative rounded-[1.25rem] p-2 ${className}`} style={{ background: '#ffffff', transform: `rotate(${rotate}deg)`, boxShadow: '0 6px 16px rgba(29,26,51,0.16)' }}>
+    <figure className={`relative rounded-[1.25rem] p-2 ${className}`} style={{ background: '#ffffff', boxShadow: '0 6px 16px rgba(29,26,51,0.16)' }} data-rotate={rotate || undefined}>
       <div className="relative rounded-[0.9rem] overflow-hidden aspect-[4/3] grid place-items-center" style={{ background: 'repeating-linear-gradient(45deg,#e9e1d2 0 10px,#f1eadd 10px 20px)' }}>
         {children}
         <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider" style={{ background: ND.ink, color: '#ffffff' }}>Placeholder photo</span>
@@ -135,7 +136,7 @@ function HandNote({ text, color = ND.pinkDeep, className = '' }: { text: string;
   return (
     <span className={`absolute flex items-end gap-1 ${className}`} aria-hidden="true">
       <svg viewBox="0 0 50 40" className="w-10 h-8"><path d="M46 6 C30 4 14 14 8 32 M8 32 l-2 -12 M8 32 l10 -6" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      <span className="text-xl leading-none" style={{ ...GY, color, transform: 'rotate(-6deg)' }}>{text}</span>
+      <span className="text-xl leading-none" style={{ ...GY, color }}>{text}</span>
     </span>
   );
 }

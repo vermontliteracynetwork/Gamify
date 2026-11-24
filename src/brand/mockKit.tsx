@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, Television, User, X, type Icon } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, SpeakerHigh, Television, Toolbox, User, X, type Icon } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { CrayonPowerUp, type PowerId } from './CrayonKit';
 
@@ -95,15 +95,65 @@ export function TurnChip({ icon, name, size = 22 }: { icon: ReactNode; name: str
 }
 // One power-up as its own square card (teacher, 2026-11-24): no tray panel,
 // no label above, no helper text, no circle behind the art.
-export function PowerCard({ id, name, size = 64 }: { id: PowerId; name: string; size?: number }) {
+export function PowerCard({ id, name, size = 80 }: { id: PowerId; name: string; size?: number }) {
   return (
     <span aria-label={name} className="grid justify-items-center content-center gap-0.5 rounded-[14px] text-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
-      <CrayonPowerUp id={id} size={size * 0.6} /><span className="font-bold leading-tight px-0.5" style={{ fontSize: Math.max(10, size * 0.16) }}>{name}</span>
+      <CrayonPowerUp id={id} size={size * 0.5} /><span className="font-bold leading-[1.05] px-1" style={{ fontSize: Math.max(13, size * 0.17) }}>{name}</span>
     </span>
   );
 }
 // The in-game hint button: a lightbulb round beside Settings (teacher, 2026-11-24).
 export function HintIcon({ size = 20 }: { size?: number }) { return <Lightbulb weight="bold" size={size} />; }
+
+// THE in-game tool group (teacher, 2026-11-24: "smaller round buttons with more
+// room", a lightbulb hint "beside settings" in every game). One order in every
+// game and mockup: Accessibility, Hint, Settings, Full screen, Close. 44px is the
+// smallest touch target we allow (Apple HIG 44pt, WCAG 2.5.5), with 14px between.
+export const TOOL_SIZE = 44;
+export function GameTools({ size = TOOL_SIZE, access = true, close = true, hint = true, gap }: { size?: number; access?: boolean; close?: boolean; hint?: boolean; gap?: number }) {
+  const s = Math.round(size * 0.45);
+  const items: [Icon, string][] = [...(access ? [[PersonArmsSpread, 'Accessibility'] as [Icon, string]] : []), ...(hint ? [[Lightbulb, 'Hint'] as [Icon, string]] : []), [GearSix, 'Settings'], [CornersOut, 'Full screen'], ...(close ? [[X, 'Close'] as [Icon, string]] : [])];
+  return (
+    <span className="flex shrink-0" style={{ gap: gap ?? Math.round(size * 0.32) }}>
+      {items.map(([Ic, l]) => <span key={l} aria-label={l} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Ic weight="bold" size={s} /></span>)}
+    </span>
+  );
+}
+
+// ---------- THE question card (teacher, 2026-11-23/24) ----------
+// One design for every game; games only swap the background around it. Inside
+// the card: the player or team left on Butter, the tools, then Listen right; the
+// question left-aligned in a fixed generous block whose font steps down for long
+// questions; four A to D tiles of ONE fixed size.
+export const SHORT_Q = 'Which one starts with a capital letter?';
+export const LONG_Q = 'Read the sentence: "my dog likes to run in the park." Which one fixes it with a capital letter at the start and punctuation at the end?';
+const Q_ANS = [['A', 'the dog ran.', PP.periwinkle, PP.gamify], ['B', 'The dog ran.', PP.sky, PP.blueCrystal], ['C', 'The dog ran', PP.pink, PP.blush], ['D', 'the dog ran', PP.lemon, PP.butter]] as const;
+function qSize(q: string, big: boolean) { const n = q.length; return big ? (n <= 60 ? 54 : n <= 110 ? 44 : 36) : (n <= 60 ? 46 : n <= 110 ? 36 : 30); }
+export function QuestionCard({ tablet, q = SHORT_Q, who, answers, right }: { tablet?: boolean; q?: string; who?: { icon: ReactNode; name: string }; answers?: readonly (readonly [string, string, string, string])[]; right?: number }) {
+  const big = !!tablet;
+  const b = big ? 60 : 52, ic = big ? 26 : 22;
+  const ans = answers ?? Q_ANS;
+  const round = (Ic: Icon, l: string) => <span key={l} aria-label={l} className="rounded-full grid place-items-center shrink-0" style={{ width: b, height: b, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Ic weight="bold" size={ic} /></span>;
+  return (
+    <div className={`${big ? 'w-[697px]' : 'w-[1088px]'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 28 : 26 }}>
+      <div className="flex items-center gap-3">
+        <span className="flex-1 min-w-0 flex"><span className="flex items-center gap-3 min-w-0 rounded-full pl-1.5 pr-5 py-1" style={{ background: TURN_SHADE }}>{who ? who.icon : <Badge t={TEAMS[1]} size={b * 0.9} />}<b className="truncate" style={{ fontSize: big ? 30 : 26 }}>{who ? who.name : 'Team Sky'}</b></span></span>
+        {round(Toolbox, 'Tools')}{round(Lightbulb, 'Hint')}{round(GearSix, 'Settings')}{round(CornersOut, 'Full screen')}{round(X, 'Close')}
+        <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: b, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={ic} />Listen</span>
+      </div>
+      <div className="flex items-center" style={{ height: big ? 330 : 200 }}>
+        <h2 className="font-bold text-left leading-snug" style={{ fontSize: qSize(q, big) }}>{q}</h2>
+      </div>
+      <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
+        {ans.map(([l, txt, c, bg], i) => (
+          <div key={l} className="flex items-center gap-4 px-4 rounded-[20px] font-bold" style={{ height: big ? 92 : 84, fontSize: big ? 38 : 32, background: right === i ? PP.mint : bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+            <span className="shrink-0 rounded-full grid place-items-center" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase', width: big ? 64 : 58, height: big ? 64 : 58, fontSize: big ? 36 : 32, background: right === i ? PP.kelly : c, border: `3px solid ${I}` }}>{l}</span>{txt}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 // THE meter (teacher, 2026-11-24: "more modern and theme aligned"), built once
 // for the round tracker, the start-menu step tracker and goal bars. One
@@ -232,29 +282,38 @@ export const useFrame = () => useContext(FrameCtx);
 export function AutoFit({ children, width }: { children: ReactNode; width?: number }) {
   const box = useRef<HTMLDivElement>(null); const inner = useRef<HTMLDivElement>(null);
   const [k, setK] = useState(1);
+  // A given width is a minimum: if fixed-size content still overflows it (it
+  // sits centered, so it spills on both sides), the width grows just enough,
+  // then the whole thing scales to fit. Phones get real-size text where it fits.
+  const [ww, setWw] = useState(width);
+  useLayoutEffect(() => { setWw(width); }, [width]);
   useLayoutEffect(() => {
     const b = box.current, c = inner.current; if (!b || !c) return;
-    const fit = () => { const cw = c.offsetWidth, ch = c.offsetHeight; if (!cw || !ch) return; setK(Math.min(1, b.clientWidth / cw, b.clientHeight / ch)); };
+    const fit = () => {
+      const cw = c.offsetWidth, ch = c.offsetHeight; if (!cw || !ch) return;
+      if (ww && c.scrollWidth > cw + 1) { setWw(cw + 2 * (c.scrollWidth - cw)); return; }
+      setK(Math.min(1, b.clientWidth / cw, b.clientHeight / ch));
+    };
     const ro = new ResizeObserver(fit); ro.observe(b); ro.observe(c); fit();
     return () => ro.disconnect();
-  }, []);
+  }, [ww]);
   // The child sits absolutely so it keeps its natural size; then it is scaled to fit and centered.
   return (
     <div ref={box} className="w-full h-full min-h-0 relative">
-      <div ref={inner} className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center" style={{ width: width ?? 'max-content', transform: `translate(-50%, -50%) scale(${k})`, transformOrigin: 'center' }}>{children}</div>
+      <div ref={inner} className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center" style={{ width: ww ?? 'max-content', transform: `translate(-50%, -50%) scale(${k})`, transformOrigin: 'center' }}>{children}</div>
     </div>
   );
 }
 
 // Renders only once scrolled near, so a page of five-device sets stays light.
-function Lazy({ children, ratio }: { children: ReactNode; ratio: number }) {
+function Lazy({ children, ratio, device }: { children: ReactNode; ratio: number; device?: string }) {
   const ref = useRef<HTMLDivElement>(null); const [on, setOn] = useState(false);
   useEffect(() => {
     const el = ref.current; if (!el) return;
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { setOn(true); io.disconnect(); } }, { rootMargin: '600px' });
     io.observe(el); return () => io.disconnect();
   }, []);
-  return <div ref={ref} style={{ aspectRatio: `${ratio}` }} className="w-full">{on ? children : null}</div>;
+  return <div ref={ref} data-device={device} style={{ aspectRatio: `${ratio}` }} className="w-full">{on ? children : null}</div>;
 }
 function Screen({ kind, land, port, landSize, portSize, adaptive, ground }: { kind: FrameKind; land: ReactNode; port?: ReactNode; landSize: [number, number]; portSize: [number, number]; adaptive?: boolean; ground: CSSProperties }) {
   const f = FRAMES[kind]; const portrait = f.h > f.w;
@@ -270,7 +329,7 @@ function Screen({ kind, land, port, landSize, portSize, adaptive, ground }: { ki
       </div>
     );
   }
-  return <Lazy ratio={f.w / f.h}><Scaled w={f.w} h={f.h}>{body}</Scaled></Lazy>;
+  return <Lazy ratio={f.w / f.h} device={`${kind}:${f.w}`}><Scaled w={f.w} h={f.h}>{body}</Scaled></Lazy>;
 }
 function Bezel({ kind, children }: { kind: FrameKind; children: ReactNode }) {
   const dark = '#2a2740';
@@ -330,7 +389,7 @@ export function Laptop({ children, w = 1000 }: { children: ReactNode; w?: number
   return (
     <div className="grid justify-items-center">
       <div className="w-full rounded-t-[1.1rem] p-[2.2%] pb-[2.6%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
-        <div className="rounded-[0.35rem] overflow-hidden"><Scaled w={w} h={w * 0.625}>{children}</Scaled></div>
+        <div className="rounded-[0.35rem] overflow-hidden" data-device={`laptop:${w}`}><Scaled w={w} h={w * 0.625}>{children}</Scaled></div>
       </div>
       <div className="w-[103%] h-3 rounded-b-[0.9rem]" style={{ background: '#c9c4d6', border: `2px solid ${I}`, borderTop: 'none' }} />
     </div>
@@ -339,7 +398,7 @@ export function Laptop({ children, w = 1000 }: { children: ReactNode; w?: number
 export function Tablet({ children }: { children: ReactNode }) {
   return (
     <div className="w-full max-w-[21rem] mx-auto rounded-[1.6rem] p-[4%]" style={{ background: '#2a2740', border: `2px solid ${I}` }}>
-      <div className="rounded-[0.7rem] overflow-hidden"><Scaled w={820} h={1180}>{children}</Scaled></div>
+      <div className="rounded-[0.7rem] overflow-hidden" data-device="ipadP:820"><Scaled w={820} h={1180}>{children}</Scaled></div>
     </div>
   );
 }
@@ -379,7 +438,7 @@ export function SiteBarSmall({ phone }: { phone: boolean }) {
     <div className="flex items-center shrink-0" style={{ padding: `0 ${phone ? 20 : 40}px`, height: phone ? 48 : 64, background: '#fbfcf8', borderBottom: '3px solid #000' }}>
       <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-6' : 'h-8'} w-auto`} draggable={false} />
       {phone
-        ? <span className="ml-auto w-10 h-10 rounded-full grid place-items-center font-bold" style={{ border: '2px solid #000', background: '#fff' }} aria-label="Menu">☰</span>
+        ? <span className="ml-auto w-11 h-11 rounded-full grid place-items-center font-bold" style={{ border: "2px solid #000", background: "#fff" }} aria-label="Menu">☰</span>
         : <span className="ml-auto flex items-center gap-3">{['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold text-[15px]">{l}</span>)}{[['Join', '#e4eafe'], ['Log in', '#fdfd94']].map(([l, bg]) => <span key={l} className="rounded-full font-bold px-3 py-1 text-[15px]" style={{ border: '2px solid #000', background: bg }}>{l}</span>)}</span>}
     </div>
   );
@@ -415,21 +474,16 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
       <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 36}px` }}>
         {/* The white top bar with the logo, then one even row: title left, step
             meter in the middle, round buttons right (teacher, 2026-11-24). */}
-        <div className="flex items-center" style={{ margin: `-${phone ? 20 : 28}px -${px}px 0`, padding: `0 ${px}px`, height: phone ? 48 : 64, background: '#fbfcf8', borderBottom: '3px solid #000' }}>
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-6' : 'h-8'} w-auto`} draggable={false} />
-          {phone
-            ? <span className="ml-auto w-10 h-10 rounded-full grid place-items-center font-bold" style={{ border: `2px solid ${I}`, background: '#fff' }} aria-label="Menu">☰</span>
-            : <span className="ml-auto flex items-center gap-3">{['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold text-[15px]">{l}</span>)}{[['Join', '#e4eafe'], ['Log in', '#fdfd94']].map(([l, bg]) => <span key={l} className="rounded-full font-bold px-3 py-1 text-[15px]" style={{ border: '2px solid #000', background: bg }}>{l}</span>)}</span>}
-        </div>
+        <div style={{ margin: `-${phone ? 20 : 28}px -${px}px 0` }}><SiteBarSmall phone={phone} /></div>
         <div className={`mt-5 ${phone ? 'grid gap-3' : 'grid grid-cols-[1fr_auto_1fr] items-center gap-4'}`}>
           <h2 className="text-left" style={{ ...MK_GY, fontSize: phone ? 28 : 38 }}>{title}</h2>
           <Meter segments={total} done={step - 1} part={1} width={total * (phone ? 34 : 44)} label={`Step ${step} of ${total}`} />
           <div className={`flex ${phone ? 'gap-1.5' : 'gap-3 justify-self-end'}`}>
-            <MkRound size={phone ? 38 : 48} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 38 : 48} label="Settings"><GearSix weight="bold" size={phone ? 18 : 22} /></MkRound>
-            <MkRound size={phone ? 38 : 48} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 38 : 48} label="Close"><X weight="bold" size={phone ? 18 : 22} /></MkRound>
+            <MkRound size={phone ? 44 : 48} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 44 : 48} label="Settings"><GearSix weight="bold" size={phone ? 18 : 22} /></MkRound>
+            <MkRound size={phone ? 44 : 48} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 44 : 48} label="Close"><X weight="bold" size={phone ? 18 : 22} /></MkRound>
           </div>
         </div>
-        <div className="flex-1 min-h-0 my-5"><AutoFit width={phone ? 640 : f.w - 2 * px}>{children}</AutoFit></div>
+        <div className="flex-1 min-h-0 my-5"><AutoFit width={phone ? 460 : f.w - 2 * px}>{children}</AutoFit></div>
         <div style={{ height: 72 }}><AutoFit>{footer}</AutoFit></div>
       </div>
     );
@@ -473,13 +527,14 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
     const phone = f.w < 600, px = phone ? 20 : 40, cw = f.w - 2 * px;
     return (
       <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 40}px` }}>
-        <div className="flex items-center justify-between"><img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-7' : 'h-10'} w-auto`} draggable={false} />
-          <div className="flex gap-2"><MkRound label="Full screen" size={phone ? 38 : 52}><CornersOut weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound label="Settings" size={phone ? 38 : 52}><GearSix weight="bold" size={phone ? 18 : 24} /></MkRound></div></div>
-        <div className="mt-5 mx-auto rounded-[24px] overflow-hidden relative shrink-0" style={{ width: Math.min(cw, f.h * 0.4 * 720 / 648), height: Math.min(cw, f.h * 0.4 * 720 / 648) * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+        {/* The site's white top bar runs across the welcome in portrait too (teacher, 2026-11-24). */}
+        <div style={{ margin: `-${phone ? 20 : 28}px -${px}px 0` }}><SiteBarSmall phone={phone} /></div>
+        <div className="mt-4 flex justify-end gap-3"><MkRound label="Full screen" size={44}><CornersOut weight="bold" size={20} /></MkRound><MkRound label="Settings" size={44}><GearSix weight="bold" size={20} /></MkRound></div>
+        <div aria-hidden="true" className="mt-3 mx-auto rounded-[24px] overflow-hidden relative shrink-0" style={{ width: Math.min(cw, f.h * 0.4 * 720 / 648), height: Math.min(cw, f.h * 0.4 * 720 / 648) * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
           <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(Math.min(cw, f.h * 0.4 * 720 / 648) - 6) / 720})` }}>{cover}</div>
         </div>
         <div className="flex-1 min-h-0 mt-5">
-          <AutoFit width={phone ? 520 : cw}>
+          <AutoFit width={phone ? 420 : cw}>
             <div className="w-full grid gap-5">
               <h1 style={{ ...MK_GY, fontSize: 60, lineHeight: 0.95 }}>{name}</h1>
               <p className="font-semibold text-[22px] leading-snug">{desc}</p>
@@ -500,7 +555,7 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
       <SiteBar f={f} canvas={canvas} />
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, color: I, ...fitDesign(f, canvas) }}>
         <div className="absolute left-10 right-10 top-[100px] bottom-[44px] flex gap-10">
-          <div className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
+          <div aria-hidden="true" className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
           <div className="flex-1 min-w-0 h-full flex flex-col justify-between">
             <div className="flex items-start gap-4">
               <h1 className="flex-1 min-w-0" style={{ ...MK_GY, fontSize: 64, lineHeight: 0.95 }}>{name}</h1>

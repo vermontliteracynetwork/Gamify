@@ -1,11 +1,12 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowClockwise, ArrowRight, Check, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, SpeakerHigh } from '@phosphor-icons/react';
+import { ArrowClockwise, ArrowRight, Check, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, SpeakerHigh, X } from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
 import { playEffect, type Effect } from '../engine/feedback';
 import { playClip, ANSWER_SOUNDS, POWER_SOUNDS } from '../engine/music';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonDie, CrayonPowerUp, type PowerId } from './CrayonKit';
+// Power-up art never sits on a circle or blob backing (teacher, 2026-11-24); BlobPatch stays only behind the tips lightbulb.
 import { Badge, cpuName, DieWiggle, GO_YELLOW, Meter, PURPLE_GROUND, TEAMS, TurnGlow } from './mockKit';
 
 // Game components (PROPOSAL, teacher 2026-11-24: "add a section in brand for
@@ -39,9 +40,11 @@ function WhiteBtn({ children, onClick }: { children: ReactNode; onClick?: () => 
 function Small({ children, onClick, label }: { children: ReactNode; onClick: () => void; label: string }) {
   return <button type="button" onClick={onClick} className="h-9 px-3 rounded-full text-sm font-bold inline-flex items-center gap-1.5 border-2 border-black bg-[#fffaf0] hover:bg-[#fdfd94]" aria-label={label}>{children}</button>;
 }
-// Top strip buttons: 2.25rem with 0.75rem between (teacher, 2026-11-24: slightly smaller, more room).
+// Top strip buttons (teacher, 2026-11-24: slightly smaller, more room): 44px,
+// the smallest touch target we allow (Apple HIG 44pt, WCAG 2.5.5), 14px apart,
+// in the one order used everywhere (mockKit GameTools).
 function Round({ children, label, onClick }: { children: ReactNode; label: string; onClick?: () => void }) {
-  return <button type="button" onClick={onClick} aria-label={label} className="w-9 h-9 rounded-full grid place-items-center shrink-0" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}>{children}</button>;
+  return <button type="button" onClick={onClick} aria-label={label} className="w-11 h-11 rounded-full grid place-items-center shrink-0" style={{ background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</button>;
 }
 
 // One component on its own card: the live preview on the purple ground, then
@@ -76,10 +79,10 @@ function Part({ n, name, use, sizes, states, motion: mo, sound, onReplay, onSoun
 // shading; that shading is the only turn signal (no "pick a card" banner).
 function TopStrip({ onHint }: { onHint?: () => void }) {
   return (
-    <div className="w-full max-w-[44rem] grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-2 pr-4 rounded-full" style={{ ...PAPER, minHeight: '3.5rem' }}>
+    <div className="w-full max-w-[48rem] grid grid-cols-[1fr_auto_1fr] items-center gap-4 pl-2 pr-3 rounded-full" style={{ ...PAPER, minHeight: '4rem' }}>
       <span className="justify-self-start flex items-center gap-2.5 pl-1.5 pr-4 py-1 rounded-full" style={{ background: PP.butter }}><Badge t={TEAMS[1]} size={36} /><b className="whitespace-nowrap">Team Sky</b></span>
-      <Meter segments={3} done={1} part={0.5} width={200} label="Round 2 of 3" />
-      <span className="justify-self-end flex gap-3"><Round label="Full screen"><CornersOut weight="bold" size={17} /></Round><Round label="Accessibility"><PersonArmsSpread weight="bold" size={17} /></Round><Round label="Hint" onClick={onHint}><Lightbulb weight="bold" size={17} /></Round><Round label="Settings"><GearSix weight="bold" size={17} /></Round></span>
+      <Meter segments={3} done={1} part={0.5} width={180} label="Round 2 of 3" />
+      <span className="justify-self-end flex gap-[14px]"><Round label="Accessibility"><PersonArmsSpread weight="bold" size={20} /></Round><Round label="Hint" onClick={onHint}><Lightbulb weight="bold" size={20} /></Round><Round label="Settings"><GearSix weight="bold" size={20} /></Round><Round label="Full screen"><CornersOut weight="bold" size={20} /></Round><Round label="Close"><X weight="bold" size={20} /></Round></span>
     </div>
   );
 }
@@ -116,9 +119,9 @@ function PowerCards({ calm, onUse }: { calm: Calm; onUse: (p: (typeof HELD)[numb
     <div className="flex gap-2.5">
       {HELD.map((h, i) => (
         <motion.button key={h.id} type="button" onClick={() => onUse(h)} {...enter(calm, i * 0.12)} whileTap={calm ? undefined : { scale: 0.95 }}
-          className="w-[5rem] grid justify-items-center content-center gap-1 rounded-[1rem] py-2" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === 1 ? 'none' : `0 3px 0 ${I}`, borderStyle: i === 1 ? 'dashed' : 'solid' }} aria-label={`${h.name}${i === 1 ? ', not now' : ''}`}>
-          <span className={calm || i === 1 ? '' : 'pu-bob'} style={{ opacity: i === 1 ? 0.45 : 1 }}><CrayonPowerUp id={h.id} size={44} /></span>
-          <span className="text-[0.75rem] font-bold leading-tight text-center px-1" style={{ opacity: i === 1 ? 0.6 : 1 }}>{h.name}</span>
+          className="w-[5rem] h-[5rem] grid justify-items-center content-center gap-0.5 rounded-[1rem]" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === 1 ? 'none' : `0 3px 0 ${I}`, borderStyle: i === 1 ? 'dashed' : 'solid' }} aria-label={`${h.name}${i === 1 ? ', not now' : ''}`}>
+          <span className={calm || i === 1 ? '' : 'pu-bob'} style={{ opacity: i === 1 ? 0.45 : 1 }}><CrayonPowerUp id={h.id} size={40} /></span>
+          <span className="text-[0.8125rem] font-bold leading-tight text-center px-1" style={{ opacity: i === 1 ? 0.6 : 1 }}>{h.name}</span>
         </motion.button>
       ))}
     </div>
@@ -130,7 +133,7 @@ function Card({ children, calm, w = '19rem' }: { children: ReactNode; calm: Calm
 function PopCard({ calm, onClose }: { calm: Calm; onClose: () => void }) {
   return (
     <Card calm={calm}>
-      <span className="relative w-32 h-32 grid place-items-center"><BlobPatch color={PP.butter} size={130} /><span className={`relative ${calm ? '' : 'pu-bob'}`}><CrayonPowerUp id="treasure-chest" size={100} /></span></span>
+      <span className="relative w-32 h-32 grid place-items-center"><span className={`relative ${calm ? '' : 'pu-bob'}`}><CrayonPowerUp id="treasure-chest" size={100} /></span></span>
       <b className="text-[2rem]" style={GY}>Prize Chest!</b>
       <span className="font-bold text-lg">+100</span>
       <GoBtn onClick={onClose} big>Continue<ArrowRight weight="bold" size={20} /></GoBtn>
@@ -151,7 +154,7 @@ function HintCard({ calm, onClose }: { calm: Calm; onClose: () => void }) {
 function ActionCard({ calm, onDone }: { calm: Calm; onDone: (team: string) => void }) {
   return (
     <Card calm={calm} w="26rem">
-      <span className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.blueCrystal} size={116} /><span className="relative"><CrayonPowerUp id="swap" size={88} /></span></span>
+      <span className="relative w-28 h-28 grid place-items-center"><span className="relative"><CrayonPowerUp id="swap" size={88} /></span></span>
       <b className="text-[2rem]" style={GY}>Swap Spinner</b>
       <span className="font-bold text-lg">Trade your whole score with a team.</span>
       <div className="grid gap-2 w-full">
@@ -262,15 +265,15 @@ function Tapped({ k, children, again }: { k: number; children: (close: () => voi
 }
 
 const MAP: [string, string[]][] = [
-  ['A top strip', ['shaded team chip + meter', 'shaded team chip + meter', 'score + meter + stars', 'shaded player chip, no meter', 'score + meter', 'shaded player chip + "Frame 4 of 10"', 'class goal "18 of 30 stars"']],
-  ['B rows', ['teams (Butter = turn)', 'race rows "12 to go"', 'none', '2 players', 'none', 'ten-frame sheet', 'Live: "12 playing"']],
-  ['B power-up cards', ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'no power-ups']],
-  ['B action', ['none (tap a card)', 'the die', 'none', 'none (tap a column)', 'none (aim)', 'Throw button', 'none']],
-  ['C feedback', ['prize line', 'Roll again, Lose a turn', 'combos, "No moves"', '"Pick a piece to pop"', '"New row!"', '"Strike!"', 'combo stars']],
-  ['D cards', ['prize, hint, question, results', 'power-up, action, hint, question, results', 'power-up, hint, question, results', 'power-up, hint, question, results', 'power-up, hint, question, results', 'power-up, hint, question, results', 'hint, question, results']],
-  ['Computer turn', ['yes (Solo)', 'yes (Solo)', 'no', 'yes (Solo)', 'no', 'no', 'no']],
+  ['A top strip', ['name chip + meter', 'name chip + meter', 'score + meter + stars', 'name chip, no meter', 'score + meter', 'name chip + ten-frame meter', 'class goal + meter', 'join code + class goal or team counts']],
+  ['B rows', ['teams (Butter = turn)', 'race rows "12 to go"', 'none', '2 players', 'none', 'ten-frame sheet', 'Live: "12 playing"', 'none']],
+  ['B power-up cards', ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'no power-ups', 'no power-ups']],
+  ['B action', ['none (tap a card)', 'the die', 'none', 'none (tap a column)', 'none (aim)', 'none (aim and roll)', 'none', 'none']],
+  ['C feedback', ['prize line', 'Roll again, Lose a turn', 'combos, "No moves"', '"Pick a piece to pop"', '"New row!"', '"Strike!"', '"Three in a row!"', '"Caught one!"']],
+  ['D cards', ['prize, tips, question, results', 'power-up, action, tips, question, results', 'power-up, tips, question, results', 'power-up, tips, question, results', 'power-up, tips, question, results', 'power-up, tips, question, results', 'tips, question, results', 'tips, question, results']],
+  ['Computer turn', ['yes (Solo)', 'yes (Solo)', 'no', 'yes (Solo)', 'no', 'no', 'no', 'no']],
 ];
-const GAMES = ['Game Show', 'Board Game', 'Match Three', 'Four in a Row', 'Bubble Pop', 'Bowling', 'Question Tracker'];
+const GAMES = ['Game Show', 'Board Game', 'Match Three', 'Four in a Row', 'Bubble Pop', 'Bowling', 'Question Tracker', 'Territory'];
 
 export default function GameComponents() {
   const { settings } = useSettings();
@@ -299,7 +302,7 @@ export default function GameComponents() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Part n={1} name="Top strip" wide use="Zone A on every game: who or what (the team or player name on a Butter chip, the score, or the class goal), the meter with no words over it, and the tools (Full screen, Accessibility, Hint, Settings) in one order. Try the lightbulb." sizes="3.5rem tall laptop and iPad, 4.5rem big screen, 3rem short laptop; icon 2.25rem; buttons 2.25rem with 0.75rem between." states="Solo score, Share team chip (Butter = their turn), Live class goal; last round: the meter marker pulses once." motion="Fades up on game start (0.7 s ease-out); the chip shading moves to the next player over 0.4 s; no idle motion." sound="None." onReplay={() => replay('top')}>
+        <Part n={1} name="Top strip" wide use="Zone A on every game: who or what (just the team or player name on a Butter chip, never 'Team Sky's turn'; the score; or the class goal), the meter with no Round X of Y words, and the tools in one order. Try the lightbulb." sizes="4rem tall laptop and iPad, 4.5rem big screen, 3.5rem short laptop; team icon 2.25rem; buttons 44px (the touch minimum) with 14px between, in one order: Accessibility, Hint, Settings, Full screen, Close." states="Solo score, Share team chip (Butter = their turn), Live class goal; last round: the meter marker pulses once." motion="Fades up on game start (0.7 s ease-out); the chip shading moves to the next player over 0.4 s; no idle motion." sound="None." onReplay={() => replay('top')}>
           <div className="w-full grid gap-4 justify-items-center">
             <motion.div key={k('top')} {...enter(calm)} className="w-full grid place-items-center"><TopStrip onHint={() => { playEffect('open', settings); setHint(true); }} /></motion.div>
             <AnimatePresence>{hint && <motion.div key="hint" className="w-full grid place-items-center"><HintCard calm={calm} onClose={() => { playEffect('close', settings); setHint(false); }} /></motion.div>}</AnimatePresence>
@@ -321,13 +324,13 @@ export default function GameComponents() {
             <TurnGlow><Badge t={TEAMS[3]} size={48} /></TurnGlow>
           </div>
         </Part>
-        <Part n={5} name="Power-up cards" use="Zone B under the rows (phone: in the dock). Each earned power-up is its own square card and WAITS until the player taps it; nothing fires by itself. No tray panel, no label, no helper line. Up to 3, names always showing (no hover-only labels on iPad); the art has no circle backing." sizes="Card 5rem square (over the 44px touch minimum), art 2.75rem, name 0.75rem bold." states="Hidden when none; usable now (gentle bob); not now (dashed, 45% faded, no bob); pressed (scale 0.95)." motion="Cards land 0.7 s ease-out, 0.12 s apart; usable ones bob (1.8 s); Calm: no bob." sound="swipe when one lands; tap on press." onReplay={() => replay('tray')} onSound={fx('swipe')}>
+        <Part n={5} name="Power-up cards" use="Zone B under the rows (phone: in the dock). Each earned power-up is its own square card and WAITS until the player taps it; nothing fires by itself. No tray panel, no label, no helper line. Up to 3, names always showing (no hover-only labels on iPad); the art has no circle backing." sizes="Card 5rem square (over the 44px touch minimum), art 2.5rem, name 0.8125rem bold (13px; never smaller on a student screen)." states="Hidden when none; usable now (gentle bob); not now (dashed, 45% faded, no bob); pressed (scale 0.95)." motion="Cards land 0.7 s ease-out, 0.12 s apart; usable ones bob (1.8 s); Calm: no bob." sound="swipe when one lands; tap on press." onReplay={() => replay('tray')} onSound={fx('swipe')}>
           <div className="grid gap-4 justify-items-center w-full">
             <div key={k('tray')}><PowerCards calm={calm} onUse={(p) => { playEffect('tap', settings); setAction(p.name); }} /></div>
             {action && <span className="text-sm font-bold">Tapped {action}: its action card opens (part 7).</span>}
           </div>
         </Part>
-        <Part n={6} name="Power-up pop card" use="Zone D when a power-up is earned: the picture on a blob patch, its name and the points only (+100). It stays until the player taps Continue." sizes="19rem wide (86% on a phone), art 8rem, title Grow Year 2rem, button 3.5rem." states="Shown until tapped." motion="0.7 s ease-out fade and grow, the art bobs; exit 0.35 s; Calm: 150 ms fade." sound="The power's own clip (here the prize chest), else power-up-fx-1." onReplay={() => replay('pop')} onSound={clip(POWER_SOUNDS.chest)}>
+        <Part n={6} name="Power-up pop card" use="Zone D when a power-up is earned: the picture (no circle or blob behind it), its name and the points only (+100). It stays until the player taps Continue." sizes="19rem wide (86% on a phone), art 8rem, title Grow Year 2rem, button 3.5rem." states="Shown until tapped." motion="0.7 s ease-out fade and grow, the art bobs; exit 0.35 s; Calm: 150 ms fade." sound="The power's own clip (here the prize chest), else power-up-fx-1." onReplay={() => replay('pop')} onSound={clip(POWER_SOUNDS.chest)}>
           <Tapped k={k('pop')} again="Show the card again">{(close) => <PopCard calm={calm} onClose={() => { playEffect('close', settings); close(); }} />}</Tapped>
         </Part>
         <Part n={7} name="Power-up action card" use="Zone D when a power-up needs a choice: the same card plus up to four big choice buttons (icon and name). One decision per card." sizes="26rem wide (92% on a phone); choice buttons 3.5rem tall; icons 2.5rem, no circle." states="Waiting for a choice, chosen." motion="Card 0.7 s ease-out, then the choices arrive 0.12 s apart once it has landed." sound="open on show, tap on a choice, then the power's clip." onReplay={() => replay('act')} onSound={fx('open')}>
@@ -336,7 +339,7 @@ export default function GameComponents() {
         <Part n={8} name="The die" use="Zone B bottom (phone: dock left). Just the die: no card, no team name, no Roll button. Tap the die to roll. Every die wiggles gently on hover so kids see it can be rolled." sizes="Die 7rem here (9rem laptop, 5.25rem phone); the whole die is the tap target." states="Can roll (hover wiggle), rolling, rolled, computer rolling (no wiggle)." motion="Hover: a 0.9 s rotate and lift loop (7 degrees, 2px); roll: tumble and land with a bouncy spring (0.55 s); Calm and Still: no wiggle, the number just changes." sound="board/dice on roll." onReplay={() => replay('die')} onSound={clip('/sounds/board/dice.mp3')}>
           <RollDie calm={calm} k={k('die')} />
         </Part>
-        <Part n={9} name="Hint button and tips card" use="A lightbulb round button beside Settings in every in-game button group. Rule and tip lines never sit under the scoreboard; the game's tips (for example Fill a row for +10) open in this small card, closed with a tap." sizes="Button 2.25rem like its neighbors; card 22rem wide (92% on a phone), tips 1.125rem bold, two or three lines." states="Closed, open." motion="Card 0.7 s ease-out; Calm: 150 ms fade." sound="open on show, close on Got it." onReplay={() => replay('hint')} onSound={fx('open')}>
+        <Part n={9} name="Hint button and tips card" use="A lightbulb round button beside Settings in every in-game button group. Rule and tip lines never sit under the scoreboard; the game's tips (for example Fill a row for +10) open in this small card, closed with a tap." sizes="Button 44px like its neighbors; card 22rem wide (92% on a phone), tips 1.125rem bold, two or three lines." states="Shown by itself once, at the first turn of a game; after that closed until the lightbulb is tapped; open until Got it." motion="Card 0.7 s ease-out; Calm: 150 ms fade." sound="open on show, close on Got it." onReplay={() => replay('hint')} onSound={fx('open')}>
           <Tapped k={k('hint')} again="Show the tips again">{(close) => <HintCard calm={calm} onClose={() => { playEffect('close', settings); close(); }} />}</Tapped>
         </Part>
 <Part n={10} name="Score pop" use="A +30 floats up from where it was earned, then the score pops. The reward size matches the moment." sizes="+30 in Grow Year 2rem; score chip 2.25rem." states="Small (under 20), medium, big (round goal)." motion="Float 1.2 s ease-out, then the number scales 1.25 to 1; Calm: no float, the number changes." sound="Small: none; medium: a match step; big: win." onReplay={() => replay('score')} onSound={clip('/sounds/library/success-power-up/notification-fx-1.mp3')}>

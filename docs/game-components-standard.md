@@ -180,22 +180,22 @@ default reduced setting; "Still" = no movement, fades of 0.15 s or less only.
 
 | # | Component | Zone, anatomy | Sizes (laptop / iPad portrait) | States | Motion: enter / idle / exit (Gentle, Still) | Sound | Research reason |
 |---|---|---|---|---|---|---|---|
-| 1 | Top strip | A. Paper pill, 3px ink edge, 0 4px 0 ink lift. Left: score (solo) or turn chip (share) or class goal (live). Middle: "Round 2 of 3" label over the meter. Right: tools. | 3.5rem tall; score Grow Year 2.75rem / 2.25rem | normal, last round (meter marker lemon pulses once) | fadeUp on game start (soft spring); no idle; stays | none | Consistency, visibility of status |
+| 1 | Top strip | A. Paper pill, 3px ink edge, 0 4px 0 ink lift. Left: just the name on a Butter chip ("Team Sky", never "Team Sky's turn"), the score (solo) or the class goal (live). Middle: the meter with NO words over it (no "Round 2 of 3"; the label lives in its aria-label). Right: the one tool group. | 4rem tall laptop, 4.5rem big screen, 3.5rem short laptop; team icon 2.25rem with no circle | normal, last round (meter marker pulses once) | fades up 0.7 s ease-out on game start; the Butter chip moves to the next player over 0.4 s; no idle | none | Consistency, visibility of status; fewer words for pre-readers |
 | 2 | Meter | Inside A. One 22px track (`mockKit.tsx Meter`), a segment per round, done Kelly, current Lemon with marker, later = track. No numbers on it. | 22px tall, 22rem / 12rem wide | per round | fill width 0.5 s ease-out per step; Still: jump | none (the round banner has the sound) | Goal-gradient, color plus shape (hollow vs filled) |
-| 3 | Scoreboard rows | B. One row per team: badge (color + icon, or piece art) 44px, whole name, score chip Grow Year 1.75rem. Leader gets a crown. Order never changes mid-game (no reshuffle). | row 3.5rem min; dock: chips 3rem | normal, your turn (glow + lemon fill), leader (crown), CPU thinking (three dots) | rows popIn stagger 0.06 s; no idle except the turn glow; exit none | none (score pop has it) | Proximity and common region; stable order lowers search time |
-| 4 | Turn banner | A left (share) and the turn card in D at turn start. Glowing badge + "Team Sky's turn". | chip 3rem; card badge 13.75rem | per player | card: POP_IN from scale 0.3; strip chip cross-fades 0.2 s | `open` (ui/open) once when the card appears; `tap` on Start | Visibility of status; one moment per turn |
-| 5 | Turn glow | THE glow only: `.turn-rays` (240%) + `.turn-halo` (170%) behind the current player's badge in A, B and the turn card. Never a flat box-shadow. | scales with badge | on/off | rays spin 10 s full, 30 s Gentle/Still; halo breathes 2.4 s, 5 s | none | One signal, one meaning (consistency) |
-| 6 | Held power-ups tray | B, under the rows (dock: middle). Butter panel, label "Your power-ups" (one wording everywhere), up to 3 square cards. Empty = hidden, not an empty box. | panel 16rem; card 4rem / 3.5rem | empty (hidden), holding, usable now, not now (45% gray, no glow) | card arrives with bouncy spring from the score row it was earned in; usable card bobs gently (`pu-bob`), Still: no bob; used card flies to D | `swipe` when it lands | Recognition over recall; Hick (max 3) |
-| 7 | Square power-up card + name | Inside 6. 4rem square, paper, 2.5px ink, 0 3px 0 lift, art 3rem, name under it in 0.8rem bold (always visible, no hover tooltip). Long press or focus shows a one-line "what it does" bubble above. | 4rem; target 4rem (> 44px) | as 6, plus pressed (scale 0.95) | PRESS preset; bubble fades 0.18 s | `tap` on press | WCAG 2.5.8 / 44px; no hover-only info on iPad |
+| 3 | Scoreboard rows | B. One row per team: the team icon (shape plus color, or piece art) with no circle border or white backing, whole name, score Grow Year 1.75rem. No crown, no held power-up badge, no tip or rule line under the rows. Order never changes mid-game. | row 3.5rem min; icon 2.5rem; dock: chips 3rem | normal, current player (Butter #FFF1B8 shading: the only turn signal), computer thinking (three dots) | rows fade in 0.12 s apart; shading moves 0.4 s; no idle | none (score pop has it) | Proximity and common region; one signal for whose turn |
+| 4 | Turn signal | NO turn banner and no turn directive anywhere ("Team Sky, pick a card!" is gone). The Butter shading on the current row (3) and the Butter name chip in A are how kids know whose turn it is. | as 1 and 3 | per player | shading moves 0.4 s | none | One cue, one meaning; less text for pre-readers |
+| 5 | THE glow (winner only) | `.turn-rays` (240%) + `.turn-halo` (170%) fully behind the winner's icon in the winner box. Never on turns, never a flat ring. | scales with the icon | on/off | rays spin 10 s a turn, 30 s Gentle/Still; halo breathes 2.4 s, 5 s | none | One signal, one meaning (consistency) |
+| 6 | Power-up cards (no tray) | B under the rows (dock: middle). Each earned power-up is its own plain square card: no tray panel, no yellow background, no "Your power-ups" or "tap one to use it" text. Up to 3. Hidden when none. Each WAITS until tapped. | card 5rem square laptop, 5.5rem iPad portrait | hidden, usable now (gentle bob), not now (dashed, 45% faded), pressed (scale 0.95) | lands 0.7 s ease-out, 0.12 s apart; bob 1.8 s; Calm/Still no bob | `swipe` when it lands, `tap` on press | Recognition over recall; Hick (max 3); autonomy (she chose tap-to-use) |
+| 7 | Square power-up card anatomy | Inside 6. Paper, 2.5px ink, 0 3px 0 lift; the crayon art (no circle backing) at 50% of the card; the name under it, at least 13px bold, always visible (no hover-only labels on iPad). | 5rem; target over 44px | as 6 | PRESS | as 6 | No hover-only info on touch (iPad first) |
 | 8 | Power-up pop card (earned) | D. Today's `PowerUpCard`, kept: 19rem, art 8rem on a blob patch, Grow Year name, one line, X 44px. | 19rem / 86vw | shown until tapped | enters by the art's own motion (spin, wiggle, bob, sparkle) with POP_IN; Still: fade 0.15 s; exit fade + scale 0.85 | the power's own clip (`board/magnet`, `board/wind`, `board/chest`) else `library/success-power-up/power-up-fx-1.mp3` (proposal; replaces `win`) | Surprise needs its own moment (Baamboozle reveal idea); reward sized medium |
 | 9 | Power-up action card (needs a choice) | D. Same card as 8, 26rem, plus one yellow `#FDFD94` "Use it" button 3.5rem tall or up to 4 choice buttons (badge + name, 3.5rem). The wheel picker and Pop Out use this one card. | 26rem / 92vw | waiting, chosen | as 8; choices popIn stagger 0.06 s | open on show, `tap` on choice, then the power's clip | Hick: one decision per card; Fitts: big buttons |
-| 10 | Roll card + die | B, bottom of the rail (dock: left). Paper card: turn chip, the die 9rem on a blob patch; the die IS the button (teacher 2026-11-13), and a yellow "Roll" label button under it only in Big text / screen-reader help. | die 9rem / 5.25rem | can roll (glow + bob), rolling, rolled, CPU | idle bob 1.2 s while it can roll (Gentle 2.4 s, Still none); tumble 0.55 s; land bouncy | `board/dice.mp3` on roll, `tap` on press | Fitts (biggest target near the board); affordance by motion |
+| 10 | The die | B bottom (dock: left). Just the die: no card, no team name, no Roll button. The whole die is the tap target; tap rolls it. Every die wiggles gently on hover (hover devices only) so kids see it rolls. | die 9rem laptop, 7rem rail, 5.25rem phone | can roll (hover wiggle), rolling, rolled, computer rolling (no wiggle) | hover: 0.9 s loop, 7 degrees and 2px; roll: tumble and bouncy land 0.55 s; Calm and Still: no wiggle, the number changes | `board/dice` | Affordance and signifiers (Norman); fewer parts per moment |
 | 11 | Score pop | A or B score chip. "+20" floats from the place it was earned to the score, then the number pops. | text 1.75rem | small (<20), medium, big (round goal) | number scale 1.25 to 1 snappy; float 0.6 s ease-out; Still: no pop, number just changes | small: none (the action already sounded); medium: `library/match/` step; big: `win` | Reward size matches importance |
 | 12 | Answer tile | Question card (D). Letter circle (color + letter), text left-aligned, 5rem min height, 3px ink. | 5rem / 7rem tall | idle, hover/focus, chosen, right (Kelly + check), wrong (fades 40%, never red X) | PRESS; right: bouncy pop 1.08; wrong: gentle 4px shake 0.3 s, Still none | right `answers/level-up.mp3`, wrong `answers/boing.mp3` (today's, keep) | Mistakes are safe; dual coding (letter + color) |
-| 13 | Feedback line | C. One pill, Grow Year 1.75rem, icon left, lemon (good) or paper (neutral) fill, never red. Replaces every per-game banner, note and status box. | 1.75rem / 1.5rem | good, neutral, waiting ("Computer is thinking") | rise 30px + scale 0.7 to 1 (bouncy), stays 1.6 s x pace, fade out; Still: fade only | follows the event, none of its own | One place to look (proximity); Doherty |
+| 13 | Feedback line | C. One pill, Grow Year 1.5rem, words only (no star icon, e.g. "Three in a row!"), Lemon (good) or paper (neutral), never red. Computer turns read "Goofy Lamp is thinking..." with the computer's fun name (Goofy Lamp, Silly Fox, Happy Rainbow, Sleepy Cloud, Bouncy Sock, Wiggly Worm; a new one each game), never "Computer". | 1.5rem; 3.5rem tall | good, neutral, waiting (three dots) | rise 16px and fade 0.6 s; stays until the next action; Calm: 150 ms fade | follows the event | One place to look (proximity); playful names build warmth (relatedness) |
 | 14 | Timer | A, left of the tools, only when the teacher turns timers on. Ring 2.5rem + seconds. Last 10 s: ring turns orange, no flashing. "3 minutes left" toast stays as today (`src/engine/playClock.tsx:52-55`). | 2.5rem | running, last 10 s, done | ring drains linearly; Still: no pulse | `tap` at 3 min and 1 min (today's) ; no ticking | No fake urgency; timers are optional (teacher) |
-| 15 | Winner box / results | D. Today's `ResultsModal` look plus the mockup's additions: winner badge in THE glow, up to 3 stat chips (blue crystal), Play again (yellow), New game, Review N missed. | 35rem / 92vw | win, tie, solo | POP_IN; confetti at edges only (Celebrations setting) | `win` (the one big sound) | Peak-end rule; one celebration |
-| 16 | Pause | Top strip tools: Gear opens Settings over a dim; game timers and CPU stop. Tools set and order everywhere: Full screen, Access, Gear, 2.75rem each. | 2.75rem / 2.75rem | open, closed | Dialog preset; Still: fade | `open` / `close` | Consistency; teacher control |
+| 15 | Winner box / results | D. The title ("TEAM SKY WINS!", Grow Year caps 2.5rem), the winner's icon (no circle or backing) in THE glow, then ONLY the score or XP centered under it in Grow Year, slightly smaller than the title (2rem). No stat chips. Play again (yellow), New game, Review N missed. | 30rem / 92vw; icon 7rem | win, tie, solo (stars or XP) | 0.7 s ease-out; confetti at edges only (Celebrations setting); stays until a button is tapped | `win` (the one big sound) | Peak-end rule; one number is remembered, five are not |
+| 16 | Tool group and hint | A right, every game and mockup, one order: Accessibility, Hint (lightbulb), Settings, Full screen, Close; 44px buttons (the touch minimum; she asked for slightly smaller than the old 48px) with 14px between. The lightbulb opens a small tips card (the game's rules and tips, e.g. "Fill a row for +10"), shown by itself once at the first turn, then only on tap, closed with "Got it". Gear opens Settings over a dim; timers and the computer stop. | 44px; tips card 22rem / 92vw | open, closed | Dialog preset 0.7 s; Calm: fade | `open` / `close` | Consistency; tips on demand keep the board clean (cognitive load, Mayer coherence) |
 
 Universal motion table (one source, `src/ui/motion/presets.ts`): cards POP_IN
 (170/20/1.1), buttons snappy (420/28), pieces and rewards bouncy (260/12/1.2),
@@ -219,11 +219,11 @@ times in the table above wherever they differ.
 
 | What | Enter | Stays | Exit | Reduced (Gentle / Calm / Still) |
 |---|---|---|---|---|
-| Power-up pop card (8), action card (9), turn card (4), winner box (15), pause message | 700 ms ease-out (cubic-bezier 0.22, 1, 0.36, 1), opacity 0 to 1 and scale 0.92 to 1, no spring snap | until tapped: a yellow `#FDFD94` "Tap to continue" (or "OK", or the choice buttons) 3.5rem tall; never auto-closes | 350 ms fade and scale to 0.96 | Gentle: same timing, no scale. Calm and Still: 150 ms fade only |
-| Feedback line (13) | 600 ms rise 16px + fade, ease-out | stays until the next action or a tap; a waiting line ("Computer is thinking...") stays for the whole computer turn | 300 ms fade | 150 ms fade |
+| Power-up pop card (8), action card (9), turn card (4), winner box (15), pause message | 700 ms ease-out (cubic-bezier 0.22, 1, 0.36, 1), opacity 0 to 1 and scale 0.92 to 1, no spring snap | until tapped: a yellow `#FDFD94` "Continue" (or "Got it", or the choice buttons) 3.5rem tall; never auto-closes | 350 ms fade and scale to 0.96 | Gentle: same timing, no scale. Calm and Still: 150 ms fade only |
+| Feedback line (13) | 600 ms rise 16px + fade, ease-out | stays until the next action or a tap; a waiting line ("Goofy Lamp is thinking...") stays for the whole computer turn | 300 ms fade | 150 ms fade |
 | Choice buttons inside a card | stagger 120 ms after the card has landed (700 ms) | until tapped | with the card | appear with the card, no stagger |
 | Held power-ups (6, 7) | earned card lands in the tray (600 ms ease-out); nothing fires by itself | waits in the tray until the player taps it; the name stays visible under the art on every device | taps open the action card (9) | no bob; Still: no movement |
-| Computer's turn | the feedback line shows "Computer is thinking..." with three dots | 2.5 s pause (2 to 3 s by game speed) before its move | the move plays at normal speed, then a 1.5 s pause with the result line ("Computer rolled a 4") before the next turn card | the same pauses (they are reading time, not motion); dots do not pulse in Still |
+| Computer's turn | the feedback line shows "Goofy Lamp is thinking..." (the computer's fun name) with three dots | 2.5 s pause (2 to 3 s by game speed) before its move | the move plays at normal speed, then a 1.5 s pause with the result line ("Goofy Lamp rolled a 4") before the Butter shading moves to the next player | the same pauses (they are reading time, not motion); dots do not pulse in Still |
 
 Research: reading speed of early readers (roughly 50 to 100 words a minute
 in grades 1 and 2, from memory, not measured here) means a one-line card needs
@@ -233,17 +233,40 @@ card came from (continuity, Gestalt common fate) without the startle of a snap.
 A visible computer pause keeps cause and effect readable (Norman's gulf of
 evaluation) and gives the teacher a beat to talk.
 
+### 3.2b Game components round (teacher, 2026-11-24, verbatim list)
+
+Her list replaces anything above that disagrees. Words: "Prize chest" everywhere
+(never "Treasure chest"); "+100" (never "+100 for you"); "Continue" (never "Tap
+to continue"). No turn banner or turn directive anywhere: Butter shading on the
+current row and the name chip is the turn signal. Player icons never wear a
+circle border or white backing. No crown and no power-up badge on the
+scoreboard. No tip or rule lines under a scoreboard: tips live behind the
+lightbulb (row 16). Power-ups are plain square cards with no tray, no labels and
+no helper text, and their art has no circle backing. The die is the whole roll
+control and wiggles on hover. Computer players have fun rotating names. The
+winner box shows only the score or XP under the winner icon. Live previews:
+`/brand` Game components tab (`src/brand/GameComponents.tsx`); shared parts in
+`src/brand/mockKit.tsx` (`GameTools`, `PowerCard`, `QuestionCard`, `Meter`,
+`TurnGlow`, `DieWiggle`, `cpuName`, `TURN_SHADE`).
+
+Research: removing the turn banner and tip lines cuts redundant on-screen text
+(Mayer's coherence and redundancy principles, from memory); one cue for whose
+turn keeps a single meaning per signal (consistency, NN/g heuristic 4); a 44px
+target is the smallest Apple's HIG allows (from memory) and passes WCAG 2.5.5.
+
 ### 3.3 Per-game mapping
 
 | Component | Game Show | Board Game | Match Three | Four in a Row | Bubble Pop | Bowling | Question Tracker |
 |---|---|---|---|---|---|---|---|
-| A top strip | turn chip + "Card 6 of 16" | turn chip + "Lap" or squares left | score + "Round 2 of 3" + stars | turn chip, no meter (no rounds) | score + "Round 2 of 4" | turn chip + "Frame 4 of 10" | class goal "18 of 30 stars" (Live) or my stars (Solo) |
-| B rows | teams + held badge | race rows "12 to go" (teacher to decide, see challenge) | none | 2 players | none | ten-frame sheet replaces rows (teacher 2026-11-23) | Live: "12 playing" |
-| B tray | yes | yes | yes | yes | yes (add) | yes | no power-ups |
-| B action card | none (tap a card) | roll card + die | none | none (tap a column) | none (aim on board) | Still: Throw button | none |
-| C feedback | prize line | Roll again, Lose a turn | combos, "No moves" | "Pick a piece to pop" | "New row!" | "Strike!" | combo stars |
-| D cards | turn card, prize box, question, results | turn card, power-up, wheel action card, question, results | power-up, question, results | turn card, power-up, question, results | power-up, question, results | turn card, power-up, question, results | question, results |
+| A top strip | name chip + meter (no words) | name chip + meter | score + meter + stars | name chip, no meter (no rounds) | score + meter | name chip + ten-segment frame meter (no "Frame 4 of 10" words) | class goal "18 of 30" + meter (Live) or my stars (Solo) |
+| B rows | teams (Butter = turn, no badge) | race rows "12 to go" (teacher to decide, see challenge) | none | 2 players | none | ten-frame sheet replaces rows (teacher 2026-11-23) | Live: "12 playing" |
+| B power-up cards | yes | yes | yes | yes | yes | yes | no power-ups |
+| B action | none (tap a card) | the die alone | none | none (tap a column) | none (aim on board) | Still: Throw button | none |
+| C feedback | prize line | Roll again, Lose a turn | combos, "No moves" | "Pick a piece to pop" | "New row!" | "Strike!" | "Three in a row!" (no star icon) |
+| D cards | prize card, tips, question, results | power-up, action card, tips, question, results | power-up, tips, question, results | power-up, tips, question, results | power-up, tips, question, results | power-up, tips, question, results | tips, question, results |
 | Timer in A | if on | if on | if on | if on | if on | if on | Live clock |
+
+Territory (Live, 2026-11-24) uses: A = join code pill, class goal meter (Cooperative) or the Cats and Mice counts (Competitive), the tool group; no rows, no power-ups; C = "Caught one!"; D = tips, question (student device), results (the room fills with the winner's color).
 
 ### 3.4 Changes needed in the live games (ranked)
 
@@ -253,7 +276,7 @@ evaluation) and gives the teacher a beat to talk.
 4. Replace `TopStrip` dashes and `RoundMeter` with the one `Meter` (22px) and the one wording "Round 2 of 3" (or "Frame", "Card"); retire unused `SoloPanel` or make it rail B for solo.
 5. One feedback line component in zone C; move Board Game banner, Match Three note, Four in a Row status, Bowling chips and Question Tracker streak note onto it.
 6. One action card for every power-up choice (wheel picker, Pop Out) on POP_IN; remove the 320/16 and 380/18 one-off springs.
-7. Corner tools: one set and order (Full screen, Access, Gear) in zone A on every game and every mockup (mockups show an X instead of Access).
+7. Corner tools: one set and order (Accessibility, Hint, Settings, Full screen, Close; 44px, 14px apart) in zone A on every game; the mockups now use it (`mockKit.tsx GameTools`).
 8. Sound sizes: stop using `win` for matches, power-ups and round goals; map to the slots above after she auditions them on the `/brand` sound board.
 9. Roll card: if the label button stays, it is yellow `#FDFD94`, not purple (`GameMockups.tsx:213`).
 

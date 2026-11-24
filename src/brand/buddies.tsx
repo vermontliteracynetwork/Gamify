@@ -89,7 +89,7 @@ export function PaperDefs() {
 // content on top stays crisp (text is never run through the filter).
 export function Paper({ color, children, className = '', rx = 22, tilt = 0, lift = true, style }: { color: string; children?: ReactNode; className?: string; rx?: number; tilt?: number; lift?: boolean; style?: CSSProperties }) {
   return (
-    <div className={`${/\babsolute\b/.test(className) ? '' : 'relative '}${className}`} style={{ transform: tilt ? `rotate(${tilt}deg)` : undefined, ...style }}>
+    <div className={`${/\babsolute\b/.test(className) ? '' : 'relative '}${className}`} style={{ ...style }} data-tilt={tilt || undefined}>
       <svg className="absolute inset-[3px] w-[calc(100%-6px)] h-[calc(100%-6px)]" overflow="visible" aria-hidden="true">
         <rect width="100%" height="100%" rx={rx} fill={color} filter={lift ? 'url(#nd-paper)' : 'url(#nd-paper-flat)'} />
       </svg>

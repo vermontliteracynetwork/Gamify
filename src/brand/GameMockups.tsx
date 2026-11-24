@@ -1,10 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { ArrowRight, ArrowsClockwise, Check, CornersOut, FlagCheckered, GearSix, HourglassHigh, Lightbulb, Play, UsersThree, X } from '@phosphor-icons/react';
+import { ArrowRight, ArrowsClockwise, FlagCheckered, HourglassHigh, Play, UsersThree } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
-import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
-import { Badge, MainBtn, ParkBack, StudioBack, TEAMS, TurnGlow, Meter, DeviceSet, Fit, cpuName, DieWiggle, PowerCard, TurnChip, TURN_SHADE } from './mockKit';
+import { CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
+import { Badge, MainBtn, ParkBack, StudioBack, TEAMS, TurnGlow, Meter, DeviceSet, Fit, cpuName, DieWiggle, GameTools, PowerCard, QuestionCard, TurnChip, TURN_SHADE } from './mockKit';
 import { layout } from '../games/castle-quest/board';
+// Territory's own Classic art, imported as is (read only; the live game owns it).
+import { CatArt, MouseArt, PoofArt, RoomArt, SIDE_PASTEL } from '../games/territory/art';
 
 // Game mockups (PROPOSAL, teacher 2026-11-23: "mockups of all the games with a
 // new and improved universal classic design theme", only the seven games live
@@ -26,14 +28,10 @@ const VS: Team[] = [{ ...TEAMS[0], name: 'You' } as unknown as Team, { ...TEAMS[
 const PASTEL_OF: Record<string, string> = { [PP.periwinkle]: PP.gamify, [PP.sky]: PP.blueCrystal, [PP.pink]: PP.blush, [PP.lemon]: PP.butter };
 
 // ---------- shared mockup parts ----------
-function Corner({ dark }: { dark?: boolean }) {
-  return (
-    <div className="absolute top-4 right-5 flex gap-3 z-20">
-      {[Lightbulb, GearSix, CornersOut, X].map((Icon, i) => (
-        <span key={i} aria-label={['Hint', 'Settings', 'Full screen', 'Close'][i]} className="w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: dark ? `0 3px 0 ${I}` : undefined }}><Icon weight="bold" size={20} /></span>
-      ))}
-    </div>
-  );
+// The one in-game tool group, top right (mockKit GameTools: Accessibility, Hint,
+// Settings, Full screen, Close; 44px, 14px apart).
+function Corner(_: { dark?: boolean }) {
+  return <div className="absolute top-4 right-5 z-20"><GameTools /></div>;
 }
 // Scoreboard row (teacher, 2026-11-24): icon with no circle, Butter shading for
 // whose turn it is (the only turn signal), no glow, crown or held power-up.
@@ -104,8 +102,8 @@ function GSPop({ scale = 1 }: { scale?: number }) {
     <div className="absolute inset-0 grid place-items-center z-10 pointer-events-none">
       <div className="relative" style={{ transform: `scale(${scale})` }}>
         <Confetti marks={[['sparkle', PP.lemon, -52, -30, 34], ['star', PP.pink, 250, -26, 28], ['dot', PP.sky, -40, 150, 16], ['heart', PP.pink, 262, 140, 24], ['sparkle', PP.paper, 120, -54, 26], ['star', PP.kelly, -64, 64, 22], ['dot', PP.lemon, 280, 60, 14]]} />
-        <div className="w-[260px] p-4 grid justify-items-center gap-2 text-center" style={{ ...paper, borderRadius: 24, boxShadow: `0 0 0 8px ${PP.lemon}, 0 0 0 11px ${I}, 0 12px 0 ${I}` }}>
-          <div className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.peach} size={124} /><span className="relative"><CrayonPowerUp id="treasure-chest" size={100} /></span></div>
+        <div className="w-[260px] p-4 grid justify-items-center gap-2 text-center" style={{ ...paper, borderRadius: 24, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="relative w-28 h-28 grid place-items-center"><span className="relative"><CrayonPowerUp id="treasure-chest" size={100} /></span></div>
           <b className="text-4xl" style={GY}>Prize Chest!</b>
           <span className="font-bold text-xl">+100</span>
           <MainBtn>Continue<ArrowRight weight="bold" size={22} /></MainBtn>
@@ -130,13 +128,14 @@ function GameShowLaptop({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
       </div>
       <div className="absolute right-[96px] top-[118px] w-[196px] grid gap-2.5">
         {teams.map((t, i) => <Score key={t.name} t={t} pts={vs ? [150, 90][i] : GS_SCORES[i]} now={vs ? i === 0 : i === 1} compact />)}
-        <span className="mt-1 flex gap-2 justify-center"><PowerCard id="double-points" name="Double Star" size={64} /></span>
+        <span className="mt-1 flex gap-2 justify-center"><PowerCard id="double-points" name="Double Star" size={80} /></span>
       </div>
       {!noPop && <div className="absolute left-[96px] top-[118px] w-[600px] h-[420px]"><GSPop scale={0.82} /></div>}
     </div>
   );
 }
-function GameShowTablet() {
+function GameShowTablet({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
+  const teams = vs ? VS : TEAMS;
   return (
     <div className="w-full h-full relative overflow-hidden">
       <StudioBack w={820} h={1180} />
@@ -146,9 +145,10 @@ function GameShowTablet() {
         <div className="w-full"><Marquee bulbs={14}>
           <div className="grid grid-cols-3 gap-3">{GS_CARDS.map((c, i) => <GSCard key={i} c={c} />)}</div>
         </Marquee></div>
-        <div className="w-full grid grid-cols-2 gap-3">{TEAMS.map((t, i) => <Score key={t.name} t={t} pts={GS_SCORES[i]} now={i === 1} />)}</div>
+        <div className="w-full grid grid-cols-2 gap-3">{teams.map((t, i) => <Score key={t.name} t={t} pts={vs ? [150, 90][i] : GS_SCORES[i]} now={vs ? i === 0 : i === 1} />)}</div>
+        <span className="flex gap-3 justify-center"><PowerCard id="double-points" name="Double Star" size={96} /></span>
       </div>
-      <div className="absolute inset-x-[60px] top-[150px] h-[740px]"><GSPop scale={1.2} /></div>
+      {!noPop && <div className="absolute inset-x-[60px] top-[150px] h-[740px]"><GSPop scale={1.2} /></div>}
     </div>
   );
 }
@@ -205,7 +205,7 @@ function DieCard({ big }: { big?: boolean }) {
   return <div className="grid place-items-center py-1"><DieWiggle><CrayonDie value={3} size={big ? 150 : 120} /></DieWiggle></div>;
 }
 const BG_HELD: { id: PowerId; name: string }[] = [{ id: 'potion', name: 'Potion' }, { id: 'shield', name: 'Shield' }];
-function Tray({ size = 64 }: { size?: number }) {
+function Tray({ size = 80 }: { size?: number }) {
   return <div className="flex gap-2 justify-center">{BG_HELD.map((p) => <PowerCard key={p.id} id={p.id} name={p.name} size={size} />)}</div>;
 }
 const BG_SCORES = ['12 to go', '24 to go', '19 to go', '32 to go'];
@@ -232,17 +232,17 @@ function BoardLaptop({ vs }: { vs?: boolean }) {
     </div>
   );
 }
-function BoardTablet() {
+function BoardTablet({ vs }: { vs?: boolean }) {
   return (
     <div className="w-full h-full relative overflow-hidden">
       <ParkBack w={820} h={1180} />
       <Corner dark />
       <div className="absolute inset-x-6 top-[80px] h-[700px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
-        <BoardGrid w={730} h={660} celebrate />
+        <BoardGrid w={730} h={660} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
       </div>
       <div className="absolute inset-x-6 top-[806px] grid grid-cols-[250px_1fr] gap-4">
         <DieCard />
-        <div className="grid gap-2 content-start"><Tray size={76} /><MiniRace /></div>
+        <div className="grid gap-2 content-start"><Tray size={88} /><MiniRace teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} /></div>
       </div>
     </div>
   );
@@ -275,11 +275,12 @@ function StarGoal({ got }: { got: number }) {
   return <span className="flex gap-1" aria-label={`${got} of 3 stars`}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={i < got ? PP.lemon : PP.paper} size={30} />)}</span>;
 }
 // Power-ups as single square cards; the old label prop is ignored (teacher, 2026-11-24: no tray, no label).
-function HeldTray({ items, row, size = 64 }: { items: { id: PowerId; name: string }[]; label?: string; row?: boolean; size?: number }) {
+function HeldTray({ items, row, size = 80 }: { items: { id: PowerId; name: string }[]; label?: string; row?: boolean; size?: number }) {
   return <span className={`flex ${row ? '' : 'flex-col items-center'} gap-2`}>{items.map((p) => <PowerCard key={p.id} id={p.id} name={p.name} size={size} />)}</span>;
 }
-function Burst({ text, color = PP.lemon, size = 'text-3xl', rot = 0 }: { text: string; color?: string; size?: string; rot?: number }) {
-  return <span className={`inline-flex items-center px-5 py-1.5 rounded-full whitespace-nowrap ${size}`} style={{ ...GY, background: color, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, transform: `rotate(${rot}deg)` }}>{text}</span>;
+// The feedback line (zone C): one flat pill, never tilted (teacher, 2026-11-23: nothing tilted).
+function Burst({ text, color = PP.lemon, size = 'text-3xl' }: { text: string; color?: string; size?: string; rot?: number }) {
+  return <span className={`inline-flex items-center px-5 py-1.5 rounded-full whitespace-nowrap ${size}`} style={{ ...GY, background: color, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>{text}</span>;
 }
 const shine = (s: number) => <path d={`M${s * 0.28} ${s * 0.36} q${s * 0.04} ${-s * 0.1} ${s * 0.14} ${-s * 0.12}`} stroke="#fff" strokeWidth={s * 0.07} fill="none" strokeLinecap="round" />;
 
@@ -336,7 +337,7 @@ function MatchThreeLaptop() {
       <div className="absolute right-[56px] top-[110px] w-[330px] grid gap-3">
         <SoloStrip score={260}><StarGoal got={2} /></SoloStrip>
         <div className="flex items-center gap-3"><Stat label="Moves left" value={2} /><Meter segments={3} done={1} part={0.5} width={170} label="Round 2 of 3" /></div>
-        <HeldTray items={M3_HELD} row />
+        <HeldTray items={M3_HELD} row size={84} />
       </div>
     </PatternStage>
   );
@@ -347,7 +348,7 @@ function MatchThreeTablet() {
       <Corner />
       <div className="absolute inset-x-8 top-[84px] grid gap-3"><SoloStrip score={260}><Stat label="Moves" value={2} /><StarGoal got={2} /></SoloStrip></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><M3Board s={102} /></div>
-      <div className="absolute inset-x-8 top-[1010px]"><HeldTray items={M3_HELD} row /></div>
+      <div className="absolute inset-x-8 top-[1000px] grid justify-items-center"><HeldTray items={M3_HELD} row size={100} /></div>
     </PatternStage>
   );
 }
@@ -422,14 +423,14 @@ function FourLaptop({ vs }: { vs?: boolean }) {
     </PatternStage>
   );
 }
-function FourTablet() {
+function FourTablet({ vs }: { vs?: boolean }) {
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[90px] z-10"><Burst text="Four in a row! Leo wins!" size="text-4xl" /></div>
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} /></div>
-      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} now /></div>
-      <Confetti marks={[['sparkle', PP.lemon, 80, 170, 40], ['star', PP.pink, 700, 180, 34], ['dot', PP.sky, 120, 240, 18]]} />
+      {!vs && <div className="absolute w-max left-1/2 -translate-x-1/2 top-[90px] z-10"><Burst text="Four in a row! Leo wins!" size="text-4xl" /></div>}
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} win={!vs} /></div>
+      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
+      {!vs && <Confetti marks={[['sparkle', PP.lemon, 80, 170, 40], ['star', PP.pink, 700, 180, 34], ['dot', PP.sky, 120, 240, 18]]} />}
     </PatternStage>
   );
 }
@@ -482,7 +483,7 @@ function BubbleLaptop() {
   return (
     <PatternStage id="doodle">
       <Corner />
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[22px]"><BubbleBoard w={430} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[76px]"><BubbleBoard w={400} /></div>
       <div className="absolute left-[40px] top-[120px] w-[200px] grid gap-3">
         <SoloStrip score={340} />
         <Stat label="Bubbles left" value={3} />
@@ -496,7 +497,7 @@ function BubbleTablet() {
   return (
     <PatternStage id="doodle">
       <Corner />
-      <div className="absolute inset-x-8 top-[84px]"><SoloStrip score={340}><Stat label="Bubbles" value={3} /><HeldTray items={BP_HELD} row /></SoloStrip></div>
+      <div className="absolute inset-x-8 top-[84px]"><SoloStrip score={340}><Stat label="Bubbles" value={3} /><HeldTray items={BP_HELD} row size={76} /></SoloStrip></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><BubbleBoard w={700} /></div>
     </PatternStage>
   );
@@ -605,14 +606,17 @@ function FrameSheet({ rows, now, frame, cell }: { rows: BowlRow[]; now: number; 
   );
 }
 // The universal top tracker for bowling: whose roll left, Frame X of 10 middle, icon buttons right.
+// The universal top strip for bowling (teacher, 2026-11-24): whose roll left
+// (just the name on Butter), the ten-frame meter in the middle with no words
+// (the sheet shades the frame too), the tool group right.
 function FrameTracker({ frame, solo, k = 1 }: { frame: number; solo?: boolean; k?: number }) {
   return (
     <div className="absolute inset-x-0 flex items-center justify-between z-20" style={{ top: 14 * k, padding: `0 ${20 * k}px` }}>
       {solo
         ? <span className="inline-flex items-baseline gap-2 px-5 py-1 rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><b style={{ ...GY, fontSize: 36 * k }} className="tabular-nums">54</b><b style={{ fontSize: 16 * k, color: PP.quiet }}>pins</b></span>
         : <RollPill />}
-      <span className="absolute left-1/2 -translate-x-1/2 px-6 rounded-full grid place-items-center font-bold whitespace-nowrap" style={{ height: 50 * k, fontSize: 22 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>Frame {frame} of 10</span>
-      <span className="flex gap-3">{[Lightbulb, GearSix, CornersOut, X].map((Icon, i) => <span key={i} className="rounded-full grid place-items-center" style={{ width: 40 * k, height: 40 * k, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Icon weight="bold" size={19 * k} /></span>)}</span>
+      <span className="absolute left-1/2 -translate-x-1/2"><Meter segments={10} done={frame - 1} part={0.5} width={k > 1 ? 200 : 300} label={`Frame ${frame} of 10`} /></span>
+      <GameTools />
     </div>
   );
 }
@@ -625,15 +629,15 @@ function BowlingLaptop({ solo }: { solo?: boolean }) {
     <AlleyStage w={1000} h={625} top={290}>
       <FrameTracker frame={solo ? 5 : 4} solo={solo} />
       <div className="absolute left-1/2 -translate-x-1/2" style={{ top: solo ? 104 : 76 }}><FrameSheet rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={solo ? 5 : 4} cell={52} /></div>
-      <div className="absolute right-[18px] top-[360px]"><HeldTray items={BW_HELD} size={72} /></div>
+      <div className="absolute right-[18px] top-[360px]"><HeldTray items={BW_HELD} size={84} /></div>
     </AlleyStage>
   );
 }
-function BowlingTablet() {
+function BowlingTablet({ solo }: { solo?: boolean }) {
   return (
     <AlleyStage w={820} h={1180} top={420} wide>
-      <FrameTracker frame={4} k={1.15} />
-      <div className="absolute left-1/2 -translate-x-1/2 top-[96px]"><FrameSheet rows={BOWL} now={1} frame={4} cell={53} /></div>
+      <FrameTracker frame={solo ? 5 : 4} solo={solo} k={1.15} />
+      <div className="absolute left-1/2 -translate-x-1/2 top-[96px]"><FrameSheet rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={solo ? 5 : 4} cell={53} /></div>
       <div className="absolute left-1/2 -translate-x-1/2 top-[316px]"><HeldTray items={BW_HELD} row size={80} /></div>
     </AlleyStage>
   );
@@ -696,7 +700,7 @@ export function NightStar({ kind, size, color }: { kind: number; size: number; c
     </svg>
   );
 }
-const NIGHT_COLORS = [PP.lemon, '#ffd24f', PP.butter, PP.lemon, '#ffc85a', PP.orange];
+const NIGHT_COLORS = [PP.lemon, PP.butter, PP.lemon, PP.butter, PP.lemon, PP.orange];
 export function NightSky({ w, h }: { w: number; h: number }) {
   let sd = 5; const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
   const dots = Array.from({ length: Math.round((w * h) / 9000) }, () => [rnd() * w, rnd() * h, 1 + rnd() * 1.6, 0.45 + rnd() * 0.5]);
@@ -729,23 +733,22 @@ function SkyScene({ w, h, got = SKY_GOT, holes = [], children }: { w: number; h:
     </div>
   );
 }
-function SkyGoal({ got = SKY_GOT, line = 'Fill the sky together!' }: { got?: number; line?: string }) {
+function SkyGoal({ got = SKY_GOT }: { got?: number }) {
   return (
     <div className="p-4 grid gap-2.5 text-center" style={paper}>
       <span className="flex items-center justify-center gap-2"><NightStar kind={2} color={PP.lemon} size={40} /><span className="font-display text-5xl font-bold leading-none tabular-nums">{got}<span className="text-2xl"> of {SKY_N}</span></span></span>
       <Meter segments={1} done={0} part={got / SKY_N} width="100%" label={`${got} of ${SKY_N} stars`} />
-      <span className="font-bold text-lg">{line}</span>
     </div>
   );
 }
-function ClassScreen() {
+function ClassScreen({ w = 1000, h = 625 }: { w?: number; h?: number }) {
   return (
-    <SkyScene w={1000} h={625} holes={[[0, 0, 300, 84], [730, 0, 1000, 625], [150, 470, 600, 560]]}>
+    <SkyScene w={w} h={h} holes={[[0, 0, 300, 84], [w - 330, 0, w, 90], [w - 270, 0, w, h], [20, h - 150, 470, h - 60]]}>
       <Corner dark />
-      <div className="absolute left-[24px] top-[18px] flex items-center gap-3 px-4 py-2" style={{ ...paper, borderRadius: 18 }}>
-        <span className="font-bold" style={{ color: PP.quiet }}>Join code</span><b className="font-display text-3xl tracking-widest">472915</b>
+      <div className="absolute left-[24px] top-[18px] flex items-center gap-3 px-5 py-2 rounded-full" style={{ ...paper, borderRadius: 999 }}>
+        <b className="font-display text-3xl tracking-widest">472915</b>
       </div>
-      <div className="absolute left-[180px] top-[492px]"><Burst text="Three gold stars in a row!" size="text-2xl" color={PP.butter} /></div>
+      <div className="absolute left-[40px]" style={{ top: h - 130 }}><Burst text="Three in a row!" size="text-2xl" color={PP.butter} /></div>
       <div className="absolute right-[24px] top-[84px] w-[230px] grid gap-3">
         <SkyGoal />
         <div className="p-3 grid gap-2" style={paper}>
@@ -756,50 +759,145 @@ function ClassScreen() {
     </SkyScene>
   );
 }
-const ANS = [['A', 'cat', PP.periwinkle], ['B', 'Cat', PP.sky], ['C', 'CAT', PP.pink], ['D', 'caT', PP.lemon]] as const;
-function StudentDevice({ solo }: { solo?: boolean }) {
+const SKY_ANS = [['A', 'cat', PP.periwinkle, PP.gamify], ['B', 'Cat', PP.sky, PP.blueCrystal], ['C', 'CAT', PP.pink, PP.blush], ['D', 'caT', PP.lemon, PP.butter]] as const;
+// The student's device: the one universal question card (mockKit QuestionCard),
+// the game's own sky around it, the student's name on Butter in the card.
+function StudentDevice({ solo, w = 820, h = 1180 }: { solo?: boolean; w?: number; h?: number }) {
+  const port = h > w;
+  const k = port ? 1 : Math.min((w - 80) / 1088, (h - 150) / 528);
   return (
-    <SkyScene w={820} h={1180} got={solo ? 4 : 9} holes={[[0, 80, 820, 1000], [560, 0, 820, 90]]}>
-      <Corner dark />
-      <div className="absolute inset-x-8 top-[96px] flex items-center gap-3 px-5 py-3" style={{ ...paper, borderRadius: 18 }}>
-        <NightStar kind={2} color={PP.lemon} size={52} /><b className="font-display text-4xl">{solo ? 'My sky: 4 stars' : 'You added 4 stars'}</b>
-        <span className="flex-1" />{!solo && <span className="font-bold text-lg" style={{ color: PP.quiet }}>Class sky: 18 of 30</span>}
+    <SkyScene w={w} h={h} got={solo ? 4 : 9} holes={port ? [[40, 80, w - 40, 1020]] : [[40, 20, w - 40, h - 70]]}>
+      <div className="absolute left-1/2" style={{ top: port ? 90 : 24, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
+        <QuestionCard tablet={port} q="Which word starts a sentence the right way?" who={{ icon: <NightStar kind={2} color={PP.lemon} size={port ? 54 : 46} />, name: solo ? 'My sky' : 'Ava' }} answers={SKY_ANS} right={1} />
       </div>
-      <div className="absolute inset-x-8 top-[210px] p-8 grid gap-6" style={{ ...paper, borderRadius: 26 }}>
-        <span className="font-bold text-xl" style={{ color: PP.quiet }}>Question 5 of 10</span>
-        <p className="font-bold text-[44px] leading-snug text-left">Which word starts a sentence the right way?</p>
-        <div className="grid gap-4">
-          {ANS.map(([l, w, c], i) => (
-            <span key={l} className="flex items-center gap-4 px-4 min-h-[112px] rounded-2xl text-left" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: i === 1 ? `0 0 0 3px ${PP.paper}, 0 0 0 6px ${I}, 0 4px 0 ${I}` : `0 4px 0 ${I}` }}>
-              <span className="w-16 h-16 rounded-full grid place-items-center font-display text-4xl font-bold" style={{ background: c, border: `3px solid ${I}` }}>{l}</span>
-              <b className="font-display text-5xl flex-1">{w}</b>{i === 1 && <span className="w-12 h-12 rounded-full grid place-items-center" style={{ background: PP.kelly, border: `3px solid ${I}` }}><Check weight="bold" size={28} /></span>}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="absolute inset-x-0 top-[1040px] grid justify-items-center"><Burst text="Yes! A star for the sky!" size="text-4xl" color={PP.lemon} rot={-3} /></div>
+      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: port ? 1040 : h - 80 }}><Burst text={solo ? 'Yes! A star for your sky!' : 'Yes! A star for the class sky!'} size={port ? 'text-4xl' : 'text-3xl'} color={PP.lemon} /></div>
     </SkyScene>
   );
 }
 // The Live student waiting screen, in the game's own sky.
-function SkyWaiting() {
+function SkyWaiting({ w = 820, h = 1180 }: { w?: number; h?: number }) {
+  const port = h > w, cw = Math.min(w - 80, 740), ch = port ? 560 : 440;
+  const l = (w - cw) / 2, t = (h - ch) / 2;
   return (
-    <SkyScene w={820} h={1180} got={14} holes={[[40, 300, 780, 860], [560, 0, 820, 90]]}>
-      <div className="absolute inset-x-10 top-[320px] p-10 grid justify-items-center gap-5 text-center" style={{ ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
-        <NightStar kind={2} color={PP.lemon} size={140} />
-        <h2 className="text-[64px]" style={GY}>You&apos;re in, Ava!</h2>
-        <p className="font-bold text-[28px] leading-snug">Your teacher will start soon. Your stars will light up the sky.</p>
+    <SkyScene w={w} h={h} got={14} holes={[[l - 20, t - 20, l + cw + 20, t + ch + 20]]}>
+      <div className="absolute p-10 grid justify-items-center content-center gap-5 text-center" style={{ left: l, top: t, width: cw, height: ch, ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
+        <NightStar kind={2} color={PP.lemon} size={port ? 140 : 100} />
+        <h2 style={{ ...GY, fontSize: port ? 64 : 54 }}>You&apos;re in, Ava!</h2>
+        <p className="font-bold leading-snug" style={{ fontSize: port ? 28 : 24 }}>Your teacher will start soon. Your stars will light up the sky.</p>
         <span className="flex gap-3" aria-label="Waiting">{[0, 1, 2].map((d) => <span key={d} className="w-5 h-5 rounded-full" style={{ background: [PP.periwinkle, PP.lemon, PP.pink][d], border: `2.5px solid ${I}` }} />)}</span>
       </div>
     </SkyScene>
   );
 }
 
+
+// ================= Territory (Live: Cooperative, Competitive) =================
+// The live game (src/games/territory, teacher 2026-11-24): a 2D living room in
+// Classic style. Cooperative: the class are the cats; mice come out of the
+// arched mouse hole in the baseboard at the teacher's pace; each right answer
+// sends a cat to catch one, which poofs away in a puff of stars (nothing is
+// ever hurt). Competitive: Cats against Mice; a right answer adds one of yours
+// and sends one of theirs away (a scared cat leaps out the window). The art is
+// the live game's own (art.tsx); this strip only arranges it.
+type Spot = { l: number; t: number; w: number; rot?: number };
+const at = ({ l, t, w, rot }: Spot): CSSProperties => ({ position: 'absolute', left: `${l}%`, top: `${t}%`, width: `${w}%`, transform: rot ? `rotate(${rot}deg)` : undefined });
+const COOP_CATS: (Spot & { look: number })[] = [{ l: 28, t: 58, w: 8, look: 0 }, { l: 49, t: 62, w: 7.5, look: 2 }, { l: 10, t: 70, w: 9, look: 3 }, { l: 60, t: 74, w: 8.5, look: 5 }];
+const COOP_MICE: (Spot & { look: number })[] = [{ l: 77.6, t: 54.5, w: 4.8, look: 1 }, { l: 67, t: 66, w: 5, look: 0 }, { l: 84, t: 80, w: 5, look: 2 }];
+const COMP_CATS: (Spot & { look: number })[] = [{ l: 30, t: 60, w: 7.5, look: 0 }, { l: 44, t: 70, w: 8, look: 3 }, { l: 12, t: 72, w: 8, look: 1 }, { l: 58, t: 62, w: 7, look: 2 }, { l: 22, t: 80, w: 8, look: 5 }];
+const COMP_MICE: (Spot & { look: number })[] = [{ l: 66, t: 70, w: 5, look: 0 }, { l: 74, t: 63, w: 4.6, look: 1 }, { l: 80, t: 76, w: 5, look: 2 }, { l: 52, t: 82, w: 5, look: 1 }, { l: 37, t: 84, w: 4.8, look: 0 }, { l: 88, t: 68, w: 4.6, look: 2 }, { l: 24, t: 41, w: 4.4, look: 0 }];
+function Animals({ cats = [], mice = [] }: { cats?: (Spot & { look: number })[]; mice?: (Spot & { look: number })[] }) {
+  return <>{cats.map((c, i) => <span key={`c${i}`} style={at(c)}><CatArt look={c.look} className="w-full h-auto block" /></span>)}{mice.map((m, i) => <span key={`m${i}`} style={at(m)}><MouseArt look={m.look} className="w-full h-auto block" /></span>)}</>;
+}
+// Live class screens have no turns: the top strip holds the join code (just the
+// code in a white pill), the class goal or the two team counts, and the tools.
+function RoomStrip({ w, center }: { w: number; center: ReactNode }) {
+  const port = w < 900;
+  return (
+    <div className="absolute inset-x-0 top-0 z-20" style={{ padding: port ? '14px 20px' : '16px 20px' }}>
+      <div className="flex items-start justify-between">
+        <span className="px-5 h-[52px] inline-flex items-center rounded-full" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><b className="font-display text-3xl tracking-widest">472915</b></span>
+        <GameTools />
+      </div>
+      <div className={`${port ? 'mt-4 grid justify-items-center' : 'absolute left-1/2 -translate-x-1/2 top-[16px]'}`}>{center}</div>
+    </div>
+  );
+}
+function CoopGoal() {
+  return (
+    <div className="px-4 py-2 grid gap-1.5 justify-items-center" style={{ ...paper, borderRadius: 22, width: 300 }}>
+      <span className="flex items-center gap-2"><CatArt look={0} className="w-[38px] h-[38px]" /><b className="font-display text-3xl tabular-nums leading-none">14<span className="text-xl"> of 20 caught</span></b></span>
+      <Meter segments={1} done={0} part={14 / 20} width="100%" label="14 of 20 mice caught" />
+    </div>
+  );
+}
+function TeamCounts() {
+  return (
+    <div className="flex gap-3">
+      {([['Cats', 9, 'defender'], ['Mice', 7, 'invader']] as const).map(([n, v, side]) => (
+        <span key={n} className="h-[56px] pl-2 pr-5 inline-flex items-center gap-2 rounded-full" style={{ background: SIDE_PASTEL[side], border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+          {side === 'defender' ? <CatArt look={0} className="w-[44px] h-[44px]" /> : <MouseArt look={0} className="w-[46px] h-auto" />}
+          <b className="text-xl">{n}</b><b className="font-display text-3xl tabular-nums">{v}</b>
+        </span>
+      ))}
+    </div>
+  );
+}
+function TerritoryCoop({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+  return (
+    <div className="relative overflow-hidden" style={{ width: w, height: h }}>
+      <RoomArt className="absolute inset-0">
+        <Animals cats={COOP_CATS} mice={COOP_MICE} />
+        {/* a catch: the cat pounces and the mouse poofs away in a puff of stars */}
+        <span style={at({ l: 34, t: 70, w: 9 })}><CatArt look={1} className="w-full h-auto block" /></span>
+        <span style={at({ l: 41, t: 64, w: 10 })}><PoofArt className="w-full h-auto block" /></span>
+      </RoomArt>
+      <RoomStrip w={w} center={<CoopGoal />} />
+      <div className="absolute left-5 bottom-5 z-20"><Burst text="Caught one!" size="text-2xl" /></div>
+    </div>
+  );
+}
+function TerritoryComp({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+  return (
+    <div className="relative overflow-hidden" style={{ width: w, height: h }}>
+      <RoomArt className="absolute inset-0">
+        <Animals cats={COMP_CATS} mice={COMP_MICE} />
+        {/* a mouse scares a cat out of the window: it leaps out, unhurt */}
+        <span style={at({ l: 11, t: 13, w: 7, rot: -28 })}><CatArt look={4} className="w-full h-auto block" /></span>
+        <span className="absolute" style={{ left: '18.5%', top: '20%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
+      </RoomArt>
+      <RoomStrip w={w} center={<TeamCounts />} />
+      <div className="absolute left-5 bottom-5 z-20"><Burst text="A mouse scared a cat away!" size="text-2xl" color={PP.paper} /></div>
+    </div>
+  );
+}
+const ROOM_ANS = [['A', 'Their', PP.periwinkle, PP.gamify], ['B', 'There', PP.sky, PP.blueCrystal], ['C', "They're", PP.pink, PP.blush], ['D', 'Thier', PP.lemon, PP.butter]] as const;
+// The student's own device: the one question card over the room, their team and animal in the card.
+function TerritoryStudent({ w = 820, h = 1180 }: { w?: number; h?: number }) {
+  const port = h > w;
+  const k = port ? 1 : Math.min((w - 80) / 1088, (h - 120) / 528);
+  return (
+    <div className="relative overflow-hidden" style={{ width: w, height: h }}>
+      <RoomArt className="absolute inset-0"><Animals cats={COOP_CATS.slice(0, 2)} mice={COOP_MICE.slice(0, 2)} /></RoomArt>
+      <div className="absolute left-1/2" style={{ top: port ? 90 : 30, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
+        <QuestionCard tablet={port} q="Which word fits? ___ dog is fast." who={{ icon: <CatArt look={2} className={port ? 'w-[54px] h-[54px]' : 'w-[46px] h-[46px]'} />, name: 'Ava, Team Cats' }} answers={ROOM_ANS} right={0} />
+      </div>
+      <div className="absolute inset-x-0 grid justify-items-center" style={{ top: port ? 1040 : h - 76 }}><Burst text="Yes! A cat is on the way!" size={port ? 'text-4xl' : 'text-3xl'} /></div>
+    </div>
+  );
+}
+// The end: the room filled with the winner's color, then the one winner box.
+function TerritoryEnd({ w = 1000, h = 625 }: { w?: number; h?: number }) {
+  const many: (Spot & { look: number })[] = Array.from({ length: 14 }, (_, i) => ({ l: 6 + ((i * 37) % 86), t: 60 + ((i * 23) % 28), w: 5, look: i % 3 }));
+  return (
+    <Results wash={PP.gamify} title="Team Mice wins!" winner={<MouseArt look={0} className="w-[120px] h-auto" />} score="12 mice in the room" missed={3}
+      game={<div className="relative overflow-hidden" style={{ width: w, height: h }}><RoomArt className="absolute inset-0"><Animals mice={many} /></RoomArt></div>} />
+  );
+}
+
 // ================= every view (teacher, 2026-11-23: "show me every view:
 // lobby, teacher screen, student, share, etc. for all games") =================
-// Menus wear the universal views look: quiet ground with a busy band only at
-// the top and bottom edge, taped paper panels, Grow Year titles, Gamify purple
-// go buttons with ink text. Every menu is centered (teacher, 2026-11-23);
+// Overlays wear the universal look: one flat paper card (no tape, no second
+// sheet), Grow Year caps titles, yellow go buttons with ink text. Every menu is centered (teacher, 2026-11-23);
 // question text stays left-aligned in its card.
 // Grow Year headings are ALL CAPS (teacher, 2026-11-23).
 const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
@@ -816,11 +914,11 @@ function Title({ children, size = 52 }: { children: ReactNode; size?: number }) 
 function Second({ children }: { children: ReactNode }) {
   return <span className="min-h-12 px-6 rounded-full font-bold text-lg inline-flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
-function Dim({ children, over }: { children: ReactNode; over: ReactNode }) {
+function Dim({ children, over, wash }: { children: ReactNode; over: ReactNode; wash?: string }) {
   return (
     <div className="w-full h-full relative">
       {children}
-      <div className="absolute inset-0 z-30" style={{ background: 'rgba(29,26,51,0.5)' }} />
+      <div className="absolute inset-0 z-30" style={wash ? { background: wash, opacity: 0.72 } : { background: 'rgba(29,26,51,0.5)' }} />
       <div className="absolute inset-0 z-40 grid place-items-center">{over}</div>
     </div>
   );
@@ -831,11 +929,11 @@ function PowerMoment({ game, id, name, job, picks }: { game: ReactNode; id: Powe
     <Dim over={
       <div className="relative">
         <Confetti marks={[['sparkle', PP.lemon, -44, -24, 34], ['star', PP.pink, 400, -20, 30], ['dot', PP.sky, -30, 230, 16], ['heart', PP.pink, 410, 250, 24]]} />
-        <div className="w-[400px] p-6 grid justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28, boxShadow: `0 0 0 8px ${PP.butter}, 0 0 0 11px ${I}, 0 12px 0 ${I}` }}>
-          <div className="relative w-36 h-36 grid place-items-center"><BlobPatch color={PP.lavender} size={160} /><span className="relative"><CrayonPowerUp id={id} size={120} /></span></div>
+        <div className="w-[400px] p-6 grid justify-items-center gap-3 text-center" style={{ ...paper, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="relative w-36 h-36 grid place-items-center"><span className="relative"><CrayonPowerUp id={id} size={120} /></span></div>
           <Title size={48}>{name}</Title>
           <span className="font-bold text-xl">{job}</span>
-          {picks ? <div className="flex flex-wrap justify-center gap-2">{picks.map((p, i) => <span key={p} className="px-4 py-2 rounded-full font-bold flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Badge t={TEAMS[[0, 2, 3][i] ?? 0]} size={24} />{p}</span>)}</div>
+          {picks ? <div className="flex flex-wrap justify-center gap-2">{picks.map((p, i) => <span key={p} className="min-h-[52px] px-4 rounded-full font-bold flex items-center gap-2" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><Badge t={TEAMS[[0, 2, 3][i] ?? 0]} size={24} />{p}</span>)}</div>
             : <MainBtn>Continue<ArrowRight weight="bold" size={22} /></MainBtn>}
         </div>
       </div>
@@ -846,9 +944,9 @@ function PowerMoment({ game, id, name, job, picks }: { game: ReactNode; id: Powe
 // The winner box (teacher, 2026-11-24): the winner's icon with no circle or
 // backing in THE glow, then only the score or XP, centered, in Grow Year a
 // little smaller than the title; no stat chips.
-function Results({ game, title, winner, score, missed = 2 }: { game: ReactNode; title: string; winner: ReactNode; score: string; missed?: number }) {
+function Results({ game, title, winner, score, missed = 2, wash }: { game: ReactNode; title: string; winner: ReactNode; score: string; missed?: number; wash?: string }) {
   return (
-    <Dim over={
+    <Dim wash={wash} over={
       <div className="relative w-[560px]">
         <Confetti marks={[['sparkle', PP.lemon, -40, 10, 36], ['star', PP.pink, 560, -10, 30], ['heart', PP.pink, -30, 300, 24], ['sparkle', PP.paper, 570, 280, 28], ['dot', PP.sky, 530, 150, 16]]} />
         <Sheet w={560} pad={28}>
@@ -865,60 +963,70 @@ function Results({ game, title, winner, score, missed = 2 }: { game: ReactNode; 
 // ---------- the view list for each game: ONLY its themable in-game views ----------
 // (teacher, 2026-11-23: "game mockups should only be in-game specific; things
 // that can be redone with new themes"). Every shared screen lives on Universal views.
-type View = { name: string; device: 'laptop' | 'tablet'; node: ReactNode; note: string };
+// Every view has a landscape design (1000 x 625) and a portrait one (820 x
+// 1180), so no device frame letterboxes a design into dead bands.
+type View = { name: string; land: ReactNode; port: ReactNode; note: string };
 const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
   'game-show': {
     uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
-      { name: 'Solo: you vs computer', device: 'laptop', node: <GameShowLaptop vs />, note: 'Two sides, You and the computer with a fun name (Goofy Lamp here, a new one each game); Butter shading shows whose turn.' },
-      { name: 'Power-up: Swap Spinner', device: 'laptop', node: <PowerMoment game={<GameShowLaptop noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, note: 'Picks a team with shape badges, never color alone.' },
-      { name: 'Celebration', device: 'laptop', node: <Results game={<GameShowLaptop noPop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} score="160 points" />, note: 'The winner in the turn glow over the studio.' },
+      { name: 'Solo: you vs computer', land: <GameShowLaptop vs />, port: <GameShowTablet vs noPop />, note: 'Two sides, You and the computer with a fun name (Goofy Lamp here, a new one each game); Butter shading shows whose turn.' },
+      { name: 'Power-up: Swap Spinner', land: <PowerMoment game={<GameShowLaptop noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, port: <PowerMoment game={<GameShowTablet noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, note: 'Picks a team with shape badges, never color alone.' },
+      { name: 'Celebration', land: <Results game={<GameShowLaptop noPop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} score="160 points" />, port: <Results game={<GameShowTablet noPop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} score="160 points" />, note: 'The winner in the turn glow over the studio.' },
     ],
   },
   'castle-quest': {
     uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
-      { name: 'Solo: you vs computer', device: 'laptop', node: <BoardLaptop vs />, note: 'Two pawns; just the die (it wiggles on hover); your race row is shaded.' },
-      { name: 'Power-up: Tornado', device: 'laptop', node: <PowerMoment game={<BoardLaptop />} id="tornado" name="Tornado" job="Whoosh! Every player lands on a new square." />, note: 'Found on a hidden square.' },
-      { name: 'Celebration', device: 'laptop', node: <Results game={<BoardLaptop />} title="Team Sky wins!" winner={<CrayonPawn color={PP.sky} size={110} />} score="120 XP" />, note: 'The winner\'s pawn in the turn glow.' },
+      { name: 'Solo: you vs computer', land: <BoardLaptop vs />, port: <BoardTablet vs />, note: 'Two pawns; just the die (it wiggles on hover); your race row is shaded.' },
+      { name: 'Power-up: Tornado', land: <PowerMoment game={<BoardLaptop />} id="tornado" name="Tornado" job="Whoosh! Every player lands on a new square." />, port: <PowerMoment game={<BoardTablet />} id="tornado" name="Tornado" job="Whoosh! Every player lands on a new square." />, note: 'Found on a hidden square.' },
+      { name: 'Celebration', land: <Results game={<BoardLaptop />} title="Team Sky wins!" winner={<CrayonPawn color={PP.sky} size={110} />} score="120 XP" />, port: <Results game={<BoardTablet />} title="Team Sky wins!" winner={<CrayonPawn color={PP.sky} size={110} />} score="120 XP" />, note: 'The winner\'s pawn in the turn glow.' },
     ],
   },
   'match-three': {
     uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause. Solo only, so no How will you play.',
     views: [
-      { name: 'Power-up: Fireball', device: 'laptop', node: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
-      { name: 'Celebration', device: 'tablet', node: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<span className="scale-[2] inline-grid"><StarGoal got={2} /></span>} score="260 points" />, note: 'Stars, not a rank.' },
+      { name: 'Power-up: Fireball', land: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, port: <PowerMoment game={<MatchThreeTablet />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
+      { name: 'Celebration', land: <Results game={<MatchThreeLaptop />} title="You got 2 stars!" winner={<span className="scale-[2] inline-grid"><StarGoal got={2} /></span>} score="260 points" />, port: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<span className="scale-[2] inline-grid"><StarGoal got={2} /></span>} score="260 points" />, note: 'Stars, not a rank.' },
     ],
   },
   'four-in-a-row': {
     uses: 'Welcome, How will you play (Share, Solo), Question set, Options, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
-      { name: 'Solo: you vs computer', device: 'laptop', node: <FourLaptop vs />, note: 'Your piece waits over its column.' },
-      { name: 'Power-up: Pop Out', device: 'laptop', node: <PowerMoment game={<FourLaptop vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, note: 'Kit has no key art; swap stands in.' },
-      { name: 'Celebration', device: 'laptop', node: <Results game={<FourLaptop />} title="Leo wins!" winner={<Disc p={2} s={110} />} score="90 XP" />, note: 'The winning piece in the turn glow.' },
+      { name: 'Solo: you vs computer', land: <FourLaptop vs />, port: <FourTablet vs />, note: 'Your piece waits over its column; the computer has a fun name.' },
+      { name: 'Power-up: Pop Out', land: <PowerMoment game={<FourLaptop vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, port: <PowerMoment game={<FourTablet vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, note: 'Kit has no key art; swap stands in.' },
+      { name: 'Celebration', land: <Results game={<FourLaptop />} title="Leo wins!" winner={<Disc p={2} s={110} />} score="90 XP" />, port: <Results game={<FourTablet />} title="Leo wins!" winner={<Disc p={2} s={110} />} score="90 XP" />, note: 'The winning piece in the turn glow.' },
     ],
   },
   'bubble-pop': {
     uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause. Solo only, so no How will you play.',
     views: [
-      { name: 'Power-up: Mystery Box', device: 'laptop', node: <PowerMoment game={<BubbleLaptop />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, note: 'Opens with a bob and a pop.' },
-      { name: 'Celebration', device: 'tablet', node: <Results game={<BubbleTablet />} title="You did it!" winner={<Bubble k={4} s={110} />} score="340 points" />, note: 'Your points, not a rank.' },
+      { name: 'Power-up: Mystery Box', land: <PowerMoment game={<BubbleLaptop />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, port: <PowerMoment game={<BubbleTablet />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, note: 'Opens with a bob and a pop.' },
+      { name: 'Celebration', land: <Results game={<BubbleLaptop />} title="You did it!" winner={<Bubble k={4} s={110} />} score="340 points" />, port: <Results game={<BubbleTablet />} title="You did it!" winner={<Bubble k={4} s={110} />} score="340 points" />, note: 'Your points, not a rank.' },
     ],
   },
   bowling: {
     uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams and players, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
-      { name: 'Solo: alone', device: 'laptop', node: <BowlingLaptop solo />, note: 'One row on the ten-frame sheet, your pins on the left, no turn chip.' },
-      { name: 'Power-up: Bumper Rails', device: 'laptop', node: <PowerMoment game={<BowlingLaptop />} id="shield" name="Bumper Rails" job="No gutter ball on your next roll." />, note: 'Shield art carries the job.' },
-      { name: 'Celebration', device: 'laptop', node: <Results game={<BowlingLaptop />} title="Ava wins!" winner={<Ball c={PP.periwinkle} s={110} />} score="146 pins" />, note: 'The winning ball in the turn glow.' },
+      { name: 'Solo: alone', land: <BowlingLaptop solo />, port: <BowlingTablet solo />, note: 'One row on the ten-frame sheet, your pins on the left, no turn chip.' },
+      { name: 'Power-up: Bumper Rails', land: <PowerMoment game={<BowlingLaptop />} id="shield" name="Bumper Rails" job="No gutter ball on your next roll." />, port: <PowerMoment game={<BowlingTablet />} id="shield" name="Bumper Rails" job="No gutter ball on your next roll." />, note: 'Shield art carries the job.' },
+      { name: 'Celebration', land: <Results game={<BowlingLaptop />} title="Ava wins!" winner={<Ball c={PP.periwinkle} s={110} />} score="146 pins" />, port: <Results game={<BowlingTablet />} title="Ava wins!" winner={<Ball c={PP.periwinkle} s={110} />} score="146 pins" />, note: 'The winning ball in the turn glow.' },
+    ],
+  },
+  territory: {
+    uses: 'Welcome, How will you play (Live only), Question set, Teacher: how the class plays (Cooperative or Competitive, pace), Join code, Student join and name, Lobby, Question screen, Results, Settings, Pause. No power-ups.',
+    views: [
+      { name: 'Competitive class screen', land: <TerritoryComp />, port: <TerritoryComp w={820} h={1180} />, note: 'Cats vs Mice counts on each team\'s pastel with its animal (never color alone); a mouse scares a cat out of the window, unhurt.' },
+      { name: 'Student device', land: <TerritoryStudent w={1000} h={625} />, port: <TerritoryStudent />, note: 'The one question card over the room; the student\'s name, team and animal in the card.' },
+      { name: 'Results', land: <TerritoryEnd />, port: <TerritoryEnd w={820} h={1180} />, note: 'The room fills with the winner\'s color, then the one winner box.' },
     ],
   },
   'star-quiz': {
-    uses: 'Welcome, How will you play (Live, Solo), Question set, Teacher: how the class plays, Join code, Student join and name, Lobby (cooperative or competitive), Question screen, Results, Settings, Pause. No power-ups in this game.',
+    uses: 'Welcome, How will you play (Live, Solo), Question set, Teacher: how the class plays (Cooperative or Competitive), Join code, Student join and name, Lobby, Question screen, Results, Settings, Pause. No power-ups in this game.',
     views: [
-      { name: 'Live student: waiting', device: 'tablet', node: <SkyWaiting />, note: 'The game\'s own sky, the student\'s star (the glow is for winners only).' },
-      { name: 'Solo: in play', device: 'tablet', node: <StudentDevice solo />, note: 'My sky, no class count.' },
-      { name: 'Class screen: celebration', device: 'laptop', node: <Results game={<ClassScreen />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} score="30 stars" missed={4} />, note: 'One class win, no ranks in Together.' },
+      { name: 'Live student: waiting', land: <SkyWaiting w={1000} h={625} />, port: <SkyWaiting />, note: 'The game\'s own sky, the student\'s star (the glow is for winners only).' },
+      { name: 'Solo: in play', land: <StudentDevice solo w={1000} h={625} />, port: <StudentDevice solo />, note: 'The one universal question card in the game\'s sky.' },
+      { name: 'Class screen: celebration', land: <Results game={<ClassScreen />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} score="30 stars" missed={4} />, port: <Results game={<ClassScreen w={820} h={1180} />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} score="30 stars" missed={4} />, note: 'One class win, no ranks in Cooperative.' },
     ],
   },
 };
@@ -946,6 +1054,7 @@ export const GAME_COVERS: { id: string; name: string; desc: string; modes: strin
   { id: 'four-in-a-row', name: 'Four in a Row', desc: 'Answer, then drop your piece. Four in a line wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Drop your piece', 'Four in a line wins'], cover: <Cover mat={PP.blueCrystal}><FourLaptop /></Cover> },
   { id: 'bubble-pop', name: 'Bubble Pop', desc: 'Answer to load bubbles, then aim and pop.', modes: ['Solo'], steps: ['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop'], cover: <Cover mat={PP.aqua}><BubbleLaptop /></Cover> },
   { id: 'bowling', name: 'Bowling', desc: 'Answer right to roll. Knock down the most pins.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Aim and add spin', 'Most pins wins'], cover: <Cover mat={PP.lavender}><BowlingLaptop /></Cover> },
+  { id: 'territory', name: 'Territory', desc: 'Mice sneak into the living room. Every right answer sends a cat to catch one.', modes: ['Live'], steps: ['Answer on your device', 'Right sends a cat', 'Catch them all, or win the room'], cover: <Cover mat={PP.peach}><TerritoryCoop /></Cover> },
   { id: 'star-quiz', name: 'Question Tracker', desc: 'Every right answer adds a star until the sky is full.', modes: ['Live', 'Solo'], steps: ['Answer a question', 'Right adds a star', 'Fill the whole sky'], cover: <Cover mat={NIGHT}><ClassScreen /></Cover> },
 ];
 
@@ -1000,6 +1109,14 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
     ],
   },
   {
+    id: 'territory', name: 'Territory (Live: Cooperative and Competitive)', laptop: <TerritoryCoop />, tablet: <TerritoryCoop w={820} h={1180} />,
+    lines: [
+      'New: the live game\'s own Classic living room (butter striped wallpaper, a white baseboard with the arched mouse hole, peach planks, teal couch, pink rug) with its six cat looks and brown, gray and white mice; the Cooperative screen shows the class goal (a cat, 14 of 20 caught, the one meter), the Competitive screen the two team counts on Peach (Cats) and Gamify pastel (Mice); just the join code in a white pill; the one tool group with the hint.',
+      'Why: one shared goal on the projector builds relatedness (self-determination theory) and the meter shows how close the class is (goal-gradient effect); a caught mouse poofs in stars and a scared cat leaps out the window, so the stakes feel playful and nothing is ever hurt; each team is an animal plus a color (WCAG 1.4.1).',
+      'Pieces (theme template, from its manifest): Room 1600 x 1000 (bottom 40% is the floor), Entrance 200 x 180, six Defenders 256 x 256, three Invaders 256 x 180, Poof 256 x 256, Cover 600 x 600, Title 1200 x 360.',
+    ],
+  },
+  {
     id: 'star-quiz', name: 'Question Tracker (Live: class screen and a student device)', laptop: <ClassScreen />, tablet: <StudentDevice />,
     lines: [
       'New (teacher, 2026-11-24: her favorite live version, kept as original as possible): the whole stage is her deep navy night sky with soft cloud bands, white twinkles and glints, filling with her six star shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat rounded, shooting star) in flat Lemon, Butter and a touch of Orange, no outlines, many sizes and turns (glowing orange for a first-try streak); the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
@@ -1013,7 +1130,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
 // shape shows more of the same world, not a band.
 const GROUND: Record<string, CSSProperties> = {
   'game-show': { background: PP.grape }, 'castle-quest': { background: PP.kelly }, 'match-three': { background: PP.butter },
-  'four-in-a-row': { background: PP.blueCrystal }, 'bubble-pop': { background: PP.aqua }, bowling: { background: PP.lavender }, 'star-quiz': { background: NIGHT },
+  'four-in-a-row': { background: PP.blueCrystal }, 'bubble-pop': { background: PP.aqua }, bowling: { background: PP.lavender }, territory: { background: PP.peach }, 'star-quiz': { background: NIGHT },
 };
 function ViewStrip({ id }: { id: string }) {
   const v = ALL_VIEWS[id];
@@ -1024,7 +1141,7 @@ function ViewStrip({ id }: { id: string }) {
       {v.views.map((x, n) => (
         <figure key={x.name} className="m-0 grid gap-1.5 content-start">
           <figcaption className="font-heading text-sm">{n + 1}. {x.name}</figcaption>
-          {x.device === 'laptop' ? <DeviceSet land={x.node} landSize={[1000, 625]} ground={g} /> : <DeviceSet land={x.node} port={x.node} landSize={[820, 1180]} ground={g} />}
+          <DeviceSet land={x.land} port={x.port} landSize={[1000, 625]} ground={g} />
           <span className="text-xs font-semibold text-muted">{x.note}</span>
         </figure>
       ))}
