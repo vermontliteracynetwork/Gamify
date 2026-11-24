@@ -10,7 +10,8 @@ export function classicTheme(gameId: string): GameTheme {
   // Bowling's Classic alley (teacher, 2026-11-24 redesign): a Lavender floor
   // under the cream confetti wall the game draws (was the 80s carpet).
   const alley = gameId === 'bowling';
-  // Game Show's Classic stage is red (teacher, 2026-11-01).
+  // Game Show's Classic stage was red (teacher, 2026-11-01); the approved studio
+  // mockup (2026-11-24) puts it on Grape behind pink curtains (src/games/game-show/studio.tsx).
   const show = gameId === 'game-show';
   // Pinball's Classic page is the table's own navy (teacher, 2026-11-13).
   const pin = gameId === 'pinball';
@@ -23,7 +24,7 @@ export function classicTheme(gameId: string): GameTheme {
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#ddd6ff' : show ? '#c8282f' : pin ? '#25365f' : doodle ? '#f6f0e4' : '#b4c4fb',
+      background: night ? '#22336e' : alley ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle ? '#f6f0e4' : '#b4c4fb',
       backgroundText: night || show || pin ? '#ffffff' : alley ? '#1d1a33' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
