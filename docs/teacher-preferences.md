@@ -268,3 +268,8 @@ line that fits, and add each new preference the same turn she says it.
 - Question screen (2026-11-24): answer tiles are thinner and always the same size whatever the question length; the question gets a generous fixed area and its text shrinks for long questions; the question card is a bit smaller so more theme background shows around it.
 - Meters (2026-11-24, "improve the horizontal meters (tracking) universally"): one modern, theme-aligned meter design for every round tracker, step tracker and progress bar.
 - Glow (2026-11-24): every circle glow is exactly the live turn glow (.turn-rays spinning sun rays plus .turn-halo breathing halo), fully behind the icon, animated; never a flat ring.
+- Teach cards (2026-11-24, "remove teach cards entirely. i dont want them"): no teach cards anywhere: removed from the setup flow, set picker and set editor on the live site, and from /brand. Stored teachCard data stays readable but unused.
+- Pause (2026-11-24): two pause screens, the default and one with the teacher's custom message.
+- Device previews (2026-11-24): every mockup shows big screen (interactive whiteboard), laptop, iPad landscape and portrait (always both), and phone portrait.
+- Welcome covers (2026-11-24): each game's welcome cover lives in its Game mockups strip, not Universal views.
+- Universal game components (2026-11-24, "add a section in brand for the universal game components"): a /brand section showing every shared in-game part: scoreboard rows (with turn glow and a held power-up badge), the turn banner ("Your turn: pick a card!"), the power-up pop card, the power-up action card with team choices (e.g. Swap Spinner), the winner box, and similar parts.

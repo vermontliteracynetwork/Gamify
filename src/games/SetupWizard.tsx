@@ -2,7 +2,6 @@ import { Children, Fragment, isValidElement, useLayoutEffect, useRef, useState, 
 import { ArrowLeft, ArrowRight, Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import Title from '../ui/Title';
-import { TeachCardBox, TeachCards, type TeachShow } from './TeachCard';
 import { PowerUpCards } from '../engine/PowerUpSwitches';
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
@@ -33,9 +32,6 @@ function splitPowers(pages: SetupPage[]): SetupPage[] {
 export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
   const pages = splitPowers(given);
   const [i, setI] = useState(0);
-  // Teach cards from the picked sets, shown after Play (market gaps, 2026-11-01).
-  const [teach, setTeach] = useState<TeachShow[]>([]);
-  const [teaching, setTeaching] = useState(false);
   const [part, setPart] = useState(0);
   // How many parts each page splits into (measured when it is shown).
   const [splits, setSplits] = useState<Record<string, number[][]>>({});
@@ -91,8 +87,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   const next = () => (partNow < groups.length - 1 ? setPart(partNow + 1) : goTo(i + 1));
   const back = () => (partNow > 0 ? setPart(partNow - 1) : i === 0 ? onBack() : goTo(i - 1, partsOf(pages[i - 1]) - 1));
   return (
-    <TeachCards.Provider value={setTeach}>
-    {teaching && teach.length > 0 && <TeachCardBox cards={teach} onDone={() => { setTeaching(false); onPlay(); }} />}
+    <>
     <div className="grid">
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
@@ -127,13 +122,13 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
           className="min-h-8 tap px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
           <ArrowLeft weight="bold" size={14} />{t('setup.back')}
         </button>
-        <button type="button" disabled={page.ready === false} onClick={() => (last ? (teach.length ? setTeaching(true) : onPlay()) : next())}
+        <button type="button" disabled={page.ready === false} onClick={() => (last ? onPlay() : next())}
           className="min-h-8 tap px-4 rounded-pill border-std border-border bg-accent font-display text-base font-bold inline-flex items-center gap-1 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 2px 0 #000' }}>
           {last ? <><Play weight="fill" size={15} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={14} /></>}
         </button>
       </div>
     </section>
     </div>
-    </TeachCards.Provider>
+    </>
   );
 }
