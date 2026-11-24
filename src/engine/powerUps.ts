@@ -15,3 +15,13 @@ export function rollPowerUp(items: ThemeItem[], rand: () => number = Math.random
 // An item's number, or the ability's default when the theme left it blank.
 export const amountOf = (it: ThemeItem, fallback: number) => it.amount ?? fallback;
 
+
+// No stealing, anywhere (teacher, 2026-11-24, from the competitor research:
+// "i dont want any power ups with stealing"): no power-up takes points, cards,
+// pieces or places from another player or team. These abilities are gone from
+// every game, and a saved theme that still names one never deals it: Swap and
+// Steal (Game Show), Sneaky Swipe (Pinball, Bowling), Pop Out (Four in a Row:
+// pulls out another player's piece) and the Board Game Wheel (sends another
+// player back).
+export const NO_STEAL_ABILITIES = new Set(['swap', 'steal', 'swipe', 'pop', 'wheel']);
+export const allowedItem = (it: { ability?: string }) => !NO_STEAL_ABILITIES.has(it.ability ?? '');

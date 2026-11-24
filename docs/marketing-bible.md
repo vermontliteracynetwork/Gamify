@@ -405,3 +405,30 @@ creative. Start small, learn, then scale what works.
   (2026-11-24).
 - Price talk always leads with value (standing sales rule, 2026-10-25).
 - English only (2026-10-26). No other company's brand anywhere (standing legal rule).
+
+---
+
+## 13. The edge list (psychology-first marketing)
+
+Owner's rule (2026-11-24): "add the no stealing as a selling point. marketing
+team should have a running list of these kind of features and it should be
+noted on the site especially if the reserach shows that that is a weak spot
+for our competators. this is the type of psycology first marketing i want
+done."
+
+Every time research finds a weak spot that classroom game sites share, and
+Gamify does it better, it goes in this table the same turn, it is shown on the
+site (the Features page section "Fair Play, Built In", Home or Pricing as fits),
+and the copywriter builds posts on it. Never name the other sites in public;
+describe the pain the teacher feels instead. Only list what ships today.
+
+| Our edge | The pain it answers (research, docs/competitor-feedback-research.md) | Psychology | On the site | Status |
+|---|---|---|---|---|
+| No stealing power-ups, ever | Point-stealing "can lead to tears" in K-2 and "brings out the worst" in students | Loss aversion (a loss stings about twice a gain), self-determination theory (competence feels real when skill decides) | Features: Fair Play, Built In | Live 2026-11-24 |
+| Every timer can be turned off | Speed and luck beat knowing the answer; quieter and slower students are left out | Cognitive load and test-anxiety research; UDL (multiple means of action) | Features: Fair Play, Built In | Live games 2026-11-24 |
+| Right answers decide the game | "Luck based", kids race to be first instead of thinking | Retrieval practice (accuracy beats speed), competence | Features: Fair Play, Built In | Live |
+| Names from the class list or friendly name dice | Student nicknames cause friction and delay learning | Psychological safety; reduces teacher policing load | Features: Fair Play, Built In | Live |
+| No ads, no trackers, no student emails | Ads on the first screen; privacy worries; under-13 sign-ups | Trust as a buying trigger for schools (risk reduction) | Features: Fair Play, Built In; Pricing | Live |
+| Accessibility free on every plan | Weak accessibility; features behind paywalls | Reciprocity; fairness; ADA Title II buying point | Features, Pricing | Live |
+| Live view of the whole class on one question | Teachers cannot see whole-class answers to one question live; question reports are paid | Formative assessment (Black and Wiliam); immediate feedback | Planned (teacher portal) | Mockup 2026-11-24 |
+| Keep editing after you cancel; clear billing reminders | No editing after cancelling; billing confusion and hard cancels | Endowment effect handled honestly; trust | Planned (billing) | Not built: needs Stripe |

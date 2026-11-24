@@ -363,6 +363,19 @@ function Features({ w }: W) {
           <TextLink>See plans</TextLink>
         </div>
       </Section>
+      {/* Fair play, built in (teacher, 2026-11-24): the edge list on the page, the
+          weak spots the research found elsewhere, answered (never naming anyone). */}
+      <Section w={w}>
+        <div className="grid gap-4 p-6" style={CARD}>
+          <H2 w={w}>Fair Play, Built In</H2>
+          <P w={w}>Games should build kids up, not set them against each other. The right answer decides what happens next.</P>
+          <div className={`grid gap-3 ${isPhone(w) ? '' : 'grid-cols-2'}`}>
+            {[['No stealing, ever', 'No power-up takes points, cards or places from another team.'], ['Every timer can be turned off', 'Students who need more time play the same game.'], ['Right answers decide the game', 'Power-ups add to your own goal, never take from someone else.'], ['Names from your class list', 'No unkind nicknames to manage.'], ['No ads, no trackers, no student emails', 'Nothing on a student screen sells anything.'], ['Accessibility is never a paid upgrade', 'Every setting is free on every plan.']].map(([h, d]) => (
+              <span key={h} className="flex gap-3 items-start rounded-[18px] p-4" style={{ background: '#fff', border: `2.5px solid ${I}` }}><Check weight="bold" size={22} className="shrink-0 mt-0.5" /><span className="grid gap-0.5"><b className="text-[18px]">{h}</b><span className="font-semibold text-[16px]" style={{ color: PP.quiet }}>{d}</span></span></span>
+            ))}
+          </div>
+        </div>
+      </Section>
     </Page>
   );
 }

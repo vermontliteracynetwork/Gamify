@@ -1,3 +1,4 @@
+import { allowedItem } from './powerUps';
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, X } from '@phosphor-icons/react';
 import type { GameManifest } from '../games/types';
@@ -62,7 +63,7 @@ export function powerUpSwitches({ manifest, theme, on, off, change }: {
   manifest: GameManifest; theme: GameTheme; on: boolean; off: string[];
   change: (patch: { powerUps?: boolean; powerOff?: string[] }) => void;
 }): ReactNode {
-  const items = theme.items?.length ? theme.items : manifest.items?.classic ?? [];
+  const items = (theme.items?.length ? theme.items : manifest.items?.classic ?? []).filter(allowedItem);
   if (!items.length) return null;
   const isOn = (id: string) => on && !off.includes(id);
   function set(id: string, v: boolean) {

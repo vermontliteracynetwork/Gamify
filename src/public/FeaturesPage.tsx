@@ -81,6 +81,23 @@ export default function FeaturesPage() {
           <ModesDemo />
         </motion.section>
 
+        {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
+            point ... psychology first marketing"). Each line answers a weak spot the
+            research found on other classroom game sites (docs/marketing-bible.md,
+            the edge list); never names another site. */}
+        <section aria-labelledby="fair-title" className={`${card} p-5 sm:p-8 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <h2 id="fair-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.fair.title')} /></h2>
+          <p className="text-lg font-semibold max-w-3xl">{t('features.fair.text')}</p>
+          <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <li key={n} className="flex gap-3 items-start rounded-input border-std border-border bg-surface p-4">
+                <Check weight="bold" size={22} className="shrink-0 mt-0.5" aria-hidden="true" />
+                <span className="grid gap-0.5"><b className="text-lg leading-snug">{t(`features.fair.${n}` as StringKey)}</b><span className="font-semibold text-muted">{t(`features.fair.${n}.why` as StringKey)}</span></span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section aria-labelledby="more-title" className="grid gap-4">
           <h2 id="more-title" className="font-display text-3xl"><Title text={t('features.moreTitle')} /></h2>
           {/* Each box opens on its own; its neighbor keeps its size (teacher, 2026-10-31). */}

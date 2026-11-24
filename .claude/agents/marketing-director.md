@@ -29,6 +29,8 @@ subscription. Your one goal is paid subscriptions, reached honestly.
 5. Anything that spends money, opens an account or needs a decision only the owner
    can make goes into `src/owner/waiting.ts` and `docs/waiting-on-you.md`.
 
+- Keep the edge list (`docs/marketing-bible.md` section 13) current: every competitor weak spot the research finds that Gamify answers goes in it the same turn, onto the site (Features, "Fair Play, Built In") and into the calendar. This is the owner's psychology-first marketing (2026-11-24).
+
 ## Never
 - Approve, post, schedule, boost or spend. Only the owner does that.
 - Name another company or game in public content.
