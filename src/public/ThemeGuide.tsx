@@ -79,7 +79,7 @@ export function ThemeGuidePage() {
     if (access !== 'ok') return;
     setDl(t('builder.dl.making'));
     const [{ fileSlug, saveFile }, { templatePdf }] = await Promise.all([import('../theme/builder/download'), import('../theme/builder/templatePdf')]);
-    saveFile(new Blob([templatePdf(templatePieces(game!))], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-for-canva.pdf`);
+    saveFile(new Blob([templatePdf(templatePieces(game!))], { type: 'application/pdf' }), `${fileSlug(game!.name)}-theme-digital-design.pdf`);
     setDl(t('builder.dl.ready'));
   }
   return (
@@ -93,6 +93,7 @@ export function ThemeGuidePage() {
         <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
           <h2 id="guide-dl" className="font-display text-3xl"><Title text={t('guide.dlTitle')} /></h2>
           <p className="font-bold">{t('guide.dlSub')}</p>
+          <p className="font-semibold">{t('guide.dlMaterials')}</p>
           <TemplateLock access={access} />
           {access === 'ok' && <div className="flex flex-wrap gap-2">
             <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'hover-pop', 'lg')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>

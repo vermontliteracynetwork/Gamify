@@ -153,6 +153,32 @@ who always has the best ideas and never brags.
   but consistent per piece, numbers as digits ("2 minutes"), US spelling, English
   only (owner rule, 2026-10-26).
 
+### Theme language (owner, 2026-11-24)
+Themes are Gamify's biggest difference; say it the same way everywhere.
+- **The nouns**: a **theme** is the look of a game (backgrounds, pieces, team
+  icons, power-ups, colors, sounds). Classes **design a theme** in the **Theme
+  Builder**. Each part is a **piece**.
+- **Two ways to design, always named together**: **Digital design** (any drawing
+  or design app, or the Theme Builder's own drawing studio) and **Physical
+  design** (made by hand with real materials).
+- **Physical design is more than pencils and crayons.** Lead with the range:
+  clay and modeling dough, textured paint, collage, recycled things (bottle caps,
+  cardboard), and nature (leaves, sticks, stones). Pencils, crayons and markers
+  are one option, not the headline.
+- **The feature to promote**: **snap a photo or scan it, and Gamify fits it into
+  the game.** Students' real, three-dimensional work becomes the game they play.
+  Say "take a photo", "scan", "upload"; show hands and finished pieces, never
+  faces.
+- **Approved lines** (adapt, keep the meaning): "Your class designs the game."
+  "Sculpt it, snap it, play it." "From clay to the big screen." "Leaves, bottle
+  caps, crayons or a drawing app: if your class can make it, it can be in the
+  game."
+- **Never**: the word **Canva** or any other design app, toy or craft brand
+  (say "a design app", "modeling dough", not a brand name); "skins"; promising
+  automatic background removal or perfect cut-outs.
+- **Beta**: theme concept ideas and material ideas go out in the regular theme
+  emails and on the classroom kit (`src/beta/themeIdeas.ts`).
+
 ### Core messages (rotate; one per piece)
 1. **One question set. Dozens of games. Four ways to play.** (the core promise)
 2. **The whole class vs the teacher.** (the shareable moment)
@@ -405,3 +431,4 @@ creative. Start small, learn, then scale what works.
   (2026-11-24).
 - Price talk always leads with value (standing sales rule, 2026-10-25).
 - English only (2026-10-26). No other company's brand anywhere (standing legal rule).
+- Themes (2026-11-24): never the word Canva anywhere a customer sees it ("we're going to get sued"); themes are digital design or physical design; promote photo and scan uploads and 3-D materials (clay, modeling dough, textured paint, recycled goods, leaves and sticks), not only pencils and crayons. See Theme language in section 4.

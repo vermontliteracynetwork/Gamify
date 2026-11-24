@@ -700,7 +700,7 @@ function GuidePage({ w }: { w: number }) {
           </div>
           <div className="grid gap-2 content-start">
             {GS_PIECES.map(([n, s, t]) => <div key={n} className="p-3 grid grid-cols-[1fr_auto] gap-x-3 items-center" style={CARD}><b className="text-[17px]">{n}</b><Chip>{s}</Chip><span className="col-span-2 font-semibold text-[15px] leading-snug" style={{ color: Q }}>{t}</span></div>)}
-            <div className={`flex gap-3 mt-2 ${ph ? 'flex-col' : ''}`}><Btn go wide={ph}><Printer weight="bold" size={18} />Print blank templates</Btn><Btn wide={ph}><DownloadSimple weight="bold" size={18} />Canva files</Btn></div>
+            <div className={`flex gap-3 mt-2 ${ph ? 'flex-col' : ''}`}><Btn go wide={ph}><Printer weight="bold" size={18} />Print blank templates</Btn><Btn wide={ph}><DownloadSimple weight="bold" size={18} />Digital design files</Btn></div>
           </div>
         </div>
       </div>
