@@ -79,7 +79,7 @@ function Wizard({ step, total, title, children, last }: { step: number; total: n
 // The overlay box over the game; in portrait it fits the card to the screen.
 function Over({ children }: { children: ReactNode }) {
   const f = useFrame();
-  if (f.adaptive && f.portrait) return <div className="absolute inset-0" style={{ padding: f.w < 600 ? 16 : 36 }}><AutoFit>{children}</AutoFit></div>;
+  if (f.adaptive) return <div className="absolute inset-0" style={{ padding: f.w < 600 ? 16 : 36 }}><AutoFit>{children}</AutoFit></div>;
   return <div className="absolute inset-0 grid place-items-center">{children}</div>;
 }
 function Board({ dim, w: w0 = 1280, h: h0 = 800 }: { dim?: boolean; w?: number; h?: number }) {
@@ -372,18 +372,20 @@ function ThemeBack({ id, w, h }: { id: ThemeId; w: number; h: number }) {
   return id === 'gameshow' ? <StudioBack w={w} h={h} /> : id === 'park' ? <ParkBack w={w} h={h} /> : <SkyBack w={w} h={h} />;
 }
 function QLaptop({ theme, q }: { theme: ThemeId; q?: string }) {
+  const f = useFrame(); const w = f.adaptive ? f.w : 1280, h = f.adaptive ? f.h : 800;
   return (
     <div className="w-full h-full relative">
-      <ThemeBack id={theme} w={1280} h={800} />
-      <div className="absolute inset-0 grid place-items-center"><QCard q={q} /></div>
+      <ThemeBack id={theme} w={w} h={h} />
+      <div className="absolute inset-0 p-8"><AutoFit><QCard q={q} /></AutoFit></div>
     </div>
   );
 }
 function QTablet({ theme, q }: { theme: ThemeId; q?: string }) {
+  const f = useFrame(); const w = f.adaptive ? f.w : 820, h = f.adaptive ? f.h : 1180;
   return (
     <div className="w-full h-full relative">
-      <ThemeBack id={theme} w={820} h={1180} />
-      <div className="absolute inset-0 grid place-items-center"><QCard tablet q={q} /></div>
+      <ThemeBack id={theme} w={w} h={h} />
+      <div className="absolute inset-0" style={{ padding: w < 600 ? 14 : 40 }}><AutoFit><QCard tablet q={q} /></AutoFit></div>
     </div>
   );
 }
@@ -402,10 +404,11 @@ function V9a() {
 }
 const HELD: { id: PowerId; name: string; soft: string }[] = [{ id: 'shield', name: 'Shield', soft: PP.blueCrystal }, { id: 'double-points', name: 'Double Points', soft: PP.butter }];
 function V9b() {
+  const f = useFrame();
   return (
     <div className="w-full h-full relative">
-      <ParkBack w={1280} h={800} />
-      <div className="absolute inset-0 flex flex-col items-center gap-6 px-10 pt-9 pb-8">
+      <ParkBack w={f.adaptive ? f.w : 1280} h={f.adaptive ? f.h : 800} />
+      <div className="absolute inset-0"><AutoFit><div className="relative w-[1280px] h-[800px] flex flex-col items-center gap-6 px-10 pt-9 pb-8">
         <Tracker mode="share" />
         <div className="w-full flex-1 min-h-0 grid grid-cols-[1fr_340px] gap-8">
           <div className="grid grid-cols-6 grid-rows-4 gap-2 p-3 rounded-[24px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
@@ -431,7 +434,7 @@ function V9b() {
             </div>
           </div>
         </div>
-      </div>
+      </div></AutoFit></div>
     </div>
   );
 }
@@ -630,7 +633,7 @@ const VIEWS: V[] = [
   { n: '9a', fit: true, name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
   { n: '9b', fit: true, name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
   { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left, Round X of Y in the middle, icon buttons right.' },
-  { n: '11b', name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team wears the turn glow; held power-ups are square cards.' },
+  { n: '11b', fit: true, name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team wears the turn glow; held power-ups are square cards.' },
   { n: '12', fit: true, name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
   { n: '13', fit: true, name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },
   { n: '14', fit: true, name: 'Settings and Calm', view: <V11 />, note: 'Calm mode first and biggest.' },
@@ -665,7 +668,7 @@ export default function UniversalViews() {
           {([['Short question', SHORT_Q], ['Long question', LONG_Q]] as const).map(([t, q]) => (
             <figure key={t} className="m-0 grid gap-3 content-start">
               <figcaption className="font-heading text-base text-center">{t}</figcaption>
-              <DeviceSet land={<QLaptop theme="park" q={q} />} port={<QTablet theme="park" q={q} />} ground={{ background: PP.kelly }} />
+              <DeviceSet adaptive land={<QLaptop theme="park" q={q} />} port={<QTablet theme="park" q={q} />} />
             </figure>
           ))}
         </div>

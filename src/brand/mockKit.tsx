@@ -189,7 +189,7 @@ export function LakeBack({ w, h }: { w: number; h: number }) {
 export type FrameKind = 'board' | 'laptop' | 'ipadL' | 'ipadP' | 'phone';
 export const FRAMES: Record<FrameKind, { w: number; h: number; label: string }> = {
   board: { w: 1600, h: 900, label: 'Big screen 16:9' }, laptop: { w: 1280, h: 800, label: 'Laptop 16:10' },
-  ipadL: { w: 1180, h: 820, label: 'iPad landscape' }, ipadP: { w: 820, h: 1180, label: 'iPad portrait' }, phone: { w: 430, h: 932, label: 'Phone portrait' },
+  ipadL: { w: 1180, h: 820, label: 'iPad landscape' }, ipadP: { w: 820, h: 1180, label: 'iPad portrait' }, phone: { w: 430, h: 932, label: 'Phone' },
 };
 type FrameInfo = { kind: FrameKind; w: number; h: number; portrait: boolean; adaptive: boolean };
 const FrameCtx = createContext<FrameInfo>({ kind: 'laptop', w: 1280, h: 800, portrait: false, adaptive: false });
@@ -202,13 +202,14 @@ export function AutoFit({ children, width }: { children: ReactNode; width?: numb
   const [k, setK] = useState(1);
   useLayoutEffect(() => {
     const b = box.current, c = inner.current; if (!b || !c) return;
-    const fit = () => { const cw = c.scrollWidth, ch = c.scrollHeight; setK(Math.min(1, b.clientWidth / Math.max(cw, 1), b.clientHeight / Math.max(ch, 1))); };
+    const fit = () => { const cw = c.offsetWidth, ch = c.offsetHeight; if (!cw || !ch) return; setK(Math.min(1, b.clientWidth / cw, b.clientHeight / ch)); };
     const ro = new ResizeObserver(fit); ro.observe(b); ro.observe(c); fit();
     return () => ro.disconnect();
   }, []);
+  // The child sits absolutely so it keeps its natural size; then it is scaled to fit and centered.
   return (
-    <div ref={box} className="w-full h-full min-h-0 relative grid place-items-center overflow-hidden">
-      <div ref={inner} className="flex flex-col items-center justify-center" style={{ width: width ?? 'max-content', transform: `scale(${k})`, transformOrigin: 'center' }}>{children}</div>
+    <div ref={box} className="w-full h-full min-h-0 relative">
+      <div ref={inner} className="absolute left-1/2 top-1/2 flex flex-col items-center justify-center" style={{ width: width ?? 'max-content', transform: `translate(-50%, -50%) scale(${k})`, transformOrigin: 'center' }}>{children}</div>
     </div>
   );
 }
@@ -226,8 +227,8 @@ function Lazy({ children, ratio }: { children: ReactNode; ratio: number }) {
 function Screen({ kind, land, port, landSize, portSize, adaptive, ground }: { kind: FrameKind; land: ReactNode; port?: ReactNode; landSize: [number, number]; portSize: [number, number]; adaptive?: boolean; ground: CSSProperties }) {
   const f = FRAMES[kind]; const portrait = f.h > f.w;
   let body: ReactNode;
-  if (portrait && adaptive && !port) {
-    body = <FrameCtx.Provider value={{ kind, w: f.w, h: f.h, portrait, adaptive: true }}><div className="w-full h-full relative">{land}</div></FrameCtx.Provider>;
+  if (adaptive) {
+    body = <FrameCtx.Provider value={{ kind, w: f.w, h: f.h, portrait, adaptive: true }}><div className="w-full h-full relative">{portrait && port ? port : land}</div></FrameCtx.Provider>;
   } else {
     const [dw, dh] = portrait && port ? portSize : landSize;
     const k = Math.min(f.w / dw, f.h / dh);
@@ -321,6 +322,13 @@ export function MainBtn({ children, wide, big, yellow }: { children: ReactNode; 
   );
 }
 
+// Landscape: the 1280 x 800 design scaled to fit the frame and centered (the
+// purple ground fills the rest, so it reads as one screen).
+function fitDesign(f: FrameInfo, canvas: number): CSSProperties {
+  if (!f.adaptive) return { transform: `scale(${canvas / 1280})` };
+  const k = Math.min(f.w / 1280, f.h / 800);
+  return { transform: `translate(${(f.w - 1280 * k) / 2}px, ${(f.h - 800 * k) / 2}px) scale(${k})` };
+}
 // ---------- THE start menu (teacher, 2026-11-23, newest: "improve the format
 // so no white background, just the card buttons like the game types and power
 // ups against the putple background. only show setting toggles and such when
@@ -368,7 +376,7 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
   }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
-      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
+      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, color: I, ...fitDesign(f, canvas) }}>
         <div className="absolute left-10 right-10 top-7 flex items-center justify-between">
           <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto" draggable={false} />
           <div className="flex gap-3">
@@ -429,7 +437,7 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
   }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
-      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
+      <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, color: I, ...fitDesign(f, canvas) }}>
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="absolute left-10 top-7 h-10 w-auto" draggable={false} />
         <div className="absolute left-10 right-10 top-[108px] bottom-[44px] flex gap-10">
           <div className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
