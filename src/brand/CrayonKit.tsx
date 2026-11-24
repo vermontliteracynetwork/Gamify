@@ -376,14 +376,14 @@ function RollingDie({ value, phase, delay, dir, size, still, onTap, label }: { v
   const tossing = phase === 'rolling' && !still;
   return (
     <motion.button type="button" onClick={onTap} aria-label={label} className="relative rounded-[18%] focus-visible:outline-4 focus-visible:outline-offset-4"
-      style={{ width: size, height: size, transformOrigin: '50% 100%', outlineColor: ND.cobalt }}
+      style={{ width: size, height: size, transformOrigin: '50% 100%', outlineColor: '#6a45f0' }}
       animate={tossing
         ? { y: [0, -size * 0.75, 0, -size * 0.26, 0, -size * 0.07, 0], scaleY: [1, 1.06, 0.76, 1.05, 0.9, 1, 1], scaleX: [1, 0.95, 1.2, 0.97, 1.08, 1, 1] }
         : phase === 'waiting' && !still ? { y: [0, -6, 0], scaleY: 1, scaleX: 1 } : { y: 0, scaleY: 1, scaleX: 1 }}
       transition={tossing
         ? { duration: 1.1, delay, times: [0, 0.28, 0.5, 0.64, 0.8, 0.9, 1], ease: ['easeOut', 'easeIn', 'easeOut', 'easeIn', 'easeOut', 'easeIn'] }
         : phase === 'waiting' && !still ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
-      whileHover={phase !== 'rolling' && !still ? { scale: 1.05 } : undefined}>
+      whileHover={phase !== 'rolling' && !still ? { scale: 1.05, rotate: [0, -6, 5, -3, 0], transition: { duration: 0.6, repeat: Infinity, repeatDelay: 0.4 } } : undefined}>
       <motion.span className="block w-full h-full" style={{ filter: phase === 'waiting' ? `drop-shadow(0 0 14px ${ND.yellow})` : undefined }}
         animate={tossing ? { rotate: [0, 200 * dir, 320 * dir, 350 * dir, 360 * dir, 360 * dir, 360 * dir] } : { rotate: 0 }}
         transition={tossing ? { duration: 1.1, delay, times: [0, 0.28, 0.5, 0.64, 0.8, 0.9, 1], ease: 'easeOut' } : { duration: 0 }}>
@@ -439,11 +439,9 @@ export function DiceDemo({ count }: { count: 1 | 2 }) {
         ))}
       </div>
       <p className="sr-only" aria-live="polite">{phase === 'waiting' ? shows : ''}</p>
-      <button type="button" onClick={tap} disabled={phase === 'rolling'}
-        className="rounded-full font-bold px-6 min-h-12 text-lg motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0.5 motion-safe:transition-transform disabled:opacity-60"
-        style={{ background: phase === 'waiting' ? ND.paper : ND.cobalt, color: phase === 'waiting' ? ND.ink : '#ffffff', border: `2px solid ${ND.ink}`, boxShadow: `0 4px 0 ${phase === 'waiting' ? '#d9cfbd' : ND.cobaltDeep}` }}>
-        {phase === 'waiting' ? 'Go on' : count === 2 ? 'Roll both' : 'Roll'}
-      </button>
+      {/* No Roll button (teacher, 2026-11-24): the die itself is the button. It
+          wiggles on hover and rolls on a tap; after a roll it waits for a tap. */}
+      <p className="font-semibold text-sm" style={{ color: ND.quiet }} aria-hidden="true">{phase === 'waiting' ? 'Tap the die to go on' : phase === 'rolling' ? ' ' : count === 2 ? 'Tap a die to roll both' : 'Tap the die to roll'}</p>
     </div>
   );
 }
@@ -500,7 +498,7 @@ export function CrayonKitSection() {
           </div>
         </div>
         <p className="text-sm font-semibold max-w-prose" style={{ color: ND.quiet }}>
-          Tap the die (or Roll) to roll. It tumbles through four hand-drawn frames, lands with a squash and two small bounces, then waits, glowing, until it is tapped, the same as the Board Game. Double dice land side by side a beat apart with no total written: kids count the pips (your rule, 2026-11-13); a screen reader hears both numbers. Still motion: a quick fade to the new face.
+          Tap the die to roll (no Roll button; it wiggles on hover). It tumbles through four hand-drawn frames, lands with a squash and two small bounces, then waits, glowing, until it is tapped, the same as the Board Game. Double dice land side by side a beat apart with no total written: kids count the pips (your rule, 2026-11-13); a screen reader hears both numbers. Still motion: a quick fade to the new face.
         </p>
       </div>
     </div>

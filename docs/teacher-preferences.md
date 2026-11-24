@@ -318,3 +318,4 @@ line that fits, and add each new preference the same turn she says it.
 - Territory cap (2026-11-24, "good"): the room shows at most 12 animals per side; the score shows the true count.
 - Pattern colors (2026-11-24, "switch up the colors so they are not just pink. add to image 2 bank of patterns"): the new patterns use varied colorways across the palette (pink at most once or twice), and all of them live in the Universal patterns bank on /brand.
 - Pinterest (2026-11-24, "add to our dev plan to have a strong pinterest marketing effort"): Pinterest is a main marketing channel (dev plan Part 5B), Design Chair drafts, she approves and posts.
+- Wait list (2026-11-24, "remove school sticker set images. do the dice demo and 404 page. wait on game lab and hidden games until my explicit approval."): no school sticker set; Game Lab games and the hidden games get no redesign work until she explicitly approves.

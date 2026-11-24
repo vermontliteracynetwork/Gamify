@@ -12,6 +12,7 @@ import MotionRoot from './ui/motion/MotionRoot';
 import PublicHome from './public/PublicHome';
 import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
+import NotFoundPage from './public/NotFoundPage';
 
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { SessionSupports } from './student/session';
@@ -204,6 +205,8 @@ function AnimatedRoutes() {
           <Route path="/owner/line" element={<Navigate to="/owner" replace />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
+          {/* Every unknown address (teacher, 2026-11-24: the 404 page). */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
       </motion.div>
