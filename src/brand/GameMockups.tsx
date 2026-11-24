@@ -799,72 +799,22 @@ function skyItems(w: number, h: number, count: number, holes: Box[], seed = 11) 
   }
   return out.map((p) => [rnd(), p] as const).sort((a, b) => a[0] - b[0]).slice(0, count).map(([, p]) => p);
 }
-// Her favorite Question Tracker (teacher, 2026-11-24: "keep as orginal as
-// possible, just updating the texture and colors"): the live Classic art in
-// public/classic/star-quiz/ redrawn flat. The deep navy night with soft lighter
-// cloud bands, tiny white twinkles and four-point glints, and her six star
-// shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat
-// rounded, shooting star with three trails). Smooth flat fills, no grain, no
-// outlines (closest to hers), brand yellows: Lemon, Butter, a touch of Orange.
 const NIGHT = '#1c3a66';
-function starPts(outer: number[], inner: number, rot: number) {
-  const n = outer.length; const pts: string[] = [];
-  for (let k = 0; k < n * 2; k++) { const r = k % 2 ? inner : outer[k / 2]; const a = ((rot - 90 + (k * 180) / n) * Math.PI) / 180; pts.push(`${(50 + r * Math.cos(a)).toFixed(1)},${(50 + r * Math.sin(a)).toFixed(1)}`); }
-  return pts.join(' ');
-}
-// Concave-sided star: each arm curves in through a point near the center.
-function curvyStar(n: number, outer: number, pull: number, rot: number) {
-  let d = '';
-  for (let k = 0; k < n; k++) {
-    const a = ((rot - 90 + (k * 360) / n) * Math.PI) / 180, m = ((rot - 90 + ((k + 0.5) * 360) / n) * Math.PI) / 180;
-    const x = 50 + outer * Math.cos(a), y = 50 + outer * Math.sin(a), cx = 50 + pull * Math.cos(m), cy = 50 + pull * Math.sin(m);
-    const a2 = ((rot - 90 + ((k + 1) * 360) / n) * Math.PI) / 180;
-    d += `${k ? '' : `M${x.toFixed(1)} ${y.toFixed(1)}`} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${(50 + outer * Math.cos(a2)).toFixed(1)} ${(50 + outer * Math.sin(a2)).toFixed(1)} `;
-  }
-  return d + 'Z';
-}
-export function NightStar({ kind, size, color }: { kind: number; size: number; color: string }) {
-  const k = kind % 6;
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
-      {k === 0 && <polygon points={starPts([49, 40, 47, 34, 45], 9, -12)} fill={color} stroke={color} strokeWidth="3" strokeLinejoin="round" />}
-      {k === 1 && <polygon points={starPts([44, 42, 44, 40, 43], 19, 18)} fill={color} stroke={color} strokeWidth="9" strokeLinejoin="round" />}
-      {k === 2 && <path d={curvyStar(5, 48, 16, 0)} fill={color} stroke={color} strokeWidth="4" strokeLinejoin="round" />}
-      {k === 3 && <path d={curvyStar(4, 49, 9, 0)} fill={color} />}
-      {k === 4 && <polygon points={starPts([40, 40, 40, 40, 40], 24, 0)} fill={color} stroke={color} strokeWidth="16" strokeLinejoin="round" />}
-      {k === 5 && <g><path d="M44 52 L92 14 M50 60 L96 30 M38 46 L80 6" stroke={color} strokeWidth="5" strokeLinecap="round" /><g transform="translate(-14 14) scale(0.62)"><polygon points={starPts([44, 44, 44, 44, 44], 21, -14)} fill={color} stroke={color} strokeWidth="10" strokeLinejoin="round" /></g></g>}
-    </svg>
-  );
-}
-const NIGHT_COLORS = [PP.lemon, PP.butter, PP.lemon, PP.butter, PP.lemon, PP.orange];
-export function NightSky({ w, h }: { w: number; h: number }) {
-  let sd = 5; const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
-  const dots = Array.from({ length: Math.round((w * h) / 9000) }, () => [rnd() * w, rnd() * h, 1 + rnd() * 1.6, 0.45 + rnd() * 0.5]);
-  const glints = Array.from({ length: Math.max(4, Math.round((w * h) / 120000)) }, () => [rnd() * w, rnd() * h * 0.9, 7 + rnd() * 9]);
-  const bands = [[0.2, 0.12, 0.5], [0.75, 0.3, 0.55], [0.3, 0.55, 0.6], [0.8, 0.78, 0.5], [0.1, 0.9, 0.45]];
-  return (
-    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
-      <defs>
-        <linearGradient id="ns-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#183460" /><stop offset="1" stopColor="#21436f" /></linearGradient>
-        <filter id="ns-b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation={Math.max(w, h) * 0.025} /></filter>
-      </defs>
-      <rect width={w} height={h} fill="url(#ns-g)" />
-      <g filter="url(#ns-b)" opacity="0.55">{bands.map(([x, y, s], i) => <ellipse key={i} cx={x * w} cy={y * h} rx={w * s} ry={h * 0.045} fill="#2f5a92" transform={`rotate(-4 ${x * w} ${y * h})`} />)}</g>
-      {dots.map(([x, y, r, o], i) => <circle key={i} cx={x} cy={y} r={r} fill="#fff" opacity={o} />)}
-      {glints.map(([x, y, r], i) => <path key={i} d={`M${x} ${y - r} Q${x + r * 0.12} ${y - r * 0.12} ${x + r} ${y} Q${x + r * 0.12} ${y + r * 0.12} ${x} ${y + r} Q${x - r * 0.12} ${y + r * 0.12} ${x - r} ${y} Q${x - r * 0.12} ${y - r * 0.12} ${x} ${y - r} Z`} fill="#fff" />)}
-    </svg>
-  );
-}
-// The whole stage is her night sky; earned stars fill the open sky around the HUD.
+// Reverted to her own Question Tracker (teacher, 2026-11-24: "star question
+// tracker still needs to be reverted back to my old one"): her uploaded
+// Classic art exactly as the live game shows it, the night-sky background
+// (public/classic/star-quiz/background.webp) and her six star pictures
+// (item-1 to item-6), never redrawn.
+const SKY_BG = '/classic/star-quiz/background.webp';
+const SKY_ITEMS = [1, 2, 3, 4, 5, 6].map((n) => `/classic/star-quiz/item-${n}.webp`);
+const SkyStar = ({ size }: { size: number }) => <img src={SKY_ITEMS[2]} alt="" aria-hidden="true" className="object-contain" style={{ width: size, height: size }} draggable={false} />;
 function SkyScene({ w, h, got = SKY_GOT, holes = [], children }: { w: number; h: number; got?: number; holes?: Box[]; children?: ReactNode }) {
   const items = skyItems(w, h, got, holes);
   return (
-    <div className="w-full h-full relative overflow-hidden" style={{ background: NIGHT }}>
-      <NightSky w={w} h={h} />
-      {items.map((p, i) => { const streak = i >= got - 3; const kind = (i * 7 + 3) % 6; return (
-        <span key={i} className="absolute" style={{ left: p.x - p.size * 0.65, top: p.y - p.size * 0.65, transform: `rotate(${p.rot}deg)`, filter: streak ? `drop-shadow(0 0 10px rgba(250,190,55,0.85))` : undefined }}>
-          <NightStar kind={kind} size={p.size * 1.3 * (streak ? 1.1 : 1)} color={streak ? PP.orange : NIGHT_COLORS[(i * 5) % 6]} />
-        </span>); })}
+    <div className="w-full h-full relative overflow-hidden" style={{ background: `${NIGHT} center / cover url("${SKY_BG}")` }}>
+      {items.map((p, i) => { const streak = i >= got - 3; return (
+        <img key={i} src={SKY_ITEMS[(i * 7 + 3) % 6]} alt="" aria-hidden="true" className="absolute object-contain" draggable={false}
+          style={{ left: p.x - p.size * 0.65, top: p.y - p.size * 0.65, width: p.size * 1.3 * (streak ? 1.1 : 1), height: p.size * 1.3 * (streak ? 1.1 : 1), transform: `rotate(${p.rot}deg)`, filter: streak ? 'drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 2px #fff6c2)' : undefined }} />); })}
       {children}
     </div>
   );
@@ -872,7 +822,7 @@ function SkyScene({ w, h, got = SKY_GOT, holes = [], children }: { w: number; h:
 function SkyGoal({ got = SKY_GOT }: { got?: number }) {
   return (
     <div className="p-4 grid gap-2.5 text-center" style={paper}>
-      <span className="flex items-center justify-center gap-2"><NightStar kind={2} color={PP.lemon} size={40} /><span className="font-display text-5xl font-bold leading-none tabular-nums">{got}<span className="text-2xl"> of {SKY_N}</span></span></span>
+      <span className="flex items-center justify-center gap-2"><img src={SKY_ITEMS[2]} alt="" aria-hidden="true" className="w-10 h-10 object-contain" /><span className="font-display text-5xl font-bold leading-none tabular-nums">{got}<span className="text-2xl"> of {SKY_N}</span></span></span>
       <Meter segments={1} done={0} part={got / SKY_N} width="100%" label={`${got} of ${SKY_N} stars`} />
     </div>
   );
@@ -917,7 +867,7 @@ function StudentDevice({ solo, w: w0 = 820, h: h0 = 1180 }: { solo?: boolean; w?
   return (
     <SkyScene w={w} h={h} got={solo ? 4 : 9} holes={phone ? [[10, 16, w - 10, 640]] : port ? [[40, 80, w - 40, 1020]] : [[40, 20, w - 40, h - 70]]}>
       <div className="absolute left-1/2" style={{ top: phone ? 24 : port ? 90 : 24, transform: `translateX(-50%) scale(${k})`, transformOrigin: 'top center' }}>
-        <QuestionCard tablet={port} q="Which word starts a sentence the right way?" who={{ icon: <NightStar kind={2} color={PP.lemon} size={phone ? 38 : port ? 54 : 46} />, name: solo ? 'My sky' : 'Ava' }} answers={SKY_ANS} right={1} />
+        <QuestionCard tablet={port} q="Which word starts a sentence the right way?" who={{ icon: <SkyStar size={phone ? 38 : port ? 54 : 46} />, name: solo ? 'My sky' : 'Ava' }} answers={SKY_ANS} right={1} />
       </div>
       <div className="absolute inset-x-0 grid justify-items-center" style={{ top: phone ? h - 92 : port ? 1040 : h - 80 }}><Burst text={solo ? 'Yes! A star for your sky!' : 'Yes! A star for the class sky!'} size={phone ? 'text-xl' : port ? 'text-4xl' : 'text-3xl'} color={PP.lemon} /></div>
     </SkyScene>
@@ -931,7 +881,7 @@ function SkyWaiting({ w: w0 = 820, h: h0 = 1180 }: { w?: number; h?: number }) {
   return (
     <SkyScene w={w} h={h} got={14} holes={[[l - 20, t - 20, l + cw + 20, t + ch + 20]]}>
       <div className={`absolute ${phone ? 'p-6' : 'p-10'} grid justify-items-center content-center gap-5 text-center`} style={{ left: l, top: t, width: cw, height: ch, ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
-        <NightStar kind={2} color={PP.lemon} size={phone ? 110 : port ? 140 : 100} />
+        <SkyStar size={phone ? 110 : port ? 140 : 100} />
         <h2 style={{ ...GY, fontSize: phone ? 40 : port ? 64 : 54 }}><GText>You&apos;re in, Ava!</GText></h2>
         <p className="font-bold leading-snug" style={{ fontSize: phone ? 22 : port ? 28 : 24 }}>Your teacher will start soon. Your stars will light up the sky.</p>
         <span className="flex gap-3" aria-label="Waiting">{[0, 1, 2].map((d) => <span key={d} className="w-5 h-5 rounded-full" style={{ background: [PP.periwinkle, PP.lemon, PP.pink][d], border: `2.5px solid ${I}` }} />)}</span>
@@ -1212,7 +1162,7 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     views: [
       { name: 'Live student: waiting', land: <SkyWaiting w={1000} h={625} />, port: <SkyWaiting />, note: 'The game\'s own sky, the student\'s star (the glow is for winners only).' },
       { name: 'Solo: in play', land: <StudentDevice solo w={1000} h={625} />, port: <StudentDevice solo />, note: 'The one universal question card in the game\'s sky.' },
-      { name: 'Class screen: celebration', land: <Results game={<ClassScreen />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} score="30 stars" missed={4} />, port: <Results game={<ClassScreen w={820} h={1180} />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} score="30 stars" missed={4} />, note: 'One class win, no ranks in Cooperative.' },
+      { name: 'Class screen: celebration', land: <Results game={<ClassScreen />} title="We filled the sky!" winner={<SkyStar size={110} />} score="30 stars" missed={4} />, port: <Results game={<ClassScreen w={820} h={1180} />} title="We filled the sky!" winner={<SkyStar size={110} />} score="30 stars" missed={4} />, note: 'One class win, no ranks in Cooperative.' },
     ],
   },
 };
@@ -1336,7 +1286,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   {
     id: 'star-quiz', name: 'Question Tracker (Live: class screen and a student device)', laptop: <ClassScreen />, tablet: <StudentDevice />,
     lines: [
-      'New (teacher, 2026-11-24: her favorite live version, kept as original as possible): the whole stage is her deep navy night sky with soft cloud bands, white twinkles and glints, filling with her six star shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat rounded, shooting star) in flat Lemon, Butter and a touch of Orange, no outlines, many sizes and turns (glowing orange for a first-try streak); the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
+      'Reverted (teacher, 2026-11-24: "star question tracker still needs to be reverted back to my old one"): her own live Question Tracker, using her uploaded night-sky background and her six star pictures exactly as the live game does, never redrawn; the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
       'Why: one shared goal builds relatedness and lowers social comparison (self-determination theory); the goal bar shows how close the class is without empty placeholder shapes (goal-gradient effect); answers are about 112px tall for small fingers (WCAG 2.5.5).',
       'Pieces (theme template): Background 1600 x 1000 (the scene that fills), six Items 256 x 256 (a star, a fish...), Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the night sky edge to edge filled with 26 items. No power-ups in this game today.',
     ],

@@ -28,7 +28,7 @@ plus the hand-off from the "Game recreations" session).
    design that i just explained for match three for the bubble shooter game and
    all other solo game board games like this in the future." Bubble Pop first;
    becomes a Brand Kit rule for all future solo board games.
-5. [ ] **Bowling redesign.** "massive improvements needed for bowling layout and
+5. [x] **Bowling redesign.** "massive improvements needed for bowling layout and
    design. refer to baamboozle bowling more." Rebuild the layout from a
    description of how that style of classroom bowling game plays and reads
    (big lane, clear turn, simple team scores); reimplemented from scratch, no
