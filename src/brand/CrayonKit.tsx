@@ -347,7 +347,7 @@ export const UNIVERSAL_POWERS: { id: PowerId; name: string; job: string; games: 
   { id: 'tornado', name: 'Tornado', job: 'Mixes up the board.', games: '10 games (Board Game, Pin Twister, Shake Up, Card Shuffle, Spin Cycle...)' },
   { id: 'lightning', name: 'Lightning', job: 'Clears a row or blasts a spot.', games: '8 games (Fireball, Color Blast, Bomb Piece, Laser Sweep, Mega Laser...)' },
   { id: 'mystery-box', name: 'Mystery Box', job: 'Opens a surprise power-up.', games: '8 games (Mystery Box, Message in a Bottle, Mystery Crate, Surprise gift...)' },
-  { id: 'treasure-chest', name: 'Treasure Chest', job: 'Bonus points.', games: '8 games (Prize Bag, Tip Jar, Golden Box, Treasure chest...)' },
+  { id: 'treasure-chest', name: 'Prize Chest', job: 'Bonus points.', games: '8 games (Prize Chest, Tip Jar, Golden Box, Prize Bag...)' },
   { id: 'second-chance', name: 'Second Chance', job: 'Try again after a miss.', games: '4 games (Second Chance, Extra Heart, Heart Snack, Safe Shovel); proposed for every quiz game' },
   { id: 'double-dice', name: 'Double Dice', job: 'Roll two dice and move both.', games: 'Every dice game: Board Game, Snakes and Ladders, Track Race' },
   { id: 'spin-wheel', name: 'Spin Wheel', job: 'Spin to see what happens.', games: 'Board Game, Game Show (Swap Spinner)' },

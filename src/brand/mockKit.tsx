@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, PersonArmsSpread, Play, Television, User, X, type Icon } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, Lightbulb, PersonArmsSpread, Play, Television, User, X, type Icon } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
+import { CrayonPowerUp, type PowerId } from './CrayonKit';
 
 // Shared parts for the Brand page mockups (PROPOSAL, 2026-11-23): the team
 // set, the one turn glow, the site's purple ground and the game theme backs.
@@ -72,6 +73,37 @@ export function TurnGlow({ children, className = '', style, rays = 2.4, halo = 1
     </span>
   );
 }
+
+// Computer players get a fun name that rotates each game (teacher, 2026-11-24:
+// "Goofy Lamp is thinking..."), never "Computer".
+export const CPU_NAMES = ['Goofy Lamp', 'Silly Fox', 'Happy Rainbow', 'Sleepy Cloud', 'Bouncy Sock', 'Wiggly Worm'] as const;
+export const cpuName = (n: number) => CPU_NAMES[((n % CPU_NAMES.length) + CPU_NAMES.length) % CPU_NAMES.length];
+
+// Every die wiggles gently on hover so kids see it can be rolled (teacher,
+// 2026-11-24): a small rotate and lift loop, only on hover devices, off in
+// Calm (still prop) and the Still motion setting.
+const WIGGLE_CSS = '@keyframes die-wiggle{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-7deg) translateY(-2px)}50%{transform:rotate(5deg) translateY(0)}75%{transform:rotate(-3deg) translateY(-1px)}}@media (hover:hover){.die-wiggle:hover .die-wiggle-in{animation:die-wiggle .9s ease-in-out infinite}}html[data-motion="still"] .die-wiggle-in{animation:none!important}';
+export function DieWiggle({ children, still }: { children: ReactNode; still?: boolean }) {
+  return <span className={`${still ? '' : 'die-wiggle'} inline-grid`}><style>{WIGGLE_CSS}</style><span className="die-wiggle-in inline-grid">{children}</span></span>;
+}
+
+// Whose turn it is (teacher, 2026-11-24): the player's icon (no circle, no
+// white backing) and name on Butter shading. No "pick a card" line, no glow.
+export const TURN_SHADE = PP.butter;
+export function TurnChip({ icon, name, size = 22 }: { icon: ReactNode; name: string; size?: number }) {
+  return <span className="inline-flex items-center gap-2.5 rounded-full font-bold whitespace-nowrap" style={{ background: TURN_SHADE, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}`, padding: `${size * 0.2}px ${size * 0.9}px ${size * 0.2}px ${size * 0.35}px`, fontSize: size }}>{icon}{name}</span>;
+}
+// One power-up as its own square card (teacher, 2026-11-24): no tray panel,
+// no label above, no helper text, no circle behind the art.
+export function PowerCard({ id, name, size = 64 }: { id: PowerId; name: string; size?: number }) {
+  return (
+    <span aria-label={name} className="grid justify-items-center content-center gap-0.5 rounded-[14px] text-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
+      <CrayonPowerUp id={id} size={size * 0.6} /><span className="font-bold leading-tight px-0.5" style={{ fontSize: Math.max(10, size * 0.16) }}>{name}</span>
+    </span>
+  );
+}
+// The in-game hint button: a lightbulb round beside Settings (teacher, 2026-11-24).
+export function HintIcon({ size = 20 }: { size?: number }) { return <Lightbulb weight="bold" size={size} />; }
 
 // THE meter (teacher, 2026-11-24: "more modern and theme aligned"), built once
 // for the round tracker, the start-menu step tracker and goal bars. One
@@ -331,6 +363,27 @@ function fitDesign(f: FrameInfo, canvas: number): CSSProperties {
   const k = Math.min(f.w / 1280, f.h / 800);
   return { transform: `translate(${(f.w - 1280 * k) / 2}px, ${(f.h - 800 * k) / 2}px) scale(${k})` };
 }
+// The site's own white top menu bar, full width across the frame (teacher,
+// 2026-11-24: "bring back the top white bar ... this main tab top menu").
+function SiteBar({ f, canvas }: { f: FrameInfo; canvas: number }) { const k = f.adaptive ? Math.min(f.w / 1280, f.h / 800) : canvas / 1280; const dx = f.adaptive ? (f.w - 1280 * k) / 2 : 0; return (
+        <div className="absolute left-0 right-0 top-0 z-10 flex items-center" style={{ height: 68 * k, paddingLeft: dx + 40 * k, background: '#fbfcf8', borderBottom: `${Math.max(2, 3 * k)}px solid #000` }}>
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="w-auto" style={{ height: 36 * k }} draggable={false} />
+          {/* The site's own top menu, as a signed-in teacher sees it in a game. */}
+          <span className="ml-auto flex items-center" style={{ gap: 10 * k, paddingRight: dx + 40 * k }}>
+            {['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold whitespace-nowrap" style={{ fontSize: 17 * k, padding: `0 ${8 * k}px` }}>{l}</span>)}
+            {[['Join', '#e4eafe'], ['Log in', '#fdfd94']].map(([l, bg]) => <span key={l} className="rounded-full font-bold whitespace-nowrap" style={{ fontSize: 17 * k, padding: `${6 * k}px ${16 * k}px`, border: `${Math.max(1.5, 2.5 * k)}px solid #000`, background: bg }}>{l}</span>)}
+          </span>
+        </div>); }
+export function SiteBarSmall({ phone }: { phone: boolean }) {
+  return (
+    <div className="flex items-center shrink-0" style={{ padding: `0 ${phone ? 20 : 40}px`, height: phone ? 48 : 64, background: '#fbfcf8', borderBottom: '3px solid #000' }}>
+      <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-6' : 'h-8'} w-auto`} draggable={false} />
+      {phone
+        ? <span className="ml-auto w-10 h-10 rounded-full grid place-items-center font-bold" style={{ border: '2px solid #000', background: '#fff' }} aria-label="Menu">☰</span>
+        : <span className="ml-auto flex items-center gap-3">{['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold text-[15px]">{l}</span>)}{[['Join', '#e4eafe'], ['Log in', '#fdfd94']].map(([l, bg]) => <span key={l} className="rounded-full font-bold px-3 py-1 text-[15px]" style={{ border: '2px solid #000', background: bg }}>{l}</span>)}</span>}
+    </div>
+  );
+}
 // ---------- THE start menu (teacher, 2026-11-23, newest: "improve the format
 // so no white background, just the card buttons like the game types and power
 // ups against the putple background. only show setting toggles and such when
@@ -341,7 +394,7 @@ function fitDesign(f: FrameInfo, canvas: number): CSSProperties {
 // the choice cards straight on the ground, centered, the same Back and Next
 // footer. No white panel. Drawn at 1280 x 800 and scaled to the frame's canvas.
 const MK_GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
-function MkRound({ children, label, size = 52 }: { children: ReactNode; label: string; size?: number }) {
+function MkRound({ children, label, size = 46 }: { children: ReactNode; label: string; size?: number }) {
   return <span aria-label={label} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
 export function MenuGo({ children }: { children: ReactNode }) {
@@ -360,16 +413,21 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
     const phone = f.w < 600, px = phone ? 20 : 40;
     return (
       <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 36}px` }}>
-        <div className="flex items-center justify-between">
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-7' : 'h-10'} w-auto`} draggable={false} />
-          <div className={`flex ${phone ? 'gap-1.5' : 'gap-3'}`}>
-            <MkRound size={phone ? 38 : 52} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound size={phone ? 38 : 52} label="Settings"><GearSix weight="bold" size={phone ? 18 : 24} /></MkRound>
-            <MkRound size={phone ? 38 : 52} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound size={phone ? 38 : 52} label="Close"><X weight="bold" size={phone ? 18 : 24} /></MkRound>
-          </div>
+        {/* The white top bar with the logo, then one even row: title left, step
+            meter in the middle, round buttons right (teacher, 2026-11-24). */}
+        <div className="flex items-center" style={{ margin: `-${phone ? 20 : 28}px -${px}px 0`, padding: `0 ${px}px`, height: phone ? 48 : 64, background: '#fbfcf8', borderBottom: '3px solid #000' }}>
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-6' : 'h-8'} w-auto`} draggable={false} />
+          {phone
+            ? <span className="ml-auto w-10 h-10 rounded-full grid place-items-center font-bold" style={{ border: `2px solid ${I}`, background: '#fff' }} aria-label="Menu">☰</span>
+            : <span className="ml-auto flex items-center gap-3">{['Home', 'Features', 'Pricing', 'Research', 'Blog'].map((l) => <span key={l} className="font-bold text-[15px]">{l}</span>)}{[['Join', '#e4eafe'], ['Log in', '#fdfd94']].map(([l, bg]) => <span key={l} className="rounded-full font-bold px-3 py-1 text-[15px]" style={{ border: '2px solid #000', background: bg }}>{l}</span>)}</span>}
         </div>
-        <div className={`mt-6 flex ${phone ? 'flex-col items-start gap-3' : 'items-center justify-between gap-4'}`}>
-          <h2 style={{ ...MK_GY, fontSize: phone ? 34 : 48 }}>{title}</h2>
-          <Meter segments={total} done={step - 1} part={1} width={total * (phone ? 40 : 52)} label={`Step ${step} of ${total}`} />
+        <div className={`mt-5 ${phone ? 'grid gap-3' : 'grid grid-cols-[1fr_auto_1fr] items-center gap-4'}`}>
+          <h2 className="text-left" style={{ ...MK_GY, fontSize: phone ? 28 : 38 }}>{title}</h2>
+          <Meter segments={total} done={step - 1} part={1} width={total * (phone ? 34 : 44)} label={`Step ${step} of ${total}`} />
+          <div className={`flex ${phone ? 'gap-1.5' : 'gap-3 justify-self-end'}`}>
+            <MkRound size={phone ? 38 : 48} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 38 : 48} label="Settings"><GearSix weight="bold" size={phone ? 18 : 22} /></MkRound>
+            <MkRound size={phone ? 38 : 48} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 22} /></MkRound><MkRound size={phone ? 38 : 48} label="Close"><X weight="bold" size={phone ? 18 : 22} /></MkRound>
+          </div>
         </div>
         <div className="flex-1 min-h-0 my-5"><AutoFit width={phone ? 640 : f.w - 2 * px}>{children}</AutoFit></div>
         <div style={{ height: 72 }}><AutoFit>{footer}</AutoFit></div>
@@ -378,18 +436,18 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
   }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
+      <SiteBar f={f} canvas={canvas} />
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, color: I, ...fitDesign(f, canvas) }}>
-        <div className="absolute left-10 right-10 top-7 flex items-center justify-between">
-          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-10 w-auto" draggable={false} />
-          <div className="flex gap-3">
-            <MkRound label="Accessibility"><PersonArmsSpread weight="bold" size={24} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={24} /></MkRound>
-            <MkRound label="Full screen"><CornersOut weight="bold" size={24} /></MkRound><MkRound label="Close"><X weight="bold" size={24} /></MkRound>
-          </div>
-        </div>
-        <div className="absolute left-[80px] right-[80px] top-[108px] bottom-[36px] flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-6">
-            <h2 className="text-[50px]" style={MK_GY}>{title}</h2>
-<Meter segments={total} done={step - 1} part={1} width={total * 62} label={`Step ${step} of ${total}`} />
+        {/* The white top bar with the logo, then one even row: title fully left,
+            step meter in the middle, round buttons right (teacher, 2026-11-24). */}
+        <div className="absolute left-10 right-10 top-[96px] bottom-[36px] flex flex-col gap-6">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+            <h2 className="text-[40px] text-left" style={MK_GY}>{title}</h2>
+            <Meter segments={total} done={step - 1} part={1} width={total * 52} label={`Step ${step} of ${total}`} />
+            <div className="flex gap-3 justify-self-end">
+              <MkRound label="Accessibility"><PersonArmsSpread weight="bold" size={22} /></MkRound><MkRound label="Settings"><GearSix weight="bold" size={22} /></MkRound>
+              <MkRound label="Full screen"><CornersOut weight="bold" size={22} /></MkRound><MkRound label="Close"><X weight="bold" size={22} /></MkRound>
+            </div>
           </div>
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
           {footer}
@@ -439,9 +497,9 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
   }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
+      <SiteBar f={f} canvas={canvas} />
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, color: I, ...fitDesign(f, canvas) }}>
-        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="absolute left-10 top-7 h-10 w-auto" draggable={false} />
-        <div className="absolute left-10 right-10 top-[108px] bottom-[44px] flex gap-10">
+        <div className="absolute left-10 right-10 top-[100px] bottom-[44px] flex gap-10">
           <div className="w-[720px] h-full rounded-[30px] overflow-hidden relative shrink-0" style={{ border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{cover}</div>
           <div className="flex-1 min-w-0 h-full flex flex-col justify-between">
             <div className="flex items-start gap-4">

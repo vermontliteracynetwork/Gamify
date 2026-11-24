@@ -65,7 +65,7 @@ export default function Pinball() {
   const { theme, themes, playable, choose } = useGameTheme('pinball');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 10, questions: 2, who: 'teams' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
+  const [setup, change] = useSavedSetup('pinball', { setId: LIBRARY[0].id, rounds: 10, questions: 2, who: 'solo' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);

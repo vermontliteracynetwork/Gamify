@@ -30,9 +30,12 @@ export default function WayToPlay({ modes: given, value, onChange }: { modes: Pl
               <Icon weight="fill" size={28} className="absolute left-[8%] bottom-[10%] opacity-20 rotate-12" />
               <Icon weight="fill" size={22} className="absolute right-[10%] top-[12%] opacity-20 -rotate-12" />
             </span>
-            <span className="px-3 py-2 grid gap-0.5">
-              <span className="font-display text-lg font-bold leading-tight">{t(`mode.${look(m)}` as StringKey)}</span>
-              <span className="font-semibold text-sm leading-snug">{m === 'versus' ? 'Play against the computer' : t(`mode.${m}.hint` as StringKey)}</span>
+            {/* The name reads big; the line under it shows on hover with a mouse
+                (teacher, 2026-11-24). Touch screens have no hover, so there it
+                shows under the picked card only (iPad-first rule). */}
+            <span className="px-3 py-2 grid gap-0.5 content-center min-h-[3.75rem]">
+              <span className="font-display text-2xl font-bold leading-tight">{t(`mode.${look(m)}` as StringKey)}</span>
+              <span className={`font-semibold text-sm leading-snug [@media(hover:hover)]:hidden [@media(hover:hover)]:group-hover:block [@media(hover:hover)]:group-focus-visible:block ${on ? '' : '[@media(hover:none)]:hidden'}`}>{m === 'versus' ? 'Play against the computer' : t(`mode.${m}.hint` as StringKey)}</span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

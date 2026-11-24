@@ -50,7 +50,7 @@ export default function FourInARow() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', way: 'share' as 'share' | 'solo', powerUps: true, powerOff: [] as string[] });
+  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', way: 'solo' as 'share' | 'solo', powerUps: true, powerOff: [] as string[] });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);

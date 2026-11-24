@@ -60,7 +60,7 @@ export default function LabGame({ def }: { def: LabDef }) {
   // one screen; Solo is one player, or one player against the computer when
   // the game is a turn game with no solo of its own.
   const ways = (LAB_MODES[def.id] ?? ['share']).filter((m): m is 'share' | 'solo' => (m === 'share' && def.ways.includes('teams')) || (m === 'solo' && (def.ways.includes('solo') || def.ways.includes('teams'))));
-  const way: 'share' | 'solo' = ways.includes(setup.who as 'share') ? (setup.who as 'share' | 'solo') : ways[0] ?? 'solo';
+  const way: 'share' | 'solo' = ways.includes(setup.who as 'share') ? (setup.who as 'share' | 'solo') : ways.includes('solo') ? 'solo' : ways[0] ?? 'solo'; // Solo first, so no extra setting shows (teacher, 2026-11-24)
   const versus = way === 'solo' && !def.ways.includes('solo');
   const solo = way === 'solo' && !versus;
   const { ask: soloAsk, element: soloElement, missed: soloMissed } = useAsk({ gameId: def.id, mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });

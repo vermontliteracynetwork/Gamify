@@ -58,7 +58,7 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'teams' as 'teams' | 'versus' });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'versus' as 'teams' | 'versus' });
   const versus = setup.who === 'versus';
   // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
   const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');

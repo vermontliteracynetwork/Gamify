@@ -61,7 +61,7 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'versus' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);

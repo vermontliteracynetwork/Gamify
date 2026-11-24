@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import {
   ArrowLeft, ArrowRight, CaretDown, Check, CornersOut, GearSix, MagnifyingGlass, Pause,
-  PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Toolbox, UsersThree, X,
+  Lightbulb, PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Toolbox, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
@@ -48,11 +48,13 @@ function Stage({ children, pad = 40 }: { children: ReactNode; pad?: number }) {
 function Round({ children, label, size = 52 }: { children: ReactNode; label: string; size?: number }) {
   return <span aria-label={label} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: PP.paper, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
-function Tools({ size = 52, access = true }: { size?: number; access?: boolean }) {
+// In-game groups add the lightbulb hint beside Settings (teacher, 2026-11-24); tips open in a card, never as lines on the board.
+function Tools({ size = 52, access = true, hint }: { size?: number; access?: boolean; hint?: boolean }) {
   const s = Math.round(size * 0.46);
   return (
-    <div className="flex gap-3">
+    <div className={`flex ${hint ? 'gap-4' : 'gap-3'}`}>
       {access && <Round size={size} label="Accessibility"><PersonArmsSpread weight="bold" size={s} /></Round>}
+      {hint && <Round size={size} label="Hint"><Lightbulb weight="bold" size={s} /></Round>}
       <Round size={size} label="Settings"><GearSix weight="bold" size={s} /></Round>
       <Round size={size} label="Full screen"><CornersOut weight="bold" size={s} /></Round>
       <Round size={size} label="Close"><X weight="bold" size={s} /></Round>
@@ -110,16 +112,13 @@ function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
   const left = mode === 'solo'
     ? <span className="flex items-baseline gap-2"><span style={{ ...GY, fontSize: 56 * k }} className="tabular-nums">120</span><b style={{ fontSize: 18 * k, color: PP.quiet }}>points</b></span>
     : mode === 'share'
-      ? <span className="flex items-center gap-3"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: 52 * k, height: 52 * k, background: PP.paper, border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={34 * k} /></span></TurnGlow><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>Team Sky&apos;s turn</b></span>
+      ? <span className="flex items-center gap-3 rounded-full pr-5" style={{ background: PP.butter, padding: `${4 * k}px ${20 * k}px ${4 * k}px ${8 * k}px` }}><Badge t={TEAMS[1]} size={48 * k} /><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>Team Sky</b></span>
       : <span className="flex items-center gap-3"><Star weight="fill" size={40 * k} color={PP.lemon} /><span className="grid"><b className="whitespace-nowrap" style={{ fontSize: 24 * k }}>38 of 60 stars</b>{k >= 1 && <span className="font-bold" style={{ fontSize: 15 * k, color: PP.quiet }}>Class goal: fill the sky</span>}</span></span>;
   return (
     <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 rounded-full" style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
       <div className="justify-self-start">{left}</div>
-      <div className="grid justify-items-center gap-1.5">
-        <b style={{ fontSize: 17 * k }}>Round 2 of 3</b>
-        <RoundMeter round={2} rounds={3} part={0.5} w={k < 1 ? 190 : 360} />
-      </div>
-      <div className="justify-self-end"><Tools size={48 * k} access={false} /></div>
+      <RoundMeter round={2} rounds={3} part={0.5} w={k < 1 ? 190 : 360} />
+      <div className="justify-self-end"><Tools size={42 * k} access={false} hint /></div>
     </div>
   );
 }
@@ -137,21 +136,27 @@ function OptCard({ label, children }: { label: string; children: ReactNode }) {
 }
 const WAYS = (['Share', 'Live', 'Solo'] as const).map((id) => ({ id, ...WAYS_STYLE[id] }));
 // Settings show only under the way they belong to (teacher, 2026-11-23).
-function V2({ pick = 'Share' }: { pick?: 'Share' | 'Solo' }) {
+// Solo is picked first so no extra setting shows; the line under each name
+// appears on hover (on touch: under the picked card); names read bigger
+// (teacher, 2026-11-24).
+function V2({ pick: first = 'Solo' }: { pick?: 'Share' | 'Solo' }) {
+  const [pick, setPick] = useState<string>(first);
   return (
     <Wizard step={1} total={5} title="How will you play?">
       <div className="flex flex-col items-center gap-9">
         <div className="flex gap-8">
           {WAYS.map((w) => { const on = w.id === pick; return (
-            <div key={w.id} className="relative w-[268px] h-[262px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
-              <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: w.soft, borderBottom: `3px solid ${I}` }}><span className="w-[128px] h-[128px] rounded-full grid place-items-center" style={{ background: w.bright, border: `3px solid ${I}` }}><w.icon weight="bold" size={80} /></span></span>
-              <span className="px-4 py-3 text-center"><b className="text-[32px] block" style={GY}>{w.id}</b><span className="text-[17px] font-semibold">{w.hint}</span></span>
+            <button type="button" key={w.id} onClick={() => setPick(w.id)} className="group relative w-[268px] h-[262px] rounded-[24px] flex flex-col text-left" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
+              <span className="flex-1 w-full grid place-items-center rounded-t-[21px]" style={{ background: w.soft, borderBottom: `3px solid ${I}` }}><span className="w-[128px] h-[128px] rounded-full grid place-items-center" style={{ background: w.bright, border: `3px solid ${I}` }}><w.icon weight="bold" size={80} /></span></span>
+              <span className="w-full h-[78px] px-4 grid place-content-center text-center">
+                <b className="block text-[40px] leading-none group-hover:text-[30px] transition-[font-size] duration-200" style={GY}>{w.id}</b>
+                <span className="text-[17px] font-semibold hidden group-hover:block">{w.hint}</span>
+              </span>
               {on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
-            </div>); })}
+            </button>); })}
         </div>
-        {pick === 'Share'
-          ? <OptCard label="How do you share?"><Seg opts={['Same device', 'Share a join code']} pick={0} /></OptCard>
-          : <OptCard label="Who do you play against?"><Seg opts={['Just me', 'The computer']} pick={1} /></OptCard>}
+        {pick === 'Share' && <OptCard label="How do you share?"><Seg opts={['Same device', 'Share a join code']} pick={0} /></OptCard>}
+        {pick === 'Live' && <OptCard label="How the class plays"><Seg opts={['Cooperative', 'Competitive']} pick={0} /></OptCard>}
       </div>
     </Wizard>
   );
@@ -270,7 +275,7 @@ function V5() {
               initial={still ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={still ? { opacity: 0, transition: { duration: 0 } } : { scale: 0.6, opacity: 0, transition: { duration: 0.18 } }}
               transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 17, layout: { type: 'spring', stiffness: 320, damping: 30 } }}
               className="relative w-[250px]" style={card}>
-              <div className={`${many ? 'h-[58px]' : 'h-[72px]'} grid place-items-center rounded-t-[17px]`} style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><span className={`${many ? 'w-12 h-12' : 'w-14 h-14'} rounded-full grid place-items-center`} style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={many ? 32 : 38} /></span></div>
+              <div className={`${many ? 'h-[58px]' : 'h-[72px]'} grid place-items-center rounded-t-[17px]`} style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><Badge t={t} size={many ? 46 : 54} /></div>
               <button type="button" aria-label={`Remove ${t.name}`} onClick={() => remove(t)} className="absolute -top-3 -right-3 w-9 h-9 rounded-full grid place-items-center" style={{ background: '#fff', border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}><X weight="bold" size={16} /></button>
               <div className={`${many ? 'p-3 gap-2' : 'p-4 gap-3'} grid`}>
                 <span className="h-11 px-4 rounded-xl flex items-center justify-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
@@ -300,7 +305,7 @@ function V6() {
         {SETUP.map((c) => (
           <div key={c.id} className="relative w-[320px] h-[196px] grid justify-items-center content-center gap-2 text-center rounded-[24px]"
             style={c.on ? { background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` } : { background: PP.cream, border: `3px dashed ${I}` }}>
-            <span className="relative w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><BlobPatch color={c.soft} size={84} /><span className="relative"><CrayonPowerUp id={c.id} size={66} /></span></span>
+            <span className="w-[76px] h-[76px] grid place-items-center" style={c.on ? undefined : { filter: 'grayscale(1)', opacity: 0.5 }}><CrayonPowerUp id={c.id} size={72} /></span>
             <b className="text-[22px] leading-tight">{c.name}</b>
             <span className="text-[16px] font-semibold leading-snug" style={{ color: PP.quiet }}>{c.job}</span>
             <span className="absolute -top-3.5 -right-3.5">{c.on ? <Check40 /> : <span className="w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><X weight="bold" size={18} /></span>}</span>
@@ -347,8 +352,9 @@ function QCard({ tablet, q = SHORT_Q }: { tablet?: boolean; q?: string }) {
     <div className={`${big ? 'w-[697px]' : 'w-[1088px]'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 28 : 26 }}>
       {/* Her page 2 header: the current team left; tools, settings, full screen, close, then Listen on the right. */}
       <div className="flex items-center gap-3">
-        <span className="flex items-center gap-3 flex-1 min-w-0"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: b, height: b, background: '#fff', border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={b * 0.62} /></span></TurnGlow><b className="truncate" style={{ fontSize: big ? 30 : 26 }}>Team Sky</b></span>
+        <span className="flex-1 min-w-0 flex"><span className="flex items-center gap-3 min-w-0 rounded-full pl-1.5 pr-5 py-1" style={{ background: PP.butter }}><Badge t={TEAMS[1]} size={b * 0.9} /><b className="truncate" style={{ fontSize: big ? 30 : 26 }}>Team Sky</b></span></span>
         <Round size={b} label="Tools"><Toolbox weight="bold" size={ic} /></Round>
+        <Round size={b} label="Hint"><Lightbulb weight="bold" size={ic} /></Round>
         <Round size={b} label="Settings"><GearSix weight="bold" size={ic} /></Round>
         <Round size={b} label="Full screen"><CornersOut weight="bold" size={ic} /></Round>
         <Round size={b} label="Close"><X weight="bold" size={ic} /></Round>
@@ -414,12 +420,12 @@ function V9b() {
           <div className="grid grid-cols-6 grid-rows-4 gap-2 p-3 rounded-[24px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
             {Array.from({ length: 24 }, (_, i) => <span key={i} className="rounded-xl" style={{ background: [PP.paper, PP.butter, PP.gamify, PP.aqua][i % 4], border: `2.5px solid ${I}` }} />)}
           </div>
-          {/* No panel: rows sit right on the stage, held power-ups are square cards under them. */}
+          {/* No panel: rows sit right on the stage; Butter shading = whose turn; power-ups are single square cards, no tray or label. */}
           <div className="grid gap-4 content-start justify-items-center">
             {TEAMS.map((t, i) => {
               const row = (
-                <div className="w-[320px] flex items-center gap-3 px-4 h-[64px] rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
-                  {i === 1 ? <TurnGlow round><Badge t={t} size={36} /></TurnGlow> : <Badge t={t} size={36} />}<b className="flex-1 text-[20px] truncate">{t.name}</b><span className="text-[36px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
+                <div className="w-[320px] flex items-center gap-3 px-4 h-[64px] rounded-full" style={{ background: i === 1 ? PP.butter : PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+                  <Badge t={t} size={44} /><b className="flex-1 text-[20px] truncate">{t.name}</b><span className="text-[36px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
                 </div>
               );
               return <div key={t.name}>{row}</div>;
@@ -427,7 +433,7 @@ function V9b() {
             <div className="flex gap-4 justify-center mt-2">
               {HELD.map((h) => (
                 <div key={h.id} className="w-[132px] aspect-square grid justify-items-center content-center gap-1 text-center rounded-[20px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
-                  <span className="relative w-[70px] h-[70px] grid place-items-center"><BlobPatch color={h.soft} size={76} /><span className="relative"><CrayonPowerUp id={h.id} size={60} /></span></span>
+                  <CrayonPowerUp id={h.id} size={66} />
                   <b className="text-[16px] leading-tight">{h.name}</b>
                 </div>
               ))}
@@ -451,7 +457,7 @@ function V10() {
                 {[1, 0, 2].map((i) => { const t = TEAMS[i]; return (
                   <div key={t.name} className="grid justify-items-center gap-3">
                     {i === 0
-                      ? <TurnGlow round><span className="w-[120px] h-[120px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={78} /></span></TurnGlow>
+                      ? <TurnGlow><Badge t={t} size={120} /></TurnGlow>
                       : <Badge t={t} size={60} />}
                     <span className="relative w-[150px] rounded-t-[20px] grid place-items-center text-[44px]" style={{ ...GY, height: [150, 110, 80][i], background: i === 0 ? PP.periwinkle : t.soft, border: `3px solid ${I}` }}>{i + 1}</span>
                   </div>); })}
@@ -593,7 +599,7 @@ function V12b() {
       <div className="w-full grid grid-cols-4 gap-5 mt-7">
         {TEAMS.map((t, i) => (
           <div key={t.name} className="flex flex-col items-center gap-3 pt-5 pb-5 rounded-[26px]" style={{ background: t.soft, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-            <span className="w-[76px] h-[76px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={50} /></span>
+            <Badge t={t} size={72} />
             <b className="text-[24px]">{t.name}</b>
             {NAMES.slice(i * 3, i * 3 + 3).map((n) => <span key={n} className="w-[200px] h-12 rounded-full grid place-items-center font-bold text-[21px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{n}</span>)}
           </div>
@@ -622,8 +628,8 @@ type V = { n: string; name: string; view: ReactNode; note: string; port?: ReactN
 // "all these screens would be considered universal and should be moved to universal page").
 const VIEWS: V[] = [
   { n: '1', fit: true, name: 'Welcome', view: <V1 />, note: 'Her original layout: the cover (a real miniature of the game in play) big on the left; the right column exactly as tall, spread evenly: the title row with the corner buttons, the description and ways to play, the How to play card, a 72px start button level with the cover bottom.' },
-  { n: '2a', fit: true, name: 'How will you play? (Share picked)', view: <V2 pick="Share" />, note: 'No white panel: the cards sit on the purple ground. "How do you share?" shows only because Share is picked.' },
-  { n: '2b', fit: true, name: 'How will you play? (Solo picked)', view: <V2 pick="Solo" />, note: 'Solo shows only its own setting: who you play against.' },
+  { n: '2a', fit: true, name: 'How will you play? (opens on Solo)', view: <V2 pick="Solo" />, note: 'Opens on Solo, so no extra setting shows at first. Names read big; hover a card to see its line (on touch it shows under the picked card). Tap a card to pick it.' },
+  { n: '2b', fit: true, name: 'How will you play? (Share picked)', view: <V2 pick="Share" />, note: '"How do you share?" appears only after Share is picked.' },
   { n: '3', fit: true, name: 'Share a join code', view: <ShareCode />, note: 'Only after Share and "Share a join code": the code big on one paper card.' },
   { n: '4', fit: true, name: 'Question set', view: <V3 />, note: 'Tabs, search, subject and grade filters, recent first; each card shows subject, grades, count, the first question and when it was used.' },
   { n: '5', fit: true, name: 'Options', view: <V4 />, note: 'Each option group is its own card on the ground; only real field labels.' },
@@ -632,8 +638,8 @@ const VIEWS: V[] = [
   { n: '8', fit: true, name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
   { n: '9a', fit: true, name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
   { n: '9b', fit: true, name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
-  { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left, Round X of Y in the middle, icon buttons right.' },
-  { n: '11b', fit: true, name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team wears the turn glow; held power-ups are square cards.' },
+  { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left (the team name only, shaded), the meter in the middle with no words, icon buttons right with the hint beside Settings.' },
+  { n: '11b', fit: true, name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team is shaded Butter (no glow, no banner); power-ups are single square cards; tips live behind the lightbulb.' },
   { n: '12', fit: true, name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
   { n: '13', fit: true, name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },
   { n: '14', fit: true, name: 'Settings and Calm', view: <V11 />, note: 'Calm mode first and biggest.' },
