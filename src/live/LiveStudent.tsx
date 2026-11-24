@@ -1,5 +1,5 @@
 import LobbyToy from './LobbyToy';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
@@ -12,6 +12,10 @@ import { ranked, routeFor, starColor, type LiveState } from './protocol';
 import { setLive, useLiveRoom } from './session';
 import { SideBadge } from '../games/territory/art';
 import { lookFor } from '../games/territory/logic';
+import Sky from '../games/practice/Sky';
+import { PAPER, skyStar, useBoxPct } from '../games/practice/SkyHud';
+import { useGameTheme } from '../theme/useGameTheme';
+import { useSettings } from '../settings/SettingsContext';
 
 // The student's waiting room for a live game: waiting to be let in, then
 // waiting for the start, then straight into the game.
@@ -25,19 +29,36 @@ export default function LiveLobby() {
     const r = routeFor(state, me.pid);
     navigate(`/games/${r.gameId}?set=${r.setId}${r.pair ? `&pair=${r.pair.code}&seat=${r.pair.seat}` : ''}`, { replace: true });
   }, [playing]); // eslint-disable-line react-hooks/exhaustive-deps
-  const box = 'max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center';
+  // Question Tracker waits in its own night sky (approved mockup, batch 7):
+  // her stars around the waiting card, the game's star in the card.
+  const { theme: skyTheme } = useGameTheme('star-quiz');
+  const { settings } = useSettings();
+  const skyRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hole = useBoxPct(skyRef, cardRef, 14);
+  const sky = !!state && !!me && me.status !== 'removed' && routeFor(state, me.pid).gameId === 'star-quiz';
+  const star = sky ? skyStar(skyTheme) : undefined;
+  const box = `max-w-lg mx-auto px-4 grid gap-5 justify-items-center text-center ${sky ? "relative z-10 pt-[clamp(1rem,4dvh,3.5rem)] pb-4" : "pt-14 pb-16"}`;
   if (!session) return <main className={box}><p className="font-bold text-lg">{t('live.noSession')}</p><Link to="/join" className={buttonClasses('primary')}>{t('live.toJoin')}</Link></main>;
   if (closed) return <main className={box}><Prohibit weight="fill" size={64} aria-hidden="true" /><h1 className="title-bubble text-4xl"><Title text={t('live.closed')} /></h1><p className="font-bold">{t('live.closedText')}</p></main>;
   const status = !state ? 'finding' : !me ? 'finding' : me.status === 'removed' ? 'removed' : me.status === 'pending' ? 'pending' : 'in';
   return (
+    <>
+    {sky && (
+      <div ref={skyRef} className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+        <Sky theme={skyTheme} filled={14} total={14} still={settings.motion === 'still'} label="" height="100%" bleed seed={5} hole={hole ?? { l: 20, t: 10, r: 80, b: 90 }} />
+      </div>
+    )}
     <main className={box}>
-      <motion.p key={session.name} initial={reduce ? false : { scale: 0.8 }} animate={{ scale: 1 }} className="font-display text-4xl">{session.name}</motion.p>
+      <div ref={cardRef} className="grid gap-5 justify-items-center w-full">
+      <motion.p key={session.name} initial={reduce ? false : { scale: 0.8 }} animate={{ scale: 1 }} className={`font-display text-4xl ${sky ? 'px-5 py-1 rounded-pill' : ''}`} style={sky ? { ...PAPER, borderRadius: 999 } : undefined}>{session.name}</motion.p>
       <div className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center w-full" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
-        {status === 'in' ? <CheckCircle weight="fill" size={64} color="#1f7a45" aria-hidden="true" /> : status === 'removed' ? <Prohibit weight="fill" size={64} aria-hidden="true" /> : (
+        {status === 'in' && star ? <motion.img src={star} alt="" aria-hidden="true" className="w-24 h-24 object-contain" draggable={false} animate={reduce ? undefined : { y: [0, -6, 0], rotate: [0, 6, -4, 0] }} transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }} />
+          : status === 'in' ? <CheckCircle weight="fill" size={64} color="#1f7a45" aria-hidden="true" /> : status === 'removed' ? <Prohibit weight="fill" size={64} aria-hidden="true" /> : (
           <motion.span animate={reduce ? undefined : { rotate: [0, 180, 180, 360] }} transition={{ repeat: Infinity, duration: 2.4 }}><HourglassMedium weight="fill" size={64} aria-hidden="true" /></motion.span>
         )}
         <h1 className="font-display text-3xl"><Title text={t(`live.${status}`)} /></h1>
-        <p className="font-bold">{t(`live.${status}Text`)}</p>
+        <p className="font-bold">{t(`live.${status}Text`)}{sky && status === 'in' ? ` ${t('sky.waitText')}` : ''}</p>
         {status === 'in' && state && me && state.gameId === 'territory' && state.mode === 'compete' && state.teams?.[me.pid] && (
           <p className="flex items-center gap-3 font-display text-2xl uppercase"><SideBadge side={state.teams[me.pid]} look={lookFor(me.pid, state.teams[me.pid])} size="4rem" /><Title text={t(state.teams[me.pid] === 'defender' ? 'territory.youCat' : 'territory.youMouse')} /></p>
         )}
@@ -47,7 +68,9 @@ export default function LiveLobby() {
       </div>
       {/* Something to play with while the class gathers (teacher, 2026-11-13). */}
       {(status === 'in' || status === 'pending') && <LobbyToy />}
+      </div>
     </main>
+    </>
   );
 }
 

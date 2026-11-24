@@ -23,10 +23,12 @@ export interface Character { id: string; name: string; image: string }
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
 // Used on its own (with a Start button) or as a setup page (onChange only).
-export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters, vsComputer = false }: {
+export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters, inOrder = false, vsComputer = false }: {
   mode: 'share' | 'versus'; min: number; max: number;
   // Characters to pick from (Board Game animals, teacher 2026-10-31), in place of team icons.
   characters?: Character[];
+  // Start player 1 on the first character, player 2 on the second (a theme's own pair, e.g. Four in a Row Classic).
+  inOrder?: boolean;
   onStart?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   onChange?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   embedded?: boolean;
@@ -55,7 +57,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const [picking, setPicking] = useState<number | null>(null);
   const iconOf = (i: number) => slots[i]?.icon ?? i;
   // Each player starts with a different character, picked at random; tap it to choose another.
-  const [deal] = useState(() => (characters ? characters.map((_, k) => k).sort(() => Math.random() - 0.5) : []));
+  const [deal] = useState(() => (characters ? (inOrder ? characters.map((_, k) => k) : characters.map((_, k) => k).sort(() => Math.random() - 0.5)) : []));
   const charOf = (i: number) => slots[i]?.character ?? deal[i % Math.max(1, deal.length)] ?? 0;
   function pickCharacter(i: number, c: number) {
     setSlots((cur) => {

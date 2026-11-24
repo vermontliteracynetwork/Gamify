@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ClassicPiece } from '../../games/match-three/pieces';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
@@ -12,6 +13,7 @@ import { GAMES } from '../../games/registry';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
 import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
+import { ballUrl } from '../../games/bowling/alley';
 
 // Each game's own preview, one file per game in ./previews, named by game id
 // (teacher, 2026-11-16: "ALWAYS show preview as the actual game template").
@@ -65,7 +67,7 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
 
 // Each team's picture as the game shows it: Bowling's balls, else team icons.
 const teamArt = (theme: GameTheme) => Array.from({ length: 10 }, (_, k) => theme.gameId === 'bowling'
-  ? pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? `/classic/bowling/ball-${k}.webp`
+  ? pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? ballUrl(k)
   : pieceImage(theme, `team-${k + 1}`));
 
 // The Teams page picker, where each team taps its picture (Bowling: its ball).
@@ -216,7 +218,8 @@ function board(theme: GameTheme, size?: number) {
         <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full aspect-square" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
           {Array.from({ length: n * n }, (_, i) => {
             const k = (i * 7 + Math.floor(i / n) * 3) % 6;
-            return <img key={i} src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;
+            const own = pieceImage(theme, `tile-${k}`);
+            return own ? <img key={i} src={own} alt="" className="w-full h-full object-contain" /> : <ClassicPiece key={i} kind={k} className="w-full h-full" />;
           })}
         </div>
       );

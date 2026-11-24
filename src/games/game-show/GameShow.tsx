@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import HintButton from '../../engine/HintButton';
 import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
@@ -44,6 +44,9 @@ import ItemArt from '../../theme/ItemArt';
 import type { ThemeItem } from '../../theme/types';
 import Title from '../../ui/Title';
 import DialogFocus from '../../ui/DialogFocus';
+import Meter, { METER_H } from '../../ui/Meter';
+import { useStageColor } from '../../theme/stageColor';
+import { Doodle, STUDIO, Marquee, PRIZE_CONFETTI, StudioBack, teamPastel, useBoxSize } from './studio';
 
 
 type Board = 'cards' | 'grid';
@@ -105,7 +108,19 @@ export default function GameShow() {
     // It stays until it is tapped (teacher, 2026-11-24).
     setToasts((x) => [...x, { id, text }]);
   }
+  // Classic wears the approved studio and marquee; a theme's own world sets its own stage.
   const marquee = theme.id.endsWith(':classic');
+  const stageColor = useStageColor('game-show');
+  const [stageRef, box] = useBoxSize<HTMLDivElement>();
+  const [gridRef, gridBox] = useBoxSize<HTMLDivElement>();
+  // A tall screen stands the card grid on its side (4 x 3 shows 3 across, 4 down).
+  const tall = box.h > box.w * 1.05 && grid.cols > grid.rows;
+  const dCols = tall ? grid.rows : grid.cols, dRows = tall ? grid.cols : grid.rows;
+  const cardW = gridBox.w > 0 ? (gridBox.w - (dCols - 1) * gap) / dCols : 120;
+  const cardBack = pieceFill(theme, 'card-back', STUDIO.butter);
+  const cardBackArt = !!pieceImage(theme, 'card-back');
+  const bulbs = Math.max(8, Math.min(26, Math.round((gridBox.w || box.w * 0.6) / (box.rem * 2.3))));
+  const progress = board === 'cards' ? { done: cards.filter((c) => c.open).length, total: cards.length } : { done: cells.filter((c) => c.used).length, total: cells.length };
   // The brass intro when play starts, then the music fades in: one track for
   // the cards board, another for the category grid (teacher, 2026-11-01).
   useGameMusic(phase === 'play', board === 'grid' ? `${GS}music-categories.mp3` : `${GS}music-cards.mp3`, settings, `${GS}intro.mp3`);
@@ -372,7 +387,7 @@ export default function GameShow() {
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
-    <main className={phase === 'play' || phase === 'end' ? '!p-0 [--gs-extra:6rem] lg:[--gs-extra:0rem]' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
+    <main className={phase === 'play' || phase === 'end' ? '!p-0' :'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
       {phase !== 'play' && phase !== 'end' && <GameTopRow hint="game-show" onSettings={() => setSettingsOpen(true)} />}
 
@@ -425,17 +440,23 @@ export default function GameShow() {
       )}
 
       {(phase === 'play' || phase === 'end') && turns && (
-        // The board fills the play space, the same in full screen; small controls
-        // on top, the scores right beside it (teacher, 2026-10-31).
-        <div className="relative play-fill px-3 sm:px-[clamp(1rem,2.5vw,2.5rem)] py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
+        // The approved studio (mockup, teacher 2026-11-24): the board in its bulb
+        // marquee with the meter on top, the scores in a column beside it (below
+        // it on portrait screens), the tools top right on the valance. The board
+        // fills the play space, the same in full screen (teacher, 2026-10-31).
+        <div ref={stageRef} className="relative play-fill overflow-hidden" data-gs-stage={marquee ? 'studio' : 'theme'}>
+          {marquee && <StudioBack w={box.w} h={box.h} rem={box.rem} back={stageColor} />}
+          <div className={`relative h-full grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_clamp(12rem,19vw,17rem)] gap-3 lg:gap-[clamp(1rem,3vw,3rem)] content-center items-center max-w-[110rem] mx-auto
+            [--gs-extra:6rem] lg:[--gs-extra:0rem] ${marquee ? '[--gs-rim:1.05rem] [--gs-inner:0.6rem] [--gs-top:3.1rem] [--gs-bottom:1.25rem]' : '[--gs-rim:0px] [--gs-inner:0px] [--gs-top:0.75rem] [--gs-bottom:0.75rem]'}`}
+            style={{ padding: marquee ? 'var(--gs-top) max(9.5%, 3rem) var(--gs-bottom)' : 'var(--gs-top) clamp(0.75rem, 2.5vw, 2.5rem) var(--gs-bottom)' }}>
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className={`absolute ${marquee ? 'top-[0.45rem] right-[max(1rem,2%)]' : 'top-3 right-3'} flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11`}>
             {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
           </div>
-          <section className="relative grid gap-4 min-w-0 @container">
+          <section className="relative grid justify-items-center gap-[0.6rem] min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
             <div className={`fixed inset-0 z-[70] grid place-content-center justify-items-center gap-3 ${toasts.length ? 'bg-black/35' : 'pointer-events-none'}`} role="status">
               <AnimatePresence>
@@ -450,26 +471,32 @@ export default function GameShow() {
             {cpuTurn && step === 'pick' && !question && !reveal && flipping === null && player && (
               <p className="fixed left-1/2 bottom-6 -translate-x-1/2 z-40 font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-6 py-2 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">{t('cpu.thinking', { name: player.name })}</p>
             )}
-            {/* Whose turn shows as a glow in the scores (teacher, 2026-10-31); screen readers hear it. */}
+            {/* Whose turn shows as the Butter row in the scores (teacher, 2026-11-24); screen readers hear it. */}
             {phase === 'play' && player && (
               <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
             )}
 
-            {phase === 'play' && board === 'cards' && (
+            {/* THE meter on top of the board (approved mockup): it fills as cards are won. */}
+            <Meter width="min(22rem, 60%)" segments={1} done={0} part={progress.total ? progress.done / progress.total : 0}
+              label={`${progress.done}/${progress.total} ${t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')}`} />
+
+            {board === 'cards' && (
               // The cards fill the space left on screen, all the same size
-              // (teacher, 2026-10-31), and are always horizontal: never taller
-              // than 0.75 times their width, at any grid size (teacher, 2026-11-01).
-              // A studio stage: marquee lights chase around the board.
-              // (Classic only: a theme's own world sets its own stage.)
-              <div className={`relative rounded-panel ${marquee ? 'p-[14px]' : ''}`} style={marquee ? { background: '#241c3d', boxShadow: 'var(--shadow-sticker-lg)' } : undefined}>
-              {marquee && (['top', 'bottom', 'left', 'right'] as const).map((side) => (
-                <span key={side} aria-hidden="true" className={`absolute pointer-events-none ${side === 'top' ? 'top-0 inset-x-3 h-[14px]' : side === 'bottom' ? 'bottom-0 inset-x-3 h-[14px]' : side === 'left' ? 'left-0 inset-y-3 w-[14px]' : 'right-0 inset-y-3 w-[14px]'} ${settings.motion === 'full' ? (side === 'top' || side === 'bottom' ? 'gs-bulbs-x gs-twinkle' : 'gs-bulbs-y gs-twinkle') : ''}`}
-                  style={{ backgroundImage: 'radial-gradient(circle, #fff6b0 0 2.5px, #f6c544 3px, rgba(246,197,68,0.25) 4.5px, transparent 5.5px)', backgroundSize: side === 'top' || side === 'bottom' ? '20px 14px' : '14px 20px', backgroundRepeat: side === 'top' || side === 'bottom' ? 'repeat-x' : 'repeat-y' }} />
-              ))}
-              <div className="grid w-full"
-                style={{ gap, gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))`,
-                  height: `min(calc(var(--play-h) - 1.5rem - ${marquee ? 28 : 0}px - var(--gs-extra, 0rem)), calc(${grid.rows} * (100cqw - ${marquee ? 28 : 0}px - ${(grid.cols - 1) * gap}px) / ${grid.cols} * 0.75 + ${(grid.rows - 1) * gap}px))` }}>
-                {cards.map((c, i) => (
+              // (teacher, 2026-10-31), and are always horizontal (300 x 220, never
+              // taller than 0.75 times their width) at any grid size (teacher,
+              // 2026-11-01). On a tall screen the grid stands on its side, so a
+              // 4 x 3 board is 3 across and 4 down; rows and columns swap together,
+              // so a full row or column is still a full line.
+              <Frame marquee={marquee} bulbs={bulbs} chase={settings.motion === 'full'}>
+              <div ref={gridRef} className="grid"
+                style={{ gap, gridTemplateColumns: `repeat(${dCols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${dRows}, minmax(0, 1fr))`,
+                  width: `calc(100cqw - 2 * ${FRAME})`,
+                  height: `min(calc(var(--play-h) - var(--gs-top) - var(--gs-bottom) - var(--gs-extra) - ${METER_H}px - 0.6rem - 2 * ${FRAME} - 8px), calc(${dRows} * (100cqw - 2 * ${FRAME} - ${(dCols - 1) * gap}px) / ${dCols} * ${CARD_RATIO} + ${(dRows - 1) * gap}px))` }}>
+                {cards.map((c, i) => {
+                  const r = Math.floor(i / grid.cols), col = i % grid.cols;
+                  const place = tall ? { gridRow: col + 1, gridColumn: r + 1 } : {};
+                  const gold = c.open && isGolden(c.kind);
+                  return (
                   <motion.button
                     key={i}
                     type="button"
@@ -478,38 +505,35 @@ export default function GameShow() {
                     aria-label={c.open ? t('tb.cardTaken', { n: i + 1, team: turns.players.find((p) => p.colorIndex === c.by)?.name ?? '' }) : t('tb.card', { n: i + 1 })}
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
-                    className={`relative w-full h-full min-h-0 rounded-input border-bold border-border font-display font-bold flex items-center justify-center text-center p-2 ${flipping === i ? 'overflow-visible z-10 !border-transparent !bg-transparent' : 'overflow-hidden'}
-                      ${c.open ? 'bg-surface' : grid.rows > 4 ? 'text-2xl' : 'text-3xl sm:text-4xl'} ${!c.open ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={flipping === i ? {} : { boxShadow: c.open && isGolden(c.kind) ? '0 0 0 4px #f2b705, 0 0 22px 6px rgba(242,183,5,0.7)' : 'var(--shadow-sticker)', ...(c.open ? (isGolden(c.kind) ? { background: 'linear-gradient(135deg, #fff3b0 0%, #ffd75e 45%, #f2b705 100%)' } : {}) : pieceFill(theme, 'card-back', '#fdfd94')) }}
+                    className={`relative w-full h-full min-h-0 rounded-[0.9rem] ${flipping === i ? 'overflow-visible z-10' : 'overflow-hidden'} ${!c.open ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
+                    style={{ ...place, border: `3px solid ${flipping === i ? 'transparent' : STUDIO.ink}`, boxShadow: flipping === i ? 'none' : gold ? '0 0 0 4px #f2b705, 0 0 22px 6px rgba(242,183,5,0.7)' : c.open ? 'none' : `0 4px 0 ${STUDIO.ink}` }}
                   >
                     {flipping === i ? (
-                      <span className="absolute inset-0" style={{ perspective: 900 }} aria-hidden="true">
-                        <motion.span className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }} initial={{ rotateY: 0, scale: 1 }} animate={{ rotateY: 180, scale: [1, 1.18, 1.08] }} transition={{ duration: 0.65 * pace(settings), ease: 'easeInOut' }}>
-                          <span className="absolute inset-0 rounded-input border-bold border-border flex items-center justify-center" style={{ backfaceVisibility: 'hidden', ...pieceFill(theme, 'card-back', '#fdfd94') }}>{i + 1}</span>
-                          <span className="absolute inset-0 rounded-input border-bold border-border flex items-center justify-center bg-surface overflow-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: '0 0 24px 6px #fdfd94' }}>
-                            {c.kind.kind === 'power' ? <span className="h-[70%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><ItemArt item={c.kind.item} size={96} still /></span> : <span className="text-[clamp(1.5rem,6cqw,4rem)]">+{c.kind.points}</span>}
-                          </span>
-                        </motion.span>
+                      // A right answer turns the card over in 3D, then the prize box opens.
+                      <span className="absolute -inset-[3px]" style={{ perspective: 900 }} aria-hidden="true">
+                        {/* A CSS keyframe turn (lift, turn, settle): Motion's rotateY jumped straight to the end here. */}
+                        <span className="absolute inset-0 gs-flip" style={{ transformStyle: 'preserve-3d', animationDuration: `${0.65 * pace(settings)}s` }}>
+                          <ClosedFace fill={cardBack} art={!cardBackArt} w={cardW} edge style={{ backfaceVisibility: 'hidden' }} />
+                          <OpenFace kind={c.kind} by={player?.colorIndex ?? 0} w={cardW} edge style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: `0 0 24px 6px ${STUDIO.butter}` }} />
+                        </span>
                       </span>
-                    ) : c.open ? (c.by !== undefined && <span className="h-[62%] aspect-square flex items-center justify-center [&>*]:!w-full [&>*]:!h-full"><TeamBadge colorIndex={c.by} /></span>) : (
-                      <>
-                        {i + 1}
-                        {/* The lucky card stays a secret until it is won (teacher, 2026-11-06). */}
-                      </>
-                    )}
+                    ) : c.open && c.by !== undefined ? <OpenFace kind={c.kind} by={c.by} w={cardW} /> : <ClosedFace fill={cardBack} art={!cardBackArt} w={cardW} />}
+                    {/* The lucky card stays a secret until it is won (teacher, 2026-11-06). */}
                   </motion.button>
-                ))}
+                  );
+                })}
               </div>
-              </div>
+              </Frame>
             )}
 
-            {phase === 'play' && board === 'grid' && (
-              // Room inside the scroll box for the bottom row's outline and shadow
-              // (teacher, 2026-10-31: never cut off).
-              <div className="overflow-x-auto p-3 -m-3">
-                <div className="grid gap-2 min-w-[560px]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
+            {board === 'grid' && (
+              // Category squares in the same marquee; room inside the scroll box for
+              // the bottom row's outline and shadow (teacher, 2026-10-31: never cut off).
+              <Frame marquee={marquee} bulbs={bulbs} chase={settings.motion === 'full'}>
+              <div className="overflow-x-auto p-1.5 -m-1.5" style={{ width: `calc(100cqw - 2 * ${FRAME})` }}>
+                <div className="grid gap-2 min-w-[min(560px,100%)]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
-                    <div key={s.id} className="min-h-16 rounded-input border-bold border-border bg-surface-2 font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]">{s.name}</div>
+                    <div key={s.id} className="min-h-14 rounded-[0.8rem] font-display font-black text-center flex items-center justify-center p-2 text-base sm:text-lg [-webkit-text-stroke:0.4px_currentColor]" style={{ background: STUDIO.paper, border: `3px solid ${STUDIO.ink}` }}>{s.name}</div>
                   ))}
                   {GRID_POINTS.map((points) => chosenSets.slice(0, 5).map((s, col) => {
                     const i = cells.findIndex((c) => c.col === col && c.points === points);
@@ -518,14 +542,16 @@ export default function GameShow() {
                       <button key={`${col}-${points}`} type="button" onClick={() => pickCell(i)}
                         disabled={!cell || cell.used || step !== 'pick' || !!question || player?.kind === 'cpu'}
                         aria-label={cell?.used ? t('tb.cellUsed', { set: s.name, points }) : t('tb.cell', { set: s.name, points })}
-                        className={`rounded-input border-bold border-border font-display text-2xl sm:text-3xl font-bold ${cell?.used ? 'bg-surface-2 text-faint' : 'tile-wiggle'}`}
-                        style={{ minHeight: 'max(3rem, calc((var(--play-h) - 1.5rem - var(--gs-extra, 0rem) - 9rem) / 5))', ...(cell?.used ? {} : { boxShadow: 'var(--shadow-sticker)', ...pieceFill(theme, 'square', '#fdfd94') }) }}>
+                        className={`rounded-[0.8rem] font-display text-2xl sm:text-3xl font-bold tabular-nums ${cell?.used ? 'text-faint' : 'tile-wiggle'}`}
+                        style={{ minHeight: `max(2.6rem, calc((var(--play-h) - var(--gs-top) - var(--gs-bottom) - var(--gs-extra) - ${METER_H}px - 0.6rem - 2 * ${FRAME} - 7.75rem) / 5))`, border: `3px solid ${STUDIO.ink}`,
+                          ...(cell?.used ? { background: 'rgba(255,250,240,0.55)', borderStyle: 'dashed' } : { boxShadow: `0 4px 0 ${STUDIO.ink}`, ...pieceFill(theme, 'square', STUDIO.butter) }) }}>
                         {cell?.used ? '' : points}
                       </button>
                     );
                   }))}
                 </div>
               </div>
+              </Frame>
             )}
 
             {phase === 'end' && (
@@ -535,8 +561,9 @@ export default function GameShow() {
             )}
           </section>
 
-          <div className="order-first lg:order-none min-w-0 grid pr-[10.5rem] lg:pr-0 lg:pt-14 lg:self-stretch">
-          <ScoreBoard turns={turns} playing={phase === 'play'} round={board === 'cards' ? `${cards.filter((c) => c.open).length}/${cards.length}` : `${cells.filter((c) => c.used).length}/${cells.length}`} roundLabel={t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')} />
+          <div className="min-w-0 grid lg:self-center">
+          <ScoreBoard turns={turns} playing={phase === 'play'} />
+          </div>
           </div>
         </div>
       )}
@@ -556,29 +583,46 @@ export default function GameShow() {
                 style={{ background: isGolden(reveal.card) ? 'repeating-conic-gradient(from 0deg, rgba(255,196,0,0.95) 0deg 8deg, rgba(255,255,255,0.6) 8deg 12deg, transparent 12deg 20deg)' : 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
             </motion.div>
           )}
+          {/* The prize card pops off the board (approved mockup, 2026-11-24): a paper
+              card with doodle confetti at its edges, the prize, its name and Continue. */}
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
-            className="relative border-heavy border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', background: reveal.card.kind === 'points' ? 'radial-gradient(circle at 50% 35%, #fffbd1, #fdfd94 45%, #f7b267 100%)' : 'var(--color-surface, #fbfcf8)' }}>
+            className="relative px-8 pt-8 pb-7 grid gap-3 justify-items-center text-center w-full max-w-[26rem]"
+            style={{ background: isGolden(reveal.card) ? 'linear-gradient(160deg, #fff7cf 0%, #ffe58a 60%, #fabe37 100%)' : STUDIO.paper, border: `3px solid ${STUDIO.ink}`, borderRadius: '1.5rem', boxShadow: `0 6px 0 ${STUDIO.ink}` }}>
+            {PRIZE_CONFETTI.map(([k, c, x, y, sz], n) => (
+              <motion.span key={n} aria-hidden="true" className="absolute pointer-events-none" style={{ left: x, top: y }}
+                initial={settings.motion === 'still' ? false : { scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: (n * 37) % 50 - 25 }} transition={{ delay: 0.2 + n * 0.05, type: 'spring', stiffness: 260, damping: 12 }}>
+                <Doodle kind={k} color={c} size={`${sz}rem`} />
+              </motion.span>
+            ))}
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
             {(current(turns).kind !== 'cpu' || !reveal.choosing) && (
-              <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+              <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-11 h-11 rounded-full flex items-center justify-center" style={{ background: STUDIO.paper, border: `2px solid ${STUDIO.ink}`, boxShadow: `0 3px 0 ${STUDIO.ink}` }}><X weight="bold" size={20} /></button>
             )}
-            {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : (
-              // The points count up, bigger for bigger prizes.
-              // A big bouncing number with streamers flying out of the box (teacher, 2026-11-01:
-              // no star, more celebratory).
+            {reveal.card.kind === 'power' ? (
+              <>
+                <motion.span className="relative w-32 h-32 grid place-items-center" initial={settings.motion === 'still' ? false : { scale: 0.3, rotate: -12 }} animate={{ scale: [0.3, 1.2, 1], rotate: [-12, 8, 0] }} transition={{ duration: 0.8, ease: 'easeOut' }}>
+                  <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} />
+                </motion.span>
+                <p className="relative font-display text-4xl sm:text-5xl leading-none"><Title text={`${reveal.card.item.name}!`} /></p>
+                <p className="relative font-bold text-xl">{t(`tb.reveal.${reveal.card.item.ability}` as 'tb.reveal.steal', { points: powerAmount(reveal.card.item) * scale })}</p>
+              </>
+            ) : (
+              // The points count up, bigger for bigger prizes: a big bouncing number
+              // with streamers flying out of the card (teacher, 2026-11-01: no star,
+              // more celebratory).
               <>
                 {settings.motion !== 'still' && Array.from({ length: 14 }, (_, k) => (
-                  <motion.span key={k} aria-hidden="true" className="absolute w-2.5 h-4 rounded-sm pointer-events-none" style={{ left: '50%', top: '38%', background: ['#e5635f', '#4fb6d8', '#9b7be0', '#4fc77a', '#f6c544', '#ef5d7a'][k % 6] }}
-                    initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }} animate={{ x: Math.cos((k / 14) * Math.PI * 2) * 190, y: Math.sin((k / 14) * Math.PI * 2) * 120 + 40, rotate: 360 + k * 40, opacity: 0 }} transition={{ duration: 1.4, ease: 'easeOut', delay: 0.15 }} />
+                  <motion.span key={k} aria-hidden="true" className="absolute w-2.5 h-4 rounded-sm pointer-events-none" style={{ left: '50%', top: '34%', background: [STUDIO.pink, '#4ba3e8', STUDIO.grape, '#22b04a', STUDIO.lemon, STUDIO.orange][k % 6], border: `1.5px solid ${STUDIO.ink}` }}
+                    initial={{ x: 0, y: 0, rotate: 0, opacity: 1 }} animate={{ x: Math.cos((k / 14) * Math.PI * 2) * 210, y: Math.sin((k / 14) * Math.PI * 2) * 140 + 40, rotate: 360 + k * 40, opacity: 0 }} transition={{ duration: 1.4, ease: 'easeOut', delay: 0.15 }} />
                 ))}
-                <motion.p className="relative font-display font-bold leading-none text-white" style={{ fontSize: `${4 + prizeTier(reveal.card)}rem`, WebkitTextStroke: '3px #000', paintOrder: 'stroke', textShadow: '0 5px 0 #000' }} aria-hidden="true"
+                <motion.p className="relative font-display font-bold leading-none" style={{ fontSize: `${4 + prizeTier(reveal.card)}rem`, color: STUDIO.lemon, WebkitTextStroke: `3px ${STUDIO.ink}`, paintOrder: 'stroke', textShadow: `0 5px 0 ${STUDIO.ink}` }} aria-hidden="true"
                   initial={settings.motion === 'still' ? false : { scale: 0.3, rotate: -10 }} animate={{ scale: [0.3, 1.25, 1], rotate: [-10, 6, 0] }} transition={{ duration: 0.8, ease: 'easeOut' }}>
                   +<CountUp to={reveal.card.points} still={settings.motion === 'still'} />
                 </motion.p>
+                <p className="relative font-display text-4xl leading-tight">{reveal.card.golden ? t('tb.pointsGolden') : reveal.card.lucky ? t('tb.pointsLucky') : t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord')}</p>
               </>
             )}
-            <p className="relative font-display text-4xl font-bold">{reveal.card.kind === 'points' ? (reveal.card.golden ? t('tb.pointsGolden') : reveal.card.lucky ? t('tb.pointsLucky') : t(prizeTier(reveal.card) === 3 ? 'tb.pointsBig' : 'tb.pointsWord')) : revealText(reveal.card)}</p>
             {reveal.choosing && current(turns).kind !== 'cpu' && (
               <div className="grid gap-2 w-full">
                 <p className="font-bold">{t('tb.chooseTeam', { action: reveal.card.kind === 'power' && reveal.card.item.ability === 'swap' ? t('tb.swapWith') : t('tb.stealFrom') })}</p>
@@ -595,12 +639,52 @@ export default function GameShow() {
             {picksTeam(reveal.card) && !reveal.choosing && turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).length === 0 && (
               <p className="font-bold">{t('tb.nobodyToPick')}</p>
             )}
-            {!reveal.choosing && <TapOk onTap={closeReveal} label={t('tb.ok')} className="relative" />}
+            {!reveal.choosing && <TapOk onTap={closeReveal} label={t('tap.goOn')} className="relative mt-1" />}
           </motion.div>
         </div>
       )}
     </main>
     </ThemedPage>
+  );
+}
+
+// Cards are the template's 300 x 220 (Brand Kit pieces), always wider than tall.
+const CARD_RATIO = 220 / 300;
+// The marquee's thickness on each side: its ink edge, rim, inner edge and inner pad.
+const FRAME = '(7px + var(--gs-rim) + var(--gs-inner))';
+
+// The bulb marquee round the board on Classic; a theme's own stage gets the board alone.
+function Frame({ marquee, bulbs, chase, children }: { marquee: boolean; bulbs: number; chase: boolean; children: ReactNode }) {
+  return marquee ? <Marquee bulbs={bulbs} chase={chase}>{children}</Marquee> : <div>{children}</div>;
+}
+
+// A closed card (approved mockup): butter with a dashed orange inset and a
+// crayon sparkle, never a number (golden rule: no numbers on spaces). A theme's
+// own card-back art shows instead when it has one.
+function ClosedFace({ fill, art, w, edge, style }: { fill: CSSProperties; art: boolean; w: number; edge?: boolean; style?: CSSProperties }) {
+  return (
+    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ ...fill, borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
+      {art && (
+        <>
+          <span className="absolute" style={{ inset: Math.max(4, w * 0.04), borderRadius: '0.6rem', border: `2px dashed ${STUDIO.orange}` }} />
+          <Doodle kind="sparkle" color={STUDIO.lemon} size={Math.round(Math.max(18, w * 0.3))} />
+        </>
+      )}
+    </span>
+  );
+}
+
+// A won card: the team's pastel, its badge small in the corner and the prize
+// (+points or the power-up), so the board shows who won what at a glance.
+function OpenFace({ kind, by, w, edge, style }: { kind: CardKind; by: number; w: number; edge?: boolean; style?: CSSProperties }) {
+  const gold = isGolden(kind);
+  return (
+    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ background: gold ? 'linear-gradient(135deg, #fff3b0 0%, #ffd75e 45%, #f2b705 100%)' : teamPastel(by), borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
+      <span className="absolute" style={{ top: Math.max(3, w * 0.035), left: Math.max(3, w * 0.035) }}><TeamBadge colorIndex={by} size={Math.round(Math.max(16, Math.min(40, w * 0.17)))} /></span>
+      {kind.kind === 'power'
+        ? <ItemArt item={kind.item} size={Math.round(Math.max(24, w * 0.4))} still />
+        : <b className="font-display tabular-nums leading-none" style={{ fontSize: Math.max(16, w * 0.26), color: STUDIO.ink }}>+{kind.points}</b>}
+    </span>
   );
 }
 

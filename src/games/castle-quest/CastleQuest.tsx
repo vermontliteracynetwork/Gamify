@@ -1,9 +1,8 @@
-import '@fontsource/chicle/400.css';
 import HintButton from '../../engine/HintButton';
 import { NO_STEAL_ABILITIES } from '../../engine/powerUps';
 import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
 import { AnimatePresence, motion } from 'motion/react';
@@ -18,7 +17,7 @@ import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
 import TeamSetup from '../../engine/TeamSetup';
-import { TeamBadge } from '../../engine/TeamBadge';
+import { TeamArt, TeamBadge } from '../../engine/TeamBadge';
 import { current, nextTurn, setScores, startTurns, TEAM_COLORS, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
@@ -42,15 +41,16 @@ import WayToPlay from '../WayToPlay';
 import ShareHow from '../ShareHow';
 import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
-import { BoardArt, boardGround, C, CHICLE, Die2D, SQUARE_COLORS, WOBBLE } from './boardArt';
+import { BoardArt, boardGround, C, CHICLE, Die2D, matPad, PARTY_COLORS, SQUARE_COLORS, WOBBLE } from './boardArt';
+import { CrayonPawn, ParkScene, PK } from './park';
 import { layout, placePowers, POWERS, roll, spaceKinds, tornadoSpots, TRAIL_SPACES, trailOf, TRAILS, wheelStop, type Layout, type Power, type SpaceKind } from './board';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'roll' | 'busy' | 'pick';
 const JUMP = '/sounds/board/jump.mp3';
 const DICE = '/sounds/board/dice.mp3';
-// The vision board palette (teacher, 2026-11-08): light blue, yellow, red,
-// sage, cream, blush and charcoal, with Chicle for the board's words.
+// Classic look (approved mockup, teacher 2026-11-24): the park, pastel squares,
+// crayon pawns and the side panel stack; Grow Year for the board's words.
 const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 // Board Game (teacher redesign, 2026-11-08): "solve the question, roll the
@@ -128,8 +128,31 @@ export default function CastleQuest() {
     const ro = new ResizeObserver(fit); ro.observe(el);
     return () => ro.disconnect();
   }, [phase]);
-  const pad = 22;
-  const L: Layout = useMemo(() => layout(n, Math.max(100, box.w - pad * 2), Math.max(100, box.h - pad * 2)), [n, box.w, box.h]);
+  // The whole stage, so the park is drawn to its real size (the sun stays round).
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState({ w: 1280, h: 760 });
+  useLayoutEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const fit = () => { const r = el.getBoundingClientRect(); if (r.width && r.height) setStage((b) => (Math.abs(b.w - r.width) + Math.abs(b.h - r.height) < 1 ? b : { w: Math.round(r.width), h: Math.round(r.height) })); };
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(el);
+    return () => ro.disconnect();
+  }, [phase]);
+  const narrow = stage.w < 1024;
+  // Room around the squares for the paper mat, its edge and shadow, and the
+  // pawns that stand up over the top row.
+  const L: Layout = useMemo(() => {
+    // Under the side-panel width (iPad portrait), the board stays a wide
+    // rectangle like the mockup, so the last lane never leaves a tall empty mat.
+    const h = narrow ? Math.max(200, Math.min(box.w * 0.85, stage.h - 330)) : box.h;
+    const fitIn = (pad: number) => layout(n, Math.max(100, box.w - pad * 2), Math.max(100, h - pad * 2 - 6));
+    const first = fitIn(22);
+    return fitIn(matPad(first.size) + 10);
+  }, [n, box.w, box.h, narrow, stage.h]);
+  // iPad portrait: the board is as tall as its squares need, and the board and
+  // the panel sit together in the middle of the park (no empty band).
+  const boardH = L.rows * L.size + (matPad(L.size) + 10) * 2 + 6;
   const ox = (box.w - L.cols * L.size) / 2, oy = (box.h - L.rows * L.size) / 2;
   const at = (i: number) => { const c = L.cells[Math.max(0, Math.min(n - 1, i))]; return { x: ox + (c.x + 0.5) * L.size, y: oy + (c.y + 0.5) * L.size }; };
   // A little wobble per square, the same all game (surprise and irregularity).
@@ -255,7 +278,7 @@ export default function CastleQuest() {
     }
     const kind = kinds[posRef.current[who]];
     if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); await say(t('cq.loseTurn'), 'lose', true); return endTurn(); }
-    if (kind === 'again') { playEffect('win', settings); impact(settings); if (!still && settings.celebrations !== 'off' && boardRef.current) { const r = boardRef.current.getBoundingClientRect(); const p = at(posRef.current[who]); void confetti({ particleCount: 45, spread: 70, startVelocity: 28, origin: { x: (r.left + p.x) / window.innerWidth, y: (r.top + p.y) / window.innerHeight }, colors: SQUARE_COLORS, disableForReducedMotion: true }); } await say(t('cq.rollAgain'), 'again'); setStep('roll'); return; }
+    if (kind === 'again') { playEffect('win', settings); impact(settings); if (!still && settings.celebrations !== 'off' && boardRef.current) { const r = boardRef.current.getBoundingClientRect(); const p = at(posRef.current[who]); void confetti({ particleCount: 45, spread: 70, startVelocity: 28, origin: { x: (r.left + p.x) / window.innerWidth, y: (r.top + p.y) / window.innerHeight }, colors: PARTY_COLORS, disableForReducedMotion: true }); } await say(t('cq.rollAgain'), 'again'); setStep('roll'); return; }
     return endTurn();
   }
   // A hidden power-up: the shield goes up at once (it starts at the reveal);
@@ -350,8 +373,8 @@ export default function CastleQuest() {
       playEffect('win', settings);
       impact(settings, true);
       if (settings.celebrations !== 'off' && !still) {
-        void confetti({ particleCount: 160, spread: 110, origin: { x: 0.5, y: 0.3 }, colors: SQUARE_COLORS, disableForReducedMotion: true });
-        window.setTimeout(() => void confetti({ particleCount: 120, spread: 80, origin: { x: 0.3, y: 0.4 }, colors: SQUARE_COLORS, disableForReducedMotion: true }), 500);
+        void confetti({ particleCount: 160, spread: 110, origin: { x: 0.5, y: 0.3 }, colors: PARTY_COLORS, disableForReducedMotion: true });
+        window.setTimeout(() => void confetti({ particleCount: 120, spread: 80, origin: { x: 0.3, y: 0.4 }, colors: PARTY_COLORS, disableForReducedMotion: true }), 500);
       }
       await sleep(ms(2600));
       setPhase('end');
@@ -381,10 +404,10 @@ export default function CastleQuest() {
   const boosted = boost.double || boost.x2 || (potion[me] ?? 0) > 0;
   const rollLabel = boost.double ? t('cq.rollTwice') : boosted ? t('cq.rollDouble') : t('cq.roll');
   const canRoll = step === 'roll' && human && phase === 'play' && !banner;
-  // Just the die, big, under the scores: tap it to roll (teacher, 2026-11-13: no text, no box).
-  const dieButton = (size: number) => (
-    <motion.button type="button" onClick={() => void rollDie()} disabled={!canRoll} aria-label={rollLabel} className="rounded-[18%] disabled:cursor-default"
-      style={{ filter: canRoll ? 'drop-shadow(0 0 14px #fdfd94) drop-shadow(0 6px 0 rgba(0,0,0,0.25))' : 'drop-shadow(0 6px 0 rgba(0,0,0,0.25))' }}
+  // Just the die, big, under the power-ups: tap it to roll (teacher, 2026-11-13: no text, no box).
+  const dieButton = (size: string) => (
+    <motion.button type="button" onClick={() => void rollDie()} disabled={!canRoll} aria-label={rollLabel} className="rounded-[18%] disabled:cursor-default shrink-0"
+      style={{ width: size, height: size, filter: canRoll ? `drop-shadow(0 0 12px ${PK.lemon}) drop-shadow(0 0 4px ${PK.butter})` : undefined }}
       animate={canRoll && !still ? { y: [0, -10, 0], rotate: [0, -6, 6, 0] } : { y: 0, rotate: 0 }} transition={canRoll ? { duration: 1.2, repeat: Infinity } : { duration: 0.2 }}
       whileHover={canRoll && !still ? { scale: 1.1 } : undefined} whileTap={canRoll && !still ? { scale: 0.9 } : undefined}>
       <Die2D value={die} size={size} rolling={false} theme={theme} />
@@ -441,21 +464,26 @@ export default function CastleQuest() {
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        <div className="relative play-fill overflow-hidden grid grid-rows-[auto_1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_220px]" style={boardGround(theme)}>
+        <div ref={stageRef} className="relative play-fill overflow-hidden grid grid-rows-[auto_auto] content-evenly lg:content-stretch lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,19rem)]" style={pieceImage(theme, 'background') ? boardGround(theme) : { background: PK.sky }}>
+          {/* Classic's world: the paper-craft park (approved mockup, 2026-11-24). */}
+          {!pieceImage(theme, 'background') && <ParkScene w={stage.w} h={stage.h} still={still} />}
           <h1 className="sr-only"><Title text={castleQuestManifest.name} /></h1>
-          {/* No scoreboard (teacher, 2026-11-16): the pieces on the board show
-              the race. Big screens keep the die in this column; small
-              screens keep the row clear for the corner buttons. */}
-          <div className="lg:col-start-2 lg:row-start-1 p-2 lg:pt-16 lg:pr-3 pr-40 lg:pl-0 grid gap-3 content-start min-w-0 z-10 max-lg:min-h-14">
-            <div className="hidden lg:grid gap-3 justify-items-center pt-4">
-              {dieButton(150)}
+          {/* The side panel (teacher, 2026-11-24: "stack in this order: leaderboard
+              players, power up, die. remove how many squares to go"): the player
+              rows with Butter on whose turn it is, the held power-up cards, then
+              the die. Big screens: a column on the right. iPad portrait and
+              small screens: one row under the board. */}
+          <div className="relative z-20 row-start-2 lg:col-start-2 lg:row-start-1 min-w-0 min-h-0 flex items-center justify-center gap-3 px-3 pb-3 lg:flex-col lg:items-stretch lg:justify-start lg:gap-3 lg:pt-16 lg:pb-3 lg:pl-0 lg:pr-4">
+            <Racers players={turns.players} now={phase === 'play' ? turns.turn : -1} shield={shield} wide={turns.players.length > 6} />
+            {/* Held power-ups wait here until they are tapped (teacher, 2026-11-24); always the top layer. */}
+            {tray}
+            <div className="relative grid justify-items-center content-center gap-2 shrink-0 lg:pt-1">
+              {dieButton(turns.players.length > 6 ? 'clamp(4rem, 13vh, 7rem)' : 'clamp(4.5rem, 17vh, 9rem)')}
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
             </div>
-            {/* Held power-ups wait here until they are tapped (teacher, 2026-11-24). */}
-            {tray}
           </div>
-          <div ref={boardRef} className="relative lg:col-start-1 lg:row-start-1 min-h-0 min-w-0 select-none">
-            <BoardArt L={L} ox={ox} oy={oy} n={n} kinds={kinds} theme={theme} wobble={wobble} still={still} here={phase === 'play' && player ? pos[me] : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} />
+          <div ref={boardRef} className="relative z-10 lg:col-start-1 lg:row-start-1 row-start-1 min-h-0 min-w-0 select-none mt-12 mx-1 lg:mt-5 lg:mb-3 lg:ml-3 lg:mr-1" style={narrow ? { height: boardH } : undefined}>
+            <BoardArt L={L} ox={ox} oy={oy} n={n} kinds={kinds} theme={theme} wobble={wobble} still={still} here={null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} />
             {turns.players.map((p, i) => {
               const here = pos[i] ?? 0;
               const same = turns.players.map((_, k) => k).filter((k) => (pos[k] ?? 0) === here);
@@ -463,7 +491,9 @@ export default function CastleQuest() {
               // Up to 10 pieces share a square in a small grid (teacher, 2026-11-16).
               const per = Math.ceil(Math.sqrt(same.length)), lines = Math.ceil(same.length / per);
               const step = (L.size * 0.84) / Math.max(per, lines);
-              const tok = same.length > 1 ? step * 1.02 : L.size * 0.6;
+              const tok = same.length > 1 ? step * 1.02 : L.size * 0.72;
+              // A pawn stands on its square, its foot a little above the middle (mockup).
+              const lift = same.length > 1 ? L.size * 0.1 : L.size * 0.24;
               const off = same.length > 1 ? { x: ((slot % per) - (per - 1) / 2) * step, y: (Math.floor(slot / per) - (lines - 1) / 2) * step } : { x: 0, y: 0 };
               const sp = at(here);
               const sw = swirl && swirl.lifted[i] ? swirl : null;
@@ -476,7 +506,7 @@ export default function CastleQuest() {
                 <motion.div key={p.id} className="absolute pointer-events-none" aria-label={t('cq.pieceAt', { name: p.name })} style={{ width: tok, height: tok, zIndex: sw ? 30 : on ? 15 : 10, translateX: '-50%', translateY: '-50%' }}
                   animate={sw && !still
                     ? { left: [sp.x, ...ring.map((q) => q.x), dest.x], top: [sp.y, ...ring.map((q) => q.y), dest.y], rotate: [0, 720], scale: [1, 1.3, 1.3, 1] }
-                    : { left: sp.x + off.x, top: sp.y + off.y, rotate: 0, scale: 1 }}
+                    : { left: sp.x + off.x, top: sp.y + off.y - lift, rotate: 0, scale: 1 }}
                   transition={sw && !still ? { duration: 2.9, ease: 'easeInOut' } : { duration: still ? 0.01 : (hop.who === i ? hop.ms : 450) / 1000, ease: 'easeOut' }}>
                   <Token player={p} on={on} shield={shield[i]} still={still} hopKey={hop.who === i ? hop.k : 0} hopMs={hop.ms} />
                 </motion.div>
@@ -484,13 +514,13 @@ export default function CastleQuest() {
             })}
             <AnimatePresence>
               {puff && !still && (
-                <motion.span key={puff.id} className="absolute pointer-events-none z-[9]" style={{ left: at(puff.at).x, top: at(puff.at).y + L.size * 0.25, translateX: '-50%', translateY: '-50%' }} initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.7 }} aria-hidden="true">
-                  {[-1, 0, 1].map((d) => <motion.span key={d} className="absolute rounded-full bg-white/80 border border-[#474241]/30" style={{ width: L.size * 0.22, height: L.size * 0.16 }} initial={{ x: -L.size * 0.11, y: 0, scale: 0.4 }} animate={{ x: -L.size * 0.11 + d * L.size * 0.35, y: -L.size * 0.08 - Math.abs(d) * 4, scale: 1.3 }} transition={{ duration: 0.6, ease: 'easeOut' }} />)}
+                <motion.span key={puff.id} className="absolute pointer-events-none z-[9]" style={{ left: at(puff.at).x, top: at(puff.at).y + L.size * 0.1, translateX: '-50%', translateY: '-50%' }} initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.7 }} aria-hidden="true">
+                  {[-1, 0, 1].map((d) => <motion.span key={d} className="absolute rounded-full bg-white/80 border border-[#1d1a33]/30" style={{ width: L.size * 0.22, height: L.size * 0.16 }} initial={{ x: -L.size * 0.11, y: 0, scale: 0.4 }} animate={{ x: -L.size * 0.11 + d * L.size * 0.35, y: -L.size * 0.08 - Math.abs(d) * 4, scale: 1.3 }} transition={{ duration: 0.6, ease: 'easeOut' }} />)}
                 </motion.span>
               )}
               {swirl && !still && <Twister key={swirl.id} item={itemFor('tornado')} w={box.w} h={box.h} />}
               {banner && (
-                <motion.div key={banner.id} className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max max-w-[90%] grid justify-items-center gap-4 text-3xl sm:text-4xl text-center border-heavy border-border rounded-panel px-7 py-5 z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker-lg)' }}
+                <motion.div key={banner.id} className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max max-w-[90%] grid justify-items-center gap-4 text-3xl sm:text-4xl text-center border-heavy border-border rounded-panel px-7 py-5 z-40 ${banner.bad ? 'bg-[var(--blush)]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker-lg)' }}
                   initial={still ? { opacity: 0 } : { y: 30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={still ? { duration: 0.01 } : POP_IN} role="dialog" aria-label={banner.text}>
                   <span className="flex items-center gap-2">{banner.icon === 'lose' && <HourglassHigh weight="fill" size={34} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={34} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={34} />}<PopText text={banner.text} /></span>
                   <TapOk onTap={() => goRef.current?.()} />
@@ -503,13 +533,6 @@ export default function CastleQuest() {
                 </motion.p>
               )}
             </AnimatePresence>
-          </div>
-          {/* Small screens: the die and the roll button along the bottom. */}
-          <div className="lg:hidden p-2 flex items-center justify-center gap-3 z-10">
-            <div className="flex items-center gap-3">
-              {dieButton(84)}
-              {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
-            </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
             {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
@@ -536,7 +559,9 @@ export default function CastleQuest() {
   );
 }
 
-// A player's piece: their round team badge on a little shadow, hopping.
+// A player's piece: a bright crayon pawn in their team color (approved
+// mockup, 2026-11-24) on a little shadow, hopping; a theme's team piece or the
+// player's own picture wins (one picture, the same on the board and the rows).
 function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlayer; on: boolean; shield: boolean; still: boolean; hopKey: number; hopMs: number }) {
   const [size, setSize] = useState(40);
   const ref = useRef<HTMLDivElement>(null);
@@ -547,12 +572,43 @@ function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlaye
       <motion.div key={hopKey} className="absolute inset-0 grid place-items-center" initial={false}
         animate={!still && hopKey ? { y: ['0%', `-${45 + ((hopKey * 37) % 20)}%`, '0%', '0%'], rotate: [0, ((hopKey * 53) % 15) - 7, 0, 0], scaleY: [1, 1.08, 0.82, 1], scaleX: [1, 0.94, 1.12, 1] } : { y: '0%' }}
         transition={{ duration: Math.max(0.08, hopMs / 1000), times: [0, 0.45, 0.8, 1], ease: 'easeOut' }} style={{ transformOrigin: '50% 100%' }}>
-        <motion.span className="rounded-full" animate={on && !still ? { boxShadow: ['0 0 0 3px #fdfd94, 0 0 10px 3px #fdfd94', '0 0 0 5px #fdfd94, 0 0 20px 8px #fdfd94', '0 0 0 3px #fdfd94, 0 0 10px 3px #fdfd94'] } : { boxShadow: on ? '0 0 0 4px #fdfd94' : '0 2px 0 rgba(0,0,0,0.35)' }}
+        {/* Whose turn: the pawn glows Lemon (mockup), the row beside the board is Butter. */}
+        <motion.span className="grid place-items-center" animate={on && !still ? { filter: [`drop-shadow(0 0 4px ${PK.lemon}) drop-shadow(0 0 8px ${PK.lemon})`, `drop-shadow(0 0 7px ${PK.lemon}) drop-shadow(0 0 16px ${PK.lemon})`, `drop-shadow(0 0 4px ${PK.lemon}) drop-shadow(0 0 8px ${PK.lemon})`] } : { filter: on ? `drop-shadow(0 0 6px ${PK.lemon})` : 'drop-shadow(0 0 0 rgba(0,0,0,0))' }}
           transition={on && !still ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
-          <TeamBadge colorIndex={player.colorIndex} size={size} />
+          <Piece player={player} size={size} />
         </motion.span>
         {shield && <span className={`absolute -inset-[18%] rounded-full border-heavy border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.5))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
       </motion.div>
+    </div>
+  );
+}
+
+// The player's picture: their own art, a theme's team piece, or Classic's crayon pawn.
+function Piece({ player, size }: { player: TurnPlayer; size: number }) {
+  const themed = useContext(TeamArt)[player.colorIndex % 10];
+  if (player.art) return <img src={player.art} alt="" aria-hidden="true" className="object-contain shrink-0" style={{ width: size, height: size }} />;
+  if (themed) return <TeamBadge colorIndex={player.colorIndex} size={size} />;
+  return <CrayonPawn color={TEAM_COLORS[player.colorIndex % TEAM_COLORS.length]} size={size} />;
+}
+
+// The player rows beside the board (Brand Kit scoreboard row, teacher
+// 2026-11-24): the pawn and the whole name, Butter for whose turn it is (the
+// only turn signal), no points and no "squares to go" (the pawns show the race).
+function Racers({ players, now, shield, wide }: { players: TurnPlayer[]; now: number; shield: boolean[]; wide: boolean }) {
+  const cur = players[now];
+  return (
+    <div className="min-w-0 shrink lg:shrink-0 max-lg:flex-1 max-lg:max-w-[26rem]">
+      <ol className={`list-none m-0 p-0 grid gap-1.5 lg:gap-2 ${players.length > 4 ? 'grid-cols-2' : 'grid-cols-1'} ${wide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`} aria-label={t('share.scores')}>
+        {players.map((p, i) => (
+          <li key={p.id} aria-current={i === now ? 'true' : undefined} className={`min-w-0 flex items-center gap-2 rounded-input border-std border-border px-2 ${wide ? 'py-1' : 'py-1 lg:py-1.5'}`}
+            style={{ background: i === now ? 'var(--butter)' : 'var(--paper)', boxShadow: '0 3px 0 var(--color-border)' }}>
+            <span className="shrink-0 grid place-items-center" style={{ width: wide ? '1.6rem' : '2.25rem', height: wide ? '1.6rem' : '2.25rem' }}><Piece player={p} size={wide ? 26 : 36} /></span>
+            <span className={`flex-1 min-w-0 font-bold leading-tight ${wide ? 'text-xs' : 'text-sm lg:text-base'}`}>{p.name}</span>
+            {shield[i] && <ShieldCheck weight="fill" size={18} className="shrink-0 text-[#1f6fb8]" aria-label={t('cq.shielded')} />}
+          </li>
+        ))}
+      </ol>
+      {cur && <p className="sr-only" aria-live="polite">{t('share.whoseTurn', { name: cur.name })}</p>}
     </div>
   );
 }
@@ -644,8 +700,8 @@ function TrailMock({ n }: { n: number }) {
   const W = 96, H = 64, L = layout(n, W - 6, H - 6);
   const s = L.size, ox = (W - L.cols * s) / 2, oy = (H - L.rows * s) / 2;
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" className="rounded-md border-thin border-border" style={{ background: C.blush }}>
-      {L.cells.map((c, i) => <rect key={i} x={ox + c.x * s + 0.6} y={oy + c.y * s + 0.6} width={s - 1.2} height={s - 1.2} rx={1} fill={i === 0 ? C.sage : i === n - 1 ? C.yellow : SQUARE_COLORS[i % 4]} stroke={C.ink} strokeWidth={0.5} />)}
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" className="rounded-md border-thin border-border" style={{ background: C.cream }}>
+      {L.cells.map((c, i) => <rect key={i} x={ox + c.x * s + 0.6} y={oy + c.y * s + 0.6} width={s - 1.2} height={s - 1.2} rx={1} fill={i === 0 ? C.mint : i === n - 1 ? C.yellow : SQUARE_COLORS[i % 4]} stroke={C.ink} strokeWidth={0.5} />)}
     </svg>
   );
 }

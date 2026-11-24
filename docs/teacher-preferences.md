@@ -34,7 +34,7 @@ line that fits, and add each new preference the same turn she says it.
 - Every game uses the same question set picker: square cards that fill whole rows (4, 5 or 6 across, whatever fits) and never cut off a row, no cover pictures, no "Pick a question set" line (2026-11-01).
 - Power-up choices: every power-up on one page as small square cards; tap a card to turn it on or off (2026-11-01).
 - Every game lets the teacher switch each power-up on or off, like Game Show's list (2026-11-01).
-- A game's background color can be changed per game; Game Show's default is red (2026-11-01).
+- A game's background color can be changed per game; Game Show's default is red (2026-11-01). Since the approved studio mockup (2026-11-24) Game Show's Classic stage is the crayon TV studio on Grape (pink curtains, lemon floor); a color the teacher picks replaces the Grape backdrop.
 - A power-up that takes, steals or swaps points never comes up when the players it would hit have no points (all games, 2026-11-01).
 - Everything moves slowly enough to follow: computer turns, menus, pop-ups and play (2026-11-01).
 

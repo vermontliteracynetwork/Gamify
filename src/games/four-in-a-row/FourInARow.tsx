@@ -6,13 +6,12 @@ import { useSearchParams } from 'react-router-dom';
 import { makeGameCode } from '../../data/gameCodes';
 import { openVersus, type VersusLink } from '../../live/versus';
 import { getSession } from '../../student/session';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ArrowFatDown, Question, Trophy } from '@phosphor-icons/react';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { playEffect } from '../../engine/feedback';
-import ScoreBoard from '../../engine/ScoreBoard';
 import ResultsModal from '../../engine/ResultsModal';
 import { TEAM_ICONS } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
@@ -44,6 +43,13 @@ import Title from '../../ui/Title';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'waiting' | 'joining' | 'play' | 'end';
 type First = 'p1' | 'p2' | 'random';
+// Classic colors from the approved mockup (Brand Kit palette): Sky rack, Sky deep
+// press shade, Lemon drop win line.
+const SKY = '#4ba3e8', SKY_DEEP = '#1f6fb8', GOLD = '#fabe37';
+// Classic's own pair (approved mockup, 2026-11-24): Grape pieces with a dot and
+// Lemon pieces with a star, so the sides differ by mark as well as color
+// (WCAG 1.4.1). The Ball Collection stays on the picker after them.
+const CLASSIC_PAIR = ['purple-dot', 'gold-star'];
 
 export default function FourInARow() {
   const { settings } = useSettings();
@@ -84,7 +90,10 @@ export default function FourInARow() {
   const placeRef = useRef<(col: number) => void>(() => undefined);
   // Pieces players choose before play (teacher, 2026-10-31): a theme's set
   // (Animal Friends: ten animals), or the Ball Collection in Classic.
-  const discs = theme.discs?.length ? theme.discs : BALL_PACK_CLEARED ? BALL_PACK.map((id) => ({ id, name: t(`fr.ball.${id}` as StringKey), image: `/classic/four-in-a-row/${id}.webp` })) : [];
+  const discs = theme.discs?.length ? theme.discs : [
+    ...CLASSIC_PAIR.map((id) => ({ id, name: t(`fr.ball.${id}` as StringKey), image: `/classic/four-in-a-row/${id}.svg` })),
+    ...(BALL_PACK_CLEARED ? BALL_PACK.map((id) => ({ id, name: t(`fr.ball.${id}` as StringKey), image: `/classic/four-in-a-row/${id}.webp` })) : []),
+  ];
   const [picks, setPicks] = useState<[number, number]>([0, 1]);
   useEffect(() => setPicks([0, 1]), [theme.id]);
 
@@ -190,8 +199,8 @@ export default function FourInARow() {
     setStep('dropping');
     setBoard(res.board);
     setLast({ row: res.row, col });
-    // The clack when it lands at the bottom of its drop.
-    window.setTimeout(() => { playEffect('tap', settings); if (!still) navigator.vibrate?.(15); }, still ? 0 : (0.32 + res.row * 0.06) * 580);
+    // The clack when it lands (62% into its fall); the turn moves on once it has settled.
+    window.setTimeout(() => { playEffect('tap', settings); if (!still) navigator.vibrate?.(15); }, still ? 0 : (0.75 + res.row * 0.12) * 620);
     window.setTimeout(() => {
       const win = winningLine(res.board);
       if (win || isFull(res.board)) {
@@ -207,13 +216,18 @@ export default function FourInARow() {
       held.endTurn();
       setTurn((t0) => (t0 === 0 ? 1 : 0));
       setStep('answer');
-    }, still ? 150 : 650);
+    }, still ? 150 : (0.75 + res.row * 0.12) * 1000 + 120);
   }
 
   placeRef.current = place;
-  // The front plate's color (a theme can change it).
-  const plate = pieceImage(theme, 'board') ? 'rgba(255,255,255,0.12)' : (pieceFill(theme, 'board', '#4f8fe0').background as string) ?? '#4f8fe0';
   const winner = line ? players[board[line[0][0]][line[0][1]] - 1] : null;
+  // The gold line draws and the burst pops before the results box opens.
+  const [results, setResults] = useState(false);
+  useEffect(() => {
+    if (phase !== 'end') { setResults(false); return; }
+    const id = window.setTimeout(() => setResults(true), line && !still ? 1700 : 200);
+    return () => window.clearTimeout(id);
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
   // The held piece wanders across the columns until the player points at
   // one, as if moving it along before choosing (teacher, 2026-11-06).
   const anyPick = phase === 'play' && (step === 'pick' || step === 'pop') && player?.kind !== 'cpu' && !remoteTurn;
@@ -229,7 +243,32 @@ export default function FourInARow() {
     }, 650);
     return () => window.clearInterval(id);
   }, [showHeld, settings.motion]);
-  const Disc = ({ who, size = '82%' }: { who: 1 | 2; size?: string }) => {
+  // The rack fills the space it is given and never scrolls (teacher, 2026-10-24):
+  // one cell size `s` from the room left beside (or under) the player cards.
+  const playing = phase === 'play' || phase === 'end';
+  // Wide screens measure the room between the cards; tall ones measure the
+  // whole stage less the cards under the rack, so rack and cards sit centered together.
+  const stage = useRef<HTMLDivElement>(null), area = useRef<HTMLDivElement>(null), cards = useRef<HTMLDivElement>(null);
+  const [s, setS] = useState(48);
+  useEffect(() => {
+    const el = area.current, out = stage.current, under = cards.current;
+    if (!playing || !el || !out || !under) return;
+    const fit = () => {
+      let w: number, h: number;
+      if (window.matchMedia('(orientation: portrait)').matches) {
+        const cs = getComputedStyle(out), o = out.getBoundingClientRect();
+        w = o.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        h = o.height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (parseFloat(cs.rowGap) || 0) - under.getBoundingClientRect().height;
+      } else ({ width: w, height: h } = el.getBoundingClientRect());
+      setS(Math.max(18, Math.floor(Math.min(w / 7.6, h / 8.15))));
+    };
+    fit();
+    let frame = 0;
+    const ro = new ResizeObserver(() => { window.cancelAnimationFrame(frame); frame = window.requestAnimationFrame(fit); });
+    [el, out, under].forEach((x) => ro.observe(x));
+    return () => { ro.disconnect(); window.cancelAnimationFrame(frame); };
+  }, [playing]);
+  const Disc = ({ who, size = '86%' }: { who: 1 | 2; size?: string }) => {
     const p = players[who - 1];
     const Icon = TEAM_ICONS[(p?.colorIndex ?? who - 1) % TEAM_ICONS.length];
     return (
@@ -244,7 +283,13 @@ export default function FourInARow() {
       </span>
     );
   };
-
+  // The rack (approved Classic mockup, 2026-11-24): a bright Sky frame with an
+  // ink edge and a deeper blue press shade; a theme can recolor it or draw it.
+  const rackBase = theme.pieces.board?.color ?? SKY;
+  const rackShade = rackBase === SKY ? SKY_DEEP : `color-mix(in srgb, ${rackBase} 62%, #1d1a33)`;
+  const pad = Math.round(s * 0.22), gap = Math.round(s * 0.12), edge = Math.max(3, Math.round(s * 0.06)), hole = Math.max(2, Math.round(s * 0.05));
+  // From the waiting piece's spot over the rack down to a row.
+  const fall = (r: number) => -((r + 1) * s + gap + edge + pad);
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0 [--fr-extra:8rem] lg:[--fr-extra:0rem]' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
@@ -277,7 +322,7 @@ export default function FourInARow() {
           { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
             // Each player's team picture is their piece (teacher, 2026-11-06):
             // one picture, picked on the player card, the same on the board.
-            <TeamSetup key={`${theme.id}-${setup.way}`} mode="versus" vsComputer={setup.way === 'solo'} min={2} max={2} embedded characters={discs.length >= 2 ? discs : undefined}
+            <TeamSetup key={`${theme.id}-${setup.way}`} mode="versus" vsComputer={setup.way === 'solo'} min={2} max={2} embedded characters={discs.length >= 2 ? discs : undefined} inOrder={!theme.discs?.length}
               onChange={(players, level) => {
                 setTeam({ players, level });
                 if (discs.length >= 2) {
@@ -312,106 +357,144 @@ export default function FourInARow() {
         </div>
       )}
 
-      {(phase === 'play' || phase === 'end') && (
-        // Same layout as every team game (teacher, 2026-10-31): the board, and
-        // the players beside it with a glow on whose turn it is.
-        // The board fills the play space and never scrolls (teacher, 2026-10-31);
-        // small controls on top, the players right beside it, top aligned.
-        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+      {/* Its own presence, so pieces, the waiting piece and the win line animate
+          in when they appear (the page transition's initial={false} would
+          otherwise skip every first animation inside the game). */}
+      <AnimatePresence>
+      {playing && (
+        // The approved Classic mockup (/brand Game mockups, 2026-11-24): the rack on
+        // legs in the middle of the squiggle stage, the next piece waiting over its
+        // column, a player card on each side (whose turn it is shaded Butter) with
+        // that player's held power-ups under it. iPad portrait and phones: the
+        // two cards sit side by side under the rack. Never scrolls.
+        <div key="play" ref={stage} className="relative play-fill overflow-hidden flex flex-col landscape:flex-row items-stretch landscape:items-center justify-center gap-4 landscape:gap-[clamp(0.75rem,2.4vw,2.5rem)] px-[clamp(0.75rem,4vw,2.5rem)] pt-14 pb-3 landscape:px-[clamp(0.75rem,3vw,3rem)] landscape:pt-3" style={{ ['--s' as string]: `${s}px` }}>
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
             {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="four-in-a-row" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
           </div>
-          <div className="contents lg:flex lg:items-start lg:gap-4">
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">
-          <div className="border-heavy border-border rounded-panel p-2 sm:p-3 w-full" style={{ ...pieceFill(theme, 'board', '#4f8fe0'), maxWidth: 'min(100%, calc(100vw - 1.5rem), calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3))', width: 'calc((var(--play-h) - 2.5rem - var(--fr-extra)) * 7 / 7.3)', boxShadow: 'var(--shadow-sticker-lg)' }}>
-            <div className="grid gap-1.5 mb-1.5 mt-[min(2.4vw,1.4rem)]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
-              {Array.from({ length: COLS }, (_, c) => {
-                const popping = step === 'pop';
-                const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
-                const canPick = phase === 'play' && (step === 'pick' || popping) && player?.kind !== 'cpu' && !remoteTurn && !full;
-                const holding = showHeld && heldCol === c;
-                return (
-                  <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
-                    onMouseEnter={() => anyPick && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
-                    aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
-                    className={`relative isolate h-[min(7vw,4.6rem)] min-h-14 rounded-input flex items-end justify-center pb-1.5 font-display text-xl border-std border-border ${canPick ? 'bg-accent tile-wiggle motion-safe:hover:-translate-y-1 motion-safe:active:scale-95 motion-safe:transition-transform' : 'bg-surface/60 opacity-70'}`}>
-                    {/* The player's piece peeks out above the numbers and slides
-                        across the columns, then drops (teacher, 2026-11-06). */}
-                    {holding && player && (
-                      <motion.span layoutId="fr-held" transition={{ type: 'spring', stiffness: 420, damping: 30 }} aria-hidden="true"
-                        className="absolute left-1/2 -translate-x-1/2 bottom-[58%] w-[78%] aspect-square -z-10 flex items-end justify-center pointer-events-none">
-                        <Disc who={(turn + 1) as 1 | 2} size="100%" />
-                      </motion.span>
-                    )}
-                    <span className="relative">{c + 1}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {/* The board (Golden Rule pass, 2026-10-31): discs sit behind a front
-                plate with round holes, drop with gravity and a bounce, and land
-                with a clack. The winning four glow and a light sweeps across them. */}
-            <div className="relative w-full" style={{ aspectRatio: `${COLS} / ${ROWS}` }}>
-              <div role="grid" aria-label={t('fr.title')} className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }}>
-                {board.map((row, r) => <div key={r} role="row" className="contents">{row.map((cell, c) => (
-                  <div key={`${r}-${c}`} role="gridcell"
-                    aria-label={t('fr.cell', { row: r + 1, col: c + 1, who: cell ? players[cell - 1]?.name ?? '' : t('fr.empty') })}
-                    onClick={() => phase === 'play' && step === 'pick' && player?.kind !== 'cpu' && !remoteTurn && board[0][c] === 0 && place(c)}
-                    className="flex items-center justify-center">
-                    <span className="w-[84%] h-[84%] rounded-full" style={{ background: 'radial-gradient(circle at 50% 35%, #f4f7ff, #dfe6f7 70%, #c3cde6)' }} />
+
+          <div ref={area} className="relative min-w-0 min-h-0 landscape:flex-1 landscape:self-stretch flex items-center justify-center">
+            <div className="relative isolate" style={{ width: 7 * s + 2 * (pad + edge), paddingBottom: Math.round(s * 0.3) }}>
+              {/* The next piece waits over its column and follows the pointer
+                  (feedforward: a tap's result shows before it happens). */}
+              <div className="relative" style={{ height: s, marginBottom: gap, marginLeft: pad + edge, width: 7 * s }} aria-hidden="true">
+                {showHeld && player && (
+                  <motion.div className="absolute left-0 top-0 flex items-center justify-center" style={{ width: s, height: s }}
+                    initial={false} animate={{ x: heldCol * s }} transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 26 }}>
+                    <motion.span className="flex items-center justify-center w-full h-full" animate={still ? undefined : { y: [0, -s * 0.08, 0], rotate: [0, -4, 0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
+                      <Disc who={(turn + 1) as 1 | 2} size="92%" />
+                    </motion.span>
+                  </motion.div>
+                )}
+              </div>
+              <div className="relative" style={{ padding: pad, border: `${edge}px solid var(--ink)`, borderRadius: s * 0.42, ...pieceFill(theme, 'board', SKY), boxShadow: `0 ${Math.round(s * 0.09)}px 0 ${rackShade}` }}>
+                <div className="relative" style={{ width: 7 * s, height: 6 * s }}>
+                  {/* Where a tap will drop: a soft light band down the waiting piece's column. */}
+                  {anyPick && (
+                    <motion.span aria-hidden="true" className="absolute top-0 pointer-events-none" style={{ left: 0, width: s, height: 6 * s, borderRadius: s / 2, background: 'rgba(255,250,240,0.32)' }}
+                      initial={false} animate={{ x: heldCol * s }} transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 30 }} />
+                  )}
+                  <div role="grid" aria-label={t('fr.title')} className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${COLS}, ${s}px)`, gridTemplateRows: `repeat(${ROWS}, ${s}px)` }}>
+                    {board.map((row, r) => <div key={r} role="row" className="contents">{row.map((cell, c) => (
+                      <div key={`${r}-${c}`} role="gridcell"
+                        aria-label={t('fr.cell', { row: r + 1, col: c + 1, who: cell ? players[cell - 1]?.name ?? '' : t('fr.empty') })}
+                        className="flex items-center justify-center">
+                        <span className="rounded-full" style={{ width: '78%', height: '78%', background: 'var(--paper)', border: `${hole}px solid var(--ink)` }} />
+                      </div>
+                    ))}</div>)}
                   </div>
-                ))}</div>)}
-              </div>
-              {/* The plate: color with a hole cut for every slot, and a rim. Placed
-                  pieces sit in front of it so no piece is ever cropped (teacher, 2026-11-06). */}
-              <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
-                {Array.from({ length: COLS * ROWS }, (_, k) => (
-                  <span key={k} className="relative" style={{ background: plate, WebkitMaskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)', maskImage: 'radial-gradient(circle, transparent 41.5%, #000 42.5%)' }}>
-                    <span className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 41.5%, rgba(36,28,61,0.55) 42.5%, rgba(36,28,61,0.15) 46%, transparent 49%)' }} />
-                  </span>
-                ))}
-              </div>
-              <div className="absolute inset-0 grid overflow-hidden pointer-events-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))` }} aria-hidden="true">
-                {board.flatMap((row, r) => row.map((cell, c) => {
-                  const isLast = last?.row === r && last?.col === c;
-                  const k = line ? line.findIndex(([lr, lc]) => lr === r && lc === c) : -1;
-                  return (
-                    <div key={`${r}-${c}`} className="flex items-center justify-center" style={{ gridRow: r + 1, gridColumn: c + 1 }}>
-                      {cell !== 0 && (
-                        <motion.span key={`${r}-${c}-${cell}-${popped?.col === c ? popped.id : 0}`} className={`w-[84%] h-[84%] flex items-center justify-center ${k >= 0 && !still ? 'fr-win' : ''}`} style={k >= 0 ? { animationDelay: `${k * 0.12}s` } : undefined}
-                          initial={isLast && !still ? { y: `-${(r + 1) * 119}%` } : popped?.col === c && !still ? { y: '-119%' } : false}
-                          animate={isLast && !still ? { y: ['-' + (r + 1) * 119 + '%', '0%', '-13%', '0%', '-4%', '0%'] } : { y: '0%' }}
+                  {/* Pieces sit in front of the rack, so no piece is ever cropped
+                      (teacher, 2026-11-06); a new one falls from the waiting spot
+                      with gravity and two bounces, then clacks. */}
+                  <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                    {board.flatMap((row, r) => row.map((cell, c) => {
+                      if (!cell) return null;
+                      const isLast = last?.row === r && last?.col === c;
+                      const k = line ? line.findIndex(([lr, lc]) => lr === r && lc === c) : -1;
+                      const pop = popped?.col === c;
+                      return (
+                        <motion.div key={`${r}-${c}-${cell}-${pop ? popped.id : 0}`} className="absolute flex items-center justify-center" style={{ left: c * s, top: r * s, width: s, height: s }}
+                          initial={isLast && !still ? { y: fall(r) } : pop && !still ? { y: -s } : false}
+                          animate={isLast && !still ? { y: [fall(r), 0, -s * 0.13, 0, -s * 0.04, 0] } : { y: 0 }}
                           transition={{ duration: 0.75 + r * 0.12, times: [0, 0.62, 0.75, 0.86, 0.94, 1], ease: 'easeIn' }}>
-                          <Disc who={cell} size="100%" />
-                        </motion.span>
-                      )}
-                    </div>
-                  );
-                }))}
+                          <span className={`flex items-center justify-center w-full h-full ${k >= 0 && !still ? 'fr-win' : ''}`} style={k >= 0 ? { animationDelay: `${k * 0.12}s` } : undefined}>
+                            <Disc who={cell} />
+                          </span>
+                        </motion.div>
+                      );
+                    }))}
+                  </div>
+                  {/* The winning four: a gold band with an ink edge, drawn end to end. */}
+                  {line && (
+                    <svg viewBox={`0 0 ${COLS} ${ROWS}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
+                      {[['var(--ink)', 0.3], [GOLD, 0.18]].map(([color, w]) => (
+                        <motion.path key={color} d={`M${line[0][1] + 0.5} ${line[0][0] + 0.5} L${line[3][1] + 0.5} ${line[3][0] + 0.5}`} stroke={color as string} strokeWidth={w as number} strokeLinecap="round" fill="none"
+                          initial={still ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }} />
+                      ))}
+                    </svg>
+                  )}
+                  {/* Tap anywhere on a column (no numbers, teacher 2026-10-31): each
+                      column is one tall button from the waiting piece to the bottom. */}
+                  {Array.from({ length: COLS }, (_, c) => {
+                    const popping = step === 'pop';
+                    const full = popping ? board[ROWS - 1][c] === 0 : board[0][c] !== 0;
+                    const canPick = anyPick && !full;
+                    return (
+                      <button key={c} type="button" disabled={!canPick} onClick={() => place(c)}
+                        onPointerEnter={() => anyPick && hoverCol(c)} onPointerMove={() => anyPick && heldCol !== c && hoverCol(c)} onFocus={() => anyPick && hoverCol(c)}
+                        aria-label={popping ? t('fr.popColumn', { n: c + 1 }) : full ? t('fr.columnFull', { n: c + 1 }) : t('fr.column', { n: c + 1 })}
+                        className={`absolute z-10 rounded-[999px] bg-transparent focus-visible:outline-[3px] focus-visible:outline-[var(--ink)] focus-visible:outline-offset-[-3px] ${canPick ? 'cursor-pointer' : 'cursor-default'}`}
+                        style={{ left: c * s, width: s, top: -(s + gap + edge + pad), bottom: -pad }} />
+                    );
+                  })}
+                </div>
               </div>
-              {line && (
-                <svg viewBox={`0 0 ${COLS} ${ROWS}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-                  <line x1={line[0][1] + 0.5} y1={line[0][0] + 0.5} x2={line[3][1] + 0.5} y2={line[3][0] + 0.5} stroke="#fdfd94" strokeWidth={0.22} strokeLinecap="round" opacity={0.9} className={still ? '' : 'fr-sweep'} />
-                </svg>
+              {/* The rack's two little legs. */}
+              {[0, 1].map((side) => (
+                <span key={side} aria-hidden="true" className="absolute -z-10" style={{ [side ? 'right' : 'left']: s * 0.5, bottom: 0, width: s * 0.4, height: Math.round(s * 0.3) + 4, background: rackShade, border: `${Math.max(2, edge - 1)}px solid var(--ink)`, borderTop: 0, borderRadius: `0 0 ${s * 0.16}px ${s * 0.16}px` }} />
+              ))}
+              {phase === 'end' && winner && (
+                <motion.p role="status" className="absolute left-1/2 z-20 whitespace-nowrap rounded-pill border-[3px] border-[var(--ink)] px-[0.9em] py-[0.2em] title-bubble leading-tight" style={{ top: s * 0.5, y: '-50%', x: '-50%', color: 'var(--ink)', background: GOLD, boxShadow: '0 4px 0 var(--ink)', fontSize: Math.max(12, Math.min(s * 0.4, (7.6 * s) / (t('fr.fourWins', { name: winner.name }).length * 0.66))) }}
+                  initial={still ? false : { scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={still ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 16, delay: 0.5 }}>
+                  <Title text={t('fr.fourWins', { name: winner.name })} />
+                </motion.p>
               )}
             </div>
           </div>
-          </div>
-          <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 grid gap-2 min-w-0">
-            <ScoreBoard turns={{ players: players.map((p, i) => ({ ...p, score: rights[i] })), turn, round: 1, history: [] }} playing={phase === 'play'} />
-            <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />
-            {step === 'pop' && <p className="bg-accent border-std border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
-            {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
-              <p className="bg-surface border-std border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking', { name: player!.name })}</p>
-            )}
-          </div>
-          </div>
 
-          {phase === 'end' && (
+          {/* The two player cards: left and right of the rack on wide screens,
+              side by side under it on tall ones. */}
+          <div ref={cards} className="grid grid-cols-2 gap-3 w-full self-center landscape:contents" style={{ maxWidth: 7.6 * s }} aria-label={t('share.scores')} role="list">
+            {[0, 1].map((i) => {
+              const p = players[i];
+              if (!p) return null;
+              const on = phase === 'play' && turn === i;
+              return (
+                <div key={p.id} role="listitem" className={`min-w-0 flex flex-col items-center gap-2.5 landscape:self-center landscape:h-[calc(var(--s)*8.05)] landscape:w-[clamp(7.5rem,16vw,13rem)] landscape:shrink-0 landscape:pt-[calc(var(--s)*1.5)] ${i === 0 ? 'landscape:order-first' : 'landscape:order-last'}`}>
+                  <div aria-current={on ? 'true' : undefined} className="w-full grid justify-items-center gap-1 text-center rounded-[1.25rem] border-[3px] border-[var(--ink)] px-2 py-2.5 landscape:py-3"
+                    style={{ background: on ? 'var(--butter)' : 'var(--paper)', boxShadow: '0 4px 0 var(--ink)' }}>
+                    <motion.span className="flex items-center justify-center" style={{ width: 'clamp(2.5rem, calc(var(--s) * 0.95), 5.25rem)', height: 'clamp(2.5rem, calc(var(--s) * 0.95), 5.25rem)' }}
+                      animate={on && !still ? { y: [0, -4, 0] } : { y: 0 }} transition={on && !still ? { repeat: Infinity, duration: 1.4, ease: 'easeInOut' } : { duration: 0.2 }}>
+                      <Disc who={(i + 1) as 1 | 2} size="100%" />
+                    </motion.span>
+                    <b className="title-bubble leading-none max-w-full break-words" style={{ color: 'var(--ink)', fontSize: 'clamp(1.05rem, calc(var(--s) * 0.4), 2.2rem)' }}><Title text={p.name} /></b>
+                  </div>
+                  {/* This player's held power-ups, on the top layer (queue, 2026-11-24). */}
+                  {on && <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />}
+                  {on && step === 'pop' && <p className="bg-[var(--butter)] border-std border-border rounded-input px-3 py-1.5 font-bold text-center text-sm" role="status">{t('fr.popPick')}</p>}
+                  {on && (remoteTurn || p.kind === 'cpu') && (
+                    <p className="bg-[var(--paper)] border-std border-border rounded-input px-3 py-1.5 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: p.name }) : t('fr.cpuThinking', { name: p.name })}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {phase === 'play' && player && <p className="sr-only" aria-live="polite">{t('share.whoseTurn', { name: player.name })}</p>}
+
+          {phase === 'end' && results && (
             <ResultsModal winners={winner ? [winner] : undefined} title={winner ? t('fr.wins', { name: winner.name }) : t('fr.draw')} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
               <p className="font-display text-xl font-bold">{t('fr.goodGame')}</p>
               <ul className="font-bold">{players.map((p, i) => p.kind !== 'cpu' && <li key={p.id}>{t('fr.rights', { name: p.name, count: rights[i] })}</li>)}</ul>
@@ -419,6 +502,7 @@ export default function FourInARow() {
           )}
         </div>
       )}
+      </AnimatePresence>
       {element}
       {powers.element}
     </main>

@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, Trash, UsersThree, Warning, GearSix, SlidersHorizontal } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, ChartBar, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, SquaresFour, Trash, UsersThree, Warning, GearSix, SlidersHorizontal, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -27,6 +27,9 @@ import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
 import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
 import Sky from '../games/practice/Sky';
+import { PAPER, RESULT_BTN, SkyBurst, SkyCode, SkyGoalCard, SkyPlaying, SkyResults, skyStar, useBoxPct } from '../games/practice/SkyHud';
+import HintButton from '../engine/HintButton';
+import { FullScreenButton } from '../settings/SettingsPanel';
 import TerritoryStage from '../games/territory/Stage';
 import { SideBadge } from '../games/territory/art';
 import { balanceTeams, swapTeam } from '../games/territory/logic';
@@ -158,6 +161,24 @@ function Room({ game }: { game: GameCode }) {
     if (reset) { setSkyOrder(state.players.flatMap((p) => Array.from({ length: p.right }, () => p.pid))); return; }
     if (add.length) setSkyOrder((o) => [...o, ...add]);
   }, [state.players]);
+  // Question Tracker's class screen (approved mockup, batch 7): the join code
+  // top left, the tools top right, the goal and who is playing in a column on
+  // the right that the stars leave free, and a pill for every new star.
+  const skyStage = useRef<HTMLDivElement>(null);
+  const skyCol = useRef<HTMLDivElement>(null);
+  const skyCodeBox = useRef<HTMLDivElement>(null);
+  const colPct = useBoxPct(skyStage, skyCol, 12);
+  const codePct = useBoxPct(skyStage, skyCodeBox, 10);
+  const [starNote, setStarNote] = useState<{ id: number; name: string } | null>(null);
+  const starCount = useRef(0);
+  useEffect(() => {
+    if (skyOrder.length > starCount.current && state.phase === 'play') {
+      const name = state.players.find((p) => p.pid === skyOrder[skyOrder.length - 1])?.name;
+      if (name) setStarNote({ id: Date.now(), name });
+    }
+    starCount.current = skyOrder.length;
+  }, [skyOrder]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!starNote) return; const id = window.setTimeout(() => setStarNote(null), 2400); return () => window.clearTimeout(id); }, [starNote]);
   // Compete ends on its own at the teacher's number of right answers or time.
   const timeLeft = state.endAt?.minutes && state.startedAt && state.phase !== 'ended' ? Math.max(0, state.startedAt + state.endAt.minutes * 60000 - now) : null;
   useEffect(() => {
@@ -186,8 +207,8 @@ function Room({ game }: { game: GameCode }) {
 
   return (
     <ThemedPage theme={screen.theme}>
-    <main className={`stage-text max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4 pb-4 gap-4 ${state.phase === 'ended' ? 'grid' : 'flex flex-col overflow-hidden'}`} style={state.phase === 'ended' ? undefined : { height: 'calc(100dvh - 4rem)' }}>
-      <div className={`flex flex-wrap items-center gap-2 ${state.phase === 'play' || state.phase === 'paused' ? 'invisible' : ''}`}>
+    <main className={`stage-text max-w-6xl mx-auto w-full px-4 sm:px-6 pt-4 pb-4 gap-4 ${state.phase === 'ended' && !skyGame ? 'grid' : 'flex flex-col overflow-hidden'}`} style={state.phase === 'ended' && !skyGame ? undefined : { height: 'calc(100dvh - 4rem)' }}>
+      <div className={`flex flex-wrap items-center gap-2 ${state.phase === 'play' || state.phase === 'paused' || (skyGame && state.phase === 'ended') ? 'invisible' : ''}`}>
         <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
         {state.phase === 'lobby' && (
           <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
@@ -259,15 +280,15 @@ function Room({ game }: { game: GameCode }) {
         </div>
       )}
 
-      {(state.phase === 'play' || state.phase === 'paused') && (
+      {(state.phase === 'play' || state.phase === 'paused' || (skyGame && state.phase === 'ended')) && (
         // The big screen fills the whole window (teacher, 2026-11-06): the sky
         // (or board) edge to edge, the goal small along the bottom, the
         // leaderboard in the top right, and the teacher's tools behind small
         // buttons, so nothing covers the stars.
-        <div className="fixed inset-x-0 bottom-0 top-16 z-30 overflow-hidden" style={skyGame || territory ? undefined : { background: 'var(--stage-bg, var(--color-bg))' }}>
+        <div ref={skyStage} className="fixed inset-x-0 bottom-0 top-16 z-30 overflow-hidden" style={skyGame || territory ? undefined : { background: 'var(--stage-bg, var(--color-bg))' }}>
           {territory ? null : skyGame ? (
-            <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%" bleed bottomGap={14}
-              hole={state.mode === 'together' ? null : { l: 74, t: 0, r: 100, b: 48 }}
+            <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%" bleed
+              hole={{ l: colPct?.l ?? 72, t: 0, r: 100, b: 100 }} keepOut={codePct ? [codePct] : undefined}
               filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
               total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
               colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
@@ -285,15 +306,26 @@ function Room({ game }: { game: GameCode }) {
             </ol>
           )}
 
-          {/* Teacher tools: small, top left, with hover text. */}
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
+          {/* Question Tracker: the join code top left, as on the mockup. */}
+          {skyGame && (
+            <div ref={skyCodeBox} className="absolute top-3 left-3 z-10 flex items-center gap-2">
+              <SkyCode code={game.code} />
+              {timeLeft !== null && state.phase !== 'ended' && <span className="px-3 min-h-12 inline-flex items-center rounded-pill font-display text-2xl tabular-nums" style={{ ...PAPER, borderRadius: 999 }} aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
+            </div>
+          )}
+          {/* Teacher tools: small, with hover text; top left, or top right
+              in the mockup's order on Question Tracker (Hint, monitor, pause,
+              full screen, end). */}
+          {state.phase !== 'ended' && <div className={`absolute top-3 z-10 flex items-center gap-2 ${skyGame ? 'right-3' : 'left-3'}`}>
+            {skyGame && <HintButton gameId="star-quiz" />}
             <button type="button" onClick={() => setMonOpen((o) => !o)} aria-expanded={monOpen} aria-label={t('live.view.monitor')} data-tip={t('live.view.monitor')} className={TOOL}><SlidersHorizontal weight="bold" size={20} /></button>
             <button type="button" onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} aria-label={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} data-tip={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} className={TOOL}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}</button>
-            <button type="button" onClick={() => setConfirmEnd(true)} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}><Stop weight="fill" size={18} /></button>
-            {timeLeft !== null && <span className="ml-1 px-3 min-h-10 inline-flex items-center rounded-pill bg-surface border-std border-border font-display text-xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
-          </div>
-          {monOpen && (
-            <div className="absolute top-16 left-3 z-20 w-[min(26rem,calc(100vw-1.5rem))] max-h-[calc(100%-5rem)] overflow-y-auto bg-surface border-bold border-border rounded-panel p-3 text-[var(--text)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="dialog" aria-label={t('live.view.monitor')}>
+            {skyGame && <FullScreenButton small />}
+            <button type="button" onClick={() => setConfirmEnd(true)} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}>{skyGame ? <X weight="bold" size={20} /> : <Stop weight="fill" size={18} />}</button>
+            {timeLeft !== null && !skyGame && <span className="ml-1 px-3 min-h-10 inline-flex items-center rounded-pill bg-surface border-std border-border font-display text-xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
+          </div>}
+          {monOpen && state.phase !== 'ended' && (
+            <div className={`absolute top-16 ${skyGame ? 'right-3' : 'left-3'} z-20 w-[min(26rem,calc(100vw-1.5rem))] max-h-[calc(100%-5rem)] overflow-y-auto bg-surface border-bold border-border rounded-panel p-3 text-[var(--text)]`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="dialog" aria-label={t('live.view.monitor')}>
               {!canMonitor ? <LimitNote>{t('live.monitorPlan')}</LimitNote> : (
             <div className="grid gap-3">
               <p className="text-sm font-bold">{t('live.monitorNote')}</p>
@@ -337,22 +369,46 @@ function Room({ game }: { game: GameCode }) {
           )}
           {state.phase === 'paused' && <p className="absolute top-3 left-1/2 -translate-x-1/2 z-10 font-display text-xl bg-accent border-std border-border rounded-pill px-4 py-1" role="status">{t('live.pausedHost')}</p>}
 
-          {/* Compete: a small leaderboard in the top right, in the corner the stars leave free. */}
-          {state.mode !== 'together' && skyGame && (
-            <ol className="absolute top-3 right-3 z-10 w-[min(22%,18rem)] grid gap-1.5 list-none m-0 p-2 rounded-panel bg-surface/90 border-std border-border" aria-label={t('live.board.leaders')}>
-              {leaders.slice(0, 8).map((p, i) => (
-                <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-sm">
-                  <span className="w-5 text-center font-display">{i + 1}</span>
-                  <StarIcon weight="fill" size={18} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />
-                  <span className="flex-1 truncate">{p.name}</span>
-                  <span className="font-display tabular-nums">{p.right}</span>
-                </motion.li>
-              ))}
-            </ol>
+          {/* Question Tracker: the column on the right (approved mockup):
+              Cooperative shows the goal card and who is playing; Competitive
+              shows the race line and the leaderboard, each name with its
+              star color (never color alone: the name is there too). */}
+          {skyGame && (
+            <div ref={skyCol} className="absolute right-3 top-[4.25rem] z-10 w-[min(15rem,30vw)] grid gap-3 content-start max-h-[calc(100%-5rem)] overflow-hidden">
+              {state.mode === 'together' ? (
+                <>
+                  <SkyGoalCard theme={skyTheme} got={Math.min(classRight, goal)} goal={goal} label={t('live.goalText', { right: Math.min(classRight, goal), goal })} />
+                  <SkyPlaying names={inRoom.map((p) => p.name)} />
+                </>
+              ) : (
+                <>
+                  <p className="m-0 p-3 font-display text-lg leading-tight text-center" style={PAPER}>{state.endAt?.right ? t('live.firstTo', { n: state.endAt.right }) : t('sky.playing', { count: inRoom.length })}</p>
+                  <ol className="grid gap-1.5 list-none m-0 p-3" style={PAPER} aria-label={t('live.board.leaders')}>
+                    {leaders.slice(0, 8).map((p, i) => (
+                      <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-base">
+                        <span className="w-5 text-center font-display">{i + 1}</span>
+                        <StarIcon weight="fill" size={22} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />
+                        <span className="flex-1 truncate">{p.name}</span>
+                        <span className="font-display text-xl tabular-nums">{p.right}</span>
+                      </motion.li>
+                    ))}
+                  </ol>
+                </>
+              )}
+            </div>
           )}
+          {/* A pill for every new star, bottom left, on the top layer. */}
+          <AnimatePresence>
+            {skyGame && starNote && state.phase === 'play' && (
+              <motion.p key={starNote.id} role="status" className="absolute left-6 bottom-6 z-[60] m-0 pointer-events-none"
+                initial={reduce ? false : { y: 30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: [1.12, 1] }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 420, damping: 18 }}>
+                <SkyBurst text={t('sky.classStar', { name: starNote.name })} style={{ background: 'var(--butter)' }} />
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           {/* The goal, small and centered along the bottom. */}
-          {!territory && <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
+          {!territory && !skyGame && <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
             {state.mode === 'together' ? (
               <>
                 <p className="font-display text-lg">{t('live.goalText', { right: classRight, goal })}</p>
@@ -374,7 +430,30 @@ function Room({ game }: { game: GameCode }) {
             onSummary={(room) => update((s) => ({ ...s, room }))} onGoal={end} />
         </div>
       )}
-      {state.phase === 'ended' && (
+      {/* Question Tracker's results box over the class sky (approved mockup). */}
+      {state.phase === 'ended' && skyGame && (() => {
+        const filled = state.mode === 'together' && classRight >= goal;
+        const top = leaders[0]?.right ?? 0;
+        const winners = state.mode === 'together' ? [] : leaders.filter((p) => p.right === top && top > 0).slice(0, 3);
+        const star = skyStar(skyTheme);
+        return (
+          <SkyResults
+            title={state.mode === 'together' ? (filled ? t('sky.filled') : t('live.togetherTitle')) : t('live.podium')}
+            art={state.mode === 'together' || !winners.length
+              ? (star ? <img src={star} alt="" className="w-36 h-36 object-contain" draggable={false} /> : <StarIcon weight="fill" size={130} color="var(--lemon)" />)
+              : winners.map((p) => <StarIcon key={p.pid} weight="fill" size={winners.length > 1 ? 96 : 130} color={starColor(state.players, p.pid)} style={{ filter: 'drop-shadow(0 3px 0 var(--color-border))' }} />)}
+            score={state.mode === 'together' ? t('sky.score', { count: Math.min(classRight, goal) }) : winners.length ? winners.map((p) => p.name).join(', ') : t('sky.score', { count: classRight })}
+            actions={<>
+              <button type="button" className={`${RESULT_BTN} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }} onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}><ArrowCounterClockwise weight="bold" size={18} />{t('live.again')}</button>
+              <Link to="/teacher/activity" className={`${RESULT_BTN} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}><SquaresFour weight="bold" size={18} />{t('results.arcadeShort')}</Link>
+              <Link to="/teacher/reports" className={`${RESULT_BTN} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}><ChartBar weight="bold" size={18} />{t('live.reports')}</Link>
+            </>}>
+            {state.mode !== 'together' && winners.length > 0 && <p className="font-bold">{t('live.rightCount', { count: top })}</p>}
+            <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t('live.classTotal', { right: classRight, count: inRoom.length })}</p>
+          </SkyResults>
+        );
+      })()}
+      {state.phase === 'ended' && !skyGame && (
         <div className={territory ? 'fixed inset-0 z-40 grid place-items-center p-4' : 'contents'}>
         <Panel className={`grid gap-4 justify-items-center text-center ${territory ? 'w-[min(35rem,92vw)]' : ''}`}>
           <h2 className="font-display text-4xl uppercase"><Title text={territory ? (state.mode === 'together' ? t('territory.togetherDone', { n: state.room?.caught ?? 0 }) : t(`territory.won.${!state.room || state.room.defenders === state.room.invaders ? 'tie' : state.room.defenders > state.room.invaders ? 'defender' : 'invader'}`)) : state.mode === 'together' ? t('live.togetherTitle') : t('live.podium')} /></h2>
