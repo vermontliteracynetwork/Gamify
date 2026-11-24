@@ -27,10 +27,10 @@ export const SOUNDS = {
   music: '/sounds/game-show/music-cards.mp3',
 };
 
-// Dev builds only: localStorage 'dev:territory-seed' = N fills the room with up
+// Dev builds and local test builds only (never a real site): localStorage 'dev:territory-seed' = N fills the room with up
 // to N of each side, so the Art Director can review a full room on screenshots.
 function devSeed(r: Room): Room {
-  if (!import.meta.env.DEV) return r;
+  if (!import.meta.env.DEV && location.hostname !== 'localhost') return r;
   let n = 0; try { n = Number(localStorage.getItem('dev:territory-seed')) || 0; } catch { n = 0; }
   let out = r; const at = Date.now() - LEAVE_MS * 2;
   for (const side of ['defender', 'invader'] as Side[]) while (count(out, side) < n) { const next = add(out, side, at); if (next === out) break; out = next; }
