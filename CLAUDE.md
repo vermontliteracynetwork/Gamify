@@ -36,7 +36,10 @@ The **Design Chair** (`.claude/agents/design-chair.md`, teacher 2026-11-23) owns
 language and voice, the Gamify Brand Kit (https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv
 and `/brand`) and its continuous alignment, sound, templates and, later, social
 media. Run a Design Chair brand check on every new part, theme or feature, and the
-`classic-art` skill before making any Classic asset (one pencil/crayon style). Its
+`classic-art` skill before making any Classic asset (one pencil/crayon style).
+The **Classic Art Director** (`.claude/agents/classic-art-director.md`, teacher
+2026-11-24) must PASS every Classic theme asset and scene on real screenshots
+before it is called done; whoever drew it never grades it. The Design Chair's
 research and design skills (`social-*`, `brand`, `design`, `design-system`,
 `banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
 

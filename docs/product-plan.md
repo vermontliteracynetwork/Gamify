@@ -210,6 +210,8 @@ New games made for the turn-based modes (2 Show, 4 Versus):
 | Spinner Wheel | 2 |
 | Territory (cats and mice invasion, rethemable; teacher 2026-11-24) | 1 (Live only: Cooperative or Competitive) |
 
+**Game Lab idea sources.** BASIC Computer Games (https://github.com/coding-horror/basic-computer-games, Unlicense; teacher 2026-11-24): all 96 classic games rated for the Lab, with a Top 10 to build next, in `docs/game-lab-ideas-basic-computer-games.md` (rules reimagined on the question engine, never copied).
+
 **DECIDE:** which three games ship first. Claudia's pick covers all four
 modes with the fewest games:
 1. **Peg Drop** (modes 1, 2, 3, 4: one game proves both engines)
@@ -1185,6 +1187,8 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 106 | **Sticker collections for teachers.** Collect-em-all Classic sticker sets for trying things (first game, five new themes, every game, Calm mode), a seasonal Winter set with clear dates, and an Achievement page to show the class what you earned together. Nothing is ever taken away for a missed day. | A friendly nudge to explore every feature, with no streak guilt | Teacher, 2026-11-23 |
 | 107 | **A sticker book for every student, no accounts.** Effort and growth stickers (kept going, new best, got it now, good listener) live on the teacher's device; interventionists link stickers to practice goals and print a progress page for a data folder or a family. | Motivation that rewards effort, not speed, and fits 1:1 and small group work | Design Chair, 2026-11-23 |
 | 108 | **Territory: cats and mice for the room.** A cozy living room on the big screen: little mice sneak out of the mouse hole, and every right answer on a student's own device sends a cat to catch one in a puff of stars. Play Cooperative (the class catches them all) or Competitive (Cats against Mice, the team with more in the room wins it). Nobody is ever hurt. Built to be rethemed (spaceships and aliens next). | A whole-class live game where the room visibly fills as the class answers; the teacher sets the pace | Teacher, 2026-11-24 |
+| 109 | **Research with the fine print showing.** The redesigned Research page puts "Studies found", a "To be fair" caveat and "In Gamify" side by side on every card, and the pricing page leads with what the class gets before the number. Honest framing is the pitch: teachers trust a tool that shows its limits (Design Chair, 2026-11-24, `/brand` Public pages proposal). |
+| 110 | **Question Tracker theme ideas: seashells on a beach, birds on wires.** Every right answer adds a seashell to the sand along the shore, or a little bird that lands on the telephone wires until the wires are full, the same fill-the-scene idea as the night sky of stars. | New calm scenes for the class-goal game without a new game to learn | Teacher, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 

@@ -90,12 +90,22 @@ the handmade themes teachers and kids make (clean core, handmade edges).
   license that allows use in a commercial website/app; one pack style per set
   so they never mix; recorded in the ledger before use.
 
+## Quality gate (teacher, 2026-11-24)
+No Classic asset or scene is done, and none is shown to the teacher as done,
+until the **Classic Art Director** agent (`.claude/agents/classic-art-director.md`)
+returns PASS on real screenshots. The agent that drew it never grades its own
+work. On FAIL, fix every listed item and send it back. Typical fails to avoid:
+generic vector clipart (uniform thin lines, perfect geometry), white highlight
+blobs, pieces too small in an empty scene, a room with no props, line weights
+that differ between pieces and background.
+
 ## The check (every asset, before it ships)
 - [ ] Looks like the kit: put it next to 3 kit pieces at 48px and 128px; a
       stranger would say they are one set.
-- [ ] Brand palette only; crayon/pencil texture present; no glossy or 3D.
+- [ ] Palette pairs only; smooth flat fills, at most a faint scribble; no glossy or 3D.
 - [ ] Template size, safe area and board zone respected.
 - [ ] Reads on a projector (bold enough texture, contrast vs its ground).
 - [ ] No characters, brands, known characters or copied art.
 - [ ] Licensed and in `docs/asset-ledger.md`.
 - [ ] Design Chair brand check passed.
+- [ ] Classic Art Director: PASS (all nine quality-bar rows at 2).

@@ -108,6 +108,8 @@ go into the library the same turn.
   the same turn; anything only she can do goes into `src/owner/waiting.ts`.
 - Every font, image, sound and library you suggest must be licensed for
   commercial use and recorded in `docs/asset-ledger.md` before it ships.
+- Classic art you draw or direct goes to the Classic Art Director for PASS/FAIL
+  before it is called done (teacher, 2026-11-24); you never grade your own art.
 - You review and advise alongside Claudia; for games, the Golden Rule and
   Claudia's sign-off still apply.
 - Output: short, specific, ranked. Lead with the decision or the top three
