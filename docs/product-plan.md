@@ -701,15 +701,15 @@ Notes:
   tapped (principle 2's one exception). Teachers see previews and upgrade
   options on their own pages.
 
-### Launch price and billing lengths (owner decision 2026-11-24; numbers partly proposed)
+### Launch price and billing lengths (owner decisions 2026-11-24; discounts approved, monthly prices proposed)
 Owner's words: "the marketing team at launch should have a campaign discount that will be offered to those who want to subscribe to a paid plan during the beta test, but dont want to be beta testers. allow also monthly subscriptions though discount at 3 month, 6 month, and 1 year. those are renewing at those intervals as well"
 
 | Plan length | Renews every | Discount vs monthly | Plus | Pro |
 |---|---|---|---|---|
 | Monthly | month | none (full price) | $10 (PROPOSED) | $18.75 (PROPOSED) |
-| 3 months | 3 months | 10% (PROPOSED) | $27 | about $50.60 |
-| 6 months | 6 months | 15% (PROPOSED) | $51 | about $95.60 |
-| 1 year | year | **20% (approved, owner 2026-11-24)** | $96 | $180 |
+| 3 months | 3 months | **5% (approved)** | $28.50 | about $53.45 |
+| 6 months | 6 months | **15% (approved)** | $51 | about $95.60 |
+| 1 year | year | **20% (approved)** | $96 | $180 |
 
 Proposed with it: the launch price stays on every renewal while the plan stays active; the offer ends Jan 31, 2027 and is not extended; teacher and parent pages only, never student pages; price, renewal length and online cancel shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Beta testers keep their free Plus (track 1). Needs Stripe recurring prices at 1, 3, 6 and 12 months (Waiting on you: billing-intervals, mkt-launch-offer).
 
@@ -1206,7 +1206,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 111 | **Pinterest as a main channel.** Tall pins of every game in the Classic look, free theme templates, sticker sheets and pattern papers as printables, seasonal classroom sets a month early, each linking to a Blog post or theme guide. | The site's look is made to be saved and shared by teachers planning their rooms | Teacher, 2026-11-24 |
 | 112 | **"Not a sale."** On sales holidays (Cyber Monday, back-to-school sales), post the one honest contrast: no discount, just the free tier, the beta, and what we will never charge for (read-aloud, calm mode, settings in every game). | A pattern interrupt in a feed full of countdowns; builds trust without fake urgency (marketing bible 5) | Marketing Director, 2026-11-24 launch plan |
 | 113 | **"Here is exactly what we ask."** The beta asks shown with their minutes (setup 15, lesson 10, play 10 to 20, check-in 1, surveys 5, reports 1) as a carousel. | Transparency lowers the perceived cost of saying yes (commitment and consistency; Fogg ability) | Marketing Director, 2026-11-24 launch plan |
-| 114 | **"Two ways to start."** Test it free as a beta tester, or just subscribe at the launch price: monthly, or save 10%, 15% or 20% with 3, 6 or 12-month plans (3 and 6-month numbers proposed). | Gives non-testers a yes instead of a no; anchoring against monthly and a real end date (Jan 31) | Owner, 2026-11-24 |
+| 114 | **"Two ways to start."** Test it free as a beta tester, or just subscribe at the launch price: monthly, or save 5%, 15% or 20% with 3, 6 or 12-month plans (owner-approved). | Gives non-testers a yes instead of a no; anchoring against monthly and a real end date (Jan 31) | Owner, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
