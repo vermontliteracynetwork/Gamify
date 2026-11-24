@@ -252,18 +252,19 @@ const pct = (n: number) => `${n}%`;
 // Farther back is a little smaller (2D depth); cats are bigger than mice.
 function size(p: Piece) {
   const y = SPOTS[p.spot][1];
-  return (p.side === 'defender' ? 18 : 9) * (0.8 + ((y - 64) / 23) * 0.35);
+  return (p.side === 'defender' ? 18 : 12) * (0.8 + ((y - 64) / 23) * 0.35);
 }
 
-// The soft poof of little stars where a mouse was caught.
-function Poof({ piece, theme, chased }: { piece: Piece; theme: GameTheme; chased: boolean }) {
+// The universal cue when a piece is caught: a small poof, then it is gone
+// (teacher, 2026-11-24: "no poof [upload], it should have a small poof
+// animation and then disappear as a universal cue"). Not a theme piece.
+function Poof({ piece, chased }: { piece: Piece; theme?: GameTheme; chased: boolean }) {
   const [x, y] = SPOTS[piece.spot];
-  const h = size(piece) * 2.4;
-  const img = pieceImage(theme, 'poof');
+  const h = size(piece) * 1.3;
   return (
     <motion.div className="absolute pointer-events-none" style={{ left: pct(x), top: pct(y - size(piece) / 2), height: `${h}%`, aspectRatio: '1', x: '-50%', y: '-50%', zIndex: 200 }}
-      initial={{ opacity: 0, scale: 0.3, rotate: -20 }} animate={{ opacity: [0, 1, 1, 0], scale: [0.3, 1, 1.15, 1.3], rotate: [-20, 0, 10, 16] }} transition={{ duration: 1.4, delay: chased ? 1.2 : 0.4, times: [0, 0.25, 0.7, 1] }}>
-      {img ? <img src={img} alt="" className="w-full h-full object-contain" draggable="false" /> : <PoofArt className="w-full h-full" />}
+      initial={{ opacity: 0, scale: 0.3, rotate: -20 }} animate={{ opacity: [0, 1, 1, 0], scale: [0.3, 1, 1.1, 1.2], rotate: [-20, 0, 10, 16] }} transition={{ duration: 0.9, delay: chased ? 1.2 : 0.4, times: [0, 0.25, 0.7, 1] }}>
+      <PoofArt className="w-full h-full" />
     </motion.div>
   );
 }

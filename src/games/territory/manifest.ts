@@ -14,9 +14,7 @@ export const territoryManifest: GameManifest = {
     { id: 'entrance', label: 'Entrance', width: 200, height: 180, hint: 'Where invaders come in (a mouse hole, a portal). Sits on the floor line, right of center' },
     ...[1, 2, 3].map((n) => ({ id: `defender-${n}`, label: `Defender ${n}`, width: 256, height: 256, hint: 'One defender, feet at the bottom edge (a cat, a spaceship)' })),
     ...[1, 2, 3].map((n) => ({ id: `invader-${n}`, label: `Invader ${n}`, width: 256, height: 256, hint: 'One invader facing left, feet at the bottom edge (a mouse, an alien)' })),
-    { id: 'poof', label: 'Poof', width: 256, height: 256, hint: 'What shows when a piece is caught (a puff of stars). Never anything hurt' },
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
-    { id: 'title', label: 'Title', width: 1200, height: 360, hint: 'The theme name in your own lettering (shown on the theme card)' },
   ],
   hasCpu: false,
 };
