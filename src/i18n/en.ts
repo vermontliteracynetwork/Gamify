@@ -234,6 +234,9 @@ export const en = {
   'tell.open': 'Tell Gamify about a problem or an idea',
 
   'way.title': 'How will you play?',
+  'way.soloWho': 'Who plays?',
+  'way.soloAlone': 'Just me',
+  'way.soloComputer': 'Me against the computer',
   'way.screens.live': 'Every student on their own device. You open a lobby and share a code.',
   'way.screens.share': 'One big screen up front. Teams take turns.',
   'way.screens.solo': 'One device, one player, right here.',

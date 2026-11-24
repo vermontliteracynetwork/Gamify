@@ -41,12 +41,12 @@ test.describe('public pages', () => {
 
 test('no automated accessibility violations on the question screen and a game board', async ({ page }) => {
   await openSetup(page, '/games/match-three');
-  for (;;) { const n = page.getByRole('button', { name: 'Next', exact: true }); if (!(await n.isVisible())) break; await n.click(); }
+  for (;;) { const n = page.getByRole('button', { name: 'Next', exact: true }); if (!(await n.isVisible())) break; if (await n.isDisabled()) await page.getByRole('radio').first().click(); await n.click(); }
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('gridcell').first()).toBeVisible();
   expect(await scan(page)).toEqual([]);
   await openSetup(page, '/games/star-quiz');
-  for (;;) { const n = page.getByRole('button', { name: 'Next', exact: true }); if (!(await n.isVisible())) break; await n.click(); }
+  for (;;) { const n = page.getByRole('button', { name: 'Next', exact: true }); if (!(await n.isVisible())) break; if (await n.isDisabled()) await page.getByRole('radio').first().click(); await n.click(); }
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.waitForTimeout(3500);

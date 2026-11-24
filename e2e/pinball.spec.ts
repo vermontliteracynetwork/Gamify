@@ -55,7 +55,10 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
   await page.getByRole('button', { name: 'Set up and play' }).click();
   for (;;) {
     if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    const next = page.getByRole('button', { name: 'Next', exact: true });
+    // The way step starts unpicked (2026-11-24): Solo, then Me against the computer.
+    if (await next.isDisabled()) { await page.getByRole('radio', { name: /^Solo/ }).click(); await page.getByRole('radio', { name: 'Me against the computer' }).click(); }
+    await next.click();
   }
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await page.getByRole('button', { name: 'Play', exact: true }).click();

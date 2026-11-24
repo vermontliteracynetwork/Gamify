@@ -17,6 +17,8 @@ test('Territory: the class screen opens the lobby, a student answers, a mouse is
   await page.getByRole('button', { name: 'Set up and play' }).click();
   if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
+  // How the class plays starts unpicked (2026-11-24): tap Cooperative first.
+  await page.getByRole('radio', { name: /^Cooperative/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   // Mice come out quickly, so the test does not wait long for one.
   await page.getByRole('radio', { name: 'Fast' }).click();

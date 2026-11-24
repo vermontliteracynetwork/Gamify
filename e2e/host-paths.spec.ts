@@ -34,7 +34,10 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
   for (let i = 0; i < 6; i++) {
     await page.waitForTimeout(150);
     if (await page.getByRole('heading', { name: /Teams$/ }).isVisible()) break;
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    const next = page.getByRole('button', { name: 'Next', exact: true });
+    // Card-choice pages start unpicked (2026-11-24): Share keeps the teams path.
+    if (await next.isDisabled()) await ((await page.getByRole('radio', { name: /^Share/ }).count()) ? page.getByRole('radio', { name: /^Share/ }) : page.getByRole('radio')).first().click();
+    await next.click();
   }
   await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
   expect(problems).toEqual([]);

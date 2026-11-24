@@ -62,25 +62,25 @@ Device check (in Help).
 
 Approved: Home.
 
-11. [ ] **Features page:** remove the text headers and pills above the title.
+11. [x] **Features page:** remove the text headers and pills above the title.
     Universal rule: "NEVER do that ... its an AI tell ... remove from
     everywhere and never have any unecessary, redundent text and headers like
     that."
-12. [ ] **Pricing:** approved except the title must say what the page is:
+12. [x] **Pricing:** approved except the title must say what the page is:
     "Plans and pricing".
-13. [ ] **Wording:** never "questions teachers ask" (or similar). A link to
+13. [x] **Wording:** never "questions teachers ask" (or similar). A link to
     Help is fine, but not with that wording.
-14. [ ] **Research page (not approved):** "needs serious updates to make it look
+14. [x] **Research page (not approved):** "needs serious updates to make it look
     more professional research focus, whilke simply highlighting why it
     works. collapsable text. list views."
-15. [ ] **Left-align page titles** and the subtext that follows (public and
+15. [x] **Left-align page titles** and the subtext that follows (public and
     teacher pages).
-16. [ ] **Left-align menu dropdowns** like on the Themes page.
-17. [ ] **Themes as a page:** "themes can otherwsie be added as page".
+16. [x] **Left-align menu dropdowns** like on the Themes page.
+17. [x] **Themes as a page:** "themes can otherwsie be added as page".
 
 ## D. Universal rules (apply everywhere, now and later)
 
-18. [ ] **Link generously.** "add lots of buttons and links to other pages
+18. [x] **Link generously.** "add lots of buttons and links to other pages
     within the gamify site. like when help pages are noted and such."
 19. [x] **Never break a word across lines.** "never break up text within a word
     to drop part of the word to the next line." No hyphenation or mid-word

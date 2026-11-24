@@ -45,12 +45,15 @@ export async function openSetup(page: Page, path: string, way?: RegExp) {
   if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(step1).toBeVisible();
   // Games with more than one way to play ask that first (2026-10-31). The way
-  // step opens on Solo now (2026-11-24); with no `way` given, older tests keep
+  // step starts with nothing picked (2026-11-24); with no `way` given, older tests keep
   // their Share path when the game has one. The tests start from the next page.
   if (await page.getByRole('heading', { name: /^Step 1 of \d+: How will you play\?/i }).isVisible()) {
+    // Nothing is picked at first (2026-11-24): a card must be tapped before Next.
     const share = page.getByRole('radio', { name: /^Share/ });
     if (way) await page.getByRole('radio', { name: way }).click();
     else if (await share.count()) await share.first().click();
+    else if (await page.getByRole('radio', { name: /^Solo/ }).count()) await page.getByRole('radio', { name: /^Solo/ }).first().click();
+    else await page.getByRole('radio').first().click();
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
 }
@@ -60,6 +63,11 @@ export async function finishSetup(page: Page) {
   for (;;) {
     const next = page.getByRole('button', { name: 'Next', exact: true });
     if (!(await next.isVisible())) break;
+    // A card-choice page waits for a tap before Next (2026-11-24).
+    if (await next.isDisabled()) {
+      const solo = page.getByRole('radio', { name: /^Solo/ });
+      await ((await solo.count()) ? solo : page.getByRole('radio')).first().click();
+    }
     await next.click();
   }
   await page.getByRole('button', { name: 'Play', exact: true }).click();
@@ -99,6 +107,11 @@ export async function showSetting(page: Page, target: Locator) {
     if (await target.first().waitFor({ state: 'visible', timeout: 700 }).then(() => true, () => false)) return;
     const next = page.getByRole('button', { name: 'Next', exact: true });
     if (!(await next.isVisible())) break;
+    // A card-choice page waits for a tap before Next (2026-11-24).
+    if (await next.isDisabled()) {
+      const solo = page.getByRole('radio', { name: /^Solo/ });
+      await ((await solo.count()) ? solo : page.getByRole('radio')).first().click();
+    }
     await next.click();
   }
   await expect(target.first()).toBeVisible();

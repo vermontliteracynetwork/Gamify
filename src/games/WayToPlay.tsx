@@ -5,6 +5,7 @@ import type { PlayMode } from '../data/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
+import { ChoiceRow } from '../ui/fields';
 
 // The first setup step when a game can be played more than one way (teacher,
 // 2026-10-31): big cards for each way, saying whether it runs on one screen
@@ -16,13 +17,19 @@ export default function WayToPlay({ modes: given, value, onChange }: { modes: Pl
   const modes = given.filter((m) => m !== 'versus' || !given.includes('solo'));
   const look = (m: PlayMode): PlayMode => (m === 'versus' ? 'solo' : m);
   const picked = useContext(ChoicePicked);
+  // Former Versus games show under Solo (teacher, 2026-11-23): when a game has
+  // both, Solo asks one more thing after it is tapped, alone or against the
+  // computer, so the computer opponent is never lost.
+  const both = given.includes('versus') && given.includes('solo');
+  const soloOn = picked && (value === 'solo' || value === 'versus');
   return (
     // Every way fits side by side, no scrolling (teacher, 2026-10-31).
     // Square cards in the middle of the box (teacher, 2026-11-18).
+    <div className="way-cards grid gap-6">
     <div role="radiogroup" aria-label={t('way.title')} className="grid gap-5 justify-center" style={{ gridTemplateColumns: `repeat(${modes.length}, min(18rem, 40vh, calc((100% - ${(modes.length - 1) * 1.25}rem) / ${modes.length})))` }}>
       {modes.map((m) => {
         const Icon = MODE_ICONS[look(m)];
-        const on = picked && value === m;
+        const on = picked && (value === m || (both && m === 'solo' && value === 'versus'));
         return (
           // A big picture band for each way to play, small text under it (teacher, 2026-11-06).
           <button key={m} type="button" role="radio" aria-checked={on} onClick={() => onChange(m)}
@@ -44,6 +51,11 @@ export default function WayToPlay({ modes: given, value, onChange }: { modes: Pl
           </button>
         );
       })}
+    </div>
+    {both && soloOn && (
+      <div className="justify-self-center"><ChoiceRow label={t('way.soloWho')} value={value === 'versus' ? 'versus' : 'solo'} onChange={(m) => onChange(m)}
+        options={[{ value: 'solo', label: t('way.soloAlone') }, { value: 'versus', label: t('way.soloComputer') }]} /></div>
+    )}
     </div>
   );
 }
