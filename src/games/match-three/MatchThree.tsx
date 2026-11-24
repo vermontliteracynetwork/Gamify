@@ -295,9 +295,10 @@ export default function MatchThree() {
         // dashes for every move of every round, and the star goal.
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="match-three" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
 
           <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>

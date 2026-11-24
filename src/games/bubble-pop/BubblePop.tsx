@@ -312,9 +312,10 @@ export default function BubblePop() {
         // 2026-11-16). Tap or click the board to shoot; no Shoot button.
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="bubble-pop" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
 
           {/* The board is the star: as big as the screen allows, with the score

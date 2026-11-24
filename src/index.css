@@ -851,3 +851,7 @@ html[data-motion="still"] .pu-rays { animation: none; }
    hyphenation and no mid-word wrapping anywhere; long words shrink (FitText)
    or the box grows instead. */
 html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual; }
+
+/* THE in-game tool round (Brand Kit game components, 2026-11-24): 44px, Paper,
+   a 2px ink edge and a press shade; Hint, Settings, Full screen in that order. */
+.tool-round { background: var(--paper); border: 2px solid var(--color-border); box-shadow: 0 3px 0 var(--color-border); }

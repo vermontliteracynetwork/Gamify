@@ -510,9 +510,10 @@ export default function CastleQuest() {
             </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="castle-quest" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
           <AnimatePresence>
             {toss && <DieToss key={toss.id} rolls={toss.rolls} wait={toss.wait} still={still} theme={theme} onGo={() => goRef.current?.()} />}

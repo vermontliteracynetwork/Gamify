@@ -337,9 +337,10 @@ export default function CastCatch() {
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="cast-catch" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
           {phase === 'play' && (
             <div className="absolute inset-x-0 bottom-5 grid gap-2 justify-items-center z-10 pointer-events-none [&>*]:pointer-events-auto">

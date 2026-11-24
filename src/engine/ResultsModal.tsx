@@ -54,32 +54,27 @@ function GameReview({ onDone }: { onDone: () => void }) {
   );
 }
 
-// The winner (or winners, in a tie) floating over a little stage, with a
-// halo around the icon (teacher, 2026-10-31). Solo games float a star.
+// THE winner box (Brand Kit game components, teacher 2026-11-24): the winner's
+// icon (no circle, no podium, no stat chips) in THE turn glow, the spinning
+// sun rays and the breathing halo; a tie shows each winner. Solo games show a
+// star.
 function WinnerStage({ winners }: { winners?: { name: string; colorIndex: number; art?: string }[] }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   const list = winners?.length ? winners : null;
-  const size = list && list.length > 2 ? 112 : 168;
+  const size = list && list.length > 2 ? 104 : 150;
   return (
-    <div className="relative w-full mx-auto h-[17rem] select-none overflow-hidden" aria-hidden="true">
-      {/* Sun rays turn slowly behind the winner (teacher, 2026-11-13: a better winning screen). */}
-      <span className={`absolute left-1/2 top-[42%] w-[44rem] h-[44rem] -translate-x-1/2 -translate-y-1/2 ${still ? '' : 'results-rays'}`} style={{ background: 'repeating-conic-gradient(rgba(255,255,255,0.55) 0deg 9deg, transparent 9deg 22.5deg)', maskImage: 'radial-gradient(circle, #000 18%, transparent 62%)', WebkitMaskImage: 'radial-gradient(circle, #000 18%, transparent 62%)' }} />
-      {/* Stage lights */}
-      <span className="absolute inset-x-[18%] bottom-8 top-0 rounded-t-full opacity-60" style={{ background: 'radial-gradient(ellipse at 50% 100%, #fdfd94 0%, rgba(253,253,148,0.35) 45%, transparent 72%)' }} />
-      {/* The stage: a round top and a front */}
-      <span className="absolute inset-x-[12%] bottom-0 h-9 rounded-b-[1.25rem] border-bold border-border" style={{ background: '#ed9d75' }} />
-      <span className="absolute inset-x-[12%] bottom-6 h-7 rounded-[50%] border-bold border-border" style={{ background: '#fdfd94' }} />
-      <div className="absolute inset-x-0 bottom-12 flex justify-center gap-4">
+    <div className="relative w-full mx-auto h-[15rem] select-none overflow-hidden grid place-items-center" aria-hidden="true">
+      <span className="turn-rays absolute left-1/2 top-1/2 w-[26rem] h-[26rem] -ml-[13rem] -mt-[13rem] rounded-full pointer-events-none" />
+      <span className="turn-halo absolute left-1/2 top-1/2 w-[17rem] h-[17rem] -ml-[8.5rem] -mt-[8.5rem] rounded-full pointer-events-none" />
+      <div className="relative flex justify-center gap-4">
         {(list ?? [null]).map((w, i) => (
-          <motion.div key={i} className="grid justify-items-center gap-1"
+          <motion.span key={i} className="grid place-items-center"
             animate={still ? undefined : { y: [0, -8, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 }}>
-            <span className="rounded-full" style={{ boxShadow: '0 0 0 5px rgba(253,253,148,0.95), 0 0 22px 12px rgba(253,253,148,0.85), 0 0 46px 18px rgba(255,255,255,0.55)' }}>
-              {w?.art ? <img src={w.art} alt="" className="rounded-full border-bold border-border bg-surface object-contain p-1" style={{ width: size, height: size }} /> : w ? <TeamBadge colorIndex={w.colorIndex} size={size} /> : (
-                <span className="rounded-full border-bold border-border bg-accent flex items-center justify-center" style={{ width: size, height: size }}><Star weight="fill" size={size * 0.6} color="#241c3d" /></span>
-              )}
-            </span>
-          </motion.div>
+            {w?.art ? <img src={w.art} alt="" className="object-contain" style={{ width: size, height: size }} />
+              : w ? <TeamBadge colorIndex={w.colorIndex} size={size} />
+              : <Star weight="fill" size={size * 0.8} color="var(--lemon)" style={{ filter: 'drop-shadow(0 3px 0 var(--color-border))' }} />}
+          </motion.span>
         ))}
       </div>
     </div>
@@ -168,12 +163,11 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
         className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
-        {/* The stage sits in a light purple band across the top of the box. */}
-        <div className="border-b-[3px] border-border" style={{ background: 'radial-gradient(120% 100% at 50% 20%, #ffffff 0%, #e6e9ff 45%, #c9d2ff 100%)' }}>
-          <WinnerStage winners={winners} />
-        </div>
-        <div className="grid justify-items-center gap-1 text-center px-5">
+        {/* THE winner box (Brand Kit, 2026-11-24): the title, the winner in the glow,
+            then only the score centered under it, then the buttons. */}
+        <div className="grid justify-items-center gap-1 text-center px-5 pt-6">
           <h2 className="title-bubble text-4xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
+          <WinnerStage winners={winners} />
           {children}
         </div>
         {view === 'main' ? (

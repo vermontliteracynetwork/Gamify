@@ -57,12 +57,15 @@ export function PowerUpTray({ manifest, items, onUse, disabled = false, auto = f
         const off = disabled || auto;
         return (
           <motion.button key={`${it.id}-${i}`} type="button" disabled={off} onClick={() => setAsk({ id: Date.now(), index: i, item: it, cpu: false })}
-            className="w-[5.5rem] aspect-square rounded-panel border-bold border-border bg-surface grid justify-items-center content-center gap-0.5 p-1 disabled:opacity-60 disabled:cursor-default"
-            style={{ boxShadow: off ? 'var(--shadow-sticker)' : '0 0 0 4px #FDFD94, 0 0 14px 4px rgba(253,253,148,0.9), 0 4px 0 #000' }}
+            // THE power-up card (Brand Kit, 2026-11-24): a bigger square so nothing is cut
+            // off, the art in its own top area, the name in its own two-line area;
+            // always the top layer of the game screen.
+            className="relative z-[25] w-[6.5rem] aspect-square rounded-[16px] border-[2.5px] border-border bg-[var(--paper)] grid grid-rows-[1fr_auto] justify-items-center gap-1 px-1.5 py-2 disabled:opacity-60 disabled:cursor-default"
+            style={{ boxShadow: off ? '0 3px 0 var(--color-border)' : '0 0 0 3px var(--butter), 0 3px 0 var(--color-border)' }}
             initial={still ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={still ? { duration: 0.01 } : POP_IN}
             whileHover={off || still ? undefined : { scale: 1.06 }} whileTap={off || still ? undefined : { scale: 0.94 }}>
-            <ItemArt item={it} size={48} still={still || off} />
-            <span className="text-xs font-bold leading-tight text-center line-clamp-2">{it.name}</span>
+            <span className="grid place-items-center min-h-0"><ItemArt item={it} size={42} still={still || off} /></span>
+            <span className="grid place-items-center text-[13px] font-bold leading-[1.1] text-center min-h-[2.3em]">{it.name}</span>
           </motion.button>
         );
       })}

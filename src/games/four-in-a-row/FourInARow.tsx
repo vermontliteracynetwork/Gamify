@@ -320,9 +320,10 @@ export default function FourInARow() {
         <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="four-in-a-row" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
           <div className="grid grid-cols-[minmax(0,1fr)] gap-2 min-w-0 justify-items-center">

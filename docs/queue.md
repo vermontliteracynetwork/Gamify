@@ -113,7 +113,7 @@ to main (approved). The Game Lab and Territory stay off main.
     Lavender main purple, Sky and Blue crystal, the bright and pastel pairs,
     Nature tones, Ink #1d1a33, Paper, Cream) as the site tokens; Grow Year
     titles in capitals with the logo G; ink edges and press shades.
-25. [ ] **Batch 2, universal game components:** top strip and meter, tool
+25. [x] **Batch 2, universal game components:** top strip and meter, tool
     buttons (Hint, Settings, Full screen, Close), scoreboard rows, power-up
     cards, results box with stickers, pause, hint card.
 26. [ ] **Batch 3, universal views:** welcome (with the portrait and phone

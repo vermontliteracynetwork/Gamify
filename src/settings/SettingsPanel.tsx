@@ -32,7 +32,7 @@ export function FullScreenButton({ small = false }: { small?: boolean }) {
   const toggle = () => { void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
   return (
     <button type="button" onClick={toggle} aria-label={t(on ? 'settings.fullscreenOff' : 'settings.fullscreen')}
-      className={`${small ? 'w-11 h-11 border-std bg-surface-2' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+      className={`${small ? 'tool-round w-11 h-11' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
       style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
       {on ? <CornersIn weight="bold" size={small ? 20 : 28} /> : <CornersOut weight="bold" size={small ? 20 : 28} />}
     </button>
@@ -45,7 +45,7 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
       type="button"
       onClick={onClick}
       aria-label={t('settings.open')}
-      className={`${small ? 'w-11 h-11' : 'w-14 h-14'} shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+      className={`${small ? 'tool-round w-11 h-11' : 'w-14 h-14 bg-surface border-bold border-border'} shrink-0 rounded-full flex items-center justify-center active:scale-95 motion-safe:transition`}
       style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}
     >
       <GearSix weight="bold" size={small ? 20 : 30} />

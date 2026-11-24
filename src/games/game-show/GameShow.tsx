@@ -430,9 +430,10 @@ export default function GameShow() {
         <div className="relative play-fill px-3 sm:px-[clamp(1rem,2.5vw,2.5rem)] py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
           <section className="relative grid gap-4 min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
