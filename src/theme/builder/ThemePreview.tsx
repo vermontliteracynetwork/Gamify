@@ -12,6 +12,7 @@ import { GAMES } from '../../games/registry';
 import { BoardArt, boardGround, Die2D, WOBBLE } from '../../games/castle-quest/boardArt';
 import { layout, spaceKinds, TRAIL_SPACES } from '../../games/castle-quest/board';
 import { halfWidthAt, PIN_XY, scaleAt, toView, xAt, yAt } from '../../games/bowling/lane';
+import { ballUrl } from '../../games/bowling/alley';
 
 // Each game's own preview, one file per game in ./previews, named by game id
 // (teacher, 2026-11-16: "ALWAYS show preview as the actual game template").
@@ -65,7 +66,7 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
 
 // Each team's picture as the game shows it: Bowling's balls, else team icons.
 const teamArt = (theme: GameTheme) => Array.from({ length: 10 }, (_, k) => theme.gameId === 'bowling'
-  ? pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? `/classic/bowling/ball-${k}.webp`
+  ? pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? ballUrl(k)
   : pieceImage(theme, `team-${k + 1}`));
 
 // The Teams page picker, where each team taps its picture (Bowling: its ball).

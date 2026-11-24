@@ -6,7 +6,7 @@ import TapOk from '../../engine/TapOk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Crosshair, HandTap, Trophy } from '@phosphor-icons/react';
+import { CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -15,7 +15,7 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import ScoreBoard from '../../engine/ScoreBoard';
+import Meter from '../../ui/Meter';
 import { CHANCES } from '../../engine/turns';
 import TeamSetup from '../../engine/TeamSetup';
 import { TeamArt } from '../../engine/TeamBadge';
@@ -42,19 +42,19 @@ import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { bowlingManifest } from './manifest';
 import { PIN_OUTLINE } from '../../theme/builder/shapes';
-import { cpuPlan, fullRack, halfWidthAt, PIN_SPOTS, PIN_XY, rollPoints, scaleAt, shakePins, simulateRoll, toView, xAt, yAt, type SimResult } from './lane';
+import { cpuPlan, fullRack, PIN_SPOTS, PIN_XY, rollPoints, shakePins, simulateRoll, toView, type SimResult } from './lane';
+import { alley, BALL_COLORS, ballUrl, BowlCards, C, ClassicPin, FlatBall, GY, INK, WallConfetti, type FrameMark } from './alley';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 type Step = 'question' | 'aim' | 'spin' | 'roll' | 'result';
-// Classic: a bowling alley, no space look (teacher, 2026-10-31), and real
-// bowling balls from the Puzzle Games Graphics Pack, one color per player.
-// Each player's ball is their icon too (teacher, 2026-11-01): the ball they
-// pick on the Teams page is the one they roll. A theme draws up to 10 balls
-// (pieces ball-1 to ball-10); any it leaves out stay Classic.
+// Classic: the approved alley (teacher, 2026-11-24 redesign), flat balls in
+// the brand brights, one color per player. Each player's ball is their icon
+// too (teacher, 2026-11-01): the ball they pick on the Teams page is the one
+// they roll. A theme draws up to 10 balls (pieces ball-1 to ball-10); any it
+// leaves out stay Classic.
 const BALLS = 10;
-const classicBallArt = (k: number) => `/classic/bowling/ball-${k % BALLS}.webp`;
-// Wood boards down the lane, fixed so they never jump between turns.
-const BOARDS = Array.from({ length: 9 }, (_, i) => -1.2 + (i + 1) * 0.24);
+// Boards down the lane (fractions of the half width), fixed so they never jump.
+const BOARDS = [-0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75];
 
 // Bowling (launch roster, Stage 7): a right answer earns a roll. Tap a
 // lane and the ball rolls into ten pins. Two rolls a frame;
@@ -95,13 +95,22 @@ export default function Bowling() {
   const alive = useRef(false);
   const [roll, setRoll] = useState<0 | 1>(0);
   const [frames, setFrames] = useState(0);
-  const [banner, setBanner] = useState<{ id: number; text: string; kind?: 'strike' | 'spare' | 'miss' | 'split' | null; sign?: string } | null>(null);
+  const [banner, setBanner] = useState<{ id: number; text: string; kind?: 'strike' | 'spare' | 'miss' | 'split' | null } | null>(null);
   // Every result banner stays until it is tapped (teacher, 2026-11-24); then the game goes on.
   const afterBanner = useRef<(() => void) | null>(null);
   const closeBanner = () => { setBanner(null); const go = afterBanner.current; afterBanner.current = null; go?.(); };
   // Strikes in a row for each player: two is a Double, three a Turkey.
   const streak = useRef<Record<string, number>>({});
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
+  // The ten-frame sheet (teacher, 2026-11-23): each player's finished frames,
+  // X for a strike, / for a spare, else the running total.
+  const [sheet, setSheet] = useState<Record<string, FrameMark[]>>({});
+  const frameKind = useRef<'X' | '/' | null>(null);
+  // The stage's size, so the lane is drawn to fill it (and, on tall screens,
+  // the height of the player row above it).
+  const stageRef = useRef<HTMLDivElement>(null);
+  const blockRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 1000, h: 625, block: 0 });
   const timers = useRef<number[]>([]);
   // Power-ups (teacher, 2026-10-31): a right answer may bring one; it waits
   // for this player's next turn under the scores and is gone after that turn.
@@ -160,14 +169,14 @@ export default function Bowling() {
   function begin() {
     const players = solo ? [{ id: 'solo', name: t('mm.you'), kind: 'student' as const, colorIndex: 0, score: 0 }] : team.players;
     const state = startTurns(players);
-    setT(state); setFrames(0); setMissed([]); setBanner(null); alive.current = true;
+    setT(state); setFrames(0); setMissed([]); setSheet({}); setBanner(null); alive.current = true;
     boost.current = { double: false, magnet: false, bumpers: false, mega: false };
     held.reset();
     setPhase('play');
     startFrame(state);
   }
   function startFrame(state: TurnState) {
-    setStanding(fullRack()); setRoll(0); setArmed([]); setAim(0); setHook(0);
+    setStanding(fullRack()); setRoll(0); setArmed([]); setAim(0); setHook(0); frameKind.current = null;
     boost.current = { double: false, magnet: false, bumpers: false, mega: false };
     held.beginTurn(current(state).id);
     askFor(state, 0);
@@ -265,6 +274,7 @@ export default function Bowling() {
     const base = rollPoints(down.length, roll, left);
     const points = base.points * (boost.current.double ? 2 : 1);
     const kind = base.kind;
+    if (kind) frameKind.current = kind === 'strike' ? 'X' : '/';
     boost.current.double = false;
     setArmed([]);
     // The pinsetter sweeps the fallen pins away instead of making them vanish.
@@ -279,10 +289,8 @@ export default function Bowling() {
     const me = current(turns).id;
     if (roll === 0) streak.current[me] = kind === 'strike' ? (streak.current[me] ?? 0) + 1 : 0;
     const run = streak.current[me] ?? 0;
-    // Classic shows the alley's glowing signs (BowlingGUI, cleared 2026-11-01).
-    const sign = !theme.id.endsWith(':classic') ? undefined : kind === 'strike' ? (run >= 3 ? 'turkey' : run === 2 ? 'double' : 'strike') : kind === 'spare' ? 'spare' : undefined;
     const label = kind === 'strike' && run >= 3 ? t('sb.turkey') : kind === 'strike' && run === 2 ? t('sb.double') : text;
-    setBanner({ id: Date.now(), text: points ? `${label} +${points}` : label, kind: kind ?? (res.gutter || down.length === 0 ? 'miss' : split ? 'split' : null), sign });
+    setBanner({ id: Date.now(), text: points ? `${label} +${points}` : label, kind: kind ?? (res.gutter || down.length === 0 ? 'miss' : split ? 'split' : null) });
     if (kind) {
       playEffect('win', settings);
       if (settings.celebrations !== 'off' && !still) {
@@ -300,6 +308,9 @@ export default function Bowling() {
   }
   function endFrame(state: TurnState) {
     held.endTurn(); // unused power-ups are gone after the turn
+    const me = current(state);
+    const mark = frameKind.current ?? String(me.score);
+    setSheet((s) => ({ ...s, [me.id]: [...(s[me.id] ?? []), { mark }] }));
     const n = frames + 1;
     setFrames(n);
     if (n >= totalFrames) { end(state); return; }
@@ -326,20 +337,42 @@ export default function Bowling() {
     return () => window.clearTimeout(id);
   }, [cpuAim, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const measure = () => { const r = el.getBoundingClientRect(); const b = blockRef.current?.getBoundingClientRect(); setBox({ w: Math.max(320, r.width), h: Math.max(320, r.height), block: b ? b.bottom - r.top : 0 }); };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    if (blockRef.current) ro.observe(blockRef.current);
+    return () => ro.disconnect();
+  }, [phase, !!turns]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Whose frame it is on their own sheet (0-based).
+  const myFrame = player ? (sheet[player.id]?.length ?? 0) : 0;
+
   // A theme's own ball for player icon k (an older design's team icon or its
-  // one Ball piece stand in).
+  // one Ball piece stand in). Classic balls are flat brand-color balls.
   const drawnBall = (k: number) => pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? pieceImage(theme, 'ball');
-  const ballIcons = Array.from({ length: BALLS }, (_, k) => drawnBall(k) ?? (pieceColor(theme, 'ball', '') ? undefined : classicBallArt(k)));
+  const themedBallColor = pieceColor(theme, 'ball', '');
+  const ballIcons = Array.from({ length: BALLS }, (_, k) => drawnBall(k) ?? (themedBallColor ? undefined : ballUrl(k)));
   const tray = <PowerUpTray manifest={bowlingManifest} items={held.held} onUse={applyItem} disabled={(step !== 'aim' && step !== 'spin') || twisting || !!banner} auto={player?.kind === 'cpu'} who={player?.name} />;
   const canAim = phase === 'play' && (step === 'aim' || step === 'spin') && player?.kind !== 'cpu' && !twisting;
-  const pinColor = pieceColor(theme, 'pin', '#fbfcf8');
+  const pinColor = pieceColor(theme, 'pin', C.paper);
   const pinArt = pieceImage(theme, 'pin');
-  const ballColor = pieceColor(theme, 'ball', '#ed9d75');
-  const laneColor = pieceColor(theme, 'lane', '#e2b07a');
+  const laneColor = pieceColor(theme, 'lane', C.peach);
+  const bgArt = pieceImage(theme, 'background');
+  const classic = theme.id.endsWith(':classic');
   const ballK = (player?.colorIndex ?? 0) % BALLS;
   const ballArt = drawnBall(ballK);
-  const near = 0, far = 1;
-  const lanePoly = `${50 - halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(near)},${yAt(near)} ${50 + halfWidthAt(far)},${yAt(far)} ${50 - halfWidthAt(far)},${yAt(far)}`;
+  const ballFill = themedBallColor || BALL_COLORS[ballK];
+  // The stage: the alley fills the whole play space; the lane is measured to it.
+  const portrait = box.w / box.h < 1.05;
+  const many = (turns?.players.length ?? 1) > (portrait ? 6 : 5);
+  const hN = portrait ? Math.min(box.w * 0.34, box.h * 0.3) : Math.min(box.w * 0.235, box.h * 0.42);
+  const railY = portrait ? Math.min(box.h * 0.55, Math.max(box.h * 0.36, box.block + hN * 0.3 + 10)) : Math.round(box.h * 0.25);
+  const A = alley(box.w, box.h, railY, portrait);
+  const hwTop = A.edgeAt(A.top), hwBot = A.edgeAt(box.h);
+  const gut = (hw: number) => hw * 0.24;
   // Where each pin is drawn: from the roll in progress, or its spot.
   const frame = sim ? sim.res.frames[Math.min(sim.res.frames.length - 1, Math.max(0, sim.res.frames.findIndex((f) => f.t >= sim.at)))] : null;
   const prevFrame = sim && frame ? sim.res.frames[Math.max(0, sim.res.frames.indexOf(frame) - 3)] : null;
@@ -353,9 +386,20 @@ export default function Bowling() {
   const ballNow = frame ? toView(frame.ball[0], frame.ball[1]) : { laneX: aim * 1.12, d: 0.02 };
   const ballGone = !!frame && ballNow.d > 0.95;
   const big = armed.includes('mega');
-  // The aim line and the curve the spin will put on it.
-  const preview = Array.from({ length: 14 }, (_, k) => { const d = (k / 13) * 0.62; const bend = step === 'spin' ? hook * 0.72 * Math.max(0, (d - 0.33) / 0.29) ** 2 : 0; return `${xAt(aim * 1.12 + bend, d)},${yAt(d)}`; }).join(' ');
-  const laneW = 'calc((var(--play-h) - 6rem - var(--sb-extra)) * 100 / 130)';
+  // The dotted aim line from the ball toward the pins, with an arrowhead.
+  const aimPts = Array.from({ length: 12 }, (_, k) => { const d = 0.07 + (k / 11) * 0.5; return [A.X(aim * 1.12, d), A.Y(d) - A.ballR * A.S(d) * 0.4] as const; });
+  const [ax, ay] = aimPts[aimPts.length - 1], [bx, by] = aimPts[aimPts.length - 2];
+  const ang = Math.atan2(ay - by, ax - bx), ah = hN * 0.07;
+  const head = `M${ax + Math.cos(ang + 2.5) * ah} ${ay + Math.sin(ang + 2.5) * ah} L${ax} ${ay} L${ax + Math.cos(ang - 2.5) * ah} ${ay + Math.sin(ang - 2.5) * ah}`;
+  const headY = A.Y(0.74);
+  const pinH = (d: number) => A.HW(d) * 0.7;
+  const drawPin = (k: number) => pinArt
+    // A drawn pin always shows inside the pin's outline (teacher, 2026-11-02).
+    ? <g transform={`scale(${(k * 200) / 11.3})`}><image href={pinArt} x={-1.8} y={-11} width={3.6} height={11.3} preserveAspectRatio="none" clipPath="url(#sb-pin-shape)" /></g>
+    : <g transform={`scale(${k * 1.45} ${k})`}><ClassicPin fill={pinColor} k={k} /></g>;
+  const meterLabel = t('sb.frame', { n: Math.min(myFrame + 1, setup.frames), total: setup.frames });
+  const foulY = A.near + (box.h - A.near) * 0.5;
+  const bannerTop = portrait ? A.top + (A.near - A.top) * 0.32 : box.h * 0.4;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -390,145 +434,123 @@ export default function Bowling() {
         ]} />
       )}
       {(phase === 'play' || phase === 'end') && turns && (
-        // The lane fills the play space, the same in full screen; small controls
-        // on top, the scores right beside it, top aligned (teacher, 2026-10-31).
-        <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
+        // The approved alley (teacher, 2026-11-24): the lane is the hero, big and
+        // centered; the player list at the left (in a row on top when the screen
+        // is tall); held power-ups at the right; the frame meter alone on top.
+        <div ref={stageRef} className={`relative play-fill overflow-hidden select-none ${shake ? 'cq-shake' : ''}`} style={bgArt ? pieceFill(theme, 'background', C.lavender) : undefined}>
           <h1 className="sr-only"><Title text={bowlingManifest.name} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+          <svg viewBox={`0 0 ${box.w} ${box.h}`} className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
+            <defs>
+              <clipPath id="sb-pin-shape"><path d={PIN_OUTLINE} /></clipPath>
+              {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
+            </defs>
+            <g style={{ transformOrigin: `${A.cx}px ${headY}px`, transform: sim?.zoom ? 'scale(1.14)' : 'scale(1)', transition: still ? 'none' : 'transform 0.45s ease-out' }}>
+              {/* The alley wall: cream with cut-paper confetti (Classic); the floor is the stage color. */}
+              {!bgArt && <rect x={-40} y={-40} width={box.w + 80} height={A.top + 40} fill={classic ? C.paper : theme.colors.surface} />}
+              {!bgArt && classic && settings.backgrounds !== 'plain' && <WallConfetti w={box.w} h={A.top} calm={!!settings.calm} />}
+              {/* Gutters, then the warm lane with its boards. */}
+              {[-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * hwTop} ${A.top} L${A.cx + sd * (hwTop + gut(hwTop))} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot))} ${box.h + 4} L${A.cx + sd * hwBot} ${box.h + 4} Z`} fill={C.lavender} stroke={INK} strokeWidth={4} strokeLinejoin="round" />)}
+              <path d={`M${A.cx - hwTop} ${A.top} L${A.cx + hwTop} ${A.top} L${A.cx + hwBot} ${box.h + 4} L${A.cx - hwBot} ${box.h + 4} Z`} fill={laneColor} stroke={INK} strokeWidth={4} strokeLinejoin="round" />
+              {BOARDS.map((u) => <path key={u} d={`M${A.cx + u * hwTop} ${A.top} L${A.cx + u * hwBot} ${box.h}`} stroke={C.orange} strokeWidth={2} opacity={0.55} />)}
+              {/* Aim arrows in a V and a row of dots, like real lane marks, drawn our way. */}
+              {[-0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6].map((u) => { const d = 0.3 - Math.abs(u) * 0.12; const x = A.cx + u * A.HW(d), y = A.Y(d), s = A.HW(d) * 0.06; return <path key={u} d={`M${x} ${y - s * 1.6} L${x + s} ${y + s} L${x - s} ${y + s} Z`} fill={C.orange} stroke={INK} strokeWidth={2} strokeLinejoin="round" />; })}
+              {[-0.5, -0.25, 0, 0.25, 0.5].map((u) => <circle key={u} cx={A.cx + u * A.HW(0.1)} cy={A.Y(0.1)} r={A.HW(0.1) * 0.025} fill={C.orange} stroke={INK} strokeWidth={1.5} />)}
+              <path d={`M${A.cx - A.edgeAt(foulY)} ${foulY} H${A.cx + A.edgeAt(foulY)}`} stroke={INK} strokeWidth={4} strokeLinecap="round" />
+              {/* The Lemon rail across the back wall (Classic). */}
+              {!bgArt && <rect x={-40} y={A.top - Math.max(7, box.h * 0.016)} width={box.w + 80} height={Math.max(10, box.h * 0.022)} fill={classic ? C.lemon : theme.colors.accent} stroke={INK} strokeWidth={3.5} />}
+              {/* Bumper rails pop up when the power-up is on. */}
+              {armed.includes('bumpers') && [-1, 1].map((sd) => <path key={sd} d={`M${A.cx + sd * (hwTop + gut(hwTop) * 0.5)} ${A.top} L${A.cx + sd * (hwBot + gut(hwBot) * 0.5)} ${box.h}`} stroke={C.teal} strokeWidth={Math.max(6, hN * 0.05)} strokeLinecap="round" className={still ? '' : 'sb-pop'} />)}
+              {canAim && <>
+                <polyline points={aimPts.map(([x, y]) => `${x},${y}`).join(' ')} fill="none" stroke={INK} strokeWidth={Math.max(4, hN * 0.02)} strokeDasharray={`1 ${Math.max(10, hN * 0.05)}`} strokeLinecap="round" />
+                <path d={head} fill="none" stroke={INK} strokeWidth={Math.max(4, hN * 0.02)} strokeLinecap="round" strokeLinejoin="round" className={still ? '' : 'cq-glow'} />
+              </>}
+              {swept && !still && (
+                <g key={swept.id}>
+                  {swept.pins.map((p) => (
+                    <g key={p.i} transform={`translate(${A.X(p.laneX, p.d)} ${A.Y(p.d)})`}>
+                      <g className="sb-swept"><g transform="rotate(85)">{drawPin(pinH(p.d) / 200)}</g></g>
+                    </g>
+                  ))}
+                  {/* The sweep bar drops in front of the pins and pulls them back into the pit. */}
+                  <rect className="sb-bar" x={A.cx - A.HW(0.6) - 8} y={A.Y(0.6) - hN * 0.05} width={(A.HW(0.6) + 8) * 2} height={hN * 0.05} rx={4} fill={C.grape} stroke={INK} strokeWidth={3} />
+                </g>
+              )}
+              {pinsNow.map((p) => {
+                const k = pinH(p.d) / 200;
+                const fallen = p.tilt >= 1;
+                const lean = p.tilt * 85 * p.dir;
+                const wob = sim?.wobble && sim.res.wobbled.includes(p.i);
+                const toppling = wob && sim!.res.down.includes(p.i);
+                return (
+                  <g key={p.i} transform={`translate(${A.X(p.laneX, p.d)} ${A.Y(p.d)})`} opacity={fallen ? 0.9 : 1}>
+                    <ellipse cx={0} cy={0} rx={30 * k * 1.45} ry={8 * k * 1.45} fill={INK} opacity={0.22} />
+                    <g transform={`rotate(${lean})`}><g className={wob && !still ? (toppling ? 'sb-topple' : 'sb-wobble') : ''}>{drawPin(k)}</g></g>
+                  </g>
+                );
+              })}
+              {/* The ball: it spins as it rolls, shrinks into the distance, glows when powered up. */}
+              {!ballGone && (step !== 'result' || !!sim) && (() => {
+                const r = A.ballR * A.S(ballNow.d) * (big ? 2.1 : 1);
+                const rot = frame ? frame.t * 900 : 0;
+                return (
+                  <g transform={`translate(${A.X(ballNow.laneX, ballNow.d)} ${A.Y(ballNow.d) - r})`}>
+                    <ellipse cx={0} cy={r * 0.92} rx={r * 0.9} ry={r * 0.22} fill={INK} opacity={0.25} />
+                    <g className={canAim && !still ? 'sb-ready' : ''}><g transform={`scale(${r / 50})`}>
+                      {(armed.includes('double') || armed.includes('magnet') || big) && <circle r={70} fill="none" stroke={armed.includes('magnet') ? C.pink : C.lemon} strokeWidth={12} opacity={0.9} className={still ? '' : 'cq-glow'} />}
+                      {ballArt ? <g transform={`rotate(${rot})`}><circle r={47} fill="url(#sb-ball-art)" stroke={INK} strokeWidth={6} /></g> : <FlatBall color={ballFill} spin={rot} />}
+                    </g></g>
+                  </g>
+                );
+              })()}
+            </g>
+          </svg>
+          {/* Tap the lane to throw; the aim line follows the finger or mouse (no caption, teacher 2026-11-13). */}
+          {canAim && !still && (
+            <div className="absolute z-[5] cursor-pointer" role="button" aria-label={t('sb.tapThrow')} onClick={tapLane}
+              style={{ left: A.cx - hwBot - gut(hwBot), width: (hwBot + gut(hwBot)) * 2, top: A.top - hN * 0.3, bottom: 0 }}
+              onPointerMove={(e) => { const r = e.currentTarget.parentElement!.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; setAim(Math.max(-0.92, Math.min(0.92, ((x - A.cx) / A.edgeAt(Math.max(A.top, y))) * (1.25 / 1.12)))); }} />
+          )}
+          {/* The frame meter alone in the top strip; the tools at the right, in one order: Hint, Settings, Full screen. */}
+          <div className={`absolute z-10 pointer-events-none flex justify-center ${box.w < 640 ? 'inset-x-3 top-[3.75rem]' : 'left-1/2 -translate-x-1/2 top-[0.95rem]'}`}>
+            <Meter segments={setup.frames} done={Math.min(myFrame, setup.frames)} part={roll === 1 ? 0.6 : 0.3} width={box.w < 640 ? '100%' : portrait ? '16rem' : '20rem'} label={meterLabel} />
+          </div>
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
             <HintButton gameId="bowling" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
           </div>
-          <div className="contents lg:flex lg:items-start lg:gap-4">
-          <section className="relative grid gap-2 min-w-0 [--sb-extra:4.5rem] lg:[--sb-extra:0rem]">
-            <div className={`relative mx-auto rounded-panel border-heavy border-border overflow-hidden select-none ${shake ? 'cq-shake' : ''} ${canAim ? 'cursor-pointer' : ''}`} onClick={canAim ? tapLane : undefined} role={canAim ? 'button' : undefined} aria-label={canAim ? t('sb.tapThrow') : undefined}
-              onPointerMove={canAim ? (e) => { const r = e.currentTarget.getBoundingClientRect(); setAim(Math.max(-0.92, Math.min(0.92, ((e.clientX - r.left) / r.width) * 2 - 1))); } : undefined}
-              style={{ ...(pieceImage(theme, 'background') ? pieceFill(theme, 'background', '#07070f') : { background: '#07070f 0 0 / 160px repeat url("/classic/bowling/carpet.svg")' }), aspectRatio: '100 / 130', width: laneW, maxWidth: '100%' }}>
-              <svg viewBox="0 0 100 130" className="absolute inset-0 w-full h-full" role="img" aria-label={t('sb.board', { count: standing.filter(Boolean).length })}>
-                <defs>
-                  {/* A drawn pin always shows inside the pin's outline (teacher, 2026-11-02). */}
-                  <clipPath id="sb-pin-shape"><path d={PIN_OUTLINE} /></clipPath>
-                  <radialGradient id="sb-shine" cx="35%" cy="35%" r="70%"><stop offset="0%" stopColor="#fff" stopOpacity="0.55" /><stop offset="45%" stopColor={ballColor} /><stop offset="100%" stopColor="#000" stopOpacity="0.35" /></radialGradient>
-                  <linearGradient id="sb-wood" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stopColor={laneColor} /><stop offset="70%" stopColor={laneColor} /><stop offset="100%" stopColor="#8a5a2b" stopOpacity="0.9" /></linearGradient>
-                  <linearGradient id="sb-gloss" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#fff" stopOpacity="0" /><stop offset="45%" stopColor="#fff" stopOpacity="0.28" /><stop offset="55%" stopColor="#fff" stopOpacity="0.28" /><stop offset="100%" stopColor="#fff" stopOpacity="0" /></linearGradient>
-                  <radialGradient id="sb-spot" cx="50%" cy="50%" r="50%"><stop offset="0%" stopColor="#fffbe0" stopOpacity="0.55" /><stop offset="100%" stopColor="#fffbe0" stopOpacity="0" /></radialGradient>
-                  {ballArt && <pattern id="sb-ball-art" patternContentUnits="objectBoundingBox" width="1" height="1"><image href={ballArt} width="1" height="1" preserveAspectRatio="xMidYMid slice" /></pattern>}
-                </defs>
-                <g style={{ transformOrigin: '50% 30%', transform: sim?.zoom ? 'scale(1.18)' : 'scale(1)', transition: still ? 'none' : 'transform 0.45s ease-out' }}>
-                {!pieceImage(theme, 'background') && <>
-                  {/* The masking unit over the pins: an 80s neon sign with chasing lights. */}
-                  <rect x={50 - halfWidthAt(far) - 9} y={yAt(far) - 22} width={(halfWidthAt(far) + 9) * 2} height={16} rx={2} fill="#241c3d" stroke="#000" strokeWidth={0.6} />
-                  <rect x={50 - halfWidthAt(far) - 7} y={yAt(far) - 20} width={(halfWidthAt(far) + 7) * 2} height={12} rx={1.5} fill="none" stroke="#ff4fa3" strokeWidth={0.9} />
-                  {Array.from({ length: 9 }, (_, i) => <circle key={i} cx={50 - halfWidthAt(far) - 4 + i * ((halfWidthAt(far) + 4) * 2) / 8} cy={yAt(far) - 14} r={1.1} fill={['#fdfd94', '#8ec5ff', '#ff4fa3'][i % 3]} className={still ? '' : 'sb-chase'} style={{ animationDelay: `${i * 0.12}s` }} />)}
-                  <rect x={0} y={yAt(far) - 5} width={100} height={1.6} fill="#ff4fa3" opacity={0.75} />
-                </>}
-                {/* Gutters, then the glossy wooden lane with its boards. */}
-                <polygon points={`${50 - halfWidthAt(near) - 5},${yAt(near)} ${50 + halfWidthAt(near) + 5},${yAt(near)} ${50 + halfWidthAt(far) + 5 * scaleAt(far)},${yAt(far)} ${50 - halfWidthAt(far) - 5 * scaleAt(far)},${yAt(far)}`} fill="#7d8597" stroke="#000" strokeWidth={0.6} />
-                <polygon points={lanePoly} fill="url(#sb-wood)" stroke="#000" strokeWidth={0.6} />
-                {BOARDS.map((x, i) => <line key={i} x1={xAt(x, near)} y1={yAt(near)} x2={xAt(x, far)} y2={yAt(far)} stroke="#8a5a2b" strokeOpacity={0.25} strokeWidth={0.25} />)}
-                <polygon points={lanePoly} fill="url(#sb-gloss)" />
-                {/* Bumper rails pop up when the power-up is on. */}
-                {armed.includes('bumpers') && [-1, 1].map((sd) => <line key={sd} x1={50 + sd * (halfWidthAt(near) + 1.5)} y1={yAt(near)} x2={50 + sd * (halfWidthAt(far) + 1.5 * scaleAt(far))} y2={yAt(far)} stroke="#fdfd94" strokeWidth={2.2} strokeLinecap="round" className={still ? '' : 'sb-pop'} />)}
-                <ellipse cx={50} cy={(yAt(0.62) + yAt(0.86)) / 2} rx={halfWidthAt(0.7) * 1.2} ry={9} fill="url(#sb-spot)" />
-                {/* Foul line, approach dots and aiming arrows, like a real alley. */}
-                <line x1={50 - halfWidthAt(0.005)} y1={yAt(0.005)} x2={50 + halfWidthAt(0.005)} y2={yAt(0.005)} stroke="#241c3d" strokeWidth={0.5} />
-                {[-0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9].map((x, i) => { const d = 0.26; const cx = xAt(x, d), cy = yAt(d), w = 1.5 * scaleAt(d); return <path key={i} d={`M${cx} ${cy - 2.4 * w} L${cx + w} ${cy} L${cx - w} ${cy} Z`} fill="#8a5a2b" opacity={0.5} />; })}
-                {canAim && <polyline points={preview} fill="none" stroke={step === 'spin' ? '#ff4fa3' : '#241c3d'} strokeWidth={0.9} strokeDasharray="0.2 2.2" strokeLinecap="round" />}
-                {swept && !still && (
-                  <g key={swept.id}>
-                    {swept.pins.map((p) => (
-                      <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${scaleAt(p.d) * 2.6})`}>
-                        <g className="sb-swept"><g transform="rotate(85)"><path d="M0,-11 C0.6,-11 0.99,-10.6 0.99,-9.87 C0.99,-9 0.58,-8 0.58,-6.93 C0.58,-5.6 1.75,-5 1.75,-3.54 C1.75,-2 1.15,-0.9 0.94,-0.13 C0.85,0.2 0.4,0.3 0,0.3 C-0.4,0.3 -0.85,0.2 -0.94,-0.13 C-1.15,-0.9 -1.75,-2 -1.75,-3.54 C-1.75,-5 -0.58,-5.6 -0.58,-6.93 C-0.58,-8 -0.99,-9 -0.99,-9.87 C-0.99,-10.6 -0.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} /></g></g>
-                      </g>
-                    ))}
-                    {/* The sweep bar drops in front of the pins and pulls them back into the pit. */}
-                    <rect className="sb-bar" x={50 - halfWidthAt(0.6) - 2} y={yAt(0.6) - 3} width={(halfWidthAt(0.6) + 2) * 2} height={3.2} rx={1} fill="#241c3d" stroke="#ff4fa3" strokeWidth={0.6} />
-                  </g>
-                )}
-                {pinsNow.map((p) => {
-                  const s = scaleAt(p.d) * 2.6;
-                  const fallen = p.tilt >= 1;
-                  const lean = p.tilt * 85 * p.dir;
-                  const wob = sim?.wobble && sim.res.wobbled.includes(p.i);
-                  const toppling = wob && sim!.res.down.includes(p.i);
-                  return (
-                    <g key={p.i} transform={`translate(${xAt(p.laneX, p.d)} ${yAt(p.d)}) scale(${s})`} opacity={fallen ? 0.9 : 1}>
-                      <g transform={`rotate(${lean})`}><g className={wob && !still ? (toppling ? 'sb-topple' : 'sb-wobble') : ''}>
-                        <ellipse cx={0} cy={0.1} rx={2.4} ry={0.7} fill="rgba(0,0,0,0.25)" />
-                        {pinArt ? <image href={pinArt} x={-1.8} y={-11} width={3.6} height={11.3} preserveAspectRatio="none" clipPath="url(#sb-pin-shape)" /> : <>
-                        <path d="M0,-11 C0.6,-11 0.99,-10.6 0.99,-9.87 C0.99,-9 0.58,-8 0.58,-6.93 C0.58,-5.6 1.75,-5 1.75,-3.54 C1.75,-2 1.15,-0.9 0.94,-0.13 C0.85,0.2 0.4,0.3 0,0.3 C-0.4,0.3 -0.85,0.2 -0.94,-0.13 C-1.15,-0.9 -1.75,-2 -1.75,-3.54 C-1.75,-5 -0.58,-5.6 -0.58,-6.93 C-0.58,-8 -0.99,-9 -0.99,-9.87 C-0.99,-10.6 -0.6,-11 0,-11 Z" fill={pinColor} stroke="#000" strokeWidth={0.5} />
-                        <rect x={-0.8} y={-8.5} width={1.6} height={0.55} fill="#e5635f" /><rect x={-0.62} y={-7.6} width={1.24} height={0.55} fill="#e5635f" />
-                        <path d="M-0.45,-10.5 C-0.65,-9.8 -0.6,-9.2 -0.45,-8.8" stroke="#fff" strokeWidth={0.45} fill="none" opacity={0.8} />
-                        </>}
-                      </g></g>
-                    </g>
-                  );
-                })}
-                {/* The ball: it spins as it rolls, shrinks into the distance, glows when powered up. */}
-                {!ballGone && (step !== 'result' || !!sim) && (() => {
-                  const sc = scaleAt(ballNow.d) * (big ? 2.1 : 1);
-                  const rot = frame ? frame.t * 900 : 0;
-                  return (
-                    <g transform={`translate(${xAt(ballNow.laneX, ballNow.d)} ${yAt(ballNow.d) - 6 * sc}) scale(${sc})`}>
-                      <ellipse cx={0} cy={6} rx={5.4} ry={1.4} fill="rgba(0,0,0,0.3)" />
-                      {(armed.includes('double') || armed.includes('magnet') || big) && <circle r={8.5} fill="none" stroke={armed.includes('magnet') ? '#ef6f6c' : '#fdfd94'} strokeWidth={1.4} opacity={0.85} className={still ? '' : 'cq-glow'} />}
-                      <g transform={`rotate(${rot})`}>
-                        {ballArt ? <circle r={6} fill="url(#sb-ball-art)" stroke="#000" strokeWidth={0.6} /> : pieceColor(theme, 'ball', '') ? <circle r={6} fill="url(#sb-shine)" stroke="#000" strokeWidth={0.6} /> : <image href={classicBallArt(ballK)} x={-6.3} y={-6.3} width={12.6} height={12.6} />}
-                        {/* Finger holes, except on a ball a theme drew itself. */}
-                        {!ballArt && [[-1.6, -2.4, 0.9], [0.6, -3, 0.9], [-0.2, -0.4, 1.1]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#241c3d" opacity={0.85} />)}
-                      </g>
-                    </g>
-                  );
-                })()}
-                </g>
-              </svg>
-              {/* No caption (teacher, 2026-11-13): the dotted aim line follows the pointer; a soft target pulses on the lane. */}
-              {canAim && !still && (
-                <motion.span className="absolute left-1/2 top-[55%] -translate-x-1/2 pointer-events-none text-white/80" animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 1.4, repeat: Infinity }} aria-hidden="true">
-                  <Crosshair weight="bold" size={44} />
-                </motion.span>
-              )}
-              <AnimatePresence>
-                {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 top-[22%] w-[34%] -translate-x-1/2 pointer-events-none" initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
-                {banner && (
-                  <motion.p key={banner.id} className={`absolute inset-x-0 top-[34%] text-center font-display ${banner.kind === 'strike' ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl'} text-white`} style={{ WebkitTextStroke: '2px #000', textShadow: banner.kind === 'strike' ? '0 0 18px #ff4fa3, 0 0 30px #fdfd94' : undefined }}
-                    initial={{ scale: 0.4, opacity: 0, rotate: banner.kind === 'strike' ? -8 : 0 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 1.2 }} transition={{ type: 'spring', stiffness: 320, damping: 14 }} role="status">
-                    {banner.sign ? (
-                      <span className="grid justify-items-center gap-1">
-                        <span className="sr-only">{banner.text}</span>
-                        <img src={`/classic/bowling/signs/${banner.sign}.webp`} alt="" aria-hidden="true" className={`w-[78%] max-w-[560px] drop-shadow-[0_0_14px_rgba(255,200,80,0.8)] ${still ? '' : 'sb-sign'}`} />
-                        <span className="text-3xl sm:text-4xl" aria-hidden="true">{banner.text.replace(/^[^+]*/, '').trim()}</span>
-                      </span>
-                    ) : banner.text}
-                  </motion.p>
-                )}
-                {banner && <motion.div key={`ok-${banner.id}`} className="absolute inset-x-0 bottom-[12%] flex justify-center z-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.4, delay: still ? 0 : 0.4 }}><TapOk onTap={closeBanner} label={t('tap.goOn')} /></motion.div>}
-                {cpuAim && player && <motion.p key="think" className="absolute inset-x-0 top-[40%] text-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status"><span className="font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1.5">{t('cpu.thinking', { name: player.name })}</span></motion.p>}
-              </AnimatePresence>
+          {/* Players (left, or a row on top on tall screens) with held power-ups at the right or under them. */}
+          <div ref={blockRef} className={portrait ? `absolute inset-x-3 z-20 grid justify-items-center gap-2.5 ${box.w < 640 ? 'top-[5.6rem]' : 'top-[4.4rem]'}` : `absolute left-4 top-[4.4rem] z-20 ${many ? 'w-[13rem]' : 'w-[15rem]'}`}>
+            <BowlCards players={turns.players} now={player?.id ?? null} sheet={sheet} frames={setup.frames} frame={myFrame} compact={many || (portrait && box.w < 640)} row={portrait} playing={phase === 'play'} still={still} />
+            {portrait && <div className={setup.powerUps ? 'min-h-[6.5rem]' : ''}>{tray}</div>}
+          </div>
+          {!portrait && <div className="absolute right-4 top-[4.6rem] z-20 w-[6.5rem]">{tray}</div>}
+          {armed.length > 0 && (
+            <div className="absolute inset-x-0 flex justify-center gap-1.5 flex-wrap pointer-events-none z-10" style={{ top: A.near - A.ballR * (big ? 4.6 : 2.6) - 40 }}>
+              {armed.map((a, i) => <span key={i} className="rounded-pill border-std border-border bg-[var(--butter)] px-3 py-0.5 text-sm font-bold" style={{ boxShadow: `0 3px 0 ${INK}` }}>{bowlingManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
             </div>
-            {/* Aim follows the finger or mouse over the lane; tap the lane to throw. With Motion off, sliders set the aim and spin. */}
-            <div className="mx-auto w-full grid gap-2" style={{ width: laneW, maxWidth: '100%' }}>
-              {still && canAim ? (
-                <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
-                  <Slider label={t('sb.aim')} min={-9} max={9} value={Math.round(aim * 10)} onChange={(v) => setAim(v / 10)} show={(v) => (v === 0 ? t('sb.middle') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
-                  <Slider label={t('sb.spin')} min={-10} max={10} value={Math.round(hook * 10)} onChange={(v) => setHook(v / 10)} show={(v) => (v === 0 ? t('sb.straight') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
-                  <button type="button" onClick={() => throwBall({ aim, hook })} className="min-h-14 px-5 rounded-pill border-bold border-border bg-accent font-display text-xl">{t('sb.throw')}</button>
-                </div>
-              ) : null}
+          )}
+          {/* With Motion off, sliders set the aim and spin, then Throw. */}
+          {still && canAim && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 w-[min(34rem,92%)] grid grid-cols-[1fr_1fr_auto] gap-2 items-end rounded-[1.25rem] p-3" style={{ background: 'var(--paper)', border: `3px solid ${INK}`, boxShadow: `0 4px 0 ${INK}` }}>
+              <Slider label={t('sb.aim')} min={-9} max={9} value={Math.round(aim * 10)} onChange={(v) => setAim(v / 10)} show={(v) => (v === 0 ? t('sb.middle') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
+              <Slider label={t('sb.spin')} min={-10} max={10} value={Math.round(hook * 10)} onChange={(v) => setHook(v / 10)} show={(v) => (v === 0 ? t('sb.straight') : v < 0 ? t('sb.leftN', { n: -v }) : t('sb.rightN', { n: v }))} />
+              <button type="button" onClick={() => throwBall({ aim, hook })} className="min-h-14 px-5 rounded-pill border-bold border-border bg-accent font-display text-xl">{t('sb.throw')}</button>
             </div>
-            {armed.length > 0 && (
-              <div className="absolute inset-x-0 top-3 flex justify-center gap-1.5 flex-wrap pointer-events-none z-10">
-                {armed.map((a, i) => <span key={i} className="rounded-pill border-std border-border bg-accent px-2.5 py-0.5 text-sm font-bold">{bowlingManifest.items?.abilities.find((x) => x.id === a)?.label}</span>)}
-              </div>
+          )}
+          <AnimatePresence>
+            {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 pointer-events-none z-20" style={{ top: A.top - hN * 0.5, width: hN * 0.9, marginLeft: -hN * 0.45 }} initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
+            {banner && (
+              // Every result pops up in the center on the top layer (teacher, 2026-11-06): a flat Grow Year pill.
+              <motion.p key={banner.id} className="absolute inset-x-0 z-30 flex justify-center pointer-events-none px-4" style={{ top: bannerTop }}
+                initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0, scale: 1.15 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }} role="status">
+                <span className={`inline-flex items-center text-center px-6 py-2.5 rounded-full leading-none ${banner.kind === 'strike' ? 'text-5xl sm:text-6xl' : 'text-4xl sm:text-5xl'}`}
+                  style={{ ...GY, background: banner.kind === 'strike' ? C.lemon : banner.kind === 'spare' ? 'var(--blue-crystal)' : banner.kind === 'miss' ? C.paper : 'var(--butter)', border: `3px solid ${INK}`, boxShadow: `0 5px 0 ${INK}` }}>{banner.text}</span>
+              </motion.p>
             )}
-          </section>
-          <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3 content-start">
-            <ScoreBoard turns={turns} playing={phase === 'play'} round={`${Math.min(frames + 1, totalFrames)}/${totalFrames}`} roundLabel={t('sb.frameWord')} />
-            {/* Held power-ups, right under the scores (teacher, 2026-10-31), never over the lane. */}
-            {tray}
-          </div>
-          </div>
+            {banner && <motion.div key={`ok-${banner.id}`} className="absolute inset-x-0 z-30 flex justify-center" style={{ top: `calc(${bannerTop}px + 6.5rem)` }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.4, delay: still ? 0 : 0.4 }}><TapOk onTap={closeBanner} label={t('tap.goOn')} /></motion.div>}
+            {cpuAim && player && <motion.p key="think" className="absolute inset-x-0 z-30 text-center pointer-events-none" style={{ top: box.h * 0.42 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status"><span className="font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1.5">{t('cpu.thinking', { name: player.name })}</span></motion.p>}
+          </AnimatePresence>
         </div>
       )}
       {question && player && phase === 'play' && !solo && <ShareQuestion key={`${question.q.id}-${question.chance}`} question={question.q} player={player} cpuLevel={team.level} onResult={onShareResult} chance={{ n: question.chance, total: CHANCES }} />}

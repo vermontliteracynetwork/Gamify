@@ -605,6 +605,9 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 .sb-chase { animation: sb-chase 0.9s ease-in-out infinite; }
 @keyframes sb-pop { from { stroke-width: 0; opacity: 0; } to { opacity: 1; } }
 .sb-pop { animation: sb-pop 0.4s ease-out; }
+/* The ball waiting to be thrown bobs a little, so kids see it is ready. */
+@keyframes sb-ready { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7%); } }
+.sb-ready { animation: sb-ready 1.3s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes sb-swept { 0%, 30% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-14px); opacity: 0; } }
 .sb-swept { animation: sb-swept 0.85s ease-in forwards; transform-box: fill-box; }
 @keyframes sb-bar { 0% { transform: translateY(-10px); opacity: 0; } 25% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-26px); opacity: 0; } }
