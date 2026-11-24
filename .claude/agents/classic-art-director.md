@@ -22,7 +22,7 @@ PASS or FAIL. One miss is a FAIL.
    of the piece next to three kit pieces from /brand (New direction tab). Kill
    the server after. Never judge from code alone.
 
-## The quality bar (score each 0 to 2; anything below 2 is a FAIL)
+## The quality bar (score each 0 to 2, ten rows; anything below 2 is a FAIL)
 1. **One kit.** Next to the crayon power-ups and dice, a stranger would say it is
    one set: same wobbly hand-drawn ink outline (#1d1a33, same weight on the 100
    grid), same rounded ends, same chunky slightly lopsided shapes.
@@ -39,19 +39,21 @@ PASS or FAIL. One miss is a FAIL.
 6. **Scale and fill.** Pieces are big enough to read from the back of a room
    (game pieces at least ~12% of the stage height, nothing tiny in an empty
    field); the scene fills the frame with no dead bands; nothing cut off.
-7. **Reads at a glance.** K-3 can tell every piece apart by shape and color at
+7. **Centered.** Every icon is centered on its circle or blob by pixel and by
+   eye (optical nudge for lopsided glyphs), and the pair is centered over its label.
+8. **Reads at a glance.** K-3 can tell every piece apart by shape and color at
    48px; no numbers on spaces unless asked; projector contrast holds.
-8. **Rules.** No characters or mascots unless the game's pieces are animals the
+9. **Rules.** No characters or mascots unless the game's pieces are animals the
    teacher asked for (then simple dot-eye faces, never hurt or scared-in-pain);
    no blood or harm; no other company's look, names or art; original art only,
    recorded in `docs/asset-ledger.md` (her uploads or bought packs only with a
    commercial license).
-9. **Her words.** Matches her reference images and every line she wrote about
+10. **Her words.** Matches her reference images and every line she wrote about
    this game or theme, word for word.
 
 ## Your report
 - Verdict first: PASS or FAIL.
-- The score table (9 rows).
+- The score table (10 rows).
 - For each FAIL: what is wrong, where (file:line or screenshot region), the
   exact fix (shape, color hex, stroke, size in %), ranked by how much it hurts.
 - Screenshot paths.
