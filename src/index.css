@@ -54,6 +54,9 @@
 
   --color-grape: #6a45f0;
   --color-lavender: #ddd6ff;
+  --color-blush: #ffd3e6;
+  --color-gamify: #b4c4fb;
+  --color-butter: #fff1b8;
 
   --color-quiz-yellow: #fff1b8;
   --color-quiz-green: #c8f0dc;
@@ -855,3 +858,8 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 /* THE in-game tool round (Brand Kit game components, 2026-11-24): 44px, Paper,
    a 2px ink edge and a press shade; Hint, Settings, Full screen in that order. */
 .tool-round { background: var(--paper); border: 2px solid var(--color-border); box-shadow: 0 3px 0 var(--color-border); }
+
+/* The teacher left rail (batch 6, 2026-11-24): the page and footer sit beside it. */
+@media (min-width: 1100px) {
+  body:has(.teacher-rail) .route-shell, body:has(.teacher-rail) .teacher-footer { padding-left: 14.5rem; }
+}

@@ -353,3 +353,4 @@ line that fits, and add each new preference the same turn she says it.
 - The top bar (site header) is pure white (#ffffff), never cream (owner, 2026-11-24).
 - Territory art follows her Canva pack closely (owner, 2026-11-24): a plain wall, a two-tone baseboard, a perspective checker floor and the closed wooden door, with no extra furniture. Use the Classic look on her layout instead of inventing a new room.
 - A cat is one shape (owner, 2026-11-24): the legs grow out of the body, with one outer outline and no seams. All cats share the gray tabby's walking shape. There is no fluffy cat: the third cat is a black-and-white tuxedo.
+- Teacher pages use a left rail on wide screens (approved teacher portal, 2026-11-24): Create an Activity at the top, then Home, Classes, Question sets, Reports, Theme Builder and Account. Narrower screens keep the pill bar. Full-screen tools (the Theme Builder editor) have no rail.
