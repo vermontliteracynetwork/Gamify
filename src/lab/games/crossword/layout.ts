@@ -28,7 +28,18 @@ function fits(grid: Map<string, string>, w: string, dir: Dir, r: number, c: numb
 }
 
 // `side` caps the puzzle at about 9 squares each way, so squares stay big.
+// A crossword needs at least four words that cross; some word orders fit
+// fewer, so a few shuffled tries keep the fullest grid.
 export function makePuzzle(words: WordPair[], rand: () => number = Math.random, max = 7, side = 9): Puzzle {
+  let best = buildPuzzle(words, rand, max, side);
+  for (let k = 0; k < 12 && best.entries.length < Math.min(4, words.length); k++) {
+    const next = buildPuzzle([...words].sort(() => rand() - 0.5), rand, max, side);
+    if (next.entries.length > best.entries.length) best = next;
+  }
+  return best;
+}
+
+function buildPuzzle(words: WordPair[], rand: () => number, max: number, side: number): Puzzle {
   const list = words.filter((w) => w.word.length >= 3 && w.word.length <= side).slice(0, max + 6).sort((a, b) => b.word.length - a.word.length);
   const grid = new Map<string, string>();
   const placed: Raw[] = [];
