@@ -14,6 +14,9 @@ export const BETA = {
   months: 3,
   // After the free months: this plan, yearly only, at this discount, for this long.
   offer: { tier: 'plus' as Exclude<Tier, 'free'>, discount: 0.2, years: 1 },
+  // Games to host with the class during the beta (Claudia's guess from "play
+  // twice a week" over the 3 free months, owner 2026-11-24; change it here).
+  hostGames: 24,
   teacherFormMinutes: '1 to 3',
   studentFormMinutes: '3 to 5',
 } as const;

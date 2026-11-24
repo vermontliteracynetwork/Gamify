@@ -3,7 +3,7 @@ import { POP_IN } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Flask, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, X } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Flag, Flask, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, X } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 import { saveCheckIn } from '../beta/surveys';
 import BetaGameForm from '../beta/BetaGameForm';
@@ -18,6 +18,7 @@ import type { MultipleChoiceQuestion } from '../data/types';
 import { useSettings } from '../settings/SettingsContext';
 import { speak } from './feedback';
 import { TeamBadge } from './TeamBadge';
+import { TellGamify } from '../ui/TellGamify';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 
@@ -175,7 +176,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
 }) {
   const { settings } = useSettings();
   const { student } = useSignedIn();
-  const [view, setView] = useState<'main' | 'rate' | 'beta'>('main');
+  const [view, setView] = useState<'main' | 'rate' | 'beta' | 'report'>('main');
   const betaTester = useBetaTester();
   const gameId = useLocation().pathname.split('/')[2];
   const [reviewing, setReviewing] = useState(false);
@@ -214,10 +215,14 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
               </button>
             )}
             {missed.length === 0 && <p className="col-span-2 text-sm font-bold text-center text-muted">{t('rv.none')}</p>}
+            {/* Report, for everyone (owner, 2026-11-24). */}
+            <button type="button" onClick={() => setView('report')} className="col-span-2 justify-self-center min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+              <Flag weight="bold" size={18} />{t('report.open')}
+            </button>
           </div>
         ) : (
           <div className="grid gap-2 px-5 pb-5">
-            {view === 'beta' ? <BetaGameForm gameId={gameId} onDone={() => setView('main')} /> : <GameReview onDone={() => setView('main')} />}
+            {view === 'beta' ? <BetaGameForm gameId={gameId} onDone={() => setView('main')} /> : view === 'report' ? <TellGamify role={student ? 'student' : 'teacher'} context={gameId} bare /> : <GameReview onDone={() => setView('main')} />}
             <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('rv.back')}</button>
           </div>
         )}

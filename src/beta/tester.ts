@@ -24,7 +24,12 @@ export async function addFormSent(gameId: string) {
   await data.setSetting(FORMS, [...sent, gameId]);
 }
 
-export interface BetaSteps { sets: number; played: string[]; themes: number; forms: number; games: { id: string; name: string }[] }
+export interface BetaSteps { sets: number; played: string[]; themes: number; forms: number; hosted: number; games: { id: string; name: string }[] }
+
+// Checklist items the teacher ticks by hand (the lesson, ratings, surveys).
+const MANUAL = 'beta-manual';
+export const loadManual = async () => (await data.getSetting<string[]>(MANUAL)) ?? [];
+export const saveManual = (done: string[]) => data.setSetting(MANUAL, done);
 
 // The tester checklist: a set of their own, every listed game played, a theme, forms.
 export function useBetaSteps(on: boolean) {
@@ -32,11 +37,14 @@ export function useBetaSteps(on: boolean) {
     if (!on) return null;
     const [sets, log, themes, forms] = await Promise.all([data.listQuestionSets(), data.listQuestionLog(), loadMadeThemes(), data.getSetting<string[]>(FORMS)]);
     const ids = new Set(log.map((e) => e.gameId));
+    // A hosted game = one game played on one day (the log has no session id).
+    const hosted = new Set(log.map((e) => `${e.at.slice(0, 10)}|${e.gameId}`)).size;
     return {
       sets: sets.filter((s) => s.ownerId !== 'gamify' && s.questions.length > 0).length,
       played: GAMES.filter((g) => ids.has(g.id)).map((g) => g.id),
       themes: themes.filter((th) => th.source === 'custom').length,
       forms: (forms ?? []).length,
+      hosted,
       games: GAMES.map((g) => ({ id: g.id, name: g.name })),
     };
   }, [on]);

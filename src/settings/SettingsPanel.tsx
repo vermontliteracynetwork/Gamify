@@ -5,6 +5,7 @@ import HintButton from '../engine/HintButton';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { TellGamify } from '../ui/TellGamify';
+import ReportButton from '../ui/ReportButton';
 import PinGate from './PinGate';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
 import { applyCalm, PRESETS, type Level, type PlayerSettings, type PresetId } from './settings';
@@ -39,8 +40,12 @@ export function FullScreenButton({ small = false }: { small?: boolean }) {
   );
 }
 
+// The Report button rides beside every gear (owner, 2026-11-24: a report
+// button on every game and every small menu of buttons).
 export function GearButton({ onClick, small = false }: { onClick: () => void; small?: boolean }) {
   return (
+    <>
+    <ReportButton small={small} />
     <button
       type="button"
       onClick={onClick}
@@ -50,6 +55,7 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
     >
       <GearSix weight="bold" size={small ? 20 : 30} />
     </button>
+    </>
   );
 }
 
