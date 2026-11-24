@@ -22,6 +22,3 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 
 
 - (2026-11-23, legal, optional) Confirm the JDSherbert UI sound pack license covers a web app (email JDSherbert for a one-line OK, or the attorney list). Credit is on the Credits page; files are used unchanged.
-- (2026-11-24, decide) Do phones need their own game layouts, or show a "please use a tablet or computer" card on very small screens?
-- (2026-11-24, decide) Approve 44px round tool buttons in games (smallest accessible touch size).
-- (2026-11-24, decide) Update live site words that still say "four ways" and Versus to the three ways.
