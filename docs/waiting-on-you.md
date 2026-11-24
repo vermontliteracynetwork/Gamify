@@ -25,3 +25,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - (2026-11-24, decide) New footer line instead of "Made in Vermont by the Vermont Literacy Network." (or remove it).
 - (2026-11-24, decide) Add Nature tones (wood, mouse brown, gray) to the Classic palette?
 - (2026-11-24, people) Collect 3 teacher quotes with permission for the home page.
+- (2026-11-24, setup) Make a Pinterest business account for Gamify (dev plan Part 5B).
