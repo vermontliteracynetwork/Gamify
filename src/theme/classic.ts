@@ -13,13 +13,15 @@ export function classicTheme(gameId: string): GameTheme {
   const show = gameId === 'game-show';
   // Pinball's Classic page is the table's own navy (teacher, 2026-11-13).
   const pin = gameId === 'pinball';
+  // Four in a Row's Classic stage is cream with pastel squiggles (approved mockup, 2026-11-24).
+  const four = gameId === 'four-in-a-row';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : pin ? '#25365f' : '#b4c4fb',
+      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : pin ? '#25365f' : four ? '#f6f0e4' : '#b4c4fb',
       backgroundText: night || alley || show || pin ? '#ffffff' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
@@ -29,7 +31,8 @@ export function classicTheme(gameId: string): GameTheme {
       miss: '#9b2c3a',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true } : { kind: 'color' },
+    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true }
+      : four ? { kind: 'image', src: '/classic/four-in-a-row/squiggles.svg', alt: 'Pastel squiggles and flowers on cream', tile: true } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the
