@@ -178,7 +178,161 @@ function quiet(seed: number, calm: boolean) {
 // ---------------------------------------------------------------- trims (kept for the mockups)
 const wobbleSquare = (x: number, y: number, s: number, c: string) => `<path d="M${x + 1} ${y + 1} C${x + s * 0.4} ${y - 0.5} ${x + s * 0.7} ${y + 1.5} ${x + s - 1} ${y + 1} C${x + s + 0.5} ${y + s * 0.4} ${x + s - 1.5} ${y + s * 0.7} ${x + s - 1} ${y + s - 1} C${x + s * 0.6} ${y + s + 0.5} ${x + s * 0.3} ${y + s - 1.5} ${x + 1} ${y + s - 1} C${x - 0.5} ${y + s * 0.6} ${x + 1.5} ${y + s * 0.3} ${x + 1} ${y + 1} Z" fill="${c}"/>`;
 
-type Pattern = { id: string; name: string; use: string; rules: string; calmNote: string; make: (calm: boolean) => CSSProperties; group?: 'main' | 'trim' };
+// ---------------------------------------------------------------- 2026-11-24 paper set
+// Teacher, 2026-11-24: "add a recreated version of patterns like these in my
+// classic theme". Her four references (pastel gingham, a hand-painted paper
+// set, sprinkles, brush dashes) are only described here and redrawn from
+// scratch: smooth flat fills, slightly wobbly hand-drawn edges, uneven
+// spacing, no grain, bleed or gradient. Colors come from the palette pairs;
+// the one in-between tone a weave needs is a solid mix of a pair (never a
+// see-through layer). Tan is the one Nature tone, used only for its gingham.
+const hex = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+const toHex = (a: number[]) => '#' + a.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+/** Solid mix of two colors, t = share of b. */
+const mix = (a: string, b: string, t: number) => { const x = hex(a), y = hex(b); return toHex(x.map((v, i) => v + (y[i] - v) * t)); };
+/** Where two stripes of a weave cross: a multiply of the stripe color with itself. */
+const weave = (c: string) => toHex(hex(c).map((v) => (v * v) / 255));
+const TAN = '#ecd9bd'; // Nature tone (proposal), only for the tan gingham
+const PALE = (c: string) => mix(c, PP.paper, 0.5);
+
+// A smooth closed curve through points (Catmull-Rom as cubic Beziers).
+function smooth(p: number[][]) {
+  const n = p.length; let d = `M${f(p[0][0])} ${f(p[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+    d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)} ${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)} ${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])} ${f(p2[1])}`;
+  }
+  return d + ' Z';
+}
+// A hand-painted square: rounded, a little lopsided, never a perfect box.
+function wobSq(r: R, w: number, h: number, j = 0.07) {
+  const q = (v: number, s: number) => v + (r() - 0.5) * s * j * 2;
+  const x = w / 2, y = h / 2;
+  return smooth([[-x * 0.7, -y], [x * 0.7, -y], [x, -y * 0.7], [x, y * 0.7], [x * 0.7, y], [-x * 0.7, y], [-x, y * 0.7], [-x, -y * 0.7]].map(([a, b]) => [q(a, w), q(b, h)]));
+}
+// A stripe with gently wobbling edges that repeat exactly every `len`, so the
+// tile edge never shows a step. vertical: x across, runs down y.
+function band(r: R, at: number, w: number, len: number, amp: number, vertical: boolean) {
+  const edge = (base: number) => { const k1 = 1 + Math.floor(r() * 2), k2 = 3 + Math.floor(r() * 2), p1 = r() * 6.28, p2 = r() * 6.28;
+    return (t: number) => base + amp * Math.sin((6.2832 * k1 * t) / len + p1) + amp * 0.45 * Math.sin((6.2832 * k2 * t) / len + p2); };
+  const a = edge(at), b = edge(at + w), steps = Math.max(8, Math.round(len / 4));
+  const ts = Array.from({ length: steps + 1 }, (_, i) => (i / steps) * len);
+  const pts = [...ts.map((t) => [a(t), t]), ...ts.reverse().map((t) => [b(t), t])].map(([u, t]) => vertical ? `${f(u)},${f(t)}` : `${f(t)},${f(u)}`);
+  return pts.join(' ');
+}
+
+// Gingham: stripes one way, the same stripes the other way, darker where
+// they cross (the woven look). Edges wobble only slightly.
+function gingham(key: string, c: string, calm: boolean, tileSize = 96, n = 2, amp = 0.7, seed = 5) {
+  const r = rand(seed), col = calm ? PALE(c) : c, deep = weave(col), step = tileSize / n, w = step / 2;
+  const vs = Array.from({ length: n }, (_, i) => `<polygon points="${band(r, i * step, w, tileSize, amp, true)}"/>`).join('');
+  const hs = Array.from({ length: n }, (_, i) => `<polygon points="${band(r, i * step, w, tileSize, amp, false)}"/>`).join('');
+  return `<defs><clipPath id="gv${key}">${vs}</clipPath></defs><g fill="${col}">${vs}${hs}</g><g fill="${deep}" clip-path="url(#gv${key})">${hs}</g>`;
+}
+
+// Hand-painted gingham: wobbly, uneven stripes and a painted square at each crossing.
+function paintedGingham(calm: boolean, pastel: string, bright: string) {
+  const r = rand(131), T = 160, n = 4, step = T / n, base = calm ? PALE(pastel) : pastel, deep = calm ? mix(pastel, bright, 0.2) : mix(pastel, bright, 0.42);
+  let out = '';
+  for (let i = 0; i < n; i++) out += `<polygon fill="${base}" points="${band(r, i * step + (r() - 0.5) * 3, step * (0.44 + r() * 0.12), T, 1.8, true)}"/>`;
+  for (let i = 0; i < n; i++) out += `<polygon fill="${base}" points="${band(r, i * step + (r() - 0.5) * 3, step * (0.44 + r() * 0.12), T, 1.8, false)}"/>`;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const s = step * (0.46 + r() * 0.1);
+    out += at(i * step + step / 4 + (r() - 0.5) * 2, j * step + step / 4 + (r() - 0.5) * 2, (r() - 0.5) * 8, `<path d="${wobSq(r, s, s * (0.9 + r() * 0.2), 0.1)}" fill="${deep}"/>`);
+  }
+  return out;
+}
+
+// Dot scatter: hand-painted dots, a little lumpy, unevenly spaced.
+function dotScatter(calm: boolean) {
+  const r = rand(149);
+  const cols = calm ? [mix(PP.lavender, PP.grape, 0.25), mix(PP.aqua, PP.teal, 0.3), mix(PP.peach, PP.orange, 0.3)] : [PP.grape, PP.teal, PP.orange];
+  const make = (): Item => { const s = (calm ? 4 : 4.5) + r() * 3.5, d = blobD(r, s, 6, 0.12); return { ext: s, draw: (c) => `<path d="${d}" fill="${c}"/>` }; };
+  return scatter(r, 180, 180, make, cols, { gapK: calm ? 2.6 : 1.3, max: calm ? 14 : 40 });
+}
+
+// Flower toss: five round petals and a paper center; flowers may overlap, a
+// thin paper edge keeps each one readable.
+function flowerToss(calm: boolean) {
+  const r = rand(167), halo = calm ? PALE(PP.lavender) : PP.lavender, cols = calm ? [PP.peach, mix(PP.peach, PP.orange, 0.3)] : [PP.peach, mix(PP.peach, PP.orange, 0.5), PP.orange];
+  const make = (): Item => {
+    const s = calm ? 9 + r() * 4 : 9 + r() * 8, tw = r() * 0.3;
+    const pet = Array.from({ length: 5 }, (_, i) => { const a = (i / 5) * Math.PI * 2 + tw + (r() - 0.5) * 0.25, pr = s * (0.5 + r() * 0.1); return [Math.cos(a) * s * 0.55, Math.sin(a) * s * 0.55, pr]; });
+    const petals = (c: string, extra: string) => pet.map(([x, y, pr]) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(pr)}" fill="${c}"${extra}/>`).join('');
+    return { ext: s * 1.05, draw: (c) => petals(halo, ` stroke="${halo}" stroke-width="3"`) + petals(c, '') + `<circle r="${f(s * 0.24)}" fill="${PP.paper}"/>` };
+  };
+  return scatter(r, 200, 200, make, cols, { gapK: calm ? 1.2 : -0.04, max: calm ? 9 : 26 });
+}
+
+// Star mix: filled and outline stars, rounded and a little lopsided.
+function wobStar(r: R, rad: number) { return smooth(Array.from({ length: 10 }, (_, i) => { const a = (-90 + i * 36 + (r() - 0.5) * 8) * Math.PI / 180, rr = (i % 2 ? rad * 0.5 : rad) * (0.92 + r() * 0.16); return [rr * Math.cos(a), rr * Math.sin(a)]; })); }
+function starMix(calm: boolean) {
+  const r = rand(181), cols = calm ? [mix(PP.butter, PP.lemon, 0.5), mix(PP.lavender, PP.grape, 0.3), mix(PP.blush, PP.pink, 0.3)] : [PP.lemon, PP.grape, PP.pink];
+  const make = (): Item => {
+    const s = 7 + r() * 7, d = wobStar(r, s), outline = r() < 0.45;
+    return { ext: s, draw: (c) => outline ? `<path d="${d}" fill="none" stroke="${c}" stroke-width="2.6" stroke-linejoin="round"/>` : `<path d="${d}" fill="${c}" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>` };
+  };
+  return scatter(r, 200, 200, make, cols, { gapK: calm ? 1.6 : 0.75, max: calm ? 10 : 40 });
+}
+
+// Painted blocks: soft painted squares in loose rows on a hot-pink ground.
+function paintedBlocks(calm: boolean) {
+  const r = rand(199), T = 192, n = 4, step = T / n, cols = calm ? [PP.paper, PP.butter] : [PP.butter, PP.peach, PP.lavender];
+  let out = '', last = '';
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+    if (calm && (i + j) % 2) continue;
+    const free = cols.filter((c) => c !== last), c = pick(r, free); last = c;
+    const s = step * (0.56 + r() * 0.12);
+    out += at(i * step + step / 2 + (j % 2 ? step / 2 : 0) + (r() - 0.5) * 5, j * step + step / 2 + (r() - 0.5) * 4, (r() - 0.5) * 9, `<path d="${wobSq(r, s, s * (0.88 + r() * 0.2), 0.08)}" fill="${c}"/>`);
+  }
+  return out;
+}
+
+// Windowpane: thin hand-drawn dashed lines in a big open check.
+function windowpane(calm: boolean) {
+  const r = rand(211), T = calm ? 144 : 120, c = calm ? mix(PP.lavender, PP.grape, 0.35) : PP.grape, n = calm ? 6 : 8, seg = T / n;
+  const dash = (x1: number, y1: number, x2: number, y2: number) => `<path d="M${f(x1)} ${f(y1)} L${f(x2)} ${f(y2)}" stroke="${c}" stroke-width="${calm ? 2.6 : 3.2}" stroke-linecap="round" fill="none"/>`;
+  let out = '';
+  for (let k = 0; k < n; k++) { // dashes repeat every T so the line meets itself at the edge
+    const a = k * seg + seg * 0.18, b = (k + 1) * seg - seg * 0.18, jx = (r() - 0.5) * 1.6, jy = (r() - 0.5) * 1.6;
+    out += dash(T / 2 + jx, a, T / 2 - jx, b) + dash(a, T / 2 + jy, b, T / 2 - jy);
+  }
+  return out;
+}
+
+// Sprinkles: short rounded dashes at any angle.
+function sprinkles(calm: boolean) {
+  const r = rand(223), cols = calm ? [PP.peach, PP.blueCrystal, PP.butter, PP.aqua, PP.blush, PP.lavender] : [PP.orange, PP.sky, PP.lemon, PP.teal, PP.pink, PP.grape];
+  const make = (): Item => { const L = 7 + r() * 5, w = calm ? 4 : 5; return { ext: L / 2 + w / 2, draw: (c) => `<path d="M${f(-L / 2)} 0 L${f(L / 2)} 0" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>` }; };
+  return scatter(r, 160, 160, make, cols, { gapK: calm ? 2.4 : 0.9, max: calm ? 14 : 60 });
+}
+
+// Brush dashes: rows of short painted tallies, uneven in length, lean and gap.
+function brushDashes(calm: boolean) {
+  const r = rand(239), T = 180, rows = calm ? 4 : 5, rh = T / rows;
+  const cols = calm ? [mix(PP.ink, PP.paper, 0.6), mix(PP.blush, PP.pink, 0.4), mix(PP.peach, PP.orange, 0.4), mix(PP.blueCrystal, PP.sky, 0.4), mix(PP.lavender, PP.grape, 0.4)] : [PP.ink, PP.pink, PP.grape, PP.orange, PP.sky];
+  let out = '';
+  for (let j = 0; j < rows; j++) {
+    const count = calm ? 5 : 7, gaps = Array.from({ length: count }, () => 0.7 + r() * 0.6), sum = gaps.reduce((a, b) => a + b, 0);
+    let x = r() * 6, last = '';
+    for (let i = 0; i < count; i++) {
+      const L = rh * (0.42 + r() * 0.16), w = 4.2 + r() * 1.6, c = pick(r, cols.filter((k) => k !== last)); last = c;
+      // a brush mark: fat at the top, a touch thinner at the lift
+      const d = `M${f(-w / 2)} ${f(-L / 2)} C${f(-w / 2)} ${f(-L / 2 - w * 0.7)} ${f(w / 2)} ${f(-L / 2 - w * 0.7)} ${f(w / 2)} ${f(-L / 2)} L${f(w * 0.36)} ${f(L / 2)} C${f(w * 0.36)} ${f(L / 2 + w * 0.5)} ${f(-w * 0.36)} ${f(L / 2 + w * 0.5)} ${f(-w * 0.36)} ${f(L / 2)} Z`;
+      out += at(x, j * rh + rh / 2 + (r() - 0.5) * 4, (r() - 0.5) * 16, `<path d="${d}" fill="${c}"/>`);
+      x += (gaps[i] / sum) * T;
+    }
+  }
+  return out;
+}
+
+const GINGHAMS: [string, string, string][] = [
+  ['lavender', 'Lavender', PP.lavender], ['blue', 'Blue crystal', PP.blueCrystal], ['pink', 'Blush', PP.blush], ['butter', 'Butter', PP.butter],
+  ['peach', 'Peach', PP.peach], ['mint', 'Mint', PP.mint], ['aqua', 'Aqua', PP.aqua], ['sage', 'Sage', PP.sage], ['tan', 'Tan (Nature tone)', TAN],
+];
+const BUSY = 'Busy: never behind words; words sit on a solid paper panel, 24px clear.';
+
+type Pattern = { id: string; name: string; use: string; rules: string; calmNote: string; make: (calm: boolean) => CSSProperties; group?: 'main' | 'trim' | 'paper' | 'gingham' };
 export const PATTERNS: Pattern[] = [
   { id: 'cutpaper', name: 'Cut-paper toss', use: 'Game covers, banners, Blog headers, social post frames, lobby edges',
     rules: 'Busy: never behind words. Words sit on a solid paper panel with a 24px clear margin. Tile 240px, no outline, evenly spaced (gap about 0.6x a shape).',
@@ -212,6 +366,48 @@ export const PATTERNS: Pattern[] = [
     rules: 'Squares match the board cell size; hand-drawn soft edges. Pieces wear the ink edge so they stand out. Tile 96px.',
     calmNote: 'Paper and lavender.',
     make: (c) => tile(`chk${c}`, 96, 96, PP.paper, () => `${wobbleSquare(0, 0, 48, c ? PP.lavender : PP.gamify)}${wobbleSquare(48, 48, 48, c ? PP.lavender : PP.gamify)}${wobbleSquare(48, 0, 48, c ? PP.paper : PP.blueCrystal)}${wobbleSquare(0, 48, 48, c ? PP.paper : PP.blueCrystal)}`) },
+  // 2026-11-24 paper set, from her four references (recreated, never copied).
+  ...GINGHAMS.map(([id, name, c]): Pattern => ({ id: `gingham-${id}`, group: 'gingham', name: `Gingham, ${name}`,
+    use: 'Backgrounds, panel backs, board grounds, sticker backing, theme cards',
+    rules: `${BUSY} One pastel pair, stripes darker where they cross (the weave). Tile 96px, 24px stripes.`,
+    calmNote: 'Half as strong, same weave.',
+    make: (calm) => tile(`gg${id}${calm}`, 96, 96, PP.paper, () => gingham(`${id}${calm ? 'c' : ''}`, c, calm)) })),
+  { id: 'gingham-painted', group: 'paper', name: 'Hand-painted gingham, Sky', use: 'Backgrounds, board grounds, theme cards, sticker backing',
+    rules: `${BUSY} Wobbly uneven Blue crystal stripes, a painted Sky-tinted square where they cross. Tile 160px.`,
+    calmNote: 'Paler blue, softer crossings.',
+    make: (c) => tile(`pg${c}`, 160, 160, PP.paper, () => paintedGingham(c, PP.blueCrystal, PP.sky)) },
+  { id: 'dots', group: 'paper', name: 'Dot scatter', use: 'Panels, sticker backing, theme cards, results box edges',
+    rules: `${BUSY} Lumpy painted dots in Grape, Teal and Orange on Butter, spaced unevenly but never touching. Tile 180px.`,
+    calmNote: 'Pastel dots on pale Butter, half as many.',
+    make: (c) => tile(`ds${c}`, 180, 180, c ? PALE(PP.butter) : PP.butter, () => dotScatter(c)) },
+  { id: 'flowers', group: 'paper', name: 'Flower toss', use: 'Backgrounds, theme cards, sticker backing, celebration frames',
+    rules: `${BUSY} Five-petal flowers in Orange and Peach with paper centers on Lavender; they may overlap, a thin Lavender edge keeps each whole. Tile 200px.`,
+    calmNote: 'A few Peach flowers on pale Lavender, no overlap.',
+    make: (c) => tile(`ft${c}`, 200, 200, c ? PALE(PP.lavender) : PP.lavender, () => flowerToss(c)) },
+  { id: 'stars', group: 'paper', name: 'Star mix', use: 'Results box edges, celebration frames, sticker backing, theme cards',
+    rules: `${BUSY} Filled and outline stars in Lemon, Grape and Pink on Blue crystal. Tile 200px.`,
+    calmNote: 'Fewer, softer stars on pale blue.',
+    make: (c) => tile(`sm${c}`, 200, 200, c ? PALE(PP.blueCrystal) : PP.blueCrystal, () => starMix(c)) },
+  { id: 'blocks', group: 'paper', name: 'Painted blocks', use: 'Banners, theme cards, board grounds outside the board zone',
+    rules: `${BUSY} Soft painted squares in Butter, Peach and Lavender in loose offset rows on Teal. Tile 192px.`,
+    calmNote: 'Aqua ground, half the blocks, paper and Butter only.',
+    make: (c) => tile(`pb${c}`, 192, 192, c ? PP.aqua : PP.teal, () => paintedBlocks(c)) },
+  { id: 'windowpane', group: 'paper', name: 'Windowpane', use: 'Board grounds, panels, sticker backing, teacher page headers',
+    rules: `${BUSY} Thin hand-drawn dashed Grape lines in a big open check on Lavender. Tile 120px.`,
+    calmNote: 'Soft purple dashes on pale Lavender, a wider check.',
+    make: (c) => tile(`wp${c}`, c ? 144 : 120, c ? 144 : 120, c ? PALE(PP.lavender) : PP.lavender, () => windowpane(c)) },
+  { id: 'sprinkles', group: 'paper', name: 'Sprinkles', use: 'Celebrations, results box edges, lobby, sticker backing, theme cards',
+    rules: `${BUSY} Short rounded dashes at any angle in six brights on cream. Red is swapped for Grape: red reads as "wrong" in a game. Tile 160px.`,
+    calmNote: 'Pastel sprinkles, a quarter as many.',
+    make: (c) => tile(`sp${c}`, 160, 160, PP.cream, () => sprinkles(c)) },
+  { id: 'brush', group: 'paper', name: 'Brush dashes', use: 'Section bands, banners, panel backs, theme cards',
+    rules: `${BUSY} Rows of painted tallies in ink, Pink, Grape, Orange and Sky on Butter; uneven length, lean and gap. Tile 180px.`,
+    calmNote: 'Four soft rows on pale Butter, wider gaps.',
+    make: (c) => tile(`bd${c}`, 180, 180, c ? PALE(PP.butter) : PP.butter, () => brushDashes(c)) },
+  { id: 'gingham-painted-mint', group: 'paper', name: 'Hand-painted gingham, Mint', use: 'Backgrounds, board grounds, theme cards, sticker backing',
+    rules: `${BUSY} The same painted weave in Mint with Kelly-tinted crossings. Tile 160px.`,
+    calmNote: 'Paler green, softer crossings.',
+    make: (c) => tile(`pgm${c}`, 160, 160, PP.paper, () => paintedGingham(c, PP.mint, PP.kelly)) },
   // Trims: small bands for panels, kept so the mockups and other views keep working.
   { id: 'stripes', group: 'trim', name: 'Wavy stripes trim', use: 'Scoreboard bars, panel headers, tape, progress tracks',
     rules: 'Bands only, never under body text; a label sits on a solid chip. Tile 120 x 48px.',
@@ -231,10 +427,22 @@ export const PATTERNS: Pattern[] = [
       : [[80, 80, 70, PP.gamify], [240, 230, 80, PP.blueCrystal], [250, 70, 46, PP.blush], [70, 250, 50, PP.butter], [170, 160, 30, PP.aqua]].map(([x, y, s, col]) => `<path transform="translate(${x} ${y})" d="${blobD(r, s as number)}" fill="${col}"/>`).join(''); }) },
 ];
 
-function Card({ p, calm, tall }: { p: Pattern; calm: boolean; tall?: boolean }) {
+// Seam check: exactly three by three tiles, with the tile edges marked, so
+// any step or cut-off shape at a join shows at once.
+const SEAM_LINES: CSSProperties = {
+  backgroundImage: `linear-gradient(to right, transparent calc(33.333% - 1px), ${PP.ink}55 calc(33.333% - 1px), ${PP.ink}55 33.333%, transparent 33.333%, transparent calc(66.666% - 1px), ${PP.ink}55 calc(66.666% - 1px), ${PP.ink}55 66.666%, transparent 66.666%), linear-gradient(to bottom, transparent calc(33.333% - 1px), ${PP.ink}55 calc(33.333% - 1px), ${PP.ink}55 33.333%, transparent 33.333%, transparent calc(66.666% - 1px), ${PP.ink}55 calc(66.666% - 1px), ${PP.ink}55 66.666%, transparent 66.666%)`,
+};
+/** The bank card (tile, name, where to use, rule, Calm line); NewDirection can render it. */
+export function PatternCard({ p, calm, seams }: { p: Pattern; calm: boolean; seams?: boolean }) { return <Card p={p} calm={calm} tall seams={seams} />; }
+function Card({ p, calm, tall, seams }: { p: Pattern; calm: boolean; tall?: boolean; seams?: boolean }) {
+  const css = p.make(calm);
   return (
-    <div className="rounded-[1.25rem] overflow-hidden" style={{ background: PP.paper, border: `2px solid ${PP.ink}` }}>
-      <div className={tall ? 'h-44' : 'h-16'} style={p.make(calm)} role="img" aria-label={`${p.name} pattern${calm ? ', Calm version' : ''}`} />
+    <div className="rounded-[1.25rem] overflow-hidden" style={{ background: PP.paper, border: `2px solid ${PP.ink}` }} data-testid={`pattern-${p.id}`}>
+      {seams
+        ? <div className="relative aspect-square" style={{ ...css, backgroundSize: '33.333% 33.333%' }} role="img" aria-label={`${p.name} pattern, 3 by 3 seam check${calm ? ', Calm version' : ''}`}>
+            <div className="absolute inset-0" style={SEAM_LINES} aria-hidden="true" />
+          </div>
+        : <div className={tall ? 'h-44' : 'h-16'} style={css} role="img" aria-label={`${p.name} pattern${calm ? ', Calm version' : ''}`} />}
       <div className="px-3 py-2 grid gap-0.5 text-sm">
         <span className="font-bold">{p.name}</span>
         <span className="font-semibold" style={{ color: PP.quiet }}>{p.use}</span>
@@ -247,6 +455,7 @@ function Card({ p, calm, tall }: { p: Pattern; calm: boolean; tall?: boolean }) 
 
 export default function PatternProposal() {
   const [calm, setCalm] = useState(false);
+  const [seams, setSeams] = useState(false);
   const get = (id: string) => PATTERNS.find((p) => p.id === id)!.make(calm);
   return (
     <section className="grid gap-4 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.periwinkle}` }} aria-labelledby="pat-title" data-testid="pattern-proposal">
@@ -255,9 +464,11 @@ export default function PatternProposal() {
         <h2 id="pat-title" className="font-heading text-xl" style={{ color: PP.ink }}>Universal patterns (proposal)</h2>
         <button type="button" aria-pressed={calm} onClick={() => setCalm((v) => !v)} className="ml-auto rounded-full px-4 min-h-11 font-bold"
           style={{ background: calm ? PP.blueCrystal : PP.paper, color: PP.ink, border: `2px solid ${PP.ink}` }}>{calm ? 'Calm version on' : 'Show Calm version'}</button>
+        <button type="button" aria-pressed={seams} onClick={() => setSeams((v) => !v)} className="rounded-full px-4 min-h-11 font-bold"
+          style={{ background: seams ? PP.butter : PP.paper, color: PP.ink, border: `2px solid ${PP.ink}` }}>{seams ? 'Seam check on' : 'Show 3 x 3 seam check'}</button>
       </div>
       <p className="text-sm font-semibold max-w-prose" style={{ color: PP.quiet }}>
-        Your request of 2026-11-23: improve the universal patterns, from your three references (cut-paper shapes, a doodle scatter with offset outlines, thick squiggles). Eight seamless tiles drawn in code with smooth flat fills, plus three trims. The rule: only the Quiet doodle ground may sit behind words; every busier pattern stays at the edges, 24px clear of text, or under a solid panel. Every pattern has a Calm version: fewer, paler shapes and no motion.
+        Your request of 2026-11-23: improve the universal patterns, from your three references (cut-paper shapes, a doodle scatter with offset outlines, thick squiggles). Then on 2026-11-24: add recreated versions of your gingham, hand-painted paper, sprinkles and brush dash references to Classic. Every tile is drawn in code with smooth flat fills, plus three trims. The rule: only the Quiet doodle ground may sit behind words; every busier pattern stays at the edges, 24px clear of text, or under a solid panel. Every pattern has a Calm version: fewer, paler shapes and no motion.
       </p>
 
       <h3 className="font-heading font-bold">Mockup: a menu panel and a question card on the patterns</h3>
@@ -271,7 +482,7 @@ export default function PatternProposal() {
               {['Board race', 'Bubble pop', 'Castle quest'].map((t) => (
                 <span key={t} className="rounded-[1rem] px-4 min-h-12 flex items-center font-bold" style={{ background: PP.blueCrystal, border: `2px solid ${PP.ink}` }}>{t}</span>
               ))}
-              <button type="button" className="justify-self-start rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.periwinkle, color: PP.ink, border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
+              <button type="button" className="justify-self-start rounded-full px-6 min-h-14 text-xl font-bold inline-flex items-center gap-2" style={{ background: PP.periwinkle, color: '#ffffff', border: `2px solid ${PP.ink}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}>
                 <Play weight="fill" aria-hidden="true" /> Start
               </button>
             </div>
@@ -292,8 +503,23 @@ export default function PatternProposal() {
         <div className="h-14" style={get('squiggle')} aria-hidden="true" />
       </div>
 
+      <h3 className="font-heading font-bold">Paper set (new, 2026-11-24)</h3>
+      <p className="text-sm font-semibold max-w-prose m-0" style={{ color: PP.quiet }}>
+        Recreated from your four references, each in its own colorway (2026-11-24: "switch up the colors so they are not just pink"): hand-painted gingham, dot scatter, flower toss, star mix, painted blocks, windowpane, sprinkles and brush dashes. Smooth flat fills with slightly wobbly edges and uneven spacing; no watercolor grain, bleed or gradient.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 wide:grid-cols-4" data-testid="pattern-paper">
+        {PATTERNS.filter((p) => p.group === 'paper').map((p) => <Card key={p.id} p={p} calm={calm} tall seams={seams} />)}
+      </div>
+      <h3 className="font-heading font-bold">Gingham, one per pastel pair</h3>
+      <p className="text-sm font-semibold max-w-prose m-0" style={{ color: PP.quiet }}>
+        One color each, darker where the stripes cross, like woven cloth. The crossing tone is a solid mix of the same pastel, never a see-through layer. Tan is the one Nature tone, used only here.
+      </p>
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 wide:grid-cols-5" data-testid="pattern-gingham">
+        {PATTERNS.filter((p) => p.group === 'gingham').map((p) => <Card key={p.id} p={p} calm={calm} tall seams={seams} />)}
+      </div>
+      <h3 className="font-heading font-bold">Doodle set</h3>
       <div className="grid gap-3 sm:grid-cols-2 wide:grid-cols-4" data-testid="pattern-grid">
-        {PATTERNS.filter((p) => p.group !== 'trim').map((p) => <Card key={p.id} p={p} calm={calm} tall />)}
+        {PATTERNS.filter((p) => !p.group || p.group === 'main').map((p) => <Card key={p.id} p={p} calm={calm} tall seams={seams} />)}
       </div>
       <h3 className="font-heading font-bold">Trims</h3>
       <div className="grid gap-3 sm:grid-cols-3">
