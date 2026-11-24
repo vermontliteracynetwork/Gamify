@@ -11,7 +11,9 @@ import ResultsModal from '../engine/ResultsModal';
 import ScoreBoard, { RoundMeter } from '../engine/ScoreBoard';
 import ShareQuestion from '../engine/ShareQuestion';
 import TeamSetup from '../engine/TeamSetup';
-import { POP_IN } from '../engine/pace';
+import { pace, POP_IN } from '../engine/pace';
+import TapOk from '../engine/TapOk';
+import DialogFocus from '../ui/DialogFocus';
 import { PowerUpCards } from '../engine/PowerUpSwitches';
 import { addPoints, CPU_ACCURACY, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../engine/turns';
 import { useAsk } from '../engine/useAsk';
@@ -86,7 +88,8 @@ export default function LabGame({ def }: { def: LabDef }) {
 
   useEffect(() => {
     if (!message) return;
-    const id = window.setTimeout(() => setMessage(null), message.tone === 'big' ? 1800 : 1300);
+    // Short cheers stay up longer now (teacher, 2026-11-24: more time for reading).
+    const id = window.setTimeout(() => setMessage(null), (message.tone === 'big' ? 1800 : 1300) * pace(settings));
     return () => window.clearTimeout(id);
   }, [message]);
 
@@ -176,12 +179,7 @@ export default function LabGame({ def }: { def: LabDef }) {
     setStatus,
   } : null;
 
-  // The computer's power-up cards close on their own (its turns go on by themselves).
-  useEffect(() => {
-    if (!card || player?.kind !== 'cpu') return;
-    const id = window.setTimeout(() => { card.resolve(); setCard(null); }, 2400);
-    return () => window.clearTimeout(id);
-  }, [card, player?.kind]);
+  // The computer's power-up cards wait for a tap from the class too (teacher, 2026-11-24).
 
   const Play = def.Play;
   const playing = phase === 'play' || phase === 'end';
@@ -216,7 +214,7 @@ export default function LabGame({ def }: { def: LabDef }) {
               {(status || myHeld.length > 0) && (
                 <div className="lg:hidden absolute left-2 bottom-2 z-10 flex items-center gap-2 pointer-events-none">
                   {status && <div className="score-card px-3 py-1.5 font-bold text-sm">{status}</div>}
-                  {myHeld.map((p, i) => <span key={`${p.id}-${i}`} title={p.name} className="score-card w-11 h-11 p-1 inline-flex [&>svg]:w-full [&>svg]:h-full">{p.art}</span>)}
+                  {myHeld.map((p, i) => <span key={`${p.id}-${i}`} className="score-card w-16 p-1 grid justify-items-center gap-0.5"><span className="w-9 h-9 inline-flex [&>svg]:w-full [&>svg]:h-full">{p.art}</span><span className="text-[0.65rem] font-bold leading-tight text-center">{p.name}</span></span>)}
                 </div>
               )}
             </section>
@@ -285,17 +283,19 @@ const ENTER = {
 };
 export function LabPowerCard({ p, text, still, onClose }: { p: LabPower; text: string; still: boolean; onClose: () => void }) {
   return (
-    <motion.div className="fixed inset-0 z-[70] grid place-items-center bg-ink-night/40 p-4" role="dialog" aria-label={p.name} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-      <motion.div className="relative w-[min(20rem,86vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-7 grid justify-items-center gap-3 text-center cursor-pointer"
+    <motion.div className="fixed inset-0 z-[70] grid place-items-center bg-ink-night/40 p-4" role="dialog" aria-label={p.name} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.45 }} onClick={onClose}>
+      <DialogFocus onClose={onClose} />
+      <motion.div onClick={(e) => e.stopPropagation()} className="relative w-[min(21rem,88vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-7 grid justify-items-center gap-3 text-center"
         style={{ boxShadow: p.silly ? '0 0 0 6px rgba(245,160,140,0.6), 0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' : '0 0 0 6px rgba(253,253,148,0.6), 0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }}
         initial={still ? { opacity: 0 } : ENTER[p.enter ?? (p.silly ? 'wiggle' : 'spin')]} animate={{ scale: 1, opacity: 1, y: 0, x: 0, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.85 }}
-        transition={POP_IN} whileHover={still ? undefined : { scale: 1.03 }}>
+        transition={still ? { duration: 0.01 } : POP_IN}>
         <button type="button" onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label={t('class.close')}
           className="absolute top-3 right-3 w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
         {!still && <span aria-hidden="true" className="absolute top-6 w-44 h-44 rounded-full pu-rays opacity-70" />}
         <span className={`relative w-32 h-32 inline-flex [&>svg]:w-full [&>svg]:h-full ${still ? '' : 'pu-bob'}`}>{p.art}</span>
         <span className="relative font-display text-3xl leading-tight"><PopText text={p.name} /></span>
-        <span className="relative font-bold text-base leading-snug text-balance">{text}</span>
+        <span className="relative font-bold text-lg leading-snug text-balance">{text}</span>
+        <TapOk onTap={onClose} className="relative mt-2" />
       </motion.div>
     </motion.div>
   );

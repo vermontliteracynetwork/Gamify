@@ -147,7 +147,8 @@ export default function FourInARow() {
       // The computer takes its time (5 to 8 seconds, teacher 2026-11-07): its
       // piece wanders over the columns, settles on its pick, then drops.
       const target = cpuMove(board, (turn + 1) as 1 | 2, level);
-      const wait = (5000 + Math.random() * 3000) * pace(settings);
+      // About 8 to 12 seconds at the normal (slower, 2026-11-24) pace.
+      const wait = (3500 + Math.random() * 2000) * pace(settings);
       const settle = window.setTimeout(() => { if (live) { pointedAt.current = Date.now(); setHeldCol(target); } }, wait - 1200);
       const timer = window.setTimeout(() => { if (live) place(target); }, wait);
       return () => { live = false; window.clearTimeout(timer); window.clearTimeout(settle); };

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ANSWER_SOUNDS, playClip } from './music';
-import { pace, POP_IN } from './pace';
+import { CPU_THINK_MS, pace, POP_IN } from './pace';
+import TapOk from './TapOk';
 import { AccessButton } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
@@ -63,12 +64,12 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   // to start, so every team knows it is their turn. The computer's card
   // moves on by itself.
   // A second or third try in the same turn goes straight to the question.
+  // The computer's card waits for a tap too (teacher, 2026-11-24).
   const [ready, setReady] = useState((!!chance && chance.n > 1) || !turnCard);
-  useEffect(() => {
-    if (player.kind !== 'cpu') return;
-    const id = window.setTimeout(() => setReady(true), (settings.motion === 'still' ? 400 : 1200) * pace(settings));
-    return () => window.clearTimeout(id);
-  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The answer stays up until it is tapped (teacher, 2026-11-24: "require tap to close").
+  const [done, setDone] = useState<boolean | null>(null);
+  const [sent, setSent] = useState(false);
+  const goOn = () => { if (done === null || sent) return; setSent(true); onResult(done); };
 
   // Little readers hear every question and its answers once it opens.
   useEffect(() => {
@@ -87,9 +88,9 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   useEffect(() => {
     if (player.kind !== 'cpu' || !ready) return;
     const right = Math.random() < CPU_ACCURACY[cpuLevel];
-    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); answerSound(right); }, 1800 * pace(settings));
-    const b = window.setTimeout(() => onResult(right), 3600 * pace(settings));
-    return () => { window.clearTimeout(a); window.clearTimeout(b); };
+    // It thinks for a while first, so the class can follow its turn.
+    const a = window.setTimeout(() => { setCpu(right ? 'right' : 'miss'); setShown(true); answerSound(right); setDone(right); }, (settings.motion === 'still' ? 1000 : CPU_THINK_MS) * pace(settings));
+    return () => { window.clearTimeout(a); };
   }, [q, ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function choose(i: number) {
@@ -97,7 +98,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
     const right = i === q.correctIndex;
     setPicked(i); setShown(true);
     answerSound(right);
-    window.setTimeout(() => onResult(right), settings.motion === 'still' ? 900 : right ? 1300 : 2200);
+    window.setTimeout(() => setDone(right), settings.motion === 'still' ? 300 : 700);
   }
 
   if (!ready && turnCard) return <TurnCard player={player} avatar={avatar} answerer={answerer} onStart={() => setReady(true)} />;
@@ -170,15 +171,18 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           })}
         </div>
 
+        <div className="min-h-[3.5rem] flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         {cpu ? (
           <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
             {cpu === 'thinking' ? t('share.cpuThinking') : cpu === 'right' ? t('share.cpuRight') : t('share.cpuMiss')}
           </p>
         ) : (
-          <p className="min-h-10 font-display text-3xl font-bold text-center" role="status" aria-live="polite">
+          <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
             {picked === null ? '' : <PopText key={`${picked}-${chance?.n ?? 0}`} text={picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} gold={picked === q.correctIndex} />}
           </p>
         )}
+        {done !== null && !sent && <TapOk onTap={goOn} label={t('tap.goOn')} />}
+        </div>
       </motion.div>
     </div>
   );
@@ -192,17 +196,15 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPlayer; avatar?: string; answerer?: string | null; onStart: () => void }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
-  useEffect(() => {
-    if (player.kind !== 'cpu') return;
-    const id = window.setTimeout(onStart, (still ? 400 : 1200) * pace(settings));
-    return () => window.clearTimeout(id);
-  }, [player.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Every turn card, the computer's too, waits for a tap (teacher, 2026-11-24).
+  const start = () => { playEffect('tap', settings); onStart(); };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45" role="dialog" aria-modal="true" aria-label={t('share.turnCard', { name: player.name })}>
       <DialogFocus />
-      <motion.button type="button" onClick={() => { playEffect('tap', settings); onStart(); }} disabled={player.kind === 'cpu'}
-        initial={still ? false : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}
-        className="relative grid justify-items-center gap-4 p-6 rounded-full" aria-label={t('share.turnStart')}>
+      <motion.div className="grid justify-items-center gap-4"
+        initial={still ? false : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={POP_IN}>
+      {/* The picture is a tap target too; the OK below is the named button. */}
+      <div onClick={start} aria-hidden="true" className="relative grid justify-items-center gap-4 p-6 rounded-full cursor-pointer">
         {/* A glow that spins clockwise behind the icon, which bobs and
             gently grows and shrinks (teacher, 2026-11-06). */}
         {/* Always on, slow and soft, so it shows even with calm motion settings
@@ -213,8 +215,10 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
           style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}
         </motion.span>
-        {answerer && <span className="font-display text-2xl sm:text-3xl text-center rounded-pill border-bold border-border bg-mint-soft px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
-      </motion.button>
+      </div>
+        {answerer && <span className="relative font-display text-2xl sm:text-3xl text-center rounded-pill border-bold border-border bg-mint-soft px-5 py-1">{t('share.answerer', { name: answerer })}</span>}
+      <TapOk onTap={start} label={t('share.turnStart')} className="relative" />
+      </motion.div>
     </div>
   );
 }

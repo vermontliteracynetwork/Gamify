@@ -1,6 +1,7 @@
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import Title from '../../ui/Title';
-import { pace } from '../../engine/pace';
+import { CPU_THINK_MS, pace } from '../../engine/pace';
+import TapOk from '../../engine/TapOk';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -93,6 +94,9 @@ export default function Bowling() {
   const [roll, setRoll] = useState<0 | 1>(0);
   const [frames, setFrames] = useState(0);
   const [banner, setBanner] = useState<{ id: number; text: string; kind?: 'strike' | 'spare' | 'miss' | 'split' | null; sign?: string } | null>(null);
+  // Every result banner stays until it is tapped (teacher, 2026-11-24); then the game goes on.
+  const afterBanner = useRef<(() => void) | null>(null);
+  const closeBanner = () => { setBanner(null); const go = afterBanner.current; afterBanner.current = null; go?.(); };
   // Strikes in a row for each player: two is a Double, three a Turkey.
   const streak = useRef<Record<string, number>>({});
   const [missed, setMissed] = useState<MultipleChoiceQuestion[]>([]);
@@ -142,7 +146,7 @@ export default function Bowling() {
       setStanding((st) => st.map((up, i) => up && !fall.includes(i)));
       const state = turnsNow.current;
       if (!alive.current || !state) return;
-      if (fall.length) { setT(addPoints(state, current(state).id, fall.length)); setBanner({ id: Date.now(), text: `${t('sb.twister', { count: fall.length })} +${fall.length}`, kind: null }); later(() => setBanner(null), 1300); }
+      if (fall.length) { setT(addPoints(state, current(state).id, fall.length)); afterBanner.current = null; setBanner({ id: Date.now(), text: `${t('sb.twister', { count: fall.length })} +${fall.length}`, kind: null }); }
     }, 1100);
   }
   const player = turns ? current(turns) : null;
@@ -285,13 +289,12 @@ export default function Bowling() {
         if (kind === 'strike') later(() => void confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1, y: 0.6 }, disableForReducedMotion: true }), 400);
       }
     } else if (!down.length) playEffect('miss', settings);
-    later(() => {
-      setBanner(null);
+    afterBanner.current = () => {
       if (!alive.current) return;
       const now = turnsNow.current ?? scored;
       if (roll === 0 && left > 0) { setRoll(1); askFor(now, 1); }
       else endFrame(now);
-    }, kind === 'strike' ? 2000 : 1500);
+    };
   }
   function endFrame(state: TurnState) {
     held.endTurn(); // unused power-ups are gone after the turn
@@ -312,22 +315,20 @@ export default function Bowling() {
     if (settings.celebrations !== 'off' && !still) void confetti({ particleCount: 90, spread: 90, origin: { y: 0.5 }, disableForReducedMotion: true });
   }
   // The computer bowls on its own after a right answer.
+  // It uses its power-ups first through the tray (each on a card the class
+  // taps), thinks a moment (teacher, 2026-11-24), then throws.
+  const cpuAim = phase === 'play' && step === 'aim' && player?.kind === 'cpu' && !held.held.length && !twisting && !banner;
   useEffect(() => {
-    if (phase !== 'play' || step !== 'aim' || player?.kind !== 'cpu') return;
-    const id = window.setTimeout(() => {
-      // Twister goes first, then the throw waits for the pins to settle.
-      const tw = held.held.findIndex((it) => it.ability === 'twister');
-      for (let k = held.held.length - 1; k >= 0; k--) if (k !== tw) applyItem(k);
-      if (tw >= 0) { applyItem(tw); later(() => throwBall(cpuPlan()), 1400); } else throwBall(cpuPlan());
-    }, 1200 * pace(settings));
+    if (!cpuAim) return;
+    const id = window.setTimeout(() => throwBall(cpuPlan()), (still ? 600 : CPU_THINK_MS) * pace(settings));
     return () => window.clearTimeout(id);
-  }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cpuAim, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A theme's own ball for player icon k (an older design's team icon or its
   // one Ball piece stand in).
   const drawnBall = (k: number) => pieceImage(theme, `ball-${k + 1}`) ?? pieceImage(theme, `team-${k + 1}`) ?? pieceImage(theme, 'ball');
   const ballIcons = Array.from({ length: BALLS }, (_, k) => drawnBall(k) ?? (pieceColor(theme, 'ball', '') ? undefined : classicBallArt(k)));
-  const tray = <PowerUpTray manifest={bowlingManifest} items={held.held} onUse={applyItem} disabled={(step !== 'aim' && step !== 'spin') || player?.kind === 'cpu' || twisting} />;
+  const tray = <PowerUpTray manifest={bowlingManifest} items={held.held} onUse={applyItem} disabled={(step !== 'aim' && step !== 'spin') || twisting || !!banner} auto={player?.kind === 'cpu'} who={player?.name} />;
   const canAim = phase === 'play' && (step === 'aim' || step === 'spin') && player?.kind !== 'cpu' && !twisting;
   const pinColor = pieceColor(theme, 'pin', '#fbfcf8');
   const pinArt = pieceImage(theme, 'pin');
@@ -499,6 +500,8 @@ export default function Bowling() {
                     ) : banner.text}
                   </motion.p>
                 )}
+                {banner && <motion.div key={`ok-${banner.id}`} className="absolute inset-x-0 bottom-[12%] flex justify-center z-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.4, delay: still ? 0 : 0.4 }}><TapOk onTap={closeBanner} label={t('tap.goOn')} /></motion.div>}
+                {cpuAim && player && <motion.p key="think" className="absolute inset-x-0 top-[40%] text-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status"><span className="font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1.5">{t('cpu.thinking', { name: player.name })}</span></motion.p>}
               </AnimatePresence>
             </div>
             {/* Aim follows the finger or mouse over the lane; tap the lane to throw. With Motion off, sliders set the aim and spin. */}

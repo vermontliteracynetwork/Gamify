@@ -30,6 +30,9 @@ for (const g of [
     const buttons = dialog.getByRole('button', { name: /^[A-D] / });
     const labels = (await buttons.allInnerTexts()).map((l) => l.trim());
     await buttons.nth(labels.findIndex((l) => l.endsWith(answers.get(prompt)!))).click();
+    // A team answer waits for a tap before the game goes on (teacher, 2026-11-24).
+    const goOn = page.getByRole('button', { name: 'Tap to go on' });
+    if (await goOn.waitFor({ timeout: 3000 }).then(() => true, () => false)) await goOn.click();
     // The power-up card stays until it is closed (2026-11-13), as a dialog
     // named for the power-up.
     const card = page.getByRole('dialog', { name: g.name });

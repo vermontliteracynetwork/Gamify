@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { pace } from './pace';
-import { AnimatePresence } from 'motion/react';
+import { pace, POP_IN } from './pace';
+import { AnimatePresence, motion } from 'motion/react';
+import TapOk from './TapOk';
+import ItemArt from '../theme/ItemArt';
 import { PowerUpCard } from './PowerUpPop';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
@@ -32,28 +34,49 @@ export function roleOf(manifest: GameManifest, it: ThemeItem) {
   return a ? `${a.label}: ${a.hint}` : '';
 }
 
-// Earned power-ups switch on by themselves at the start of the player's next
-// turn (teacher, 2026-11-07): no box to tap, just a big centered message with
-// the power-up's picture so everyone sees what happened.
-export function PowerUpTray({ manifest, items, onUse, disabled = false }: { manifest: GameManifest; items: ThemeItem[]; onUse: (index: number) => void; disabled?: boolean }) {
+// Held power-ups wait in a tray until the player taps one (teacher,
+// 2026-11-24: "power ups should wait for tap"). Each is a square card with its
+// picture and its name always showing (no hover-only label). A tap opens a
+// card that says what it does, with Use it / Not now. The computer still uses
+// its own by itself (`auto`), but each one is announced on a card that waits
+// for a tap from the class.
+export function PowerUpTray({ manifest, items, onUse, disabled = false, auto = false, who }: { manifest: GameManifest; items: ThemeItem[]; onUse: (index: number) => void; disabled?: boolean; auto?: boolean; who?: string }) {
   const { settings } = useSettings();
-  const [shown, setShown] = useState<{ id: number; item: ThemeItem } | null>(null);
-  const tried = useRef(new Set<ThemeItem>());
-  const next = items.findIndex((it) => !tried.current.has(it));
+  const still = settings.motion === 'still';
+  const [ask, setAsk] = useState<{ id: number; index: number; item: ThemeItem; cpu: boolean } | null>(null);
+  // The computer picks its next one after a short pause.
   useEffect(() => {
-    if (disabled || next < 0 || shown) return;
-    const id = window.setTimeout(() => {
-      const it = items[next];
-      tried.current.add(it); // one that needs a tap on the board (like a magnet) is not retried
-      setShown({ id: Date.now(), item: it });
-      onUse(next);
-    }, 900 * pace(settings));
+    if (!auto || disabled || ask || !items.length) return;
+    const id = window.setTimeout(() => setAsk({ id: Date.now(), index: 0, item: items[0], cpu: true }), (still ? 300 : 1200) * pace(settings));
     return () => window.clearTimeout(id);
-  }, [disabled, next, items, shown]); // eslint-disable-line react-hooks/exhaustive-deps
-  // The card stays until it is closed (teacher, 2026-11-13: "never close menus without a click").
+  }, [auto, disabled, ask, items]); // eslint-disable-line react-hooks/exhaustive-deps
+  const use = () => { if (!ask) return; const i = items.indexOf(ask.item); setAsk(null); if (i >= 0) onUse(i); };
+  const tray = items.length > 0 && (
+    <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={t('pu.tray')}>
+      {items.map((it, i) => {
+        const off = disabled || auto;
+        return (
+          <motion.button key={`${it.id}-${i}`} type="button" disabled={off} onClick={() => setAsk({ id: Date.now(), index: i, item: it, cpu: false })}
+            className="w-[5.5rem] aspect-square rounded-panel border-bold border-border bg-surface grid justify-items-center content-center gap-0.5 p-1 disabled:opacity-60 disabled:cursor-default"
+            style={{ boxShadow: off ? 'var(--shadow-sticker)' : '0 0 0 4px #FDFD94, 0 0 14px 4px rgba(253,253,148,0.9), 0 4px 0 #000' }}
+            initial={still ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={still ? { duration: 0.01 } : POP_IN}
+            whileHover={off || still ? undefined : { scale: 1.06 }} whileTap={off || still ? undefined : { scale: 0.94 }}>
+            <ItemArt item={it} size={48} still={still || off} />
+            <span className="text-xs font-bold leading-tight text-center line-clamp-2">{it.name}</span>
+          </motion.button>
+        );
+      })}
+    </div>
+  );
   return (
-    <AnimatePresence>
-      {shown && <PowerUpCard key={shown.id} id={shown.id} item={shown.item} title={t('pu.on', { name: shown.item.name })} text={roleOf(manifest, shown.item)} onClose={() => setShown(null)} />}
-    </AnimatePresence>
+    <>
+      {tray}
+      <AnimatePresence>
+        {ask && (ask.cpu
+          ? <PowerUpCard key={ask.id} id={ask.id} item={ask.item} title={who ? t('pu.cpuUses', { name: who, item: ask.item.name }) : t('pu.on', { name: ask.item.name })} text={roleOf(manifest, ask.item)} onClose={use} />
+          : <PowerUpCard key={ask.id} id={ask.id} item={ask.item} title={ask.item.name} text={roleOf(manifest, ask.item)} onClose={() => setAsk(null)}
+              actions={<><TapOk onTap={use} label={t('pu.useIt')} /><button type="button" onClick={() => setAsk(null)} className="min-h-[3.5rem] px-5 rounded-pill border-bold border-border bg-surface-2 font-bold text-lg">{t('pu.notNow')}</button></>} />)}
+      </AnimatePresence>
+    </>
   );
 }

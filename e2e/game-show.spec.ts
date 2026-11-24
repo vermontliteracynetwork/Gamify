@@ -97,10 +97,13 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await page.getByRole('button', { name: 'Shapes, 300 points' }).click();
   await answerShare(page, true);
   await expect(page.getByLabel('300 points', { exact: true })).toBeVisible();
-  // The computer takes its turn on its own.
-  await expect(page.getByText('The computer is thinking...')).toBeVisible({ timeout: 8000 });
+  // The class taps once to let the computer start (teacher, 2026-11-24), then it thinks and moves on its own.
+  await startTurn(page);
+  await expect(page.getByText('The computer is thinking...')).toBeVisible({ timeout: 15000 });
   await page.screenshot({ path: `test-results/gameshow-grid-${info.project.name}.png`, fullPage: true });
-  await expect(page.getByText(/The computer (got it|missed)!/)).toBeVisible({ timeout: 8000 });
+  await expect(page.getByText(/The computer (got it|missed)!/)).toBeVisible({ timeout: 15000 });
+  // Its answer waits for a tap too.
+  await page.getByRole('button', { name: 'Tap to go on' }).click();
   expect(problems).toEqual([]);
 });
 

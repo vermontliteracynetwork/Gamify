@@ -12,6 +12,8 @@ export async function answerShare(page: Page, right = true) {
   const labels = (await buttons.allInnerTexts()).map((l) => l.trim());
   const correct = labels.findIndex((l) => l.endsWith(answers.get(prompt)!));
   await buttons.nth(right ? correct : (correct + 1) % labels.length).click();
+  // The answer stays up until it is tapped (teacher, 2026-11-24).
+  await dialog.getByRole('button', { name: 'Tap to go on' }).click();
   await expect(page.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 5000 });
 }
 

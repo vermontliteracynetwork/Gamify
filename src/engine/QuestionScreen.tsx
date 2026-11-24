@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { POP_IN } from './pace';
+import { pace, POP_IN } from './pace';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
@@ -87,7 +87,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     }
     setPicked(i);
     const ms = Date.now() - shownAt.current;
-    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), right ? 900 : 1400);
+    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), (right ? 900 : 1400) * pace(settings));
   }
 
   const words = q.prompt.split(/(\s+)/);

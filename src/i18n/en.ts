@@ -575,7 +575,7 @@ export const en = {
   // Territory (teacher, 2026-11-24)
   'territory.how1': 'Read the question on your own device.',
   'territory.how2': 'Every right answer sends a cat after a mouse on the big screen.',
-  'territory.how3': 'Together, catch them all. Or play Cats against Mice for the room!',
+  'territory.how3': 'Cooperative: catch them all. Competitive: Cats against Mice for the room!',
   'territory.pace': 'How often a mouse comes out',
   'territory.pace.slow': 'Slow',
   'territory.pace.normal': 'Normal',

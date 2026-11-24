@@ -24,6 +24,8 @@ test('Pinball: a right answer earns a shot; pick a lane and the ball shoots at o
   if (info.project.name === 'ipad-landscape') for (let f = 0; f < 8; f++) { await page.screenshot({ path: `test-results/pinball-frame-${f}.png` }); await page.waitForTimeout(150); }
   await expect(page.getByText(/^(\+\d+|So close!)$/).first()).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/pinball-landed-${info.project.name}.png` });
+  // The result waits for a tap (teacher, 2026-11-24).
+  await page.getByRole('button', { name: 'Tap to go on' }).click();
   // Next team's question.
   await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });

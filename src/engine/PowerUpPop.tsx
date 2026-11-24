@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import TapOk from './TapOk';
+import DialogFocus from '../ui/DialogFocus';
 import { POP_IN } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import { X } from '@phosphor-icons/react';
@@ -22,21 +24,26 @@ const ENTER: Record<string, { scale: number; opacity: number; y?: number; rotate
 // A power-up card (teacher, 2026-11-13): a tall card over the game with the
 // picture on top, then its name, then a short line on what it does, and an X
 // at the top. It stays until the X (or the card) is tapped, so everyone sees it.
-export function PowerUpCard({ id, item, title, text, onClose }: { id: number | string; item: ThemeItem; title: string; text: string; onClose: () => void }) {
+// It closes only on a tap (teacher, 2026-11-24): the big yellow OK button
+// (Enter or Space too), the X, or the dim around it. `actions` swaps the OK
+// for other buttons (the Use it / Not now choice of a held power-up).
+export function PowerUpCard({ id, item, title, text, onClose, actions }: { id: number | string; item: ThemeItem; title: string; text: string; onClose: () => void; actions?: ReactNode }) {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   return (
     <motion.div key={id} className="fixed inset-0 z-[70] grid place-items-center bg-ink-night/40 p-4" role="dialog" aria-label={title}
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}>
-      <motion.div className="relative w-[min(19rem,86vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-7 grid justify-items-center gap-3 text-center cursor-pointer"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.45 }} onClick={onClose}>
+      <DialogFocus onClose={onClose} />
+      <motion.div onClick={(e) => e.stopPropagation()} className="relative w-[min(21rem,88vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-7 grid justify-items-center gap-3 text-center"
         style={{ boxShadow: '0 0 0 6px rgba(253,253,148,0.6), 0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }}
         initial={still ? { opacity: 0 } : ENTER[item.motion] ?? ENTER.none} animate={{ scale: 1, opacity: 1, y: 0, x: 0, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.85 }}
-        transition={POP_IN} whileHover={still ? undefined : { scale: 1.03 }}>
+        transition={still ? { duration: 0.01 } : POP_IN}>
         <button type="button" onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label={t('class.close')}
           className="absolute top-3 right-3 w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
         <span className={still ? '' : 'pu-bob'}><ItemArt item={item} size={128} still={still} /></span>
         <span className="font-display text-3xl leading-tight"><PopText text={title} /></span>
-        <span className="font-bold text-base leading-snug text-balance">{text}</span>
+        <span className="font-bold text-lg leading-snug text-balance">{text}</span>
+        <div className="mt-2 flex flex-wrap gap-3 justify-center">{actions ?? <TapOk onTap={onClose} />}</div>
       </motion.div>
     </motion.div>
   );

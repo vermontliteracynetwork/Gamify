@@ -1,6 +1,7 @@
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { pace } from '../../engine/pace';
+import { CPU_THINK_MS, pace } from '../../engine/pace';
+import TapOk from '../../engine/TapOk';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { CheckCircle, Crosshair, Trophy } from '@phosphor-icons/react';
@@ -305,8 +306,12 @@ export default function Pinball() {
       playEffect('miss', settings);
     }
     setStep('result');
-    timers.current.push(window.setTimeout(() => afterTurn(next), (still ? 1000 : 1800) * pace(settings)));
+    // The result waits for a tap (teacher, 2026-11-24), after a short beat to land.
+    timers.current.push(window.setTimeout(() => { afterShot.current = () => afterTurn(next); setWaitTap(true); }, (still ? 300 : 900) * pace(settings)));
   }
+  const afterShot = useRef<(() => void) | null>(null);
+  const [waitTap, setWaitTap] = useState(false);
+  const goOn = () => { setWaitTap(false); const go = afterShot.current; afterShot.current = null; go?.(); };
   function afterTurn(state: TurnState) {
     if (phaseNow.current !== 'play') return;
     held.endTurn(); // unused power-ups are gone after the turn
@@ -331,11 +336,14 @@ export default function Pinball() {
   }
   phaseNow.current = phase;
   // The computer uses what it holds, then picks a lane.
+  // Its power-ups go through the tray, each on a card the class taps; then it
+  // thinks a moment before it picks (teacher, 2026-11-24).
+  const cpuAim = phase === 'play' && player?.kind === 'cpu' && step === 'aim' && !held.held.length;
   useEffect(() => {
-    if (phase !== 'play' || player?.kind !== 'cpu' || step !== 'aim') return;
-    const id = window.setTimeout(() => { for (let k = held.held.length - 1; k >= 0; k--) applyItem(k); pickLane(Math.floor(Math.random() * ZONES)); }, 900 * pace(settings));
+    if (!cpuAim) return;
+    const id = window.setTimeout(() => pickLane(Math.floor(Math.random() * ZONES)), (still ? 600 : CPU_THINK_MS) * pace(settings));
     return () => window.clearTimeout(id);
-  }, [phase, step, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cpuAim, player?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   // Keyboard: 1 to 5 pick a lane, Space or Enter shoots.
   useEffect(() => {
     if (phase !== 'play' || !human) return;
@@ -351,7 +359,7 @@ export default function Pinball() {
   const canAim = phase === 'play' && step === 'aim' && human;
   const pw = 100 / Math.max(1, values.length);
   const boardW = `calc((var(--play-h) - 1.5rem - var(--pb-extra)) * ${W / H})`;
-  const tray = <PowerUpTray manifest={pinballManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim' || !human} />;
+  const tray = <PowerUpTray manifest={pinballManifest} items={held.held} onUse={applyItem} disabled={step !== 'aim'} auto={!human} who={player?.name} />;
 
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
@@ -493,18 +501,19 @@ export default function Pinball() {
                   {banner && (
                     <motion.p key={banner.id} className="absolute inset-x-0 top-[24%] mx-auto w-max max-w-[90%] text-center font-display text-xl sm:text-2xl bg-surface border-bold border-border rounded-pill px-4 py-1 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }}
                       initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.35 }}
-                      onAnimationComplete={() => { const id = banner.id; timers.current.push(window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600)); }}
+                      onAnimationComplete={() => { const id = banner.id; timers.current.push(window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600 * pace(settings))); }}
                       role="status">{banner.text}</motion.p>
                   )}
+                  {waitTap && <motion.div key="ok" className="absolute inset-x-0 bottom-[8%] flex justify-center z-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><TapOk onTap={goOn} label={t('tap.goOn')} /></motion.div>}
+                  {cpuAim && player && <motion.p key="think" className="absolute inset-x-0 top-[40%] text-center pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status"><span className="font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1.5">{t('cpu.thinking', { name: player.name })}</span></motion.p>}
                 </AnimatePresence>
               </div>
-              {/* Small screens: held power-ups float over the table's lower left. */}
-              <div className="lg:hidden absolute left-2 w-[min(15rem,45%)] z-10" style={{ bottom: '1rem' }}>{tray}</div>
             </section>
             <div className="order-first lg:order-none lg:w-[260px] lg:shrink-0 min-w-0 grid gap-3">
               <ScoreBoard turns={turns} playing={phase === 'play'} round={`${round}/${setup.rounds}`} roundLabel={t('pb.roundWord')} />
               {/* Held power-ups, right under the scores (teacher, 2026-10-31). */}
-              <div className="hidden lg:block">{tray}</div>
+              {/* One tray on every screen size, so a power-up card never opens twice. */}
+              {tray}
             </div>
           </div>
         </div>
