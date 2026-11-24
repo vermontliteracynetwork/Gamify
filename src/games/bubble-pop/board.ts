@@ -12,8 +12,11 @@ export const ROW_H = Math.sqrt(3);
 export const W = COLS * 2;
 export const DANGER_ROW = 11; // a bubble on this row sets off a rescue
 export const MAX_ROWS = 13;
-export const SHOOTER = { x: W / 2, y: (MAX_ROWS + 1.4) * ROW_H };
-export const H = SHOOTER.y + 2.2;
+// A tall board, 1000 x 1300 like its theme piece (approved mockup, owner
+// 2026-11-24): the bubbles packed at the top, the danger line, then open
+// sky to aim through, the shooter at the bottom.
+export const H = W * 1.3;
+export const SHOOTER = { x: W / 2, y: H - 3.2 };
 export const COLORS = 6;
 
 export type Cell = number | null;
@@ -42,7 +45,8 @@ export function emptyBoard(): Board {
 // Later boards add a color and a row.
 export function makeBoard(level: number, rng: Rng = Math.random): Board {
   const colors = Math.min(COLORS, 3 + level);
-  const rows = Math.min(7, 4 + level);
+  // Packed rows at the top from the start, like the approved mockup (2026-11-24).
+  const rows = Math.min(7, 6 + level);
   const b = emptyBoard();
   for (let r = 0; r < rows; r++) for (let c = 0; c < rowLen(b, r); c++) {
     const near = neighbors(b, r, c).map(([nr, nc]) => get(b, nr, nc)).filter((x): x is number => x !== null);

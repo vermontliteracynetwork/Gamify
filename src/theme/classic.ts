@@ -13,13 +13,16 @@ export function classicTheme(gameId: string): GameTheme {
   const show = gameId === 'game-show';
   // Pinball's Classic page is the table's own navy (teacher, 2026-11-13).
   const pin = gameId === 'pinball';
+  // Bubble Pop's Classic stage is the cream doodle scatter of the approved
+  // mockup (owner, 2026-11-24: /brand Game mockups, Bubble Pop).
+  const doodle = gameId === 'bubble-pop';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : pin ? '#25365f' : '#b4c4fb',
+      background: night ? '#22336e' : alley ? '#07070f' : show ? '#c8282f' : pin ? '#25365f' : doodle ? '#f6f0e4' : '#b4c4fb',
       backgroundText: night || alley || show || pin ? '#ffffff' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
@@ -29,7 +32,8 @@ export function classicTheme(gameId: string): GameTheme {
       miss: '#9b2c3a',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true } : { kind: 'color' },
+    backdrop: alley ? { kind: 'image', src: '/classic/bowling/carpet.svg', alt: 'A retro bowling alley carpet with neon shapes', tile: true }
+      : doodle ? { kind: 'image', src: '/classic/bubble-pop/doodle.svg', alt: 'Pastel doodle shapes on cream', tile: true } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the
