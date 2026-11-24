@@ -67,7 +67,8 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
   await finishSetup(page);
   expect(await page.locator('h1, h2').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
-  const bg = await page.getByRole('button', { name: /^Card 1(,|$)/ }).evaluate((el) => getComputedStyle(el).backgroundImage);
+  // The uploaded card back shows on the card face (inside the card since the studio redraw, batch 7).
+  const bg = await page.getByRole('button', { name: /^Card 1(,|$)/ }).evaluate((el) => [el, ...el.querySelectorAll('*')].map((e) => getComputedStyle(e).backgroundImage).find((b) => b.includes('url(')) ?? 'none');
   expect(bg).toContain('url(');
   await page.screenshot({ path: `test-results/builder-played-${info.project.name}.png` });
   expect(problems).toEqual([]);
@@ -149,7 +150,8 @@ test('Bowling: ten round ball pieces; a photo of a drawing is cut out; players p
   await page.getByRole('button', { name: /^Pick a team picture for / }).first().click();
   const balls = page.getByRole('group', { name: /^Pick a team picture for / }).locator('img');
   await expect(balls).toHaveCount(10);
-  expect(await balls.first().getAttribute('src')).toContain('/classic/bowling/ball-0.webp');
+  // Classic balls are drawn in code since the alley redraw (batch 7, 2026-11-24).
+  expect(await balls.first().getAttribute('src')).toContain('data:image/svg+xml');
   await page.screenshot({ path: `test-results/bowling-ball-icons-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });
