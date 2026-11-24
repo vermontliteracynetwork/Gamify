@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'openrouter-key', kind: 'money', added: '2026-11-24', title: 'Optional: add an OpenRouter API key in Vercel for the CEO Agent',
+    why: 'The CEO Agent is now in the Developer Portal (CEO Agent). Without a key it answers on free AI models, which are slower and weaker and can be busy. A key lets it use the stronger paid models; you pay OpenRouter per message (set to the "efficient" cost mode to keep it low).',
+    how: 'Make an account at openrouter.ai, create a key (set a monthly credit limit there), then in Vercel, Gamify project, Settings, Environment Variables: add OPENROUTER_API_KEY (Production and Preview) and redeploy. Never paste the key in a chat.' },
   { id: 'owner-email', kind: 'setup', added: '2026-11-23', title: 'Set VITE_OWNER_EMAIL in Vercel so only your account sees the Developer Portal',
     why: 'The red Developer Portal button now shows only for the owner account; nobody else sees it. It already works for the account marked as owner in Supabase; the email setting makes sure your email login counts too, without putting your email in the code.',
     how: 'Vercel, Gamify project, Settings, Environment Variables: add VITE_OWNER_EMAIL with your login email (Production and Preview), then redeploy.' },

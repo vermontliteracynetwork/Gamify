@@ -25,7 +25,9 @@ const BRAND_KIT = 'https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv';
 export const TEAM: TeamAgent[] = [
   {
     id: CEO_ID, name: 'CEO', role: 'Runs the whole team; every agent reports here', color: '#fdfd94',
-    status: 'planned', workingOn: ['Not built yet: you will create the CEO agent'], needsYou: [], reportsTo: '', updated: '2026-11-23',
+    status: 'working', reportsTo: '', updated: '2026-11-24',
+    workingOn: ['CEO Agent is live in the Developer Portal (CEO Agent): chat with it or ask a department with @marketing, @finance, @legal', 'Leads Finance, Operations, Technology, Marketing, People and Legal heads'],
+    needsYou: [{ text: 'Add OPENROUTER_API_KEY in Vercel for stronger answers (free models work until then)' }],
   },
   {
     id: 'design-chair', name: 'Design Chair', role: 'Brand, voice, Brand Kit, sound, templates, social media', file: '.claude/agents/design-chair.md', color: '#c58ce8',
@@ -47,6 +49,12 @@ export const TEAM: TeamAgent[] = [
       { text: 'Play the Game Lab games and say which go to main', link: '/lab' },
       { text: 'Confirm guesses: Snakes and Ladders without square numbers, Word Search clues only, A to Z keyboards' },
     ],
+  },
+  {
+    id: 'vermont-business-advisor', name: 'Vermont Business Advisor', role: 'Vermont LLC law, filings, taxes, student data rules and school buying', file: '.claude/agents/vermont-business-advisor.md', color: '#2e8b57',
+    status: 'working', updated: '2026-11-24', reportsTo: CEO_ID,
+    workingOn: ['Vermont reminders on the CEO Agent page: forming the LLC, trade name, EIN, myVTax and sales tax, annual report, student privacy, breach plan, hiring, school buying', 'In the CEO Agent chat: @vermont_business_advisor'],
+    needsYou: [{ text: 'Read the Vermont reminders and tell me which steps are already done', link: '/owner?s=ceo' }],
   },
   {
     id: 'qa-tester', name: 'QA Tester', role: 'Tests every screen on iPad and laptop sizes', file: '.claude/agents/qa-tester.md', color: '#6aa9e9',

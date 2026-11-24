@@ -50,6 +50,8 @@ line that fits, and add each new preference the same turn she says it.
 - Packs she uploads from itch.io come with commercial licenses (teacher, 2026-11-01: "all found on itch.io with commercial licensing"). Record them in the asset ledger as confirmed by her and use them; don't hold them in Waiting on you. Still ask for the license line when a pack needs credit (CC BY) or forbids something.
 
 ## Working style
+- CEO Agent (2026-11-24): the open-source CEO Agent (github.com/tradersurfer/ceo-agent) is built into the Developer Portal, not run as a separate site; setup answers predicted from Gamify (name Gamify CEO, all six departments, efficient cost mode).
+- Vermont Business Advisor (2026-11-24): Gamify will be a new Vermont LLC; a team member knows Vermont law, practices, tax and business rules and gives reminders and recommendations (`.claude/agents/vermont-business-advisor.md`, `src/owner/vermont.ts`, @vermont_business_advisor in the CEO Agent).
 - Keep the queue running; predict her answers from past decisions and log the guess.
 - Quiet build: no narration; short final report starting with Waiting on you.
 - Test in a real browser at every size before calling anything done; read console errors.
