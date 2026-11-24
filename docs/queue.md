@@ -38,7 +38,7 @@ plus the hand-off from the "Game recreations" session).
    redesign new." Use her uploaded cats, mice and room pieces as they are; only
    apply the Classic treatment (outline, palette, flat fill) to them. No newly
    drawn animals. Classic Art Director PASS before showing her.
-7. [ ] **Question Tracker revert.** "star question tracker still needs to be
+7. [x] **Question Tracker revert.** "star question tracker still needs to be
    reverted back to my old one." Find her favorite earlier version (git
    history; her note "this version of the question tracker is my favorite")
    and restore it.

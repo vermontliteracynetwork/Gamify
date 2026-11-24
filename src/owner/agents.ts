@@ -64,4 +64,17 @@ export const TEAM: TeamAgent[] = [
     id: 'sound-designer', name: 'Sound Designer', role: 'Sound plans for each game and theme', file: '.claude/agents/sound-designer.md', color: '#f39a6b',
     status: 'idle', updated: '2026-11-23', reportsTo: 'design-chair', workingOn: [], needsYou: [],
   },
+  {
+    id: 'classic-art-director', name: 'Classic Art Director', role: 'Passes or fails every Classic theme asset on screenshots', file: '.claude/agents/classic-art-director.md', color: '#b4c4fb',
+    status: 'waiting', updated: '2026-11-24', reportsTo: 'design-chair', workingOn: ['Territory: waiting for your uploaded cats and mice'], needsYou: [{ text: 'Upload the Territory cats and mice again (the pictures from your earlier chat are not in the project)' }],
+  },
+  {
+    id: 'marketing-director', name: 'Marketing Director', role: 'Leads marketing; every post and ad waits for your OK in Marketing', file: '.claude/agents/marketing-director.md', color: '#f4a6a6',
+    status: 'waiting', updated: '2026-11-24', reportsTo: CEO_ID, workingOn: ['December posts and two campaigns, drafted'], needsYou: [{ text: 'Review the posts waiting in Marketing', link: '/owner?s=marketing' }],
+  },
+  { id: 'brand-copywriter', name: 'Brand Copywriter', role: 'Captions, hooks, ad copy in one brand voice', file: '.claude/agents/brand-copywriter.md', color: '#fdfd94', status: 'idle', updated: '2026-11-24', reportsTo: 'marketing-director', workingOn: [], needsYou: [] },
+  { id: 'social-planner', name: 'Social Planner', role: 'Content calendar for Instagram, Facebook, Pinterest, TikTok', file: '.claude/agents/social-planner.md', color: '#a7e3c9', status: 'idle', updated: '2026-11-24', reportsTo: 'marketing-director', workingOn: [], needsYou: [] },
+  { id: 'ads-strategist', name: 'Ads Strategist', role: 'Google and Meta ads; proposes, you approve every dollar', file: '.claude/agents/ads-strategist.md', color: '#d6c8fb', status: 'idle', updated: '2026-11-24', reportsTo: 'marketing-director', workingOn: [], needsYou: [] },
+  { id: 'trend-researcher', name: 'Trend Researcher', role: 'Trends, licensed sounds and what works for other brands', file: '.claude/agents/trend-researcher.md', color: '#f7b39a', status: 'idle', updated: '2026-11-24', reportsTo: 'marketing-director', workingOn: ['First monthly trend check due 2026-12-01'], needsYou: [] },
+  { id: 'performance-analyst', name: 'Performance Analyst', role: 'Results, tests and every lesson learned', file: '.claude/agents/performance-analyst.md', color: '#b4c4fb', status: 'idle', updated: '2026-11-24', reportsTo: 'marketing-director', workingOn: [], needsYou: [] },
 ];

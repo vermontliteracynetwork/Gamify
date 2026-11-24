@@ -974,6 +974,7 @@ export const en = {
   'owner.kpiNewReports': 'New reports',
   'owner.kpiAnswersWeek': 'Answers this week',
   'owner.kpiPaying': 'Paying accounts',
+  'owner.kpiLaunch': 'Days to launch',
   'owner.chartLabel': '{title}: {n} in the last 26 weeks, {last} this week',
   'owner.ledger.date': 'Date',
   'owner.ledger.kind': 'In or out',

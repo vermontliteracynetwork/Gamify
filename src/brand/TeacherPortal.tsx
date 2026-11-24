@@ -829,12 +829,16 @@ function FirstRun() {
           <div className="flex items-center gap-3"><span className="text-[14px] font-semibold" style={{ color: Q }}>Want to see what reports look like first?</span><Btn><ChartBar weight="bold" size={18} />Open the example report</Btn></div>
         </Card>
         <div className="grid gap-4 content-start">
-          {[[ChartBar, 'Reports fill in after your first game', 'Every question your class answers shows up here: what they got, what they missed, and what to teach next.'], [Warning, 'Needs attention is empty', 'When a student is stuck or a question trips up the class, it shows here, privately.'], [StickerIcon, 'No stickers yet', 'Your class earns the first one, First game!, the first time they play.']].map(([Ic, t, d]) => {
+          {/* The empty states live on the home (teacher, 2026-11-24: "merge the empties
+              concept into the teacher dashboard/home"): each says what will fill it,
+              why it matters, and has its one next step. */}
+          {[[ChartBar, 'Reports fill in after your first game', 'Every question your class answers shows up here: what they got, what they missed, and what to teach next.', 'Create an Activity', PP.blueCrystal], [Warning, 'Needs attention is empty', 'When a student is stuck or a question trips up the class, it shows here, privately.', 'Add a class', PP.butter], [StickerIcon, 'No stickers yet', 'Your class earns the first one, First game!, the first time they play.', 'See the stickers', PP.blush]].map(([Ic, t, d, b, c]) => {
             const C = Ic as typeof House;
             return (
               <div key={t as string} className="rounded-[18px] p-5 grid justify-items-center text-center gap-2" style={{ border: `2.5px dashed ${Q}` }}>
-                <span className="w-12 h-12 rounded-full grid place-items-center" style={{ background: PP.paper, border: `2px solid ${I}` }}><C weight="bold" size={22} /></span>
+                <span className="w-12 h-12 rounded-full grid place-items-center" style={{ background: c as string, border: `2px solid ${I}` }}><C weight="bold" size={22} /></span>
                 <b className="text-[16px]">{t as string}</b><span className="text-[14px] font-semibold leading-snug" style={{ color: Q }}>{d as string}</span>
+                <Btn>{b as string}<ArrowRight weight="bold" size={16} /></Btn>
               </div>
             );
           })}
@@ -888,7 +892,7 @@ const VIEWS: { n: string; name: string; view: ReactNode; why: string; changed: s
   { n: '8', name: 'Achievements', view: <Achievements />,
     why: 'Stickers reward playing and trying, never scores, so every child can earn them and intrinsic motivation is protected (overjustification effect). A visible collection with how-to-earn captions gives a goal that builds (goal-gradient effect).',
     changed: 'New page, using the Starter collection: earned in full color, locked in gray with the how-to-earn caption in full-strength words, a progress bar and Show on the big screen.' },
-  { n: '9', name: 'First run and empty states', view: <FirstRun />,
+  { n: '9', name: 'Dashboard home: first day (empty states merged in)', view: <FirstRun />,
     why: 'Endowed progress (1 of 3 already done because the class is added) and one highlighted next step lower the start cost. Empty states explain what will appear and why, instead of a blank card (NN/g empty states, from memory).',
     changed: 'Today GetStarted is a checklist elsewhere. New: the first home is the checklist, the example report is one click away, and every empty card says what will fill it.' },
 ];

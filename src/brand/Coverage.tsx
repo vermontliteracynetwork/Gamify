@@ -105,7 +105,7 @@ const ROWS: Row[] = [
   { area: 'Teacher', screen: 'Achievements (new page)', route: 'new', where: [tp('8', 'Achievements'), { tab: 'stickers', view: 'Stickers' }] },
   { area: 'Teacher', screen: 'Theme Builder', route: '/teacher/themes, /teacher/themes/:gameId', where: [ms('themebuilder', 'Theme Builder')], added: true },
   { area: 'Teacher', screen: 'Account', route: '/teacher/account', where: [ms('account', 'Account')], added: true },
-  { area: 'Teacher', screen: 'Empty states', route: 'every list', where: [tp('9', 'First run'), ms('empty', 'Empty states')], added: true },
+  { area: 'Teacher', screen: 'Empty states', route: 'every list', where: [tp('9', 'Dashboard home: first day')], added: true },
   // ---------- Owner ----------
   { area: 'Owner', screen: 'Owner desktop (kept plain)', route: '/owner', where: [ms('owner', 'Developer view')], added: true },
   { area: 'Owner', screen: 'Owner Theme Builder', route: '/owner/themes', where: [ms('themebuilder', 'Theme Builder')], added: true },
@@ -123,8 +123,17 @@ const I = PP.ink;
 const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
 const CARD: CSSProperties = { background: PP.paper, border: `2px solid ${I}`, borderRadius: 18, boxShadow: `0 3px 0 ${I}` };
 
+// Her decisions so far (teacher, 2026-11-24, More screens and Public pages).
+// The rest stay Proposed until she says.
+const DECIDED: Record<string, Status> = Object.fromEntries([
+  ...['Settings panel (Accessibility inside)', 'Choice board', 'Eyes up here', 'Share mirror', 'Class check-in', 'Loading', 'Page not found', 'Something went wrong',
+    'Import a spreadsheet', 'Account', 'Theme Builder', 'Pick a game', 'Empty states', 'Owner desktop (kept plain)', 'Help Center and articles',
+    'Legal: Privacy, Terms, Accessibility, Student data, Credits', 'Purchase order', 'Permission slip', 'Theme guide', 'Device check', 'Home', 'Pricing'].map((k) => [k, 'Approved' as Status]),
+  ...['Features', 'Research'].map((k) => [k, 'Changes asked' as Status]),
+]);
+
 export default function Coverage({ onGo }: { onGo: (tab: BrandTab, anchor?: string) => void }) {
-  const [status, setStatus] = useState<Record<string, Status>>({});
+  const [status, setStatus] = useState<Record<string, Status>>(DECIDED);
   const shown = ROWS.filter((r) => r.where.length > 0).length;
   const before = ROWS.filter((r) => r.where.some((w) => w.tab !== 'more')).length;
   const counts = useMemo(() => ROWS.reduce((a, r) => { const s = status[r.screen] ?? 'Proposed'; a[s] += 1; return a; }, { Proposed: 0, Approved: 0, 'Changes asked': 0 } as Record<Status, number>), [status]);

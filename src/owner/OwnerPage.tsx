@@ -20,6 +20,10 @@ import { listCheckIns, listSurveys, recommendScore } from '../beta/surveys';
 import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
+import { TEAM } from './agents';
+
+// The public launch target (teacher, 2026-11-23: Monday 2026-11-30).
+const LAUNCH_DAY = '2026-11-30';
 import OwnerGate from './OwnerGate';
 import TeamCard from './TeamCard';
 import { GrowthChartCard } from './GrowthChart';
@@ -142,11 +146,15 @@ function Overview({ owner, go }: { owner: ReturnType<typeof useOwnerStats>; go: 
   const fresh = reports.filter((r) => (meta[r.id]?.status ?? 'new') === 'new');
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
   const paying = owner.stats ? PAID_TIERS.reduce((n, k) => n + (owner.stats!.tiers[k] ?? 0), 0) : null;
+  // The approved owner desktop (teacher, 2026-11-24: "add owner desktop to my
+  // developer view"): teachers, answers this week, paid plans, days to launch;
+  // Waiting on you with its count, and the agent team beside it.
+  const days = Math.max(0, Math.ceil((new Date(`${LAUNCH_DAY}T00:00:00`).getTime() - Date.now()) / 86400000));
   const kpis: { label: string; value: string | number; to: SectionId }[] = [
-    { label: t('owner.waiting'), value: open.length, to: 'waiting' },
-    { label: t('owner.kpiNewReports'), value: fresh.length, to: 'feedback' },
+    { label: t('owner.teacherCount'), value: owner.stats?.teachers ?? '–', to: 'subs' },
     { label: t('owner.kpiAnswersWeek'), value: log.filter((e) => e.at >= weekAgo).length, to: 'usage' },
     { label: t('owner.kpiPaying'), value: paying ?? '–', to: 'subs' },
+    { label: t('owner.kpiLaunch'), value: days, to: 'release' },
   ];
   return (
     <div className="dash-overview">
@@ -161,7 +169,7 @@ function Overview({ owner, go }: { owner: ReturnType<typeof useOwnerStats>; go: 
           <GrowthChartCard {...owner} height={chartH} />
         </section>
         <section className="dash-card" aria-labelledby="ov-wait">
-          <DashHead id="ov-wait" title={t('owner.waiting')} more={() => go('waiting')} />
+          <DashHead id="ov-wait" title={`${t('owner.waiting')} (${open.length})`} more={() => go('waiting')} />
           {open.length === 0 ? <p className="dash-empty">{t('owner.waitingNone')}</p> : (
             <ol className="dash-list">
               {open.slice(0, 4).map((w) => <li key={w.id}><span className="dash-dot" aria-hidden="true" />{w.title}</li>)}
@@ -169,18 +177,14 @@ function Overview({ owner, go }: { owner: ReturnType<typeof useOwnerStats>; go: 
           )}
           {open.length > 4 && <p className="dash-more-note">{t('owner.andMore', { count: open.length - 4 })}</p>}
         </section>
-        <section className="dash-card" aria-labelledby="ov-feed">
-          <DashHead id="ov-feed" title={t('owner.feedback')} more={() => go('feedback')} />
-          {reports.length === 0 ? <p className="dash-empty">{t('owner.noFeedback')}</p> : (
-            <ul className="dash-list">
-              {reports.slice(-3).reverse().map((r) => (
-                <li key={r.id} className="dash-report">
-                  <span className="dash-tag">{t(`owner.kind.${r.kind}`)}</span>
-                  <span>{r.details ? (r.details.length > 90 ? `${r.details.slice(0, 90)}…` : r.details) : t('owner.noDetails')}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+        <section className="dash-card" aria-labelledby="ov-team">
+          <DashHead id="ov-team" title={t('owner.team')} more={() => go('team')} />
+          <ul className="dash-list">
+            {TEAM.filter((m) => m.status !== 'planned').slice(0, 6).map((m) => (
+              <li key={m.id} className="dash-report"><span className="dash-tag">{m.name}</span><span>{m.needsYou[0]?.text ?? m.workingOn[0] ?? m.role}</span></li>
+            ))}
+          </ul>
+          {fresh.length > 0 && <button type="button" onClick={() => go('feedback')} className="dash-link self-start">{t('owner.kpiNewReports')}: {fresh.length}<ArrowRight size={14} aria-hidden="true" /></button>}
         </section>
       </div>
     </div>

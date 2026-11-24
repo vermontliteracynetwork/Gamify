@@ -256,29 +256,6 @@ function OwnerView() {
   );
 }
 
-// Empty states: say what will fill the space, why it matters, and the one next step.
-function EmptyView() {
-  const items: [ReactNode, string, string, string, string][] = [
-    [<Stack key="s" weight="bold" size={34} />, 'No question sets yet', 'Your sets show here. The same set works in every game.', 'Make a set', PP.mint],
-    [<ChartBar key="r" weight="bold" size={34} />, 'No reports yet', 'Play one game with your class and its report appears here the same day.', 'Create an Activity', PP.blueCrystal],
-    [<UsersThree key="u" weight="bold" size={34} />, 'No classes yet', 'Add a class list so students tap their name instead of typing.', 'Add a class', PP.butter],
-    [<MagnifyingGlass key="m" weight="bold" size={34} />, 'Nothing matches that search', 'Try fewer words, or clear the grade filter.', 'Clear filters', PP.blush],
-  ];
-  return (
-    <Shell active="sets" title="Empty states">
-      <div className="h-full grid grid-cols-2 gap-5">
-        {items.map(([ic, t, d, b, c], i) => (
-          <Card key={t} style={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-            <span className="relative grid place-items-center" style={{ width: 120, height: 120 }}><BlobPatch color={c} variant={i} size={120} /><span className="relative">{ic}</span></span>
-            <h3 className="m-0 mt-3 font-heading font-bold text-[20px]">{t}</h3>
-            <p className="m-0 mt-1 mb-4 max-w-[26rem] font-semibold leading-snug" style={{ color: Q }}>{d}</p>
-            <Btn main={i !== 3}><Plus weight="bold" size={16} />{b}</Btn>
-          </Card>
-        ))}
-      </div>
-    </Shell>
-  );
-}
 
 // ================= student screens (every device) =================
 function useK() {
@@ -475,16 +452,30 @@ function OopsView({ error }: { error?: boolean }) {
   );
 }
 
-// Class check-in (beta surveys): each student walks up and taps two pictures.
+// Class check-in (beta surveys): each student walks up and taps a face.
+// Smile emoji faces (teacher, 2026-11-24: "class check in (but updated with
+// smile emoji faces instead)"): round yellow faces drawn in code, big grin,
+// small smile, little frown.
+function EmojiFace({ mood, size }: { mood: 0 | 1 | 2; size: number }) {
+  const mouth = mood === 0 ? 'M30 58 Q50 80 70 58 Q50 70 30 58 Z' : mood === 1 ? 'M33 62 Q50 70 67 62' : 'M33 68 Q50 56 67 68';
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
+      <circle cx="50" cy="50" r="44" fill={PP.lemon} stroke={I} strokeWidth="5" />
+      <ellipse cx="36" cy="40" rx="5" ry="7" fill={I} /><ellipse cx="64" cy="40" rx="5" ry="7" fill={I} />
+      <path d={mouth} fill={mood === 0 ? I : 'none'} stroke={I} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      {mood === 0 && <><circle cx="26" cy="56" r="5" fill={PP.blush} /><circle cx="74" cy="56" r="5" fill={PP.blush} /></>}
+    </svg>
+  );
+}
 function CheckInView() {
   const { phone, px } = useK();
-  const opts: [PowerId, string, string][] = [['lightning', 'Loved it', PP.butter], ['shield', 'It was OK', PP.blueCrystal], ['slow-mo', 'Not for me', PP.blush]];
+  const opts: [0 | 1 | 2, string, string][] = [[0, 'Loved it', PP.butter], [1, 'It was OK', PP.blueCrystal], [2, 'Not for me', PP.blush]];
   const w = phone ? 104 : px(230);
   return (
     <Stu>
       <H>Was it fun?</H>
-      <div className="flex gap-3 justify-center">{opts.map(([id, l, c]) => <span key={l} className="grid justify-items-center gap-2 p-3" style={{ ...CARD, width: w, background: c }}><CrayonPowerUp id={id} size={phone ? 64 : px(130)} /><b style={{ fontSize: phone ? 15 : px(24) }}>{l}</b></span>)}</div>
-      <Txt size={20}>No names are kept. Only how many tapped each picture.</Txt>
+      <div className="flex gap-3 justify-center">{opts.map(([m, l, c]) => <span key={l} className="grid justify-items-center gap-2 p-3" style={{ ...CARD, width: w, background: c }}><EmojiFace mood={m} size={phone ? 64 : px(130)} /><b style={{ fontSize: phone ? 15 : px(24) }}>{l}</b></span>)}</div>
+      <Txt size={20}>No names are kept. Only how many tapped each face.</Txt>
     </Stu>
   );
 }
@@ -765,7 +756,6 @@ export const MORE: MoreScreen[] = [
   { id: 'account', area: 'Teacher', name: 'Account', kind: 'laptop', render: () => <AccountView />, why: 'Value first (what your class has done) before plan limits (framing); delete needs typed DELETE (a deliberate speed bump for an action that cannot be undone).' },
   { id: 'themebuilder', area: 'Teacher', name: 'Theme Builder', kind: 'laptop', render: () => <ThemeBuilderView />, why: 'Her layout rules: one bar on top, two columns of upload cards with the title only, color circles, and the real game preview big with page-turn arrows. Seeing the change live on the real game is direct manipulation (Shneiderman, from memory).' },
   { id: 'pick', area: 'Teacher', name: 'Pick a game', kind: 'laptop', render: () => <PickGameView />, why: 'Real covers carry the choice (picture superiority); the three way circles filter, no intro line (her rule 2026-11-06).' },
-  { id: 'empty', area: 'Teacher', name: 'Empty states', kind: 'laptop', render: () => <EmptyView />, why: 'Each says what will fill it, why it matters and the one next step, instead of a blank card (NN/g empty states, from memory).' },
   { id: 'owner', area: 'Owner', name: 'Owner desktop (Developer view)', kind: 'laptop', render: () => <OwnerView />, why: 'Kept plain on purpose (her rule 2026-11-13): grayscale with Grape accents, Waiting on you first, one screen, no sticker look. Real Waiting on you items.' },
   { id: 'help', area: 'Public', name: 'Help Center', kind: 'page', render: (w) => <HelpCenter w={w ?? 1440} />, why: 'One big search and a tile per topic, the help-guide pattern teachers already know (Jakob\'s law; her rule 2026-11-16).' },
   { id: 'helparticle', area: 'Public', name: 'Help article', kind: 'page', render: (w) => <HelpArticle w={w ?? 1440} />, why: 'Numbered steps, related articles, Was this helpful, Still need help (procedural chunking; her rule 2026-11-16).' },
