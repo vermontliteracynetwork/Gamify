@@ -243,7 +243,7 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
                 </div>
               ))}
             </div>
-            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}><Play weight="fill" size={32} />{go}</span>
+            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: '#fdfd94', color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
           </div>
         </div>
       </div>
