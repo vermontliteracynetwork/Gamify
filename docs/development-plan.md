@@ -397,3 +397,16 @@ production release.
   Bubble Pop centered with a round strip and shoot on click; Pinball and
   Cast and Catch hidden; Help Center rebuilt as topic tiles and article
   pages. Pinball description matches the new game.
+- 2026-11-24: Territory built (teacher's request): a Live-only invasion game.
+  Class screen is a code-drawn Classic living room (wallpaper, couch, lamp,
+  window, plant, rug, arched mouse hole in the baseboard); six cat looks and
+  brown, gray and white mice. Cooperative: mice come out at the teacher's pace
+  (slow default) and each right answer sends a cat to catch one (poof of
+  stars, no harm). Competitive: Cats and Mice teams split evenly in the lobby
+  (tap to swap); default rule, a right answer adds one of yours and sends one
+  of theirs away (teacher can pick add only or send only); the team with more
+  in the room wins and the room fills with its color. Theme pieces named
+  defender, invader, entrance, poof so an aliens and spaceships theme can
+  follow. Guess noted: kid-facing words stay Cooperative / Competitive (the
+  Live names); Territory is not on the free plan. Next: aliens theme, Solo
+  later if she wants it.

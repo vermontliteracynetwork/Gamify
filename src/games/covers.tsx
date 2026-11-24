@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { houseFor } from '../theme/house';
 import type { GameTheme } from '../theme/types';
+import { CatArt, MouseArt, PoofArt, RoomArt } from './territory/art';
 import { Hamburger, Cat, Dog, Fish, Rocket, Sun, Crown, Heart, IceCream, Pizza, Sparkle, Star, Trophy, type Icon } from '@phosphor-icons/react';
 
 // Cover art for each game, drawn in code (no bought art), so every game card
@@ -217,6 +218,16 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           })}
           <Heart weight="fill" className="absolute right-[6%] bottom-[8%] w-[14%] h-auto" color="#e5635f" />
         </div>
+      );
+    case 'territory':
+      // The living room (teacher, 2026-11-24): mice out of the mouse hole,
+      // cats on the rug, one mouse caught in a puff of stars.
+      return (
+        <RoomArt className={base}>
+          {([[30, 84, 0, 20], [48, 90, 3, 22], [16, 92, 5, 21]] as const).map(([x, y, k, h], i) => <CatArt key={i} look={k} className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${x}%`, top: `${y}%`, height: `${h}%`, width: 'auto' }} />)}
+          {([[72, 74, 0], [86, 84, 1], [62, 88, 2]] as const).map(([x, y, k], i) => <MouseArt key={i} look={k} className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${x}%`, top: `${y}%`, height: '9%', width: 'auto' }} />)}
+          <PoofArt className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: '60%', top: '70%', height: '18%', width: 'auto' }} />
+        </RoomArt>
       );
     case 'bubble-pop':
       // The Classic bubbles (Puzzle Games Graphics Pack, cleared 2026-10-31).

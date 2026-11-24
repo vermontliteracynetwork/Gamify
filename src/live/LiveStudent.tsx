@@ -10,6 +10,8 @@ import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 import { ranked, routeFor, starColor, type LiveState } from './protocol';
 import { setLive, useLiveRoom } from './session';
+import { SideBadge } from '../games/territory/art';
+import { lookFor } from '../games/territory/logic';
 
 // The student's waiting room for a live game: waiting to be let in, then
 // waiting for the start, then straight into the game.
@@ -36,6 +38,9 @@ export default function LiveLobby() {
         )}
         <h1 className="font-display text-3xl"><Title text={t(`live.${status}`)} /></h1>
         <p className="font-bold">{t(`live.${status}Text`)}</p>
+        {status === 'in' && state && me && state.gameId === 'territory' && state.mode === 'compete' && state.teams?.[me.pid] && (
+          <p className="flex items-center gap-3 font-display text-2xl uppercase"><SideBadge side={state.teams[me.pid]} look={lookFor(me.pid, state.teams[me.pid])} size="4rem" /><Title text={t(state.teams[me.pid] === 'defender' ? 'territory.youCat' : 'territory.youMouse')} /></p>
+        )}
         {status === 'in' && state && me && skyColor(state, me.pid) && (
           <p className="flex items-center gap-2 font-display text-2xl"><Star weight="fill" size={44} color={skyColor(state, me.pid)} className="drop-shadow-[0_0_1px_#000]" aria-hidden="true" />{t('live.yourColor')}</p>
         )}
@@ -71,7 +76,12 @@ export function LiveOverlay() {
         <div className={panel} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="font-display text-4xl"><Title text={t('live.endTitle')} /></h2>
           <p className="font-bold text-lg">{t(state.closedByTeacher ? 'live.closedByTeacher' : 'live.endedByTeacher')}</p>
-          {state.mode === 'together' ? (
+          {state.gameId === 'territory' ? (
+            <div className="grid gap-3 justify-items-center">
+              <p className="font-display text-2xl uppercase"><Title text={state.mode === 'together' ? t('territory.togetherDone', { n: state.room?.caught ?? 0 }) : t(`territory.won.${!state.room || state.room.defenders === state.room.invaders ? 'tie' : state.room.defenders > state.room.invaders ? 'defender' : 'invader'}`)} /></p>
+              {state.mode === 'compete' && <p className="flex items-center gap-3 font-display text-3xl"><SideBadge side="defender" size="3rem" />{state.room?.defenders ?? 0}<span className="px-2">·</span>{state.room?.invaders ?? 0}<SideBadge side="invader" look={1} size="3rem" /></p>}
+            </div>
+          ) : state.mode === 'together' ? (
             <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
           ) : <>
           <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
@@ -99,7 +109,11 @@ export function LiveOverlay() {
     const clock = left !== null && <span className={`inline-flex items-center gap-1 font-display tabular-nums ${left <= 60 ? 'text-danger' : ''}`}><Timer weight="bold" size={18} aria-hidden="true" />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>;
     return (
       <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 pointer-events-none" role="status" aria-live="polite">
-        {state.mode === 'together' ? (
+        {state.gameId === 'territory' ? (
+          <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-bold border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            {state.mode === 'together' ? t('territory.goal', { n: Math.min(state.room?.caught ?? 0, goal), goal }) : t('territory.score', { cats: state.room?.defenders ?? 0, mice: state.room?.invaders ?? 0 })}{clock}
+          </span>
+        ) : state.mode === 'together' ? (
           <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-bold border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>
             <span className="h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>

@@ -7,6 +7,7 @@ import { classicTheme } from '../classic';
 import type { ThemePieceSpec } from '../types';
 import { isRound } from './template';
 import { CLASSIC_ITEM_ART } from '../classicItems';
+import { CatArt, HoleArt, MouseArt, PoofArt, RoomArt } from '../../games/territory/art';
 
 // The Classic look of one theme piece as plain SVG shapes, at the piece's own
 // size. It is the example on the "Classic example" template pages and
@@ -24,6 +25,18 @@ export function ClassicPiece({ piece, gameId }: { piece: ThemePieceSpec; gameId:
   const round = isRound(piece);
   const icon = (I: typeof Star, color: string, size = m * 0.6) => <I weight="fill" color={color} size={size} x={(w - size) / 2} y={(h - size) / 2} />;
 
+  // Territory's Classic pieces are drawn by the game itself (teacher, 2026-11-24).
+  if (gameId === 'territory' && ['background', 'entrance', 'poof', 'cover'].concat(['defender', 'invader'].flatMap((k) => [1, 2, 3, 4, 5, 6].map((n) => `${k}-${n}`))).includes(id)) {
+    const k = Number(id.split('-')[1]) - 1;
+    return (
+      <foreignObject width={w} height={h}>
+        <div style={{ width: w, height: h, position: 'relative' }}>
+          {id === 'background' || id === 'cover' ? <RoomArt className="absolute inset-0" /> : id === 'entrance' ? <HoleArt className="w-full h-full" /> : id === 'poof' ? <PoofArt className="w-full h-full" />
+            : id.startsWith('defender') ? <CatArt look={k} className="w-full h-full" /> : <MouseArt look={k} className="w-full h-full" />}
+        </div>
+      </foreignObject>
+    );
+  }
   if (id === 'background') {
     const bg = classicTheme(gameId).colors.background;
     return (

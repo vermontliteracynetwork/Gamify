@@ -208,6 +208,7 @@ New games made for the turn-based modes (2 Show, 4 Versus):
 | Match Up, Group Sort | 1 3 |
 | Flashcards | 3 |
 | Spinner Wheel | 2 |
+| Territory (cats and mice invasion, rethemable; teacher 2026-11-24) | 1 (Live only: Cooperative or Competitive) |
 
 **DECIDE:** which three games ship first. Claudia's pick covers all four
 modes with the fewest games:
@@ -1183,6 +1184,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 105 | **Thirty-plus game styles, one question set.** One set plays as baseball, a sprint race, bingo, a word search, a snow friend word game, a survey show, a treasure quest, a toy factory, a claw machine, a pixel space shooter and more, each with goofy power-ups that have their own animation and sound. | Every quiz-game style a class loves, in one place, no rebuilding the set | Game Lab, 2026-11-22 |
 | 106 | **Sticker collections for teachers.** Collect-em-all Classic sticker sets for trying things (first game, five new themes, every game, Calm mode), a seasonal Winter set with clear dates, and an Achievement page to show the class what you earned together. Nothing is ever taken away for a missed day. | A friendly nudge to explore every feature, with no streak guilt | Teacher, 2026-11-23 |
 | 107 | **A sticker book for every student, no accounts.** Effort and growth stickers (kept going, new best, got it now, good listener) live on the teacher's device; interventionists link stickers to practice goals and print a progress page for a data folder or a family. | Motivation that rewards effort, not speed, and fits 1:1 and small group work | Design Chair, 2026-11-23 |
+| 108 | **Territory: cats and mice for the room.** A cozy living room on the big screen: little mice sneak out of the mouse hole, and every right answer on a student's own device sends a cat to catch one in a puff of stars. Play Cooperative (the class catches them all) or Competitive (Cats against Mice, the team with more in the room wins it). Nobody is ever hurt. Built to be rethemed (spaceships and aliens next). | A whole-class live game where the room visibly fills as the class answers; the teacher sets the pace | Teacher, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1259,3 +1261,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 - Same set, five games (2026-11-22): run one vocabulary set as a word search, then a word scramble, then a snow friend word game, then Letter Lock, and talk about which game made the words stick (spelling, meaning, letter patterns).
 - Survey Showdown as a discussion starter (2026-11-22): after each board, ask why the top answer is the top answer.
 - Class sticker goals (2026-11-23): show the Achievement page on the projector on Friday, talk about which stickers the class earned by trying hard (not by winning), and pick one locked sticker to work toward together next week.
+- Territory warm-up (2026-11-24): start a Cooperative round on slow while students settle in, count the cats and mice together before you end, then switch to Competitive Cats against Mice and talk about why a balanced team matters.

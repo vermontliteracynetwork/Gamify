@@ -27,6 +27,9 @@ import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
 import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
 import Sky from '../games/practice/Sky';
+import TerritoryStage from '../games/territory/Stage';
+import { SideBadge } from '../games/territory/art';
+import { balanceTeams, swapTeam } from '../games/territory/logic';
 import { ThemedPage, useGameTheme } from '../theme/useGameTheme';
 import { pieceImage } from '../theme/library';
 
@@ -61,6 +64,11 @@ function Room({ game }: { game: GameCode }) {
   // Question Tracker shows the class sky (teacher, 2026-10-26).
   const skyGame = game.gameId === 'star-quiz';
   const { theme: skyTheme } = useGameTheme('star-quiz');
+  // Territory's living room (teacher, 2026-11-24): its own class screen, the
+  // teacher's pace and Compete rule, and two teams in Compete.
+  const territory = game.gameId === 'territory';
+  const { theme: roomTheme } = useGameTheme('territory');
+  const startQ = new URLSearchParams(search);
   // The big-screen look (Theme Builder, Big screen); the teacher picks it here.
   const screen = useGameTheme('big-screen');
   const [message, setMessage] = useState('');
@@ -70,7 +78,7 @@ function Room({ game }: { game: GameCode }) {
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
-  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}) });
+  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}), ...(game.gameId === 'territory' ? { teams: {}, options: { pace: startQ.get('pace') ?? 'slow', rule: startQ.get('rule') ?? 'both' }, goal: startPlay.goal ?? 20 } : {}) });
   const link = useRef<LiveLink>();
   // Closing or leaving this page ends the game for everyone, and every
   // student is told and sent back to Join (teacher, 2026-11-06).
@@ -156,6 +164,13 @@ function Room({ game }: { game: GameCode }) {
     if (state.phase !== 'play' || state.mode === 'together') return;
     if ((state.endAt?.right && leaders[0]?.right >= state.endAt.right) || timeLeft === 0) end();
   }); // eslint-disable-line react-hooks/exhaustive-deps
+  // Territory Compete: everyone in gets a side, evenly, as they come in.
+  const inKey = inRoom.map((p) => p.pid).join('|');
+  useEffect(() => {
+    if (!territory) return;
+    const next = balanceTeams(inRoom.map((p) => p.pid), state.teams);
+    if (JSON.stringify(next) !== JSON.stringify(state.teams ?? {})) update((s) => ({ ...s, teams: next }));
+  }, [inKey]); // eslint-disable-line react-hooks/exhaustive-deps
   function end() {
     update((s) => ({ ...s, phase: 'ended', locks: {} }));
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, disableForReducedMotion: true });
@@ -217,6 +232,12 @@ function Room({ game }: { game: GameCode }) {
                     {editing === p.pid
                       ? <input autoFocus defaultValue={p.name} maxLength={24} aria-label={t('live.renameTo', { name: p.name })} onBlur={(e) => { setPlayer(p.pid, { name: e.target.value.trim() || p.name }); setEditing(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} className="flex-1 min-h-10 px-2 rounded-input border-std border-border font-bold" />
                       : <span className="flex-1 font-bold min-w-32">{p.name}</span>}
+                    {territory && state.mode === 'compete' && p.status === 'in' && state.teams?.[p.pid] && (
+                      <button type="button" onClick={() => update((s) => ({ ...s, teams: swapTeam(s.teams ?? {}, p.pid) }))} aria-label={t('territory.swap', { name: p.name })} data-tip={t('territory.swap', { name: p.name })}
+                        className="min-h-10 pl-1 pr-3 rounded-pill border-std border-border bg-surface font-bold text-sm inline-flex items-center gap-1.5">
+                        <SideBadge side={state.teams[p.pid]} size="2rem" />{t(state.teams[p.pid] === 'defender' ? 'territory.cats' : 'territory.mice')}
+                      </button>
+                    )}
                     {paid && p.status === 'in' && groups.length > 1 && (
                       <select value={assignOf(p.pid).group ?? 0} aria-label={t('live.groupFor', { name: p.name })} onChange={(e) => setAssign(p.pid, { group: Number(e.target.value) })} className="min-h-10 px-2 rounded-input border-std border-border font-bold bg-surface text-sm">
                         {groups.map((_, i) => <option key={i} value={i}>{t('live.groupN', { n: i + 1 })}</option>)}
@@ -243,8 +264,8 @@ function Room({ game }: { game: GameCode }) {
         // (or board) edge to edge, the goal small along the bottom, the
         // leaderboard in the top right, and the teacher's tools behind small
         // buttons, so nothing covers the stars.
-        <div className="fixed inset-x-0 bottom-0 top-16 z-30 overflow-hidden" style={skyGame ? undefined : { background: 'var(--stage-bg, var(--color-bg))' }}>
-          {skyGame ? (
+        <div className="fixed inset-x-0 bottom-0 top-16 z-30 overflow-hidden" style={skyGame || territory ? undefined : { background: 'var(--stage-bg, var(--color-bg))' }}>
+          {territory ? null : skyGame ? (
             <Sky theme={skyTheme} still={settings.motion === 'still'} height="100%" bleed bottomGap={14}
               hole={state.mode === 'together' ? null : { l: 74, t: 0, r: 100, b: 48 }}
               filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
@@ -331,7 +352,7 @@ function Room({ game }: { game: GameCode }) {
           )}
 
           {/* The goal, small and centered along the bottom. */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
+          {!territory && <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
             {state.mode === 'together' ? (
               <>
                 <p className="font-display text-lg">{t('live.goalText', { right: classRight, goal })}</p>
@@ -342,14 +363,28 @@ function Room({ game }: { game: GameCode }) {
             ) : (
               <p className="font-display text-lg">{state.endAt?.right ? t('live.firstTo', { n: state.endAt.right }) : t('live.lateCode', { code: game.code })}</p>
             )}
-          </div>
+          </div>}
         </div>
       )}
 
+      {territory && state.phase !== 'lobby' && (
+        <div className="fixed inset-x-0 bottom-0 top-16 z-[29] overflow-hidden">
+          <TerritoryStage theme={roomTheme} players={state.players} mode={state.mode === 'together' ? 'together' : 'compete'} teams={state.teams ?? {}}
+            pace={(state.options?.pace ?? 'slow') as 'slow' | 'normal' | 'fast'} rule={(state.options?.rule ?? 'both') as 'both' | 'add' | 'chase'} goal={goal} phase={state.phase}
+            onSummary={(room) => update((s) => ({ ...s, room }))} onGoal={end} />
+        </div>
+      )}
       {state.phase === 'ended' && (
-        <Panel className="grid gap-4 justify-items-center text-center">
-          <h2 className="font-display text-4xl"><Title text={state.mode === 'together' ? t('live.togetherTitle') : t('live.podium')} /></h2>
-          {state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
+        <div className={territory ? 'fixed inset-0 z-40 grid place-items-center p-4' : 'contents'}>
+        <Panel className={`grid gap-4 justify-items-center text-center ${territory ? 'w-[min(35rem,92vw)]' : ''}`}>
+          <h2 className="font-display text-4xl uppercase"><Title text={territory ? (state.mode === 'together' ? t('territory.togetherDone', { n: state.room?.caught ?? 0 }) : t(`territory.won.${!state.room || state.room.defenders === state.room.invaders ? 'tie' : state.room.defenders > state.room.invaders ? 'defender' : 'invader'}`)) : state.mode === 'together' ? t('live.togetherTitle') : t('live.podium')} /></h2>
+          {territory ? (
+            <div className="flex items-center justify-center gap-6">
+              {(['defender', 'invader'] as const).map((sd) => (
+                <span key={sd} className="grid justify-items-center gap-1"><SideBadge side={sd} look={sd === 'defender' ? 0 : 1} size="4.5rem" /><span className="font-display text-4xl tabular-nums">{sd === 'defender' ? state.room?.defenders ?? 0 : state.room?.invaders ?? 0}</span><span className="font-bold">{t(sd === 'defender' ? 'territory.cats' : 'territory.mice')}</span></span>
+              ))}
+            </div>
+          ) : state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
             {[1, 0, 2].map((i) => leaders.at(i) && (
               <motion.div key={leaders.at(i)!.pid} initial={reduce ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: reduce ? 0 : 0.2 + (2 - i) * 0.25 }} className="flex-1 grid gap-2 justify-items-center">
@@ -363,10 +398,11 @@ function Room({ game }: { game: GameCode }) {
           )}
           <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t('live.classTotal', { right: classRight, count: inRoom.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="primary" onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}>{t('live.again')}</Button>
+            <Button variant="primary" onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}>{t('live.again')}</Button>
             <Link to="/teacher/reports" className={buttonClasses('secondary')}>{t('live.reports')}</Link>
           </div>
         </Panel>
+        </div>
       )}
       {/* Lobby settings open in their own full view, so the projected lobby
           never scrolls (teacher, 2026-11-06). */}
@@ -415,6 +451,21 @@ function Room({ game }: { game: GameCode }) {
               <label className="flex flex-wrap items-center gap-2 font-bold">{t('live.goalLabel')}
                 <input type="number" min={5} max={999} value={goal} onChange={(e) => update((s) => ({ ...s, goal: Math.max(5, Math.min(999, Number(e.target.value) || 5)) }))} className="w-24 min-h-11 px-2 rounded-input border-std border-border font-bold" />
               </label>
+            )}
+            {territory && (
+              <div className="grid gap-3">
+                {([['pace', ['slow', 'normal', 'fast']], ...(state.mode === 'compete' ? [['rule', ['both', 'add', 'chase']]] : [])] as [string, string[]][]).map(([k, opts]) => (
+                  <div key={k} className="grid gap-1.5">
+                    <span className="font-bold">{t(`territory.${k}` as 'territory.pace')}</span>
+                    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t(`territory.${k}` as 'territory.pace')}>
+                      {opts.map((o) => {
+                        const on = (state.options?.[k] ?? opts[0]) === o;
+                        return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => update((s) => ({ ...s, options: { ...s.options, [k]: o } }))} className={`min-h-11 px-4 rounded-pill border-std font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`territory.${k}.${o}` as 'territory.pace.slow')}</button>;
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
             <h3 className="font-bold text-lg">{t('live.groups')}</h3>
             {!paid && <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('live.groupsPlan')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}

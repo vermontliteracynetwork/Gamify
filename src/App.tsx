@@ -34,6 +34,7 @@ const ActivityPage = lazyPage(() => import('./teacher/ActivityPage'));
 const SetEditorPage = lazyPage(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazyPage(() => import('./teacher/ImportPage'));
 const StarQuiz = lazyPage(() => import('./games/practice/StarQuiz'));
+const Territory = lazyPage(() => import('./games/territory/Territory'));
 const GameShow = lazyPage(() => import('./games/game-show/GameShow'));
 const MatchThree = lazyPage(() => import('./games/match-three/MatchThree'));
 const FourInARow = lazyPage(() => import('./games/four-in-a-row/FourInARow'));
@@ -156,6 +157,7 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
+          <Route path="/games/territory" element={<RequireSignIn><RequireGame id="territory"><Territory /></RequireGame></RequireSignIn>} />
           <Route path="/games/castle-quest" element={<RequireSignIn><RequireGame id="castle-quest"><CastleQuest /></RequireGame></RequireSignIn>} />
           <Route path="/games/pinball" element={<RequireSignIn><RequireGame id="pinball"><Pinball /></RequireGame></RequireSignIn>} />
           {/* Peg Drop became Pinball (teacher, 2026-10-31). */}
