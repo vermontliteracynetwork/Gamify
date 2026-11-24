@@ -7,6 +7,15 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'beta-bar', kind: 'decide', added: '2026-11-24', title: 'Beta: set the ready-to-launch bar and the open beta calls',
+    why: 'Your beta answers are in the Beta Test Plan tab of the dev plan doc. Still yours: the ready-to-launch numbers (question 4, proposed there), whether the teacher form runs after every game or a 1-minute tap form after each game plus a 5-minute form weekly, and the final Pro price behind the 20% offer.',
+    how: 'Open the dev plan doc, Beta Test Plan tab; change any number or line directly, or answer in chat.' },
+  { id: 'beta-invites', kind: 'people', added: '2026-11-24', title: 'Beta: send the invites (your teachers, the homeschool co-op, Facebook teacher groups)',
+    why: 'The beta is invite-first: teachers you know, one homeschool co-op free, and a post in Facebook teacher groups linking to the /beta application. The Facebook post goes through the marketing team and waits for your OK.',
+    how: 'Once the /beta page is updated to the new plan: send your personal invites, contact the co-op, and approve the Facebook group post in /owner, Marketing. Pick who gets in from the applications.' },
+  { id: 'beta-release-forms', kind: 'legal', added: '2026-11-24', title: 'Beta: attorney check of the photo release and the class-made themes clause',
+    why: 'Beta photos and videos (no faces) need a signed release, and the themes classes make in the beta may join the Gamify theme library (credited to the class, never a student name). Both need the right wording.',
+    how: 'Add both to the attorney list: the photo and video release, and the beta agreement line that lets Gamify add class-made themes to the library.' },
   { id: 'kapso-whatsapp', kind: 'setup', added: '2026-11-24', title: 'After the domain: make a Kapso account so you can text the CEO Agent on WhatsApp',
     why: 'You want your own WhatsApp line to the CEO Agent (developer use only, never teachers or students). Kapso connects to the official WhatsApp Business service. Its free plan is $0 a month with 2,000 messages (yours and its replies both count, so about 1,000 back-and-forths) and one number. Meta bills its own small fees to your Meta Business account for messages the agent starts (reminders), and may charge for replies too; check before relying on it.',
     how: 'After the domain is bought: sign up at kapso.ai (free plan), pick a Kapso number or connect your own, set up the Meta Business account it asks for, then tell Claude. Claude asks for the Kapso API key through a secure form (never paste it in chat), builds the owner-only WhatsApp link to the CEO Agent (it answers only your phone number) and the daily reminders. Check the live pricing at kapso.ai/pricing and Meta\'s WhatsApp pricing page first.' },
