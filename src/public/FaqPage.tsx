@@ -43,7 +43,6 @@ export default function FaqPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <header className={`${panel} p-6 sm:p-8 grid gap-3`}>
-          <p className="text-sm font-bold uppercase tracking-wider text-muted">{t('help.kicker')}</p>
           <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
           <p className="text-lg font-semibold max-w-3xl">{t('faq.sub')}</p>
           <label className="relative max-w-3xl">

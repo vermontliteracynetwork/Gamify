@@ -51,11 +51,11 @@ wrong, Import spreadsheet, Teacher account, New Theme Builder, Pick a game,
 Help Center ("LOVE the new help center"), Legal pages, Form, Theme guide,
 Device check (in Help).
 
-8. [ ] **Class check-in:** approved "but updated with smile emoji faces
+8. [x] **Class check-in:** approved "but updated with smile emoji faces
    instead". Swap the check-in faces for smile emoji faces.
-9. [ ] **Empty states:** "merge the empties concept into the teacher
+9. [x] **Empty states:** "merge the empties concept into the teacher
    dashboard/home".
-10. [ ] **Owner desktop:** "add owner desktop to my developer view". The
+10. [x] **Owner desktop:** "add owner desktop to my developer view". The
     owner-desktop mockup goes into the real developer dashboard (/owner).
 
 ## C. Public pages tab

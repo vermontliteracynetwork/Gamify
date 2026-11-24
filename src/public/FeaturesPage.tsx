@@ -57,7 +57,6 @@ export default function FeaturesPage() {
 
         <motion.section id="learning" {...enter} aria-labelledby="learning-title" className="grid lg:grid-cols-2 gap-6 items-center scroll-mt-24">
           <div className="grid gap-4">
-            <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.learning')}</p>
             <h2 id="learning-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.learn.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.learn.text')}</p>
             <Points prefix="features.learn" n={4} />
@@ -68,7 +67,6 @@ export default function FeaturesPage() {
         <motion.section id="themes" {...enter} aria-labelledby="themes-title" className={`${card} !bg-accent p-5 sm:p-8 grid lg:grid-cols-2 gap-6 items-center scroll-mt-24`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <ThemeDemo />
           <div className="grid gap-4">
-            <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.themes')}</p>
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
@@ -78,7 +76,6 @@ export default function FeaturesPage() {
         </motion.section>
 
         <motion.section id="play" {...enter} aria-labelledby="play-title" className="grid gap-5 scroll-mt-24">
-          <p className="font-bold uppercase tracking-wider text-sm">{t('features.p.play')}</p>
           <h2 id="play-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
           <p className="text-lg font-semibold max-w-3xl">{t('features.play.text')}</p>
           <ModesDemo />

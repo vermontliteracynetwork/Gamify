@@ -26,7 +26,6 @@ export default function BetaPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
         <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <p className="font-bold uppercase tracking-wider text-sm">{t('betaPage.kicker')}</p>
           <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><RocketLaunch weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={t('betaPage.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('betaPage.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">

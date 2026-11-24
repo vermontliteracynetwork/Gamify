@@ -104,7 +104,6 @@ export function HelpPage() {
     <>
       <main className="max-w-6xl mx-auto px-6 sm:px-10 pt-8 pb-16 grid gap-8">
         <section className={`${card} px-6 py-10 sm:py-14 grid gap-4 justify-items-center text-center`}>
-          <p className="text-xs font-bold uppercase tracking-wider text-muted">{t('help.kicker')}</p>
           <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
           <label className="relative w-full max-w-2xl">
             <MagnifyingGlass weight="bold" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />

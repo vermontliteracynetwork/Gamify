@@ -128,7 +128,7 @@ const CARD: CSSProperties = { background: PP.paper, border: `2px solid ${I}`, bo
 const DECIDED: Record<string, Status> = Object.fromEntries([
   ...['Settings panel (Accessibility inside)', 'Choice board', 'Eyes up here', 'Share mirror', 'Class check-in', 'Loading', 'Page not found', 'Something went wrong',
     'Import a spreadsheet', 'Account', 'Theme Builder', 'Pick a game', 'Empty states', 'Owner desktop (kept plain)', 'Help Center and articles',
-    'Legal: Privacy, Terms, Accessibility, Student data, Credits', 'Purchase order', 'Permission slip', 'Theme guide', 'Device check', 'Home', 'Pricing'].map((k) => [k, 'Approved' as Status]),
+    'Legal: Privacy, Terms, Accessibility, Student data, Credits', 'Purchase order', 'Permission slip', 'Theme guide', 'Device check', 'Home', 'Pricing', 'Themes gallery'].map((k) => [k, 'Approved' as Status]),
   ...['Features', 'Research'].map((k) => [k, 'Changes asked' as Status]),
 ]);
 

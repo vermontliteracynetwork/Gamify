@@ -653,8 +653,8 @@ function InfoPage({ w }: { w: number }) {
   return (
     <Pub w={w}>
       <div className="grid gap-5 max-w-[860px] mx-auto">
-        <h1 style={pH1(w)}>Questions teachers ask</h1>
-        <p className={`m-0 font-semibold leading-snug ${pBody(w)}`}>Short answers first. Tap a question for the details.</p>
+        <h1 style={pH1(w)}>Quick Answers</h1>
+        <p className={`m-0 font-semibold leading-snug ${pBody(w)}`}>Short answers first. Tap one for the details, or <span className="underline font-bold">search the Help Center</span>.</p>
         {qs.map((q, i) => (
           <div key={q} className="p-5 grid gap-2" style={CARD}>
             <div className="flex items-center gap-3"><b className={`flex-1 font-heading ${w < 600 ? 'text-[18px]' : 'text-[21px]'}`}>{q}</b><CaretDown weight="bold" size={20} style={{ transform: i === 0 ? 'rotate(180deg)' : undefined }} /></div>

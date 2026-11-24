@@ -18,7 +18,6 @@ export default function ChallengePage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <p className="font-bold uppercase tracking-wider text-sm">{t('challenge.kicker')}</p>
           <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><Trophy weight="fill" size={52} color="#c98a00" aria-hidden="true" className="wiggle-on-hover shrink-0 hidden sm:block" /><Title text={t('challenge.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('challenge.sub')}</p>
           <div className="flex flex-wrap gap-3">

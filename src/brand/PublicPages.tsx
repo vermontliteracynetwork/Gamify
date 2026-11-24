@@ -52,6 +52,16 @@ function P({ children, w, big }: W & { children: ReactNode; big?: boolean }) {
 function Section({ children, w, tight }: W & { children: ReactNode; tight?: boolean }) {
   return <section className="grid gap-6" style={{ padding: `${tight ? 24 : isPhone(w) ? 40 : 64}px ${pad(w)}px 0` }}>{children}</section>;
 }
+// Page title (teacher, 2026-11-24): the title says exactly what the page is,
+// left aligned with its subtext under it; never a pill, kicker or extra header
+// above it ("its an AI tell").
+function PageHead({ w, title, sub, children }: W & { title: string; sub?: string; children?: ReactNode }) {
+  return <div className="grid gap-4 justify-items-start text-left"><H1 w={w}>{title}</H1>{sub && <P w={w} big>{sub}</P>}{children}</div>;
+}
+// A plain in-site link (teacher, 2026-11-24: "add lots of buttons and links to other pages").
+function SiteLink({ children }: { children: ReactNode }) {
+  return <span className="font-bold text-[17px] inline-flex items-center gap-1.5 underline underline-offset-4">{children}<ArrowRight weight="bold" size={16} /></span>;
+}
 function IconDot({ children, bg }: { children: ReactNode; bg: string }) {
   return <span className="w-12 h-12 shrink-0 rounded-full grid place-items-center" style={{ background: bg, border: `2.5px solid ${I}` }}>{children}</span>;
 }
@@ -306,13 +316,10 @@ function Features({ w }: W) {
   return (
     <Page w={w} on="Features">
       <Section w={w}>
-        <div className="grid gap-4 justify-items-center text-center">
-          <span className="font-bold uppercase tracking-wider text-[15px]">Features</span>
-          <H1 w={w}>What You Can Get Done</H1>
-          <P w={w} big>Your questions become real practice, your class designs how the games look, and the games fit any way you teach.</P>
-          <Go w={w} wide={ph}><ChalkboardTeacher weight="bold" size={22} />Start free</Go>
+        <PageHead w={w} title="Features" sub="Your questions become real practice, your class designs how the games look, and the games fit any way you teach.">
+          <div className={`flex gap-4 items-center ${ph ? 'flex-col items-start' : ''}`}><Go w={w} wide={ph}><ChalkboardTeacher weight="bold" size={22} />Start free</Go><SiteLink>See plans and pricing</SiteLink><SiteLink>How to play every game</SiteLink></div>
           <span className="font-bold" style={{ fontSize: ph ? 16 : 17, color: PP.quiet }}>Free forever for one class of 30. No card needed.</span>
-        </div>
+        </PageHead>
         {/* the four jobs at a glance: four chunks, each a jump link */}
         <div className={`grid gap-4 ${ph ? 'grid-cols-2' : 'grid-cols-4'}`}>
           {JOBS.map((j) => { const Ic = j.icon; return (
@@ -326,8 +333,7 @@ function Features({ w }: W) {
         <Section key={j.id} w={w}>
           <div className={`grid gap-8 items-center ${ph ? '' : flip ? 'grid-cols-[600px_1fr]' : 'grid-cols-[1fr_600px]'}`} style={{ ...CARD, padding: ph ? 24 : 40 }}>
             <div className={`grid gap-4 content-start ${flip ? 'order-2' : ''}`}>
-              <span className="flex items-center gap-3"><IconDot bg={j.bg}><Ic weight="bold" size={24} /></IconDot><b className="uppercase tracking-wider text-[15px]">{j.tag}</b></span>
-              <H2 w={w}>{j.h}</H2>
+              <span className="flex items-center gap-3"><IconDot bg={j.bg}><Ic weight="bold" size={24} /></IconDot><H2 w={w}>{j.h}</H2></span>
               <P w={w} big>{j.t}</P>
               <Checks w={w} items={j.points} />
             </div>
@@ -397,14 +403,10 @@ function Pricing({ w }: W) {
   return (
     <Page w={w} on="Pricing">
       <Section w={w}>
-        <div className="grid gap-4 justify-items-center text-center">
-          <span className="font-bold uppercase tracking-wider text-[15px]">Plans and pricing</span>
-          <H1 w={w}>Start Free. Grow When Your Class Does.</H1>
-          <P w={w} big>Every plan turns your questions into games your class asks for. Unlock every game and your class&apos;s own designs whenever you are ready.</P>
-        </div>
+        <PageHead w={w} title="Plans and Pricing" sub="Start free and grow when your class does. Every plan turns your questions into games your class asks for; unlock every game and your class's own designs whenever you are ready." />
         {/* risk reversal, before the numbers */}
-        <div className={`flex gap-3 justify-center ${ph ? 'flex-col' : 'flex-wrap'}`}>{['No card needed to start', 'Cancel any time', 'Nothing is ever deleted', 'Accessibility free on every plan'].map((x) => <span key={x} className="inline-flex items-center justify-center gap-2 rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 48, background: '#fff', border: `2.5px solid ${I}` }}><ShieldCheck weight="bold" size={18} />{x}</span>)}</div>
-        <span className="text-center font-semibold" style={{ fontSize: ph ? 16 : 17 }}>Paid plans bill once a year, so there is no monthly charge to track. Prices are shown per month.</span>
+        <div className={`flex gap-3 justify-start ${ph ? 'flex-col' : 'flex-wrap'}`}>{['No card needed to start', 'Cancel any time', 'Nothing is ever deleted', 'Accessibility free on every plan'].map((x) => <span key={x} className="inline-flex items-center justify-center gap-2 rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 48, background: '#fff', border: `2.5px solid ${I}` }}><ShieldCheck weight="bold" size={18} />{x}</span>)}</div>
+        <span className="text-left font-semibold" style={{ fontSize: ph ? 16 : 17 }}>Paid plans bill once a year, so there is no monthly charge to track. Prices are shown per month.</span>
         <div className={`grid gap-5 ${ph ? '' : 'grid-cols-3 items-end'}`}>
           {PLANS.map((p) => (
             <div key={p.id} className="grid gap-4 content-start relative" style={{ ...CARD, padding: p.best ? (ph ? 24 : 30) : 24, background: p.best ? PP.butter : PP.paper, border: `${p.best ? 4 : 3}px solid ${I}`, boxShadow: `0 ${p.best ? 8 : 5}px 0 ${I}`, marginTop: p.best && !ph ? 0 : undefined }}>
@@ -424,7 +426,7 @@ function Pricing({ w }: W) {
         </div>
         <span className="text-center font-bold text-[17px]">Homeschooling? The Homeschool plan has every game for up to 10 students.</span>
       </Section>
-      {/* compare: the six rows teachers ask about, the rest one tap away */}
+      {/* compare: the six most useful rows, the rest one tap away */}
       <Section w={w}>
         <H2 w={w} center>Compare Plans</H2>
         <div className="overflow-hidden" style={{ ...CARD, borderRadius: 22 }}>
@@ -459,7 +461,7 @@ function Pricing({ w }: W) {
         </div>
       </Section>
       <Section w={w}>
-        <H2 w={w} center>Questions Teachers Ask</H2>
+        <div className="flex flex-wrap items-end justify-between gap-3"><H2 w={w}>Good to Know</H2><SiteLink>More answers in the Help Center</SiteLink></div>
         <div className={`grid gap-4 items-start ${ph ? '' : 'grid-cols-2'}`}>
           {FAQ.map(([q, a]) => <div key={q} className="grid gap-2 p-5" style={{ ...CARD, borderRadius: 22 }}><H3 w={w}>{q}</H3><P w={w}>{a}</P></div>)}
         </div>
@@ -470,23 +472,54 @@ function Pricing({ w }: W) {
 }
 
 // ================= Research =================
+// Not approved yet (teacher, 2026-11-24): "needs serious updates to make it look
+// more professional research focus, whilke simply highlighting why it works.
+// collapsable text. list views." A plain research brief: a short summary of why
+// it works, then a numbered list of findings; each row shows the finding in
+// one line and opens to the evidence, the honest limits, how Gamify uses it
+// and the full citations with links.
 function Research({ w }: W) {
   const ph = isPhone(w);
+  const why = ['Every move is a practice question, and practice questions help students remember.', 'Game structure (goals, quick feedback, small wins) keeps students practicing longer.', 'Right answers power the game, so the learning is the fun part, not a break from it.'];
   return (
     <Page w={w} on="Research">
-      <Section w={w}><div className="grid gap-4 justify-items-center text-center"><H1 w={w}>Research</H1><P w={w} big>What studies found about practice questions and gamified learning, with the honest caveats. These are not studies of Gamify itself.</P></div></Section>
-      <Section w={w} tight>
-        <div className={`grid gap-5 ${ph ? '' : 'grid-cols-2'}`}>
-          {FINDINGS.slice(0, 4).map((f, i) => (
-            <article key={f.id} className="grid gap-3 p-6 content-start" style={CARD}>
-              <span className="flex items-center gap-3"><IconDot bg={[PP.butter, PP.blush, PP.aqua, PP.lavender][i % 4]}><BookOpen weight="bold" size={24} /></IconDot><H3 w={w}>{f.title}</H3></span>
-              <div className="grid gap-1"><b className="text-[16px]">Studies found</b><P w={w}>{f.found}</P></div>
-              <div className="grid gap-1 rounded-[16px] p-3" style={{ background: PP.cream }}><b className="text-[16px]">To be fair</b><P w={w}>{f.fair}</P></div>
-              <div className="grid gap-1"><b className="text-[16px]">In Gamify</b><P w={w}>{f.inGamify}</P></div>
-              <span className="font-semibold text-[15px]" style={{ color: PP.quiet }}>{f.sources[0].cite}</span>
-            </article>
-          ))}
+      <Section w={w}>
+        <PageHead w={w} title="Research" sub="Why Gamify works, from published studies of practice questions and gamified learning. These are not studies of Gamify itself." />
+        <div className={`grid gap-6 ${ph ? '' : 'grid-cols-[1.1fr_1fr]'}`}>
+          <div className="grid gap-3 p-6 content-start" style={CARD}>
+            <H3 w={w}>Why It Works, in Short</H3>
+            <ol className="m-0 pl-6 grid gap-2 list-decimal font-semibold" style={{ fontSize: ph ? 17 : 19 }}>{why.map((x) => <li key={x}>{x}</li>)}</ol>
+          </div>
+          <div className="grid gap-2 p-6 content-start" style={{ ...CARD, background: PP.cream }}>
+            <H3 w={w}>How to Read This Page</H3>
+            <P w={w}>Each finding says what the studies found, where the evidence is limited, and how Gamify uses it. Open a finding to see the sources.</P>
+            <div className="flex flex-wrap gap-4 pt-1"><SiteLink>Features</SiteLink><SiteLink>Student data promise</SiteLink></div>
+          </div>
         </div>
+      </Section>
+      <Section w={w} tight>
+        <ol className="m-0 p-0 list-none grid" style={{ ...CARD, borderRadius: 22, overflow: 'hidden' }}>
+          {FINDINGS.map((f, i) => {
+            const open = i === 0;
+            return (
+              <li key={f.id} style={{ borderTop: i ? `2px solid ${I}` : undefined }}>
+                <div className="flex items-center gap-4" style={{ padding: ph ? '16px 18px' : '20px 28px', background: open ? PP.cream : undefined }}>
+                  <span className="w-10 h-10 shrink-0 rounded-full grid place-items-center tabular-nums" style={{ ...GY, fontSize: 20, background: PP.paper, border: `2.5px solid ${I}` }}><GText>{i + 1}</GText></span>
+                  <span className="grid gap-0.5 flex-1 min-w-0"><b className="font-heading leading-snug" style={{ fontSize: ph ? 18 : 21 }}>{f.title}</b>{!ph && <span className="font-semibold text-[15px]" style={{ color: PP.quiet }}>{f.sources.length} {f.sources.length === 1 ? 'source' : 'sources'}</span>}</span>
+                  <span aria-hidden="true" className="w-10 h-10 shrink-0 rounded-full grid place-items-center font-bold text-xl" style={{ border: `2.5px solid ${I}`, background: '#fff' }}>{open ? '–' : '+'}</span>
+                </div>
+                {open && (
+                  <div className={`grid gap-4 ${ph ? '' : 'grid-cols-3'}`} style={{ padding: ph ? '0 18px 18px' : '0 28px 24px', background: PP.cream }}>
+                    <div className="grid gap-1 content-start"><b className="text-[16px]">What studies found</b><P w={w}>{f.found}</P></div>
+                    <div className="grid gap-1 content-start"><b className="text-[16px]">Limits</b><P w={w}>{f.fair}</P></div>
+                    <div className="grid gap-1 content-start"><b className="text-[16px]">In Gamify</b><P w={w}>{f.inGamify}</P></div>
+                    <ul className={`m-0 pl-5 grid gap-1 ${ph ? '' : 'col-span-3'}`}>{f.sources.map((src) => <li key={src.url} className="font-semibold text-[15px]" style={{ color: PP.quiet }}>{src.cite} <span className="underline">{src.url.replace('https://', '')}</span></li>)}</ul>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
       </Section>
     </Page>
   );
@@ -498,8 +531,8 @@ function Blog({ w }: W) {
   const ph = isPhone(w);
   return (
     <Page w={w} on="Blog">
-      <Section w={w}><div className="grid gap-4 justify-items-center text-center"><H1 w={w}>Blog</H1><P w={w} big>Ideas for game day, theme guides and how to play every game.</P></div>
-        <div className={`flex gap-2.5 justify-center ${ph ? 'flex-wrap' : ''}`}>{['All', 'Classroom ideas', 'Themes', 'How to play', 'Homeschool'].map((x, i) => <span key={x} className="inline-flex items-center rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 46, background: i === 0 ? PP.butter : '#fff', border: `2.5px solid ${I}` }}>{x}</span>)}</div>
+      <Section w={w}><PageHead w={w} title="Blog" sub="Ideas for game day, theme guides and how to play every game." />
+        <div className={`flex gap-2.5 justify-start ${ph ? 'flex-wrap' : ''}`}>{['All', 'Classroom ideas', 'Themes', 'How to play', 'Homeschool'].map((x, i) => <span key={x} className="inline-flex items-center rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 46, background: i === 0 ? PP.butter : '#fff', border: `2.5px solid ${I}` }}>{x}</span>)}</div>
       </Section>
       <Section w={w} tight>
         <div className={`grid gap-5 ${ph ? '' : 'grid-cols-3'}`}>
@@ -541,9 +574,9 @@ function Themes({ w }: W) {
   const ph = isPhone(w);
   return (
     <Page w={w} on="Themes">
-      <Section w={w}><div className="grid gap-4 justify-items-center text-center"><H1 w={w}>Themes</H1><P w={w} big>Looks for every game, designed by classes and teachers. Heart the ones you love, then offer them to your students when you assign a set.</P></div>
+      <Section w={w}><PageHead w={w} title="Themes" sub="Looks for every game, designed by classes and teachers. Heart the ones you love, then offer them to your students when you assign a set."><div className="flex flex-wrap gap-4"><SiteLink>Make your own in the Theme Builder</SiteLink><SiteLink>Theme guides</SiteLink></div></PageHead>
         <div className="grid gap-4 p-6" style={{ ...CARD, background: PP.butter }}><H3 w={w}>Your class could be featured here</H3><P w={w}>The Theme Building Challenge winner gets this spot, seen by every teacher.</P></div>
-        <div className={`flex gap-2.5 ${ph ? 'flex-wrap' : 'justify-center'}`}>{['Game: All games', 'Ages: All ages', 'Sort: Trending'].map((x) => <span key={x} className="inline-flex items-center rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 46, background: '#fff', border: `2.5px solid ${I}` }}>{x} ▾</span>)}</div>
+        <div className="flex flex-wrap gap-2.5 justify-start">{['Game: All games', 'Ages: All ages', 'Sort: Trending'].map((x) => <span key={x} className="inline-flex items-center rounded-full px-5 font-bold text-[17px]" style={{ minHeight: 46, background: '#fff', border: `2.5px solid ${I}` }}>{x} ▾</span>)}</div>
       </Section>
       <Section w={w} tight>
         <div className={`grid gap-5 ${ph ? '' : 'grid-cols-3'}`}>
