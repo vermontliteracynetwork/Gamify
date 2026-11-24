@@ -67,7 +67,7 @@ test('owner dashboard shows growth tips from the numbers', async ({ page }) => {
 
 test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboard', async ({ page }) => {
   await page.goto('/teacher/classes');
-  await page.getByRole('button', { name: 'Tell Gamify about a problem or an idea' }).click();
+  await page.getByRole('button', { name: 'Report a problem, idea or request' }).first().click();
   await page.getByRole('radio', { name: 'I need help' }).click();
   await page.getByLabel('Tell us more (you can skip this)').fill('How do I print the theme template?');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
