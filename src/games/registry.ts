@@ -27,7 +27,8 @@ export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, cas
 // Lunch Rush and Farm Grow are kept but not listed for now (teacher, 2026-10-31).
 // Pinball and Cast and Catch are hidden too (teacher, 2026-11-16): all their
 // logic stays, they are just off the main site for now.
-export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'lunch-rush', 'farm-grow', 'pinball', 'cast-catch'];
+// Territory waits too (2026-11-24) until its art passes the Classic Art Director.
+export const LATER_GAMES = ['memory-match', 'match-up', 'road-hop', 'flashcards', 'lunch-rush', 'farm-grow', 'pinball', 'cast-catch', 'territory'];
 export const GAMES: GameManifest[] = ALL_GAMES.filter((g) => !LATER_GAMES.includes(g.id));
 
 export function getGame(id: string): GameManifest | undefined {
