@@ -246,7 +246,7 @@ function StageColorPicker({ gameId }: { gameId: string }) {
   const swatch = (c: string | null, label: string) => (
     <button key={label} type="button" role="radio" aria-checked={(color ?? null) === c} aria-label={label} data-tip={label} onClick={() => setStageColor(gameId, c)}
       className={`w-11 h-11 rounded-full border-bold border-border flex items-center justify-center font-bold text-xs ${(color ?? null) === c ? 'ring-4 ring-accent' : ''}`}
-      style={c ? { background: c } : { background: 'linear-gradient(135deg, #fbfcf8 50%, #b4c4fb 50%)' }}>{c ? '' : 'A'}</button>
+      style={c ? { background: c } : { background: 'linear-gradient(135deg, #fbfcf8 50%, #ddd6ff 50%)' }}>{c ? '' : 'A'}</button>
   );
   return (
     <div className="grid gap-2">
@@ -257,7 +257,7 @@ function StageColorPicker({ gameId }: { gameId: string }) {
         {STAGE_SWATCHES.map((c) => swatch(c, c))}
         <label className="w-11 h-11 rounded-full border-bold border-border overflow-hidden relative cursor-pointer" data-tip={t('settings.stageColorCustom')} style={{ background: 'conic-gradient(#ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)' }}>
           <span className="sr-only">{t('settings.stageColorCustom')}</span>
-          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={color ?? '#b4c4fb'} onChange={(e) => setStageColor(gameId, e.target.value)} />
+          <input type="color" className="absolute inset-0 opacity-0 cursor-pointer" value={color ?? '#ddd6ff'} onChange={(e) => setStageColor(gameId, e.target.value)} />
         </label>
       </div>
     </div>

@@ -14,7 +14,7 @@ import { saveCheckIn } from './surveys';
 type Tally = [number, number, number];
 const QUESTIONS: { key: 'feel' | 'level'; icons: Icon[]; colors: string[] }[] = [
   { key: 'feel', icons: [Smiley, SmileyMeh, SmileySad], colors: ['#ddfcc6', '#fdfd94', '#ed9d75'] },
-  { key: 'level', icons: [Feather, Target, Mountains], colors: ['#b4c4fb', '#ddfcc6', '#ed9d75'] },
+  { key: 'level', icons: [Feather, Target, Mountains], colors: ['#ddd6ff', '#ddfcc6', '#ed9d75'] },
 ];
 
 // A class check-in the teacher runs on one screen (development plan, beta

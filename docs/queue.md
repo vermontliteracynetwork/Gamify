@@ -99,3 +99,34 @@ Approved: Home.
 
 On hold until her explicit approval: Game Lab games, hidden games.
 Dropped: OmniRoute (her call, 2026-11-24).
+
+## F. Live-site rebuild to the approved /brand design (owner, 2026-11-24)
+
+Her words: "make sure all the pages i approved push to main, replacing old
+pages as relevaant. make sure the new design pushes to main with all new
+components, unviersal pages, colors, etc." and "all of the new components in
+the brand look amazing. lets push them to main". Each batch: build on the
+preview branch, check every device size in a browser, run the tests, then push
+to main (approved). The Game Lab and Territory stay off main.
+
+24. [x] **Batch 1, colors and type:** the New direction palette (Grape and
+    Lavender main purple, Sky and Blue crystal, the bright and pastel pairs,
+    Nature tones, Ink #1d1a33, Paper, Cream) as the site tokens; Grow Year
+    titles in capitals with the logo G; ink edges and press shades.
+25. [ ] **Batch 2, universal game components:** top strip and meter, tool
+    buttons (Hint, Settings, Full screen, Close), scoreboard rows, power-up
+    cards, results box with stickers, pause, hint card.
+26. [ ] **Batch 3, universal views:** welcome (with the portrait and phone
+    order), how will you play, share a join code, question set picker,
+    options, teams and players, power-up setup, how the class plays, question
+    screen, settings panel, loading, page not found, something went wrong.
+27. [ ] **Batch 4, student screens:** join, name pick, lobby, choice board,
+    eyes up here, share mirror, class check-in (smile faces).
+28. [ ] **Batch 5, approved public pages:** Home, Plans and Pricing, Help
+    Center and articles, legal pages, forms, theme guide, device check,
+    Themes; Features and Research once their fixes are approved.
+29. [ ] **Batch 6, teacher pages:** dashboard home with the first-day empty
+    states, Pick a game, Import a spreadsheet, Account, Theme Builder.
+30. [ ] **Batch 7, game boards:** each live game's in-play screen matched to
+    its approved mockup (Board Game, Match Three, Bubble Pop, Bowling, Game
+    Show, Four in a Row, Question Tracker).

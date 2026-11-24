@@ -20,7 +20,7 @@ export function RoundMeter({ round, label, className = '' }: { round: string; la
       {label && <p className="text-xs font-bold uppercase tracking-wider text-muted mt-1">{label}</p>}
       {part !== null && (
         <div className="mx-4 mt-2 mb-3 h-3 rounded-pill border-std border-border bg-surface-2 overflow-hidden" aria-hidden="true">
-          <motion.span className="block h-full rounded-pill" style={{ background: 'linear-gradient(90deg, #b4c4fb, #8fe3a0)' }} initial={false} animate={{ width: `${part * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
+          <motion.span className="block h-full rounded-pill" style={{ background: 'linear-gradient(90deg, #ddd6ff, #8fe3a0)' }} initial={false} animate={{ width: `${part * 100}%` }} transition={{ duration: still ? 0 : 0.5 }} />
         </div>
       )}
     </div>

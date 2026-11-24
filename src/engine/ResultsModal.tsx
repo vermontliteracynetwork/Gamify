@@ -23,7 +23,7 @@ import DialogFocus from '../ui/DialogFocus';
 // Since 2026-10-31 it sits behind the Rate game button.
 const FEEL = [Smiley, SmileyMeh, SmileySad];
 const LEVEL = [Feather, Target, Mountains];
-const COLORS = [['#ddfcc6', '#fdfd94', '#ed9d75'], ['#b4c4fb', '#ddfcc6', '#ed9d75']];
+const COLORS = [['#ddfcc6', '#fdfd94', '#ed9d75'], ['#ddd6ff', '#ddfcc6', '#ed9d75']];
 function GameReview({ onDone }: { onDone: () => void }) {
   const [feel, setFeel] = useState<number | null>(null);
   const [done, setDone] = useState(false);
