@@ -1,0 +1,6 @@
+{
+  "name": "ceo-agent-vendored",
+  "private": true,
+  "type": "commonjs",
+  "description": "CEO Agent engine (github.com/tradersurfer/ceo-agent, MIT), vendored for the Gamify owner dashboard"
+}
