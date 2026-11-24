@@ -42,14 +42,13 @@ function Svg({ box, children, className, style, label }: { box: string; children
 }
 
 // ---- Cats (defenders): six original looks ---------------------------------
-export const CAT_LOOKS = ['Orange tabby', 'Black cat', 'Gray cat', 'Calico', 'White with spots', 'Point cat'] as const;
+// Three defenders and three invaders, each drawn on a square 1:1 piece
+// (teacher, 2026-11-24).
+export const CAT_LOOKS = ['Orange tabby', 'Black cat', 'Gray cat'] as const;
 const CAT = [
   { body: P.orange, ear: P.peach, eye: INK },
   { body: FUR.black, ear: P.blush, eye: P.lemon },
   { body: FUR.gray, ear: P.blush, eye: INK },
-  { body: P.paper, ear: P.blush, eye: INK },
-  { body: P.paper, ear: P.blush, eye: INK },
-  { body: P.cream, ear: FUR.point, eye: P.sky },
 ];
 // A sitting cat seen from the front, 100 x 100, feet on y = 96.
 export function CatArt({ look = 0, className, style, label }: { look?: number; className?: string; style?: CSSProperties; label?: string }) {
@@ -96,11 +95,11 @@ export function CatArt({ look = 0, className, style, label }: { look?: number; c
 // ---- Mice (invaders): brown, gray and white -------------------------------
 export const MOUSE_LOOKS = ['Brown mouse', 'Gray mouse', 'White mouse'] as const;
 const MOUSE = [FUR.brown, FUR.gray, P.paper];
-// A little mouse in side view, facing left, 100 x 70, feet on y = 66.
+// A little mouse in side view, facing left, on a square 100 x 100 piece, feet near the bottom.
 export function MouseArt({ look = 0, className, style, label }: { look?: number; className?: string; style?: CSSProperties; label?: string }) {
   const body = MOUSE[look % MOUSE.length];
   return (
-    <Svg box="0 0 100 70" className={className} style={style} label={label}>
+    <Svg box="-2 -28 104 104" className={className} style={style} label={label}>
       <path d="M72 52 C86 54 92 44 96 34" fill="none" strokeWidth="3.4" stroke={P.pink} />
       <path d="M72 52 C86 54 92 44 96 34" fill="none" strokeWidth="1" stroke={INK} opacity="0.5" />
       <path d="M14 50 C14 34 30 24 50 24 C68 24 80 36 78 50 C77 60 68 64 50 64 L24 64 C17 64 14 58 14 50 Z" fill={body} strokeWidth="3.8" />

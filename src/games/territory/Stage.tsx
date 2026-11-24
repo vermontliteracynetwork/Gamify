@@ -6,6 +6,7 @@ import { playClip } from '../../engine/music';
 import { useGameMusic } from '../../engine/music';
 import type { GameTheme } from '../../theme/types';
 import { pieceImage } from '../../theme/library';
+import { pieceFor } from './looks';
 import type { LivePlayer } from '../../live/protocol';
 import Title from '../../ui/Title';
 import { CatArt, INK, MouseArt, PoofArt, RoomArt, SIDE_COLOR, SIDE_PASTEL, SideBadge } from './art';
@@ -204,7 +205,7 @@ function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; 
   const [x, y] = SPOTS[piece.spot];
   const cat = piece.side === 'defender';
   const h = size(piece);
-  const img = pieceImage(theme, `${piece.side}-${piece.look + 1}`);
+  const { img } = pieceFor(theme, piece.side, piece.look);
   const art = img ? <img src={img} alt="" className="w-full h-full object-contain" draggable="false" />
     : cat ? <CatArt look={piece.look} className="w-full h-full" /> : <MouseArt look={piece.look} className="w-full h-full" />;
   const [ex, ey] = cat ? [-6, y] : ENTRANCE;
@@ -238,7 +239,7 @@ function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; 
   }, [still, leave?.at, chase?.id, fresh]); // eslint-disable-line react-hooks/exhaustive-deps
   const moving = !still && !gentle && (chase || fresh || (leave && cat));
   return (
-    <motion.div className="absolute" style={{ height: `${h}%`, aspectRatio: cat ? '1' : '100 / 70', x: '-50%', y: '-100%', zIndex: Math.round(y) }}
+    <motion.div className="absolute" style={{ height: `${h}%`, aspectRatio: '1', x: '-50%', y: '-100%', zIndex: Math.round(y) }}
       initial={fresh && !still ? { left: pct(ex), top: pct(ey), opacity: 0, scale: cat ? 1 : 0.6 } : fresh ? { left: pct(x), top: pct(y), opacity: 0 } : false} animate={anim} transition={trans}>
       <motion.div className="w-full h-full" style={{ scaleX: face }} animate={moving ? { y: [0, -6, 0] } : { y: 0 }} transition={moving ? { duration: 0.42, repeat: 5, ease: 'easeInOut', delay: fresh && !cat ? 1 : 0 } : { duration: 0.2 }}>
         {art}

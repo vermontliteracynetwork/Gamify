@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Cat, DeviceTablet, Question } from '@phosphor-icons/react';
@@ -26,6 +27,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import { useSavedSetup } from '../useSavedSetup';
 import { CatArt, INK, MouseArt, RoomArt, SIDE_PASTEL } from './art';
+import { pieceFor } from './looks';
 import { lookFor, type CompeteRule, type Pace, type Side } from './logic';
 import { territoryManifest } from './manifest';
 import { SOUNDS } from './Stage';
@@ -58,7 +60,7 @@ function TeacherSetup() {
   return (
     <ThemedPage theme={theme} menu>
       <main className="w-full px-4 sm:px-6 pt-6 pb-6">
-        <GameTopRow onSettings={() => setSettingsOpen(true)} />
+        <GameTopRow hint="territory" onSettings={() => setSettingsOpen(true)} />
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="territory" />
         {phase === 'welcome' && (
           <GameWelcome game={territoryManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -129,7 +131,7 @@ function StudentPlay() {
 
   const rightText = mode === 'together' ? t('territory.rightTogether') : rule === 'add' ? t('territory.rightAdd') : side === 'defender' ? t('territory.rightCat') : t('territory.rightMouse');
   const Art = ({ className }: { className: string }) => {
-    const img = pieceImage(theme, `${side}-${look + 1}`);
+    const { img } = pieceFor(theme, side, look);
     if (img) return <img src={img} alt="" className={`${className} object-contain`} />;
     return side === 'defender' ? <CatArt look={look} className={className} /> : <MouseArt look={look} className={className} />;
   };
@@ -142,7 +144,7 @@ function StudentPlay() {
           <h1 className="sr-only"><Title text={territoryManifest.name} /></h1>
           <RoomArt background={pieceImage(theme, 'background')} entrance={pieceImage(theme, 'entrance')} className="absolute inset-0" />
           {/* A: who I am, on which team, and how the room stands */}
-          <div className="absolute top-3 left-3 right-[10.5rem] flex justify-start">
+          <div className="absolute top-3 left-3 right-[13.5rem] flex justify-start">
             <div className="flex items-center gap-3 pl-1.5 pr-4 py-1.5 rounded-pill border-[3px] border-[#1d1a33] max-w-full" style={{ background: SIDE_PASTEL[side], boxShadow: `0 4px 0 ${INK}` }}>
               <span className="w-12 h-12 shrink-0 rounded-full bg-[#fffaf0] border-[2.5px] border-[#1d1a33] grid place-items-center"><Art className="w-[80%] h-[80%]" /></span>
               <span className="grid leading-tight min-w-0">
@@ -154,6 +156,7 @@ function StudentPlay() {
           <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
             <AccessButton small />
+            <HintButton gameId="territory" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           {stopped && !asking && !reward && state?.phase === 'play' && (

@@ -84,7 +84,7 @@ export function add(r: Room, side: Side, now: number, rand = Math.random, look?:
   const free = SPOTS.map((_, i) => i).filter((i) => !used.has(i));
   const pool = free.length ? free : SPOTS.map((_, i) => i);
   const spot = pool[Math.floor(rand() * pool.length) % pool.length];
-  const looks = side === 'defender' ? 6 : 3;
+  const looks = 3; // three defenders, three invaders (teacher, 2026-11-24)
   const piece: Piece = { id: r.nextId, side, look: look ?? Math.floor(rand() * looks) % looks, spot, born: now };
   return { ...r, pieces: [...r.pieces, piece], nextId: r.nextId + 1, lastSpawn: side === 'invader' ? now : r.lastSpawn };
 }
@@ -171,10 +171,10 @@ export function balanceTeams(pids: string[], teams: Record<string, Side> = {}): 
 export const swapTeam = (teams: Record<string, Side>, pid: string): Record<string, Side> => ({ ...teams, [pid]: other(teams[pid] ?? 'invader') });
 
 // Each student's own animal look (stays the same all game).
-export function lookFor(pid: string, side: Side): number {
+export function lookFor(pid: string, _side?: Side): number {
   let h = 0;
   for (const c of pid) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % (side === 'defender' ? 6 : 3);
+  return h % 3;
 }
 
 // New right answers since the last look, per student (the host watches each
