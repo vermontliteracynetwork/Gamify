@@ -29,7 +29,8 @@ const ITEM_PIECES = ['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6']
 // and beside it each get a jittered grid, shuffled with a fixed seed so the
 // layout stays put. Sizes vary a lot, from small to big.
 export interface Hole { l: number; t: number; r: number; b: number } // % of the sky
-export interface SkySpot { x: number; y: number; size: number; spin: number; unit: string }
+// `uw`, `uh`: the spot's cell in % of the sky's width and height (its `unit`).
+export interface SkySpot { x: number; y: number; size: number; spin: number; unit: string; uw: number; uh: number }
 const DEFAULT_HOLE: Hole = { l: 15, t: 22, r: 85, b: 68 };
 
 export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HOLE, aspect = 0.7, skipTop = false): SkySpot[] {
@@ -64,11 +65,29 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
         size: Math.min(size, 0.9 / (Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180)))),
         spin,
         unit,
+        uw: w / cols,
+        uh: ht / rows,
       },
     }); });
   });
   // Mix the strips so items appear all around in turn.
   return out.sort((x, y) => x.order - y.order).map((o) => o.spot);
+}
+
+// Spots clear of some smaller boxes too (the class screen's join code): a
+// few more spots are laid out and those that would touch a box are dropped,
+// so every star stays in view (batch 7, 2026-11-24).
+export function clearSpots(count: number, make: (n: number) => SkySpot[], keepOut: Hole[], aspect: number): SkySpot[] {
+  const hits = (p: SkySpot) => {
+    const hx = Math.min(p.uw, p.uh / aspect) * p.size * 0.6, hy = Math.min(p.uw * aspect, p.uh) * p.size * 0.6;
+    return keepOut.some((k) => p.x + hx > k.l && p.x - hx < k.r && p.y + hy > k.t && p.y - hy < k.b);
+  };
+  const step = Math.max(1, Math.ceil(count * 0.05));
+  for (let n = count; n <= count * 3 + 6; n += step) {
+    const ok = make(n).filter((p) => !hits(p));
+    if (ok.length >= count) return ok.slice(0, count);
+  }
+  return make(count);
 }
 
 // Watches where the question box (or results box) sits over the sky. The
@@ -109,7 +128,7 @@ function useHole(ref: React.RefObject<HTMLDivElement | null>) {
 // `hole` overrides the measured question box (the live big screen keeps a
 // corner free for its leaderboard); `bottomGap` keeps a strip at the bottom
 // (in % of the height) free for the goal bar (teacher, 2026-11-06).
-export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, fx, hole: holeProp, bottomGap = 0 }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; fx?: (StarFx | undefined)[]; hole?: Hole | null; bottomGap?: number }) {
+export default function Sky({ theme, filled, total, still, label, colors, height = 'calc(100dvh - 11.875rem + var(--chrome-save, 0rem))', bleed = false, seed = 7, fx, hole: holeProp, bottomGap = 0, keepOut }: { theme: GameTheme; filled: number; total: number; still: boolean; label: string; colors?: string[]; height?: string; bleed?: boolean; seed?: number; fx?: (StarFx | undefined)[]; hole?: Hole | null; bottomGap?: number; keepOut?: Hole[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const measured = useHole(ref);
   const aspect = measured.aspect;
@@ -117,9 +136,13 @@ export default function Sky({ theme, filled, total, still, label, colors, height
   // A room theme: pets stand on the floor, below the wall, upright and evenly
   // sized; nothing hangs on the wall above the question box.
   const room = theme.room;
-  const spots = room
+  const keepKey = JSON.stringify([hole, keepOut ?? []]);
+  const spots = useMemo(() => room
     ? skySpots(total, seed, { l: hole?.l ?? 50, r: hole?.r ?? 50, t: room.floor, b: Math.max(hole?.b ?? 0, room.floor + 4) }, aspect, true).map((p) => ({ ...p, spin: 0, size: 0.6 + (p.size - 0.2) * 0.4 }))
-    : skySpots(total, seed, hole, aspect).map((p) => (bottomGap ? { ...p, y: p.y * (100 - bottomGap) / 100 } : p));
+    : (() => {
+      const make = (n: number) => skySpots(n, seed, hole, aspect).map((p) => (bottomGap ? { ...p, y: p.y * (100 - bottomGap) / 100 } : p));
+      return keepOut?.length ? clearSpots(total, make, keepOut, aspect) : make(total);
+    })(), [room, total, seed, keepKey, aspect, bottomGap]); // eslint-disable-line react-hooks/exhaustive-deps
   // Items a theme leaves empty keep the Classic look (the teacher's stars).
   const own = theme.itemImages?.length ? theme.itemImages : ITEM_PIECES.map((id) => pieceImage(theme, id)).filter(Boolean) as string[];
   const items = own.length ? own : ITEM_PIECES.map((id) => pieceImage(classicTheme(theme.gameId), id)).filter(Boolean) as string[];
