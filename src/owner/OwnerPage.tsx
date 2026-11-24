@@ -320,7 +320,7 @@ function UsageCard() {
         {byGame.map(({ g, n }) => (
           <li key={g.id} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-2 text-sm font-bold">
             <span className="truncate">{g.name}</span>
-            <span className="h-3 rounded-pill bg-surface-2 border border-border overflow-hidden"><span className="block h-full" style={{ width: `${(n / max) * 100}%`, background: '#b4c4fb' }} /></span>
+            <span className="h-3 rounded-pill bg-surface-2 border border-border overflow-hidden"><span className="block h-full" style={{ width: `${(n / max) * 100}%`, background: '#ddd6ff' }} /></span>
             <span className="tabular-nums text-right">{n}</span>
           </li>
         ))}

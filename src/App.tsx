@@ -221,6 +221,7 @@ function AnimatedRoutes() {
 
 // Fixed, pointer-events-none decorative layer -- a soft purple marble/swirl
 // texture behind the whole app, matching the "sticker" style mockups.
+// New direction palette (teacher, 2026-11-24): the Lavender ground.
 // Procedural (SVG feTurbulence displacement of layered blobs), not
 // hand-authored path data, per the no-hand-rolled-decorative-SVG rule.
 // Fixed positioning means it never repaints as the page scrolls.
@@ -231,11 +232,11 @@ const SWIRL_SVG = encodeURIComponent(`
     <feDisplacementMap in="SourceGraphic" in2="noise" scale="140" xChannelSelector="R" yChannelSelector="G" />
   </filter>
   <g filter="url(#marble)">
-    <rect width="800" height="800" fill="#b4c4fb" />
-    <circle cx="150" cy="150" r="180" fill="#c8d4fc" />
-    <circle cx="650" cy="220" r="220" fill="#a3b6f7" />
-    <circle cx="300" cy="600" r="240" fill="#c8d4fc" />
-    <circle cx="700" cy="700" r="180" fill="#a3b6f7" />
+    <rect width="800" height="800" fill="#ddd6ff" />
+    <circle cx="150" cy="150" r="180" fill="#eae5ff" />
+    <circle cx="650" cy="220" r="220" fill="#c9bffb" />
+    <circle cx="300" cy="600" r="240" fill="#eae5ff" />
+    <circle cx="700" cy="700" r="180" fill="#c9bffb" />
   </g>
 </svg>
 `);

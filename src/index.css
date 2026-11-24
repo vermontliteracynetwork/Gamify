@@ -29,32 +29,36 @@
   /* Wider page column (teacher, 2026-11-19: "main column ... too small"). */
   --container-6xl: 84rem;
   --container-7xl: 92rem;
-  --color-bg: #b4c4fb;
-  --color-bg-elevated: #9fb2f5;
-  --color-surface: #fbfcf8;
-  --color-surface-2: #e9eefe;
-  --color-surface-hover: #f2f5ff;
-  --color-border: #000000;
-  --color-border-soft: #cdd7fb;
+  /* New direction palette (teacher, 2026-11-24); see the :root block below. */
+  --color-bg: #ddd6ff;
+  --color-bg-elevated: #c9bffb;
+  --color-surface: #fffaf0;
+  --color-surface-2: #f1edff;
+  --color-surface-hover: #f7f4ff;
+  --color-border: #1d1a33;
+  --color-border-soft: #d6cff0;
 
-  --color-text: #000000;
-  --color-muted: #314677;
-  --color-faint: #7383ad;
+  --color-text: #1d1a33;
+  --color-muted: #57506e;
+  --color-faint: #7d7696;
 
   --color-accent: #fdfd94;
   --color-accent-hover: #ffffb8;
-  --color-accent-ink: #000000;
+  --color-accent-ink: #1d1a33;
 
-  --color-secondary: #ed9d75;
-  --color-secondary-hover: #f4b291;
+  --color-secondary: #ffd9b3;
+  --color-secondary-hover: #ffe6cc;
 
-  --color-success: #9fe7a0;
-  --color-danger: #e5635f;
+  --color-success: #22b04a;
+  --color-danger: #f055a5;
 
-  --color-quiz-yellow: #fdfd94;
-  --color-quiz-green: #ddfcc6;
-  --color-quiz-blue: #b4c4fb;
-  --color-quiz-orange: #ed9d75;
+  --color-grape: #6a45f0;
+  --color-lavender: #ddd6ff;
+
+  --color-quiz-yellow: #fff1b8;
+  --color-quiz-green: #c8f0dc;
+  --color-quiz-blue: #bfdff3;
+  --color-quiz-orange: #ffd9b3;
   /* Named 2026-11-18 (design system audit): colors that were hand-typed. */
   --color-ink-night: #241c3d;
   --color-gold: #f6c544;
@@ -91,37 +95,63 @@
   and --stroke below, applied via the .sticker utility class.
 */
 :root {
-  --bg: #b4c4fb;
-  --bg-elevated: #9fb2f5;
-  --surface: #fbfcf8;
-  --surface-2: #e9eefe;
-  --surface-hover: #f2f5ff;
-  --border: #000000;
-  --border-soft: #cdd7fb;
+  /* The New direction palette (teacher, 2026-11-24: "make sure the new design
+     pushes to main with all new components, unviersal pages, colors"): Grape
+     and Lavender replace the Gamify purples; Ink and Paper; every bright has
+     its pastel (src/brand/PaletteProposal.tsx is the reference). */
+  --bg: #ddd6ff;
+  --bg-elevated: #c9bffb;
+  --surface: #fffaf0;
+  --surface-2: #f1edff;
+  --surface-hover: #f7f4ff;
+  --border: #1d1a33;
+  --border-soft: #d6cff0;
 
-  --text: #000000;
-  --text-muted: #314677;
-  --text-faint: #7383ad;
+  --text: #1d1a33;
+  --text-muted: #57506e;
+  --text-faint: #7d7696;
 
   --accent: #fdfd94;
   --accent-hover: #ffffb8;
-  --accent-ink: #000000;
+  --accent-ink: #1d1a33;
 
-  --secondary: #ed9d75;
-  --secondary-hover: #f4b291;
+  --secondary: #ffd9b3;
+  --secondary-hover: #ffe6cc;
 
-  --success: #9fe7a0;
-  --danger: #e5635f;
+  --success: #22b04a;
+  --danger: #f055a5;
 
-  /* Chart series (src/ui/chart): brand colors in an order that stays
-     distinct side by side. Every mark also gets the black sticker outline,
-     so color is never the only cue. */
-  --chart-1: #7f8fe0;
-  --chart-2: #3f9e6a;
-  --chart-3: #ed9d75;
-  --chart-4: #314677;
-  --chart-5: #e5635f;
-  --chart-6: #fdfd94;
+  /* Chart series (src/ui/chart): the palette brights in an order that stays
+     distinct side by side; every mark keeps its ink outline. */
+  --chart-1: #6a45f0;
+  --chart-2: #22b04a;
+  --chart-3: #ff9b28;
+  --chart-4: #4ba3e8;
+  --chart-5: #f055a5;
+  --chart-6: #fabe37;
+
+  /* Brand names, for parts that need a named color. */
+  --grape: #6a45f0;
+  --grape-deep: #4b2fc9;
+  --lavender: #ddd6ff;
+  --sky: #4ba3e8;
+  --blue-crystal: #bfdff3;
+  --pink-punch: #f055a5;
+  --blush: #ffd3e6;
+  --lemon: #fabe37;
+  --butter: #fff1b8;
+  --orange-paloma: #ff9b28;
+  --peach: #ffd9b3;
+  --kelly: #22b04a;
+  --mint: #c8f0dc;
+  --teal: #1fb5a8;
+  --aqua: #c9f1ee;
+  --cream: #f6f0e4;
+  --paper: #fffaf0;
+  --ink: #1d1a33;
+  --wood: #c47a45;
+  --mouse-brown: #c9ac90;
+  --nature-gray: #aaa6bb;
 
   --radius-panel: 26px;
   --radius-pill: 999px;
@@ -313,7 +343,7 @@ html:has(.game-stage) {
 }
 html[data-comfort="on"] body { letter-spacing: 0.04em; word-spacing: 0.12em; line-height: 1.75; }
 html[data-contrast="high"] {
-  --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #e4eafe;
+  --color-text: #000000; --color-muted: #1c1730; --color-border-soft: #1c1730; --color-bg: #ebe7ff;
   --text: #000000; --text-muted: #1c1730; --border-soft: #1c1730;
 }
 html[data-dim="on"] body { filter: brightness(0.85); }
@@ -584,7 +614,7 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 @keyframes cq-spin-slow { to { transform: rotate(360deg); } }
 
 
-.game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f4f5ff 0%, #e6e9ff 60%, #dde1ff 100%); }
+.game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f7f4ff 0%, #ebe6ff 60%, #ddd6ff 100%); }
 /* Each setting sits on its own white card with a soft lift (teacher, 2026-11-13: dimension, professional). */
 .brand-menu .setup-item { background: var(--surface); border: 2.5px solid #000; border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 #000, 0 16px 30px rgba(36, 28, 61, 0.10); }
 .brand-menu > main { position: relative; padding-top: 1.5rem !important; }
@@ -668,7 +698,7 @@ html[data-motion="still"] .belt-move { animation: none; }
    grayscale with purple accents, one screen. Scoped tokens restyle every
    card inside it; the sticker look stays everywhere else. */
 .dev-dash {
-  --dash-purple: #6d28d9;
+  --dash-purple: #6a45f0;
   --dash-purple-soft: #ede9fe;
   --dash-line: #e4e4e7;
   --bg: #f6f6f7; --surface: #ffffff; --surface-2: #f4f4f5; --surface-hover: #fafafa;

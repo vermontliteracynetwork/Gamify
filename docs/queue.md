@@ -109,7 +109,7 @@ the brand look amazing. lets push them to main". Each batch: build on the
 preview branch, check every device size in a browser, run the tests, then push
 to main (approved). The Game Lab and Territory stay off main.
 
-24. [ ] **Batch 1, colors and type:** the New direction palette (Grape and
+24. [x] **Batch 1, colors and type:** the New direction palette (Grape and
     Lavender main purple, Sky and Blue crystal, the bright and pastel pairs,
     Nature tones, Ink #1d1a33, Paper, Cream) as the site tokens; Grow Year
     titles in capitals with the logo G; ink edges and press shades.

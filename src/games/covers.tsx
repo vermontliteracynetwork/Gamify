@@ -135,10 +135,10 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       );
     case 'memory-match':
       return (
-        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true">
+        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #ddfcc6, #ddd6ff)' }} aria-hidden="true">
           <div className="absolute inset-[10%] grid grid-cols-4 gap-[4%]">
             {['?', '', 'cat', '', '', '2+2', '', '4'].map((v, i) => (
-              <span key={i} className="rounded-lg border-bold border-border flex items-center justify-center font-display text-[clamp(8px,4cqw,22px)]" style={{ background: v ? (i % 2 ? '#fdfd94' : '#fbfcf8') : '#b4c4fb', transform: `rotate(${(i % 3) - 1}deg)` }}>{v}</span>
+              <span key={i} className="rounded-lg border-bold border-border flex items-center justify-center font-display text-[clamp(8px,4cqw,22px)]" style={{ background: v ? (i % 2 ? '#fdfd94' : '#fbfcf8') : '#ddd6ff', transform: `rotate(${(i % 3) - 1}deg)` }}>{v}</span>
             ))}
           </div>
         </div>
@@ -153,7 +153,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       );
     case 'match-up':
       return (
-        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #b4c4fb, #ddfcc6)' }} aria-hidden="true">
+        <div className={base} style={{ containerType: 'inline-size', background: 'linear-gradient(160deg, #ddd6ff, #ddfcc6)' }} aria-hidden="true">
           <div className="absolute inset-[10%] grid grid-cols-2 gap-x-[18%] gap-y-[6%]">
             {['3 + 4', '7', 'cat', 'animal', 'red', 'color'].map((v, i) => (
               <span key={i} className="rounded-lg border-bold border-border flex items-center justify-center font-display text-[clamp(8px,5cqw,24px)]" style={{ background: i % 2 ? '#fdfd94' : '#fbfcf8' }}>{v}</span>
@@ -285,9 +285,9 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
         </div>
       );
     case 'big-screen':
-      return <div className={base} style={{ background: 'linear-gradient(160deg, #fdfd94, #ff9a8b)' }} aria-hidden="true"><Scatter icons={[Trophy, Star, Crown, Sparkle, Star, Trophy]} colors={['#fdfd94', '#ffd166', '#fbfcf8', '#b4c4fb', '#ffffff', '#fdfd94']} /></div>;
+      return <div className={base} style={{ background: 'linear-gradient(160deg, #fdfd94, #ff9a8b)' }} aria-hidden="true"><Scatter icons={[Trophy, Star, Crown, Sparkle, Star, Trophy]} colors={['#fdfd94', '#ffd166', '#fbfcf8', '#ddd6ff', '#ffffff', '#fdfd94']} /></div>;
     case 'sign-in':
-      return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #b4c4fb)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#b4c4fb', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
+      return <div className={base} style={{ background: 'linear-gradient(160deg, #ddfcc6, #ddd6ff)' }} aria-hidden="true"><Scatter icons={[Cat, Dog, Fish, Sun, Rocket, Heart]} colors={['#fdfd94', '#ed9d75', '#ddd6ff', '#ffd166', '#cdd7fb', '#e5635f']} /></div>;
     case 'star-quiz':
     default:
       // The teacher's Classic sky for the Question Tracker (2026-10-31).

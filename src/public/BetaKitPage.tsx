@@ -9,7 +9,7 @@ import Title from '../ui/Title';
 // letter paper. Pictures first, so pre-readers can use the poster.
 const CHOICES = [
   { icon: Bug, key: 'tell.bug', color: '#ed9d75' },
-  { icon: SmileySad, key: 'tell.problem', color: '#b4c4fb' },
+  { icon: SmileySad, key: 'tell.problem', color: '#ddd6ff' },
   { icon: Lightbulb, key: 'tell.idea', color: '#fdfd94' },
 ] as const;
 
