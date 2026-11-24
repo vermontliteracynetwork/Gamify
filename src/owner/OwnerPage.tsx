@@ -31,6 +31,7 @@ import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import MarketingCard from './marketing/MarketingCard';
 import CeoCard from './CeoCard';
+import BetaSpec from './BetaSpec';
 import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
@@ -104,7 +105,7 @@ function Desktop() {
     access: <AccessCard />,
     preview: <PlanPreviewCard />,
     gallery: <GalleryCard />,
-    beta: <BetaCard />,
+    beta: <div className="grid gap-6"><BetaSpec /><BetaCard /></div>,
     marketing: <MarketingCard />,
   };
   const linkCls = 'dash-nav-item no-underline';

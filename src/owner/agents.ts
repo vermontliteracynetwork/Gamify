@@ -59,7 +59,7 @@ export const TEAM: TeamAgent[] = [
   {
     id: 'beta-lead', name: 'Beta Lead', role: 'Runs the beta test: invites, onboarding, weekly upkeep, review and the launch decision', file: '.claude/agents/beta-lead.md', color: '#f28c5b',
     status: 'working', updated: '2026-11-24', reportsTo: CEO_ID,
-    workingOn: ['Beta Test Plan written from your answers (dev plan doc tab): Pro free, every game tested, a question set and a theme from every tester, short forms', 'Next: update /beta, tester checklist, after-game and face-rating forms, IT allowlist page', 'In the CEO Agent chat: @beta_lead'],
+    workingOn: ['Beta Test Plan written from your answers (dev plan doc tab): Pro free, every game tested, a question set and a theme from every tester, short forms', 'Built: /beta updated, tester checklist, Beta form after each game, three-face rating with a comment, Beta test page on /owner', 'In the CEO Agent chat: @beta_lead'],
     needsYou: [{ text: 'Set the ready-to-launch bar and the open calls in the Beta Test Plan tab', link: 'https://claude.ai/artifact/P8kwMjDCq1E2yCa8VaMSpj' }],
     // Beta plan decisions: dev plan doc, Beta Test Plan tab; docs/teacher-preferences.md (2026-11-24).
   },

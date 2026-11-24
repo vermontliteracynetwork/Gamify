@@ -226,12 +226,12 @@ test.describe('buyer pages', () => {
   test('beta test page says exactly what we ask, and the application needs the agreement', async ({ page }, info) => {
     await page.goto('/beta');
     await expect(page.getByRole('heading', { level: 1, name: /Join the Gamify Beta Test/i })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Play at least twice a week' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Play every game at least once' })).toBeVisible();
     await page.getByLabel('Your name').fill('Ms. Rivera');
     await page.getByLabel('Your email').fill('rivera@school.org');
     const send = page.getByRole('button', { name: 'Apply for the beta test' });
     await expect(send).toBeDisabled();
-    await page.getByLabel(/I can play Gamify with my students/).check();
+    await page.getByLabel(/I will build a question set, play every Gamify game/).check();
     await send.click();
     await expect(page.getByText('Your application is in.', { exact: false })).toBeVisible();
     await page.screenshot({ path: `test-results/beta-page-${info.project.name}.png`, fullPage: true });

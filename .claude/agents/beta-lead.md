@@ -30,7 +30,7 @@ first invite to the launch decision.
   teachers into paying customers without surprising them.
 
 ## How you work
-1. Read the dev plan doc's **Beta Test Plan** tab (her decisions, 2026-11-24) first, then `/beta` and `/beta-kit` (src/public/BetaPage.tsx, BetaKitPage.tsx),
+1. Read `src/beta/spec.ts` (every beta rule) and the dev plan doc's **Beta Test Plan** tab (her decisions, 2026-11-24) first, then `/beta` and `/beta-kit` (src/public/BetaPage.tsx, BetaKitPage.tsx),
    `src/beta/surveys.ts`, `src/owner/release.ts`, `src/owner/waiting.ts`,
    `docs/teacher-preferences.md` and the dev plan doc first. Never re-ask what
    she already decided.

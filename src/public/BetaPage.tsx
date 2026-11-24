@@ -9,13 +9,14 @@ import type { StringKey } from '../i18n/en';
 import { Button, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import { BETA, dollars, fullPrice, offerPrice } from '../beta/spec';
 
 // Join the Gamify beta test (teacher, 2026-10-25): say exactly what a beta
-// tester does, how long it takes and what they get. Testers get Plus free;
+// tester does, how long it takes and what they get. Testers get Pro free (owner, 2026-11-24: 3 months, 10 spots);
 // what we need back is honest feedback from real classrooms.
 const ASKS: { key: string; minutes: string }[] = [
-  { key: 'setup', minutes: '15' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
-  { key: 'checkin', minutes: '1' }, { key: 'surveys', minutes: '5' }, { key: 'report', minutes: '1' },
+  { key: 'setup', minutes: '15' }, { key: 'questions', minutes: '15-30' }, { key: 'theme', minutes: '20+' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
+  { key: 'checkin', minutes: '3-5' }, { key: 'surveys', minutes: '1-3' }, { key: 'report', minutes: '1' },
 ];
 const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 content-start';
 
@@ -85,7 +86,8 @@ export default function BetaPage() {
               </li>
             ))}
           </ol>
-          <p className="font-semibold">{t('betaPage.after')}</p>
+          <p className="font-semibold">{t('betaPage.after', { off: BETA.offer.discount * 100, price: dollars(offerPrice()), full: dollars(fullPrice()) })}</p>
+          <p className="font-bold">{t('betaPage.spots', { spots: BETA.spots, months: BETA.months })}</p>
         </section>
 
         <section className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
@@ -128,7 +130,7 @@ function ApplyForm() {
           <label className="grid gap-1 font-bold min-w-0">{t('betaPage.email')}<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={120} className={field} /></label>
           <label className="grid gap-1 font-bold min-w-0">{t('betaPage.role')}
             <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className={field}>
-              {(['teacher', 'specialist', 'homeschool', 'other'] as const).map((r) => <option key={r} value={r}>{t(`betaPage.role.${r}` as StringKey)}</option>)}
+              {(['teacher', 'specialist', 'homeschool', 'coop', 'other'] as const).map((r) => <option key={r} value={r}>{t(`betaPage.role.${r}` as StringKey)}</option>)}
             </select>
           </label>
           <label className="grid gap-1 font-bold min-w-0">{t('beta.school')}<input value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} maxLength={120} className={field} /></label>

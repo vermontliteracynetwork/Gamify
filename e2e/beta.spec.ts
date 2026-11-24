@@ -47,8 +47,8 @@ test('the week 1 teacher survey appears in the menu, and its answers reach the o
   await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
-  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta and surveys' }).click();
-  const card = page.getByRole('region', { name: 'Beta and surveys' });
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta test' }).click();
+  const card = page.getByRole('region', { name: 'Beta test' });
   await expect(card.getByText('More science sets')).toBeVisible();
   await expect(card.getByText('5.0 / 5')).toBeVisible();
   await card.screenshot({ path: `test-results/owner-beta-${info.project.name}.png` });

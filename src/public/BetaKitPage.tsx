@@ -1,6 +1,7 @@
 import { Bug, ChatCircleDots, Lightbulb, Printer, SmileySad, Warning } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
+import { Link } from 'react-router-dom';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { MATERIALS, PHOTO_TIPS, THEME_IDEAS } from '../beta/themeIdeas';
@@ -33,7 +34,12 @@ export default function BetaKitPage() {
           <p className="font-display text-2xl">{t('kit.goodTitle')}</p>
           <ul className="grid gap-1 pl-6 m-0 list-disc font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`kit.good.${n}` as StringKey)}</li>)}</ul>
         </div>
+        <div className="rounded-input border-std border-border p-4 grid gap-2">
+          <p className="font-display text-2xl">{t('kit.facesTitle')}</p>
+          <ul className="grid gap-1 pl-6 m-0 list-disc font-semibold">{[1, 2, 3, 4].map((n) => <li key={n}>{t(`kit.faces.${n}` as StringKey)}</li>)}</ul>
+        </div>
         <p className="font-bold flex gap-2 items-start"><Warning weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('kit.privacy')}</p>
+        <p className="font-semibold">{t('kit.itNote')} <Link to="/it">{window.location.host}/it</Link></p>
       </section>
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-6 content-evenly justify-items-center text-center min-h-[10in]" aria-label={t('kit.posterTitle')}>

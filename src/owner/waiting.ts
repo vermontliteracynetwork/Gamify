@@ -7,9 +7,12 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'beta-bar', kind: 'decide', added: '2026-11-24', title: 'Beta: set the ready-to-launch bar and the open beta calls',
-    why: 'Your beta answers are in the Beta Test Plan tab of the dev plan doc. Still yours: the ready-to-launch numbers (question 4, proposed there), whether the teacher form runs after every game or a 1-minute tap form after each game plus a 5-minute form weekly, and the final Pro price behind the 20% offer.',
+  { id: 'beta-bar', kind: 'decide', added: '2026-11-24', title: 'Beta: set the ready-to-launch bar',
+    why: 'Your beta answers are in the Beta Test Plan tab of the dev plan doc. Still yours: the ready-to-launch numbers (question 4, proposed there and on /owner, Beta test) and the final Plus price behind the 20% offer ($76.80 for year one at $96).',
     how: 'Open the dev plan doc, Beta Test Plan tab; change any number or line directly, or answer in chat.' },
+  { id: 'beta-code', kind: 'setup', added: '2026-11-24', title: 'Beta: make the beta code (Pro, 3 months, 10 uses)',
+    why: 'The beta closes after 10 approved testers. One code that gives Pro for 3 months and works only 10 times does that by itself, and Pro means unlimited themes. Teachers who use it tick the beta agreement, which turns on their beta checklist and the Beta form after each game.',
+    how: 'On /owner, Access codes and beta plans: make a code (for example BETA2026), plan Pro, 3 months, 10 uses, beta on. Send it only to approved testers. For the homeschool co-op, give each family the same code, or give their accounts Pro with the note "beta".' },
   { id: 'beta-invites', kind: 'people', added: '2026-11-24', title: 'Beta: send the invites (your teachers, the homeschool co-op, Facebook teacher groups)',
     why: 'The beta is invite-first: teachers you know, one homeschool co-op free, and a post in Facebook teacher groups linking to the /beta application. The Facebook post goes through the marketing team and waits for your OK.',
     how: 'Once the /beta page is updated to the new plan: send your personal invites, contact the co-op, and approve the Facebook group post in /owner, Marketing. Pick who gets in from the applications.' },
