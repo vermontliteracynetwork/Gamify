@@ -127,7 +127,7 @@ to main (approved). The Game Lab and Territory stay off main.
     Themes; Features and Research once their fixes are approved.
 29. [x] **Batch 6, teacher pages:** dashboard home with the first-day empty
     states, Pick a game, Import a spreadsheet, Account, Theme Builder.
-30. [ ] **Batch 7, game boards:** each live game's in-play screen matched to
+30. [x] **Batch 7, game boards:** each live game's in-play screen matched to
     its approved mockup (Board Game, Match Three, Bubble Pop, Bowling, Game
     Show, Four in a Row, Question Tracker).
     - Bowling built (2026-11-24): cream confetti wall over a Lemon rail, Lavender
