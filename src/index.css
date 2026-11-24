@@ -525,6 +525,34 @@ html:fullscreen { --play-h: 100dvh; }
 .play-fill { height: var(--play-h); }
 html:fullscreen .play-fill { height: 100dvh; }
 
+/* THE solo board-game layout (src/engine/SoloStrip.tsx; teacher 2026-11-24):
+   the meter pill over the board, the score and held power-ups at the right.
+   Wide screens: board left, score column beside it. Tall screens: meter,
+   then the score row at the right, then the board. The board is the square
+   that is left once the strip and the column are placed, so nothing scrolls. */
+.solo-grid {
+  display: grid; justify-content: center; align-content: center; gap: 0.75rem 2.5rem; padding: 0.75rem 1rem 1.75rem;
+  --solo-board: min(calc(var(--play-h) - 7rem), calc(100vw - 19rem), 58rem);
+  grid-template-columns: var(--solo-board) 11rem;
+  grid-template-rows: auto var(--solo-board);
+  grid-template-areas: "meter ." "board score";
+}
+.solo-meter-cell { grid-area: meter; }
+.solo-score-cell { grid-area: score; align-self: start; padding-top: 0.5rem; }
+.solo-board-cell { grid-area: board; width: var(--solo-board); height: var(--solo-board); }
+.solo-meter-track { width: min(24rem, 30vw); flex: 0 1 auto; }
+@media (orientation: portrait) {
+  .solo-grid {
+    padding-top: 4rem;
+    --solo-board: min(calc(100vw - 2rem), calc(var(--play-h) - 24rem), 58rem);
+    grid-template-columns: var(--solo-board);
+    grid-template-rows: auto 11rem var(--solo-board);
+    grid-template-areas: "meter" "score" "board";
+  }
+  .solo-score-cell { justify-self: end; padding: 0 0.5rem 0 0; }
+  .solo-score-cell .solo-score [role="group"] { flex-wrap: nowrap; }
+}
+
 /* Pinball (2026-10-31): pockets pop in each round, the landed pocket glows,
    bumpers flash and flippers flick on a launch, sparks where the ball bounces. */
 @keyframes pb-pocket { from { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); opacity: 1; } to { transform: scale(1); } }
