@@ -18,13 +18,15 @@ export function classicTheme(gameId: string): GameTheme {
   // Bubble Pop's Classic stage is the cream doodle scatter of the approved
   // mockup (owner, 2026-11-24: /brand Game mockups, Bubble Pop).
   const doodle = gameId === 'bubble-pop';
+  // Four in a Row's Classic stage is cream with pastel squiggles (approved mockup, 2026-11-24).
+  const four = gameId === 'four-in-a-row';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle ? '#f6f0e4' : '#b4c4fb',
+      background: night ? '#22336e' : alley ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle || four ? '#f6f0e4' : '#b4c4fb',
       backgroundText: night || show || pin ? '#ffffff' : alley ? '#1d1a33' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
@@ -34,7 +36,8 @@ export function classicTheme(gameId: string): GameTheme {
       miss: '#9b2c3a',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: doodle ? { kind: 'image', src: '/classic/bubble-pop/doodle.svg', alt: 'Pastel doodle shapes on cream', tile: true } : { kind: 'color' },
+    backdrop: doodle ? { kind: 'image', src: '/classic/bubble-pop/doodle.svg', alt: 'Pastel doodle shapes on cream', tile: true }
+      : four ? { kind: 'image', src: '/classic/four-in-a-row/squiggles.svg', alt: 'Pastel squiggles and flowers on cream', tile: true } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the
