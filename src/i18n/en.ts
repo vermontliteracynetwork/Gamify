@@ -1405,7 +1405,7 @@ export const en = {
   'betaPage.ask.lesson': 'Teach the Tell Gamify button',
   'betaPage.ask.lesson.text': 'A short lesson from the printable classroom kit, so students can report bugs and ideas without typing their names. Once.',
   'betaPage.ask.play': 'Play at least twice a week',
-  'betaPage.ask.play.text': 'Any game, any way to play: a whole-class Share game, Live on every student's device, or Solo practice at a center. Short sessions are perfect.',
+  'betaPage.ask.play.text': 'Any game, any way to play: a whole-class Share game, Live on each student\'s own device, or Solo practice at a center. Short sessions are perfect.',
   'betaPage.ask.checkin': 'Run the student check-in',
   'betaPage.ask.checkin.text': 'After a game, students tap a face and an easy or tricky picture. Anonymous, only counts are kept. When it fits your day.',
   'betaPage.ask.surveys': 'Answer three short surveys',
