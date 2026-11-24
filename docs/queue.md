@@ -125,7 +125,7 @@ to main (approved). The Game Lab and Territory stay off main.
 28. [x] **Batch 5, approved public pages:** Home, Plans and Pricing, Help
     Center and articles, legal pages, forms, theme guide, device check,
     Themes; Features and Research once their fixes are approved.
-29. [ ] **Batch 6, teacher pages:** dashboard home with the first-day empty
+29. [x] **Batch 6, teacher pages:** dashboard home with the first-day empty
     states, Pick a game, Import a spreadsheet, Account, Theme Builder.
 30. [ ] **Batch 7, game boards:** each live game's in-play screen matched to
     its approved mockup (Board Game, Match Three, Bubble Pop, Bowling, Game

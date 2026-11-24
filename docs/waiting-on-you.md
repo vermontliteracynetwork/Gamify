@@ -30,3 +30,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - (2026-11-24, decide) New footer line instead of "Made in Vermont by the Vermont Literacy Network." (or remove it).
 - (2026-11-24, people) Collect 3 teacher quotes with permission for the home page.
 - (2026-11-24, setup) Make a Pinterest business account for Gamify (dev plan Part 5B).
+- (2026-11-24, setup) Connect Canva and the social accounts for auto-posting. The visual planner and the auto-posting queue are built on /owner, under Marketing. An approved post goes out on its own once its Canva design is ready and its account is connected. Nothing posts without your OK, and ads never launch on their own. Steps: docs/marketing-autopost.md.

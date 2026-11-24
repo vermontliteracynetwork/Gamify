@@ -83,7 +83,7 @@ export default function ImportPage() {
                   {result.errors.map((e) => (
                     <tr key={`e${e.row}`} className="border-t border-border/20 bg-blush">
                       <td className="p-2.5 align-top">{e.row}</td>
-                      <td className="p-2.5 align-top" colSpan={2}>{e.message}</td>
+                      <td className="p-2.5 align-top" colSpan={2}>{t('import.row', { row: e.row, message: e.message })}</td>
                       <td className="p-2.5 align-top"><span className="inline-flex items-center gap-1"><WarningCircle weight="bold" size={14} />{t('import.bad')}</span></td>
                     </tr>
                   ))}

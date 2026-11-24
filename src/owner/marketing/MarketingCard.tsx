@@ -7,20 +7,29 @@ import type { StringKey } from '../../i18n/en';
 import Dialog from '../../ui/Dialog';
 import { Button, Tabs, fieldClasses } from '../../ui/kit';
 import { ACTIVITY, CAMPAIGNS, PLATFORMS, POSTS, shownStatus, teamExport, type Decision, type OwnerIdea, type Post } from './plan';
+import { publishState, withMoves, type Moves } from './autopost';
+import VisualPlanner, { Publishing, StateTag } from './VisualPlanner';
 
 // The content planner on the developer dashboard (owner's rule, 2026-11-24):
 // everything the marketing team does, in one place, and only the owner says
 // yes. Her decisions and ideas save with her settings (the cloud when signed
 // in); "Copy for the team" hands them to the next marketing session.
-type View = 'ok' | 'calendar' | 'campaigns' | 'activity' | 'ideas';
+type View = 'ok' | 'planner' | 'publishing' | 'calendar' | 'campaigns' | 'activity' | 'ideas';
 const DECISIONS_KEY = 'marketing-decisions';
 const IDEAS_KEY = 'marketing-ideas';
+const MOVES_KEY = 'marketing-moves';
+// Written by the server publisher once an account is connected (docs/marketing-autopost.md).
+const CONNECTED_KEY = 'marketing-connections';
 
 const platform = (id: Post['platform']) => PLATFORMS.find((p) => p.id === id)!;
 
 export default function MarketingCard() {
   const { value: saved, reload } = useAsync(() => data.getSetting<Record<string, Decision>>(DECISIONS_KEY));
   const { value: savedIdeas, reload: reloadIdeas } = useAsync(() => data.getSetting<OwnerIdea[]>(IDEAS_KEY));
+  const { value: savedMoves, reload: reloadMoves } = useAsync(() => data.getSetting<Moves>(MOVES_KEY));
+  const { value: savedConnected } = useAsync(() => data.getSetting<Record<string, boolean>>(CONNECTED_KEY));
+  const moves = savedMoves ?? {};
+  const connected = savedConnected ?? {};
   const decisions = saved ?? {};
   const ideas = savedIdeas ?? [];
   const [view, setView] = useState<View>('ok');
@@ -32,12 +41,22 @@ export default function MarketingCard() {
     await data.setSetting(DECISIONS_KEY, { ...decisions, [id]: { decision, note: note.trim(), at: new Date().toISOString() } });
     reload();
   }
+  async function move(id: string, date: string) {
+    const orig = POSTS.find((p) => p.id === id);
+    const next = { ...moves };
+    if (orig && orig.date === date) delete next[id]; else next[id] = { date };
+    await data.setSetting(MOVES_KEY, next);
+    reloadMoves();
+  }
   async function copy() {
-    try { await navigator.clipboard.writeText(teamExport(decisions, ideas)); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
+    const moved = Object.entries(moves).map(([id, m]) => `- ${id}: moved to ${m.date}${m.time ? ` ${m.time}` : ''}`);
+    try { await navigator.clipboard.writeText(teamExport(decisions, ideas) + (moved.length ? `\n\nMOVED ON THE PLANNER\n${moved.join('\n')}` : '')); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
   }
 
   const views: { id: View; label: string }[] = [
     { id: 'ok', label: `${t('mkt.tab.ok')} (${waiting.length})` },
+    { id: 'planner', label: t('mkt.tab.planner') },
+    { id: 'publishing', label: t('mkt.tab.publishing') },
     { id: 'calendar', label: t('mkt.tab.calendar') },
     { id: 'campaigns', label: t('mkt.tab.campaigns') },
     { id: 'activity', label: t('mkt.tab.activity') },
@@ -54,13 +73,16 @@ export default function MarketingCard() {
       {view === 'ok' && (waiting.length === 0 ? <p className="font-semibold">{t('mkt.okNone')}</p> : (
         <ul className="grid gap-3 list-none p-0 m-0">{waiting.map((p) => <li key={p.id}><PostDetail post={p} decision={decisions[p.id]} onDecide={decide} /></li>)}</ul>
       ))}
+      {view === 'planner' && <VisualPlanner decisions={decisions} moves={moves} connected={connected} onMove={(id, d) => void move(id, d)} onOpen={setOpen} />}
+      {view === 'publishing' && <Publishing decisions={decisions} moves={moves} connected={connected} onOpen={setOpen} />}
       {view === 'calendar' && <Calendar decisions={decisions} onOpen={setOpen} />}
       {view === 'campaigns' && <Campaigns decisions={decisions} />}
       {view === 'activity' && <ActivityLog decisions={decisions} />}
       {view === 'ideas' && <Ideas ideas={ideas} onSave={async (next) => { await data.setSetting(IDEAS_KEY, next); reloadIdeas(); }} />}
       {open && (
         <Dialog title={`${open.id} · ${platform(open.platform).label}`} onClose={() => setOpen(null)} closeLabel={t('mkt.close')} size="lg">
-          <PostDetail post={open} decision={decisions[open.id]} onDecide={async (...a) => { await decide(...a); setOpen(null); }} />
+          <PostDetail post={withMoves([open], moves)[0]} decision={decisions[open.id]} onDecide={async (...a) => { await decide(...a); setOpen(null); }}
+            onMove={(d) => void move(open.id, d)} state={publishState(withMoves([open], moves)[0], decisions, connected)} />
         </Dialog>
       )}
     </div>
@@ -72,7 +94,7 @@ function StatusTag({ post, decisions }: { post: Post; decisions: Record<string, 
   return <span className="dash-tag">{t(`mkt.status.${s}` as StringKey)}</span>;
 }
 
-function PostDetail({ post, decision, onDecide }: { post: Post; decision?: Decision; onDecide: (id: string, d: Decision['decision'], note: string) => Promise<void> }) {
+function PostDetail({ post, decision, onDecide, onMove, state }: { post: Post; decision?: Decision; onDecide: (id: string, d: Decision['decision'], note: string) => Promise<void>; onMove?: (date: string) => void; state?: ReturnType<typeof publishState> }) {
   const [note, setNote] = useState('');
   const [problem, setProblem] = useState('');
   const pf = platform(post.platform);
@@ -91,6 +113,13 @@ function PostDetail({ post, decision, onDecide }: { post: Post; decision?: Decis
         <span className="ml-auto"><StatusTag post={post} decisions={decision ? { [post.id]: decision } : {}} /></span>
       </div>
       <p className="font-bold text-lg leading-snug">{post.hook}</p>
+      {(onMove || state || post.design) && (
+        <div className="flex flex-wrap items-center gap-3 text-sm font-bold">
+          {state && <StateTag state={state} />}
+          {post.design?.url ? <a href={post.design.url} target="_blank" rel="noreferrer" className="dash-link">{t('mkt.plan.openCanva')}</a> : <span className="text-muted">{t('mkt.plan.canvaToMake')}</span>}
+          {onMove && <label className="flex items-center gap-2 ml-auto">{t('mkt.plan.move')}<input type="date" value={post.date} onChange={(e) => e.target.value && onMove(e.target.value)} className={fieldClasses('sm')} /></label>}
+        </div>
+      )}
       <dl className="grid gap-2 m-0">
         {row('mkt.f.caption', post.caption)}
         {row('mkt.f.onScreen', post.onScreen?.join('\n'))}

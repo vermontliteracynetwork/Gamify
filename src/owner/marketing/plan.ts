@@ -34,6 +34,7 @@ export interface Post {
   caption: string; // caption, pin description or ad text
   onScreen?: string[]; // text per frame or slide
   canva?: string; // the Canva brief: template and fields
+  design?: { canva: string; url?: string; thumb?: string }; // the finished Canva design (id, edit link, preview image)
   sound?: string; // with its license source
   tags?: string[]; // hashtags or pin keywords
   alt?: string; // alt text
