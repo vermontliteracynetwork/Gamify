@@ -52,6 +52,8 @@ line that fits, and add each new preference the same turn she says it.
 ## Working style
 - CEO Agent (2026-11-24): the open-source CEO Agent (github.com/tradersurfer/ceo-agent) is built into the Developer Portal, not run as a separate site; setup answers predicted from Gamify (name Gamify CEO, all six departments, efficient cost mode).
 - Vermont Business Advisor (2026-11-24): Gamify will be a new Vermont LLC; a team member knows Vermont law, practices, tax and business rules and gives reminders and recommendations (`.claude/agents/vermont-business-advisor.md`, `src/owner/vermont.ts`, @vermont_business_advisor in the CEO Agent).
+- Advisor standpoint (2026-11-24): every C-suite agent advises: it helps her think critically about what she wants the business to look like and ends with one question for her to decide.
+- Beta Lead and Playtest Lead (2026-11-24): one chair owns the beta from invites to launch; one lead actually plays every game in a real browser (Playwright MCP) before it ships.
 - Keep the queue running; predict her answers from past decisions and log the guess.
 - Quiet build: no narration; short final report starting with Waiting on you.
 - Test in a real browser at every size before calling anything done; read console errors.

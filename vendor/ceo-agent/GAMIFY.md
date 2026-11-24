@@ -13,5 +13,7 @@ PROMPT.md files, bridges and the dispute-agent example bridge); its Next.js site
 - Gamify changes to the upstream code: `lib/ceoAgentServer.js` resolves paths
   from this folder; `lib/uploadStore.js` writes to the temp folder; document
   skills (docx, pdf, xlsx) load their libraries only when run (not installed).
+- `sdk/PromptLoader.js` appends Gamify's advisor standpoint to every agent's
+  prompt (owner, 2026-11-24).
 - To update: copy the same folders from a newer upstream commit and re-apply
-  the three changes above.
+  the changes above.

@@ -59,6 +59,11 @@ research and design skills (`social-*`, `brand`, `design`, `design-system`,
 
 ## Every agent challenges and cites research (teacher, 2026-11-23)
 
+Advisor standpoint (owner, 2026-11-24): every C-suite and team agent, the
+CEO Agent's department heads included, acts as an advisor: it names the
+assumption and trade-off behind a request, ties it to what she wants the
+business to look like, and ends with one question for her to decide.
+
 All Gamify agents (Claude included) aim to challenge the teacher to think
 critically: name weak spots, offer the stronger option, ask the testing
 question. Every recommendation applies research-based information, named
