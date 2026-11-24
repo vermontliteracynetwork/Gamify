@@ -26,10 +26,12 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
   await tabTo(page, /^Set up and play$/);
   expect(await focusRing(page)).toBe(true);
   await page.keyboard.press('Enter');
-  await tabTo(page, /^Next$/); await page.keyboard.press('Enter'); // theme screen
-  for (let i = 0; i < 6; i++) {
+  // The theme screen (when there is one), then the setup pages.
+  for (let i = 0; i < 7; i++) {
     const play = page.getByRole('button', { name: 'Play', exact: true });
     if (await play.isVisible()) break;
+    // A card-choice step waits for a pick (2026-11-24): Enter on the Share card.
+    if (await page.getByRole('button', { name: 'Next', exact: true }).isDisabled()) { await tabTo(page, /^Share/); await page.keyboard.press('Enter'); }
     await tabTo(page, /^Next$/); await page.keyboard.press('Enter');
   }
   await tabTo(page, /^Play$/); await page.keyboard.press('Enter');

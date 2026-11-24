@@ -64,7 +64,8 @@ export async function finishSetup(page: Page) {
     const next = page.getByRole('button', { name: 'Next', exact: true });
     if (!(await next.isVisible())) break;
     // A card-choice page waits for a tap before Next (2026-11-24).
-    if (await next.isDisabled()) {
+    if (await next.isDisabled()) await page.waitForTimeout(300);
+    if (await next.isDisabled() && await page.getByRole('radio').count()) {
       const solo = page.getByRole('radio', { name: /^Solo/ });
       await ((await solo.count()) ? solo : page.getByRole('radio')).first().click();
     }
@@ -108,7 +109,8 @@ export async function showSetting(page: Page, target: Locator) {
     const next = page.getByRole('button', { name: 'Next', exact: true });
     if (!(await next.isVisible())) break;
     // A card-choice page waits for a tap before Next (2026-11-24).
-    if (await next.isDisabled()) {
+    if (await next.isDisabled()) await page.waitForTimeout(300);
+    if (await next.isDisabled() && await page.getByRole('radio').count()) {
       const solo = page.getByRole('radio', { name: /^Solo/ });
       await ((await solo.count()) ? solo : page.getByRole('radio')).first().click();
     }
