@@ -30,6 +30,7 @@ import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
 import Title from '../../ui/Title';
 import Sky, { comboFx, type StarFx } from './Sky';
+import { SkyBurst } from './SkyHud';
 import { liveStarColor } from '../../live/LiveStudent';
 import { getLive } from '../../live/session';
 
@@ -67,7 +68,8 @@ export default function StarQuiz() {
   // The note clears on its own (also in still motion, where no animation ends).
   useEffect(() => { if (!streakNote) return; const id = window.setTimeout(() => setStreakNote(null), 2400); return () => window.clearTimeout(id); }, [streakNote]);
   // In a class race, a student's own stars wear their color.
-  const myColor = getLive() ? liveStarColor() : undefined;
+  const myLive = !!getLive();
+  const myColor = myLive ? liveStarColor() : undefined;
 
   const timeUp = useRef(false);
   const clock = usePlayClock({ playing: phase === 'play', score: stars, onTimeUp: () => { timeUp.current = true; cancel(); } });
@@ -82,7 +84,8 @@ export default function StarQuiz() {
     for (let r = 0; r < v.rounds; r++) {
       setRound(r + 1);
       lastRight.current = null;
-      const done = await ask();
+      // The card names whose sky it is (the mockup's "My sky" or the student's name), no icon.
+      const done = await ask({ player: getLive()?.name ?? t('sky.mySky') });
       if (timeUp.current) break;
       if (!done) { setLeftEarly(true); break; }
       // Right answers in a row earn combo stars (teacher, 2026-11-06): 3
@@ -93,8 +96,11 @@ export default function StarQuiz() {
       run = first ? run + 1 : 0;
       const fx = comboFx(run);
       setGolden((g) => { const n = [...g]; n[r] = fx; return n; });
+      // Every right answer gets the feedback pill (the approved mockup's
+      // "Yes! A star for your sky!"); combos and comebacks say their own line.
       if (fx) { setStreakNote({ id: Date.now(), text: t(`practice.combo.${fx}`, { n: run }), gold: true }); playEffect('win', settings); }
       else if (lastRight.current === 'retry') setStreakNote({ id: Date.now(), text: t('practice.keptGoing'), gold: false });
+      else if (first) setStreakNote({ id: Date.now(), text: t(getLive() ? 'sky.yesClass' : 'sky.yesSolo'), gold: true });
       setStars((s) => s + 1);
     }
     playEffect('win', settings);
@@ -143,13 +149,16 @@ export default function StarQuiz() {
         <section className="relative play-fill">
           <h1 className="sr-only"><Title text={t('practice.title')} /></h1>
           <Sky theme={theme} filled={stars} total={total} still={settings.motion === 'still'} label={t('practice.stars', { count: stars })} colors={myColor ? Array.from({ length: total }, () => myColor) : undefined} height="100%" bleed seed={seed} fx={myColor ? undefined : golden} />
-          {/* A streak of first-try answers: the stars turn gold. */}
+          {/* The feedback pill under the question card, on the top layer
+              (approved mockup, 2026-11-24): flat, Grow Year, no star. In a
+              live game it sits above the student's goal bar. */}
           <AnimatePresence>
             {streakNote && phase === 'play' && (
-              <motion.p key={streakNote.id} role="status" className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] pointer-events-none whitespace-nowrap font-display text-2xl sm:text-3xl ${streakNote.gold ? 'bg-[#ffc93c]' : 'bg-success'} border-bold border-border rounded-pill px-5 py-1.5 flex items-center gap-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}
-                initial={settings.motion === 'still' ? false : { y: -30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+              <motion.p key={streakNote.id} role="status" className={`fixed inset-x-0 z-[70] pointer-events-none flex justify-center px-4 ${myLive ? 'bottom-[4.5rem]' : 'bottom-[max(1rem,3dvh)]'}`}
+                initial={settings.motion === 'still' ? false : { y: 30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: [1.12, 1] }} exit={{ opacity: 0, y: 10 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 18 }}
               >
-                <Star weight="fill" size={26} aria-hidden="true" />{streakNote.text}
+                <SkyBurst text={streakNote.text} gold={streakNote.gold} />
               </motion.p>
             )}
           </AnimatePresence>
