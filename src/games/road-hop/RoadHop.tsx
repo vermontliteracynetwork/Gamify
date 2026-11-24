@@ -11,7 +11,6 @@ import { buzz, playEffect } from '../../engine/feedback';
 import { makeDeck } from '../../engine/picker';
 import ResultsModal from '../../engine/ResultsModal';
 import ShareQuestion from '../../engine/ShareQuestion';
-import { TeamBadge } from '../../engine/TeamBadge';
 import TeamSetup from '../../engine/TeamSetup';
 import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { useAsk } from '../../engine/useAsk';
@@ -187,7 +186,7 @@ export default function RoadHop() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-4">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="road-hop" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow hint="road-hop" onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
         <GameWelcome game={roadHopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('rh.how1') },
@@ -213,8 +212,10 @@ export default function RoadHop() {
           <section className="grid gap-2 min-w-0 [--rh-extra:4.375rem] lg:[--rh-extra:0rem]">
             {phase === 'play' && (
               <div className="flex items-center gap-3 bg-surface border-bold border-border rounded-panel px-4 py-2" aria-live="polite">
-                <TeamBadge colorIndex={player.colorIndex} size={36} />
-                <span className="font-display text-xl sm:text-2xl">{step === 'question' ? t('share.whoseTurn', { name: player.name }) : player.kind === 'cpu' ? t('fr.cpuThinking') : t('rh.go', { name: player.name })}</span>
+                {/* No turn directive (teacher, 2026-11-24): the player's yellow row in the
+                    scores is the turn signal; the computer still says it is thinking. */}
+                <span className="sr-only">{t('share.whoseTurn', { name: player.name })}</span>
+                {player.kind === 'cpu' && step !== 'question' && <span className="font-display text-xl sm:text-2xl">{t('cpu.thinking', { name: player.name })}</span>}
                 <span className="ml-auto font-bold text-sm text-right">
                   {t('rh.turn', { n: Math.min(asked + 1, total), total })}<br />
                   <span className="inline-flex gap-1 align-middle" aria-label={t('rh.hops', { count: hops })}>

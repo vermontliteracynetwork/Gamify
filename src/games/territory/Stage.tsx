@@ -9,8 +9,8 @@ import { pieceImage } from '../../theme/library';
 import { pieceFor } from './looks';
 import type { LivePlayer } from '../../live/protocol';
 import Title from '../../ui/Title';
-import { CatArt, INK, MouseArt, PoofArt, RoomArt, SIDE_COLOR, SIDE_PASTEL, SideBadge } from './art';
-import { ENTRANCE, EXIT, LEAVE_MS, SPOTS, competeRight, count, newRights, newRoom, sweep, tick, togetherDone, togetherRight, winner, type CompeteRule, type Pace, type Piece, type Room, type Side } from './logic';
+import { CatArt, INK, MouseArt, PoofArt, RoomArt, SIDE_COLOR, SIDE_PASTEL, SideBadge, useRoomFit, type RoomFit } from './art';
+import { LEAVE_MS, SPOTS, competeRight, stagePieces, count, newRights, newRoom, sweep, tick, togetherDone, togetherRight, winner, type CompeteRule, type Pace, type Piece, type Room, type Side } from './logic';
 
 // Territory's class screen (teacher, 2026-11-24): the living room on the
 // projector. Together: the class's cats catch the mice that come out of the
@@ -112,11 +112,9 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
   useEffect(() => { if (phase === 'ended') playClip(SOUNDS.cheer, settings, 0.8); }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const won = phase === 'ended' && mode === 'compete' ? winner(room) : null;
-  const shown = useMemo(() => {
-    const d = room.pieces.filter((p) => p.side === 'defender').slice(-30);
-    const i = room.pieces.filter((p) => p.side === 'invader').slice(-30);
-    return [...d, ...i].sort((a, b) => SPOTS[a.spot][1] - SPOTS[b.spot][1]);
-  }, [room.pieces]);
+  // At most STAGE_CAP animals per side on show (logic.ts); the counts stay true.
+  const shown = useMemo(() => stagePieces(room.pieces, now).sort((a, b) => SPOTS[a.spot][1] - SPOTS[b.spot][1]), [room.pieces, now]);
+  const crowd = Math.max(0.8, 1 - 0.025 * Math.max(0, shown.filter((p) => !p.leaving).length - 16));
   const byId = useMemo(() => new Map(room.pieces.map((p) => [p.id, p])), [room.pieces]);
   const chases = useMemo(() => {
     const m = new Map<number, Piece>();
@@ -155,8 +153,8 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
       {/* The board: the living room */}
       <RoomArt background={pieceImage(theme, 'background')} entrance={pieceImage(theme, 'entrance')} className="min-h-0 rounded-panel border-[3px] border-[#1d1a33]">
         <div className="absolute inset-0" role="img" aria-label={mode === 'together' ? t('territory.roomTogether', { cats: summary.defenders, mice: summary.invaders }) : t('territory.roomCompete', { cats: summary.defenders, mice: summary.invaders })}>
-          {shown.map((p) => <Animal key={p.id} piece={p} theme={theme} still={still} gentle={settings.motion !== 'full'} chase={chases.get(p.id)} chased={p.leaving?.by != null && byId.has(p.leaving.by)} />)}
-          {!still && shown.filter((p) => p.leaving && p.side === 'invader').map((p) => <Poof key={`poof-${p.id}`} piece={p} theme={theme} chased={p.leaving!.by != null} />)}
+          {shown.map((p) => <Animal key={p.id} piece={p} crowd={crowd} theme={theme} still={still} gentle={settings.motion !== 'full'} chase={chases.get(p.id)} chased={p.leaving?.by != null && byId.has(p.leaving.by)} />)}
+          {!still && shown.filter((p) => p.leaving && p.side === 'invader').map((p) => <Poof key={`poof-${p.id}`} piece={p} crowd={crowd} theme={theme} chased={p.leaving!.by != null} />)}
         </div>
         {/* The winner's color fills the room at the end. */}
         <AnimatePresence>
@@ -166,7 +164,7 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
           )}
         </AnimatePresence>
         {/* C: the feedback line, until the next thing happens */}
-        <div className="absolute inset-x-0 bottom-[2.5%] flex justify-center pointer-events-none px-4">
+        <div className="absolute inset-x-0 top-[4%] z-[3000] flex justify-center pointer-events-none px-4">
           <AnimatePresence mode="wait">
             {note && phase !== 'ended' && (
               <motion.p key={note.id} role="status" className="max-w-[86%] text-center font-display uppercase text-[clamp(1rem,min(2.2vw,3.4vh),1.9rem)] leading-tight px-5 py-1.5 rounded-pill border-[3px] border-[#1d1a33] flex items-center gap-2"
@@ -201,10 +199,14 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
 }
 
 // One animal. Positions are % of the room; motion moves it step by step.
-function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; theme: GameTheme; still: boolean; gentle: boolean; chase?: Piece; chased: boolean }) {
-  const [x, y] = SPOTS[piece.spot];
+function Animal({ piece, crowd, theme, still, gentle, chase, chased }: { piece: Piece; crowd: number; theme: GameTheme; still: boolean; gentle: boolean; chase?: Piece; chased: boolean }) {
+  // The room fit (art.tsx) maps the logic rows onto this box's floor.
+  const fit = useRoomFit();
+  const [lx, ly] = SPOTS[piece.spot];
   const cat = piece.side === 'defender';
-  const h = size(piece);
+  const h = size(piece, fit, crowd);
+  const x = clampX(fit.x(lx), h, fit); const y = fit.y(ly);
+  const ENTRANCE = fit.entrance; const EXIT = fit.exit;
   const { img } = pieceFor(theme, piece.side, piece.look);
   const art = img ? <img src={img} alt="" className="w-full h-full object-contain" draggable="false" />
     : cat ? <CatArt look={piece.look} className="w-full h-full" /> : <MouseArt look={piece.look} className="w-full h-full" />;
@@ -227,7 +229,8 @@ function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; 
     }
     if (chase) {
       // Trot over to the one it is after, then home again.
-      const [tx, ty] = SPOTS[chase.spot];
+      const [ltx, lty] = SPOTS[chase.spot];
+      const tx = clampX(fit.x(ltx), h, fit); const ty = fit.y(lty);
       const nx = tx + (tx < x ? 3 : -3);
       return { anim: { left: [pct(x), pct(nx), pct(nx), pct(x)], top: [pct(y), pct(ty), pct(ty), pct(y)], scaleY: [1, 1, 0.86, 1], opacity: 1, scale: 1 }, trans: { duration: 3, times: [0, 0.42, 0.55, 1], ease: 'easeInOut' }, face: tx < x ? -1 : 1 };
     }
@@ -236,10 +239,10 @@ function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; 
       trans: fresh ? { left: { delay: cat ? 0 : 1, duration: cat ? 2 : 1.6, ease: 'easeInOut' }, top: { delay: cat ? 0 : 1, duration: cat ? 2 : 1.6, ease: 'easeInOut' }, opacity: { duration: 0.5 }, scale: { duration: 0.8 } } : { duration: 0.4 },
       face: cat ? (x > 50 ? -1 : 1) : -1,
     };
-  }, [still, leave?.at, chase?.id, fresh]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [still, leave?.at, chase?.id, fresh, fit.floor]); // eslint-disable-line react-hooks/exhaustive-deps
   const moving = !still && !gentle && (chase || fresh || (leave && cat));
   return (
-    <motion.div className="absolute" style={{ height: `${h}%`, aspectRatio: '1', x: '-50%', y: '-100%', zIndex: Math.round(y) }}
+    <motion.div className="absolute" style={{ height: `${h}%`, transition: 'height 0.4s ease', aspectRatio: '1', x: '-50%', y: '-100%', zIndex: cat ? Math.round(y * 2) : 1000 + Math.round(y * 2) }}
       initial={fresh && !still ? { left: pct(ex), top: pct(ey), opacity: 0, scale: cat ? 1 : 0.6 } : fresh ? { left: pct(x), top: pct(y), opacity: 0 } : false} animate={anim} transition={trans}>
       <motion.div className="w-full h-full" style={{ scaleX: face }} animate={moving ? { y: [0, -6, 0] } : { y: 0 }} transition={moving ? { duration: 0.42, repeat: 5, ease: 'easeInOut', delay: fresh && !cat ? 1 : 0 } : { duration: 0.2 }}>
         {art}
@@ -250,19 +253,34 @@ function Animal({ piece, theme, still, gentle, chase, chased }: { piece: Piece; 
 
 const pct = (n: number) => `${n}%`;
 // Farther back is a little smaller (2D depth); cats are bigger than mice.
-function size(p: Piece) {
+// Big enough to read from the back of a room (Art Director, 2026-11-24): a
+// front cat is about 23% of the room height, the smallest mouse 13.5%. On a
+// tall (portrait) room the pieces cap at 15% (cats) and 11% (mice) of the
+// room width, and mice start a little bigger so they still read.
+// A crowded room shrinks everyone a little (never below 80%, cats 14% and
+// mice 12% of the room height) so bodies overlap less.
+function size(p: Piece, fit: RoomFit, crowd = 1) {
   const y = SPOTS[p.spot][1];
-  return (p.side === 'defender' ? 18 : 12) * (0.8 + ((y - 64) / 23) * 0.35);
+  const cat = p.side === 'defender';
+  const h = (cat ? 20 : fit.aspect < 1 ? 17 : 15) * (0.9 + ((y - 64) / 23) * 0.25);
+  return Math.min(Math.max(cat ? 14 : 12, h * crowd), (cat ? 15 : 11) / fit.ratio);
+}
+// Keep a piece's whole width inside the room, never touching an edge.
+function clampX(x: number, h: number, fit: RoomFit) {
+  const hw = (h * fit.ratio) / 2 + 1;
+  return Math.max(hw, Math.min(100 - hw, x));
 }
 
 // The universal cue when a piece is caught: a small poof, then it is gone
 // (teacher, 2026-11-24: "no poof [upload], it should have a small poof
 // animation and then disappear as a universal cue"). Not a theme piece.
-function Poof({ piece, chased }: { piece: Piece; theme?: GameTheme; chased: boolean }) {
-  const [x, y] = SPOTS[piece.spot];
-  const h = size(piece) * 1.3;
+function Poof({ piece, crowd, chased }: { piece: Piece; crowd: number; theme?: GameTheme; chased: boolean }) {
+  const fit = useRoomFit();
+  const [lx, ly] = SPOTS[piece.spot];
+  const x = clampX(fit.x(lx), size(piece, fit, crowd), fit); const y = fit.y(ly);
+  const h = size(piece, fit, crowd) * 1.3;
   return (
-    <motion.div className="absolute pointer-events-none" style={{ left: pct(x), top: pct(y - size(piece) / 2), height: `${h}%`, aspectRatio: '1', x: '-50%', y: '-50%', zIndex: 200 }}
+    <motion.div className="absolute pointer-events-none" style={{ left: pct(x), top: pct(y - size(piece, fit, crowd) / 2), height: `${h}%`, aspectRatio: '1', x: '-50%', y: '-50%', zIndex: 2500 }}
       initial={{ opacity: 0, scale: 0.3, rotate: -20 }} animate={{ opacity: [0, 1, 1, 0], scale: [0.3, 1, 1.1, 1.2], rotate: [-20, 0, 10, 16] }} transition={{ duration: 0.9, delay: chased ? 1.2 : 0.4, times: [0, 0.25, 0.7, 1] }}>
       <PoofArt className="w-full h-full" />
     </motion.div>

@@ -7,6 +7,7 @@ import type { StringKey } from '../i18n/en';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { Student } from '../data/types';
+import { nextCpuName } from './cpuNames';
 import { rollName } from './nameDice';
 import { balancedTeams, randomTeams } from './teamMaker';
 import { TEAM_ICONS, TeamBadge } from './TeamBadge';
@@ -40,9 +41,11 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const session = useSession();
   const { teacher } = useSignedIn();
   const alone = mode === 'versus' && !!session && !teacher;
+  // The computer's fun name for this game (teacher, 2026-11-24), a new one each game.
+  const [cpuName] = useState(nextCpuName);
   const [slots, setSlots] = useState<Slot[]>(() => {
-    if (alone) return [{ name: session.name, kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
-    if (vsComputer) return [{ name: rollName(), kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
+    if (alone) return [{ name: session.name, kind: human }, { name: cpuName, kind: 'cpu' }];
+    if (vsComputer) return [{ name: rollName(), kind: human }, { name: cpuName, kind: 'cpu' }];
     const first = rollName();
     return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
   });
@@ -80,10 +83,10 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const hasCpu = solo ? opponent === 'cpu' : slots.some((s) => s.kind === 'cpu');
 
   function build(): TurnPlayer[] {
-    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? t('teams.computer') : s.name, kind: s.kind, colorIndex: s.icon ?? i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}), ...(characters?.length ? { art: characters[charOf(i)].image } : {}) }));
+    const players: TurnPlayer[] = slots.map((s, i) => ({ id: `p${i}`, name: s.kind === 'cpu' ? cpuName : s.name, kind: s.kind, colorIndex: s.icon ?? i, score: 0, ...(members[i]?.length ? { members: members[i] } : {}), ...(characters?.length ? { art: characters[charOf(i)].image } : {}) }));
     const free = [9, ...TEAM_ICONS.keys()].find((k) => !players.some((p) => p.colorIndex === k)) ?? 9;
     const freeChar = characters?.length ? characters[deal.find((k) => !slots.some((_s, j) => charOf(j) === k)) ?? 0].image : undefined;
-    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? t('teams.computer') : t('teams.teacher'), kind: opponent, colorIndex: free, score: 0, ...(freeChar ? { art: freeChar } : {}) });
+    if (solo) players.push({ id: 'p-other', name: opponent === 'cpu' ? cpuName : t('teams.teacher'), kind: opponent, colorIndex: free, score: 0, ...(freeChar ? { art: freeChar } : {}) });
     return players;
   }
   function start() { onStart?.(build(), level); }

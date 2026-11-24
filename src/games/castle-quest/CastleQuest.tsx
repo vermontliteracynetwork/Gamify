@@ -1,4 +1,5 @@
 import '@fontsource/chicle/400.css';
+import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -22,7 +23,7 @@ import { PowerUpTray, roleOf, useHeldPowerUps } from '../../engine/HeldPowerUps'
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import PowerUpPop from '../../engine/PowerUpPop';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
@@ -38,7 +39,7 @@ import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
 import ShareHow from '../ShareHow';
-import { useSavedSetup } from '../useSavedSetup';
+import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import { BoardArt, boardGround, C, CHICLE, Die2D, SQUARE_COLORS, WOBBLE } from './boardArt';
 import { layout, placePowers, POWERS, roll, spaceKinds, tornadoSpots, TRAIL_SPACES, trailOf, TRAILS, wheelStop, type Layout, type Power, type SpaceKind } from './board';
@@ -61,7 +62,8 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'versus' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
+  const hostTeams = useHostTeams();
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'versus' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false }, hostTeams ? { who: 'teams' as const } : undefined);
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -410,7 +412,7 @@ export default function CastleQuest() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="castle-quest" />
-      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase !== 'play' && phase !== 'end' && <GameTopRow hint="castle-quest" onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
         <GameWelcome game={castleQuestManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('cq.how1') },
@@ -507,9 +509,9 @@ export default function CastleQuest() {
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
             </div>
           </div>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-30 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="castle-quest" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <AnimatePresence>

@@ -261,6 +261,14 @@ button, a, [role="button"] {
      a small or zoomed-in window, 16px on big desktops. */
   html { font-size: clamp(12px, min(8px + 0.95vh, 7.5px + 0.6vw), 16.5px); }
 }
+/* Phones (teacher, 2026-11-24: "phone sizing mobile site needs a great deal
+   of improvement"): no text below 13px on content pages, and the sticky site
+   bar never hides a heading that a link jumps to. Game screens and their
+   tiny cover previews (aria-hidden art) keep their own sizes. */
+@media (max-width: 639px) {
+  body:not(:has(.game-stage)) main .text-xs:not([aria-hidden="true"] *) { font-size: 0.8125rem; }
+  html { scroll-padding-top: 4.5rem; }
+}
 /* Roomier side margins on every content page (not game screens), growing
    with the window, so pages never look crowded (teacher, 2026-11-18). */
 @media (min-width: 640px) {
@@ -583,6 +591,10 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 @keyframes pop { 0% { transform: scale(0.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
 .brand-menu .game-top > button { width: 2.75rem; height: 2.75rem; }
 .brand-menu .game-top > button svg { width: 1.25rem; height: 1.25rem; }
+/* The tips lightbulb is for play; start menus keep their three buttons (2026-11-24). */
+.brand-menu .game-top > .hint-btn { display: none; }
+/* Tips are strictly for game play: never under the results box (teacher, 2026-11-24). */
+body:has(.results-box) .hint-btn { display: none; }
 
 /* Turn card glow (teacher, 2026-11-06): sun rays that spin clockwise and a
    soft halo that breathes. Slow and gentle, so it stays on in every motion

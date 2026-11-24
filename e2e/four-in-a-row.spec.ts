@@ -15,7 +15,6 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
   await page.getByRole('combobox', { name: 'Computer level' }).selectOption('easy');
   await finishSetup(page);
-
   for (let turn = 0; turn < 2; turn++) {
     const dialog = page.getByRole('dialog');
     await startTurn(page); // the player's turn card (icon only), then the question
@@ -26,7 +25,17 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
     await buttons.nth(labels.findIndex((l) => l.trim().endsWith(answers.get(prompt)!))).click();
     await page.getByRole('button', { name: 'Drop in column 4' }).click();
     if (turn === 1 && info.project.name === 'ipad-landscape') for (let f = 0; f < 6; f++) { await page.screenshot({ path: `test-results/four-drop-${f}.png` }); await page.waitForTimeout(70); }
-    await expect(page.getByText('The computer is choosing...')).toBeVisible();
+    await expect(page.getByText(/ is choosing\.\.\.$/)).toBeVisible();
+    if (turn === 0) {
+      // The lightbulb by Settings opens the game's tips; Got it closes them (teacher, 2026-11-24).
+      await page.getByRole('button', { name: 'Tips' }).click();
+      const tips = page.getByRole('dialog', { name: 'Tips' });
+      await expect(tips.getByRole('listitem').first()).toBeVisible();
+      await page.waitForTimeout(700);
+      await page.screenshot({ path: `test-results/four-tips-${info.project.name}.png` });
+      await tips.getByRole('button', { name: 'Got it' }).click();
+      await expect(tips).toHaveCount(0);
+    }
     // Back to the player: their turn card comes up (no turn bar; the scores glow).
     await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 20000 });
   }
@@ -40,11 +49,9 @@ test('Four in a Row on two devices: the friend joins with the code and moves sho
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   await openSetup(page, '/games/four-in-a-row');
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  // Next until the "On another device" choice shows (the Ball Collection
-  // pieces page may come first, 2026-11-01).
-  for (let i = 0; i < 4 && !(await page.getByRole('radio', { name: 'On another device' }).isVisible()); i++) await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await page.getByRole('radio', { name: 'On another device' }).click();
+  // "On another device" sits under Share on the way page (2026-11-23).
+  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('radio', { name: 'Share a join code' }).click();
   await finishSetup(page);
   await expect(page.getByRole('heading', { name: 'Waiting for Your Friend' })).toBeVisible();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.slice(-5);
@@ -98,12 +105,18 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   await card.getByRole('button', { name: 'Close' }).click();
   // Held power-ups show on the player's next turn.
   await page.getByRole('button', { name: 'Drop in column 4' }).click();
-  await expect(page.getByText('The computer is choosing...')).toBeVisible();
+  await expect(page.getByText(/ is choosing\.\.\.$/)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 20000 });
   await answer();
-  // Earned power-ups switch on by themselves on the next turn (teacher, 2026-11-07).
-  const on = page.getByRole('dialog', { name: /^Double Drop is on/ });
-  await expect(on).toBeVisible({ timeout: 15000 });
+  // The power-up won on this answer shows first; close it.
+  const won = page.getByRole('dialog').filter({ hasText: /Double Drop|Pop Out/ });
+  await expect(won).toBeVisible({ timeout: 15000 });
+  await won.getByRole('button', { name: 'Close' }).click();
+  // Held power-ups wait in the tray for a tap (teacher, 2026-11-24): tap
+  // Double Drop, read its card, then Use it!
+  const tray = page.getByRole('group', { name: 'Power-ups' });
+  await tray.getByRole('button', { name: /Double Drop/ }).click({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Use it!' }).click();
   await page.screenshot({ path: `test-results/four-power-${info.project.name}.png` });
   // Close every power-up card (a new one can stack on top).
   for (let k = 0; k < 4; k++) {
@@ -118,7 +131,7 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   await page.getByRole('button', { name: 'Drop in column 3' }).click();
   await expect(page.getByRole('button', { name: 'Drop in column 5' })).toBeEnabled({ timeout: 4000 });
   await page.getByRole('button', { name: 'Drop in column 5' }).click();
-  await expect(page.getByText('The computer is choosing...')).toBeVisible();
+  await expect(page.getByText(/ is choosing\.\.\.$/)).toBeVisible();
   await expect(page.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(5, { timeout: 15000 });
   expect(problems).toEqual([]);
 });

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import { pace } from '../../engine/pace';
 import { useSearchParams } from 'react-router-dom';
@@ -20,7 +21,7 @@ import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { BALL_PACK, BALL_PACK_CLEARED } from '../../config';
 import type { StringKey } from '../../i18n/en';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -28,7 +29,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import WayToPlay from '../WayToPlay';
 import { fourInARowManifest } from './manifest';
-import { useSavedSetup } from '../useSavedSetup';
+import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
@@ -50,7 +51,8 @@ export default function FourInARow() {
   const still = settings.motion === 'still';
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', way: 'solo' as 'share' | 'solo', powerUps: true, powerOff: [] as string[] });
+  const hostTeams = useHostTeams();
+  const [setup, change] = useSavedSetup('four-in-a-row', { setId: LIBRARY[0].id, first: 'p1' as First, perTurn: 1, where: 'here' as 'here' | 'other', way: 'solo' as 'share' | 'solo', powerUps: true, powerOff: [] as string[] }, hostTeams ? { way: 'share' as const } : undefined);
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const [team, setTeam] = useState<{ players: TurnPlayer[]; level: CpuLevel }>({ players: [], level: 'medium' });
   const pool = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
@@ -247,7 +249,7 @@ export default function FourInARow() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0 [--fr-extra:8rem] lg:[--fr-extra:0rem]' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="four-in-a-row" />
-      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase !== 'play' && phase !== 'end' && <GameTopRow hint="four-in-a-row" onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={fourInARowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -317,9 +319,9 @@ export default function FourInARow() {
         // small controls on top, the players right beside it, top aligned.
         <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="four-in-a-row" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
@@ -403,7 +405,7 @@ export default function FourInARow() {
             <PowerUpTray manifest={fourInARowManifest} items={held.held} onUse={useItem} disabled={step !== 'pick' || player?.kind === 'cpu' || remoteTurn} />
             {step === 'pop' && <p className="bg-accent border-std border-border rounded-input px-3 py-1.5 font-bold text-center" role="status">{t('fr.popPick')}</p>}
             {phase === 'play' && (remoteTurn || player?.kind === 'cpu') && (
-              <p className="bg-surface border-std border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking')}</p>
+              <p className="bg-surface border-std border-border rounded-input px-3 py-1.5 lg:py-2 font-bold text-sm text-center" role="status">{remoteTurn ? t('fr.waitingFor', { name: player!.name }) : t('fr.cpuThinking', { name: player!.name })}</p>
             )}
           </div>
           </div>

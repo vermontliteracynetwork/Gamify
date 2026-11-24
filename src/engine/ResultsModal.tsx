@@ -164,7 +164,7 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const [reviewing, setReviewing] = useState(false);
   const btn = 'min-h-12 px-3 rounded-input border-bold border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
   return (
-    <div className="brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="results-box brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
         className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>

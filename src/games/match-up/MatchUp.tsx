@@ -118,7 +118,7 @@ export default function MatchUp() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-up" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow hint="match-up" onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
         <GameWelcome game={matchUpManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <HandTap weight="fill" size={22} />, text: t('mu.how1') },

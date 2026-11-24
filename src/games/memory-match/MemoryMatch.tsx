@@ -157,7 +157,7 @@ export default function MemoryMatch() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="memory-match" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow hint="memory-match" onSettings={() => setSettingsOpen(true)} />
 
       {phase === 'welcome' && (
         <GameWelcome game={memoryMatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -184,12 +184,12 @@ export default function MemoryMatch() {
         <section className="grid gap-3">
           <div className="flex flex-wrap items-center gap-2" aria-live="polite">
             {players.length > 1 ? players.map((p, i) => (
-              <span key={p.id} className={`inline-flex items-center gap-2 rounded-pill border-bold px-3 min-h-11 font-bold bg-surface ${i === turn && phase === 'play' ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`}>
+              <span key={p.id} aria-current={i === turn && phase === 'play' ? 'true' : undefined} className={`inline-flex items-center gap-2 rounded-pill border-bold px-3 min-h-11 font-bold ${i === turn && phase === 'play' ? 'border-border bg-accent ring-4 ring-accent' : 'border-border-soft bg-surface'}`}>
                 <TeamBadge colorIndex={p.colorIndex} size={28} />{p.name}<span className="font-display text-xl tabular-nums">{scores[i]}</span>
               </span>
             )) : <span className="inline-flex items-center gap-2 rounded-pill border-bold border-border px-4 min-h-11 font-display text-xl bg-surface">{t('mm.found', { found: Object.keys(found).length, total: deck.length / 2 })}</span>}
             <span className="inline-flex items-center rounded-pill border-bold border-border px-4 min-h-11 font-bold bg-surface">{t('mm.moves', { count: moves })}</span>
-            {player?.kind === 'cpu' && phase === 'play' && <span className="font-bold stage-text">{t('mm.cpuTurn')}</span>}
+            {player?.kind === 'cpu' && phase === 'play' && <span className="font-bold stage-text">{t('mm.cpuTurn', { name: player.name })}</span>}
           </div>
           <div className="grid gap-2 sm:gap-3 mx-auto w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, maxWidth: `min(100%, calc((100dvh - 18.125rem + var(--chrome-save, 0rem)) / ${rows} * ${cols} * ${ratio.toFixed(3)}))` }}>
             {deck.map((c, i) => {

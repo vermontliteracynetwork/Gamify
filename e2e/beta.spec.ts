@@ -44,9 +44,9 @@ test('the week 1 teacher survey appears in the menu, and its answers reach the o
   await expect(page.getByText('Thank you!')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Quick survey' })).toHaveCount(0, { timeout: 4000 });
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta and surveys' }).click();
   const card = page.getByRole('region', { name: 'Beta and surveys' });
   await expect(card.getByText('More science sets')).toBeVisible();
@@ -56,9 +56,9 @@ test('the week 1 teacher survey appears in the menu, and its answers reach the o
 
 test('owner dashboard shows growth tips from the numbers', async ({ page }) => {
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Growth chart' }).click();
   const card = page.getByRole('region', { name: 'Growth tips' });
   await expect(card.getByText(/no class or set yet|Nothing to act on/)).toBeVisible();
@@ -73,9 +73,9 @@ test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboa
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByText('Thank you! We read every message.')).toBeVisible();
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Tell Gamify reports' }).click();
   const card = page.getByRole('region', { name: 'Tell Gamify reports' });
   await card.getByRole('radio', { name: /Help requests \(1\)/ }).click();
@@ -84,9 +84,9 @@ test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboa
 
 test('developer dashboard: bookkeeping with totals and CSV, plan preview with a banner', async ({ page }, info) => {
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Subscriptions' }).click();
   await expect(page.getByRole('region', { name: 'Subscriptions' })).toContainText('Real numbers show here once the cloud is connected.');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Bookkeeping' }).click();

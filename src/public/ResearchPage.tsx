@@ -46,7 +46,7 @@ export default function ResearchPage() {
                   <p className="text-sm font-semibold text-muted"><span className="font-bold">{t('research.goodToKnow')} </span>{f.fair}</p>
                   <ul className="grid gap-1 list-none p-0 m-0">
                     {f.sources.map((s) => (
-                      <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer" className="text-xs font-bold inline-flex gap-1 items-start">{s.cite}<ArrowSquareOut size={14} className="shrink-0 mt-0.5" aria-label={t('research.newTab')} /></a></li>
+                      <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer" className="text-xs font-bold inline-flex gap-1 items-start max-sm:py-1.5">{s.cite}<ArrowSquareOut size={14} className="shrink-0 mt-0.5" aria-label={t('research.newTab')} /></a></li>
                     ))}
                   </ul>
                 </motion.article>

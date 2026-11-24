@@ -1,3 +1,4 @@
+import { teacherSession } from './session';
 import { test, expect, type Page } from '@playwright/test';
 import { seedGameCode, signUpTeacher } from './setup';
 
@@ -104,7 +105,7 @@ test('join page: five wrong codes means a short wait; the code screen shows a QR
 });
 
 test.describe('signed in', () => {
-  test.use({ storageState: 'e2e/teacher-session.json' });
+  test.use({ storageState: teacherSession });
   test('projector code screen', async ({ page }, info) => {
     await page.goto('/show/BKDFT');
     await expect(page.getByRole('img', { name: /QR code/ })).toBeVisible();

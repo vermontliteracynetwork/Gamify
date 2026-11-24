@@ -118,7 +118,7 @@ export default function FarmGrow() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="landscape:[--wide-save:1rem] max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="farm-grow" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)}>
+      <GameTopRow hint="farm-grow" onSettings={() => setSettingsOpen(true)}>
         {(phase === 'play' || phase === 'end') && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={farmGrowManifest.name} /></h1>}
       </GameTopRow>
 

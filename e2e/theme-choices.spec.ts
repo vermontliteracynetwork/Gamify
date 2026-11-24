@@ -65,9 +65,9 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Gallery review' }).click();
   await page.getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByText('No themes waiting for review.')).toBeVisible();

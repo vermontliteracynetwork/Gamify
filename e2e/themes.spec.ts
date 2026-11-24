@@ -301,9 +301,9 @@ test('Free plan: the Theme Builder works on Game Show only', async ({ page }) =>
 
 test('developer view opens with the owner PIN and links to the Theme Builder', async ({ page }) => {
   await page.goto('/owner');
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByRole('region', { name: 'Dashboard' })).toBeVisible();
   await page.screenshot({ path: `test-results/owner-${test.info().project.name}.png` });
   // One screen: the page itself never scrolls.

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Cat, DeviceTablet, Question } from '@phosphor-icons/react';
@@ -11,7 +12,7 @@ import { useAsk } from '../../engine/useAsk';
 import { playClip } from '../../engine/music';
 import TapOk from '../../engine/TapOk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow } from '../../ui/fields';
 import { useSignedIn } from '../../auth/session';
@@ -152,9 +153,9 @@ function StudentPlay() {
               </span>
             </div>
           </div>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="territory" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           {stopped && !asking && !reward && state?.phase === 'play' && (

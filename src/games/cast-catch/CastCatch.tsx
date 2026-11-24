@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import ClassPlayOptions, { classPlayQuery, DEFAULT_CLASS_PLAY, type ClassPlay } from '../../live/ClassPlay';
 import { AnimatePresence, motion } from 'motion/react';
@@ -15,7 +16,7 @@ import { getLive } from '../../live/session';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -226,7 +227,7 @@ export default function CastCatch() {
       {clock.element}
       {(phase === 'play' || phase === 'end')
         ? <h1 className="sr-only">{castCatchManifest.name}</h1>
-        : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+        : <GameTopRow hint="cast-catch" onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={castCatchManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -335,9 +336,9 @@ export default function CastCatch() {
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg tabular-nums" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.points', { count: score })}>{score} {t('cc.pts')}</span>
             <span className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-display text-lg" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('cc.caught', { count: catches.length })}><FishIcon weight="fill" size={20} />{catches.length}</span>
           </div>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="cast-catch" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           {phase === 'play' && (

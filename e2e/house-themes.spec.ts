@@ -38,6 +38,9 @@ test('Four in a Row Animal Friends', async ({ page }, info) => {
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('radio', { name: /Animal Friends/ }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+  // Share (two players), then the players page.
+  await page.getByRole('radio', { name: /^Share/ }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   // The team picture is the player's piece, picked on the player card (teacher, 2026-11-06).
   await page.getByRole('button', { name: /^Pick a player piece for / }).first().click();
   await page.getByRole('dialog').getByRole('button', { name: /^Elephant/ }).click();

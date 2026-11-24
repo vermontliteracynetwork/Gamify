@@ -76,7 +76,10 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of/ })).toBeVisible();
-  // Alone on their device, the student plays the computer.
+  // Alone on their device, the student plays the computer: the way step
+  // opens on Solo (2026-11-24), and the players page has the computer.
+  await expect(page.getByRole('radio', { name: /^Solo/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('combobox', { name: 'Computer level' })).toBeVisible();
   await page.screenshot({ path: `test-results/choose-vs-${info.project.name}.png` });
   expect(problems).toEqual([]);

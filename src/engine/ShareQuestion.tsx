@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ANSWER_SOUNDS, playClip } from './music';
 import { CPU_THINK_MS, pace, POP_IN } from './pace';
 import TapOk from './TapOk';
-import { AccessButton } from '../settings/SettingsPanel';
+import { GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import { motion } from 'motion/react';
 import { Check, SpeakerHigh, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
@@ -60,6 +60,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
   const [shown, setShown] = useState(false);
   const [picked, setPicked] = useState<number | null>(null);
   const [cpu, setCpu] = useState<'thinking' | 'right' | 'miss' | null>(player.kind === 'cpu' ? 'thinking' : null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // The turn card (teacher, 2026-10-31): the player's own icon, big, and a tap
   // to start, so every team knows it is their turn. The computer's card
   // moves on by itself.
@@ -133,7 +134,9 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
             className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
-          <AccessButton small />
+          {/* Only Listen and Settings on a question (teacher, 2026-11-24); accessibility is in Settings. */}
+          <GearButton small onClick={() => setSettingsOpen(true)} />
+          <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
         </div>
 
         {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
@@ -174,7 +177,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         <div className="min-h-[3.5rem] flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         {cpu ? (
           <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
-            {cpu === 'thinking' ? t('share.cpuThinking') : cpu === 'right' ? t('share.cpuRight') : t('share.cpuMiss')}
+            {t(cpu === 'thinking' ? 'share.cpuThinking' : cpu === 'right' ? 'share.cpuRight' : 'share.cpuMiss', { name: player.name })}
           </p>
         ) : (
           <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">

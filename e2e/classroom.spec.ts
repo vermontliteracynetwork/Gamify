@@ -23,7 +23,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   // Supports for Ava, behind the teacher PIN (chosen here the first time).
   await page.getByRole('button', { name: 'Supports for Ava' }).click();
   for (const _ of [0, 1]) {
-    for (const d of '1357') await page.getByRole('button', { name: d, exact: true }).click();
+    await page.locator('input[autocomplete="one-time-code"]').last().fill('1357');
     await page.waitForTimeout(250);
   }
   const dialog = page.getByRole('dialog', { name: 'Supports for Ava' });
@@ -55,11 +55,11 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   const pin = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').pin as string);
   expect(pin).toMatch(/^\d{4}$/);
   const wrong = pin === '1111' ? '2222' : '1111';
-  for (const d of wrong) await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill(wrong);
   await expect(page.getByText('Not quite. Try your PIN again.')).toBeVisible();
   await page.screenshot({ path: `test-results/arcade-pin-${info.project.name}.png` });
   await page.waitForTimeout(800);
-  for (const d of pin) await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill(pin);
   // The code opens its game for Ava, and no other.
   await expect(page).toHaveURL(/\/games\/star-quiz/);
   await page.goto('/games/game-show');
@@ -134,7 +134,7 @@ test('Plus: upload a student picture and set a PIN; a game link asks students fo
   await expect(page.getByRole('heading', { name: "Who's Playing?" })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Mia' }).locator('img')).toHaveCount(1);
   await page.getByRole('button', { name: 'Mia' }).click();
-  for (const d of '4826') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('4826');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('gamify:arcade-session')!).name)).toBe('Mia');
   expect(problems).toEqual([]);

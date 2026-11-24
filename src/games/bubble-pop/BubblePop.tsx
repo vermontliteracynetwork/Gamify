@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -11,7 +12,7 @@ import ResultsModal from '../../engine/ResultsModal';
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -279,7 +280,7 @@ export default function BubblePop() {
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-4'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bubble-pop" />
       {clock.element}
-      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{bubblePopManifest.name}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{bubblePopManifest.name}</h1> : <GameTopRow hint="bubble-pop" onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={bubblePopManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -310,9 +311,9 @@ export default function BubblePop() {
         // score, the rounds as a progress bar, and the shots left (teacher,
         // 2026-11-16). Tap or click the board to shoot; no Shoot button.
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="bubble-pop" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 

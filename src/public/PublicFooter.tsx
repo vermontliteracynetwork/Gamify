@@ -8,7 +8,7 @@ export default function PublicFooter() {
     <footer className="mt-16 border-t-[2.5px] border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid gap-5 lg:grid-cols-[minmax(12rem,auto)_minmax(0,1fr)] items-start">
         <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
-        <nav aria-label={t('public.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-bold text-sm">
+        <nav aria-label={t('public.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-bold text-sm max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-3 max-sm:gap-y-0 max-sm:text-base [&>a]:max-sm:flex [&>a]:pointer-coarse:min-h-11 [&>a]:pointer-coarse:inline-flex [&>a]:items-center">
           <Link to="/features">{t('public.nav.features')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>
           <Link to="/themes">{t('public.nav.themes')}</Link>
@@ -20,7 +20,7 @@ export default function PublicFooter() {
           <Link to="/beta">{t('public.nav.beta')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
-        <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm">
+        <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-3 max-sm:gap-y-0 [&>a]:max-sm:flex [&>a]:pointer-coarse:min-h-11 [&>a]:pointer-coarse:inline-flex [&>a]:items-center">
           <Link to="/privacy">{t('legal.privacy')}</Link>
           <Link to="/student-data">{t('public.nav.studentData')}</Link>
           <Link to="/terms">{t('legal.terms')}</Link>

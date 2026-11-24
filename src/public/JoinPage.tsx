@@ -134,7 +134,7 @@ export default function JoinPage() {
       <h1 className="title-bubble text-5xl"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-lg">{t('join.sub')}</p>
       <div className="flex items-center justify-center gap-2 w-full">
-        <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoCapitalize="characters" autoComplete="off" spellCheck={false}
+        <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoFocus enterKeyHint="go" autoCapitalize="characters" autoComplete="off" autoCorrect="off" spellCheck={false}
           onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && ready) void ready.go(); }}
           aria-label={t('join.code')} placeholder="BKDFT"
           className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-heavy border-border bg-surface uppercase" />

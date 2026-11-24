@@ -41,6 +41,9 @@ test('keyboard: set up Game Show, pick a card and answer', async ({ page }) => {
   await tabTo(page, new RegExp(`^[A-D]\\s+${right.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
   await page.keyboard.press('Enter');
   await expect(dialog.getByText('You got it!')).toBeVisible();
+  // The answer waits for a tap (2026-11-24); Enter goes on from the keyboard.
+  await expect(dialog.getByRole('button', { name: 'Continue', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
   // A right answer picks a card to turn over.
   await expect(dialog).toHaveCount(0, { timeout: 5000 });
   await tabTo(page, /^Card 1(,|$)/);
