@@ -900,10 +900,10 @@ function SkyWaiting({ w: w0 = 820, h: h0 = 1180 }: { w?: number; h?: number }) {
 // the live game's own (art.tsx); this strip only arranges it.
 type Spot = { l: number; t: number; w: number; rot?: number };
 const at = ({ l, t, w, rot }: Spot): CSSProperties => ({ position: 'absolute', left: `${l}%`, top: `${t}%`, width: `${w}%`, transform: rot ? `rotate(${rot}deg)` : undefined });
-const COOP_CATS: (Spot & { look: number })[] = [{ l: 28, t: 58, w: 8, look: 0 }, { l: 49, t: 62, w: 7.5, look: 2 }, { l: 10, t: 70, w: 9, look: 3 }, { l: 60, t: 74, w: 8.5, look: 5 }];
-const COOP_MICE: (Spot & { look: number })[] = [{ l: 77.6, t: 54.5, w: 4.8, look: 1 }, { l: 67, t: 66, w: 5, look: 0 }, { l: 84, t: 80, w: 5, look: 2 }];
-const COMP_CATS: (Spot & { look: number })[] = [{ l: 30, t: 60, w: 7.5, look: 0 }, { l: 44, t: 70, w: 8, look: 3 }, { l: 12, t: 72, w: 8, look: 1 }, { l: 58, t: 62, w: 7, look: 2 }, { l: 22, t: 80, w: 8, look: 5 }];
-const COMP_MICE: (Spot & { look: number })[] = [{ l: 66, t: 70, w: 5, look: 0 }, { l: 74, t: 63, w: 4.6, look: 1 }, { l: 80, t: 76, w: 5, look: 2 }, { l: 52, t: 82, w: 5, look: 1 }, { l: 37, t: 84, w: 4.8, look: 0 }, { l: 88, t: 68, w: 4.6, look: 2 }];
+const COOP_CATS: (Spot & { look: number })[] = [{ l: 28, t: 58, w: 10.4, look: 0 }, { l: 49, t: 62, w: 9.8, look: 2 }, { l: 10, t: 70, w: 11.7, look: 3 }, { l: 60, t: 74, w: 11.1, look: 5 }];
+const COOP_MICE: (Spot & { look: number })[] = [{ l: 76, t: 56, w: 8.6, look: 1 }, { l: 84, t: 67, w: 9, look: 0 }, { l: 86, t: 81, w: 9, look: 2 }];
+const COMP_CATS: (Spot & { look: number })[] = [{ l: 30, t: 60, w: 9.8, look: 0 }, { l: 44, t: 70, w: 10.4, look: 3 }, { l: 12, t: 72, w: 10.4, look: 1 }, { l: 58, t: 62, w: 9.1, look: 2 }, { l: 22, t: 80, w: 10.4, look: 5 }];
+const COMP_MICE: (Spot & { look: number })[] = [{ l: 64, t: 72, w: 9, look: 0 }, { l: 72, t: 62, w: 8.3, look: 1 }, { l: 80, t: 76, w: 9, look: 2 }, { l: 50, t: 84, w: 9, look: 1 }, { l: 66, t: 86, w: 8.6, look: 0 }, { l: 88, t: 66, w: 8.3, look: 2 }];
 function Animals({ cats = [], mice = [] }: { cats?: (Spot & { look: number })[]; mice?: (Spot & { look: number })[] }) {
   return <>{cats.map((c, i) => <span key={`c${i}`} style={at(c)}><CatArt look={c.look} className="w-full h-auto block" /></span>)}{mice.map((m, i) => <span key={`m${i}`} style={at(m)}><MouseArt look={m.look} className="w-full h-auto block" /></span>)}</>;
 }
@@ -972,7 +972,7 @@ function TerritoryComp({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }
       <RoomArt className="absolute inset-0">
         <Animals cats={COMP_CATS} mice={COMP_MICE} />
         {/* a mouse scares a cat out of the room: it runs off, unhurt */}
-        <span style={at({ l: 1, t: 60, w: 7, rot: -10 })}><span className="block -scale-x-100"><CatArt look={1} className="w-full h-auto block" /></span></span>
+        <span style={at({ l: 1, t: 60, w: 9, rot: -10 })}><span className="block -scale-x-100"><CatArt look={1} className="w-full h-auto block" /></span></span>
         <span className="absolute" style={{ left: '8%', top: '58%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
       </RoomArt>
       <RoomStrip w={w} center={<TeamCounts />} />

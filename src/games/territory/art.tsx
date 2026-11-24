@@ -28,6 +28,7 @@ const WOOD = { main: '#c47a45', deep: '#8a4f2a' };
 const TAN = '#f3cd8c'; // her pack's floor square, a Nature tone beside Butter
 const MOUSE_BROWN = { main: '#c9ac90', deep: '#8f7258' };
 const GRAY = { main: '#aaa6bb', deep: '#5f5a76' };
+const SLATE = { main: '#8c8a9a', deep: '#55536a' }; // the gray mouse: darker than the gray cat (Art Director)
 const ORANGE_DEEP = '#b84300'; // the kit's orange deep shade (src/brand/CrayonKit)
 
 // Team colors: Cats wear Orange with Peach, Mice wear Gamify purple with its pastel.
@@ -131,11 +132,11 @@ function One({ parts, color, deep, w = 4.4, children }: { parts: Part[]; color: 
 }
 const legPart = (x: number, top: number, w = 12, h = 26, tilt = 0): Part => { const l = leg(x, top - 6, w, h + 6, tilt); return { d: l.d, t: l.t }; };
 function Paw({ x, top, w = 12, h = 26, tilt = 0, color, toe }: { x: number; top: number; w?: number; h?: number; tilt?: number; color?: string; toe?: string }) {
-  const l = leg(x, top, w, h, tilt); const paw = leg(x, top + h - 9, w, 9, 0);
+  const l = leg(x, top, w, h, tilt); const paw = leg(x, top + h - 12, w, 12, 0);
   return (
     <g transform={l.t}>
       {color && <path d={paw.d} fill={color} stroke="none" />}
-      {color && <path d={`M${x - w / 2 - 0.4} ${top + h - 9} H${x + w / 2 + 0.4}`} fill="none" stroke={INK} strokeWidth="2.6" />}
+      {color && <path d={`M${x - w / 2 - 0.4} ${top + h - 12} H${x + w / 2 + 0.4}`} fill="none" stroke={INK} strokeWidth="2.6" />}
       {toe && <path d={`M${x - w / 2 + 2} ${top + h - 5} C${x - 2} ${top + h - 7.5} ${x + 2} ${top + h - 7.5} ${x + w / 2 - 2} ${top + h - 5}`} fill="none" stroke={toe} strokeWidth="2.6" />}
     </g>
   );
@@ -182,6 +183,8 @@ export function CatArt({ look = 0, className, style, label }: { look?: number; c
         <Paw x={62} top={66} tilt={-8} color={c.chest === P.paper ? P.paper : undefined} toe={c.chest === P.paper ? GRAY.main : c.deep} />
         <Paw x={36} top={68} tilt={-9} color={c.chest === P.paper ? P.paper : undefined} toe={c.chest === P.paper ? GRAY.main : c.deep} />
         <Paw x={70} top={66} tilt={9} color={c.chest === P.paper ? P.paper : undefined} toe={c.chest === P.paper ? GRAY.main : c.deep} />
+        {/* white bib from under the chin down the front (her pack) */}
+        <path d="M66 46 C72 46 78 50 78 57 C78 64 73 70 67 71 C63 66 62 58 63 52 C63 49 64 47 66 46 Z" fill={c.chest} stroke="none" />
         {/* three bold stripes, hand strokes from the back */}
         {c.stripes && <path d="M28 43 C26 49 27 55 30 59 M40 42 C38 49 39 56 42 61 M52 42 C50 49 51 55 54 59" fill="none" stroke={c.deep} strokeWidth="5.4" />}
       </One>
@@ -204,7 +207,7 @@ export function CatArt({ look = 0, className, style, label }: { look?: number; c
 export const MOUSE_LOOKS = ['Brown mouse', 'Gray mouse', 'White mouse'] as const;
 const MOUSE = [
   { body: MOUSE_BROWN.main, deep: MOUSE_BROWN.deep },
-  { body: GRAY.main, deep: GRAY.deep },
+  { body: SLATE.main, deep: SLATE.deep },
   { body: P.paper, deep: GRAY.main },
 ];
 export function MouseArt({ look = 0, className, style, label }: { look?: number; className?: string; style?: CSSProperties; label?: string }) {
@@ -212,20 +215,23 @@ export function MouseArt({ look = 0, className, style, label }: { look?: number;
   return (
     <Piece className={className} style={style} label={label} grow={1} seed={look}>
       <g transform="translate(50 95) scale(0.89) translate(-50 -95)">
-      {/* long pink tail, curving back and up */}
-      <Tube d="M18 76 C6 76 2 64 2 54 C2 47 8 45 11 49" color={P.blush} w={3.6} />
+      {/* long thin pink tail trailing behind, rising gently (her pack) */}
+      <Tube d="M18 76 C8 76 2 70 -6 60" color={P.blush} w={2.8} />
       {/* back foot, stretched out */}
       <Wax d="M22 84 C16 86 10 90 9 93 C14 95 22 93 28 89 Z" color={P.blush} w={3.4} hatch={false} />
       {/* the round body, a lopsided teardrop with the point at the nose */}
       <Wax d="M16 74 C13 58 28 47 48 47 C64 47 76 54 86 64 C92 70 93 75 88 78 C79 84 64 89 46 89 C29 89 18 84 16 74 Z" color={m.body} deep={m.deep} />
       {/* front foot reaching forward */}
       <Wax d="M64 84 C70 86 76 89 79 93 C74 95 66 93 60 89 Z" color={P.blush} w={3.4} hatch={false} />
+      {/* the far ear, behind, in the deep shade */}
+      <Wax d="M49 35 C39 35 35 43 36 51 C37 59 45 63 53 61 C61 59 64 51 61 43 C59 38 55 35 49 35 Z" color={m.body === P.paper ? P.cream : m.deep} w={4} hatch={false} />
       {/* big round ear */}
       <Wax d="M60 32 C50 32 46 40 47 48 C48 56 56 60 64 58 C72 56 75 48 72 40 C70 35 66 32 60 32 Z" color={m.body} deep={m.deep} w={4} />
       <path d="M60 39 C55 39 53 44 54 48 C55 52 59 53 63 52 C67 51 68 47 66.6 43.6 C65.6 41 63 39 60 39 Z" fill={P.blush} stroke="none" />
       <circle cx="76" cy="64" r="3.2" fill={INK} stroke="none" />
       <path d="M86.6 71 C89 68.6 93 69 94 72 C93 75 89 75.6 86.6 73.6 Z" fill={P.pink} strokeWidth="1.8" />
       <path d="M85 74 L97 71 M85 76.4 L97 78" fill="none" strokeWidth="1.5" />
+      <path d="M84 76 C82 79 79 80 76 79" fill="none" strokeWidth="1.8" />
       </g>
     </Piece>
   );
@@ -345,8 +351,8 @@ function fitFor(w: number, h: number, themed?: boolean): RoomFit & { rw: number;
   const x = (lx: number) => aspect > 1.6 ? Math.max(4, Math.min(96, 50 + (lx - 50) * (aspect / 1.6))) : lx;
   return {
     rw, rh, s, coreLeft, floor, aspect, ratio, x, y,
-    entrance: [toX(1284), floor], exit: [-14, floor + 6],
-    door: { left: toX(1170), top: floor - toY(205), width: toX(1398) - toX(1170) },
+    entrance: [toX(1290), floor], exit: [-14, floor + 6],
+    door: { left: toX(1215), top: floor - toY(135), width: toX(1365) - toX(1215) },
   };
 }
 const FitContext = createContext<RoomFit>(fitFor(1600, 1000));
