@@ -58,8 +58,8 @@ export default function PricingPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <div>
-          <h1 className="title-bubble text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
-          <p className="text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>
+          <h1 className="title-bubble text-4xl sm:text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
+          <p className="text-lg sm:text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 mt-4 mb-0">
             {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
@@ -102,7 +102,31 @@ export default function PricingPage() {
           <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}</Link>
         </section>
 
-        <div className="overflow-x-auto bg-surface border-bold border-border rounded-panel">
+        {/* Phones: each row of the table becomes a small card with the three
+            plans side by side, so nothing scrolls sideways (teacher, 2026-11-24). */}
+        <section aria-labelledby="compare-phone" className="sm:hidden grid gap-2">
+          <h2 id="compare-phone" className="font-display text-2xl">{t('pricing.compare')}</h2>
+          <div className="sticky top-14 z-10 grid grid-cols-3 gap-1 bg-surface border-bold border-border rounded-input p-1 text-center font-display text-lg">
+            {tiers.map((x) => <span key={x} className={`rounded-input py-1 ${x === 'plus' ? 'bg-accent' : ''}`}>{t(`pricing.${x}`)}</span>)}
+          </div>
+          <ul className="grid gap-2 list-none p-0 m-0">
+            {rows.map((r) => (
+              <li key={r.label} className="bg-surface border-std border-border rounded-input p-3 grid gap-2">
+                <span className="font-bold">{r.label}</span>
+                <span className="grid grid-cols-3 gap-1 text-center">
+                  {tiers.map((x) => {
+                    const v = r.value(x);
+                    return <span key={x} className={`rounded-input px-1 py-1.5 font-semibold text-sm leading-snug flex items-center justify-center min-h-10 ${x === 'plus' ? 'bg-accent/40' : 'bg-surface-2'}`}>
+                      <span className="sr-only">{t(`pricing.${x}`)}: </span>
+                      {typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}
+                    </span>;
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <div className="hidden sm:block overflow-x-auto bg-surface border-bold border-border rounded-panel">
           <table className="w-full min-w-[560px] text-left">
             <caption className="sr-only">{t('pricing.compare')}</caption>
             <thead><tr className="border-b-[2px] border-border">

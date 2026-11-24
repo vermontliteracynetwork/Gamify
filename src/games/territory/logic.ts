@@ -53,13 +53,65 @@ export interface Room {
 // Spots on the floor in % of the room (x, y = where the feet stand). Spread
 // out with a steady gap, front rows larger on screen (the stage scales by y).
 export const SPOTS: [number, number][] = (() => {
-  const rows = [[64, 9], [71, 10], [79, 11], [87, 10]] as const;
+  // The back and front rows have 7 spots on one step (wider than a cat's
+  // footprint) and never overlap each other: 14 animals fit with no body
+  // overlapping another. The two middle rows (6 spots, offset half a step)
+  // take the rest. 26 spots, room for the stage cap on both sides.
+  const rows = [64, 71, 79, 87];
+  const step = 88 / 6;
   const out: [number, number][] = [];
-  rows.forEach(([y, n], r) => {
-    for (let i = 0; i < n; i++) out.push([6 + ((i + (r % 2 ? 0.5 : 0)) * 88) / (n - 0.5), y]);
+  rows.forEach((y, r) => {
+    const n = r === 0 || r === 3 ? 7 : 6;
+    for (let i = 0; i < n; i++) out.push([6 + (i + (n === 6 ? 0.5 : 0)) * step, y]);
   });
   return out;
 })();
+// The floor rows (their y), back to front, and whether a spot has a close neighbour.
+const ROW_YS = [...new Set(SPOTS.map((s) => s[1]))];
+export function crowded(i: number, used: Set<number>): boolean {
+  const [x, y] = SPOTS[i];
+  const r = ROW_YS.indexOf(y);
+  if ([i - 1, i + 1].some((j) => used.has(j) && SPOTS[j]?.[1] === y)) return true;
+  return [...used].some((j) => {
+    const [jx, jy] = SPOTS[j];
+    return Math.abs(ROW_YS.indexOf(jy) - r) === 1 && Math.abs(jx - x) < 9;
+  });
+}
+
+// A piece's footprint in logic % (width, height), and the gap between two
+// pieces: 1 or more means their bodies do not overlap.
+const FOOT_W: Record<Side, number> = { defender: 13, invader: 10 };
+const FOOT_H: Record<Side, number> = { defender: 20, invader: 15 };
+export function gap(i: number, side: Side, j: number, sideJ: Side): number {
+  const [x, y] = SPOTS[i]; const [jx, jy] = SPOTS[j];
+  const front = y >= jy ? side : sideJ;
+  return Math.max(Math.abs(x - jx) / ((FOOT_W[side] + FOOT_W[sideJ]) / 2), Math.abs(y - jy) / FOOT_H[front]);
+}
+
+// The stage shows at most this many animals per side, so the room never turns
+// into a pile (Art Director, 2026-11-24; teacher to confirm the number). The
+// score strip still shows the true count. When a 13th arrives, the oldest one
+// on show leaves (a mouse in a poof, a cat out the window).
+export const STAGE_CAP = 12;
+// The pieces to draw at `now`: everything still leaving, plus each side's
+// newest STAGE_CAP; older ones pushed off the stage leave from the moment the
+// piece that pushed them arrived, and are gone after LEAVE_MS.
+export function stagePieces(pieces: Piece[], now: number, cap = STAGE_CAP): Piece[] {
+  const out: Piece[] = [];
+  for (const side of ['defender', 'invader'] as const) {
+    const mine = pieces.filter((p) => p.side === side);
+    const on = mine.filter((p) => !p.leaving).sort((a, b) => a.born - b.born || a.id - b.id);
+    const over = Math.max(0, on.length - cap);
+    on.forEach((p, k) => {
+      if (k >= over) { out.push(p); return; }
+      const at = on[k + cap].born;
+      if (now - at < LEAVE_MS) out.push({ ...p, leaving: { by: null, at } });
+    });
+    out.push(...mine.filter((p) => p.leaving && now - p.leaving.at < LEAVE_MS));
+  }
+  return out;
+}
+
 // Where invaders come in (the mouse hole) and where sent-away defenders leave
 // (the window), in % of the room.
 export const ENTRANCE: [number, number] = [80, 59];
@@ -79,11 +131,23 @@ export function newRoom(mode: 'together' | 'compete', now: number, defenders = 3
 
 // Adds one piece on a free spot (any spot once the floor is full).
 export function add(r: Room, side: Side, now: number, rand = Math.random, look?: number): Room {
-  const used = new Set(r.pieces.map((p) => p.spot));
-  // Invaders take spots near the entrance first, defenders the rest.
+  // Spots taken by what is on show (the stage cap leaves the rest off screen).
+  const shown = stagePieces(r.pieces, now);
+  const used = new Set(shown.filter((p) => !p.leaving).map((p) => p.spot));
   const free = SPOTS.map((_, i) => i).filter((i) => !used.has(i));
-  const pool = free.length ? free : SPOTS.map((_, i) => i);
-  const spot = pool[Math.floor(rand() * pool.length) % pool.length];
+  // Keep every piece's footprint clear of the others (Art Director,
+  // 2026-11-24): score each free spot by its smallest footprint gap to what is
+  // on show, keep the clear ones (gap >= 1) if any, pick among the best three.
+  // A mouse never takes a spot that overlaps a cat unless nothing else is left.
+  const on = shown.filter((p) => !p.leaving);
+  const score = (i: number, only?: Side) => Math.min(Infinity, ...on.filter((p) => !only || p.side === only).map((p) => gap(i, side, p.spot, p.side)));
+  const clear = free.filter((i) => score(i) >= 1);
+  const noCat = side === 'invader' ? free.filter((i) => score(i, 'defender') >= 1) : free;
+  // The back and front rows first: every clear spot there stays clear of the rest.
+  const outer = clear.filter((i) => SPOTS[i][1] === SPOTS[0][1] || SPOTS[i][1] === SPOTS[SPOTS.length - 1][1]);
+  const pool = outer.length ? outer : clear.length ? clear : noCat.length ? noCat : free.length ? free : SPOTS.map((_, i) => i);
+  const best = on.length ? [...pool].sort((x, y) => score(y) - score(x)).slice(0, 3) : pool;
+  const spot = best[Math.floor(rand() * best.length) % best.length];
   const looks = 3; // three defenders, three invaders (teacher, 2026-11-24)
   const piece: Piece = { id: r.nextId, side, look: look ?? Math.floor(rand() * looks) % looks, spot, born: now };
   return { ...r, pieces: [...r.pieces, piece], nextId: r.nextId + 1, lastSpawn: side === 'invader' ? now : r.lastSpawn };

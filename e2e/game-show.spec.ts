@@ -99,11 +99,11 @@ test('Game Show: category grid, class vs the computer', async ({ page }, info) =
   await expect(page.getByLabel('300 points', { exact: true })).toBeVisible();
   // The class taps once to let the computer start (teacher, 2026-11-24), then it thinks and moves on its own.
   await startTurn(page);
-  await expect(page.getByText('The computer is thinking...')).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/ is thinking\.\.\.$/)).toBeVisible({ timeout: 15000 });
   await page.screenshot({ path: `test-results/gameshow-grid-${info.project.name}.png`, fullPage: true });
-  await expect(page.getByText(/The computer (got it|missed)!/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/ (got it|missed)!$/)).toBeVisible({ timeout: 15000 });
   // Its answer waits for a tap too.
-  await page.getByRole('button', { name: 'Tap to go on' }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
   expect(problems).toEqual([]);
 });
 
@@ -141,9 +141,9 @@ test('Share Mirror: a student sees the big-screen question close up, with their 
   await startTurn(page);
   await page.getByRole('button', { name: /settings/i }).first().click();
   await page.getByRole('tab', { name: 'Teacher' }).click();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
-  for (const d of '2468') await page.getByRole('button', { name: d, exact: true }).click();
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('button', { name: 'Make a mirror code' }).click();
   const code = (await page.getByLabel(/^Game code [A-Z]{5}$/).getAttribute('aria-label'))!.slice(-5);
   await page.keyboard.press('Escape');

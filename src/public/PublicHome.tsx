@@ -32,7 +32,7 @@ export default function PublicHome() {
           <motion.div initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="grid gap-5">
             <h1 className="title-bubble text-4xl sm:text-5xl xl:text-6xl leading-tight"><Title text={t('public.hero')} /></h1>
             <p className="text-lg font-bold max-w-xl">{t('public.heroSub')}</p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 max-sm:grid max-sm:[&>a]:w-full">
               <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')} style={{ boxShadow: 'var(--shadow-sticker)' }}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
               <Link to="/join" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.joinCode')}<ArrowRight weight="bold" size={20} /></Link>
             </div>
@@ -68,7 +68,7 @@ export default function PublicHome() {
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
                   {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
 <div className="flex gap-1.5">{shownModes(g.modes).map((m) => <ModeDot key={m} mode={m} small />)}</div>
-                  <p className="text-muted text-xs leading-snug">{g.description}</p>
+                  <p className="text-muted text-sm sm:text-xs leading-snug">{g.description}</p>
                   <span className="text-sm font-bold inline-flex items-center gap-1.5">{t('public.tryIt')}<ArrowRight weight="bold" size={16} className="motion-safe:group-hover:translate-x-1 motion-safe:transition-transform" /></span>
                 </div>
               </Link>
@@ -110,9 +110,9 @@ export default function PublicHome() {
           <span className={buttonClasses('primary', '!bg-text !text-white')}>{t('beta.join')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
-        <section className="mt-16 bg-accent border-bold border-border rounded-panel p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="mt-16 bg-accent border-bold border-border rounded-panel p-5 sm:p-8 grid gap-4 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('public.ctaTitle')} /></h2>
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center max-sm:grid max-sm:w-full max-sm:[&>a]:w-full">
             <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('ghost', 'hover-pop', 'lg')}>{t('public.seePlans')}</Link>
           </div>
@@ -147,7 +147,7 @@ function ThemesShowcase() {
           </motion.div>
         ))}
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 max-sm:grid max-sm:[&>a]:w-full">
         <Link to="/themes" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
         <Link to="/challenge" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.themesChallenge')}</Link>
       </div>

@@ -25,7 +25,7 @@ test('Pinball: a right answer earns a shot; pick a lane and the ball shoots at o
   await expect(page.getByText(/^(\+\d+|So close!)$/).first()).toBeVisible({ timeout: 5000 });
   await page.screenshot({ path: `test-results/pinball-landed-${info.project.name}.png` });
   // The result waits for a tap (teacher, 2026-11-24).
-  await page.getByRole('button', { name: 'Tap to go on' }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
   // Next team's question.
   await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });
@@ -45,7 +45,14 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  await openSetup(page, '/games/pinball', /^Versus/);
+  // Pinball has its own Solo, so the way page leaves Versus out (2026-11-23);
+  // a saved Versus setup still plays one player against the computer.
+  await page.addInitScript(() => {
+    const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
+    if (!s['versus-seeded']) localStorage.setItem('gamify:settings', JSON.stringify({ ...s, 'versus-seeded': true, 'setup:pinball': { ...s['setup:pinball'], who: 'versus' } }));
+  });
+  await page.goto('/games/pinball');
+  await page.getByRole('button', { name: 'Set up and play' }).click();
   for (;;) {
     if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
     await page.getByRole('button', { name: 'Next', exact: true }).click();
@@ -55,7 +62,13 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
   await answerShare(page, true);
   await page.getByRole('button', { name: 'Shoot up lane 2' }).click();
   // The computer's turn: its question, its lane, its shot, then back to us.
-  await expect(page.getByText('2/5').locator('visible=true').first()).toBeVisible({ timeout: 40_000 });
+  // Each result waits for a tap (teacher, 2026-11-24).
+  const round2 = page.getByText('2/5').locator('visible=true').first();
+  const goOn = page.getByRole('button', { name: /^(Continue|Tap to start)$/ });
+  await expect(async () => {
+    if (await goOn.first().isVisible()) await goOn.first().click();
+    await expect(round2).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 40_000 });
   await answerShare(page, true);
   await expect(page.getByRole('button', { name: 'Shoot up lane 2' })).toBeEnabled({ timeout: 10_000 });
   await page.screenshot({ path: `test-results/pinball-cpu-${info.project.name}.png` });

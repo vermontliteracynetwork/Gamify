@@ -16,7 +16,7 @@ const clips = new Map<string, HTMLAudioElement>();
 export const ANSWER_SOUNDS = { right: '/sounds/answers/level-up.mp3', wrong: '/sounds/answers/boing.mp3' };
 
 // Power-up sounds (teacher's uploads, 2026-11-01): a zap for magnets, wind
-// for the tornado, an 8-bit chest opening for treasure chests.
+// for the tornado, an 8-bit chest opening for prize chests.
 export const POWER_SOUNDS = { magnet: '/sounds/board/magnet.mp3', tornado: '/sounds/board/wind.mp3', chest: '/sounds/board/chest.mp3' };
 
 export function playClip(src: string, s: PlayerSettings, level = 0.8) {

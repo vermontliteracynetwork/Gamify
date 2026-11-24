@@ -14,7 +14,7 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
   const still = useSettings().settings.motion === 'still';
   const done = (Math.min(round, rounds) - 1) * perRound + (perRound - left);
   return (
-    <div className="w-full flex items-center gap-3 min-w-0" role="group" aria-label={label}>
+    <div className="w-full flex items-center justify-center gap-2 min-w-0" role="group" aria-label={label}>
       {/* Solo games show no player icon (teacher, 2026-11-23); kept only when a theme designed one. */}
       {player && <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" />}
       {/* A steady live region, so screen readers hear each new score; only the inner number pops. */}

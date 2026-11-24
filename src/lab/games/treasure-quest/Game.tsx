@@ -288,7 +288,7 @@ function ChestButton({ slot, box, open, faded, show, peeked, glow, can, still, s
   const [seed] = useState(() => Math.random());
   const ring = glow === 'clover' ? '#8fe3a0' : glow === 'rush' ? '#fdfd94' : null;
   return (
-    <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Treasure chest ${slot + 1}`}
+    <motion.button type="button" disabled={!can} onClick={onPick} aria-label={`Prize chest ${slot + 1}`}
       className="relative w-full aspect-[6/5] max-h-full mx-auto disabled:cursor-default focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#241c3d] rounded-2xl"
       style={{ opacity: faded ? 0.75 : 1 }}
       animate={still || open ? { rotate: 0, scale: 1 } : sneeze ? { scale: [1, 1.18, 0.9, 1], rotate: [0, -6, 6, 0] } : can ? { rotate: [0, -4, 4, -2, 0, 0], y: [0, -6, 0, 0, 0, 0] } : waiting ? { rotate: 0 } : { rotate: 0 }}
@@ -551,7 +551,7 @@ function Cover() {
 const def: LabDef = {
   id: 'treasure-quest',
   name: 'Treasure Quest',
-  description: 'Answer right for gold, then pick a treasure chest. More gold, double or a moth? The biggest pile wins.',
+  description: 'Answer right for gold, then pick a prize chest. More gold, double or a moth? The biggest pile wins.',
   ways: ['teams', 'solo'],
   minTeams: 2,
   maxTeams: 6,
@@ -566,7 +566,7 @@ const def: LabDef = {
   cover: <Cover />,
   pieces: [
     { id: 'background', label: 'Beach', hint: 'Sky, sea and sand behind the chests' },
-    { id: 'chest', label: 'Treasure chest', hint: 'A closed chest (the lid opens)' },
+    { id: 'chest', label: 'Prize chest', hint: 'A closed chest (the lid opens)' },
     { id: 'chest-open', label: 'Open chest', hint: 'The chest with its lid open' },
     { id: 'coin', label: 'Gold coin', hint: 'One coin of the gold piles' },
     { id: 'moth', label: 'Moth', hint: 'What flies out of an empty chest' },

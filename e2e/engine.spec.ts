@@ -9,9 +9,9 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  // Up chime for right, boing for wrong (teacher, 2026-11-05).
+  // Level up for right, boing for wrong (teacher, 2026-11-05, 2026-11-23).
   const sounds = new Set<string>();
-  page.on('response', (r) => { const m = r.url().match(/sounds\/answers\/(\w+)\.mp3/); if (m && r.ok()) sounds.add(m[1]); });
+  page.on('response', (r) => { const m = r.url().match(/sounds\/answers\/([\w-]+)\.mp3/); if (m && r.ok()) sounds.add(m[1]); });
 
   await openSetup(page, '/games/star-quiz');
   await page.getByRole('searchbox', { name: 'Search titles and tags' }).fill('Animals');
@@ -54,7 +54,7 @@ test('Star Quiz plays start to finish through the shared engine', async ({ page 
   }
 
   await expect(page.getByText('You caught 5 stars!')).toBeVisible({ timeout: 5000 });
-  expect([...sounds].sort()).toEqual(['boing', 'chime']);
+  expect([...sounds].sort()).toEqual(['boing', 'level-up']);
   await page.screenshot({ path: `test-results/sky-end-${info.project.name}.png` });
   // Results: four buttons; Review walks through the missed question full screen.
   const results = page.getByRole('dialog', { name: 'You caught 5 stars!' });
@@ -125,7 +125,9 @@ test('Question Tracker: every star stays in view around the question box', async
   const stars = await page.locator('[role=img] > span svg, [role=img] > span img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));
   expect(stars.length).toBe(11);
   for (const s of stars) {
-    const overlap = s.x < box.x + box.width && s.x + s.w > box.x && s.y < box.y + box.height && s.y + s.h > box.y;
+    // 2px slack: the sky's items slowly turn, so a star's box wobbles by a pixel.
+    const e = 2;
+    const overlap = s.x + e < box.x + box.width && s.x + s.w - e > box.x && s.y + e < box.y + box.height && s.y + s.h - e > box.y;
     expect(overlap, JSON.stringify({ s, box })).toBe(false);
   }
 });

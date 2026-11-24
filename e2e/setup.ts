@@ -13,7 +13,7 @@ export async function answerShare(page: Page, right = true) {
   const correct = labels.findIndex((l) => l.endsWith(answers.get(prompt)!));
   await buttons.nth(right ? correct : (correct + 1) % labels.length).click();
   // The answer stays up until it is tapped (teacher, 2026-11-24).
-  await dialog.getByRole('button', { name: 'Tap to go on' }).click();
+  await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 5000 });
 }
 
@@ -44,10 +44,13 @@ export async function openSetup(page: Page, path: string, way?: RegExp) {
   await expect(page.getByRole('heading', { name: 'Pick a Theme' }).or(step1)).toBeVisible();
   if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(step1).toBeVisible();
-  // Games with more than one way to play ask that first (2026-10-31); the
-  // default way stays, and the tests start from the next page.
+  // Games with more than one way to play ask that first (2026-10-31). The way
+  // step opens on Solo now (2026-11-24); with no `way` given, older tests keep
+  // their Share path when the game has one. The tests start from the next page.
   if (await page.getByRole('heading', { name: /^Step 1 of \d+: How will you play\?/i }).isVisible()) {
+    const share = page.getByRole('radio', { name: /^Share/ });
     if (way) await page.getByRole('radio', { name: way }).click();
+    else if (await share.count()) await share.first().click();
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
 }

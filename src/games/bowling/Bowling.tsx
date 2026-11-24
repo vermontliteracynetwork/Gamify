@@ -1,4 +1,5 @@
 import { playClip, POWER_SOUNDS } from '../../engine/music';
+import HintButton from '../../engine/HintButton';
 import Title from '../../ui/Title';
 import { CPU_THINK_MS, pace } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
@@ -22,7 +23,7 @@ import { addPoints, current, leaders, nextTurn, startTurns, type CpuLevel, type 
 import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -35,7 +36,7 @@ import WayToPlay from '../WayToPlay';
 import ShareHow from '../ShareHow';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
-import { useSavedSetup } from '../useSavedSetup';
+import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
@@ -64,7 +65,8 @@ export default function Bowling() {
   const { theme, themes, playable, choose } = useGameTheme('bowling');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'solo' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]});
+  const hostTeams = useHostTeams();
+  const [setup, change] = useSavedSetup('bowling', { setId: LIBRARY[0].id, frames: 3, who: 'solo' as 'teams' | 'solo' | 'versus', powerUps: true , powerOff: [] as string[]}, hostTeams ? { who: 'teams' as const } : undefined);
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -361,7 +363,7 @@ export default function Bowling() {
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="bowling" />
       {clock.element}
-      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase !== 'play' && phase !== 'end' && <GameTopRow hint="bowling" onSettings={() => setSettingsOpen(true)} />}
       {phase === 'welcome' && (
         <GameWelcome game={bowlingManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <CheckCircle weight="fill" size={22} />, text: t('sb.how1') },
@@ -392,9 +394,9 @@ export default function Bowling() {
         // on top, the scores right beside it, top aligned (teacher, 2026-10-31).
         <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={bowlingManifest.name} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="bowling" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">

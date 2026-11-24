@@ -63,7 +63,7 @@ function ClassicLook({ piece, gameId }: { piece: ThemePieceSpec; gameId: string 
       <svg width={piece.width * k} height={piece.height * k} viewBox={`0 0 ${piece.width} ${piece.height}`} className="pointer-events-none" style={isRound(piece) ? { clipPath: 'circle(50%)' } : undefined}>
         <ClassicPiece piece={piece} gameId={gameId} />
       </svg>
-      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
+      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] max-sm:text-[13px] font-bold tracking-wide">{t('guide.example')}</span>
     </span>
   );
 }
@@ -128,7 +128,7 @@ export function ThemeGuidePage() {
                   <li key={it.id} className="bg-surface border-bold border-border rounded-panel p-4 grid grid-cols-[84px_1fr] gap-3 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
                     <span className="relative w-20 h-20 flex items-center justify-center bg-surface-2 rounded-input border-std border-border-soft select-none" aria-hidden="true" onContextMenu={(e) => e.preventDefault()}>
                       <span className="pointer-events-none"><ClassicItemSvg art={it.art ?? ''} size={64} /></span>
-                      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] font-bold tracking-wide">{t('guide.example')}</span>
+                      <span className="absolute -top-2 -left-2 px-1.5 rounded-pill bg-surface border-std border-border text-[10px] max-sm:text-[13px] font-bold tracking-wide">{t('guide.example')}</span>
                     </span>
                     <span className="grid gap-1">
                       <span className="font-display text-xl">{it.name}</span>

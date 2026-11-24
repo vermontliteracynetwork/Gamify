@@ -103,7 +103,7 @@ export default function ThemesPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
-                  <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
+                  <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1 max-sm:min-h-11 max-sm:text-base">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>
               </motion.li>
             );

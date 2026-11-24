@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LEAVE_MS, MAX_INVADERS, PEEK_MS, SPAWN_MS, SPOTS, add, balanceTeams, competeRight, count, lookFor, newRights, newRoom, spawnDue, swapTeam, tick, togetherDone, togetherRight, winner } from './logic';
+import { LEAVE_MS, MAX_INVADERS, STAGE_CAP, gap, stagePieces, PEEK_MS, SPAWN_MS, SPOTS, add, balanceTeams, competeRight, count, lookFor, newRights, newRoom, spawnDue, swapTeam, tick, togetherDone, togetherRight, winner } from './logic';
 
 const rand = () => 0.3;
 
@@ -107,5 +107,30 @@ describe('Territory: teams and answers', () => {
   it('a student keeps the same animal', () => {
     expect(lookFor('kid-1', 'defender')).toBe(lookFor('kid-1', 'defender'));
     expect(lookFor('kid-1', 'invader')).toBeLessThan(3);
+  });
+});
+
+describe('Territory: the stage', () => {
+  it('keeps 14 pieces clear of each other (every footprint gap >= 1)', () => {
+    let seed = 11; const fixed = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    let r = newRoom('together', 0, 2, fixed);
+    for (let k = 1; r.pieces.length < 14; k++) r = add(r, k % 2 ? 'invader' : 'defender', k, fixed);
+    const ps = r.pieces;
+    for (let a = 0; a < ps.length; a++) for (let b = a + 1; b < ps.length; b++) expect(gap(ps[a].spot, ps[a].side, ps[b].spot, ps[b].side)).toBeGreaterThanOrEqual(1);
+  });
+  it('gives 24 shown pieces 24 different spots', () => {
+    let seed = 7; const fixed = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    let r = newRoom('together', 0, 2, fixed);
+    for (let k = 1; r.pieces.length < 24; k++) r = add(r, k % 2 ? 'invader' : 'defender', k, fixed);
+    expect(new Set(stagePieces(r.pieces, 1000).map((p) => p.spot)).size).toBe(24);
+  });
+  it('shows at most STAGE_CAP per side; the oldest leaves, the count stays true', () => {
+    let r = newRoom('together', 0, 2, rand);
+    for (let k = 1; k <= STAGE_CAP + 3; k++) r = add(r, 'invader', k * 10, rand);
+    const on = stagePieces(r.pieces, STAGE_CAP * 10 + 40);
+    expect(on.filter((p) => p.side === 'invader' && !p.leaving)).toHaveLength(STAGE_CAP);
+    expect(on.filter((p) => p.side === 'invader' && p.leaving)).toHaveLength(3);
+    expect(count(r, 'invader')).toBe(STAGE_CAP + 3);
+    expect(stagePieces(r.pieces, 1e6).filter((p) => p.leaving)).toHaveLength(0);
   });
 });

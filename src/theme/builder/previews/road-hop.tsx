@@ -2,7 +2,6 @@ import { ArrowFatLeft, ArrowFatRight, ArrowFatUp, HourglassMedium } from '@phosp
 import { TeamArt, TeamBadge } from '../../../engine/TeamBadge';
 import { carBox, Hopper, Lanes, roadLook, Vehicle } from '../../../games/road-hop/art';
 import { COLS, makeMap, ROWS, START } from '../../../games/road-hop/road';
-import { t } from '../../../i18n';
 import { backdropStyle, pieceFill } from '../../library';
 import type { GameTheme } from '../../types';
 
@@ -36,14 +35,10 @@ export default function RoadHopPreview({ theme }: { theme: GameTheme }) {
           </div>
         </div>
         <div className="min-w-0 grid content-start gap-2">
-          <div className="flex items-center gap-1.5 bg-surface border-std border-border rounded-input px-2 py-1">
-            <TeamBadge colorIndex={0} size={22} />
-            <span className="font-display text-xs leading-tight">{t('rh.go', { name: TEAMS[0] })}</span>
-          </div>
           <div className="score-card overflow-hidden">
             <ol className="grid gap-1 list-none p-1.5 m-0">
               {TEAMS.map((name, i) => (
-                <li key={name} className={`flex items-center gap-1.5 rounded-md border-std p-1 ${i === 0 ? 'border-border bg-surface-2' : 'border-border-soft'}`}>
+                <li key={name} className={`flex items-center gap-1.5 rounded-md border-std p-1 ${i === 0 ? 'border-border bg-accent' : 'border-border-soft'}`}>
                   <TeamBadge colorIndex={i} size={20} /><span className="font-bold text-[11px] leading-tight flex-1 min-w-0 truncate">{name}</span>
                   <span className="font-display text-sm tabular-nums">{[3, 2, 0][i]}</span>
                 </li>

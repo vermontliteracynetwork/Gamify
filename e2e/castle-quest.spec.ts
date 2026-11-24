@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CPU_NAMES } from '../src/engine/cpuNames';
 import { answerShare, finishSetup, openSetup, showSetting } from './setup';
 
 test.beforeEach(async ({ page }) => {
@@ -37,15 +38,16 @@ test('Board Game: a right answer earns a roll, the die tumbles, the round piece 
 
 test('Board Game Versus: one player against the computer', async ({ page }) => {
   test.setTimeout(60_000);
-  await openSetup(page, '/games/castle-quest', /^Versus/);
+  await openSetup(page, '/games/castle-quest', /^Solo/);
   for (;;) {
     if (await page.getByRole('heading', { name: /Players/ }).isVisible()) break;
     await page.getByRole('button', { name: 'Next', exact: true }).click();
   }
-  await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
+  // Solo (Versus) already makes player 2 the computer (2026-11-23).
+  await expect(page.getByRole('combobox', { name: 'Computer level' })).toBeVisible();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('img', { name: /^A game board of \d+ squares/ })).toBeVisible();
-  await expect(page.getByLabel(/^Computer on the board/).first()).toBeAttached();
+  await expect(page.getByLabel(new RegExp(`^(${CPU_NAMES.join('|')}) on the board`)).first()).toBeAttached();
 });
 
 test('Board Game short board: fewer squares', async ({ page }, info) => {

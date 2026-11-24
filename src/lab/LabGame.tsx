@@ -191,7 +191,7 @@ export default function LabGame({ def }: { def: LabDef }) {
       <main className={`${playing ? 'max-w-[110rem]' : 'max-w-6xl'} mx-auto px-3 sm:px-5 pt-3 pb-2`}>
         <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context={def.id} />
         {/* In play the small round controls overlap the top right (teacher, 2026-10-24). */}
-        <div className={playing ? 'absolute right-3 sm:right-5 top-2 z-20 [&_.game-top]:mb-0' : ''}><GameTopRow onSettings={() => setSettingsOpen(true)} /></div>
+        <div className={playing ? 'absolute right-3 sm:right-5 top-2 z-20 [&_.game-top]:mb-0' : ''}><GameTopRow hint={playing ? def.how.map((h) => h.text) : undefined} onSettings={() => setSettingsOpen(true)} /></div>
         {phase === 'welcome' && <LabWelcome def={def} still={still} onStart={() => setPhase('setup')} />}
         {phase === 'setup' && (
           <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} pages={[

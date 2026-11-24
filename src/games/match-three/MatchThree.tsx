@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import PopText from '../../ui/PopText';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
@@ -13,7 +14,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -256,7 +257,7 @@ export default function MatchThree() {
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="match-three" />
       {clock.element}
-      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{t('bm.title')}</h1> : <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase === 'play' || phase === 'end' ? <h1 className="sr-only">{t('bm.title')}</h1> : <GameTopRow hint="match-three" onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={matchThreeManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -293,9 +294,9 @@ export default function MatchThree() {
         // top (teacher, 2026-11-18): the score in the Gamify font, one meter of
         // dashes for every move of every round, and the star goal.
         <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="match-three" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
 

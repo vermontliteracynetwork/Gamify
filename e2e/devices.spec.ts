@@ -27,7 +27,8 @@ for (const size of SIZES) {
     const problems: string[] = [];
     page.on('pageerror', (e) => problems.push(e.message));
     await page.setViewportSize({ width: size.width, height: size.height });
-    for (const g of GAMES) {
+    // Live-only games (Territory) open a lobby instead of a board; e2e/territory.spec.ts covers them.
+    for (const g of GAMES.filter((x) => x.modes.some((m) => m !== 'live'))) {
       await openSetup(page, `/games/${g.id}`);
       await finishSetup(page);
       await page.waitForTimeout(600);

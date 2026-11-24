@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import HintButton from '../../engine/HintButton';
 import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
 import { playClip, useGameMusic } from '../../engine/music';
@@ -25,7 +26,7 @@ import TeamSetup from '../../engine/TeamSetup';
 import { ChoiceRow, PictureChoice, Slider } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
-import { AccessButton, FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
 import { useSettings } from '../../settings/SettingsContext';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -33,7 +34,7 @@ import SetupWizard from '../SetupWizard';
 import WayToPlay from '../WayToPlay';
 import ShareHow from '../ShareHow';
 import { gameShowManifest } from './manifest';
-import { useSavedSetup } from '../useSavedSetup';
+import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
 import ThemeScreen from '../ThemeScreen';
@@ -58,7 +59,8 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'versus' as 'teams' | 'versus' });
+  const hostTeams = useHostTeams();
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'versus' as 'teams' | 'versus' }, hostTeams ? { who: 'teams' as const } : undefined);
   const versus = setup.who === 'versus';
   // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
   const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');
@@ -372,7 +374,7 @@ export default function GameShow() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0 [--gs-extra:6rem] lg:[--gs-extra:0rem]' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="game-show" />
-      {phase !== 'play' && phase !== 'end' && <GameTopRow onSettings={() => setSettingsOpen(true)} />}
+      {phase !== 'play' && phase !== 'end' && <GameTopRow hint="game-show" onSettings={() => setSettingsOpen(true)} />}
 
       {phase === 'welcome' && (
         <GameWelcome game={gameShowManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
@@ -427,9 +429,9 @@ export default function GameShow() {
         // on top, the scores right beside it (teacher, 2026-10-31).
         <div className="relative play-fill px-3 sm:px-[clamp(1rem,2.5vw,2.5rem)] py-3 grid lg:grid-cols-[1fr_280px] gap-3 lg:gap-5 items-start content-center max-w-[110rem] mx-auto">
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
-          <div className="absolute top-3 right-3 flex items-center gap-2 z-10 [&_button]:!w-11 [&_button]:!h-11">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
             <FullScreenButton small />
-            <AccessButton small />
+            <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
           </div>
           <section className="relative grid gap-4 min-w-0 @container">

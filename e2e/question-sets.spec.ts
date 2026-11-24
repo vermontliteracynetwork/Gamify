@@ -137,8 +137,8 @@ test('set editor: Upload CSV adds questions, Download CSV and Copy to Google She
 });
 
 // Market gaps (2026-11-01): true or false in one tap, the teacher's own
-// voice for a question, and a teach card shown before play.
-test('set editor: true or false, a sound clip for the question, and a teach card before play', async ({ page }, info) => {
+// voice for a question, then the set plays.
+test('set editor: true or false and a sound clip for the question, then play the set', async ({ page }, info) => {
   const problems = watchConsole(page);
   await page.goto('/teacher/sets');
   await page.getByRole('button', { name: 'New set' }).click();
@@ -155,7 +155,6 @@ test('set editor: true or false, a sound clip for the question, and a teach card
   await page.getByRole('button', { name: 'Add a sound clip for question 1' }).click();
   await (await chooser).setFiles({ name: 'q1.wav', mimeType: 'audio/wav', buffer: wav });
   await expect(page.getByRole('button', { name: 'Play your recording of question 1' })).toBeVisible();
-  await page.getByLabel('Teach card (optional)').fill('A fact is true. Fiction is made up.');
   await page.getByLabel('Subject').selectOption('Science');
   await page.getByLabel('From', { exact: true }).selectOption('1');
   await page.getByLabel('To', { exact: true }).selectOption('2');
@@ -163,19 +162,14 @@ test('set editor: true or false, a sound clip for the question, and a teach card
   await page.getByRole('button', { name: 'Add tag' }).click();
   await page.getByLabel('No Common Core standard applies', { exact: false }).check();
   await expect(page.getByText('Saved')).toBeVisible();
-  await page.screenshot({ path: `test-results/editor-tf-voice-teach-${info.project.name}.png`, fullPage: true });
+  await page.screenshot({ path: `test-results/editor-tf-voice-${info.project.name}.png`, fullPage: true });
 
   await openSetup(page, '/games/game-show');
   for (let k = 0; k < 6 && !(await page.getByRole('radio', { name: /^Fact or fiction/ }).isVisible()); k++) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('radio', { name: /^Fact or fiction/ }).click();
   for (let k = 0; k < 8 && await page.getByRole('button', { name: 'Next', exact: true }).isVisible(); k++) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  const card = page.getByRole('dialog', { name: 'Before we play' });
-  await expect(card).toBeVisible();
-  await expect(card.getByText('A fact is true. Fiction is made up.')).toBeVisible();
-  await page.screenshot({ path: `test-results/teach-card-${info.project.name}.png` });
-  await card.getByRole('button', { name: "Let's play!" }).click();
-  await expect(card).toHaveCount(0);
+  // Teach cards were removed (2026-11-24): play starts on the turn card.
   await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible();
   expect(problems).toEqual([]);
 });

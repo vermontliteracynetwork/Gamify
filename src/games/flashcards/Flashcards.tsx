@@ -88,7 +88,7 @@ export default function Flashcards() {
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-6">
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} context="flashcards" />
-      <GameTopRow onSettings={() => setSettingsOpen(true)} />
+      <GameTopRow hint="flashcards" onSettings={() => setSettingsOpen(true)} />
       {phase === 'welcome' && (
         <GameWelcome game={flashcardsManifest} cover={pieceImage(theme, 'cover')} onStart={() => setPhase(themes.length > 1 ? 'theme' : 'setup')} steps={[
           { icon: <HandTap weight="fill" size={22} />, text: t('fc.how1') },
