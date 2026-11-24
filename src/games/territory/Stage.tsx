@@ -10,7 +10,7 @@ import { pieceFor } from './looks';
 import type { LivePlayer } from '../../live/protocol';
 import Title from '../../ui/Title';
 import { CatArt, INK, MouseArt, PoofArt, RoomArt, SIDE_COLOR, SIDE_PASTEL, SideBadge, useRoomFit, type RoomFit } from './art';
-import { LEAVE_MS, SPOTS, competeRight, stagePieces, count, newRights, newRoom, sweep, tick, togetherDone, togetherRight, winner, type CompeteRule, type Pace, type Piece, type Room, type Side } from './logic';
+import { LEAVE_MS, SPOTS, add, competeRight, stagePieces, count, newRights, newRoom, sweep, tick, togetherDone, togetherRight, winner, type CompeteRule, type Pace, type Piece, type Room, type Side } from './logic';
 
 // Territory's class screen (teacher, 2026-11-24): the living room on the
 // projector. Together: the class's cats catch the mice that come out of the
@@ -27,6 +27,16 @@ export const SOUNDS = {
   music: '/sounds/game-show/music-cards.mp3',
 };
 
+// Dev builds only: localStorage 'dev:territory-seed' = N fills the room with up
+// to N of each side, so the Art Director can review a full room on screenshots.
+function devSeed(r: Room): Room {
+  if (!import.meta.env.DEV) return r;
+  let n = 0; try { n = Number(localStorage.getItem('dev:territory-seed')) || 0; } catch { n = 0; }
+  let out = r; const at = Date.now() - LEAVE_MS * 2;
+  for (const side of ['defender', 'invader'] as Side[]) while (count(out, side) < n) { const next = add(out, side, at); if (next === out) break; out = next; }
+  return out;
+}
+
 export interface RoomSummary { defenders: number; invaders: number; caught: number; scared: number }
 
 type Note = { id: number; text: string; side: Side };
@@ -39,7 +49,7 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   const inRoom = players.filter((p) => p.status === 'in');
-  const [room, setRoomState] = useState<Room>(() => newRoom(mode, Date.now(), inRoom.length));
+  const [room, setRoomState] = useState<Room>(() => devSeed(newRoom(mode, Date.now(), inRoom.length)));
   // The room lives in a ref too, so sounds and notes run once per change.
   const roomRef = useRef(room);
   const setRoom = (r: Room) => { roomRef.current = r; setRoomState(r); };

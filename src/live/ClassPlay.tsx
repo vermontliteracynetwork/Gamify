@@ -1,4 +1,6 @@
+import { useContext } from 'react';
 import { t } from '../i18n';
+import { ChoicePicked } from '../games/SetupWizard';
 import { ChoiceRow, Slider } from '../ui/fields';
 import ClassModeIcon from './ClassModeIcon';
 
@@ -28,11 +30,13 @@ export function readClassPlay(search: string): { endAt?: { right?: number; minut
 
 export default function ClassPlayOptions({ value, onChange }: { value: ClassPlay; onChange: (v: ClassPlay) => void }) {
   const set = (p: Partial<ClassPlay>) => onChange({ ...value, ...p });
+  // Starts unpicked in setup (teacher, 2026-11-24): the cards first, the rest after a tap.
+  const picked = useContext(ChoicePicked);
   return (
     <div className="grid gap-5">
-      <ChoiceRow label={t('classPlay.style')} value={value.mode} onChange={(mode) => set({ mode })}
+      <ChoiceRow label={t('classPlay.style')} value={picked ? value.mode : ('' as ClassPlay['mode'])} onChange={(mode) => set({ mode })}
         options={[{ value: 'together', label: t('live.mode.together'), tip: t('live.mode.togetherHint'), art: <ClassModeIcon mode="together" /> }, { value: 'compete', label: t('live.mode.compete'), tip: t('live.mode.competeHint'), art: <ClassModeIcon mode="compete" /> }]} />
-      {value.mode === 'together' ? (
+      {!picked ? null : value.mode === 'together' ? (
         <Slider label={t('live.goalLabel')} hint={t('classPlay.goalHint')} min={10} max={300} value={value.goal} onChange={(goal) => set({ goal })} />
       ) : (
         <>

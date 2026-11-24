@@ -1,8 +1,15 @@
-import { Children, Fragment, isValidElement, useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { Children, createContext, Fragment, isValidElement, useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import Title from '../ui/Title';
 import { PowerUpCards } from '../engine/PowerUpSwitches';
+
+// Card-choice steps start unpicked (teacher, 2026-11-24: "dont select either
+// card option for game type at first. the user must click, then the setting on
+// the bottom should appear"): until a card on a choice page is tapped, no card
+// shows as picked, the settings under the cards stay hidden and Next is off.
+export const ChoicePicked = createContext(true);
+const CHOICE_PAGES = ['way', 'class'];
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
 
@@ -40,6 +47,9 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // shows a second scroll bar (teacher, 2026-11-16).
   const [tall, setTall] = useState(false);
   const page = pages[i];
+  const [picked, setPicked] = useState<Set<string>>(() => new Set());
+  const choice = CHOICE_PAGES.includes(page.id) && !picked.has(page.id);
+  const ready = page.ready !== false && !choice;
   // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
   // Power-up pages have no white box behind the cards (teacher, 2026-11-23).
@@ -102,7 +112,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (
               <li key={`${p.id}-${q}`} className="flex-1">
-                <button type="button" onClick={() => goTo(k, q)} disabled={k > i && pages.slice(i, k).some((x) => x.ready === false)}
+                <button type="button" onClick={() => goTo(k, q)} disabled={k > i && pages.slice(i, k).some((x) => x.ready === false || (CHOICE_PAGES.includes(x.id) && !picked.has(x.id)))}
                   aria-current={n === stepNo ? 'step' : undefined} aria-label={t('setup.stepOf', { n, total, title: p.title })}
                   className={`w-full h-1.5 rounded-pill ${n <= stepNo ? 'bg-border' : 'bg-border-soft/50'} motion-safe:transition-colors`} />
               </li>
@@ -110,19 +120,21 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
           }))}
         </ol>
       </div>
-      <div ref={body} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <ChoicePicked.Provider value={!choice}>
+      <div ref={body} onClickCapture={(e) => { if (choice && (e.target as HTMLElement).closest('[role="radio"]')) setPicked((p) => new Set(p).add(page.id)); }} data-unpicked={choice ? '' : undefined} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
           <div key={k} ref={(el) => { refs.current[k] = el; }} className={showing.has(k) ? `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-full max-w-5xl mx-auto ${page.id === 'questions' || cardsOnly ? '' : 'setup-item'}` : `grid grid-cols-[minmax(0,1fr)] gap-6 min-w-0 w-auto max-w-5xl mx-auto absolute left-6 right-6 sm:left-8 sm:right-8 top-0 invisible pointer-events-none ${page.id === 'questions' || cardsOnly ? '' : 'setup-item'}`} aria-hidden={showing.has(k) ? undefined : true}>{it}</div>
         ))}
       </div>
+      </ChoicePicked.Provider>
       <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">
         <button type="button" onClick={back}
           className="min-h-8 tap px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
           <ArrowLeft weight="bold" size={14} />{t('setup.back')}
         </button>
-        <button type="button" disabled={page.ready === false} onClick={() => (last ? onPlay() : next())}
+        <button type="button" disabled={!ready} onClick={() => (last ? onPlay() : next())}
           className="min-h-8 tap px-4 rounded-pill border-std border-border bg-accent font-display text-base font-bold inline-flex items-center gap-1 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 2px 0 #000' }}>
           {last ? <><Play weight="fill" size={15} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={14} /></>}
         </button>

@@ -1,4 +1,6 @@
+import { useContext } from 'react';
 import { Check } from '@phosphor-icons/react';
+import { ChoicePicked } from './SetupWizard';
 import type { PlayMode } from '../data/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -13,13 +15,14 @@ export default function WayToPlay({ modes: given, value, onChange }: { modes: Pl
   // left out when it has one; Share already covers two players on one screen.
   const modes = given.filter((m) => m !== 'versus' || !given.includes('solo'));
   const look = (m: PlayMode): PlayMode => (m === 'versus' ? 'solo' : m);
+  const picked = useContext(ChoicePicked);
   return (
     // Every way fits side by side, no scrolling (teacher, 2026-10-31).
     // Square cards in the middle of the box (teacher, 2026-11-18).
     <div role="radiogroup" aria-label={t('way.title')} className="grid gap-5 justify-center" style={{ gridTemplateColumns: `repeat(${modes.length}, min(18rem, 40vh, calc((100% - ${(modes.length - 1) * 1.25}rem) / ${modes.length})))` }}>
       {modes.map((m) => {
         const Icon = MODE_ICONS[look(m)];
-        const on = value === m;
+        const on = picked && value === m;
         return (
           // A big picture band for each way to play, small text under it (teacher, 2026-11-06).
           <button key={m} type="button" role="radio" aria-checked={on} onClick={() => onChange(m)}

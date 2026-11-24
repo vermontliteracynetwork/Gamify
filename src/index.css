@@ -811,3 +811,7 @@ html[data-motion="still"] .pu-rays { animation: none; }
    as big as fits, never past the box (teacher, 2026-11-16 screen-size rule). */
 .lab-board { container-type: size; }
 .lab-fit { --ar: 1; width: min(100cqw, 100cqh * var(--ar)); height: min(100cqh, 100cqw / var(--ar)); }
+
+/* Card-choice steps (SetupWizard): until a card is tapped, the settings under
+   the cards stay hidden (teacher, 2026-11-24). */
+[data-unpicked] [role="radiogroup"] ~ * { display: none !important; }

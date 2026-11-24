@@ -111,7 +111,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, f
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
             {speaking ? t('q.stop') : t('q.listen')}
           </button>}
-          {/* Only Listen, Accessibility and Settings on a question (teacher, 2026-11-24). */}
+          {/* Only Listen and Settings on a question; accessibility lives inside Settings (teacher, 2026-11-24). */}
           <GearButton small onClick={() => setSettingsOpen(true)} />
         </div>
 
