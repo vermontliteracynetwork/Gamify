@@ -2489,6 +2489,7 @@ export const en = {
   'sb.framesHint': 'Each frame is two rolls; a question comes first.',
   'sb.frame': 'Frame {n} of {total}',
   'sb.frameWord': 'Frame',
+  'sb.sheet': "{name}'s frames: {marks}",
   'sb.roll': 'Roll {n} of 2',
   'sb.board': 'Bowling lane, {count} pins standing',
   'sb.strike': 'Strike!',
