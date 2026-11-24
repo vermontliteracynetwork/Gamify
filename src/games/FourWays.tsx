@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowArcLeft, ArrowArcRight, Check, DeviceTablet, Lightning, ProjectorScreen, Robot, Star, User, Users } from '@phosphor-icons/react';
-import { ALL_MODES, type PlayMode } from '../data/types';
+import type { PlayMode } from '../data/types';
+import { SHOWN_MODES } from './ModeBadge';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import Title from '../ui/Title';
@@ -17,8 +18,8 @@ import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
 export default function FourWays({ compact = false, filter, onFilter }: { compact?: boolean; filter?: PlayMode | null; onFilter?: (m: PlayMode | null) => void }) {
   const reduce = useReducedMotion();
   return (
-    <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-2 lg:grid-cols-4 gap-2' : 'sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
-      {ALL_MODES.map((m, i) => (
+    <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-3 gap-2' : 'sm:grid-cols-3 gap-4 auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
+      {SHOWN_MODES.map((m, i) => (
         <motion.li key={m} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.08 }}
           whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 0.6 : -0.6 }} className={compact ? '' : 'grid'}>
           {compact ? <Compact mode={m} on={filter === m} dim={!!filter && filter !== m} onClick={onFilter ? () => onFilter(filter === m ? null : m) : undefined} /> : <FlipCard mode={m} />}

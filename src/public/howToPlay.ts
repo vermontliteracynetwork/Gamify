@@ -214,4 +214,23 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     settings: ['Number of questions.', 'Live: together or compete, and when it ends (a number right or a time).'],
     tips: ['Use it as a calm warm-up on the big screen.'],
   },
+  {
+    gameId: 'territory',
+    goal: 'Mice sneak out of the mouse hole into the living room. Right answers send cats to catch them, or, in Competitive, win the room for your team.',
+    steps: [
+      'The teacher opens the lobby; students join with the code on their own devices.',
+      'Read the question on your device and tap an answer.',
+      'Cooperative: every right answer sends a cat to catch a mouse. The caught mouse disappears in a puff of stars.',
+      'Competitive: Cats against Mice. A right answer adds one of your animals and sends one of theirs away.',
+    ],
+    pieces: [
+      { name: 'Living room', what: 'The big screen: wallpaper, a couch, a lamp, a window, a plant, a rug, and a mouse hole in the baseboard.' },
+      { name: 'Cats', what: 'Six looks: orange tabby, black, gray, calico, white with spots, and a cat with dark points.' },
+      { name: 'Mice', what: 'Little brown, gray and white mice. They peek out of the hole, then scurry in.' },
+      { name: 'Poof', what: 'A soft puff of stars when a mouse is caught. Nobody is ever hurt; a scared cat leaps out the window.' },
+    ],
+    rules: ['A miss brings a new question and never costs anything.', 'Cooperative ends at the class goal or when the teacher stops it. Competitive ends when the teacher stops it, at a number right, or at a time; the team with more animals in the room wins it.'],
+    settings: ['Cooperative or Competitive.', 'How often a mouse comes out: slow, normal or fast.', 'Competitive: what a right answer does (adds yours and sends theirs away, only adds, or only sends away).', 'Teams split evenly as students join; tap a student to move them.'],
+    tips: ['Start on slow so younger students can watch each chase.', 'Count the animals in the room together before you end a Competitive round.'],
+  },
 ];

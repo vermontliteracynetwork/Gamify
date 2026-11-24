@@ -8,7 +8,7 @@ import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import { ALL_MODES, type Classroom, type PlayMode, type SetAssignment, type Student } from '../data/types';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeBadge, SHOWN_MODES } from '../games/ModeBadge';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
@@ -85,7 +85,8 @@ export default function ClassPage() {
       {tab === 'modes' && (
         <Panel className="grid gap-3">
           <p className="font-bold">{t('class.modesNote')}</p>
-          {ALL_MODES.map((m) => {
+          {/* No Versus category (teacher, 2026-11-23): Solo also switches the games played against the computer. */}
+          {SHOWN_MODES.map((m) => {
             const on = (classroom.allowedModes ?? ALL_MODES).includes(m);
             return (
               <div key={m} className="flex flex-wrap items-center gap-3">
@@ -93,7 +94,8 @@ export default function ClassPage() {
                 <div className="ml-auto min-w-40">
                   <Toggle label={on ? t('class.modeOn') : t('class.modeOff')} value={on} onChange={async (v) => {
                     const cur = classroom.allowedModes ?? ALL_MODES;
-                    await data.saveClassroom({ ...classroom, allowedModes: v ? ALL_MODES.filter((x) => x === m || cur.includes(x)) : cur.filter((x) => x !== m) });
+                    const ms: PlayMode[] = m === 'solo' ? ['solo', 'versus'] : [m];
+                    await data.saveClassroom({ ...classroom, allowedModes: v ? ALL_MODES.filter((x) => ms.includes(x) || cur.includes(x)) : cur.filter((x) => !ms.includes(x)) });
                     reloadClass();
                   }} />
                 </div>
@@ -292,8 +294,8 @@ export function SupportsDialog({ student, onClose }: { student: Student; onClose
       ))}
       <p className="font-bold">{t('class.studentModes')}</p>
       <div className="flex flex-wrap gap-2">
-        {ALL_MODES.map((m) => (
-          <button key={m} type="button" role="checkbox" aria-checked={modes.includes(m)} onClick={() => setModes(modes.includes(m) ? modes.filter((x) => x !== m) : [...modes, m])}
+        {SHOWN_MODES.map((m) => (
+          <button key={m} type="button" role="checkbox" aria-checked={modes.includes(m)} onClick={() => { const ms: PlayMode[] = m === 'solo' ? ['solo', 'versus'] : [m]; setModes(modes.includes(m) ? modes.filter((x) => !ms.includes(x)) : [...new Set([...modes, ...ms])]); }}
             className={`rounded-pill ${modes.includes(m) ? '' : 'opacity-40'}`}><ModeBadge mode={m} /></button>
         ))}
       </div>

@@ -12,3 +12,8 @@ pw-alt.config.ts
 pw-board.config.ts
 pw-dev.config.ts
 test-results-dev
+.tmp-*
+.shot-tmp*
+undefined/
+/.*shot*.mjs
+/.*.mjs

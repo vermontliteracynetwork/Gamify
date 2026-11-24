@@ -24,6 +24,8 @@ test('Bowling: a right answer earns a roll; point to aim, tap to throw, and the 
   if (info.project.name === 'ipad-portrait') for (let f = 0; f < 12; f++) { await page.screenshot({ path: `test-results/bowling-frame-${f}.png` }); await page.waitForTimeout(160); }
   await expect(page.getByRole('status').filter({ hasText: /Strike!|Spare!|Gutter ball!|Split!|So close!|pins?!/ })).toBeVisible({ timeout: 9000 });
   await page.screenshot({ path: `test-results/bowling-result-${info.project.name}.png` });
+  // The result waits for a tap (teacher, 2026-11-24).
+  await page.getByRole('button', { name: 'Tap to go on' }).click();
   // Then the same team's second roll, or the next team's turn: a new question either way.
   await startTurn(page);
   await expect(page.getByRole('dialog').getByRole('button', { name: /^[A-D] / }).first()).toBeVisible({ timeout: 6000 });

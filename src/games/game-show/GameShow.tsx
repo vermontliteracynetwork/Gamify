@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { pace, POP_IN } from '../../engine/pace';
+import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
+import TapOk from '../../engine/TapOk';
 import { playClip, useGameMusic } from '../../engine/music';
 
 // Game Show's own sounds (teacher uploads, 2026-11-01; ledger: Pixabay).
@@ -30,6 +31,7 @@ import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import WayToPlay from '../WayToPlay';
+import ShareHow from '../ShareHow';
 import { gameShowManifest } from './manifest';
 import { useSavedSetup } from '../useSavedSetup';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -56,7 +58,7 @@ export default function GameShow() {
   const allSets = useMemo<QuestionSet[]>(() => [...mine, ...LIBRARY].filter((s) => s.questions.some(isPlayable)), [mine]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
-  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'teams' as 'teams' | 'versus' });
+  const [setup, change] = useSavedSetup('game-show', { board: 'cards' as Board, setIds: [LIBRARY[0].id], cardCount: 12, powerOff: [] as string[], takeOn: [] as string[], tries: '1' as '1' | '3' | 'all', who: 'versus' as 'teams' | 'versus' });
   const versus = setup.who === 'versus';
   // Tries per turn (teacher, 2026-10-31): one, three or unlimited; one by default.
   const tries = setup.tries === 'all' ? Infinity : Number(setup.tries ?? '1');
@@ -98,8 +100,8 @@ export default function GameShow() {
   const streak = useRef<Record<string, number>>({});
   function toast(text: string) {
     const id = Date.now() + Math.random();
+    // It stays until it is tapped (teacher, 2026-11-24).
     setToasts((x) => [...x, { id, text }]);
-    window.setTimeout(() => setToasts((x) => x.filter((y) => y.id !== id)), 2600 * pace(settings));
   }
   const marquee = theme.id.endsWith(':classic');
   // The brass intro when play starts, then the music fades in: one track for
@@ -341,14 +343,14 @@ export default function GameShow() {
   // or steal (the leader), and close its own reveal.
   const cpuTurn = phase === 'play' && player?.kind === 'cpu';
   useEffect(() => {
-    if (!cpuTurn || step !== 'pick' || question || flipping !== null) return;
+    if (!cpuTurn || step !== 'pick' || question || flipping !== null || toasts.length) return;
     if (reveal) {
+      // Its reveal waits for a tap from the class (teacher, 2026-11-24); it only picks its team itself.
+      if (!reveal.choosing || !turns) return;
       const timer = window.setTimeout(() => {
-        if (reveal.choosing && turns) {
-          const target = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).sort((a, b) => b.score - a.score)[0];
-          applyCard(reveal.card, target?.id);
-        } else closeReveal();
-      }, 2000 * pace(settings));
+        const target = turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).sort((a, b) => b.score - a.score)[0];
+        applyCard(reveal.card, target?.id);
+      }, CPU_THINK_MS * pace(settings));
       return () => window.clearTimeout(timer);
     }
     const timer = window.setTimeout(() => {
@@ -359,7 +361,7 @@ export default function GameShow() {
         const open = cells.map((c, i) => (c.used ? -1 : i)).filter((i) => i >= 0);
         if (open.length) pickCell(open[Math.floor(Math.random() * open.length)]);
       }
-    }, 1200 * pace(settings));
+    }, (settings.motion === 'still' ? 800 : CPU_THINK_MS) * pace(settings));
     return () => window.clearTimeout(timer);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -387,7 +389,7 @@ export default function GameShow() {
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players, team.level)} pages={[
           // Teams on the big screen, or two players head to head (teacher, 2026-10-31).
-          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
+          { id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} />{!versus && <ShareHow gameId="game-show" setId={setup.setIds[0]} />}</div> },
           { id: 'board', title: t('setup.board'), content: (
             <PictureChoice label={t('tb.board')} value={board}
               onChange={(v) => change({ board: v, setIds: v === 'cards' ? setIds.slice(0, 1) : setIds })}
@@ -412,7 +414,7 @@ export default function GameShow() {
           ) },
           versus
             ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2 && team.players.every((p) => p.name.trim()), content: (
-              <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
+              <TeamSetup key="versus" mode="versus" vsComputer min={2} max={2} embedded onChange={(players, level) => setTeam({ players, level })} />
             ) }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0 && team.players.every((p) => p.name.trim()), content: (
               <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(players, level) => setTeam({ players, level })} />
@@ -432,14 +434,19 @@ export default function GameShow() {
           </div>
           <section className="relative grid gap-4 min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
-            <div className="fixed inset-0 z-[70] grid place-content-center justify-items-center gap-2 pointer-events-none" role="status">
+            <div className={`fixed inset-0 z-[70] grid place-content-center justify-items-center gap-3 ${toasts.length ? 'bg-black/35' : 'pointer-events-none'}`} role="status">
               <AnimatePresence>
                 {toasts.map((x) => (
-                  <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-accent border-heavy border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
-                    initial={settings.motion === 'still' ? false : { y: -40, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} transition={POP_IN}>{x.text}</motion.p>
+                  <motion.p key={x.id} className="font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-6 py-2" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
+                    initial={settings.motion === 'still' ? false : { y: -40, opacity: 0, scale: 0.6 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} transition={settings.motion === 'still' ? { duration: 0.01 } : POP_IN}>{x.text}</motion.p>
                 ))}
               </AnimatePresence>
+              {toasts.length > 0 && <TapOk onTap={() => setToasts([])} />}
             </div>
+            {/* The computer thinks out loud before it picks (teacher, 2026-11-24). */}
+            {cpuTurn && step === 'pick' && !question && !reveal && flipping === null && player && (
+              <p className="fixed left-1/2 bottom-6 -translate-x-1/2 z-40 font-display text-2xl sm:text-3xl bg-surface border-heavy border-border rounded-pill px-6 py-2 pointer-events-none" style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">{t('cpu.thinking', { name: player.name })}</p>
+            )}
             {/* Whose turn shows as a glow in the scores (teacher, 2026-10-31); screen readers hear it. */}
             {phase === 'play' && player && (
               <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
@@ -550,7 +557,7 @@ export default function GameShow() {
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
             className="relative border-heavy border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full overflow-hidden" style={{ boxShadow: 'var(--shadow-sticker-lg)', background: reveal.card.kind === 'points' ? 'radial-gradient(circle at 50% 35%, #fffbd1, #fdfd94 45%, #f7b267 100%)' : 'var(--color-surface, #fbfcf8)' }}>
             {/* Always a way out (teacher, 2026-10-31): X closes it; a swap or steal not chosen yet is skipped. */}
-            {current(turns).kind !== 'cpu' && (
+            {(current(turns).kind !== 'cpu' || !reveal.choosing) && (
               <button type="button" onClick={closeReveal} aria-label={t('class.close')} className="absolute top-3 right-3 w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
             )}
             {reveal.card.kind === 'power' ? <ItemArt item={reveal.card.item} size={120} still={settings.motion === 'still'} /> : (
@@ -585,9 +592,7 @@ export default function GameShow() {
             {picksTeam(reveal.card) && !reveal.choosing && turns.players.filter((p) => p.id !== current(turns).id && p.score > 0).length === 0 && (
               <p className="font-bold">{t('tb.nobodyToPick')}</p>
             )}
-            {!reveal.choosing && current(turns).kind !== 'cpu' && (
-              <button type="button" onClick={closeReveal} className="min-h-14 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl font-bold">{t('tb.ok')}</button>
-            )}
+            {!reveal.choosing && <TapOk onTap={closeReveal} label={t('tb.ok')} className="relative" />}
           </motion.div>
         </div>
       )}

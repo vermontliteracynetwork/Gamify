@@ -28,7 +28,7 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
     if (turn === 1 && info.project.name === 'ipad-landscape') for (let f = 0; f < 6; f++) { await page.screenshot({ path: `test-results/four-drop-${f}.png` }); await page.waitForTimeout(70); }
     await expect(page.getByText('The computer is choosing...')).toBeVisible();
     // Back to the player: their turn card comes up (no turn bar; the scores glow).
-    await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 20000 });
   }
   await expect(page.getByRole('gridcell', { name: /: (?!empty)/ })).toHaveCount(4);
   await page.screenshot({ path: `test-results/four-${info.project.name}.png`, fullPage: true });
@@ -99,7 +99,7 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   // Held power-ups show on the player's next turn.
   await page.getByRole('button', { name: 'Drop in column 4' }).click();
   await expect(page.getByText('The computer is choosing...')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible({ timeout: 20000 });
   await answer();
   // Earned power-ups switch on by themselves on the next turn (teacher, 2026-11-07).
   const on = page.getByRole('dialog', { name: /^Double Drop is on/ });

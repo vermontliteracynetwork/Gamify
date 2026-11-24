@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
-import { TeamBadge } from './TeamBadge';
 
 // The one strip across the top of a solo game's board (design system,
 // 2026-11-18; teacher, 2026-11-16 and 11-18): the player's picture and the
@@ -16,7 +15,8 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
   const done = (Math.min(round, rounds) - 1) * perRound + (perRound - left);
   return (
     <div className="w-full flex items-center gap-3 min-w-0" role="group" aria-label={label}>
-      {player ? <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" /> : <TeamBadge colorIndex={0} size={36} />}
+      {/* Solo games show no player icon (teacher, 2026-11-23); kept only when a theme designed one. */}
+      {player && <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" />}
       {/* A steady live region, so screen readers hear each new score; only the inner number pops. */}
       <span className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
         <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}>{score}</motion.span>

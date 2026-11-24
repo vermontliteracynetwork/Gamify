@@ -1,5 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { TeachCards } from './TeachCard';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { CheckCircle } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
@@ -30,11 +29,6 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
 }) {
   const [filter, setFilter] = useState<SetFilter>({});
   const still = useSettings().settings.motion === 'still';
-  // The picked sets' teach cards, shown before play.
-  const teach = useContext(TeachCards);
-  useEffect(() => {
-    teach?.(value.map((id) => sets.find((s) => s.id === id)).filter((s): s is QuestionSet => !!s?.teachCard?.text.trim()).map((s) => ({ name: s.name, card: s.teachCard! })));
-  }, [value.join(','), sets]); // eslint-disable-line react-hooks/exhaustive-deps
   const wrap = useRef<HTMLDivElement>(null);
   const gallery = useRef<HTMLDivElement>(null);
   // The gallery scrolls on its own under the locked tabs and search

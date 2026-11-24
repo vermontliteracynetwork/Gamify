@@ -22,13 +22,15 @@ export interface Character { id: string; name: string; image: string }
 // Team or player setup for Share and Versus. Names come from the silly name
 // dice by default; the teacher's device can also type a name.
 // Used on its own (with a Start button) or as a setup page (onChange only).
-export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters }: {
+export default function TeamSetup({ mode, min, max, onStart, onChange, embedded = false, characters, vsComputer = false }: {
   mode: 'share' | 'versus'; min: number; max: number;
   // Characters to pick from (Board Game animals, teacher 2026-10-31), in place of team icons.
   characters?: Character[];
   onStart?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   onChange?: (players: TurnPlayer[], cpuLevel: CpuLevel) => void;
   embedded?: boolean;
+  // Solo against the computer (teacher, 2026-11-23: Versus is shown as Solo): player 2 starts as the computer.
+  vsComputer?: boolean;
 }) {
   const human: Slot['kind'] = mode === 'share' ? 'team' : 'student';
   // Play or share passes how teams are made (?teams=teacher|random|class).
@@ -40,6 +42,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const alone = mode === 'versus' && !!session && !teacher;
   const [slots, setSlots] = useState<Slot[]>(() => {
     if (alone) return [{ name: session.name, kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
+    if (vsComputer) return [{ name: rollName(), kind: human }, { name: t('teams.computer'), kind: 'cpu' }];
     const first = rollName();
     return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
   });

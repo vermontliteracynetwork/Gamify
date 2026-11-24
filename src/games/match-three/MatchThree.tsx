@@ -300,7 +300,7 @@ export default function MatchThree() {
           </div>
 
           <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
-          <TopStrip leftLabel={t('bm.moves', { count: moves })} score={score} player={pieceImage(theme, 'player')} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
+          <TopStrip leftLabel={t('bm.moves', { count: moves })} score={score} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
             label={t('bm.round', { n: round, total: plan.current.rounds })} right={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />
           <div className="relative border-bold border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
             {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}

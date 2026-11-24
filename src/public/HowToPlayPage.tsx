@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { BookOpen, CheckCircle, Lightbulb, ListNumbers, PaintBrush, SlidersHorizontal, Sparkle } from '@phosphor-icons/react';
 import { GameCover } from '../games/covers';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeBadge, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
@@ -47,7 +47,7 @@ export default function HowToPlayPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
         <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-bold border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('howto.cardTitle', { game: game.name })} /></h1>
-        <div className="flex flex-wrap gap-2">{game.modes.map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
+        <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
         <p className="text-xl font-bold">{h.goal}</p>
 
         <div className="grid sm:grid-cols-2 gap-3">

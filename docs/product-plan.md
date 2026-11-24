@@ -208,6 +208,9 @@ New games made for the turn-based modes (2 Show, 4 Versus):
 | Match Up, Group Sort | 1 3 |
 | Flashcards | 3 |
 | Spinner Wheel | 2 |
+| Territory (cats and mice invasion, rethemable; teacher 2026-11-24) | 1 (Live only: Cooperative or Competitive) |
+
+**Game Lab idea sources.** BASIC Computer Games (https://github.com/coding-horror/basic-computer-games, Unlicense; teacher 2026-11-24): all 96 classic games rated for the Lab, with a Top 10 to build next, in `docs/game-lab-ideas-basic-computer-games.md` (rules reimagined on the question engine, never copied).
 
 **DECIDE:** which three games ship first. Claudia's pick covers all four
 modes with the fewest games:
@@ -1180,6 +1183,13 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 103 | **Your voice, your lesson.** Record a question in your own voice (or add a sound clip), make any question true or false in one tap, and give a set a short teach card that is shown and read aloud before the game starts. | Pre-readers hear their own teacher; every game starts with the skill, not just the score | Market research, 2026-11-01 |
 
 | 104 | **A classic board game on the smart board.** A real tabletop race board: answer, roll, hop square by square. A spinning forward or back wheel, a tornado that swirls every piece, and a die your class can redraw on one page. | Familiar board-game fun with a question on every turn; "your class designs the dice" | Teacher, 2026-11-08 |
+| 105 | **Thirty-plus game styles, one question set.** One set plays as baseball, a sprint race, bingo, a word search, a snow friend word game, a survey show, a treasure quest, a toy factory, a claw machine, a pixel space shooter and more, each with goofy power-ups that have their own animation and sound. | Every quiz-game style a class loves, in one place, no rebuilding the set | Game Lab, 2026-11-22 |
+| 106 | **Sticker collections for teachers.** Collect-em-all Classic sticker sets for trying things (first game, five new themes, every game, Calm mode), a seasonal Winter set with clear dates, and an Achievement page to show the class what you earned together. Nothing is ever taken away for a missed day. | A friendly nudge to explore every feature, with no streak guilt | Teacher, 2026-11-23 |
+| 107 | **A sticker book for every student, no accounts.** Effort and growth stickers (kept going, new best, got it now, good listener) live on the teacher's device; interventionists link stickers to practice goals and print a progress page for a data folder or a family. | Motivation that rewards effort, not speed, and fits 1:1 and small group work | Design Chair, 2026-11-23 |
+| 108 | **Territory: cats and mice for the room.** A cozy living room on the big screen: little mice sneak out of the mouse hole, and every right answer on a student's own device sends a cat to catch one in a puff of stars. Play Cooperative (the class catches them all) or Competitive (Cats against Mice, the team with more in the room wins it). Nobody is ever hurt. Built to be rethemed (spaceships and aliens next). | A whole-class live game where the room visibly fills as the class answers; the teacher sets the pace | Teacher, 2026-11-24 |
+| 109 | **Research with the fine print showing.** The redesigned Research page puts "Studies found", a "To be fair" caveat and "In Gamify" side by side on every card, and the pricing page leads with what the class gets before the number. Honest framing is the pitch: teachers trust a tool that shows its limits (Design Chair, 2026-11-24, `/brand` Public pages proposal). |
+| 110 | **Question Tracker theme ideas: seashells on a beach, birds on wires.** Every right answer adds a seashell to the sand along the shore, or a little bird that lands on the telephone wires until the wires are full, the same fill-the-scene idea as the night sky of stars. | New calm scenes for the class-goal game without a new game to learn | Teacher, 2026-11-24 |
+| 111 | **Pinterest as a main channel.** Tall pins of every game in the Classic look, free theme templates, sticker sheets and pattern papers as printables, seasonal classroom sets a month early, each linking to a Blog post or theme guide. | The site's look is made to be saved and shared by teachers planning their rooms | Teacher, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1253,3 +1263,7 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 61 | **Fish facts science warm-up with Cast and Catch** | Project the game, cast together, and read each fish fact aloud; students keep a class fish book of the kinds found and research one that is still hiding. | Cast and Catch, Live or Solo, any set | Golden Rule pass, 2026-11-01; grades K-5 |
 | 62 | **Teach, Then Play** | Write a one-line teach card for the skill ("A noun is a person, place or thing"), record the questions in your own voice, then play any game; the card is read aloud before the first turn. | Teach cards, recorded questions | Development, 2026-11-01; K-3 |
 - Board Game review race (2026-11-08): teams answer to roll; use Lose a turn and Roll again squares to talk about chance and fairness, then let students design their own die faces (counting dots stays the same).
+- Same set, five games (2026-11-22): run one vocabulary set as a word search, then a word scramble, then a snow friend word game, then Letter Lock, and talk about which game made the words stick (spelling, meaning, letter patterns).
+- Survey Showdown as a discussion starter (2026-11-22): after each board, ask why the top answer is the top answer.
+- Class sticker goals (2026-11-23): show the Achievement page on the projector on Friday, talk about which stickers the class earned by trying hard (not by winning), and pick one locked sticker to work toward together next week.
+- Territory warm-up (2026-11-24): start a Cooperative round on slow while students settle in, count the cats and mice together before you end, then switch to Competitive Cats against Mice and talk about why a balanced team matters.

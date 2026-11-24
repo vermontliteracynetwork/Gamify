@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { POP_IN } from './pace';
+import { pace, POP_IN } from './pace';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { Calculator, Check, GridNine, HighlighterCircle, PencilSimpleLine, SpeakerHigh, SpeakerSlash, Toolbox, X } from '@phosphor-icons/react';
 import type { MultipleChoiceQuestion } from '../data/types';
 import { t } from '../i18n';
+import Gif from '../ui/Gif';
 import { useSettings } from '../settings/SettingsContext';
 import { buzz, speakQuestion, stopSpeaking } from './feedback';
 import { ANSWER_SOUNDS, playClip } from './music';
@@ -86,7 +87,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
     }
     setPicked(i);
     const ms = Date.now() - shownAt.current;
-    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), right ? 900 : 1400);
+    window.setTimeout(() => onAnswer({ tapped: q.choices[i], tries, right, ms }), (right ? 900 : 1400) * pace(settings));
   }
 
   const words = q.prompt.split(/(\s+)/);
@@ -165,7 +166,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, o
           </FloatingCard>
         ))}
 
-        {q.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />}
+        {q.imageUrl && <figure className="m-0 grid justify-items-center"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
         <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
           {highlighting
             ? words.map((w, i) => /\s+/.test(w) ? w : (

@@ -2,7 +2,8 @@ import '@fontsource/chicle/400.css';
 import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { pace } from '../../engine/pace';
+import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
+import TapOk from '../../engine/TapOk';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ArrowsClockwise, CheckCircle, DiceFive, FlagCheckered, HourglassHigh, ShieldCheck, Trophy } from '@phosphor-icons/react';
@@ -36,6 +37,7 @@ import SetPicker from '../SetPicker';
 import SetupWizard from '../SetupWizard';
 import ThemeScreen from '../ThemeScreen';
 import WayToPlay from '../WayToPlay';
+import ShareHow from '../ShareHow';
 import { useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import { BoardArt, boardGround, C, CHICLE, Die2D, SQUARE_COLORS, WOBBLE } from './boardArt';
@@ -59,7 +61,7 @@ export default function CastleQuest() {
   const { theme, themes, playable, choose } = useGameTheme('castle-quest');
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'teams' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
+  const [setup, change] = useSavedSetup('castle-quest', { setId: LIBRARY[0].id, who: 'versus' as 'teams' | 'versus', powerUps: true, trail: 'medium' as string, powerOff: [] as string[], exact: false });
   const setId = sets.some((s) => s.id === setup.setId) ? setup.setId : LIBRARY[0].id;
   const picked = useMemo(() => sets.filter((s) => s.id === setId).map((set) => ({ set, starred: false })), [sets, setId]);
   const game = useGamePool(picked);
@@ -82,7 +84,8 @@ export default function CastleQuest() {
   const [toss, setToss] = useState<{ id: number; rolls: number[]; mult: number; wait: boolean } | null>(null);
   // Click to go on (teacher, 2026-11-13): the die, the wheel and power-up cards wait for a tap.
   const goRef = useRef<(() => void) | null>(null);
-  const tapToGo = (auto: boolean) => new Promise<void>((res) => { goRef.current = () => { goRef.current = null; res(); }; if (auto) window.setTimeout(() => goRef.current?.(), ms(1400)); });
+  // Every pop-up waits for a tap, the computer's too (teacher, 2026-11-24): one tap from the class goes on.
+  const tapToGo = () => new Promise<void>((res) => { goRef.current = () => { goRef.current = null; res(); }; });
   const [wheel, setWheel] = useState<{ id: number; stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean } | null>(null);
   const [shield, setShield] = useState<boolean[]>([]);
   const [skip, setSkip] = useState<boolean[]>([]);
@@ -131,7 +134,12 @@ export default function CastleQuest() {
 
   useEffect(() => { if (toss) playClip(DICE, settings, 0.8); }, [toss?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function say(text: string, icon?: 'lose' | 'again' | 'shield', bad = false) { setBanner({ id: Date.now() + Math.random(), text, icon, bad }); }
+  // A message card that stays until it is tapped (teacher, 2026-11-24).
+  async function say(text: string, icon?: 'lose' | 'again' | 'shield', bad = false) {
+    setBanner({ id: Date.now() + Math.random(), text, icon, bad });
+    await tapToGo();
+    setBanner(null);
+  }
   function place(next: number[]) {
     posRef.current = next; setPos(next);
     const s = turnsRef.current;
@@ -164,8 +172,7 @@ export default function CastleQuest() {
     if (skipRef.current[i]) {
       setSkip((s) => s.map((v, k) => (k === i ? false : v)));
       setStep('busy');
-      say(t('cq.skipped', { name: p.name }), 'lose', true);
-      await sleep(ms(1800));
+      await say(t('cq.skipped', { name: p.name }), 'lose', true);
       return advance();
     }
     held.beginTurn(p.id);
@@ -210,7 +217,7 @@ export default function CastleQuest() {
     // The die waits big on the screen until it is tapped, so the student can
     // count the dots before the piece moves (teacher, 2026-11-13).
     setToss((x) => (x ? { ...x, wait: true } : x));
-    await tapToGo(current(turnsRef.current!).kind === 'cpu');
+    await tapToGo();
     setToss(null);
     return rolls;
   }
@@ -243,8 +250,8 @@ export default function CastleQuest() {
       if (posRef.current.some((p) => p >= finish)) return endTurn();
     }
     const kind = kinds[posRef.current[who]];
-    if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); say(t('cq.loseTurn'), 'lose', true); await sleep(ms(1600)); return endTurn(); }
-    if (kind === 'again') { playEffect('win', settings); impact(settings); if (!still && settings.celebrations !== 'off' && boardRef.current) { const r = boardRef.current.getBoundingClientRect(); const p = at(posRef.current[who]); void confetti({ particleCount: 45, spread: 70, startVelocity: 28, origin: { x: (r.left + p.x) / window.innerWidth, y: (r.top + p.y) / window.innerHeight }, colors: SQUARE_COLORS, disableForReducedMotion: true }); } say(t('cq.rollAgain'), 'again'); await sleep(ms(1300)); setStep('roll'); return; }
+    if (kind === 'lose') { setSkip((s) => s.map((v, k) => (k === who ? true : v))); playEffect('miss', settings); await say(t('cq.loseTurn'), 'lose', true); return endTurn(); }
+    if (kind === 'again') { playEffect('win', settings); impact(settings); if (!still && settings.celebrations !== 'off' && boardRef.current) { const r = boardRef.current.getBoundingClientRect(); const p = at(posRef.current[who]); void confetti({ particleCount: 45, spread: 70, startVelocity: 28, origin: { x: (r.left + p.x) / window.innerWidth, y: (r.top + p.y) / window.innerHeight }, colors: SQUARE_COLORS, disableForReducedMotion: true }); } await say(t('cq.rollAgain'), 'again'); setStep('roll'); return; }
     return endTurn();
   }
   // A hidden power-up: the shield goes up at once (it starts at the reveal);
@@ -255,13 +262,13 @@ export default function CastleQuest() {
     if (power === 'shield') {
       setShield((v) => v.map((x, k) => (k === who ? true : x)));
       setPop({ id: Date.now(), item: it, text: roleOf(castleQuestManifest, it) });
-      await tapToGo(current(s).kind === 'cpu');
+      await tapToGo();
       setPop(null);
       return;
     }
     held.earn(s.players[who].id, it);
     setPop({ id: Date.now(), item: it, text: t('pu.later', { role: roleOf(castleQuestManifest, it) }) });
-    await tapToGo(current(s).kind === 'cpu');
+    await tapToGo();
     setPop(null);
   }
   // Held power-ups switch on by themselves at the start of the roll.
@@ -288,8 +295,7 @@ export default function CastleQuest() {
     impact(settings, true);
     await sleep(ms(500));
     setSwirl(null);
-    say(t('cq.tornadoDone'));
-    await sleep(ms(1300));
+    await say(t('cq.tornadoDone'));
     setStep('roll');
   }
   // Wheel (teacher, 2026-11-08): pick a player, roll, then a spinning wheel
@@ -301,8 +307,7 @@ export default function CastleQuest() {
       if (current(s).kind === 'cpu') {
         // The computer picks whoever is furthest ahead (not itself).
         target = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== me).sort((a, b) => b[0] - a[0])[0][1];
-        say(t('cq.wheelPicks', { name: s.players[target].name }));
-        await sleep(ms(1300));
+        await say(t('cq.wheelPicks', { name: s.players[target].name }));
       } else {
         setStep('pick');
         target = await new Promise<number>((res) => { pickRef.current = res; });
@@ -312,19 +317,18 @@ export default function CastleQuest() {
     }
     const [n1] = await throwDie(1, 1);
     const forward = Math.random() < 0.5;
-    const cpu = current(s).kind === 'cpu';
-    // Tap the wheel to spin it, and tap again to go on (teacher, 2026-11-13).
+        // Tap the wheel to spin it, and tap again to go on (teacher, 2026-11-13).
     setWheel({ id: Date.now(), stop: wheelStop(forward), forward, n: n1, name: s.players[target].name, done: false, spinning: false });
-    await tapToGo(cpu);
+    await tapToGo();
     setWheel((w) => (w ? { ...w, spinning: true } : w));
     playEffect('whoosh', settings);
     await sleep(still ? 500 : 4200);
     setWheel((w) => (w ? { ...w, done: true } : w));
     playEffect(forward ? 'win' : 'miss', settings);
     impact(settings);
-    await tapToGo(cpu);
+    await tapToGo();
     setWheel(null);
-    if (target !== me && shieldRef.current[target]) { say(t('cq.shieldBlocks'), 'shield'); await sleep(ms(1400)); setStep('roll'); return; }
+    if (target !== me && shieldRef.current[target]) { await say(t('cq.shieldBlocks'), 'shield'); setStep('roll'); return; }
     await walk(target, Math.max(0, Math.min(finish, posRef.current[target] + (forward ? n1 : -n1))));
     if (posRef.current.some((p) => p >= finish)) return endTurn();
     setStep('roll');
@@ -333,7 +337,8 @@ export default function CastleQuest() {
   async function endTurn() {
     const s = turnsRef.current;
     if (!s) return;
-    await sleep(ms(500));
+    // After the computer's move, a pause so the class can see what happened.
+    await sleep(ms(current(s).kind === 'cpu' ? 1200 : 500));
     held.endTurn();
     const done = posRef.current.findIndex((p) => p >= finish);
     if (done >= 0) {
@@ -358,17 +363,20 @@ export default function CastleQuest() {
     void startTurn(next);
   }
 
-  // The computer rolls by itself.
+  // The computer thinks for a moment, then rolls by itself (teacher, 2026-11-24).
+  const [thinking, setThinking] = useState(false);
+  const cpuRoll = phase === 'play' && player?.kind === 'cpu' && step === 'roll' && !held.held.length && !banner && !pop;
   useEffect(() => {
-    if (phase !== 'play' || player?.kind !== 'cpu' || step !== 'roll' || held.held.length) return;
-    const id = window.setTimeout(() => void rollDie(), 1400 * pace(settings));
+    if (!cpuRoll) { setThinking(false); return; }
+    setThinking(true);
+    const id = window.setTimeout(() => { setThinking(false); void rollDie(); }, (still ? 600 : CPU_THINK_MS) * pace(settings));
     return () => window.clearTimeout(id);
-  }); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cpuRoll]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={step !== 'roll'} />;
+  const tray = <PowerUpTray manifest={castleQuestManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={step !== 'roll' || !!banner || !!pop} auto={!human} who={player?.name} />;
   const boosted = boost.double || boost.x2 || (potion[me] ?? 0) > 0;
   const rollLabel = boost.double ? t('cq.rollTwice') : boosted ? t('cq.rollDouble') : t('cq.roll');
-  const canRoll = step === 'roll' && human && phase === 'play' && held.held.length === 0;
+  const canRoll = step === 'roll' && human && phase === 'play' && !banner;
   // Just the die, big, under the scores: tap it to roll (teacher, 2026-11-13: no text, no box).
   const dieButton = (size: number) => (
     <motion.button type="button" onClick={() => void rollDie()} disabled={!canRoll} aria-label={rollLabel} className="rounded-[18%] disabled:cursor-default"
@@ -413,7 +421,7 @@ export default function CastleQuest() {
       {phase === 'theme' && <ThemeScreen gameName={castleQuestManifest.name} current={theme} themes={themes} playable={playable} onChoose={choose} onBack={() => setPhase('welcome')} onNext={() => setPhase('setup')} />}
       {phase === 'setup' && (
         <SetupWizard onBack={() => setPhase(themes.length > 1 ? 'theme' : 'welcome')} onPlay={() => begin(team.players)} pages={[
-          { id: 'way', title: t('way.title'), content: <WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} /> },
+          { id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={['share', 'versus']} value={versus ? 'versus' : 'share'} onChange={(m) => change({ who: m === 'versus' ? 'versus' : 'teams' })} />{!versus && <ShareHow gameId="castle-quest" setId={setId} />}</div> },
           ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
           { id: 'options', title: t('setup.options'), content: (
             <>
@@ -424,7 +432,7 @@ export default function CastleQuest() {
             </>
           ) },
           versus
-            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
+            ? { id: 'players', title: t('setup.players'), ready: team.players.length === 2, content: <TeamSetup key="versus" mode="versus" vsComputer min={2} max={2} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> }
             : { id: 'teams', title: t('setup.teams'), ready: team.players.length > 0, content: <TeamSetup key="share" mode="share" min={1} max={10} embedded onChange={(ps, level) => setTeam({ players: ps, level })} /> },
         ]} />
       )}
@@ -439,6 +447,8 @@ export default function CastleQuest() {
               {dieButton(150)}
               {boosted && <BoostTag boost={boost} potion={potion[me] ?? 0} still={still} />}
             </div>
+            {/* Held power-ups wait here until they are tapped (teacher, 2026-11-24). */}
+            {tray}
           </div>
           <div ref={boardRef} className="relative lg:col-start-1 lg:row-start-1 min-h-0 min-w-0 select-none">
             <BoardArt L={L} ox={ox} oy={oy} n={n} kinds={kinds} theme={theme} wobble={wobble} still={still} here={phase === 'play' && player ? pos[me] : null} color={player ? TEAM_COLORS[player.colorIndex % TEAM_COLORS.length] : '#fff'} />
@@ -476,10 +486,16 @@ export default function CastleQuest() {
               )}
               {swirl && !still && <Twister key={swirl.id} item={itemFor('tornado')} w={box.w} h={box.h} />}
               {banner && (
-                <motion.p key={banner.id} className={`absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] flex items-center gap-2 text-2xl sm:text-3xl border-heavy border-border rounded-pill px-5 py-1.5 pointer-events-none z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
-                  initial={{ y: 30, opacity: 0, scale: 0.7, rotate: -4 }} animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }} exit={{ opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 380, damping: 18, duration: still ? 0.01 : undefined }}
-                  onAnimationComplete={() => { const id = banner.id; window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), 1600); }} role="status">
-                  {banner.icon === 'lose' && <HourglassHigh weight="fill" size={30} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={30} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={30} />}<PopText text={banner.text} />
+                <motion.div key={banner.id} className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max max-w-[90%] grid justify-items-center gap-4 text-3xl sm:text-4xl text-center border-heavy border-border rounded-panel px-7 py-5 z-40 ${banner.bad ? 'bg-[#ffd6cc]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker-lg)' }}
+                  initial={still ? { opacity: 0 } : { y: 30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={still ? { duration: 0.01 } : POP_IN} role="dialog" aria-label={banner.text}>
+                  <span className="flex items-center gap-2">{banner.icon === 'lose' && <HourglassHigh weight="fill" size={34} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={34} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={34} />}<PopText text={banner.text} /></span>
+                  <TapOk onTap={() => goRef.current?.()} />
+                </motion.div>
+              )}
+              {thinking && player && !banner && (
+                <motion.p key="thinking" className="absolute left-1/2 bottom-[6%] -translate-x-1/2 w-max max-w-[86%] text-2xl sm:text-3xl border-heavy border-border rounded-pill bg-surface px-5 py-1.5 pointer-events-none z-40" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}
+                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.5 }} role="status">
+                  {t('cpu.thinking', { name: player.name })}
                 </motion.p>
               )}
             </AnimatePresence>
@@ -502,7 +518,6 @@ export default function CastleQuest() {
           </AnimatePresence>
         </div>
       )}
-      {tray}
       {picker}
       {question && player && phase === 'play' && <ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} />}
       {phase === 'end' && turns && (

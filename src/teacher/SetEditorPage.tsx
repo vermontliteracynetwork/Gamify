@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, CheckSquare, Lightbulb, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, Table, Plus, Trash, X } from '@phosphor-icons/react';
+import { Check, CheckSquare, CopySimple, DownloadSimple, FileArrowUp, Image as ImageIcon, MagnifyingGlass, Table, Plus, Trash, X } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { getLibrarySet } from '../data/library';
@@ -17,6 +17,7 @@ import { newSet } from './QuestionSetsPage';
 import SetDetailsPanel from './SetDetailsPanel';
 import Title from '../ui/Title';
 import CaptionedImage from '../ui/CaptionedImage';
+import MediaSearch from '../ui/MediaSearch';
 import QuestionVoice from './QuestionVoice';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -104,7 +105,6 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
       )}
 
       <SetDetailsPanel set={set} onChange={update} readOnly={library} />
-      {(!library || set.teachCard?.text) && <TeachCardEditor set={set} readOnly={library} onChange={(teachCard) => update({ ...set, teachCard })} />}
 
       <ol className="grid gap-3 list-none p-0 m-0">
         {set.questions.map((q, i) => (
@@ -129,41 +129,6 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
   );
 }
 
-// A short teach card shown before play (market gaps, 2026-11-01).
-function TeachCardEditor({ set, readOnly, onChange }: { set: QuestionSet; readOnly: boolean; onChange: (card: QuestionSet['teachCard']) => void }) {
-  const card = set.teachCard;
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [problem, setProblem] = useState('');
-  const put = (p: Partial<NonNullable<QuestionSet['teachCard']>>) => {
-    const next = { text: '', ...card, ...p };
-    onChange(next.text.trim() || next.imageUrl ? next : undefined);
-  };
-  return (
-    <Panel className="mb-5 grid gap-2">
-      <label htmlFor="teach-text" className="font-bold flex items-center gap-2"><Lightbulb weight="fill" size={20} />{t('editor.teach.title')}</label>
-      <p className="text-sm font-semibold text-muted -mt-1">{t('editor.teach.hint')}</p>
-      <div className="flex flex-wrap items-start gap-3">
-        {card?.imageUrl && <CaptionedImage src={card.imageUrl} alt={card.imageAlt ?? ''} onAlt={(imageAlt) => put({ imageAlt })} readOnly={readOnly} required className="h-24 w-auto" />}
-        <textarea id="teach-text" value={card?.text ?? ''} readOnly={readOnly} maxLength={200} rows={2} placeholder={t('editor.teach.placeholder')}
-          onChange={(e) => put({ text: e.target.value })}
-          className="flex-1 min-w-60 min-h-11 px-3 py-2 rounded-input border-std border-border-soft bg-surface font-bold resize-y" />
-      </div>
-      {!readOnly && (
-        <div className="flex flex-wrap items-center gap-2">
-          {card?.imageUrl
-            ? <Button variant="ghost" onClick={() => put({ imageUrl: undefined, imageAlt: undefined })}>{t('editor.teach.removePicture')}</Button>
-            : <Button variant="ghost" onClick={() => fileRef.current?.click()}><ImageIcon weight="bold" size={16} />{t('editor.teach.addPicture')}</Button>}
-          <input ref={fileRef} type="file" accept="image/*" hidden onChange={async (e) => {
-            const file = e.target.files?.[0]; e.target.value = '';
-            if (!file) return;
-            try { setProblem(''); put({ imageUrl: await imageFileToDataUrl(file) }); } catch (err) { setProblem((err as Error).message); }
-          }} />
-          {problem && <span className="font-bold text-sm">{problem}</span>}
-        </div>
-      )}
-    </Panel>
-  );
-}
 
 function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
   q: MultipleChoiceQuestion; n: number; readOnly: boolean;
@@ -173,6 +138,7 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
   const started = q.prompt.trim() !== '' || q.choices.some((c) => c.trim());
   const fileRef = useRef<HTMLInputElement>(null);
   const [pictureError, setPictureError] = useState('');
+  const [searching, setSearching] = useState(false);
 
   function setChoice(k: number, value: string) {
     const choices = [...q.choices];
@@ -271,9 +237,11 @@ function QuestionRow({ q, n, readOnly, onChange, onDuplicate, onRemove }: {
           {q.choices.length < MAX_CHOICES && (
             <Button variant="ghost" onClick={() => onChange({ choices: [...q.choices, ''] })}><Plus weight="bold" size={16} />{t('editor.addAnswer')}</Button>
           )}
-          {!q.imageUrl && (
+          {!q.imageUrl && (<>
             <Button variant="ghost" onClick={() => fileRef.current?.click()}><ImageIcon weight="bold" size={16} />{t('editor.addPicture')}</Button>
-          )}
+            <Button variant="ghost" onClick={() => setSearching(true)}><MagnifyingGlass weight="bold" size={16} />Find a GIF or photo</Button>
+            {searching && <MediaSearch onClose={() => setSearching(false)} onPick={(m) => { setSearching(false); onChange({ imageUrl: m.url, imageAlt: m.alt, imageCredit: m.credit, imageStill: m.still }); }} />}
+          </>)}
           {/* True or false in one tap (market gaps, 2026-11-01). */}
           {!(q.choices.length === 2 && q.choices[0] === t('editor.true') && q.choices[1] === t('editor.false')) && (
             <Button variant="ghost" aria-label={t('editor.trueFalseN', { n })} onClick={() => onChange({ choices: [t('editor.true'), t('editor.false')], correctIndex: q.correctIndex === 1 ? 1 : 0, choiceImages: undefined, choiceAlts: undefined })}>

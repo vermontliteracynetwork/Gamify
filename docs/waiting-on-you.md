@@ -2,6 +2,7 @@
 
 Things only Kayden can do (money, accounts, legal, going live). The same list shows first on the owner desktop (`/owner`) every time it opens, with a box to tick each one. Source of truth: `src/owner/waiting.ts`; Claudia adds to it in the same change that finds the need.
 
+1. **Reconnect Figma and Canva, and send your design websites (2026-11-22).** The design review and accessibility plugins ran on every Game Lab game; Figma and Canva could not connect from the cloud session, and no list of design websites was found. How: claude.ai Settings, Connectors, reconnect them; paste the design websites into the chat or the dev plan doc.
 2. **Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26).** Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it. How: Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC's trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC's name.
 4. **Open a Stripe account.** Plus, Pro, school invoices and the Vermont Literacy Network beta code all run through it. How: Create the account in the business's name, confirm prices ($96 and $180 a year), and add the keys to Vercel.
 5. **Trademark search, then buy the domain.** Claudia's pick is joingamify.com, with gamifyedu.app as a second. "Gamify" is a common word, so check before spending on a domain. How: USPTO Trademark Search (tmsearch.uspto.gov): search "gamify" and "gamif*", then look at live marks in classes 9 (apps), 41 (education) and 42 (software as a service). Also search the Vermont Secretary of State business names and the app stores. Bring what you find to the attorney for a clearance opinion, then buy the domain and point it at Vercel.
@@ -22,3 +23,9 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - **Set up the Canva brand kit and starter templates (2026-11-24).** Logo, brand palette, Grow Year and Inclusive Sans (if their licenses allow), then the templates in docs/marketing-bible.md section 10.
 - **Google Ads and Meta ads: accounts and a test budget, after the domain (2026-11-24).** Meta Business account with an ad account, and a Google Ads account, in the business's name. Tell the team your monthly test budget; nothing spends without your OK.
 - **Photo and video releases for classroom footage in posts (2026-11-24).** No student faces, names, voices or work in marketing without a signed release; ask the attorney for a marketing media release.
+
+
+- (2026-11-23, legal, optional) Confirm the JDSherbert UI sound pack license covers a web app (email JDSherbert for a one-line OK, or the attorney list). Credit is on the Credits page; files are used unchanged.
+- (2026-11-24, decide) New footer line instead of "Made in Vermont by the Vermont Literacy Network." (or remove it).
+- (2026-11-24, people) Collect 3 teacher quotes with permission for the home page.
+- (2026-11-24, setup) Make a Pinterest business account for Gamify (dev plan Part 5B).

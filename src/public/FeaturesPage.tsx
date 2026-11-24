@@ -4,10 +4,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Brain, Check, ChalkboardTeacher, GameController, PaintBrush, Sparkle, SpeakerHigh, Star, TextAa, Leaf, X } from '@phosphor-icons/react';
-import { ALL_MODES, type PlayMode } from '../data/types';
+import type { PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';
 import { CyclingCover } from '../games/covers';
-import { ModeBadge } from '../games/ModeBadge';
+import { ModeBadge, SHOWN_MODES, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -209,11 +209,11 @@ function ThemeDemo() {
 // The four ways to play as tabs, with the games that play each way.
 function ModesDemo() {
   const [mode, setMode] = useState<PlayMode>('share');
-  const games = GAMES.filter((g) => g.modes.includes(mode));
+  const games = GAMES.filter((g) => shownModes(g.modes).includes(mode));
   return (
     <div className={`${card} p-5 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
       <div role="tablist" aria-label={t('features.play.modes')} className="flex flex-wrap gap-2">
-        {ALL_MODES.map((m) => (
+        {SHOWN_MODES.map((m) => (
           <button key={m} type="button" role="tab" id={`mode-${m}`} aria-controls="mode-panel" aria-selected={mode === m} onClick={() => setMode(m)}
             className={`min-h-12 px-4 rounded-pill border-std font-display text-lg ${mode === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
         ))}

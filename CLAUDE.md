@@ -46,6 +46,25 @@ performance-analyst. Skills: marketing-bible-check, content-calendar,
 campaign-brief, ad-copy-variants, tracking-links, landing-page-audit,
 competitor-teardown, post-review. Platforms: Instagram, Facebook, Pinterest,
 TikTok; Canva templates; Google and Meta ads. The goal is paid subscriptions.
+The **Design Chair** (`.claude/agents/design-chair.md`, teacher 2026-11-23) owns
+language and voice, the Gamify Brand Kit (https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv
+and `/brand`) and its continuous alignment, sound, templates and, later, social
+media. Run a Design Chair brand check on every new part, theme or feature, and the
+`classic-art` skill before making any Classic asset (one pencil/crayon style).
+The **Classic Art Director** (`.claude/agents/classic-art-director.md`, teacher
+2026-11-24) must PASS every Classic theme asset and scene on real screenshots
+before it is called done; whoever drew it never grades it. The Design Chair's
+research and design skills (`social-*`, `brand`, `design`, `design-system`,
+`banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
+
+## Every agent challenges and cites research (teacher, 2026-11-23)
+
+All Gamify agents (Claude included) aim to challenge the teacher to think
+critically: name weak spots, offer the stronger option, ask the testing
+question. Every recommendation applies research-based information, named
+briefly; never invented. The Design Chair always adds the psychology
+(concepts, facts, research, methods) and concrete UI/UX advice. The rule
+block lives at the end of each file in `.claude/agents/`.
 
 ## Design system
 

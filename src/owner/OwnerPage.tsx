@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, CurrencyDollar, Eye, Factory, GameController, Megaphone, Notebook, PaintBrush, SquaresFour, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, CurrencyDollar, Eye, Factory, GameController, Megaphone, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -21,6 +21,7 @@ import { useTier } from '../data/hooks';
 import { growthTips } from './growth';
 import { WAITING } from './waiting';
 import OwnerGate from './OwnerGate';
+import TeamCard from './TeamCard';
 import { GrowthChartCard } from './GrowthChart';
 import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
@@ -50,9 +51,10 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing';
+type SectionId = 'overview' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
+  { id: 'team', label: 'owner.team', icon: Robot },
   { id: 'release', label: 'owner.release', icon: Factory },
   { id: 'forecast', label: 'owner.forecast', icon: CurrencyDollar },
   { id: 'stripe', label: 'owner.stripe', icon: CreditCard },
@@ -81,6 +83,7 @@ function Desktop() {
   const current = SECTIONS.find((x) => x.id === section)!;
   const body: Record<SectionId, ReactNode> = {
     overview: <div className="grid gap-6"><ProductionLine section="overview" go={(x) => go(x as SectionId)} /><Overview owner={owner} go={go} /></div>,
+    team: <TeamCard />,
     release: <ProductionLine section="release" />,
     forecast: <ProductionLine section="forecast" />,
     stripe: <ProductionLine section="stripe" />,

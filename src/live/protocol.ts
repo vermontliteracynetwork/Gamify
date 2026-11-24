@@ -29,6 +29,11 @@ export interface LiveState {
   // (teacher, 2026-10-26); neither means the teacher ends it.
   endAt?: { right?: number; minutes?: number };
   startedAt?: number;
+  // Territory (teacher, 2026-11-24): each student's side in Compete, the
+  // teacher's options (pace, rule), and how the room on the class screen stands.
+  teams?: Record<string, 'defender' | 'invader'>;
+  options?: Record<string, string>;
+  room?: { defenders: number; invaders: number; caught: number; scared: number };
 }
 
 // Each student's star color in the class sky (Question Tracker), by the

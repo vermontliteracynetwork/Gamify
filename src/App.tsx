@@ -12,9 +12,11 @@ import MotionRoot from './ui/motion/MotionRoot';
 import PublicHome from './public/PublicHome';
 import LoginPage from './public/LoginPage';
 import JoinPage from './public/JoinPage';
+import NotFoundPage from './public/NotFoundPage';
 
 import { RequireGame, RequireSignIn, RequireTeacher } from './public/SignInGate';
 import { SessionSupports } from './student/session';
+import UiSounds from './ui/UiSounds';
 import { useSettings } from './settings/SettingsContext';
 import { pageTitle } from './ui/pageTitle';
 import { UpgradeHost } from './billing/Upgrade';
@@ -33,6 +35,7 @@ const ActivityPage = lazyPage(() => import('./teacher/ActivityPage'));
 const SetEditorPage = lazyPage(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazyPage(() => import('./teacher/ImportPage'));
 const StarQuiz = lazyPage(() => import('./games/practice/StarQuiz'));
+const Territory = lazyPage(() => import('./games/territory/Territory'));
 const GameShow = lazyPage(() => import('./games/game-show/GameShow'));
 const MatchThree = lazyPage(() => import('./games/match-three/MatchThree'));
 const FourInARow = lazyPage(() => import('./games/four-in-a-row/FourInARow'));
@@ -47,6 +50,10 @@ const Bowling = lazyPage(() => import('./games/bowling/Bowling'));
 const RoadHop = lazyPage(() => import('./games/road-hop/RoadHop'));
 const LunchRush = lazyPage(() => import('./games/lunch-rush/LunchRush'));
 const FarmGrow = lazyPage(() => import('./games/farm-grow/FarmGrow'));
+// The Game Lab (preview only, teacher 2026-11-22): not linked from the main site.
+const LabIndex = lazyPage(() => import('./lab/LabPage').then((m) => ({ default: m.LabIndex })));
+const BrandPage = lazyPage(() => import('./brand/BrandPage'));
+const LabPlay = lazyPage(() => import('./lab/LabPage').then((m) => ({ default: m.LabPlay })));
 const ThemeBuilderPage = lazyPage(() => import('./theme/builder/ThemeBuilderPage'));
 const TemplatePage = lazyPage(() => import('./theme/builder/TemplatePage'));
 const OwnerPage = lazyPage(() => import('./owner/OwnerPage'));
@@ -151,6 +158,7 @@ function AnimatedRoutes() {
           <Route path="/show/:code" element={<RequireTeacher><CodeScreen /></RequireTeacher>} />
           <Route path="/play" element={<RequireSignIn><Home /></RequireSignIn>} />
           <Route path="/games/star-quiz" element={<RequireSignIn><RequireGame id="star-quiz"><StarQuiz /></RequireGame></RequireSignIn>} />
+          <Route path="/games/territory" element={<RequireSignIn><RequireGame id="territory"><Territory /></RequireGame></RequireSignIn>} />
           <Route path="/games/castle-quest" element={<RequireSignIn><RequireGame id="castle-quest"><CastleQuest /></RequireGame></RequireSignIn>} />
           <Route path="/games/pinball" element={<RequireSignIn><RequireGame id="pinball"><Pinball /></RequireGame></RequireSignIn>} />
           {/* Peg Drop became Pinball (teacher, 2026-10-31). */}
@@ -161,6 +169,9 @@ function AnimatedRoutes() {
           <Route path="/games/bowling" element={<RequireSignIn><RequireGame id="bowling"><Bowling /></RequireGame></RequireSignIn>} />
           <Route path="/games/road-hop" element={<RequireSignIn><RequireGame id="road-hop"><RoadHop /></RequireGame></RequireSignIn>} />
           <Route path="/games/lunch-rush" element={<RequireSignIn><RequireGame id="lunch-rush"><LunchRush /></RequireGame></RequireSignIn>} />
+          <Route path="/lab" element={<LabIndex />} />
+          <Route path="/brand" element={<BrandPage />} />
+          <Route path="/games/lab/:id" element={<LabPlay />} />
           <Route path="/games/farm-grow" element={<RequireSignIn><RequireGame id="farm-grow"><FarmGrow /></RequireGame></RequireSignIn>} />
           <Route path="/games/bubble-pop" element={<RequireSignIn><RequireGame id="bubble-pop"><BubblePop /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-up" element={<RequireSignIn><RequireGame id="match-up"><MatchUp /></RequireGame></RequireSignIn>} />
@@ -194,6 +205,8 @@ function AnimatedRoutes() {
           <Route path="/owner/line" element={<Navigate to="/owner" replace />} />
           <Route path="/owner/themes" element={<ThemeBuilderPage owner />} />
           <Route path="/owner/themes/:gameId" element={<ThemeBuilderPage owner />} />
+          {/* Every unknown address (teacher, 2026-11-24: the 404 page). */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
       </motion.div>
@@ -262,6 +275,7 @@ export default function App() {
         <Supports />
         <PreviewBanner />
         <HoverTips />
+        <UiSounds />
         <div id="main-content" tabIndex={-1} className="outline-none flex-1 flex flex-col">
           <AnimatedRoutes />
         </div>

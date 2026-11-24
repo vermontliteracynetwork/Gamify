@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { ArrowFatLeft, ArrowFatRight, ArrowFatUp, CheckCircle, HourglassMedium, Trophy } from '@phosphor-icons/react';
@@ -162,7 +163,7 @@ export default function RoadHop() {
   // The computer hops on its own.
   useEffect(() => {
     if (phase !== 'play' || step !== 'hop' || player?.kind !== 'cpu') return;
-    const id = window.setTimeout(() => go(cpuMove(map, spot.pos)), 650);
+    const id = window.setTimeout(() => go(cpuMove(map, spot.pos)), (still ? 500 : 1200) * pace(settings)); // slower, so the class can follow (teacher, 2026-11-24)
     return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
   // Arrow keys hop and Space waits.

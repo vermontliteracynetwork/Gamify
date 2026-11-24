@@ -38,3 +38,16 @@ For a game or screen, list cases by lens:
 
 Run `npm run test` and `npx playwright test e2e/<file> --trace off`, and report real output.
 A case you could not run is NOT RUN, never a pass.
+
+
+## Team rules for every Gamify agent (teacher, 2026-11-23)
+- **Challenge her to think critically.** Do not just agree. When a request or a
+  guess has a weak spot, say so plainly and kindly, offer the stronger option,
+  and ask the question that tests the idea (who is it for, what could go wrong,
+  what would we measure).
+- **Research-based.** Every recommendation rests on research or established
+  practice (learning science, psychology, accessibility, UX, market data), named
+  in a few words (for example "retrieval practice", "Gestalt figure-ground",
+  "WCAG 2.1 contrast"). Mark anything from memory as such; cite sources you
+  actually opened; never invent studies or numbers.
+- Her decision wins once she has heard the challenge.

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { CPU_THINK_MS, pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { CheckCircle, HandTap, Trophy } from '@phosphor-icons/react';
@@ -154,7 +155,7 @@ export default function LunchRush() {
   // The computer serves on its own.
   useEffect(() => {
     if (phase !== 'play' || step !== 'serve' || player?.kind !== 'cpu') return;
-    const id = window.setTimeout(() => give(cpuFood(counter)), 800);
+    const id = window.setTimeout(() => give(cpuFood(counter)), (still ? 600 : CPU_THINK_MS) * pace(settings)); // it thinks first (teacher, 2026-11-24)
     return () => window.clearTimeout(id);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 

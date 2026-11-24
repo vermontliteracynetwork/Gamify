@@ -4,6 +4,7 @@ import { ChalkboardTeacher, ChatCircleDots, HouseSimple, SignOut, X } from '@pho
 import { setTeacher, useSignedIn } from '../auth/session';
 import { t } from '../i18n';
 import { TellGamify } from './TellGamify';
+import { useIsOwner } from '../owner/useIsOwner';
 
 // Persistent top nav on every screen, so there's always a way back to the
 // game list from inside a game.
@@ -15,6 +16,7 @@ export default function NavBar() {
   const inGame = path.startsWith('/games/');
   const role = path.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
+  const isOwner = useIsOwner();
   const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-10 tap rounded-pill border-std border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border`}>
@@ -49,6 +51,8 @@ export default function NavBar() {
             className="w-9 h-9 tap-round rounded-full border-std border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
             <ChatCircleDots weight="bold" size={18} />
           </button>
+          {/* Only the owner's own account ever sees this (teacher, 2026-11-23); it opens the developer dashboard. */}
+          {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>}
           {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
           {!student && <Link to="/play" className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.allGames')}</span></Link>}
           {teacher && !student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden sm:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}

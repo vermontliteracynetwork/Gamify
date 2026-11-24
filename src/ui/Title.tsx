@@ -1,6 +1,7 @@
 // Headings (teacher rule, 2026-10-24): Title Case, with small words like
 // "the" and "of" left lowercase unless they come first or last, and every
-// capital G drawn as the G from the Gamify logo. Screen readers get the
+// capital G that starts a word drawn as the G from the Gamify logo
+// (teacher, 2026-11-24). Screen readers get the
 // plain words.
 
 const SMALL = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'nor', 'of', 'on', 'or', 'per', 'so', 'the', 'to', 'up', 'via', 'vs', 'with', 'yet']);
@@ -26,9 +27,9 @@ export default function Title({ text }: { text: string }) {
     <>
       <span className="sr-only">{cased}</span>
       <span aria-hidden="true">
-        {cased.split(/(\s+)/).map((word, w) => word.includes('G')
-          // A word with a logo G stays on one line.
-          ? <span key={w} className="whitespace-nowrap">{word.split('G').map((part, i) => <span key={i}>{i > 0 && <><span className="logo-g" /><span className="logo-g-text">G</span></>}{part}</span>)}</span>
+        {cased.split(/(\s+)/).map((word, w) => /^[^\p{L}\p{N}]*G/u.test(word)
+          // Only a G that starts a word is the logo G (teacher, 2026-11-24).
+          ? <span key={w} className="whitespace-nowrap">{word.split(/(?<=^[^\p{L}\p{N}]*)G/u).map((part, i) => <span key={i}>{i > 0 && <><span className="logo-g" /><span className="logo-g-text">G</span></>}{part}</span>)}</span>
           : word)}
       </span>
     </>

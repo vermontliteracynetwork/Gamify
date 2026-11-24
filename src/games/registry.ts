@@ -13,10 +13,11 @@ import { bowlingManifest } from './bowling/manifest';
 import { roadHopManifest } from './road-hop/manifest';
 import { lunchRushManifest } from './lunch-rush/manifest';
 import { farmGrowManifest } from './farm-grow/manifest';
+import { territoryManifest } from './territory/manifest';
 import type { GameManifest } from './types';
 
 // Every game built, in Arcade order (development plan Part 4).
-export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, castleQuestManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, farmGrowManifest, starQuizManifest, flashcardsManifest];
+export const ALL_GAMES: GameManifest[] = [gameShowManifest, pinballManifest, castleQuestManifest, castCatchManifest, matchThreeManifest, fourInARowManifest, memoryMatchManifest, matchUpManifest, bubblePopManifest, bowlingManifest, roadHopManifest, lunchRushManifest, farmGrowManifest, starQuizManifest, territoryManifest, flashcardsManifest];
 
 // For now the lineup is only games where multiple-choice questions interrupt
 // play, with an easy re-theme and power-ups (teacher, 2026-10-26). Games where

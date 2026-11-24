@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { pace } from '../../engine/pace';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { Drop, Moon, Plant, Question, Shovel } from '@phosphor-icons/react';
@@ -59,7 +60,7 @@ export default function FarmGrow() {
   function show(text: string, crop?: Crop, ms = 1800) {
     const id = Date.now();
     setBanner({ id, text, crop });
-    window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), ms);
+    window.setTimeout(() => setBanner((b) => (b?.id === id ? null : b)), ms * pace(settings));
   }
   function start() {
     setDays(setup.days);

@@ -4,13 +4,30 @@ import type { SoundPack } from '../theme/types';
 // Sound effects (recorded for Classic, generated in code for theme packs),
 // haptics and the read-aloud voice. Every call respects the player's settings.
 
-type Effect = 'right' | 'miss' | 'tap' | 'win' | 'whoosh';
+export type Effect = 'right' | 'miss' | 'tap' | 'win' | 'whoosh' | 'blip' | 'open' | 'close' | 'cancel' | 'swipe';
 const TONES: Record<Effect, { freqs: number[]; type: OscillatorType; step: number; length: number }> = {
   right: { freqs: [660, 880, 1175], type: 'sine', step: 0.08, length: 0.18 },
   miss: { freqs: [330, 262], type: 'triangle', step: 0.12, length: 0.2 }, // soft, never harsh
   tap: { freqs: [520], type: 'sine', step: 0, length: 0.06 },
   win: { freqs: [523, 659, 784, 1047], type: 'sine', step: 0.11, length: 0.28 },
   whoosh: { freqs: [400, 300], type: 'sine', step: 0.05, length: 0.12 },
+  blip: { freqs: [300, 240], type: 'sine', step: 0.06, length: 0.1 },
+  open: { freqs: [440, 660], type: 'sine', step: 0.05, length: 0.1 },
+  close: { freqs: [660, 440], type: 'sine', step: 0.05, length: 0.1 },
+  cancel: { freqs: [392, 330], type: 'sine', step: 0.06, length: 0.1 },
+  swipe: { freqs: [500, 620], type: 'sine', step: 0.03, length: 0.08 },
+};
+
+// The universal UI pack (teacher, 2026-11-23): JDSherbert's Ultimate UI SFX
+// Pack (commercial use with credit; files used exactly as supplied, never
+// edited, so loudness is set here). Other effects use public/sounds/<name>.mp3.
+const FILES: Partial<Record<Effect, { path: string; gain: number }>> = {
+  tap: { path: 'ui/select', gain: 1 },
+  blip: { path: 'ui/error', gain: 0.6 },
+  open: { path: 'ui/open', gain: 0.8 },
+  close: { path: 'ui/close', gain: 0.8 },
+  cancel: { path: 'ui/cancel', gain: 1 },
+  swipe: { path: 'ui/swipe', gain: 0.6 },
 };
 
 // A theme's sound pack reshapes the same effects (set by the themed page).
@@ -44,7 +61,7 @@ function sample(ac: AudioContext, name: Effect): AudioBuffer | null {
   if (b && b !== 'loading' && b !== 'failed') return b;
   if (!b) {
     buffers.set(name, 'loading');
-    void fetch(`/sounds/${name}.mp3`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject())).then((a) => ac.decodeAudioData(a))
+    void fetch(`/sounds/${FILES[name]?.path ?? name}.mp3`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject())).then((a) => ac.decodeAudioData(a))
       .then((buf) => { buffers.set(name, buf); }).catch(() => { buffers.set(name, 'failed'); });
   }
   return null;
@@ -53,7 +70,11 @@ export function preloadSounds() { const ac = audio(); if (ac) (Object.keys(TONES
 
 // `rate` raises the pitch (1 = as recorded), so a chain of hits climbs
 // (engagement audit, 2026-11-08).
+// The UI click plays for every tap on the site (teacher, 2026-11-23), so a
+// game's own tap right after it is skipped instead of doubling up.
+let lastTap = 0;
 export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = pack, rate = 1): void {
+  if (name === 'tap' || name === 'cancel' || name === 'swipe') { const now = Date.now(); if (now - lastTap < 90) return; lastTap = now; }
   const p = PACKS[with_];
   // Effects dip while the read-aloud talks, so the words come through.
   const gain = volume(s, 'effects') * 0.25 * p.gain * (isSpeaking() ? 0.3 : 1);
@@ -65,7 +86,7 @@ export function playEffect(name: Effect, s: PlayerSettings, with_: SoundPack = p
     if (buf) {
       const src = ac.createBufferSource();
       const g = ac.createGain();
-      g.gain.value = Math.min(1, gain * 3.2);
+      g.gain.value = Math.min(1, gain * 3.2 * (FILES[name]?.gain ?? 1));
       src.buffer = buf;
       src.playbackRate.value = rate;
       src.connect(g).connect(ac.destination);

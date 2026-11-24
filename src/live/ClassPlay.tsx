@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { ChoiceRow, Slider } from '../ui/fields';
+import ClassModeIcon from './ClassModeIcon';
 
 // How the class plays, chosen in the setup menus before the lobby opens
 // (teacher, 2026-10-31): compete on a leaderboard or work together toward a
@@ -30,7 +31,7 @@ export default function ClassPlayOptions({ value, onChange }: { value: ClassPlay
   return (
     <div className="grid gap-5">
       <ChoiceRow label={t('classPlay.style')} value={value.mode} onChange={(mode) => set({ mode })}
-        options={[{ value: 'compete', label: `${t('live.mode.compete')}: ${t('live.mode.competeHint')}` }, { value: 'together', label: `${t('live.mode.together')}: ${t('live.mode.togetherHint')}` }]} />
+        options={[{ value: 'together', label: t('live.mode.together'), tip: t('live.mode.togetherHint'), art: <ClassModeIcon mode="together" /> }, { value: 'compete', label: t('live.mode.compete'), tip: t('live.mode.competeHint'), art: <ClassModeIcon mode="compete" /> }]} />
       {value.mode === 'together' ? (
         <Slider label={t('live.goalLabel')} hint={t('classPlay.goalHint')} min={10} max={300} value={value.goal} onChange={(goal) => set({ goal })} />
       ) : (
