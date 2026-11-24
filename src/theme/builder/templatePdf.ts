@@ -3,8 +3,8 @@ import { isRound } from './template';
 import { hasShape, shapePdf } from './shapes';
 
 // The digital template as one PDF (teacher, 2026-10-31): a page per piece at
-// the piece's exact size, so Canva opens the upload as one project with every
-// page the right size. Canva reads a PDF at 96 dpi, so a piece W px wide is a
+// the piece's exact size, so a design app opens it as one project with every
+// page the right size. Design apps read a PDF at 96 dpi, so a piece W px wide is a
 // page W x 0.75 points wide. Each page holds a faint dashed guide of the
 // piece's shape and its name in a corner; nothing else, never Classic art.
 // Written by hand like the quote PDF, no library.

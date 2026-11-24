@@ -245,8 +245,9 @@ theme, designed on Bubble Pop's template. The theme picker inside each
 game shows only that game's themes.
 
 ### Theme tiers (matches section 5)
-- **Free:** the house default theme to play; every other theme can be
-  **previewed but not played**; only ONE Game Show theme of its own (owner, 2026-11-24), never unlimited themes.
+- **Free:** plays every theme already made (the whole library;
+  owner, 2026-11-24) and can create only ONE theme of its own, for Game Show
+  (owner, 2026-11-24), never unlimited themes.
 - **Plus:** full theme library, playable, plus seasonal drops (fall,
   winter, spring, field day; secular by default, specific holidays only
   when a teacher chooses them).
@@ -701,17 +702,17 @@ Notes:
   tapped (principle 2's one exception). Teachers see previews and upgrade
   options on their own pages.
 
-### Launch price and billing lengths (owner decisions 2026-11-24; discounts and first-term-only approved, monthly prices approved: Plus $8, Pro $15)
-Owner's words: "the marketing team at launch should have a campaign discount that will be offered to those who want to subscribe to a paid plan during the beta test, but dont want to be beta testers. allow also monthly subscriptions though discount at 3 month, 6 month, and 1 year. those are renewing at those intervals as well"
+### Standard prices, billing lengths and the launch sale (owner decisions 2026-11-24)
+Owner's words: "the marketing team at launch should have a campaign discount that will be offered to those who want to subscribe to a paid plan during the beta test, but dont want to be beta testers. allow also monthly subscriptions though discount at 3 month, 6 month, and 1 year. those are renewing at those intervals as well" ... "those are the standard prices. we will have an additional 10% off sale until jan 1 2027 for our launch sale."
 
-| Plan length | Renews every | First-term discount vs monthly | Plus first term | Pro first term |
-|---|---|---|---|---|
-| Monthly | month | none (full price) | **$8 (approved)** | **$15 (approved)** |
-| 3 months | 3 months | **5% (approved)** | $22.80 | $42.75 |
-| 6 months | 6 months | **15% (approved)** | $40.80 | $76.50 |
-| 1 year | year | **20% (approved)** | $76.80 | $144 |
+| Plan length | Renews every | Standard discount vs monthly | Plus standard | Pro standard | Plus launch sale (first term) | Pro launch sale (first term) |
+|---|---|---|---|---|---|---|
+| Monthly | month | none | $8 | $15 | $7.20 | $13.50 |
+| 3 months | 3 months | 5% | $22.80 | $42.75 | $20.52 | $38.48 |
+| 6 months | 6 months | 15% | $40.80 | $76.50 | $36.72 | $68.85 |
+| 1 year | year | 20% | $76.80 | $144 | $69.12 | $129.60 |
 
-Approved with it: the discount covers the first term only and does not renew; the plan then renews at the regular price for the same length unless the teacher cancels, and every post and the checkout say so. Proposed: the regular price for a length is monthly times the length (a renewing year: Plus $96, Pro $180, the standing yearly prices); the offer ends Jan 31, 2027 and is not extended; teacher and parent pages only, never student pages; price, renewal length and online cancel shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Beta testers keep their free Plus (track 1). Needs Stripe recurring prices at 1, 3, 6 and 12 months (Waiting on you: billing-intervals, mkt-launch-offer).
+Homeschool is priced like Plus. The launch sale (Founding Subscriber, code FOUNDING10, Claudia's guess for the name and code) is an extra 10% off the first term only, for subscriptions started before Jan 1, 2027, and does not renew: the plan renews at the standard price for the same length unless the teacher cancels. Price, renewal length and online cancel are shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Teacher and parent pages only, never student pages. Beta testers get their own offer (Pro free for 3 months, src/beta/spec.ts); the two never stack. School quotes start from the Pro yearly price, now $144 (owner to confirm). Code: src/config.ts (PRICES_USD, LAUNCH_OFFER).
 
 **School/district plans matter most:** a single district purchase order is
 worth hundreds of individual card subscriptions, and districts are who ask
@@ -1206,7 +1207,10 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 111 | **Pinterest as a main channel.** Tall pins of every game in the Classic look, free theme templates, sticker sheets and pattern papers as printables, seasonal classroom sets a month early, each linking to a Blog post or theme guide. | The site's look is made to be saved and shared by teachers planning their rooms | Teacher, 2026-11-24 |
 | 112 | **"Not a sale."** On sales holidays (Cyber Monday, back-to-school sales), post the one honest contrast: no discount, just the free tier, the beta, and what we will never charge for (read-aloud, calm mode, settings in every game). | A pattern interrupt in a feed full of countdowns; builds trust without fake urgency (marketing bible 5) | Marketing Director, 2026-11-24 launch plan |
 | 113 | **"Here is exactly what we ask."** The beta asks shown with their minutes (setup 15, lesson 10, play 10 to 20, check-in 1, surveys 5, reports 1) as a carousel. | Transparency lowers the perceived cost of saying yes (commitment and consistency; Fogg ability) | Marketing Director, 2026-11-24 launch plan |
-| 114 | **"Two ways to start."** Test it free as a beta tester, or just subscribe at the launch price: monthly, or save 5%, 15% or 20% with 3, 6 or 12-month plans (owner-approved). | Gives non-testers a yes instead of a no; anchoring against monthly and a real end date (Jan 31) | Owner, 2026-11-24 |
+| 114 | **"Two ways to start."** Test it free as a beta tester, or just subscribe at the launch price: monthly, or save 5%, 15% or 20% with 3, 6 or 12-month plans, plus an extra 10% off the first term in the launch sale until Jan 1. | Gives non-testers a yes instead of a no; anchoring against monthly and a real end date (Jan 1) | Owner, 2026-11-24 |
+| 115 | **Sculpt it, snap it, play it.** Physical design: classes make theme pieces from clay, modeling dough, textured paint, recycled things or leaves and sticks, take a photo or scan, and Gamify fits it into the game. Digital design works too. | The one feature no other quiz game platform has: students' real, hands-on work becomes the game; strong visuals for Pinterest and Reels (hands and pieces, no faces) | Owner, 2026-11-24 |
+| 116 | **Pay the way that fits: monthly, 3 months, 6 months or yearly.** Every paid plan renews at the interval you pick, and longer terms save more (5%, 15% and 20%). | Removes the "I can't pay a year up front" objection for teachers paying out of pocket | Owner, 2026-11-24 |
+| 117 | **Founding Subscriber launch offer.** Subscribe before Jan 1, 2027 and get an extra 10% off your first term (owner, 2026-11-24). | Turns beta-season interest into paid plans from teachers who don't want to test | Owner, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1279,6 +1283,7 @@ real classroom photos (with releases), screenshots, and a step-by-step
 | 60 | **Earn three stars: goal setting with Match Three** | Students set a star goal before playing, then reflect on how close they came and what helped (special pieces, careful swaps, right answers). A short SEL routine. | Match Three, Solo, any set | Golden Rule pass, 2026-10-31; grades 1-8 |
 | 61 | **Fish facts science warm-up with Cast and Catch** | Project the game, cast together, and read each fish fact aloud; students keep a class fish book of the kinds found and research one that is still hiding. | Cast and Catch, Live or Solo, any set | Golden Rule pass, 2026-11-01; grades K-5 |
 | 62 | **Teach, Then Play** | Write a one-line teach card for the skill ("A noun is a person, place or thing"), record the questions in your own voice, then play any game; the card is read aloud before the first turn. | Teach cards, recorded questions | Development, 2026-11-01; K-3 |
+| 63 | **From Clay to the Big Screen: Physical Theme Design** | Pick a game, pick a material (clay, modeling dough, textured paint, collage, recycled things, leaves and sticks), make each piece, photograph it on white paper, upload. Includes the photo tips and a materials list. | Theme Builder, physical design | Owner, 2026-11-24; all grades |
 - Board Game review race (2026-11-08): teams answer to roll; use Lose a turn and Roll again squares to talk about chance and fairness, then let students design their own die faces (counting dots stays the same).
 - Same set, five games (2026-11-22): run one vocabulary set as a word search, then a word scramble, then a snow friend word game, then Letter Lock, and talk about which game made the words stick (spelling, meaning, letter patterns).
 - Survey Showdown as a discussion starter (2026-11-22): after each board, ask why the top answer is the top answer.

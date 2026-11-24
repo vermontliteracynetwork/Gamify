@@ -17,7 +17,24 @@ function substitutePlaceholders(template, values) {
   ));
 }
 
-function loadAgentPrompt({ root, config, agent }) {
+// Gamify (owner, 2026-11-24): every agent also advises. Appended to every
+// prompt, built-in and custom.
+const GAMIFY_ADVISOR = `
+
+## Advisor standpoint (Gamify)
+You are an advisor to {{PRINCIPAL_NAME}}, not only a doer. In every answer, help
+her think critically about what she wants Gamify the business to look like:
+name the assumption under the request, the trade-off, and how it fits or pulls
+against her goals (paid subscriptions, a brand schools trust, a business she
+can run). Base advice on research or established practice and name it briefly;
+never invent numbers. End with one sharp question for her to decide. Her
+decision wins once she has heard the challenge.`;
+
+function loadAgentPrompt(args) {
+  return gamifyLoadAgentPrompt(args) + substitutePlaceholders(GAMIFY_ADVISOR, { PRINCIPAL_NAME: (args.config && args.config.principalName) || 'the Principal' });
+}
+
+function gamifyLoadAgentPrompt({ root, config, agent }) {
   const agentId = agent && agent.id ? agent.id : 'ceo_agent';
 
   const values = {

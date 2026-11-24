@@ -11,7 +11,7 @@ import { useSettings } from '../../settings/SettingsContext';
 import { speak } from '../../engine/feedback';
 
 // Draw a theme piece right in the Theme Builder (teacher, 2026-10-26: "think
-// Canva and Procreate", "simple yet intuitive... menus collapsable, things
+// design apps", "simple yet intuitive... menus collapsable, things
 // searchable... free usable assets... paint brush options, fill bucket").
 // Everything here is ours or MIT (Phosphor icons, docs/asset-ledger.md), so
 // whatever a class draws is theirs to use.
@@ -21,7 +21,7 @@ type BrushKind = 'pen' | 'marker' | 'crayon' | 'spray';
 type ShapeKind = 'circle' | 'square' | 'triangle' | 'heart' | 'star';
 
 // Stickers, shapes and words sit above the paint as pieces you can move,
-// resize, turn and delete (Canva style); brushes paint underneath (Procreate
+// resize, turn and delete (like design apps); brushes paint underneath (Procreate
 // style). Saving flattens both into one picture.
 interface Obj { id: number; kind: 'sticker' | 'shape' | 'text'; x: number; y: number; size: number; rot: number; flip?: boolean; color: string;
   // Shapes: outline color and width (0 = no outline; teacher, 2026-10-31).

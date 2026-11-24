@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, TIERS, type Tier } from '../config';
+import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, TIERS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, buttonClasses, fieldClasses } from '../ui/kit';
+import { Button, Tabs, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import PlanFeatures from '../billing/PlanFeatures';
@@ -19,10 +19,12 @@ import PlanFeatures from '../billing/PlanFeatures';
 // call. Teacher-facing only: student pages never show prices. Every number
 // comes from src/config.ts.
 const fmt = (n: number) => (Number.isFinite(n) ? String(n) : t('pricing.unlimited'));
-const monthly = (x: Exclude<Tier, 'free'>) => (PRICES_USD_PER_YEAR[x] / 12).toFixed(0);
+const perMonth = (x: Exclude<Tier, 'free'>, b: Billing) => { const m = PRICES_USD[x][b] / billingMonths(b); return m % 1 ? m.toFixed(2) : String(m); };
 
 export default function PricingPage() {
   const reduce = useReducedMotion();
+  // Monthly, 3 months, 6 months or yearly (owner, 2026-11-24); yearly first, it saves the most.
+  const [billing, setBilling] = useState<Billing>('year');
   // Links like /pricing#schools land on that section.
   useEffect(() => { const id = window.location.hash.slice(1); if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 50); }, [reduce]);
   const rows: { label: string; value: (tier: Tier) => string | boolean }[] = [
@@ -65,6 +67,13 @@ export default function PricingPage() {
           </ul>
         </div>
 
+        {LAUNCH_OFFER.active && new Date() < new Date(`${LAUNCH_OFFER.endsBefore}T00:00:00`) && (
+          <p className="bg-secondary border-bold border-border rounded-panel p-4 font-bold text-lg m-0" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            {t('pricing.founding', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}
+          </p>
+        )}
+        <Tabs value={billing} onChange={setBilling} label={t('pricing.billing')} className="justify-self-start mb-0"
+          options={BILLINGS.map((b) => ({ id: b.id, label: b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) }) }))} />
         <div className="grid md:grid-cols-3 gap-4 items-stretch">
           {tiers.map((x, i) => {
             return (
@@ -78,7 +87,7 @@ export default function PricingPage() {
                 <div className="mt-1">
                   {x === 'free'
                     ? <><p className="font-display text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>
-                    : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: monthly(x) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[x] })}</p></>}
+                    : <><p className="font-display text-4xl leading-none">{t('upgrade.price', { m: perMonth(x as 'plus' | 'pro', billing) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-semibold text-muted">{t(`pricing.renews.${billing}` as StringKey, { n: PRICES_USD[x as 'plus' | 'pro'][billing] })}</p></>}
                 </div>
                 <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('primary', `min-h-14 text-lg hover-pop ${x === 'plus' ? '!bg-text !text-white' : ''}`)}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { ArrowRight, Brain, Buildings, ChalkboardTeacher, Check, FileText, Heart, House, LockKey, Rocket, ShieldCheck, Sparkle, UsersThree, X } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
-import { PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS } from '../config';
+import { PRICES_USD_PER_YEAR, SCHOOL_SEAT_DISCOUNTS, perMonthUSD } from '../config';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -135,7 +135,7 @@ export function SchoolsPage() {
 }
 
 export function HomeschoolPage() {
-  const home = (PRICES_USD_PER_YEAR.homeschool / 12).toFixed(0);
+  const home = perMonthUSD(PRICES_USD_PER_YEAR.homeschool);
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">

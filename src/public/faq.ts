@@ -29,7 +29,7 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
   ],
   teachers: [
     { q: 'What does the Gamify Free plan include?', a: 'The Gamify Free plan is free forever: one class of up to 30 students, the free games, every accessibility feature, and one Game Show theme you design. It needs no credit card.' },
-    { q: 'What do Plus and Pro add?', a: 'Plus unlocks every game, a theme your class designs for each game, 3 classes of up to 60 students and unlimited question sets, for only $8 a month, billed yearly. Pro removes every limit and adds early access to new games and unlimited theme creations per game, for only $15 a month.' },
+    { q: 'What do Plus and Pro add?', a: 'Plus unlocks every game, a theme your class designs for each game, 3 classes of up to 60 students and unlimited question sets, for $8 a month, or $6.40 a month on a yearly plan. Pro removes every limit and adds early access to new games and unlimited theme creations per game, for $15 a month, or $12 a month on a yearly plan.' },
     { q: 'How long does it take to get started?', a: 'About five minutes: make a class, paste your class list, pick a ready-made set or write your own, then share a game code. The Get Started steps walk you through it.' },
     { q: 'Does Gamify give points for answering fastest?', a: 'No. In every Gamify game a right answer counts the same whether it takes five seconds or fifty, so careful readers and students who need more time are never punished for thinking. Timers are optional, and calm mode can turn them off.' },
     { q: 'Do I have to write my own questions?', a: 'You can, and that is where Gamify shines, but you do not have to. Start from the ready-made library, copy a set and edit it, or upload a spreadsheet.' },
@@ -46,7 +46,7 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
   ],
   homeschool: [
     { q: 'Can I use Gamify for homeschooling?', a: 'Yes. Your family is your class: add each child, assign their own question sets, and play together on one screen or one at a time.' },
-    { q: 'Which plan should my family use?', a: 'Start on Free: one class (your family, up to 30), your own questions in any subject, and every accessibility feature, forever. Plus adds every game and a theme your children design for each one, for only $8 a month, billed yearly.' },
+    { q: 'Which plan should my family use?', a: 'Start on Free: one class (your family, up to 30), your own questions in any subject, and every accessibility feature, forever. Plus adds every game and a theme your children design for each one, for $8 a month, or $6.40 a month on a yearly plan.' },
     { q: 'I teach several ages at once. Does that work?', a: 'Yes. Give each child their own sets, so a six-year-old practices letters while a twelve-year-old reviews fractions. For family game time, play a Share game together as one team against the computer.' },
     { q: 'Will it fit my curriculum?', a: 'Yes, because you write or import the questions. Any subject, any approach, any faith or none. The ready-made library is there when you want a quick start.' },
     { q: 'Can it help with my state\'s record keeping?', a: 'Reports show what each child practiced and how they did, by subject, set and day, ready to print or download for a portfolio.' },
