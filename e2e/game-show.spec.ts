@@ -51,8 +51,8 @@ test('Game Show: surprise cards with two teams', async ({ page }, info) => {
   const reveal = page.getByRole('dialog');
   await expect(reveal).toBeVisible();
   await page.screenshot({ path: `test-results/gameshow-reveal-${info.project.name}.png` });
-  // Swap/steal with nobody else scoring falls through to OK; points too.
-  await reveal.getByRole('button', { name: 'OK' }).click();
+  // The prize card waits for Continue (approved mockup, 2026-11-24).
+  await reveal.getByRole('button', { name: 'Continue' }).click();
   await page.screenshot({ path: `test-results/gameshow-board-${info.project.name}.png`, fullPage: true });
 
   // The turned card shows only the winning team's icon (teacher, 2026-10-31).

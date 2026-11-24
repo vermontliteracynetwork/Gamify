@@ -552,6 +552,15 @@ html[data-motion="still"] :is(.qt-gold) { animation: none; }
 .gs-bulbs-x.gs-twinkle { animation: gs-bulbs-x 0.9s linear infinite, gs-twinkle 1.3s ease-in-out infinite; }
 .gs-bulbs-y.gs-twinkle { animation: gs-bulbs-y 0.9s linear infinite, gs-twinkle 1.3s ease-in-out infinite; }
 @keyframes gs-twinkle { 0%, 100% { filter: drop-shadow(0 0 1px #fff6b0); } 50% { filter: drop-shadow(0 0 5px #fdfd94) drop-shadow(0 0 9px rgba(253,253,148,0.8)); } }
+/* Game Show's marquee bulbs chase: each pair swaps lemon and paper (approved mockup, 2026-11-24). */
+.gs-bulb { animation: gs-bulb 0.9s steps(1, end) infinite; }
+.gs-bulb-b { animation-name: gs-bulb-b; }
+@keyframes gs-bulb { 0% { background: #fabe37; box-shadow: 0 0 6px 2px rgba(250,190,55,0.75); } 50% { background: #fffaf0; box-shadow: none; } }
+@keyframes gs-bulb-b { 0% { background: #fffaf0; box-shadow: none; } 50% { background: #fabe37; box-shadow: 0 0 6px 2px rgba(250,190,55,0.75); } }
+html[data-motion="still"] .gs-bulb { animation: none !important; }
+/* Game Show's card turn: it lifts, turns over in 3D and settles a little big. */
+.gs-flip { animation: gs-flip 1s cubic-bezier(0.45, 0, 0.3, 1) both; }
+@keyframes gs-flip { 0% { transform: rotateY(0deg) scale(1) translateY(0); } 45% { transform: rotateY(90deg) scale(1.18) translateY(-6%); } 100% { transform: rotateY(180deg) scale(1.08) translateY(0); } }
 /* A slight wiggle when a pointer rests on a card tile (teacher, 2026-11-06). */
 /* Hover: a slight enlarge, border kept (teacher, 2026-11-13: no wiggle). */
 @media (hover: hover) { .tile-wiggle { transition: scale 0.18s ease-out; } .tile-wiggle:hover { scale: 1.03; z-index: 2; position: relative; } }
