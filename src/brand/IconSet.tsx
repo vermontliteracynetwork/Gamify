@@ -40,7 +40,7 @@ const GROUPS: { title: string; jobs: Job[] }[] = [
     { name: 'Mute', icon: SpeakerSlash, use: 'Stop reading, sound off' },
     { name: 'Timer', icon: Timer, use: 'Time limits, the clock', not: 'Clock, HourglassMedium' },
     { name: 'Power-up', icon: Lightning, use: 'Power-up settings (art is the crayon kit)' },
-    { name: 'Hint', icon: Lightbulb, use: 'Hint, teach card' },
+    { name: 'Hint', icon: Lightbulb, use: 'Hint' },
     { name: 'Tools', icon: Toolbox, use: 'Calculator, scratchpad' },
     { name: 'Calm', icon: Moon, use: 'Calm mode' },
   ] },

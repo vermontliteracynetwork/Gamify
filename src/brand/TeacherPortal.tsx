@@ -386,7 +386,7 @@ function CreateActivity() {
             </div>
             <div className="mt-6 rounded-[14px] p-4 grid gap-2.5" style={{ background: PP.cream }}>
               <span className="flex items-center gap-2"><b className="text-[15px]">Game options</b><Tip text="Set in the How and Game steps. Change any of them here before you start." /><span className="ml-auto text-[14px] font-bold" style={{ color: PP.grapeDeep }}>Change</span></span>
-              <div className="flex flex-wrap gap-2">{['10 rounds', '2 tries per question', 'Timer off', '4 power-ups on', 'Classic theme', 'Teach card first', 'Shuffle answers'].map((o) => <Chip key={o} bg={PP.paper} strong>{o}</Chip>)}</div>
+              <div className="flex flex-wrap gap-2">{['10 rounds', '2 tries per question', 'Timer off', '4 power-ups on', 'Classic theme', 'Shuffle answers'].map((o) => <Chip key={o} bg={PP.paper} strong>{o}</Chip>)}</div>
             </div>
             <div className="mt-auto flex items-center justify-center gap-6 text-[14px] font-semibold" style={{ color: Q }}>
               <span className="inline-flex items-center gap-2"><Check weight="bold" size={16} />Projector set to Extend, not Mirror <Tip text="Mirror shows your private class view to the room. Extend keeps it on your laptop only." /></span>
@@ -450,7 +450,7 @@ function LiveView() {
             <Card title="Hardest question right now" pad={14}>
               <p className="m-0 text-[14px] font-bold leading-snug">Q4: Which sentence uses commas in a list?</p>
               <p className="m-0 mt-1 text-[13px] font-semibold" style={{ color: Q }}>9 picked &quot;apples bananas, and grapes&quot;</p>
-              <div className="mt-2.5"><Takeaway stack text="Pause and teach it now?" action="Show teach card" /></div>
+              <div className="mt-2.5"><Takeaway stack text="Pause and teach it now?" action="Reteach it now" /></div>
             </Card>
             <Card title="Hugo, stuck 74s" pad={14}>
               <div className="flex flex-wrap gap-2"><Btn small><ChatCircleText weight="bold" size={14} />You&apos;ve got this</Btn><Btn small><Lightbulb weight="bold" size={14} />Send a hint</Btn><Btn small><Snowflake weight="bold" size={14} />Freeze, I&apos;m coming</Btn></div>
@@ -530,13 +530,12 @@ function SetEditor() {
             <b className="text-[14px] flex items-center gap-2"><Lightbulb weight="bold" size={16} />How it played: 41% right on first try</b>
             <span className="text-[14px] font-semibold">Most picked wrong answer: B (9 students). B and the right answer differ by one comma, so this question tests looking closely as much as the rule.</span>
           </div>
-          <div className="mt-auto flex gap-2"><Btn small><Plus weight="bold" size={14} />Add a picture</Btn><Btn small><Plus weight="bold" size={14} />Teach card</Btn><Btn small>True or false</Btn></div>
+          <div className="mt-auto flex gap-2"><Btn small><Plus weight="bold" size={14} />Add a picture</Btn><Btn small>True or false</Btn></div>
         </Card>
         <Card title="Set details" tip="All details are needed before a set can be shared in Public sets.">
           {[['Subject', 'English language arts'], ['Grades', '1 to 2'], ['Standards', 'L.1.2a, L.1.2c'], ['Tags', 'punctuation, capital letter']].map(([k, v]) => (
             <div key={k} className="grid gap-1 mb-3"><b className="text-[13px]" style={{ color: Q }}>{k}</b><span className="h-10 rounded-[10px] px-3 flex items-center font-semibold text-[14px]" style={{ background: PP.cream, border: '2px solid rgba(29,26,51,0.2)' }}>{v}</span></div>
           ))}
-          <div className="rounded-[12px] p-3 grid gap-1 text-[13px] font-semibold" style={{ background: PP.blueCrystal }}><b className="text-[14px]">Teach card</b>&quot;Put a comma after each thing in a list, except the last one.&quot;</div>
           <span className="mt-auto text-[13px] font-bold inline-flex items-center gap-1.5" style={{ color: '#15703a' }}><CheckCircle weight="bold" size={16} />10 of 10 questions ready to play</span>
         </Card>
       </div>
@@ -748,7 +747,7 @@ function SmallGroup() {
             );
           })}
         </div>
-        <Takeaway text="Rosa and Hugo are on track. Theo is flat for 3 sessions: try a 1:1 with the teach card first." action="Plan Theo's 1:1" icon={<Student weight="bold" size={16} />} />
+        <Takeaway text="Rosa and Hugo are on track. Theo is flat for 3 sessions: try a 1:1 reteach first." action="Plan Theo's 1:1" icon={<Student weight="bold" size={16} />} />
       </div>
     </Shell>
   );

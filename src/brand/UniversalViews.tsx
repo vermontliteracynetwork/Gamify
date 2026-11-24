@@ -2,13 +2,13 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import {
-  ArrowLeft, ArrowRight, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
+  ArrowLeft, ArrowRight, CaretDown, Check, CornersOut, GearSix, MagnifyingGlass, Pause,
   PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Toolbox, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { Badge, Fit, Laptop, MainBtn as BaseBtn, MenuStep, MORE_TEAMS, type Team, WAYS_STYLE, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
+import { AutoFit, Badge, DeviceSet, Laptop, MainBtn as BaseBtn, MenuStep, Meter, useFrame, MORE_TEAMS, type Team, WAYS_STYLE, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
 import { GAME_COVERS } from './GameMockups';
 
 export { Badge, Laptop, BaseBtn as MainBtn, Tablet, TEAMS };
@@ -76,7 +76,14 @@ function Wizard({ step, total, title, children, last }: { step: number; total: n
   return <MenuStep title={title} step={step + 1} total={total + 1} go={last ? <MainBtn><Play weight="fill" size={24} />Play</MainBtn> : undefined}>{children}</MenuStep>;
 }
 // A game stage stand-in (Board Game, Classic park) so overlays sit on a real theme.
-function Board({ dim, w = 1280, h = 800 }: { dim?: boolean; w?: number; h?: number }) {
+// The overlay box over the game; in portrait it fits the card to the screen.
+function Over({ children }: { children: ReactNode }) {
+  const f = useFrame();
+  if (f.adaptive && f.portrait) return <div className="absolute inset-0" style={{ padding: f.w < 600 ? 16 : 36 }}><AutoFit>{children}</AutoFit></div>;
+  return <div className="absolute inset-0 grid place-items-center">{children}</div>;
+}
+function Board({ dim, w: w0 = 1280, h: h0 = 800 }: { dim?: boolean; w?: number; h?: number }) {
+  const f = useFrame(); const w = f.adaptive ? f.w : w0, h = f.adaptive ? f.h : h0;
   return (
     <div className="w-full h-full relative">
       <ParkBack w={w} h={h} />
@@ -97,15 +104,7 @@ function Corner({ id, x, y, rot, size = 110 }: { id: string; x: string; y: strin
 // a chunky meter, one segment per round, no numbers on it. Right: icon buttons.
 type Mode = 'solo' | 'share' | 'live';
 function RoundMeter({ round, rounds, part, w = 360 }: { round: number; rounds: number; part: number; w?: number }) {
-  return (
-    <span className="flex gap-2" style={{ width: w }} role="img" aria-label={`Round ${round} of ${rounds}`}>
-      {Array.from({ length: rounds }, (_, r) => (
-        <span key={r} className="flex-1 h-[18px] rounded-full overflow-hidden relative" style={{ background: r < round - 1 ? PP.kelly : PP.paper, border: `2.5px solid ${I}` }}>
-          {r === round - 1 && <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${part * 100}%`, background: PP.periwinkle, borderRight: `2.5px solid ${I}` }} />}
-        </span>
-      ))}
-    </span>
-  );
+  return <Meter segments={rounds} done={round - 1} part={part} width={w} label={`Round ${round} of ${rounds}`} />;
 }
 function Tracker({ mode, k = 1 }: { mode: Mode; k?: number }) {
   const left = mode === 'solo'
@@ -315,7 +314,7 @@ function V7() {
   return (
     <div className="w-full h-full relative">
       <Board dim />
-      <div className="absolute inset-0 grid place-items-center">
+      <Over>
         <div className="relative">
           <span aria-hidden="true" className="absolute left-1/2 top-[36%] -translate-x-1/2 -translate-y-1/2 w-[620px] h-[620px] rounded-full" style={{ background: `repeating-conic-gradient(${PP.butter} 0 10deg, transparent 10deg 20deg)`, maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', opacity: 0.6 }} />
           <Paper layer={PP.butter} pad={0} className="w-[540px]">
@@ -328,18 +327,24 @@ function V7() {
           </Paper>
           {(['sparkle', 'star', 'dot', 'sparkle', 'heart'] as const).map((k, i) => <Doodle key={i} kind={k} color={[PP.lemon, PP.pink, PP.sky, PP.kelly, PP.pink][i]} size={36} className="absolute" style={{ left: ['-12%', '104%', '-9%', '102%', '46%'][i], top: ['12%', '22%', '74%', '82%', '106%'][i] }} />)}
         </div>
-      </div>
+      </Over>
     </div>
   );
 }
 
 // ---------- question screen: the game's theme around the standard card ----------
 const ANS = [['A', 'the dog ran.', PP.periwinkle, PP.gamify], ['B', 'The dog ran.', PP.sky, PP.blueCrystal], ['C', 'The dog ran', PP.pink, PP.blush], ['D', 'the dog ran', PP.lemon, PP.butter]] as const;
-function QCard({ tablet }: { tablet?: boolean }) {
+// Teacher, 2026-11-24: thinner answer tiles at ONE fixed size; the question
+// gets a fixed generous block and its font steps down for long questions; the
+// card is about 85% of the frame so more of the theme shows around it.
+const SHORT_Q = 'Which one starts with a capital letter?';
+const LONG_Q = 'Read the sentence: "my dog likes to run in the park." Which one fixes it with a capital letter at the start and punctuation at the end?';
+function qSize(q: string, big: boolean) { const n = q.length; return big ? (n <= 60 ? 54 : n <= 110 ? 44 : 36) : (n <= 60 ? 46 : n <= 110 ? 36 : 30); }
+function QCard({ tablet, q = SHORT_Q }: { tablet?: boolean; q?: string }) {
   const big = !!tablet;
   const b = big ? 60 : 52, ic = big ? 26 : 22;
   return (
-    <div className={`${big ? 'w-full flex-1 min-h-0' : 'w-[1120px] h-full'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 30 : 28 }}>
+    <div className={`${big ? 'w-[697px]' : 'w-[1088px]'} rounded-[30px] flex flex-col gap-5`} style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}`, padding: big ? 28 : 26 }}>
       {/* Her page 2 header: the current team left; tools, settings, full screen, close, then Listen on the right. */}
       <div className="flex items-center gap-3">
         <span className="flex items-center gap-3 flex-1 min-w-0"><TurnGlow round><span className="grid place-items-center rounded-full" style={{ width: b, height: b, background: '#fff', border: `3px solid ${I}` }}><Badge t={TEAMS[1]} size={b * 0.62} /></span></TurnGlow><b className="truncate" style={{ fontSize: big ? 30 : 26 }}>Team Sky</b></span>
@@ -349,11 +354,13 @@ function QCard({ tablet }: { tablet?: boolean }) {
         <Round size={b} label="Close"><X weight="bold" size={ic} /></Round>
         <span className="px-5 rounded-full inline-flex items-center gap-2 font-bold shrink-0" style={{ minHeight: b, fontSize: big ? 24 : 20, background: PP.blueCrystal, border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><SpeakerHigh weight="bold" size={ic} />Listen</span>
       </div>
-      <h2 className="font-bold text-left leading-snug" style={{ fontSize: big ? 54 : 42 }}>Which one starts with a capital letter and ends with punctuation?</h2>
-      <div className="grid gap-4 flex-1" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
+      <div className="flex items-center" style={{ height: big ? 330 : 200 }}>
+        <h2 className="font-bold text-left leading-snug" style={{ fontSize: qSize(q, big) }}>{q}</h2>
+      </div>
+      <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${big ? 1 : 2}, 1fr)` }}>
         {ANS.map(([l, txt, c, bg]) => (
-          <div key={l} className="flex items-center gap-5 px-5 rounded-[22px] font-bold" style={{ fontSize: big ? 46 : 40, background: bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
-            <span className="shrink-0 rounded-full grid place-items-center" style={{ ...GY, width: big ? 84 : 76, height: big ? 84 : 76, fontSize: big ? 46 : 40, background: c, border: `3px solid ${I}` }}>{l}</span>{txt}
+          <div key={l} className="flex items-center gap-4 px-4 rounded-[20px] font-bold" style={{ height: big ? 92 : 84, fontSize: big ? 38 : 32, background: bg, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+            <span className="shrink-0 rounded-full grid place-items-center" style={{ ...GY, width: big ? 64 : 58, height: big ? 64 : 58, fontSize: big ? 36 : 32, background: c, border: `3px solid ${I}` }}>{l}</span>{txt}
           </div>
         ))}
       </div>
@@ -364,19 +371,19 @@ type ThemeId = 'gameshow' | 'park' | 'sky';
 function ThemeBack({ id, w, h }: { id: ThemeId; w: number; h: number }) {
   return id === 'gameshow' ? <StudioBack w={w} h={h} /> : id === 'park' ? <ParkBack w={w} h={h} /> : <SkyBack w={w} h={h} />;
 }
-function QLaptop({ theme }: { theme: ThemeId }) {
+function QLaptop({ theme, q }: { theme: ThemeId; q?: string }) {
   return (
     <div className="w-full h-full relative">
       <ThemeBack id={theme} w={1280} h={800} />
-      <div className="absolute inset-0 flex flex-col items-center px-10 py-10"><QCard /></div>
+      <div className="absolute inset-0 grid place-items-center"><QCard q={q} /></div>
     </div>
   );
 }
-function QTablet({ theme }: { theme: ThemeId }) {
+function QTablet({ theme, q }: { theme: ThemeId; q?: string }) {
   return (
     <div className="w-full h-full relative">
       <ThemeBack id={theme} w={820} h={1180} />
-      <div className="absolute inset-0 flex flex-col items-center px-7 pt-10 pb-12"><QCard tablet /></div>
+      <div className="absolute inset-0 grid place-items-center"><QCard tablet q={q} /></div>
     </div>
   );
 }
@@ -409,10 +416,10 @@ function V9b() {
             {TEAMS.map((t, i) => {
               const row = (
                 <div className="w-[320px] flex items-center gap-3 px-4 h-[64px] rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
-                  <Badge t={t} size={36} /><b className="flex-1 text-[20px] truncate">{t.name}</b><span className="text-[36px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
+                  {i === 1 ? <TurnGlow round><Badge t={t} size={36} /></TurnGlow> : <Badge t={t} size={36} />}<b className="flex-1 text-[20px] truncate">{t.name}</b><span className="text-[36px] tabular-nums" style={GY}>{[80, 110, 60, 95][i]}</span>
                 </div>
               );
-              return i === 1 ? <TurnGlow key={t.name} radius={9999}>{row}</TurnGlow> : <div key={t.name}>{row}</div>;
+              return <div key={t.name}>{row}</div>;
             })}
             <div className="flex gap-4 justify-center mt-2">
               {HELD.map((h) => (
@@ -432,7 +439,7 @@ function V10() {
   return (
     <div className="w-full h-full relative">
       <Board dim />
-      <div className="absolute inset-0 grid place-items-center">
+      <Over>
         <div className="relative">
           <Paper layer={PP.blush} tilt={-1.5} pad={0} className="w-[820px]">
             <div className="px-10 pt-9 pb-9 grid justify-items-center gap-6 text-center">
@@ -452,7 +459,7 @@ function V10() {
           <Corner id="star" x="-56px" y="30px" rot={-14} />
           <Corner id="balloon" x="768px" y="140px" rot={12} />
         </div>
-      </div>
+      </Over>
     </div>
   );
 }
@@ -463,7 +470,7 @@ function V11() {
   return (
     <div className="w-full h-full relative">
       <Board dim />
-      <div className="absolute inset-0 grid place-items-center">
+      <Over>
         <Paper pad={28} className="w-[880px]" layer={PP.mint}>
           <div className="relative flex items-center justify-center mb-5"><h2 className="text-[52px]" style={GY}>Settings</h2><span className="absolute right-0"><Round label="Close"><X weight="bold" size={24} /></Round></span></div>
           <div className="grid grid-cols-[220px_1fr] gap-6">
@@ -477,7 +484,7 @@ function V11() {
             </div>
           </div>
         </Paper>
-      </div>
+      </Over>
     </div>
   );
 }
@@ -485,7 +492,7 @@ function V11b() {
   return (
     <div className="w-full h-full relative">
       <Board dim />
-      <div className="absolute inset-0 grid place-items-center">
+      <Over>
         <Paper pad={44} className="w-[600px]" layer={PP.blueCrystal}>
           <div className="grid justify-items-center gap-4 text-center">
             <span className="relative w-36 h-36 grid place-items-center"><BlobPatch color={PP.blueCrystal} size={150} /><span className="relative w-24 h-24 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Pause weight="bold" size={52} /></span></span>
@@ -493,7 +500,24 @@ function V11b() {
             <p className="font-bold text-[26px] leading-snug">Your teacher paused the game. It will be back soon.</p>
           </div>
         </Paper>
-      </div>
+      </Over>
+    </div>
+  );
+}
+// The teacher's own pause message (teacher, 2026-11-24).
+function V11c({ msg = 'Eyes on me! We will finish after lunch.' }: { msg?: string }) {
+  return (
+    <div className="w-full h-full relative">
+      <Board dim />
+      <Over>
+        <Paper pad={44} className="w-[760px]" layer={PP.blueCrystal}>
+          <div className="grid justify-items-center gap-4 text-center">
+            <span className="relative w-28 h-28 grid place-items-center"><BlobPatch color={PP.blueCrystal} size={120} /><span className="relative w-20 h-20 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Pause weight="bold" size={44} /></span></span>
+            <p className="font-bold text-[54px] leading-tight">{msg}</p>
+            <span className="font-bold text-[20px]" style={{ color: PP.quiet }}>from your teacher</span>
+          </div>
+        </Paper>
+      </Over>
     </div>
   );
 }
@@ -582,62 +606,40 @@ function V12c() {
       <CodeChip />
       <div className="mt-7 px-9 py-6 grid justify-items-center gap-4 rounded-[26px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
         <span className="flex items-center gap-3 text-[30px] font-bold"><Star weight="fill" size={40} color={PP.lemon} />Our goal: fill the sky with 60 stars</span>
-        <span className="flex items-center gap-4"><span className="w-[560px] h-7 rounded-full overflow-hidden" style={{ background: PP.blueCrystal, border: `3px solid ${I}` }}><span className="block h-full w-[4%]" style={{ background: PP.lemon, borderRight: `3px solid ${I}` }} /></span><b className="text-[22px] tabular-nums">0 of 60</b></span>
+        <span className="flex items-center gap-4"><Meter segments={1} done={0} part={0.04} width={560} label="0 of 60 stars" /><b className="text-[22px] tabular-nums">0 of 60</b></span>
       </div>
       <div className="flex flex-wrap justify-center gap-3 max-w-[900px] mt-7">{NAMES.map((n, i) => <span key={n} className="px-5 h-12 rounded-full font-bold text-[22px] flex items-center" style={{ background: soft[i % 6], border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{n}</span>)}</div>
     </MenuStep>
   );
 }
 
-function V13() {
-  return (
-    <div className="w-full h-full relative">
-      <Board dim />
-      <div className="absolute inset-0 grid place-items-center">
-        <div className="relative">
-          <Paper pad={40} className="w-[780px]">
-            <div className="grid justify-items-center gap-4 text-center">
-              <span className="inline-flex items-center gap-2 px-5 h-11 rounded-full font-bold text-[19px]" style={{ background: PP.butter, border: `3px solid ${I}` }}><Lightbulb weight="bold" size={22} />Before we play</span>
-              <div className="relative w-[230px] h-[170px] grid place-items-center"><BlobPatch color={PP.gamify} size={200} /><span className="relative text-[130px]" style={{ ...GY, textTransform: 'none' }}>Aa</span></div>
-              <p className="font-bold text-[38px] leading-snug">A sentence starts with a capital letter and ends with punctuation.</p>
-              <div className="flex gap-4 items-center"><SecondBtn h={60}><SpeakerHigh weight="bold" size={22} />Listen</SecondBtn><MainBtn big><Play weight="fill" size={26} />Let&apos;s play!</MainBtn></div>
-            </div>
-          </Paper>
-          <Corner id="bulb" x="700px" y="-40px" rot={14} size={100} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
-type V = { n: string; name: string; view: ReactNode; note: string; tablet?: boolean };
+type V = { n: string; name: string; view: ReactNode; note: string; port?: ReactNode; fit?: boolean; tall?: boolean };
 // Every shared screen, in the order a class meets them (teacher, 2026-11-23:
 // "all these screens would be considered universal and should be moved to universal page").
 const VIEWS: V[] = [
-  { n: '1', name: 'Welcome', view: <V1 />, note: 'Her original layout: the cover (a real miniature of the game in play) big on the left; the right column exactly as tall, spread evenly: the title row with the corner buttons, the description and ways to play, the How to play card, a 72px start button level with the cover bottom.' },
-  { n: '2a', name: 'How will you play? (Share picked)', view: <V2 pick="Share" />, note: 'No white panel: the cards sit on the purple ground. "How do you share?" shows only because Share is picked.' },
-  { n: '2b', name: 'How will you play? (Solo picked)', view: <V2 pick="Solo" />, note: 'Solo shows only its own setting: who you play against.' },
-  { n: '3', name: 'Share a join code', view: <ShareCode />, note: 'Only after Share and "Share a join code": the code big on one paper card.' },
-  { n: '4', name: 'Question set', view: <V3 />, note: 'Tabs, search, subject and grade filters, recent first; each card shows subject, grades, count, the first question and when it was used.' },
-  { n: '5', name: 'Options', view: <V4 />, note: 'Each option group is its own card on the ground; only real field labels.' },
-  { n: '6', name: 'Teams and players', view: <V5 />, note: 'No count selector: Add team (between Back and Next) pops a new card in while the others slide over; x removes one. Two to eight teams, centered, wrapping onto centered rows.' },
-  { n: '7', name: 'Power-up setup', view: <V6 />, note: 'The cards on the purple ground, centered; off cards dashed.' },
-  { n: '8', name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
-  { n: '9a', name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
-  { n: '9b', name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
-  { n: '10', name: 'Question screen (laptop)', view: <QLaptop theme="park" />, note: 'The ONE question screen; games only swap the background (Board Game park here).' },
+  { n: '1', fit: true, name: 'Welcome', view: <V1 />, note: 'Her original layout: the cover (a real miniature of the game in play) big on the left; the right column exactly as tall, spread evenly: the title row with the corner buttons, the description and ways to play, the How to play card, a 72px start button level with the cover bottom.' },
+  { n: '2a', fit: true, name: 'How will you play? (Share picked)', view: <V2 pick="Share" />, note: 'No white panel: the cards sit on the purple ground. "How do you share?" shows only because Share is picked.' },
+  { n: '2b', fit: true, name: 'How will you play? (Solo picked)', view: <V2 pick="Solo" />, note: 'Solo shows only its own setting: who you play against.' },
+  { n: '3', fit: true, name: 'Share a join code', view: <ShareCode />, note: 'Only after Share and "Share a join code": the code big on one paper card.' },
+  { n: '4', fit: true, name: 'Question set', view: <V3 />, note: 'Tabs, search, subject and grade filters, recent first; each card shows subject, grades, count, the first question and when it was used.' },
+  { n: '5', fit: true, name: 'Options', view: <V4 />, note: 'Each option group is its own card on the ground; only real field labels.' },
+  { n: '6', fit: true, name: 'Teams and players', view: <V5 />, note: 'No count selector: Add team (between Back and Next) pops a new card in while the others slide over; x removes one. Two to eight teams, centered, wrapping onto centered rows.' },
+  { n: '7', fit: true, name: 'Power-up setup', view: <V6 />, note: 'The cards on the purple ground, centered; off cards dashed.' },
+  { n: '8', fit: true, name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
+  { n: '9a', fit: true, name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },
+  { n: '9b', fit: true, name: 'Lobby: cooperative', view: <V12c />, note: 'One class goal with its bar, every name joining one group.' },
   { n: '11a', name: 'Top tracker: solo, share, live', view: <V9a />, note: 'Who or what left, Round X of Y in the middle, icon buttons right.' },
   { n: '11b', name: 'Scoreboard and held power-ups', view: <V9b />, note: 'No panel; the current team wears the turn glow; held power-ups are square cards.' },
-  { n: '12', name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
-  { n: '13', name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },
-  { n: '14', name: 'Settings and Calm', view: <V11 />, note: 'Calm mode first and biggest.' },
-  { n: '15', name: 'Pause', view: <V11b />, note: 'A plain calm card.' },
-  { n: '16', name: 'Teach card', view: <V13 />, note: 'The skill line at 38px, Let’s play.' },
+  { n: '12', fit: true, name: 'Power-up pop card', view: <V7 />, note: 'One flat card with soft rays over the game.' },
+  { n: '13', fit: true, name: 'Results', view: <V10 />, note: 'The winner wears the same turn glow.' },
+  { n: '14', fit: true, name: 'Settings and Calm', view: <V11 />, note: 'Calm mode first and biggest.' },
+  { n: '15a', fit: true, name: 'Pause: default', view: <V11b />, note: 'A plain calm card.' },
+  { n: '15b', fit: true, name: 'Pause: teacher message', view: <V11c />, note: 'Her own words big; a small "from your teacher" line under them.' },
 ];
 const TABLETS: V[] = [
-  { n: '17', name: 'Student join (iPad)', view: <V12 />, note: '104px digit boxes and a 150 x 96 keypad for small fingers; Hear my code.' },
-  { n: '18', name: 'Student name pick (iPad)', view: <V12n />, note: 'Class list names as big tap cards; picked = ink ring and green check.' },
-  { n: '10i', name: 'Question screen (iPad portrait)', view: <QTablet theme="park" />, note: 'The same card in one column; 84px letters, 46px answers.' },
+  { n: '17', tall: true, name: 'Student join (iPad)', view: <V12 />, note: '104px digit boxes and a 150 x 96 keypad for small fingers; Hear my code.' },
+  { n: '18', tall: true, name: 'Student name pick (iPad)', view: <V12n />, note: 'Class list names as big tap cards; picked = ink ring and green check.' },
 ];
 
 export default function UniversalViews() {
@@ -645,37 +647,30 @@ export default function UniversalViews() {
     <section className="grid gap-6">
       <div className="grid gap-1 justify-items-center text-center">
         <h2 className="font-heading text-2xl">Universal views <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">Every shared screen, the same in every game: the welcome, the start menus (no white panel, cards on the purple ground, settings only under the way they belong to), join, lobbies, the one question screen, trackers, results, settings, pause and the teach card. Each game&apos;s themable views are on Game mockups. Preview only.</p>
+        <p className="text-sm font-semibold text-muted max-w-prose">Every shared screen, the same in every game: the welcome, the start menus (no white panel, cards on the purple ground, settings only under the way they belong to), join, lobbies, the one question screen, trackers, results, settings and pause. Each game&apos;s themable views are on Game mockups. Preview only.</p>
       </div>
-      <div className="grid gap-8 lg:grid-cols-2">
-        {VIEWS.map((v) => (
+      <div className="grid gap-10 lg:grid-cols-2">
+        {[...VIEWS.slice(0, 11), ...TABLETS, ...VIEWS.slice(11)].map((v) => (
           <figure key={v.n} className="m-0 grid gap-3 content-start">
             <figcaption className="font-heading text-lg text-center">{v.n}. {v.name}</figcaption>
-            <Laptop w={1280}>{v.view}</Laptop>
+            {v.tall ? <DeviceSet land={v.view} port={v.view} landSize={[820, 1180]} /> : <DeviceSet land={v.view} port={v.port} adaptive={v.fit} />}
             <p className="text-sm font-semibold text-center">{v.note}</p>
           </figure>
         ))}
       </div>
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {TABLETS.map((v) => (
-          <figure key={v.n} className="m-0 grid gap-3 content-start">
-            <figcaption className="font-heading text-lg text-center">{v.n}. {v.name}</figcaption>
-            <Tablet>{v.view}</Tablet>
-            <p className="text-sm font-semibold text-center">{v.note}</p>
-          </figure>
-        ))}
-      </div>
-      <figure className="m-0 grid gap-3">
-        <figcaption className="font-heading text-lg text-center">1b. Welcome covers: each game in play</figcaption>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {GAME_COVERS.map((g) => (
-            <div key={g.id} className="grid gap-1.5">
-              <div className="rounded-[1rem] overflow-hidden border-2 border-black"><Fit w={720} h={648}><div className="relative w-full h-full">{g.cover}</div></Fit></div>
-              <b className="text-sm text-center">{g.name}</b>
-            </div>
+      {/* Teacher, 2026-11-24: one fixed tile size; the question block is fixed and its type steps down for long questions. */}
+      <div className="grid gap-3">
+        <h3 className="font-heading text-lg text-center">10. Question screen: a short and a long question</h3>
+        <div className="grid gap-10 lg:grid-cols-2">
+          {([['Short question', SHORT_Q], ['Long question', LONG_Q]] as const).map(([t, q]) => (
+            <figure key={t} className="m-0 grid gap-3 content-start">
+              <figcaption className="font-heading text-base text-center">{t}</figcaption>
+              <DeviceSet land={<QLaptop theme="park" q={q} />} port={<QTablet theme="park" q={q} />} ground={{ background: PP.kelly }} />
+            </figure>
           ))}
         </div>
-      </figure>
+        <p className="text-sm font-semibold text-center">The ONE question screen; games only swap the background (Board Game park here). Answer tiles stay one size (84px laptop, 92px iPad portrait); the question block is fixed (200px, 330px portrait) and the question steps down from 46 to 36 to 30px (54, 44, 36 on iPad) as it gets longer. The card is 85% of the screen width.</p>
+      </div>
     </section>
   );
 }

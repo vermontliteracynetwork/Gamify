@@ -1,5 +1,4 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { motion } from 'motion/react';
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, PersonArmsSpread, Play, Television, User, X, type Icon } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 
@@ -57,18 +56,44 @@ export function WayRow({ way }: { way: keyof typeof WAYS_STYLE }) {
 // Yellow go button (teacher, 2026-11-24): Next, Play and Start are #FDFD94 with ink text and an ink shadow.
 export const GO_YELLOW = '#fdfd94';
 
-// THE one glow (teacher, 2026-11-23: "the glow around the winner is the same
-// glow that circles the icon before click of turn"): a 6px lemon ring plus a
-// soft 24px lemon halo, breathing between 0.75 and 1 opacity every 1.6 s.
-// Used on the your-turn icon, the current scoreboard row and the winner.
-export const TURN_GLOW = `0 0 0 6px ${PP.lemon}, 0 0 24px 10px rgba(250,190,55,0.55)`;
-export const TURN_GLOW_PULSE = { opacity: [1, 0.75, 1] as number[], transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' as const } };
-// Wraps anything (a badge, a row, the winner) in the glow; `round` for circles.
-export function TurnGlow({ children, round, radius = 18, still, className = '', style }: { children: ReactNode; round?: boolean; radius?: number; still?: boolean; className?: string; style?: CSSProperties }) {
+// THE one glow (teacher, 2026-11-24: exactly the live game's turn glow).
+// Reuses src/index.css .turn-rays (yellow sun rays spinning clockwise) and
+// .turn-halo (a soft halo that breathes), so the motion settings apply. Both
+// sit centered and completely BEHIND what they wrap (rays 240%, halo 170% of
+// its width); never a flat ring. Used on the your-turn icon, the current
+// scoreboard row icon, the selected player and the winner.
+export function TurnGlow({ children, className = '', style, rays = 2.4, halo = 1.7 }: { children: ReactNode; round?: boolean; radius?: number; className?: string; style?: CSSProperties; rays?: number; halo?: number }) {
+  const at = (k: number): CSSProperties => ({ width: `${k * 100}%`, aspectRatio: '1 / 1', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' });
   return (
-    <span className={`relative inline-grid ${className}`} style={style}>
-      <motion.span aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ borderRadius: round ? 9999 : radius, boxShadow: TURN_GLOW }} animate={still ? undefined : TURN_GLOW_PULSE} />
+    <span className={`relative inline-grid isolate ${className}`} style={style}>
+      <span aria-hidden="true" className="absolute pointer-events-none -z-10" style={at(rays)}><span className="turn-rays block w-full h-full rounded-full" /></span>
+      <span aria-hidden="true" className="absolute pointer-events-none -z-10" style={at(halo)}><span className="turn-halo block w-full h-full rounded-full" /></span>
       <span className="relative">{children}</span>
+    </span>
+  );
+}
+
+// THE meter (teacher, 2026-11-24: "more modern and theme aligned"), built once
+// for the round tracker, the start-menu step tracker and goal bars. One
+// continuous rounded track (pale, soft inner shadow, ink edge); segments are
+// gentle gaps inside it; done is Kelly, the current one Lemon with a small
+// glowing marker at its edge, later ones stay track. Always 22px tall.
+export const METER_H = 22;
+export function Meter({ segments = 1, done = 0, part = 1, width = 360, label }: { segments?: number; done?: number; part?: number; width?: number | string; label?: string }) {
+  const fill = (c: string) => `linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%), ${c}`;
+  return (
+    <span role="img" aria-label={label} className="inline-flex items-stretch gap-[4px] rounded-full p-[3px] shrink-0"
+      style={{ width, height: METER_H, background: '#eeeaf8', border: `2.5px solid ${I}`, boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)', boxSizing: 'border-box' }}>
+      {Array.from({ length: segments }, (_, i) => {
+        const cur = i === done && done < segments;
+        return (
+          <span key={i} className="flex-1 relative rounded-full" style={{ background: i < done ? fill(PP.kelly) : 'rgba(29,26,51,0.06)' }}>
+            {cur && part > 0 && <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.max(part, 0.12) * 100}%`, background: fill(PP.lemon) }}>
+              <span className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 rounded-full" style={{ width: METER_H - 4, height: METER_H - 4, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 0 0 3px rgba(250,190,55,0.55), 0 0 10px 3px rgba(250,190,55,0.6)` }} />
+            </span>}
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -153,6 +178,103 @@ export function LakeBack({ w, h }: { w: number; h: number }) {
   );
 }
 
+// ---------- the five devices (teacher, 2026-11-24) ----------
+// Every view is previewed on a big screen (interactive whiteboard, 16:9), a
+// laptop (16:10), an iPad landscape AND portrait, and a phone portrait. One
+// view component is rendered at each size and scaled; nothing is hand-copied.
+// Landscape frames fit the 16:10 design to the frame on the same purple ground
+// (seamless). Portrait frames hand the view the frame's own size through
+// useFrame(), so start menus, the welcome and overlays reflow; a view with its
+// own portrait design (`port`) uses it there.
+export type FrameKind = 'board' | 'laptop' | 'ipadL' | 'ipadP' | 'phone';
+export const FRAMES: Record<FrameKind, { w: number; h: number; label: string }> = {
+  board: { w: 1600, h: 900, label: 'Big screen 16:9' }, laptop: { w: 1280, h: 800, label: 'Laptop 16:10' },
+  ipadL: { w: 1180, h: 820, label: 'iPad landscape' }, ipadP: { w: 820, h: 1180, label: 'iPad portrait' }, phone: { w: 430, h: 932, label: 'Phone portrait' },
+};
+type FrameInfo = { kind: FrameKind; w: number; h: number; portrait: boolean; adaptive: boolean };
+const FrameCtx = createContext<FrameInfo>({ kind: 'laptop', w: 1280, h: 800, portrait: false, adaptive: false });
+export const useFrame = () => useContext(FrameCtx);
+
+// Scales its child (natural size) down to fit the box; used by reflowing views
+// in portrait so nothing is cut off or runs past its box.
+export function AutoFit({ children, width }: { children: ReactNode; width?: number }) {
+  const box = useRef<HTMLDivElement>(null); const inner = useRef<HTMLDivElement>(null);
+  const [k, setK] = useState(1);
+  useLayoutEffect(() => {
+    const b = box.current, c = inner.current; if (!b || !c) return;
+    const fit = () => { const cw = c.scrollWidth, ch = c.scrollHeight; setK(Math.min(1, b.clientWidth / Math.max(cw, 1), b.clientHeight / Math.max(ch, 1))); };
+    const ro = new ResizeObserver(fit); ro.observe(b); ro.observe(c); fit();
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <div ref={box} className="w-full h-full min-h-0 relative grid place-items-center overflow-hidden">
+      <div ref={inner} className="flex flex-col items-center justify-center" style={{ width: width ?? 'max-content', transform: `scale(${k})`, transformOrigin: 'center' }}>{children}</div>
+    </div>
+  );
+}
+
+// Renders only once scrolled near, so a page of five-device sets stays light.
+function Lazy({ children, ratio }: { children: ReactNode; ratio: number }) {
+  const ref = useRef<HTMLDivElement>(null); const [on, setOn] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { setOn(true); io.disconnect(); } }, { rootMargin: '600px' });
+    io.observe(el); return () => io.disconnect();
+  }, []);
+  return <div ref={ref} style={{ aspectRatio: `${ratio}` }} className="w-full">{on ? children : null}</div>;
+}
+function Screen({ kind, land, port, landSize, portSize, adaptive, ground }: { kind: FrameKind; land: ReactNode; port?: ReactNode; landSize: [number, number]; portSize: [number, number]; adaptive?: boolean; ground: CSSProperties }) {
+  const f = FRAMES[kind]; const portrait = f.h > f.w;
+  let body: ReactNode;
+  if (portrait && adaptive && !port) {
+    body = <FrameCtx.Provider value={{ kind, w: f.w, h: f.h, portrait, adaptive: true }}><div className="w-full h-full relative">{land}</div></FrameCtx.Provider>;
+  } else {
+    const [dw, dh] = portrait && port ? portSize : landSize;
+    const k = Math.min(f.w / dw, f.h / dh);
+    body = (
+      <div className="w-full h-full relative overflow-hidden" style={ground}>
+        <div className="absolute" style={{ width: dw, height: dh, left: (f.w - dw * k) / 2, top: (f.h - dh * k) / 2, transform: `scale(${k})`, transformOrigin: 'top left' }}>{portrait && port ? port : land}</div>
+      </div>
+    );
+  }
+  return <Lazy ratio={f.w / f.h}><Scaled w={f.w} h={f.h}>{body}</Scaled></Lazy>;
+}
+function Bezel({ kind, children }: { kind: FrameKind; children: ReactNode }) {
+  const dark = '#2a2740';
+  if (kind === 'board') return (
+    <div className="grid justify-items-center">
+      <div className="w-full rounded-[0.6rem] p-[1.4%]" style={{ background: dark, border: `2px solid ${I}` }}><div className="rounded-[0.2rem] overflow-hidden">{children}</div></div>
+      <div className="w-[40%] h-2.5 rounded-b-[0.5rem]" style={{ background: '#c9c4d6', border: `2px solid ${I}`, borderTop: 'none' }} />
+    </div>
+  );
+  if (kind === 'laptop') return (
+    <div className="grid justify-items-center">
+      <div className="w-full rounded-t-[0.7rem] p-[2.4%] pb-[2.8%]" style={{ background: dark, border: `2px solid ${I}` }}><div className="rounded-[0.25rem] overflow-hidden">{children}</div></div>
+      <div className="w-[106%] h-2 rounded-b-[0.6rem]" style={{ background: '#c9c4d6', border: `2px solid ${I}`, borderTop: 'none' }} />
+    </div>
+  );
+  const phone = kind === 'phone';
+  return <div className={`w-full ${phone ? 'rounded-[1.1rem] p-[6%]' : 'rounded-[0.9rem] p-[4.5%]'}`} style={{ background: dark, border: `2px solid ${I}` }}><div className={`${phone ? 'rounded-[0.6rem]' : 'rounded-[0.4rem]'} overflow-hidden`}>{children}</div></div>;
+}
+// The set: the big screen wide on top, then laptop, both iPads and the phone
+// in one row at one height (widths follow each device's shape).
+export function DeviceSet({ land, port, landSize = [1280, 800], portSize = [820, 1180], adaptive, ground = PURPLE_GROUND }: { land: ReactNode; port?: ReactNode; landSize?: [number, number]; portSize?: [number, number]; adaptive?: boolean; ground?: CSSProperties }) {
+  const row: FrameKind[] = ['laptop', 'ipadL', 'ipadP', 'phone'];
+  const pad: Record<FrameKind, number> = { board: 1.03, laptop: 1.08, ipadL: 1.09, ipadP: 1.13, phone: 1.18 };
+  return (
+    <div className="grid gap-3">
+      <figure className="m-0 grid gap-1"><Bezel kind="board"><Screen kind="board" land={land} port={port} landSize={landSize} portSize={portSize} adaptive={adaptive} ground={ground} /></Bezel><figcaption className="text-xs font-bold text-muted text-center">{FRAMES.board.label}</figcaption></figure>
+      <div className="flex gap-3 items-end">
+        {row.map((kd) => { const f = FRAMES[kd]; return (
+          <figure key={kd} className="m-0 grid gap-1 min-w-0" style={{ flex: `${(f.w / f.h) / pad[kd]} 1 0` }}>
+            <Bezel kind={kd}><Screen kind={kd} land={land} port={port} landSize={landSize} portSize={portSize} adaptive={adaptive} ground={ground} /></Bezel>
+            <figcaption className="text-xs font-bold text-muted text-center leading-tight">{f.label}</figcaption>
+          </figure>); })}
+      </div>
+    </div>
+  );
+}
+
 // ---------- device frames (shared by Universal views, Game mockups, Teacher portal) ----------
 function Scaled({ w, h, children }: { w: number; h: number; children: ReactNode }) {
   const box = useRef<HTMLDivElement>(null);
@@ -219,6 +341,31 @@ export function MenuBack() {
   return <span className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 whitespace-nowrap" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><ArrowLeft weight="bold" size={20} />Back</span>;
 }
 export function MenuStep({ title, step, total, children, go, back = true, extra, canvas = 1280 }: { title: string; step: number; total: number; children: ReactNode; go?: ReactNode; back?: boolean; extra?: ReactNode; canvas?: number }) {
+  const f = useFrame();
+  const footer = <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{extra}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>;
+  if (f.adaptive && f.portrait) {
+    // Portrait reflow: the title row stays (title left, tracker right) on an
+    // iPad; on a phone the tracker drops under the title. Cards and footer fit
+    // the width, never cut off.
+    const phone = f.w < 600, px = phone ? 20 : 40;
+    return (
+      <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 36}px` }}>
+        <div className="flex items-center justify-between">
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-7' : 'h-10'} w-auto`} draggable={false} />
+          <div className={`flex ${phone ? 'gap-1.5' : 'gap-3'}`}>
+            <MkRound size={phone ? 38 : 52} label="Accessibility"><PersonArmsSpread weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound size={phone ? 38 : 52} label="Settings"><GearSix weight="bold" size={phone ? 18 : 24} /></MkRound>
+            <MkRound size={phone ? 38 : 52} label="Full screen"><CornersOut weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound size={phone ? 38 : 52} label="Close"><X weight="bold" size={phone ? 18 : 24} /></MkRound>
+          </div>
+        </div>
+        <div className={`mt-6 flex ${phone ? 'flex-col items-start gap-3' : 'items-center justify-between gap-4'}`}>
+          <h2 style={{ ...MK_GY, fontSize: phone ? 34 : 48 }}>{title}</h2>
+          <Meter segments={total} done={step - 1} part={1} width={total * (phone ? 40 : 52)} label={`Step ${step} of ${total}`} />
+        </div>
+        <div className="flex-1 min-h-0 my-5"><AutoFit width={phone ? 640 : f.w - 2 * px}>{children}</AutoFit></div>
+        <div style={{ height: 72 }}><AutoFit>{footer}</AutoFit></div>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
@@ -232,12 +379,10 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
         <div className="absolute left-[80px] right-[80px] top-[108px] bottom-[36px] flex flex-col gap-6">
           <div className="flex items-center justify-between gap-6">
             <h2 className="text-[50px]" style={MK_GY}>{title}</h2>
-            <ol className="flex gap-2 list-none p-0 m-0" aria-label={`Step ${step} of ${total}`}>
-              {Array.from({ length: total }, (_, i) => <li key={i} className="w-14 h-4 rounded-full" style={{ background: i < step - 1 ? PP.periwinkle : i === step - 1 ? PP.lemon : '#fff', border: `2.5px solid ${I}` }} />)}
-            </ol>
+<Meter segments={total} done={step - 1} part={1} width={total * 62} label={`Step ${step} of ${total}`} />
           </div>
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
-          <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{extra}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
+          {footer}
         </div>
       </div>
     </div>
@@ -253,6 +398,35 @@ export function MenuStep({ title, step, total, children, go, back = true, extra,
 // How to play card, and a full-width 72px start button whose bottom lines up
 // with the cover bottom.
 export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up and play', canvas = 1280 }: { name: string; desc: string; modes: string[]; steps: [ReactNode, string][]; cover: ReactNode; go?: string; canvas?: number }) {
+  const f = useFrame();
+  if (f.adaptive && f.portrait) {
+    // Portrait: the same parts stacked, cover on top at its own shape, then
+    // the title, description and ways, How to play and the yellow start button.
+    const phone = f.w < 600, px = phone ? 20 : 40, cw = f.w - 2 * px;
+    return (
+      <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 40}px` }}>
+        <div className="flex items-center justify-between"><img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-7' : 'h-10'} w-auto`} draggable={false} />
+          <div className="flex gap-2"><MkRound label="Full screen" size={phone ? 38 : 52}><CornersOut weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound label="Settings" size={phone ? 38 : 52}><GearSix weight="bold" size={phone ? 18 : 24} /></MkRound></div></div>
+        <div className="mt-5 rounded-[24px] overflow-hidden relative shrink-0" style={{ width: cw, height: cw * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(cw - 6) / 720})` }}>{cover}</div>
+        </div>
+        <div className="flex-1 min-h-0 mt-5">
+          <AutoFit width={phone ? 520 : cw}>
+            <div className="w-full grid gap-5">
+              <h1 style={{ ...MK_GY, fontSize: 60, lineHeight: 0.95 }}>{name}</h1>
+              <p className="font-semibold text-[22px] leading-snug">{desc}</p>
+              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: (WAYS_STYLE[m as keyof typeof WAYS_STYLE]?.soft) ?? [PP.gamify, PP.aqua, PP.butter][i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
+              <div className="rounded-[26px] px-7 py-5 grid gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+                <h2 className="text-[26px]" style={MK_GY}>How to play</h2>
+                {steps.map(([ic, t], i) => <div key={t} className="flex items-center gap-4 font-bold text-[22px] leading-tight"><span className="w-10 h-10 rounded-full grid place-items-center shrink-0" style={{ background: [PP.butter, PP.blush, PP.aqua][i % 3], border: `2.5px solid ${I}` }}>{ic}</span>{t}</div>)}
+              </div>
+              <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
+            </div>
+          </AutoFit>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>

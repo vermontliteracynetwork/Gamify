@@ -3,7 +3,7 @@ import { ArrowsClockwise, Check, CornersOut, FlagCheckered, GearSix, HourglassHi
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
 import { BlobPatch, CrayonDie, CrayonPawn, CrayonPowerUp, Doodle, type DoodleKind, type PowerId } from './CrayonKit';
-import { Badge, Laptop, MainBtn, ParkBack, StudioBack, Tablet, TEAMS, TURN_GLOW, TurnGlow } from './mockKit';
+import { Badge, MainBtn, ParkBack, StudioBack, TEAMS, TurnGlow, Meter, DeviceSet, Fit } from './mockKit';
 import { layout } from '../games/castle-quest/board';
 
 // Game mockups (PROPOSAL, teacher 2026-11-23: "mockups of all the games with a
@@ -36,15 +36,15 @@ function Corner({ dark }: { dark?: boolean }) {
 }
 function TurnPill({ t, text }: { t: Team; text: string }) {
   return (
-    <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `${TURN_GLOW}, 0 4px 0 ${I}` }}>
-      <Badge t={t} size={34} />{text}
+    <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+      <TurnGlow round><Badge t={t} size={34} /></TurnGlow>{text}
     </div>
   );
 }
 function Score({ t, pts, now, held, compact }: { t: Team; pts: number; now?: boolean; held?: { id: PowerId; name: string }; compact?: boolean }) {
   return (
-    <div className={`flex items-center gap-2.5 ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} rounded-2xl`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: now ? `${TURN_GLOW}, 0 4px 0 ${I}` : `0 3px 0 ${I}` }}>
-      <Badge t={t} size={compact ? 28 : 32} />
+    <div className={`flex items-center gap-2.5 ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} rounded-2xl`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: now ? `0 4px 0 ${I}` : `0 3px 0 ${I}` }}>
+      {now ? <TurnGlow round><Badge t={t} size={compact ? 28 : 32} /></TurnGlow> : <Badge t={t} size={compact ? 28 : 32} />}
       <b className={`flex-1 truncate ${compact ? 'text-base' : 'text-lg'}`}>{t.name}</b>
       {held && <span title={`Holds ${held.name}`} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 1 }}><CrayonPowerUp id={held.id} size={compact ? 30 : 34} sticker /></span>}
       <span className={`font-display ${compact ? 'text-2xl' : 'text-3xl'} tabular-nums`}>{pts}</span>
@@ -226,8 +226,8 @@ function Tray() {
 const BG_SCORES = ['12 to go', '24 to go', '19 to go', '32 to go'];
 function MiniRace({ compact, teams = TEAMS, now = 1 }: { compact?: boolean; teams?: readonly Team[]; now?: number }) {
   return <>{teams.map((t, i) => (
-    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === now ? `${TURN_GLOW}, 0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
-      <CrayonPawn color={t.color} size={26} /><b className="flex-1 truncate text-sm">{t.name}</b><span className="text-sm font-bold" style={{ color: PP.quiet }}>{BG_SCORES[i]}</span>
+    <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: i === now ? `0 3px 0 ${I}` : `0 2px 0 ${I}` }}>
+      {i === now ? <TurnGlow round><CrayonPawn color={t.color} size={26} /></TurnGlow> : <CrayonPawn color={t.color} size={26} />}<b className="flex-1 truncate text-sm">{t.name}</b><span className="text-sm font-bold" style={{ color: PP.quiet }}>{BG_SCORES[i]}</span>
     </div>
   ))}</>;
 }
@@ -420,8 +420,8 @@ function F4Board({ s, win = true }: { s: number; win?: boolean }) {
 }
 function F4Player({ i, now, held, name, note = 'Winner!' }: { i: number; now?: boolean; held?: { id: PowerId; name: string }; name?: string; note?: string }) {
   return (
-    <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={{ ...paper, boxShadow: now ? `${TURN_GLOW}, 0 4px 0 ${I}` : paper.boxShadow }}>
-      <Disc p={i + 1} s={54} />
+    <div className="p-3 grid justify-items-center gap-2 text-center w-full" style={paper}>
+      {now ? <TurnGlow round><Disc p={i + 1} s={54} /></TurnGlow> : <Disc p={i + 1} s={54} />}
       <b className="font-display text-2xl">{name ?? ['Ava', 'Leo'][i]}</b>
       {now && <span className="font-bold text-sm">{note}</span>}
       {held && <span title={held.name} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 2 }}><CrayonPowerUp id={held.id} size={40} sticker /></span>}
@@ -636,7 +636,7 @@ function FrameTracker({ frame, solo, k = 1 }: { frame: number; solo?: boolean; k
 }
 const BW_HELD: { id: PowerId; name: string }[] = [{ id: 'magnet', name: 'Pin Magnet' }, { id: 'shield', name: 'Bumper Rails' }];
 function RollPill({ who = 'Mia rolls!' }: { who?: string }) {
-  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `${TURN_GLOW}, 0 4px 0 ${I}` }}><Ball c={BALLS[1]} s={36} />{who}</div>;
+  return <div className="inline-flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-full font-display text-2xl font-bold justify-self-start" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><TurnGlow round><Ball c={BALLS[1]} s={36} /></TurnGlow>{who}</div>;
 }
 function BowlingLaptop({ solo }: { solo?: boolean }) {
   return (
@@ -668,8 +668,8 @@ type Box = [number, number, number, number]; // l, t, r, b in px
 function skyItems(w: number, h: number, count: number, holes: Box[], seed = 11) {
   let s = seed;
   const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
-  const cols = Math.round(w / 92), rows = Math.round((h * 0.7) / 92);
-  const cw = w / cols, ch = (h * 0.7) / rows;
+  const cols = Math.round(w / 92), rows = Math.round((h * 0.92) / 92);
+  const cw = w / cols, ch = (h * 0.92) / rows;
   const out: { x: number; y: number; size: number; rot: number }[] = [];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const size = 34 + rnd() * 40, x = c * cw + cw / 2 + (rnd() - 0.5) * cw * 0.5, y = 20 + r * ch + ch / 2 + (rnd() - 0.5) * ch * 0.5, rot = (rnd() - 0.5) * 50;
@@ -677,30 +677,72 @@ function skyItems(w: number, h: number, count: number, holes: Box[], seed = 11) 
   }
   return out.map((p) => [rnd(), p] as const).sort((a, b) => a[0] - b[0]).slice(0, count).map(([, p]) => p);
 }
-function Cloud({ x, y, s }: { x: number; y: number; s: number }) {
-  return <path d={`M${x} ${y} c${-8 * s} 0 ${-12 * s} ${-10 * s} ${-4 * s} ${-14 * s} c${2 * s} ${-12 * s} ${18 * s} ${-14 * s} ${22 * s} ${-4 * s} c${8 * s} ${-8 * s} ${22 * s} ${-2 * s} ${20 * s} ${8 * s} c${8 * s} ${2 * s} ${8 * s} ${10 * s} 0 ${10 * s} Z`} fill={PP.paper} stroke={I} strokeWidth="3.5" strokeLinejoin="round" />;
+// Her favorite Question Tracker (teacher, 2026-11-24: "keep as orginal as
+// possible, just updating the texture and colors"): the live Classic art in
+// public/classic/star-quiz/ redrawn flat. The deep navy night with soft lighter
+// cloud bands, tiny white twinkles and four-point glints, and her six star
+// shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat
+// rounded, shooting star with three trails). Smooth flat fills, no grain, no
+// outlines (closest to hers), brand yellows: Lemon, Butter, a touch of Orange.
+const NIGHT = '#1c3a66';
+function starPts(outer: number[], inner: number, rot: number) {
+  const n = outer.length; const pts: string[] = [];
+  for (let k = 0; k < n * 2; k++) { const r = k % 2 ? inner : outer[k / 2]; const a = ((rot - 90 + (k * 180) / n) * Math.PI) / 180; pts.push(`${(50 + r * Math.cos(a)).toFixed(1)},${(50 + r * Math.sin(a)).toFixed(1)}`); }
+  return pts.join(' ');
 }
-// The whole stage is the scene: a big sky over a mint hill, flowers and trees, the stars it has earned.
+// Concave-sided star: each arm curves in through a point near the center.
+function curvyStar(n: number, outer: number, pull: number, rot: number) {
+  let d = '';
+  for (let k = 0; k < n; k++) {
+    const a = ((rot - 90 + (k * 360) / n) * Math.PI) / 180, m = ((rot - 90 + ((k + 0.5) * 360) / n) * Math.PI) / 180;
+    const x = 50 + outer * Math.cos(a), y = 50 + outer * Math.sin(a), cx = 50 + pull * Math.cos(m), cy = 50 + pull * Math.sin(m);
+    const a2 = ((rot - 90 + ((k + 1) * 360) / n) * Math.PI) / 180;
+    d += `${k ? '' : `M${x.toFixed(1)} ${y.toFixed(1)}`} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${(50 + outer * Math.cos(a2)).toFixed(1)} ${(50 + outer * Math.sin(a2)).toFixed(1)} `;
+  }
+  return d + 'Z';
+}
+export function NightStar({ kind, size, color }: { kind: number; size: number; color: string }) {
+  const k = kind % 6;
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
+      {k === 0 && <polygon points={starPts([49, 40, 47, 34, 45], 9, -12)} fill={color} stroke={color} strokeWidth="3" strokeLinejoin="round" />}
+      {k === 1 && <polygon points={starPts([44, 42, 44, 40, 43], 19, 18)} fill={color} stroke={color} strokeWidth="9" strokeLinejoin="round" />}
+      {k === 2 && <path d={curvyStar(5, 48, 16, 0)} fill={color} stroke={color} strokeWidth="4" strokeLinejoin="round" />}
+      {k === 3 && <path d={curvyStar(4, 49, 9, 0)} fill={color} />}
+      {k === 4 && <polygon points={starPts([40, 40, 40, 40, 40], 24, 0)} fill={color} stroke={color} strokeWidth="16" strokeLinejoin="round" />}
+      {k === 5 && <g><path d="M44 52 L92 14 M50 60 L96 30 M38 46 L80 6" stroke={color} strokeWidth="5" strokeLinecap="round" /><g transform="translate(-14 14) scale(0.62)"><polygon points={starPts([44, 44, 44, 44, 44], 21, -14)} fill={color} stroke={color} strokeWidth="10" strokeLinejoin="round" /></g></g>}
+    </svg>
+  );
+}
+const NIGHT_COLORS = [PP.lemon, '#ffd24f', PP.butter, PP.lemon, '#ffc85a', PP.orange];
+export function NightSky({ w, h }: { w: number; h: number }) {
+  let sd = 5; const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+  const dots = Array.from({ length: Math.round((w * h) / 9000) }, () => [rnd() * w, rnd() * h, 1 + rnd() * 1.6, 0.45 + rnd() * 0.5]);
+  const glints = Array.from({ length: Math.max(4, Math.round((w * h) / 120000)) }, () => [rnd() * w, rnd() * h * 0.9, 7 + rnd() * 9]);
+  const bands = [[0.2, 0.12, 0.5], [0.75, 0.3, 0.55], [0.3, 0.55, 0.6], [0.8, 0.78, 0.5], [0.1, 0.9, 0.45]];
+  return (
+    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
+      <defs>
+        <linearGradient id="ns-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#183460" /><stop offset="1" stopColor="#21436f" /></linearGradient>
+        <filter id="ns-b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation={Math.max(w, h) * 0.025} /></filter>
+      </defs>
+      <rect width={w} height={h} fill="url(#ns-g)" />
+      <g filter="url(#ns-b)" opacity="0.55">{bands.map(([x, y, s], i) => <ellipse key={i} cx={x * w} cy={y * h} rx={w * s} ry={h * 0.045} fill="#2f5a92" transform={`rotate(-4 ${x * w} ${y * h})`} />)}</g>
+      {dots.map(([x, y, r, o], i) => <circle key={i} cx={x} cy={y} r={r} fill="#fff" opacity={o} />)}
+      {glints.map(([x, y, r], i) => <path key={i} d={`M${x} ${y - r} Q${x + r * 0.12} ${y - r * 0.12} ${x + r} ${y} Q${x + r * 0.12} ${y + r * 0.12} ${x} ${y + r} Q${x - r * 0.12} ${y + r * 0.12} ${x - r} ${y} Q${x - r * 0.12} ${y - r * 0.12} ${x} ${y - r} Z`} fill="#fff" />)}
+    </svg>
+  );
+}
+// The whole stage is her night sky; earned stars fill the open sky around the HUD.
 function SkyScene({ w, h, got = SKY_GOT, holes = [], children }: { w: number; h: number; got?: number; holes?: Box[]; children?: ReactNode }) {
-  const hill = h * 0.78;
   const items = skyItems(w, h, got, holes);
   return (
-    <div className="w-full h-full relative overflow-hidden">
-      <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
-        <rect width={w} height={h} fill={PP.blueCrystal} />
-        <path d={`M${w * 0.06} ${hill} A${w * 0.44} ${w * 0.44} 0 0 1 ${w * 0.94} ${hill}`} fill="none" stroke={PP.paper} strokeWidth={w * 0.03} opacity="0.9" />
-        <path d={`M${w * 0.1} ${hill} A${w * 0.4} ${w * 0.4} 0 0 1 ${w * 0.9} ${hill}`} fill="none" stroke={PP.lavender} strokeWidth={w * 0.022} opacity="0.85" />
-        <Cloud x={w * 0.5} y={h * 0.3} s={w / 620} /><Cloud x={w * 0.62} y={h * 0.1} s={w / 700} /><Cloud x={w * 0.4} y={h * 0.5} s={w / 820} />
-        <path d={`M0 ${hill} C${w * 0.25} ${hill - h * 0.08} ${w * 0.5} ${hill - h * 0.02} ${w * 0.7} ${hill - h * 0.06} C${w * 0.85} ${hill - h * 0.1} ${w * 0.95} ${hill - h * 0.04} ${w} ${hill - h * 0.05} L${w} ${h} L0 ${h} Z`} fill={PP.mint} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-        <path d={`M0 ${h * 0.9} C${w * 0.3} ${h * 0.84} ${w * 0.65} ${h * 0.95} ${w} ${h * 0.87} L${w} ${h} L0 ${h} Z`} fill={PP.kelly} stroke={I} strokeWidth="4" strokeLinejoin="round" />
-        {[0.08, 0.86].map((f, i) => { const x = w * f, y = hill - h * (i ? 0.05 : 0.07), r = Math.min(w, h) * 0.05; return <g key={f}><rect x={x - 6} y={y - 6} width="12" height={r * 1.4} rx="5" fill="#a0683a" stroke={I} strokeWidth="3" /><circle cx={x} cy={y - r * 0.6} r={r} fill={PP.kelly} stroke={I} strokeWidth="3.5" /><circle cx={x - r * 0.35} cy={y - r * 0.9} r={r * 0.16} fill={PP.pink} /></g>; })}
-        {Array.from({ length: 16 }, (_, i) => { const x = (w / 16) * i + 24, y = h * 0.93 + ((i * 37) % 40); return <g key={i}><path d={`M${x} ${y} v16`} stroke={I} strokeWidth="3" strokeLinecap="round" /><circle cx={x} cy={y} r="7" fill={[PP.pink, PP.paper, PP.lemon, PP.sky][i % 4]} stroke={I} strokeWidth="2.5" /></g>; })}
-      </svg>
-      {items.map((p, i) => (
-        <span key={i} className="absolute" style={{ left: p.x - p.size / 2, top: p.y - p.size / 2, transform: `rotate(${p.rot}deg)`, filter: i >= got - 3 ? `drop-shadow(0 0 8px ${PP.lemon})` : undefined }}>
-          <Doodle kind="star" color={i >= got - 3 ? PP.orange : PP.lemon} size={i >= got - 3 ? p.size * 1.15 : p.size} />
-        </span>
-      ))}
+    <div className="w-full h-full relative overflow-hidden" style={{ background: NIGHT }}>
+      <NightSky w={w} h={h} />
+      {items.map((p, i) => { const streak = i >= got - 3; const kind = (i * 7 + 3) % 6; return (
+        <span key={i} className="absolute" style={{ left: p.x - p.size * 0.65, top: p.y - p.size * 0.65, transform: `rotate(${p.rot}deg)`, filter: streak ? `drop-shadow(0 0 10px rgba(250,190,55,0.85))` : undefined }}>
+          <NightStar kind={kind} size={p.size * 1.3 * (streak ? 1.1 : 1)} color={streak ? PP.orange : NIGHT_COLORS[(i * 5) % 6]} />
+        </span>); })}
       {children}
     </div>
   );
@@ -708,8 +750,8 @@ function SkyScene({ w, h, got = SKY_GOT, holes = [], children }: { w: number; h:
 function SkyGoal({ got = SKY_GOT, line = 'Fill the sky together!' }: { got?: number; line?: string }) {
   return (
     <div className="p-4 grid gap-2.5 text-center" style={paper}>
-      <span className="flex items-center justify-center gap-2"><Doodle kind="star" color={PP.lemon} size={40} /><span className="font-display text-5xl font-bold leading-none tabular-nums">{got}<span className="text-2xl"> of {SKY_N}</span></span></span>
-      <span className="h-6 rounded-full overflow-hidden" style={{ background: PP.cream, border: `2.5px solid ${I}` }}><span className="block h-full" style={{ width: `${(got / SKY_N) * 100}%`, background: PP.lemon, borderRight: `2.5px solid ${I}` }} /></span>
+      <span className="flex items-center justify-center gap-2"><NightStar kind={2} color={PP.lemon} size={40} /><span className="font-display text-5xl font-bold leading-none tabular-nums">{got}<span className="text-2xl"> of {SKY_N}</span></span></span>
+      <Meter segments={1} done={0} part={got / SKY_N} width="100%" label={`${got} of ${SKY_N} stars`} />
       <span className="font-bold text-lg">{line}</span>
     </div>
   );
@@ -738,7 +780,7 @@ function StudentDevice({ solo }: { solo?: boolean }) {
     <SkyScene w={820} h={1180} got={solo ? 4 : 9} holes={[[0, 80, 820, 1000], [560, 0, 820, 90]]}>
       <Corner dark />
       <div className="absolute inset-x-8 top-[96px] flex items-center gap-3 px-5 py-3" style={{ ...paper, borderRadius: 18 }}>
-        <Doodle kind="star" color={PP.lemon} size={52} /><b className="font-display text-4xl">{solo ? 'My sky: 4 stars' : 'You added 4 stars'}</b>
+        <NightStar kind={2} color={PP.lemon} size={52} /><b className="font-display text-4xl">{solo ? 'My sky: 4 stars' : 'You added 4 stars'}</b>
         <span className="flex-1" />{!solo && <span className="font-bold text-lg" style={{ color: PP.quiet }}>Class sky: 18 of 30</span>}
       </div>
       <div className="absolute inset-x-8 top-[210px] p-8 grid gap-6" style={{ ...paper, borderRadius: 26 }}>
@@ -762,7 +804,7 @@ function SkyWaiting() {
   return (
     <SkyScene w={820} h={1180} got={14} holes={[[40, 300, 780, 860], [560, 0, 820, 90]]}>
       <div className="absolute inset-x-10 top-[320px] p-10 grid justify-items-center gap-5 text-center" style={{ ...paper, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
-        <TurnGlow round><span className="w-[150px] h-[150px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Doodle kind="star" color={PP.lemon} size={100} /></span></TurnGlow>
+        <TurnGlow round><span className="w-[150px] h-[150px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><NightStar kind={2} color={PP.lemon} size={100} /></span></TurnGlow>
         <h2 className="text-[64px]" style={GY}>You&apos;re in, Ava!</h2>
         <p className="font-bold text-[28px] leading-snug">Your teacher will start soon. Your stars will light up the sky.</p>
         <span className="flex gap-3" aria-label="Waiting">{[0, 1, 2].map((d) => <span key={d} className="w-5 h-5 rounded-full" style={{ background: [PP.periwinkle, PP.lemon, PP.pink][d], border: `2.5px solid ${I}` }} />)}</span>
@@ -841,7 +883,7 @@ function Results({ game, title, winner, stats, missed = 2 }: { game: ReactNode; 
 type View = { name: string; device: 'laptop' | 'tablet'; node: ReactNode; note: string };
 const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
   'game-show': {
-    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause, Teach card.',
+    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: you vs computer', device: 'laptop', node: <GameShowLaptop vs />, note: 'Two sides, You and Computer; same board.' },
       { name: 'Power-up: Swap Spinner', device: 'laptop', node: <PowerMoment game={<GameShowLaptop noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, note: 'Picks a team with shape badges, never color alone.' },
@@ -849,7 +891,7 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     ],
   },
   'castle-quest': {
-    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause, Teach card.',
+    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: you vs computer', device: 'laptop', node: <BoardLaptop vs />, note: 'Two pawns; the die card says Your turn.' },
       { name: 'Power-up: Tornado', device: 'laptop', node: <PowerMoment game={<BoardLaptop />} id="tornado" name="Tornado" job="Whoosh! Every player lands on a new square." />, note: 'Found on a hidden square.' },
@@ -857,14 +899,14 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     ],
   },
   'match-three': {
-    uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause, Teach card. Solo only, so no How will you play.',
+    uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause. Solo only, so no How will you play.',
     views: [
       { name: 'Power-up: Fireball', device: 'laptop', node: <PowerMoment game={<MatchThreeLaptop />} id="lightning" name="Fireball" job="Pops every piece of one kind." />, note: 'Kit has no fireball yet; lightning stands in.' },
       { name: 'Celebration', device: 'tablet', node: <Results game={<MatchThreeTablet />} title="You got 2 stars!" winner={<StarGoal got={2} />} stats={['260 points', '9 matches']} />, note: 'Stars, not a rank.' },
     ],
   },
   'four-in-a-row': {
-    uses: 'Welcome, How will you play (Share, Solo), Question set, Options, Power-up setup, Question screen, Results, Settings, Pause, Teach card.',
+    uses: 'Welcome, How will you play (Share, Solo), Question set, Options, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: you vs computer', device: 'laptop', node: <FourLaptop vs />, note: 'Your piece waits over its column.' },
       { name: 'Power-up: Pop Out', device: 'laptop', node: <PowerMoment game={<FourLaptop vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, note: 'Kit has no key art; swap stands in.' },
@@ -872,14 +914,14 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     ],
   },
   'bubble-pop': {
-    uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause, Teach card. Solo only, so no How will you play.',
+    uses: 'Welcome, Question set, Options, Power-up setup, Question screen, Results, Settings, Pause. Solo only, so no How will you play.',
     views: [
       { name: 'Power-up: Mystery Box', device: 'laptop', node: <PowerMoment game={<BubbleLaptop />} id="mystery-box" name="Mystery Box" job="A surprise: 10 to 100 points!" />, note: 'Opens with a bob and a pop.' },
       { name: 'Celebration', device: 'tablet', node: <Results game={<BubbleTablet />} title="340 points!" winner={<Bubble k={4} s={110} />} stats={['31 bubbles popped', 'Best combo x4']} />, note: 'Your points, not a rank.' },
     ],
   },
   bowling: {
-    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams and players, Power-up setup, Question screen, Results, Settings, Pause, Teach card.',
+    uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams and players, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: alone', device: 'laptop', node: <BowlingLaptop solo />, note: 'One row on the ten-frame sheet, your pins on the left, no turn pill.' },
       { name: 'Power-up: Bumper Rails', device: 'laptop', node: <PowerMoment game={<BowlingLaptop />} id="shield" name="Bumper Rails" job="No gutter ball on your next roll." />, note: 'Shield art carries the job.' },
@@ -891,7 +933,7 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     views: [
       { name: 'Live student: waiting', device: 'tablet', node: <SkyWaiting />, note: 'The game\'s own sky, the student\'s star in the turn glow.' },
       { name: 'Solo: in play', device: 'tablet', node: <StudentDevice solo />, note: 'My sky, no class count.' },
-      { name: 'Class screen: celebration', device: 'laptop', node: <Results game={<ClassScreen />} title="We filled the sky!" winner={<Doodle kind="star" color={PP.lemon} size={110} />} stats={['30 stars', '12 players', '9 gold stars']} missed={4} />, note: 'One class win, no ranks in Together.' },
+      { name: 'Class screen: celebration', device: 'laptop', node: <Results game={<ClassScreen />} title="We filled the sky!" winner={<NightStar kind={2} color={PP.lemon} size={110} />} stats={['30 stars', '12 players', '9 gold stars']} missed={4} />, note: 'One class win, no ranks in Together.' },
     ],
   },
 };
@@ -982,20 +1024,25 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   },
 ];
 
+// Letterbox ground per game, matched to its stage edge, so a frame of another
+// shape shows more of the same world, not a band.
+const GROUND: Record<string, CSSProperties> = {
+  'game-show': { background: PP.grape }, 'castle-quest': { background: PP.kelly }, 'match-three': { background: PP.butter },
+  'four-in-a-row': { background: PP.blueCrystal }, 'bubble-pop': { background: PP.aqua }, bowling: { background: PP.lavender }, 'star-quiz': { background: PP.blueCrystal },
+};
 function ViewStrip({ id }: { id: string }) {
   const v = ALL_VIEWS[id];
   if (!v) return null;
+  const g = GROUND[id];
   return (
-    <div className="grid gap-3">
-      <div className="flex flex-wrap gap-5 items-start">
-        {v.views.map((x, n) => (
-          <figure key={x.name} className={`m-0 grid gap-1.5 content-start ${x.device === 'laptop' ? 'flex-1 basis-[22rem] min-w-[18rem] max-w-[27rem]' : 'w-[12rem]'}`}>
-            <figcaption className="font-heading text-sm">{n + 1}. {x.name} <span className="font-semibold text-muted">({x.device === 'laptop' ? 'laptop or big screen' : 'iPad'})</span></figcaption>
-            {x.device === 'laptop' ? <Laptop>{x.node}</Laptop> : <Tablet>{x.node}</Tablet>}
-            <span className="text-xs font-semibold text-muted">{x.note}</span>
-          </figure>
-        ))}
-      </div>
+    <div className="grid gap-8 lg:grid-cols-2">
+      {v.views.map((x, n) => (
+        <figure key={x.name} className="m-0 grid gap-1.5 content-start">
+          <figcaption className="font-heading text-sm">{n + 1}. {x.name}</figcaption>
+          {x.device === 'laptop' ? <DeviceSet land={x.node} landSize={[1000, 625]} ground={g} /> : <DeviceSet land={x.node} port={x.node} landSize={[820, 1180]} ground={g} />}
+          <span className="text-xs font-semibold text-muted">{x.note}</span>
+        </figure>
+      ))}
     </div>
   );
 }
@@ -1014,9 +1061,17 @@ export default function GameMockups() {
         <article key={g.id} id={`gm-${g.id}`} className="grid gap-4 scroll-mt-24 pt-6 border-t-2 border-black/20">
           <h3 className="font-heading text-xl">{g.name}</h3>
           <p className="text-sm font-semibold -mt-2"><b>Uses these universal screens:</b> {ALL_VIEWS[g.id]?.uses}</p>
-          <div className="grid gap-6 lg:grid-cols-[1fr_17rem] items-start">
-            <figure className="m-0 grid gap-2"><Laptop>{g.laptop}</Laptop><figcaption className="text-sm font-bold text-muted">Laptop 16:10, in play</figcaption></figure>
-            <figure className="m-0 grid gap-2"><Tablet>{g.tablet}</Tablet><figcaption className="text-sm font-bold text-muted text-center">iPad portrait</figcaption></figure>
+          <div className="grid gap-8 lg:grid-cols-[18rem_1fr] items-start">
+            {/* Welcome cover (teacher, 2026-11-24: covers live here, not on Universal views). */}
+            <figure className="m-0 grid gap-2 content-start">
+              <figcaption className="font-heading text-sm">Welcome cover</figcaption>
+              {(() => { const c = GAME_COVERS.find((x) => x.id === g.id); return c ? <div className="rounded-[1rem] overflow-hidden border-2 border-black"><Fit w={720} h={648}><div className="relative w-full h-full">{c.cover}</div></Fit></div> : null; })()}
+              <span className="text-xs font-semibold text-muted">A real miniature of the game in play, 720 x 648 on the welcome page.</span>
+            </figure>
+            <figure className="m-0 grid gap-2 content-start">
+              <figcaption className="font-heading text-sm">In play</figcaption>
+              <DeviceSet land={g.laptop} port={g.tablet} landSize={[1000, 625]} ground={GROUND[g.id]} />
+            </figure>
           </div>
           <ul className="grid gap-1.5 text-sm font-semibold max-w-[70rem] list-disc pl-5">
             {g.lines.map((l) => <li key={l}>{l}</li>)}
