@@ -22,6 +22,8 @@ import GameMockups from './GameMockups';
 import Stickers from './Stickers';
 import TeacherPortal from './TeacherPortal';
 import PublicPages from './PublicPages';
+import MoreScreens from './MoreScreens';
+import Coverage, { type BrandTab } from './Coverage';
 
 // The Brand page (preview, teacher 2026-11-23): the brand kit shown live, with
 // the real colors, type, parts, motion and every sound, so it can be approved
@@ -46,7 +48,9 @@ const PATTERNS: [string, string][] = [
 ];
 
 export default function BrandPage() {
-  const [tab, setTab] = useState<'style' | 'sounds' | 'direction' | 'views' | 'components' | 'games' | 'stickers' | 'icons' | 'teacher' | 'public'>('style');
+  // ?tab= opens a tab directly; the Approval list jumps to a tab and its view.
+  const [tab, setTab] = useState<BrandTab>(() => (new URLSearchParams(window.location.search).get('tab') as BrandTab | null) ?? 'style');
+  const go = (t: BrandTab, anchor?: string) => { setTab(t); window.setTimeout(() => { const el = anchor ? document.getElementById(anchor) : null; if (el) el.scrollIntoView({ block: 'start' }); else window.scrollTo(0, 0); }, 60); };
   return (
     <div className="brand-menu min-h-[calc(100dvh-4rem)]">
       <main className="max-w-[84rem] mx-auto px-4 sm:px-8 pt-6 pb-16 grid gap-6">
@@ -54,8 +58,8 @@ export default function BrandPage() {
           <h1 className="title-bubble text-4xl" style={{ color: 'var(--text)' }}><Title text="Brand Kit" /></h1>
           <p className="font-semibold text-muted">The Gamify look, motion and sound, live. Preview only.</p>
         </header>
-        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal (proposal)' }, { id: 'public', label: 'Public pages (proposal)' }]} /></div>
-        {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : tab === 'views' ? <UniversalViews /> : tab === 'components' ? <GameComponents /> : tab === 'games' ? <GameMockups /> : tab === 'stickers' ? <Stickers /> : tab === 'icons' ? <IconSet /> : tab === 'teacher' ? <TeacherPortal /> : tab === 'public' ? <PublicPages /> : <NewDirection />}
+        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal (proposal)' }, { id: 'public', label: 'Public pages (proposal)' }, { id: 'more', label: 'More screens (proposal)' }, { id: 'approval', label: 'Approval' }]} /></div>
+        {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : tab === 'views' ? <UniversalViews /> : tab === 'components' ? <GameComponents /> : tab === 'games' ? <GameMockups /> : tab === 'stickers' ? <Stickers /> : tab === 'icons' ? <IconSet /> : tab === 'teacher' ? <TeacherPortal /> : tab === 'public' ? <PublicPages /> : tab === 'more' ? <MoreScreens /> : tab === 'approval' ? <Coverage onGo={go} /> : <NewDirection />}
       </main>
     </div>
   );

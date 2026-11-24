@@ -1,401 +1,304 @@
-import { type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { GearSix, Play, SpeakerHigh, Star } from '@phosphor-icons/react';
+import {
+  ArrowRight, Broadcast, ChartBar, Check, GameController, GearSix, Heart, House, Lightbulb, Lightning, MagnifyingGlass, Palette as PaletteIcon, Play,
+  Printer, SpeakerHigh, Stack, Star, Trophy, UploadSimple, UsersThree, X,
+} from '@phosphor-icons/react';
 import { useSettings } from '../settings/SettingsContext';
-import { LogoMark, LogoWord, ND, Paper, PaperDefs, Washi } from './buddies';
-import { CrayonDie, CrayonKitSection, CrayonPawn, CrayonPowerUp, type PowerId } from './CrayonKit';
-import HandmadeMock from './HandmadeMock';
-import { WayRow } from './mockKit';
-import PlayfulMock from './PlayfulMock';
-import PaletteProposal from './PaletteProposal';
-import PatternProposal from './PatternProposal';
+import { BlobPatch, CrayonDie, CrayonPowerUp, Doodle, UNIVERSAL_POWERS, type PowerId } from './CrayonKit';
+import { DieWiggle, GameTools, GO_YELLOW, IconBadge, MenuBack, MenuGo, PURPLE_GROUND, SiteBarSmall, WayRow } from './mockKit';
+import { PP } from './PaletteProposal';
+import { PATTERNS, PatternCard } from './PatternProposal';
+import { STARTER, StickerArt } from './Stickers';
 
-// "New direction" (proposal, teacher 2026-11-23): playful flat shapes from her
-// moodboards, kept clearly different from the main competitor's look. Preview
-// only: nothing here is used outside the Brand page until she approves.
-// Every drawing below is original, made in code. Mirrors the Brand Kit doc tab
-// "Direction: playful flat shapes (2026-11-23)", section "Clean core, handmade
-// edges": the art is cut paper, tape and crayon; the controls stay clean.
+// "New direction" (PROPOSAL, rewritten 2026-11-24: "the new direction ... so
+// when i request a push and have everything be redesigned, i would have seen
+// and approved everything already"). This tab shows ONLY the current
+// direction: each block is one rule in one line, then the real parts. The
+// early mockups (washi tape, tilted and stacked paper cards, heavy crayon
+// grain, the playful mixed-media sunburst and kind-word cards, buddies, the
+// cream ground, the old four ways to play) were removed. Palette, newest
+// (teacher, 2026-11-24): "remove the gamify purples and replace with the grape
+// and lavender": Grape #6A45F0 (white text) and Lavender #DDD6FF lead.
 
-// Grow Year by name: outside h1 the app maps .font-display to the heading font.
-const GY = { fontFamily: "'Grow Year', 'Segoe UI', system-ui, sans-serif" };
+const I = PP.ink;
+const Q = PP.quiet;
+const GY: CSSProperties = { fontFamily: 'var(--font-display)', fontWeight: 400, lineHeight: 1, textTransform: 'uppercase' };
+const CARD: CSSProperties = { background: PP.paper, border: `2px solid ${I}`, borderRadius: 22, boxShadow: `0 3px 0 ${I}` };
 
-
-const PALETTE: { name: string; hex: string; role: string; text: string; pair: string }[] = [
-  { name: 'Cream', hex: ND.cream, role: 'Ground', text: ND.ink, pair: 'Ink 14.8:1' },
-  { name: 'Paper', hex: ND.paper, role: 'Panels, question box', text: ND.ink, pair: 'Ink 16.2:1' },
-  { name: 'Ink', hex: ND.ink, role: 'Text, faces, control edge', text: '#ffffff', pair: 'White 17:1' },
-  { name: 'Bubblegum pink', hex: ND.pink, role: 'Lead block', text: ND.ink, pair: 'Ink 5.9:1' },
-  { name: 'Cobalt', hex: ND.cobalt, role: 'Main button, lead block', text: '#ffffff', pair: 'White 5.1:1' },
-  { name: 'Grass green', hex: ND.green, role: 'Lead block, right, done', text: ND.ink, pair: 'Ink 5.0:1' },
-  { name: 'Sunny yellow', hex: ND.yellow, role: 'Accent only: stars, rewards', text: ND.ink, pair: 'Ink 11.9:1' },
-  { name: 'Tangerine', hex: ND.tangerine, role: 'Warm accent, timers', text: ND.ink, pair: 'Ink 5.9:1' },
-  { name: 'Violet', hex: ND.violet, role: 'Support only', text: ND.ink, pair: 'Large text only' },
-  { name: 'Mint', hex: ND.mint, role: 'Calm accent', text: ND.ink, pair: 'Ink 8.7:1' },
-  { name: 'Coral red', hex: ND.coral, role: 'Delete, stop', text: ND.ink, pair: 'Ink 4.8:1' },
-];
-const DEEP: [string, string, string][] = [
-  ['Cobalt deep', ND.cobaltDeep, '6.6:1 on cream'], ['Pink deep', ND.pinkDeep, '5.5:1 on cream'], ['Violet deep', ND.violetDeep, '6.2:1 on cream'],
-  ['Green deep', ND.greenDeep, '4.8:1 on cream'], ['Tangerine deep', ND.tangDeep, '4.8:1 on cream'], ['Quiet text', ND.quiet, '6.7:1 on cream'],
-];
-
-
-// ---------- Doodles ----------
-function Sparkle({ x, y, s = 1, c }: { x: number; y: number; s?: number; c: string }) {
-  return <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -10 C1.5 -2 2 -1.5 10 0 C2 1.5 1.5 2 0 10 C-1.5 2 -2 1.5 -10 0 C-2 -1.5 -1.5 -2 0 -10 Z" fill={c} />;
+// WCAG 2.1 contrast, computed (never typed by hand).
+function lum(hex: string) {
+  const c = hex.replace('#', '').match(/../g)!.map((h) => parseInt(h, 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 }
-// The power-up sheet (no characters, teacher 2026-11-23): crayon power-ups
-// and sparkles on an even offset grid, at the edges only.
-const SHEET: PowerId[] = ['magnet', 'double-points', 'shield', 'lightning', 'mystery-box', 'hint', 'freeze', 'treasure-chest'];
-function PowerSheet({ className = '' }: { className?: string }) {
-  return (
-    <div className={`grid gap-y-5 py-3 overflow-hidden ${className}`} aria-hidden="true">
-      {[0, 1, 2].map((row) => (
-        <div key={row} className="flex gap-10 whitespace-nowrap" style={{ marginLeft: row % 2 ? '2.25rem' : '0.5rem' }}>
-          {Array.from({ length: 16 }, (_, k) => <CrayonPowerUp key={k} id={SHEET[(k + row * 3) % SHEET.length]} size={38} />)}
-        </div>
-      ))}
-    </div>
-  );
-}
-function Doodles() {
-  return (
-    <svg viewBox="0 0 240 120" className="w-full h-full" aria-hidden="true" filter="url(#nd-crayon)">
-      <Sparkle x={30} y={30} s={1.6} c={ND.yellow} />
-      <Sparkle x={210} y={92} s={1.2} c={ND.pink} />
-      <path d="M70 34 q10 -16 20 0 t20 0 t20 0" stroke={ND.cobalt} strokeWidth="5" fill="none" strokeLinecap="round" />
-      <path d="M160 26 a12 12 0 1 1 -2 18 a7 7 0 1 1 8 -8" stroke={ND.green} strokeWidth="5" fill="none" strokeLinecap="round" />
-      <path d="M40 92 C60 70 90 70 110 88 M100 78 l12 10 l-14 6" stroke={ND.tangerine} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="140" cy="90" r="5" fill={ND.violet} /><circle cx="156" cy="74" r="3.5" fill={ND.mint} /><circle cx="196" cy="40" r="4" fill={ND.coral} />
-    </svg>
-  );
-}
+const ratio = (a: string, b: string) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+const textOn = (bg: string) => (ratio(bg, '#ffffff') > ratio(bg, I) ? '#ffffff' : I);
 
-// ---------- Controls in the new direction ----------
-const shade = (c: string) => ({ [ND.cobalt]: ND.cobaltDeep, [ND.pink]: ND.pinkDeep, [ND.green]: ND.greenDeep, [ND.yellow]: '#d9a900', [ND.paper]: '#d9cfbd', [ND.coral]: '#c12f2c', [ND.tangerine]: ND.tangDeep } as Record<string, string>)[c] ?? ND.ink;
-function NDButton({ bg, fg, children, big = false }: { bg: string; fg: string; children: ReactNode; big?: boolean }) {
+function Block({ id, n, title, rule, children }: { id: string; n: number; title: string; rule: string; children: ReactNode }) {
   return (
-    <button type="button" className={`rounded-full font-bold inline-flex items-center gap-2 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0.5 motion-safe:transition-transform ${big ? 'px-7 min-h-14 text-xl' : 'px-5 min-h-12 text-lg'}`}
-      style={{ background: bg, color: fg, border: `2px solid ${ND.ink}`, boxShadow: `0 4px 0 ${shade(bg)}` }}>
-      {children}
-    </button>
-  );
-}
-
-function Block({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
-  return (
-    <section className="grid gap-3">
-      <div><h2 className="font-heading text-xl" style={{ color: ND.ink }}>{title}</h2>{note && <p className="text-sm font-semibold" style={{ color: ND.quiet }}>{note}</p>}</div>
+    <section id={`nd-${id}`} className="grid gap-3 scroll-mt-24" aria-labelledby={`nd-${id}-h`}>
+      <div className="grid gap-1">
+        <h2 id={`nd-${id}-h`} className="text-[1.6rem]" style={GY}>{n}. {title}</h2>
+        <p className="m-0 font-bold text-[1.02rem] leading-snug"><span className="px-2 py-0.5 rounded-full mr-2 text-sm" style={{ background: PP.butter, border: `2px solid ${I}` }}>Rule</span>{rule}</p>
+      </div>
       {children}
     </section>
   );
 }
 
-
-// ---------- Mixed media layer (teacher, 2026-11-23): photo stickers with white
-// edges, torn paper, tape, hand-lettered notes and gentle grain, on top of the
-// crayon power-ups. Photos here are neutral placeholders, clearly marked. ----------
-function Grain() {
+// ---------- 1. Palette pairs ----------
+type Pair = { bright: [string, string]; pastel: [string, string]; job: string };
+const PAIRS: Pair[] = [
+  { bright: ['Grape', PP.grape], pastel: ['Lavender', PP.lavender], job: 'Main brand pair: Grape buttons with white text, Lavender page ground' },
+  { bright: ['Sky', PP.sky], pastel: ['Blue crystal', PP.blueCrystal], job: 'Live, info, freeze' },
+  { bright: ['Pink punch', PP.pink], pastel: ['Blush', PP.blush], job: 'Competitive, celebrations' },
+  { bright: ['Lemon drop', PP.lemon], pastel: ['Butter', PP.butter], job: 'Share, stars, the active player shade' },
+  { bright: ['Orange paloma', PP.orange], pastel: ['Peach', PP.peach], job: 'Timers, warm accent' },
+  { bright: ['Kelly green', PP.kelly], pastel: ['Mint', PP.mint], job: 'Solo, Cooperative, right, done' },
+  { bright: ['Teal', PP.teal], pastel: ['Aqua', PP.aqua], job: 'Water, cool accent' },
+  { bright: ['Lime wedge', PP.lime], pastel: ['Sage', PP.sage], job: 'Small accent only' },
+];
+// Nature tones (pending her decision, Waiting on you "nature-tones"):
+// colors taken from the Territory build so one named set replaces one-offs.
+const NATURE: Pair[] = [
+  { bright: ['Wood', '#c47a45'], pastel: ['Sand', '#f1d9bf'], job: 'Doors, floors, furniture' },
+  { bright: ['Mouse brown', '#8f7258'], pastel: ['Fawn', '#e2d2c0'], job: 'Animals, earth' },
+  { bright: ['Gray', '#8c8a9a'], pastel: ['Cloud', '#e3e2ea'], job: 'Animals, stone, metal' },
+];
+function Swatch({ name, hex }: { name: string; hex: string }) {
+  const fg = textOn(hex);
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none mix-blend-multiply opacity-[0.1]" aria-hidden="true">
-      <filter id="nd-grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" /><feColorMatrix values="0 0 0 0 0.11  0 0 0 0 0.1  0 0 0 0 0.2  0 0 0 0.55 0" /></filter>
-      <rect width="100%" height="100%" filter="url(#nd-grain)" />
-    </svg>
-  );
-}
-// No washi tape anywhere (teacher, 2026-11-23, urgent): Tape draws nothing.
-function Tape(_props: { className?: string; color?: string; rotate?: number }) {
-  return null;
-}
-function torn(w: number, h: number, seed: number) {
-  let d = `M0 0 H${w} V${h - 8}`;
-  for (let x = w; x > 0; x -= 10) { const j = ((Math.sin(x * 12.9898 + seed) * 43758.5453) % 1 + 1) % 1; d += ` L${x - 5} ${h - 8 + j * 8} L${x - 10} ${h - 8}`; }
-  return d + ' Z';
-}
-function TornPaper({ color, children, className = '', seed = 1 }: { color: string; children: ReactNode; className?: string; seed?: number }) {
-  return (
-    <div className={`relative ${className}`}>
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true"><path d={torn(300, 100, seed)} fill={color} /></svg>
-      <div className="relative px-5 pt-3 pb-5">{children}</div>
+    <div className="grid content-between rounded-[16px] px-3 py-2.5 min-h-[5.5rem]" style={{ background: hex, color: fg, border: `2px solid ${I}` }}>
+      <b className="text-[1rem] leading-tight">{name}</b>
+      <span className="grid text-[0.85rem] font-bold leading-snug"><span>{hex.toUpperCase()}</span><span>{fg === '#ffffff' ? 'White' : 'Ink'} text {ratio(hex, fg).toFixed(1)}:1{ratio(hex, fg) < 4.5 ? ', big text only' : ''}</span></span>
     </div>
   );
 }
-// A photo sticker: a white die-cut edge around a photo. Placeholder art only.
-function PhotoSticker({ label, children, rotate = 0, className = '' }: { label: string; children: ReactNode; rotate?: number; className?: string }) {
+function PairCard({ p, pending }: { p: Pair; pending?: boolean }) {
   return (
-    <figure className={`relative rounded-[1.25rem] p-2 ${className}`} style={{ background: '#ffffff', boxShadow: '0 6px 16px rgba(29,26,51,0.16)' }} data-rotate={rotate || undefined}>
-      <div className="relative rounded-[0.9rem] overflow-hidden aspect-[4/3] grid place-items-center" style={{ background: 'repeating-linear-gradient(45deg,#e9e1d2 0 10px,#f1eadd 10px 20px)' }}>
-        {children}
-        <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider" style={{ background: ND.ink, color: '#ffffff' }}>Placeholder photo</span>
-      </div>
-      <figcaption className="text-xs font-semibold pt-1.5 text-center" style={{ color: ND.quiet }}>{label}</figcaption>
-    </figure>
-  );
-}
-function HandNote({ text, color = ND.pinkDeep, className = '' }: { text: string; color?: string; className?: string }) {
-  return (
-    <span className={`absolute flex items-end gap-1 ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 50 40" className="w-10 h-8"><path d="M46 6 C30 4 14 14 8 32 M8 32 l-2 -12 M8 32 l10 -6" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-      <span className="text-xl leading-none" style={{ ...GY, color }}>{text}</span>
-    </span>
-  );
-}
-// A GIF-style looping sticker: a short bounce loop, stopped in Still.
-function LoopSticker({ id, still, label }: { id: PowerId; still: boolean; label: string }) {
-  return (
-    <div className="grid justify-items-center gap-1">
-      <motion.span className="block rounded-full p-2" style={{ background: '#ffffff' }}
-        animate={still ? undefined : { y: [0, -14, 0, 0], scaleY: [1, 1.06, 0.9, 1], rotate: [0, -4, 3, 0] }}
-        transition={still ? undefined : { duration: 1.4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.4 }}>
-        <CrayonPowerUp id={id} size={72} />
-      </motion.span>
-      <span className="text-xs font-bold" style={{ color: ND.quiet }}>{label}</span>
+    <div className="grid gap-2 p-3" style={{ ...CARD, borderStyle: pending ? 'dashed' : 'solid' }}>
+      <div className="grid grid-cols-2 gap-2"><Swatch name={p.bright[0]} hex={p.bright[1]} /><Swatch name={p.pastel[0]} hex={p.pastel[1]} /></div>
+      <span className="text-[0.9rem] font-semibold leading-snug" style={{ color: Q }}>{p.job}</span>
     </div>
   );
 }
-function MixedMedia({ still }: { still: boolean }) {
-  // GIF-style loops follow the GIFs sensory setting (Calm sets it to Still).
+function Palette() {
   return (
-    <div className="grid gap-5">
-      <div className="grid wide:grid-cols-[1.3fr_1fr] gap-5">
-        {/* Home page "Made by teachers" gallery strip */}
-        <div className="relative rounded-[1.75rem] overflow-hidden p-6 pb-10 min-h-[22rem]" style={{ background: ND.cobalt }}>
-          <Grain />
-          <TornPaper color={ND.paper} className="relative inline-block max-w-[22rem]" seed={3}>
-            <span className="text-3xl leading-tight" style={GY}><span style={{ color: ND.pinkDeep }}>Made</span> <span style={{ color: ND.greenDeep }}>by</span> <span style={{ color: ND.cobaltDeep }}>teachers</span> <span style={{ color: ND.tangDeep }}>and kids</span></span>
-          </TornPaper>
-          <div className="relative grid grid-cols-3 gap-4 mt-6 items-start">
-            <div className="relative"><Tape className="-top-3 left-6 z-10" /><PhotoSticker label="Clay board pieces" rotate={-4}><span className="flex gap-1"><CrayonPawn color="#d98a5f" size={52} /><CrayonPawn color={ND.cobalt} size={52} /></span></PhotoSticker></div>
-            <div className="relative mt-6"><Tape className="-top-3 left-8 z-10" color="#ec6fa8cc" rotate={4} /><PhotoSticker label="Felt and fabric theme" rotate={3}><CrayonPowerUp id="second-chance" size={64} /></PhotoSticker></div>
-            <div className="relative"><Tape className="-top-3 left-4 z-10" color="#3fd0b6cc" rotate={-2} /><PhotoSticker label="Crayon drawing theme" rotate={-2}><CrayonPowerUp id="double-points" size={64} /></PhotoSticker></div>
-          </div>
-          <HandNote text="handmade!" color={ND.yellow} className="right-6 top-6" />
-        </div>
-        {/* A theme card as a scrapbook page */}
-        <div className="relative rounded-[1.75rem] overflow-hidden p-5 min-h-[22rem]" style={{ background: 'repeating-linear-gradient(0deg, #fffaf0 0 26px, #e6eeff 26px 28px)' }}>
-          <Grain />
-          <span className="absolute left-0 top-0 bottom-0 w-6" style={{ background: 'repeating-conic-gradient(#ec6fa8 0 25%, #fffaf0 0 50%) 0 0 / 12px 12px' }} aria-hidden="true" />
-          <div className="relative pl-6 grid gap-3">
-            <div className="flex items-center gap-2"><span className="rounded-full px-3 py-1 text-xs font-bold" style={{ background: ND.green, color: ND.ink }}>Theme</span><span className="font-heading font-bold">Paper Garden</span></div>
-            <div className="relative max-w-[24rem]"><Tape className="-top-3 right-8 z-10" rotate={8} /><PhotoSticker label="Cut paper power-ups, glued and photographed" rotate={2}><div className="flex gap-1"><CrayonPowerUp id="potion" size={52} /><CrayonPowerUp id="magnet" size={52} /></div></PhotoSticker></div>
-            <p className="text-sm font-semibold" style={{ color: ND.quiet }}>For board games. 12 pieces. Made by a class.</p>
-          </div>
-          <HandNote text="we made these" className="right-4 bottom-4" />
-        </div>
+    <div className="grid gap-4">
+      <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">{PAIRS.map((p) => <PairCard key={p.bright[0]} p={p} />)}</div>
+      <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]">
+        {([['Ink', I, 'All text, outlines, icon lines'], ['Paper', PP.paper, 'Cards, question card, panels'], ['White', '#ffffff', 'Back buttons, top bar, sticker edge']] as const).map(([n, h, j]) => (
+          <div key={n} className="grid gap-1.5 p-3" style={CARD}><Swatch name={n} hex={h} /><span className="text-[0.9rem] font-semibold" style={{ color: Q }}>{j}</span></div>
+        ))}
       </div>
-      <div className="rounded-[1.5rem] p-4 flex flex-wrap items-end justify-around gap-4" style={{ background: ND.paper }}>
-        <LoopSticker id="double-points" still={still} label="Right answer loop" />
-        <LoopSticker id="lightning" still={still} label="Big moment loop" />
-        <LoopSticker id="mystery-box" still={still} label="Power-up loop" />
-        <LoopSticker id="extra-time" still={still} label="Waiting loop" />
-        <p className="text-xs font-semibold max-w-[16rem]" style={{ color: ND.quiet }}>GIF-style sticker loops: lively by default. Calm mode and the GIFs setting (Moving or Still pictures) hold them still. No flashing 3 or more times a second, no full-screen strobes.</p>
+      <div className="grid gap-2 rounded-[22px] p-4" style={{ border: `3px dashed ${I}`, background: PP.paper }}>
+        <p className="m-0 font-bold"><span className="px-2 py-0.5 rounded-full mr-2 text-sm" style={{ background: PP.blush, border: `2px solid ${I}` }}>Pending your decision</span>Nature tones: three more pairs so brown and gray animals, doors and floors come from the kit, not one-off colors.</p>
+        <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(17rem,1fr))]">{NATURE.map((p) => <PairCard key={p.bright[0]} p={p} pending />)}</div>
       </div>
     </div>
   );
 }
 
-const DONTS: [string, string][] = [
-  ['Cream ground; pink, cobalt and green blocks lead', 'Yellow ground with purple type and purple buttons'],
-  ['Solid flat headline letters, no outline, no shadow', 'Outlined headline text with an offset drop shadow'],
-  ['Crayon power-ups and pieces: objects, no faces, no characters', 'Black-outlined, googly-eyed cartoon mascots and "WOW" bursts'],
-  ['A tidy power-up sheet at the edges', 'Scattered confetti dashes and worm squiggles as the main texture'],
-  ['Our own logo: the G joystick mark and the Grow Year wordmark, kept as they are', 'A bubbly outlined logo with a smiley in a letter'],
+// ---------- 2. Smooth hand-drawn style ----------
+const STYLE_SET: [PowerId, string][] = [['magnet', PP.blush], ['shield', PP.lavender], ['freeze', PP.aqua], ['treasure-chest', PP.peach]];
+function SmoothStyle() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="flex flex-wrap items-end justify-center gap-6 p-5" style={CARD}>
+        {STYLE_SET.map(([id, tint], i) => (
+          <span key={id} className="relative grid place-items-center" style={{ width: 124, height: 124 }}>
+            <BlobPatch color={tint} variant={i} size={124} />
+            <span className="relative"><CrayonPowerUp id={id} size={94} /></span>
+            <Doodle kind={(['sparkle', 'star', 'dot', 'heart'] as const)[i]} color={[PP.lemon, PP.pink, PP.sky, PP.kelly][i]} size={16} className="absolute" style={{ top: 6, right: 8 }} />
+          </span>
+        ))}
+        <span className="basis-full flex justify-center"><span className="inline-flex items-center gap-3 rounded-full px-4 py-2" style={{ background: PP.lavender }}>{STYLE_SET.map(([id]) => <CrayonPowerUp key={id} id={id} size={48} />)}<b className="text-sm">at 48px</b></span></span>
+      </div>
+      <div className="grid gap-2 p-5 content-start" style={CARD}>
+        {[['Do', 'Smooth flat solid fills in palette brights'], ['Do', 'One dark ink outline (#1D1A33) with a slight wobble and round ends'], ['Do', 'A soft pastel blob patch behind, tiny doodle confetti around'], ['Never', 'Grain, paper tooth or visible pencil strokes'], ['Never', 'Gradients, gloss, 3D, faces or characters'], ['Never', 'See-through or faded color']].map(([k, t], i) => (
+          <span key={i} className="flex items-start gap-2 font-semibold leading-snug"><span className="shrink-0 mt-0.5 w-6 h-6 rounded-full grid place-items-center" style={{ background: k === 'Do' ? PP.mint : PP.blush, border: `2px solid ${I}` }}>{k === 'Do' ? <Check weight="bold" size={13} /> : <X weight="bold" size={13} />}</span>{t}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------- 3. Patterns ----------
+function Patterns() {
+  const [calm, setCalm] = useState(false);
+  return (
+    <div className="grid gap-3">
+      <button type="button" aria-pressed={calm} onClick={() => setCalm((v) => !v)} className="justify-self-start rounded-full px-5 min-h-11 font-bold" style={{ background: calm ? PP.blueCrystal : '#ffffff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{calm ? 'Calm versions on' : 'Show the Calm versions'}</button>
+      <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]">
+        {PATTERNS.map((p) => <PatternCard key={p.id} p={p} calm={calm} />)}
+      </div>
+    </div>
+  );
+}
+
+// ---------- 4. Power-ups ----------
+const PASTELS = [PP.butter, PP.blush, PP.lavender, PP.peach, PP.aqua, PP.mint, PP.blueCrystal, PP.sage];
+function PowerUps() {
+  return (
+    <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))]">
+      {UNIVERSAL_POWERS.map((p, i) => (
+        <div key={p.id} className="grid justify-items-center content-start gap-1 p-3 text-center" style={CARD}>
+          <span className="relative grid place-items-center" style={{ width: 112, height: 112 }}><BlobPatch color={PASTELS[i % PASTELS.length]} variant={i} size={112} /><span className="relative"><CrayonPowerUp id={p.id} size={84} title={p.name} /></span></span>
+          <b className="text-[1.05rem] leading-tight">{p.name}</b>
+          <span className="text-[0.9rem] font-semibold leading-snug">{p.job}</span>
+          {p.optional && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: PP.butter, border: `1.5px solid ${I}` }}>Optional, off by default</span>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------- 5. The die ----------
+// The roll is just the die (teacher, 2026-11-24): tap it to roll; no Roll button,
+// no total written. It tumbles through faces, then waits on the new face.
+function RollDie({ start, still, size }: { start: number; still: boolean; size: number }) {
+  const [v, setV] = useState(start); const [spin, setSpin] = useState(0);
+  const roll = () => {
+    if (still) { setV(1 + Math.floor(Math.random() * 6)); return; }
+    let n = 0; const t = window.setInterval(() => { setV(1 + Math.floor(Math.random() * 6)); n += 1; if (n > 6) window.clearInterval(t); }, 110);
+    setSpin((k) => k + 1);
+  };
+  return (
+    <button type="button" onClick={roll} aria-label={`Die showing ${v}. Tap to roll`} className="rounded-[20px]">
+      <DieWiggle still={still}><motion.span key={spin} className="inline-grid" initial={still || !spin ? false : { rotate: -200, y: -30 }} animate={{ rotate: 0, y: 0 }} transition={{ type: 'spring', stiffness: 180, damping: 11 }}><CrayonDie value={v} size={size} /></motion.span></DieWiggle>
+    </button>
+  );
+}
+function Dice({ still }: { still: boolean }) {
+  return (
+    <div className="grid gap-4">
+      <div className="flex flex-wrap items-center justify-center gap-4 p-4" style={CARD}>
+        {[1, 2, 3, 4, 5, 6].map((n) => <DieWiggle key={n} still={still}><CrayonDie value={n} size={84} title={`Die face ${n}`} /></DieWiggle>)}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 p-5 justify-items-center content-center" style={{ ...CARD, background: PP.mint }}><b>One die: tap it to roll</b><RollDie start={4} still={still} size={140} /></div>
+        <div className="grid gap-3 p-5 justify-items-center content-center" style={{ ...CARD, background: PP.lavender }}><b>Double dice, side by side</b><span className="flex gap-5"><RollDie start={5} still={still} size={120} /><RollDie start={2} still={still} size={120} /></span></div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- 8. Icons ----------
+const ICON_ROW: [typeof GearSix, string, string][] = [
+  [House, 'Home', PP.lavender], [GearSix, 'Settings', PP.paper], [Lightbulb, 'Hint', PP.butter], [SpeakerHigh, 'Listen', PP.blueCrystal], [Play, 'Play', GO_YELLOW],
+  [MagnifyingGlass, 'Search', PP.paper], [Stack, 'Question sets', PP.mint], [ChartBar, 'Reports', PP.aqua], [PaletteIcon, 'Themes', PP.blush], [UploadSimple, 'Upload', PP.peach],
+  [Printer, 'Print', PP.paper], [Trophy, 'Results', PP.butter], [GameController, 'Games', PP.lavender], [Star, 'Stars', PP.butter],
+];
+
+// ---------- 11. Class modes ----------
+function ClassMode({ kind }: { kind: 'Cooperative' | 'Competitive' }) {
+  const co = kind === 'Cooperative';
+  const bright = co ? PP.kelly : PP.pink, soft = co ? PP.mint : PP.blush;
+  const Mark = co ? Heart : Lightning;
+  return (
+    <div className="grid justify-items-center gap-2 p-5 text-center" style={{ ...CARD, background: soft }}>
+      <span className="relative inline-grid place-items-center w-24 h-24 rounded-full" style={{ background: bright, border: `3px solid ${I}` }}>
+        <UsersThree weight="bold" size={50} aria-hidden="true" />
+        <span className="absolute -right-1 -top-1 w-10 h-10 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Mark weight="fill" size={20} color={co ? PP.pink : I} aria-hidden="true" /></span>
+      </span>
+      <b className="text-[1.3rem]" style={GY}>{kind}</b>
+      <span className="font-semibold leading-snug">{co ? 'People with a heart. The class plays toward one goal.' : 'People with a versus spark. Teams race each other.'}</span>
+    </div>
+  );
+}
+
+const NEVER = [
+  'Washi tape, or a second sheet stacked behind a card', 'Tilted menus, cards or teams', 'Characters, buddies, faces on objects, mascots',
+  'Heavy crayon grain or pencil strokes', 'Outlined headlines with an offset drop shadow', 'A yellow ground with purple pill buttons as the main pairing',
+  'A purple pill with Gamify typed in it (the real wordmark only)', 'Versus as its own way to play; "Step X of Y" text; teach cards',
 ];
 
 export default function NewDirection() {
   const { settings } = useSettings();
   const still = settings.motion === 'still';
   return (
-    <div className="relative rounded-[2rem] p-5 sm:p-8 grid gap-10 overflow-x-clip" style={{ background: ND.cream, color: ND.ink }}>
-      <PaperDefs />
-      <PaletteProposal />
-      <PatternProposal />
-      <Block title="Playful mixed style mockup" note="Your references of 2026-11-23: kids' crayon drawings, soft pencil stickers, a scrapbook collage (no characters: power-ups and pieces carry the art). A home page hero and one game welcome card. Mess at the edges, a clean reading zone in the middle.">
-        <PlayfulMock still={still} />
+    <div className="rounded-[2rem] p-5 sm:p-8 grid gap-12" style={{ ...PURPLE_GROUND, color: I }}>
+      <header className="grid gap-2 justify-items-center text-center">
+        <h1 className="text-[2.6rem]" style={GY}>New direction</h1>
+        <p className="m-0 max-w-[46rem] font-semibold text-[1.05rem]">The current direction only, one rule per block. Every Universal view, game mockup, teacher page and public page on /brand is built from these parts. Approving this tab and the Approval list means the live rebuild matches what you saw here.</p>
+        <span className="text-sm font-bold px-3 py-1 rounded-full" style={{ background: PP.butter, border: `2px solid ${I}` }}>Proposal: nothing on the live site changes until you approve</span>
+      </header>
+
+      <Block id="palette" n={1} title="Palette pairs" rule="Grape and Lavender are the main pair; every bright has its named pastel; white text only on Grape and Ink, ink text everywhere else (WCAG 4.5:1, computed below).">
+        <Palette />
       </Block>
 
-      <p className="font-semibold max-w-prose" style={{ color: ND.quiet }}>
-        A proposal from your moodboards and your note of 2026-11-23: very modern and simple in function, playful scrapbook and mixed media around it. Classic is made by hand (cut paper, tape, crayon) so a kid's clay, crayon or fabric theme sits naturally beside it. Nothing on the site uses this yet. Full rules are in the Brand Kit doc tab "Direction: playful flat shapes", section "Clean core, handmade edges".
-      </p>
+      <Block id="style" n={2} title="Smooth hand-drawn style" rule="Smooth flat solid fills with one wobbly dark ink outline; no grain, no pencil strokes, no faces; a pastel blob patch and tiny doodles around the art.">
+        <SmoothStyle />
+      </Block>
 
-      <Block title="Clean core, handmade edges (mockup)" note="One rule for every screen. What kids read, answer and tap is modern and plain, the same in every game. Frames, backgrounds, covers, celebrations and the gallery are made by hand.">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="rounded-[1.5rem] p-5 grid gap-1.5 content-start" style={{ background: '#ffffff' }}>
-            <span className="font-heading font-bold text-lg">Clean core (never themed)</span>
-            {['Question card, answer tiles, main button', 'Board play zone, score board, timer', 'Menu controls, settings, teacher forms', 'Flat fill, ink text at 7:1 or more, no tilt, no tape, no texture', 'Same place in every game'].map((t) => <span key={t} className="font-semibold">{t}</span>)}
+      <Block id="patterns" n={3} title="Patterns" rule="Only the Quiet doodle ground sits behind words; every busier pattern stays at the edges, 24px clear of text; each has a Calm version.">
+        <Patterns />
+      </Block>
+
+      <Block id="powerups" n={4} title="Crayon power-ups" rule="One shared set with the same name and job in every game; a game picks from it and only adds its own when none fits; the bonus box is the Prize Chest everywhere.">
+        <PowerUps />
+      </Block>
+
+      <Block id="die" n={5} title="The simple themable die" rule="One plain face (rounded square, ink outline, round pips; no base, shine or texture) so a theme can swap the face color, the pip color or the whole face; it wiggles on hover and rolls on tap.">
+        <Dice still={still} />
+      </Block>
+
+      <Block id="stickers" n={6} title="Stickers" rule="One solid bright, a fun die-cut edge, a thick white border, one big picture and the earn rule in capitals on the top arc; locked ones are gray with how to earn them.">
+        <div className="flex flex-wrap items-center justify-center gap-5 p-5" style={CARD}>
+          {STARTER.slice(0, 7).map((s) => <StickerArt key={s.id} s={s} size={112} />)}
+          <span className="grid justify-items-center gap-1"><StickerArt s={STARTER[8]} size={112} locked /><span className="text-xs font-bold" style={{ color: Q }}>Locked</span></span>
+        </div>
+      </Block>
+
+      <Block id="icons" n={7} title="Icons" rule="Phosphor bold only, one icon per job, ink on a round pastel badge, centered by pixel and by eye; the full list is on the Icons tab.">
+        <div className="grid grid-cols-4 sm:grid-cols-7 justify-items-center gap-4 p-5" style={CARD}>
+          {ICON_ROW.map(([Ic, l, bg]) => <span key={l} className="grid justify-items-center gap-1 w-20 text-center"><IconBadge size={56} bg={bg} ring optical={l === 'Play' ? 'play' : l === 'Hint' ? 'bulb' : l === 'Stars' ? 'star' : 'none'}><Ic weight="bold" size={26} /></IconBadge><span className="text-[0.85rem] font-bold leading-tight">{l}</span></span>)}
+        </div>
+      </Block>
+
+      <Block id="type" n={8} title="Type" rule="Two fonts only: Grow Year in ALL CAPITALS for titles, scores and the tagline; Inclusive Sans (bold for headings and buttons, regular for body) in sentence case.">
+        <div className="grid gap-4 p-6" style={CARD}>
+          <p className="m-0 text-[clamp(2rem,4.5vw,3.6rem)]" style={{ ...GY, color: PP.grape }}>Every question becomes a game</p>
+          <p className="m-0 font-heading font-bold text-[1.6rem]">Pick your question set</p>
+          <p className="m-0 text-[1.15rem] max-w-prose">Answer the question, then tap the board to make your move. Right answers can bring a surprise power-up.</p>
+          <span className="text-[3rem] tabular-nums" style={GY}>1,250</span>
+        </div>
+      </Block>
+
+      <Block id="buttons" n={9} title="Buttons" rule="Yellow #FDFD94 with ink text is go (Start, Next, Play); Grape with white text is every other main action; white is Back and secondary; round tools are 44px; Next stays off until a card is picked.">
+        <div className="grid gap-4 p-5" style={CARD}>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>
+            <MenuGo disabled>Next<ArrowRight weight="bold" size={24} /></MenuGo>
+            <MenuBack />
+            <span className="min-h-[56px] px-7 rounded-full font-bold text-[20px] inline-flex items-center gap-2" style={{ background: PP.grape, color: '#ffffff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${PP.grapeDeep}` }}><Play weight="fill" size={20} />Create an Activity</span>
+            <span className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2" style={{ background: '#ffffff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>Cancel</span>
           </div>
-          <Paper color={ND.paper} rx={24} tilt={-0.6}>
-            <div className="p-5 grid gap-1.5 content-start">
-              <span className="font-heading font-bold text-lg">Handmade edges (the theme's to change)</span>
-              {['Frames, backgrounds, game covers', 'Celebrations, results decorations, lobby', 'Gallery, Blog guides, marketing', 'Cut paper, grain, crayon, tape, stickers, photos', 'Tilt up to 4 degrees, outside the reading zone'].map((t) => <span key={t} className="font-semibold" style={{ color: ND.quiet }}>{t}</span>)}
-            </div>
-            <Washi className="-top-2 right-10" rotate={6} color={ND.pink} />
-          </Paper>
-        </div>
-        <HandmadeMock still={still} />
-      </Block>
-
-      {/* Mock hero for the home page */}
-      <Block title="Home page hero (mockup)" note="Real layout widths. Cream page, one color-block collage, a solid headline with no outline or shadow.">
-        <div className="rounded-[2rem] overflow-hidden" style={{ background: ND.paper }}>
-          <nav className="flex items-center gap-4 px-6 py-4">
-            <LogoWord h={34} />
-            <span className="ml-auto hidden sm:flex gap-5 font-bold" style={{ color: ND.ink }}><span>Games</span><span>Blog</span><span>Pricing</span></span>
-            <NDButton bg={ND.paper} fg={ND.ink}>Sign in</NDButton>
-          </nav>
-          <div className="grid wide:grid-cols-[1.05fr_1fr] gap-8 px-6 sm:px-10 pb-10 pt-4 items-center">
-            <div className="grid gap-5 content-center">
-              <h3 className="leading-[1.02] text-[clamp(2.6rem,5.2vw,4.6rem)]" style={{ ...GY, color: ND.ink }}>
-                Every Question <span style={{ color: ND.cobaltDeep }}>Becomes a Game</span>
-              </h3>
-              <svg viewBox="0 0 220 16" className="w-56 -mt-3" aria-hidden="true"><path d="M4 10 q14 -10 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0" stroke={ND.pink} strokeWidth="5" fill="none" strokeLinecap="round" /></svg>
-              <p className="text-lg max-w-[34rem]" style={{ color: ND.quiet }}>Bring your own questions. Pick a game. Kids join with a code and play on any screen.</p>
-              <div className="flex flex-wrap gap-3">
-                <NDButton bg={ND.cobalt} fg="#ffffff" big><Play weight="fill" size={22} />Start an Activity</NDButton>
-                <NDButton bg={ND.paper} fg={ND.ink} big>Join with a code</NDButton>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 grid-rows-2 gap-3 aspect-[1.1] w-full max-w-[32rem] justify-self-center">
-              <Paper color={ND.pink} rx={26} tilt={-1.5} className="grid"><span className="h-full grid place-items-center"><CrayonPowerUp id="magnet" size={150} title="Magnet power-up" /></span></Paper>
-              <Paper color={ND.cobalt} rx={26} tilt={1.5} className="grid"><span className="h-full grid place-items-center"><CrayonPowerUp id="double-points" size={120} /></span><Washi className="-top-2 left-1/3" rotate={-5} color={ND.mint} /></Paper>
-              <Paper color={ND.green} rx={26} tilt={1} className="grid"><span className="h-full grid place-items-center"><CrayonDie value={5} size={116} /></span></Paper>
-              <Paper color={ND.cream} rx={26} tilt={-1} className="grid overflow-visible">
-                <div className="absolute inset-x-0 top-0 h-1/2"><Doodles /></div>
-                <span className="h-full grid place-items-center pt-16"><CrayonPowerUp id="treasure-chest" size={96} /></span>
-              </Paper>
-            </div>
-          </div>
+          <div className="flex justify-center"><GameTools /></div>
         </div>
       </Block>
 
-      <Block title="How we differ from the competitor look" note="A ship check: if a screen could pass for the competitor at a glance, it is not done.">
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div className="rounded-[1.5rem] p-5 grid gap-2 content-start" style={{ background: ND.green }}>
-            <span className="font-heading font-bold text-lg">Do</span>
-            {DONTS.map(([d]) => <span key={d} className="font-semibold">{d}</span>)}
-          </div>
-          <div className="rounded-[1.5rem] p-5 grid gap-2 content-start" style={{ background: ND.paper }}>
-            <span className="font-heading font-bold text-lg">Do not</span>
-            {DONTS.map(([, n]) => <span key={n} className="font-semibold" style={{ color: ND.quiet }}>{n}</span>)}
-          </div>
+      <Block id="topbar" n={10} title="The white site top bar" rule="Every public page, welcome and start menu has the white top bar with the real GAMIFY wordmark; phones fold the links into one 44px menu; student pages show the logo only.">
+        <div className="grid gap-3">
+          <div className="overflow-hidden rounded-[16px]" style={{ border: `2px solid ${I}` }}><SiteBarSmall phone={false} /></div>
+          <div className="overflow-hidden rounded-[16px] max-w-[390px]" style={{ border: `2px solid ${I}` }}><SiteBarSmall phone /></div>
         </div>
       </Block>
 
-      <Block title="Palette" note="Pink, cobalt and green lead. Yellow is an accent, never the ground. Each chip shows the text color that passes 4.5:1 on it.">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3">
-          {PALETTE.map((p) => (
-            <div key={p.name} className="rounded-[1.5rem] p-4 min-h-32 grid content-between" style={{ background: p.hex, color: p.text, boxShadow: p.hex === ND.cream ? `inset 0 0 0 2px ${ND.paper}` : undefined }}>
-              <span className="font-bold">{p.name}</span>
-              <span className="grid"><span className="text-sm font-mono">{p.hex}</span><span className="text-xs font-semibold">{p.role}</span><span className="text-xs font-semibold">{p.pair}</span></span>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {DEEP.map(([n, h, r]) => <span key={n} className="rounded-full px-4 py-2 font-bold text-sm" style={{ background: h, color: '#ffffff' }}>{n} {h}, {r}</span>)}
-        </div>
+      <Block id="classmodes" n={11} title="Cooperative and Competitive" rule="The Live class choice is Cooperative (people with a heart, Kelly and Mint) or Competitive (people with a versus spark, Pink and Blush), in the ways-to-play icon family.">
+        <div className="grid gap-4 sm:grid-cols-2 max-w-[44rem]"><ClassMode kind="Cooperative" /><ClassMode kind="Competitive" /></div>
       </Block>
 
-      <Block title="Universal power-ups (crayon)" note="Your direction, 2026-11-23: no characters; one set of power-ups shared across games, all drawn in one crayon and colored-pencil style. A game picks the ones it uses from this set and adds its own only when none fits. Names and jobs stay the same in every game.">
-        <CrayonKitSection />
+      <Block id="ways" n={12} title="Ways to play" rule="Three ways only, each with its own pair: Share (Lemon, Butter), Live (Sky, Blue crystal), Solo (Kelly, Mint); a game shows only the ways it really plays.">
+        <div className="grid gap-2 max-w-[38rem]"><WayRow way="Share" /><WayRow way="Live" /><WayRow way="Solo" /></div>
+        <p className="m-0 text-sm font-semibold flex items-center gap-2" style={{ color: Q }}><Broadcast weight="bold" size={16} />Live always means a class screen plus each student&apos;s own device.</p>
       </Block>
 
-      <Block title="Logo (kept as is)" note="Your decision, 2026-11-23: the G joystick stays the logo and Grow Year stays the title font. The existing files, never redrawn: on cream, on color blocks, white on cobalt, and as a sticker on scrapbook pages.">
-        <div className="flex flex-wrap items-center gap-6 rounded-[1.5rem] p-6" style={{ background: ND.paper }}>
-          <LogoMark h={96} />
-          <LogoWord h={48} />
-          <div className="rounded-[1.5rem] px-6 py-4 flex items-center gap-3" style={{ background: ND.cobalt }}><LogoMark h={56} tone="white" /><LogoWord h={36} tone="white" /></div>
-          <div className="rounded-[1.5rem] px-6 py-4 flex items-center gap-3" style={{ background: ND.pink }}><LogoMark h={56} /><LogoWord h={36} /></div>
-          <Paper color="url(#pm-gingham)" rx={10} tilt={-3} className="w-32 h-32 grid place-items-center"><span className="h-full grid place-items-center"><LogoMark h={84} sticker /></span><Washi className="-top-2 left-8" rotate={-6} color={ND.mint} w="3.5rem" /></Paper>
-        </div>
-      </Block>
-
-      <Block title="Ways to play" note="Your decisions: three ways only (2026-11-23, Versus is not a category anywhere), now in the new palette (2026-11-24): Share Lemon and Butter, Live Sky and Blue crystal, Solo Kelly and Mint. Pastel fill, ink text, ink outline, the bright on the icon circle.">
-        <div className="grid gap-2 max-w-[36rem]">
-          <WayRow way="Share" /><WayRow way="Live" /><WayRow way="Solo" />
-        </div>
-      </Block>
-
-      <Block title="Patterns and doodles" note="The power-up sheet is the main texture, at the edges only. Doodles: sparkles, a swirl, an arrow, dots. One squiggle may underline a word.">
-        <div className="grid sm:grid-cols-[2fr_1fr] gap-4">
-          <div className="rounded-[1.5rem] h-48 overflow-hidden" style={{ background: ND.cream, boxShadow: `inset 0 0 0 2px ${ND.paper}` }}><PowerSheet /></div>
-          <div className="rounded-[1.5rem] h-48 p-3" style={{ background: ND.paper }}><Doodles /></div>
-        </div>
-      </Block>
-
-      <Block title="Type" note="Kept: Grow Year (logo, titles, scores) and Inclusive Sans. Optional third font: Fredoka or Baloo 2 (both OFL), not installed yet, so not shown.">
-        <div className="rounded-[1.5rem] p-6 grid gap-4" style={{ background: ND.paper }}>
-          <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Grow Year: solid letters, never outlined</p><p className="text-5xl" style={{ ...GY, color: ND.pinkDeep }}>Three in a row!</p></div>
-          <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Inclusive Sans bold: headings and buttons</p><p className="font-heading font-bold text-2xl">Pick your question set</p></div>
-          <div><p className="text-xs font-bold uppercase tracking-wider" style={{ color: ND.quiet }}>Inclusive Sans: body</p><p className="text-lg max-w-prose">Answer the question, then tap the board to make your move. Right answers can bring a surprise power-up.</p></div>
-        </div>
-      </Block>
-
-      <Block title="Buttons, answer tiles, cards and score board" note="Tappable things keep a thin ink edge and a press shade in their own color. Cards and art have no outline.">
-        <div className="flex flex-wrap items-center gap-3">
-          <NDButton bg={ND.cobalt} fg="#ffffff" big><Play weight="fill" size={22} />Set up and play</NDButton>
-          <NDButton bg={ND.cobalt} fg="#ffffff">Next</NDButton>
-          <NDButton bg={ND.paper} fg={ND.ink}>Back</NDButton>
-          <NDButton bg={ND.coral} fg={ND.ink}>Delete</NDButton>
-          {[<GearSix key="g" weight="bold" size={24} />, <SpeakerHigh key="s" weight="bold" size={24} />].map((ic, i) => (
-            <button key={i} type="button" aria-label={i ? 'Listen' : 'Settings'} className="w-12 h-12 rounded-full grid place-items-center motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ background: ND.paper, border: `2px solid ${ND.ink}`, boxShadow: `0 4px 0 ${shade(ND.paper)}` }}>{ic}</button>
-          ))}
-        </div>
-        <div className="grid lg:grid-cols-[19rem_1fr] gap-5 items-start">
-          <div className="rounded-[1.75rem] p-4 grid gap-2" style={{ background: ND.paper }}>
-            <div className="flex items-center justify-between"><span className="font-heading font-bold text-lg">Scores</span><span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: ND.cream }}>Rounds 3/8</span></div>
-            {[['Cosmic Waffle', 12, ND.cobalt], ['Wiggly Penguin', 9, ND.coral], ['Turbo Unicorn', 15, ND.green]].map(([n, s, c], i) => (
-              <div key={n as string} className="flex items-center gap-3 rounded-[1.25rem] px-3 py-2" style={{ background: i === 0 ? ND.cream : 'transparent', boxShadow: i === 0 ? `inset 0 0 0 2px ${ND.cobalt}` : undefined }}>
-                <CrayonPawn color={c as string} size={40} />
-                <span className="font-bold flex-1">{n as string}</span>
-                <span className="text-3xl tabular-nums" style={GY}>{s as number}</span>
-              </div>
-            ))}
-            <span className="text-xs font-semibold" style={{ color: ND.quiet }}>Ring shows whose turn it is.</span>
-          </div>
-          <div className="grid gap-3">
-            <div className="rounded-[1.75rem] p-5 text-left font-heading font-bold text-[clamp(1.4rem,3vw,2.2rem)]" style={{ background: ND.paper }}>Which word starts with a capital letter?</div>
-            <div className="grid grid-cols-2 gap-3">
-              {([['A', ND.pink, 'Monday'], ['B', ND.yellow, 'apple'], ['C', ND.green, 'blue'], ['D', ND.mint, 'run']] as [string, string, string][]).map(([letter, bg, w]) => (
-                <button key={w} type="button" className="min-h-20 rounded-[1.25rem] flex items-center gap-3 px-4 font-bold text-2xl motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform"
-                  style={{ background: bg, color: ND.ink, border: `2px solid ${ND.ink}`, boxShadow: `0 4px 0 ${shade(bg) === ND.ink ? '#2aa58f' : shade(bg)}` }}>
-                  <span className="w-10 h-10 rounded-full grid place-items-center text-lg" style={{ background: ND.paper }}>{letter}</span>{w}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
-          {([['Board games', ND.pink, 'double-dice'], ['Word games', ND.cobalt, 'hint'], ['Arcade', ND.green, 'lightning']] as [string, string, PowerId][]).map(([t, bg, id]) => (
-            <Paper key={t} color={bg} rx={26} className="min-h-40">
-              <div className="p-5 pr-20 min-h-40 grid content-between">
-                <span className="text-3xl" style={{ ...GY, color: bg === ND.cobalt ? '#ffffff' : ND.ink }}>{t}</span>
-                <span className="flex items-center gap-1 font-bold" style={{ color: bg === ND.cobalt ? '#ffffff' : ND.ink }}><Star weight="fill" size={18} />Classic theme family</span>
-              </div>
-              <span className="absolute right-3 top-3"><CrayonPowerUp id={id} size={64} sticker /></span>
-              <Washi className="-top-2 left-6" rotate={-4} color={ND.yellow} w="3.5rem" />
-            </Paper>
-          ))}
-        </div>
-      </Block>
-
-      <Block title="Mixed media layer" note="Photo stickers with white edges, torn paper, tape, hand-lettered notes and soft grain around the crayon power-ups. The star is the themes teachers and kids make by hand. Photos below are placeholders; only owned, licensed or permission-given photos ever ship. Teacher search: GIFs from GIPHY (Powered by GIPHY) and photos from Unsplash (with credit), pending the GIPHY production key and attorney review.">
-        <MixedMedia still={still || settings.gifs === 'still'} />
-      </Block>
-
-      <Block title="Classic game board (sketch)" note="The board zone stays plain; only the frame is cut paper with a strip of the power-up sheet. Pieces are crayon pawns; a power-up space shows its power-up.">
-        <div className="rounded-[1.75rem] p-4 sm:p-6 grid gap-3 relative overflow-hidden" style={{ background: ND.cream }}>
-          <Paper color={ND.pink} lift={false} rx={28} className="absolute inset-1" />
-          <div className="absolute inset-x-0 top-0 h-14 opacity-90 overflow-hidden"><PowerSheet /></div>
-          <div className="relative rounded-[1.5rem] p-4 grid grid-cols-6 gap-2 mt-10" style={{ background: ND.paper }}>
-            {Array.from({ length: 12 }, (_, i) => (
-              <div key={i} className="aspect-square rounded-[0.9rem] grid place-items-center" style={{ background: [ND.cream, '#ffe9f2', '#e6eeff', '#e3f6ea'][i % 4], border: `2px solid ${ND.ink}` }}>
-                {i === 2 && <CrayonPawn color={ND.cobalt} size={46} />}
-                {i === 7 && <CrayonPawn color={ND.pink} size={46} />}
-                {i === 11 && <CrayonPowerUp id="magnet" size={50} />}
-              </div>
-            ))}
-          </div>
-        </div>
+      <Block id="never" n={13} title="Never" rule="If a screen has any of these, it is not done (your rules, and clear distance from the competitor look).">
+        <ul className="grid gap-2 sm:grid-cols-2 m-0 p-0 list-none">
+          {NEVER.map((t) => <li key={t} className="flex items-start gap-2 p-3 font-semibold leading-snug" style={CARD}><span className="shrink-0 w-6 h-6 rounded-full grid place-items-center" style={{ background: PP.blush, border: `2px solid ${I}` }}><X weight="bold" size={13} /></span>{t}</li>)}
+        </ul>
       </Block>
     </div>
   );

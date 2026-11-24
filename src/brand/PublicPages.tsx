@@ -72,7 +72,7 @@ export function SiteNav({ w, student, on }: W & { student?: boolean; on?: string
           ? <span className="ml-auto flex items-center gap-2"><Pill bg="#fdfd94" w={w}>Log in</Pill><span aria-label="Menu" className="w-11 h-11 rounded-full grid place-items-center font-bold text-xl" style={{ border: '2px solid #000', background: '#fff' }}>☰</span></span>
           : <nav className="ml-auto flex items-center gap-1">
               {LINKS.map((l) => <span key={l} className="px-3 py-2 rounded-full font-bold text-[18px]" style={on === l ? { background: PP.butter, border: `2px solid ${I}` } : { border: '2px solid transparent' }}>{l}</span>)}
-              <span className="ml-2 flex gap-2"><Pill bg="#e4eafe" w={w}>Join</Pill><Pill bg="#fdfd94" w={w}>Log in</Pill></span>
+              <span className="ml-2 flex gap-2"><Pill bg={PP.lavender} w={w}>Join</Pill><Pill bg="#fdfd94" w={w}>Log in</Pill></span>
             </nav>}
     </header>
   );
@@ -220,7 +220,7 @@ function Home({ w }: W) {
       </Section>
       {/* CTA */}
       <Section w={w}>
-        <div className="grid gap-5 justify-items-center text-center relative overflow-hidden" style={{ ...CARD, background: PP.periwinkle, padding: ph ? 28 : 48 }}>
+        <div className="grid gap-5 justify-items-center text-center relative overflow-hidden" style={{ ...CARD, background: PP.lavender, padding: ph ? 28 : 48 }}>
           <span className="absolute left-6 top-5" aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={40} /></span>
           <span className="absolute right-8 bottom-6" aria-hidden="true"><Doodle kind="star" color={PP.pink} size={34} /></span>
           <H2 w={w} center>Ready for Game Day?</H2>
@@ -350,7 +350,7 @@ function Features({ w }: W) {
         </div>
       </Section>
       <Section w={w}>
-        <div className="grid gap-4 justify-items-center text-center" style={{ ...CARD, background: PP.periwinkle, padding: ph ? 28 : 48 }}>
+        <div className="grid gap-4 justify-items-center text-center" style={{ ...CARD, background: PP.lavender, padding: ph ? 28 : 48 }}>
           <H2 w={w} center>Try It With Your Class Today</H2>
           <P w={w}>One class of 30 and every accessibility feature, free forever.</P>
           <Go w={w} wide={ph}>Start free</Go>
