@@ -22,3 +22,5 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 
 
 - (2026-11-23, legal, optional) Confirm the JDSherbert UI sound pack license covers a web app (email JDSherbert for a one-line OK, or the attorney list). Credit is on the Credits page; files are used unchanged.
+- (2026-11-24, decide) New footer line instead of "Made in Vermont by the Vermont Literacy Network." (or remove it).
+- (2026-11-24, decide) Add Nature tones (wood, mouse brown, gray) to the Classic palette?
