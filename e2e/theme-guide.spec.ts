@@ -25,17 +25,17 @@ test('Blog theme guides: one per game, every piece with its size, blank download
 
   // Free plan: Bowling templates are locked behind Plus (teacher, 2026-10-31).
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Canva file/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Digital design file/ })).toHaveCount(0);
   await page.goto('/blog/themes/bowling/print');
   await expect(page.getByText('The templates for this game come with Plus', { exact: false })).toBeVisible();
   await page.evaluate(() => localStorage.setItem('gamify:settings', JSON.stringify({ ...JSON.parse(localStorage.getItem('gamify:settings') ?? '{}'), tier: 'plus' })));
   await page.goto('/blog/themes/bowling');
   const wait = page.waitForEvent('download');
-  await page.getByRole('button', { name: /Canva file/ }).click();
+  await page.getByRole('button', { name: /Digital design file/ }).click();
   const file = await wait;
-  expect(file.suggestedFilename()).toBe('bowling-theme-for-canva.pdf');
+  expect(file.suggestedFilename()).toBe('bowling-theme-digital-design.pdf');
 
-  await page.getByRole('link', { name: /Printable pages/ }).click();
+  await page.getByRole('link', { name: /printable pages/i }).click();
   await expect(page.getByText('pages, one for each piece', { exact: false })).toBeVisible();
   await expect(page.getByText('EXAMPLE')).toHaveCount(0);
   await page.getByRole('link', { name: 'Back to the theme guide' }).click();

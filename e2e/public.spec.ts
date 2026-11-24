@@ -86,6 +86,9 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.getByRole('button', { name: 'Roll a new name' }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.getByRole('button', { name: 'Set up and play' }).click();
+  // Free plays every library theme (owner, 2026-11-24), so the theme step comes first.
+  await page.getByRole('heading', { name: 'Pick a Theme' }).or(page.getByRole('heading', { name: /^Step 1 of 1:/ })).first().waitFor();
+  if (await page.getByRole('heading', { name: 'Pick a Theme' }).isVisible()) await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of 1:/ })).toBeVisible();
   // The code opens one game only: no game list, no other games (teacher, 2026-10-31).
   await page.goto('/play');

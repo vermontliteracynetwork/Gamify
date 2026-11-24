@@ -49,7 +49,7 @@ test('Upgrade from the Question sets limit lifts the cap', async ({ page }) => {
 test('Pricing: Start with Pro opens the plan box after sign-up, and a school gets a quote with no sales call', async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem('gamify:teacher-session'));
   await page.goto('/pricing');
-  await expect(page.getByText('Only $8')).toBeVisible();
+  await expect(page.getByText('Only $6.40')).toBeVisible();
   await page.getByLabel('Number of teachers').fill('25');
   await expect(page.getByText('Save 30%')).toHaveCount(0);
   await page.getByLabel('Your name').fill('Ms. Rivera');
