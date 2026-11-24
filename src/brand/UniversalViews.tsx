@@ -124,7 +124,7 @@ function Tracker({ mode, k = 1, narrow }: { mode: Mode; k?: number; narrow?: boo
     <div className={`w-full grid grid-cols-[1fr_auto_1fr] items-center ${narrow ? "gap-3 px-4" : "gap-6 px-6"} rounded-full`} style={{ minHeight: 84 * k, background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}>
       <div className="justify-self-start">{left}</div>
       <RoundMeter round={2} rounds={3} part={0.5} w={narrow ? 150 : k < 1 ? 190 : 300} />
-      <div className="justify-self-end"><Tools size={44} hint /></div>
+      <div className="justify-self-end"><Tools size={48} hint /></div>
     </div>
   );
 }
@@ -304,7 +304,7 @@ function V5() {
               transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 17, layout: { type: 'spring', stiffness: 320, damping: 30 } }}
               className={`relative ${phone ? 'w-[164px]' : 'w-[250px]'}`} style={card}>
               <div className={`${many ? 'h-[58px]' : 'h-[72px]'} grid place-items-center rounded-t-[17px]`} style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><Badge t={t} size={many ? 46 : 54} /></div>
-              <button type="button" aria-label={`Remove ${t.name}`} onClick={() => remove(t)} className="absolute -top-3 -right-3 w-11 h-11 rounded-full grid place-items-center" style={{ background: '#fff', border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}><X weight="bold" size={16} /></button>
+              <button type="button" aria-label={`Remove ${t.name}`} onClick={() => remove(t)} className="absolute -top-3 -right-3 w-12 h-12 rounded-full grid place-items-center" style={{ background: '#fff', border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}><X weight="bold" size={16} /></button>
               <div className={`${many || phone ? 'p-3 gap-2' : 'p-4 gap-3'} grid`}>
                 <span className={`h-11 ${phone ? 'px-1 text-[17px]' : 'px-4 text-[19px]'} rounded-xl flex items-center justify-center font-bold whitespace-nowrap`} style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
                 <div className="flex flex-wrap justify-center gap-1.5 text-[16px] font-bold">{['Ava', 'Leo'].map((n) => <span key={n} className="px-3 py-1 rounded-full" style={{ background: t.soft, border: `2px solid ${I}` }}>{n}</span>)}

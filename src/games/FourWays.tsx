@@ -18,7 +18,7 @@ import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
 export default function FourWays({ compact = false, filter, onFilter }: { compact?: boolean; filter?: PlayMode | null; onFilter?: (m: PlayMode | null) => void }) {
   const reduce = useReducedMotion();
   return (
-    <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-3 gap-2' : 'sm:grid-cols-3 gap-4 auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
+    <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-3 gap-2' : 'sm:grid-cols-3 gap-4 sm:auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
       {SHOWN_MODES.map((m, i) => (
         <motion.li key={m} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.08 }}
           whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 0.6 : -0.6 }} className={compact ? '' : 'grid'}>

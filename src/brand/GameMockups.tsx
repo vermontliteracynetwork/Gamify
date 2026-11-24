@@ -545,14 +545,18 @@ function Bubble({ k, s }: { k: number; s: number }) {
   );
 }
 const BCOLS = 19, BROWS = 7;
-const BGRID = Array.from({ length: BROWS }, (_, r) => Array.from({ length: r % 2 ? BCOLS - 1 : BCOLS }, (_, c) => (Math.floor(c / 2) + r * 2 + (c % 3 === 0 ? 1 : 0)) % 6));
+const bgrid = (cols: number) => Array.from({ length: BROWS }, (_, r) => Array.from({ length: r % 2 ? cols - 1 : cols }, (_, c) => (Math.floor(c / 2) + r * 2 + (c % 3 === 0 ? 1 : 0)) % 6));
+const BGRID = bgrid(BCOLS);
+// Phones (hand-off note, 2026-11-24): 19 across made 17px bubbles; 11 across keeps them about 30px, big enough to read and aim at.
+const BGRID_PHONE = bgrid(11);
 const BPOP = new Set(['6-8', '6-9', '5-9', '6-10']); // the cluster that just popped
-function BubbleBoard({ w, bare }: { w: number; bare?: boolean }) {
-  const s = w / BCOLS, rowH = s * 0.87, h = w * 1.3;
+function BubbleBoard({ w, bare, cols = BCOLS }: { w: number; bare?: boolean; cols?: number }) {
+  const s = w / cols, rowH = s * 0.87, h = w * 1.3;
+  const grid = cols === BCOLS ? BGRID : cols === 11 ? BGRID_PHONE : bgrid(cols);
   return (
     <div className="relative rounded-[24px] overflow-hidden" style={{ width: w + 24, height: h, padding: 12, background: PP.blueCrystal, border: `4px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
       <div className="relative" style={{ width: w, height: h - 24 }}>
-        {BGRID.flatMap((row, r) => row.map((k, c) => {
+        {grid.flatMap((row, r) => row.map((k, c) => {
           const popped = !bare && BPOP.has(`${r}-${c}`);
           return (
             <span key={`${r}-${c}`} className="absolute" style={{ left: c * s + (r % 2 ? s / 2 : 0), top: r * rowH }}>
@@ -603,7 +607,7 @@ function BubblePhone() {
     <PatternStage id="doodle">
       <PTop left={<PPill><span className="font-display text-[34px] font-bold leading-none tabular-nums">340</span><span className="grid leading-none"><span className="text-[13px] font-bold" style={{ color: PP.quiet }}>Bubbles</span><b className="font-display text-2xl tabular-nums">3</b></span></PPill>} />
       <PStack>
-        <BubbleBoard w={330} />
+        <BubbleBoard w={330} cols={11} />
         <HeldTray items={BP_HELD} row size={66} />
       </PStack>
     </PatternStage>
