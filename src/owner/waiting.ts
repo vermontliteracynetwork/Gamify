@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'kapso-whatsapp', kind: 'setup', added: '2026-11-24', title: 'After the domain: make a Kapso account so you can text the CEO Agent on WhatsApp',
+    why: 'You want your own WhatsApp line to the CEO Agent (developer use only, never teachers or students). Kapso connects to the official WhatsApp Business service. Its free plan is $0 a month with 2,000 messages (yours and its replies both count, so about 1,000 back-and-forths) and one number. Meta bills its own small fees to your Meta Business account for messages the agent starts (reminders), and may charge for replies too; check before relying on it.',
+    how: 'After the domain is bought: sign up at kapso.ai (free plan), pick a Kapso number or connect your own, set up the Meta Business account it asks for, then tell Claude. Claude asks for the Kapso API key through a secure form (never paste it in chat), builds the owner-only WhatsApp link to the CEO Agent (it answers only your phone number) and the daily reminders. Check the live pricing at kapso.ai/pricing and Meta\'s WhatsApp pricing page first.' },
   { id: 'openrouter-key', kind: 'money', added: '2026-11-24', title: 'Optional: add an OpenRouter API key in Vercel for the CEO Agent',
     why: 'The CEO Agent is now in the Developer Portal (CEO Agent). Without a key it answers on free AI models, which are slower and weaker and can be busy. A key lets it use the stronger paid models; you pay OpenRouter per message (set to the "efficient" cost mode to keep it low).',
     how: 'Make an account at openrouter.ai, create a key (set a monthly credit limit there), then in Vercel, Gamify project, Settings, Environment Variables: add OPENROUTER_API_KEY (Production and Preview) and redeploy. Never paste the key in a chat.' },
