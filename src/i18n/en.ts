@@ -418,7 +418,7 @@ export const en = {
   'bm.done': 'You scored {score} points!',
   'bm.kind.0': 'Cookie', 'bm.kind.1': 'Cake', 'bm.kind.2': 'Ice cream', 'bm.kind.3': 'Pizza', 'bm.kind.4': 'Popcorn', 'bm.kind.5': 'Cocoa',
   // Gem names for when the Puzzle Games Graphics Pack is cleared:
-  'bm.gem.0': 'Blue diamond', 'bm.gem.1': 'Red heart', 'bm.gem.2': 'Green gem', 'bm.gem.3': 'Yellow star', 'bm.gem.4': 'Purple drop', 'bm.gem.5': 'Orange moon',
+  'bm.gem.0': 'Blue diamond', 'bm.gem.1': 'Pink heart', 'bm.gem.2': 'Green square', 'bm.gem.3': 'Yellow star', 'bm.gem.4': 'Purple circle', 'bm.gem.5': 'Orange triangle',
 
   'fr.rightsHint': 'Right answers',
   'fr.title': 'Four in a Row',
@@ -518,6 +518,7 @@ export const en = {
   'm3.nice': 'Nice!', 'm3.great': 'Great!', 'm3.amazing': 'Amazing!', 'm3.incredible': 'Incredible!',
   'm3.special.row': 'Zap a row!', 'm3.special.col': 'Zap a column!', 'm3.special.burst': 'Star burst!', 'm3.special.rainbow': 'Rainbow!',
   'm3.rainbow': 'Rainbow piece',
+  'm3.match': 'Match!', 'm3.movesLeft': '{count} moves left', 'm3.movesLeft.one': '1 move left',
   'm3.goal': 'Star goal: {stars} of 3 stars',
   'bm.doubleReady': 'Your next match scores double!',
   'bm.shuffled': 'A brand new board!',

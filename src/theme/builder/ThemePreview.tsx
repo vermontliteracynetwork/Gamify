@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ClassicPiece } from '../../games/match-three/pieces';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
 import { backdropStyle, pieceColor, pieceFill, pieceImage } from '../library';
@@ -216,7 +217,8 @@ function board(theme: GameTheme, size?: number) {
         <div className="grid gap-[3%] p-[3%] rounded-input border-std border-border h-full aspect-square" style={{ ...pieceFill(theme, 'board', '#ffffff'), gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
           {Array.from({ length: n * n }, (_, i) => {
             const k = (i * 7 + Math.floor(i / n) * 3) % 6;
-            return <img key={i} src={pieceImage(theme, `tile-${k}`) ?? `/classic/match-three/gem-${k}.webp`} alt="" className="w-full h-full object-contain" />;
+            const own = pieceImage(theme, `tile-${k}`);
+            return own ? <img key={i} src={own} alt="" className="w-full h-full object-contain" /> : <ClassicPiece key={i} kind={k} className="w-full h-full" />;
           })}
         </div>
       );

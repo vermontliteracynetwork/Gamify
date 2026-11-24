@@ -1,10 +1,9 @@
 import { useMemo, useRef, useState } from 'react';
 import HintButton from '../../engine/HintButton';
-import PopText from '../../ui/PopText';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsLeftRight, Cake, Coffee, Cookie, Diamond, IceCream, Pizza, Popcorn, Question, Sparkle, Star, type Icon } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Cookie, Diamond, Question, Sparkle, Star } from '@phosphor-icons/react';
 import { PUZZLE_PACK_CLEARED } from '../../config';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -25,7 +24,12 @@ import { useSavedSetup } from '../useSavedSetup';
 import { usePowerUps } from '../../engine/usePowerUps';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
-import TopStrip from '../../engine/TopStrip';
+import SoloLayout, { SoloMeter, SoloScore } from '../../engine/SoloStrip';
+import { Doodle, type DoodleKind } from '../../brand/CrayonKit';
+import { PATTERNS } from '../../brand/PatternProposal';
+import { useStageColor } from '../../theme/stageColor';
+import type { GameTheme } from '../../theme/types';
+import { ClassicPiece, PIECE_COLORS } from './pieces';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
 import { ThemedPage, useGameTheme } from '../../theme/useGameTheme';
@@ -34,17 +38,16 @@ import ThemeScreen from '../ThemeScreen';
 import { clearAndRefill, createGrid, findMatches, fire, hasAnyValidMove, isAdjacent, pointsFor, rainbowSwap, resolveMatches, swapTiles, wouldMatch, type Clear, type Grid, type Pos, type Special } from './matchThree';
 
 
-// Simple house look: each gem has its own shape AND color (never color
-// alone). Library and class-made themes swap in artwork per tile.
-// Classic tiles are gems (teacher, 2026-10-31): each a different shape and
-// color, on a soft tile of its own color, so shape alone tells them apart.
-const TILE_COLORS = PUZZLE_PACK_CLEARED ? ['#d6e8ff', '#ffd9dc', '#d4f5dc', '#fff4c2', '#eadcff', '#ffe2c7'] : ['#f2c27b', '#f6a5c0', '#9fd8f0', '#f7b267', '#fbe38a', '#c9a27e'];
-const TILE_ICONS: Icon[] = [Cookie, Cake, IceCream, Pizza, Popcorn, Coffee];
-const CLASSIC_GEM = (k: number) => `/classic/match-three/gem-${k}.webp`;
+// Classic look (approved mockup, teacher 2026-11-24): six bold shapes in six
+// brights (pieces.tsx), each its own shape AND color, never color alone, on a
+// Lavender and Blue crystal checker, on a pastel cut-paper desk. Library and
+// class-made themes swap in artwork per piece, board and background.
+const pattern = (id: string, calm: boolean) => PATTERNS.find((p) => p.id === id)!.make(calm);
+const CHECKER = pattern('checker', false);
+const SPARK_KINDS: DoodleKind[] = ['sparkle', 'star', 'dot', 'sparkle'];
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 // Combo words grow with the chain (Golden Rule pass, 2026-10-31).
 const CALLOUTS = ['m3.nice', 'm3.great', 'm3.amazing', 'm3.incredible'] as const;
-const RAINBOW_BG = 'conic-gradient(from 0deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #b06bff, #ff6b6b)';
 // The star goal: points for 1, 2 and 3 stars, from the moves in the game
 // and the board size (bigger boards chain more). Tuned so a careful player
 // earns 3 and most players earn 1 or 2 (Claudia's simulation, 2026-10-31).
@@ -81,8 +84,10 @@ export default function MatchThree() {
   // Effects: beams and bursts from special pieces, sparks from popped pieces,
   // and a combo word over the board.
   const [fx, setFx] = useState<{ id: number; special: Special; row: number; col: number }[]>([]);
-  const [sparks, setSparks] = useState<{ id: number; row: number; col: number; color: string }[]>([]);
-  const [callout, setCallout] = useState<{ id: number; text: string } | null>(null);
+  const [sparks, setSparks] = useState<{ id: number; seed: number; row: number; col: number; color: string }[]>([]);
+  const [callout, setCallout] = useState<{ id: number; text: string; x: number; y: number } | null>(null);
+  // Classic draws its own board (paper with the checker); a theme's board wins.
+  const classicBoard = !theme.pieces.board;
   const goals = starGoals(plan.current.rounds * plan.current.moves, plan.current.size);
   const stars = goals.filter((g) => score >= g).length;
   // Points land as each clear pops; a star pops when a goal line is passed.
@@ -156,15 +161,21 @@ export default function MatchThree() {
       setPopping(new Set([...res.cleared].filter((k) => !born.has(k))));
       if (!still) {
         setFx(res.fired.map((f, k) => ({ id: id + k / 100, special: f.special, row: f.pos.row, col: f.pos.col })));
-        setSparks([...res.cleared].slice(0, 40).map((k, n) => { const [row, col] = k.split(',').map(Number); const kind = g[row][col].kind; return { id: id + n / 1000, row, col, color: kind < 0 ? '#fdfd94' : TILE_COLORS[kind] }; }));
+        setSparks([...res.cleared].slice(0, 40).map((k, n) => { const [row, col] = k.split(',').map(Number); const kind = g[row][col].kind; return { id: id + n / 1000, seed: n * 1.7 + cascade, row, col, color: kind < 0 || kind > 5 ? '#fabe37' : PIECE_COLORS[kind] }; }));
       }
-      const word = res.fired.length ? t(SPECIAL_KEY[res.fired[0].special]) : cascade >= 2 ? t(CALLOUTS[Math.min(CALLOUTS.length, cascade - 1) - 1]) : '';
-      if (word) setCallout({ id, text: word });
+      const pts = (pointsFor(res.cleared.size, cascade) + res.fired.length * 20) * mult;
+      // The points burst sits just above the middle of what popped (mockup:
+      // "MATCH! +30"); its word grows with the chain or names the special.
+      const cells = [...res.cleared].map((k) => k.split(',').map(Number));
+      const cx = cells.reduce((n, [, c]) => n + c, 0) / cells.length, top = Math.min(...cells.map(([r]) => r)), low = Math.max(...cells.map(([r]) => r));
+      // Above the match, or under it when the match is on the top row.
+      const cy = top >= 1 ? top - 0.35 : low + 1.35;
+      const word = res.fired.length ? t(SPECIAL_KEY[res.fired[0].special]) : cascade >= 2 ? t(CALLOUTS[Math.min(CALLOUTS.length, cascade - 1) - 1]) : t('m3.match');
+      setCallout({ id, text: `${word} +${pts}`, x: Math.min(78, Math.max(22, ((cx + 0.5) / COLS) * 100)), y: Math.min(93, (cy / ROWS) * 100) });
       playEffect(res.fired.length || cascade >= 3 ? 'win' : 'right', settings, undefined, 1 + Math.min(cascade - 1, 6) * 0.09);
       if (cascade >= 3) impact(settings, cascade >= 4);
       buzz(res.fired.length ? 40 : 20, settings);
-      await wait(res.fired.length ? 420 : 260);
-      const pts = (pointsFor(res.cleared.size, cascade) + res.fired.length * 20) * mult;
+      await wait(res.fired.length ? 420 : 380);
       gained += pts;
       addScore(pts);
       g = clearAndRefill(g, res.cleared, Math.random, res.made);
@@ -289,29 +300,31 @@ export default function MatchThree() {
       )}
 
       {(phase === 'play' || phase === 'end') && (
-        // The board fills the play space like the reference games (teacher, 2026-10-31).
-        // The board in the middle of the screen with one strip across its
-        // top (teacher, 2026-11-18): the score in the Gamify font, one meter of
-        // dashes for every move of every round, and the star goal.
-        <div className="relative play-fill grid content-center justify-items-center gap-2 px-3 py-3">
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
+        // THE solo board-game layout (approved mockup, teacher 2026-11-24): the
+        // meter with the moves on top, the score (XP) at the top right with the
+        // held power-ups under it, centered on it; the board in the middle.
+        <SoloLayout
+          ground={<Ground theme={theme} />}
+          tools={<span className="flex items-center gap-2 [&_button]:!w-11 [&_button]:!h-11">
             {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="match-three" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
-          </div>
-
-          <div className="grid gap-2" style={{ width: 'min(calc(100vw - 2rem), calc(var(--play-h) - 6.5rem), 60rem)' }}>
-          <TopStrip leftLabel={t('bm.moves', { count: moves })} score={score} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
-            label={t('bm.round', { n: round, total: plan.current.rounds })} right={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />
-          <div className="relative border-bold border-border rounded-panel p-3 sm:p-4 w-full" style={{ ...pieceFill(theme, 'board', '#ffffff'), boxShadow: 'var(--shadow-sticker-lg)' }}>
-            {note && <p className="absolute left-1/2 -top-3 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
-            <div className="relative">
-            <div role="grid" aria-label={t('bm.title')} className="grid gap-1.5 select-none touch-none" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
+          </span>}
+          meter={<SoloMeter text={t('m3.movesLeft', { count: moves })} label={t('bm.round', { n: round, total: plan.current.rounds })} meterLabel={t('bm.moves', { count: moves })} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
+            goal={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />}
+          score={<SoloScore score={score}><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></SoloScore>}
+          board={
+          <div className="relative w-full h-full p-[2.2%] rounded-[1.5rem] border-[4px] border-border" style={{ ...(classicBoard ? { background: 'var(--paper)' } : pieceFill(theme, 'board', '#ffffff')), boxShadow: '0 6px 0 var(--color-border)' }}>
+            {note && <p className="absolute left-1/2 -top-4 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
+            <div className="relative w-full h-full">
+            {/* The checker under the pieces: one square per cell (pattern rule). */}
+            <div role="grid" aria-label={t('bm.title')} className="grid w-full h-full select-none touch-none rounded-[1rem]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))`, ...(classicBoard ? { ...CHECKER, backgroundSize: `${200 / COLS}% ${200 / ROWS}%` } : {}) }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
                 const isSel = selected?.row === r && selected?.col === c;
                 const sp = tileItem.special;
+                const pop = popping.has(key);
                 const kindName = sp === 'rainbow' ? t('m3.rainbow') : `${theme.pieces[`tile-${tileItem.kind}`]?.alt ?? t(`bm.${PUZZLE_PACK_CLEARED ? "gem" : "kind"}.${tileItem.kind}` as StringKey)}${sp ? `, ${t(SPECIAL_KEY[sp])}` : ''}`;
                 return (
                   <motion.button
@@ -329,63 +342,62 @@ export default function MatchThree() {
                     onPointerUp={(e) => onPointerUp(e, { row: r, col: c })}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap({ row: r, col: c }); } }}
                     initial={still ? false : sp ? { scale: 1.8, opacity: 0 } : { y: -40, opacity: 0 }}
-                    whileHover={still || phase !== 'play' ? undefined : { scale: 1.08 }}
+                    whileHover={still || phase !== 'play' ? undefined : { scale: 1.1, rotate: (r + c) % 2 ? 4 : -4 }}
                     whileTap={still ? undefined : { scale: 0.88 }}
-                    animate={popping.has(key) ? { scale: [1, 1.25, 0], opacity: [1, 1, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : { scale: 1, opacity: 1, y: 0, x: 0 }}
+                    // A match swells and wobbles, then pops; a wrong swap shakes.
+                    animate={pop ? { scale: [1, 1.22, 1.22, 0], opacity: [1, 1, 1, 0], rotate: [0, -6, 6, 0] } : shake === key ? { x: [0, -5, 5, -3, 3, 0] } : isSel ? { scale: still ? 1 : 1.12, opacity: 1, y: 0, x: 0, rotate: 0 } : { scale: 1, opacity: 1, y: 0, x: 0, rotate: 0 }}
                     // Pieces fall with a little bounce, one column just after the
                     // next, so a refill ripples across the board.
-                    transition={{ type: 'spring', stiffness: 520, damping: 24, delay: still ? 0 : c * 0.025, opacity: { duration: 0.2 } }}
+                    transition={pop ? { duration: still ? 0.05 : 0.38, times: [0, 0.35, 0.7, 1] } : { type: 'spring', stiffness: 520, damping: 24, delay: still || isSel ? 0 : c * 0.025, opacity: { duration: 0.2 } }}
                     // No colored square behind a piece (teacher, 2026-11-18): just the piece.
-                    className={`relative aspect-square rounded-input flex items-center justify-center ${isSel ? 'ring-4 ring-accent bg-white/40' : ''}`}
+                    className={`relative aspect-square rounded-full flex items-center justify-center ${isSel ? 'z-10' : ''}`}
                   >
+                    {/* Picked: a Lemon ring around the piece. Popping: a Butter glow behind it. */}
+                    {(isSel || pop) && <span aria-hidden="true" className="absolute inset-[4%] rounded-full border-[3px] pointer-events-none" style={{ background: pop ? 'var(--butter)' : 'transparent', borderColor: pop ? 'var(--lemon)' : 'var(--color-border)', boxShadow: '0 0 0 3px var(--lemon)' }} />}
                     {(() => {
                       // A piece made by a combo is its own design (teacher, 2026-11-18:
                       // like a wrapped candy): a theme's picture for it, else Classic's.
                       const made = sp ? pieceImage(theme, `special-${sp}`) : undefined;
                       if (made) return <img src={made} alt="" aria-hidden="true" draggable="false" className={`relative w-[92%] h-[92%] object-contain pointer-events-none ${loop ? 'm3-pulse' : ''}`} />;
-                      const own = pieceImage(theme, `tile-${tileItem.kind}`);
-                      return <>
-                        {sp === 'rainbow' && <span aria-hidden="true" className={`relative w-[86%] h-[86%] rounded-full border-bold border-ink-night grid place-items-center ${loop ? 'm3-spin' : ''}`} style={{ background: RAINBOW_BG }}><Star weight="fill" className="w-3/5 h-3/5 drop-shadow-[0_0_2px_#000]" color="#fff" /></span>}
-                        {sp !== 'rainbow' && own && <img src={own} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none" />}
-                        {sp !== 'rainbow' && !own && !PUZZLE_PACK_CLEARED && (() => { const Icon = TILE_ICONS[tileItem.kind]; return <Icon weight="fill" className="relative w-4/5 h-4/5" color={TILE_COLORS[tileItem.kind]} aria-hidden="true" />; })()}
-                        {sp !== 'rainbow' && !own && PUZZLE_PACK_CLEARED && <img src={CLASSIC_GEM(tileItem.kind)} alt="" aria-hidden="true" draggable="false" className="relative w-[88%] h-[88%] object-contain pointer-events-none drop-shadow-[0_2px_0_rgba(0,0,0,0.15)]" />}
-                        {/* Classic made pieces: shine stripes (lines) or a glowing wrap (burst) on the piece itself. */}
-                        {(sp === 'row' || sp === 'col') && <span aria-hidden="true" className={`absolute inset-[14%] rounded-[30%] pointer-events-none mix-blend-screen ${loop ? 'm3-glow' : ''}`} style={{ background: `repeating-linear-gradient(${sp === 'row' ? '0deg' : '90deg'}, rgba(255,255,255,0.9) 0 9%, transparent 9% 22%)` }} />}
-                        {sp === 'burst' && <span aria-hidden="true" className={`absolute inset-[6%] rounded-full pointer-events-none ${loop ? 'm3-pulse' : ''}`} style={{ boxShadow: '0 0 12px 3px #fdfd94, inset 0 0 10px #fff' }} />}
-                      </>;
+                      const own = sp === 'rainbow' ? undefined : pieceImage(theme, `tile-${tileItem.kind}`);
+                      if (own) return <img src={own} alt="" aria-hidden="true" draggable="false" className="relative w-[84%] h-[84%] object-contain pointer-events-none" />;
+                      return <ClassicPiece kind={tileItem.kind} made={sp} className={`relative w-[78%] h-[78%] pointer-events-none ${sp === 'rainbow' && loop ? 'm3-spin' : sp && loop ? 'm3-pulse' : ''}`} />;
                     })()}
                   </motion.button>
                 );
               })}</div>)}
             </div>
-            {/* Beams, bursts, sparks and the combo word, over the board. */}
+            {/* Beams, bursts, sparks and the points, over the board. */}
             <div className="absolute inset-0 pointer-events-none overflow-visible" aria-hidden="true">
               {fx.map((f) => {
                 const cell = { left: `${(f.col / COLS) * 100}%`, top: `${(f.row / ROWS) * 100}%`, width: `${100 / COLS}%`, height: `${100 / ROWS}%` };
-                if (f.special === 'row') return <motion.span key={f.id} className="absolute left-0 right-0 rounded-pill" style={{ top: cell.top, height: cell.height, background: 'linear-gradient(90deg, transparent, #fff 20%, #fdfd94 50%, #fff 80%, transparent)' }} initial={{ scaleX: 0, opacity: 1 }} animate={{ scaleX: 1, opacity: [1, 1, 0] }} transition={{ duration: 0.42 }} />;
-                if (f.special === 'col') return <motion.span key={f.id} className="absolute top-0 bottom-0 rounded-pill" style={{ left: cell.left, width: cell.width, background: 'linear-gradient(180deg, transparent, #fff 20%, #fdfd94 50%, #fff 80%, transparent)' }} initial={{ scaleY: 0, opacity: 1 }} animate={{ scaleY: 1, opacity: [1, 1, 0] }} transition={{ duration: 0.42 }} />;
-                return <motion.span key={f.id} className="absolute rounded-full" style={{ left: `calc(${cell.left} + ${50 / COLS}%)`, top: `calc(${cell.top} + ${50 / ROWS}%)`, width: f.special === 'rainbow' ? '160%' : `${300 / COLS}%`, aspectRatio: '1', x: '-50%', y: '-50%', border: '6px solid #fdfd94', background: f.special === 'rainbow' ? 'radial-gradient(circle, transparent 55%, rgba(255,255,255,0.6) 60%, transparent 70%)' : 'radial-gradient(circle, rgba(255,255,255,0.9), rgba(253,253,148,0.4) 60%, transparent 70%)', borderColor: f.special === 'rainbow' ? '#b06bff' : '#fdfd94' }} initial={{ scale: 0.1, opacity: 1 }} animate={{ scale: 1, opacity: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} />;
+                if (f.special === 'row') return <motion.span key={f.id} className="absolute left-0 right-0 rounded-pill border-[3px] border-border" style={{ top: cell.top, height: cell.height, background: 'linear-gradient(90deg, #fff1b8, #fabe37 50%, #fff1b8)' }} initial={{ scaleX: 0, opacity: 1 }} animate={{ scaleX: 1, opacity: [1, 1, 0] }} transition={{ duration: 0.42 }} />;
+                if (f.special === 'col') return <motion.span key={f.id} className="absolute top-0 bottom-0 rounded-pill border-[3px] border-border" style={{ left: cell.left, width: cell.width, background: 'linear-gradient(180deg, #fff1b8, #fabe37 50%, #fff1b8)' }} initial={{ scaleY: 0, opacity: 1 }} animate={{ scaleY: 1, opacity: [1, 1, 0] }} transition={{ duration: 0.42 }} />;
+                return <motion.span key={f.id} className="absolute rounded-full" style={{ left: `calc(${cell.left} + ${50 / COLS}%)`, top: `calc(${cell.top} + ${50 / ROWS}%)`, width: f.special === 'rainbow' ? '160%' : `${300 / COLS}%`, aspectRatio: '1', x: '-50%', y: '-50%', border: '6px solid #fabe37', background: f.special === 'rainbow' ? 'radial-gradient(circle, transparent 55%, rgba(255,255,255,0.6) 60%, transparent 70%)' : 'radial-gradient(circle, #fffaf0, #fff1b8 60%, transparent 70%)', borderColor: f.special === 'rainbow' ? '#6a45f0' : '#fabe37' }} initial={{ scale: 0.1, opacity: 1 }} animate={{ scale: 1, opacity: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} />;
               })}
-              {sparks.flatMap((sp) => [0, 1, 2, 3, 4].map((k) => {
-                const a = (k / 5) * Math.PI * 2 + sp.id;
-                return <motion.span key={`${sp.id}-${k}`} className="absolute w-2 h-2 rounded-full border border-black/40" style={{ left: `${((sp.col + 0.5) / COLS) * 100}%`, top: `${((sp.row + 0.5) / ROWS) * 100}%`, background: sp.color }}
-                  initial={{ x: 0, y: 0, opacity: 1, scale: 1.2 }} animate={{ x: Math.cos(a) * 34, y: Math.sin(a) * 34 + 10, opacity: 0, scale: 0.4 }} transition={{ duration: 0.55, ease: 'easeOut' }} />;
+              {/* Doodle confetti from each popped piece: sparkles, stars and dots in its color. */}
+              {sparks.flatMap((sp) => [0, 1, 2, 3].map((k) => {
+                const a = (k / 4) * Math.PI * 2 + sp.seed;
+                const dist = 28 + ((sp.seed * 97 + k * 13) % 20);
+                return <motion.span key={`${sp.id}-${k}`} className="absolute" style={{ left: `${((sp.col + 0.5) / COLS) * 100}%`, top: `${((sp.row + 0.5) / ROWS) * 100}%`, marginLeft: -9, marginTop: -9 }}
+                  initial={{ x: 0, y: 0, opacity: 1, scale: 0.6, rotate: 0 }} animate={{ x: Math.cos(a) * dist, y: Math.sin(a) * dist + 12, opacity: 0, scale: 1.1, rotate: 90 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
+                  <Doodle kind={SPARK_KINDS[k]} color={k === 3 ? '#fffaf0' : sp.color} size={18} />
+                </motion.span>;
               }))}
               <AnimatePresence>
                 {callout && (
-                  <motion.p key={callout.id} className="absolute inset-x-0 top-[40%] text-center font-display text-5xl sm:text-6xl text-accent" style={{ WebkitTextStroke: '2.5px #000', paintOrder: 'stroke' }}
-                    initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, y: -20 }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 320, damping: 14 }}
-                    onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 650); }}><PopText text={callout.text} /></motion.p>
+                  // The points burst (mockup: "MATCH! +30"): a flat Lemon pill over the match.
+                  <motion.p key={callout.id} className="absolute z-20 m-0" style={{ left: `${callout.x}%`, top: `${callout.y}%`, x: '-50%', y: '-50%' }}
+                    initial={still ? { opacity: 0 } : { scale: 0.3, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0, y: '-120%' }} transition={still ? { duration: 0.01 } : { type: 'spring', stiffness: 380, damping: 15 }}
+                    onAnimationComplete={() => { const id = callout.id; window.setTimeout(() => setCallout((c) => (c?.id === id ? null : c)), 650); }}>
+                    <span className="inline-flex items-center px-[0.9em] py-[0.25em] rounded-full whitespace-nowrap uppercase leading-none bg-[var(--lemon)] text-[var(--ink)] border-[3px] border-border" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 'calc(var(--solo-board) * 0.05)', boxShadow: '0 4px 0 var(--color-border)' }}>{callout.text}</span>
+                  </motion.p>
                 )}
               </AnimatePresence>
             </div>
             </div>
           </div>
-
-          </div>
-          {/* Held power-ups wait in the corner, off the board. */}
-          <div className="fixed left-3 bottom-3 w-[min(14rem,40vw)] z-20"><PowerUpTray manifest={matchThreeManifest} items={held.held} onUse={(i) => void applyItem(i)} disabled={busy || phase !== 'play'} /></div>
-        </div>
+          } />
       )}
 
       {phase === 'end' && (
@@ -411,15 +423,28 @@ function SizeMock({ n }: { n: number }) {
   );
 }
 
-// The three stars of the goal, at the right end of the top strip.
+// The three stars of the goal, at the right end of the meter pill: Lemon
+// doodle stars when earned, paper ones still to win; each pops as it lands.
 function StarGoal({ score, stars, goals, still }: { score: number; stars: number; goals: number[]; still: boolean }) {
   return (
-    <span className="flex gap-0.5 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
+    <span className="flex gap-1 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
       {goals.map((g, i) => (
-        <motion.span key={g} animate={stars > i && !still ? { scale: [1, 1.5, 1], rotate: [0, 20, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-          <Star weight={stars > i ? 'fill' : 'bold'} size={26} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} />
+        <motion.span key={g} className="grid" animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 25, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
+          <Doodle kind="star" color={stars > i ? '#fabe37' : '#fffaf0'} size={30} />
         </motion.span>
       ))}
     </span>
   );
+}
+
+// The stage ground. Classic: the pastel cut-paper desk (calm: the softer
+// version; plain backgrounds: flat cream). A theme's background picture or
+// the teacher's own stage color wins.
+function Ground({ theme }: { theme: GameTheme }) {
+  const { settings } = useSettings();
+  const stage = useStageColor(theme.gameId);
+  if (pieceImage(theme, 'background')) return <div className="absolute inset-0" style={pieceFill(theme, 'background', theme.colors.background)} aria-hidden="true" />;
+  if (stage || theme.source !== 'house' || theme.name !== 'Classic') return null;
+  const plain = settings.backgrounds === 'plain';
+  return <div className="absolute inset-0" style={plain ? { background: '#f6f0e4' } : { backgroundColor: '#f6f0e4', ...pattern('cutpaper-pastel', settings.calm) }} aria-hidden="true" />;
 }

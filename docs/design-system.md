@@ -90,6 +90,7 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 
 ### Game pieces (`src/engine`)
 - `TopStrip`: the one strip across the top of a solo game (Bubble Pop, Match Three): player picture, score in Grow Year with no box (a steady live region, so screen readers hear each score), a dash for every turn of every round (used filled, this turn yellow with a ring, turns to come hollow), and an optional slot on the right.
+- `SoloStrip` (`SoloLayout`, `SoloMeter`, `SoloScore`): THE solo board-game layout (teacher, 2026-11-24, Match Three first; Bubble Pop and every future solo board game follow it). The paper meter pill ("2 moves left", the meter, the game's goal) over the board; the score as a big Grow Year number at the top right with the held power-up cards under it, centered on it (always the top layer). Wide screens: score column beside the board; tall screens: meter, score row at the right, then the board. The board is the square left over (`--solo-board`), so nothing scrolls.
 - `ScoreBoard` and `RoundMeter`: the one score board for team games (no title, whole names) and the round box under it.
 - `GameWelcome`, `SetupWizard`, `WayToPlay`, `SetPicker`, `PowerUpCards`: the same start menus in every game.
 
