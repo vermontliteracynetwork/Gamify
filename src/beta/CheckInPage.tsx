@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowLeft, Feather, Mountains, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, type Icon } from '@phosphor-icons/react';
+import type { ComponentType } from 'react';
+import { ArrowLeft, Feather, Mountains, SpeakerHigh, Star, Target } from '@phosphor-icons/react';
+import { FaceGreat, FaceNotGreat, FaceOkay } from '../ui/EmojiFace';
 import { playEffect, speak } from '../engine/feedback';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -12,9 +14,11 @@ import Title from '../ui/Title';
 import { saveCheckIn } from './surveys';
 
 type Tally = [number, number, number];
-const QUESTIONS: { key: 'feel' | 'level'; icons: Icon[]; colors: string[] }[] = [
-  { key: 'feel', icons: [Smiley, SmileyMeh, SmileySad], colors: ['#ddfcc6', '#fdfd94', '#ed9d75'] },
-  { key: 'level', icons: [Feather, Target, Mountains], colors: ['#ddd6ff', '#ddfcc6', '#ed9d75'] },
+// The feel faces are smile emoji faces (teacher, 2026-11-24).
+type Pic = ComponentType<{ size?: number | string; weight?: 'fill'; 'aria-hidden'?: 'true' | boolean }>;
+const QUESTIONS: { key: 'feel' | 'level'; icons: Pic[]; colors: string[] }[] = [
+  { key: 'feel', icons: [FaceGreat, FaceOkay, FaceNotGreat], colors: ['#fff1b8', '#bfdff3', '#ffd3e6'] },
+  { key: 'level', icons: [Feather as Pic, Target as Pic, Mountains as Pic], colors: ['#ddd6ff', '#c8f0dc', '#ffd9b3'] },
 ];
 
 // A class check-in the teacher runs on one screen (development plan, beta

@@ -39,6 +39,6 @@ test('play clock: warnings, a normal ending, then the look-at-your-teacher scree
   await expect(page).toHaveURL(/\/look-up/);
   await page.clock.resume();
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1, name: /Look at Your Teacher/i })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Eyes up here/i })).toBeVisible();
   await page.screenshot({ path: `test-results/clock-lookup-${info.project.name}.png` });
 });

@@ -120,7 +120,7 @@ to main (approved). The Game Lab and Territory stay off main.
     order), how will you play, share a join code, question set picker,
     options, teams and players, power-up setup, how the class plays, question
     screen, settings panel, loading, page not found, something went wrong.
-27. [ ] **Batch 4, student screens:** join, name pick, lobby, choice board,
+27. [x] **Batch 4, student screens:** join, name pick, lobby, choice board,
     eyes up here, share mirror, class check-in (smile faces).
 28. [ ] **Batch 5, approved public pages:** Home, Plans and Pricing, Help
     Center and articles, legal pages, forms, theme guide, device check,

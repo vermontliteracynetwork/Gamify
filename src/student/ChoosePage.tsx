@@ -25,7 +25,7 @@ export default function ChoosePage() {
             whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 1 : -1 }} whileTap={{ scale: 0.97 }}>
             <Link to={`/games/${g.id}?set=${setId}`} className="block rounded-panel border-bold border-border bg-surface overflow-hidden no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <GameCover gameId={g.id} className="aspect-[16/10] border-b-[2.5px] border-border" />
-              <span className="block p-3 font-display text-2xl text-center">{g.name}</span>
+              <span className="block p-3 font-display text-2xl text-center uppercase"><Title text={g.name} /></span>
             </Link>
           </motion.li>
         ))}

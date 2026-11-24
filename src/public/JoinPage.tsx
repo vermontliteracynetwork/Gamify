@@ -126,12 +126,12 @@ export default function JoinPage() {
   }
 
   return (
-    <main className="relative max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="relative max-w-2xl mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
       <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">
         <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="!w-12 !h-12 bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}><SpeakerHigh weight="bold" size={24} /></IconButton>
       </div>
-      <h1 className="title-bubble text-5xl"><Title text={t('join.title')} /></h1>
+      <h1 className="title-bubble text-4xl sm:text-5xl whitespace-nowrap"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-lg">{t('join.sub')}</p>
       <div className="flex items-center justify-center gap-2 w-full">
         <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoFocus enterKeyHint="go" autoCapitalize="characters" autoComplete="off" autoCorrect="off" spellCheck={false}
