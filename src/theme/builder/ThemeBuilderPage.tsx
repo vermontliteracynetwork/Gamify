@@ -515,7 +515,7 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
       {/* Two columns of cards (teacher, 2026-11-19): the title gets its own
           line under the picture and buttons, so words never split. */}
       <div className="min-w-0 col-span-3 row-start-2" data-tip={`${piece.hint} (${piece.width} x ${piece.height})`}>
-        <p className="font-bold text-sm leading-tight flex items-center gap-1.5 min-w-0"><span className="break-words">{piece.label}</span>{image && <CheckCircle weight="fill" size={16} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
+        <p className="font-bold text-sm leading-tight flex items-center gap-1.5 min-w-0"><span className="">{piece.label}</span>{image && <CheckCircle weight="fill" size={16} color="#1f7a45" className="shrink-0" aria-label={t('builder.done')} />}</p>
         <p className="sr-only">{piece.hint} {piece.width} x {piece.height}</p>
       </div>
       {/* Small buttons (teacher, 2026-11-16): draw, see-through on or off, remove. */}
@@ -638,7 +638,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
     <div className="relative rounded-input border-std border-border-soft p-2 flex items-center gap-2" data-tip={hint}>
       <button type="button" onClick={tap} aria-expanded={open} aria-label={t('builder.colorOpen', { name: label })}
         className="shrink-0 w-11 h-11 rounded-full border-bold border-border motion-safe:active:scale-95" style={{ background: value }} />
-      <span className="font-bold text-sm leading-tight min-w-0 [overflow-wrap:anywhere]">{label}</span>
+      <span className="font-bold text-sm leading-tight min-w-0">{label}</span>
       {open && (
         <div className="absolute left-2 top-full mt-1 z-20 bg-surface border-std border-border rounded-input p-2 flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <input id={id} type="color" value={value} onChange={(e) => onChange(e.target.value)} aria-label={t('builder.colorPick', { name: label })} className="color-dot shrink-0 w-11 h-11" />

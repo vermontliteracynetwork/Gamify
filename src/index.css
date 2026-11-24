@@ -815,3 +815,9 @@ html[data-motion="still"] .pu-rays { animation: none; }
 /* Card-choice steps (SetupWizard): until a card is tapped, the settings under
    the cards stay hidden (teacher, 2026-11-24). */
 [data-unpicked] [role="radiogroup"] ~ * { display: none !important; }
+
+/* Never break a word across two lines (teacher, 2026-11-24: "never break up
+   text within a word to drop part of the word to the next line"): no
+   hyphenation and no mid-word wrapping anywhere; long words shrink (FitText)
+   or the box grows instead. */
+html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual; }

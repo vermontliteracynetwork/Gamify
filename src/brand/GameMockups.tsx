@@ -250,11 +250,12 @@ const BG_HELD: { id: PowerId; name: string }[] = [{ id: 'potion', name: 'Potion'
 function Tray({ size = 80 }: { size?: number }) {
   return <div className="flex gap-2 justify-center">{BG_HELD.map((p) => <PowerCard key={p.id} id={p.id} name={p.name} size={size} />)}</div>;
 }
-const BG_SCORES = ['12 to go', '24 to go', '19 to go', '32 to go'];
+// No "N to go" on the rows (teacher, 2026-11-24: "remove how many squares to go");
+// the pawns on the board show who is ahead.
 function MiniRace({ compact, teams = TEAMS, now = 1 }: { compact?: boolean; teams?: readonly Team[]; now?: number }) {
   return <>{teams.map((t, i) => (
     <div key={t.name} className={`flex items-center gap-2 ${compact ? 'px-2 py-1' : 'px-2.5 py-1.5'} rounded-2xl`} style={{ background: i === now ? TURN_SHADE : PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}>
-      <CrayonPawn color={t.color} size={30} /><b className="flex-1 truncate text-sm">{t.name}</b><span className="text-sm font-bold" style={{ color: PP.quiet }}>{BG_SCORES[i]}</span>
+      <CrayonPawn color={t.color} size={30} /><b className="flex-1 truncate text-sm">{t.name}</b>
     </div>
   ))}</>;
 }
@@ -266,10 +267,11 @@ function BoardLaptop({ vs }: { vs?: boolean }) {
       <div className="absolute left-6 top-[74px] w-[690px] h-[520px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}>
         <BoardGrid w={650} h={480} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
       </div>
-      <div className="absolute right-6 top-[74px] w-[250px] grid gap-2">
-        <DieCard />
-        <Tray />
+      {/* Side panel order (teacher, 2026-11-24): players, then power-ups, then the die. */}
+      <div className="absolute right-6 top-[96px] w-[250px] grid gap-2">
         <MiniRace compact teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} />
+        <Tray />
+        <DieCard />
       </div>
     </div>
   );
@@ -283,9 +285,10 @@ function BoardTablet({ vs }: { vs?: boolean }) {
       <div className="absolute inset-x-6 top-[80px] h-[700px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 30, boxShadow: `0 6px 0 ${I}` }}>
         <BoardGrid w={730} h={660} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
       </div>
-      <div className="absolute inset-x-6 top-[806px] grid grid-cols-[250px_1fr] gap-4">
+      <div className="absolute inset-x-6 top-[806px] grid grid-cols-[1fr_auto_250px] gap-4 items-start">
+        <div className="grid gap-2 content-start"><MiniRace teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} /></div>
+        <Tray size={88} />
         <DieCard />
-        <div className="grid gap-2 content-start"><Tray size={88} /><MiniRace teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} /></div>
       </div>
     </div>
   );
@@ -300,12 +303,12 @@ function BoardPhone({ vs }: { vs?: boolean }) {
         <div className="grid place-items-center py-3" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 24, boxShadow: `0 5px 0 ${I}` }}>
           <BoardGrid w={346} h={430} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
         </div>
-        {/* Race rows as chips: the team badge (shape plus color) and how far to go; Butter = whose turn. */}
+        {/* Players first, then power-ups, then the die (teacher, 2026-11-24); Butter = whose turn. */}
         <div className="grid grid-cols-2 gap-2">{teams.map((t, i) => (
-          <span key={t.name} aria-label={`${t.name}, ${BG_SCORES[i]}`} className="h-[44px] rounded-full flex items-center justify-center gap-2 px-2" style={{ background: i === (vs ? 0 : 1) ? TURN_SHADE : PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}>
-            <Badge t={t as Team} size={26} />{vs && <b className="truncate text-[14px]">{t.name}</b>}<span className="text-[14px] font-bold whitespace-nowrap">{BG_SCORES[i]}</span>
+          <span key={t.name} aria-label={t.name} className="h-[44px] rounded-full flex items-center justify-center gap-2 px-2" style={{ background: i === (vs ? 0 : 1) ? TURN_SHADE : PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}>
+            <Badge t={t as Team} size={26} /><b className="truncate text-[14px]">{t.name}</b>
           </span>))}</div>
-        <div className="flex items-center justify-center gap-5"><DieWiggle><CrayonDie value={3} size={100} /></DieWiggle><Tray size={62} /></div>
+        <div className="flex items-center justify-center gap-5"><Tray size={62} /><DieWiggle><CrayonDie value={3} size={100} /></DieWiggle></div>
       </div>
     </div>
   );
@@ -317,20 +320,24 @@ const pat = (id: string) => PATTERNS.find((p) => p.id === id)!.make(false);
 function PatternStage({ id, children }: { id: string; children: ReactNode }) {
   return <div className="w-full h-full relative overflow-hidden" style={pat(id)}>{children}</div>;
 }
-function Stat({ label, value, icon }: { label: string; value: ReactNode; icon?: ReactNode }) {
+// THE solo board-game layout (teacher, 2026-11-24, Match Three first, then
+// Bubble Pop and every future solo board game): the meter with the moves runs
+// across the top; the score is a big number at the top right, with the held
+// power-ups under it, centered on the score.
+function SoloMeter({ label, segments, done, part = 0, width = 320, goal, compact }: { label: string; segments: number; done: number; part?: number; width?: number; goal?: ReactNode; compact?: boolean }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>
-      {icon}<span className="grid leading-none"><span className="text-[13px] font-bold" style={{ color: PP.quiet }}>{label}</span><b className="font-display text-2xl tabular-nums">{value}</b></span>
+    <div className={`inline-flex items-center ${compact ? 'gap-2 px-3 h-[52px]' : 'gap-3 px-5 h-[60px]'} rounded-full`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
+      <b className={`whitespace-nowrap ${compact ? 'text-[15px]' : 'text-[18px]'}`}>{label}</b>
+      <Meter segments={segments} done={done} part={part} width={width} label={label} />
+      {goal}
     </div>
   );
 }
-// Solo top strip: score first and biggest, no player icon (teacher, 2026-11-23).
-function SoloStrip({ score, children }: { score: number; children?: ReactNode }) {
+function SoloScore({ score, items, size = 80, row, big = 64 }: { score: number; items: { id: PowerId; name: string }[]; size?: number; row?: boolean; big?: number }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-2" style={{ ...paper, borderRadius: 22 }}>
-      <span className="font-display text-5xl font-bold leading-none tabular-nums">{score}</span>
-      <span className="flex-1" />
-      {children}
+    <div className="grid justify-items-center gap-3">
+      <span className="tabular-nums leading-none" style={{ ...GY, fontSize: big }}><GText>{score}</GText></span>
+      <HeldTray items={items} row={row} size={size} />
     </div>
   );
 }
@@ -398,12 +405,10 @@ function MatchThreeLaptop() {
   return (
     <PatternStage id="cutpaper-pastel">
       <Corner />
-      <div className="absolute left-[60px] top-[58px]"><M3Board s={66} /></div>
-      <div className="absolute right-[56px] top-[110px] w-[330px] grid gap-3">
-        <SoloStrip score={260}><StarGoal got={2} /></SoloStrip>
-        <div className="flex items-center gap-3"><Stat label="Moves left" value={2} /><Meter segments={3} done={1} part={0.5} width={170} label="Round 2 of 3" /></div>
-        <HeldTray items={M3_HELD} row size={84} />
-      </div>
+      {/* The meter sits over the board, clear of the tool buttons. */}
+      <div className="absolute left-[300px] -translate-x-1/2 top-4 z-10"><SoloMeter label="2 moves left" segments={10} done={8} width={240} goal={<StarGoal got={2} />} /></div>
+      <div className="absolute left-[60px] top-[96px]"><M3Board s={64} /></div>
+      <div className="absolute right-[60px] top-[110px] w-[300px]"><SoloScore score={260} items={M3_HELD} size={84} /></div>
     </PatternStage>
   );
 }
@@ -412,20 +417,20 @@ function MatchThreeTablet() {
   return (
     <PatternStage id="cutpaper-pastel">
       <Corner />
-      <div className="absolute inset-x-8 top-[84px] grid gap-3"><SoloStrip score={260}><Stat label="Moves" value={2} /><StarGoal got={2} /></SoloStrip></div>
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><M3Board s={102} /></div>
-      <div className="absolute inset-x-8 top-[1000px] grid justify-items-center"><HeldTray items={M3_HELD} row size={100} /></div>
+      <div className="absolute inset-x-8 top-[84px] grid justify-items-center"><SoloMeter label="2 moves left" segments={10} done={8} width={420} goal={<StarGoal got={2} />} /></div>
+      <div className="absolute right-10 top-[170px]"><SoloScore score={260} items={M3_HELD} row size={84} big={72} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[380px]"><M3Board s={100} /></div>
     </PatternStage>
   );
 }
 function MatchThreePhone() {
   return (
     <PatternStage id="cutpaper-pastel">
-      <PTop left={<PPill><span className="font-display text-[34px] font-bold leading-none tabular-nums">260</span><StarGoal got={2} /></PPill>} />
-      <PStack>
-        <div className="flex items-center gap-3"><Stat label="Moves left" value={2} /><Meter segments={3} done={1} part={0.5} width={150} label="Round 2 of 3" /></div>
+      <PTop />
+      <PStack top={68}>
+        <SoloMeter compact label="2 moves" segments={10} done={8} width={150} goal={<StarGoal got={2} size={22} />} />
+        <div className="self-end pr-2"><SoloScore score={260} items={M3_HELD} row size={60} big={46} /></div>
         <M3Board s={47} />
-        <HeldTray items={M3_HELD} row size={66} />
       </PStack>
     </PatternStage>
   );
@@ -582,13 +587,9 @@ function BubbleLaptop() {
   return (
     <PatternStage id="doodle">
       <Corner />
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[76px]"><BubbleBoard w={400} /></div>
-      <div className="absolute left-[40px] top-[120px] w-[200px] grid gap-3">
-        <SoloStrip score={340} />
-        <Stat label="Bubbles left" value={3} />
-        <Stat label="Break" value="2 of 4" />
-      </div>
-      <div className="absolute right-[40px] top-[120px] w-[200px]"><HeldTray items={BP_HELD} size={80} /></div>
+      <div className="absolute left-1/2 -translate-x-1/2 top-4 z-10"><SoloMeter label="3 bubbles left" segments={5} done={2} width={260} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><BubbleBoard w={390} /></div>
+      <div className="absolute right-[48px] top-[110px] w-[220px]"><SoloScore score={340} items={BP_HELD} size={80} /></div>
     </PatternStage>
   );
 }
@@ -597,18 +598,20 @@ function BubbleTablet() {
   return (
     <PatternStage id="doodle">
       <Corner />
-      <div className="absolute inset-x-8 top-[84px]"><SoloStrip score={340}><Stat label="Bubbles" value={3} /><HeldTray items={BP_HELD} row size={76} /></SoloStrip></div>
-      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[220px]"><BubbleBoard w={700} /></div>
+      <div className="absolute inset-x-8 top-[84px] grid justify-items-center"><SoloMeter label="3 bubbles left" segments={5} done={2} width={360} /></div>
+      <div className="absolute right-10 top-[170px]"><SoloScore score={340} items={BP_HELD} row size={80} big={72} /></div>
+      <div className="absolute w-max left-1/2 -translate-x-1/2 top-[370px]"><BubbleBoard w={600} /></div>
     </PatternStage>
   );
 }
 function BubblePhone() {
   return (
     <PatternStage id="doodle">
-      <PTop left={<PPill><span className="font-display text-[34px] font-bold leading-none tabular-nums">340</span><span className="grid leading-none"><span className="text-[13px] font-bold" style={{ color: PP.quiet }}>Bubbles</span><b className="font-display text-2xl tabular-nums">3</b></span></PPill>} />
-      <PStack>
+      <PTop />
+      <PStack top={68}>
+        <SoloMeter compact label="3 left" segments={5} done={2} width={170} />
+        <div className="self-end pr-2"><SoloScore score={340} items={BP_HELD} row size={60} big={46} /></div>
         <BubbleBoard w={330} cols={11} />
-        <HeldTray items={BP_HELD} row size={66} />
       </PStack>
     </PatternStage>
   );

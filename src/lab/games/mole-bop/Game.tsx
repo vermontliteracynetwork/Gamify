@@ -137,7 +137,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 transition={m.state === 'bonk' ? { duration: 1.3, times: [0, 0.55, 1] } : m.state === 'down' ? { duration: 0.3, ease: 'easeIn' } : m.state === 'giggle' ? { duration: 0.7 } : { type: 'spring', stiffness: 300, damping: 14 }}
                 style={{ originY: 1 }}>
                 <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform origin-bottom" style={{ opacity: rest ? 0.45 : 1, scale: help, transition: 'opacity .3s, scale .3s' }}>
-                  <span className="absolute left-0 right-0 top-0 h-[30%] z-[1] grid place-items-center bg-[#fbfcf8] border-std border-border rounded-lg px-1 text-center font-bold leading-[1.05] break-words"
+                  <span className="absolute left-0 right-0 top-0 h-[30%] z-[1] grid place-items-center bg-[#fbfcf8] border-std border-border rounded-lg px-1 text-center font-bold leading-[1.05]"
                     style={{ fontSize: `calc(var(--u) * ${labelSize(text, sz * 1.1, 4.8)})`, color: '#241c3d', boxShadow: '0 3px 0 #000', transform: `rotate(${(m.key % 5) - 2}deg)` }}>{upNow ? text : ''}</span>
                   <span className="absolute left-[28%] right-[28%] top-[28%] h-[12%] block" aria-hidden="true"><svg viewBox="0 0 40 20" preserveAspectRatio="none" className="w-full h-full"><rect x="2" y="0" width="5" height="20" fill="#c58f5a" stroke="#000" strokeWidth="1.5" /><rect x="33" y="0" width="5" height="20" fill="#c58f5a" stroke="#000" strokeWidth="1.5" /></svg></span>
                   <span className="absolute left-[12%] right-[12%] top-[36%] bottom-0 block"><MoleArt state={m.state} gold={gold} /></span>

@@ -155,7 +155,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, f
                 </span>
                 {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-12 h-12 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
                 <span className="sr-only"> </span>
-                <span className="min-w-0 break-words">{c}</span>
+                <span className="min-w-0">{c}</span>
               </motion.button>
             );
           })}

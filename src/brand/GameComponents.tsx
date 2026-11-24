@@ -267,7 +267,7 @@ function Tapped({ k, children, again }: { k: number; children: (close: () => voi
 
 const MAP: [string, string[]][] = [
   ['A top strip', ['name chip + meter', 'name chip + meter', 'score + meter + stars', 'name chip, no meter', 'score + meter', 'name chip + ten-frame meter', 'class goal + meter', 'join code + class goal or team counts']],
-  ['B rows', ['teams (Butter = turn)', 'race rows "12 to go"', 'none', '2 players', 'none', 'ten-frame sheet', 'Live: "12 playing"', 'none']],
+  ['B rows', ['teams (Butter = turn)', 'race rows (team names, no squares to go)', 'none', '2 players', 'none', 'ten-frame sheet', 'Live: "12 playing"', 'none']],
   ['B power-up cards', ['yes', 'yes', 'yes', 'yes', 'yes', 'yes', 'no power-ups', 'no power-ups']],
   ['B action', ['none (tap a card)', 'the die', 'none', 'none (tap a column)', 'none (aim)', 'none (aim and roll)', 'none', 'none']],
   ['C feedback', ['prize line', 'Roll again, Lose a turn', 'combos, "No moves"', '"Pick a piece to pop"', '"New row!"', '"Strike!"', '"Three in a row!"', '"Caught one!"']],

@@ -36,7 +36,7 @@ export default function MatchUpPreview({ theme }: { theme: GameTheme }) {
         </div>
         <div className="grid grid-cols-2 gap-5" style={{ gridTemplateRows: 'repeat(4, minmax(0, 1fr))', gridAutoFlow: 'column', height: 4 * 104 }}>
           {LEFT.map((text, i) => (
-            <span key={`l${i}`} className={tileClass(i === PICKED, DONE.has(i))} style={tileStyle(theme, 'l', DONE.has(i))}><span className="text-lg break-words">{text}</span></span>
+            <span key={`l${i}`} className={tileClass(i === PICKED, DONE.has(i))} style={tileStyle(theme, 'l', DONE.has(i))}><span className="text-lg">{text}</span></span>
           ))}
           {RIGHT.map((text, i) => (
             <span key={`r${i}`} className={`${tileClass(false, DONE.has(PAIR_OF_RIGHT[i]))} ${answerClass}`} style={tileStyle(theme, 'r', DONE.has(PAIR_OF_RIGHT[i]))}>{text}</span>

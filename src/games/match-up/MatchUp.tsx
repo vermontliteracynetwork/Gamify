@@ -150,7 +150,7 @@ export default function MatchUp() {
               <motion.button key={`l${tile.pair}`} type="button" onClick={() => tap('l', tile)} aria-pressed={pick?.side === 'l' && pick.pair === tile.pair} disabled={done.includes(tile.pair)}
                 animate={wobble === tile.pair + 'l' && !still ? { x: [0, -8, 8, -5, 5, 0] } : done.includes(tile.pair) && !still ? { scale: [1, 1.05, 1] } : {}}
                 className={tileClass(pick?.side === 'l' && pick.pair === tile.pair, done.includes(tile.pair))} style={tileStyle(theme, 'l', done.includes(tile.pair))}>
-                <span className="text-sm sm:text-lg break-words">{tile.text}</span>
+                <span className="text-sm sm:text-lg">{tile.text}</span>
               </motion.button>
             ))}
             {right.map((tile) => (

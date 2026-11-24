@@ -430,7 +430,7 @@ function Pricing({ w }: W) {
         <div className="overflow-hidden" style={{ ...CARD, borderRadius: 22 }}>
           <div className="grid font-bold" style={{ gridTemplateColumns: ph ? '1.2fr 1fr 1fr 1.1fr' : '2fr 1fr 1fr 1fr', fontSize: ph ? 12 : 17 }}>
             {['', 'Free', 'Plus', 'Pro'].map((h, i) => <span key={h + i} className="p-3" style={{ ...GY, fontSize: ph ? 18 : 24, background: i === 2 ? PP.butter : undefined, borderBottom: `2.5px solid ${I}` }}><GText>{h}</GText></span>)}
-            {COMPARE.map((r) => r.map((c, i) => <span key={r[0] + i} className={`${ph ? 'p-2' : 'p-3'} min-w-0 break-words ${i ? 'font-semibold' : ''}`} style={{ background: i === 2 ? 'rgba(253,240,180,0.7)' : undefined, borderBottom: `1.5px solid rgba(29,26,51,0.15)` }}>{c}</span>))}
+            {COMPARE.map((r) => r.map((c, i) => <span key={r[0] + i} className={`${ph ? 'p-2' : 'p-3'} min-w-0 ${i ? 'font-semibold' : ''}`} style={{ background: i === 2 ? 'rgba(253,240,180,0.7)' : undefined, borderBottom: `1.5px solid rgba(29,26,51,0.15)` }}>{c}</span>))}
           </div>
           <span className="block text-center p-3 font-bold text-[17px] underline underline-offset-4">Show all 18 rows</span>
         </div>

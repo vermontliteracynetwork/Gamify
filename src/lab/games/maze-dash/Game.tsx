@@ -271,7 +271,7 @@ function Board({ m, ar, toWorld, rooms, steps, runner, clouds, cellPos, giant, f
           <button key={k} type="button" disabled={ar.ctx.cpu || !ar.running} aria-label={`Room: ${text}`} onPointerDown={(e) => { e.stopPropagation(); onRoom(k); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRoom(k); } }}
             className="absolute grid place-items-center p-[3%] disabled:cursor-default focus-visible:outline-4 focus-visible:outline-black rounded-md group"
             style={{ ...pct(ox + c0 * cs + cs * 0.18, oy + r0 * cs + cs * 0.18), width: `calc(var(--u) * ${w - cs * 0.36})`, height: `calc(var(--u) * ${h - cs * 0.36})` }}>
-            <span className={`font-bold text-center leading-[1.05] break-words motion-safe:group-hover:scale-105 motion-safe:transition-transform `}
+            <span className={`font-bold text-center leading-[1.05] motion-safe:group-hover:scale-105 motion-safe:transition-transform `}
               style={{ fontSize: `calc(var(--u) * ${labelSize(text, w * 0.9, 5)})`, color: '#241c3d', transform: flip ? 'rotate(180deg)' : undefined, textShadow: '0 1px 0 #fff' }}>{text}</span>
           </button>
         );

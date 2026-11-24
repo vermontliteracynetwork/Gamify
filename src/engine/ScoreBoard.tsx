@@ -55,8 +55,8 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
               {p.art ? <img src={p.art} alt="" aria-hidden="true" className="w-11 h-11 object-contain shrink-0" /> : <TeamBadge colorIndex={p.colorIndex} size={44} />}
               {/* Whole names, never cut off or hidden (teacher, 2026-11-16). */}
               <span className="flex-1 min-w-0 grid grid-cols-[minmax(0,1fr)]">
-                <span className="font-bold leading-tight [overflow-wrap:anywhere]">{p.name}</span>
-                {p.members && <span className="hidden lg:block text-xs font-semibold text-muted break-words" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
+                <span className="font-bold leading-tight">{p.name}</span>
+                {p.members && <span className="hidden lg:block text-xs font-semibold text-muted" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
               </span>
               {top.some((l) => l.id === p.id) && <Crown weight="fill" size={20} className="text-accent" aria-hidden="true" />}
               <motion.span key={p.score} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl font-bold tabular-nums min-w-[2.75rem] text-center rounded-pill bg-surface border-std border-border px-2 py-0.5" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>

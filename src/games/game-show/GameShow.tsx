@@ -648,7 +648,7 @@ function BoardArt({ kind }: { kind: Board }) {
   return (
     <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
-      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5 break-words">{c}</span>)}
+      {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
         <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}

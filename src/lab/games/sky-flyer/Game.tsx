@@ -185,7 +185,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 <CloudArt />
               </span>
               {text && (
-                <span className="absolute inset-[18%_12%_14%] grid place-items-center text-center font-bold leading-[1.05] break-words"
+                <span className="absolute inset-[18%_12%_14%] grid place-items-center text-center font-bold leading-[1.05]"
                   style={{ fontSize: `calc(var(--u) * ${labelSize(text, w * 0.75, 4.8)})`, color: '#241c3d', transform: flip ? 'rotate(180deg)' : undefined }}>{text}</span>
               )}
             </button>

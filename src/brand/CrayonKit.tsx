@@ -33,7 +33,9 @@ const deep: Record<string, string> = {
 // Waxy crayon: wobbly edges (displacement) and paper tooth (tiny holes).
 function CrayonFilter({ id, seed, sticker }: { id: string; seed: number; sticker?: boolean }) {
   return (
-    <filter id={id} x="-12%" y="-12%" width="124%" height="124%">
+    // A wide fixed region (teacher, 2026-11-24: power-ups are "never cut off"): the
+    // crayon wobble and thick outlines can never be clipped by the filter box.
+    <filter id={id} filterUnits="userSpaceOnUse" x="-30" y="-30" width="160" height="160">
       <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed={seed} result="warp" />
       <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="wob" />
       {/* Smooth fills (teacher, 2026-11-23: "more smooth design, still handdrawn but less pencil/crayon marks"): no grain holes. */}

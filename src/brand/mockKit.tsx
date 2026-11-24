@@ -99,14 +99,16 @@ export function TurnChip({ icon, name, size = 22 }: { icon: ReactNode; name: str
 // 1.3x the old size; the art sits in its own top area at 40% of the card with
 // padding all round (the crayon strokes run a little past their box, so the
 // area leaves room for them), and the name has its own area that holds two
-// lines with room to spare. Nothing ever crosses the card edge.
+// lines with room to spare. Nothing ever crosses the card edge. Always the top
+// layer of the game screen (over boards, frames and borders, under a pop-up
+// box that dims the game), never clipped (teacher, 2026-11-24).
 export const POWER_CARD_GROW = 1.3;
 export function PowerCard({ id, name, size = 80 }: { id: PowerId; name: string; size?: number }) {
   const side = Math.round(size * POWER_CARD_GROW);
   const fs = Math.max(13, Math.round(side * 0.125));
   const pad = Math.round(side * 0.09);
   return (
-    <span aria-label={name} className="flex flex-col items-center rounded-[16px] text-center shrink-0 overflow-hidden" style={{ width: side, height: side, padding: `${pad}px ${Math.round(pad * 0.6)}px`, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
+    <span aria-label={name} className="relative z-[25] flex flex-col items-center rounded-[16px] text-center shrink-0" style={{ width: side, height: side, padding: `${pad}px ${Math.round(pad * 0.6)}px`, background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>
       <span className="flex-1 min-h-0 w-full grid place-items-center"><CrayonPowerUp id={id} size={Math.round(side * 0.4)} /></span>
       <span className="w-full grid place-items-center font-bold" style={{ height: fs * 2.3, fontSize: fs, lineHeight: 1.1 }}><span>{name}</span></span>
     </span>

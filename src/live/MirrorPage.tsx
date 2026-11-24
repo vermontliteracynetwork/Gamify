@@ -55,7 +55,7 @@ export default function MirrorPage() {
               return (
                 <li key={i} className={`flex items-center gap-3 rounded-input border-heavy p-3 font-bold ${SIZES[Math.max(0, size - 1)]} ${right ? 'ring-[5px] ring-success' : ''} ${wrong ? 'ring-[5px] ring-danger' : ''} ${contrast ? 'border-white' : 'border-border bg-surface-2'}`}>
                   <span className={`w-12 h-12 shrink-0 rounded-full border-bold flex items-center justify-center font-display text-2xl ${contrast ? 'border-white' : 'border-border bg-surface'}`}>{right ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : wrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}</span>
-                  <span className="min-w-0 break-words">{c}</span>
+                  <span className="min-w-0">{c}</span>
                 </li>
               );
             })}

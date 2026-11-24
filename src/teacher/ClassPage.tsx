@@ -176,7 +176,7 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
           <Panel key={s.id} className="flex items-center gap-3 !p-3">
             <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95"><Avatar avatar={avatarOf(s)} theme={look} size={48} /></button>
             <span className="flex-1 min-w-0 grid">
-              <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="font-bold [overflow-wrap:anywhere] underline-offset-2 hover:underline">{s.name}</Link>
+              <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="font-bold underline-offset-2 hover:underline">{s.name}</Link>
               <span className="text-sm font-bold text-muted tabular-nums">{t('class.pinIs', { pin: s.pin ?? '' })}</span>
             </span>
             {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}

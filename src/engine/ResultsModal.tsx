@@ -122,7 +122,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
                   <span className="w-12 h-12 shrink-0 rounded-full bg-surface-2 border-bold border-border flex items-center justify-center font-display text-2xl">
                     {right ? <CheckCircle weight="fill" size={30} aria-label={t('q.rightMark')} /> : String.fromCharCode(65 + k)}
                   </span>
-                  <span className="min-w-0 break-words">{c}</span>
+                  <span className="min-w-0">{c}</span>
                 </li>
               );
             })}

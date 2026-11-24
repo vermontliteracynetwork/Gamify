@@ -274,7 +274,7 @@ function Board({ ctx }: { ctx: LabCtx }) {
       <motion.div className="absolute inset-0 flex flex-col gap-[2%] p-[2.5%]" animate={wobble}>
         {/* The terminal line. */}
         <div className="shrink-0 rounded-xl border-std border-[#000] px-4 py-2 font-mono font-bold flex items-center gap-2" style={{ background: '#0c1a14', color: GLOW, boxShadow: `0 0 18px ${GLOW}55, inset 0 0 12px ${GLOW}33`, fontSize: 'clamp(0.95rem, 3cqmin, 1.6rem)' }} aria-live="polite">
-          <span className="min-w-0 leading-snug break-words">{typed}</span>
+          <span className="min-w-0 leading-snug">{typed}</span>
           <motion.span className="inline-block w-[0.6em] h-[1.1em]" style={{ background: GLOW }} animate={ctx.still ? undefined : { opacity: [1, 0.45, 1] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }} />
         </div>
         {/* The data boxes, or the code to crack. */}

@@ -24,7 +24,7 @@ function Hero({ icon: I, kicker, title, sub, children }: { icon: Icon; kicker: s
   return (
     <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       <p className="font-bold uppercase tracking-wider text-sm">{kicker}</p>
-      <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0 break-words"><I weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={title} /></h1>
+      <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><I weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={title} /></h1>
       <p className="text-xl font-bold max-w-3xl">{sub}</p>
       <div className="flex flex-wrap gap-3">{children}</div>
     </section>

@@ -14,7 +14,7 @@ export function CardFace({ theme, up, side, text, image, alt }: { theme: GameThe
   return (
     <span className="grid gap-1 justify-items-center">
       {image && <img src={image} alt={alt ?? ''} className="max-h-12 object-contain" />}
-      <span className={`font-bold leading-tight break-words ${side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{text}</span>
+      <span className={`font-bold leading-tight ${side === 'a' ? 'text-lg sm:text-2xl' : 'text-xs sm:text-base lg:text-lg'}`}>{text}</span>
     </span>
   );
 }

@@ -81,7 +81,7 @@ function PostDetail({ post, decision, onDecide }: { post: Post; decision?: Decis
     if (d !== 'approved' && !note.trim()) { setProblem(t('mkt.noteNeeded')); return; }
     setProblem(''); void onDecide(post.id, d, note); setNote('');
   }
-  const row = (label: StringKey, value?: string) => value ? <div className="grid sm:grid-cols-[9rem_1fr] gap-1"><dt className="text-xs font-bold uppercase text-muted">{t(label)}</dt><dd className="m-0 text-sm font-semibold whitespace-pre-wrap break-words">{value}</dd></div> : null;
+  const row = (label: StringKey, value?: string) => value ? <div className="grid sm:grid-cols-[9rem_1fr] gap-1"><dt className="text-xs font-bold uppercase text-muted">{t(label)}</dt><dd className="m-0 text-sm font-semibold whitespace-pre-wrap">{value}</dd></div> : null;
   return (
     <article className="rounded-input border-std border-border-soft p-3 grid gap-3 bg-surface">
       <div className="flex flex-wrap items-center gap-2 text-sm font-bold">

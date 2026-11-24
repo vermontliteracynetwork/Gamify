@@ -197,7 +197,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
                 {it.chicken ? <ChickenArt flat /> : <FruitArt kind={it.kind} />}
               </span>
               {text && (
-                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#fbfcf8] border-std border-border rounded-xl px-1.5 py-0.5 font-bold text-center leading-[1.05] break-words"
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#fbfcf8] border-std border-border rounded-xl px-1.5 py-0.5 font-bold text-center leading-[1.05]"
                   style={{ fontSize: `calc(var(--u) * ${labelSize(text, r * 1.9 * giant / giant, 4.6)})`, color: '#241c3d', maxWidth: `calc(var(--u) * ${r * 2.3})`, minWidth: `calc(var(--u) * ${r * 0.9})`, boxShadow: '0 2px 0 #000' }}>{text}</span>
               )}
             </button>

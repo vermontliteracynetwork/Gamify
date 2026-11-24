@@ -124,7 +124,7 @@ function Play({ ctx }: { ctx: LabCtx }) {
               <span className="absolute inset-0 block motion-safe:group-hover:scale-105 motion-safe:transition-transform origin-top">
                 <BalloonArt color={b.color} sway={ctx.still ? 0 : Math.sin(ar.t * 1.3 + b.ph) * 6} />
               </span>
-              <span className="absolute left-[8%] right-[8%] top-[6%] h-[56%] grid place-items-center text-center font-bold leading-[1.05] break-words"
+              <span className="absolute left-[8%] right-[8%] top-[6%] h-[56%] grid place-items-center text-center font-bold leading-[1.05]"
                 style={{ fontSize: `calc(var(--u) * ${labelSize(text, r * 1.7)})`, color: '#241c3d', transform: flip ? 'rotate(180deg)' : undefined, transition: 'transform .5s' }}>{text}</span>
             </motion.span>
           </button>

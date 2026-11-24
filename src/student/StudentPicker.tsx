@@ -51,7 +51,7 @@ export default function StudentPicker({ classroomId, onSignIn }: { classroomId: 
         {students.map((s) => (
           <button key={s.id} type="button" onClick={() => setWho(s)} className="min-h-16 min-w-0 rounded-panel border-bold border-border bg-surface flex items-center gap-2 sm:gap-3 p-2 sm:p-3 text-left active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <Avatar avatar={avatarOf(s)} theme={look} size={48} />
-            <span className="font-display text-lg sm:text-xl font-bold min-w-0 break-words leading-tight">{s.name}</span>
+            <span className="font-display text-lg sm:text-xl font-bold min-w-0 leading-tight">{s.name}</span>
           </button>
         ))}
         {students.length === 0 && <p className="font-bold col-span-full text-center">{t('arcade.noStudents')}</p>}

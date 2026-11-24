@@ -126,7 +126,7 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                         <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-thin border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
                           <I weight="fill" size={15} color={art.ink} aria-hidden="true" />
                         </span>
-                        <span className="font-bold text-lg leading-snug break-words [overflow-wrap:anywhere] min-w-0">{s.name || t('sets.untitled')}</span>
+                        <span className="font-bold text-lg leading-snug min-w-0">{s.name || t('sets.untitled')}</span>
                       </span>
                       <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
                         <span className="rounded-pill border-thin border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
@@ -137,13 +137,13 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                     <>
                       <span className="text-[11px] font-bold uppercase tracking-wide text-muted pr-9">{t('sets.question1')}</span>
                       {q?.imageUrl && <img src={q.imageUrl} alt={q.imageAlt ?? ''} className="w-full h-auto max-h-28 object-contain rounded-input" />}
-                      <span className="text-sm font-bold leading-snug break-words [overflow-wrap:anywhere]">{q ? q.prompt : t('sets.noQuestions')}</span>
+                      <span className="text-sm font-bold leading-snug">{q ? q.prompt : t('sets.noQuestions')}</span>
                       {q && (
                         <ol className="grid gap-1 list-none p-0 m-0">
                           {q.choices.map((c, k) => {
                             const right = k === q.correctIndex;
                             return (
-                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-thin px-2 py-1 break-words [overflow-wrap:anywhere] ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
+                              <li key={k} className={`flex items-start justify-between gap-1.5 text-left text-xs font-semibold leading-snug rounded-input border-thin px-2 py-1 ${right ? 'border-success bg-[#e5f4e4] font-bold' : 'border-border-soft'}`}>
                                 <span className="min-w-0">{c}</span>
                                 {right && <CheckCircle weight="fill" size={15} color="#1f7a45" className="shrink-0 mt-px" aria-label={t('sets.correct')} />}
                               </li>

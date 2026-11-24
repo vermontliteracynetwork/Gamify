@@ -162,7 +162,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
                 </span>
                 {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
                 <span className="sr-only"> </span>
-                <span className="min-w-0 break-words">{c}</span>
+                <span className="min-w-0">{c}</span>
                 {isRight && picked === i && settings.motion !== 'still' && <Burst />}
                 {magnet && i === q.correctIndex && (
                   <motion.img src={magnet} alt={t('cq.magnetHere')} className="absolute -top-7 -right-4 w-16 h-16 object-contain pointer-events-none drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]"
