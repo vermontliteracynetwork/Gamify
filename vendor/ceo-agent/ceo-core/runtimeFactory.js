@@ -1,0 +1,149 @@
+const path = require('path');
+const AgentRegistry = require('../sdk/AgentRegistry');
+const JECIRuntime = require('./JECIRuntime');
+const Organization = require('../organization/Organization');
+const { loadRuntimeRegistries } = require('./RegistryLoader');
+const frameworkCatalog = require('./frameworks/catalog');
+const { createWorkflowPersistence } = require('./persistence');
+const { WorkflowScheduler } = require('./WorkflowScheduler');
+const { InMemoryAuditLog } = require('./WorkflowRuntime');
+const { resolveCeoMode } = require('./ceoModes');
+
+const SESSION_PROJECTS = Object.freeze(['cli-session', 'web-session']);
+
+function buildActiveAgentList(registry, activeDepartments) {
+  const allAgents = registry.listAgents();
+  const activeSet = new Set(activeDepartments);
+  return allAgents.filter(agent => {
+    if (agent.id === 'ceo_agent') return true;
+    const department = agent.department || agent.lane || null;
+    if (department && activeSet.has(department)) return true;
+    const manager = agent.reports_to
+      ? allAgents.find(candidate => candidate.id === agent.reports_to)
+      : null;
+    return Boolean(manager && activeSet.has(manager.department || manager.lane));
+  });
+}
+
+function buildConfiguredAgentList(registry, config) {
+  const baseAgents = buildActiveAgentList(registry, config.activeDepartments);
+  const customAgents = Array.isArray(config.customAgents) ? config.customAgents : [];
+  return [...baseAgents, ...customAgents];
+}
+
+/**
+ * Creates the canonical CEO Agent runtime used by CLI, web, dispatch, and
+ * tests. Runtime construction and registry wiring belong here only.
+ * @param {object} config Per-install CEO Agent config.
+ * @param {object} options Injectable dependencies for tests/advanced installs.
+ * @returns {JECIRuntime} Initialized runtime.
+ */
+function createRuntime(config, options = {}) {
+  if (!config || !Array.isArray(config.activeDepartments)) {
+    throw new TypeError('Runtime config with activeDepartments is required.');
+  }
+
+  const root = options.root || path.resolve(__dirname, '..');
+  const agentRegistry = options.agentRegistry
+    || new AgentRegistry(path.join(root, 'registry', 'agent-registry.json'));
+  const organization = options.organization || Organization.createDefault();
+  const activeAgents = buildConfiguredAgentList(agentRegistry, config);
+  // CEO Modes (Stream B2, core/ceoModes.js): resolved from config.ceoMode
+  // once here, same lifecycle as organization/agentRegistry above — an
+  // explicit options.ceoMode (tests/advanced installs) wins over config.
+  const ceoMode = options.ceoMode || resolveCeoMode(config.ceoMode);
+
+  for (const agent of config.customAgents || []) organization.registerAgent({
+    ...agent,
+    department: agent.department || agent.lane,
+    reportsTo: agent.reportsTo || agent.reports_to || null,
+  });
+
+  // Persistent workflow store + audit log, a Supabase-backed skill-execution
+  // audit log, and a Supabase-backed model-usage audit log, when Supabase is
+  // configured; falls back to WorkflowRuntime's, SkillExecutor's, and
+  // UsageTracker's own in-memory defaults otherwise (createWorkflowPersistence
+  // returns null when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are absent).
+  // Called at most once, so all three conformers share one underlying
+  // Supabase client (see core/persistence/index.js) rather than opening
+  // three connections. An explicitly injected workflowRuntimeOptions (tests/
+  // advanced installs) wins and is NOT combined with the auto-derived
+  // skillAudit/usageAudit — pass those explicitly alongside it if that path
+  // needs them too.
+  const persistence = options.workflowRuntimeOptions ? null : createWorkflowPersistence();
+  const workflowRuntimeOptions = options.workflowRuntimeOptions
+    || (persistence ? { store: persistence.store, audit: persistence.audit } : undefined);
+  const skillAudit = options.skillAudit || (persistence ? persistence.skillAudit : undefined);
+  // UsageTracker has no owning class with its own in-memory default (unlike
+  // WorkflowRuntime/SkillExecutor), so runtimeFactory always constructs one.
+  const usageAudit = options.usageAudit || (persistence ? persistence.usageAudit : new InMemoryAuditLog());
+
+  const connectedRegistries = loadRuntimeRegistries({
+    root,
+    organization,
+    ceoMode,
+    bridgeOptions: options.bridgeOptions,
+    workflowRuntimeOptions,
+    skillAudit,
+  });
+
+  const runtime = new JECIRuntime({
+    config: {
+      supervisorAgentId: 'ceo_agent',
+      brandName: config.agentName,
+      organization: config.businessContext,
+      owner: config.principalName,
+      departments: config.activeDepartments,
+      models: options.models,
+    },
+    registry: activeAgents,
+    logger: options.logger,
+  });
+  runtime.initialize();
+
+  runtime.organization = organization;
+  runtime.ceoMode = ceoMode;
+  runtime.agentRegistry = agentRegistry;
+  runtime.activeAgents = activeAgents;
+  runtime.registries = connectedRegistries.documents;
+  runtime.skillRegistry = connectedRegistries.skillRegistry;
+  runtime.skillExecutor = connectedRegistries.skillExecutor;
+  runtime.workflowRuntime = connectedRegistries.workflowRuntime;
+  runtime.usageAudit = usageAudit;
+  // Constructed (never auto-started) only when a caller supplies a
+  // workflowResolver — this scaffold ships no pre-built workflow
+  // definitions, so there is nothing to poll by default. Installs that
+  // define real workflows opt in explicitly via options.schedulerOptions
+  // and call .start(intervalMs) themselves.
+  runtime.workflowScheduler = options.schedulerOptions && options.schedulerOptions.workflowResolver
+    ? new WorkflowScheduler({
+      runtime: connectedRegistries.workflowRuntime,
+      workflowResolver: options.schedulerOptions.workflowResolver,
+      clock: options.schedulerOptions.clock,
+    })
+    : null;
+  runtime.frameworkCatalog = frameworkCatalog;
+  runtime.registryCatalog = {
+    agents: activeAgents,
+    roles: organization.listRoles().map(role => ({
+      id: role.id,
+      title: role.title,
+      department: role.department,
+      requiredCapabilities: [...role.requiredCapabilities],
+    })),
+    capabilities: [...new Set(organization.listAgents().flatMap(agent => agent.capabilities))],
+    projects: connectedRegistries.documents.projects.projects,
+    skills: connectedRegistries.documents.skills.skills,
+    tools: connectedRegistries.documents.tools.tools,
+    workflows: connectedRegistries.documents.workflows.workflows,
+  };
+
+  return runtime;
+}
+
+module.exports = {
+  createRuntime,
+  buildActiveAgentList,
+  buildConfiguredAgentList,
+  SESSION_PROJECTS,
+};
