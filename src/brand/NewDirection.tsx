@@ -5,7 +5,7 @@ import { useSettings } from '../settings/SettingsContext';
 import { LogoMark, LogoWord, ND, Paper, PaperDefs, Washi } from './buddies';
 import { CrayonDie, CrayonKitSection, CrayonPawn, CrayonPowerUp, type PowerId } from './CrayonKit';
 import HandmadeMock from './HandmadeMock';
-import { ModeBadge } from '../games/ModeBadge';
+import { WayRow } from './mockKit';
 import PlayfulMock from './PlayfulMock';
 import PaletteProposal from './PaletteProposal';
 import PatternProposal from './PatternProposal';
@@ -308,9 +308,9 @@ export default function NewDirection() {
         </div>
       </Block>
 
-      <Block title="Ways to play (kept as they are)" note="Your decision, 2026-11-23: three ways only, with their names, icons and colors. Versus is not a category anywhere.">
+      <Block title="Ways to play" note="Your decisions: three ways only (2026-11-23, Versus is not a category anywhere), now in the new palette (2026-11-24): Share Lemon and Butter, Live Sky and Blue crystal, Solo Kelly and Mint. Pastel fill, ink text, ink outline, the bright on the icon circle.">
         <div className="grid gap-2 max-w-[36rem]">
-          <ModeBadge mode="share" withHint /><ModeBadge mode="live" withHint /><ModeBadge mode="solo" withHint />
+          <WayRow way="Share" /><WayRow way="Live" /><WayRow way="Solo" />
         </div>
       </Block>
 

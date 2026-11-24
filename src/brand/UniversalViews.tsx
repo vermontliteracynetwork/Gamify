@@ -1,15 +1,19 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useSettings } from '../settings/SettingsContext';
 import {
-  ArrowLeft, ArrowRight, Broadcast, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
-  PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Television, Toolbox, User, UsersThree, X,
+  ArrowLeft, ArrowRight, CaretDown, Check, CornersOut, GearSix, Lightbulb, MagnifyingGlass, Pause,
+  PersonArmsSpread, Play, Plus, SpeakerHigh, Star, Toolbox, UsersThree, X,
 } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { BlobPatch, CrayonPowerUp, Doodle, type PowerId } from './CrayonKit';
 import { STARTER, StickerArt } from './Stickers';
-import { Badge, Fit, Laptop, MainBtn, MenuStep, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
+import { Badge, Fit, Laptop, MainBtn as BaseBtn, MenuStep, MORE_TEAMS, type Team, WAYS_STYLE, WelcomeScreen, ParkBack, PURPLE_GROUND, SkyBack, StudioBack, Tablet, TEAMS, TurnGlow } from './mockKit';
 import { GAME_COVERS } from './GameMockups';
 
-export { Badge, Laptop, MainBtn, Tablet, TEAMS };
+export { Badge, Laptop, BaseBtn as MainBtn, Tablet, TEAMS };
+// Every go button on a universal screen is yellow (teacher, 2026-11-24).
+function MainBtn(p: { children: ReactNode; wide?: boolean; big?: boolean }) { return <BaseBtn {...p} yellow />; }
 
 // Universal views (PROPOSAL, teacher 2026-11-23). Round 3 rules: no washi
 // tape; every universal screen sits on the site's purple ground; the scoreboard
@@ -132,11 +136,7 @@ function V1() {
 function OptCard({ label, children }: { label: string; children: ReactNode }) {
   return <div className="px-8 py-5 grid justify-items-center gap-3 rounded-[24px]" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}><b className="text-[22px]">{label}</b>{children}</div>;
 }
-const WAYS = [
-  { id: 'Share', hint: 'Play together on one screen', icon: <Television weight="bold" size={104} />, bg: PP.gamify },
-  { id: 'Live', hint: 'Play together on your own devices', icon: <Broadcast weight="bold" size={104} />, bg: PP.aqua },
-  { id: 'Solo', hint: 'Play on your own', icon: <User weight="bold" size={104} />, bg: PP.butter },
-];
+const WAYS = (['Share', 'Live', 'Solo'] as const).map((id) => ({ id, ...WAYS_STYLE[id] }));
 // Settings show only under the way they belong to (teacher, 2026-11-23).
 function V2({ pick = 'Share' }: { pick?: 'Share' | 'Solo' }) {
   return (
@@ -145,7 +145,7 @@ function V2({ pick = 'Share' }: { pick?: 'Share' | 'Solo' }) {
         <div className="flex gap-8">
           {WAYS.map((w) => { const on = w.id === pick; return (
             <div key={w.id} className="relative w-[268px] h-[262px] rounded-[24px] flex flex-col" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: on ? `${SEL}, 0 10px 0 ${I}` : `0 5px 0 ${I}`, transform: on ? 'translateY(-6px)' : undefined }}>
-              <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: w.bg, borderBottom: `3px solid ${I}` }}>{w.icon}</span>
+              <span className="flex-1 grid place-items-center rounded-t-[21px]" style={{ background: w.soft, borderBottom: `3px solid ${I}` }}><span className="w-[128px] h-[128px] rounded-full grid place-items-center" style={{ background: w.bright, border: `3px solid ${I}` }}><w.icon weight="bold" size={80} /></span></span>
               <span className="px-4 py-3 text-center"><b className="text-[32px] block" style={GY}>{w.id}</b><span className="text-[17px] font-semibold">{w.hint}</span></span>
               {on && <span className="absolute -top-4 -right-4"><Check40 /></span>}
             </div>); })}
@@ -161,9 +161,7 @@ function ShareCode() {
   return (
     <Wizard step={1} total={5} title="Share a join code">
       <div className="grid justify-items-center gap-6">
-        <span className="font-bold text-[26px]">Open the Join page on the screen you want to play on and type</span>
         <span className="px-10 py-4 rounded-[26px] tracking-[0.2em]" style={{ ...GY, fontSize: 120, background: PP.paper, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>472 915</span>
-        <span className="font-bold text-[22px] flex items-center gap-2 px-5 h-12 rounded-full" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}><Television weight="bold" size={26} />Same game and question set, on one shared screen</span>
       </div>
     </Wizard>
   );
@@ -245,25 +243,46 @@ function V4() {
     </Wizard>
   );
 }
+// Teams (teacher, 2026-11-24): no "How many teams?" selector; an Add team
+// button between Back and Next; cards centered both ways, wrapping onto new
+// centered rows. A new card pops in (scale 0.6 to 1, small overshoot) while the
+// others slide to their new places (layout). Still motion or Calm: no animation.
+const TEAM_POOL: Team[] = [...TEAMS, ...MORE_TEAMS];
 function V5() {
+  const { settings } = useSettings();
+  const reduce = useReducedMotion();
+  const still = reduce || settings.motion === 'still' || !!settings.calm;
+  const [teams, setTeams] = useState<Team[]>(TEAM_POOL.slice(0, 3));
+  const add = () => setTeams((ts) => { const next = TEAM_POOL.find((t) => !ts.includes(t)); return next && ts.length < 8 ? [...ts, next] : ts; });
+  const remove = (t: Team) => setTeams((ts) => (ts.length > 2 ? ts.filter((x) => x !== t) : ts));
+  const full = teams.length >= 8;
+  const addBtn = (
+    <button type="button" onClick={add} disabled={full} data-testid="add-team" className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 whitespace-nowrap disabled:opacity-50" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}>
+      <Plus weight="bold" size={20} />Add team
+    </button>
+  );
+  const many = teams.length > 4;
   return (
-    <Wizard step={4} total={5} title="Teams">
-      <div className="w-full grid gap-6 justify-items-center">
-        <div className="flex items-center justify-center gap-4 font-bold text-[20px]"><span>How many teams?</span><Seg opts={['2', '3', '4']} pick={2} /></div>
-        <div className="w-full grid grid-cols-4 gap-5">
-          {TEAMS.map((t) => (
-            <div key={t.name} className="relative" style={card}>
-              <div className="h-[72px] grid place-items-center rounded-t-[17px]" style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><span className="w-14 h-14 rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={38} /></span></div>
-              <div className="p-4 grid gap-3">
-                <span className="h-12 px-4 rounded-xl flex items-center justify-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
-                <div className="flex flex-wrap justify-center gap-1.5 text-[16px] font-bold">{['Ava', 'Leo', 'Mia'].map((n) => <span key={n} className="px-3 py-1 rounded-full" style={{ background: t.soft, border: `2px solid ${I}` }}>{n}</span>)}
+    <MenuStep title="Teams" step={5} total={6} extra={addBtn}>
+      <div className="w-full h-full flex flex-wrap justify-center content-center gap-5">
+        <AnimatePresence initial={false}>
+          {teams.map((t) => (
+            <motion.div key={t.name} layout={!still}
+              initial={still ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={still ? { opacity: 0, transition: { duration: 0 } } : { scale: 0.6, opacity: 0, transition: { duration: 0.18 } }}
+              transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 17, layout: { type: 'spring', stiffness: 320, damping: 30 } }}
+              className="relative w-[250px]" style={card}>
+              <div className={`${many ? 'h-[58px]' : 'h-[72px]'} grid place-items-center rounded-t-[17px]`} style={{ background: t.soft, borderBottom: `3px solid ${I}` }}><span className={`${many ? 'w-12 h-12' : 'w-14 h-14'} rounded-full grid place-items-center`} style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={many ? 32 : 38} /></span></div>
+              <button type="button" aria-label={`Remove ${t.name}`} onClick={() => remove(t)} className="absolute -top-3 -right-3 w-9 h-9 rounded-full grid place-items-center" style={{ background: '#fff', border: `2.5px solid ${I}`, boxShadow: `0 2px 0 ${I}` }}><X weight="bold" size={16} /></button>
+              <div className={`${many ? 'p-3 gap-2' : 'p-4 gap-3'} grid`}>
+                <span className="h-11 px-4 rounded-xl flex items-center justify-center font-bold text-[19px]" style={{ background: PP.paper, border: `2.5px solid ${I}` }}>{t.name}</span>
+                <div className="flex flex-wrap justify-center gap-1.5 text-[16px] font-bold">{['Ava', 'Leo'].map((n) => <span key={n} className="px-3 py-1 rounded-full" style={{ background: t.soft, border: `2px solid ${I}` }}>{n}</span>)}
                   <span className="px-3 py-1 rounded-full inline-flex items-center gap-1" style={{ border: `2px dashed ${PP.quiet}`, color: PP.quiet }}><Plus weight="bold" size={14} />Add</span></div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </AnimatePresence>
       </div>
-    </Wizard>
+    </MenuStep>
   );
 }
 const SETUP: { id: PowerId; name: string; job: string; on: boolean; soft: string }[] = [
@@ -530,14 +549,14 @@ function ClassHow() {
             </div>
           ))}
         </div>
-        <OptCard label="The game ends"><Seg opts={['When I stop it', 'After a number right', 'After some minutes']} pick={0} /></OptCard>
+        <OptCard label="The game ends"><Seg opts={['When I stop it', 'After a number right', 'At time']} pick={0} /></OptCard>
       </div>
     </Wizard>
   );
 }
 // ---------- lobbies ----------
 function CodeChip() {
-  return <div className="flex items-center gap-4 px-6 h-[76px] rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: LIFT }}><b className="text-[20px]">Join code</b><span className="text-[52px] whitespace-nowrap" style={GY}>472 915</span><span className="flex items-center gap-2 px-4 h-11 rounded-full font-bold text-[18px]" style={{ background: PP.mint, border: `2px solid ${I}` }}><UsersThree weight="bold" size={22} />12 here</span></div>;
+  return <div className="flex items-center px-10 h-[84px] rounded-full" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: LIFT }}><span className="text-[52px] whitespace-nowrap tracking-[0.12em]" style={GY}>472 915</span></div>;
 }
 const NAMES = ['Ava', 'Leo', 'Mia', 'Noah', 'Zoe', 'Eli', 'Ivy', 'Max', 'Ruby', 'Sam', 'Lily', 'Owen'];
 function V12b() {
@@ -601,7 +620,7 @@ const VIEWS: V[] = [
   { n: '3', name: 'Share a join code', view: <ShareCode />, note: 'Only after Share and "Share a join code": the code big on one paper card.' },
   { n: '4', name: 'Question set', view: <V3 />, note: 'Tabs, search, subject and grade filters, recent first; each card shows subject, grades, count, the first question and when it was used.' },
   { n: '5', name: 'Options', view: <V4 />, note: 'Each option group is its own card on the ground; only real field labels.' },
-  { n: '6', name: 'Teams and players', view: <V5 />, note: 'Straight cards, a shape and color on each team.' },
+  { n: '6', name: 'Teams and players', view: <V5 />, note: 'No count selector: Add team (between Back and Next) pops a new card in while the others slide over; x removes one. Two to eight teams, centered, wrapping onto centered rows.' },
   { n: '7', name: 'Power-up setup', view: <V6 />, note: 'The cards on the purple ground, centered; off cards dashed.' },
   { n: '8', name: 'Teacher: how the class plays (Live only)', view: <ClassHow />, note: 'Shows only when Live is picked: Together or Compete, and when the game ends.' },
   { n: '9a', name: 'Lobby: competitive', view: <V12b />, note: 'Teams in their colors and shapes, names joining under each.' },

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, CornersOut, GearSix, PersonArmsSpread, Play, X } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CornersOut, GearSix, PersonArmsSpread, Play, Television, User, X, type Icon } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 
 // Shared parts for the Brand page mockups (PROPOSAL, 2026-11-23): the team
@@ -16,12 +16,46 @@ export const TEAMS = [
   { name: 'Team Pink', color: PP.pink, shape: 'triangle', text: I, soft: PP.blush },
   { name: 'Team Lemon', color: PP.lemon, shape: 'square', text: I, soft: PP.butter },
 ] as const;
-export function Badge({ t, size = 40 }: { t: (typeof TEAMS)[number]; size?: number }) {
+// Four more for the Teams step, up to eight teams (teacher, 2026-11-24).
+export const MORE_TEAMS = [
+  { name: 'Team Green', color: PP.kelly, shape: 'diamond', text: I, soft: PP.mint },
+  { name: 'Team Orange', color: PP.orange, shape: 'hexagon', text: I, soft: PP.peach },
+  { name: 'Team Teal', color: PP.teal, shape: 'heart', text: I, soft: PP.aqua },
+  { name: 'Team Lime', color: PP.lime, shape: 'pentagon', text: I, soft: PP.sage },
+] as const;
+export type Team = { name: string; color: string; shape: string; text: string; soft: string };
+export function Badge({ t, size = 40 }: { t: Team; size?: number }) {
   const d = t.shape === 'circle' ? <circle cx="20" cy="20" r="16" /> : t.shape === 'star'
     ? <path d="M20 3 L25 15 L38 15 L27.5 23 L31.5 36 L20 28 L8.5 36 L12.5 23 L2 15 L15 15 Z" />
-    : t.shape === 'triangle' ? <path d="M20 4 L37 35 L3 35 Z" /> : <rect x="5" y="5" width="30" height="30" rx="6" />;
+    : t.shape === 'triangle' ? <path d="M20 4 L37 35 L3 35 Z" />
+    : t.shape === 'diamond' ? <path d="M20 2 L37 20 L20 38 L3 20 Z" />
+    : t.shape === 'hexagon' ? <path d="M11 4 L29 4 L38 20 L29 36 L11 36 L2 20 Z" />
+    : t.shape === 'heart' ? <path d="M20 35 C6 25 2 18 4 12 C6 5 15 4 20 11 C25 4 34 5 36 12 C38 18 34 25 20 35 Z" />
+    : t.shape === 'pentagon' ? <path d="M20 3 L37 15 L31 36 L9 36 L3 15 Z" />
+    : <rect x="5" y="5" width="30" height="30" rx="6" />;
   return <svg viewBox="0 0 40 40" width={size} height={size} aria-hidden="true"><g fill={t.color} stroke={I} strokeWidth="3" strokeLinejoin="round">{d}</g></svg>;
 }
+
+// The three ways to play in the new palette (teacher, 2026-11-24: "update ways
+// to play colors to match new theme"): each wears its pastel fill with ink text
+// and an ink outline, its bright on the icon circle. Same pair everywhere.
+export const WAYS_STYLE: Record<'Share' | 'Live' | 'Solo', { bright: string; soft: string; icon: Icon; hint: string }> = {
+  Share: { bright: PP.lemon, soft: PP.butter, icon: Television, hint: 'Play together on one screen' },
+  Live: { bright: PP.sky, soft: PP.blueCrystal, icon: Broadcast, hint: 'Play together on your own devices' },
+  Solo: { bright: PP.kelly, soft: PP.mint, icon: User, hint: 'Play on your own' },
+};
+export function WayRow({ way }: { way: keyof typeof WAYS_STYLE }) {
+  const w = WAYS_STYLE[way]; const Ic = w.icon;
+  return (
+    <span className="grid grid-cols-[auto_5.5rem_1fr] items-center gap-x-3 rounded-[1rem] px-3 py-2 text-base leading-snug" style={{ background: w.soft, color: I, border: `2px solid ${I}` }}>
+      <span className="w-9 h-9 rounded-full grid place-items-center" style={{ background: w.bright, border: `2px solid ${I}` }}><Ic weight="bold" size={20} aria-hidden="true" /></span>
+      <span className="font-display font-bold text-lg">{way}</span>
+      <span className="font-semibold">{w.hint}</span>
+    </span>
+  );
+}
+// Yellow go button (teacher, 2026-11-24): Next, Play and Start are #FDFD94 with ink text and an ink shadow.
+export const GO_YELLOW = '#fdfd94';
 
 // THE one glow (teacher, 2026-11-23: "the glow around the winner is the same
 // glow that circles the icon before click of turn"): a 6px lemon ring plus a
@@ -158,10 +192,10 @@ export function Tablet({ children }: { children: ReactNode }) {
 export function Fit({ w, h, children }: { w: number; h: number; children: ReactNode }) {
   return <Scaled w={w} h={h}>{children}</Scaled>;
 }
-export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean }) {
+export function MainBtn({ children, wide, big, yellow }: { children: ReactNode; wide?: boolean; big?: boolean; yellow?: boolean }) {
   return (
     <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
-      style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
+      style={yellow ? { background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` } : { background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
   );
 }
 
@@ -179,12 +213,12 @@ function MkRound({ children, label, size = 52 }: { children: ReactNode; label: s
   return <span aria-label={label} className="rounded-full grid place-items-center shrink-0" style={{ width: size, height: size, background: '#fff', border: `2px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}>{children}</span>;
 }
 export function MenuGo({ children }: { children: ReactNode }) {
-  return <span className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={{ background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>;
+  return <span className="min-h-[60px] px-8 text-[24px] rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>{children}</span>;
 }
 export function MenuBack() {
   return <span className="min-h-[56px] px-6 rounded-full font-bold text-[20px] inline-flex items-center gap-2 whitespace-nowrap" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 4px 0 ${I}` }}><ArrowLeft weight="bold" size={20} />Back</span>;
 }
-export function MenuStep({ title, step, total, children, go, back = true, canvas = 1280 }: { title: string; step: number; total: number; children: ReactNode; go?: ReactNode; back?: boolean; canvas?: number }) {
+export function MenuStep({ title, step, total, children, go, back = true, extra, canvas = 1280 }: { title: string; step: number; total: number; children: ReactNode; go?: ReactNode; back?: boolean; extra?: ReactNode; canvas?: number }) {
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
@@ -203,7 +237,7 @@ export function MenuStep({ title, step, total, children, go, back = true, canvas
             </ol>
           </div>
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">{children}</div>
-          <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
+          <div className="flex justify-center gap-5 items-center">{back && <MenuBack />}{extra}{go ?? <MenuGo>Next<ArrowRight weight="bold" size={24} /></MenuGo>}</div>
         </div>
       </div>
     </div>
@@ -219,7 +253,6 @@ export function MenuStep({ title, step, total, children, go, back = true, canvas
 // How to play card, and a full-width 72px start button whose bottom lines up
 // with the cover bottom.
 export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up and play', canvas = 1280 }: { name: string; desc: string; modes: string[]; steps: [ReactNode, string][]; cover: ReactNode; go?: string; canvas?: number }) {
-  const chip = [PP.gamify, PP.aqua, PP.butter];
   return (
     <div className="w-full h-full relative overflow-hidden" style={PURPLE_GROUND}>
       <div className="absolute top-0 left-0 origin-top-left" style={{ width: 1280, height: 800, transform: `scale(${canvas / 1280})`, color: I }}>
@@ -233,7 +266,7 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
             </div>
             <div className="grid gap-4">
               <p className="font-semibold text-[22px] leading-snug">{desc}</p>
-              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: chip[i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
+              <div className="flex flex-wrap gap-2.5">{modes.map((m, i) => <span key={m} className="px-5 h-11 inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: (WAYS_STYLE[m as keyof typeof WAYS_STYLE]?.soft) ?? [PP.gamify, PP.aqua, PP.butter][i % 3], border: `2.5px solid ${I}` }}>{m}</span>)}</div>
             </div>
             <div className="rounded-[26px] px-7 py-5 grid gap-3.5" style={{ background: '#fff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
               <h2 className="text-[26px]" style={MK_GY}>How to play</h2>
@@ -243,7 +276,7 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
                 </div>
               ))}
             </div>
-            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: '#fdfd94', color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
+            <span className="w-full h-[72px] rounded-full font-display font-bold text-[30px] inline-flex items-center justify-center gap-3" style={{ background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />{go}</span>
           </div>
         </div>
       </div>
