@@ -90,7 +90,7 @@ Approved: Home.
 
 20. [ ] **Browser tests green** after the card-choice change (setup tests must
     tap a card before Next); then a GitHub check run.
-21. [ ] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
+21. [x] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
     browser on every device.
 22. [ ] **Slow-device check:** a test round on a slow school Chromebook and a
     projector (suggested by the build session; needs her or a beta classroom).
