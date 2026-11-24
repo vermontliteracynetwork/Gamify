@@ -1,5 +1,6 @@
 import '@fontsource/chicle/400.css';
 import HintButton from '../../engine/HintButton';
+import { NO_STEAL_ABILITIES } from '../../engine/powerUps';
 import { impact } from '../../engine/impact';
 import { playClip, POWER_SOUNDS } from '../../engine/music';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -153,7 +154,8 @@ export default function CastleQuest() {
   function begin(ps: TurnPlayer[]) {
     const size = TRAIL_SPACES[trailOf(setup.trail)];
     const k = spaceKinds(size);
-    const allowed = POWERS.filter((p) => !(setup.powerOff ?? []).includes(itemFor(p).id));
+    // No power-up that moves another player back (no stealing, teacher 2026-11-24).
+    const allowed = POWERS.filter((p) => !NO_STEAL_ABILITIES.has(p) && !(setup.powerOff ?? []).includes(itemFor(p).id));
     setN(size); setKinds(k);
     setPowers(setup.powerUps ? placePowers(k, ps.length < 2 ? allowed.filter((p) => p !== 'wheel' && p !== 'shield') : allowed) : new Map());
     const state = startTurns(ps);

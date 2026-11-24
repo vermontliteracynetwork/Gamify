@@ -106,15 +106,17 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
           with the corner buttons (teacher, 2026-11-06). The question set
           search and filters lock right under it. */}
       <div className="px-6 sm:px-8 pt-1.5 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
-        <h2 className="font-display text-xl font-bold"><Title text={t('setup.stepTitle', { n: stepNo, total, title: page.title })} /></h2>
-        <ol className="flex gap-1 list-none p-0 m-0 w-56 max-w-full" aria-label={t('setup.steps')}>
+        {/* Step title left, the step meter right, no "Step x of x" on screen
+            (teacher, 2026-11-23); screen readers still hear the step number. */}
+        <h2 className="font-display text-xl font-bold"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
+        <ol className="ml-auto flex gap-[4px] list-none m-0 w-56 max-w-full rounded-full p-[3px]" style={{ background: '#eeeaf8', border: '2.5px solid var(--color-border)', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (
               <li key={`${p.id}-${q}`} className="flex-1">
                 <button type="button" onClick={() => goTo(k, q)} disabled={k > i && pages.slice(i, k).some((x) => x.ready === false || (CHOICE_PAGES.includes(x.id) && !picked.has(x.id)))}
                   aria-current={n === stepNo ? 'step' : undefined} aria-label={t('setup.stepOf', { n, total, title: p.title })}
-                  className={`w-full h-1.5 rounded-pill ${n <= stepNo ? 'bg-border' : 'bg-border-soft/50'} motion-safe:transition-colors`} />
+                  className="w-full h-3 rounded-full motion-safe:transition-colors" style={{ background: n < stepNo ? 'var(--kelly)' : n === stepNo ? 'var(--lemon)' : 'rgba(29,26,51,0.06)' }} />
               </li>
             );
           }))}

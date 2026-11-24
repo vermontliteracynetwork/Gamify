@@ -343,3 +343,7 @@ line that fits, and add each new preference the same turn she says it.
 - Links (2026-11-24): add lots of buttons and links to other Gamify pages wherever a page mentions them (Help pages and so on).
 - Words (2026-11-24): never break a word across two lines.
 - Approved public pages (2026-11-24): Home; Pricing (with the title fix).
+- No stealing (2026-11-24, from the competitor research): no power-up ever takes points, cards, pieces or places from another player or team, in any game.
+- Timers (2026-11-24): wherever there is a timer, the teacher can turn it off, so nothing is a time-based requirement.
+- Teacher portal (2026-11-24, "I love our preview of the new teacher portals"): it includes a live view of the whole class on one question, question set folders, and editing question sets.
+- Psychology-first marketing (2026-11-24): the marketing team keeps a running edge list (docs/marketing-bible.md section 13) of features that answer competitors' weak spots in the research, shows each on the site (Features "Fair Play, Built In"), and builds posts on them; no stealing is the first.

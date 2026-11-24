@@ -143,6 +143,19 @@ export const POSTS: Post[] = [
     lesson: 'First test. Bible 6: carousels earn saves; slide 1 is the hook, last slide the CTA.',
     status: 'drafting',
     history: [{ at: T('2026-11-24'), by: 'Social Planner', note: 'Drafted; waiting on screenshots of each mode before the bible check.' }] },
+  { id: 'p-0006', date: '2026-12-12', time: '07:00', platform: 'instagram', format: 'carousel', campaign: 'c-class-vs-teacher', buyer: 'k5-teachers', funnel: 'try', pillar: 'product',
+    principle: 'Loss aversion and psychological safety: name the pain teachers already feel (tears over stolen points), then the relief.',
+    hook: 'Review games where nobody steals your points',
+    hooksTried: ['The power-up that made my class cry (and why we left it out)', 'Fair fun: right answers decide the game'],
+    caption: 'Review games where nobody steals your points.\n\nIn Gamify, power-ups only add to your own team. No stealing, ever. Every timer can be turned off, so the kids who need a little longer play too.\n\nSave this for your next review day.',
+    onScreen: ['Slide 1: "Review games where nobody steals your points"', 'Slide 2: Power-ups only add to your own team', 'Slide 3: Every timer can be turned off', 'Slide 4: Right answers decide the game', 'Slide 5: "Save this for review day"'],
+    canva: 'Template "Carousel 4:5": hook slide, 3 feature slides with the Fair Play icons, CTA slide; screenshots of a power-up card and the timer setting.',
+    tags: ['#teachersofinstagram', '#classroommanagement', '#reviewgame', '#elementaryteacher'],
+    alt: 'Five-slide guide: power-ups only add to your own team, timers can be turned off, right answers decide the game.',
+    link: link('/features', 'instagram', 'social', 'ig_traffic_try_k5-teachers_fair-play_202612', 'p-0006'),
+    lesson: 'First test. Edge list item 1 (docs/marketing-bible.md section 13): the research shows stealing is the top complaint.',
+    status: 'needs-ok',
+    history: [{ at: T('2026-11-24'), by: 'Brand Copywriter', note: 'Built on the edge list: no stealing, timers off, right answers decide. No other site named.' }, { at: T('2026-11-24'), by: 'Marketing Director', note: 'Bible check: READY FOR OWNER.' }] },
 ];
 
 export const ACTIVITY: Activity[] = [
@@ -152,6 +165,7 @@ export const ACTIVITY: Activity[] = [
   { at: T('2026-11-24'), by: 'Social Planner', what: 'Placed 5 posts across TikTok, Instagram, Pinterest and Facebook for the first two weeks of December.' },
   { at: T('2026-11-24'), by: 'Trend Researcher', what: 'First monthly trend check is due 2026-12-01; platform specs in the bible are a baseline until then.' },
   { at: T('2026-11-24'), by: 'Marketing Director', what: 'Added accounts, Canva brand kit and ad budgets to Waiting on you. Nothing is posted until you approve.' },
+  { at: T('2026-11-24'), by: 'Marketing Director', what: 'Started the edge list (bible section 13) from the competitor research; no stealing leads. Drafted p-0006 on it.' },
 ];
 
 // Who may change a status: only the owner approves.

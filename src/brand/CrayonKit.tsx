@@ -360,9 +360,8 @@ export const UNIVERSAL_POWERS: { id: PowerId; name: string; job: string; games: 
   { id: 'treasure-chest', name: 'Prize Chest', job: 'Bonus points.', games: '8 games (Prize Chest, Tip Jar, Golden Box, Prize Bag...)' },
   { id: 'second-chance', name: 'Second Chance', job: 'Try again after a miss.', games: '4 games (Second Chance, Extra Heart, Heart Snack, Safe Shovel); proposed for every quiz game' },
   { id: 'double-dice', name: 'Double Dice', job: 'Roll two dice and move both.', games: 'Every dice game: Board Game, Snakes and Ladders, Track Race' },
-  { id: 'spin-wheel', name: 'Spin Wheel', job: 'Spin to see what happens.', games: 'Board Game, Game Show (Swap Spinner)' },
+  { id: 'spin-wheel', name: 'Spin Wheel', job: 'Spin to see what happens.', games: 'Board Game' },
   { id: 'potion', name: 'Potion', job: 'A boost for your next few turns.', games: 'Board Game; fits any turn game' },
-  { id: 'swap', name: 'Swap', job: 'Trade places or points with a player.', games: 'Optional, Share only, off by default: Game Show, Bowling, Pinball, Top Answers, Treasure Quest, Track Race', optional: true },
 ];
 
 // ---------- The roll demo ----------

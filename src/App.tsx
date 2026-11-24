@@ -27,6 +27,7 @@ import { t } from './i18n';
 // iPads and school networks.
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
+import ErrorBoundary from './ui/ErrorBoundary';
 import HoverTips from './ui/HoverTips';
 const QuestionSetsPage = lazyPage(() => import('./teacher/QuestionSetsPage'));
 const TeacherTimePage = lazyPage(() => import('./student/TeacherTimePage'));
@@ -114,6 +115,7 @@ function AnimatedRoutes() {
         className="flex-1"
       >
         <Breadcrumbs />
+        <ErrorBoundary>
         <Suspense fallback={<Loading />}>
         <Routes location={location}>
           <Route path="/" element={<PublicHome />} />
@@ -209,6 +211,7 @@ function AnimatedRoutes() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         </Suspense>
+        </ErrorBoundary>
       </motion.div>
     </AnimatePresence>
     {/* Full-screen tools (live games, a game's Theme Builder) have no footer, so nothing scrolls (teacher, 2026-10-31). */}

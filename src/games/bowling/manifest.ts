@@ -28,7 +28,6 @@ export const bowlingManifest: GameManifest = {
       { id: 'bumpers', label: 'Bumper rails', hint: 'Rails pop up along both gutters, so your next roll cannot be a gutter ball.' },
       { id: 'mega', label: 'Mega ball', hint: 'Your next ball is twice as big, so it is much easier to hit lots of pins.' },
       { id: 'mystery', label: 'Mystery points', hint: 'A surprise: you get from 1 to 10 points right away.' },
-      { id: 'swipe', label: 'Sneaky swipe', hint: 'Takes points from the team in first place and gives them to you.', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
       { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 1, max: 30, step: 1, default: 5 } },
     ],
     classic: [
@@ -38,7 +37,6 @@ export const bowlingManifest: GameManifest = {
       { id: 'classic-fireball', name: 'Fireball', ability: 'mega', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
       { id: 'classic-pin-twister', name: 'Pin Twister', ability: 'twister', motion: 'spin', often: 2, image: '/classic/powerups/tornado.webp' },
       { id: 'classic-mystery-box', name: 'Mystery Box', ability: 'mystery', motion: 'bob', often: 2, image: '/classic/powerups/mystery.webp' },
-      { id: 'classic-sneaky-swipe', name: 'Sneaky Swipe', ability: 'swipe', amount: 5, motion: 'wiggle', often: 1, image: '/classic/powerups/lightning.webp' },
     ],
   },
   hasCpu: true,

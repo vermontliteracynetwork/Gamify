@@ -74,12 +74,11 @@ function PhoneChips({ teams, pts, now, names }: { teams: readonly Team[]; pts: (
 // ================= Game Show =================
 // The real game: a grid of surprise cards (4 x 3 here, 12 cards), teams take
 // turns, a right answer picks a card; cards hold points or one of the four
-// Classic power-ups (Double Star, Swap Spinner, Sneaky Magnet, Prize Chest).
+// Classic power-ups (Double Star, Prize Chest); no stealing (teacher, 2026-11-24).
 // World: a TV studio stage (curtains, valance, spotlights, stage floor, a
 // bulb marquee) with the board zone blocked out in the middle.
 const GS_POWERS: Record<string, { id: PowerId; name: string }> = {
-  double: { id: 'double-points', name: 'Double Star' }, swap: { id: 'swap', name: 'Swap Spinner' },
-  steal: { id: 'magnet', name: 'Sneaky Magnet' }, bonus: { id: 'treasure-chest', name: 'Prize Chest' },
+  double: { id: 'double-points', name: 'Double Star' }, bonus: { id: 'treasure-chest', name: 'Prize Chest' },
 };
 // Open cards: team index and points (or a used power-up). null = closed.
 const GS_CARDS: ({ by: number; pts?: number; power?: string } | null)[] = [
@@ -435,7 +434,7 @@ function MatchThreePhone() {
 
 // ================= Four in a Row (Share, or Solo against the computer) =================
 // The real game: a 7 x 6 frame, answer then drop a piece, four in a line wins;
-// power-ups Double Drop and Pop Out. Pieces carry a mark as well as a color.
+// power-up Double Drop (no Pop Out: it takes another player's piece, teacher 2026-11-24). Pieces carry a mark as well as a color.
 const P1 = { color: PP.periwinkle, mark: 'dot' as const }, P2 = { color: PP.lemon, mark: 'star' as const };
 // 0 empty, 1 player one, 2 player two; row 0 is the top.
 const F4: number[][] = [
@@ -495,7 +494,7 @@ function FourLaptop({ vs }: { vs?: boolean }) {
   return (
     <PatternStage id="squiggle-pastel">
       <Corner />
-      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'swap', name: 'Pop Out' }} /></div>
+      <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'double-dice', name: 'Double Drop' }} /></div>
       <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><F4Board s={64} win={!vs} /></div>
       {!vs && <div className="absolute w-max left-1/2 -translate-x-1/2 top-[546px] z-10"><Burst text="Four in a row! Leo wins!" size="text-3xl" /></div>}
@@ -510,7 +509,7 @@ function FourTablet({ vs }: { vs?: boolean }) {
       <Corner />
       {!vs && <div className="absolute w-max left-1/2 -translate-x-1/2 top-[90px] z-10"><Burst text="Four in a row! Leo wins!" size="text-4xl" /></div>}
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[300px]"><F4Board s={98} win={!vs} /></div>
-      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'swap', name: 'Pop Out' }} /><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
+      <div className="absolute inset-x-10 top-[960px] grid grid-cols-2 gap-5"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'double-dice', name: 'Double Drop' }} /><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
       {!vs && <Confetti marks={[['sparkle', PP.lemon, 80, 170, 40], ['star', PP.pink, 700, 180, 34], ['dot', PP.sky, 120, 240, 18]]} />}
     </PatternStage>
   );
@@ -526,7 +525,7 @@ function FourPhone({ vs }: { vs?: boolean }) {
         {!vs && <Burst text="Four in a row! Leo wins!" size="text-xl" />}
         <div className="pt-12"><F4Board s={44} win={!vs} /></div>
         <div className="w-full grid grid-cols-2 gap-3 mt-3">{card(0, !!vs, vs ? 'You' : 'Ava')}{card(1, !vs, vs ? cpuName(1) : 'Leo')}</div>
-        <PowerCard id="swap" name="Pop Out" size={60} />
+        <PowerCard id="double-dice" name="Double Drop" size={60} />
       </PStack>
     </PatternStage>
   );
@@ -1107,7 +1106,6 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     uses: 'Welcome, How will you play (Share, Solo), Share a join code, Question set, Options, Teams, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: you vs computer', land: <GameShowLaptop vs />, port: <GameShowTablet vs noPop />, note: 'Two sides, You and the computer with a fun name (Goofy Lamp here, a new one each game); Butter shading shows whose turn.' },
-      { name: 'Power-up: Swap Spinner', land: <PowerMoment game={<GameShowLaptop noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, port: <PowerMoment game={<GameShowTablet noPop />} id="swap" name="Swap Spinner" job="Trade your whole score with a team." picks={['Team Purple', 'Team Pink', 'Team Lemon']} />, note: 'Picks a team with shape badges, never color alone.' },
       { name: 'Celebration', land: <Results game={<GameShowLaptop noPop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} score="160 points" />, port: <Results game={<GameShowTablet noPop />} title="Team Sky wins!" winner={<Badge t={TEAMS[1]} size={110} />} score="160 points" />, note: 'The winner in the turn glow over the studio.' },
     ],
   },
@@ -1130,7 +1128,6 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
     uses: 'Welcome, How will you play (Share, Solo), Question set, Options, Power-up setup, Question screen, Results, Settings, Pause.',
     views: [
       { name: 'Solo: you vs computer', land: <FourLaptop vs />, port: <FourTablet vs />, note: 'Your piece waits over its column; the computer has a fun name.' },
-      { name: 'Power-up: Pop Out', land: <PowerMoment game={<FourLaptop vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, port: <PowerMoment game={<FourTablet vs />} id="swap" name="Pop Out" job="Pull out a bottom piece; the rest fall down." />, note: 'Kit has no key art; swap stands in.' },
       { name: 'Celebration', land: <Results game={<FourLaptop />} title="Leo wins!" winner={<Disc p={2} s={110} />} score="90 XP" />, port: <Results game={<FourTablet />} title="Leo wins!" winner={<Disc p={2} s={110} />} score="90 XP" />, note: 'The winning piece in the turn glow.' },
     ],
   },

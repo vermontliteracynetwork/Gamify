@@ -116,7 +116,7 @@ to main (approved). The Game Lab and Territory stay off main.
 25. [x] **Batch 2, universal game components:** top strip and meter, tool
     buttons (Hint, Settings, Full screen, Close), scoreboard rows, power-up
     cards, results box with stickers, pause, hint card.
-26. [ ] **Batch 3, universal views:** welcome (with the portrait and phone
+26. [x] **Batch 3, universal views:** welcome (with the portrait and phone
     order), how will you play, share a join code, question set picker,
     options, teams and players, power-up setup, how the class plays, question
     screen, settings panel, loading, page not found, something went wrong.
@@ -130,3 +130,21 @@ to main (approved). The Game Lab and Territory stay off main.
 30. [ ] **Batch 7, game boards:** each live game's in-play screen matched to
     its approved mockup (Board Game, Match Three, Bubble Pop, Bowling, Game
     Show, Four in a Row, Question Tracker).
+
+## G. From the competitor research (owner, 2026-11-24)
+
+Her words: "based on the research in the table above, i dont want any power ups
+with stealing. in any instance where there is a timer, i want the ability to
+turn it off so its not a time based requirement. I love our preview of the new
+teacher portals. in it, i want to make sure we have live view of the whole
+class on one question. folders and editing question sets."
+
+31. [x] **No stealing power-ups, anywhere:** remove every power-up that takes
+    points, cards, pieces or places from another player or team (steal, swap,
+    sneaky magnet style), in live games, the shared power-up set, mockups and
+    theme kits.
+32. [x] **Every timer can be turned off:** any game, question or round with a
+    clock gets a setting to switch the clock off, so nothing depends on time.
+33. [x] **Teacher portal mockups:** a live view of the whole class on one
+    question (who answered what, right now); question set folders; editing
+    question sets in the portal.

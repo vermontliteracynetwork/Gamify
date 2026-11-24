@@ -110,7 +110,6 @@ function Row({ t, name, score, now, cpu }: { t: (typeof TEAMS)[number]; name?: s
 const HELD: { id: PowerId; name: string; job: string }[] = [
   { id: 'double-points', name: 'Double Points', job: 'Your next points count twice.' },
   { id: 'shield', name: 'Shield', job: 'Stops the next bad thing.' },
-  { id: 'swap', name: 'Swap Spinner', job: 'Trade your whole score with a team.' },
 ];
 // Power-ups are single square cards (teacher, 2026-11-24): no tray panel, no
 // label, no helper line. The art has no circle backing. Names always show.
@@ -155,9 +154,10 @@ function HintCard({ calm, onClose }: { calm: Calm; onClose: () => void }) {
 function ActionCard({ calm, onDone }: { calm: Calm; onDone: (team: string) => void }) {
   return (
     <Card calm={calm} w="26rem">
-      <span className="relative w-28 h-28 grid place-items-center"><span className="relative"><CrayonPowerUp id="swap" size={88} /></span></span>
-      <b className="text-[2rem]" style={GY}><GText>Swap Spinner</GText></b>
-      <span className="font-bold text-lg">Trade your whole score with a team.</span>
+      <span className="relative w-28 h-28 grid place-items-center"><span className="relative"><CrayonPowerUp id="treasure-chest" size={88} /></span></span>
+      {/* A kind pick, never a steal (teacher, 2026-11-24: no stealing power-ups). */}
+      <b className="text-[2rem]" style={GY}><GText>Share the Prize</GText></b>
+      <span className="font-bold text-lg">Give a team 20 bonus points.</span>
       <div className="grid gap-2 w-full">
         {[TEAMS[0], TEAMS[2], TEAMS[3]].map((t, i) => (
           <motion.button key={t.name} type="button" onClick={() => onDone(t.name)} {...enter(calm, calm ? 0 : 0.7 + i * 0.12)}

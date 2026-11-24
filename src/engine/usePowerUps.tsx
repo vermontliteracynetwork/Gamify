@@ -1,3 +1,4 @@
+import { allowedItem } from './powerUps';
 import { useState } from 'react';
 import type { GameManifest } from '../games/types';
 import { t } from '../i18n';
@@ -12,7 +13,7 @@ import { amountOf, rollPowerUp } from './powerUps';
 // shows what came. `on` is the teacher's Power-ups switch.
 // `off`: the power-ups the teacher switched off one by one (2026-11-01).
 export function usePowerUps(manifest: GameManifest, theme: GameTheme, on: boolean, off: string[] = []) {
-  const items = (theme.items?.length ? theme.items : manifest.items?.classic ?? []).filter((it) => !off.includes(it.id));
+  const items = (theme.items?.length ? theme.items : manifest.items?.classic ?? []).filter((it) => !off.includes(it.id) && allowedItem(it));
   const [pop, setPop] = useState<{ id: number; item: ThemeItem; text: string } | null>(null);
   const amount = (it: ThemeItem) => amountOf(it, manifest.items?.abilities.find((a) => a.id === it.ability)?.amount?.default ?? 0);
   // `later`: the item waits for the player's next turn (held power-ups,

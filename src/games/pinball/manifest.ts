@@ -29,7 +29,6 @@ export const pinballManifest: GameManifest = {
       { id: 'magnet', label: 'Jackpot magnet', hint: 'Your next ball rolls straight to the biggest pocket.' },
       { id: 'bounce', label: 'Bounce bonus', hint: 'Your next ball earns 10 extra points for every bumper or wall it bounces off.' },
       { id: 'mystery', label: 'Mystery points', hint: 'A surprise: you get from 10 to 100 points right away.' },
-      { id: 'swipe', label: 'Sneaky swipe', hint: 'Takes points from the player in first place and gives them to you.', amount: { label: 'Points', min: 10, max: 100, step: 10, default: 30 } },
       { id: 'bonus', label: 'Bonus points', hint: 'Adds points to your score right away.', amount: { label: 'Points', min: 10, max: 200, step: 10, default: 50 } },
     ],
     classic: [
@@ -38,7 +37,6 @@ export const pinballManifest: GameManifest = {
       { id: 'classic-jackpot-magnet', name: 'Jackpot Magnet', ability: 'magnet', motion: 'wiggle', often: 1, art: 'magnet' },
       { id: 'classic-bouncy-ball', name: 'Bouncy Ball', ability: 'bounce', motion: 'bob', often: 2, art: 'extra-ball' },
       { id: 'classic-mystery-bottle', name: 'Mystery Bottle', ability: 'mystery', motion: 'bob', often: 1, art: 'bottle' },
-      { id: 'classic-sneaky-swipe', name: 'Sneaky Swipe', ability: 'swipe', amount: 30, motion: 'wiggle', often: 1, art: 'swap-arrows' },
     ],
   },
   hasCpu: true,

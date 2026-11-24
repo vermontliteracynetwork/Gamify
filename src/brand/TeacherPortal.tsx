@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { GText } from './mockKit';
-import {
+import { FolderSimple,
   ArrowCounterClockwise, ArrowRight, Broadcast, CalendarBlank, ChartBar, ChatCircleText, Check, CheckCircle, Clock, Copy, DownloadSimple,
   EyeSlash, GameController, House, Info, Lightbulb, LinkSimple, LockSimple, MagnifyingGlass, Microphone, Palette, Pause, PencilSimple, Plus,
   Printer, Snowflake, Stack, Sticker as StickerIcon, Stop, Student, Target, TrendDown, TrendUp, UserCircle, UsersThree, Warning,
@@ -402,6 +402,49 @@ function CreateActivity() {
 }
 
 // ---------- 5. Live class view ----------
+// The whole class on one question, live (teacher, 2026-11-24: "live view of
+// the whole class on one question"): the question the class is on, a bar for
+// each answer with the names of who picked it (right answer marked), and who
+// has not answered yet. Teacher-only; the big screen never shows names.
+function LiveQuestion() {
+  const answers: [string, string[], boolean][] = [
+    ['A  Monday', ['Ava', 'Ben', 'Dev', 'Elle', 'Finn', 'Isla', 'Kai', 'Lena', 'Milo', 'Nora', 'Priya', 'Sam', 'Uma'], true],
+    ['B  monday', ['Carmen', 'Hugo', 'Omar', 'Theo'], false],
+    ['C  MONDAY', ['Jamal'], false],
+    ['D  mOnday', [], false],
+  ];
+  const waiting = ['Grace', 'Quinn', 'Rosa', 'Vic'];
+  const total = 22;
+  return (
+    <Shell active="activities" title="Live: one question" sub="Room 12 · Question 4 of 10 · only you see names" live>
+      <div className="h-full grid grid-cols-[1fr_300px] gap-4">
+        <Card title="Which word needs a capital letter?" right={<span className="text-[14px] font-bold" style={{ color: Q }}>18 of {total} answered</span>}>
+          <div className="grid gap-3">
+            {answers.map(([a, who, right]) => (
+              <div key={a} className="grid gap-1.5">
+                <div className="flex items-center gap-3">
+                  <b className="w-[120px] text-[16px] flex items-center gap-1.5">{right && <CheckCircle weight="fill" size={18} color={PP.kelly} />}{a}</b>
+                  <span className="flex-1 h-6 rounded-full overflow-hidden" style={{ background: PP.cream, border: `2px solid ${I}` }}><span className="block h-full" style={{ width: `${(who.length / total) * 100}%`, background: right ? PP.kelly : PP.blush }} /></span>
+                  <b className="w-10 text-right tabular-nums">{who.length}</b>
+                </div>
+                {who.length > 0 && <div className="flex flex-wrap gap-1 pl-[132px]">{who.map((n) => <Chip key={n} bg={right ? PP.mint : PP.blush}>{n}</Chip>)}</div>}
+              </div>
+            ))}
+          </div>
+          <p className="m-0 mt-3 text-[14px] font-bold flex gap-2"><Lightbulb weight="bold" size={18} className="shrink-0" />4 students wrote monday with a small m. Reteach capital letters for days of the week.</p>
+        </Card>
+        <div className="grid gap-4 content-start">
+          <Card title="Not answered yet">
+            <div className="flex flex-wrap gap-1.5">{waiting.map((n) => <Chip key={n} bg={PP.butter}>{n}</Chip>)}</div>
+          </Card>
+          <Card title="Next">
+            <div className="grid gap-2"><Btn main>Next question<ArrowRight weight="bold" size={16} /></Btn><Btn>Show the answer on the big screen</Btn><Btn>Pause the class</Btn></div>
+          </Card>
+        </div>
+      </div>
+    </Shell>
+  );
+}
 function LiveView() {
   type S = { n: string; done: number; right: number; state: 'ok' | 'stuck' | 'guess' | 'done' | 'away'; sec?: number };
   const st: S[] = NAMES.slice(0, 22).map((n, i) => ({
@@ -474,12 +517,25 @@ function Sets() {
   ] as const;
   return (
     <Shell active="sets" title="Question sets" actions={<><Btn><DownloadSimple weight="bold" size={18} />Import a spreadsheet</Btn><Btn main><Plus weight="bold" size={18} />New set</Btn></>}>
-      <div className="h-full grid grid-cols-[220px_1fr] gap-4">
+      <div className="h-full grid grid-cols-[240px_1fr] gap-4">
+        {/* Folders (teacher, 2026-11-24: "folders and editing question sets"): sets live
+            in folders the teacher names; drag a set onto one, or pick it from the set's menu. */}
+        <div className="grid gap-4 content-start">
+        <Card title="Folders" right={<Btn small><Plus weight="bold" size={14} />New</Btn>}>
+          <div className="grid gap-1">
+            {[['All sets', 5], ['Grammar unit', 3], ['Math facts', 1], ['Science, spring', 1]].map(([f, n], i) => (
+              <span key={f as string} className="h-10 px-3 rounded-[10px] flex items-center gap-2 text-[14px] font-bold" style={i === 1 ? { background: PP.lavender, border: `2px solid ${I}` } : { background: PP.cream }}>
+                <FolderSimple weight={i === 1 ? 'fill' : 'bold'} size={18} />{f as string}<span className="ml-auto text-[13px]" style={{ color: Q }}>{n as number}</span>
+              </span>
+            ))}
+          </div>
+        </Card>
         <Card title="Filter">
           {[['Subject', ['ELA', 'Math', 'Science']], ['Grade', ['K', '1', '2', '3']], ['Standard', ['L.1.2', 'L.2.1', 'L.2.2', '2.OA']]].map(([h, opts]) => (
             <div key={h as string} className="grid gap-1.5 mb-4"><b className="text-[13px]" style={{ color: Q }}>{h as string}</b><div className="flex flex-wrap gap-1.5">{(opts as string[]).map((o, i) => <span key={o} className="h-8 px-3 rounded-full text-[13px] font-bold inline-flex items-center gap-1" style={i === 0 ? { background: PP.mint, border: `2px solid ${I}` } : { background: PP.cream }}>{i === 0 && <Check weight="bold" size={12} />}{o}</span>)}</div></div>
           ))}
         </Card>
+        </div>
         <div className="flex flex-col gap-3 min-h-0">
           <div className="flex gap-1.5">{['My sets (5)', 'Public sets'].map((t, i) => <span key={t} className="h-10 px-4 rounded-full font-bold text-[14px] inline-flex items-center" style={i === 0 ? { background: PP.gamify, border: `2px solid ${I}` } : { background: PP.paper }}>{t}</span>)}</div>
           <Card pad={8}>
@@ -489,7 +545,7 @@ function Sets() {
                 <span className="grid gap-1"><b className="text-[16px]">{name}</b><span className="flex gap-1.5 items-center text-[13px] font-semibold" style={{ color: Q }}>{subj}, {gr}, {n} questions{work > 0 && <Chip bg={PP.peach} strong><Warning weight="bold" size={12} />{work} need work</Chip>}</span></span>
                 <span className="flex flex-wrap gap-1">{stds.map((s) => <Chip key={s} bg={PP.lavender} strong>{s}</Chip>)}</span>
                 <span className="grid gap-1 text-[13px] font-bold">{pct ? <><span style={{ color: Q }}>Class right on first try</span><span className="inline-flex items-center gap-2"><Meter pct={pct} color={skillColor(pct)} w={70} />{pct}%</span></> : <span style={{ color: Q }}>Not played yet</span>}</span>
-                <span className="flex gap-2"><Btn small><PencilSimple weight="bold" size={14} />Edit</Btn><Btn small main>Use<ArrowRight weight="bold" size={14} /></Btn></span>
+                <span className="flex gap-2"><Btn small><PencilSimple weight="bold" size={14} />Edit</Btn><Btn small><FolderSimple weight="bold" size={14} />Move</Btn><Btn small main>Use<ArrowRight weight="bold" size={14} /></Btn></span>
               </div>
             ))}
           </Card>
@@ -868,7 +924,10 @@ const VIEWS: { n: string; name: string; view: ReactNode; why: string; changed: s
   { n: '5', name: 'Live class view (teacher laptop)', view: <LiveView />,
     why: 'Timely, private feedback beats public comparison (Hattie, feedback; mastery-goal research, from memory). Sort by need puts the 2 or 3 students who need you first (Few: put the most important at the top left). Status uses an icon and words as well as color (WCAG 1.4.1).',
     changed: 'Today the monitor is a small pop-up list and the big screen shows a top-10 leaderboard by name. New: a full private view, tiles sorted by need with per-question dots, one-click help (message, hint, freeze), pause and end in reach, and the big screen preview showing the class goal only.' },
-  { n: '6a', name: 'Question sets', view: <Sets />,
+  { n: '5b', name: 'Live: the whole class on one question', view: <LiveQuestion />,
+    why: 'Her request (2026-11-24) and the top research gap: other sites cannot show the whole class on one question live. The answer bars with names make the common mistake visible in seconds, so the teacher can reteach on the spot (formative assessment, Black and Wiliam).',
+    changed: 'New. The class, the question it is on, a bar per answer with who picked it, who has not answered yet, and Next, Show the answer and Pause in reach.' },
+  { n: '6a', name: 'Question sets (with folders)', view: <Sets />,
     why: 'Information scent (NN/g, from memory): standards chips and how the class did tell a teacher which set to use before opening it. Faceted filters (subject, grade, standard) beat one long list.',
     changed: 'Rows gain standard chips, a "need work" badge and the class first-try meter, plus a Use button that starts Create an Activity with the set filled in.' },
   { n: '6b', name: 'Set editor', view: <SetEditor />,
