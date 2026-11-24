@@ -701,6 +701,18 @@ Notes:
   tapped (principle 2's one exception). Teachers see previews and upgrade
   options on their own pages.
 
+### Launch price and billing lengths (owner decision 2026-11-24; numbers partly proposed)
+Owner's words: "the marketing team at launch should have a campaign discount that will be offered to those who want to subscribe to a paid plan during the beta test, but dont want to be beta testers. allow also monthly subscriptions though discount at 3 month, 6 month, and 1 year. those are renewing at those intervals as well"
+
+| Plan length | Renews every | Discount vs monthly | Plus | Pro |
+|---|---|---|---|---|
+| Monthly | month | none (full price) | $10 (PROPOSED) | $18.75 (PROPOSED) |
+| 3 months | 3 months | 10% (PROPOSED) | $27 | about $50.60 |
+| 6 months | 6 months | 15% (PROPOSED) | $51 | about $95.60 |
+| 1 year | year | **20% (approved, owner 2026-11-24)** | $96 | $180 |
+
+Proposed with it: the launch price stays on every renewal while the plan stays active; the offer ends Jan 31, 2027 and is not extended; teacher and parent pages only, never student pages; price, renewal length and online cancel shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Beta testers keep their free Plus (track 1). Needs Stripe recurring prices at 1, 3, 6 and 12 months (Waiting on you: billing-intervals, mkt-launch-offer).
+
 **School/district plans matter most:** a single district purchase order is
 worth hundreds of individual card subscriptions, and districts are who ask
 for the privacy and accessibility paperwork in section 6.
@@ -1192,6 +1204,9 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 109 | **Research with the fine print showing.** The redesigned Research page puts "Studies found", a "To be fair" caveat and "In Gamify" side by side on every card, and the pricing page leads with what the class gets before the number. Honest framing is the pitch: teachers trust a tool that shows its limits (Design Chair, 2026-11-24, `/brand` Public pages proposal). |
 | 110 | **Question Tracker theme ideas: seashells on a beach, birds on wires.** Every right answer adds a seashell to the sand along the shore, or a little bird that lands on the telephone wires until the wires are full, the same fill-the-scene idea as the night sky of stars. | New calm scenes for the class-goal game without a new game to learn | Teacher, 2026-11-24 |
 | 111 | **Pinterest as a main channel.** Tall pins of every game in the Classic look, free theme templates, sticker sheets and pattern papers as printables, seasonal classroom sets a month early, each linking to a Blog post or theme guide. | The site's look is made to be saved and shared by teachers planning their rooms | Teacher, 2026-11-24 |
+| 112 | **"Not a sale."** On sales holidays (Cyber Monday, back-to-school sales), post the one honest contrast: no discount, just the free tier, the beta, and what we will never charge for (read-aloud, calm mode, settings in every game). | A pattern interrupt in a feed full of countdowns; builds trust without fake urgency (marketing bible 5) | Marketing Director, 2026-11-24 launch plan |
+| 113 | **"Here is exactly what we ask."** The beta asks shown with their minutes (setup 15, lesson 10, play 10 to 20, check-in 1, surveys 5, reports 1) as a carousel. | Transparency lowers the perceived cost of saying yes (commitment and consistency; Fogg ability) | Marketing Director, 2026-11-24 launch plan |
+| 114 | **"Two ways to start."** Test it free as a beta tester, or just subscribe at the launch price: monthly, or save 10%, 15% or 20% with 3, 6 or 12-month plans (3 and 6-month numbers proposed). | Gives non-testers a yes instead of a no; anchoring against monthly and a real end date (Jan 31) | Owner, 2026-11-24 |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1269,3 +1284,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 - Survey Showdown as a discussion starter (2026-11-22): after each board, ask why the top answer is the top answer.
 - Class sticker goals (2026-11-23): show the Achievement page on the projector on Friday, talk about which stickers the class earned by trying hard (not by winning), and pick one locked sticker to work toward together next week.
 - Territory warm-up (2026-11-24): start a Cooperative round on slow while students settle in, count the cats and mice together before you end, then switch to Competitive Cats against Mice and talk about why a balanced team matters.
+- What our beta classrooms taught us (2026-11-24, marketing launch plan): a short building-in-public post after each beta month: what testers reported (no student names or details), what changed, and a thank-you; pairs with the "You asked, we built it" social series (section 10 #39). Only once real beta feedback exists.

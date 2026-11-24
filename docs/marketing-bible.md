@@ -154,7 +154,9 @@ who always has the best ideas and never brags.
   only (owner rule, 2026-10-26).
 
 ### Core messages (rotate; one per piece)
-1. **One question set. Dozens of games. Four ways to play.** (the core promise)
+1. **One question set. Dozens of games. Four ways to play.** (the core promise;
+   until dozens are listed on the main site, say the real count, for example "7 games"
+   on 2026-11-24, checked in `src/games/registry.ts` the day before posting)
 2. **The whole class vs the teacher.** (the shareable moment)
 3. **Accessibility is never a paid upgrade.** (values, and a district buying point)
 4. **No student accounts, no ads, no trackers.** (trust)
