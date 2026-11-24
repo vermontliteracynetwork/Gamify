@@ -88,7 +88,7 @@ Approved: Home.
 
 ## E. Carried over from the hand-off
 
-20. [ ] **Browser tests green** after the card-choice change (setup tests must
+20. [x] **Browser tests green** after the card-choice change (setup tests must
     tap a card before Next); then a GitHub check run.
 21. [x] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
     browser on every device.
