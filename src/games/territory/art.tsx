@@ -29,7 +29,6 @@ const TAN = '#f3cd8c'; // her pack's floor square, a Nature tone beside Butter
 const MOUSE_BROWN = { main: '#c9ac90', deep: '#8f7258' };
 const GRAY = { main: '#aaa6bb', deep: '#5f5a76' };
 const ORANGE_DEEP = '#b84300'; // the kit's orange deep shade (src/brand/CrayonKit)
-const HOLE = INK;
 
 // Team colors: Cats wear Orange with Peach, Mice wear Gamify purple with its pastel.
 export const SIDE_COLOR = { defender: P.orange, invader: P.purple } as const;
