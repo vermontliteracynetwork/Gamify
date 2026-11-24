@@ -91,7 +91,7 @@ export function gap(i: number, side: Side, j: number, sideJ: Side): number {
 // The stage shows at most this many animals per side, so the room never turns
 // into a pile (Art Director, 2026-11-24; teacher to confirm the number). The
 // score strip still shows the true count. When a 13th arrives, the oldest one
-// on show leaves (a mouse in a poof, a cat out the window).
+// on show leaves (a mouse in a poof, a cat out of the room).
 export const STAGE_CAP = 12;
 // The pieces to draw at `now`: everything still leaving, plus each side's
 // newest STAGE_CAP; older ones pushed off the stage leave from the moment the
@@ -113,7 +113,7 @@ export function stagePieces(pieces: Piece[], now: number, cap = STAGE_CAP): Piec
 }
 
 // Where invaders come in (the mouse hole) and where sent-away defenders leave
-// (the window), in % of the room.
+// (out at the side), in % of the room.
 export const ENTRANCE: [number, number] = [80, 59];
 export const EXIT: [number, number] = [18, 22];
 

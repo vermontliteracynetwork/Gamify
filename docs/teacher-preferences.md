@@ -350,3 +350,6 @@ line that fits, and add each new preference the same turn she says it.
 - Teacher portal (2026-11-24, "I love our preview of the new teacher portals"): it includes a live view of the whole class on one question, question set folders, and editing question sets.
 - Psychology-first marketing (2026-11-24): the marketing team keeps a running edge list (docs/marketing-bible.md section 13) of features that answer competitors' weak spots in the research, shows each on the site (Features "Fair Play, Built In"), and builds posts on them; no stealing is the first.
 - Class check-in (2026-11-24, "say how was this game? and make the middle face a flat mout"): the question reads "How was this game?"; the middle face has a flat mouth.
+- The top bar (site header) is pure white (#ffffff), never cream (owner, 2026-11-24).
+- Territory art follows her Canva pack closely (owner, 2026-11-24): a plain wall, a two-tone baseboard, a perspective checker floor and the closed wooden door, with no extra furniture. Use the Classic look on her layout instead of inventing a new room.
+- A cat is one shape (owner, 2026-11-24): the legs grow out of the body, with one outer outline and no seams. All cats share the gray tabby's walking shape. There is no fluffy cat: the third cat is a black-and-white tuxedo.

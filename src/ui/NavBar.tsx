@@ -24,7 +24,7 @@ export default function NavBar() {
   const studentPage = /^\/(join|choose|live|mirror|look-up|arcade)(\/|$)/.test(path);
   const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-10 tap rounded-pill border-std border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
-    <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-surface border-b-[2.5px] border-border`}>
+    <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border`}>
       {studentPage && !any
         ? <span className="flex items-center shrink-0 mr-auto"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" /></span>
         : <Link to={any ? '/play' : '/'} className="flex items-center min-h-11 shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
