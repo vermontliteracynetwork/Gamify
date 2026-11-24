@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, CurrencyDollar, Eye, Factory, GameController, Notebook, PaintBrush, SquaresFour, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, CurrencyDollar, Eye, Factory, GameController, Megaphone, Notebook, PaintBrush, SquaresFour, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -24,6 +24,7 @@ import OwnerGate from './OwnerGate';
 import { GrowthChartCard } from './GrowthChart';
 import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
+import MarketingCard from './marketing/MarketingCard';
 import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
@@ -49,13 +50,14 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta';
+type SectionId = 'overview' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
   { id: 'release', label: 'owner.release', icon: Factory },
   { id: 'forecast', label: 'owner.forecast', icon: CurrencyDollar },
   { id: 'stripe', label: 'owner.stripe', icon: CreditCard },
   { id: 'waiting', label: 'owner.waiting', icon: ListChecks },
+  { id: 'marketing', label: 'owner.marketing', icon: Megaphone },
   { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots },
   { id: 'subs', label: 'owner.subs', icon: CreditCard },
   { id: 'growth', label: 'owner.chart', icon: ChartLineUp },
@@ -93,6 +95,7 @@ function Desktop() {
     preview: <PlanPreviewCard />,
     gallery: <GalleryCard />,
     beta: <BetaCard />,
+    marketing: <MarketingCard />,
   };
   const linkCls = 'dash-nav-item no-underline';
   return (

@@ -32,6 +32,21 @@ asset-audit, bug-report) are adapted from Claude Code Game Studios (MIT, see
 `.claude/THIRD_PARTY.md`). Use them while building; they never overrule the
 Golden Rule, the three lenses or Claudia.
 
+## Marketing team (owner's rule, 2026-11-24)
+
+The marketing team works inside the developer dashboard (`/owner`, Marketing:
+the content planner in `src/owner/marketing/plan.ts`) so the owner sees
+everything, and she makes the final call: nothing posts, boosts or spends
+without her OK. Every post, caption, ad and campaign follows
+`docs/marketing-bible.md` and passes the `marketing-bible-check` skill; the
+team learns in `docs/marketing-lessons.md` (lessons, her rejections word for
+word, monthly trend watch). Agents: marketing-director (lead),
+brand-copywriter, social-planner, ads-strategist, trend-researcher,
+performance-analyst. Skills: marketing-bible-check, content-calendar,
+campaign-brief, ad-copy-variants, tracking-links, landing-page-audit,
+competitor-teardown, post-review. Platforms: Instagram, Facebook, Pinterest,
+TikTok; Canva templates; Google and Meta ads. The goal is paid subscriptions.
+
 ## Design system
 
 `docs/design-system.md` is the look of every menu and teacher page: the

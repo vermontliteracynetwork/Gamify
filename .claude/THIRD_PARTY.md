@@ -14,7 +14,26 @@ ships to users.
 Gamify's own reviewers (Claudia, `golden-rule`) still have the final word. These
 helpers draft and check; they never overrule her.
 
-## License of the original work
+## Marketing skills (irinabuht12-oss/marketing-skills)
+
+Parts of the marketing team's methods were adapted from **marketing-skills** by Ryze AI
+(https://github.com/irinabuht12-oss/marketing-skills), MIT License, per its README and
+plugin manifest. Taken: the ad copy variant method, UTM and campaign naming rules,
+landing page message-match audit, competitor and creative teardown, creative fatigue
+thresholds, A/B test design and the weekly summary shape. Left out: the bundled Ryze
+MCP connector and its setup steps (a third-party service that would read our ad
+accounts; not approved), LinkedIn, Reddit, X, programmatic SEO, AI-visibility and
+other account-audit skills we don't need yet. Everything was rewritten for Gamify's
+marketing bible (`docs/marketing-bible.md`), which overrules them.
+
+- Agents: `ads-strategist`, `performance-analyst` (methods)
+- Skills: `ad-copy-variants`, `tracking-links`, `landing-page-audit`, `competitor-teardown`, `post-review`
+
+Gamify's own marketing team files (`marketing-director`, `brand-copywriter`,
+`social-planner`, `trend-researcher`, `marketing-bible-check`, `content-calendar`,
+`campaign-brief`) are original.
+
+## License of the original work (Claude Code Game Studios; marketing-skills is also MIT)
 
 MIT License
 

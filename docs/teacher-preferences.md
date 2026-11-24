@@ -194,3 +194,9 @@ line that fits, and add each new preference the same turn she says it.
 - Theme Builder colors (2026-11-19): no hint line and no hex boxes; each color is a circle and its name. Double-tap (double-click) the circle to open a color picker with a hex code box.
 - Bigger site (2026-11-19, "top bar and main column are still too small"): the top bar is taller with bigger text, the page column is wider (84rem), and laptop text is nudged up (about 16px on 1440 x 900, 15.5px on a wide 1856 x 795 window). Game menus keep the shorter top bar so they never scroll.
 - Question screens (2026-11-19, "improve the design, layout, text sizing, formatting of games"): the question is big and centered; the four answers fill the rest of the screen as big colored buttons, short answers big and centered with the letter at the left; long questions and answers drop to the regular screen-fit size. Star Quiz's question box is wide with the same big text. iPad portrait gets taller answer buttons.
+
+## Marketing (2026-11-24)
+- The marketing team works inside the developer dashboard so she sees everything they do; she always makes the final call.
+- Socials to start: Instagram, Facebook, Pinterest, TikTok. Templates in Canva. Paid ads on Google and Meta.
+- Every decision applies the best psychological research; posts use current, modern styles, captions and sounds; the team learns from past posts, campaigns and how other brands and games post.
+- The goal is money and subscriptions: high-quality campaigns that convert. Everything runs through docs/marketing-bible.md.
