@@ -246,7 +246,7 @@ game shows only that game's themes.
 
 ### Theme tiers (matches section 5)
 - **Free:** the house default theme to play; every other theme can be
-  **previewed but not played**; no Theme Builder.
+  **previewed but not played**; only ONE Game Show theme of its own (owner, 2026-11-24), never unlimited themes.
 - **Plus:** full theme library, playable, plus seasonal drops (fall,
   winter, spring, field day; secular by default, specific holidays only
   when a teacher chooses them).
@@ -679,7 +679,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | CSV import | Yes (counts toward the 3) | Yes | Yes | Yes |
 | Games | **Free games only** (a set list) | All games | All games | All games |
 | Modes in the games you can use | All four (Live up to your 30 students) | All four | All four | All four |
-| Themes | Classic only; others preview only; try the Theme Builder on one game (developer's pick) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
+| Themes | Classic only; others preview only; **one Game Show theme only** (owner, 2026-11-24; not unlimited) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
 | Question sets assigned at a time, per student (class and/or individual) | **1** | **5** | Unlimited | Unlimited |
@@ -701,17 +701,17 @@ Notes:
   tapped (principle 2's one exception). Teachers see previews and upgrade
   options on their own pages.
 
-### Launch price and billing lengths (owner decisions 2026-11-24; discounts approved, monthly prices proposed)
+### Launch price and billing lengths (owner decisions 2026-11-24; discounts and first-term-only approved, monthly prices proposed)
 Owner's words: "the marketing team at launch should have a campaign discount that will be offered to those who want to subscribe to a paid plan during the beta test, but dont want to be beta testers. allow also monthly subscriptions though discount at 3 month, 6 month, and 1 year. those are renewing at those intervals as well"
 
-| Plan length | Renews every | Discount vs monthly | Plus | Pro |
+| Plan length | Renews every | First-term discount vs monthly | Plus first term | Pro first term |
 |---|---|---|---|---|
 | Monthly | month | none (full price) | $10 (PROPOSED) | $18.75 (PROPOSED) |
 | 3 months | 3 months | **5% (approved)** | $28.50 | about $53.45 |
 | 6 months | 6 months | **15% (approved)** | $51 | about $95.60 |
 | 1 year | year | **20% (approved)** | $96 | $180 |
 
-Proposed with it: the launch price stays on every renewal while the plan stays active; the offer ends Jan 31, 2027 and is not extended; teacher and parent pages only, never student pages; price, renewal length and online cancel shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Beta testers keep their free Plus (track 1). Needs Stripe recurring prices at 1, 3, 6 and 12 months (Waiting on you: billing-intervals, mkt-launch-offer).
+Approved with it: the discount covers the first term only and does not renew; the plan then renews at the regular price for the same length unless the teacher cancels, and every post and the checkout say so. Proposed: the regular price for a length is monthly times the length (a renewing year: Plus $120, Pro $225); the offer ends Jan 31, 2027 and is not extended; teacher and parent pages only, never student pages; price, renewal length and online cancel shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Beta testers keep their free Plus (track 1). Needs Stripe recurring prices at 1, 3, 6 and 12 months (Waiting on you: billing-intervals, mkt-launch-offer).
 
 **School/district plans matter most:** a single district purchase order is
 worth hundreds of individual card subscriptions, and districts are who ask
