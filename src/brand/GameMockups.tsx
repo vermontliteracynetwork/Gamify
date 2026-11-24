@@ -46,7 +46,7 @@ function Score({ t, pts, now, held, compact }: { t: Team; pts: number; now?: boo
     <div className={`flex items-center gap-2.5 ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} rounded-2xl`} style={{ background: PP.paper, border: `3px solid ${I}`, boxShadow: now ? `0 4px 0 ${I}` : `0 3px 0 ${I}` }}>
       {now ? <TurnGlow round><Badge t={t} size={compact ? 28 : 32} /></TurnGlow> : <Badge t={t} size={compact ? 28 : 32} />}
       <b className={`flex-1 truncate ${compact ? 'text-base' : 'text-lg'}`}>{t.name}</b>
-      {held && <span title={`Holds ${held.name}`} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 1 }}><CrayonPowerUp id={held.id} size={compact ? 30 : 34} sticker /></span>}
+      {held && <span aria-label={`Holds ${held.name}`} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 1 }}><CrayonPowerUp id={held.id} size={compact ? 30 : 34} sticker /></span>}
       <span className={`font-display ${compact ? 'text-2xl' : 'text-3xl'} tabular-nums`}>{pts}</span>
     </div>
   );
@@ -207,9 +207,9 @@ function BoardGrid({ w, h, celebrate, pawns = PAWNS }: { w: number; h: number; c
 }
 function DieCard({ big, who }: { big?: boolean; who?: Team }) {
   return (
-    <div className="p-4 grid justify-items-center gap-3 text-center" style={paper}>
+    <div className={`${big ? "p-4 gap-3" : "p-3 gap-2"} grid justify-items-center text-center`} style={paper}>
       <span className="font-display text-2xl font-bold flex items-center gap-2"><Badge t={who ?? TEAMS[1]} size={30} />{who ? 'Your turn' : 'Team Sky'}</span>
-      <div className="relative grid place-items-center" style={{ width: big ? 150 : 128, height: big ? 150 : 128 }}><BlobPatch color={PP.blueCrystal} size={big ? 150 : 128} /><span className="relative"><CrayonDie value={3} size={big ? 112 : 96} /></span></div>
+      <div className="relative grid place-items-center" style={{ width: big ? 150 : 112, height: big ? 150 : 112 }}><BlobPatch color={PP.blueCrystal} size={big ? 150 : 112} /><span className="relative"><CrayonDie value={3} size={big ? 112 : 96} /></span></div>
       <MainBtn wide>Roll</MainBtn>
     </div>
   );
@@ -217,9 +217,9 @@ function DieCard({ big, who }: { big?: boolean; who?: Team }) {
 const BG_HELD: { id: PowerId; name: string }[] = [{ id: 'potion', name: 'Potion' }, { id: 'shield', name: 'Shield' }];
 function Tray() {
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-2xl" style={{ background: PP.butter, border: `2.5px solid ${I}` }}>
+    <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-2xl" style={{ background: PP.butter, border: `2.5px solid ${I}` }}>
       <b className="text-sm flex-1">Your power-ups</b>
-      {BG_HELD.map((p) => <span key={p.id} title={p.name} className="rounded-xl" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}`, padding: 2 }}><CrayonPowerUp id={p.id} size={44} sticker /></span>)}
+      {BG_HELD.map((p) => <span key={p.id} aria-label={`${p.name}, tap to use`} className="w-[60px] grid justify-items-center rounded-xl py-0.5" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><CrayonPowerUp id={p.id} size={30} /><span className="text-[10px] font-bold leading-tight text-center px-0.5">{p.name}</span></span>)}
     </div>
   );
 }
@@ -239,7 +239,7 @@ function BoardLaptop({ vs }: { vs?: boolean }) {
       <div className="absolute left-6 top-[74px] w-[690px] h-[520px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}>
         <BoardGrid w={650} h={480} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
       </div>
-      <div className="absolute right-6 top-[74px] w-[250px] grid gap-2.5">
+      <div className="absolute right-6 top-[74px] w-[250px] grid gap-2">
         <DieCard who={vs ? VS[0] : undefined} />
         <Tray />
         <MiniRace compact teams={vs ? [{ ...VS[0], color: TEAMS[0].color }, { ...VS[1], color: TEAMS[3].color }] : TEAMS} now={vs ? 0 : 1} />
@@ -293,7 +293,7 @@ function HeldTray({ items, label = 'Power-ups', row }: { items: { id: PowerId; n
   return (
     <div className={`flex ${row ? 'items-center' : 'flex-col'} gap-2 px-3 py-2 rounded-2xl`} style={{ background: PP.butter, border: `2.5px solid ${I}` }}>
       <b className="text-sm">{label}</b>
-      <span className="flex gap-2">{items.map((p) => <span key={p.id} title={p.name} className="rounded-xl" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}`, padding: 2 }}><CrayonPowerUp id={p.id} size={44} sticker /></span>)}</span>
+      <span className="flex gap-2">{items.map((p) => <span key={p.id} aria-label={`${p.name}, tap to use`} className="w-[64px] grid justify-items-center gap-0.5 rounded-xl py-1" style={{ background: PP.paper, border: `2.5px solid ${I}`, boxShadow: `0 3px 0 ${I}` }}><CrayonPowerUp id={p.id} size={40} /><span className="text-[11px] font-bold leading-tight text-center px-0.5">{p.name}</span></span>)}</span>
     </div>
   );
 }
@@ -424,7 +424,7 @@ function F4Player({ i, now, held, name, note = 'Winner!' }: { i: number; now?: b
       {now ? <TurnGlow round><Disc p={i + 1} s={54} /></TurnGlow> : <Disc p={i + 1} s={54} />}
       <b className="font-display text-2xl">{name ?? ['Ava', 'Leo'][i]}</b>
       {now && <span className="font-bold text-sm">{note}</span>}
-      {held && <span title={held.name} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 2 }}><CrayonPowerUp id={held.id} size={40} sticker /></span>}
+      {held && <span aria-label={held.name} className="rounded-xl" style={{ background: PP.butter, border: `2px solid ${I}`, padding: 2 }}><CrayonPowerUp id={held.id} size={40} sticker /></span>}
     </div>
   );
 }
@@ -867,9 +867,9 @@ function Results({ game, title, winner, stats, missed = 2 }: { game: ReactNode; 
       <div className="relative w-[560px]">
         <Confetti marks={[['sparkle', PP.lemon, -40, 10, 36], ['star', PP.pink, 560, -10, 30], ['heart', PP.pink, -30, 300, 24], ['sparkle', PP.paper, 570, 280, 28], ['dot', PP.sky, 530, 150, 16]]} />
         <Sheet w={560} layer={PP.butter} pad={24}>
-          <Title size={48}>{title}</Title>
+          <span className="relative z-10"><Title size={48}>{title}</Title></span>
           <TurnGlow round className="w-28 h-28 place-items-center rounded-full" style={{ background: PP.paper, border: `3px solid ${I}`, borderRadius: 9999 }}><span className="w-28 h-28 grid place-items-center"><span className="scale-[0.7]">{winner}</span></span></TurnGlow>
-          <div className="flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold text-lg" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
+          <div className="relative z-10 flex flex-wrap justify-center gap-2">{stats.map((s2) => <span key={s2} className="px-3 py-1 rounded-full font-bold text-lg" style={{ background: PP.blueCrystal, border: `2.5px solid ${I}` }}>{s2}</span>)}</div>
           <div className="flex flex-wrap justify-center gap-3"><MainBtn><ArrowsClockwise weight="bold" size={20} />Play again</MainBtn><Second>New game</Second><Second>Review {missed} missed</Second></div>
         </Sheet>
       </div>
@@ -961,7 +961,7 @@ export const GAME_COVERS: { id: string; name: string; desc: string; modes: strin
   { id: 'four-in-a-row', name: 'Four in a Row', desc: 'Answer, then drop your piece. Four in a line wins.', modes: ['Share', 'Solo'], steps: ['Answer the question', 'Drop your piece', 'Four in a line wins'], cover: <Cover mat={PP.blueCrystal}><FourLaptop /></Cover> },
   { id: 'bubble-pop', name: 'Bubble Pop', desc: 'Answer to load bubbles, then aim and pop.', modes: ['Solo'], steps: ['Answer to load bubbles', 'Aim and shoot', 'Match 3 to pop'], cover: <Cover mat={PP.aqua}><BubbleLaptop /></Cover> },
   { id: 'bowling', name: 'Bowling', desc: 'Answer right to roll. Knock down the most pins.', modes: ['Share', 'Solo'], steps: ['Answer right to roll', 'Aim and add spin', 'Most pins wins'], cover: <Cover mat={PP.lavender}><BowlingLaptop /></Cover> },
-  { id: 'star-quiz', name: 'Question Tracker', desc: 'Every right answer adds a star until the sky is full.', modes: ['Live', 'Solo'], steps: ['Answer a question', 'Right adds a star', 'Fill the whole sky'], cover: <Cover mat={PP.gamify}><ClassScreen /></Cover> },
+  { id: 'star-quiz', name: 'Question Tracker', desc: 'Every right answer adds a star until the sky is full.', modes: ['Live', 'Solo'], steps: ['Answer a question', 'Right adds a star', 'Fill the whole sky'], cover: <Cover mat={NIGHT}><ClassScreen /></Cover> },
 ];
 
 // ================= the tab =================
@@ -1017,7 +1017,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   {
     id: 'star-quiz', name: 'Question Tracker (Live: class screen and a student device)', laptop: <ClassScreen />, tablet: <StudentDevice />,
     lines: [
-      'New: the whole stage is the scene, a big Blue crystal sky over a mint hill with trees and flowers, filling with lemon stars in many sizes and turns (glowing orange for a first-try streak); the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
+      'New (teacher, 2026-11-24: her favorite live version, kept as original as possible): the whole stage is her deep navy night sky with soft cloud bands, white twinkles and glints, filling with her six star shapes (skinny spiky, tipped, bright five-point, four-point sparkle, fat rounded, shooting star) in flat Lemon, Butter and a touch of Orange, no outlines, many sizes and turns (glowing orange for a first-try streak); the join code, the class goal card with its progress bar and who is playing sit on paper cards; the student device shows the same sky around the question card.',
       'Why: one shared goal builds relatedness and lowers social comparison (self-determination theory); the goal bar shows how close the class is without empty placeholder shapes (goal-gradient effect); answers are about 112px tall for small fingers (WCAG 2.5.5).',
       'Pieces (theme template): Background 1600 x 1000 (the scene that fills), six Items 256 x 256 (a star, a fish...), Cover 600 x 600, Title 1200 x 360. No power-ups in this game today.',
     ],
@@ -1028,7 +1028,7 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
 // shape shows more of the same world, not a band.
 const GROUND: Record<string, CSSProperties> = {
   'game-show': { background: PP.grape }, 'castle-quest': { background: PP.kelly }, 'match-three': { background: PP.butter },
-  'four-in-a-row': { background: PP.blueCrystal }, 'bubble-pop': { background: PP.aqua }, bowling: { background: PP.lavender }, 'star-quiz': { background: PP.blueCrystal },
+  'four-in-a-row': { background: PP.blueCrystal }, 'bubble-pop': { background: PP.aqua }, bowling: { background: PP.lavender }, 'star-quiz': { background: NIGHT },
 };
 function ViewStrip({ id }: { id: string }) {
   const v = ALL_VIEWS[id];

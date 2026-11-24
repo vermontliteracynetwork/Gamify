@@ -209,6 +209,30 @@ error (`ui/error`, as `blip`), right, wrong, dice, power-up (proposal:
 round done (proposal: `library/success-power-up/new-level-fx-1.mp3`), win.
 Only the win uses `win`.
 
+### 3.2a Slower pop-ups, tap to close, the computer's turn (teacher, 2026-11-24)
+
+Her words: "the presented menus, text pop ups, etc. need to be slower, give more
+time for reading and require tap to close. give the students and the teacher
+time to process as the computer makes a turn, and slow everything down." And:
+"power ups should wait for tap." These values replace the enter and dwell
+times in the table above wherever they differ.
+
+| What | Enter | Stays | Exit | Reduced (Gentle / Calm / Still) |
+|---|---|---|---|---|
+| Power-up pop card (8), action card (9), turn card (4), winner box (15), pause message | 700 ms ease-out (cubic-bezier 0.22, 1, 0.36, 1), opacity 0 to 1 and scale 0.92 to 1, no spring snap | until tapped: a yellow `#FDFD94` "Tap to continue" (or "OK", or the choice buttons) 3.5rem tall; never auto-closes | 350 ms fade and scale to 0.96 | Gentle: same timing, no scale. Calm and Still: 150 ms fade only |
+| Feedback line (13) | 600 ms rise 16px + fade, ease-out | stays until the next action or a tap; a waiting line ("Computer is thinking...") stays for the whole computer turn | 300 ms fade | 150 ms fade |
+| Choice buttons inside a card | stagger 120 ms after the card has landed (700 ms) | until tapped | with the card | appear with the card, no stagger |
+| Held power-ups (6, 7) | earned card lands in the tray (600 ms ease-out); nothing fires by itself | waits in the tray until the player taps it; the name stays visible under the art on every device | taps open the action card (9) | no bob; Still: no movement |
+| Computer's turn | the feedback line shows "Computer is thinking..." with three dots | 2.5 s pause (2 to 3 s by game speed) before its move | the move plays at normal speed, then a 1.5 s pause with the result line ("Computer rolled a 4") before the next turn card | the same pauses (they are reading time, not motion); dots do not pulse in Still |
+
+Research: reading speed of early readers (roughly 50 to 100 words a minute
+in grades 1 and 2, from memory, not measured here) means a one-line card needs
+several seconds, so timing must belong to the reader (WCAG 2.2.1 Timing
+Adjustable; no auto-close). Slower, eased entrances let the eye follow where a
+card came from (continuity, Gestalt common fate) without the startle of a snap.
+A visible computer pause keeps cause and effect readable (Norman's gulf of
+evaluation) and gives the teacher a beat to talk.
+
 ### 3.3 Per-game mapping
 
 | Component | Game Show | Board Game | Match Three | Four in a Row | Bubble Pop | Bowling | Question Tracker |

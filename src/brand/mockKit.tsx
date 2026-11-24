@@ -315,7 +315,9 @@ export function Tablet({ children }: { children: ReactNode }) {
 export function Fit({ w, h, children }: { w: number; h: number; children: ReactNode }) {
   return <Scaled w={w} h={h}>{children}</Scaled>;
 }
-export function MainBtn({ children, wide, big, yellow }: { children: ReactNode; wide?: boolean; big?: boolean; yellow?: boolean }) {
+// Every go button is yellow (teacher, 2026-11-24: Next, Play, Start, Roll).
+export function MainBtn({ children, wide, big }: { children: ReactNode; wide?: boolean; big?: boolean; yellow?: boolean }) {
+  const yellow = true;
   return (
     <span className={`${wide ? 'w-full' : ''} ${big ? 'min-h-[68px] text-[30px] px-10' : 'min-h-[60px] text-[24px] px-8'} rounded-full font-display font-bold inline-flex items-center justify-center gap-3 whitespace-nowrap shrink-0`}
       style={yellow ? { background: GO_YELLOW, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` } : { background: PP.periwinkle, color: I, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${PP.grapeDeep}` }}>{children}</span>
@@ -415,8 +417,8 @@ export function WelcomeScreen({ name, desc, modes, steps, cover, go = 'Set up an
       <div className="w-full h-full flex flex-col" style={{ ...PURPLE_GROUND, color: I, padding: `${phone ? 20 : 28}px ${px}px ${phone ? 24 : 40}px` }}>
         <div className="flex items-center justify-between"><img src="/brand/gamify-wordmark.png" alt="Gamify" className={`${phone ? 'h-7' : 'h-10'} w-auto`} draggable={false} />
           <div className="flex gap-2"><MkRound label="Full screen" size={phone ? 38 : 52}><CornersOut weight="bold" size={phone ? 18 : 24} /></MkRound><MkRound label="Settings" size={phone ? 38 : 52}><GearSix weight="bold" size={phone ? 18 : 24} /></MkRound></div></div>
-        <div className="mt-5 rounded-[24px] overflow-hidden relative shrink-0" style={{ width: cw, height: cw * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
-          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(cw - 6) / 720})` }}>{cover}</div>
+        <div className="mt-5 mx-auto rounded-[24px] overflow-hidden relative shrink-0" style={{ width: Math.min(cw, f.h * 0.4 * 720 / 648), height: Math.min(cw, f.h * 0.4 * 720 / 648) * 648 / 720, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}>
+          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(Math.min(cw, f.h * 0.4 * 720 / 648) - 6) / 720})` }}>{cover}</div>
         </div>
         <div className="flex-1 min-h-0 mt-5">
           <AutoFit width={phone ? 520 : cw}>

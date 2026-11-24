@@ -446,17 +446,17 @@ function V10() {
         <div className="relative">
           <Paper layer={PP.blush} tilt={-1.5} pad={0} className="w-[820px]">
             <div className="px-10 pt-9 pb-9 grid justify-items-center gap-6 text-center">
-              <h2 className="text-[80px]" style={GY}>Great game!</h2>
+              <h2 className="relative z-10 text-[80px]" style={GY}>Great game!</h2>
               <div className="flex items-end gap-6">
                 {[1, 0, 2].map((i) => { const t = TEAMS[i]; return (
                   <div key={t.name} className="grid justify-items-center gap-3">
                     {i === 0
                       ? <TurnGlow round><span className="w-[120px] h-[120px] rounded-full grid place-items-center" style={{ background: PP.paper, border: `3px solid ${I}` }}><Badge t={t} size={78} /></span></TurnGlow>
                       : <Badge t={t} size={60} />}
-                    <span className="w-[150px] rounded-t-[20px] grid place-items-center text-[44px]" style={{ ...GY, height: [150, 110, 80][i], background: i === 0 ? PP.periwinkle : t.soft, border: `3px solid ${I}` }}>{i + 1}</span>
+                    <span className="relative w-[150px] rounded-t-[20px] grid place-items-center text-[44px]" style={{ ...GY, height: [150, 110, 80][i], background: i === 0 ? PP.periwinkle : t.soft, border: `3px solid ${I}` }}>{i + 1}</span>
                   </div>); })}
               </div>
-              <div className="flex gap-4 justify-center items-center"><MainBtn big><Play weight="fill" size={26} />Play again</MainBtn><SecondBtn>New game</SecondBtn><SecondBtn>Review</SecondBtn><SecondBtn><Star weight="bold" size={20} />Rate</SecondBtn></div>
+              <div className="relative z-10 flex gap-4 justify-center items-center"><MainBtn big><Play weight="fill" size={26} />Play again</MainBtn><SecondBtn>New game</SecondBtn><SecondBtn>Review</SecondBtn><SecondBtn><Star weight="bold" size={20} />Rate</SecondBtn></div>
             </div>
           </Paper>
           <Corner id="star" x="-56px" y="30px" rot={-14} />
