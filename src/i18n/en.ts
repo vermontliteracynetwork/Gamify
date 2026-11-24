@@ -2465,6 +2465,8 @@ export const en = {
   'bp.aim': 'Aim and shoot!',
   'bp.answer': 'Answer to load more bubbles!',
   'bp.flying': 'Pop!',
+  'bp.next': 'Next',
+  'bp.popGain': 'Pop! +{n}',
   'bp.shots': '{count} bubbles left',
   'bp.shots.one': '1 bubble left',
   'bp.board': 'Board {n}',

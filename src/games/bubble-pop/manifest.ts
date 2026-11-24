@@ -1,6 +1,10 @@
 import type { GameManifest } from '../types';
 
-export const BUBBLE_COLORS = ['#fdfd94', '#e5635f', '#8fe3a0', '#8ec5ff', '#f6a5c0', '#f7b267'];
+// The Classic bubbles in the brand brights (approved mockup, owner 2026-11-24):
+// Lemon drop, Pink punch, Kelly green, Sky, Grape, Orange paloma.
+export const BUBBLE_COLORS = ['#fabe37', '#f055a5', '#22b04a', '#4ba3e8', '#6a45f0', '#ff9b28'];
+// The board: Blue crystal, the pastel of Sky (no more navy).
+export const BOARD_COLOR = '#bfdff3';
 
 // Kept apart from the game so the game list loads without loading every game.
 export const bubblePopManifest: GameManifest = {
@@ -11,7 +15,7 @@ export const bubblePopManifest: GameManifest = {
   questionKinds: ['mc'],
   themePieces: [
     { id: 'background', label: 'Background', width: 1600, height: 1200, hint: 'Behind the board' },
-    { id: 'board', label: 'Board', width: 1000, height: 1300, hint: 'Behind the bubbles', color: '#314677' },
+    { id: 'board', label: 'Board', width: 1000, height: 1300, hint: 'Behind the bubbles', color: BOARD_COLOR },
     ...BUBBLE_COLORS.map((color, i) => ({ id: `bubble-${i}`, label: `Bubble ${i + 1}`, width: 128, height: 128, hint: 'One of the six bubbles you match', color })),
     { id: 'cover', label: 'Cover', width: 600, height: 600, hint: 'The picture on the game card' },
   ],

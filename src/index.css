@@ -423,7 +423,27 @@ html[data-motion="still"] :is(.cc-splash, .cc-tense) { animation: none; }
 @keyframes bp-pop { 0% { transform: scale(1); opacity: 1; } 25% { transform: scale(1.35); opacity: 1; } 45% { transform: scale(0.9) translateY(0); opacity: 0.95; } 100% { transform: scale(0.7) translateY(16px); opacity: 0; } }
 @keyframes bp-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(22px) rotate(25deg); opacity: 0; } }
 @keyframes bp-in { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes bp-spark { 0% { transform: scale(0.2) rotate(0deg); opacity: 0; } 30% { transform: scale(1.25) rotate(25deg); opacity: 1; } 100% { transform: scale(0.6) rotate(70deg) translateY(-6px); opacity: 0; } }
 html[data-motion="still"] :is(.bp-fx) { animation: none !important; }
+/* Bubble Pop's in-play layout (approved mockup, owner 2026-11-24; the solo
+   board-game standard): the meter pill across the top, the tall board in the
+   middle, the score at the top right with the held power-ups under it,
+   centered on the score. Portrait puts the score above the board, right. */
+.bp-play { --bp-top: 4.75rem; --bp-bw: min(calc(100vw - 22rem), calc((var(--play-h) - 5.5rem) / 1.3)); }
+.bp-board { top: var(--bp-top); width: var(--bp-bw); }
+.bp-side { top: calc(var(--bp-top) + 0.5rem); left: calc(50% + var(--bp-bw) / 2); right: 0; }
+.bp-meter { left: 50%; transform: translateX(-50%); }
+.bp-meter-bar { width: clamp(6rem, calc(100vw - 32rem), 16rem); }
+.bp-gy { font-family: var(--font-display); font-weight: 400; line-height: 1; text-transform: uppercase; }
+@media (orientation: portrait) {
+  .bp-play { --bp-top: 16rem; --bp-bw: min(calc(100vw - 2.5rem), calc((var(--play-h) - 16.75rem) / 1.3)); }
+  .bp-side { top: 4.5rem; left: auto; right: calc(50% - var(--bp-bw) / 2); }
+  .bp-meter-bar { width: clamp(6rem, calc(100vw - 30rem), 14rem); }
+}
+@media (orientation: portrait) and (max-width: 40rem) {
+  .bp-meter { left: 0.75rem; transform: none; }
+  .bp-meter-bar { width: clamp(4rem, calc(100vw - 22rem), 10rem); }
+}
 /* Bowling: knocked pins tip over and fade. */
 
 /* Promotional site hover motion (teacher, 2026-10-25): cards lift and tilt a
