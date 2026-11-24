@@ -60,7 +60,7 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
     // the preview and the tabs share the space left under the menu.
     <main className={`max-w-7xl mx-auto px-4 sm:px-6 pt-4 ${game ? 'pb-4 h-[calc(100dvh-3.5rem)] flex flex-col' : 'pb-6'}`}>
-      <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} />}</div>
+      <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} rail={!game} />}</div>
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
   );
@@ -315,11 +315,11 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
         </div>
       )}
 
-      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
         {/* The preview, as big as the space allows, with arrows that turn
             between the screens the pieces show up on (teacher, 2026-11-18:
             no Game / Power-ups buttons, no count line). */}
-        <div className="min-h-0 flex items-center justify-center gap-2 [container-type:size]">
+        <div className="min-h-0 flex items-center justify-center gap-2 [container-type:size] lg:order-2">
           {views.length > 1 && <PageTurn dir="prev" label={t('builder.prevView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) - 1 + views.length) % views.length].id)} />}
           <div className="flex-1 min-w-0 grid justify-items-center">
             {/* The dots hang under the preview, so the preview itself sits in
@@ -337,7 +337,9 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
           {views.length > 1 && <PageTurn dir="next" label={t('builder.nextView')} onClick={() => setView(views[(views.findIndex((v) => v.id === view) + 1) % views.length].id)} />}
         </div>
 
-        {/* The menu is as tall as the preview beside it (teacher, 2026-11-19). */}
+        {/* The menu is as tall as the preview beside it (teacher, 2026-11-19);
+            the pieces on the left, the preview big on the right (approved
+            /brand Theme Builder, batch 6, 2026-11-24). */}
         <div className="min-h-0 flex flex-col gap-3 lg:self-center" style={previewH ? { height: previewH } : undefined}>
           {blocked && <LimitNote><span className="flex items-center gap-2"><LockSimple weight="fill" size={20} />{blocked}</span></LimitNote>}
           {!blocked && (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Crown, DownloadSimple, Trash } from '@phosphor-icons/react';
+import { Crown, DownloadSimple, SignOut, Trash } from '@phosphor-icons/react';
 import { PlanCards } from '../billing/Upgrade';
 import { setTeacher, useTeacher } from '../auth/session';
 import { TIERS } from '../config';
@@ -51,39 +51,52 @@ export default function AccountPage() {
     navigate('/');
   }
 
+  // Two columns (approved /brand Account, batch 6, 2026-11-24): value and the
+  // plan first on the left; download, delete (typed DELETE, a deliberate speed
+  // bump) and log out on the right.
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24 grid gap-4">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader title={t('account.title')} subtitle={teacher?.name} />
-      <Panel className="grid gap-2">
-        <h2 className="font-display text-2xl">{t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
-        <p className="font-semibold">{(!TIERS[tier].hasClasses ? t('account.limitsFree', { students: String(TIERS[tier].studentsPerClassroom), sets: String(TIERS[tier].savedQuestionSets) }) : t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) })).replace(/Infinity/g, t('pricing.unlimited'))}</p>
-        <p className="font-bold text-lg">{used && used.answers > 0 ? t('account.value', { answers: used.answers, students: used.students, sets: used.sets }) : t('account.valueNew')}</p>
-        {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : tier === 'pro' ? (
-          <p className="font-bold flex items-center gap-2"><Crown weight="fill" size={22} aria-hidden="true" />{t('account.topPlan')}</p>
-        ) : (
-          <>
-            <p className="font-display text-xl">{tier === 'plus' ? t('account.moreFromPro') : t('account.moreFrom')}</p>
-            <PlanCards suggest={tier === 'plus' ? 'pro' : 'plus'} onDone={(p) => setUpgraded(t(`pricing.${p}`))} />
-          </>
-        )}
-        <PlanUntil />
-        <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
-      </Panel>
-      {tier === 'free' && <AccessCode />}
-      <Panel className="grid gap-2">
-        <h2 className="font-display text-2xl">{t('account.exportTitle')}</h2>
-        <p className="font-semibold">{t('account.exportText')}</p>
-        <Button className="justify-self-start" onClick={() => void exportAll()}><DownloadSimple weight="bold" size={18} />{t('account.export')}</Button>
-      </Panel>
-      <Panel className="grid gap-2">
-        <h2 className="font-display text-2xl">{t('account.deleteTitle')}</h2>
-        <p className="font-semibold">{t('account.deleteText')}</p>
-        <label className="grid gap-1 font-bold">{t('account.typeDelete')}
-          <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border font-bold max-w-xs" />
-        </label>
-        <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => void deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
-      </Panel>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] items-start">
+        <div className="grid gap-4 min-w-0">
+          <Panel className="grid gap-2">
+            <h2 className="font-heading font-bold text-xl">{t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
+            <p className="font-semibold">{(!TIERS[tier].hasClasses ? t('account.limitsFree', { students: String(TIERS[tier].studentsPerClassroom), sets: String(TIERS[tier].savedQuestionSets) }) : t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) })).replace(/Infinity/g, t('pricing.unlimited'))}</p>
+            <p className="font-bold text-lg">{used && used.answers > 0 ? t('account.value', { answers: used.answers, students: used.students, sets: used.sets }) : t('account.valueNew')}</p>
+            <PlanUntil />
+            <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
+            {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : tier === 'pro' ? (
+              <p className="font-bold flex items-center gap-2"><Crown weight="fill" size={22} aria-hidden="true" />{t('account.topPlan')}</p>
+            ) : (
+              <>
+                <p className="font-heading font-bold text-lg mt-2">{tier === 'plus' ? t('account.moreFromPro') : t('account.moreFrom')}</p>
+                <PlanCards suggest={tier === 'plus' ? 'pro' : 'plus'} onDone={(p) => setUpgraded(t(`pricing.${p}`))} />
+              </>
+            )}
+          </Panel>
+          {tier === 'free' && <AccessCode />}
+        </div>
+        <div className="grid gap-4">
+          <Panel className="grid gap-2">
+            <h2 className="font-heading font-bold text-lg">{t('account.exportTitle')}</h2>
+            <p className="font-semibold text-sm">{t('account.exportText')}</p>
+            <Button className="justify-self-start" onClick={() => void exportAll()}><DownloadSimple weight="bold" size={18} />{t('account.export')}</Button>
+          </Panel>
+          <Panel className="grid gap-2 !bg-blush">
+            <h2 className="font-heading font-bold text-lg">{t('account.deleteTitle')}</h2>
+            <p className="font-semibold text-sm">{t('account.deleteText')}</p>
+            <label className="grid gap-1 font-bold text-sm">{t('account.typeDelete')}
+              <input value={confirm} onChange={(e) => setConfirm(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border bg-surface font-bold" />
+            </label>
+            <Button variant="danger" className="justify-self-start" disabled={confirm !== 'DELETE'} onClick={() => void deleteAll()}><Trash weight="bold" size={18} />{t('account.delete')}</Button>
+          </Panel>
+          <Panel className="grid gap-2">
+            <h2 className="font-heading font-bold text-lg">{t('account.logoutTitle')}</h2>
+            <Button onClick={() => { setTeacher(null); navigate('/'); }}><SignOut weight="bold" size={18} />{t('account.logout')}</Button>
+          </Panel>
+        </div>
+      </div>
     </main>
   );
 }

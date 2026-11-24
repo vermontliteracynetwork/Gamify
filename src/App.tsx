@@ -93,6 +93,7 @@ const WaysList = lazyPage(() => import('./public/WaysPage').then((m) => ({ defau
 const WaysPost = lazyPage(() => import('./public/WaysPage').then((m) => ({ default: m.WaysPost })));
 const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
+const TeacherHome = lazyPage(() => import('./teacher/TeacherHome'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -110,7 +111,7 @@ function AnimatedRoutes() {
         animate={{ opacity: 1, y: 0 }}
         exit={reduce ? undefined : { opacity: 0, y: -12 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-        className="flex-1"
+        className="route-shell flex-1"
       >
         <Breadcrumbs />
         <ErrorBoundary>
@@ -179,7 +180,7 @@ function AnimatedRoutes() {
           <Route path="/games/game-show" element={<RequireSignIn><RequireGame id="game-show"><GameShow /></RequireGame></RequireSignIn>} />
           <Route path="/games/match-three" element={<RequireSignIn><RequireGame id="match-three"><MatchThree /></RequireGame></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
-          <Route path="/teacher" element={<RequireTeacher><Navigate to="/teacher/classes" replace /></RequireTeacher>} />
+          <Route path="/teacher" element={<RequireTeacher><TeacherHome /></RequireTeacher>} />
           <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />

@@ -360,3 +360,9 @@ line that fits, and add each new preference the same turn she says it.
 - Monthly prices (2026-11-24): Plus $8 a month, Pro $15 a month.
 - Class check-in (2026-11-24, "say how was this game? and make the middle face a flat mout"): the question reads "How was this game?"; the middle face has a flat mouth.
 - Standard prices and launch sale (2026-11-24): Plus $8 and Pro $15 a month, 3 months 5% off, 6 months 15% off, 1 year 20% off are the STANDARD prices (they renew at those prices). The launch sale is an extra 10% off the first term until Jan 1, 2027; it does not renew. This replaces the predicted $10/$19 prices and the FOUNDING15 offer.
+- The top bar (site header) is pure white (#ffffff), never cream (owner, 2026-11-24).
+- Territory art follows her Canva pack closely (owner, 2026-11-24): a plain wall, a two-tone baseboard, a perspective checker floor and the closed wooden door, with no extra furniture. Use the Classic look on her layout instead of inventing a new room.
+- A cat is one shape (owner, 2026-11-24): the legs grow out of the body, with one outer outline and no seams. All cats share the gray tabby's walking shape. There is no fluffy cat: the third cat is a black-and-white tuxedo.
+- Teacher pages use a left rail on wide screens (approved teacher portal, 2026-11-24): Create an Activity at the top, then Home, Classes, Question sets, Reports, Theme Builder and Account. Narrower screens keep the pill bar. Full-screen tools (the Theme Builder editor) have no rail.
+- Every /owner section must scroll to its end on every device, so nothing is cut off (owner, 2026-11-24).
+- The content planner is visual: posts show as their pictures, in the platform's own shape, on a four-week board, and you drag a post to another day to move it. Canva makes the designs. Approved posts can post on their own once the accounts are connected, but nothing posts without her OK (owner, 2026-11-24).

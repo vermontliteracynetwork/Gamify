@@ -34,6 +34,7 @@ export interface Post {
   caption: string; // caption, pin description or ad text
   onScreen?: string[]; // text per frame or slide
   canva?: string; // the Canva brief: template and fields
+  design?: { canva: string; url?: string; thumb?: string }; // the finished Canva design (id, edit link, preview image)
   sound?: string; // with its license source
   tags?: string[]; // hashtags or pin keywords
   alt?: string; // alt text
@@ -156,7 +157,7 @@ export const POSTS: Post[] = [
     status: 'drafting',
     history: [{ at: T('2026-11-24'), by: 'Social Planner', note: 'Drafted; waiting on screenshots of each mode before the bible check.' }] },
   { id: 'p-0006', date: '2026-12-12', time: '07:00', platform: 'instagram', format: 'carousel', campaign: 'c-class-vs-teacher', buyer: 'k5-teachers', funnel: 'try', pillar: 'product',
-    principle: 'Loss aversion and psychological safety: name the pain teachers already feel (tears over stolen points), then the relief.',
+    principle: 'Loss aversion and psychological safety: name the pain teachers already feel (a team that answered right and still lost), then the relief.',
     hook: 'Review games where nobody steals your points',
     hooksTried: ['The power-up that made my class cry (and why we left it out)', 'Fair fun: right answers decide the game'],
     caption: 'Review games where nobody steals your points.\n\nIn Gamify, power-ups only add to your own team. No stealing, ever. Every timer can be turned off, so the kids who need a little longer play too.\n\nSave this for your next review day.',

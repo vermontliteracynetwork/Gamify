@@ -454,7 +454,7 @@ describe the pain the teacher feels instead. Only list what ships today.
 
 | Our edge | The pain it answers (research, docs/competitor-feedback-research.md) | Psychology | On the site | Status |
 |---|---|---|---|---|
-| No stealing power-ups, ever | Point-stealing "can lead to tears" in K-2 and "brings out the worst" in students | Loss aversion (a loss stings about twice a gain), self-determination theory (competence feels real when skill decides) | Features: Fair Play, Built In | Live 2026-11-24 |
+| No stealing power-ups, ever | With score-changing power-ups "a team can answer many questions correctly and still lose", and students "complain about the fairness" (verified 2026-11-24, competitor-feedback-research.md) | Loss aversion (a loss stings about twice a gain), self-determination theory (competence feels real when skill decides) | Features: Fair Play, Built In | Live 2026-11-24 |
 | Every timer can be turned off | Speed and luck beat knowing the answer; quieter and slower students are left out | Cognitive load and test-anxiety research; UDL (multiple means of action) | Features: Fair Play, Built In | Live games 2026-11-24 |
 | Right answers decide the game | "Luck based", kids race to be first instead of thinking | Retrieval practice (accuracy beats speed), competence | Features: Fair Play, Built In | Live |
 | Names from the class list or friendly name dice | Student nicknames cause friction and delay learning | Psychological safety; reduces teacher policing load | Features: Fair Play, Built In | Live |

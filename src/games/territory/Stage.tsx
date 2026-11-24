@@ -17,7 +17,7 @@ import { LEAVE_MS, SPOTS, add, competeRight, stagePieces, count, newRights, newR
 // mouse hole, one for every right answer. Compete: the Cats team and the Mice
 // team; every right answer adds one of yours and sends one of theirs away.
 // Nobody is ever hurt: a caught mouse poofs away in a puff of stars, a
-// scared cat leaps out the window.
+// scared cat runs out of the room.
 
 export const SOUNDS = {
   scurry: '/sounds/library/transition/swipe-fx-1.mp3',
@@ -227,7 +227,7 @@ function Animal({ piece, crowd, theme, still, gentle, chase, chased }: { piece: 
   const { anim, trans, face } = useMemo((): { anim: TargetAndTransition; trans: Transition; face: number } => {
     if (still) return { anim: { left: pct(x), top: pct(y), opacity: leave ? 0 : 1, scale: 1 }, trans: { duration: leave ? 0.6 : 0.3, delay: leave ? 0.9 : 0 }, face: cat ? 1 : -1 };
     if (leave && cat) {
-      // Scared away: a hop to the window, then out (no harm).
+      // Scared away: a hop, then out of the room at the side (no harm).
       return {
         anim: { left: [pct(x), pct(x), pct((x + EXIT[0]) / 2), pct(EXIT[0])], top: [pct(y), pct(y), pct(EXIT[1] - 8), pct(EXIT[1])], opacity: [1, 1, 1, 0], scale: [1, 1, 0.9, 0.6] },
         trans: { duration: 2.6, times: [0, chased ? 0.45 : 0.1, 0.75, 1], ease: 'easeInOut' }, face: EXIT[0] < x ? -1 : 1,

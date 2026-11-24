@@ -36,9 +36,11 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   // Teacher logs in on this device and makes a class with a join code.
   await page.goto('/login');
   await signUpTeacher(page);
-  await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
-  await expect(page.getByText('0 of 4 done')).toBeVisible();
-  // Free has no classes: the teacher lands on their student list.
+  // The teacher lands on Home: the first-day steps and empty states (batch 6).
+  await expect(page.getByRole('heading', { name: 'Welcome to Gamify' })).toBeVisible();
+  await expect(page.getByText('Get started, 0 of 4 done').first()).toBeVisible();
+  // Free has no classes: the menu opens their student list.
+  await page.getByRole('navigation', { name: 'Teacher pages' }).getByRole('link', { name: 'Students' }).click();
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Kai');
   await page.getByRole('button', { name: 'Add 1 student' }).click();

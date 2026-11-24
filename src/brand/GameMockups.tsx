@@ -896,14 +896,14 @@ function SkyWaiting({ w: w0 = 820, h: h0 = 1180 }: { w?: number; h?: number }) {
 // arched mouse hole in the baseboard at the teacher's pace; each right answer
 // sends a cat to catch one, which poofs away in a puff of stars (nothing is
 // ever hurt). Competitive: Cats against Mice; a right answer adds one of yours
-// and sends one of theirs away (a scared cat leaps out the window). The art is
+// and sends one of theirs away (a scared cat runs out of the room). The art is
 // the live game's own (art.tsx); this strip only arranges it.
 type Spot = { l: number; t: number; w: number; rot?: number };
 const at = ({ l, t, w, rot }: Spot): CSSProperties => ({ position: 'absolute', left: `${l}%`, top: `${t}%`, width: `${w}%`, transform: rot ? `rotate(${rot}deg)` : undefined });
-const COOP_CATS: (Spot & { look: number })[] = [{ l: 28, t: 58, w: 8, look: 0 }, { l: 49, t: 62, w: 7.5, look: 2 }, { l: 10, t: 70, w: 9, look: 3 }, { l: 60, t: 74, w: 8.5, look: 5 }];
-const COOP_MICE: (Spot & { look: number })[] = [{ l: 77.6, t: 54.5, w: 4.8, look: 1 }, { l: 67, t: 66, w: 5, look: 0 }, { l: 84, t: 80, w: 5, look: 2 }];
-const COMP_CATS: (Spot & { look: number })[] = [{ l: 30, t: 60, w: 7.5, look: 0 }, { l: 44, t: 70, w: 8, look: 3 }, { l: 12, t: 72, w: 8, look: 1 }, { l: 58, t: 62, w: 7, look: 2 }, { l: 22, t: 80, w: 8, look: 5 }];
-const COMP_MICE: (Spot & { look: number })[] = [{ l: 66, t: 70, w: 5, look: 0 }, { l: 74, t: 63, w: 4.6, look: 1 }, { l: 80, t: 76, w: 5, look: 2 }, { l: 52, t: 82, w: 5, look: 1 }, { l: 37, t: 84, w: 4.8, look: 0 }, { l: 88, t: 68, w: 4.6, look: 2 }, { l: 24, t: 41, w: 4.4, look: 0 }];
+const COOP_CATS: (Spot & { look: number })[] = [{ l: 28, t: 58, w: 10.4, look: 0 }, { l: 49, t: 62, w: 9.8, look: 2 }, { l: 10, t: 70, w: 11.7, look: 3 }, { l: 60, t: 74, w: 11.1, look: 5 }];
+const COOP_MICE: (Spot & { look: number })[] = [{ l: 76, t: 56, w: 8.6, look: 1 }, { l: 84, t: 67, w: 9, look: 0 }, { l: 86, t: 81, w: 9, look: 2 }];
+const COMP_CATS: (Spot & { look: number })[] = [{ l: 30, t: 60, w: 9.8, look: 0 }, { l: 44, t: 70, w: 10.4, look: 3 }, { l: 12, t: 72, w: 10.4, look: 1 }, { l: 58, t: 62, w: 9.1, look: 2 }, { l: 22, t: 80, w: 10.4, look: 5 }];
+const COMP_MICE: (Spot & { look: number })[] = [{ l: 64, t: 72, w: 9, look: 0 }, { l: 72, t: 62, w: 8.3, look: 1 }, { l: 80, t: 76, w: 9, look: 2 }, { l: 50, t: 84, w: 9, look: 1 }, { l: 66, t: 86, w: 8.6, look: 0 }, { l: 88, t: 66, w: 8.3, look: 2 }];
 function Animals({ cats = [], mice = [] }: { cats?: (Spot & { look: number })[]; mice?: (Spot & { look: number })[] }) {
   return <>{cats.map((c, i) => <span key={`c${i}`} style={at(c)}><CatArt look={c.look} className="w-full h-auto block" /></span>)}{mice.map((m, i) => <span key={`m${i}`} style={at(m)}><MouseArt look={m.look} className="w-full h-auto block" /></span>)}</>;
 }
@@ -971,9 +971,9 @@ function TerritoryComp({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }
     <div className="relative overflow-hidden" style={{ width: w, height: h }}>
       <RoomArt className="absolute inset-0">
         <Animals cats={COMP_CATS} mice={COMP_MICE} />
-        {/* a mouse scares a cat out of the window: it leaps out, unhurt */}
-        <span style={at({ l: 11, t: 13, w: 7, rot: -28 })}><CatArt look={4} className="w-full h-auto block" /></span>
-        <span className="absolute" style={{ left: '18.5%', top: '20%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
+        {/* a mouse scares a cat out of the room: it runs off, unhurt */}
+        <span style={at({ l: 1, t: 60, w: 9, rot: -10 })}><span className="block -scale-x-100"><CatArt look={1} className="w-full h-auto block" /></span></span>
+        <span className="absolute" style={{ left: '8%', top: '58%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
       </RoomArt>
       <RoomStrip w={w} center={<TeamCounts />} />
       <div className={`absolute z-20 ${phone ? 'left-3 bottom-4' : 'left-5 bottom-5'}`}><Burst text="A mouse scared a cat away!" size={phone ? 'text-lg' : 'text-2xl'} color={PP.paper} /></div>
@@ -1149,7 +1149,7 @@ const ALL_VIEWS: Record<string, { uses: string; views: View[] }> = {
   territory: {
     uses: 'Welcome, How will you play (Live only), Question set, Teacher: how the class plays (Cooperative or Competitive, pace), Join code, Student join and name, Lobby, Question screen, Results, Settings, Pause. No power-ups.',
     views: [
-      { name: 'Competitive class screen', land: <TerritoryComp />, port: <TerritoryComp w={820} h={1180} />, note: 'Cats vs Mice counts on each team\'s pastel with its animal (never color alone); a mouse scares a cat out of the window, unhurt.' },
+      { name: 'Competitive class screen', land: <TerritoryComp />, port: <TerritoryComp w={820} h={1180} />, note: 'Cats vs Mice counts on each team\'s pastel with its animal (never color alone); a mouse scares a cat out of the room, unhurt.' },
       { name: 'Student device', land: <TerritoryStudent w={1000} h={625} />, port: <TerritoryStudent />, note: 'The one question card over the room; the student\'s name, team and animal in the card.' },
       { name: 'Results', land: <TerritoryEnd />, port: <TerritoryEnd w={820} h={1180} />, note: 'The room fills with the winner\'s color, then the one winner box.' },
     ],
@@ -1275,8 +1275,8 @@ const GAMES: { id: string; name: string; laptop: ReactNode; tablet: ReactNode; l
   {
     id: 'territory', name: 'Territory (Live: Cooperative and Competitive)', laptop: <TerritoryCoop />, tablet: <TerritoryCoop w={820} h={1180} />,
     lines: [
-      'New: the live game\'s own Classic living room (butter striped wallpaper, a white baseboard with the arched mouse hole, peach planks, teal couch, pink rug) with its six cat looks and brown, gray and white mice; the Cooperative screen shows the class goal (a cat, 14 of 20 caught, the one meter), the Competitive screen the two team counts on Peach (Cats) and Gamify pastel (Mice); just the join code in a white pill; the one tool group with the hint.',
-      'Why: one shared goal on the projector builds relatedness (self-determination theory) and the meter shows how close the class is (goal-gradient effect); a caught mouse poofs in stars and a scared cat leaps out the window, so the stakes feel playful and nothing is ever hurt; each team is an animal plus a color (WCAG 1.4.1).',
+      'New: the live game\'s own Classic room, matched to her Canva pack (a plain Blue crystal wall, a two-tone wooden baseboard, a Butter and Peach checker floor in perspective, the closed wooden door) with its three cat looks (white paws on the tabbies) and brown, gray and white mice; the Cooperative screen shows the class goal (a cat, 14 of 20 caught, the one meter), the Competitive screen the two team counts on Peach (Cats) and Gamify pastel (Mice); just the join code in a white pill; the one tool group with the hint.',
+      'Why: one shared goal on the projector builds relatedness (self-determination theory) and the meter shows how close the class is (goal-gradient effect); a caught mouse poofs in stars and a scared cat runs out of the room, so the stakes feel playful and nothing is ever hurt; each team is an animal plus a color (WCAG 1.4.1).',
       'Pieces (theme template, from its manifest): Room 1600 x 1000 (bottom 40% is the floor), Entrance 200 x 180, six Defenders 256 x 256, three Invaders 256 x 180, Poof 256 x 256, Cover 600 x 600, Title 1200 x 360. Cover template 720 x 648: the room centered with its scenery around it, three cats and three mice, the mouse hole showing.',
     ],
   },

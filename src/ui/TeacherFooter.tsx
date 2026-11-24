@@ -5,7 +5,7 @@ import { t } from '../i18n';
 // the legal pages, one line on wide screens. Not on the live big screen.
 export default function TeacherFooter() {
   return (
-    <footer id="teacher-footer" className="no-print border-t-[2.5px] border-border bg-surface">
+    <footer id="teacher-footer" className="teacher-footer no-print border-t-[2.5px] border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
         <nav aria-label={t('teacherFooter.nav')} className="flex flex-wrap gap-x-4 gap-y-1.5 font-bold">
           <Link to="/faq">{t('public.nav.faq')}</Link>
