@@ -30,10 +30,17 @@ installed there would disappear and would not change that session's limits.
    The dashboard opens at http://localhost:20128.
 3. In the dashboard, connect the providers you want (your own accounts and
    keys; some have free tiers) and set the fallback order.
-4. Point Claude Code at it: the dashboard's CLI Tools page has a one-click
-   setup for Claude Code, or set the base URL to `http://localhost:20128/v1`
-   as it shows.
-5. To go back to normal Claude Code, undo step 4 (or stop OmniRoute).
+4. Point Claude Code at it. In the Claude for Mac app, Claude Code reads
+   `~/.claude/settings.json`; add (or merge) this, using the key OmniRoute's
+   dashboard gives you, then quit and reopen the app:
+   ```json
+   { "env": { "ANTHROPIC_BASE_URL": "http://localhost:20128/v1", "ANTHROPIC_API_KEY": "your-omniroute-key" } }
+   ```
+   (OmniRoute's own docs use the same two variables; its dashboard CLI Tools
+   page can also write them for you.)
+5. To go back to normal Claude Code, remove those two lines and reopen the app.
+   OmniRoute must be running (step 2) whenever those lines are in place, or
+   Claude Code cannot connect.
 
 ## Things to know
 
