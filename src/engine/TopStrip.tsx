@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
+import Meter from '../ui/Meter';
 
 // The one strip across the top of a solo game's board (design system,
 // 2026-11-18; teacher, 2026-11-16 and 11-18): the player's picture and the
@@ -21,16 +22,12 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
       <span className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
         <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}>{score}</motion.span>
       </span>
-      <span className="flex-1 min-w-0 flex gap-2" role="img" aria-label={leftLabel}>
-        {Array.from({ length: rounds }, (_, r) => (
-          <span key={r} aria-hidden="true" className="flex-1 flex gap-[3px] p-[3px] rounded-pill border-std border-border bg-surface">
-            {Array.from({ length: perRound }, (_, m) => {
-              const k = r * perRound + m;
-              // Used turns are filled green, this turn yellow with a ring, turns to come are hollow (shape, not only color).
-              return <span key={m} className={`flex-1 h-2.5 rounded-pill ${k < done ? 'bg-success' : k === done ? 'bg-accent shadow-[0_0_0_2px_#000]' : 'border-thin border-muted bg-transparent'}`} />;
-            })}
-          </span>
-        ))}
+      {/* THE meter (Brand Kit game components, 2026-11-24): one segment per turn
+          when they fit, else one per round with the current round part-filled. */}
+      <span className="flex-1 min-w-0 flex">
+        {rounds * perRound <= 20
+          ? <Meter segments={rounds * perRound} done={done} part={0.5} label={leftLabel} />
+          : <Meter segments={rounds} done={Math.min(round, rounds) - 1} part={(perRound - left) / perRound || 0.12} label={leftLabel} />}
       </span>
       {right}
     </div>

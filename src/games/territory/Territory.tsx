@@ -154,9 +154,10 @@ function StudentPlay() {
             </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            <FullScreenButton small />
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
             <HintButton gameId="territory" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
+            <FullScreenButton small />
           </div>
           {stopped && !asking && !reward && state?.phase === 'play' && (
             <div className="absolute inset-0 grid place-items-center"><TapOk label={t('territory.next')} onTap={() => void loop()} /></div>

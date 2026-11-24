@@ -44,7 +44,7 @@ export default function HintButton({ gameId, tips, small = true }: { gameId?: st
   return (
     <>
       <button type="button" onClick={() => { playEffect('open', settings); setOpen(true); }} aria-label={t('hint.open')} title={t('hint.open')}
-        className={`hint-btn ${small ? 'w-11 h-11 border-std bg-surface-2' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
+        className={`hint-btn ${small ? 'tool-round w-11 h-11' : 'w-14 h-14 border-bold bg-surface'} shrink-0 rounded-full border-border flex items-center justify-center active:scale-95 motion-safe:transition`}
         style={small ? undefined : { boxShadow: 'var(--shadow-sticker)' }}>
         <Lightbulb weight="bold" size={small ? 22 : 30} />
       </button>
