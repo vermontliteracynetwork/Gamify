@@ -52,7 +52,6 @@ export default function ThemesPage() {
         <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-accent border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="#c98a00" aria-hidden="true" /></span>
           <span className="grid gap-1">
-            <span className="text-xs font-bold uppercase tracking-wider">{t('themes.featured')}</span>
             <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
             <span className="font-semibold">{t('themes.featuredText')}</span>
           </span>

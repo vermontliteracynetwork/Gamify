@@ -8,7 +8,7 @@ test('a class check-in counts picture taps, with no names', async ({ page }, inf
     localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '', joinCode: 'BCDFG' }]));
   });
   await page.goto('/teacher/classes/c1/check-in');
-  await expect(page.getByRole('heading', { name: /How did today feel/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /How was this game/i })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.waitForTimeout(700);
   await page.screenshot({ path: `test-results/checkin-${info.project.name}.png` });
@@ -16,7 +16,7 @@ test('a class check-in counts picture taps, with no names', async ({ page }, inf
     await page.getByRole('button', { name: a, exact: true }).click();
     await page.getByRole('button', { name: b, exact: true }).click();
     await expect(page.getByText('Thank you! Next friend!')).toBeVisible();
-    await expect(page.getByRole('heading', { name: /How did today feel/i })).toBeVisible({ timeout: 4000 });
+    await expect(page.getByRole('heading', { name: /How was this game/i })).toBeVisible({ timeout: 4000 });
   }
   await expect(page.getByText('2 students checked in')).toBeVisible();
   await page.getByRole('button', { name: 'Finish (teacher)' }).click();

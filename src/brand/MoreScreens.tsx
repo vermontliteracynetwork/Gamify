@@ -457,7 +457,7 @@ function OopsView({ error }: { error?: boolean }) {
 // smile emoji faces instead)"): round yellow faces drawn in code, big grin,
 // small smile, little frown.
 function EmojiFace({ mood, size }: { mood: 0 | 1 | 2; size: number }) {
-  const mouth = mood === 0 ? 'M30 58 Q50 80 70 58 Q50 70 30 58 Z' : mood === 1 ? 'M33 62 Q50 70 67 62' : 'M33 68 Q50 56 67 68';
+  const mouth = mood === 0 ? 'M30 58 Q50 80 70 58 Q50 70 30 58 Z' : mood === 1 ? 'M34 64 L66 64' : 'M33 68 Q50 56 67 68';
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
       <circle cx="50" cy="50" r="44" fill={PP.lemon} stroke={I} strokeWidth="5" />
@@ -473,7 +473,7 @@ function CheckInView() {
   const w = phone ? 104 : px(230);
   return (
     <Stu>
-      <H>Was it fun?</H>
+      <H>How was this game?</H>
       <div className="flex gap-3 justify-center">{opts.map(([m, l, c]) => <span key={l} className="grid justify-items-center gap-2 p-3" style={{ ...CARD, width: w, background: c }}><EmojiFace mood={m} size={phone ? 64 : px(130)} /><b style={{ fontSize: phone ? 15 : px(24) }}>{l}</b></span>)}</div>
       <Txt size={20}>No names are kept. Only how many tapped each face.</Txt>
     </Stu>

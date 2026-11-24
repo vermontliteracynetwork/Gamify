@@ -159,7 +159,8 @@ export default function PricingPage() {
         </section>
 
         <section aria-labelledby="faq" className="grid gap-3">
-          <h2 id="faq" className="font-display text-3xl"><Title text={t('pricing.faqTitle')} /></h2>
+          {/* "Good to Know" with a way to Help (teacher, 2026-11-24: never "questions teachers ask"). */}
+          <div className="flex flex-wrap items-end justify-between gap-3"><h2 id="faq" className="font-display text-3xl"><Title text={t('pricing.faqTitle')} /></h2><Link to="/help" className="font-bold underline underline-offset-4 inline-flex items-center gap-1.5">{t('pricing.faqHelp')}<ArrowRight weight="bold" size={16} aria-hidden="true" /></Link></div>
           {/* FAQ structured data: search and AI answer tools read these (teacher, 2026-10-31). */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [1, 2, 3, 4, 5, 6].map((n) => ({ '@type': 'Question', name: t(`pricing.faq.${n}.q` as StringKey), acceptedAnswer: { '@type': 'Answer', text: t(`pricing.faq.${n}.a` as StringKey) } })) }) }} />
           {[1, 2, 3, 4, 5, 6].map((n) => (

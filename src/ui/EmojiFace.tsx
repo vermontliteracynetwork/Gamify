@@ -1,8 +1,8 @@
 // Smile emoji faces (teacher, 2026-11-24: "class check in (but updated with
 // smile emoji faces instead)"): round yellow faces drawn in code (no emoji
-// font to license), big grin, small smile, little frown.
+// font to license), big grin, a flat mouth (teacher, 2026-11-24), little frown.
 export default function EmojiFace({ mood, size = 64 }: { mood: 0 | 1 | 2; size?: number | string }) {
-  const mouth = mood === 0 ? 'M30 58 Q50 80 70 58 Q50 70 30 58 Z' : mood === 1 ? 'M33 62 Q50 70 67 62' : 'M33 68 Q50 56 67 68';
+  const mouth = mood === 0 ? 'M30 58 Q50 80 70 58 Q50 70 30 58 Z' : mood === 1 ? 'M34 64 L66 64' : 'M33 68 Q50 56 67 68';
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
       <circle cx="50" cy="50" r="44" fill="#fabe37" stroke="#1d1a33" strokeWidth="5" />
