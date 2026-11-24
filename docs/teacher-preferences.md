@@ -351,3 +351,4 @@ line that fits, and add each new preference the same turn she says it.
 - Psychology-first marketing (2026-11-24): the marketing team keeps a running edge list (docs/marketing-bible.md section 13) of features that answer competitors' weak spots in the research, shows each on the site (Features "Fair Play, Built In"), and builds posts on them; no stealing is the first.
 - Launch price (2026-11-24): monthly is full price; 3 months 5% off, 6 months 15% off, 1 year 20% off. The discount covers only the first term picked and does not renew; after that the plan renews at the regular price for the same length.
 - Free plan themes (2026-11-24): Free gets only ONE Game Show theme, never unlimited; say "one" in every page and post.
+- Monthly prices (2026-11-24): Plus $8 a month, Pro $15 a month.
