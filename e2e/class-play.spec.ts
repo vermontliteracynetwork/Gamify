@@ -10,7 +10,7 @@ for (const game of ['star-quiz', 'cast-catch']) {
     page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
     await openSetup(page, `/games/${game}`, /Live/);
     await expect(page.getByRole('heading', { name: /How the class plays/i })).toBeVisible();
-    await page.getByRole('radio', { name: /^Compete/ }).click();
+    await page.getByRole('radio', { name: /^Competitive/ }).click();
     await page.getByRole('radio', { name: 'First to a number right' }).click();
     await page.getByLabel('Right answers').fill('7');
     await page.screenshot({ path: `test-results/class-play-${game}-${info.project.name}.png` });
@@ -33,7 +33,7 @@ for (const game of ['star-quiz', 'cast-catch']) {
 test('Together: the class goal carries into the lobby', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
   await openSetup(page, '/games/star-quiz', /Live/);
-  await page.getByRole('radio', { name: /^Together/ }).click();
+  await page.getByRole('radio', { name: /^Cooperative/ }).click();
   await page.getByLabel(/Class goal/).fill('40');
   for (;;) {
     const next = page.getByRole('button', { name: 'Next', exact: true });
@@ -43,5 +43,5 @@ test('Together: the class goal carries into the lobby', async ({ page }) => {
   await page.getByRole('button', { name: 'Open the live lobby' }).click();
   await expect(page).toHaveURL(/mode=together&goal=40/);
   await page.getByRole('button', { name: 'Game settings' }).click();
-  await expect(page.getByRole('radio', { name: /^Together/ })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByRole('radio', { name: /^Cooperative/ })).toHaveAttribute('aria-checked', 'true');
 });

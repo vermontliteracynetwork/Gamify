@@ -15,7 +15,7 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
   await page.screenshot({ path: `test-results/host-screen-${info.project.name}.png` });
 
   await dialog.getByRole('radio', { name: /On their own devices/ }).click();
-  await dialog.getByRole('radio', { name: /^Together/ }).click();
+  await dialog.getByRole('radio', { name: /^Cooperative/ }).click();
   await page.screenshot({ path: `test-results/host-devices-${info.project.name}.png` });
 
   await dialog.getByRole('radio', { name: /As homework/ }).click();
@@ -46,8 +46,8 @@ test('Play or share: together on own devices opens the lobby on Together', async
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
   await page.getByRole('radio', { name: /Question Tracker/ }).click();
-  await page.getByRole('radio', { name: /^Together/ }).click();
+  await page.getByRole('radio', { name: /^Cooperative/ }).click();
   await page.getByRole('button', { name: 'Host a live game' }).click();
   await expect(page).toHaveURL(/mode=together/);
-  await expect(page.getByRole('radio', { name: /^Together/ })).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByRole('radio', { name: /^Cooperative/ })).toHaveAttribute('aria-checked', 'true');
 });

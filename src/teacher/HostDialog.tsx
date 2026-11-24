@@ -1,3 +1,4 @@
+import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Broadcast, CalendarCheck, Copy, DeviceTablet, LockSimple, Play, ProjectorScreen, QrCode, ShareNetwork, UsersThree, X } from '@phosphor-icons/react';
@@ -105,7 +106,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 {where === 'devices' && (
                   <div className="rounded-input border-std border-border-soft p-3 grid gap-3">
                     <Choices label={t('live.howPlay')} value={together} onChange={setTogether}
-                      options={(['compete', 'together'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`) }))} />
+                      options={(['together', 'compete'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`), art: <ClassModeIcon mode={k} /> }))} />
                     <div className="flex flex-wrap gap-2">
                       <Button variant="primary" onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>
                       {!code && <Button onClick={async () => setCode(await makeGameCode(game.id, set.id))}><QrCode weight="bold" size={18} />{t('host.makeCode')}</Button>}
@@ -146,15 +147,15 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
   );
 }
 
-export function Choices<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; title: string; hint: string }[]; onChange: (v: T) => void }) {
+export function Choices<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: { id: T; title: string; hint: string; art?: React.ReactNode }[]; onChange: (v: T) => void }) {
   return (
     <div className="grid gap-1.5">
       <span className="font-bold">{label}</span>
       <div role="radiogroup" aria-label={label} className={`grid gap-2 ${options.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         {options.map((o) => (
           <button key={o.id} type="button" role="radio" aria-checked={value === o.id} onClick={() => onChange(o.id)}
-            className={`min-h-14 px-3 py-2 rounded-input border-std text-left grid ${value === o.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-            <span className="font-bold">{o.title}</span><span className="text-sm font-semibold text-muted">{o.hint}</span>
+            className={`min-h-14 px-3 py-2 rounded-input border-std text-left ${o.art ? 'flex items-center gap-3' : 'grid'} ${value === o.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+            {o.art}<span className="grid"><span className="font-bold">{o.title}</span><span className="text-sm font-semibold text-muted">{o.hint}</span></span>
           </button>
         ))}
       </div>

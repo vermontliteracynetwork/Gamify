@@ -1,3 +1,4 @@
+import ClassModeIcon from './ClassModeIcon';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { readClassPlay } from './ClassPlay';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -378,10 +379,10 @@ function Room({ game }: { game: GameCode }) {
               <button type="button" onClick={() => setSetOpen(false)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-accent font-bold inline-flex items-center gap-1.5" style={{ boxShadow: '0 3px 0 #000' }}><Check weight="bold" size={18} />{t('teams.done')}</button>
             </div>
             <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
-              {(['compete', 'together'] as const).map((m) => (
+              {(['together', 'compete'] as const).map((m) => (
                 <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); }}
-                  className={`min-h-16 px-4 rounded-input border-std text-left grid ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                  <span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span>
+                  className={`min-h-16 px-4 rounded-input border-std text-left flex items-center gap-3 ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                  <ClassModeIcon mode={m} /><span className="grid"><span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span></span>
                 </button>
               ))}
             </div>

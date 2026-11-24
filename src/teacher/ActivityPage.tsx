@@ -1,3 +1,4 @@
+import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, DeviceTablet, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
@@ -161,7 +162,7 @@ export default function ActivityPage() {
             </div>
             {(how === 'each' || how === 'board') && !pro && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.proOnly')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'screen' && <Choices label={t('host.teams')} value={teams} onChange={setTeams} options={(['teacher', 'random', 'class'] as const).map((k) => ({ id: k, title: t(`host.teams.${k}`), hint: t(`host.teams.${k}Hint`) }))} />}
-            {how === 'lobby' && <Choices label={t('live.howPlay')} value={together} onChange={setTogether} options={(['compete', 'together'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`) }))} />}
+            {how === 'lobby' && <Choices label={t('live.howPlay')} value={together} onChange={setTogether} options={(['together', 'compete'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`), art: <ClassModeIcon mode={k} /> }))} />}
             {(how === 'code' || how === 'homework' || how === 'each' || how === 'board') && (
               <div className="grid sm:grid-cols-2 gap-3">
                 <label className="grid gap-1 font-bold">{t(how === 'each' || how === 'board' ? 'activity.endsIn' : 'activity.playFor')}
