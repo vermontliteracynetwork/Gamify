@@ -67,7 +67,7 @@ export default function StudentPage() {
           </ul>
         )}
       </Panel>
-      <ReportDoc log={mineLog} students={[student]} names={names} className={classroom.name} student={student} />
+      <ReportDoc log={mineLog} students={[student]} names={names} standardsOf={(x) => sets.find((s) => s.id === x)?.standards} className={classroom.name} student={student} />
       {dialog === 'pin' && <Dialog title={t('class.supportsFor', { name: student.name })} onClose={() => setDialog(null)}><PinGate onUnlock={() => { setUnlocked(true); setDialog('supports'); }} /></Dialog>}
       {dialog === 'supports' && <SupportsDialog student={student} onClose={() => { setDialog(null); reload(); }} />}
       {dialog === 'avatar' && <AvatarDialog student={student} others={students.filter((x) => x.id !== sid)} look={look} onClose={() => { setDialog(null); reload(); }} />}

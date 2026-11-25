@@ -447,7 +447,7 @@ function ClassReport({ classId, className, students }: { classId: string; classN
   return (
     <div className="grid gap-3">
       <Link to={`/teacher/reports/print?class=${classId}`} className={buttonClasses('primary', 'justify-self-start')}><Printer weight="bold" size={18} />{t('rp.print')}</Link>
-      <ReportDoc log={log} students={students} names={names} className={className} />
+      <ReportDoc log={log} students={students} names={names} standardsOf={(x) => sets.find((s) => s.id === x)?.standards} className={className} />
     </div>
   );
 }

@@ -15,6 +15,15 @@ test('reports group the question log, show the most common wrong answer, and dow
     ]));
   });
   await page.goto('/teacher/reports');
+  // Reports open on the Class overview (approved /brand mockup 7a); the table is one tab deeper.
+  await expect(page.getByRole('heading', { name: 'Accuracy over time' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'By question: most missed' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Activities' }).click();
+  await expect(page.getByRole('heading', { name: 'Per question' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Small groups' }).click();
+  await page.getByRole('button', { name: 'Pick the 4 who need it most' }).click();
+  await expect(page.getByText(/Goal: 80% right on first try/)).toBeVisible();
+  await page.getByRole('tab', { name: 'All answers' }).click();
   await expect(page.getByRole('rowheader', { name: 'Ava' })).toBeVisible();
   await expect(page.getByRole('rowheader', { name: 'Ben' })).toBeVisible();
   await page.getByRole('tab', { name: 'Question' }).click();
@@ -67,6 +76,8 @@ test('the example report shows 20 students on every plan, even with no class dat
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })); });
   await page.goto('/teacher/reports');
   await expect(page.getByText(/This is an example: 20 students/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'By skill (Common Core)' })).toBeVisible();
+  await page.getByRole('tab', { name: 'All answers' }).click();
   await expect(page.getByRole('rowheader')).toHaveCount(20);
   await expect(page.getByRole('rowheader', { name: 'Ava' })).toBeVisible();
   await page.getByRole('tab', { name: 'Question' }).click();
