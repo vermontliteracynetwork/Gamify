@@ -1,7 +1,7 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, DeviceTablet, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, DeviceTablet, Info, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { makeGameCode, makeLobbyCode, type GameCode, type LobbyPick } from '../data/gameCodes';
@@ -15,6 +15,7 @@ import { t } from '../i18n';
 import { UpgradeButton } from '../billing/Upgrade';
 import { Button, PageHeader, Panel } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
+import Title from '../ui/Title';
 import { Choices, CodeBox } from './HostDialog';
 
 // Create an activity (teacher, 2026-10-31): question sets, games and
@@ -91,26 +92,89 @@ export default function ActivityPage() {
   }
 
   const card = (on: boolean) => `rounded-input border-bold text-left bg-surface ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`;
+  // The approved Create an Activity (/brand teacher portal 4, teacher
+  // 2026-11-25: "apply the new mockups that are in the brand page to the main
+  // site"): a stepper whose done steps show green checks, "Your choices" kept
+  // in view with a Change link for each (lower working memory load), and a
+  // Start card with the code shown big. Only the teacher's real picks show.
+  const className = classes.find((c) => c.id === classId)?.name;
+  const choices: { step: number; value: string }[] = [
+    { step: 0, value: className ?? t('activity.anyone') },
+    { step: 1, value: how ? t(`activity.how.${how}`) : '' },
+    { step: 2, value: how === 'board' ? board.map((id) => GAMES.find((g) => g.id === id)?.name).join(', ') : game?.name ?? '' },
+    { step: 3, value: set ? `${set.name || t('sets.untitled')}, ${t('activity.questions', { count: set.questions.length })}` : '' },
+  ];
+  const supported = students.filter((st) => st.accommodations && (st.accommodations.tools?.listen || (st.accommodations.triesPerQuestion ?? 1) > 1 || (st.accommodations.readFirstSeconds ?? 0) > 0));
+  const options = [
+    how === 'screen' ? t(`host.teams.${teams}`) : '',
+    how === 'lobby' ? t(`live.mode.${together}`) : '',
+    how === 'code' || how === 'homework' || how === 'each' || how === 'board' ? (minutes ? t('activity.minutes', { count: minutes }) : t('activity.noLimit')) : '',
+    goal ? t('activity.opt.goal', { n: goal }) : '',
+    how === 'homework' ? t('activity.opt.due', { date: new Date(`${due}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) }) : '',
+    how === 'each' && Object.keys(plan).length ? t('activity.opt.own', { count: Object.keys(plan).length }) : '',
+  ].filter(Boolean);
+  const goTo = (i: number) => { setStep(i); setCode(null); };
+  const GoIcon = how === 'screen' ? Play : how === 'lobby' ? Broadcast : how === 'homework' ? CalendarCheck : QrCode;
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 pb-8">
       <TeacherNav startOpen={false} />
       <PageHeader title={t('activity.title')} subtitle={t('activity.sub')} />
-      <ol className="flex flex-wrap gap-2 list-none p-0 m-0 mb-4" aria-label={t('activity.steps')}>
-        {STEPS.map((s, i) => (
-          <li key={s} aria-current={i === step ? 'step' : undefined}
-            className={`min-h-10 px-4 rounded-pill border-std font-bold text-sm flex items-center gap-2 ${i === step ? 'bg-accent border-border' : i < step ? 'bg-surface border-border' : 'bg-surface-2 border-border-soft text-muted'}`}>
-            <span className="tabular-nums">{i + 1}</span>{t(`activity.step.${s}`)}
-          </li>
-        ))}
-      </ol>
-      <Panel className="grid gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-2xl">{t(`activity.q.${STEPS[step]}`)}</h2>
-          <div className="flex gap-2">
-            {step > 0 && <Button onClick={() => { setStep(step - 1); setCode(null); }}><ArrowLeft weight="bold" size={18} />{t('activity.back')}</Button>}
-            {step < STEPS.length - 1 && <Button variant="primary" disabled={!ready} onClick={() => setStep(step + 1)}>{t('activity.next')}<ArrowRight weight="bold" size={18} /></Button>}
-          </div>
-        </div>
+      <div className="grid gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] items-start">
+        <Panel className="grid gap-3 content-start order-last lg:order-none !p-4">
+          <h2 className="font-heading font-bold text-base m-0">{t('activity.choices')}</h2>
+          <ol className="list-none m-0 p-0 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            {choices.map(({ step: i, value }) => {
+              const done = i < step && !!value;
+              return (
+                <li key={i} className={`rounded-input p-3 grid gap-0.5 ${done ? 'bg-surface-2' : 'bg-surface-2/50'}`}>
+                  <span className="flex items-center gap-2 text-sm font-bold text-muted">
+                    {done ? <span className="w-5 h-5 rounded-full grid place-items-center bg-success text-white shrink-0"><Check weight="bold" size={12} aria-label={t('start.done')} /></span>
+                      : <span className="w-5 h-5 rounded-full grid place-items-center border-std border-border-soft text-xs shrink-0">{i + 1}</span>}
+                    {t(`activity.step.${STEPS[i]}`)}
+                    {done && <button type="button" onClick={() => goTo(i)} aria-label={t('activity.changeStep', { step: t(`activity.step.${STEPS[i]}`) })} className="ml-auto min-h-8 px-2 -my-1 rounded-pill font-bold text-grape hover:bg-surface underline-offset-2 hover:underline">{t('activity.change')}</button>}
+                  </span>
+                  <b className={`leading-snug ${done ? '' : 'text-faint font-semibold'}`}>{done ? value : t('activity.notYet')}</b>
+                </li>
+              );
+            })}
+          </ol>
+          {classId && students.length > 0 && (
+            <div className="grid gap-2">
+              <b className="text-sm text-muted">{t('activity.whoPlays', { count: students.length })}</b>
+              <ul className="list-none m-0 p-0 flex flex-wrap gap-1.5">
+                {students.slice(0, 12).map((st, i) => (
+                  <li key={st.id} className="min-h-8 pl-1 pr-2.5 rounded-pill inline-flex items-center gap-1.5 font-bold text-sm bg-surface-2">
+                    <span className={`w-6 h-6 rounded-full grid place-items-center text-xs ${AVATAR_BG[i % AVATAR_BG.length]}`} aria-hidden="true">{st.name[0]}</span>{st.name}
+                  </li>
+                ))}
+                {students.length > 12 && <li className="min-h-8 px-2.5 rounded-pill inline-flex items-center font-bold text-sm bg-surface-2">{t('activity.more', { count: students.length - 12 })}</li>}
+              </ul>
+            </div>
+          )}
+          {supported.length > 0 && <p className="m-0 rounded-input p-3 text-sm font-semibold leading-snug bg-quiz-blue">{t('activity.supports', { names: supported.map((st) => st.name).join(', ') })}</p>}
+        </Panel>
+
+        <div className="grid gap-3 min-w-0">
+          <ol className="grid grid-cols-5 gap-2 list-none p-0 m-0" aria-label={t('activity.steps')}>
+            {STEPS.map((s, i) => {
+              const done = i < step;
+              const inner = <>{done ? <span className="w-6 h-6 rounded-full grid place-items-center bg-success text-white shrink-0"><Check weight="bold" size={14} aria-label={t('start.done')} /></span>
+                : <span className={`w-6 h-6 rounded-full grid place-items-center text-xs tabular-nums shrink-0 border-std ${i === step ? 'border-border bg-surface' : 'border-border-soft'}`}>{i + 1}</span>}
+                <span className="min-w-0">{t(`activity.step.${s}`)}</span></>;
+              const look = `w-full min-h-11 px-2 rounded-pill font-bold text-sm flex items-center justify-center gap-2 ${i === step ? 'bg-gold border-std border-border' : done ? 'bg-surface border-std border-transparent' : 'bg-surface/60 border-std border-transparent text-muted'}`;
+              return (
+                <li key={s} aria-current={i === step ? 'step' : undefined} className="min-w-0">
+                  {done ? <button type="button" onClick={() => goTo(i)} className={`${look} hover-pop`}>{inner}</button> : <span className={look}>{inner}</span>}
+                </li>
+              );
+            })}
+          </ol>
+          <Panel className="grid gap-4 min-w-0">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <span>{step > 0 && <Button onClick={() => goTo(step - 1)}><ArrowLeft weight="bold" size={18} />{t('activity.back')}</Button>}</span>
+              <h2 className="title-bubble text-2xl sm:text-3xl text-center m-0"><Title text={t(`activity.q.${STEPS[step]}`)} /></h2>
+              <span className="justify-self-end">{step < STEPS.length - 1 && <Button variant="primary" disabled={!ready} onClick={() => setStep(step + 1)}>{t('activity.next')}<ArrowRight weight="bold" size={18} /></Button>}</span>
+            </div>
 
         {STEPS[step] === 'who' && (
           <div role="radiogroup" aria-label={t('activity.q.who')} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -190,11 +254,19 @@ export default function ActivityPage() {
 
         {STEPS[step] === 'go' && (game || how === 'board') && set && (
           <div className="grid gap-4">
-            <dl className="grid sm:grid-cols-4 gap-3 m-0">
-              {[[t('activity.step.who'), classes.find((c) => c.id === classId)?.name ?? t('activity.anyone')], [t('activity.step.game'), how === 'board' ? board.map((id) => GAMES.find((g) => g.id === id)?.name).join(', ') : game?.name ?? ''], [t('activity.step.how'), how ? t(`activity.how.${how}`) : ''], [t('activity.step.set'), set.name]].map(([k, v]) => (
-                <div key={k} className="rounded-input border-std border-border-soft p-3"><dt className="text-xs font-bold uppercase tracking-wider text-muted">{k}</dt><dd className="m-0 font-bold">{v}</dd></div>
-              ))}
-            </dl>
+            <div className="rounded-panel p-5 sm:p-6 grid justify-items-center text-center gap-3 bg-gamify shadow-[0_0_0_0.2rem_var(--color-surface),0_0_0_0.4rem_var(--color-border)] mx-1">
+              <span className="w-14 h-14 rounded-full grid place-items-center bg-surface border-std border-border"><GoIcon weight="bold" size={26} aria-hidden="true" /></span>
+              <b className="text-xl">{how ? t(`activity.how.${how}`) : ''}</b>
+              <p className="m-0 font-semibold max-w-prose">{how ? t(`activity.how.${how}Hint`) : ''}</p>
+              {code ? <CodeBox big code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} onShow={how === 'code' ? () => navigate(`/show/${code.code}`) : undefined} />
+                : <Button variant="primary" size="lg" onClick={() => void finish()}><GoIcon weight={how === 'screen' ? 'fill' : 'bold'} size={20} />{t(`activity.go.${how || 'code'}`)}</Button>}
+            </div>
+            {options.length > 0 && (
+              <div className="rounded-input p-4 grid gap-2.5 bg-surface-2">
+                <span className="flex items-center gap-2"><b>{t('activity.options')}</b><button type="button" onClick={() => goTo(1)} className="ml-auto min-h-8 px-2 rounded-pill font-bold text-grape hover:bg-surface" aria-label={t('activity.changeStep', { step: t('activity.step.how') })}>{t('activity.change')}</button></span>
+                <ul className="list-none m-0 p-0 flex flex-wrap gap-2">{options.map((o) => <li key={o} className="min-h-8 px-3 rounded-pill inline-flex items-center bg-surface font-bold text-sm">{o}</li>)}</ul>
+              </div>
+            )}
             {how === 'each' && game && !code && (
               <div className="grid gap-2">
                 <p className="font-bold">{t('activity.eachPlan')}</p>
@@ -229,14 +301,19 @@ export default function ActivityPage() {
                 </ul>
               </div>
             )}
-            {code ? <CodeBox code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} onShow={how === 'code' ? () => navigate(`/show/${code.code}`) : undefined} />
-              : <Button variant="primary" className="justify-self-start min-h-14 px-7 text-lg" onClick={() => void finish()}>
-                  {how === 'screen' ? <Play weight="fill" size={20} /> : how === 'lobby' ? <Broadcast weight="bold" size={20} /> : <QrCode weight="bold" size={20} />}{t(`activity.go.${how || 'code'}`)}
-                </Button>}
-            <p role="status" aria-live="polite" className="font-bold min-h-6">{status}</p>
+            <ul className="list-none m-0 p-0 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm font-semibold text-muted">
+              {(how === 'lobby' || how === 'screen') && <li className="inline-flex items-center gap-2"><Info weight="bold" size={16} aria-hidden="true" />{t('activity.tip.extend')}</li>}
+              <li className="inline-flex items-center gap-2"><Check weight="bold" size={16} aria-hidden="true" />{t(how === 'homework' ? 'activity.tip.due' : how === 'lobby' || how === 'screen' ? 'activity.tip.end' : 'activity.tip.code')}</li>
+            </ul>
+            <p role="status" aria-live="polite" className="font-bold min-h-6 m-0 text-center">{status}</p>
           </div>
         )}
-      </Panel>
+          </Panel>
+        </div>
+      </div>
     </main>
   );
 }
+
+// Avatar colors for the student chips (palette pastels).
+const AVATAR_BG = ['bg-gamify', 'bg-quiz-blue', 'bg-blush', 'bg-butter', 'bg-mint-soft', 'bg-secondary'];

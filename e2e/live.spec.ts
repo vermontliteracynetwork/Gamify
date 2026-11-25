@@ -47,7 +47,7 @@ test('live game: lobby with name approval, start, monitor and lock, pause, podiu
   await page.getByRole('button', { name: 'Resume' }).click();
   await expect(kid.getByRole('dialog', { name: 'Paused' })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'My monitor' }).click(); // closes the monitor menu
+  await page.getByRole('button', { name: 'Back to the big screen' }).click(); // closes the Live class view
   await page.screenshot({ path: `test-results/live-screen-${info.project.name}.png` });
   await page.getByRole('button', { name: 'End game' }).click();
   await page.getByRole('dialog', { name: 'End the game for everyone?' }).getByRole('button', { name: 'End game' }).click();

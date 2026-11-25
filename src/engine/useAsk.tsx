@@ -68,7 +68,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
 
   const ask = useCallback((opts: AskOptions = {}) => new Promise<boolean>((resolve) => {
     const drawn = next(lastId.current);
-    liveAsked();
+    liveAsked(drawn.question.id);
     setTurnShown(false);
     setActive({ question: drawn.question, setId: drawn.setId, n: 1, total: Math.max(1, opts.count ?? 1), player: opts.player, turn: opts.turn, resolve });
   }), [next]);
@@ -83,7 +83,8 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
   function onAnswer(r: AnswerResult) {
     if (!active) return;
     log(active, r, r.right ? 'right' : 'skipped');
-    liveAnswered(r.right);
+    // The first answer tapped, so the teacher sees who picked what.
+    liveAnswered(r.right, { q: active.question.id, pick: r.tries[0] ?? r.tapped });
     history.current.push({ at: Date.now(), ms: r.ms, right: r.right });
     setStats((s) => ({ asked: s.asked + 1, right: s.right + (r.right ? 1 : 0), firstTry: s.firstTry + (r.right && !missedThis.current ? 1 : 0) }));
 
@@ -91,6 +92,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
       lastRight.current = missedThis.current ? 'retry' : 'first';
       if (active.n >= active.total) { active.resolve(true); setActive(null); return; }
       const drawn = next(active.question.id);
+      liveAsked(drawn.question.id);
       setActive({ ...active, question: drawn.question, setId: drawn.setId, n: active.n + 1 });
       return;
     }
@@ -99,6 +101,7 @@ export function useAsk({ gameId, mode, pool, classroomId, studentId, framed = fa
     setMissed((m) => (m.some((x) => x.id === active.question.id) ? m : [...m, active.question]));
     if (isGuessing(history.current)) { history.current = []; setBreathing(true); }
     const drawn = next(active.question.id);
+    liveAsked(drawn.question.id);
     setActive({ ...active, question: drawn.question, setId: drawn.setId });
   }
 
