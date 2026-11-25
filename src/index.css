@@ -927,3 +927,11 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 
 /* Achievements on the big screen (Show on the big screen = fullscreen). */
 .ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }
+
+/* One page width and one page-title size on every page (owner, 2026-11-25:
+   "all page widths need to be the same margins and the title text for the
+   page needs to be same size"). Pages use max-w-6xl px-4 sm:px-6; every page
+   h1 is this size, except the Home hero and in-game screens. */
+:root { --text-page-title: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem); }
+.route-shell main h1:not(.hero-title) { font-size: var(--text-page-title); line-height: 1.05; }
+.route-shell main:has(.game-stage) h1, .route-shell .brand-menu h1 { font-size: revert-layer; }

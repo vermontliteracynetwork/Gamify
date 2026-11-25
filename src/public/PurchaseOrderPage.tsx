@@ -32,7 +32,7 @@ export default function PurchaseOrderPage() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [k]: k === 'seats' ? Math.max(1, Number(e.target.value) || 1) : e.target.value });
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-6">
         <div className="grid gap-2">
           <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('po.title')} /></h1>
           <p className="text-lg font-bold">{t('po.sub')}</p>

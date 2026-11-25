@@ -64,7 +64,7 @@ function FaqTeaser({ group }: { group: 'schools' | 'homeschool' }) {
 export function SchoolsPage() {
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={Buildings} kicker={t('schools.kicker')} title={t('schools.title')} sub={t('schools.sub')}>
           <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
           <Link to="/beta" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('schools.pilot')}</Link>
@@ -138,7 +138,7 @@ export function HomeschoolPage() {
   const home = perMonthUSD(PRICES_USD_PER_YEAR.homeschool);
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={House} kicker={t('hs.kicker')} title={t('hs.title')} sub={t('hs.sub')}>
           <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('hs.start')}</Link>
           <Link to="/faq?for=homeschool" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('hs.questions')}</Link>
@@ -210,7 +210,7 @@ export function StudentDataPage() {
   ];
   return (
     <>
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <h1 className="title-bubble text-5xl"><Title text={t('data.title')} /></h1>
         <p className="text-xl font-bold max-w-3xl -mt-2">{t('data.sub')}</p>
         {sections.map(({ key, n, icon: I }) => (

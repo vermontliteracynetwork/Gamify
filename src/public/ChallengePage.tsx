@@ -16,7 +16,7 @@ export default function ChallengePage() {
   const card = 'bg-surface border-bold border-border rounded-panel p-6 grid gap-3 content-start';
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <section className="grid gap-4 justify-items-start text-left">
           <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('challenge.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('challenge.sub')}</p>

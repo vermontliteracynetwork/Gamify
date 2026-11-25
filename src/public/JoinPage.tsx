@@ -97,7 +97,7 @@ export default function JoinPage() {
 
   if (game && rosters.length > 0 && !guest) {
     return (
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
           <div className="grid sm:grid-cols-2 gap-3">
@@ -111,7 +111,7 @@ export default function JoinPage() {
 
   if (game) {
     return (
-      <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
@@ -126,7 +126,7 @@ export default function JoinPage() {
   }
 
   return (
-    <main className="relative max-w-2xl mx-auto px-4 pt-14 pb-16 grid justify-items-center">
+    <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid justify-items-center">
       <div className="w-full bg-surface border-bold border-border rounded-panel px-5 py-8 sm:px-10 sm:py-10 grid gap-5 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
       <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">

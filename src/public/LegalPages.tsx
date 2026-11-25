@@ -10,7 +10,7 @@ import PublicFooter from './PublicFooter';
 function LegalPage({ title, intro, sections }: { title: string; intro: string; sections: { h: string; items: string[] }[] }) {
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
         <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
         <p className="text-lg font-bold">{intro}</p>
         {sections.map((s) => (

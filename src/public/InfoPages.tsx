@@ -11,7 +11,7 @@ import PublicFooter from './PublicFooter';
 function InfoPage({ title, sub, sections, extra }: { title: string; sub: string; sections: { h: StringKey; items: StringKey[] }[]; extra?: React.ReactNode }) {
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
         <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
         <p className="text-lg font-bold">{sub}</p>
         {sections.map((s) => (
@@ -66,7 +66,7 @@ export function HelpPage() {
     const I = article.icon;
     return (
       <>
-        <main className="max-w-6xl mx-auto px-6 sm:px-10 pt-8 pb-16 grid lg:grid-cols-[minmax(0,1fr)_17rem] gap-8 items-start">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid lg:grid-cols-[minmax(0,1fr)_17rem] gap-8 items-start">
           <article className={`${card} p-6 sm:p-10 grid gap-6`}>
             <nav aria-label={t('help.backTo')} className="text-sm font-bold"><Link to="/help" className="text-muted no-underline hover:underline">{t('help.backTo')}</Link><span className="text-faint" aria-hidden="true"> / </span><span>{t(article.h as StringKey)}</span></nav>
             <header className="grid gap-3 border-b-[1.5px] border-border-soft pb-5">
@@ -102,7 +102,7 @@ export function HelpPage() {
 
   return (
     <>
-      <main className="max-w-6xl mx-auto px-6 sm:px-10 pt-8 pb-16 grid gap-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-8">
         <section className="px-2 pt-4 grid gap-4 justify-items-center text-center">
           <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
           <label className="relative w-full max-w-2xl">

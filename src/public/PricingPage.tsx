@@ -58,7 +58,7 @@ export default function PricingPage() {
 
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <div>
           <h1 className="title-bubble text-4xl sm:text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
           <p className="text-lg sm:text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>

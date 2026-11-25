@@ -17,7 +17,7 @@ const CHOICES = [
 
 export default function BetaKitPage() {
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-10 grid gap-5">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-10 grid gap-5">
       <div className="no-print grid gap-2">
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('kit.title')} /></h1>
         <p className="font-bold">{t('kit.sub')}</p>

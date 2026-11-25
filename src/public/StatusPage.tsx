@@ -35,7 +35,7 @@ export default function StatusPage() {
   const icon = (s: State) => s === 'ok' ? <CheckCircle weight="fill" size={28} color="#1f7a45" aria-hidden="true" /> : s === 'checking' ? <Clock weight="bold" size={28} aria-hidden="true" /> : s === 'off' ? <CheckCircle weight="bold" size={28} aria-hidden="true" /> : <WarningCircle weight="fill" size={28} color="#9b2c3a" aria-hidden="true" />;
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('status.title')} /></h1>
         <p className="text-lg font-semibold">{t('status.sub')}</p>
         <ul className="grid gap-3 list-none p-0 m-0">

@@ -16,7 +16,7 @@ export function RequireSignIn({ children }: { children: ReactNode }) {
   const { any } = useSignedIn();
   if (any) return <>{children}</>;
   return (
-    <main className="max-w-2xl mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-5xl"><Title text={t('gate.title')} /></h1>
       <p className="font-bold text-lg">{t('gate.sub')}</p>
       <div className="grid sm:grid-cols-2 gap-4 w-full">
@@ -38,7 +38,7 @@ export function RequireSignIn({ children }: { children: ReactNode }) {
 // A student who reached a game without its code: back to the join page.
 function AskForCode() {
   return (
-    <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-4xl"><Title text={t('gate.askTitle')} /></h1>
       <p className="font-bold text-lg">{t('gate.askCode')}</p>
       <Link to="/join" className={buttonClasses('primary', '', 'lg')}>{t('results.newCode')}</Link>
@@ -56,7 +56,7 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
   if (canPlayGame(tier, id)) return <>{children}</>;
   const name = getGame(id)?.name ?? '';
   return (
-    <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <span className="w-24 h-24 rounded-full bg-surface border-heavy border-border flex items-center justify-center"><LockSimple weight="fill" size={48} aria-hidden="true" /></span>
       <h1 className="title-bubble text-4xl"><Title text={name} /></h1>
       <p className="font-bold text-lg">{teacher ? t('gate.gamePlans', { name }) : t('gate.gameAsk')}</p>
@@ -73,7 +73,7 @@ export function RequireTeacher({ children }: { children: ReactNode }) {
   const { teacher } = useSignedIn();
   if (teacher) return <>{children}</>;
   return (
-    <main className="max-w-lg mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
       <h1 className="title-bubble text-5xl"><Title text={t('gate.teacherTitle')} /></h1>
       <Link to="/login" className={buttonClasses('primary', '', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.nav.login')}</Link>
     </main>

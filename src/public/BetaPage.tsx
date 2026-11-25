@@ -25,7 +25,7 @@ export default function BetaPage() {
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : Math.min(i, 8) * 0.05 } });
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
         <section className="grid gap-4 justify-items-start text-left">
           <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('betaPage.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('betaPage.sub')}</p>

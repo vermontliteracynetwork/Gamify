@@ -86,7 +86,7 @@ export function WaysPost() {
   if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />
         <p className="text-xl font-bold">{post.summary}</p>
