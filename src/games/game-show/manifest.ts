@@ -22,7 +22,7 @@ export const gameShowManifest: GameManifest = {
     ],
     classic: [
       { id: 'classic-double', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
-      { id: 'classic-bonus', name: 'Treasure Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-bonus', name: 'Prize Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
     ],
   },
   hasCpu: true,

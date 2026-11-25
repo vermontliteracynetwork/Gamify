@@ -31,7 +31,7 @@ export const bubblePopManifest: GameManifest = {
     ],
     classic: [
       { id: 'classic-bubble-bundle', name: 'Bubble Bundle', ability: 'shots', amount: 2, motion: 'bob', often: 2, art: 'extra-bubble' },
-      { id: 'classic-prize-bag', name: 'Treasure Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-prize-bag', name: 'Prize Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
       { id: 'classic-double-star', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 1, art: 'double-star' },
       { id: 'classic-mystery-box', name: 'Mystery Box', ability: 'mystery', motion: 'bob', often: 2, image: '/classic/powerups/mystery.webp' },
     ],
