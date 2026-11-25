@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'supabase-0014', kind: 'setup', added: '2026-11-25', title: 'Run 0014 so question set folders save to your account',
+    why: 'Question sets now have folders (New, Rename, Move). Signed-in teachers keep using everything without it, but until 0014 adds the folder column, a set\'s folder is saved only for empty folders, not on the set itself.',
+    how: 'Supabase SQL Editor: run supabase/migrations/0014_set_folders.sql (safe to run twice).' },
   { id: 'beta-bar', kind: 'decide', added: '2026-11-24', title: 'Beta: set the ready-to-launch bar',
     why: 'Your beta answers are in the Beta Test Plan tab of the dev plan doc. Still yours: the ready-to-launch numbers (question 4, proposed there and on /owner, Beta test) and the beta tester offer after the free months: 20% off a year of Plus at the new standard $76.80 is $61.44 (keep it, or change it now that yearly is already 20% off monthly?).',
     how: 'Open the dev plan doc, Beta Test Plan tab; change any number or line directly, or answer in chat.' },
