@@ -18,7 +18,7 @@ export const C = {
 };
 
 // Ten Classic balls, one per player color: the brand brights (Ink last, with paper finger holes).
-export const BALL_COLORS = [C.grape, C.pink, C.kelly, C.sky, C.orange, C.teal, C.lemon, C.lime, '#7a88fe', INK];
+export const BALL_COLORS = [C.grape, C.pink, C.kelly, C.sky, C.orange, C.teal, C.lemon, C.lime, C.lavender, INK];
 const holeFor = (c: string) => (c === INK ? C.paper : INK);
 // A flat ball as an SVG file, so it can be each player's icon everywhere
 // (scores, question header, results) as well as the ball they roll.
@@ -75,7 +75,8 @@ export function alley(W: number, H: number, top: number, portrait: boolean): All
 // Lime and Sky triangles, Orange and Kelly dots), placed on a jittered grid
 // from a fixed seed so it never jumps between turns.
 function rng(seed: number) { let s = seed; return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
-const WALL_COLORS = [C.teal, C.pink, C.grape, C.lime, C.orange, C.sky, C.kelly, C.lemon];
+// Pastels only, so the pins and the meter stand out from the wall.
+const WALL_PASTELS = ['#ddd6ff', '#ffd3e6', '#bfdff3', '#fff1b8', '#c8f0dc'];
 export function WallConfetti({ w, h, calm }: { w: number; h: number; calm: boolean }) {
   const r = rng(7);
   const cell = Math.max(58, Math.min(86, Math.max(w, h * 1.6) / 16));
@@ -86,10 +87,12 @@ export function WallConfetti({ w, h, calm }: { w: number; h: number; calm: boole
       n++;
       if (r() < (calm ? 0.55 : 0.12)) continue;
       const px = x + (r() - 0.5) * cell * 0.6, py = y + (r() - 0.5) * cell * 0.45;
+      // Quiet wall (Art Director, 2026-11-25): clear behind the pin deck.
+      if (Math.abs(px - w / 2) < w * 0.2) continue;
       // Mostly blobs, crosses and triangles (the mockup's wall), a few bars and dots.
       const kind = [0, 1, 2, 1, 2, 0, 3, 4][Math.floor(r() * 8)];
-      const s = cell * (kind === 4 ? 0.1 : 0.22 + r() * 0.12) * (calm ? 0.8 : 1);
-      const c = WALL_COLORS[Math.floor(r() * WALL_COLORS.length)];
+      const s = cell * (kind === 4 ? 0.05 : 0.11 + r() * 0.06) * (calm ? 0.8 : 1);
+      const c = WALL_PASTELS[Math.floor(r() * WALL_PASTELS.length)];
       const rot = Math.round((r() - 0.5) * 60);
       const shape = kind === 0
         ? <path d={`M${-s} ${-s * 0.2} C${-s} ${-s * 1.1} ${s * 0.9} ${-s * 1.1} ${s} ${-s * 0.1} C${s * 1.1} ${s * 0.9} ${-s * 0.2} ${s * 1.1} ${-s * 0.7} ${s * 0.6} C${-s * 1.1} ${s * 0.3} ${-s} ${0} ${-s} ${-s * 0.2} Z`} fill={c} />

@@ -27,6 +27,7 @@ import { ChoiceRow, PictureChoice, Slider } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -451,10 +452,11 @@ export default function GameShow() {
             style={{ padding: marquee ? 'var(--gs-top) max(9.5%, 3rem) var(--gs-bottom)' : 'var(--gs-top) clamp(0.75rem, 2.5vw, 2.5rem) var(--gs-bottom)' }}>
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className={`absolute ${marquee ? 'top-[0.45rem] right-[max(1rem,2%)]' : 'top-3 right-3'} flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11`}>
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           <section className="relative grid justify-items-center gap-[0.6rem] min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
@@ -580,7 +582,7 @@ export default function GameShow() {
               initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: prizeTier(reveal.card) === 3 ? 0.9 : 0.55, scale: 1 }} transition={{ duration: settings.motion === 'still' ? 0 : 0.5 }}>
               {/* The spin lives on an inner layer so the grow-in still shows. */}
               <div className={`w-full h-full rounded-full ${settings.motion === 'full' ? 'gs-rays' : ''}`}
-                style={{ background: isGolden(reveal.card) ? 'repeating-conic-gradient(from 0deg, rgba(255,196,0,0.95) 0deg 8deg, rgba(255,255,255,0.6) 8deg 12deg, transparent 12deg 20deg)' : 'repeating-conic-gradient(from 0deg, rgba(253,253,148,0.85) 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
+                style={{ background: isGolden(reveal.card) ? 'repeating-conic-gradient(from 0deg, #fabe37 0deg 8deg, #fff1b8 8deg 12deg, transparent 12deg 20deg)' : 'repeating-conic-gradient(from 0deg, #fff1b8 0deg 10deg, transparent 10deg 20deg)', WebkitMaskImage: 'radial-gradient(circle, #000 30%, transparent 70%)', maskImage: 'radial-gradient(circle, #000 30%, transparent 70%)' }} />
             </motion.div>
           )}
           {/* The prize card pops off the board (approved mockup, 2026-11-24): a paper
@@ -588,7 +590,7 @@ export default function GameShow() {
           <motion.div initial={settings.motion === 'still' ? false : { scale: prizeTier(reveal.card) === 3 ? 0.3 : 0.6, rotate: -6 }} animate={{ scale: 1, rotate: 0 }}
             transition={prizeTier(reveal.card) === 3 ? { type: 'spring', stiffness: 150, damping: 11, mass: 1.1 } : POP_IN}
             className="relative px-8 pt-8 pb-7 grid gap-3 justify-items-center text-center w-full max-w-[26rem]"
-            style={{ background: isGolden(reveal.card) ? 'linear-gradient(160deg, #fff7cf 0%, #ffe58a 60%, #fabe37 100%)' : STUDIO.paper, border: `3px solid ${STUDIO.ink}`, borderRadius: '1.5rem', boxShadow: `0 6px 0 ${STUDIO.ink}` }}>
+            style={{ background: isGolden(reveal.card) ? STUDIO.lemon : STUDIO.paper, border: `3px solid ${STUDIO.ink}`, borderRadius: '1.5rem', boxShadow: `0 6px 0 ${STUDIO.ink}` }}>
             {PRIZE_CONFETTI.map(([k, c, x, y, sz], n) => (
               <motion.span key={n} aria-hidden="true" className="absolute pointer-events-none" style={{ left: x, top: y }}
                 initial={settings.motion === 'still' ? false : { scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: (n * 37) % 50 - 25 }} transition={{ delay: 0.2 + n * 0.05, type: 'spring', stiffness: 260, damping: 12 }}>
@@ -679,7 +681,7 @@ function ClosedFace({ fill, art, w, edge, style }: { fill: CSSProperties; art: b
 function OpenFace({ kind, by, w, edge, style }: { kind: CardKind; by: number; w: number; edge?: boolean; style?: CSSProperties }) {
   const gold = isGolden(kind);
   return (
-    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ background: gold ? 'linear-gradient(135deg, #fff3b0 0%, #ffd75e 45%, #f2b705 100%)' : teamPastel(by), borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
+    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ background: gold ? STUDIO.lemon : teamPastel(by), borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
       <span className="absolute" style={{ top: Math.max(3, w * 0.035), left: Math.max(3, w * 0.035) }}><TeamBadge colorIndex={by} size={Math.round(Math.max(16, Math.min(40, w * 0.17)))} /></span>
       {kind.kind === 'power'
         ? <ItemArt item={kind.item} size={Math.round(Math.max(24, w * 0.4))} still />

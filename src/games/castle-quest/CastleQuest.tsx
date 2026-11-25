@@ -24,6 +24,7 @@ import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import PowerUpPop from '../../engine/PowerUpPop';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
@@ -489,12 +490,15 @@ export default function CastleQuest() {
               const same = turns.players.map((_, k) => k).filter((k) => (pos[k] ?? 0) === here);
               const slot = same.indexOf(i);
               // Up to 10 pieces share a square in a small grid (teacher, 2026-11-16).
-              const per = Math.ceil(Math.sqrt(same.length)), lines = Math.ceil(same.length / per);
-              const step = (L.size * 0.84) / Math.max(per, lines);
-              const tok = same.length > 1 ? step * 1.02 : L.size * 0.72;
+              // Up to 4 fan out side by side near full size (Art Director, 2026-11-25:
+              // never shrunk to a dot); more share the square in a small grid.
+              const fan = same.length > 1 && same.length <= 4;
+              const per = fan ? same.length : Math.ceil(Math.sqrt(same.length)), lines = fan ? 1 : Math.ceil(same.length / per);
+              const step = fan ? L.size * 0.3 : (L.size * 0.84) / Math.max(per, lines);
+              const tok = fan ? L.size * 0.6 : same.length > 1 ? step * 1.02 : L.size * 0.72;
               // A pawn stands on its square, its foot a little above the middle (mockup).
-              const lift = same.length > 1 ? L.size * 0.1 : L.size * 0.24;
-              const off = same.length > 1 ? { x: ((slot % per) - (per - 1) / 2) * step, y: (Math.floor(slot / per) - (lines - 1) / 2) * step } : { x: 0, y: 0 };
+              const lift = fan ? L.size * 0.2 : same.length > 1 ? L.size * 0.1 : L.size * 0.24;
+              const off = same.length > 1 ? { x: ((slot % per) - (per - 1) / 2) * step, y: (Math.floor(slot / per) - (lines - 1) / 2) * step + (fan ? (slot % 2 ? -L.size * 0.06 : L.size * 0.06) : 0) } : { x: 0, y: 0 };
               const sp = at(here);
               const sw = swirl && swirl.lifted[i] ? swirl : null;
               const on = i === turns.turn && phase === 'play';
@@ -535,10 +539,11 @@ export default function CastleQuest() {
             </AnimatePresence>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="castle-quest" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           <AnimatePresence>
             {toss && <DieToss key={toss.id} rolls={toss.rolls} wait={toss.wait} still={still} theme={theme} onGo={() => goRef.current?.()} />}

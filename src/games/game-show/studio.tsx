@@ -7,14 +7,17 @@ import { TEAM_COLORS } from '../../engine/turns';
 // purple bulb marquee. Drawn from the mockup's StudioBack and Marquee (copied
 // here because games do not import from src/brand), sized to the real screen.
 export const STUDIO = {
-  grape: '#6a45f0', grapeDeep: '#4b2fc9', lavender: '#ddd6ff', pink: '#f055a5',
+  grape: '#6a45f0', grapeDeep: '#1d1a33', lavender: '#ddd6ff', pink: '#f055a5',
   lemon: '#fabe37', orange: '#ff9b28', butter: '#fff1b8', paper: '#fffaf0', ink: '#1d1a33',
 };
 const I = STUDIO.ink;
 
 // A team's pastel for its won cards: the team color mixed with paper, so the
 // small badge in the corner and the card read as one team.
-export const teamPastel = (colorIndex: number) => `color-mix(in srgb, ${TEAM_COLORS[colorIndex % TEAM_COLORS.length]} 50%, ${STUDIO.paper})`;
+// Each team color's own pastel pair from the palette (Art Director, 2026-11-25),
+// never a computed tint, in TEAM_COLORS order.
+const TEAM_PASTELS = ['#fff1b8', '#c8f0dc', '#bfdff3', '#ffd9b3', '#ddd6ff', '#ffd3e6', '#e8f0b4', '#fff1b8', '#c9f1ee', '#ffd9b3'];
+export const teamPastel = (colorIndex: number) => TEAM_PASTELS[colorIndex % TEAM_COLORS.length];
 
 // Measures a box so the studio is drawn at its real size (curtains never stretch).
 // A callback ref, so it follows the box when it appears (play starts) or goes.

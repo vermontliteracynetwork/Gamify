@@ -13,6 +13,7 @@ import { playClip } from '../../engine/music';
 import TapOk from '../../engine/TapOk';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow } from '../../ui/fields';
 import { useSignedIn } from '../../auth/session';
@@ -154,10 +155,11 @@ function StudentPlay() {
             </div>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="territory" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           {stopped && !asking && !reward && state?.phase === 'play' && (
             <div className="absolute inset-0 grid place-items-center"><TapOk label={t('territory.next')} onTap={() => void loop()} /></div>

@@ -24,6 +24,7 @@ import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { PowerUpTray, useHeldPowerUps } from '../../engine/HeldPowerUps';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceFill, pieceImage } from '../../theme/library';
@@ -400,10 +401,11 @@ export default function Pinball() {
         <div className="relative play-fill grid grid-cols-[minmax(0,1fr)] content-center gap-3 px-3 py-3 lg:flex lg:justify-center lg:items-center">
           <h1 className="sr-only"><Title text={pinballManifest.name} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="pinball" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           <div className="contents lg:flex lg:items-start lg:gap-4">
             <section className="relative grid gap-2 min-w-0 [--pb-extra:4.5rem] lg:[--pb-extra:0rem]">

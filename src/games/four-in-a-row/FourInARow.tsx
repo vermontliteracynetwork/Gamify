@@ -21,6 +21,7 @@ import { t } from '../../i18n';
 import { BALL_PACK, BALL_PACK_CLEARED } from '../../config';
 import type { StringKey } from '../../i18n/en';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -45,7 +46,7 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'waiting' | 'joining' | 'play' | 'e
 type First = 'p1' | 'p2' | 'random';
 // Classic colors from the approved mockup (Brand Kit palette): Sky rack, Sky deep
 // press shade, Lemon drop win line.
-const SKY = '#4ba3e8', SKY_DEEP = '#1f6fb8', GOLD = '#fabe37';
+const SKY = '#4ba3e8', SKY_DEEP = '#1d1a33', GOLD = '#fabe37';
 // Classic's own pair (approved mockup, 2026-11-24): Grape pieces with a dot and
 // Lemon pieces with a star, so the sides differ by mark as well as color
 // (WCAG 1.4.1). The Ball Collection stays on the picker after them.
@@ -370,10 +371,11 @@ export default function FourInARow() {
         <div key="play" ref={stage} className="relative play-fill overflow-hidden flex flex-col landscape:flex-row items-stretch landscape:items-center justify-center gap-4 landscape:gap-[clamp(0.75rem,2.4vw,2.5rem)] px-[clamp(0.75rem,4vw,2.5rem)] pt-14 pb-3 landscape:px-[clamp(0.75rem,3vw,3rem)] landscape:pt-3" style={{ ['--s' as string]: `${s}px` }}>
           <h1 className="sr-only"><Title text={t('fr.title')} /></h1>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="four-in-a-row" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
 
           <div ref={area} className="relative min-w-0 min-h-0 landscape:flex-1 landscape:self-stretch flex items-center justify-center">
