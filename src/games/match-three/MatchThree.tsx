@@ -14,6 +14,7 @@ import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import type { StringKey } from '../../i18n/en';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { ChoiceRow, Slider } from '../../ui/fields';
 import GameWelcome from '../GameWelcome';
@@ -306,10 +307,11 @@ export default function MatchThree() {
         <SoloLayout
           ground={<Ground theme={theme} />}
           tools={<span className="flex items-center gap-2 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="match-three" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </span>}
           meter={<SoloMeter text={t('m3.movesLeft', { count: moves })} label={t('bm.round', { n: round, total: plan.current.rounds })} meterLabel={t('bm.moves', { count: moves })} round={round} rounds={plan.current.rounds} perRound={MOVES_PER_ROUND} left={moves}
             goal={<StarGoal score={score} stars={stars} goals={goals} still={still} />} />}

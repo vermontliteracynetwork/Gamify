@@ -24,6 +24,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceColor, pieceFill, pieceImage } from '../../theme/library';
@@ -510,7 +511,7 @@ export default function Bowling() {
               style={{ left: A.cx - hwBot - gut(hwBot), width: (hwBot + gut(hwBot)) * 2, top: A.top - hN * 0.3, bottom: 0 }}
               onPointerMove={(e) => { const r = e.currentTarget.parentElement!.getBoundingClientRect(); const x = e.clientX - r.left, y = e.clientY - r.top; setAim(Math.max(-0.92, Math.min(0.92, ((x - A.cx) / A.edgeAt(Math.max(A.top, y))) * (1.25 / 1.12)))); }} />
           )}
-          {/* The frame meter alone in the top strip; the tools at the right, in one order: Hint, Settings, Full screen. */}
+          {/* The frame meter alone in the top strip; the tools at the right, in one order: Hint, Settings, Full screen, Close. */}
           <div className={`absolute z-10 pointer-events-none flex justify-center ${box.w < 640 ? 'inset-x-3 top-[3.75rem]' : 'left-1/2 -translate-x-1/2 top-[0.95rem]'}`}>
             <Meter segments={setup.frames} done={Math.min(myFrame, setup.frames)} part={roll === 1 ? 0.6 : 0.3} width={box.w < 640 ? '100%' : portrait ? '16rem' : '20rem'} label={meterLabel} />
           </div>
@@ -518,6 +519,7 @@ export default function Bowling() {
             <HintButton gameId="bowling" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           {/* Players (left, or a row on top on tall screens) with held power-ups at the right or under them. */}
           <div ref={blockRef} className={portrait ? `absolute inset-x-3 z-20 grid justify-items-center gap-2.5 ${box.w < 640 ? 'top-[5.6rem]' : 'top-[4.4rem]'}` : `absolute left-4 top-[4.4rem] z-20 ${many ? 'w-[13rem]' : 'w-[15rem]'}`}>

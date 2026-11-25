@@ -31,3 +31,5 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - (2026-11-24, people) Collect 3 teacher quotes with permission for the home page.
 - (2026-11-24, setup) Make a Pinterest business account for Gamify (dev plan Part 5B).
 - (2026-11-24, setup) Connect Canva and the social accounts for auto-posting. The visual planner and the auto-posting queue are built on /owner, under Marketing. An approved post goes out on its own once its Canva design is ready and its account is connected. Nothing posts without your OK, and ads never launch on their own. Steps: docs/marketing-autopost.md.
+- (2026-11-25, decide) Check six guesses made while rebuilding the game boards to your mockups. They are: Game Show on purple (Grape) instead of red; Four in a Row starting on the purple and gold pieces; Bowling's neon signs off in Classic; Question Tracker's goal card and message pill; keeping the name "Prize Bag"; and whether the gold team in Game Show needs a stronger color.
+- (2026-11-25, decide) Territory animals: keep the code-drawn cats and mice and OK the tan floor (#f3cd8c), or license some.

@@ -24,6 +24,7 @@ import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import PowerUpPop from '../../engine/PowerUpPop';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
 import { pieceImage } from '../../theme/library';
@@ -535,10 +536,11 @@ export default function CastleQuest() {
             </AnimatePresence>
           </div>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-30 [&_button]:!w-11 [&_button]:!h-11">
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="castle-quest" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           <AnimatePresence>
             {toss && <DieToss key={toss.id} rolls={toss.rolls} wait={toss.wait} still={still} theme={theme} onGo={() => goRef.current?.()} />}

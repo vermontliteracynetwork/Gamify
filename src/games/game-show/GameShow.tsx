@@ -27,6 +27,7 @@ import { ChoiceRow, PictureChoice, Slider } from '../../ui/fields';
 import { addPoints, current, leaders, nextTurn, setScores, startTurns, type CpuLevel, type TurnPlayer, type TurnState } from '../../engine/turns';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import GameWelcome from '../GameWelcome';
 import SetPicker from '../SetPicker';
@@ -451,10 +452,11 @@ export default function GameShow() {
             style={{ padding: marquee ? 'var(--gs-top) max(9.5%, 3rem) var(--gs-bottom)' : 'var(--gs-top) clamp(0.75rem, 2.5vw, 2.5rem) var(--gs-bottom)' }}>
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
           <div className={`absolute ${marquee ? 'top-[0.45rem] right-[max(1rem,2%)]' : 'top-3 right-3'} flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11`}>
-            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen. */}
+            {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
             <FullScreenButton small />
+            <CloseGameButton />
           </div>
           <section className="relative grid justify-items-center gap-[0.6rem] min-w-0 @container">
             {/* Bonus toasts: full row or column, hot streak. */}
