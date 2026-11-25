@@ -92,7 +92,7 @@ Approved: Home.
     tap a card before Next); then a GitHub check run.
 21. [x] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
     browser on every device.
-22. [ ] **Slow-device check:** a test round on a slow school Chromebook and a
+22. [ ] **Slow-device check:** (simulated run passed 2026-11-25, docs/slow-device-check.md) a test round on a slow school Chromebook and a
     projector (suggested by the build session; needs her or a beta classroom).
 23. [x] **Rebuild the live site** to the new direction: only when she asks for
     the push after approving /brand.
