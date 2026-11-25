@@ -49,7 +49,11 @@ A post with 200 likes and 0 sign-ups did worse than a post with 20 likes and 3.
 
 Skills the team uses (`.claude/skills/`): `marketing-bible-check` (the gate),
 `content-calendar`, `campaign-brief`, `ad-copy-variants`, `tracking-links`,
-`landing-page-audit`, `competitor-teardown`, `post-review`.
+`landing-page-audit`, `competitor-teardown`, `post-review`, and the social media
+pipeline `social-video-pipeline` (2026-11-25): `last30days` (what teachers talk about,
+cookie-free), `social`, `copywriting`, `video` and the other vendored marketing skills
+(scripts, hooks, captions, hashtags), `humanizer` (sounds like Gamify, not AI),
+`hyperframes` (the video), then the planner for her OK and Buffer once connected.
 
 ### The approval rule (non-negotiable)
 

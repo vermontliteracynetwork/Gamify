@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'buffer', kind: 'setup', added: '2026-11-25', title: 'Optional: a Buffer account to schedule approved posts',
+    why: 'The social media pipeline from your video is set up for the marketing team: find what teachers are talking about, write scripts, hooks, captions and hashtags, make them sound like Gamify, and build the video. The last step, scheduling across Instagram, TikTok, Facebook and Pinterest, can use Buffer. Its free plan covers a few channels with a limited queue; paid plans cost per channel each month (check buffer.com/pricing). Nothing is scheduled without your OK either way.',
+    how: 'Only if you want it: make a Buffer account in the business name, connect the Gamify Instagram, TikTok, Facebook and Pinterest accounts, then tell Claude. Claude asks for access through a secure form, never in chat. Until then, approved posts use the planner\'s own auto-post queue or you post them by hand.' },
   { id: 'affiliate-terms', kind: 'decide', added: '2026-11-25', title: 'Affiliates: approve the terms',
     why: 'The affiliate program is built (public page /affiliates, referral links and codes, the Affiliates page here, payouts into Books). The terms are predicted: 25% of what a new subscriber pays in their first 12 months, 10% of a school plan\'s first year, a 60-day window (last link or code wins), monthly payouts after a 30-day refund hold with a $25 minimum, followers 10% off their first term, and Pro free for active affiliates. One Plus yearly sale pays $19.20; one Pro yearly sale pays $36.',
     how: 'Open /owner, Affiliates, read the terms (and docs/affiliate-program.md), then say yes or change a number. Also pick how you pay affiliates: PayPal, bank transfer, or a paid affiliate tool (a money decision).' },

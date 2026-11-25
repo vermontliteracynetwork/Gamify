@@ -84,3 +84,23 @@ pure-Python ephemeris engine `scripts/astro_engine.py`. Left out: the MCP server
 API, Docker and cloud files. Used only by the owner's private Astrology Advisor
 (`.claude/agents/astrology-advisor.md`) for the Developer Portal; development tooling,
 never shipped to teachers or students.
+
+## Social media pipeline tools (2026-11-25)
+
+From the owner's "free Claude plugins to automate social media" video. Wired together by
+Gamify's own `social-video-pipeline` skill; the marketing bible overrules all of them.
+Development tooling only, never shipped to teachers or students.
+
+- `last30days/` from **last30days-skill** by Matt Van Horn (https://github.com/mvanhorn/last30days-skill,
+  commit 7c2e1c2), MIT. Taken: SKILL.md, references, scripts, agents; left out: the 14 MB assets folder,
+  docs, tests, MCP server. Used cookie-free only (no browser-cookie reads).
+- `social/`, `copywriting/`, `copy-editing/`, `video/`, `influencer-marketing/`, `referrals/`,
+  `marketing-psychology/`, `content-strategy/`, `marketing-ideas/`, `ad-creative/`, `launch/`, `offers/`,
+  `community-marketing/` from **marketingskills** by Corey Haines (https://github.com/coreyhaines31/marketingskills,
+  commit 8fd2fca), MIT. Evals left out. Their product context is `.claude/product-marketing.md`.
+- `humanizer/` from **humanizer** by Siqi Chen (https://github.com/blader/humanizer, commit a32f244), MIT.
+- `hyperframes/`, `hyperframes-cli/`, `media-use/` from **HyperFrames** by HeyGen
+  (https://github.com/heygen-com/hyperframes, commit a3e0903), Apache License 2.0 (copy in each folder).
+  Its usage note (telemetry) is always declined; no cloud render without the owner's OK.
+
+Each folder keeps its own LICENSE file.
