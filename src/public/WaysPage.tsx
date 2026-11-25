@@ -90,7 +90,7 @@ export function WaysPost() {
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />
         <p className="text-xl font-bold">{post.summary}</p>
-        <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-bold border-border" />
+        <GameCover gameId={post.cover} className="aspect-[21/9] max-h-[22rem] w-full rounded-panel border-bold border-border" />
         {post.body.map((para, i) => <p key={i} className="text-lg leading-relaxed">{para}</p>)}
         {post.lists?.map((l) => (
           <section key={l.heading} className="grid gap-2">
