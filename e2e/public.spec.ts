@@ -126,13 +126,16 @@ test.describe('signed out', () => {
     await page.goto('/');
     await page.getByRole('contentinfo').getByRole('link', { name: 'Blog' }).click();
     await expect(page.getByRole('heading', { name: /^Blog$/i })).toBeVisible();
-    await page.getByRole('button', { name: '9-12' }).click();
+    // Topic pills and a grades dropdown (the /brand Blog index mockup, 2026-11-25).
+    const grades = page.getByRole('combobox', { name: /^Grades/ });
+    await grades.selectOption('912');
     await expect(page.getByRole('link', { name: /Unit Review Tournament/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Two-Tap Exit Tickets/ })).toHaveCount(0);
+    await grades.selectOption('all');
     await page.getByRole('button', { name: 'Homeschool' }).click();
     await expect(page.getByRole('link', { name: /Siblings at Different Grades/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Design a Theme as a Class/ })).toHaveCount(0);
-    await page.getByRole('button', { name: 'All grades' }).click();
+    await page.getByRole('button', { name: 'All', exact: true }).click();
     await page.screenshot({ path: `test-results/ways-${info.project.name}.png`, fullPage: true });
     await page.getByRole('link', { name: /Design a Theme as a Class/ }).click();
     await expect(page.getByRole('heading', { name: /Just try it/i })).toBeVisible();

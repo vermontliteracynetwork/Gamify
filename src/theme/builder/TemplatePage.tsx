@@ -21,6 +21,15 @@ function wrap(text: string, max: number): string[] {
 export function TemplateSheet({ gameName, piece, page, total }: { gameName: string; piece: ThemePieceSpec; page: number; total: number }) {
   const box = outlineBox(piece);
   const ink = '#3a3a3a';
+  // The safe line is dashed (the /brand template sheet mockup), with the
+  // piece's name and size under it. When a tall piece leaves no room under
+  // its outline, the label moves down to the notes at the foot of the page.
+  const dash = `${OUTLINE_STROKE * 3.4} ${OUTLINE_STROKE * 2.2}`;
+  const bottom = box.y + box.height;
+  const roomy = piece.id === 'dice' || bottom + 70 <= 1995;
+  const sizeY = piece.id === 'dice' ? bottom + 130 : roomy ? bottom + 60 : 2028;
+  const noteY = roomy ? 2030 : 2070, footY = roomy ? 2085 : 2112;
+  const outline = { fill: 'none', stroke: ink, strokeWidth: OUTLINE_STROKE, strokeDasharray: dash };
   return (
     <svg viewBox={`0 0 ${PAGE.width} ${PAGE.height}`} className="template-sheet" role="img" aria-label={t('builder.sheet', { n: page, piece: piece.label })}
       style={{ fontFamily: "'Inclusive Sans', system-ui, sans-serif" }}>
@@ -39,20 +48,21 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
       {wrap(piece.hint ?? '', 66).slice(0, 3).map((ln, i, all) => (
         <text key={i} x={PAGE.width / 2} y={300 + i * 42 - (all.length - 1) * 8} textAnchor="middle" fontSize={34} fill="#333">{ln}</text>
       ))}
-      <text x={PAGE.width / 2} y={2030} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetNote')}</text>
+      <text x={PAGE.width / 2} y={sizeY} textAnchor="middle" fontSize={32} fontWeight={700} fill="#555">{t('builder.sheetSize', { piece: piece.label, w: piece.width, h: piece.height })}</text>
+      <text x={PAGE.width / 2} y={noteY} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetNote')}</text>
       {piece.id === 'dice'
         // The die: all six sides on one strip, one square each, numbered (teacher, 2026-11-08).
         ? Array.from({ length: 6 }, (_, k) => { const w = box.width / 6; return (
             <g key={k}>
-              <rect x={box.x + k * w + 8} y={box.y + 8} width={w - 16} height={box.height - 16} rx={22} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />
+              <rect x={box.x + k * w + 8} y={box.y + 8} width={w - 16} height={box.height - 16} rx={22} {...outline} />
               <text x={box.x + k * w + w / 2} y={box.y + box.height + 56} textAnchor="middle" fontSize={40} fontWeight={700} fill="#555">{t('builder.dieSide', { n: k + 1 })}</text>
             </g>); })
         : hasShape(piece.id)
-        ? <path d={shapePath(piece.id, box.x, box.y, box.width, box.height)!} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} strokeLinejoin="round" />
+        ? <path d={shapePath(piece.id, box.x, box.y, box.width, box.height)!} {...outline} strokeLinejoin="round" />
         : isRound(piece)
-        ? <ellipse cx={box.x + box.width / 2} cy={box.y + box.height / 2} rx={box.width / 2} ry={box.height / 2} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />
-        : <rect x={box.x} y={box.y} width={box.width} height={box.height} rx={18} fill="none" stroke={ink} strokeWidth={OUTLINE_STROKE} />}
-      <text x={PAGE.width / 2} y={2085} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetFooter', { game: gameName, n: page, total })}</text>
+        ? <ellipse cx={box.x + box.width / 2} cy={box.y + box.height / 2} rx={box.width / 2} ry={box.height / 2} {...outline} />
+        : <rect x={box.x} y={box.y} width={box.width} height={box.height} rx={18} {...outline} />}
+      <text x={PAGE.width / 2} y={footY} textAnchor="middle" fontSize={30} fill="#555">{t('builder.sheetFooter', { game: gameName, n: page, total })}</text>
     </svg>
   );
 }
@@ -69,26 +79,28 @@ export default function TemplatePage({ guide = false }: { guide?: boolean }) {
   const back = guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`;
   if (access !== 'ok') {
     return (
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-4">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-4">
         <Link to={back} className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t(guide ? 'guide.back' : 'builder.backToBuilder')}</Link>
         <TemplateLock access={access} />
       </main>
     );
   }
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16">
+     <div className="max-w-[52rem] mx-auto">
       <div className="no-print flex flex-wrap items-center gap-3 mb-6">
         <Link to={guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t(guide ? 'guide.back' : 'builder.backToBuilder')}</Link>
         <button type="button" onClick={() => window.print()} className={buttonClasses('main')}><Printer weight="bold" size={18} />{t('builder.print')}</button>
         <p className="font-bold">{t('builder.printNote', { count: pages.length })}</p>
       </div>
-      <div className="grid gap-6">
+      <div className="grid gap-6 bg-border-soft border-std border-border rounded-panel p-4 sm:p-8 print:bg-transparent print:border-0 print:p-0 print:rounded-none">
         {pages.map((p, i) => (
-          <div key={p.id} className="template-page bg-white border-std border-border-soft rounded-input overflow-hidden">
+          <div key={p.id} className="template-page bg-white border-thin border-border-soft overflow-hidden shadow-[0_2px_8px_rgba(29,26,51,0.18)] print:shadow-none">
             <TemplateSheet gameName={game.name} piece={p} page={i + 1} total={pages.length} />
           </div>
         ))}
       </div>
+     </div>
     </main>
   );
 }

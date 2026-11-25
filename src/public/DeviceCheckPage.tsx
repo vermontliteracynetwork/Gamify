@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, SpeakerHigh, WarningCircle, XCircle } from '@phosphor-icons/react';
+import { AppWindow, CheckCircle, CornersOut, FloppyDisk, HandPointing, Info, MusicNotes, Play, SpeakerHigh, WarningCircle, WifiHigh, XCircle, type Icon } from '@phosphor-icons/react';
+import IconBadge from '../ui/IconBadge';
 import { playEffect, speak } from '../engine/feedback';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -12,6 +13,7 @@ import PublicFooter from './PublicFooter';
 // "Will Gamify work here?" (Stage 8 device check, for teachers and school
 // IT): checks this browser on the spot, nothing is sent anywhere.
 type Result = 'ok' | 'warn' | 'fail';
+const ICONS: Record<string, Icon> = { browser: AppWindow, screen: CornersOut, storage: FloppyDisk, network: WifiHigh, voice: SpeakerHigh, sound: MusicNotes, touch: HandPointing };
 interface Check { id: string; result: Result; detail?: string }
 
 async function runChecks(): Promise<Check[]> {
@@ -39,36 +41,46 @@ export default function DeviceCheckPage() {
   useEffect(() => { void runChecks().then(setChecks); }, []);
   const worst: Result = !checks ? 'ok' : checks.some((c) => c.result === 'fail') ? 'fail' : checks.some((c) => c.result === 'warn') ? 'warn' : 'ok';
   const icon = (r: Result, size = 28) => r === 'ok' ? <CheckCircle weight="fill" size={size} color="#1f7a45" aria-hidden="true" /> : r === 'warn' ? <WarningCircle weight="fill" size={size} color="#b7791f" aria-hidden="true" /> : <XCircle weight="fill" size={size} color="#9b2c3a" aria-hidden="true" />;
+  const tryIt: Record<string, { label: string; run: () => void } | undefined> = {
+    sound: { label: t('check.trySound'), run: () => playEffect('right', settings) },
+    voice: { label: t('check.tryVoice'), run: () => speak(t('check.voiceLine'), settings) },
+  };
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
-        <h1 className="title-bubble text-5xl"><Title text={t('check.title')} /></h1>
-        <p className="text-lg font-bold -mt-2">{t('check.sub')}</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10">
+       <div className="max-w-[47.5rem] mx-auto grid gap-5">
+        <div className="grid gap-2">
+          <h1 className="title-bubble"><Title text={t('check.title')} /></h1>
+          <p className="text-lg font-semibold">{t('check.sub')}</p>
+        </div>
         {!checks ? <p className="font-bold" role="status">{t('check.running')}</p> : (
           <>
             <section className={`border-bold border-border rounded-panel p-5 flex items-center gap-3 ${worst === 'ok' ? 'bg-mint-soft' : worst === 'warn' ? 'bg-butter' : 'bg-blush'}`} style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
               {icon(worst, 44)}
-              <p className="font-display text-2xl">{t(`check.overall.${worst}` as StringKey)}</p>
+              <p className="font-heading font-bold text-2xl">{t(`check.overall.${worst}` as StringKey)}</p>
             </section>
-            <ul className="grid gap-2 list-none p-0 m-0">
-              {checks.map((c) => (
-                <li key={c.id} className="bg-surface border-std border-border rounded-input p-4 flex items-start gap-3">
-                  {icon(c.result)}
-                  <span className="grid gap-0.5">
-                    <span className="font-bold text-lg">{t(`check.${c.id}` as StringKey)}{c.detail ? `: ${c.detail}` : ''}</span>
-                    <span className="font-semibold text-sm">{t(`check.${c.id}.${c.result}` as StringKey)}</span>
-                  </span>
-                </li>
-              ))}
+            <ul className="grid gap-3 list-none p-0 m-0">
+              {checks.map((c) => {
+                const I = ICONS[c.id] ?? Info;
+                const extra = tryIt[c.id];
+                return (
+                  <li key={c.id} className="bg-surface border-std border-border rounded-panel p-4 flex flex-wrap items-center gap-x-4 gap-y-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                    <IconBadge color={c.result === 'ok' ? 'mint' : c.result === 'warn' ? 'butter' : 'blush'}><I weight="bold" size={24} /></IconBadge>
+                    <span className="grid gap-0.5 flex-1 min-w-[12rem]">
+                      <span className="font-bold text-lg">{t(`check.${c.id}` as StringKey)}{c.detail ? `: ${c.detail}` : ''}</span>
+                      <span className="font-semibold text-sm text-muted">{t(`check.${c.id}.${c.result}` as StringKey)}</span>
+                    </span>
+                    {extra && <Button size="sm" onClick={extra.run}><Play weight="fill" size={16} />{extra.label}</Button>}
+                    {icon(c.result, 30)}
+                  </li>
+                );
+              })}
             </ul>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => playEffect('right', settings)}><SpeakerHigh weight="bold" size={18} />{t('check.trySound')}</Button>
-              <Button onClick={() => speak(t('check.voiceLine'), settings)}><SpeakerHigh weight="bold" size={18} />{t('check.tryVoice')}</Button>
-              <Link to="/it" className={buttonClasses('ghost')}>{t('public.nav.it')}</Link>
-            </div>
+            <Link to="/it" className={buttonClasses('secondary', 'justify-self-start')}>{t('public.nav.it')}</Link>
           </>
         )}
         <p className="text-sm font-semibold text-muted">{t('check.private')}</p>
+       </div>
       </main>
       <PublicFooter />
     </>

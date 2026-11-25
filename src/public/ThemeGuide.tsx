@@ -12,6 +12,7 @@ import type { ThemePieceSpec } from '../theme/types';
 import { Button, buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import { BlogCard, GameHeader } from './BlogCard';
 import { TemplateLock, useTemplateAccess } from '../theme/builder/templateAccess';
 
 // Theme guides in the blog (teacher, 2026-10-28): one article per game that
@@ -42,16 +43,8 @@ export function pieceTips(p: ThemePieceSpec): string[] {
 export const guideGames = (): GameManifest[] => GAMES;
 
 export function ThemeGuideCard({ game }: { game: GameManifest }) {
-  return (
-    <Link to={`/blog/themes/${game.id}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={game.id} className="aspect-[16/9] cover-zoom" /></span>
-      <span className="p-4 grid gap-2">
-        <span className="font-display text-2xl leading-tight">{t('guide.cardTitle', { game: game.name })}</span>
-        <span className="font-semibold text-sm">{t('guide.cardSub', { n: game.themePieces.length + (game.items?.classic.length ?? 0) })}</span>
-        <span className="inline-flex items-center gap-1 text-xs font-bold text-muted"><PaintBrush weight="bold" size={16} aria-hidden="true" />{t('guide.tag')}</span>
-      </span>
-    </Link>
-  );
+  return <BlogCard to={`/blog/themes/${game.id}`} header={<GameHeader gameId={game.id} />} title={t('guide.cardTitle', { game: game.name })} sub={t('guide.cardSub', { n: game.themePieces.length + (game.items?.classic.length ?? 0) })}
+    meta={<span className="inline-flex items-center gap-1 text-xs font-bold text-muted"><PaintBrush weight="bold" size={16} aria-hidden="true" />{t('guide.tag')}</span>} />;
 }
 
 // A look at the Classic piece: drawn on screen, small, marked Example.
@@ -73,7 +66,7 @@ export function ThemeGuidePage() {
   const game = guideGames().find((g) => g.id === gameId);
   const [dl, setDl] = useState('');
   const access = useTemplateAccess(gameId ?? '');
-  if (!game) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog?tag=themes" className={buttonClasses('secondary')}>{t('guide.all')}</Link></main>;
+  if (!game) return <main className="max-w-6xl mx-auto px-4 sm:px-6 p-6"><Link to="/blog?tag=themes" className={buttonClasses('secondary')}>{t('guide.all')}</Link></main>;
   const items = game.items;
   async function zip() {
     if (access !== 'ok') return;
@@ -84,29 +77,54 @@ export function ThemeGuidePage() {
   }
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('guide.cardTitle', { game: game.name })} /></h1>
-        <p className="text-xl font-bold">{t('guide.intro', { game: game.name })}</p>
-        <GameCover gameId={game.id} className="aspect-[21/9] max-h-[22rem] w-full rounded-panel border-bold border-border" />
-        <p className="text-lg leading-relaxed">{t('guide.classicNote')}</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid gap-6">
+        <div className="grid gap-2">
+          <h1 className="title-bubble"><Title text={t('guide.cardTitle', { game: game.name })} /></h1>
+          <p className="text-lg font-semibold max-w-3xl">{t('guide.intro', { game: game.name })}</p>
+        </div>
 
-        <section className="bg-butter border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
-          <h2 id="guide-dl" className="font-display text-3xl"><Title text={t('guide.dlTitle')} /></h2>
-          <p className="font-bold">{t('guide.dlSub')}</p>
-          <p className="font-semibold">{t('guide.dlMaterials')}</p>
-          <TemplateLock access={access} />
-          {access === 'ok' && <div className="flex flex-wrap gap-2">
-            <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('secondary', 'hover-pop', 'lg')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
-            <Button variant="secondary" className="min-h-14 px-6 hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => void zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
-          </div>}
-          {dl && <p className="font-bold" role="status">{dl}</p>}
-          <p className="text-sm font-semibold">{t('guide.dlThen')}</p>
-        </section>
+        {/* The Classic example beside every piece and its size (the /brand
+            Theme guide mockup). Classic is shown on screen only, marked
+            Example, never handed out. */}
+        <div className="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-6 items-start">
+          <figure className="m-0 grid gap-3 lg:sticky lg:top-24">
+            <span className="relative block rounded-panel overflow-hidden border-bold border-border select-none" style={{ boxShadow: 'var(--shadow-sticker)' }} onContextMenu={(e) => e.preventDefault()}>
+              <GameCover gameId={game.id} className="aspect-[10/9] w-full pointer-events-none" />
+              <span className="absolute left-3 top-3 px-3 py-1 rounded-pill bg-butter border-std border-border font-bold text-sm">{t('guide.exampleTag')}</span>
+            </span>
+            <figcaption className="font-semibold leading-relaxed">{t('guide.classicNote')}</figcaption>
+          </figure>
+          <div className="grid gap-4 content-start">
+            <nav aria-label={t('guide.atGlance')} className="grid gap-2">
+              <h2 className="font-heading font-bold text-xl">{t('guide.atGlance')}</h2>
+              <ul className={`grid gap-2 list-none p-0 m-0 ${game.themePieces.length > 8 ? 'sm:grid-cols-2' : ''}`}>
+                {game.themePieces.map((p) => (
+                  <li key={p.id}><a href={`#piece-${p.id}`} className="hover-lift bg-surface border-std border-border rounded-input px-3 py-2 grid grid-cols-[1fr_auto] gap-x-3 items-center no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                    <span className="font-bold leading-tight">{p.label}</span>
+                    <span className="px-2.5 py-0.5 rounded-pill bg-lavender border-thin border-border text-xs font-bold whitespace-nowrap">{t('guide.size', { w: p.width, h: p.height })}</span>
+                  </a></li>
+                ))}
+              </ul>
+            </nav>
+            <section className="bg-butter border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-labelledby="guide-dl">
+              <h2 id="guide-dl" className="font-heading font-bold text-2xl">{t('guide.dlTitle')}</h2>
+              <p className="font-semibold">{t('guide.dlSub')}</p>
+              <TemplateLock access={access} />
+              {access === 'ok' && <div className="flex flex-wrap gap-2">
+                <Link to={`/blog/themes/${game.id}/print`} className={buttonClasses('main', 'hover-pop')}><Printer weight="bold" size={20} />{t('guide.dlPrint')}</Link>
+                <Button variant="secondary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')} onClick={() => void zip()}><DownloadSimple weight="bold" size={20} />{t('guide.dlDigital')}</Button>
+              </div>}
+              {dl && <p className="font-bold" role="status">{dl}</p>}
+              <p className="text-sm font-semibold">{t('guide.dlMaterials')}</p>
+              <p className="text-sm font-semibold">{t('guide.dlThen')}</p>
+            </section>
+          </div>
+        </div>
 
-        <h2 className="font-display text-3xl mt-2"><Title text={t('guide.piecesTitle')} /></h2>
-        <ol className="grid gap-3 list-none p-0 m-0">
+        <h2 className="font-heading font-bold text-3xl mt-2">{t('guide.piecesTitle')}</h2>
+        <ol className="grid lg:grid-cols-2 gap-3 list-none p-0 m-0">
           {game.themePieces.map((p, i) => (
-            <li key={p.id} className="bg-surface border-bold border-border rounded-panel p-4 grid sm:grid-cols-[170px_1fr] gap-4 items-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <li key={p.id} id={`piece-${p.id}`} className="scroll-mt-24 bg-surface border-bold border-border rounded-panel p-4 grid sm:grid-cols-[170px_1fr] gap-4 items-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <span className="flex items-center justify-center min-h-[150px] bg-surface-2 rounded-input border-std border-border-soft p-2"><ClassicLook piece={p} gameId={game.id} /></span>
               <div className="grid gap-1.5">
                 <h3 className="font-display text-2xl">{i + 1}. {p.label}</h3>
@@ -120,7 +138,7 @@ export function ThemeGuidePage() {
 
         {items && items.classic.length > 0 && (
           <>
-            <h2 className="font-display text-3xl mt-2"><Title text={t('guide.powersTitle')} /></h2>
+            <h2 className="font-heading font-bold text-3xl mt-2">{t('guide.powersTitle')}</h2>
             <p className="text-lg">{t('guide.powersSub', { w: items.width, h: items.height, max: items.max })}</p>
             <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
               {items.classic.map((it) => {
@@ -148,7 +166,7 @@ export function ThemeGuidePage() {
         )}
 
         <section className="bg-surface border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 className="font-display text-3xl"><Title text={t('guide.allTipsTitle')} /></h2>
+          <h2 className="font-heading font-bold text-2xl">{t('guide.allTipsTitle')}</h2>
           <ul className="grid gap-1.5 pl-5 m-0 list-disc text-lg font-semibold">
             {(['png', 'exact', 'words', 'kids', 'own'] as const).map((k) => <li key={k}>{t(`guide.rule.${k}`)}</li>)}
           </ul>

@@ -1,12 +1,13 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
-import { ArrowRight, Clock, GraduationCap, PaintBrush } from '@phosphor-icons/react';
-import { GameCover } from '../games/covers';
+import { ArrowRight, Clock, GraduationCap } from '@phosphor-icons/react';
+import { BlogCard, BlogCrumb, PostHeader, Steps, type Topic } from './BlogCard';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
+import PillSelect from '../ui/PillSelect';
 import Title from '../ui/Title';
-import { POSTS } from './posts';
+import { POSTS, type Post } from './posts';
 import { guideGames, ThemeGuideCard } from './ThemeGuide';
 import { HowToPlayCard, howToGames } from './HowToPlayPage';
 import PublicFooter from './PublicFooter';
@@ -18,52 +19,50 @@ export function gradeRange(grades: string): [number, number] {
   return [a, b];
 }
 
-// The public "Ways to use Gamify" pages: a list of posts and each post.
+// Topics (the /brand Blog index mockup): All, Classroom ideas, Themes, How to
+// play, Homeschool. Classroom ideas are the posts with no homeschool or
+// themes tag; Themes adds every game's theme guide, How to play every game's
+// article.
+const TOPICS: readonly Topic[] = ['all', 'classroom', 'themes', 'howto', 'homeschool'];
+const topicOf = (p: Post): Exclude<Topic, 'all' | 'howto'> => (p.tags?.includes('homeschool') ? 'homeschool' : p.tags?.includes('themes') ? 'themes' : 'classroom');
+
+const pill = (on: boolean) => `hover-pop min-h-11 px-5 rounded-pill border-std border-border font-bold text-sm ${on ? 'bg-butter' : 'bg-surface'}`;
+
+// The public Blog: topic pills and a grade dropdown over a grid of cards.
 export function WaysList() {
   const [params, setParams] = useSearchParams();
   const band = BANDS.find((b) => b.id === params.get('grades')) ?? BANDS[0];
-  const tag = params.get('tag');
-  const posts = POSTS.filter((p) => { const [lo, hi] = gradeRange(p.grades); return lo <= band.hi && hi >= band.lo && (!tag || p.tags?.includes(tag)); });
+  const topic: Topic = (TOPICS as readonly string[]).includes(params.get('tag') ?? '') ? (params.get('tag') as Topic) : 'all';
+  const go = (next: { tag?: Topic; grades?: string }) => {
+    const tag = next.tag ?? topic, grades = next.grades ?? band.id;
+    setParams({ ...(tag !== 'all' ? { tag } : {}), ...(grades !== 'all' ? { grades } : {}) }, { replace: true });
+  };
+  const posts = POSTS.map((p, i) => ({ p, i })).filter(({ p }) => {
+    const [lo, hi] = gradeRange(p.grades);
+    return lo <= band.hi && hi >= band.lo && (topic === 'all' || topicOf(p) === topic);
+  });
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
-        <div>
-          <h1 className="title-bubble text-5xl"><Title text={t('ways.title')} /></h1>
-          <p className="text-lg font-bold mt-1">{t('ways.sub')}</p>
+        <div className="grid gap-2">
+          <h1 className="title-bubble"><Title text={t('ways.title')} /></h1>
+          <p className="text-lg font-semibold max-w-3xl">{t('ways.sub')}</p>
         </div>
-        <div role="group" aria-label={t('ways.filter')} className="flex flex-wrap gap-2">
-          {BANDS.map((b) => (
-            <button key={b.id} type="button" aria-pressed={band.id === b.id} onClick={() => setParams(b.id === 'all' ? {} : { grades: b.id }, { replace: true })}
-              className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-butter' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
-          ))}
-          <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-butter' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
-          <button type="button" aria-pressed={tag === 'howto'} onClick={() => setParams(tag === 'howto' ? {} : { tag: 'howto' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'howto' ? 'bg-butter' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
-          <button type="button" aria-pressed={tag === 'themes'} onClick={() => setParams(tag === 'themes' ? {} : { tag: 'themes' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'themes' ? 'bg-butter' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div role="group" aria-label={t('ways.topics')} className="flex flex-wrap gap-2.5">
+            {TOPICS.map((k) => <button key={k} type="button" aria-pressed={topic === k} onClick={() => go({ tag: k })} className={pill(topic === k)}>{t(`ways.topic.${k}` as StringKey)}</button>)}
+          </div>
+          <PillSelect label={t('ways.gradesLabel')} value={band.id} onChange={(v) => go({ grades: v })} active={band.id !== 'all'}>
+            {BANDS.map((b) => <option key={b.id} value={b.id}>{t(`ways.band.${b.id}` as StringKey)}</option>)}
+          </PillSelect>
         </div>
-        {!tag && (
-          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-butter border-bold border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <PaintBrush weight="fill" size={44} aria-hidden="true" />
-            <span className="grid gap-1 flex-1 min-w-60"><span className="font-display text-2xl">{t('guide.listTitle')}</span><span className="font-semibold">{t('guide.listSub')}</span></span>
-            <span className={buttonClasses('secondary')}>{t('guide.listOpen')}<ArrowRight weight="bold" size={18} /></span>
-          </Link>
-        )}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {posts.map((p) => (
-            <Link key={p.slug} to={`/blog/${p.slug}`} className="hover-lift rounded-panel bg-surface border-bold border-border no-underline text-text overflow-hidden flex flex-col" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <span className="block overflow-hidden border-b-[2.5px] border-border"><GameCover gameId={p.cover} className="aspect-[16/9] cover-zoom" /></span>
-              <span className="p-4 grid gap-2">
-                <span className="font-display text-2xl leading-tight">{p.title}</span>
-                <span className="font-semibold text-sm">{p.summary}</span>
-                <Meta grades={p.grades} minutes={p.minutes} />
-              </span>
-            </Link>
-          ))}
-          {tag === 'themes' && guideGames().map((g) => <ThemeGuideCard key={g.id} game={g} />)}
-          {tag === 'howto' && howToGames().map((g) => <HowToPlayCard key={g.id} game={g} />)}
+        {topic === 'themes' && <p className="font-semibold max-w-3xl -mt-2">{t('guide.listSub')}</p>}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {posts.map(({ p, i }) => <BlogCard key={p.slug} to={`/blog/${p.slug}`} header={<PostHeader i={i} />} title={p.title} sub={p.summary} meta={<Meta grades={p.grades} minutes={p.minutes} />} />)}
+          {topic === 'themes' && guideGames().map((g) => <ThemeGuideCard key={g.id} game={g} />)}
+          {topic === 'howto' && howToGames().map((g) => <HowToPlayCard key={g.id} game={g} />)}
         </div>
+        {posts.length === 0 && topic !== 'themes' && topic !== 'howto' && <p className="font-bold">{t('ways.none')}</p>}
       </main>
       <PublicFooter />
     </>
@@ -81,29 +80,33 @@ function Meta({ grades, minutes }: { grades: string; minutes: number }) {
 
 export function WaysPost() {
   const { slug } = useParams();
-  const post = POSTS.find((p) => p.slug === slug);
+  const index = POSTS.findIndex((p) => p.slug === slug);
+  const post = POSTS[index];
   useCrumbLabel(post?.title);
-  if (!post) return <main className="max-w-3xl mx-auto p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
+  if (!post) return <main className="max-w-6xl mx-auto px-4 sm:px-6 p-6"><Link to="/blog" className={buttonClasses('secondary')}>{t('ways.all')}</Link></main>;
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
-        <Meta grades={post.grades} minutes={post.minutes} />
-        <p className="text-xl font-bold">{post.summary}</p>
-        <GameCover gameId={post.cover} className="aspect-[21/9] max-h-[22rem] w-full rounded-panel border-bold border-border" />
-        {post.body.map((para, i) => <p key={i} className="text-lg leading-relaxed">{para}</p>)}
-        {post.lists?.map((l) => (
-          <section key={l.heading} className="grid gap-2">
-            <h2 className="text-2xl">{l.heading}</h2>
-            <ul className="grid gap-1 pl-7 m-0 text-lg list-disc">{l.items.map((item) => <li key={item}>{item}</li>)}</ul>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8">
+        <article className="max-w-[47.5rem] mx-auto grid gap-5">
+          <BlogCrumb topic={topicOf(post)} />
+          <h1 className="title-bubble"><Title text={post.title} /></h1>
+          <p className="text-xl font-semibold leading-snug">{post.summary}</p>
+          <Meta grades={post.grades} minutes={post.minutes} />
+          <PostHeader i={index} tall />
+          {post.body.map((para, i) => <p key={i} className="text-lg leading-relaxed">{para}</p>)}
+          {post.lists?.map((l) => (
+            <section key={l.heading} className="grid gap-2">
+              <h2 className="font-heading font-bold text-2xl">{l.heading}</h2>
+              <ul className="grid gap-1 pl-7 m-0 text-lg list-disc">{l.items.map((item) => <li key={item}>{item}</li>)}</ul>
+            </section>
+          ))}
+          <section className="bg-mint border-bold border-border rounded-panel p-5 sm:p-6 grid gap-4 mt-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <h2 className="font-heading font-bold text-2xl sm:text-3xl">{t('ways.tryIt')}</h2>
+            <p className="font-semibold">{t('ways.tryItSub')}</p>
+            <Steps items={post.tryIt} />
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('ways.start')}<ArrowRight weight="bold" size={20} /></Link>
           </section>
-        ))}
-        <section className="bg-butter border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 className="font-display text-3xl"><Title text={t('ways.tryIt')} /></h2>
-          <p className="font-bold">{t('ways.tryItSub')}</p>
-          <ol className="grid gap-2 pl-7 m-0 font-semibold text-lg list-decimal marker:font-bold">{post.tryIt.map((s, i) => <li key={i}>{s}</li>)}</ol>
-          <Link to="/login?mode=signup" className={buttonClasses('secondary', 'justify-self-start hover-pop', 'lg')}>{t('ways.start')}<ArrowRight weight="bold" size={20} /></Link>
-        </section>
+        </article>
       </main>
       <PublicFooter />
     </>
