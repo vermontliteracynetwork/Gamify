@@ -100,7 +100,7 @@ export const POSTS: Post[] = [
     title: 'Siblings at Different Grades, One Game Night',
     summary: 'A six-year-old and a ten-year-old can play the same game at the same table, each with questions and supports that fit them.',
     cover: 'game-show',
-    grades: 'K-12',
+    grades: 'K-8',
     minutes: 30,
     tags: ['homeschool'],
     body: [
@@ -163,7 +163,7 @@ export const POSTS: Post[] = [
     title: 'Design a Theme as a Class, Then Play Fractions',
     summary: 'Every student draws one piece of the game. The class photographs the pages, and the game wears their art the same day.',
     cover: 'game-show',
-    grades: 'K-12',
+    grades: 'K-8',
     minutes: 45,
     body: [
       'Kids care about a game more when they made part of it. The Theme Builder turns that into a lesson plan: print the template, hand each student a page, and let them design one piece of the game, like a card back, a team picture or the background.',
@@ -184,7 +184,7 @@ export const POSTS: Post[] = [
     title: 'Two-Tap Exit Tickets for Pre-Readers',
     summary: 'A one-screen class check-in where each student taps a face and an easy or tricky picture. No names, no reading needed.',
     cover: 'star-quiz',
-    grades: 'K-12',
+    grades: 'K-3',
     minutes: 5,
     body: [
       'Exit tickets are hard when half the class is still learning to read. Every Gamify game now ends with a two-tap review, pictures only: How did that game feel? Was it easy or tricky?',
@@ -202,7 +202,7 @@ export const POSTS: Post[] = [
     title: 'Bubble Pop as a Bell-Ringer',
     summary: 'Five minutes of review that students ask for: every right answer loads five bubbles to aim and pop.',
     cover: 'bubble-pop',
-    grades: 'K-12',
+    grades: 'K-8',
     minutes: 5,
     body: [
       'The first five minutes of class set the tone. Bubble Pop turns that warm-up into review: students answer a question from the set you assigned, and a right answer loads five bubbles.',
@@ -221,7 +221,7 @@ export const POSTS: Post[] = [
     title: 'Watch the Sky Fill: Question Tracker for Independent Practice',
     summary: 'A calm practice mode where every right answer adds a star to a night sky, so progress is a picture.',
     cover: 'star-quiz',
-    grades: 'K-12',
+    grades: 'K-5',
     minutes: 10,
     body: [
       'Some students do their best work without a scoreboard or a timer. Question Tracker is for them: a quiet night sky that fills with stars, one for every right answer.',
@@ -240,7 +240,7 @@ export const POSTS: Post[] = [
     title: 'Whole Class vs the Computer: A Friday Review Ritual',
     summary: 'One team, one goal: the class beats the computer on this week\'s questions before the weekend.',
     cover: 'four-in-a-row',
-    grades: 'K-12',
+    grades: '1-8',
     minutes: 20,
     body: [
       'Team games are fun until one team pulls ahead. Playing as one class against the computer fixes that: everyone is on the same side.',
@@ -259,7 +259,7 @@ export const POSTS: Post[] = [
     title: 'Unit Review Tournament: Game Show Category Grid for Grades 8-12',
     summary: 'Turn a unit test review into a tournament: each column is a topic, every square is worth more the harder it gets.',
     cover: 'game-show',
-    grades: 'K-12',
+    grades: '8-12',
     minutes: 30,
     body: [
       'Older students still love a scoreboard, as long as it feels like a real competition and not a worksheet in disguise. The category grid in Game Show works like a classic quiz show: up to five columns, one per question set, with squares from 100 to 500 points.',
@@ -279,7 +279,7 @@ export const POSTS: Post[] = [
     title: 'Students Write the Questions',
     summary: 'Writing a good multiple-choice question is harder than answering one. Let students build the review set, then play it.',
     cover: 'game-show',
-    grades: 'K-12',
+    grades: '6-12',
     minutes: 40,
     body: [
       'To write a fair question with three believable wrong answers, a student has to know the material and the common mistakes around it. That makes question writing one of the best review activities there is, and older students take it seriously when they know their classmates will play it.',
@@ -298,7 +298,7 @@ export const POSTS: Post[] = [
     title: 'Head-to-Head Vocabulary for Middle and High School',
     summary: 'Two players, one device, real stakes: Four in a Row turns vocabulary review into a duel.',
     cover: 'four-in-a-row',
-    grades: 'K-12',
+    grades: '6-12',
     minutes: 15,
     body: [
       'Vocabulary practice works when students recall the meaning again and again, spread over days. Head-to-head games make that repetition feel like a challenge instead of a chore.',
@@ -317,7 +317,7 @@ export const POSTS: Post[] = [
     title: 'Standards-First Review: Filter by Common Core Code',
     summary: 'Pick the standard you are teaching this week, filter the sets, and play in two taps.',
     cover: 'pinball',
-    grades: 'K-12',
+    grades: 'K-8',
     minutes: 10,
     body: [
       'Every question set in Gamify carries its subject, grades, tags and standard codes. That means you can start from the standard instead of hunting through folders.',
