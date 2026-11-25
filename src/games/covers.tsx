@@ -387,7 +387,7 @@ export function CyclingCover({ gameId, className = '' }: { gameId: string; class
   const timer = useRef<number | null>(null);
   const reduce = useReducedMotion();
   const box = useRef<HTMLDivElement>(null);
-  const count = looks.length + 1; // the designed themes, then Classic
+  const count = looks.length + 1; // Classic first (the main design), then the designed themes
   // Hovering anywhere on the card (or focusing it) starts the cycle.
   useEffect(() => {
     if (!looks.length) return;
@@ -404,7 +404,7 @@ export function CyclingCover({ gameId, className = '' }: { gameId: string; class
     <div ref={box} className={`relative overflow-hidden ${className}`}>
       <AnimatePresence initial={false}>
         <motion.div key={i} className="absolute inset-0" initial={reduce ? { opacity: 0 } : { opacity: 0, x: '12%' }} animate={{ opacity: 1, x: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, x: '-12%' }} transition={{ duration: 0.45 }}>
-          {i < looks.length ? <ThemeCover theme={looks[i]} className="w-full h-full" /> : <GameCover gameId={gameId} className="w-full h-full" />}
+          {i === 0 ? <GameCover gameId={gameId} className="w-full h-full" /> : <ThemeCover theme={looks[i - 1]} className="w-full h-full" />}
         </motion.div>
       </AnimatePresence>
       <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1" aria-hidden="true">
