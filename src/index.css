@@ -71,6 +71,7 @@
   --color-blush: #ffd3e6;
   --color-gamify: #ddd6ff; /* Lavender (teacher, 2026-11-24: the old periwinkle is retired) */
   --color-butter: #fff1b8;
+  --color-cream: #f6f0e4; /* the teacher pages' ground (approved portal Shell, 2026-11-25) */
 
   --color-quiz-yellow: #fff1b8;
   --color-quiz-green: #c8f0dc;
@@ -939,10 +940,26 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
    a 2px ink edge and a press shade; Hint, Settings, Full screen in that order. */
 .tool-round { background: var(--paper); border: 2px solid var(--color-border); box-shadow: 0 3px 0 var(--color-border); }
 
-/* The teacher left rail (batch 6, 2026-11-24): the page and footer sit beside it. */
+/* The teacher left rail (approved portal Shell, 2026-11-25): the page and
+   footer sit beside it, and on wide screens it replaces the public top bar
+   (the logo, Help, Report and Log out live in the rail). */
 @media (min-width: 1100px) {
   body:has(.teacher-rail) .route-shell, body:has(.teacher-rail) .teacher-footer { padding-left: 14.5rem; }
+  body:has(.teacher-rail) .site-header { display: none; }
 }
+/* Short laptop windows (1190 x 540): the rail tightens so everything fits. */
+@media (min-width: 1100px) and (max-height: 680px) {
+  .teacher-rail { gap: 0.125rem; padding-block: 0.625rem; }
+  .teacher-rail .rail-item { min-height: 2.35rem; }
+  .teacher-rail .rail-logo { min-height: 2.25rem; margin-bottom: 0.25rem; }
+  .teacher-rail .rail-logo img { height: 1.75rem; }
+  .teacher-rail .rail-class-count { display: none; }
+}
+/* Full-screen teacher tools with their own one bar (the Theme Builder editor,
+   the class check-in) hide the site bar on every screen. */
+body:has(.solo-bar) .site-header { display: none; }
+/* Teacher pages stand on Cream (approved portal Shell, 2026-11-25). */
+html[data-area="teacher"] .ambient-ground { background-color: var(--cream) !important; background-image: none !important; }
 
 /* Achievements on the big screen (Show on the big screen = fullscreen). */
 .ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }

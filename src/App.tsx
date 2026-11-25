@@ -104,6 +104,11 @@ function AnimatedRoutes() {
   const location = useLocation();
   const reduce = useReducedMotion();
   useEffect(() => { document.title = pageTitle(location.pathname); }, [location.pathname]);
+  // Teacher pages stand on Cream (approved portal Shell); the live big screen keeps its own look.
+  useEffect(() => {
+    const teacher = location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live');
+    if (teacher) document.documentElement.dataset.area = 'teacher'; else delete document.documentElement.dataset.area;
+  }, [location.pathname]);
 
   return (
     <>
@@ -218,7 +223,7 @@ function AnimatedRoutes() {
       </motion.div>
     </AnimatePresence>
     {/* Full-screen tools (live games, a game's Theme Builder) have no footer, so nothing scrolls (teacher, 2026-10-31). */}
-    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && <TeacherFooter />}
+    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && !location.pathname.endsWith('/check-in') && <TeacherFooter />}
     <UpgradeHost />
     <LiveLayer />
     </>
@@ -251,7 +256,7 @@ function AmbientBackground() {
   return (
     <div
       aria-hidden="true"
-      className="no-print fixed inset-0 -z-10 pointer-events-none"
+      className="ambient-ground no-print fixed inset-0 -z-10 pointer-events-none"
       style={{
         backgroundColor: 'var(--color-bg)',
         backgroundImage: `url("data:image/svg+xml,${SWIRL_SVG}")`,

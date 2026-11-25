@@ -10,6 +10,7 @@ import type { StringKey } from '../i18n/en';
 import { Button, Tabs, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import Accordion from '../ui/Accordion';
 import PlanFeatures from '../billing/PlanFeatures';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets
@@ -172,12 +173,7 @@ export default function PricingPage() {
           <div className="flex flex-wrap items-end justify-between gap-3"><h2 id="faq" className="font-display text-3xl"><Title text={t('pricing.faqTitle')} /></h2><Link to="/help" className="font-bold underline underline-offset-4 inline-flex items-center gap-1.5">{t('pricing.faqHelp')}<ArrowRight weight="bold" size={16} aria-hidden="true" /></Link></div>
           {/* FAQ structured data: search and AI answer tools read these (teacher, 2026-10-31). */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [1, 2, 3, 4, 5, 6].map((n) => ({ '@type': 'Question', name: t(`pricing.faq.${n}.q` as StringKey), acceptedAnswer: { '@type': 'Answer', text: t(`pricing.faq.${n}.a` as StringKey) } })) }) }} />
-          {[1, 2, 3, 4, 5, 6].map((n) => (
-            <details key={n} className="bg-surface border-std border-border rounded-input p-4">
-              <summary className="font-display text-xl cursor-pointer">{t(`pricing.faq.${n}.q` as StringKey)}</summary>
-              <p className="font-semibold mt-2 mb-0">{t(`pricing.faq.${n}.a` as StringKey)}</p>
-            </details>
-          ))}
+          <Accordion items={[1, 2, 3, 4, 5, 6].map((n) => ({ id: String(n), title: t(`pricing.faq.${n}.q` as StringKey), body: <p>{t(`pricing.faq.${n}.a` as StringKey)}</p> }))} />
         </section>
       </main>
       <PublicFooter />

@@ -9,6 +9,7 @@ import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import Accordion from '../ui/Accordion';
 import { POSTS } from './posts';
 import { GameCover } from '../games/covers';
 import { FAQS } from './faq';
@@ -50,12 +51,7 @@ function FaqTeaser({ group }: { group: 'schools' | 'homeschool' }) {
   return (
     <section aria-labelledby="faq-teaser" className="grid gap-3">
       <h2 id="faq-teaser" className="font-display text-3xl"><Title text={t('aud.faqTitle')} /></h2>
-      {FAQS[group].slice(0, 5).map((f) => (
-        <details key={f.q} className="bg-surface border-std border-border rounded-input p-4">
-          <summary className="font-display text-xl cursor-pointer">{f.q}</summary>
-          <p className="font-semibold mt-2 mb-0">{f.a}</p>
-        </details>
-      ))}
+      <Accordion items={FAQS[group].slice(0, 5).map((f) => ({ id: f.q, title: f.q, body: <p>{f.a}</p> }))} />
       <Link to={`/faq?for=${group}`} className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('aud.allQuestions')}<ArrowRight weight="bold" size={18} /></Link>
     </section>
   );

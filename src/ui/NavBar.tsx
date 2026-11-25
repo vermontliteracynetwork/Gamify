@@ -6,10 +6,22 @@ import { t } from '../i18n';
 import { TellGamify } from './TellGamify';
 import { useIsOwner } from '../owner/useIsOwner';
 
+// The teacher rail's Report button opens the same Tell Gamify box.
+const REPORT_EVENT = 'gamify-open-report';
+export function openReport() { window.dispatchEvent(new Event(REPORT_EVENT)); }
+
+// The public links (approved /brand "Top bar and footer", 2026-11-25): the
+// same set signed out and signed in, so a teacher's site never changes shape.
+const BAR_LINKS = [
+  { to: '/', key: 'public.nav.home' }, { to: '/features', key: 'public.nav.features' }, { to: '/pricing', key: 'public.nav.pricing' },
+  { to: '/research', key: 'public.nav.research' }, { to: '/themes', key: 'public.nav.themes' }, { to: '/blog', key: 'public.nav.ideas' },
+] as const;
+
 // Persistent top nav on every screen, so there's always a way back to the
 // game list from inside a game.
 export default function NavBar() {
   const [tellOpen, setTellOpen] = useState(false);
+  useEffect(() => { const f = () => setTellOpen(true); window.addEventListener(REPORT_EVENT, f); return () => window.removeEventListener(REPORT_EVENT, f); }, []);
   const path = useLocation().pathname;
   // A bigger bar on site and teacher pages (teacher, 2026-11-19: "the top bar
   // ... still too small"); game menus keep the shorter bar so they never scroll.
@@ -43,32 +55,25 @@ export default function NavBar() {
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" />
           </Link>}
       {!any && !studentPage && (
-        <nav aria-label={t('public.nav.label')} className="hidden md:flex items-center gap-1 sm:gap-2">
-          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className={navLink('/')}>{t('public.nav.home')}</Link>
-          <Link to="/features" aria-current={path === '/features' ? 'page' : undefined} className={navLink('/features')}>{t('public.nav.features')}</Link>
-          <Link to="/pricing" aria-current={path === '/pricing' ? 'page' : undefined} className={navLink('/pricing')}>{t('public.nav.pricing')}</Link>
-          <Link to="/research" aria-current={path === '/research' ? 'page' : undefined} className={navLink('/research')}>{t('public.nav.research')}</Link>
-          <Link to="/blog" aria-current={path === '/blog' ? 'page' : undefined} className={navLink('/blog')}>{t('public.nav.ideas')}</Link>
+        <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1">
+          {BAR_LINKS.map(({ to, key }) => <Link key={to} to={to} aria-current={path === to ? 'page' : undefined} className={navLink(to)}>{t(key)}</Link>)}
           <Link to="/join" className={`${pill} !bg-lavender`}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>
       )}
       {/* Phones (rule 10): Log in beside one 44px menu that holds every link and Report. */}
-      {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-accent md:hidden`}>{t('public.nav.login')}</Link>}
+      {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-accent lg:hidden`}>{t('public.nav.login')}</Link>}
       {!any && !studentPage && <MobileMenu path={path} onReport={() => setTellOpen(true)} />}
       {/* Report, for everyone on every page (owner, 2026-11-24); student pages show the logo only (rule 10). */}
-      {!logoOnly && reportBtn(teacher || !any ? 'hidden md:flex' : '')}
+      {!logoOnly && reportBtn(teacher ? 'hidden md:flex' : !any ? 'hidden lg:flex' : '')}
       {any && teacher && (
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
               and help (teacher, 2026-10-31). Students never see these. */}
           {/* Not inside a game (teacher, 2026-11-18): just the buttons on the right. */}
           {!student && !path.startsWith('/games/') && (
-            <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1 mr-1">
-              <Link to="/" className={navLink('/')}>{t('public.nav.home')}</Link>
-              <Link to="/features" className={navLink('/features')}>{t('public.nav.features')}</Link>
-              <Link to="/blog" className={navLink('/blog')}>{t('public.nav.ideas')}</Link>
-              <Link to="/help" className={navLink('/help')}>{t('public.nav.faq')}</Link>
+            <nav aria-label={t('public.nav.label')} className="hidden xl:flex items-center gap-1 mr-1">
+              {BAR_LINKS.map(({ to, key }) => <Link key={to} to={to} aria-current={path === to ? 'page' : undefined} className={navLink(to)}>{t(key)}</Link>)}
             </nav>
           )}
 
@@ -77,7 +82,7 @@ export default function NavBar() {
           <Link to="/teacher" className={`${pill} hidden md:flex`}><ChalkboardTeacher weight="bold" size={16} />{t('nav.teacher')}</Link>
           {!student && <Link to="/play" className={`${pill} hidden md:flex`}><HouseSimple weight="bold" size={16} />{t('nav.allGames')}</Link>}
           {!student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden md:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
-          <TeacherMenu path={path} owner={isOwner && !student} student={!!student} onReport={() => setTellOpen(true)} />
+          <TeacherMenu path={path} owner={isOwner && !student} student={!!student} wide={!inGame && !student} onReport={() => setTellOpen(true)} />
         </>
       )}
       <TellDialog open={tellOpen} role={role} onClose={() => setTellOpen(false)} />
@@ -130,11 +135,11 @@ function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) 
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
-        className="md:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
+        className="lg:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
         <List weight="bold" size={22} aria-hidden="true" />
       </button>
       <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
-        className="md:hidden m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40">
+        className="lg:hidden m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40">
         <div className="min-h-full flex flex-col">
           <div className="h-14 shrink-0 flex items-center px-4 bg-surface border-b-[2.5px] border-border">
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto mr-auto" draggable="false" />
@@ -164,7 +169,10 @@ function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) 
 
 // Signed-in teachers on phones (rule 10): Teacher, All games, the site links,
 // Report and Log out fold into the same one 44px menu.
-function TeacherMenu({ path, owner, student, onReport }: { path: string; owner: boolean; student: boolean; onReport: () => void }) {
+// Signed-in teachers on iPads and small laptops (below 1280) keep the site
+// links in this menu too, beside Teacher, All games and Log out (`wide`).
+function TeacherMenu({ path, owner, student, wide, onReport }: { path: string; owner: boolean; student: boolean; wide: boolean; onReport: () => void }) {
+  const hide = wide ? 'xl:hidden' : 'md:hidden';
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -179,17 +187,16 @@ function TeacherMenu({ path, owner, student, onReport }: { path: string; owner: 
     { to: '/teacher', label: t('nav.teacher') },
     ...(student ? [] : [{ to: '/play', label: t('nav.allGames') }]),
     ...(owner ? [{ to: '/owner', label: t('nav.devPortal') }] : []),
-    { to: '/', label: t('public.nav.home') }, { to: '/features', label: t('public.nav.features') },
-    { to: '/blog', label: t('public.nav.ideas') }, { to: '/help', label: t('public.nav.faq') },
+    ...BAR_LINKS.map(({ to, key }) => ({ to, label: t(key) })), { to: '/help', label: t('public.nav.faq') },
   ];
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
-        className="md:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
+        className={`${hide} shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95`}>
         <List weight="bold" size={22} aria-hidden="true" />
       </button>
       <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
-        className="md:hidden m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40">
+        className={`${hide} m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40`}>
         <div className="min-h-full flex flex-col">
           <div className="h-14 shrink-0 flex items-center px-4 bg-white border-b-[2.5px] border-border">
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto mr-auto" draggable="false" />

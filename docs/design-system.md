@@ -32,6 +32,7 @@ pastel; white text only on Grape and Ink, ink text everywhere else (WCAG AA).
 | `peach` / `orange` | #ffd9b3 / #ff9b28 | timers, warm accent |
 | `lemon` | #fabe37 | stars, crowns, the current step |
 | `aqua` / `teal` | #c9f1ee / #1fb5a8 | water, cool accent |
+| `cream` | #f6f0e4 | the teacher pages' ground (portal Shell), the class switcher card |
 | `success` / `success-ink` | #22b04a / #1f7a45 | right / green text |
 | `danger` / `error` | #f055a5 / #9b2c3a | delete hover / error text |
 | `ink-night` | #1d1a33 | dim overlays (now Ink) |
@@ -93,7 +94,30 @@ White, the real wordmark. Wide screens: the links (current page in Butter), Join
 (Lavender) and Log in (yellow). Phones: Log in beside one 44px round menu that
 holds every link and Report; signed-in teachers fold Teacher, All games, the
 site links, Report and Log out into the same menu. Student pages show the logo
-only.
+only. The links are the same signed out and signed in: Home, Features,
+Pricing, Research, Themes, Blog (2026-11-25); signed-in teachers below 1280px
+reach them from the menu.
+
+### Teacher shell (`src/ui/TeacherNav.tsx`, approved portal Shell, 2026-11-25)
+Every /teacher page stands on Cream. From 1100px the left rail replaces the
+public top bar: the logo (to the public site), Create an Activity, the places
+(Home, Classes, Question sets, Reports, Themes, Achievements, Account), the Get
+started pill, the class switcher card, and four round buttons (All games, Help,
+Report, Log out). Narrower screens keep the top bar and the pill menu. The Get
+started checklist is on Teacher Home only. Full-screen tools with their own one
+bar (the Theme Builder editor, the class check-in) add `solo-bar` so the site
+bar steps aside. No Search (there is no teacher search yet) and no Activities
+item (no Activities list page yet).
+
+### Footer (`src/public/PublicFooter.tsx`)
+The logo and the tagline, then three grouped columns: Gamify, For you, Trust;
+the copyright under them. The Vermont line waits on her new words (Waiting on
+you, footer-tag).
+
+### Accordion (`src/ui/Accordion.tsx`)
+The one folded-answer list: a single Paper card, rows split by soft lines, a
+chevron that turns. Items are `{ id, title, body, tag? }`. Used by the FAQ
+(Quick answers), Pricing Good to Know, Schools and Homeschool.
 
 ### IconButton
 A round 44px button that shows only its icon; `label` becomes its hover text and what screen readers say. Use it for every icon-only action.
@@ -133,3 +157,4 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 | Put hints in hover text | Add a line of small print under every setting |
 | Size in rem; check a 1190 x 540 window | Fix sizes in px that do not scale with the screen |
 | Use `Dialog` for any new pop-up on a menu or teacher page | Build a new fixed overlay by hand |
+| Use `Accordion` for folded questions and answers | Hand-roll `<details>` rows |

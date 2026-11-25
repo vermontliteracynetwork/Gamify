@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Crown, DownloadSimple, SignOut, Trash } from '@phosphor-icons/react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Crown, DownloadSimple, Receipt, SignOut, Trash } from '@phosphor-icons/react';
+import { supabase } from '../data/supabase';
+import { PIN_KEY } from '../settings/pin';
 import { PlanCards } from '../billing/Upgrade';
 import { setTeacher, useTeacher } from '../auth/session';
 import { TIERS } from '../config';
@@ -8,7 +10,7 @@ import { data } from '../data';
 import { useAsync, useTier } from '../data/hooks';
 import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { t } from '../i18n';
-import { Button, PageHeader, Panel, Tabs } from '../ui/kit';
+import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
 import { BetaTab } from './BetaChecklist';
 import TeacherNav from '../ui/TeacherNav';
 import AccessCode, { PlanUntil } from './AccessCode';
@@ -32,6 +34,15 @@ export default function AccountPage() {
     const students = (await Promise.all(classes.map((c) => data.listStudents(c.id)))).flat();
     return { answers: (await data.listQuestionLog()).length, students: students.length, sets: (await data.listQuestionSets()).length };
   });
+
+  // The You card (approved /brand Account): only what Gamify really holds.
+  const { value: you } = useAsync(async () => {
+    const pin = await data.getSetting<string>(PIN_KEY);
+    let email: string | undefined;
+    try { email = supabase ? (await supabase.auth.getUser()).data.user?.email ?? undefined : undefined; } catch { email = undefined; }
+    return { pin: !!pin, email };
+  });
+  const [billing, setBilling] = useState(false);
 
   async function exportAll() {
     const classes = await data.listClassrooms();
@@ -68,12 +79,26 @@ export default function AccountPage() {
       {beta && tab === 'beta' ? <BetaTab s={beta} /> : (
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] items-start">
         <div className="grid gap-4 min-w-0">
+          <Panel className="grid gap-3">
+            <h2 className="font-heading font-bold text-xl">{t('account.you')}</h2>
+            <dl className="m-0 grid gap-4 sm:grid-cols-2">
+              <YouField label={t('account.you.name')} value={teacher?.name ?? ''} />
+              {you?.email && <YouField label={t('account.you.email')} value={you.email} />}
+              <YouField label={t('account.you.username')} value={teacher?.username ?? teacher?.name ?? ''} hint={t('account.you.usernameHint')} />
+              <YouField label={t('account.you.pin')} value={you ? (you.pin ? '\u2022\u2022\u2022\u2022' : t('account.you.pinNone')) : ''} hint={t('account.you.pinHint')} />
+            </dl>
+          </Panel>
           <Panel className="grid gap-2">
             <h2 className="font-heading font-bold text-xl">{t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
             <p className="font-semibold">{(!TIERS[tier].hasClasses ? t('account.limitsFree', { students: String(TIERS[tier].studentsPerClassroom), sets: String(TIERS[tier].savedQuestionSets) }) : t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) })).replace(/Infinity/g, t('pricing.unlimited'))}</p>
             <p className="font-bold text-lg">{used && used.answers > 0 ? t('account.value', { answers: used.answers, students: used.students, sets: used.sets }) : t('account.valueNew')}</p>
             <PlanUntil />
             <p className="text-sm font-bold text-muted">{t('account.downgrade')}</p>
+            <div className="flex flex-wrap gap-2 mt-1">
+              <Link to="/pricing" className={buttonClasses('main')}>{t('account.seePlans')}</Link>
+              <Button aria-expanded={billing} onClick={() => setBilling(!billing)}><Receipt weight="bold" size={18} />{t('account.billing')}</Button>
+            </div>
+            {billing && <p className="font-semibold text-sm rounded-input bg-butter p-3" role="status">{t('account.billingSoon')}</p>}
             {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : tier === 'pro' ? (
               <p className="font-bold flex items-center gap-2"><Crown weight="fill" size={22} aria-hidden="true" />{t('account.topPlan')}</p>
             ) : (
@@ -107,5 +132,15 @@ export default function AccountPage() {
       </div>
       )}
     </main>
+  );
+}
+
+function YouField({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="grid gap-1 content-start">
+      <dt className="text-sm font-bold text-muted">{label}</dt>
+      <dd className="m-0 min-h-11 px-3 rounded-input border-std border-border-soft bg-surface-2 font-bold flex items-center break-all">{value}</dd>
+      {hint && <dd className="m-0 text-xs font-semibold text-muted">{hint}</dd>}
+    </div>
   );
 }

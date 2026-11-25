@@ -58,7 +58,7 @@ export default function ClassesPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
-      <TeacherNav startOpen />
+      <TeacherNav />
       {/* Make class sits beside the title (teacher, 2026-10-31); its name box opens at the top. */}
       <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')}
         actions={room ? <Button variant="main" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />

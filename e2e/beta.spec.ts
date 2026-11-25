@@ -12,7 +12,7 @@ test('a class check-in counts picture taps, with no names', async ({ page }, inf
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
   await page.waitForTimeout(700);
   await page.screenshot({ path: `test-results/checkin-${info.project.name}.png` });
-  for (const [a, b] of [['Great', 'Just right'], ['Okay', 'Tricky']]) {
+  for (const [a, b] of [['Loved it', 'Just right'], ['It was OK', 'Tricky']]) {
     await page.getByRole('button', { name: a, exact: true }).click();
     await page.getByRole('button', { name: b, exact: true }).click();
     await expect(page.getByText('Thank you! Next friend!')).toBeVisible();

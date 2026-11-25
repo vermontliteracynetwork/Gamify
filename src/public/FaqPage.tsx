@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { BookOpen, Buildings, CaretDown, ChalkboardTeacher, DeviceMobile, House, Lightbulb, MagnifyingGlass, Student, WifiHigh } from '@phosphor-icons/react';
+import { BookOpen, Buildings, ChalkboardTeacher, DeviceMobile, House, Lightbulb, MagnifyingGlass, Student, WifiHigh } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
+import Accordion from '../ui/Accordion';
 import { buttonClasses } from '../ui/kit';
 import PublicFooter from './PublicFooter';
 import { FAQ_GROUPS, FAQS, type FaqGroup } from './faq';
@@ -43,7 +44,7 @@ export default function FaqPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <header className="grid gap-3 justify-items-start text-left">
-          <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
+          <h1 className="font-display text-4xl sm:text-5xl">{t('faq.short')}</h1>
           <p className="text-lg font-semibold max-w-3xl">{t('faq.sub')}</p>
           <label className="relative w-full max-w-3xl">
             <MagnifyingGlass weight="bold" size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -80,18 +81,10 @@ export default function FaqPage() {
 
           <section className="grid gap-3" aria-live="polite">
             <h2 className="font-display text-3xl">{q ? t('faq.found', { count: hits.length }) : t(`faq.group.${group}` as StringKey)}</h2>
-            <div className={`${panel} divide-y-[1.5px] divide-border-soft`}>
-              {hits.map((f) => (
-                <details key={`${f.g}-${f.q}`} className="group px-5 py-4">
-                  <summary className="cursor-pointer flex items-start gap-3 list-none font-bold text-lg">
-                    <span className="flex-1">{f.q}</span>
-                    {q && <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-thin border-border-soft whitespace-nowrap">{t(`faq.group.${f.g}` as StringKey)}</span>}
-                    <CaretDown weight="bold" size={20} className="shrink-0 mt-1 motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" />
-                  </summary>
-                  <p className="font-semibold leading-relaxed mt-2 mb-0 text-text/90">{f.a}</p>
-                </details>
-              ))}
-            </div>
+            <Accordion items={hits.map((f) => ({
+              id: `${f.g}-${f.q}`, title: f.q, body: <p>{f.a}</p>,
+              tag: q ? <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-thin border-border-soft whitespace-nowrap">{t(`faq.group.${f.g}` as StringKey)}</span> : undefined,
+            }))} />
             <div className={`${panel} p-5 grid gap-3 sm:grid-cols-[1fr_auto] items-center mt-2`}>
               <div>
                 <h3 className="font-bold text-xl">{t('faq.moreTitle')}</h3>
