@@ -8,11 +8,8 @@
 // VITE_OWNER_EMAIL (optional), OPENROUTER_API_KEY (paid models; free ones work without).
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { isOwner } from './_owner';
 
-const SB_URL = process.env.VITE_SUPABASE_URL;
-const ANON = process.env.VITE_SUPABASE_ANON_KEY;
-const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const OWNER_EMAIL = process.env.VITE_OWNER_EMAIL?.trim().toLowerCase();
 
 const NO_STORE = { 'Cache-Control': 'no-store' };
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: NO_STORE });
@@ -35,25 +32,6 @@ function load(): Any {
     skills: req(`${base}ceo-core/skillDispatch.js`),
   };
   return engine;
-}
-
-async function isOwner(request: Request): Promise<boolean> {
-  const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!token || !SB_URL || !ANON) return false;
-  try {
-    const claims = JSON.parse(Buffer.from(token.split('.')[1] ?? '', 'base64url').toString('utf8')) as { aal?: string };
-    if (claims.aal !== 'aal2') return false;
-  } catch { return false; }
-  const res = await fetch(`${SB_URL}/auth/v1/user`, { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
-  if (!res.ok) return false;
-  const user = (await res.json()) as { id?: string; email?: string };
-  if (OWNER_EMAIL && user.email?.toLowerCase() === OWNER_EMAIL) return true;
-  if (!SERVICE || !user.id) return false;
-  const admin: Record<string, string> = SERVICE.startsWith('sb_') ? { apikey: SERVICE } : { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
-  const prof = await fetch(`${SB_URL}/rest/v1/profiles?select=is_owner&id=eq.${encodeURIComponent(user.id)}`, { headers: admin });
-  if (!prof.ok) return false;
-  const [row] = (await prof.json()) as { is_owner?: boolean }[];
-  return !!row?.is_owner;
 }
 
 // Owner only, but still capped so a stuck button cannot run up a model bill.

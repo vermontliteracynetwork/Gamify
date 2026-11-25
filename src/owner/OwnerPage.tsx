@@ -33,7 +33,8 @@ import MarketingCard from './marketing/MarketingCard';
 import CeoCard from './CeoCard';
 import AstroCard from './AstroCard';
 import BetaSpec from './BetaSpec';
-import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
+import BooksCard from './books/BooksCard';
+import { AccessCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
 export const OWNER_PIN_KEY = 'owner-pin-hash';
 
@@ -103,7 +104,7 @@ function Desktop() {
     growth: <div className="grid gap-10"><GrowthChartCard {...owner} /><section aria-labelledby="tips-h" className="grid gap-3"><h2 id="tips-h" className="font-bold text-lg">{t('owner.growthTips')}</h2><GrowthCard /></section></div>,
     usage: <UsageCard />,
     income: <IncomeCard />,
-    books: <LedgerCard />,
+    books: <BooksCard />,
     access: <AccessCard />,
     preview: <PlanPreviewCard />,
     gallery: <GalleryCard />,
