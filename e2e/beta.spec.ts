@@ -82,29 +82,16 @@ test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboa
   await expect(card.getByText('How do I print the theme template?')).toBeVisible();
 });
 
-test('developer dashboard: bookkeeping with totals and CSV, plan preview with a banner', async ({ page }, info) => {
+test('developer dashboard: Books opens, plan preview with a banner', async ({ page }, info) => {
   await page.goto('/owner');
   await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Subscriptions' }).click();
   await expect(page.getByRole('region', { name: 'Subscriptions' })).toContainText('Real numbers show here once the cloud is connected.');
-  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Bookkeeping' }).click();
-  const books = page.getByRole('region', { name: 'Bookkeeping' });
-  await books.getByLabel('Category').selectOption('Hosting');
-  await books.getByLabel('What it was').fill('Vercel Pro');
-  await books.getByLabel('Amount ($)').fill('20');
-  await books.getByRole('button', { name: 'Add' }).click();
-  await books.getByLabel('In or out').first().selectOption('in');
-  await books.getByLabel('Category').selectOption('Subscriptions');
-  await books.getByLabel('What it was').fill('Plus, Miss Jen');
-  await books.getByLabel('Amount ($)').fill('96');
-  await books.getByRole('button', { name: 'Add' }).click();
-  await expect(books.getByText('In $96.00, out $20.00, net $76.00')).toBeVisible();
-  const wait = page.waitForEvent('download');
-  await books.getByRole('button', { name: 'Download CSV' }).click();
-  expect((await wait).suggestedFilename()).toMatch(/^gamify-books-\d{4}\.csv$/);
-  await books.screenshot({ path: `test-results/owner-books-${info.project.name}.png` });
+  // Bookkeeping became Gamify Books (2026-11-25, its own tests in src/owner/books): it opens with its search.
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Books', exact: true }).click();
+  await expect(page.getByRole('tablist', { name: 'Books sections' }).or(page.getByRole('group', { name: 'Books sections' })).first()).toBeVisible();
 
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Plan preview' }).click();
   const preview = page.getByRole('region', { name: 'Plan preview' });
