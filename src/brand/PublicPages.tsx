@@ -710,7 +710,7 @@ export default function PublicPages() {
   return (
     <section className="grid gap-8">
       <div className="grid gap-1">
-        <h2 className="font-heading text-2xl">Public pages <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
+        <h2 className="font-heading text-2xl">Public pages <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
         <p className="text-sm font-semibold text-muted max-w-prose">Home, Features, Pricing, Research, Blog, Themes, Join and teacher sign in, redesigned in the new direction with the real words from the live pages. Each page shows on a laptop and a phone (Home and Join on an iPad portrait too) at its real width, the whole page top to bottom. Preview only: no live page changes until you approve.</p>
       </div>
       <nav aria-label="Jump to a page" className="flex flex-wrap gap-2">{[...PAGES.map((p) => [p.id, p.name]), ['nav', 'Top bar and footer']].map(([id, n]) => <a key={id} href={`#pp-${id}`} className="px-3 py-1.5 rounded-full font-bold text-sm border-2 border-black bg-[#fffaf0] hover:bg-[#fdfd94]">{n}</a>)}</nav>

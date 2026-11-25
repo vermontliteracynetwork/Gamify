@@ -243,8 +243,8 @@ export default function Stickers() {
   return (
     <section className="grid gap-5 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.periwinkle}`, color: INK }} aria-labelledby="st-title">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, border: `2px solid ${INK}` }}>Proposal, not live</span>
-        <h2 id="st-title" className="font-heading text-xl">Sticker collections (proposal)</h2>
+        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, border: `2px solid ${INK}` }}>Approved, live</span>
+        <h2 id="st-title" className="font-heading text-xl">Sticker collections</h2>
       </div>
       <p className="text-sm font-semibold max-w-prose" style={quiet}>
         Your request of 2026-11-23: Classic stickers in collect-em-all collections, a page to see and share what the class earned, and see-through stickers that say how to earn them. Starter collection: 12 round-ish die-cut stickers, each a different fun edge, one solid palette bright, one big image and its label curving along the top (your reference, 2026-11-23). Your reference star had a face; these have none (no faces in brand art), so that is a question for you. Full brainstorm: docs/stickers.md.

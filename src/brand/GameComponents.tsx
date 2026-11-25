@@ -290,8 +290,8 @@ export default function GameComponents() {
   return (
     <section className="grid gap-6">
       <div className="grid gap-2 justify-items-center text-center">
-        <h2 className="font-heading text-2xl">Game components <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">Every shared in-game part on its own, the same in every game: what it is for, its sizes and states, its motion and its sound. Pop-ups enter slowly (0.7 s) and stay until tapped; Butter shading shows whose turn it is (no turn banner); the computer pauses before and after its turn. Source: docs/game-components-standard.md. Preview only.</p>
+        <h2 className="font-heading text-2xl">Game components <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
+        <p className="text-sm font-semibold text-muted max-w-prose">Every shared in-game part on its own, the same in every game: what it is for, its sizes and states, its motion and its sound. Pop-ups enter slowly (0.7 s) and stay until tapped; Butter shading shows whose turn it is (no turn banner); the computer pauses before and after its turn. Source: docs/game-components-standard.md. Live in every game.</p>
         <label className="inline-flex items-center gap-2 font-bold text-sm cursor-pointer">
           <input type="checkbox" checked={calmOn} onChange={(e) => setCalm(e.target.checked)} className="w-5 h-5" />Show the Calm / Still version (150 ms fades, no bob, no shake)
         </label>

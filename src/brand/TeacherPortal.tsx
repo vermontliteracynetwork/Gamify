@@ -78,7 +78,7 @@ function Meter({ pct, color = PP.periwinkle, w = 120 }: { pct: number; color?: s
   return <span className="inline-block h-2.5 rounded-full overflow-hidden align-middle" style={{ width: w, background: PP.cream }}><span className="block h-full rounded-full" style={{ width: `${pct}%`, background: color }} /></span>;
 }
 function Proposal() {
-  return <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ background: PP.butter, border: `2px solid ${I}` }}>Proposal</span>;
+  return <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ background: PP.butter, border: `2px solid ${I}` }}>Approved, live</span>;
 }
 
 // ---------- the shell: a left rail (chosen over top tabs, see view 2) ----------

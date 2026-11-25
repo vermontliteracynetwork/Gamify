@@ -221,7 +221,7 @@ export default function NewDirection() {
       <header className="grid gap-2 justify-items-center text-center">
         <h1 className="text-[2.6rem]" style={GY}><GText>New direction</GText></h1>
         <p className="m-0 max-w-[46rem] font-semibold text-[1.05rem]">The current direction only, one rule per block. Every Universal view, game mockup, teacher page and public page on /brand is built from these parts. Approving this tab and the Approval list means the live rebuild matches what you saw here.</p>
-        <span className="text-sm font-bold px-3 py-1 rounded-full" style={{ background: PP.butter, border: `2px solid ${I}` }}>Proposal: nothing on the live site changes until you approve</span>
+        <span className="text-sm font-bold px-3 py-1 rounded-full" style={{ background: PP.butter, border: `2px solid ${I}` }}>Approved: this is the look of the live site</span>
       </header>
 
       <Block id="palette" n={1} title="Palette pairs" rule="Grape and Lavender are the main pair; every bright has its named pastel; white text only on Grape and Ink, ink text everywhere else (WCAG 4.5:1, computed below).">
