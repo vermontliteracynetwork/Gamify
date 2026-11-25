@@ -177,7 +177,7 @@ export const POSTS: Post[] = [
     history: [{ at: T('2026-11-24'), by: 'Brand Copywriter', note: 'Built on the edge list: no stealing, timers off, right answers decide. No other site named.' }, { at: T('2026-11-24'), by: 'Marketing Director', note: 'Bible check: READY FOR OWNER.' }, { at: '2026-11-25T18:00:00', by: 'Marketing Director', note: 'K-12 rule (owner, 2026-11-25: "gamify is k-12 and should always be promoted as k-12 becuase we have game difficulty and lots of theme options. live will alwyas be separete devices no matter grade."): customer-facing text rewritten to present Gamify as K-12; any grade-specific search term sits beside a K-12 term. Buyer and the utm_campaign audience part stay as targeting data (bible 9 allows only the section 3 segment ids). Bible check: READY FOR OWNER (check 15, K-12: pass).' }] },
 
   // Beta launch week (c-launch): the new pages go live Sunday 2026-11-29.
-  // Truth checked 2026-11-24: 7 games listed on main (src/games/registry.ts:
+  // Truth checked 2026-11-24: 8 games listed on main (Territory added 2026-11-25) (src/games/registry.ts:
   // Game Show, Board Game, Match Three, Four in a Row, Bubble Pop, Bowling,
   // Question Tracker); the beta offer is word for word from /beta (src/i18n/en.ts).
   // Game audio is muted in every recording: some ledger sounds need a credit line.
@@ -223,14 +223,14 @@ export const POSTS: Post[] = [
     history: [{ at: '2026-11-24T15:00:00', by: 'Brand Copywriter', note: 'Founder intro, pinned to the profile. The owner confirms the story is in her own words before filming (core message 7, bible 4).' }, { at: '2026-11-24T15:10:00', by: 'Marketing Director', note: 'Bible check: READY FOR OWNER (needs her filmed clip).' }, { at: '2026-11-25T18:00:00', by: 'Marketing Director', note: 'K-12 rule (owner, 2026-11-25: "gamify is k-12 and should always be promoted as k-12 becuase we have game difficulty and lots of theme options. live will alwyas be separete devices no matter grade."): customer-facing text rewritten to present Gamify as K-12; any grade-specific search term sits beside a K-12 term. Buyer and the utm_campaign audience part stay as targeting data (bible 9 allows only the section 3 segment ids). Bible check: READY FOR OWNER (check 15, K-12: pass).' }] },
 
   { id: 'p-0010', date: '2026-11-29', time: '16:00', platform: 'instagram', format: 'carousel', campaign: 'c-launch', buyer: 'k5-teachers', funnel: 'see', pillar: 'product',
-    principle: 'Processing fluency (one idea per slide) + specificity (true numbers: 7 games, 4 ways to play); one CTA (Fogg behavior model).',
-    hook: 'Meet Gamify: type your questions once, play them as 7 games.',
-    hooksTried: ['Your question set, 7 games, 4 ways to play', 'Meet the review game site built by a teacher'],
-    caption: 'Meet Gamify: type your questions once, play them as 7 games.\n\nWrite or import a question set for any grade, K-12, pick a game, and play it 4 ways: on one screen, on students\' own devices (Live), solo, or head to head. Read-aloud and calm mode are free on every plan. No student accounts, no ads, no trackers.\n\nWe are in beta and building it with teachers. Tap the link in bio to join the beta test.',
-    onScreen: ['Slide 1: "Meet Gamify: one question set, 7 games"', 'Slide 2: "Write or import your questions once, any grade K-12"', 'Slide 3: "Pick a game: Game Show, Bowling, Board Game, Bubble Pop and more"', 'Slide 4: "Play 4 ways: one screen, own devices, solo, head to head"', 'Slide 5: "Read-aloud, calm mode and every setting: free"', 'Slide 6: "No student accounts. No ads. No trackers."', 'Slide 7: "We\'re in beta. Help build it: link in bio"'],
+    principle: 'Processing fluency (one idea per slide) + specificity (true numbers: 8 games, 4 ways to play); one CTA (Fogg behavior model).',
+    hook: 'Meet Gamify: type your questions once, play them as 8 games.',
+    hooksTried: ['Your question set, 8 games, 4 ways to play', 'Meet the review game site built by a teacher'],
+    caption: 'Meet Gamify: type your questions once, play them as 8 games.\n\nWrite or import a question set for any grade, K-12, pick a game, and play it 4 ways: on one screen, on students\' own devices (Live), solo, or head to head. Read-aloud and calm mode are free on every plan. No student accounts, no ads, no trackers.\n\nWe are in beta and building it with teachers. Tap the link in bio to join the beta test.',
+    onScreen: ['Slide 1: "Meet Gamify: one question set, 8 games"', 'Slide 2: "Write or import your questions once, any grade K-12"', 'Slide 3: "Pick a game: Game Show, Bowling, Board Game, Bubble Pop and more"', 'Slide 4: "Play 4 ways: one screen, own devices, solo, head to head"', 'Slide 5: "Read-aloud, calm mode and every setting: free"', 'Slide 6: "No student accounts. No ads. No trackers."', 'Slide 7: "We\'re in beta. Help build it: link in bio"'],
     canva: 'Template "Carousel 4:5": hook slide, 5 body slides with one screenshot each (set editor, Pick a game, the four way-to-play icons, the settings gear, the Features page Fair Play list), CTA slide.',
     tags: ['#teachersofinstagram', '#k12teacher', '#classroomgames', '#reviewgame', '#teacherresources'],
-    alt: 'Seven-slide introduction to Gamify: write questions once for any grade K-12, pick from 7 games, play 4 ways, free accessibility, no student accounts or ads, and an invitation to join the beta.',
+    alt: 'Seven-slide introduction to Gamify: write questions once for any grade K-12, pick from 8 games, play 4 ways, free accessibility, no student accounts or ads, and an invitation to join the beta.',
     link: link('/beta', 'instagram', 'social', 'ig_aware_see_k5-teachers_meet-gamify_202611', 'p-0010'),
     lesson: 'Applies p-0005 (carousel: slide 1 the hook, last slide the CTA) and trend watch 2026-11-24 (5 hashtags at most).',
     status: 'needs-ok',
@@ -241,15 +241,15 @@ export const POSTS: Post[] = [
     hook: 'Same 10 questions. 7 different games. Watch.',
     hooksTried: ['One question set, a whole week of games', 'Monday bowling, Friday game show, same questions'],
     caption: 'Same 10 questions. 7 different games. Watch.\n\nIn Gamify you write or import a question set once, then play it as Game Show, Bowling, Board Game, Bubble Pop, Match Three, Four in a Row or Question Tracker. Monday it is a bowling match, Friday a game show. Any grade, K-12: your questions, your level, and lots of themes to choose from.\n\nWhich one would your class pick first? Tell us in the comments.',
-    onScreen: ['0-2s: one question card, text "Same 10 questions..."', '2-15s: 2-second cuts, each labeled: Game Show, Bowling, Board Game, Bubble Pop, Match Three, Four in a Row, Question Tracker', '15-18s (the peak): the Bowling strike and the Game Show win', 'End card: "One question set. 7 games. Gamify (beta)"'],
-    canva: 'Template "Reel text overlays" (game labels as the step field) + "Reel cover": cover text "7 games, 1 question set". Screen recordings from the live site, Classic theme, sample nicknames.',
+    onScreen: ['0-2s: one question card, text "Same 10 questions..."', '2-15s: 2-second cuts, each labeled: Game Show, Bowling, Board Game, Bubble Pop, Match Three, Four in a Row, Question Tracker, Territory', '15-18s (the peak): the Bowling strike and the Game Show win', 'End card: "One question set. 8 games. Gamify (beta)"'],
+    canva: 'Template "Reel text overlays" (game labels as the step field) + "Reel cover": cover text "8 games, 1 question set". Screen recordings from the live site, Classic theme, sample nicknames.',
     sound: 'Meta Sound Collection upbeat track (business-licensed; title recorded when picked). Game audio muted.',
     tags: ['#teachersofinstagram', '#reviewgame', '#classroomgames', '#k12teacher'],
     alt: 'The same question plays across seven colorful classroom games in quick cuts, ending on a bowling strike and a game show win.',
     link: link('/', 'instagram', 'social', 'ig_engage_care_k5-teachers_one-set-many-games_202611', 'p-0011'),
     lesson: 'Applies p-0002 (Reels judged on shares and saves; native first frame) and bible 5 (peak-end: never end on a logo hold).',
     status: 'needs-ok',
-    history: [{ at: '2026-11-24T15:00:00', by: 'Social Planner', note: 'Pinned post 2 of 3, the game demo. Uses "7 games" rather than the bible\'s "dozens" because 7 is what main lists today.' }, { at: '2026-11-24T15:10:00', by: 'Marketing Director', note: 'Bible check: READY FOR OWNER.' }, { at: '2026-11-25T18:00:00', by: 'Marketing Director', note: 'K-12 rule (owner, 2026-11-25: "gamify is k-12 and should always be promoted as k-12 becuase we have game difficulty and lots of theme options. live will alwyas be separete devices no matter grade."): customer-facing text rewritten to present Gamify as K-12; any grade-specific search term sits beside a K-12 term. Buyer and the utm_campaign audience part stay as targeting data (bible 9 allows only the section 3 segment ids). Bible check: READY FOR OWNER (check 15, K-12: pass).' }] },
+    history: [{ at: '2026-11-24T15:00:00', by: 'Social Planner', note: 'Pinned post 2 of 3, the game demo. Uses "8 games" rather than the bible\'s "dozens" because 7 is what main lists today.' }, { at: '2026-11-24T15:10:00', by: 'Marketing Director', note: 'Bible check: READY FOR OWNER.' }, { at: '2026-11-25T18:00:00', by: 'Marketing Director', note: 'K-12 rule (owner, 2026-11-25: "gamify is k-12 and should always be promoted as k-12 becuase we have game difficulty and lots of theme options. live will alwyas be separete devices no matter grade."): customer-facing text rewritten to present Gamify as K-12; any grade-specific search term sits beside a K-12 term. Buyer and the utm_campaign audience part stay as targeting data (bible 9 allows only the section 3 segment ids). Bible check: READY FOR OWNER (check 15, K-12: pass).' }] },
 
   { id: 'p-0012', date: '2026-11-29', time: '19:00', platform: 'facebook', format: 'image', campaign: 'c-launch', buyer: 'k5-teachers', funnel: 'see', pillar: 'product',
     principle: 'Processing fluency (numbered steps) + reciprocity (free accessibility, free beta Plus) (Cialdini).',
@@ -292,10 +292,10 @@ export const POSTS: Post[] = [
 
   { id: 'p-0015', date: '2026-11-29', time: '19:00', platform: 'tiktok', format: 'tiktok', campaign: 'c-launch', buyer: 'k5-teachers', funnel: 'care', pillar: 'product',
     principle: 'Curiosity gap (the POV opens a question) + peak-end rule (end on the win).',
-    hook: 'POV: you typed 10 questions and got 7 games',
-    hooksTried: ['Same questions, 7 games, zero rebuilding', 'Monday bowling. Friday game show. Same 10 questions.'],
-    caption: 'POV: you typed 10 questions and got 7 games. Game Show on Monday, Bowling on Wednesday, Board Game on Friday. Any grade, K-12. Which one would your class pick first?',
-    onScreen: ['0-2s: phone shot of hands typing a question on a laptop, text "POV: you typed 10 questions"', '2-14s: labeled 2-second cuts of the 7 games', '14-17s (the peak): Bowling strike', 'End: "Gamify. In beta now."'],
+    hook: 'POV: you typed 10 questions and got 8 games',
+    hooksTried: ['Same questions, 8 games, zero rebuilding', 'Monday bowling. Friday game show. Same 10 questions.'],
+    caption: 'POV: you typed 10 questions and got 8 games. Game Show on Monday, Bowling on Wednesday, Board Game on Friday. Any grade, K-12. Which one would your class pick first?',
+    onScreen: ['0-2s: phone shot of hands typing a question on a laptop, text "POV: you typed 10 questions"', '2-14s: labeled 2-second cuts of the 8 games', '14-17s (the peak): Bowling strike', 'End: "Gamify. In beta now."'],
     canva: 'Template "Reel text overlays": hook and game labels. Phone-shot opening (native look), screen recordings after.',
     sound: 'TikTok Commercial Music Library track (title recorded when picked). Game audio muted.',
     tags: ['#teachersoftiktok', '#reviewgame', '#classroomgames', '#k12teacher', '#teachertok'],
