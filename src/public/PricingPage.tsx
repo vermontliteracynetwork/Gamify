@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Buildings, House, Check, CreditCard, Heart, Minus, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
-import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, TIERS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
+import { ArrowDown, ArrowRight, Buildings, House, Check, CreditCard, Heart, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
+import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Button, Tabs, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
-import PlanFeatures from '../billing/PlanFeatures';
+import CompareChart from './CompareChart';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets
 // comes before what it costs, the monthly price is the big number with the
@@ -18,7 +18,6 @@ import PlanFeatures from '../billing/PlanFeatures';
 // happens if you leave, and schools get a price and a quote without a sales
 // call. Teacher-facing only: student pages never show prices. Every number
 // comes from src/config.ts.
-const fmt = (n: number) => (Number.isFinite(n) ? String(n) : t('pricing.unlimited'));
 // About what a yearly plan costs a school day (180 days), as on the approved mockup.
 const perDay = (year: number) => { const d = year / 180; return d < 1 ? t('pricing.perDayCents', { n: Math.round(d * 100) }) : t('pricing.perDayDollars', { n: d.toFixed(2) }); };
 // One Grow Year size for section titles (the approved /brand Pricing mockup).
@@ -32,27 +31,9 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<Billing>('year');
   // Links like /pricing#schools land on that section.
   useEffect(() => { const id = window.location.hash.slice(1); if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 50); }, [reduce]);
-  const rows: { label: string; value: (tier: Tier) => string | boolean }[] = [
-    { label: t('pricing.row.games'), value: (x) => (x === 'pro' ? t('pricing.allGamesEarly') : TIERS[x].allGames ? t('pricing.allGames') : t('pricing.freeGames')) },
-    { label: t('pricing.row.themes'), value: (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder] },
-    { label: t('pricing.row.library'), value: (x) => TIERS[x].themesPlayable },
-    { label: t('pricing.row.classes'), value: (x) => (x === 'free' ? false : fmt(TIERS[x].classrooms)) },
-    { label: t('pricing.row.students'), value: (x) => fmt(TIERS[x].studentsPerClassroom) },
-    { label: t('pricing.row.pictures'), value: (x) => (x === 'free' ? t('pricing.pictures.free') : t('pricing.pictures.paid')) },
-    { label: t('pricing.row.sets'), value: (x) => fmt(TIERS[x].savedQuestionSets) },
-    { label: t('pricing.row.homework'), value: (x) => (x === 'free' ? t('pricing.homework.free') : t('pricing.homework.paid')) },
-    { label: t('pricing.row.groups'), value: (x) => x !== 'free' },
-    { label: t('pricing.row.assigned'), value: (x) => fmt(TIERS[x].assignedSetsPerStudent) },
-    { label: t('pricing.row.live'), value: (x) => TIERS[x].liveMonitorAndLock },
-    { label: t('pricing.row.lobbyGoal'), value: (x) => x !== 'free' },
-    { label: t('pricing.row.guides'), value: (x) => x !== 'free' },
-    { label: t('pricing.row.each'), value: (x) => x === 'pro' },
-    { label: t('pricing.row.board'), value: (x) => x === 'pro' },
-    { label: t('pricing.row.early'), value: (x) => x === 'pro' },
-    { label: t('pricing.row.reports'), value: (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('pricing.days', { n: TIERS[x].reportHistoryDays }) : t('pricing.allTime')) },
-    { label: t('pricing.row.access'), value: () => true },
-  ];
   const tiers: Tier[] = ['free', 'plus', 'pro'];
+  // "Compare every feature" glides down to the chart.
+  const toChart = (e: MouseEvent) => { e.preventDefault(); document.getElementById('compare')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', '#compare'); };
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : i * 0.06 } });
   const trust = [
     { icon: CreditCard, text: t('pricing.trust.card') },
@@ -66,7 +47,7 @@ export default function PricingPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <div>
           <h1 className="title-bubble mb-4"><Title text={t('pricing.title')} /></h1>
-          <p className="text-lg sm:text-xl font-semibold leading-snug max-w-3xl">{t('pricing.sub')}</p>
+          <p className="text-lg sm:text-xl font-semibold leading-snug">{t('pricing.sub')}</p>
           <ul className="flex flex-wrap gap-3 list-none p-0 mt-5 mb-0">
             {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-2 bg-white border-bold border-border rounded-pill px-4 sm:px-5 min-h-12 font-bold"><I weight="bold" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
@@ -86,9 +67,11 @@ export default function PricingPage() {
                 {x === 'plus' && <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-ink border-bold border-border font-bold rounded-pill px-5 py-1.5">{t('pricing.recommended')}</span>}
                 <h2 id={`plan-${x}`} className="title-bubble text-4xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-semibold leading-snug">{t(`pricing.${x}.who` as StringKey)}</p>
-                {x === 'free'
-                  ? <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.free.${n}` as StringKey)}</li>)}</ul>
-                  : <PlanFeatures plan={x as 'plus' | 'pro'} />}
+                {/* The four lines that sell it, then the full chart (teacher,
+                    2026-11-25: "shorten each plan and then have a very detailed
+                    comparison chart"; replaces every highlight on the card). */}
+                <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold leading-snug"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t((x === 'free' ? `pricing.free.${n}` : `upgrade.${x}.${n}`) as StringKey)}</li>)}</ul>
+                <a href="#compare" onClick={toChart} className="justify-self-start font-bold underline underline-offset-4 inline-flex items-center gap-1.5">{t('pricing.compareAll')}<ArrowDown weight="bold" size={16} aria-hidden="true" /></a>
                 <div className="grid gap-1 pt-4 border-t-2 border-dashed border-border">
                   {x === 'free'
                     ? <><p className="font-score text-5xl leading-none tabular-nums m-0">{t('pricing.free.price')}</p><p className="font-semibold m-0">{t('pricing.free.note')}</p></>
@@ -116,52 +99,7 @@ export default function PricingPage() {
           <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}</Link>
         </section>
 
-        {/* Phones: each row of the table becomes a small card with the three
-            plans side by side, so nothing scrolls sideways (teacher, 2026-11-24). */}
-        <section aria-labelledby="compare" className="grid gap-6 mt-4">
-        <h2 id="compare" className={H2}><Title text={t('pricing.compare')} /></h2>
-        <div className="sm:hidden grid gap-2">
-          <div className="sticky top-14 z-10 grid grid-cols-3 gap-1 bg-surface border-bold border-border rounded-input p-1 text-center font-score text-xl">
-            {tiers.map((x) => <span key={x} className={`rounded-input py-1 ${x === 'plus' ? 'bg-butter' : ''}`}>{t(`pricing.${x}`)}</span>)}
-          </div>
-          <ul className="grid gap-2 list-none p-0 m-0">
-            {rows.map((r) => (
-              <li key={r.label} className="bg-surface border-std border-border rounded-input p-3 grid gap-2">
-                <span className="font-bold">{r.label}</span>
-                <span className="grid grid-cols-3 gap-1 text-center">
-                  {tiers.map((x) => {
-                    const v = r.value(x);
-                    return <span key={x} className={`rounded-input px-1 py-1.5 font-semibold text-sm leading-snug flex items-center justify-center min-h-10 ${x === 'plus' ? 'bg-butter/70' : 'bg-surface-2'}`}>
-                      <span className="sr-only">{t(`pricing.${x}`)}: </span>
-                      {typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}
-                    </span>;
-                  })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="hidden sm:block overflow-x-auto bg-surface border-bold border-border rounded-panel" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <table className="w-full min-w-[560px] text-left">
-            <caption className="sr-only">{t('pricing.compare')}</caption>
-            <thead><tr className="border-b-[2px] border-border">
-              <th scope="col" className="p-3"><span className="sr-only">{t('pricing.compare')}</span></th>
-              {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-score text-2xl font-normal ${x === 'plus' ? 'bg-butter' : ''}`}>{t(`pricing.${x}`)}</th>)}
-            </tr></thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.label} className="border-b border-border-soft last:border-0">
-                  <th scope="row" className="p-3 font-bold">{r.label}</th>
-                  {tiers.map((x) => {
-                    const v = r.value(x);
-                    return <td key={x} className={`p-3 font-semibold ${x === 'plus' ? 'bg-butter/70' : ''}`}>{typeof v === 'boolean' ? (v ? <Check weight="bold" size={20} aria-label={t('pricing.yes')} /> : <Minus weight="bold" size={20} aria-label={t('pricing.no')} />) : v}</td>;
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        </section>
+        <CompareChart billing={billing} titleClass={H2} />
 
         <SchoolPlans />
 
