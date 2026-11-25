@@ -5,6 +5,8 @@ import TeacherSurvey from '../beta/TeacherSurvey';
 import { surveyDue, type SurveyId } from '../beta/surveys';
 import { t } from '../i18n';
 import GetStarted, { useStartSteps } from '../teacher/GetStarted';
+import BetaChecklist from '../teacher/BetaChecklist';
+import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { useTier } from '../data/hooks';
 import { TIERS } from '../config';
 
@@ -15,6 +17,8 @@ import { TIERS } from '../config';
 // tools like the Theme Builder need the room; teacher, 2026-10-31).
 export default function TeacherNav({ startOpen = true, rail: withRail = true }: { startOpen?: boolean; rail?: boolean }) {
   const start = useStartSteps();
+  const betaOn = useBetaTester();
+  const { value: beta } = useBetaSteps(betaOn);
   const tier = useTier();
   const [open, setOpen] = useState<boolean | null>(null);
   // A beta survey that has come due shows as a pill too.
@@ -76,6 +80,7 @@ export default function TeacherNav({ startOpen = true, rail: withRail = true }: 
         )}
       </nav>
       {survey && surveyOpen && <TeacherSurvey id={survey} onClose={() => { setSurveyOpen(false); void surveyDue().then(setSurvey); }} />}
+      {beta && !onAccount && <BetaChecklist s={beta} />}
       {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => setOpen(false)} />}
     </>
   );

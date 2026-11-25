@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ChalkboardTeacher, ChatCircleDots, HouseSimple, List, SignOut, X } from '@phosphor-icons/react';
+import { ArrowRight, ChalkboardTeacher, Flag, HouseSimple, List, SignOut, X } from '@phosphor-icons/react';
 import { setTeacher, useSignedIn } from '../auth/session';
 import { t } from '../i18n';
 import { TellGamify } from './TellGamify';
@@ -14,7 +14,6 @@ export default function NavBar() {
   // A bigger bar on site and teacher pages (teacher, 2026-11-19: "the top bar
   // ... still too small"); game menus keep the shorter bar so they never scroll.
   const inGame = path.startsWith('/games/');
-  const role = path.startsWith('/teacher') ? 'teacher' : 'student';
   const { teacher, student, any } = useSignedIn();
   const isOwner = useIsOwner();
   // Student pages (teacher, 2026-11-24: "remove login entirely from student
@@ -22,6 +21,9 @@ export default function NavBar() {
   // just the logo, with no site links and nowhere to wander.
   // Every screen a student can reach, Eyes up here and the design studio too (2026-11-24).
   const studentPage = /^\/(join|choose|live|mirror|look-up|arcade)(\/|$)/.test(path);
+  // Students (and anyone inside a game without a teacher signed in) get the
+  // student form; teachers and site visitors get the adult one with Help.
+  const role = student || studentPage || (inGame && !teacher) ? 'student' : 'teacher';
   const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-10 tap rounded-pill border-std border-border bg-surface-2 hover:bg-secondary transition-colors';
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border`}>
@@ -42,6 +44,11 @@ export default function NavBar() {
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>
       )}
+      {/* Report, for everyone on every page (owner, 2026-11-24). */}
+      <button type="button" onClick={() => setTellOpen(true)} aria-label={t('report.open')} title={t('report.open')}
+        className="w-9 h-9 tap-round rounded-full border-std border-border bg-surface-2 hover:bg-secondary flex items-center justify-center shrink-0">
+        <Flag weight="bold" size={18} />
+      </button>
       {any && (
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
@@ -55,10 +62,7 @@ export default function NavBar() {
               <Link to="/help" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.faq')}</Link>
             </nav>
           )}
-          <button type="button" onClick={() => setTellOpen(true)} aria-label={t('tell.open')}
-            className="w-9 h-9 tap-round rounded-full border-std border-border bg-surface-2 hover:bg-secondary flex items-center justify-center">
-            <ChatCircleDots weight="bold" size={18} />
-          </button>
+
           {/* Only the owner's own account ever sees this (teacher, 2026-11-23); it opens the developer dashboard. */}
           {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>}
           {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}

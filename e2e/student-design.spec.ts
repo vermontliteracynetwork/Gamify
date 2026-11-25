@@ -13,7 +13,7 @@ test('student design mode: a student sends a theme, the teacher approves it, it 
   });
   // Teacher opens the class for designing.
   await page.goto('/teacher/classes/c1');
-  await page.getByRole('tab', { name: 'Play modes' }).click();
+  await page.getByRole('tab', { name: 'Ways to play' }).click();
   await page.getByRole('switch').last().click();
   await expect(page.getByRole('switch').last()).toHaveAttribute('aria-checked', 'true');
   // Students reach the studio only with a design code (teacher, 2026-10-31).

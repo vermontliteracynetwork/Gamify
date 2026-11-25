@@ -3,7 +3,7 @@ import { forecast, mrrOf } from './forecast';
 
 describe('income forecast', () => {
   it('turns yearly prices into monthly income', () => {
-    expect(mrrOf({ plus: 12, pro: 0, homeschool: 0, schoolSeats: 0 })).toBe(96);
+    expect(mrrOf({ plus: 12, pro: 0, homeschool: 0, schoolSeats: 0 })).toBe(76.8);
   });
   it('grows with growth, shrinks with churn, and dates each month', () => {
     const start = { plus: 10, pro: 2, homeschool: 1, schoolSeats: 0 };

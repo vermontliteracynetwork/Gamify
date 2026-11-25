@@ -12,12 +12,12 @@ export const VT_ADVISOR_UPDATED = '2026-11-24';
 
 export const VT_REMINDERS: VtReminder[] = [
   { id: 'llc-form', kind: 'form', when: 'Before the first sale',
-    title: 'Form the LLC (or assign Gamify to Vermont Literacy Network LLC) with the Secretary of State',
+    title: 'Form Gamify LLC with the Secretary of State',
     detail: 'Vermont LLCs live under the Uniform Limited Liability Company Act (11 V.S.A. chapter 25). File Articles of Organization online and name a registered agent with a Vermont street address. Write an operating agreement even for one member: it is what keeps the liability shield believable.',
-    check: 'Current filing fee and whether Gamify is a new LLC or a trade name of the existing one (your 2026-10-26 decision was the existing LLC).', source: 'https://sos.vermont.gov/corporations/' },
+    check: 'Current filing fee. Gamify LLC is a new company, separate from Vermont Literacy Network (your decision, 2026-11-19); the attorney\'s one-page assignment moves Gamify into it.', source: 'https://sos.vermont.gov/corporations/' },
   { id: 'trade-name', kind: 'form', when: 'With the LLC filing',
-    title: 'Register "Gamify" as a trade name if it sells under an LLC with another name',
-    detail: 'Selling as Gamify under Vermont Literacy Network LLC needs a trade name (DBA) registration with the Secretary of State, renewed on its cycle. Do the trademark search first so the name is safe to build on.',
+    title: 'Only if needed: a trade name for any other selling name',
+    detail: 'Selling as Gamify LLC needs no trade name. Selling under any other name (for example "Learn Gamify") needs a trade name (DBA) registration with the Secretary of State, renewed on its cycle. Do the trademark search first so the name is safe to build on.',
     check: 'Renewal period and fee on the Secretary of State trade name page.', source: 'https://sos.vermont.gov/corporations/' },
   { id: 'ein', kind: 'tax', when: 'Right after forming',
     title: 'Get an EIN, then open the bank account and Stripe in the LLC\'s name',

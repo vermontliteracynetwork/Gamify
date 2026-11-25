@@ -29,7 +29,8 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   const dialog = page.getByRole('dialog', { name: 'Supports for Ava' });
   await dialog.getByRole('slider', { name: 'Time to read before answering' }).fill('0');
   await dialog.getByRole('button', { name: 'Save supports' }).click();
-  await expect(page.getByText('Supports', { exact: true })).toBeVisible();
+  // Supports show as chips in the roster table (teacher portal 3b).
+  await expect(page.getByRole('cell', { name: '0s to read first' })).toBeVisible();
 
   // Assign Animals and habitats to the whole class.
   await page.getByRole('tab', { name: 'Assigned sets' }).click();
@@ -42,7 +43,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await page.screenshot({ path: `test-results/class-sets-${info.project.name}.png`, fullPage: true });
 
   // Hide Versus for the class.
-  await page.getByRole('tab', { name: 'Play modes' }).click();
+  await page.getByRole('tab', { name: 'Ways to play' }).click();
   await page.getByRole('switch').nth(3).click();
 
   // Student sign-in through a game code (no class codes or Arcade, teacher
@@ -119,6 +120,8 @@ test('Plus: upload a student picture and set a PIN; a game link asks students fo
   await dialog.getByLabel('PIN (4 numbers)').fill('4826');
   await dialog.screenshot({ path: `test-results/avatar-dialog-${info.project.name}.png` });
   await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+  // PINs stay hidden in the roster until the teacher shows them (teacher portal 3b).
+  await page.getByRole('button', { name: 'Show PINs' }).click();
   await expect(page.getByText('PIN 4826')).toBeVisible();
 
   // A hosted game code: Mia taps her picture and types her PIN.

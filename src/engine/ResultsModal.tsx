@@ -3,9 +3,13 @@ import { POP_IN } from './pace';
 import { AnimatePresence, motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Feather, Mountains, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, Target, X } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, CaretLeft, CaretRight, ChalkboardTeacher, CheckCircle, Eye, Flag, Flask, SquaresFour, Smiley, SmileyMeh, SmileySad, SpeakerHigh, Star, X } from '@phosphor-icons/react';
 import { useLocation } from 'react-router-dom';
 import { saveCheckIn } from '../beta/surveys';
+import BetaGameForm from '../beta/BetaGameForm';
+import { useBetaTester } from '../beta/tester';
+import { data, newId } from '../data';
+import { getGame } from '../games/registry';
 import { getSession } from '../student/session';
 import type { StringKey } from '../i18n/en';
 import { useSignedIn } from '../auth/session';
@@ -14,43 +18,60 @@ import type { MultipleChoiceQuestion } from '../data/types';
 import { useSettings } from '../settings/SettingsContext';
 import { speak } from './feedback';
 import { TeamBadge } from './TeamBadge';
+import { TellGamify } from '../ui/TellGamify';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 
-// A two-tap review at the end of every game (teacher, 2026-10-26: instead of
-// a class check-in): how it felt, then easy or tricky. Pictures only, read
-// aloud by the device's Listen tools; only counts are kept, never names.
-// Since 2026-10-31 it sits behind the Rate game button.
+// The end-of-game rating (owner, 2026-11-24: "all student feedback will be a
+// three face tap. comment text field is optional"). Faces first (only counts
+// are kept), then an optional comment, typed or spoken with the keyboard's
+// microphone. A comment goes to the owner's Feedback as a beta report, never
+// with a name. Sits behind the Rate game button.
 const FEEL = [Smiley, SmileyMeh, SmileySad];
-const LEVEL = [Feather, Target, Mountains];
-const COLORS = [['#ddfcc6', '#fdfd94', '#ed9d75'], ['#ddd6ff', '#ddfcc6', '#ed9d75']];
+const COLORS = ['#ddfcc6', '#fdfd94', '#ed9d75'];
 function GameReview({ onDone }: { onDone: () => void }) {
   const [feel, setFeel] = useState<number | null>(null);
+  const [comment, setComment] = useState('');
   const [done, setDone] = useState(false);
   const gameId = useLocation().pathname.split('/')[2];
-  const step = feel === null ? 0 : 1;
   if (done) return <p className="font-bold text-center" role="status">{t('review.thanks')}</p>;
-  const icons = step === 0 ? FEEL : LEVEL;
-  const key = step === 0 ? 'feel' : 'level';
   function pick(i: number) {
-    if (step === 0) { setFeel(i); return; }
     const oneHot = (n: number) => [0, 1, 2].map((k) => (k === n ? 1 : 0)) as [number, number, number];
-    void saveCheckIn({ at: new Date().toISOString(), classroomId: getSession()?.classroomId ?? '', gameId, feel: oneHot(feel!), level: oneHot(i) });
+    void saveCheckIn({ at: new Date().toISOString(), classroomId: getSession()?.classroomId ?? '', gameId, feel: oneHot(i), level: [0, 0, 0] });
+    setFeel(i);
+  }
+  function finish() {
+    const text = comment.trim();
+    if (text && feel !== null) {
+      void data.sendFeedback({ id: newId('fb'), at: new Date().toISOString(), kind: 'beta', role: getSession() ? 'student' : 'teacher', where: `/play/${gameId}`, device: navigator.userAgent,
+        details: `Student rating: ${getGame(gameId)?.name ?? gameId}, ${t(`checkin.feel.${feel}` as StringKey)}. Comment: ${text}`.slice(0, 1000) });
+    }
     setDone(true);
     window.setTimeout(onDone, 1400);
   }
-  return (
+  if (feel === null) return (
     <div className="grid gap-2 justify-items-center rounded-input border-std border-border-soft p-3">
-      <p className="font-bold">{t(step === 0 ? 'review.feel' : 'review.level')}</p>
+      <p className="font-bold">{t('review.feel')}</p>
       <div className="flex gap-2">
-        {icons.map((I, i) => (
-          <button key={i} type="button" onClick={() => pick(i)} aria-label={t(`checkin.${key}.${i}` as StringKey)}
-            className="w-16 h-16 rounded-full border-bold border-border flex items-center justify-center active:scale-90" style={{ background: COLORS[step][i] }}>
+        {FEEL.map((I, i) => (
+          <button key={i} type="button" onClick={() => pick(i)} aria-label={t(`checkin.feel.${i}` as StringKey)}
+            className="w-16 h-16 rounded-full border-bold border-border flex items-center justify-center active:scale-90" style={{ background: COLORS[i] }}>
             <I weight="fill" size={34} aria-hidden="true" />
           </button>
         ))}
       </div>
     </div>
+  );
+  return (
+    <form className="grid gap-2 rounded-input border-std border-border-soft p-3" onSubmit={(e) => { e.preventDefault(); finish(); }}>
+      <label className="grid gap-1 font-bold">{t('review.comment')}
+        <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} maxLength={600} className="w-full px-3 py-2 rounded-input border-std border-border font-semibold resize-none" />
+      </label>
+      <p className="text-sm font-semibold text-muted m-0">{t('review.commentHint')}</p>
+      <div className="flex justify-center gap-2">
+        <button type="submit" className="min-h-12 px-6 rounded-input border-bold border-border bg-accent font-display text-lg">{comment.trim() ? t('review.send') : t('review.skip')}</button>
+      </div>
+    </form>
   );
 }
 
@@ -155,7 +176,9 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
 }) {
   const { settings } = useSettings();
   const { student } = useSignedIn();
-  const [view, setView] = useState<'main' | 'rate'>('main');
+  const [view, setView] = useState<'main' | 'rate' | 'beta' | 'report'>('main');
+  const betaTester = useBetaTester();
+  const gameId = useLocation().pathname.split('/')[2];
   const [reviewing, setReviewing] = useState(false);
   const btn = 'min-h-12 px-3 rounded-input border-bold border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
   return (
@@ -186,11 +209,20 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
             <button type="button" onClick={() => setView('rate')} className={`${btn} bg-quiz-green`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <Smiley weight="bold" size={24} />{t('rv.rate')}
             </button>
+            {betaTester && !student && (
+              <button type="button" onClick={() => setView('beta')} className={`${btn} bg-secondary col-span-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <Flask weight="bold" size={20} />{t('bform.open')}
+              </button>
+            )}
             {missed.length === 0 && <p className="col-span-2 text-sm font-bold text-center text-muted">{t('rv.none')}</p>}
+            {/* Report, for everyone (owner, 2026-11-24). */}
+            <button type="button" onClick={() => setView('report')} className="col-span-2 justify-self-center min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+              <Flag weight="bold" size={18} />{t('report.open')}
+            </button>
           </div>
         ) : (
           <div className="grid gap-2 px-5 pb-5">
-            <GameReview onDone={() => setView('main')} />
+            {view === 'beta' ? <BetaGameForm gameId={gameId} onDone={() => setView('main')} /> : view === 'report' ? <TellGamify role={student ? 'student' : 'teacher'} context={gameId} bare /> : <GameReview onDone={() => setView('main')} />}
             <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('rv.back')}</button>
           </div>
         )}

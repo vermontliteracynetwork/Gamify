@@ -6,7 +6,7 @@ import { GAME_COVERS } from './GameMockups';
 import { GO_YELLOW, PURPLE_GROUND, QuestionCard, WAYS_STYLE, GText } from './mockKit';
 import { FINDINGS } from '../public/research';
 import { POSTS } from '../public/posts';
-import { PRICES_USD_PER_YEAR } from '../config';
+import { PRICES_USD_PER_YEAR, perMonthUSD } from '../config';
 
 // Public pages (PROPOSAL, teacher 2026-11-24: "in the brand tab show mockups
 // for the public facing pages with the new design directives"). Real content
@@ -386,10 +386,10 @@ function Features({ w }: W) {
 // yearly billing framed per month and per school day, risk reversal under the
 // prices, the school path and an FAQ built from the Sales doc's counter
 // arguments. Every number comes from src/config.ts and the live en.ts lines.
-const perMonth = (y: number) => Math.round(y / 12);
+const perMonth = perMonthUSD;
 const perDay = (y: number) => Math.round((y / 180) * 100);
 const PLANS = [
-  { id: 'Free', who: 'Everything you need to see your class light up.', gets: ['Play the free games with your class today', 'Up to 30 students, each signing in with a picture and PIN', '3 question sets of your own, plus the whole ready-made library', 'Design your own Game Show theme with your class'], price: '$0', note: 'Free forever. No card needed.', day: '', more: 0, go: 'Start free' },
+  { id: 'Free', who: 'Everything you need to see your class light up.', gets: ['Play the free games with your class today', 'Up to 30 students, each signing in with a picture and PIN', '3 question sets of your own, plus the whole ready-made library', 'Design one Game Show theme with your class'], price: '$0', note: 'Free forever. No card needed.', day: '', more: 0, go: 'Start free' },
   { id: 'Plus', who: 'Every game, and your class designs how each one looks.', gets: ['Every game, unlocked the moment you upgrade', 'Your class designs a theme for every game', '3 classes of up to 60 students, with live monitoring', 'Unlimited question sets and reports you keep forever'], price: `$${perMonth(PRICES_USD_PER_YEAR.plus)}`, note: `a month, billed once a year ($${PRICES_USD_PER_YEAR.plus})`, day: `About ${perDay(PRICES_USD_PER_YEAR.plus)} cents a school day`, more: 8, go: 'Start with Plus', best: true },
   { id: 'Pro', who: 'Everything, with no limits, for classrooms that play every day.', gets: ['Every game, and new games before anyone else', 'As many themes for every game as your class can dream up', 'Unlimited classes and students', 'Every report kept, all year and beyond'], price: `$${perMonth(PRICES_USD_PER_YEAR.pro)}`, note: `a month, billed once a year ($${PRICES_USD_PER_YEAR.pro})`, day: `About $${(PRICES_USD_PER_YEAR.pro / 180).toFixed(2)} a school day`, more: 6, go: 'Start with Pro' },
 ];

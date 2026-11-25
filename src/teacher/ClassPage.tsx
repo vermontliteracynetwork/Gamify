@@ -1,13 +1,13 @@
 import { makeGameCode } from '../data/gameCodes';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { DiceFive, GearSix, Heart, Plus, Printer, Star, Trash, UploadSimple } from '@phosphor-icons/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { DiceFive, Eye, EyeSlash, GearSix, Heart, Lightbulb, Minus, PencilSimple, Plus, Printer, Star, Trash, TrendDown, TrendUp, UploadSimple, UsersThree } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
-import { ALL_MODES, type Classroom, type PlayMode, type SetAssignment, type Student } from '../data/types';
+import { ALL_MODES, type Classroom, type PlayMode, type QuestionLogEntry, type QuestionSet, type SetAssignment, type Student } from '../data/types';
 import { ModeBadge, SHOWN_MODES } from '../games/ModeBadge';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
@@ -20,38 +20,45 @@ import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { themesFor } from '../theme/library';
 import { GAMES } from '../games/registry';
 import { ChoiceRow, Slider, Toggle } from '../ui/fields';
-import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
+import { Button, buttonClasses, fieldClasses, IconButton, PageHeader, Panel, Tabs } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
 import { readOnlyIds } from '../data/downgrade';
 import Title from '../ui/Title';
 import { LimitNote, UpgradeButton } from '../billing/Upgrade';
 import SharedDialog from '../ui/Dialog';
-import ReportDoc from './reportDoc';
+import ReportDoc, { supportsText, trend } from './reportDoc';
+import { Chip, FirstTryBar, firstTry, fmtDay, lastDay, PortalCard, skillsOf, SOFT } from './portalParts';
 import type { GameTheme } from '../theme/types';
 
-type Tab = 'students' | 'report' | 'sets' | 'modes';
+type Tab = 'students' | 'groups' | 'report' | 'sets' | 'modes';
+const TABS: Tab[] = ['students', 'groups', 'report', 'sets', 'modes'];
 
-// One classroom: the class list with avatar + PIN sign-in and per-student
-// accommodations (behind the teacher PIN), assigned sets, and which play
-// modes students see. On Free there are no classes (teacher, 2026-10-26):
-// this page is the teacher's one student list, "My students".
+// One classroom, in the approved teacher portal look (/brand?tab=teacher,
+// view 3b, 2026-11-25): the roster as a scannable table (picture, hidden
+// PIN, supports as chips, last played, right on first try, trend), small
+// groups beside it, then the report, assigned sets and ways to play.
+// Avatar + PIN sign-in and per-student accommodations sit behind the teacher
+// PIN. On Free there are no classes (teacher, 2026-10-26): this page is the
+// teacher's one student list, "My students".
 export default function ClassPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('students');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (TABS as string[]).includes(params.get('tab') ?? '') ? params.get('tab') as Tab : 'students');
+  const [preset, setPreset] = useState<string[]>([]);
   const { value: classes = [], reload: reloadClass } = useAsync(() => data.listClassrooms());
   const [designCode, setDesignCode] = useState('');
   const { value: students = [], reload: reloadStudents } = useAsync(() => data.listStudents(id), [id]);
   const { value: assignments = [], reload: reloadAssignments } = useAsync(() => data.listAssignments(id), [id]);
+  const { value: log = [] } = useAsync(() => data.listQuestionLog({ classroomId: id }), [id]);
+  const { value: mine = [] } = useMySets();
+  const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const classroom = classes.find((c) => c.id === id);
   const tier = useTier();
   // Downgrade rules: classes past the plan limit stay, read-only.
   const frozen = readOnlyIds(classes, TIERS[tier].classrooms).has(id);
   const free = !TIERS[tier].hasClasses;
   const [confirmDelete, setConfirmDelete] = useState(false);
-  useEffect(() => {
-    // Classes made before join codes existed get one now.
-  }, [classroom]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Students added before PIN sign-in get a PIN now.
     const missing = students.filter((s) => !s.pin);
@@ -63,25 +70,28 @@ export default function ClassPage() {
   const { themes: madeThemes } = useMadeThemes();
   const look = madeThemes.find((th) => th.id === classroom?.signInThemeId);
   if (!classroom) return null;
+  const assignTo = (ids: string[]) => { setPreset(ids); setTab('sets'); };
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       {/* No class join codes (teacher, 2026-10-31): students get in with a game code or link. */}
       <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
-        actions={<Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('rp.classReport')}</Link>} />
-      {/* Every student's name right under the class name, each opening that
-          student's own page (teacher, 2026-11-16). */}
-      <StudentStrip classId={id} students={students} look={look} />
-      <Tabs label={t('class.tabs')} value={tab} onChange={setTab} options={[
-        { id: 'students', label: t('class.tab.students') }, { id: 'report', label: t('rp.classReport') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
+        actions={<>
+          <Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('secondary')}><Printer weight="bold" size={18} />{t('classes.progress')}</Link>
+          <Link to="/teacher/activity" className={buttonClasses('primary')}><Plus weight="bold" size={18} />{t('teacherNav.create')}</Link>
+        </>} />
+      <Tabs label={t('class.tabs')} value={tab} onChange={(v) => { setTab(v); if (v !== 'sets') setPreset([]); }} options={[
+        { id: 'students', label: t('class.tab.students') }, { id: 'groups', label: t('class.tab.groups') }, { id: 'report', label: t('class.tab.report') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
       ]} />
       {frozen && <LimitNote className="mb-4">{t('class.frozen')}</LimitNote>}
       <fieldset disabled={frozen} className="contents">
-      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} />}
+      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} log={log}
+        groups={<GroupsSide students={students} log={log} sets={sets} look={look} reload={reloadStudents} onNew={() => setTab('groups')} onAssign={assignTo} />} />}
       {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
+      {tab === 'groups' && <GroupsTab students={students} log={log} sets={sets} look={look} reload={reloadStudents} onAssign={assignTo} />}
       {tab === 'report' && <ClassReport classId={id} className={classroom.name} students={students} />}
-      {tab === 'sets' && <SetsTab classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} />}
+      {tab === 'sets' && <SetsTab key={preset.join()} classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} preset={preset} />}
       {tab === 'modes' && (
         <Panel className="grid gap-3">
           <p className="font-bold">{t('class.modesNote')}</p>
@@ -136,7 +146,21 @@ export default function ClassPage() {
   );
 }
 
-function StudentsTab({ classroomId, students, reload, signInThemeId }: { classroomId: string; students: Student[]; reload: () => void; signInThemeId?: string }) {
+// The supports a student has, one chip each ("3 tries", "Listen").
+export function supportChips(s: Student): string[] {
+  return supportsText(s).split('; ').filter(Boolean);
+}
+
+function TrendMark({ entries }: { entries: QuestionLogEntry[] }) {
+  const tr = trend(entries);
+  const label = t(`rp.trend.${tr}`);
+  if (tr === 'up') return <TrendUp weight="bold" size={18} color="var(--color-success-ink)" role="img" aria-label={label} />;
+  if (tr === 'down') return <TrendDown weight="bold" size={18} color="var(--color-error)" role="img" aria-label={label} />;
+  if (tr === 'steady') return <Minus weight="bold" size={18} className="text-muted" role="img" aria-label={label} />;
+  return <span role="img" aria-label={label} className="font-bold text-muted">-</span>;
+}
+
+function StudentsTab({ classroomId, students, reload, signInThemeId, log, groups }: { classroomId: string; students: Student[]; reload: () => void; signInThemeId?: string; log: QuestionLogEntry[]; groups: React.ReactNode }) {
   const { themes } = useMadeThemes();
   const look = themes.find((th) => th.id === signInThemeId);
   const tier = useTier();
@@ -146,8 +170,12 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
   const [editing, setEditing] = useState<Student | null>(null);
   const [asking, setAsking] = useState<Student | null>(null);
   const [picking, setPicking] = useState<Student | null>(null);
+  // PINs stay hidden until the teacher asks (portal 3b): the page may be on the projector.
+  const [showPins, setShowPins] = useState(false);
+  const addRef = useRef<HTMLTextAreaElement>(null);
   const toAdd = names.split('\n').map((n) => n.trim()).filter(Boolean);
   const room = Number.isFinite(limit) ? limit - students.length : Infinity;
+  const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name));
 
   async function add() {
     const taken = students.map((s) => s.picturePassword);
@@ -169,25 +197,69 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
   function openSettings(s: Student) { if (unlocked) setEditing(s); else setAsking(s); }
 
   return (
-    <div className="grid gap-4">
-      {students.length === 0 && <Panel><p className="font-bold">{t('class.noStudents')}</p></Panel>}
-      <div className="grid sm:grid-cols-2 gap-3">
-        {students.map((s) => (
-          <Panel key={s.id} className="flex items-center gap-3 !p-3">
-            <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95"><Avatar avatar={avatarOf(s)} theme={look} size={48} /></button>
-            <span className="flex-1 min-w-0 grid">
-              <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="font-bold underline-offset-2 hover:underline">{s.name}</Link>
-              <span className="text-sm font-bold text-muted tabular-nums">{t('class.pinIs', { pin: s.pin ?? '' })}</span>
-            </span>
-            {s.accommodations && <span className="text-xs font-bold px-2 py-0.5 rounded-pill bg-surface-2 border border-border">{t('class.hasSupports')}</span>}
-            <button type="button" onClick={() => openSettings(s)} aria-label={t('class.supportsFor', { name: s.name })} className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center"><GearSix weight="bold" size={20} /></button>
-            <button type="button" onClick={async () => { await data.deleteStudent(s.id); reload(); }} aria-label={t('class.remove', { name: s.name })} className="w-11 h-11 rounded-full border-std border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={20} /></button>
-          </Panel>
-        ))}
+    <div className="grid gap-4 mb-4">
+      <div className="grid gap-4 items-start min-[1340px]:grid-cols-[minmax(0,1fr)_20rem]">
+        <PortalCard labelledBy="roster-title" title={t('class.studentCount', { count: students.length })} tip={t('class.rosterTip')}
+          right={<>
+            {students.length > 0 && <Button size="sm" aria-pressed={showPins} onClick={() => setShowPins(!showPins)}>{showPins ? <EyeSlash weight="bold" size={16} /> : <Eye weight="bold" size={16} />}{showPins ? t('class.hidePins') : t('class.showPins')}</Button>}
+            <Button size="sm" onClick={() => { addRef.current?.focus(); addRef.current?.scrollIntoView({ block: 'center' }); }}><Plus weight="bold" size={16} />{t('class.addStudentsShort')}</Button>
+          </>}>
+          {students.length === 0 ? <p className="font-bold">{t('class.noStudents')}</p> : (
+            <div className="overflow-x-auto -mx-1 px-1">
+              <table className="w-full text-sm border-collapse">
+                <caption className="sr-only">{t('class.rosterCaption')}</caption>
+                <thead>
+                  <tr className="text-left text-[0.8125rem] text-muted">
+                    <th scope="col" className="font-bold pb-1.5 pr-2">{t('rp.student')}</th>
+                    <th scope="col" className="font-bold pb-1.5 pr-2">{t('class.pinCol')}</th>
+                    <th scope="col" className="font-bold pb-1.5 pr-2">{t('reports.supports')}</th>
+                    <th scope="col" className="font-bold pb-1.5 pr-2 hidden md:table-cell">{t('rp.last')}</th>
+                    <th scope="col" className="font-bold pb-1.5 pr-2">{t('rp.firstTry')}</th>
+                    <th scope="col" className="font-bold pb-1.5 pr-2 hidden sm:table-cell">{t('rp.trend')}</th>
+                    <th scope="col" className="pb-1.5"><span className="sr-only">{t('class.actions')}</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map((s) => {
+                    const mine = log.filter((e) => e.studentId === s.id);
+                    const ft = firstTry(mine);
+                    const chips = supportChips(s);
+                    return (
+                      <tr key={s.id} className="border-t border-border-soft">
+                        <th scope="row" className="py-1.5 pr-2 text-left font-bold">
+                          <span className="inline-flex items-center gap-2.5 min-w-0">
+                            <button type="button" onClick={() => setPicking(s)} aria-label={t('class.avatarFor', { name: s.name })} className="rounded-full active:scale-95 shrink-0"><Avatar avatar={avatarOf(s)} theme={look} size={36} /></button>
+                            <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="text-text underline-offset-2 hover:underline break-words">{s.name}</Link>
+                          </span>
+                        </th>
+                        <td className="pr-2 font-bold tabular-nums tracking-widest text-muted whitespace-nowrap">
+                          {showPins ? <><span className="sr-only">{t('class.pinIs', { pin: '' })}</span>{s.pin}</> : <span role="img" aria-label={t('class.pinHidden')}>••••</span>}
+                        </td>
+                        <td className="pr-2 py-1"><span className="flex flex-wrap gap-1">{chips.map((c) => <Chip key={c} bg="var(--blue-crystal)">{c}</Chip>)}</span></td>
+                        <td className="pr-2 font-semibold whitespace-nowrap hidden md:table-cell">{fmtDay(lastDay(mine)) || <span className="text-muted">{t('class.notYet')}</span>}</td>
+                        <td className="pr-2">{ft.answered ? <FirstTryBar pct={ft.pct} label={t('classes.firstTryIs', { pct: ft.pct })} /> : <span className="text-muted font-semibold">-</span>}</td>
+                        <td className="pr-2 hidden sm:table-cell"><TrendMark entries={mine} /></td>
+                        <td className="py-1">
+                          <span className="flex items-center justify-end gap-1">
+                            <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} aria-label={t('cv.openStudent', { name: s.name })} className="font-bold text-sm text-[var(--grape-deep)] px-1.5 min-h-9 inline-flex items-center hover:underline">{t('class.open')}</Link>
+                            <IconButton label={t('class.supportsFor', { name: s.name })} onClick={() => openSettings(s)} className="!w-9 !h-9"><GearSix weight="bold" size={18} /></IconButton>
+                            <IconButton label={t('class.remove', { name: s.name })} onClick={async () => { await data.deleteStudent(s.id); reload(); }} className="!w-9 !h-9 bg-surface"><Trash weight="bold" size={18} /></IconButton>
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {students.length > 0 && <p className="mt-2 text-[0.8125rem] font-bold text-muted">{t('class.sortedByName')}</p>}
+        </PortalCard>
+        {groups}
       </div>
       <Panel className="grid gap-2">
         <label htmlFor="student-names" className="font-bold">{t('class.addStudents')}</label>
-        <textarea id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
+        <textarea ref={addRef} id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
           className="px-3 py-2 rounded-input border-std border-border font-bold" />
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="primary" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
@@ -202,6 +274,153 @@ function StudentsTab({ classroomId, students, reload, signInThemeId }: { classro
       )}
       {editing && <SupportsDialog student={editing} onClose={() => { setEditing(null); reload(); }} />}
       {picking && <AvatarDialog student={picking} others={students.filter((x) => x.id !== picking.id)} look={look} onClose={() => { setPicking(null); reload(); }} />}
+    </div>
+  );
+}
+
+// ---------- small groups (portal 3b, 2026-11-25) ----------
+// A group is a name the teacher gives a few students (Student.groups).
+// Students never see group names. "Assign a set" opens Assigned sets with the
+// group's students picked.
+
+interface Group { name: string; members: Student[] }
+function groupsOf(students: Student[]): Group[] {
+  const by = new Map<string, Student[]>();
+  for (const s of students) for (const g of s.groups ?? []) by.set(g, [...(by.get(g) ?? []), s]);
+  return [...by].map(([name, members]) => ({ name, members: members.sort((a, b) => a.name.localeCompare(b.name)) })).sort((a, b) => a.name.localeCompare(b.name));
+}
+async function saveGroup(students: Student[], name: string, memberIds: string[], oldName?: string) {
+  await Promise.all(students.map((s) => {
+    const had = s.groups ?? [];
+    const rest = had.filter((g) => g !== name && g !== oldName);
+    const next = memberIds.includes(s.id) && name ? [...rest, name] : rest;
+    if (next.length === had.length && next.every((g) => had.includes(g))) return undefined;
+    return data.saveStudent({ ...s, groups: next.length ? next : undefined });
+  }));
+}
+
+// A group to suggest from the reports: a Common Core standard where two or
+// more students who are not yet grouped for it are under 50% on first try.
+function useSuggestion(students: Student[], log: QuestionLogEntry[], sets: QuestionSet[]) {
+  return useMemo(() => {
+    const low = new Map<string, Student[]>();
+    for (const s of students) {
+      for (const sk of skillsOf(log.filter((e) => e.studentId === s.id), sets)) if (sk.band === 'notYet') low.set(sk.standard, [...(low.get(sk.standard) ?? []), s]);
+    }
+    const [standard, who] = [...low].filter(([, w]) => w.length >= 2).sort((a, b) => b[1].length - a[1].length)[0] ?? [];
+    if (!standard || !who) return undefined;
+    const name = t('groups.practiceName', { standard });
+    if (groupsOf(students).some((g) => g.name === name)) return undefined;
+    return { standard, who, name };
+  }, [students, log, sets]);
+}
+
+function Suggestion({ students, log, sets, reload }: { students: Student[]; log: QuestionLogEntry[]; sets: QuestionSet[]; reload: () => void }) {
+  const sug = useSuggestion(students, log, sets);
+  const [hidden, setHidden] = useState('');
+  if (!sug || hidden === sug.name) return null;
+  const list = sug.who.map((s) => s.name);
+  const names = list.length > 1 ? `${list.slice(0, -1).join(', ')} and ${list[list.length - 1]}` : list[0];
+  return (
+    <div className="rounded-[1.125rem] p-4 grid gap-2 border-[2.5px] border-dashed border-muted bg-surface/50">
+      <b className="text-[0.9375rem] flex items-center gap-2"><Lightbulb weight="bold" size={18} aria-hidden="true" />{t('groups.suggested')}</b>
+      <span className="text-sm font-semibold leading-snug">{t('groups.suggestLine', { names, standard: sug.standard })}</span>
+      <span className="flex flex-wrap gap-2">
+        <Button size="sm" variant="primary" onClick={async () => { await saveGroup(students, sug.name, sug.who.map((s) => s.id)); reload(); }}><UsersThree weight="bold" size={16} />{t('groups.make')}</Button>
+        <Button size="sm" onClick={() => setHidden(sug.name)}>{t('groups.notNow')}</Button>
+      </span>
+    </div>
+  );
+}
+
+function GroupCard({ g, i, look, onAssign, extra }: { g: Group; i: number; look?: GameTheme; onAssign: (ids: string[]) => void; extra?: React.ReactNode }) {
+  return (
+    <li className="rounded-input p-3 grid gap-2" style={{ background: [SOFT[2], SOFT[1], SOFT[4], SOFT[3], SOFT[5]][i % 5] }}>
+      <div className="flex flex-wrap items-center gap-2"><b className="text-[0.9375rem] break-words min-w-0">{g.name}</b><span className="ml-auto text-[0.8125rem] font-bold">{t('groups.count', { count: g.members.length })}</span></div>
+      <ul aria-label={t('groups.membersOf', { name: g.name })} className="list-none m-0 p-0 flex flex-wrap gap-1">
+        {g.members.map((s) => <li key={s.id} data-tip={s.name} aria-label={s.name} className="rounded-full"><Avatar avatar={avatarOf(s)} theme={look} size={30} /></li>)}
+      </ul>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" onClick={() => onAssign(g.members.map((s) => s.id))}>{t('groups.assign')}</Button>
+        {extra}
+      </div>
+    </li>
+  );
+}
+
+// Beside the roster: the suggestion and the class's groups.
+function GroupsSide({ students, log, sets, look, reload, onNew, onAssign }: { students: Student[]; log: QuestionLogEntry[]; sets: QuestionSet[]; look?: GameTheme; reload: () => void; onNew: () => void; onAssign: (ids: string[]) => void }) {
+  if (!students.length) return null;
+  const groups = groupsOf(students);
+  return (
+    <div className="grid gap-3 content-start min-w-0">
+      <Suggestion students={students} log={log} sets={sets} reload={reload} />
+      <PortalCard labelledBy="groups-side" title={t('class.tab.groups')} tip={t('groups.tip')} right={<Button size="sm" onClick={onNew}><Plus weight="bold" size={16} />{t('groups.new')}</Button>}>
+        {groups.length === 0 ? <p className="text-sm font-semibold text-muted">{t('groups.none')}</p> : (
+          <ul className="list-none m-0 p-0 grid gap-2 sm:grid-cols-2 min-[1340px]:grid-cols-1">{groups.map((g, i) => <GroupCard key={g.name} g={g} i={i} look={look} onAssign={onAssign} />)}</ul>
+        )}
+      </PortalCard>
+    </div>
+  );
+}
+
+// The Groups tab: make, change and remove groups.
+function GroupsTab({ students, log, sets, look, reload, onAssign }: { students: Student[]; log: QuestionLogEntry[]; sets: QuestionSet[]; look?: GameTheme; reload: () => void; onAssign: (ids: string[]) => void }) {
+  const groups = groupsOf(students);
+  const [name, setName] = useState('');
+  const [picked, setPicked] = useState<string[]>([]);
+  const [editing, setEditing] = useState<string | undefined>();
+  const taken = groups.some((g) => g.name === name.trim() && g.name !== editing);
+  const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name));
+  async function save() {
+    await saveGroup(students, name.trim(), picked, editing);
+    setName(''); setPicked([]); setEditing(undefined);
+    reload();
+  }
+  if (!students.length) return <Panel><p className="font-bold">{t('class.noStudents')}</p></Panel>;
+  return (
+    <div className="grid gap-4 items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <PortalCard labelledBy="group-make" title={editing ? t('groups.editTitle', { name: editing }) : t('groups.new')} tip={t('groups.tip')}>
+        <div className="grid gap-3">
+          <label className="grid gap-1 font-bold">{t('groups.name')}
+            <input value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={t('groups.namePlaceholder')} className={fieldClasses()} />
+          </label>
+          {taken && <p className="text-sm font-bold text-error" role="alert">{t('groups.taken')}</p>}
+          <fieldset className="grid gap-2">
+            <legend className="font-bold mb-1">{t('groups.who')}</legend>
+            <div className="flex flex-wrap gap-2">
+              {sorted.map((s) => {
+                const on = picked.includes(s.id);
+                return (
+                  <button key={s.id} type="button" role="checkbox" aria-checked={on} onClick={() => setPicked(on ? picked.filter((x) => x !== s.id) : [...picked, s.id])}
+                    className={`min-h-11 pl-1 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-1.5 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                    <Avatar avatar={avatarOf(s)} theme={look} size={30} />{s.name}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="primary" disabled={!name.trim() || !picked.length || taken} onClick={() => void save()}><UsersThree weight="bold" size={18} />{editing ? t('groups.saveChanges') : t('groups.save')}</Button>
+            {editing && <Button onClick={() => { setEditing(undefined); setName(''); setPicked([]); }}>{t('classes.cancel')}</Button>}
+          </div>
+        </div>
+      </PortalCard>
+      <div className="grid gap-3 content-start min-w-0">
+        <Suggestion students={students} log={log} sets={sets} reload={reload} />
+        <PortalCard labelledBy="group-list" title={t('groups.yours')}>
+          {groups.length === 0 ? <p className="text-sm font-semibold text-muted">{t('groups.none')}</p> : (
+            <ul className="list-none m-0 p-0 grid gap-2">
+              {groups.map((g, i) => (
+                <GroupCard key={g.name} g={g} i={i} look={look} onAssign={onAssign} extra={<>
+                  <Button size="sm" onClick={() => { setEditing(g.name); setName(g.name); setPicked(g.members.map((s) => s.id)); }}><PencilSimple weight="bold" size={16} />{t('groups.edit')}</Button>
+                  <IconButton label={t('groups.remove', { name: g.name })} onClick={async () => { await saveGroup(students, '', [], g.name); reload(); }} className="!w-9 !h-9 bg-surface"><Trash weight="bold" size={18} /></IconButton>
+                </>} />
+              ))}
+            </ul>
+          )}
+        </PortalCard>
+      </div>
     </div>
   );
 }
@@ -304,14 +523,14 @@ export function SupportsDialog({ student, onClose }: { student: Student; onClose
   );
 }
 
-function SetsTab({ classroomId, students, assignments, reload }: { classroomId: string; students: Student[]; assignments: SetAssignment[]; reload: () => void }) {
+function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { classroomId: string; students: Student[]; assignments: SetAssignment[]; reload: () => void; preset?: string[] }) {
   const tier = useTier();
   const limit = TIERS[tier].assignedSetsPerStudent;
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
   const [setId, setSetId] = useState<string[]>([]);
-  const [who, setWho] = useState<'class' | 'some'>('class');
-  const [chosen, setChosen] = useState<string[]>([]);
+  const [who, setWho] = useState<'class' | 'some'>(preset.length ? 'some' : 'class');
+  const [chosen, setChosen] = useState<string[]>(preset);
   const [startsOn, setStartsOn] = useState('');
   const [endsOn, setEndsOn] = useState('');
   const [themeIds, setThemeIds] = useState<string[]>([]);

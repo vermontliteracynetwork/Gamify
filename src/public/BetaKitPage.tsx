@@ -1,8 +1,10 @@
 import { Bug, ChatCircleDots, Lightbulb, Printer, SmileySad, Warning } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
+import { Link } from 'react-router-dom';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
+import { MATERIALS, PHOTO_TIPS, THEME_IDEAS } from '../beta/themeIdeas';
 
 // The beta classroom kit (development plan Part 5A): a one-page teacher
 // lesson for the Tell Gamify button and a student poster, both printable on
@@ -32,7 +34,12 @@ export default function BetaKitPage() {
           <p className="font-display text-2xl">{t('kit.goodTitle')}</p>
           <ul className="grid gap-1 pl-6 m-0 list-disc font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`kit.good.${n}` as StringKey)}</li>)}</ul>
         </div>
+        <div className="rounded-input border-std border-border p-4 grid gap-2">
+          <p className="font-display text-2xl">{t('kit.facesTitle')}</p>
+          <ul className="grid gap-1 pl-6 m-0 list-disc font-semibold">{[1, 2, 3, 4].map((n) => <li key={n}>{t(`kit.faces.${n}` as StringKey)}</li>)}</ul>
+        </div>
         <p className="font-bold flex gap-2 items-start"><Warning weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('kit.privacy')}</p>
+        <p className="font-semibold">{t('kit.itNote')} <Link to="/it">{window.location.host}/it</Link></p>
       </section>
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-6 content-evenly justify-items-center text-center min-h-[10in]" aria-label={t('kit.posterTitle')}>
@@ -49,6 +56,27 @@ export default function BetaKitPage() {
         </div>
         <p className="font-display text-3xl">{t('kit.posterTell')}</p>
         <p className="font-display text-3xl flex items-center gap-3"><Warning weight="fill" size={40} aria-hidden="true" />{t('kit.posterNoNames')}</p>
+      </section>
+
+      <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-4 content-start" aria-labelledby="kit-themes">
+        <h2 id="kit-themes" className="title-bubble text-4xl"><Title text={t('kit.themesTitle')} /></h2>
+        <p className="font-bold text-lg">{t('kit.themesSub')}</p>
+        <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
+          {THEME_IDEAS.map((i) => (
+            <li key={i.title} className="rounded-input border-std border-border p-3 grid gap-1 content-start">
+              <p className="text-sm font-bold text-muted m-0">{i.game}{i.older ? ` · ${t('kit.older')}` : ''}</p>
+              <p className="font-display text-xl m-0">{i.title}</p>
+              <p className="font-semibold m-0">{i.idea}</p>
+              <p className="text-sm font-semibold m-0"><span className="font-bold">{t('kit.material')} </span>{i.material}</p>
+            </li>
+          ))}
+        </ul>
+        <h3 className="font-display text-2xl">{t('kit.materialsTitle')}</h3>
+        <ul className="grid gap-2 pl-6 m-0 list-disc font-semibold">
+          {MATERIALS.map((m) => <li key={m.name}><span className="font-bold">{m.name}: </span>{m.tip}</li>)}
+        </ul>
+        <h3 className="font-display text-2xl">{t('kit.photoTitle')}</h3>
+        <ol className="grid gap-1 pl-7 m-0 list-decimal font-semibold">{PHOTO_TIPS.map((p) => <li key={p}>{p}</li>)}</ol>
       </section>
     </main>
   );

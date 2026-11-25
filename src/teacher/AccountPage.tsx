@@ -6,8 +6,10 @@ import { setTeacher, useTeacher } from '../auth/session';
 import { TIERS } from '../config';
 import { data } from '../data';
 import { useAsync, useTier } from '../data/hooks';
+import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { t } from '../i18n';
-import { Button, PageHeader, Panel } from '../ui/kit';
+import { Button, PageHeader, Panel, Tabs } from '../ui/kit';
+import { BetaTab } from './BetaChecklist';
 import TeacherNav from '../ui/TeacherNav';
 import AccessCode, { PlanUntil } from './AccessCode';
 
@@ -19,6 +21,10 @@ export default function AccountPage() {
   const navigate = useNavigate();
   const [confirm, setConfirm] = useState('');
   const [upgraded, setUpgraded] = useState<string | null>(null);
+  // Beta testers get a Beta tester tab with their full checklist (owner, 2026-11-24).
+  const betaTester = useBetaTester();
+  const { value: beta } = useBetaSteps(betaTester);
+  const [tab, setTab] = useState<'account' | 'beta'>('account');
   // What the class already gets from Gamify, so the plan talk starts from
   // value (teacher rule: lead with value, never the price).
   const { value: used } = useAsync(async () => {
@@ -58,6 +64,8 @@ export default function AccountPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav />
       <PageHeader title={t('account.title')} subtitle={teacher?.name} />
+      {beta && <Tabs label={t('account.title')} value={tab} onChange={setTab} options={[{ id: 'account', label: t('account.tab.account') }, { id: 'beta', label: t('account.tab.beta') }]} />}
+      {beta && tab === 'beta' ? <BetaTab s={beta} /> : (
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] items-start">
         <div className="grid gap-4 min-w-0">
           <Panel className="grid gap-2">
@@ -97,6 +105,7 @@ export default function AccountPage() {
           </Panel>
         </div>
       </div>
+      )}
     </main>
   );
 }

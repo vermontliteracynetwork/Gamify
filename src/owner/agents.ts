@@ -57,6 +57,17 @@ export const TEAM: TeamAgent[] = [
     needsYou: [{ text: 'Read the Vermont reminders and tell me which steps are already done', link: '/owner?s=ceo' }],
   },
   {
+    id: 'beta-lead', name: 'Beta Lead', role: 'Runs the beta test: invites, onboarding, weekly upkeep, review and the launch decision', file: '.claude/agents/beta-lead.md', color: '#f28c5b',
+    status: 'working', updated: '2026-11-24', reportsTo: CEO_ID,
+    workingOn: ['Beta Test Plan written from your answers (dev plan doc tab): Pro free, every game tested, a question set and a theme from every tester, short forms', 'Built: /beta updated, tester checklist, Beta form after each game, three-face rating with a comment, Beta test page on /owner', 'In the CEO Agent chat: @beta_lead'],
+    needsYou: [{ text: 'Set the ready-to-launch bar and the open calls in the Beta Test Plan tab', link: 'https://claude.ai/artifact/P8kwMjDCq1E2yCa8VaMSpj' }],
+    // Beta plan decisions: dev plan doc, Beta Test Plan tab; docs/teacher-preferences.md (2026-11-24).
+  },
+  {
+    id: 'playtest-lead', name: 'Playtest Lead', role: 'Plays every game in a real browser as a K-3 student, a gamer and a teacher, at every size', file: '.claude/agents/playtest-lead.md', color: '#4f6bd8',
+    status: 'idle', updated: '2026-11-24', reportsTo: CEO_ID, workingOn: ['Ready: plays games through the Playwright browser tool before beta waves and after game changes'], needsYou: [],
+  },
+  {
     id: 'qa-tester', name: 'QA Tester', role: 'Tests every screen on iPad and laptop sizes', file: '.claude/agents/qa-tester.md', color: '#6aa9e9',
     status: 'idle', updated: '2026-11-23', reportsTo: CEO_ID, workingOn: [], needsYou: [],
   },

@@ -1,4 +1,4 @@
-// Small helpers for the Theme Builder downloads (the Canva PDF is in
+// Small helpers for the Theme Builder downloads (the digital design PDF is in
 // templatePdf.ts).
 export const fileSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 

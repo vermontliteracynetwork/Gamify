@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Bell, Crown, MagnifyingGlass, type Icon, PaintBrush, PersonArmsSpread, Coins, SpeakerHigh, CheckSquare, Sparkle, Bank } from '@phosphor-icons/react';
+import { Bell, Crown, MagnifyingGlass, type Icon, PaintBrush, PersonArmsSpread, Coins, SpeakerHigh, CheckSquare, Sparkle, Bank, RocketLaunch, GameController } from '@phosphor-icons/react';
 import { CEO_ID, TEAM, type AgentStatus, type TeamAgent } from './agents';
 
 // The Team view (teacher, 2026-11-23, from her reference picture): every
@@ -10,7 +10,7 @@ import { CEO_ID, TEAM, type AgentStatus, type TeamAgent } from './agents';
 // working on and what it needs from you.
 const ICONS: Record<string, Icon> = {
   ceo: Crown, 'design-chair': PaintBrush, claudia: Sparkle, 'qa-tester': CheckSquare,
-  'accessibility-specialist': PersonArmsSpread, 'economy-designer': Coins, 'sound-designer': SpeakerHigh, 'vermont-business-advisor': Bank,
+  'accessibility-specialist': PersonArmsSpread, 'economy-designer': Coins, 'sound-designer': SpeakerHigh, 'vermont-business-advisor': Bank, 'beta-lead': RocketLaunch, 'playtest-lead': GameController,
 };
 const STATUS: Record<AgentStatus, { label: string; color: string }> = {
   working: { label: 'Working', color: '#1f7a45' },

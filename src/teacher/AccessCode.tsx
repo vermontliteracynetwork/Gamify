@@ -7,6 +7,7 @@ import { supabase } from '../data/supabase';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Button, Panel } from '../ui/kit';
+import { markBetaTester } from '../beta/tester';
 
 const longDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -32,6 +33,7 @@ export default function AccessCode() {
     if (error) { setMsg(t('code.problem.setup')); return; }
     const r = res as { problem?: string; tier?: string; until?: string };
     if (r.problem) { setMsg(t(`code.problem.${r.problem}` as StringKey)); return; }
+    if (agree) void markBetaTester();
     setMsg(t('code.done', { plan: t(`pricing.${r.tier}` as StringKey), date: longDate(r.until!) }));
     window.dispatchEvent(new Event('gamify-tier'));
   }

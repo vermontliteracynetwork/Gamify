@@ -352,6 +352,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                     <div className="rounded-input border-std border-border p-3 grid gap-2 content-start">
                       <p className="font-display text-lg flex items-center gap-2"><Printer weight="fill" size={22} aria-hidden="true" />{t('builder.dl.print')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
+                      <p className="text-sm font-semibold text-muted">{t('builder.dl.materials')}</p>
                       <div className="flex flex-wrap gap-2">
                         <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}><Printer weight="bold" size={18} />{t('builder.dl.blank')}</Link>
                         {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}><BookOpen weight="bold" size={18} />{t('builder.dl.guide')}</Link>}
@@ -365,7 +366,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                           onClick={async () => {
                             setDl(t('builder.dl.making'));
                             const [{ fileSlug, saveFile }, { templatePieces }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
-                            saveFile(new Blob([templatePdf(templatePieces(game))], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-for-canva.pdf`);
+                            saveFile(new Blob([templatePdf(templatePieces(game))], { type: 'application/pdf' }), `${fileSlug(game.name)}-theme-digital-design.pdf`);
                             setDl(t('builder.dl.ready'));
                           }}><DownloadSimple weight="bold" size={20} />{t('builder.dl.pdf')}</Button>
                       </div>
