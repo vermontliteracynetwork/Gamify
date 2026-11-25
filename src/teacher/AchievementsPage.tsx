@@ -68,7 +68,7 @@ export default function AchievementsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
       <TeacherNav startOpen={false} />
       <PageHeader title={t('ach.title')} subtitle={t('ach.sub')}
-        actions={<Button onClick={bigScreen}><Broadcast weight="bold" size={18} />{t('ach.bigScreen')}</Button>} />
+        actions={<Button variant="main" onClick={bigScreen}><Broadcast weight="bold" size={18} />{t('ach.bigScreen')}</Button>} />
       {progress && earned === 0 && (
         <div className="rounded-card p-5 mb-4 flex flex-wrap items-center gap-4 border-[2.5px] border-dashed border-muted bg-surface/60">
           <span className="w-12 h-12 rounded-full grid place-items-center border-std border-border bg-blush shrink-0"><Sticker weight="bold" size={22} /></span>
@@ -86,7 +86,7 @@ export default function AchievementsPage() {
           {progress && <Meter part={earned / STARTER.length} width="min(100%, 12rem)" height={18} label={t('ach.count', { got: earned, total: STARTER.length })} />}
         </div>
         <Panel>
-          <ul className="list-none m-0 p-0 grid gap-x-4 gap-y-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(9.5rem, 1fr))' }}>
+          <ul className="list-none m-0 p-0 grid gap-x-4 gap-y-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr))' }}>
             {STARTER.map((s) => {
               const p = progress?.[s.id];
               const got = done(s.id);

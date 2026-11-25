@@ -7,23 +7,40 @@ import PublicFooter from './PublicFooter';
 // factual promise until the attorney-approved documents are posted
 // (development plan Stage 8; drafts in docs/legal). Credits holds the
 // attributions licenses ask for (Common Core notice, fonts, icons, libraries).
+// The approved /brand Legal template (2026-11-25): an "On this page" list
+// (a sticky card beside the text on laptops, a card on top on phones and
+// iPads) so a parent or district reviewer jumps straight to the part they
+// came for (NN/g: in-page links for long reference pages), an Updated line,
+// and plain headed sections in one reading column.
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function LegalPage({ title, intro, sections }: { title: string; intro: string; sections: { h: string; items: string[] }[] }) {
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
-        <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
-        <p className="text-lg font-bold">{intro}</p>
-        {sections.map((s) => (
-          <section key={s.h} className="bg-surface border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <h2 className="font-display text-3xl"><Title text={s.h} /></h2>
-            <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold">{k}</li>)}</ul>
-          </section>
-        ))}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-10 items-start">
+        <nav aria-label={t('legal.onPage')} className="bg-surface border-std border-border rounded-panel p-4 grid gap-1 lg:sticky lg:top-24 lg:row-start-1" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <h2 className="m-0 mb-1 font-heading font-bold text-lg">{t('legal.onPage')}</h2>
+          {sections.map((s) => <a key={s.h} href={`#${slug(s.h)}`} className="min-h-10 inline-flex items-center font-semibold text-text no-underline hover:underline">{s.h}</a>)}
+        </nav>
+        <article className="grid gap-6 max-w-[47.5rem] min-w-0 lg:row-start-1 lg:col-start-2">
+          <div className="grid gap-2">
+            <h1 className="title-bubble text-5xl"><Title text={title} /></h1>
+            <p className="m-0 font-semibold text-muted">{t('legal.updated', { date: LEGAL_UPDATED })}</p>
+          </div>
+          <p className="m-0 text-lg font-bold">{intro}</p>
+          {sections.map((s) => (
+            <section key={s.h} id={slug(s.h)} className="grid gap-2 scroll-mt-24">
+              <h2 className="m-0 font-heading font-bold text-2xl">{s.h}</h2>
+              <ul className="grid gap-2 list-disc pl-5 m-0">{s.items.map((k) => <li key={k} className="font-semibold leading-relaxed">{k}</li>)}</ul>
+            </section>
+          ))}
+        </article>
       </main>
       <PublicFooter />
     </>
   );
 }
+// The month these pages last changed; move it with every edit to their words.
+const LEGAL_UPDATED = 'November 2026';
 const keys = (prefix: string, n: number) => Array.from({ length: n }, (_, i) => t(`${prefix}.${i + 1}` as StringKey));
 
 export function PrivacyPage() {

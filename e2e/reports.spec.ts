@@ -37,25 +37,23 @@ test('reports group the question log, show the most common wrong answer, and dow
   expect(problems).toEqual([]);
 });
 
-test('Get started stays at the top of every teacher tab until done, except Account; it minimizes', async ({ page }) => {
+// The checklist lives on Teacher Home only (approved /brand teacher portal,
+// owner 2026-11-25); every other tab keeps the Get started pill, which opens it.
+test('Get started shows on Teacher Home; other tabs keep its pill, except Account', async ({ page }) => {
+  await page.goto('/teacher');
+  await expect(page.getByText(/Get started, \d of 4 done/).first()).toBeVisible();
   for (const path of ['/teacher/classes', '/teacher/sets', '/teacher/reports', '/teacher/themes']) {
     await page.goto(path);
-    await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Get started \d\/4$/ })).toBeVisible();
   }
-  await page.getByRole('button', { name: 'Minimize the get started steps' }).click();
-  await expect(page.getByRole('link', { name: /Add your students/ })).toHaveCount(0);
-  await page.goto('/teacher/sets');
-  await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Add your students/ })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Show the get started steps' }).click();
-  await expect(page.getByRole('link', { name: /Add your students/ })).toBeVisible();
-  await page.goto('/teacher/account');
-  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
-  await page.goto('/teacher/themes');
-  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
-  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
   await page.getByRole('button', { name: /^Get started \d\/4$/ }).click();
   await expect(page.getByRole('heading', { name: 'Get Started' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fold the get started steps into the menu' }).click();
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
+  await page.goto('/teacher/account');
+  await expect(page.getByRole('heading', { name: 'Get Started' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Get started \d\/4$/ })).toHaveCount(0);
 });
 
 test('classes list shows each class\'s week at a glance', async ({ page }) => {

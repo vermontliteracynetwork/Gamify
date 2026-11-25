@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { DownloadSimple, Eye, Printer, SortAscending, SortDescending } from '@phosphor-icons/react';
+import { CaretDown, DownloadSimple, Eye, MagnifyingGlass, Printer, SortAscending, SortDescending } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { data } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -7,7 +7,7 @@ import { LIBRARY } from '../data/library';
 import type { Student } from '../data/types';
 import { GAMES, getGame } from '../games/registry';
 import { t } from '../i18n';
-import { PageHeader, Panel, Tabs, fieldClasses } from '../ui/kit';
+import { PageHeader, Panel, Tabs } from '../ui/kit';
 import { listLiveEvents } from '../live/events';
 
 import TeacherNav from '../ui/TeacherNav';
@@ -27,6 +27,22 @@ import { ActivityView, ClassOverview, SmallGroupView } from './reportViews';
 // most common wrong answer, CSV) stays one tab deeper, in All answers.
 type SortKey = 'label' | 'asked' | 'pct' | 'firstTry' | 'avgSeconds';
 type View = 'overview' | 'activities' | 'groups' | 'table';
+const RANGES = ['all', 'week', 'weeks5', 'days90', 'custom'] as const;
+type Range = (typeof RANGES)[number];
+const pill = 'min-h-11 px-3.5 rounded-pill border-std border-border bg-surface font-bold text-sm text-text';
+
+// One filter pill: a native select wearing the pill, its current choice as its text.
+function PillSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: [string, string][] }) {
+  return (
+    <span className="relative inline-flex max-w-full">
+      <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)}
+        className={`${pill} appearance-none pr-9 max-w-[16rem] truncate cursor-pointer hover:bg-surface-hover ${value && value !== 'all' ? 'bg-butter' : ''}`}>
+        {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
+      <CaretDown weight="bold" size={14} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+    </span>
+  );
+}
 
 export default function ReportsPage() {
   const tier = useTier();
@@ -67,7 +83,15 @@ export default function ReportsPage() {
 
   const total = rows.grouped.reduce((a, r) => ({ asked: a.asked + r.asked, right: a.right + r.right, firstTry: a.firstTry + r.firstTry }), { asked: 0, right: 0, firstTry: 0 });
   const kept = useMemo(() => retention(rows.kept), [rows.kept]);
-  const field = fieldClasses('md');
+  // The date range is one pill (approved Reports mockup): All time, the last
+  // week, the last 5 weeks, the last 90 days, or two dates of her own.
+  const [range, setRange] = useState<Range>('all');
+  function pickRange(r: Range) {
+    setRange(r);
+    if (r === 'custom') return;
+    const days = { all: 0, week: 7, weeks5: 35, days90: 90 }[r];
+    setFilter({ ...filter, from: days ? new Date(Date.now() - days * 86400000).toISOString().slice(0, 10) : undefined, to: undefined });
+  }
   // The overview, Activity and Small group views read the same filtered log.
   const viewInput = { log: rows.kept, students: filter.studentId ? students.filter((st) => st.id === filter.studentId) : students, names, sets, classId: example ? EXAMPLE_CLASS.id : classId, example };
   const groupLabel = t(`reports.by.${by}`);
@@ -92,7 +116,7 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
-        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('main', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
+        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button><Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('main', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link></>} />
       <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-butter' : ''}`}>
         <Eye weight="fill" size={24} aria-hidden="true" />
         <p className="font-bold flex-1 min-w-60">{example ? t('reports.exampleOn') : t('reports.exampleOff')}</p>
@@ -101,23 +125,29 @@ export default function ReportsPage() {
       </Panel>
       <Tabs label={t('rx.views')} value={view} onChange={setView} panelIds className="mb-4"
         options={([['overview', t('rx.overview')], ['activities', t('rx.activities')], ['groups', t('rx.groups')], ['table', t('rx.table')]] as [View, string][]).map(([id, label]) => ({ id, label }))} />
-      <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 !p-3">
-        <select aria-label={t('reports.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setFilter({ ...filter, studentId: undefined }); }} className={field}>
-          <option value="">{t('reports.allClasses')}</option>
-          {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <select aria-label={t('reports.student')} value={filter.studentId ?? ''} onChange={(e) => setFilter({ ...filter, studentId: e.target.value || undefined })} className={field}>
-          <option value="">{t('reports.allStudents')}</option>
-          {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-        <select aria-label={t('reports.game')} value={filter.gameId ?? ''} onChange={(e) => setFilter({ ...filter, gameId: e.target.value || undefined })} className={field}>
-          <option value="">{t('reports.allGames')}</option>
-          {GAMES.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-        </select>
-        <input type="date" aria-label={t('reports.from')} value={filter.from ?? ''} onChange={(e) => setFilter({ ...filter, from: e.target.value || undefined })} className={field} />
-        <input type="date" aria-label={t('reports.to')} value={filter.to ?? ''} onChange={(e) => setFilter({ ...filter, to: e.target.value || undefined })} className={field} />
-        <input type="search" aria-label={t('reports.search')} placeholder={t('reports.search')} value={filter.search ?? ''} onChange={(e) => setFilter({ ...filter, search: e.target.value })} className={field} />
-      </Panel>
+      {/* The filters are pills in one row (approved /brand Reports, 7a,
+          2026-11-25): each reads as its current choice (Room 12, Last 5
+          weeks, All games), so the page says what it is showing at a glance
+          (NN/g: visible filter state). Native selects inside, for keyboards
+          and screen readers. */}
+      <div role="group" aria-label={t('reports.filters')} className="flex flex-wrap items-center gap-2 mb-4">
+        <PillSelect label={t('reports.class')} value={classId} onChange={(v) => { setClassId(v); setFilter({ ...filter, studentId: undefined }); }}
+          options={[['', t('reports.allClasses')], ...classes.map((c) => [c.id, c.name] as [string, string])]} />
+        <PillSelect label={t('reports.student')} value={filter.studentId ?? ''} onChange={(v) => setFilter({ ...filter, studentId: v || undefined })}
+          options={[['', t('reports.allStudents')], ...students.map((st) => [st.id, st.name] as [string, string])]} />
+        <PillSelect label={t('reports.range')} value={range} onChange={(v) => pickRange(v as Range)}
+          options={RANGES.map((r) => [r, t(`reports.range.${r}`)] as [string, string])} />
+        {range === 'custom' && <>
+          <input type="date" aria-label={t('reports.from')} value={filter.from ?? ''} onChange={(e) => setFilter({ ...filter, from: e.target.value || undefined })} className={pill} />
+          <input type="date" aria-label={t('reports.to')} value={filter.to ?? ''} onChange={(e) => setFilter({ ...filter, to: e.target.value || undefined })} className={pill} />
+        </>}
+        <PillSelect label={t('reports.game')} value={filter.gameId ?? ''} onChange={(v) => setFilter({ ...filter, gameId: v || undefined })}
+          options={[['', t('reports.allGames')], ...GAMES.map((g) => [g.id, g.name] as [string, string])]} />
+        <label className="relative flex-1 min-w-[12rem] max-w-[20rem]">
+          <MagnifyingGlass weight="bold" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <input type="search" aria-label={t('reports.search')} placeholder={t('reports.search')} value={filter.search ?? ''} onChange={(e) => setFilter({ ...filter, search: e.target.value })} className={`${pill} w-full !pl-9`} />
+        </label>
+      </div>
       <div role="tabpanel" id={`panel-${view}`} aria-labelledby={`tab-${view}`}>
       {view === 'overview' && <ClassOverview {...viewInput} onSeeQuestion={(prompt) => { setBy('question'); setFilter({ ...filter, search: prompt }); setView('table'); }} />}
       {view === 'activities' && <ActivityView {...viewInput} onGroup={(ids, setId) => { setPreset({ ids, setId, at: Date.now() }); setView('groups'); }} />}

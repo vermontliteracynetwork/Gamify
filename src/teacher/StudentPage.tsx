@@ -19,7 +19,6 @@ import Title from '../ui/Title';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { AvatarDialog, Dialog, StudentStrip, SupportsDialog, supportChips } from './ClassPage';
 import { Chip, firstTry, fmtDay, PortalCard, skillsOf, Takeaway, weekly, type SkillBand } from './portalParts';
-import ReportDoc from './reportDoc';
 
 // One student inside a class, in the approved teacher portal look
 // (/brand?tab=teacher, view 7c, 2026-11-25): growth over time compared with
@@ -56,7 +55,6 @@ export default function StudentPage() {
   const setName = (x?: string) => sets.find((s) => s.id === x)?.name ?? t('reports.noSet');
   const gameName = (g: string) => GAMES.find((x) => x.id === g)?.name ?? g;
   const own = assignments.filter((a) => !a.studentId || a.studentId === sid);
-  const names = { student: () => student.name, set: setName, game: gameName };
   const chips = supportChips(student);
   const sub = chips.length ? t('sp.subSupports', { cls: classroom.name, supports: chips.join(', ') }) : classroom.name;
 
@@ -166,7 +164,8 @@ export default function StudentPage() {
         </div>
       </div>
 
-      <ReportDoc log={mineLog} students={[student]} names={names} standardsOf={(x) => sets.find((s) => s.id === x)?.standards} className={classroom.name} student={student} />
+      {/* The full family report opens behind Family report (its print view),
+          not under the page (approved /brand "7c. One student", 2026-11-25). */}
       {dialog === 'pin' && <Dialog title={t('class.supportsFor', { name: student.name })} onClose={() => setDialog(null)}><PinGate onUnlock={() => { setUnlocked(true); setDialog('supports'); }} /></Dialog>}
       {dialog === 'supports' && <SupportsDialog student={student} onClose={() => { setDialog(null); reload(); }} />}
       {dialog === 'avatar' && <AvatarDialog student={student} others={students.filter((x) => x.id !== sid)} look={look} onClose={() => { setDialog(null); reload(); }} />}

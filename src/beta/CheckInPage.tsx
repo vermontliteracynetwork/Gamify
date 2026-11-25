@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
 import { Button, buttonClasses } from '../ui/kit';
+import { FullScreenButton, GearButton, SettingsPanel } from '../settings/SettingsPanel';
 import Title from '../ui/Title';
 import { saveCheckIn } from './surveys';
 
@@ -32,6 +33,7 @@ export default function CheckInPage() {
   const [tallies, setTallies] = useState<{ feel: Tally; level: Tally }>({ feel: [0, 0, 0], level: [0, 0, 0] });
   const [thanks, setThanks] = useState(false);
   const [done, setDone] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const count = tallies.feel.reduce((a, b) => a + b, 0);
   const question = QUESTIONS[q];
   const prompt = t(`checkin.${question.key}` as StringKey);
@@ -52,8 +54,20 @@ export default function CheckInPage() {
     setDone(true);
   }
 
+  // One bar, the logo and the class tools only (approved /brand Class
+  // check-in): students walk up to this screen, so nothing else to tap.
+  const bar = (
+    <div className="solo-bar no-print sticky top-0 z-50 h-14 flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border">
+      <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto mr-auto" draggable="false" />
+      <GearButton small onClick={() => setSettingsOpen(true)} />
+      <FullScreenButton small />
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </div>
+  );
+
   if (done) {
     return (
+      <>{bar}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-8 grid gap-4">
         <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={t('checkin.results')} /></h1>
         <p className="font-bold">{t('checkin.count', { count })}</p>
@@ -74,11 +88,13 @@ export default function CheckInPage() {
         })}
         <Link to={`/teacher/classes/${id}`} className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('checkin.back')}</Link>
       </main>
+      </>
     );
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-6 grid gap-5 min-h-[calc(100dvh-80px)] content-center">
+    <>{bar}
+    <main className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-6 grid gap-5 min-h-[calc(100dvh-3.5rem)] content-center">
       <div className="flex items-center gap-2 justify-between">
         <span className="font-bold text-sm bg-surface rounded-pill border-std border-border px-3 py-1">{t('checkin.count', { count })}</span>
         <Button onClick={() => void finish()}>{t('checkin.finish')}</Button>
@@ -104,9 +120,11 @@ export default function CheckInPage() {
                 </motion.button>
               ))}
             </div>
+            <p className="m-0 text-center font-semibold text-lg text-muted">{t('checkin.private')}</p>
           </motion.section>
         )}
       </AnimatePresence>
     </main>
+    </>
   );
 }

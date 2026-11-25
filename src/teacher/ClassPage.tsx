@@ -1,6 +1,6 @@
 import { makeGameCode } from '../data/gameCodes';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { DiceFive, Eye, EyeSlash, GearSix, Heart, Lightbulb, Minus, PencilSimple, Plus, Printer, Star, Trash, TrendDown, TrendUp, UploadSimple, UsersThree } from '@phosphor-icons/react';
 import { TIERS } from '../config';
@@ -169,7 +169,9 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
   const [picking, setPicking] = useState<Student | null>(null);
   // PINs stay hidden until the teacher asks (portal 3b): the page may be on the projector.
   const [showPins, setShowPins] = useState(false);
-  const addRef = useRef<HTMLTextAreaElement>(null);
+  // The paste box waits behind Add students once the class has names
+  // (approved /brand "3b", 2026-11-25); an empty class shows it right away.
+  const [adding, setAdding] = useState(false);
   const toAdd = names.split('\n').map((n) => n.trim()).filter(Boolean);
   const room = Number.isFinite(limit) ? limit - students.length : Infinity;
   const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name));
@@ -189,17 +191,18 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
       await data.saveStudent({ id: newId('stu'), classroomId, name: name.slice(0, 30), picturePassword: pw, avatar, pin });
     }
     setNames('');
+    setAdding(false);
     reload();
   }
   function openSettings(s: Student) { if (unlocked) setEditing(s); else setAsking(s); }
 
   return (
     <div className="grid gap-4 mb-4">
-      <div className="grid gap-4 items-start min-[1340px]:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-4 items-start xl:grid-cols-[minmax(0,1fr)_20rem]">
         <PortalCard labelledBy="roster-title" title={t('class.studentCount', { count: students.length })} tip={t('class.rosterTip')}
           right={<>
             {students.length > 0 && <Button size="sm" aria-pressed={showPins} onClick={() => setShowPins(!showPins)}>{showPins ? <EyeSlash weight="bold" size={16} /> : <Eye weight="bold" size={16} />}{showPins ? t('class.hidePins') : t('class.showPins')}</Button>}
-            <Button size="sm" onClick={() => { addRef.current?.focus(); addRef.current?.scrollIntoView({ block: 'center' }); }}><Plus weight="bold" size={16} />{t('class.addStudentsShort')}</Button>
+            <Button size="sm" onClick={() => { if (students.length) setAdding(true); else document.getElementById('student-names')?.focus(); }}><Plus weight="bold" size={16} />{t('class.addStudentsShort')}</Button>
           </>}>
           {students.length === 0 ? <p className="font-bold">{t('class.noStudents')}</p> : (
             <div className="overflow-x-auto -mx-1 px-1">
@@ -250,20 +253,26 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
               </table>
             </div>
           )}
-          {students.length > 0 && <p className="mt-2 text-[0.8125rem] font-bold text-muted">{t('class.sortedByName')}</p>}
+          {students.length > 0 && <p className="mt-2 text-[0.8125rem] font-bold text-muted">{t('class.sortedByName')}{Number.isFinite(limit) && <> · {t('class.studentLimit', { count: students.length, limit })}</>}</p>}
         </PortalCard>
         {groups}
       </div>
-      <Panel className="grid gap-2">
+      {(() => {
+        const box = (
+          <div className="grid gap-2">
         <label htmlFor="student-names" className="font-bold">{t('class.addStudents')}</label>
-        <textarea ref={addRef} id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
+        <textarea autoFocus={adding} id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
           className="px-3 py-2 rounded-input border-std border-border font-bold" />
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="main" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
           <p className="font-bold text-sm">{Number.isFinite(limit) ? t('class.studentLimit', { count: students.length, limit }) : t('class.studentCount', { count: students.length })}</p>
         </div>
         {toAdd.length > room && <div className="flex flex-wrap items-center gap-2"><p className="font-bold text-sm">{t('class.overLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
-      </Panel>
+          </div>
+        );
+        if (students.length === 0) return <Panel>{box}</Panel>;
+        return adding && <Dialog title={t('class.addStudentsShort')} onClose={() => setAdding(false)}>{box}</Dialog>;
+      })()}
       {asking && (
         <Dialog title={t('class.supportsFor', { name: asking.name })} onClose={() => setAsking(null)}>
           <PinGate onUnlock={() => { setUnlocked(true); setEditing(asking); setAsking(null); }} />

@@ -34,9 +34,9 @@ test('Pro choice board: the class code opens a board of the chosen games', async
   page.on('pageerror', (e) => problems.push(e.message));
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
   await page.goto('/teacher/classes');
-  await page.getByRole('button', { name: 'Make class' }).click();
+  await page.getByRole('button', { name: 'Add a class', exact: true }).click();
   await page.getByLabel('New class name').fill('Room 9');
-  await page.getByRole('button', { name: 'Make class' }).last().click();
+  await page.getByRole('button', { name: 'Add a class', exact: true }).last().click();
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Ava');
   await page.getByRole('button', { name: 'Add 1 student' }).click();
   await page.goto('/teacher/activity');

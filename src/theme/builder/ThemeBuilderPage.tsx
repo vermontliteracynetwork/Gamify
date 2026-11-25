@@ -58,8 +58,10 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
   return (
     // A game's builder fills the screen and never scrolls (teacher, 2026-10-31):
     // the preview and the tabs share the space left under the menu.
-    <main className={`max-w-7xl mx-auto px-4 sm:px-6 pt-4 ${game ? 'pb-4 h-[calc(100dvh-3.5rem)] flex flex-col' : 'pb-6'}`}>
-      <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav startOpen={!game} rail={!game} />}</div>
+    // The editor's own bar is the only bar (approved /brand Theme Builder,
+    // 2026-11-25), so the site bar steps aside (`solo-bar`).
+    <main className={`max-w-7xl mx-auto px-4 sm:px-6 ${game ? 'solo-bar w-full pt-3 pb-4 h-dvh flex flex-col' : 'pt-4 pb-6'}`}>
+      {!game && <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav />}</div>}
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
   );
@@ -146,7 +148,7 @@ function blankTheme(gameId: string, owner: boolean): GameTheme {
   return { ...classicTheme(gameId), id: newId('theme'), name: '', source: owner ? 'library' : 'custom', pieces: {} };
 }
 
-function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: string }) {
+function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base: string }) {
   const game = BUILDER_TARGETS.find((g) => g.id === gameId)!;
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -291,17 +293,20 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
             onSave={(img) => { setPiece(drawing.id, img); setDrawing(null); setStatus(''); }} />
         </Suspense>
       )}
-      {/* One bar across the top, under the teacher bar (teacher, 2026-11-19):
-          the theme's name, Save, and the design tabs. No back arrow: the
-          teacher bar's Theme Builder link goes back to all games. */}
+      {/* One bar across the top (approved /brand Theme Builder, 2026-11-25):
+          back to every game, the logo, the theme's name, Save and the design
+          tabs. It wraps on narrow screens and never scrolls sideways. */}
       <h1 className="sr-only">{t('builder.designsFor', { game: game.name })}</h1>
-      {!blocked && (
-        <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <Link to={base} aria-label={owner ? t('builder.allGames') : t('builder.backToBuilder')} title={owner ? t('builder.allGames') : t('builder.backToBuilder')}
+          className="w-11 h-11 shrink-0 rounded-full grid place-items-center border-std border-border bg-white hover:bg-surface-hover text-text"><ArrowLeft weight="bold" size={20} /></Link>
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto shrink-0 hidden sm:block" draggable="false" />
+        {!blocked && <>
           {mine.map((th) => (
             <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
               className={`min-h-9 tap px-3 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
           ))}
-          <label className="grid font-bold text-sm w-56 max-w-full"><span className="sr-only">{t('builder.name')}</span>
+          <label className="grid font-bold text-sm w-56 max-w-full min-w-0 flex-1 sm:flex-none"><span className="sr-only">{t('builder.name')}</span>
             <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
               className={fieldClasses('sm', 'w-full')} />
           </label>
@@ -309,10 +314,10 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
           {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
           {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
-          <Tabs size="sm" fill panelIds className="flex-1 min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
+          <Tabs size="sm" fill panelIds className="flex-1 basis-full lg:basis-auto min-w-0 lg:min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
             options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
-        </div>
-      )}
+        </>}
+      </div>
 
       <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
         {/* The preview, as big as the space allows, with arrows that turn
