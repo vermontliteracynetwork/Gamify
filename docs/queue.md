@@ -162,5 +162,5 @@ and "the new theme should cover all pages like the mockups".
 34. [x] **Classes, Class page, Student page** to Teacher portal mockups 3a, 3b, 7c.
 35. [x] **Create an Activity and the teacher's live views** to mockups 4, 5, 5b (the whole class on one question).
 36. [ ] **Question sets (with folders) and the set editor** to mockups 6a, 6b.
-37. [ ] **Reports and the print report** to mockups 7a, 7b, 7d, 7e.
+37. [x] **Reports and the print report** to mockups 7a, 7b, 7d, 7e.
 38. [x] **Achievements page** (mockup 8) and a sweep of every other page still in the old look.
