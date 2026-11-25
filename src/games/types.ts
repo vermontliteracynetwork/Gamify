@@ -19,6 +19,9 @@ export interface GameManifest {
   id: string;
   name: string;
   description: string;
+  // The one short line on the game's welcome (Universal views 1, approved
+  // 2026-11-25); the longer description stays for game cards and guides.
+  tagline?: string;
   modes: PlayMode[];
   questionKinds: Question['kind'][];
   // The pieces a theme for this game can design (themes are per game).

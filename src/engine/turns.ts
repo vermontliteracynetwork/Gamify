@@ -27,6 +27,8 @@ export interface TurnState {
 // never the only way to tell teams apart.
 // Palette brights only (Classic Art Director, 2026-11-25), each with its icon.
 export const TEAM_COLORS = ['#fabe37', '#22b04a', '#4ba3e8', '#ff9b28', '#6a45f0', '#f055a5', '#ccd537', '#1fb5a8', '#1d1a33', '#6a45f0'];
+// Each bright's pastel pair (New direction rule 1), for team cards in setup.
+export const TEAM_PASTELS = ['#fff1b8', '#c8f0dc', '#bfdff3', '#ffd9b3', '#ddd6ff', '#ffd3e6', '#e8f0b4', '#c9f1ee', '#f6f0e4', '#ddd6ff'];
 
 export function startTurns(players: TurnPlayer[]): TurnState {
   return { players, turn: 0, round: 1, history: [] };

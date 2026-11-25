@@ -87,7 +87,8 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   await page.getByLabel('Standard code').fill('1.OA');
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toBeVisible();
   await page.getByLabel('Standard code').fill('');
-  await page.getByLabel('Subject').selectOption('Science');
+  // Subjects are toggle chips in the game picker (Universal views 4, 2026-11-25).
+  await page.getByRole('group', { name: 'Subject' }).getByRole('button', { name: 'Science', exact: true }).click();
   // Ready-made sets live on the Public sets tab (teacher, 2026-11-06).
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await expect(page.getByRole('radio', { name: /Animals and habitats/ })).toBeVisible();

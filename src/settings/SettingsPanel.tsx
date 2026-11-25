@@ -102,30 +102,37 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
   const set = <K extends keyof PlayerSettings>(k: K, v: PlayerSettings[K]) => update({ ...s, [k]: v });
 
   return (
+    // The approved Settings panel (Universal views 14, 2026-11-25): a centered
+    // box over the dimmed game, the title in Grow Year, a vertical tab list
+    // on the left (laptop and iPad), wrapping two-across chips on a phone so
+    // every tab is in reach; the picked tab is Mint with an ink ring.
     <dialog
       ref={ref}
       onClose={onClose}
       aria-label={t('settings.title')}
-      className="m-auto w-[min(640px,calc(100vw-32px))] max-h-[calc(100dvh-32px)] rounded-panel border-bold border-border bg-surface p-0 backdrop:bg-black/40"
+      className="settings-panel m-auto w-[min(55rem,calc(100vw-2rem))] h-[min(40rem,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] rounded-[1.75rem] border-heavy border-border bg-surface p-0 backdrop:bg-[rgba(29,26,51,0.5)] overflow-hidden"
+      style={{ boxShadow: '0 6px 0 var(--ink)' }}
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 bg-surface border-b-[2px] border-border-soft">
-        <h2 className="font-display text-2xl font-bold flex items-center gap-2"><GearSix weight="bold" size={26} /><Title text={t('settings.title')} /></h2>
-        <button type="button" onClick={onClose} aria-label={t('settings.close')} className="w-12 h-12 rounded-full border-std border-border flex items-center justify-center bg-surface-2">
+      <div className="h-full flex flex-col">
+      <div className="relative shrink-0 flex items-center justify-center px-16 pt-4 pb-3 sm:pt-5">
+        <h2 className="title-bubble text-[clamp(2rem,6vw,3.25rem)] leading-none text-center"><Title text={t('settings.title')} /></h2>
+        <button type="button" onClick={onClose} aria-label={t('settings.close')} className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border-std border-border flex items-center justify-center bg-surface active:scale-95" style={{ boxShadow: '0 3px 0 var(--ink)' }}>
           <X weight="bold" size={22} />
         </button>
       </div>
 
-      <div role="tablist" aria-label={t('settings.title')} className="flex gap-1.5 overflow-x-auto px-4 py-2 border-b-[2px] border-border-soft bg-surface">
+      <div className="flex-1 min-h-0 grid grid-rows-[auto_minmax(0,1fr)] sm:grid-rows-1 sm:grid-cols-[13rem_minmax(0,1fr)] gap-3 sm:gap-5 px-4 sm:px-6 pb-4 sm:pb-6">
+      <div role="tablist" aria-label={t('settings.title')} className="grid grid-cols-2 sm:grid-cols-1 gap-1.5 sm:gap-2 content-start">
         {TABS.map(({ id, icon: Icon, label }) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
-            className={`shrink-0 min-h-14 min-w-16 px-2.5 rounded-input border-std flex flex-col items-center justify-center gap-0.5 font-bold text-xs
-              ${tab === id ? 'bg-butter border-border' : 'bg-surface border-transparent hover:bg-surface-2'}`}>
-            <Icon weight="bold" size={22} aria-hidden="true" />{t(label)}
+            className={`min-h-11 sm:min-h-12 px-3 rounded-input border-std flex items-center gap-2 font-bold text-sm sm:text-base text-left
+              ${tab === id ? 'bg-mint border-border shadow-[inset_0_0_0_1px_var(--ink)]' : 'bg-surface border-border sm:border-transparent hover:bg-surface-2'}`}>
+            <Icon weight="bold" size={20} aria-hidden="true" className="shrink-0" />{t(label)}
           </button>
         ))}
       </div>
 
-      <div className="px-5 py-4 grid gap-4" role="tabpanel">
+      <div className="min-h-0 overflow-y-auto px-1 py-1 grid gap-4 content-start" role="tabpanel">
         {tab === 'quick' && (
           <div className="grid grid-cols-2 gap-2">
             {(Object.keys(PRESETS) as PresetId[]).map((id) => (
@@ -214,6 +221,8 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
         )}
 
         {tab === 'tell' && <TellGamify context={context} />}
+      </div>
+      </div>
       </div>
     </dialog>
   );

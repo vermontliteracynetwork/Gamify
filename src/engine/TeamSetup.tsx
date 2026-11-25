@@ -1,7 +1,11 @@
 import { FitInput } from '../ui/FitText';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'motion/react';
+import { FooterSlot } from '../games/SetupWizard';
+import { useSettings } from '../settings/SettingsContext';
 import { useLocation } from 'react-router-dom';
-import { DiceFive, Minus, Play, Plus, UsersThree, X } from '@phosphor-icons/react';
+import { DiceFive, Play, Plus, UsersThree, X } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { data } from '../data';
@@ -11,13 +15,16 @@ import { nextCpuName } from './cpuNames';
 import { rollName } from './nameDice';
 import { balancedTeams, randomTeams } from './teamMaker';
 import { TEAM_ICONS, TeamBadge } from './TeamBadge';
-import type { CpuLevel, TurnPlayer } from './turns';
+import { TEAM_PASTELS, type CpuLevel, type TurnPlayer } from './turns';
 import Title from '../ui/Title';
 import { useSignedIn } from '../auth/session';
 import { useSession } from '../student/session';
 
 // `icon` is the team picture (and color) picked from the theme's team icons.
-interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number; character?: number }
+interface Slot { name: string; kind: 'team' | 'student' | 'cpu'; icon?: number; character?: number; key?: number }
+// A steady key per card, so a card that leaves or joins animates on its own.
+let slotKey = 0;
+const keyed = (s: Slot): Slot => ({ ...s, key: ++slotKey });
 export interface Character { id: string; name: string; image: string }
 
 // Team or player setup for Share and Versus. Names come from the silly name
@@ -45,11 +52,13 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const alone = mode === 'versus' && !!session && !teacher;
   // The computer's fun name for this game (teacher, 2026-11-24), a new one each game.
   const [cpuName] = useState(nextCpuName);
+  const { settings } = useSettings();
+  const still = settings.motion === 'still';
   const [slots, setSlots] = useState<Slot[]>(() => {
-    if (alone) return [{ name: session.name, kind: human }, { name: cpuName, kind: 'cpu' }];
-    if (vsComputer) return [{ name: rollName(), kind: human }, { name: cpuName, kind: 'cpu' }];
+    if (alone) return [{ name: session.name, kind: human }, { name: cpuName, kind: 'cpu' as const }].map(keyed);
+    if (vsComputer) return [{ name: rollName(), kind: human }, { name: cpuName, kind: 'cpu' as const }].map(keyed);
     const first = rollName();
-    return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2));
+    return [{ name: first, kind: human }, { name: rollName(Math.random, [first]), kind: human }].slice(0, how === 'class' && min <= 1 ? 1 : Math.max(min, 2)).map(keyed);
   });
   const [opponent, setOpponent] = useState<'cpu' | 'teacher'>('cpu');
   const [members, setMembers] = useState<string[][]>([]);
@@ -78,7 +87,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   const names = () => slots.map((s) => s.name);
   const resize = (n: number) => setSlots((cur) => {
     const next = cur.slice(0, n);
-    while (next.length < n) next.push({ name: rollName(Math.random, next.map((s) => s.name)), kind: human });
+    while (next.length < n) next.push(keyed({ name: rollName(Math.random, next.map((s) => s.name)), kind: human }));
     return next;
   });
   const solo = mode === 'share' && slots.length === 1;
@@ -94,36 +103,57 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
   function start() { onStart?.(build(), level); }
   useEffect(() => { onChange?.(build(), level); }, [slots, opponent, level, members]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Teams (Universal views 6, approved 2026-11-25): no count selector. An
+  // Add team button sits between Back and Next (the setup footer), an x on
+  // each card takes one away, and the cards sit centered, wrapping onto
+  // centered rows; a new card pops in while the others slide over.
+  const counted = min !== max;
+  const canRemove = counted && slots.length > min;
+  const removeAt = (i: number) => setSlots((cur) => (cur.length > min ? cur.filter((_x, j) => j !== i) : cur));
+  const footer = useContext(FooterSlot);
+  const addBtn = counted && (
+    <button type="button" onClick={() => resize(slots.length + 1)} disabled={slots.length >= max} data-testid="add-team"
+      className="max-sm:order-3 min-h-12 px-6 rounded-pill border-[3px] border-border bg-white font-bold text-lg inline-flex items-center gap-2 shadow-[0_4px_0_var(--ink)] disabled:opacity-40 disabled:shadow-none active:scale-95 motion-safe:transition-transform">
+      <Plus weight="bold" size={20} />{mode === 'share' ? t('teams.add') : t('teams.addPlayer')}
+    </button>
+  );
+  const big = mode === 'versus';
+
   return (
-    <section className={embedded ? 'grid gap-5' : 'bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
+    <section className={embedded ? 'grid gap-4 content-center' : 'bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 max-w-2xl mx-auto'} style={embedded ? undefined : { boxShadow: 'var(--shadow-sticker-lg)' }}>
       {!embedded && <h1 className="title-bubble text-3xl sm:text-4xl"><Title text={mode === 'share' ? t('teams.title') : t('teams.players')} /></h1>}
 
-      {/* A game with a fixed number of players (Four in a Row: always 2) shows no count (teacher, 2026-10-31). */}
-      {min !== max && <div className="flex items-center gap-2 text-base">
-        <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>
-        <button type="button" aria-label={t('teams.less')} disabled={slots.length <= min} onClick={() => resize(slots.length - 1)}
-          className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={18} /></button>
-        <span className="font-display text-2xl font-bold w-8 text-center tabular-nums" aria-live="polite">{slots.length}</span>
-        <button type="button" aria-label={t('teams.more')} disabled={slots.length >= max} onClick={() => resize(slots.length + 1)}
-          className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={18} /></button>
-        {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
-      </div>}
+      {counted && mode === 'share' && !solo && <div className="flex justify-center empty:hidden"><ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} /></div>}
 
       {/* Characters (Board Game animals) show as player cards: the animal big,
           no circle around it, the name under it (teacher, 2026-11-01). */}
       {/* Versus players are big cards too (teacher, 2026-11-06). */}
-      <ol className={`grid items-start list-none p-0 m-0 ${characters?.length ? 'gap-2 grid-cols-2 lg:grid-cols-3' : mode === 'versus' ? 'gap-5 grid-cols-2 w-full max-w-3xl mx-auto' : 'gap-3 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4'}`}>
+      <ol className={`flex flex-wrap justify-center content-center list-none p-0 m-0 ${big ? 'gap-6' : 'gap-x-[clamp(0.75rem,2vw,1.25rem)] gap-y-5'}`}>
+        <AnimatePresence initial={false}>
         {slots.map((s, i) => (
-          <li key={i} className={true
-            ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-bold border-border bg-surface p-4 ${mode === 'versus' ? 'min-h-[min(22rem,48vh)] content-center gap-3 p-6 bg-gradient-to-b from-[#eef0ff] to-surface' : 'bg-gradient-to-b from-[#f3f4ff] to-surface'}`
-            : 'flex flex-wrap items-center gap-2 rounded-input border-std border-border-soft p-2'}
-            style={true ? { boxShadow: '0 5px 0 var(--ink), 0 14px 24px rgba(36,28,61,0.12)' } : undefined}>
-            <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
-              onClick={() => setPicking(picking === i ? null : i)} className={`${true ? 'basis-full flex justify-center pt-1 pb-3' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:hover:-rotate-3 motion-safe:transition-transform`}>
-              {characters?.length
-                ? <img src={characters[charOf(i)].image} alt="" className="w-[min(6.5rem,14vh)] aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]" />
-                : <span className="rounded-full inline-flex motion-safe:animate-[float_3.2s_ease-in-out_infinite]" style={{ boxShadow: '0 10px 18px rgba(36,28,61,0.25)' }}><TeamBadge colorIndex={iconOf(i)} size={mode === 'versus' ? 172 : 104} /></span>}
-            </button>
+          <motion.li key={s.key ?? i} layout={!still}
+            initial={still ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={still ? { opacity: 0, transition: { duration: 0 } } : { scale: 0.6, opacity: 0, transition: { duration: 0.18 } }}
+            transition={still ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 17, layout: { type: 'spring', stiffness: 320, damping: 30 } }}
+            className={`relative rounded-[1.25rem] border-[3px] border-border bg-surface grid ${big ? 'w-[min(20rem,42vw)]' : 'w-[clamp(8.5rem,calc(50%-0.5rem),15.5rem)]'}`}
+            style={{ boxShadow: '0 4px 0 var(--ink)' }}>
+            {/* The team's pastel band with its picture (tap it to pick another). */}
+            <div className="relative grid place-items-center rounded-t-[1.05rem] border-b-[3px] border-border" style={{ background: TEAM_PASTELS[iconOf(i) % TEAM_PASTELS.length] }}>
+              <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
+                onClick={() => setPicking(picking === i ? null : i)} className="py-2 motion-safe:hover:scale-110 motion-safe:hover:-rotate-3 motion-safe:transition-transform">
+                {characters?.length
+                  ? <img src={characters[charOf(i)].image} alt="" className={`${big ? 'w-[min(8rem,18vh)]' : 'w-[min(5rem,11vh)]'} aspect-square object-contain drop-shadow-[0_4px_0_rgba(0,0,0,0.18)]`} />
+                  : <span className={big ? "" : "inline-flex max-sm:scale-[0.82]"}><TeamBadge colorIndex={iconOf(i)} size={big ? 120 : 58} /></span>}
+              </button>
+              {s.kind !== 'cpu' && (
+                <button type="button" aria-label={t('teams.roll', { name: s.name })}
+                  onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: rollName(Math.random, names()) } : x)))}
+                  className="absolute left-1.5 bottom-1.5 w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-90 motion-safe:transition-transform"><DiceFive weight="fill" size={22} /></button>
+              )}
+            </div>
+            {canRemove && (
+              <button type="button" aria-label={t('teams.remove', { name: s.name })} onClick={() => removeAt(i)}
+                className="absolute -top-3 -right-3 w-11 h-11 rounded-full border-bold border-border bg-white flex items-center justify-center active:scale-90" style={{ boxShadow: '0 2px 0 var(--ink)' }}><X weight="bold" size={16} /></button>
+            )}
             {picking === i && characters?.length ? (
               // A pop-up box of big animal tiles, so the setup page never scrolls (teacher, 2026-10-31).
               <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4" onClick={() => setPicking(null)}>
@@ -176,31 +206,32 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
               </div>
               </div>
             )}
+            <div className={`grid gap-2 ${big ? 'p-4' : 'p-2.5 sm:p-3'}`}>
             {s.kind === 'cpu' ? (
               // The computer's level sits where its name would be (teacher, 2026-11-06).
               <select value={level} onChange={(e) => setLevel(e.target.value as CpuLevel)} aria-label={t('teams.level')}
-                className="flex-1 min-w-0 min-h-11 px-2 rounded-input border-std border-border bg-surface font-bold">
+                className="w-full min-w-0 min-h-11 px-2 rounded-input border-std border-border bg-surface font-bold">
                 {(['easy', 'medium', 'hard'] as const).map((lv) => <option key={lv} value={lv}>{t(`opt.${lv}`)}</option>)}
               </select>
             ) : (
+              // The whole card width for the name; FitInput shrinks long names so none is cut off.
               <FitInput id={`slot-${i}`} value={s.name} aria-label={t('teams.name', { n: i + 1 })} maxLength={24}
                 onChange={(e) => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
-                className="flex-1 min-w-0 min-h-12 px-3 rounded-input border-std border-border bg-surface font-bold text-lg" />
-            )}
-            {s.kind !== 'cpu' && (
-              <button type="button" aria-label={t('teams.roll', { name: s.name })}
-                onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: rollName(Math.random, names()) } : x)))}
-                className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center"><DiceFive weight="fill" size={22} /></button>
+                className="w-full min-w-0 min-h-11 px-2 rounded-input border-[2.5px] border-border bg-surface font-bold text-lg text-center" />
             )}
             {mode === 'versus' && i > 0 && (
               <button type="button" onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, kind: x.kind === 'cpu' ? 'student' : 'cpu' } : x)))}
-                className="min-h-11 px-3 rounded-pill border-std border-border bg-white font-bold text-sm">
+                className="justify-self-center min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold text-sm">
                 {s.kind === 'cpu' ? t('teams.cpu') : t('teams.human')}
               </button>
             )}
-          </li>
+            {members[i]?.length > 0 && <div className="flex flex-wrap justify-center gap-1.5 text-sm font-bold">{members[i].map((n) => <span key={n} className="px-2.5 py-0.5 rounded-pill border-std border-border" style={{ background: TEAM_PASTELS[iconOf(i) % TEAM_PASTELS.length] }}>{n}</span>)}</div>}
+            </div>
+          </motion.li>
         ))}
+        </AnimatePresence>
       </ol>
+      {addBtn && (footer && embedded ? createPortal(addBtn, footer) : <div className="flex justify-center">{addBtn}</div>)}
 
 
       {solo && (

@@ -50,7 +50,8 @@ export default function NavBar() {
   );
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border`}>
-      {studentPage && !any
+      {/* Student pages show the logo only, even with a teacher signed in on this device (rule 10, 2026-11-25). */}
+      {studentPage
         ? <span className="flex items-center shrink-0 mr-auto"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" /></span>
         : <Link to={any ? '/play' : '/'} className="flex items-center min-h-11 shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" />
@@ -67,7 +68,7 @@ export default function NavBar() {
       {!any && !studentPage && <MobileMenu path={path} onReport={() => setTellOpen(true)} />}
       {/* Report, for everyone on every page (owner, 2026-11-24); student pages show the logo only (rule 10). */}
       {!logoOnly && reportBtn(teacher ? 'hidden md:flex' : !any ? 'hidden lg:flex' : '')}
-      {any && teacher && (
+      {any && teacher && !studentPage && (
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
               and help (teacher, 2026-10-31). Students never see these. */}

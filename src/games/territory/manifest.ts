@@ -7,6 +7,7 @@ export const territoryManifest: GameManifest = {
   id: 'territory',
   name: 'Territory',
   description: 'Mice sneak out of the little wooden door into the room. Every right answer sends a cat to catch one. Catch them together, or play Cats against Mice for the room.',
+  tagline: 'Mice sneak into the living room. Every right answer sends a cat to catch one.',
   modes: ['live'],
   questionKinds: ['mc'],
   themePieces: [

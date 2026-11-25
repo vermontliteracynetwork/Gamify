@@ -37,7 +37,7 @@ pastel; white text only on Grape and Ink, ink text everywhere else (WCAG AA).
 | `danger` / `error` | #f055a5 / #9b2c3a | delete hover / error text |
 | `ink-night` | #1d1a33 | dim overlays (now Ink) |
 | `gold` | #fabe37 | stars earned (now Lemon drop) |
-| `quiz-yellow/green/blue/orange` | Butter, Mint, Blue crystal, Peach | answer tiles A to D |
+| `quiz-yellow/green/blue/orange` | Butter, Mint, Blue crystal, Peach | older answer tiles (the question card now uses Lavender, Blue crystal, Blush, Butter; `src/engine/questionCard.ts`) |
 
 Ways to play (rule 12): Share is Lemon and Butter (television), Live is Sky and
 Blue crystal (broadcast), Solo is Kelly and Mint (one person); `MODE_COLORS` is
@@ -134,7 +134,7 @@ Game screens keep their own themed overlays (power-up pop, results box, question
 
 ### Tabs
 The one tab bar: `size` sm (36px, 44px on touch screens: question set tabs, Theme Builder) or md (44px page tabs); `fill` stretches the tabs (labels may wrap, never cut); `panelIds` links the selected tab to its panel.
-Special-purpose tab bars that stay hand-built: the Help Center's vertical topic list, the Features page's ways-to-play badges and the Settings panel's scrolling strip.
+Special-purpose tab bars that stay hand-built: the Help Center's vertical topic list, the Features page's ways-to-play badges and the Settings panel's vertical tab list (two-across chips on phones).
 
 ### Choices (`src/ui/fields.tsx`)
 - `ChoiceRow`: the one choice control. A sliding yellow pick for words, or white cards when options have `art` (a small picture: board sizes, grid sizes). Each option can have `tip` hover text; on touch screens (no hover) the tip shows on the card, or under the row for the picked word.
@@ -147,7 +147,9 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 - `TopStrip`: the one strip across the top of a solo game (Bubble Pop, Match Three): player picture, score in Grow Year with no box (a steady live region, so screen readers hear each score), a dash for every turn of every round (used filled, this turn yellow with a ring, turns to come hollow), and an optional slot on the right.
 - `SoloStrip` (`SoloLayout`, `SoloMeter`, `SoloScore`): THE solo board-game layout (teacher, 2026-11-24, Match Three first; Bubble Pop and every future solo board game follow it). The paper meter pill ("2 moves left", the meter, the game's goal) over the board; the score as a big Grow Year number at the top right with the held power-up cards under it, centered on it (always the top layer). Wide screens: score column beside the board; tall screens: meter, score row at the right, then the board. The board is the square left over (`--solo-board`), so nothing scrolls.
 - `ScoreBoard` and `RoundMeter`: the one score board for team games (no title, whole names) and the round box under it.
-- `GameWelcome`, `SetupWizard`, `WayToPlay`, `SetPicker`, `PowerUpCards`: the same start menus in every game.
+- `GameWelcome`, `SetupWizard`, `WayToPlay`, `SetPicker`, `PowerUpCards`: the same start menus in every game (Universal views, approved /brand 2026-11-25). The welcome shows the game's short `tagline`; on iPad portrait and phones the cover gives up height so nothing scrolls. Way cards: the pastel band with the icon on its round bright badge and the name in Grow Year. Back and Next sit side by side in the middle under the step; a step's own button (Teams: Add team) goes between them through `FooterSlot`. Set cards: a subject band, the title, the first question, grades and count. Power-up cards: white with a Kelly check when on, dashed cream with an x when off, sized to the room so the page never scrolls. Teams: no count stepper; Add team in the footer, an x on each card.
+- The question card (`QuestionScreen`, `ShareQuestion`; sizes in `.q-card`, `src/index.css`): one white card over the game, the mockup's 1280 x 800, 820 x 1180 and 390 x 844 drawings scaled to the screen; a fixed question block, A to D tiles of one size with filled letter badges (Grape with white text, Sky, Pink, Lemon).
+- `CodeBoxes` (`src/ui/CodeBoxes.tsx`): PINs (numbers) and, with `letters size="xl"`, the join page's five letter boxes (the next box Butter with a Lemon ring and a blinking caret).
 
 ## Do and don't
 | Do | Don't |

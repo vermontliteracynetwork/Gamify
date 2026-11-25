@@ -5,6 +5,7 @@ export const bowlingManifest: GameManifest = {
   id: 'bowling',
   name: 'Bowling',
   description: 'Answer right, aim, put some spin on it and send the ball crashing into the pins. Every roll is different!',
+  tagline: 'Answer right to roll. Knock down the most pins.',
   modes: ['share', 'versus', 'solo'],
   questionKinds: ['mc'],
   themePieces: [
