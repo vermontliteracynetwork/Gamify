@@ -99,3 +99,36 @@ export function weekUsage(log: QuestionLogEntry[], classroomId?: string, now = D
   const topGame = [...games.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
   return { answered: week.length, rightPct: percent(week.filter((e) => e.outcome === 'right').length, week.length), students: new Set(week.map((e) => e.studentId).filter(Boolean)).size, topGame };
 }
+
+// How a question set played (approved teacher portal, 6a and 6b, 2026-11-25):
+// of the answered questions (not left early), how many were right on the
+// first try, for the whole set and for each question (keyed by its prompt,
+// the way the log stores it), plus each question's most picked wrong answer.
+// Nothing played gives no entry, so the page hides the number instead of
+// showing a made-up one.
+export interface PlayStats { answered: number; firstTry: number; pct: number; topWrong?: string; topWrongCount: number }
+
+function playStats(rows: QuestionLogEntry[]): PlayStats {
+  const answered = rows.filter((r) => r.outcome !== 'left');
+  const firstTry = answered.filter((r) => r.outcome === 'right' && r.tries.length <= 1).length;
+  const wrongs = new Map<string, number>();
+  for (const r of answered) for (const w of new Set(r.tries.filter((x) => x !== r.answer))) wrongs.set(w, (wrongs.get(w) ?? 0) + 1);
+  const [topWrong, topWrongCount = 0] = [...wrongs].sort((a, b) => b[1] - a[1])[0] ?? [];
+  return { answered: answered.length, firstTry, pct: percent(firstTry, answered.length), topWrong, topWrongCount };
+}
+
+export function setPlayStats(log: QuestionLogEntry[]): Map<string, PlayStats> {
+  const bySet = new Map<string, QuestionLogEntry[]>();
+  for (const e of log) if (e.setId) bySet.set(e.setId, [...(bySet.get(e.setId) ?? []), e]);
+  const out = new Map<string, PlayStats>();
+  for (const [id, rows] of bySet) { const s = playStats(rows); if (s.answered) out.set(id, s); }
+  return out;
+}
+
+export function questionPlayStats(log: QuestionLogEntry[], setId: string): Map<string, PlayStats> {
+  const byPrompt = new Map<string, QuestionLogEntry[]>();
+  for (const e of log) if (e.setId === setId) byPrompt.set(e.prompt, [...(byPrompt.get(e.prompt) ?? []), e]);
+  const out = new Map<string, PlayStats>();
+  for (const [prompt, rows] of byPrompt) { const s = playStats(rows); if (s.answered) out.set(prompt, s); }
+  return out;
+}

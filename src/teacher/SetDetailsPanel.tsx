@@ -16,7 +16,10 @@ import { Button, Panel, fieldClasses } from '../ui/kit';
 
 // The details every question set needs (all required): subject, grades,
 // tags and Common Core standards, plus an optional cover picture.
-export default function SetDetailsPanel({ set, onChange, readOnly }: { set: QuestionSet; onChange: (s: QuestionSet) => void; readOnly: boolean }) {
+// The column beside the question editor (approved teacher portal 6b,
+// 2026-11-25): one job per column, so the details sit beside the questions
+// instead of in a panel above them.
+export default function SetDetailsPanel({ set, onChange, readOnly, footer }: { set: QuestionSet; onChange: (s: QuestionSet) => void; readOnly: boolean; footer?: React.ReactNode }) {
   const missing = missingDetails(set);
   const [tag, setTag] = useState('');
   const field = fieldClasses('md');
@@ -35,52 +38,36 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
   }
 
   return (
-    <Panel className="grid gap-4 mb-5">
-      <div className="flex flex-wrap items-start gap-4">
-        <div className="w-48 grid gap-2">
-          <SetCover set={set} className="aspect-[16/9] rounded-input border-std border-border" />
-          {!readOnly && (
-            <div className="flex gap-2">
-              <label className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
-                <UploadSimple weight="bold" size={16} />{t('details.cover')}
-                <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onChange({ ...set, cover: await imageFileToDataUrl(f, 800) }); }} />
-              </label>
-              {set.cover && <Button variant="ghost" onClick={() => onChange({ ...set, cover: undefined })}>{t('details.removeCover')}</Button>}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-64 grid gap-3">
-          <h2 className="font-display text-2xl font-bold">{t('details.title')}</h2>
-          <p className="text-sm font-bold text-muted">{missing.length ? t('details.note') : t('details.done')}</p>
-          <div className="flex flex-wrap gap-3">
-            <label className="grid gap-1 font-bold">
-              <span>{t('filter.subject')}{req('subject')}</span>
-              <select disabled={readOnly} value={set.subject ?? ''} onChange={(e) => onChange({ ...set, subject: (e.target.value || undefined) as Subject | undefined })} className={field}>
-                <option value="">{t('details.pick')}</option>
-                {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </label>
-            <fieldset className="grid gap-1 font-bold">
-              <legend>{t('details.grades')}{req('grades')}</legend>
-              <div className="flex items-center gap-2">
-                {[0, 1].map((k) => (
-                  <select key={k} disabled={readOnly} aria-label={k === 0 ? t('details.from') : t('details.to')} value={grades[k] ?? ''} className={field}
-                    onChange={(e) => {
-                      const v = e.target.value as Grade;
-                      const from = (k === 0 ? v : grades[0] ?? v) as Grade, to = (k === 1 ? v : grades[1] ?? v) as Grade;
-                      onChange({ ...set, grades: gradeIndex(from) <= gradeIndex(to) ? [from, to] : [to, from] });
-                    }}>
-                    <option value="">{k === 0 ? t('details.from') : t('details.to')}</option>
-                    {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-        </div>
+    <Panel className="grid grid-cols-1 gap-4 content-start min-w-0">
+      <div className="grid gap-1">
+        <h2 className="font-heading text-lg font-bold">{t('details.title')}</h2>
+        <p className="text-sm font-bold text-muted">{missing.length ? t('details.note') : t('details.done')}</p>
       </div>
+      <label className="grid gap-1 font-bold">
+        <span>{t('filter.subject')}{req('subject')}</span>
+        <select disabled={readOnly} value={set.subject ?? ''} onChange={(e) => onChange({ ...set, subject: (e.target.value || undefined) as Subject | undefined })} className={`${field} w-full`}>
+          <option value="">{t('details.pick')}</option>
+          {SUBJECTS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </label>
+      <fieldset className="grid gap-1 font-bold min-w-0">
+        <legend>{t('details.grades')}{req('grades')}</legend>
+        <div className="grid grid-cols-2 gap-2">
+          {[0, 1].map((k) => (
+            <select key={k} disabled={readOnly} aria-label={k === 0 ? t('details.from') : t('details.to')} value={grades[k] ?? ''} className={`${field} w-full min-w-0`}
+              onChange={(e) => {
+                const v = e.target.value as Grade;
+                const from = (k === 0 ? v : grades[0] ?? v) as Grade, to = (k === 1 ? v : grades[1] ?? v) as Grade;
+                onChange({ ...set, grades: gradeIndex(from) <= gradeIndex(to) ? [from, to] : [to, from] });
+              }}>
+              <option value="">{k === 0 ? t('details.from') : t('details.to')}</option>
+              {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          ))}
+        </div>
+      </fieldset>
 
-      <div className="grid gap-1.5">
+      <div className="grid grid-cols-1 gap-1.5">
         <span className="font-bold">{t('details.tags')}{req('tags')}</span>
         <div className="flex flex-wrap items-center gap-2">
           {(set.tags ?? []).map((x) => (
@@ -90,7 +77,7 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
           ))}
           {!readOnly && (
             <>
-              <input value={tag} onChange={(e) => setTag(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); } }} placeholder={t('details.tagPlaceholder')} aria-label={t('details.tags')} className={`${field} w-48`} />
+              <input value={tag} onChange={(e) => setTag(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); } }} placeholder={t('details.tagPlaceholder')} aria-label={t('details.tags')} className={`${field} flex-1 min-w-0 basis-32`} />
               <Button onClick={() => addTag()} disabled={!tag.trim()}><Plus weight="bold" size={16} />{t('details.addTag')}</Button>
             </>
           )}
@@ -106,6 +93,21 @@ export default function SetDetailsPanel({ set, onChange, readOnly }: { set: Ques
       </div>
 
       <StandardsField set={set} onChange={onChange} readOnly={readOnly} required={req('standards')} />
+
+      <div className="grid grid-cols-1 gap-2">
+        <span className="font-bold">{t('details.cover')}</span>
+        <SetCover set={set} className="aspect-[16/9] max-w-56 rounded-input border-std border-border" />
+        {!readOnly && (
+          <div className="flex flex-wrap gap-2">
+            <label className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
+              <UploadSimple weight="bold" size={16} />{t('details.cover')}
+              <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onChange({ ...set, cover: await imageFileToDataUrl(f, 800) }); }} />
+            </label>
+            {set.cover && <Button variant="ghost" onClick={() => onChange({ ...set, cover: undefined })}>{t('details.removeCover')}</Button>}
+          </div>
+        )}
+      </div>
+      {footer}
     </Panel>
   );
 }
@@ -120,6 +122,10 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
   const [domain, setDomain] = useState('');
   const [n, setN] = useState(1);
   const [typed, setTyped] = useState('');
+  // The standard builder opens by itself while a set has none; once it has
+  // some, it waits behind Add a standard so the details column stays short.
+  const [adding, setAdding] = useState(!set.standards?.length);
+  const open = adding || (!set.standards?.length && !set.noStandard);
   const d = domains.includes(domain) ? domain : domains[0];
   const codeFor = (k: number) => (hs ? '' : math ? `${grade}.${d}.${k}` : `${d}.${elaGradeCode(grade)}.${k}`);
   const built = codeFor(n);
@@ -130,7 +136,7 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
   const typedText = isStandardCode(typed) ? text(typed) : undefined;
 
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-1 gap-2">
       <span className="font-bold">{t('details.standards')}{required}</span>
       <div className="flex flex-wrap gap-2">
         {(set.standards ?? []).map((c) => {
@@ -149,19 +155,22 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
         })}
         {set.noStandard && <span className="min-h-9 px-3 rounded-pill bg-surface-2 border-std border-border font-bold text-sm inline-flex items-center">{t('details.noStandard')}</span>}
       </div>
+      {!readOnly && !open && !set.noStandard && (
+        <Button size="sm" className="justify-self-start" onClick={() => setAdding(true)}><Plus weight="bold" size={14} />{t('details.addAStandard')}</Button>
+      )}
       {!readOnly && (
         <>
-          {(math || set.subject === 'Literacy') && (
+          {open && (math || set.subject === 'Literacy') && (
             <div className="flex flex-wrap items-end gap-2">
               <label className="grid gap-1 text-sm font-bold">{t('filter.grade')}
                 <select value={grade} onChange={(e) => { setGrade(e.target.value as Grade); setN(1); }} className={field}>{GRADES.filter((g) => g !== 'College').map((g) => <option key={g} value={g}>{g}</option>)}</select>
               </label>
               {!hs && (
                 <>
-                  <label className="grid gap-1 text-sm font-bold">{t('details.domain')}
-                    <select value={d} onChange={(e) => { setDomain(e.target.value); setN(1); }} className={field}>{domains.map((x) => <option key={x} value={x}>{x}: {names[x]}</option>)}</select>
+                  <label className="grid gap-1 text-sm font-bold min-w-0 flex-1">{t('details.domain')}
+                    <select value={d} onChange={(e) => { setDomain(e.target.value); setN(1); }} className={`${field} w-full min-w-0`}>{domains.map((x) => <option key={x} value={x}>{x}: {names[x]}</option>)}</select>
                   </label>
-                  <label className="grid gap-1 text-sm font-bold min-w-0 flex-1 basis-56">{t('details.number')}
+                  <label className="grid gap-1 text-sm font-bold min-w-0 flex-1 basis-full">{t('details.number')}
                     <select value={n} onChange={(e) => setN(Number(e.target.value))} className={`${field} w-full`}>
                       {Array.from({ length: 12 }, (_, i) => i + 1).filter((k) => !text(codeFor(1)) || text(codeFor(k))).map((k) => {
                         const about = text(codeFor(k));
@@ -174,14 +183,16 @@ function StandardsField({ set, onChange, readOnly, required }: { set: QuestionSe
               )}
             </div>
           )}
-          {(math || set.subject === 'Literacy') && !hs && (
+          {open && (math || set.subject === 'Literacy') && !hs && (
             <p className="text-sm font-semibold bg-surface-2 border-std border-border-soft rounded-input p-2" aria-live="polite">
               {builtText ? <><span className="font-bold">{built}: </span>{builtText}</> : t('details.noSuchStandard', { code: built })}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-2">
-            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t('details.typeStandard')} aria-label={t('details.typeStandard')} className={`${field} w-56`} />
+          {open && <div className="flex flex-wrap items-center gap-2">
+            <input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={t('details.typeStandard')} aria-label={t('details.typeStandard')} className={`${field} flex-1 min-w-0 basis-40`} />
             <Button disabled={!isStandardCode(typed)} onClick={() => { add(typed); setTyped(''); }}><Plus weight="bold" size={16} />{t('details.add')}</Button>
+          </div>}
+          <div className="flex flex-wrap items-center gap-2">
             <label className="inline-flex items-center gap-2 font-bold text-sm min-h-11">
               <input type="checkbox" checked={!!set.noStandard} onChange={(e) => onChange({ ...set, noStandard: e.target.checked, standards: e.target.checked ? [] : set.standards })} className="w-5 h-5" />
               {t('details.noStandardBox')}

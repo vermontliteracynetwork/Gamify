@@ -1,6 +1,6 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, DeviceTablet, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
@@ -49,7 +49,10 @@ export default function ActivityPage() {
   const [how, setHow] = useState<How | ''>('');
   const [teams, setTeams] = useState<'teacher' | 'random' | 'class'>('teacher');
   const [together, setTogether] = useState<'compete' | 'together'>('compete');
-  const [setId, setSetId] = useState<string[]>([]);
+  // Use on a question set opens this page with the set filled in (approved
+  // teacher portal 6a, 2026-11-25): /teacher/activity?set=<id>.
+  const [params] = useSearchParams();
+  const [setId, setSetId] = useState<string[]>(() => (params.get('set') ? [params.get('set')!] : []));
   const [board, setBoard] = useState<string[]>([]);
   // How long they play, and a score that ends the game (teacher, 2026-10-31).
   const [minutes, setMinutes] = useState(0);

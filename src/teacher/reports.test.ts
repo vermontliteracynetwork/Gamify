@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QuestionLogEntry } from '../data/types';
-import { filterLog, groupLog, percent, toCsv } from './reports';
+import { filterLog, groupLog, percent, questionPlayStats, setPlayStats, toCsv } from './reports';
 
 const row = (p: Partial<QuestionLogEntry>): QuestionLogEntry => ({
   id: Math.random().toString(), at: '2026-10-24T10:00:00Z', gameId: 'star-quiz', mode: 'solo', prompt: 'Q1', answer: 'a', tries: ['a'], ms: 2000, outcome: 'right', ...p,
@@ -58,5 +58,28 @@ describe('weekUsage', () => {
       e('2026-10-10T10:00:00Z', {}), e('2026-10-24T10:00:00Z', { classroomId: 'c2' }), e('2026-10-24T10:00:00Z', { outcome: 'left' as const })];
     expect(weekUsage(log, 'c1', now)).toEqual({ answered: 3, rightPct: 67, students: 2, topGame: 'game-show' });
     expect(weekUsage([], 'c1', now)).toEqual({ answered: 0, rightPct: 0, students: 0, topGame: undefined });
+  });
+});
+
+describe('how a set played', () => {
+  const log = [
+    row({ setId: 's1', prompt: 'Q1' }),
+    row({ setId: 's1', prompt: 'Q1', tries: ['b', 'a'] }),
+    row({ setId: 's1', prompt: 'Q2', tries: ['c', 'c'], outcome: 'skipped' }),
+    row({ setId: 's1', prompt: 'Q2', outcome: 'left', tries: [] }),
+    row({ setId: 's2', prompt: 'Q9' }),
+    row({ prompt: 'no set' }),
+  ];
+  it('gives each set its first-try share of answered questions', () => {
+    const s = setPlayStats(log);
+    expect([s.get('s1')!.answered, s.get('s1')!.firstTry, s.get('s1')!.pct]).toEqual([3, 1, 33]);
+    expect(s.get('s2')!.pct).toBe(100);
+    expect(s.has('s3')).toBe(false);
+  });
+  it('gives each question its share and most picked wrong answer, counted once per try list', () => {
+    const q = questionPlayStats(log, 's1');
+    expect(q.get('Q1')).toMatchObject({ answered: 2, firstTry: 1, pct: 50, topWrong: 'b', topWrongCount: 1 });
+    expect(q.get('Q2')).toMatchObject({ answered: 1, pct: 0, topWrong: 'c', topWrongCount: 1 });
+    expect(q.has('Q9')).toBe(false);
   });
 });

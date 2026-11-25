@@ -33,6 +33,9 @@ export interface QuestionSet extends SetDetails {
   id: string;
   name: string;
   teachCard?: TeachCard;
+  // The teacher's folder for this set (teacher, 2026-11-24: "folders and
+  // editing question sets"). Missing = not in a folder.
+  folder?: string;
   questions: Question[];
   ownerId: string;
   visibility: 'private' | 'public';

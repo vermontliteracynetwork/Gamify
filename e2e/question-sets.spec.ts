@@ -173,3 +173,60 @@ test('set editor: true or false and a sound clip for the question, then play the
   await expect(page.getByRole('button', { name: 'Tap to start' })).toBeVisible();
   expect(problems).toEqual([]);
 });
+
+// Approved teacher portal 6a and 6b (2026-11-25): folders, facets, the class
+// first-try meter from real play only, Use, and per-question results.
+test('sets: folders, filters, first-try results and Use', async ({ page }, info) => {
+  const problems = watchConsole(page);
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:sets')) return;
+    const q = (id: string, prompt: string) => ({ id, kind: 'mc', prompt, choices: ['yes', 'no'], correctIndex: 0 });
+    const base = { ownerId: 'local-teacher', visibility: 'private', createdAt: '', updatedAt: '' };
+    localStorage.setItem('gamify:sets', JSON.stringify([
+      { ...base, id: 'f1', name: 'Commas', subject: 'Literacy', grades: ['1', '2'], tags: ['commas'], standards: ['L.1.2c'], questions: [q('a', 'Comma here?'), q('b', 'Comma there?')] },
+      { ...base, id: 'f2', name: 'Doubles', subject: 'Math', grades: ['1', '1'], tags: ['doubles'], standards: ['1.OA.6'], questions: [q('c', '2 + 2 = 4?')] },
+    ]));
+    const row = (n: number, prompt: string, tries: string[]) => ({ id: `l${n}`, at: '2026-11-20T10:00:00Z', gameId: 'star-quiz', mode: 'solo', setId: 'f1', prompt, answer: 'yes', tries, ms: 3000, outcome: 'right' });
+    localStorage.setItem('gamify:log', JSON.stringify([row(1, 'Comma here?', ['yes']), row(2, 'Comma here?', ['no', 'yes']), row(3, 'Comma there?', ['yes'])]));
+  });
+  await page.goto('/teacher/sets');
+  // Real play shows the class meter; a set never played says so, with no number.
+  await expect(page.getByRole('img', { name: '67% right on the first try' })).toBeVisible();
+  await expect(page.getByText('Not played yet')).toBeVisible();
+  // Facets: only the subjects the sets have.
+  await page.getByRole('button', { name: 'Show only Subject Math' }).click();
+  await expect(page.getByRole('heading', { name: 'Doubles' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Commas' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  // Make a folder, move a set into it, rename it.
+  await page.getByRole('button', { name: 'New folder' }).click();
+  await page.getByLabel('Folder name').fill('Grammar unit');
+  await page.getByRole('button', { name: 'Make the folder' }).click();
+  await expect(page.getByText('This folder is empty', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'All sets' }).click();
+  await page.getByRole('button', { name: 'Move Commas to a folder' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Grammar unit' }).click();
+  await page.getByRole('button', { name: /^Grammar unit/ }).click();
+  await expect(page.getByRole('heading', { name: 'Commas' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Doubles' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Rename the folder Grammar unit' }).click();
+  await page.getByLabel('Folder name').fill('Punctuation');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('button', { name: /^Punctuation/ })).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await page.getByRole('button', { name: /^Punctuation/ }).click();
+  await expect(page.getByRole('heading', { name: 'Commas' })).toBeVisible();
+  await page.screenshot({ path: `test-results/sets-folders-${info.project.name}.png` });
+  // The editor shows how each question played and its most picked wrong answer.
+  await page.getByRole('button', { name: 'Edit Commas' }).click();
+  await expect(page.getByText('How it played: 50% right on the first try (2 answers)')).toBeVisible();
+  await expect(page.getByText('Most picked wrong answer: B, "no" (picked once).')).toBeVisible();
+  await page.getByRole('list', { name: 'Questions in this set' }).getByRole('button').nth(1).click();
+  await expect(page.getByLabel('Question 2', { exact: true })).toHaveValue('Comma there?');
+  await expect(page.getByText('No one picked a wrong answer.')).toBeVisible();
+  await page.screenshot({ path: `test-results/set-editor-results-${info.project.name}.png` });
+  // Use starts Create an Activity with the set filled in.
+  await page.getByRole('button', { name: 'Use in an Activity' }).click();
+  await expect(page).toHaveURL(/\/teacher\/activity\?set=f1/);
+  expect(problems).toEqual([]);
+});

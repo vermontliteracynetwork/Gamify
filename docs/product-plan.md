@@ -1211,6 +1211,7 @@ claim beyond what `docs/gamified-learning-research.md` supports.
 | 115 | **Sculpt it, snap it, play it.** Physical design: classes make theme pieces from clay, modeling dough, textured paint, recycled things or leaves and sticks, take a photo or scan, and Gamify fits it into the game. Digital design works too. | The one feature no other quiz game platform has: students' real, hands-on work becomes the game; strong visuals for Pinterest and Reels (hands and pieces, no faces) | Owner, 2026-11-24 |
 | 116 | **Pay the way that fits: monthly, 3 months, 6 months or yearly.** Every paid plan renews at the interval you pick, and longer terms save more (5%, 15% and 20%). | Removes the "I can't pay a year up front" objection for teachers paying out of pocket | Owner, 2026-11-24 |
 | 117 | **Founding Subscriber launch offer.** Subscribe before Jan 1, 2027 and get an extra 10% off your first term (owner, 2026-11-24). | Turns beta-season interest into paid plans from teachers who don't want to test | Owner, 2026-11-24 |
+| 118 | **"See the wrong answer they all picked."** The question set editor shows how each question played on the first try and the most picked wrong answer, from real games only (2026-11-25). | Item and distractor analysis without a spreadsheet: a teacher fixes a misleading question or reteaches the mix-up the next day. Pairs with a short screen clip. |
 
 ### 10A. Blog post ideas (website "Ways to use Gamify")
 
@@ -1290,3 +1291,4 @@ real classroom photos (with releases), screenshots, and a step-by-step
 - Class sticker goals (2026-11-23): show the Achievement page on the projector on Friday, talk about which stickers the class earned by trying hard (not by winning), and pick one locked sticker to work toward together next week.
 - Territory warm-up (2026-11-24): start a Cooperative round on slow while students settle in, count the cats and mice together before you end, then switch to Competitive Cats against Mice and talk about why a balanced team matters.
 - What our beta classrooms taught us (2026-11-24, marketing launch plan): a short building-in-public post after each beta month: what testers reported (no student names or details), what changed, and a thank-you; pairs with the "You asked, we built it" social series (section 10 #39). Only once real beta feedback exists.
+- Fix the question, not the kid (2026-11-25): after a game, open the set editor, find the question with the lowest first-try number, read its most picked wrong answer, and decide: reword the question, or reteach that mix-up as a warm-up tomorrow.

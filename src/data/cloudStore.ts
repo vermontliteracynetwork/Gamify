@@ -16,6 +16,7 @@ const setRow = (s: QuestionSet): Row => ({
   subject: s.subject ?? null, grade_from: s.grades?.[0] ?? null, grade_to: s.grades?.[1] ?? null,
   tags: s.tags ?? [], standards: s.standards ?? [], no_standard: !!s.noStandard, cover: s.cover ?? null,
   ...(s.teachCard ? { teach_card: s.teachCard } : {}),
+  ...(s.folder ? { folder: s.folder } : { folder: null }),
 });
 const fromSet = (r: Row): QuestionSet => ({
   id: r.id, name: r.name, questions: r.questions ?? [], ownerId: r.owner_id, visibility: r.visibility,
@@ -23,6 +24,7 @@ const fromSet = (r: Row): QuestionSet => ({
   grades: r.grade_from && r.grade_to ? [r.grade_from as Grade, r.grade_to as Grade] : undefined,
   tags: r.tags ?? [], standards: r.standards ?? [], noStandard: r.no_standard || undefined, cover: r.cover ?? undefined,
   teachCard: r.teach_card ?? undefined,
+  folder: r.folder ?? undefined,
 });
 
 const classRow = (c: Classroom): Row => ({
@@ -94,9 +96,15 @@ export function createCloudStore(db: SupabaseClient): CloudStore {
       return row ? fromSet(row) : undefined;
     },
     async saveQuestionSet(set) {
-      // Until 0013 adds the teach card column, save the set without it.
+      // Until 0013 (teach card) and 0014 (folder) add their columns, save the
+      // set without whichever column is missing.
       const res = await db.from('question_sets').upsert(setRow(set));
-      if (res.error && /teach_card/.test(res.error.message)) { const { teach_card: _skip, ...row } = setRow(set); void _skip; ok(await db.from('question_sets').upsert(row)); return; }
+      if (res.error && /teach_card|folder/.test(res.error.message)) {
+        const row = setRow(set);
+        for (const col of ['teach_card', 'folder']) if (res.error.message.includes(col)) delete row[col];
+        ok(await db.from('question_sets').upsert(row));
+        return;
+      }
       ok(res);
     },
     async deleteQuestionSet(id) {
