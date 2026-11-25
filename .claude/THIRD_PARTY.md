@@ -74,3 +74,13 @@ SOFTWARE.
 
 Development tooling only; none of it ships to users. Gamify's approved Brand
 Kit wins over any of their defaults.
+
+## Astrology skill (aryaminus/astro, 2026-11-25)
+
+`.claude/skills/astrology/` is the **Astro** skill by the Astrology API Contributors
+(https://github.com/aryaminus/astro, commit 82df4c1), MIT License (copy in
+`.claude/skills/astrology/LICENSE`). Taken: `SKILL.md`, `references/`, `assets/` and the
+pure-Python ephemeris engine `scripts/astro_engine.py`. Left out: the MCP server, REST
+API, Docker and cloud files. Used only by the owner's private Astrology Advisor
+(`.claude/agents/astrology-advisor.md`) for the Developer Portal; development tooling,
+never shipped to teachers or students.

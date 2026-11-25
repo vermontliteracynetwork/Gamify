@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'quickbooks', kind: 'setup', added: '2026-11-25', title: 'Later, only if you want QuickBooks too: open an Intuit developer account',
+    why: 'Bookkeeping in the Developer Portal is now Gamify Books, built around Stripe: transactions, categories and rules, school invoices, customers, Profit and Loss, Schedule C summary, and a QuickBooks upload file. QuickBooks Online cannot be shown inside another site, so a live two-way sync with your QuickBooks company needs Intuit\'s own connection.',
+    how: 'Only if you keep a QuickBooks Online subscription: make a free account at developer.intuit.com, create an app for "Accounting", and tell Claude. Claude asks for the keys through a secure form and builds the sync. Until then, Books, Reports, "QuickBooks upload (CSV)" makes a file QuickBooks imports (Banking, Upload transactions).' },
   { id: 'supabase-0014', kind: 'setup', added: '2026-11-25', title: 'Run 0014 so question set folders save to your account',
     why: 'Question sets now have folders (New, Rename, Move). Signed-in teachers keep using everything without it, but until 0014 adds the folder column, a set\'s folder is saved only for empty folders, not on the set itself.',
     how: 'Supabase SQL Editor: run supabase/migrations/0014_set_folders.sql (safe to run twice).' },

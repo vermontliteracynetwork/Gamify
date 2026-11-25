@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Crown, PaperPlaneRight } from '@phosphor-icons/react';
 import { supabase } from '../data/supabase';
 import { t } from '../i18n';
@@ -30,7 +31,9 @@ function loadTurns(): Turn[] {
 export default function CeoCard() {
   const [view, setView] = useState<View>({ k: 'loading' });
   const [turns, setTurns] = useState<Turn[]>(loadTurns);
-  const [draft, setDraft] = useState('');
+  const [params] = useSearchParams();
+  // The Astrology page's Ask button opens here with @astrology_advisor ready.
+  const [draft, setDraft] = useState(() => (params.get('ask') === 'astrology_advisor' ? '@astrology_advisor ' : ''));
   const [busy, setBusy] = useState(false);
   const box = useRef<HTMLTextAreaElement>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -106,6 +109,7 @@ export default function CeoCard() {
             <li key={d}><Button size="sm" onClick={() => ask(d === 'executive' ? 'ceo_agent' : d)}>{t(`ceo.dept.${d}` as StringKey)}</Button></li>
           ))}
           <li><Button size="sm" onClick={() => ask('vermont_business_advisor')}>{t('ceo.vermontAsk')}</Button></li>
+          <li><Button size="sm" onClick={() => ask('astrology_advisor')}>{t('ceo.astroAsk')}</Button></li>
         </ul>
       </section>
 
