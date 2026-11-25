@@ -301,7 +301,7 @@ test('Status page checks each part; the accessibility report prints as a VPAT-st
   await expect(page.getByRole('cell', { name: /^1\.4\.3 Contrast/ })).toBeVisible();
 });
 
-test('every new page opens at the top, and paid plans list every highlight', async ({ page }, info) => {
+test('every new page opens at the top, and the comparison chart lists every plan highlight', async ({ page }, info) => {
   const problems = watch(page);
   await page.goto('/blog');
   await expect(page.locator('main a[href^="/blog/"]').last()).toBeVisible();
@@ -313,9 +313,19 @@ test('every new page opens at the top, and paid plans list every highlight', asy
   await expect(page.getByRole('navigation', { name: 'You are here' })).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.goto('/pricing');
-  await expect(page.getByText('A game for each student: pick the game and the questions, one student at a time')).toBeVisible();
-  await expect(page.getByText('Live class lobby: compete on a leaderboard or work together toward one class goal')).toBeVisible();
-  await expect(page.getByRole('rowheader', { name: 'Choice boards' })).toBeVisible();
+  // Short cards (teacher, 2026-11-25: "shorten each plan and then have a very
+  // detailed comparison chart"): four lines each, then the chart has a row for
+  // every highlight of every plan.
+  await expect(page.getByText('A game for each student: pick the game and the questions, one student at a time')).toHaveCount(0);
+  await page.getByRole('link', { name: 'Compare every feature' }).first().click();
+  const chart = page.getByRole('table', { name: 'Compare Every Feature' });
+  await expect(chart).toBeVisible();
+  for (const row of ['Games', 'New games before anyone else', 'Theme Builder designs', 'Classes', 'Students', 'Live monitor and Lock', 'Saved question sets', 'Report history',
+    'Class lobby: leaderboard or one class goal', 'Groups in the lobby, each with its own game', 'Sets assigned per student', 'Library themes', 'Theme guide templates',
+    'Student sign-in pictures', 'How far ahead a due date can be', 'A game for each student', 'Choice boards', 'A fresh class lobby code each time', 'Read-aloud']) {
+    await expect(chart.getByRole('rowheader', { name: new RegExp(`^${row.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) })).toHaveCount(1);
+  }
+  await expect(chart.getByRole('row', { name: /^Choice boards/ }).getByRole('cell').nth(2)).toHaveText('Included');
   await page.screenshot({ path: `test-results/pricing-plans-${info.project.name}.png`, fullPage: true });
   await page.goto('/features');
   await expect(page.getByText('Choice boards: students pick from the games you choose')).toBeVisible();
