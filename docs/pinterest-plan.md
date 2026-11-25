@@ -16,7 +16,7 @@ titled with what a teacher types keeps sending visits for months. We win on
 | Board | What goes on it | Live pins | Status |
 |---|---|---|---|
 | Classroom game ideas | Whole-class review routines, physical design, ideas for any subject | p-0016, p-0018, p-0034 | Open |
-| Every Question Becomes a Game | One pin per live game (7 of 7), linking to its how-to-play, theme guide or lesson | p-0032, p-0038 (+ the game pins below, saved here too) | Open |
+| Every Question Becomes a Game | One pin per live game (8 of 8), linking to its how-to-play, theme guide or lesson | p-0032, p-0038, p-0042 (+ the game pins below, saved here too) | Open |
 | Theme templates and printables | Blank theme templates, linked to each theme guide (`/blog/themes/:id`) | p-0033, p-0017 | Open. Named without "Free" until the owner decides (see 5) |
 | Classroom decor in the Gamify style | Patterns and stickers | none | **Parked.** Patterns are a proposal on /brand, not live; stickers are Classic art, which is never handed out (CLAUDE.md). Needs an owner decision before any pin |
 | Reading and grammar games | ELA, vocabulary, phonics and literacy centers | p-0036, p-0040 | Open |
@@ -27,9 +27,11 @@ titled with what a teacher types keeps sending visits for months. We win on
 
 One game per pin is the kit; every live game now has one: Game Show (p-0033,
 p-0035, p-0038), Board Game (p-0039), Match Three (p-0041), Four in a Row
-(p-0036), Bubble Pop (p-0018), Bowling (p-0032), Question Tracker (p-0040).
-If Territory is listed on the main site (a change was in progress on
-2026-11-25), it gets its own pin kit before any pin says "every game".
+(p-0036), Bubble Pop (p-0018), Bowling (p-0032), Question Tracker (p-0040),
+Territory (p-0042, Dec 15; listed on the main site 2026-11-25). Territory's
+how-to-play page still mentions a window and furniture the drawn room does not
+have; fix the page before p-0042 posts. Territory has no power-ups; in games
+that have one, the bonus power-up is "Prize Chest" in every pin.
 
 ## 2. The pin kit (per game and theme)
 
