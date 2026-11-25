@@ -107,10 +107,10 @@ export function LiveOverlay() {
           ) : state.mode === 'together' ? (
             <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
           ) : <>
-          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-accent' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="#c98a00" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
+          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-butter' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="var(--lemon)" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
           <p className="font-display text-2xl">{t('live.you', { count: me.right, place: mine })}</p>
           </>}
-          <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('primary', '', 'lg')}>{t('live.toJoinScreen')}</button>
+          <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('secondary', '', 'lg')}>{t('live.toJoinScreen')}</button>
         </div>
       </div>
     );
@@ -139,14 +139,14 @@ export function LiveOverlay() {
         ) : state.mode === 'together' ? (
           <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-bold border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>
-            <span className="h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><span className="block h-full bg-accent" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
+            <span className="h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><span className="block h-full bg-grape" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
           </div>
         ) : (
           <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-bold border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <Crown weight="fill" size={18} color="#c98a00" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}{clock}
+            <Crown weight="fill" size={18} color="var(--lemon)" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}{clock}
           </span>
         )}
-        {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-accent border-bold border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}
+        {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-butter border-bold border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}
       </div>
     );
   }

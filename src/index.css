@@ -53,7 +53,21 @@
   --color-danger: #f055a5;
 
   --color-grape: #6a45f0;
+  --color-grape-deep: #4b2fc9;
   --color-lavender: #ddd6ff;
+  /* The rest of the palette pairs as Tailwind colors (New direction rule 1). */
+  --color-sky: #4ba3e8;
+  --color-blue-crystal: #bfdff3;
+  --color-pink: #f055a5;
+  --color-lemon: #fabe37;
+  --color-orange: #ff9b28;
+  --color-peach: #ffd9b3;
+  --color-kelly: #22b04a;
+  --color-mint: #c8f0dc;
+  --color-teal: #1fb5a8;
+  --color-aqua: #c9f1ee;
+  --color-ink: #1d1a33;
+  --color-paper: #fffaf0;
   --color-blush: #ffd3e6;
   --color-gamify: #ddd6ff; /* Lavender (teacher, 2026-11-24: the old periwinkle is retired) */
   --color-butter: #fff1b8;
@@ -63,8 +77,8 @@
   --color-quiz-blue: #bfdff3;
   --color-quiz-orange: #ffd9b3;
   /* Named 2026-11-18 (design system audit): colors that were hand-typed. */
-  --color-ink-night: #241c3d;
-  --color-gold: #f6c544;
+  --color-ink-night: #1d1a33; /* Ink (was #241c3d, New direction 2026-11-25) */
+  --color-gold: #fabe37; /* Lemon drop (was #f6c544) */
   --color-mint-soft: #c8f0dc;
   --color-error: #9b2c3a;
   --color-success-ink: #1f7a45;
@@ -217,6 +231,11 @@ h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-s
   font-display: swap;
 }
 h1, h2, h3, .font-display, .title-bubble { font-synthesis: none; letter-spacing: 0.01em; }
+/* ALL CAPITALS means every letter a capital (New direction rule 8): Grow Year's
+   "Th" ligature draws a small h, so ligatures stay off wherever it can show. */
+html { font-variant-ligatures: no-common-ligatures; }
+/* Scores wear Grow Year (New direction rule 8), one weight, never faked bold. */
+.font-score { font-family: var(--font-display); font-weight: 400; font-synthesis: none; text-transform: uppercase; }
 
 /* Page and game titles: solid black display text (teacher rule,
    2026-10-24). On a game stage they follow the theme's title text color
@@ -508,7 +527,7 @@ html[data-motion="still"] :is(.fw-bob, .fw-hop, .fw-twinkle, .fw-flash, .fw-nudg
   --font-display: 'Grow Year', 'Segoe UI', system-ui, sans-serif;
   --font-heading: 'Inclusive Sans', 'Segoe UI', system-ui, sans-serif;
   --color-accent: #fdfd94;
-  --color-accent-ink: #000000;
+  --color-accent-ink: #1d1a33;
   --stage-bg-text: var(--text);
 }
 
@@ -679,7 +698,7 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 
 .game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f7f4ff 0%, #ebe6ff 60%, #ddd6ff 100%); }
 /* Each setting sits on its own white card with a soft lift (teacher, 2026-11-13: dimension, professional). */
-.brand-menu .setup-item { background: var(--surface); border: 2.5px solid #000; border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 #000, 0 16px 30px rgba(36, 28, 61, 0.10); }
+.brand-menu .setup-item { background: var(--surface); border: 2.5px solid var(--ink); border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 var(--ink), 0 16px 30px rgba(36, 28, 61, 0.10); }
 .brand-menu > main { position: relative; padding-top: 1.5rem !important; }
 .brand-menu .game-top { position: absolute; top: calc(1.5rem + var(--menu-offset, 0px)); right: 1.5rem; margin: 0; z-index: 5; }
 .brand-menu .menu-panel { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
@@ -869,8 +888,8 @@ html[data-motion="still"] [class*="animate-[float"] { animation: none !important
 
 /* One score board look in every game (teacher, 2026-11-13): a white card
    with a navy header strip, roomy rows and the title font for numbers. */
-.score-card { background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--radius-panel, 1.25rem); box-shadow: 0 5px 0 #000, 0 14px 26px rgba(36, 28, 61, 0.14); }
-.score-head { display: flex; align-items: center; gap: 0.4rem; margin: 0; padding: 0.45rem 0.9rem; background: #241c3d; color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2.5px solid var(--border); }
+.score-card { background: var(--surface); border: 2.5px solid var(--border); border-radius: var(--radius-panel, 1.25rem); box-shadow: 0 5px 0 var(--ink), 0 14px 26px rgba(36, 28, 61, 0.14); }
+.score-head { display: flex; align-items: center; gap: 0.4rem; margin: 0; padding: 0.45rem 0.9rem; background: var(--ink); color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 2.5px solid var(--border); }
 .score-head svg { color: #fdfd94; }
 
 /* Game screens: a thin, quiet top bar so the board gets the room (teacher,
@@ -927,3 +946,11 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 
 /* Achievements on the big screen (Show on the big screen = fullscreen). */
 .ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }
+
+/* One page width and one page-title size on every page (owner, 2026-11-25:
+   "all page widths need to be the same margins and the title text for the
+   page needs to be same size"). Pages use max-w-6xl px-4 sm:px-6; every page
+   h1 is this size, except the Home hero and in-game screens. */
+:root { --text-page-title: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem); }
+.route-shell main h1:not(.hero-title) { font-size: var(--text-page-title); line-height: 1.05; }
+.route-shell main:has(.game-stage) h1, .route-shell .brand-menu h1 { font-size: revert-layer; }

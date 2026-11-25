@@ -78,7 +78,7 @@ export default function ClassPage() {
       <PageHeader title={free ? t('roster.title') : classroom.name} subtitle={t('class.counts', { students: students.length, sets: assignments.length })}
         actions={<>
           <Link to={`/teacher/reports/print?class=${id}`} className={buttonClasses('secondary')}><Printer weight="bold" size={18} />{t('classes.progress')}</Link>
-          <Link to="/teacher/activity" className={buttonClasses('primary')}><Plus weight="bold" size={18} />{t('teacherNav.create')}</Link>
+          <Link to="/teacher/activity" className={buttonClasses('main')}><Plus weight="bold" size={18} />{t('teacherNav.create')}</Link>
         </>} />
       <Tabs label={t('class.tabs')} value={tab} onChange={(v) => { setTab(v); if (v !== 'sets') setPreset([]); }} options={[
         { id: 'students', label: t('class.tab.students') }, { id: 'groups', label: t('class.tab.groups') }, { id: 'report', label: t('class.tab.report') }, { id: 'sets', label: t('class.tab.sets') }, { id: 'modes', label: t('class.tab.modes') },
@@ -118,7 +118,7 @@ export default function ClassPage() {
             {/* Students reach the design studio with a code, like a game (teacher, 2026-10-31). */}
             {classroom.studentDesign && (
               <div className="basis-full flex flex-wrap items-center gap-2">
-                <Button variant="primary" onClick={async () => setDesignCode((await makeGameCode('design', '', 'design')).code)}>{t('class.designCode')}</Button>
+                <Button variant="main" onClick={async () => setDesignCode((await makeGameCode('design', '', 'design')).code)}>{t('class.designCode')}</Button>
                 {designCode && <>
                   <span className="font-display text-2xl tracking-[0.2em]" aria-label={t('class.designCodeIs', { code: designCode })}>{designCode}</span>
                   <Link to={`/show/${designCode}`} className={buttonClasses('secondary')}>{t('class.showCode')}</Link>
@@ -259,7 +259,7 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
         <textarea ref={addRef} id="student-names" value={names} onChange={(e) => setNames(e.target.value)} rows={3} placeholder={t('class.namesPlaceholder')}
           className="px-3 py-2 rounded-input border-std border-border font-bold" />
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="primary" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
+          <Button variant="main" disabled={toAdd.length === 0 || room <= 0} onClick={() => void add()}><Plus weight="bold" size={18} />{t('class.add', { count: Math.min(toAdd.length, room) })}</Button>
           <p className="font-bold text-sm">{Number.isFinite(limit) ? t('class.studentLimit', { count: students.length, limit }) : t('class.studentCount', { count: students.length })}</p>
         </div>
         {toAdd.length > room && <div className="flex flex-wrap items-center gap-2"><p className="font-bold text-sm">{t('class.overLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
@@ -323,7 +323,7 @@ function Suggestion({ students, log, sets, reload }: { students: Student[]; log:
       <b className="text-[0.9375rem] flex items-center gap-2"><Lightbulb weight="bold" size={18} aria-hidden="true" />{t('groups.suggested')}</b>
       <span className="text-sm font-semibold leading-snug">{t('groups.suggestLine', { names, standard: sug.standard })}</span>
       <span className="flex flex-wrap gap-2">
-        <Button size="sm" variant="primary" onClick={async () => { await saveGroup(students, sug.name, sug.who.map((s) => s.id)); reload(); }}><UsersThree weight="bold" size={16} />{t('groups.make')}</Button>
+        <Button size="sm" variant="main" onClick={async () => { await saveGroup(students, sug.name, sug.who.map((s) => s.id)); reload(); }}><UsersThree weight="bold" size={16} />{t('groups.make')}</Button>
         <Button size="sm" onClick={() => setHidden(sug.name)}>{t('groups.notNow')}</Button>
       </span>
     </div>
@@ -390,7 +390,7 @@ function GroupsTab({ students, log, sets, look, reload, onAssign }: { students: 
                 const on = picked.includes(s.id);
                 return (
                   <button key={s.id} type="button" role="checkbox" aria-checked={on} onClick={() => setPicked(on ? picked.filter((x) => x !== s.id) : [...picked, s.id])}
-                    className={`min-h-11 pl-1 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-1.5 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                    className={`min-h-11 pl-1 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-1.5 ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                     <Avatar avatar={avatarOf(s)} theme={look} size={30} />{s.name}
                   </button>
                 );
@@ -398,7 +398,7 @@ function GroupsTab({ students, log, sets, look, reload, onAssign }: { students: 
             </div>
           </fieldset>
           <div className="flex flex-wrap gap-2">
-            <Button variant="primary" disabled={!name.trim() || !picked.length || taken} onClick={() => void save()}><UsersThree weight="bold" size={18} />{editing ? t('groups.saveChanges') : t('groups.save')}</Button>
+            <Button variant="main" disabled={!name.trim() || !picked.length || taken} onClick={() => void save()}><UsersThree weight="bold" size={18} />{editing ? t('groups.saveChanges') : t('groups.save')}</Button>
             {editing && <Button onClick={() => { setEditing(undefined); setName(''); setPicked([]); }}>{t('classes.cancel')}</Button>}
           </div>
         </div>
@@ -446,7 +446,7 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" role="radiogroup" aria-label={t('class.avatarPick')}>
         {PICTURES.map((p) => (
           <button key={p.id} type="button" role="radio" aria-checked={avatar === p.id} aria-label={p.id} onClick={() => setAvatar(p.id)}
-            className={`rounded-full p-1 ${avatar === p.id ? 'bg-accent ring-[3px] ring-border' : ''}`}><Avatar avatar={p.id} theme={look} size={52} /></button>
+            className={`rounded-full p-1 ${avatar === p.id ? 'bg-butter ring-[3px] ring-border' : ''}`}><Avatar avatar={p.id} theme={look} size={52} /></button>
         ))}
       </div>
       {tier === 'free' ? (
@@ -465,7 +465,7 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
         </span>
       </label>
       <p className="min-h-6 font-bold text-error" role="alert">{problem}</p>
-      <Button variant="primary" onClick={() => void save()}>{t('class.avatarSave')}</Button>
+      <Button variant="main" onClick={() => void save()}>{t('class.avatarSave')}</Button>
     </Dialog>
   );
 }
@@ -500,7 +500,7 @@ export function SupportsDialog({ student, onClose }: { student: Student; onClose
             className={`rounded-pill ${modes.includes(m) ? '' : 'opacity-40'}`}><ModeBadge mode={m} /></button>
         ))}
       </div>
-      <Button variant="primary" onClick={() => void save()}>{t('class.saveSupports')}</Button>
+      <Button variant="main" onClick={() => void save()}>{t('class.saveSupports')}</Button>
     </Dialog>
   );
 }
@@ -539,7 +539,7 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
             <span className="font-bold flex-1 min-w-40">{name(a.setId)}</span>
             <span className="text-sm font-bold text-muted">{a.studentId ? students.find((s) => s.id === a.studentId)?.name : t('class.wholeClass')}{a.startsOn || a.endsOn ? ` · ${a.startsOn ?? ''} to ${a.endsOn ?? ''}` : ''}{a.themeIds?.length ? ` · ${t('class.themeCount', { count: a.themeIds.length })}` : ''}</span>
             <button type="button" aria-pressed={a.starred} onClick={async () => { await data.saveAssignment({ ...a, starred: !a.starred }); reload(); }} aria-label={t('class.focus', { name: name(a.setId) })}
-              className={`w-11 h-11 rounded-full border-std border-border flex items-center justify-center ${a.starred ? 'bg-accent' : 'bg-surface'}`}><Star weight={a.starred ? 'fill' : 'bold'} size={20} /></button>
+              className={`w-11 h-11 rounded-full border-std border-border flex items-center justify-center ${a.starred ? 'bg-butter' : 'bg-surface'}`}><Star weight={a.starred ? 'fill' : 'bold'} size={20} /></button>
             <button type="button" onClick={async () => { await data.deleteAssignment(a.id); reload(); }} aria-label={t('class.unassign', { name: name(a.setId) })}
               className="w-11 h-11 rounded-full border-std border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={20} /></button>
           </div>
@@ -551,7 +551,7 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
       <Panel className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
-          <Button variant="primary" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
+          <Button variant="main" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
         </div>
         <p className="font-bold -mt-2" aria-live="polite">{setId.length ? t('class.picked', { name: name(setId[0]) }) : t('class.pickBelow')}</p>
         {full && Number.isFinite(limit) && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('class.setLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
@@ -569,7 +569,7 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
           <div className="flex flex-wrap gap-2">
             {students.map((s) => (
               <button key={s.id} type="button" role="checkbox" aria-checked={chosen.includes(s.id)} onClick={() => setChosen(chosen.includes(s.id) ? chosen.filter((x) => x !== s.id) : [...chosen, s.id])}
-                className={`min-h-11 px-4 rounded-pill border-std font-bold ${chosen.includes(s.id) ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{s.name}</button>
+                className={`min-h-11 px-4 rounded-pill border-std font-bold ${chosen.includes(s.id) ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{s.name}</button>
             ))}
           </div>
         )}
@@ -605,7 +605,7 @@ function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: st
             return (
               <button key={th.id} type="button" role="checkbox" aria-checked={on} disabled={!on && value.length >= MAX_THEME_CHOICES}
                 onClick={() => onChange(on ? value.filter((x) => x !== th.id) : [...value, th.id])}
-                className={`min-h-11 pl-1.5 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-2 disabled:opacity-40 ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                className={`min-h-11 pl-1.5 pr-3 rounded-pill border-std font-bold text-sm inline-flex items-center gap-2 disabled:opacity-40 ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                 <span className="w-7 h-7 rounded-full border-std border-border" style={{ background: th.colors.background }} aria-hidden="true" />
                 {favorites.includes(th.id) && <Heart weight="fill" size={14} color="#d6336c" aria-label={t('class.favorite')} />}
                 {th.name}<span className="font-semibold text-muted">· {game}</span>
@@ -627,7 +627,7 @@ export function StudentStrip({ classId, students, current, look }: { classId: st
     <nav aria-label={t('cv.allStudents')} className="flex flex-wrap gap-2 mb-5">
       {[...students].sort((a, b) => a.name.localeCompare(b.name)).map((s) => (
         <Link key={s.id} to={`/teacher/classes/${classId}/students/${s.id}`} aria-current={s.id === current ? 'page' : undefined} aria-label={t('cv.openStudent', { name: s.name })}
-          className={`inline-flex items-center gap-1.5 min-h-10 pl-1 pr-3 rounded-pill border-std font-bold text-sm no-underline text-text hover-pop ${s.id === current ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+          className={`inline-flex items-center gap-1.5 min-h-10 pl-1 pr-3 rounded-pill border-std font-bold text-sm no-underline text-text hover-pop ${s.id === current ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
           <Avatar avatar={avatarOf(s)} theme={look} size={30} />{s.name}
         </Link>
       ))}
@@ -647,7 +647,7 @@ function ClassReport({ classId, className, students }: { classId: string; classN
   };
   return (
     <div className="grid gap-3">
-      <Link to={`/teacher/reports/print?class=${classId}`} className={buttonClasses('primary', 'justify-self-start')}><Printer weight="bold" size={18} />{t('rp.print')}</Link>
+      <Link to={`/teacher/reports/print?class=${classId}`} className={buttonClasses('main', 'justify-self-start')}><Printer weight="bold" size={18} />{t('rp.print')}</Link>
       <ReportDoc log={log} students={students} names={names} standardsOf={(x) => sets.find((s) => s.id === x)?.standards} className={className} />
     </div>
   );

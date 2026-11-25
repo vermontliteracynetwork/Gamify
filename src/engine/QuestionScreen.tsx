@@ -107,7 +107,7 @@ export default function QuestionScreen({ question, progress, player, onAnswer, f
           )}
           {player && <span className={`font-display font-bold ${framed ? 'text-lg' : 'text-fit-turn'}`}>{t('q.turn', { name: player })}</span>}
           <span className="flex-1" />
-          {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+          {settings.tools.listen && <button type="button" onClick={listen} className="min-h-11 px-3 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-1.5">
             {speaking ? <SpeakerSlash weight="bold" size={20} /> : <SpeakerHigh weight="bold" size={20} />}
             {speaking ? t('q.stop') : t('q.listen')}
           </button>}
@@ -118,14 +118,14 @@ export default function QuestionScreen({ question, progress, player, onAnswer, f
 
         {q.imageUrl && <figure className="m-0 grid justify-items-center"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="max-h-[min(14rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
         <h2 className={`font-body font-bold leading-snug text-balance ${framed ? `text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}` : `w-full max-w-[90rem] mx-auto text-center ${bigPrompt ? 'text-fit-question-big leading-tight' : 'text-fit-question'}`}`}>
-          {words.map((w, i) => <span key={i} className={marked.has(i) ? 'bg-accent rounded px-0.5' : ''}>{w}</span>)}
+          {words.map((w, i) => <span key={i} className={marked.has(i) ? 'bg-butter rounded px-0.5' : ''}>{w}</span>)}
         </h2>
 
         {locked && (
           <div className="grid gap-1" aria-live="polite">
             <span className="font-bold text-sm">{t('q.readFirst')}</span>
             <div className="h-2.5 rounded-pill bg-surface-2 overflow-hidden border border-border-soft">
-              <motion.div className="h-full bg-accent" initial={{ width: '100%' }} animate={{ width: '0%' }}
+              <motion.div className="h-full bg-orange" initial={{ width: '100%' }} animate={{ width: '0%' }}
                 transition={{ duration: settings.readFirstSeconds, ease: 'linear' }} />
             </div>
           </div>

@@ -126,12 +126,12 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           {chance && chance.total === Infinity && <span className="font-bold">{t('share.chanceOpen', { n: chance.n })}</span>}
           {chance && chance.total > 1 && chance.total !== Infinity && (
             <span className="inline-flex items-center gap-1.5 font-bold" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
-              {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-std border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-accent' : 'bg-surface'}`} />)}
+              {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-std border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-mint' : 'bg-surface'}`} />)}
               <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
             </span>
           )}
           <button type="button" onClick={() => speakQuestion(q, settings)}
-            className="min-h-12 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2">
+            className="min-h-12 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2">
             <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
           </button>
           {/* Only Listen and Settings on a question (teacher, 2026-11-24); accessibility is in Settings. */}

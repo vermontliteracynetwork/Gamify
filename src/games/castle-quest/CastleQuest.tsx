@@ -423,7 +423,7 @@ export default function CastleQuest() {
         <div className="flex flex-wrap gap-3 justify-center">
           {turns.players.map((p, i) => (
             <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { scale: 1.05 }}
-              className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
+              className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-butter" aria-label={p.name}>
               <TeamBadge colorIndex={p.colorIndex} size={56} />
               <span className="font-bold">{p.name}</span>
               {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#4ba3e8]" aria-label={t('cq.shielded')} />}

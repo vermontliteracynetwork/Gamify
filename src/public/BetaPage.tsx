@@ -25,14 +25,14 @@ export default function BetaPage() {
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : Math.min(i, 8) * 0.05 } });
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
         <section className="grid gap-4 justify-items-start text-left">
           <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('betaPage.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('betaPage.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
             {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-std border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
           </ul>
-          <a href="#apply" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</a>
+          <a href="#apply" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</a>
         </section>
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">
@@ -54,7 +54,7 @@ export default function BetaPage() {
             {ASKS.map((a, i) => (
               <motion.li key={a.key} {...enter(i)} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <div className="flex items-center gap-3">
-                  <span className="w-11 h-11 shrink-0 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-xl">{i + 1}</span>
+                  <span className="w-11 h-11 shrink-0 rounded-full bg-butter border-bold border-border flex items-center justify-center font-display text-xl">{i + 1}</span>
                   <span className="text-sm font-bold inline-flex items-center gap-1 bg-surface-2 border-std border-border-soft rounded-pill px-2 py-0.5"><Clock weight="bold" size={14} aria-hidden="true" />{t('betaPage.minutes', { n: a.minutes })}</span>
                 </div>
                 <h3 className="font-display text-2xl">{t(`betaPage.ask.${a.key}` as StringKey)}</h3>
@@ -138,7 +138,7 @@ function ApplyForm() {
           <label className="grid gap-1 font-bold min-w-0">{t('betaPage.devices')}<input value={form.devices} onChange={(e) => setForm({ ...form, devices: e.target.value })} maxLength={80} className={field} placeholder={t('betaPage.devicesHint')} /></label>
           <label className="sm:col-span-2 flex items-start gap-2 font-bold"><input type="checkbox" checked={form.agree} onChange={(e) => setForm({ ...form, agree: e.target.checked })} className="w-5 h-5 mt-0.5 shrink-0" />{t('betaPage.agree')}</label>
           <p className="text-sm font-semibold text-muted sm:col-span-2">{t('beta.privacy')}</p>
-          <Button variant="primary" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void send()}>{t('betaPage.send')}</Button>
+          <Button variant="main" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void send()}>{t('betaPage.send')}</Button>
         </div>
       )}
     </section>

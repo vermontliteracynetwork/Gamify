@@ -17,7 +17,7 @@ export default function CodeScreen() {
   const link = `${window.location.origin}/join/${code}`;
   // Wears the teacher's Big screen look (Theme Builder).
   const { theme } = useGameTheme('big-screen');
-  useEffect(() => { void QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: '#000000', light: '#fbfcf8' } }).then(setQr); }, [link]);
+  useEffect(() => { void QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: '#000000', light: '#ffffff' } }).then(setQr); }, [link]);
   return (
     <ThemedPage theme={theme}>
     <main className="stage-text min-h-[calc(100dvh-4rem)] px-4 py-4 grid content-center justify-items-center gap-4 text-center">
@@ -31,7 +31,7 @@ export default function CodeScreen() {
         {qr && <img src={qr} alt={t('show.qr')} className="w-[min(30vh,320px)] h-auto rounded-input border-heavy border-border" />}
       </div>
       <p className="font-bold text-lg">{t('show.scan')}</p>
-      <Link to="/teacher" className="no-print min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2 no-underline text-text"><ArrowLeft weight="bold" size={18} />{t('show.back')}</Link>
+      <Link to="/teacher" className="no-print min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2 no-underline text-text"><ArrowLeft weight="bold" size={18} />{t('show.back')}</Link>
     </main>
     </ThemedPage>
   );

@@ -1,14 +1,14 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, DeviceTablet, Info, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, Info, LockSimple, Play, QrCode, SquaresFour, Sword, Television, User, UsersThree } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { makeGameCode, makeLobbyCode, type GameCode, type LobbyPick } from '../data/gameCodes';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import { GameCover } from '../games/covers';
-import { ModeDot, shownModes } from '../games/ModeBadge';
+import { MODE_BRIGHT, ModeDot, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
@@ -25,9 +25,9 @@ import { Choices, CodeBox } from './HostDialog';
 // set, then the code or the game itself.
 type How = 'screen' | 'lobby' | 'code' | 'pairs' | 'homework' | 'each' | 'board';
 const HOWS: { id: How; icon: typeof Play; mode?: 'share' | 'live' | 'solo' | 'versus' }[] = [
-  { id: 'screen', icon: ProjectorScreen, mode: 'share' },
+  { id: 'screen', icon: Television, mode: 'share' },
   { id: 'lobby', icon: Broadcast, mode: 'live' },
-  { id: 'code', icon: DeviceTablet, mode: 'solo' },
+  { id: 'code', icon: User, mode: 'solo' },
   { id: 'pairs', icon: Sword, mode: 'versus' },
   { id: 'homework', icon: CalendarCheck, mode: 'solo' },
   // Pro with a class (teacher, 2026-10-31): a game for each student or group,
@@ -93,7 +93,7 @@ export default function ActivityPage() {
     setCode(made);
   }
 
-  const card = (on: boolean) => `rounded-input border-bold text-left bg-surface ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft'}`;
+  const card = (on: boolean) => `rounded-input border-bold text-left bg-surface ${on ? 'border-border ring-4 ring-border ring-offset-4 ring-offset-paper' : 'border-border-soft'}`;
   // The approved Create an Activity (/brand teacher portal 4, teacher
   // 2026-11-25: "apply the new mockups that are in the brand page to the main
   // site"): a stepper whose done steps show green checks, "Your choices" kept
@@ -130,7 +130,7 @@ export default function ActivityPage() {
               return (
                 <li key={i} className={`rounded-input p-3 grid gap-0.5 ${done ? 'bg-surface-2' : 'bg-surface-2/50'}`}>
                   <span className="flex items-center gap-2 text-sm font-bold text-muted">
-                    {done ? <span className="w-5 h-5 rounded-full grid place-items-center bg-success text-white shrink-0"><Check weight="bold" size={12} aria-label={t('start.done')} /></span>
+                    {done ? <span className="w-5 h-5 rounded-full grid place-items-center bg-kelly text-text border-thin border-border shrink-0"><Check weight="bold" size={12} aria-label={t('start.done')} /></span>
                       : <span className="w-5 h-5 rounded-full grid place-items-center border-std border-border-soft text-xs shrink-0">{i + 1}</span>}
                     {t(`activity.step.${STEPS[i]}`)}
                     {done && <button type="button" onClick={() => goTo(i)} aria-label={t('activity.changeStep', { step: t(`activity.step.${STEPS[i]}`) })} className="ml-auto min-h-8 px-2 -my-1 rounded-pill font-bold text-grape hover:bg-surface underline-offset-2 hover:underline">{t('activity.change')}</button>}
@@ -160,7 +160,7 @@ export default function ActivityPage() {
           <ol className="grid grid-cols-5 gap-2 list-none p-0 m-0" aria-label={t('activity.steps')}>
             {STEPS.map((s, i) => {
               const done = i < step;
-              const inner = <>{done ? <span className="w-6 h-6 rounded-full grid place-items-center bg-success text-white shrink-0"><Check weight="bold" size={14} aria-label={t('start.done')} /></span>
+              const inner = <>{done ? <span className="w-6 h-6 rounded-full grid place-items-center bg-kelly text-text border-thin border-border shrink-0"><Check weight="bold" size={14} aria-label={t('start.done')} /></span>
                 : <span className={`w-6 h-6 rounded-full grid place-items-center text-xs tabular-nums shrink-0 border-std ${i === step ? 'border-border bg-surface' : 'border-border-soft'}`}>{i + 1}</span>}
                 <span className="min-w-0">{t(`activity.step.${s}`)}</span></>;
               const look = `w-full min-h-11 px-2 rounded-pill font-bold text-sm flex items-center justify-center gap-2 ${i === step ? 'bg-gold border-std border-border' : done ? 'bg-surface border-std border-transparent' : 'bg-surface/60 border-std border-transparent text-muted'}`;
@@ -217,10 +217,11 @@ export default function ActivityPage() {
         {STEPS[step] === 'how' && (
           <div className="grid gap-4">
             <div role="radiogroup" aria-label={t('activity.q.how')} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {hows.map(({ id, icon: Icon }) => (
+              {hows.map(({ id, icon: Icon, mode }) => (
                 <button key={id} type="button" role="radio" aria-checked={how === id} onClick={() => { setHow(id); setGameId(''); setBoard([]); }}
-                  className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-3 items-center ${how === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                  <Icon weight="fill" size={30} aria-hidden="true" className="row-span-2" />
+                  className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-3 items-center ${how === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
+                  {/* Icons (rule 7): Phosphor bold, ink on a round badge in the way's color (rule 12). */}
+                  <span className="row-span-2 w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: mode ? MODE_BRIGHT[mode] : 'var(--lavender)' }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
                   <span className="font-display text-lg leading-tight flex items-center gap-2">{t(`activity.how.${id}`)}{(id === 'each' || id === 'board') && !pro && <LockSimple weight="fill" size={18} aria-label={t('activity.proOnly')} />}</span>
                   <span className="text-sm font-semibold text-muted leading-snug">{t(`activity.how.${id}Hint`)}</span>
                 </button>
@@ -261,7 +262,7 @@ export default function ActivityPage() {
               <b className="text-xl">{how ? t(`activity.how.${how}`) : ''}</b>
               <p className="m-0 font-semibold max-w-prose">{how ? t(`activity.how.${how}Hint`) : ''}</p>
               {code ? <CodeBox big code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} onShow={how === 'code' ? () => navigate(`/show/${code.code}`) : undefined} />
-                : <Button variant="primary" size="lg" onClick={() => void finish()}><GoIcon weight={how === 'screen' ? 'fill' : 'bold'} size={20} />{t(`activity.go.${how || 'code'}`)}</Button>}
+                : <Button variant={how === 'screen' || how === 'lobby' ? 'go' : 'main'} size="lg" onClick={() => void finish()}><GoIcon weight={how === 'screen' ? 'fill' : 'bold'} size={20} />{t(`activity.go.${how || 'code'}`)}</Button>}
             </div>
             {options.length > 0 && (
               <div className="rounded-input p-4 grid gap-2.5 bg-surface-2">
@@ -293,7 +294,7 @@ export default function ActivityPage() {
                     return (
                       <li key={st.id}>
                         <button type="button" role="checkbox" aria-checked={on} onClick={() => setPicked(on ? picked.filter((x) => x !== st.id) : [...picked, st.id])}
-                          className={`w-full min-h-14 px-3 py-2 rounded-input border-std text-left grid ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                          className={`w-full min-h-14 px-3 py-2 rounded-input border-std text-left grid ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                           <span className="font-bold">{st.name}</span>
                           <span className="text-sm font-semibold text-muted">{mine ? `${GAMES.find((g) => g.id === mine.gameId)?.name} · ${sets.find((x) => x.id === mine.setId)?.name ?? ''}` : t('activity.classPick', { game: game.name })}</span>
                         </button>

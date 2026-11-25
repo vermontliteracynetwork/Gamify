@@ -216,7 +216,7 @@ export const HOW_TO_PLAY: HowToPlay[] = [
   },
   {
     gameId: 'territory',
-    goal: 'Mice sneak out of the mouse hole into the living room. Right answers send cats to catch them, or, in Competitive, win the room for your team.',
+    goal: 'Mice sneak out of the little wooden door into the room. Right answers send cats to catch them, or, in Competitive, win the room for your team.',
     steps: [
       'The teacher opens the lobby; students join with the code on their own devices.',
       'Read the question on your device and tap an answer.',
@@ -224,10 +224,10 @@ export const HOW_TO_PLAY: HowToPlay[] = [
       'Competitive: Cats against Mice. A right answer adds one of your animals and sends one of theirs away.',
     ],
     pieces: [
-      { name: 'Living room', what: 'The big screen: wallpaper, a couch, a lamp, a window, a plant, a rug, and a mouse hole in the baseboard.' },
-      { name: 'Cats', what: 'Six looks: orange tabby, black, gray, calico, white with spots, and a cat with dark points.' },
-      { name: 'Mice', what: 'Little brown, gray and white mice. They peek out of the hole, then scurry in.' },
-      { name: 'Poof', what: 'A soft puff of stars when a mouse is caught. Nobody is ever hurt; a scared cat leaps out the window.' },
+      { name: 'The room', what: 'The big screen: a plain wall, a wooden baseboard, a checker floor and a little arched wooden door the mice come out of.' },
+      { name: 'Cats', what: 'Three looks: a gray tabby, an orange tabby and a black-and-white tuxedo cat.' },
+      { name: 'Mice', what: 'Little brown, gray and white mice. They peek out of the door, then scurry in.' },
+      { name: 'Poof', what: 'A soft puff of stars when a mouse is caught. Nobody is ever hurt; a scared cat runs out of the room.' },
     ],
     rules: ['A miss brings a new question and never costs anything.', 'Cooperative ends at the class goal or when the teacher stops it. Competitive ends when the teacher stops it, at a number right, or at a time; the team with more animals in the room wins it.'],
     settings: ['Cooperative or Competitive.', 'How often a mouse comes out: slow, normal or fast.', 'Competitive: what a right answer does (adds yours and sends theirs away, only adds, or only sends away).', 'Teams split evenly as students join; tap a student to move them.'],

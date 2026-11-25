@@ -102,10 +102,10 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
       {min !== max && <div className="flex items-center gap-2 text-base">
         <span className="font-bold">{mode === 'share' ? t('teams.count') : t('teams.playerCount')}</span>
         <button type="button" aria-label={t('teams.less')} disabled={slots.length <= min} onClick={() => resize(slots.length - 1)}
-          className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={18} /></button>
+          className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={18} /></button>
         <span className="font-display text-2xl font-bold w-8 text-center tabular-nums" aria-live="polite">{slots.length}</span>
         <button type="button" aria-label={t('teams.more')} disabled={slots.length >= max} onClick={() => resize(slots.length + 1)}
-          className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={18} /></button>
+          className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={18} /></button>
         {mode === 'share' && !solo && <ClassTeams teams={slots.length} names={names()} icons={slots.map((_s, i) => iconOf(i))} autoRandom={how === 'random'} onChange={setMembers} />}
       </div>}
 
@@ -117,7 +117,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
           <li key={i} className={true
             ? `flex flex-wrap items-center justify-center gap-2 rounded-panel border-bold border-border bg-surface p-4 ${mode === 'versus' ? 'min-h-[min(22rem,48vh)] content-center gap-3 p-6 bg-gradient-to-b from-[#eef0ff] to-surface' : 'bg-gradient-to-b from-[#f3f4ff] to-surface'}`
             : 'flex flex-wrap items-center gap-2 rounded-input border-std border-border-soft p-2'}
-            style={true ? { boxShadow: '0 5px 0 #000, 0 14px 24px rgba(36,28,61,0.12)' } : undefined}>
+            style={true ? { boxShadow: '0 5px 0 var(--ink), 0 14px 24px rgba(36,28,61,0.12)' } : undefined}>
             <button type="button" aria-label={characters?.length ? t('teams.pickCharacter', { name: s.name }) : t('teams.pickIcon', { name: s.name })} aria-expanded={picking === i} aria-haspopup="true"
               onClick={() => setPicking(picking === i ? null : i)} className={`${true ? 'basis-full flex justify-center pt-1 pb-3' : 'rounded-full p-0.5 -m-0.5'} motion-safe:hover:scale-110 motion-safe:hover:-rotate-3 motion-safe:transition-transform`}>
               {characters?.length
@@ -132,7 +132,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
                   onKeyDown={(e) => { if (e.key === 'Escape') setPicking(null); }}>
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-display text-2xl font-bold">{t('teams.pickCharacter', { name: s.name })}</h3>
-                    <button type="button" autoFocus onClick={() => setPicking(null)} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+                    <button type="button" autoFocus onClick={() => setPicking(null)} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-bold border-border bg-white flex items-center justify-center"><X weight="bold" size={20} /></button>
                   </div>
                   <div role="group" aria-label={t('teams.pickCharacter', { name: s.name })} className="grid grid-cols-5 gap-2">
                     {characters.map((c, k) => {
@@ -141,7 +141,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
                         <button key={c.id} type="button" aria-pressed={owner === i} title={c.name}
                           aria-label={owner >= 0 && owner !== i ? t('teams.characterTaken', { animal: c.name, name: slots[owner].name }) : c.name}
                           onClick={() => pickCharacter(i, k)}
-                          className={`grid justify-items-center rounded-input p-1 border-heavy ${owner === i ? 'border-border bg-accent' : 'border-transparent bg-surface-2'} ${owner >= 0 && owner !== i ? 'opacity-45' : ''} motion-safe:hover:scale-105 motion-safe:transition-transform`}>
+                          className={`grid justify-items-center rounded-input p-1 border-heavy ${owner === i ? 'border-border bg-mint' : 'border-transparent bg-surface-2'} ${owner >= 0 && owner !== i ? 'opacity-45' : ''} motion-safe:hover:scale-105 motion-safe:transition-transform`}>
                           <img src={c.image} alt="" className="w-[min(4.5rem,12vh)] aspect-square object-contain" />
                           <span className="text-xs font-bold leading-tight">{c.name}</span>
                         </button>
@@ -158,7 +158,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
                 onKeyDown={(e) => { if (e.key === 'Escape') setPicking(null); }}>
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="font-display text-2xl font-bold">{t('teams.pickIcon', { name: s.name })}</h3>
-                  <button type="button" autoFocus onClick={() => setPicking(null)} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+                  <button type="button" autoFocus onClick={() => setPicking(null)} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-bold border-border bg-white flex items-center justify-center"><X weight="bold" size={20} /></button>
                 </div>
               <div role="group" aria-label={t('teams.pickIcon', { name: s.name })} className="grid grid-cols-5 justify-items-center gap-3">
                 {TEAM_ICONS.map((_, k) => {
@@ -167,7 +167,7 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
                     <button key={k} type="button" aria-pressed={owner === i}
                       aria-label={owner >= 0 && owner !== i ? t('teams.iconTaken', { n: k + 1, name: slots[owner].name }) : t('teams.iconN', { n: k + 1 })}
                       onClick={() => pickIcon(i, k)}
-                      className={`rounded-full p-1.5 border-heavy ${owner === i ? 'border-border bg-accent' : 'border-transparent'} ${owner >= 0 && owner !== i ? 'opacity-50' : ''} motion-safe:hover:scale-105 motion-safe:transition-transform`}>
+                      className={`rounded-full p-1.5 border-heavy ${owner === i ? 'border-border bg-mint' : 'border-transparent'} ${owner >= 0 && owner !== i ? 'opacity-50' : ''} motion-safe:hover:scale-105 motion-safe:transition-transform`}>
                       <TeamBadge colorIndex={k} size={96} />
                     </button>
                   );
@@ -190,11 +190,11 @@ export default function TeamSetup({ mode, min, max, onStart, onChange, embedded 
             {s.kind !== 'cpu' && (
               <button type="button" aria-label={t('teams.roll', { name: s.name })}
                 onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, name: rollName(Math.random, names()) } : x)))}
-                className="w-11 h-11 rounded-full border-std border-border bg-accent flex items-center justify-center"><DiceFive weight="fill" size={22} /></button>
+                className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center"><DiceFive weight="fill" size={22} /></button>
             )}
             {mode === 'versus' && i > 0 && (
               <button type="button" onClick={() => setSlots((cur) => cur.map((x, j) => (j === i ? { ...x, kind: x.kind === 'cpu' ? 'student' : 'cpu' } : x)))}
-                className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm">
+                className="min-h-11 px-3 rounded-pill border-std border-border bg-white font-bold text-sm">
                 {s.kind === 'cpu' ? t('teams.cpu') : t('teams.human')}
               </button>
             )}
@@ -224,7 +224,7 @@ function Choice<T extends string>({ label, value, options, onChange }: { label: 
       <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
         {options.map(([v, key]) => (
           <button key={v} type="button" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
-            className={`min-h-12 px-5 rounded-pill border-std font-bold ${value === v ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(key)}</button>
+            className={`min-h-12 px-5 rounded-pill border-std font-bold ${value === v ? 'bg-mint border-border' : 'bg-surface border-border-soft'}`}>{t(key)}</button>
         ))}
       </div>
     </div>
@@ -272,13 +272,13 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
   return (
     <>
     <button type="button" onClick={() => setOpen(true)} className="ml-auto min-h-11 px-3 rounded-pill border-std border-border bg-surface font-bold text-sm inline-flex items-center gap-1.5 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform">
-      <UsersThree weight="bold" size={16} aria-hidden="true" />{t('teams.fromClassBtn')}{groups.flat().length > 0 && <span className="rounded-pill bg-accent border border-border px-1.5 text-xs">{groups.flat().length}</span>}
+      <UsersThree weight="bold" size={16} aria-hidden="true" />{t('teams.fromClassBtn')}{groups.flat().length > 0 && <span className="rounded-pill bg-butter border border-border px-1.5 text-xs">{groups.flat().length}</span>}
     </button>
     <div className={open ? 'fixed inset-0 z-50 bg-surface overflow-y-auto' : 'hidden'} role="dialog" aria-modal="true" aria-label={t('teams.fromClass')}>
     <div className="max-w-5xl mx-auto px-6 py-6 grid gap-4">
       <div className="flex items-center gap-3">
         <h2 className="font-display text-xl font-bold flex-1">{t('teams.fromClass')}</h2>
-        <button type="button" onClick={() => setOpen(false)} className="min-h-11 px-6 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold" style={{ boxShadow: '0 3px 0 #000' }}>{t('teams.done')}</button>
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 px-6 rounded-pill border-bold border-border bg-grape text-white font-display text-lg font-bold" style={{ boxShadow: '0 3px 0 var(--grape-deep)' }}>{t('teams.done')}</button>
       </div>
       <select aria-label={t('teams.pickClass')} value={classId} onChange={(e) => { setClassId(e.target.value); apply([]); }} className="min-h-11 px-3 rounded-input border-std border-border bg-surface font-bold">
         <option value="">{t('teams.noClass')}</option>
@@ -287,10 +287,10 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
       {classId && students.length > 0 && (
         <>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => void make('random')} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold">{t('teams.random')}</button>
-            <button type="button" onClick={() => void make('balanced')} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold">{t('teams.balanced')}</button>
+            <button type="button" onClick={() => void make('random')} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold">{t('teams.random')}</button>
+            <button type="button" onClick={() => void make('balanced')} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold">{t('teams.balanced')}</button>
             {saved.map((sv) => (
-              <button key={sv.name} type="button" onClick={() => apply(sv.groups.slice(0, teams))} className="min-h-11 px-4 rounded-pill border-std border-border bg-accent font-bold">{sv.name}</button>
+              <button key={sv.name} type="button" onClick={() => apply(sv.groups.slice(0, teams))} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold">{sv.name}</button>
             ))}
           </div>
           <p className="text-sm font-bold text-muted">{t('teams.handPick')}</p>
@@ -298,7 +298,7 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
             <div className="flex flex-wrap gap-1.5" aria-label={t('teams.unplaced')}>
               {unplaced.map((s) => (
                 <button key={s.id} type="button" aria-pressed={held === s.id} onClick={() => setHeld(held === s.id ? null : s.id)}
-                  className={`min-h-10 px-3 rounded-pill border-std font-bold text-sm ${held === s.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{s.name}</button>
+                  className={`min-h-10 px-3 rounded-pill border-std font-bold text-sm ${held === s.id ? 'bg-mint border-border' : 'bg-surface border-border-soft'}`}>{s.name}</button>
               ))}
             </div>
           )}
@@ -309,7 +309,7 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
                 <span className="flex flex-wrap gap-1">
                   {(groups[i] ?? []).map((id) => (
                     <button key={id} type="button" aria-pressed={held === id} onClick={(e) => { e.stopPropagation(); setHeld(held === id ? null : id); }}
-                      className={`min-h-11 px-3 rounded-pill border-std font-bold text-sm ${held === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{nameOf(id)}</button>
+                      className={`min-h-11 px-3 rounded-pill border-std font-bold text-sm ${held === id ? 'bg-mint border-border' : 'bg-surface border-border-soft'}`}>{nameOf(id)}</button>
                   ))}
                 </span>
               </div>
@@ -321,7 +321,7 @@ function ClassTeams({ teams, names, icons, autoRandom = false, onChange }: { tea
               <button type="button" disabled={!saveName.trim()} onClick={async () => {
                 const list = [...saved.filter((x) => x.name !== saveName.trim()), { name: saveName.trim(), groups }];
                 await data.setSetting(`team-sets:${classId}`, list); setSaveName(''); reload();
-              }} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold disabled:opacity-40">{t('teams.save')}</button>
+              }} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold disabled:opacity-40">{t('teams.save')}</button>
             </div>
           )}
         </>

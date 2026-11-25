@@ -54,7 +54,7 @@ export default function ThemesPage() {
         </div>
 
         <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-butter border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="#c98a00" aria-hidden="true" /></span>
+          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="var(--lemon)" aria-hidden="true" /></span>
           <span className="grid gap-1">
             <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
             <span className="font-semibold">{t('themes.featuredText')}</span>
@@ -80,7 +80,7 @@ export default function ThemesPage() {
               {BANDS.filter((b) => b !== 'all').map((b) => <option key={b} value={b}>{t(`features.band.${b}` as StringKey)}</option>)}
             </select>
           </label>
-          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={`${field} inline-flex items-center gap-2 ${onlyFavs ? '!bg-accent' : ''}`}>
+          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={`${field} inline-flex items-center gap-2 ${onlyFavs ? '!bg-butter' : ''}`}>
             <Heart weight={onlyFavs ? 'fill' : 'bold'} size={18} aria-hidden="true" />{t('themes.favorites', { count: favorites.length })}
           </button>
         </div>

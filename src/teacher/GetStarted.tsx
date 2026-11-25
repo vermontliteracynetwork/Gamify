@@ -48,7 +48,7 @@ export default function GetStarted({ steps, count, onFold }: { steps: StartSteps
   useEffect(() => { void data.getSetting<boolean>(MINIMIZED).then((v) => setSmall(!!v)); }, []);
   const toggle = () => { setSmall(!small); void data.setSetting(MINIMIZED, !small); };
   return (
-    <Panel className="mb-4 grid gap-2 bg-accent !p-3">
+    <Panel className="mb-4 grid gap-2 bg-butter !p-3">
       <div className="flex items-center gap-2">
         <div className="flex-1 flex flex-wrap items-baseline gap-x-3">
           <h2 className="font-display text-xl"><Title text={t('start.title')} /></h2>

@@ -61,7 +61,7 @@ export default function StudentPicker({ classroomId, onSignIn }: { classroomId: 
       <p className="font-bold text-lg">{t('arcade.typePin')}</p>
       <CodeBoxes value={digits} onChange={type} label={t('arcade.typePin')} shake={wrong} size="lg" />
       <p className="min-h-6 font-bold" role="status" aria-live="polite">{wrong ? t('arcade.wrongPin') : ''}</p>
-      <button type="button" onClick={() => { setWho(null); setDigits(''); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2"><ArrowLeft weight="bold" size={20} />{t('arcade.notMe')}</button>
+      <button type="button" onClick={() => { setWho(null); setDigits(''); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2"><ArrowLeft weight="bold" size={20} />{t('arcade.notMe')}</button>
     </div>
   );
 }

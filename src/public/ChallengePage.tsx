@@ -16,7 +16,7 @@ export default function ChallengePage() {
   const card = 'bg-surface border-bold border-border rounded-panel p-6 grid gap-3 content-start';
   return (
     <>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <section className="grid gap-4 justify-items-start text-left">
           <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('challenge.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('challenge.sub')}</p>
@@ -32,7 +32,7 @@ export default function ChallengePage() {
             {(['winner', 'runner'] as const).map((k, i) => (
               <motion.article key={k} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
                 className={`${card} hover-lift ${k === 'winner' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <h3 className="font-display text-3xl flex items-center gap-2">{k === 'winner' ? <Crown weight="fill" size={32} color="#c98a00" aria-hidden="true" /> : <Medal weight="fill" size={32} color="#6aa9e9" aria-hidden="true" />}<Title text={t(`challenge.${k}` as StringKey)} /></h3>
+                <h3 className="font-display text-3xl flex items-center gap-2">{k === 'winner' ? <Crown weight="fill" size={32} color="var(--lemon)" aria-hidden="true" /> : <Medal weight="fill" size={32} color="var(--sky)" aria-hidden="true" />}<Title text={t(`challenge.${k}` as StringKey)} /></h3>
                 <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`challenge.${k}.${n}` as StringKey)}</li>)}</ul>
               </motion.article>
             ))}
@@ -44,7 +44,7 @@ export default function ChallengePage() {
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-2xl">{n}</span>
+                <span className="w-12 h-12 rounded-full bg-butter border-bold border-border flex items-center justify-center font-display text-2xl">{n}</span>
                 <h3 className="font-display text-2xl">{t(`challenge.step.${n}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`challenge.step.${n}.text` as StringKey)}</p>
               </li>
@@ -60,7 +60,7 @@ export default function ChallengePage() {
               <article key={k} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-3xl flex items-center gap-2"><Icon weight="fill" size={32} aria-hidden="true" /><Title text={t(`challenge.track.${k}`)} /></h3>
                 <ol className="grid gap-2 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3, 4].map((n) => <li key={n}>{t(`challenge.track.${k}.${n}` as StringKey)}</li>)}</ol>
-                <Link to={to} className={buttonClasses('primary', 'justify-self-start min-h-12 px-5 hover-pop')}>{t(cta)}</Link>
+                <Link to={to} className={buttonClasses('main', 'justify-self-start min-h-12 px-5 hover-pop')}>{t(cta)}</Link>
               </article>
             ))}
           </div>

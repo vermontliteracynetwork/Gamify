@@ -12,11 +12,11 @@ const TINT: Record<Level, string> = { Supports: '#e5f4e4', 'Partially supports':
 export default function ConformanceReport() {
   const count = (l: Level) => CRITERIA.filter((c) => c.result === l).length;
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-5">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-5">
       <article className="bg-surface border-bold border-border rounded-panel p-5 sm:p-8 grid gap-4 print:border-0 print:p-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="font-display text-3xl sm:text-4xl min-w-0"><Title text={t('vpat.title')} /></h1>
-          <Button variant="primary" className="no-print shrink-0" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('vpat.print')}</Button>
+          <Button variant="main" className="no-print shrink-0" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('vpat.print')}</Button>
         </div>
         <p className="font-semibold">{t('vpat.intro', { date: REPORT_DATE })}</p>
         <p className="font-bold">{t('vpat.summary', { s: count('Supports'), p: count('Partially supports'), n: count('Not applicable'), d: count('Does not support') })}</p>

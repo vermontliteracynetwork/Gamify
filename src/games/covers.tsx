@@ -408,7 +408,7 @@ export function CyclingCover({ gameId, className = '' }: { gameId: string; class
         </motion.div>
       </AnimatePresence>
       <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1" aria-hidden="true">
-        {Array.from({ length: count }, (_, k) => <span key={k} className={`w-2 h-2 rounded-full border border-border ${k === i ? 'bg-accent' : 'bg-surface/80'}`} />)}
+        {Array.from({ length: count }, (_, k) => <span key={k} className={`w-2 h-2 rounded-full border border-border ${k === i ? 'bg-mint' : 'bg-surface/80'}`} />)}
       </span>
     </div>
   );

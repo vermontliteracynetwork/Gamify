@@ -22,7 +22,7 @@ export default function BetaGameForm({ gameId, onDone }: { gameId: string; onDon
   const [change, setChange] = useState('');
   const [sent, setSent] = useState(false);
   const name = getGame(gameId)?.name ?? gameId;
-  const chip = (on: boolean) => `min-h-10 px-3 rounded-pill border-std border-border font-bold text-sm ${on ? 'bg-accent' : 'bg-surface'}`;
+  const chip = (on: boolean) => `min-h-10 px-3 rounded-pill border-std border-border font-bold text-sm ${on ? 'bg-butter' : 'bg-surface'}`;
   const row = (label: StringKey, opts: readonly string[], value: string | null, set: (v: string) => void, prefix: string) => (
     <fieldset className="grid gap-1.5 border-0 p-0 m-0">
       <legend className="font-bold text-sm mb-1">{t(label)}</legend>
@@ -56,7 +56,7 @@ export default function BetaGameForm({ gameId, onDone }: { gameId: string; onDon
       {row('bform.setup', SCALE, setup, setSetup, 'bform.scale')}
       <label className="grid gap-1 font-bold text-sm">{t('bform.broke')}<input value={broke} onChange={(e) => setBroke(e.target.value)} maxLength={200} className={fieldClasses('sm', 'w-full')} /></label>
       <label className="grid gap-1 font-bold text-sm">{t('bform.change')}<input value={change} onChange={(e) => setChange(e.target.value)} maxLength={200} className={fieldClasses('sm', 'w-full')} /></label>
-      <button type="submit" disabled={!worked} className="justify-self-center min-h-12 px-6 rounded-input border-bold border-border bg-accent font-display text-lg disabled:opacity-40">{t('bform.send')}</button>
+      <button type="submit" disabled={!worked} className="justify-self-center min-h-12 px-6 rounded-input border-bold border-border bg-grape text-white font-display text-lg disabled:opacity-40">{t('bform.send')}</button>
     </form>
   );
 }

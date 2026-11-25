@@ -99,7 +99,7 @@ export default function SetDetailsPanel({ set, onChange, readOnly, footer }: { s
         <SetCover set={set} className="aspect-[16/9] max-w-56 rounded-input border-std border-border" />
         {!readOnly && (
           <div className="flex flex-wrap gap-2">
-            <label className="min-h-11 px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
+            <label className="min-h-11 px-3 rounded-pill border-std border-border bg-white font-bold text-sm inline-flex items-center gap-1.5 cursor-pointer">
               <UploadSimple weight="bold" size={16} />{t('details.cover')}
               <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onChange({ ...set, cover: await imageFileToDataUrl(f, 800) }); }} />
             </label>

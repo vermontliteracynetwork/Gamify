@@ -462,7 +462,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
 
   const ALL_TOOLS: [Tool, Icon][] = [['move', HandGrabbing], ['brush', PaintBrush], ['eraser', Eraser], ['restore', MagicWand], ['fill', PaintBucket], ['sticker', Sticker], ['shape', Shapes], ['text', TextT]];
   const TOOLS = ALL_TOOLS.filter(([id]) => (!simple || (id !== 'shape' && id !== 'text')) && (id !== 'restore' || !!restoreFrom));
-  const handle = 'absolute w-9 h-9 rounded-full border-bold border-border bg-accent flex items-center justify-center touch-none';
+  const handle = 'absolute w-9 h-9 rounded-full border-bold border-border bg-butter flex items-center justify-center touch-none';
 
   return (
     <div className="fixed inset-0 z-50 bg-black/45 flex items-stretch justify-center p-2 sm:p-4" role="dialog" aria-modal="true" aria-label={t('studio.title', { piece: piece.label })}>
@@ -475,7 +475,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
           {restoreFrom && <IconButton label={t(original ? 'studio.startOverUpload' : 'studio.startOver')} onClick={startOver}><ClockCounterClockwise weight="bold" size={20} /></IconButton>}
           <IconButton variant="danger" label={t('studio.clearAll')} onClick={() => setConfirmClear(true)}><Trash weight="bold" size={20} /></IconButton>
           <IconButton label={t('studio.cancel')} onClick={onClose}><X weight="bold" size={20} /></IconButton>
-          <Button variant="primary" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
+          <Button variant="main" disabled={saving} onClick={() => void save()}>{t('studio.use')}</Button>
         </div>
         {confirmClear && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/45" role="alertdialog" aria-modal="true" aria-label={t('studio.clearAsk')}>
@@ -491,7 +491,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
           </div>
         )}
         {warn.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-accent border-b-[2px] border-border" role="alert">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 bg-butter border-b-[2px] border-border" role="alert">
             <span className="font-bold flex-1 min-w-48">{t('studio.hardToRead', { words: warn.join(', ') })}</span>
             <Button onClick={() => setWarn([])}>{t('studio.fixIt')}</Button>
             <Button onClick={() => void save(true)}>{t('studio.saveAnyway')}</Button>
@@ -503,7 +503,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
           <div role="radiogroup" aria-label={t('studio.tools')} className="flex lg:flex-col gap-1.5 p-2 border-b-[2px] lg:border-b-0 lg:border-r-[2px] border-border-soft overflow-x-auto lg:overflow-y-auto">
             {TOOLS.map(([id, I]) => (
               <button key={id} type="button" role="radio" aria-checked={tool === id} onClick={() => { setTool(id); if (id !== 'move') setSel(null); if (simple) speak(t(`studio.say.${id}`), settings); }}
-                className={`shrink-0 ${simple ? 'w-24 min-h-20 text-sm' : 'w-[4.5rem] min-h-14 text-xs'} rounded-input border-std grid justify-items-center content-center gap-0.5 font-bold ${tool === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                className={`shrink-0 ${simple ? 'w-24 min-h-20 text-sm' : 'w-[4.5rem] min-h-14 text-xs'} rounded-input border-std grid justify-items-center content-center gap-0.5 font-bold ${tool === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                 <I weight={tool === id ? 'fill' : 'bold'} size={simple ? 34 : 24} aria-hidden="true" />{t(`studio.tool.${id}`)}
               </button>
             ))}
@@ -602,7 +602,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
               <div role="radiogroup" aria-label={t('studio.brushKind')} className="grid grid-cols-2 gap-1.5">
                 {(['pen', 'marker', 'crayon', 'spray'] as const).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={brush === k} onClick={() => { setBrush(k); setTool('brush'); }}
-                    className={`min-h-11 rounded-input border-std font-bold text-sm ${brush === k && tool === 'brush' ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`studio.brush.${k}`)}</button>
+                    className={`min-h-11 rounded-input border-std font-bold text-sm ${brush === k && tool === 'brush' ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`studio.brush.${k}`)}</button>
                 ))}
               </div>
               <label className="grid gap-1 font-bold text-sm">{t('studio.size', { size })}
@@ -615,13 +615,13 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
               <div role="radiogroup" aria-label={t('studio.shelves')} className="flex flex-wrap gap-1">
                 {['all', ...SHELVES.map(([k]) => k), 'things'].map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={shelf === k} onClick={() => setShelf(k)}
-                    className={`min-h-9 px-2.5 rounded-pill border-std font-bold text-xs ${shelf === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`studio.shelf.${k}` as StringKey)}</button>
+                    className={`min-h-9 px-2.5 rounded-pill border-std font-bold text-xs ${shelf === k ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`studio.shelf.${k}` as StringKey)}</button>
                 ))}
               </div>
               <div className="grid grid-cols-6 gap-1">
                 {found.map(([name, I]) => (
                   <button key={name} type="button" draggable aria-label={name} aria-pressed={sticker?.label === name} onClick={(e) => pickSticker(e, name, true)} onDragStart={(e) => dragOut(e, name, true)}
-                    className={`aspect-square rounded-input border-std flex items-center justify-center ${sticker?.label === name ? 'border-border bg-accent' : 'border-transparent'}`}><I weight="fill" size={28} /></button>
+                    className={`aspect-square rounded-input border-std flex items-center justify-center ${sticker?.label === name ? 'border-border bg-butter' : 'border-transparent'}`}><I weight="fill" size={28} /></button>
                 ))}
               </div>
               {found.length === 0 && <p className="text-sm font-bold text-muted">{t('studio.noStickers')}</p>}
@@ -631,7 +631,7 @@ export default function DrawStudio({ piece, image, original, onSave, onClose, si
               <div role="radiogroup" aria-label={t('studio.shapes')} className="grid grid-cols-5 gap-1.5">
                 {(Object.keys(SHAPE_SVG) as ShapeKind[]).map((k) => (
                   <button key={k} type="button" role="radio" aria-checked={shape === k && tool === 'shape'} aria-label={t(`studio.shape.${k}`)} onClick={() => { setShape(k); setTool('shape'); }}
-                    className={`min-h-12 rounded-input border-std flex items-center justify-center ${shape === k && tool === 'shape' ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                    className={`min-h-12 rounded-input border-std flex items-center justify-center ${shape === k && tool === 'shape' ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                     <img src={svgUrl(svgDoc(SHAPE_SVG[k](color, color2, outline)))} alt="" className="w-7 h-7" />
                   </button>
                 ))}

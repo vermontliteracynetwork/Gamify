@@ -74,7 +74,7 @@ export default function LoginPage() {
   const problem = (k: SignUpProblem) => problems.includes(k) && <span id={`p-${k}`} className="text-sm font-bold text-error" role="alert">{t(`login.problem.${k}` as StringKey)}</span>;
   const bad = (...k: SignUpProblem[]) => k.some((x) => problems.includes(x));
   return (
-    <main className="max-w-xl mx-auto px-4 pt-10 pb-16 grid gap-4">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-4">
       <Panel className="grid gap-4">
         <h1 className="title-bubble text-4xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
         <Tabs fill className="mb-0" label={t('login.tabs')} value={mode} onChange={(m) => { setMode(m); setProblems([]); setWrong(false); }} options={[{ id: 'login', label: t('login.tab.login') }, { id: 'signup', label: t('login.tab.signup') }]} />

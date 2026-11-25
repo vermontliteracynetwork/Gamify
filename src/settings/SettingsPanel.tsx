@@ -119,7 +119,7 @@ export function SettingsPanel({ open, onClose, context }: { open: boolean; onClo
         {TABS.map(({ id, icon: Icon, label }) => (
           <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
             className={`shrink-0 min-h-14 min-w-16 px-2.5 rounded-input border-std flex flex-col items-center justify-center gap-0.5 font-bold text-xs
-              ${tab === id ? 'bg-accent border-border' : 'bg-surface border-transparent hover:bg-surface-2'}`}>
+              ${tab === id ? 'bg-butter border-border' : 'bg-surface border-transparent hover:bg-surface-2'}`}>
             <Icon weight="bold" size={22} aria-hidden="true" />{t(label)}
           </button>
         ))}
@@ -236,7 +236,7 @@ function MirrorControl({ gameId }: { gameId: string }) {
         <>
           <span className="font-display text-4xl tracking-[0.15em]" aria-label={t('host.codeIs', { code })}>{code}</span>
           <span className="text-sm font-semibold">{t('mirror.teacherHow', { host: window.location.host })}</span>
-          <button type="button" onClick={() => { setMirrorCode(''); setCode(''); }} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold">{t('mirror.stop')}</button>
+          <button type="button" onClick={() => { setMirrorCode(''); setCode(''); }} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold">{t('mirror.stop')}</button>
         </>
       ) : (
         <button type="button" onClick={async () => { const c = (await makeGameCode(gameId, '', 'mirror')).code; setMirrorCode(c); setCode(c); }} className="justify-self-start min-h-11 px-4 rounded-pill border-std border-border bg-accent font-bold">{t('mirror.start')}</button>
@@ -252,7 +252,7 @@ function StageColorPicker({ gameId }: { gameId: string }) {
   const swatch = (c: string | null, label: string) => (
     <button key={label} type="button" role="radio" aria-checked={(color ?? null) === c} aria-label={label} data-tip={label} onClick={() => setStageColor(gameId, c)}
       className={`w-11 h-11 rounded-full border-bold border-border flex items-center justify-center font-bold text-xs ${(color ?? null) === c ? 'ring-4 ring-accent' : ''}`}
-      style={c ? { background: c } : { background: 'linear-gradient(135deg, #fbfcf8 50%, #ddd6ff 50%)' }}>{c ? '' : 'A'}</button>
+      style={c ? { background: c } : { background: 'linear-gradient(135deg, #fffaf0 50%, #ddd6ff 50%)' }}>{c ? '' : 'A'}</button>
   );
   return (
     <div className="grid gap-2">

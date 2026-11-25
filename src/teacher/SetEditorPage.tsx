@@ -97,14 +97,14 @@ export default function SetEditorPage({ library: isLibrary = false }: { library?
             }} />
           </div>
         </div>
-        <Button variant="primary" onClick={() => navigate(`/teacher/activity?set=${encodeURIComponent(set.id)}`)}>{t('editor.use')}<ArrowRight weight="bold" size={18} /></Button>
+        <Button variant="main" onClick={() => navigate(`/teacher/activity?set=${encodeURIComponent(set.id)}`)}>{t('editor.use')}<ArrowRight weight="bold" size={18} /></Button>
       </div>
 
       {library && (
         <Panel className="mb-4 flex flex-wrap items-center gap-3 bg-surface-2">
           <p className="font-bold flex-1">{overLimit ? t('editor.overLimit') : t('editor.readOnly')}</p>
           <Button
-            variant="primary"
+            variant="main"
             disabled={atLimit}
             onClick={async () => {
               const copy = { ...newSet(set.name, set.questions.map((q) => ({ ...q, id: newId('q'), choices: [...q.choices] }))),
@@ -359,7 +359,7 @@ function SpreadsheetTools({ set, readOnly, onAdd }: { set: QuestionSet; readOnly
   const fileRef = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState('');
   const slug = (set.name || 'question-set').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const pill = 'min-h-9 tap px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1.5 hover-pop';
+  const pill = 'min-h-9 tap px-3 rounded-pill border-std border-border bg-white font-bold text-sm inline-flex items-center gap-1.5 hover-pop';
   async function upload(file: File) {
     const { questions, errors } = csvRowsToQuestions(parseCsv(await file.text()), () => newId('q'));
     if (questions.length) onAdd(questions);

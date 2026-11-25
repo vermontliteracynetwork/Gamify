@@ -41,7 +41,7 @@ export default function DeviceCheckPage() {
   const icon = (r: Result, size = 28) => r === 'ok' ? <CheckCircle weight="fill" size={size} color="#1f7a45" aria-hidden="true" /> : r === 'warn' ? <WarningCircle weight="fill" size={size} color="#b7791f" aria-hidden="true" /> : <XCircle weight="fill" size={size} color="#9b2c3a" aria-hidden="true" />;
   return (
     <>
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
         <h1 className="title-bubble text-5xl"><Title text={t('check.title')} /></h1>
         <p className="text-lg font-bold -mt-2">{t('check.sub')}</p>
         {!checks ? <p className="font-bold" role="status">{t('check.running')}</p> : (

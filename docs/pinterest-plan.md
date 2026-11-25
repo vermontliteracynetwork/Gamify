@@ -16,20 +16,22 @@ titled with what a teacher types keeps sending visits for months. We win on
 | Board | What goes on it | Live pins | Status |
 |---|---|---|---|
 | Classroom game ideas | Whole-class review routines, physical design, ideas for any subject | p-0016, p-0018, p-0034 | Open |
-| Every Question Becomes a Game | One pin per live game (7 of 7), linking to its how-to-play, theme guide or lesson | p-0032, p-0038 (+ the game pins below, saved here too) | Open |
+| Every Question Becomes a Game | One pin per live game (8 of 8), linking to its how-to-play, theme guide or lesson | p-0032, p-0038, p-0042 (+ the game pins below, saved here too) | Open |
 | Theme templates and printables | Blank theme templates, linked to each theme guide (`/blog/themes/:id`) | p-0033, p-0017 | Open. Named without "Free" until the owner decides (see 5) |
 | Classroom decor in the Gamify style | Patterns and stickers | none | **Parked.** Patterns are a proposal on /brand, not live; stickers are Classic art, which is never handed out (CLAUDE.md). Needs an owner decision before any pin |
 | Reading and grammar games | ELA, vocabulary, phonics and literacy centers | p-0036, p-0040 | Open |
-| Math games | Math by grade | p-0035, p-0039, p-0041 | Open |
+| Math games | Math ideas for every grade, K-12 | p-0035, p-0039, p-0041 | Open |
 | Teacher tips | Exit tickets, accessibility, planning | p-0037, p-0023 | Open |
 | Winter classroom games (seasonal) | Winter and January-return sets | p-0032 | Open Dec 1 to Feb 28 |
 | Test review games (seasonal) | Spring review | none yet | Opens mid-January (see 4) |
 
 One game per pin is the kit; every live game now has one: Game Show (p-0033,
 p-0035, p-0038), Board Game (p-0039), Match Three (p-0041), Four in a Row
-(p-0036), Bubble Pop (p-0018), Bowling (p-0032), Question Tracker (p-0040).
-If Territory is listed on the main site (a change was in progress on
-2026-11-25), it gets its own pin kit before any pin says "every game".
+(p-0036), Bubble Pop (p-0018), Bowling (p-0032), Question Tracker (p-0040),
+Territory (p-0042, Dec 15; listed on the main site 2026-11-25). Territory's
+how-to-play page still mentions a window and furniture the drawn room does not
+have; fix the page before p-0042 posts. Territory has no power-ups; in games
+that have one, the bonus power-up is "Prize Chest" in every pin.
 
 ## 2. The pin kit (per game and theme)
 
@@ -46,7 +48,12 @@ If Territory is listed on the main site (a change was in progress on
    games come with Plus, Pro and Homeschool (`src/theme/builder/templateAccess.tsx`).
    So only Game Show pins may say "free template".
 
-Copy in the teacher voice: what the class does and learns, the grade, the time.
+Copy in the teacher voice: what the class does and learns, and the time. Gamify
+is K-12 in every title and description (owner, 2026-11-25; bible 4 K-12
+positioning): "Whole Class Review Game for K-12", never "for K-5" or "for
+Elementary". A pin promoting one blog idea may name that idea's best-fit band as
+the idea's fit ("a K-3 idea"), never as who Gamify is for. Live means every
+student on their own device, at every grade.
 Every detail comes from a live page (blog post, theme guide, how-to-play); no
 prices on idea pins.
 
@@ -59,19 +66,22 @@ evidence. What the search-result snippets suggested, unverified: teachers search
 curriculum-specific phrases (grade + subject + activity) rather than broad
 words; Pinterest's search-bar suggestions and related searches are the usual
 way sellers find terms; the first ~40 characters of a title matter most. The
-list below is the team's best guess built on that pattern (grade + subject +
-"game"); check each one before relying on it.
+list below is the team's best guess built on that pattern (subject + "game",
+with K-12 in the title); check each one before relying on it. Owner rule
+(2026-11-25): K-12 keywords first; a grade-specific term is used only beside a
+K-12 term on the same pin.
 
 | Theme | Keywords to test (title first, then description) |
 |---|---|
 | Review, any subject | review game ideas, whole class review game, friday review game, unit review game, test review activity, no prep review activity |
-| By grade | kindergarten math games, first grade math game, 2nd grade math games, 3rd grade math games, 4th grade math review, middle school ela games, high school review game |
+| K-12 (use first) | k-12 review games, k-12 math games, k-12 vocabulary games, k-12 literacy games, k-12 formative assessment, k-12 special education, #k12teacher |
+| By grade (only beside a K-12 term) | kindergarten math games, first grade math game, 2nd grade math games, 3rd grade math games, 4th grade math review, middle school ela games, high school review game |
 | Math | fractions review game, counting practice game, independent math practice, math early finishers, math centers game |
 | Reading and grammar | vocabulary review game, phonics review game, literacy centers games, kindergarten literacy centers, ela station ideas |
 | Themes and art | free printable classroom game, review game template, classroom art project, clay classroom project, art integration lesson, student design project |
-| Teacher tips | exit ticket ideas, exit tickets kindergarten, formative assessment k-3, teacher tips elementary |
+| Teacher tips | exit ticket ideas, k-12 formative assessment, exit tickets kindergarten, teacher tips |
 | Inclusive | accessible classroom games, special education games, read aloud games, calm classroom activity |
-| Seasonal | winter review game, kindergarten winter activities, snowman classroom activity; later: test prep games, state test review game, spring review activities |
+| Seasonal | winter review game, winter classroom games, snowman classroom activity; later: test prep games, state test review game, spring review activities |
 
 How to verify (owner or team, once the account exists, about 20 minutes):
 type each phrase in the Pinterest search bar and note the suggested endings;

@@ -352,7 +352,7 @@ export default function FourInARow() {
             <>
               <p className="font-bold text-lg">{t('fr.waitingText', { host: window.location.host })}</p>
               <p className="font-display text-6xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: hostCode })}>{hostCode}</p>
-              <button type="button" onClick={() => { link.current?.close(); link.current = null; setPhase('setup'); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('setup.back')}</button>
+              <button type="button" onClick={() => { link.current?.close(); link.current = null; setPhase('setup'); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-white font-bold">{t('setup.back')}</button>
             </>
           )}
         </div>

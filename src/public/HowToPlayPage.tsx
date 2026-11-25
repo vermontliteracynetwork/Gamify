@@ -44,11 +44,11 @@ export default function HowToPlayPage() {
   const list = 'grid gap-2 pl-5 m-0 font-semibold text-lg';
   return (
     <>
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('howto.cardTitle', { game: game.name })} /></h1>
         <p className="text-xl font-bold">{h.goal}</p>
         <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} withHint />)}</div>
-        <GameCover gameId={game.id} className="aspect-[21/9] rounded-panel border-bold border-border" />
+        <GameCover gameId={game.id} className="aspect-[21/9] max-h-[22rem] w-full rounded-panel border-bold border-border" />
 
         <div className="grid sm:grid-cols-2 gap-3">
           {SHOTS.map((s) => (

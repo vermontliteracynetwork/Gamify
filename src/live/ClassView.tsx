@@ -109,13 +109,13 @@ export default function ClassView(p: ClassViewProps) {
           </div>
           <div role="tablist" aria-label={t('live.cv.tabs')} className="flex gap-1 p-1 rounded-pill bg-surface-2 border-std border-border-soft">{tabBtn('class')}{tabBtn('question')}</div>
           <Button size="sm" aria-pressed={hide} onClick={() => setHide(!hide)}>{hide ? <Eye weight="bold" size={16} /> : <EyeSlash weight="bold" size={16} />}{t('live.cv.hideNames')}</Button>
-          <Button size="sm" variant="primary" onClick={p.onClose}><X weight="bold" size={16} />{t('live.cv.back')}</Button>
+          <Button size="sm" variant="secondary" onClick={p.onClose}><X weight="bold" size={16} />{t('live.cv.back')}</Button>
         </header>
         <p className="m-0 shrink-0 flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-input px-3.5 py-2 bg-gamify text-sm">
           <EyeSlash weight="bold" size={18} aria-hidden="true" /><b>{t('live.cv.private')}</b><span className="font-semibold">{t('live.cv.privateText')}</span>
         </p>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Button variant="primary" onClick={p.onPause}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}{state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')}</Button>
+          <Button variant="main" onClick={p.onPause}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}{state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')}</Button>
           {p.canMonitor && <>
             <input value={p.message} onChange={(e) => p.setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className={fieldClasses('md', 'flex-1 min-w-[14rem] max-w-[22rem]')} />
             {p.templates.map((k) => <button key={k} type="button" onClick={() => p.setMessage(k)} className="min-h-9 px-3 rounded-pill border-std border-border-soft bg-surface font-bold text-sm hover:border-border">{k}</button>)}
@@ -178,7 +178,7 @@ export default function ClassView(p: ClassViewProps) {
                 {hardest ? <>
                   <p className="m-0 text-sm font-bold leading-snug">{hardest.q.prompt}</p>
                   <p className="m-0 text-xs font-semibold text-muted">{t('live.cv.hardestPick', { count: hardest.count, pick: hardest.pick })}</p>
-                  <Button size="sm" variant="primary" className="justify-self-start" onClick={() => { setQSel(hardest.q.id); setTab('question'); }}><Lightbulb weight="bold" size={16} />{t('live.cv.seeQuestion')}</Button>
+                  <Button size="sm" variant="main" className="justify-self-start" onClick={() => { setQSel(hardest.q.id); setTab('question'); }}><Lightbulb weight="bold" size={16} />{t('live.cv.seeQuestion')}</Button>
                 </> : <p className="m-0 text-sm font-semibold text-muted">{t('live.cv.noAnswers')}</p>}
               </section>
               <section className={card} aria-live="polite">

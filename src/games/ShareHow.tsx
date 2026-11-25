@@ -14,7 +14,7 @@ export default function ShareHow({ gameId, setId }: { gameId: string; setId: str
       <ChoiceRow label="How do you share?" value={how} onChange={setHow} options={[{ value: 'here', label: 'Same device' }, { value: 'code', label: 'Share a join code' }]} />
       {how === 'code' && (code
         ? <p className="font-bold">Join code: <span className="font-display text-3xl tracking-widest">{code}</span><br /><span className="text-sm text-muted">Players go to the Join page and type it.</span></p>
-        : <Button variant="primary" onClick={async () => setCode((await makeGameCode(gameId, setId, 'play')).code)}>Make a join code</Button>)}
+        : <Button variant="main" onClick={async () => setCode((await makeGameCode(gameId, setId, 'play')).code)}>Make a join code</Button>)}
     </div>
   );
 }

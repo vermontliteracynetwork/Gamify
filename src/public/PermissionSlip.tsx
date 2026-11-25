@@ -15,7 +15,7 @@ export default function PermissionSlip() {
       <article className="bg-surface border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4 print:border-0 print:p-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" />
-          <Button variant="primary" className="no-print" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('permission.print')}</Button>
+          <Button variant="main" className="no-print" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('permission.print')}</Button>
         </div>
         <h1 className="font-display text-3xl"><Title text={t('permission.title')} /></h1>
         <p className="text-lg font-semibold">{t('permission.intro')}</p>

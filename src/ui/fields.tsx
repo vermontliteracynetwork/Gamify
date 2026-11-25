@@ -41,8 +41,8 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
           const on = value === o.value;
           return (
             <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
-              className={`min-w-24 px-4 py-3 rounded-input border-bold bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-accent' : 'border-border-soft hover:border-border'}`}
-              style={{ boxShadow: on ? '0 4px 0 #000' : undefined }}>
+              className={`min-w-24 px-4 py-3 rounded-input border-bold bg-surface grid justify-items-center gap-2 font-bold motion-safe:transition-transform motion-safe:hover:-translate-y-0.5 ${on ? 'border-border ring-4 ring-border ring-offset-4 ring-offset-paper' : 'border-border-soft hover:border-border'}`}
+              style={{ boxShadow: on ? '0 4px 0 var(--ink)' : undefined }}>
               {o.art}<span>{o.label}</span>
               {/* Touch screens have no hover, so the tip shows on the card (Claudia, 2026-11-18). */}
               {o.tip && <span className="hidden [@media(hover:none)]:block text-xs font-semibold text-muted max-w-48">{o.tip}</span>}
@@ -63,7 +63,7 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
             <button key={o.value} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.value)} data-tip={o.tip} aria-description={o.tip}
               className={`relative min-h-11 px-4 ${o.art ? 'rounded-input' : 'rounded-pill'} font-bold motion-safe:active:scale-95 motion-safe:transition-transform ${o.art ? 'py-2 grid justify-items-center gap-1' : ''}`}>
               {on && <motion.span layoutId={still ? undefined : `pick-${id}`} transition={{ type: 'spring', stiffness: 520, damping: 30 }}
-                className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-accent border-std border-border`} style={{ boxShadow: '0 2px 0 #000' }} aria-hidden="true" />}
+                className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-mint border-std border-border`} style={{ boxShadow: '0 2px 0 var(--ink)' }} aria-hidden="true" />}
               {o.art && <span className="relative">{o.art}</span>}
               <span className="relative">{o.label}</span>
             </button>
@@ -102,10 +102,10 @@ export function Stepper({ label, value, min, max, onChange, lessLabel, moreLabel
     <div className="flex items-center gap-3">
       <span className="font-bold flex-1">{label}</span>
       <button type="button" aria-label={lessLabel} disabled={value <= min} onClick={() => onChange(value - 1)}
-        className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={22} /></button>
+        className="w-12 h-12 rounded-full border-bold border-border bg-white flex items-center justify-center disabled:opacity-40"><Minus weight="bold" size={22} /></button>
       <span className="font-display text-3xl font-bold w-12 text-center tabular-nums" aria-live="polite">{value}</span>
       <button type="button" aria-label={moreLabel} disabled={value >= max} onClick={() => onChange(value + 1)}
-        className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
+        className="w-12 h-12 rounded-full border-bold border-border bg-white flex items-center justify-center disabled:opacity-40"><Plus weight="bold" size={22} /></button>
     </div>
   );
 }
@@ -122,14 +122,14 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
         const on = value === o.value;
         return (
           <button key={o.value} type="button" role="radio" aria-checked={on} aria-label={o.title} onClick={() => onChange(o.value)}
-            className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-accent' : 'opacity-90 hover:opacity-100'}`}
-            style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
+            className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : 'opacity-90 hover:opacity-100'}`}
+            style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
             <span className="block h-[clamp(5rem,30vh,18rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
             <span className="px-3 py-2 grid gap-0.5">
               <span className="font-display text-base font-bold leading-tight">{o.title}</span>
               <span className="font-semibold text-xs text-muted leading-snug">{o.hint}</span>
             </span>
-            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
+            {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-kelly border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>
         );
       })}
