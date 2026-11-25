@@ -11,7 +11,6 @@ import { Button, Tabs, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import Accordion from '../ui/Accordion';
-import PlanFeatures from '../billing/PlanFeatures';
 import CompareChart from './CompareChart';
 
 // Plans and pricing, value first (teacher, 2026-10-25): what a teacher gets

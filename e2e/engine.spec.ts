@@ -119,7 +119,8 @@ test('Question Tracker: every star stays in view around the question box', async
     await expect(dialog.getByRole('heading', { level: 2, name: prompt, exact: true })).toHaveCount(0, { timeout: 6000 });
   }
   await expect(dialog.getByRole('heading', { level: 2 })).toBeVisible();
-  await page.waitForTimeout(800);
+  // The newest star flies in big before it settles in the sky: measure after it lands.
+  await page.waitForTimeout(2000);
   await page.screenshot({ path: `test-results/sky-${info.project.name}.png` });
   const box = (await dialog.locator('> div').first().boundingBox())!;
   const stars = await page.locator('[role=img] > span svg, [role=img] > span img').evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => ({ x: r.x, y: r.y, w: r.width, h: r.height })));

@@ -30,7 +30,9 @@ const ITEM_PIECES = ['item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6']
 // layout stays put. Sizes vary a lot, from small to big.
 export interface Hole { l: number; t: number; r: number; b: number } // % of the sky
 // `uw`, `uh`: the spot's cell in % of the sky's width and height (its `unit`).
-export interface SkySpot { x: number; y: number; size: number; spin: number; unit: string; uw: number; uh: number }
+// How much wider a square gets when tipped by `spin` degrees (plus its slow turn).
+const turned = (spin: number) => Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180));
+export interface SkySpot { x: number; y: number; size: number; cap?: number; spin: number; unit: string; uw: number; uh: number }
 const DEFAULT_HOLE: Hole = { l: 15, t: 22, r: 85, b: 68 };
 
 export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HOLE, aspect = 0.7, skipTop = false): SkySpot[] {
@@ -62,7 +64,9 @@ export function skySpots(count: number, seed = 7, hole: Hole | null = DEFAULT_HO
         y: top + ((Math.floor(c / cols) + 0.4 + rand() * 0.2) / rows) * ht,
         // Small to big, each tipped its own way (teacher, 2026-10-31); a tipped
         // item stays inside its cell (and so never under the question box).
-        size: Math.min(size, 0.9 / (Math.abs(Math.cos(((Math.abs(spin) + 12) * Math.PI) / 180)) + Math.abs(Math.sin(((Math.abs(spin) + 12) * Math.PI) / 180)))),
+        size: Math.min(size, 0.9 / turned(spin)),
+        // A power star's grow (mega 1.3x) stops at its cell too, so it never slides under the question box.
+        cap: 0.9 / turned(spin),
         spin,
         unit,
         uw: w / cols,
@@ -188,7 +192,7 @@ export default function Sky({ theme, filled, total, still, label, colors, height
             ? <img src={img} alt="" className={`relative w-full h-full object-contain ${room ? 'object-bottom' : ''}`} style={{ ...(theme.pixelArt ? { imageRendering: 'pixelated' as const } : {}), ...(glow ? { filter: 'drop-shadow(0 0 6px #ffd23f) drop-shadow(0 0 2px #fff6c2)' } : {}) }} />
             : <Star weight="fill" className="relative w-full h-full drop-shadow-[0_0_10px_rgba(255,220,120,0.7)]" color={glow ? '#ffc93c' : colors?.[i] ?? pieceColor(theme, 'item-1', '#ffd166')} />;
         return (
-          <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${p.size * grow})`, height: `calc(${p.unit} * ${p.size * grow})`, zIndex: f ? 2 : undefined }}
+          <motion.span key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%`, width: `calc(${p.unit} * ${Math.min(p.size * grow, Math.max(p.size, p.cap ?? Infinity))})`, height: `calc(${p.unit} * ${Math.min(p.size * grow, Math.max(p.size, p.cap ?? Infinity))})`, zIndex: f ? 2 : undefined }}
             initial={still ? false : room ? { y: '-120%', opacity: 0, scale: 0.6 } : { scale: 0, rotate: -90, opacity: 0 }}
             animate={still ? { opacity: 1 } : room ? { y: ['0%', '-8%', '0%'], opacity: 1, scale: 1 } : { scale: 1, opacity: 1, rotate: [p.spin, p.spin + 12, p.spin - 8, p.spin] }}
             transition={still ? undefined : room

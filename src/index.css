@@ -1010,5 +1010,5 @@ html[data-motion="still"] .code-caret { animation: none; }
 /* Games whose scene is the frame (Question Tracker's sky, Territory's room)
    keep a slightly smaller card, so the stars and pieces around it stay in view. */
 .q-card.q-framed { --u: min(100vw / 1280, 100dvh / 800) * 0.8; }
-@media (orientation: portrait) and (min-width: 600px) { .q-card.q-framed { --u: min(100vw / 820, 100dvh / 1180) * 0.85; } }
+@media (orientation: portrait) and (min-width: 600px) { .q-card.q-framed { --u: min(100vw / 820, 100dvh / 1180) * 0.8; } }
 @media (max-width: 599px) { .q-card.q-framed { --u: min(100vw / 390, 100dvh / 844) * 0.92; } }
