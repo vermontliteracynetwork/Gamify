@@ -36,12 +36,13 @@ const fromClass = (r: Row): Classroom => ({
 
 const studentRow = (s: Student): Row => ({
   id: toUuid(s.id), classroom_id: toUuid(s.classroomId), name: s.name, picture_password: s.picturePassword,
-  allowed_modes: s.allowedModes ?? null, settings: { accommodations: s.accommodations ?? null, avatar: s.avatar ?? null, pin: s.pin ?? null },
+  allowed_modes: s.allowedModes ?? null, settings: { accommodations: s.accommodations ?? null, avatar: s.avatar ?? null, pin: s.pin ?? null, groups: s.groups ?? null, notes: s.notes ?? null },
 });
 const fromStudent = (r: Row): Student => ({
   id: r.id, classroomId: r.classroom_id, name: r.name, picturePassword: r.picture_password as [string, string],
   allowedModes: r.allowed_modes ?? undefined, accommodations: r.settings?.accommodations ?? undefined,
   avatar: r.settings?.avatar ?? undefined, pin: r.settings?.pin ?? undefined,
+  groups: r.settings?.groups ?? undefined, notes: r.settings?.notes ?? undefined,
 });
 
 const assignmentRow = (a: SetAssignment): Row => ({

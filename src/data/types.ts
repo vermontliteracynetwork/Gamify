@@ -80,6 +80,11 @@ export interface Student {
     shuffleAnswers?: boolean;
     tools?: { listen: boolean; calculator: boolean; scratchpad: boolean; highlighter: boolean; timesTable: boolean };
   };
+  // Small groups the teacher put this student in, by group name (approved
+  // teacher portal 3b, 2026-11-25). Teacher-only: students never see them.
+  groups?: string[];
+  // The teacher's own dated notes on this student (portal 7c). Teacher-only.
+  notes?: { at: string; text: string }[];
 }
 
 // A set assigned to a whole class (studentId absent) or to one student.
