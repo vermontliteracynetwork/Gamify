@@ -65,7 +65,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
     case 'match-three':
       // The approved in-play look (batch 7, 2026-11-24): the bold shapes on the
       // Lavender and Blue crystal checker, on the pastel cut-paper desk, three
-      // hearts lit in a match with a MATCH! burst.
+      // hearts lit in a match (the board only: her cover rule, 2026-11-24).
       return (
         <div className={base} style={{ backgroundColor: '#f6f0e4', ...PATTERNS.find((x) => x.id === 'cutpaper-pastel')!.make(false) }} aria-hidden="true">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] aspect-[5/4] rounded-[8%] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] p-[2.5%] grid grid-cols-5 grid-rows-4 shadow-[0_0.25rem_0_#1d1a33]">
@@ -78,7 +78,6 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
               );
             }))}
           </div>
-          <span className="absolute left-1/2 top-[14%] -translate-x-1/2 -rotate-6 px-[4%] py-[1%] rounded-full bg-[#fabe37] border-[0.2rem] border-[#1d1a33] font-display text-[clamp(0.7rem,4.5cqw,1.6rem)] leading-none whitespace-nowrap" style={{ fontFamily: 'Grow Year' }}>MATCH! +30</span>
         </div>
       );
     case 'four-in-a-row': {
@@ -257,14 +256,18 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
                 const x = 4 + c * 10.4, y = 3.5 + r * 9;
                 const kind = i === 0 ? 'start' : i === path.length - 1 ? 'finish' : i === 9 ? 'lose' : i === 15 ? 'again' : '';
                 const fill = kind === 'start' ? PK.mint : kind === 'finish' ? PK.lemon : kind === 'lose' ? INK : kind === 'again' ? PK.paper : P4[i % 4];
-                return <rect key={i} x={x} y={y} width="8.6" height="7.4" rx="1.6" fill={fill} stroke={INK} strokeWidth="0.7" />;
+                return (
+                  <g key={i}>
+                    <rect x={x} y={y} width="8.6" height="7.4" rx="1.6" fill={fill} stroke={INK} strokeWidth="0.7" />
+                    {kind === 'lose' && <path d={`M${x + 2.6} ${y + 1.4} h3.4 l-1.7 2.3 1.7 2.3 h-3.4 l1.7 -2.3 Z`} fill={PK.lemon} />}
+                  </g>
+                );
               })}
               <path d="M7.4 5.6 l3 1.8 -3 1.8 Z" fill={INK} />
-              <path d="M47 21.4 h3.4 l-1.7 2.4 1.7 2.4 h-3.4 l1.7 -2.4 Z" fill={PK.lemon} />
             </svg>
           </div>
-          <span className="absolute left-[26%] top-[26%] w-[6%]"><CrayonPawn color={PK.pink} size="100%" /></span>
-          <span className="absolute left-[48%] top-[44%] w-[6%]"><CrayonPawn color="#6a45f0" size="100%" /></span>
+          <span className="absolute left-[22%] top-[14%] w-[11%]"><CrayonPawn color={PK.pink} size="100%" /></span>
+          <span className="absolute left-[50%] top-[34%] w-[11%]"><CrayonPawn color="#6a45f0" size="100%" /></span>
           <span className="absolute right-[7%] bottom-[8%] w-[13%] rotate-6"><CrayonDieFace value={3} size="100%" /></span>
         </div>
       );

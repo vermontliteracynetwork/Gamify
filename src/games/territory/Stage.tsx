@@ -272,8 +272,9 @@ const pct = (n: number) => `${n}%`;
 function size(p: Piece, fit: RoomFit, crowd = 1) {
   const y = SPOTS[p.spot][1];
   const cat = p.side === 'defender';
-  const h = (cat ? 20 : fit.aspect < 1 ? 17 : 15) * (0.9 + ((y - 64) / 23) * 0.25);
-  return Math.min(Math.max(cat ? 14 : 12, h * crowd), (cat ? 15 : 11) / fit.ratio);
+  const h = (cat ? 20 : fit.aspect < 1 ? 24 : 22) * (0.9 + ((y - 64) / 23) * 0.25);
+  // Mice read at about 55% of a cat (Art Director, 2026-11-25).
+  return Math.min(Math.max(cat ? 14 : 15, h * crowd), (cat ? 15 : 16) / fit.ratio);
 }
 // Keep a piece's whole width inside the room, never touching an edge.
 function clampX(x: number, h: number, fit: RoomFit) {

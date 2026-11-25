@@ -961,7 +961,7 @@ function TerritoryCoop({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }
         <span style={at({ l: 41, t: 64, w: 10 })}><PoofArt className="w-full h-auto block" /></span>
       </RoomArt>
       <RoomStrip w={w} center={<CoopGoal />} />
-      <div className="absolute left-5 bottom-5 z-20"><Burst text="Caught one!" size={phone ? 'text-xl' : 'text-2xl'} /></div>
+      <div className="absolute left-1/2 -translate-x-1/2 top-[34%] z-20"><Burst text="Caught one!" size={phone ? 'text-xl' : 'text-2xl'} /></div>
     </div>
   );
 }
@@ -976,7 +976,7 @@ function TerritoryComp({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }
         <span className="absolute" style={{ left: '8%', top: '58%', width: '4%' }} aria-hidden="true"><Doodle kind="sparkle" color={PP.lemon} size={26} /></span>
       </RoomArt>
       <RoomStrip w={w} center={<TeamCounts />} />
-      <div className={`absolute z-20 ${phone ? 'left-3 bottom-4' : 'left-5 bottom-5'}`}><Burst text="A mouse scared a cat away!" size={phone ? 'text-lg' : 'text-2xl'} color={PP.paper} /></div>
+      <div className="absolute z-20 left-1/2 -translate-x-1/2 top-[34%]"><Burst text="A mouse scared a cat away!" size={phone ? 'text-lg' : 'text-2xl'} color={PP.paper} /></div>
     </div>
   );
 }

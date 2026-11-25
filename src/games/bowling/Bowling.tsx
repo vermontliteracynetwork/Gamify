@@ -24,6 +24,7 @@ import { usePlayClock } from '../../engine/playClock';
 import { useAsk } from '../../engine/useAsk';
 import { t } from '../../i18n';
 import { FullScreenButton, GameTopRow, GearButton, SettingsPanel } from '../../settings/SettingsPanel';
+import { CrayonPowerUp } from '../../brand/CrayonKit';
 import CloseGameButton from '../../engine/CloseGameButton';
 import { useSettings } from '../../settings/SettingsContext';
 import { useGamePool } from '../../student/session';
@@ -541,7 +542,7 @@ export default function Bowling() {
             </div>
           )}
           <AnimatePresence>
-            {twisting && <motion.img key="tw" src="/classic/powerups/tornado.webp" alt="" className="absolute left-1/2 pointer-events-none z-20" style={{ top: A.top - hN * 0.5, width: hN * 0.9, marginLeft: -hN * 0.45 }} initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} />}
+            {twisting && <motion.span key="tw" aria-hidden="true" className="absolute left-1/2 pointer-events-none z-20" style={{ top: A.top - hN * 0.5, width: hN * 0.9, marginLeft: -hN * 0.45 }} initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: 1, scale: 1, rotate: still ? 0 : [0, -15, 15, -10, 0] }} exit={{ opacity: 0, scale: 0.4 }} transition={{ duration: 0.9 }} ><CrayonPowerUp id="tornado" size={Math.round(hN * 0.9)} /></motion.span>}
             {banner && (
               // Every result pops up in the center on the top layer (teacher, 2026-11-06): a flat Grow Year pill.
               <motion.p key={banner.id} className="absolute inset-x-0 z-30 flex justify-center pointer-events-none px-4" style={{ top: bannerTop }}

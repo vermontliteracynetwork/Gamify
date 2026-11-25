@@ -46,7 +46,7 @@ type Phase = 'welcome' | 'theme' | 'setup' | 'waiting' | 'joining' | 'play' | 'e
 type First = 'p1' | 'p2' | 'random';
 // Classic colors from the approved mockup (Brand Kit palette): Sky rack, Sky deep
 // press shade, Lemon drop win line.
-const SKY = '#4ba3e8', SKY_DEEP = '#1f6fb8', GOLD = '#fabe37';
+const SKY = '#4ba3e8', SKY_DEEP = '#1d1a33', GOLD = '#fabe37';
 // Classic's own pair (approved mockup, 2026-11-24): Grape pieces with a dot and
 // Lemon pieces with a star, so the sides differ by mark as well as color
 // (WCAG 1.4.1). The Ball Collection stays on the picker after them.
