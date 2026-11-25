@@ -31,6 +31,11 @@ function Scatter({ icons, colors }: { icons: Icon[]; colors: string[] }) {
   );
 }
 
+// The box Match Three's board fills; Four in a Row's rack and Bubble Pop's
+// playfield stand exactly as tall inside it (owner, 2026-11-25: "the same
+// size as the match three (hight)").
+const BOARD_BOX = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] aspect-[5/4]';
+
 export function GameCover({ gameId, className = '' }: { gameId: string; className?: string }) {
   const base = `relative overflow-hidden ${className}`;
   switch (gameId) {
@@ -68,7 +73,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       // hearts lit in a match (the board only: her cover rule, 2026-11-24).
       return (
         <div className={base} style={{ backgroundColor: '#f6f0e4', ...PATTERNS.find((x) => x.id === 'cutpaper-pastel')!.make(false) }} aria-hidden="true">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] aspect-[5/4] rounded-[8%] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] p-[2.5%] grid grid-cols-5 grid-rows-4 shadow-[0_0.25rem_0_#1d1a33]">
+          <div className={`${BOARD_BOX} rounded-[8%] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] p-[2.5%] grid grid-cols-5 grid-rows-4 shadow-[0_0.25rem_0_#1d1a33]`}>
             {[[4, 3, 0, 1, 2], [5, 1, 1, 1, 3], [2, 0, 4, 5, 1], [3, 2, 5, 0, 4]].map((row, r) => row.map((k, c) => {
               const lit = r === 1 && c >= 1 && c <= 3;
               return (
@@ -83,11 +88,13 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
     case 'four-in-a-row': {
       // The approved rack (batch 7, 2026-11-24): a bright blue rack with cream
       // holes on the cream squiggle stage, purple dot and gold star pieces, a
-      // gold line through the four, the next piece hovering above.
+      // gold line through the four, the next piece waiting beside the rack's top
+      // (inside the cover now the rack stands as tall as Match Three's board).
       const grid = ['......', '......', '...g..', '..gp..', '.gpp..', 'gpgpp.'];
       return (
         <div className={base} style={{ background: '#f6f0e4 url(/classic/four-in-a-row/squiggles.svg) repeat center / 45% auto' }} aria-hidden="true">
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+          {/* The rack stands as tall as Match Three's board (owner, 2026-11-25). */}
+          <div className={BOARD_BOX}><svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="18 22 64 75" preserveAspectRatio="xMidYMid meet">
             <rect x="24" y="96" width="5" height="4" fill="#2f7fc4" stroke="#1d1a33" strokeWidth="0.8" /><rect x="71" y="96" width="5" height="4" fill="#2f7fc4" stroke="#1d1a33" strokeWidth="0.8" />
             <rect x="18" y="22" width="64" height="75" rx="5" fill="#4ba3e8" stroke="#1d1a33" strokeWidth="1.6" />
             {grid.map((row, r) => row.split('').map((ch, c) => {
@@ -97,8 +104,8 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
               return <circle key={`${r}-${c}`} cx={cx} cy={cy} r="4" fill="#fffaf0" stroke="#1d1a33" strokeWidth="0.9" />;
             }))}
             <path d="M26 86 L54.8 53" stroke="#1d1a33" strokeWidth="3.4" strokeLinecap="round" /><path d="M26 86 L54.8 53" stroke="#fabe37" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="64" cy="12" r="5" fill="#6a45f0" stroke="#1d1a33" strokeWidth="1" /><circle cx="64" cy="12" r="1.5" fill="#fffaf0" />
-          </svg>
+            <circle cx="90" cy="28" r="5" fill="#6a45f0" stroke="#1d1a33" strokeWidth="1" /><circle cx="90" cy="28" r="1.5" fill="#fffaf0" />
+          </svg></div>
         </div>
       );
     }
@@ -229,7 +236,8 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       // dotted aim line and the loaded bubble.
       return (
         <div className={base} style={{ background: '#f6f0e4 url(/classic/bubble-pop/doodle.svg) repeat center / 40% auto' }} aria-hidden="true">
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+          {/* The playfield stands as tall as Match Three's board (owner, 2026-11-25). */}
+          <div className={BOARD_BOX}><svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="24 4 52 92" preserveAspectRatio="xMidYMid meet">
             <rect x="24" y="4" width="52" height="92" rx="6" fill="#bfdff3" stroke="#1d1a33" strokeWidth="2" />
             {Array.from({ length: 4 }, (_, r) => Array.from({ length: r % 2 ? 6 : 7 }, (_, c) => {
               const k = (r * 3 + c * 5) % BUBBLE_COLORS.length;
@@ -239,7 +247,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
             <path d="M50 86 L58 36" stroke="#1d1a33" strokeWidth="1.1" strokeDasharray="0.1 2.4" strokeLinecap="round" />
             <circle cx="50" cy="86" r="4.6" fill="#f055a5" stroke="#1d1a33" strokeWidth="1" />
             <path d="M47.6 84.2 q1.2-1.8 3-2" stroke="#fffaf0" strokeWidth="1" fill="none" strokeLinecap="round" />
-          </svg>
+          </svg></div>
         </div>
       );
     case 'castle-quest': {
