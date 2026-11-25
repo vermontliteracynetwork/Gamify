@@ -54,3 +54,5 @@ name them in public content.
 
 | Test id | Hypothesis | Variable | Sample needed | Result | Winner | Lesson link |
 |---|---|---|---|---|---|---|
+
+- 2026-11-25, owner answer to "should a pin promoting one blog idea name its best-fit grade?": "both can be possible". Rule: a pin for a single blog idea may name that idea's grade band ("a K-3 idea") to win grade searches, or stay band-free; Gamify itself is always K-12 in every title. Test both styles and let saves and outbound clicks decide.
