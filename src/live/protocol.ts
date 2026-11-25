@@ -64,7 +64,11 @@ export type ToHost =
   | { t: 'hello'; pid: string }
   | { t: 'join'; pid: string; name: string }
   | { t: 'leave'; pid: string }
-  | { t: 'progress'; pid: string; round: number; answered: number; right: number; askedAt: number | null };
+  // `q` is the question on the student's screen now; `last` is the question
+  // just answered and the answer tapped first (the teacher's whole class on
+  // one question, 2026-11-24). Both stay on the teacher's device: they are
+  // never put in the state every student receives.
+  | { t: 'progress'; pid: string; round: number; answered: number; right: number; askedAt: number | null; q?: string; last?: { q: string; pick: string; right: boolean } };
 // Question sets go out once (not in every state update): each student's own.
 export type ToPlayers = { t: 'state'; state: LiveState } | { t: 'closed'; pid: string } | { t: 'sets'; sets: QuestionSet[] };
 export type LiveMsg = ToHost | ToPlayers;
@@ -94,4 +98,24 @@ export function reduceHost(s: LiveState, m: ToHost, approveNames: boolean, now =
     case 'progress': if (m.round !== s.round) return s; return { ...s, players: s.players.map((p) => (p.pid === m.pid ? { ...p, answered: m.answered, right: m.right, askedAt: m.askedAt, lastSeen: now } : p)), at: now };
     default: return s;
   }
+}
+
+// The teacher's private answer log (Live class view): every student's
+// answers this round, in order, and the question each one is on now. Kept on
+// the teacher's device only, never sent to students or the big screen.
+export interface AnswerLog { round: number; picks: Record<string, { q: string; pick: string; right: boolean; at: number }[]>; on: Record<string, string> }
+export const emptyLog = (round: number): AnswerLog => ({ round, picks: {}, on: {} });
+export function foldAnswer(log: AnswerLog, m: ToHost, now = Date.now()): AnswerLog {
+  if (m.t !== 'progress') return log;
+  if (m.round !== log.round) return m.round > log.round ? foldAnswer(emptyLog(m.round), m, now) : log;
+  const on = { ...log.on };
+  if (m.q) on[m.pid] = m.q; else if (m.last) delete on[m.pid];
+  const picks = m.last ? { ...log.picks, [m.pid]: [...(log.picks[m.pid] ?? []), { ...m.last, at: now }] } : log.picks;
+  return { ...log, picks, on };
+}
+// Who picked what on one question: each student's first answer to it.
+export function firstPicks(log: AnswerLog, q: string): Record<string, { pick: string; right: boolean }> {
+  const out: Record<string, { pick: string; right: boolean }> = {};
+  for (const [pid, list] of Object.entries(log.picks)) { const a = list.find((x) => x.q === q); if (a) out[pid] = { pick: a.pick, right: a.right }; }
+  return out;
 }

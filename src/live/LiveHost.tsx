@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import QRCode from 'qrcode';
 import confetti from 'canvas-confetti';
-import { ArrowCounterClockwise, ChartBar, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, SquaresFour, Trash, UsersThree, Warning, GearSix, SlidersHorizontal, X } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, ChartBar, Check, Crown, Star as StarIcon, LockSimple, LockSimpleOpen, Pause, PencilSimple, Play, Stop, SquaresFour, Trash, UsersThree, GearSix, SlidersHorizontal, X } from '@phosphor-icons/react';
 import { TIERS } from '../config';
 import { GAMES } from '../games/registry';
 import { LIBRARY } from '../data/library';
@@ -23,9 +23,9 @@ import { Button, buttonClasses, Panel } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 import Dialog from '../ui/Dialog';
-import { LimitNote } from '../billing/Upgrade';
 import { logLiveEvent } from './events';
-import { openLink, ranked, reduceHost, starColor, type LiveLink, type LivePlayer, type LiveState } from './protocol';
+import { emptyLog, foldAnswer, openLink, ranked, reduceHost, starColor, type AnswerLog, type LiveLink, type LivePlayer, type LiveState } from './protocol';
+import ClassView, { RevealCard } from './ClassView';
 import Sky from '../games/practice/Sky';
 import { PAPER, RESULT_BTN, SkyBurst, SkyCode, SkyGoalCard, SkyPlaying, SkyResults, skyStar, useBoxPct } from '../games/practice/SkyHud';
 import HintButton from '../engine/HintButton';
@@ -37,7 +37,6 @@ import { ThemedPage, useGameTheme } from '../theme/useGameTheme';
 import { pieceImage } from '../theme/library';
 
 const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl.great'] as const;
-const STUCK_MS = 60_000;
 
 // The teacher's live game screen (development plan Stage 6): a lobby with
 // name approval, rename, remove and a room lock; then a big-screen view
@@ -83,6 +82,10 @@ function Room({ game }: { game: GameCode }) {
   const [now, setNow] = useState(Date.now());
   const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}), ...(game.gameId === 'territory' ? { teams: {}, options: { pace: startQ.get('pace') ?? 'slow', rule: startQ.get('rule') ?? 'both' }, goal: startPlay.goal ?? 20 } : {}) });
   const link = useRef<LiveLink>();
+  const seenAt = useRef<Record<string, number>>({});
+  const [log, setLog] = useState<AnswerLog>(() => emptyLog(1));
+  // The answer to one question on the big screen (Live class view, One question).
+  const [reveal, setReveal] = useState<string | null>(null);
   // Closing or leaving this page ends the game for everyone, and every
   // student is told and sent back to Join (teacher, 2026-11-06).
   const stateRef = useRef(state);
@@ -103,6 +106,10 @@ function Room({ game }: { game: GameCode }) {
     link.current = l;
     const off = l.listen((m) => {
       if (m.t === 'state' || m.t === 'closed' || m.t === 'sets') return;
+      // Private to this device (Live class view): when each student was last
+      // heard from, and their answers this round. Never sent to students.
+      seenAt.current[m.pid] = Date.now();
+      if (m.t === 'progress') setLog((lg) => foldAnswer(lg, m));
       if (m.t === 'hello') { setState((s) => { l.send({ t: 'state', state: s }); l.send({ t: 'sets', sets: setsFor(s) }); return s; }); return; }
       setState((s) => {
         if (m.t === 'join' && s.roomLocked && !s.players.some((p) => p.pid === m.pid)) l.send({ t: 'closed', pid: m.pid });
@@ -124,6 +131,10 @@ function Room({ game }: { game: GameCode }) {
   }
   const setKey = [state.setId, ...Object.values(state.assign ?? {}).map((a) => a.setId ?? '')].join('|');
   useEffect(() => { link.current?.send({ t: 'sets', sets: setsFor(state) }); }, [setKey, allSets]); // eslint-disable-line react-hooks/exhaustive-deps
+  const setsInUse = useMemo(() => setsFor(state), [setKey, allSets]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Play again starts the private answer log over.
+  useEffect(() => { setLog((lg) => (lg.round === state.round ? lg : emptyLog(state.round))); setReveal(null); }, [state.round]);
+  const revealed = reveal ? setsInUse.flatMap((x) => x.questions).find((q) => q.id === reveal) : undefined;
   // Groups, a game per group and a set per student: Plus, Homeschool and Pro.
   const paid = tier !== 'free';
   const groups = state.groups ?? [{ gameId: state.gameId }];
@@ -139,7 +150,6 @@ function Room({ game }: { game: GameCode }) {
   const leaders = useMemo(() => ranked(state.players), [state.players]);
   const goal = state.goal ?? Math.max(10, inRoom.length * 10);
   const classRight = inRoom.reduce((n, p) => n + p.right, 0);
-  const allLocked = state.locks.all !== undefined;
   function lock(pid: string, on: boolean) {
     const who = pid === 'all' ? t('live.everyone') : state.players.find((p) => p.pid === pid)?.name ?? '';
     void logLiveEvent({ at: new Date().toISOString(), code: game.code, gameId: game.gameId, kind: on ? 'lock' : 'unlock', who, message: on ? message.trim() || undefined : undefined });
@@ -193,6 +203,8 @@ function Room({ game }: { game: GameCode }) {
     if (JSON.stringify(next) !== JSON.stringify(state.teams ?? {})) update((s) => ({ ...s, teams: next }));
   }, [inKey]); // eslint-disable-line react-hooks/exhaustive-deps
   function end() {
+    setMonOpen(false);
+    setReveal(null);
     update((s) => ({ ...s, phase: 'ended', locks: {} }));
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, disableForReducedMotion: true });
   }
@@ -316,7 +328,7 @@ function Room({ game }: { game: GameCode }) {
           {/* Teacher tools: small, with hover text; top left, or top right
               in the mockup's order on Question Tracker (Hint, monitor, pause,
               full screen, end). */}
-          {state.phase !== 'ended' && <div className={`absolute top-3 z-10 flex items-center gap-2 ${skyGame ? 'right-3' : 'left-3'}`}>
+          {state.phase !== 'ended' && !monOpen && <div className={`absolute top-3 z-10 flex items-center gap-2 ${skyGame ? 'right-3' : 'left-3'}`}>
             {skyGame && <HintButton gameId="star-quiz" />}
             <button type="button" onClick={() => setMonOpen((o) => !o)} aria-expanded={monOpen} aria-label={t('live.view.monitor')} data-tip={t('live.view.monitor')} className={TOOL}><SlidersHorizontal weight="bold" size={20} /></button>
             <button type="button" onClick={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} aria-label={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} data-tip={state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')} className={TOOL}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}</button>
@@ -324,39 +336,17 @@ function Room({ game }: { game: GameCode }) {
             <button type="button" onClick={() => setConfirmEnd(true)} aria-label={t('live.end')} data-tip={t('live.end')} className={TOOL}>{skyGame ? <X weight="bold" size={20} /> : <Stop weight="fill" size={18} />}</button>
             {timeLeft !== null && !skyGame && <span className="ml-1 px-3 min-h-10 inline-flex items-center rounded-pill bg-surface border-std border-border font-display text-xl tabular-nums" aria-label={t('live.timeLeft', { time: clock(timeLeft) })}>{clock(timeLeft)}</span>}
           </div>}
+          {/* The answer to one question, on the big screen: no names, no counts. */}
+          {revealed && state.phase !== 'ended' && <RevealCard question={revealed} onClose={() => setReveal(null)} />}
+          {/* The teacher's Live class view (approved /brand teacher portal 5
+              and 5b): a full private view over the big screen. */}
           {monOpen && state.phase !== 'ended' && (
-            <div className={`absolute top-16 ${skyGame ? 'right-3' : 'left-3'} z-20 w-[min(26rem,calc(100vw-1.5rem))] max-h-[calc(100%-5rem)] overflow-y-auto bg-surface border-bold border-border rounded-panel p-3 text-[var(--text)]`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="dialog" aria-label={t('live.view.monitor')}>
-              {!canMonitor ? <LimitNote>{t('live.monitorPlan')}</LimitNote> : (
-            <div className="grid gap-3">
-              <p className="text-sm font-bold">{t('live.monitorNote')}</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className="flex-1 min-w-48 min-h-11 px-3 rounded-input border-std border-border font-bold" />
-                {TEMPLATES.map((k) => <button key={k} type="button" onClick={() => setMessage(t(k))} className="min-h-10 px-3 rounded-pill border-std border-border-soft bg-surface font-bold text-sm">{t(k)}</button>)}
-                <Button variant="primary" onClick={() => lock('all', !allLocked)}>{allLocked ? <LockSimpleOpen weight="bold" size={18} /> : <LockSimple weight="fill" size={18} />}{allLocked ? t('live.unlockAll') : t('live.lockAll')}</Button>
-              </div>
-              <ul className="grid gap-2 list-none p-0 m-0" aria-label={t('live.players')}>
-                {inRoom.map((p) => {
-                  const locked = state.locks[p.pid] !== undefined || allLocked;
-                  const onQ = p.askedAt ? Math.round((now - p.askedAt) / 1000) : null;
-                  const stuck = p.askedAt !== null && now - p.askedAt > STUCK_MS;
-                  const low = p.answered >= 4 && p.right / p.answered < 0.5;
-                  return (
-                    <li key={p.pid} className={`rounded-input border-bold p-3 grid gap-1 ${stuck || low ? 'border-border bg-[#ffe3dc]' : 'border-border-soft bg-surface'}`}>
-                      <div className="flex items-center gap-2">
-                        <span className="font-display text-xl flex-1 truncate">{p.name}</span>
-                        <button type="button" onClick={() => lock(p.pid, state.locks[p.pid] === undefined)} aria-pressed={locked} aria-label={t(locked ? 'live.unlockOne' : 'live.lockOne', { name: p.name })} className={`w-10 h-10 rounded-full border-std border-border flex items-center justify-center ${locked ? 'bg-accent' : 'bg-surface'}`}>{locked ? <LockSimple weight="fill" size={18} /> : <LockSimpleOpen weight="bold" size={18} />}</button>
-                      </div>
-                      <p className="text-sm font-semibold">{t('live.tile', { right: p.right, answered: p.answered })}</p>
-                      {paid && <SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} />}
-                      <p className="text-sm font-semibold text-muted">{onQ === null ? t('live.between') : t('live.onQuestion', { s: onQ })}</p>
-                      {(stuck || low) && <p className="text-sm font-bold flex items-center gap-1"><Warning weight="fill" size={16} aria-hidden="true" />{stuck ? t('live.stuck') : t('live.guessing')}</p>}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-              )}
-            </div>
+            <ClassView state={state} gameName={gameName} setName={allSets.find((x) => x.id === state.setId)?.name || t('sets.untitled')} sets={setsInUse} log={log} seenAt={seenAt.current} now={now}
+              canMonitor={canMonitor} paid={paid} message={message} setMessage={setMessage} templates={TEMPLATES.map((k) => t(k))} lock={lock}
+              onPause={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} onEnd={() => setConfirmEnd(true)} onClose={() => setMonOpen(false)}
+              setSelect={(pl) => <SetSelect value={assignOf(pl.pid).setId ?? state.setId} label={t('live.setFor', { name: pl.name })} onChange={(v) => setAssign(pl.pid, { setId: v })} />}
+              timeLeft={timeLeft !== null ? clock(timeLeft) : null} goal={goal} classRight={classRight} reveal={reveal} setReveal={setReveal}
+              screenNow={t(revealed ? 'live.cv.onScreen.answer' : state.mode === 'together' && !territory ? 'live.board.goal' : skyGame ? 'live.cv.onScreen.sky' : territory ? 'live.cv.onScreen.room' : 'live.cv.onScreen.board')} />
           )}
 
           {confirmEnd && (

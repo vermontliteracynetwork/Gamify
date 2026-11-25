@@ -28,16 +28,18 @@ type Tally = { round: number; answered: number; right: number };
 let tally: Tally = (() => { try { return JSON.parse(sessionStorage.getItem(TALLY) ?? '') as Tally; } catch { return { round: 0, answered: 0, right: 0 }; } })();
 const saveTally = () => { try { sessionStorage.setItem(TALLY, JSON.stringify(tally)); } catch { /* this tab only */ } };
 function startRound(round: number) { if (tally.round !== round) { tally = { round, answered: 0, right: 0 }; saveTally(); } }
-export function liveAsked() {
+// `q` is the question's id; `pick` the answer tapped first (for the
+// teacher's private view of the whole class on one question).
+export function liveAsked(q?: string) {
   const s = getLive();
-  if (s) linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: Date.now() });
+  if (s) linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: Date.now(), ...(q ? { q } : {}) });
 }
-export function liveAnswered(right: boolean) {
+export function liveAnswered(right: boolean, last?: { q: string; pick: string }) {
   const s = getLive();
   if (!s) return;
   tally = { ...tally, answered: tally.answered + 1, right: tally.right + (right ? 1 : 0) };
   saveTally();
-  linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: null });
+  linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: null, ...(last ? { last: { ...last, right } } : {}) });
 }
 
 // The student's view of the room: the host's latest state, asked for on open.

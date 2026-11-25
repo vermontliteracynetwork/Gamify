@@ -41,3 +41,21 @@ describe('lobby routes', () => {
     expect(routeFor(s, 'c').pair).toBeUndefined();
   });
 });
+
+import { emptyLog, firstPicks, foldAnswer } from './protocol';
+describe('the teacher\'s private answer log', () => {
+  it('keeps each student\'s first answer to a question, the question they are on, and starts over each round', () => {
+    let log = emptyLog(1);
+    log = foldAnswer(log, { t: 'progress', pid: 'p1', round: 1, answered: 0, right: 0, askedAt: 1, q: 'q1' }, 1);
+    expect(log.on).toEqual({ p1: 'q1' });
+    log = foldAnswer(log, { t: 'progress', pid: 'p1', round: 1, answered: 1, right: 0, askedAt: null, last: { q: 'q1', pick: 'monday', right: false } }, 2);
+    log = foldAnswer(log, { t: 'progress', pid: 'p1', round: 1, answered: 2, right: 1, askedAt: null, last: { q: 'q1', pick: 'Monday', right: true } }, 3);
+    log = foldAnswer(log, { t: 'progress', pid: 'p2', round: 1, answered: 1, right: 1, askedAt: null, last: { q: 'q1', pick: 'Monday', right: true } }, 4);
+    expect(log.on).toEqual({});
+    expect(firstPicks(log, 'q1')).toEqual({ p1: { pick: 'monday', right: false }, p2: { pick: 'Monday', right: true } });
+    expect(foldAnswer(log, { t: 'progress', pid: 'p1', round: 0, answered: 9, right: 9, askedAt: null, last: { q: 'q2', pick: 'x', right: true } })).toBe(log);
+    const next = foldAnswer(log, { t: 'progress', pid: 'p1', round: 2, answered: 0, right: 0, askedAt: 5, q: 'q3' });
+    expect(next.picks).toEqual({});
+    expect(next.on).toEqual({ p1: 'q3' });
+  });
+});

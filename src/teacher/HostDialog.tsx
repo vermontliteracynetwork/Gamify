@@ -163,11 +163,12 @@ export function Choices<T extends string>({ label, value, options, onChange }: {
   );
 }
 
-export function CodeBox({ code, setName, onCopied, onShow }: { code: GameCode; setName: string; onCopied: () => void; onShow?: () => void }) {
+// `big`: the code centered and large, as on the approved Create an Activity (teacher portal 4).
+export function CodeBox({ code, setName, onCopied, onShow, big = false }: { code: GameCode; setName: string; onCopied: () => void; onShow?: () => void; big?: boolean }) {
   return (
-    <div className="grid gap-2 justify-items-start">
-      <p className="font-display text-4xl tracking-[0.2em]" aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
-      <div className="flex flex-wrap gap-2">
+    <div className={`grid gap-2 ${big ? 'justify-items-center text-center' : 'justify-items-start'}`}>
+      <p className={`font-display tracking-[0.2em] ${big ? 'text-6xl my-1' : 'text-4xl'}`} aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
+      <div className={`flex flex-wrap gap-2 ${big ? 'justify-center' : ''}`}>
         <Button onClick={() => { void navigator.clipboard?.writeText(gameLink(code)).catch(() => undefined); onCopied(); }}><Copy weight="bold" size={18} />{t('host.copyLink')}</Button>
         {onShow && <Button onClick={onShow}><ProjectorScreen weight="bold" size={18} />{t('host.show')}</Button>}
         <a href={classroomShare(gameLink(code), setName)} target="_blank" rel="noreferrer" className={buttonClasses('secondary')}><ShareNetwork weight="bold" size={18} />{t('host.classroom')}</a>
