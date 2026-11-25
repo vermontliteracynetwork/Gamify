@@ -20,7 +20,7 @@ export function RequireSignIn({ children }: { children: ReactNode }) {
       <h1 className="title-bubble text-5xl"><Title text={t('gate.title')} /></h1>
       <p className="font-bold text-lg">{t('gate.sub')}</p>
       <div className="grid sm:grid-cols-2 gap-4 w-full">
-        <Link to="/join" className="no-underline text-text bg-accent border-bold border-border rounded-panel p-6 grid gap-2 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <Link to="/join" className="no-underline text-text bg-butter border-bold border-border rounded-panel p-6 grid gap-2 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <Student weight="fill" size={48} aria-hidden="true" /><span className="font-display text-2xl">{t('gate.student')}</span>
         </Link>
         <Link to="/login" className="no-underline text-text bg-surface border-bold border-border rounded-panel p-6 grid gap-2 justify-items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>

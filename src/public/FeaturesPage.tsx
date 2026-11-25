@@ -46,7 +46,7 @@ export default function FeaturesPage() {
           <nav aria-label={t('features.jump')} className="grid sm:grid-cols-3 gap-3">
             {PILLARS.map(({ id, icon: I }, i) => (
               <motion.a key={id} href={`#${id}`} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-                className={`${card} hover-lift p-5 grid gap-2 no-underline text-text ${id === 'themes' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                className={`${card} hover-lift p-5 grid gap-2 no-underline text-text ${id === 'themes' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="w-14 h-14 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={30} aria-hidden="true" /></span>
                 <span className="font-display text-2xl">{t(`features.p.${id}` as StringKey)}</span>
                 <span className="font-semibold">{t(`features.p.${id}.short` as StringKey)}</span>
@@ -64,14 +64,14 @@ export default function FeaturesPage() {
           <QuestionDemo />
         </motion.section>
 
-        <motion.section id="themes" {...enter} aria-labelledby="themes-title" className={`${card} !bg-accent p-5 sm:p-8 grid lg:grid-cols-2 gap-6 items-center scroll-mt-24`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <motion.section id="themes" {...enter} aria-labelledby="themes-title" className={`${card} !bg-butter p-5 sm:p-8 grid lg:grid-cols-2 gap-6 items-center scroll-mt-24`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <ThemeDemo />
           <div className="grid gap-4">
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
             <p className="font-bold bg-surface border-std border-border rounded-input p-3 flex gap-2"><Sparkle weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('features.theme.challenge')}</p>
-            <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
           </div>
         </motion.section>
 
@@ -167,7 +167,7 @@ function QuestionDemo() {
   const prompt = t('features.demo.q');
   const choices = ['1/4', '4/1', '1/2', '3/4'];
   const right = 0;
-  const tiles = calm ? ['bg-surface-2', 'bg-surface-2', 'bg-surface-2', 'bg-surface-2'] : ['bg-accent', 'bg-[#d9f5d0]', 'bg-[#d6e4ff]', 'bg-[#ffd9cf]'];
+  const tiles = calm ? ['bg-surface-2', 'bg-surface-2', 'bg-surface-2', 'bg-surface-2'] : ['bg-butter', 'bg-mint-soft', 'bg-quiz-blue', 'bg-blush'];
   const toggle = 'min-h-11 px-3 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-1.5';
   return (
     <div className={`${card} p-5 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>

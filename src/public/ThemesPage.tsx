@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Heart, PaintBrush, Trophy } from '@phosphor-icons/react';
+import { ArrowRight, Heart, Trophy } from '@phosphor-icons/react';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
@@ -45,17 +45,21 @@ export default function ThemesPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <div className="grid gap-3">
-          <h1 className="title-bubble text-5xl sm:text-6xl flex items-center gap-3"><PaintBrush weight="fill" size={48} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('themes.title')} /></h1>
+          <h1 className="title-bubble text-5xl sm:text-6xl"><Title text={t('themes.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('themes.sub')}</p>
+          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
+            <Link to="/teacher/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkBuilder')}<ArrowRight weight="bold" size={16} /></Link>
+            <Link to="/blog/themes/game-show" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkGuides')}<ArrowRight weight="bold" size={16} /></Link>
+          </p>
         </div>
 
-        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-accent border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-butter border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="#c98a00" aria-hidden="true" /></span>
           <span className="grid gap-1">
             <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
             <span className="font-semibold">{t('themes.featuredText')}</span>
           </span>
-          <span className={buttonClasses('primary', '!bg-text !text-white')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
+          <span className={buttonClasses()}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
         <div className="grid gap-3 sm:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-end">
@@ -95,7 +99,7 @@ export default function ThemesPage() {
                     <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
                   </div>
                   <button type="button" aria-pressed={fav} aria-label={t(fav ? 'themes.unfavorite' : 'themes.favorite', { name: x.name })} onClick={() => toggle(x.theme.id)}
-                    className={`w-11 h-11 shrink-0 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-[#ffd9e3]' : 'bg-surface'}`}>
+                    className={`w-11 h-11 shrink-0 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-blush' : 'bg-surface'}`}>
                     <Heart weight={fav ? 'fill' : 'bold'} size={22} color={fav ? '#d6336c' : undefined} />
                   </button>
                 </div>

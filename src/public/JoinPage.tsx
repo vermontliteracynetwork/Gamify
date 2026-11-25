@@ -126,7 +126,8 @@ export default function JoinPage() {
   }
 
   return (
-    <main className="relative max-w-2xl mx-auto px-4 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+    <main className="relative max-w-2xl mx-auto px-4 pt-14 pb-16 grid justify-items-center">
+      <div className="w-full bg-surface border-bold border-border rounded-panel px-5 py-8 sm:px-10 sm:py-10 grid gap-5 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
       {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
       <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">
         <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="!w-12 !h-12 bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}><SpeakerHigh weight="bold" size={24} /></IconButton>
@@ -149,6 +150,7 @@ export default function JoinPage() {
           </motion.button>
         )}
       </AnimatePresence>
+      </div>
     </main>
   );
 }

@@ -55,7 +55,7 @@
   --color-grape: #6a45f0;
   --color-lavender: #ddd6ff;
   --color-blush: #ffd3e6;
-  --color-gamify: #b4c4fb;
+  --color-gamify: #ddd6ff; /* Lavender (teacher, 2026-11-24: the old periwinkle is retired) */
   --color-butter: #fff1b8;
 
   --color-quiz-yellow: #fff1b8;
@@ -924,3 +924,6 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 @media (min-width: 1100px) {
   body:has(.teacher-rail) .route-shell, body:has(.teacher-rail) .teacher-footer { padding-left: 14.5rem; }
 }
+
+/* Achievements on the big screen (Show on the big screen = fullscreen). */
+.ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }

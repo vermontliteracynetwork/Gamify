@@ -12,7 +12,7 @@ import { MATERIALS, PHOTO_TIPS, THEME_IDEAS } from '../beta/themeIdeas';
 const CHOICES = [
   { icon: Bug, key: 'tell.bug', color: '#ed9d75' },
   { icon: SmileySad, key: 'tell.problem', color: '#ddd6ff' },
-  { icon: Lightbulb, key: 'tell.idea', color: '#fdfd94' },
+  { icon: Lightbulb, key: 'tell.idea', color: 'var(--color-butter)' },
 ] as const;
 
 export default function BetaKitPage() {
@@ -44,7 +44,7 @@ export default function BetaKitPage() {
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-6 content-evenly justify-items-center text-center min-h-[10in]" aria-label={t('kit.posterTitle')}>
         <h2 className="font-display text-6xl"><Title text={t('kit.posterTitle')} /></h2>
-        <span className="w-44 h-44 rounded-full border-[4px] border-border bg-[#ddfcc6] flex items-center justify-center"><ChatCircleDots weight="bold" size={110} aria-hidden="true" /></span>
+        <span className="w-44 h-44 rounded-full border-[4px] border-border bg-mint-soft flex items-center justify-center"><ChatCircleDots weight="bold" size={110} aria-hidden="true" /></span>
         <p className="font-display text-3xl">{t('kit.posterTap')}</p>
         <div className="grid grid-cols-3 gap-4 w-full">
           {CHOICES.map(({ icon: Icon, key, color }) => (

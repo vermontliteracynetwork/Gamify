@@ -20,10 +20,10 @@ import { FAQS } from './faq';
 const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-2 content-start';
 type Icon = typeof Brain;
 
-function Hero({ icon: I, title, sub, children }: { icon: Icon; kicker?: string; title: string; sub: string; children: ReactNode }) {
+function Hero({ title, sub, children }: { icon?: Icon; kicker?: string; title: string; sub: string; children: ReactNode }) {
   return (
-    <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><I weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={title} /></h1>
+    <section className="grid gap-4 justify-items-start text-left">
+      <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={title} /></h1>
       <p className="text-xl font-bold max-w-3xl">{sub}</p>
       <div className="flex flex-wrap gap-3">{children}</div>
     </section>
@@ -66,7 +66,7 @@ export function SchoolsPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={Buildings} kicker={t('schools.kicker')} title={t('schools.title')} sub={t('schools.sub')}>
-          <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('schools.quote')}</Link>
+          <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
           <Link to="/beta" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('schools.pilot')}</Link>
         </Hero>
 
@@ -107,7 +107,7 @@ export function SchoolsPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => {
               return (
-                <div key={d.minSeats} className={`${card} text-center justify-items-center ${d.minSeats === 10 ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <div key={d.minSeats} className={`${card} text-center justify-items-center ${d.minSeats === 10 ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                   <p className="font-bold">{t('schools.tierTeachers', { n: d.minSeats })}</p>
                   <p className="font-display text-4xl">{t('schools.save', { off: Math.round(d.discount * 100) })}</p>
                   <p className="font-semibold">{t('schools.quoteByEmail')}</p>
@@ -120,11 +120,11 @@ export function SchoolsPage() {
 
         <FaqTeaser group="schools" />
 
-        <section className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-butter border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('schools.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('schools.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('schools.quote')}</Link>
+            <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
             <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
           </div>
         </section>
@@ -140,7 +140,7 @@ export function HomeschoolPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={House} kicker={t('hs.kicker')} title={t('hs.title')} sub={t('hs.sub')}>
-          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('hs.start')}</Link>
+          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('hs.start')}</Link>
           <Link to="/faq?for=homeschool" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('hs.questions')}</Link>
         </Hero>
 
@@ -176,11 +176,11 @@ export function HomeschoolPage() {
           {/* Free and the Homeschool plan (teacher, 2026-10-26: no Plus or co-op cards here). */}
           <div className="grid md:grid-cols-2 gap-4 items-start">
             {(['free', 'homeschool'] as const).map((k) => (
-              <div key={k} className={`${card} ${k === 'homeschool' ? '!bg-accent' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <div key={k} className={`${card} ${k === 'homeschool' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-2xl">{t(`hs.plan.${k}` as StringKey)}</h3>
                 <ul className="grid gap-1.5 list-none p-0 m-0">{(k === 'free' ? [1, 2, 3] : [1, 2, 3, 4, 5, 6, 7, 8]).map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`hs.plan.${k}.${n}` as StringKey)}</li>)}</ul>
                 <p className="font-display text-2xl mt-1">{t(`hs.plan.${k}.price` as StringKey, { m: home })}</p>
-                {k === 'homeschool' && <Link to="/login?mode=signup&plan=homeschool" className={buttonClasses('primary', 'justify-self-start min-h-12 px-6 hover-pop !bg-text !text-white')}>{t('hs.plan.homeschool.start')}</Link>}
+                {k === 'homeschool' && <Link to="/login?mode=signup&plan=homeschool" className={buttonClasses('primary', 'justify-self-start min-h-12 px-6 hover-pop')}>{t('hs.plan.homeschool.start')}</Link>}
               </div>
             ))}
           </div>
@@ -194,9 +194,9 @@ export function HomeschoolPage() {
 
         <FaqTeaser group="homeschool" />
 
-        <section className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+        <section className="bg-butter border-bold border-border rounded-panel p-6 grid gap-3 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
           <h2 className="title-bubble text-4xl"><Title text={t('hs.endTitle')} /></h2>
-          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}>{t('hs.start')}</Link>
+          <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('hs.start')}</Link>
         </section>
       </main>
       <PublicFooter />
@@ -211,7 +211,7 @@ export function StudentDataPage() {
   return (
     <>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
-        <h1 className="title-bubble text-5xl flex items-center gap-3"><ShieldCheck weight="fill" size={48} aria-hidden="true" className="shrink-0 hidden sm:block" /><Title text={t('data.title')} /></h1>
+        <h1 className="title-bubble text-5xl"><Title text={t('data.title')} /></h1>
         <p className="text-xl font-bold max-w-3xl -mt-2">{t('data.sub')}</p>
         {sections.map(({ key, n, icon: I }) => (
           <section key={key} className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>

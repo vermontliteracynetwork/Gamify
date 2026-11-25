@@ -46,7 +46,7 @@ export default function DeviceCheckPage() {
         <p className="text-lg font-bold -mt-2">{t('check.sub')}</p>
         {!checks ? <p className="font-bold" role="status">{t('check.running')}</p> : (
           <>
-            <section className={`border-bold border-border rounded-panel p-5 flex items-center gap-3 ${worst === 'ok' ? 'bg-[#d9f5d0]' : worst === 'warn' ? 'bg-accent' : 'bg-[#ffd9cf]'}`} style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
+            <section className={`border-bold border-border rounded-panel p-5 flex items-center gap-3 ${worst === 'ok' ? 'bg-mint-soft' : worst === 'warn' ? 'bg-butter' : 'bg-blush'}`} style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
               {icon(worst, 44)}
               <p className="font-display text-2xl">{t(`check.overall.${worst}` as StringKey)}</p>
             </section>

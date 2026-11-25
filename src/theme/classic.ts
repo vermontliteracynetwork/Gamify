@@ -20,14 +20,18 @@ export function classicTheme(gameId: string): GameTheme {
   const doodle = gameId === 'bubble-pop';
   // Four in a Row's Classic stage is cream with pastel squiggles (approved mockup, 2026-11-24).
   const four = gameId === 'four-in-a-row';
+  // The Big screen (join code on the projector, Live lobby) sits on the Lavender
+  // ground of the new direction (teacher, 2026-11-25: "the new theme should cover
+  // all pages"); the old periwinkle is retired (2026-11-24).
+  const big = gameId === 'big-screen';
   return {
     id: `${gameId}:classic`,
     gameId,
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle || four ? '#f6f0e4' : '#b4c4fb',
-      backgroundText: night || show || pin ? '#ffffff' : alley ? '#1d1a33' : '#000000',
+      background: night ? '#22336e' : alley || big ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle || four ? '#f6f0e4' : '#b4c4fb',
+      backgroundText: night || show || pin ? '#ffffff' : alley || big ? '#1d1a33' : '#000000',
       surface: '#fbfcf8',
       text: '#000000',
       accent: '#fdfd94',

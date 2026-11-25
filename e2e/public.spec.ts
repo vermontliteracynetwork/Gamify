@@ -125,7 +125,7 @@ test.describe('signed out', () => {
   test('Blog: post list with grade and homeschool filters, and a post with a Just try it box', async ({ page }, info) => {
     await page.goto('/');
     await page.getByRole('contentinfo').getByRole('link', { name: 'Blog' }).click();
-    await expect(page.getByRole('heading', { name: /The Gamify Blog/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Blog$/i })).toBeVisible();
     await page.getByRole('button', { name: '9-12' }).click();
     await expect(page.getByRole('link', { name: /Unit Review Tournament/ })).toBeVisible();
     await expect(page.getByRole('link', { name: /Two-Tap Exit Tickets/ })).toHaveCount(0);
