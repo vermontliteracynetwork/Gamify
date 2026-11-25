@@ -57,6 +57,12 @@ export const TEAM: TeamAgent[] = [
     needsYou: [{ text: 'Read the Vermont reminders and tell me which steps are already done', link: '/owner?s=ceo' }],
   },
   {
+    id: 'astrology-advisor', name: 'Astrology Advisor', role: 'Private: your natal chart and real planetary timing turned into career and money advice for Gamify', file: '.claude/agents/astrology-advisor.md', color: '#8c7ae6',
+    status: 'working', updated: '2026-11-25', reportsTo: CEO_ID,
+    workingOn: ['Astrology page in the Developer Portal: your chart, strengths, watch-outs and 2026 to 2028 timing', 'In the CEO Agent chat: @astrology_advisor'],
+    needsYou: [{ text: 'Confirm your birth time (11:22 am) is from a birth certificate: the houses and rising sign depend on it', link: '/owner?s=astro' }],
+  },
+  {
     id: 'beta-lead', name: 'Beta Lead', role: 'Runs the beta test: invites, onboarding, weekly upkeep, review and the launch decision', file: '.claude/agents/beta-lead.md', color: '#f28c5b',
     status: 'working', updated: '2026-11-24', reportsTo: CEO_ID,
     workingOn: ['Beta Test Plan written from your answers (dev plan doc tab): Pro free, every game tested, a question set and a theme from every tester, short forms', 'Built: /beta updated, tester checklist, Beta form after each game, three-face rating with a comment, Beta test page on /owner', 'In the CEO Agent chat: @beta_lead'],

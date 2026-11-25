@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Megaphone, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -31,6 +31,7 @@ import { supabase } from '../data/supabase';
 import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import MarketingCard from './marketing/MarketingCard';
 import CeoCard from './CeoCard';
+import AstroCard from './AstroCard';
 import BetaSpec from './BetaSpec';
 import { AccessCard, LedgerCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
 
@@ -57,7 +58,7 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing';
+type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
   { id: 'ceo', label: 'owner.ceo', icon: Crown },
@@ -76,6 +77,7 @@ const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'preview', label: 'owner.preview', icon: Eye },
   { id: 'gallery', label: 'owner.gallery', icon: PaintBrush },
   { id: 'beta', label: 'owner.beta', icon: UsersThree },
+  { id: 'astro', label: 'owner.astro', icon: MoonStars },
 ];
 
 // The developer dashboard (teacher, 2026-11-13: "simple, clean lines,
@@ -107,6 +109,7 @@ function Desktop() {
     gallery: <GalleryCard />,
     beta: <div className="grid gap-6"><BetaSpec /><BetaCard /></div>,
     marketing: <MarketingCard />,
+    astro: <AstroCard />,
   };
   const linkCls = 'dash-nav-item no-underline';
   return (
