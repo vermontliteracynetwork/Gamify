@@ -1,6 +1,6 @@
 ---
 name: marketing-bible-check
-description: "Gamify's marketing quality gate. MUST run on every post, caption, ad, campaign, Canva brief and reply template before it goes to the owner for her OK (status needs-ok). Checks goal, buyer, hook, truth, brand, psychology and ethics, platform fit, legal and kids, trend, lessons applied, tracking and accessibility. One miss means not ready."
+description: "Gamify's marketing quality gate. MUST run on every post, caption, ad, campaign, Canva brief and reply template before it goes to the owner for her OK (status needs-ok). Checks goal, buyer, hook, truth, brand, psychology and ethics, platform fit, legal and kids, trend, lessons applied, tracking, accessibility and K-12 positioning. One miss means not ready."
 argument-hint: "[post id | campaign id]"
 ---
 
@@ -25,6 +25,7 @@ Source: `docs/marketing-bible.md` section 2. Read the bible and the last 4 weeks
 | 12 | Tracked | Tracking link with the post id as utm_content; test named if it is one |
 | 13 | Accessible | Alt text on images; captions on video; good contrast; no flashing |
 | 14 | Owner notes | Every past owner note that fits (bible 12, lessons Rejected) is applied |
+| 15 | K-12 | Gamify is presented as K-12 in the hook, caption, on-screen text, Canva brief, alt text and campaign message: never "K-5", "K-3", "grades 2-5", "elementary", "for high school" as the product's audience. The reason, where it fits: adjustable game difficulty and lots of theme options (name a real control; never "free themes"). One classroom idea (a blog post, or a pin or post promoting one) may name its best-fit band as the idea's fit ("a K-3 idea"). Live means every student on their own device, at every grade; no mode tied to an age. Grade keywords and hashtags only beside a K-12 one. Owner, 2026-11-25; bible 4 K-12 positioning; `plan.test.ts` checks it |
 
 Output:
 
