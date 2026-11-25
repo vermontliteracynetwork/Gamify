@@ -7,6 +7,15 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'affiliate-terms', kind: 'decide', added: '2026-11-25', title: 'Affiliates: approve the terms',
+    why: 'The affiliate program is built (public page /affiliates, referral links and codes, the Affiliates page here, payouts into Books). The terms are predicted: 25% of what a new subscriber pays in their first 12 months, 10% of a school plan\'s first year, a 60-day window (last link or code wins), monthly payouts after a 30-day refund hold with a $25 minimum, followers 10% off their first term, and Pro free for active affiliates. One Plus yearly sale pays $19.20; one Pro yearly sale pays $36.',
+    how: 'Open /owner, Affiliates, read the terms (and docs/affiliate-program.md), then say yes or change a number. Also pick how you pay affiliates: PayPal, bank transfer, or a paid affiliate tool (a money decision).' },
+  { id: 'affiliate-legal', kind: 'legal', added: '2026-11-25', title: 'Affiliates: attorney writes the agreement; accountant on W-9s and 1099s',
+    why: 'Gamify can be held responsible for what affiliates post (FTC Endorsement Guides), so every affiliate signs an agreement with the disclosure rules, approved claims and how pay and ending work. Payments need a W-9 first, and 1099-NEC forms above the IRS threshold (it changed for 2026; the accountant confirms the number). The privacy policy needs a line about referral codes.',
+    how: 'Add to the attorney list: the affiliate agreement and program terms, and the privacy policy line. Ask the accountant: W-9 before the first payout, the 1099-NEC threshold, and how commissions are booked.' },
+  { id: 'supabase-0015', kind: 'setup', added: '2026-11-25', title: 'Run 0015 so sign-ups are counted per affiliate code',
+    why: 'Teachers who sign up with an affiliate\'s link or code keep that code on their profile, and the Affiliates page counts sign-ups and paid plans per code. It also lets affiliate applications save.',
+    how: 'Supabase SQL Editor: run supabase/migrations/0015_affiliates.sql (safe to run twice).' },
   { id: 'quickbooks', kind: 'setup', added: '2026-11-25', title: 'Later, only if you want QuickBooks too: open an Intuit developer account',
     why: 'Bookkeeping in the Developer Portal is now Gamify Books, built around Stripe: transactions, categories and rules, school invoices, customers, Profit and Loss, Schedule C summary, and a QuickBooks upload file. QuickBooks Online cannot be shown inside another site, so a live two-way sync with your QuickBooks company needs Intuit\'s own connection.',
     how: 'Only if you keep a QuickBooks Online subscription: make a free account at developer.intuit.com, create an app for "Accounting", and tell Claude. Claude asks for the keys through a secure form and builds the sync. Until then, Books, Reports, "QuickBooks upload (CSV)" makes a file QuickBooks imports (Banking, Upload transactions).' },

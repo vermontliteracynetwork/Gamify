@@ -44,6 +44,9 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - (2026-11-24, setup) Make a Pinterest business account for Gamify (dev plan Part 5B).
 - (2026-11-24, setup) Connect Canva and the social accounts for auto-posting. The visual planner and the auto-posting queue are built on /owner, under Marketing. An approved post goes out on its own once its Canva design is ready and its account is connected. Nothing posts without your OK, and ads never launch on their own. Steps: docs/marketing-autopost.md.
 - (2026-11-25, decide) Check six guesses made while rebuilding the game boards to your mockups. They are: Game Show on purple (Grape) instead of red; Four in a Row starting on the purple and gold pieces; Bowling's neon signs off in Classic; Question Tracker's goal card and message pill; keeping the name "Prize Bag"; and whether the gold team in Game Show needs a stronger color.
+- (2026-11-25, decide) Affiliates: approve the terms (25% of the first 12 months, 10% of a school plan's first year, 60-day window, $25 minimum after a 30-day hold, followers 10% off, Pro free for affiliates) and pick how affiliates are paid. See docs/affiliate-program.md.
+- (2026-11-25, legal) Affiliates: attorney writes the affiliate agreement and a privacy policy line for referral codes; accountant confirms W-9s and the 2026 1099-NEC threshold.
+- (2026-11-25, setup) Run supabase/migrations/0015_affiliates.sql so sign-ups are counted per affiliate code.
 - (2026-11-25, setup) Later, only if you want QuickBooks too: open a free Intuit developer account (developer.intuit.com) so Gamify Books can sync live with QuickBooks Online. Until then, Books makes a QuickBooks upload file.
 - (2026-11-25, decide) Territory animals: keep the code-drawn cats and mice and OK the tan floor (#f3cd8c), or license some.
 - (2026-11-25, setup) After the domain is live, ask the school web filters to list Gamify as Education (docs/web-filter-requests.md).

@@ -37,7 +37,7 @@ export async function cloudLogIn(username: string, password: string): Promise<Lo
   return 'ok';
 }
 
-export async function cloudSignUp(f: { username: string; email: string; password: string; confirm: string }): Promise<SignUpProblem[] | 'ok' | 'checkEmail' | 'offline'> {
+export async function cloudSignUp(f: { username: string; email: string; password: string; confirm: string }, ref = ''): Promise<SignUpProblem[] | 'ok' | 'checkEmail' | 'offline'> {
   const problems = signUpProblems(f, []);
   if (problems.length) return problems;
   const u = normalizeUsername(f.username);
@@ -46,7 +46,7 @@ export async function cloudSignUp(f: { username: string; email: string; password
   if (!free.data) return ['usernameTaken'];
   const { data, error } = await supabase!.auth.signUp({
     email: f.email.trim(), password: f.password,
-    options: { data: { username: u }, emailRedirectTo: `${window.location.origin}/login` },
+    options: { data: ref ? { username: u, ref } : { username: u }, emailRedirectTo: `${window.location.origin}/login` },
   });
   if (error) return /registered|exists/i.test(error.message) ? ['emailTaken'] : 'offline';
   // With email confirmation on, Supabase answers a sign-up for an email that

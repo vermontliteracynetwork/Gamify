@@ -31,6 +31,7 @@ export const CATEGORIES: { name: string; kind: 'in' | 'out'; scheduleC: string }
   { name: 'Legal', kind: 'out', scheduleC: '17 Legal and professional services' },
   { name: 'Accounting', kind: 'out', scheduleC: '17 Legal and professional services' },
   { name: 'Insurance', kind: 'out', scheduleC: '15 Insurance' },
+  { name: 'Affiliate commissions', kind: 'out', scheduleC: '10 Commissions and fees' },
   { name: 'Contractors', kind: 'out', scheduleC: '11 Contract labor' },
   { name: 'Equipment', kind: 'out', scheduleC: '13 Depreciation (ask the accountant)' },
   { name: 'Taxes and licenses', kind: 'out', scheduleC: '23 Taxes and licenses' },

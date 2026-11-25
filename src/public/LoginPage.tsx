@@ -10,6 +10,7 @@ import { Button, Panel, Tabs, fieldClasses } from '../ui/kit';
 import { openUpgrade } from '../billing/Upgrade';
 import { upgradeTo } from '../billing/upgrade';
 import Title from '../ui/Title';
+import { cleanCode, currentRef, saveRef, validCode } from '../affiliate/program';
 
 // Teacher log in and sign up (teacher, 2026-10-26): sign up with email,
 // password, confirm password and a username; log in with username and
@@ -19,6 +20,8 @@ export default function LoginPage() {
   const [params] = useSearchParams();
   const [mode, setMode] = useState<'login' | 'signup'>(params.get('mode') === 'signup' ? 'signup' : 'login');
   const [f, setF] = useState({ username: '', email: '', password: '', confirm: '' });
+  // An affiliate's code (from their link, or typed from a video).
+  const [ref, setRef] = useState(() => currentRef());
   const [problems, setProblems] = useState<SignUpProblem[]>([]);
   const [wrong, setWrong] = useState(false);
   const [note, setNote] = useState<'checkEmail' | 'confirmFirst' | 'offline' | 'setup' | null>(null);
@@ -44,7 +47,9 @@ export default function LoginPage() {
     if (cloudOn) {
       setBusy(true);
       if (mode === 'signup') {
-        const res = await cloudSignUp(f);
+        const code = cleanCode(ref);
+        if (validCode(code)) saveRef(code);
+        const res = await cloudSignUp(f, validCode(code) ? code : '');
         if (Array.isArray(res)) setProblems(res);
         else if (res === 'ok') enter();
         else setNote(res);
@@ -95,6 +100,12 @@ export default function LoginPage() {
             <label className="grid gap-1 font-bold">{t('login.confirm')}
               <input type="password" autoComplete="new-password" value={f.confirm} onChange={set('confirm')} aria-invalid={bad('confirm')} className={field} />
               {problem('confirm')}
+            </label>
+          )}
+          {mode === 'signup' && (
+            <label className="grid gap-1 font-bold">{t('login.ref')}
+              <input value={ref} maxLength={24} autoCapitalize="characters" onChange={(e) => setRef(e.target.value)} className={field} />
+              <span className="text-xs font-semibold text-muted">{t('login.refHint')}</span>
             </label>
           )}
           {wrong && <p className="font-bold text-error" role="alert">{t('login.wrong')}</p>}

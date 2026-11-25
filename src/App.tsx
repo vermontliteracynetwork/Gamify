@@ -60,6 +60,8 @@ const FeaturesPage = lazyPage(() => import('./public/FeaturesPage'));
 const ThemesPage = lazyPage(() => import('./public/ThemesPage'));
 const ChallengePage = lazyPage(() => import('./public/ChallengePage'));
 const BetaPage = lazyPage(() => import('./public/BetaPage'));
+const AffiliatesPage = lazyPage(() => import('./public/AffiliatesPage'));
+const RefLink = lazyPage(() => import('./affiliate/RefLink'));
 const DeviceCheckPage = lazyPage(() => import('./public/DeviceCheckPage'));
 const PermissionSlip = lazyPage(() => import('./public/PermissionSlip'));
 const ConformanceReport = lazyPage(() => import('./public/ConformanceReport'));
@@ -126,6 +128,8 @@ function AnimatedRoutes() {
           <Route path="/accessibility/report" element={<ConformanceReport />} />
           <Route path="/status" element={<StatusPage />} />
           <Route path="/beta" element={<BetaPage />} />
+          <Route path="/affiliates" element={<AffiliatesPage />} />
+          <Route path="/a/:code" element={<RefLink />} />
           <Route path="/check" element={<DeviceCheckPage />} />
           <Route path="/mirror/:code" element={<MirrorPage />} />
           <Route path="/teacher/live/:code" element={<RequireTeacher><LiveHost /></RequireTeacher>} />
