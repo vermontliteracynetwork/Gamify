@@ -68,36 +68,11 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
   expect(problems).toEqual([]);
 });
 
-// Share screens wear a Big screen design: draw its lobby picture, save, and
-// the live lobby shows it with a picker for the look.
-test('Big screen design: lobby picture shows in the live lobby; teacher pages have a footer', async ({ page }, info) => {
-  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
-  // Teacher pages have a footer; the full-screen Theme Builder has none (teacher, 2026-10-31).
+// Teacher pages have a footer; the full-screen Theme Builder editor has none (teacher, 2026-10-31).
+// (The Big screen design was removed by the owner, 2026-11-25.)
+test('teacher pages have a footer', async ({ page }) => {
   await page.goto('/teacher/sets');
   await expect(page.getByRole('contentinfo')).toContainText('Help Center');
-  await page.goto('/teacher/themes/big-screen');
-  await page.getByLabel('Theme name').fill('Party');
-  await page.getByRole('tab', { name: 'Upload' }).click();
-  await page.getByRole('button', { name: /^Draw the Lobby picture/ }).click();
-  const studio = page.getByRole('dialog');
-  await studio.getByRole('radio', { name: 'Stickers' }).click();
-  await studio.getByLabel('Search stickers').fill('balloon');
-  await studio.getByRole('button', { name: 'balloon', exact: true }).click();
-  const box = (await studio.getByLabel(/^Drawing of the Lobby picture/).boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await studio.getByRole('button', { name: 'Use this picture' }).click();
-  await page.getByRole('button', { name: 'Save theme' }).click();
-  await expect(page.getByText('Saved Party.', { exact: false })).toBeVisible();
-
-  await page.goto('/teacher/sets');
-  await page.getByRole('tab', { name: 'Public sets' }).click();
-  await page.getByRole('button', { name: 'Play or share' }).first().click();
-  await page.getByRole('radio', { name: /Question Tracker/ }).click();
-  await page.getByRole('button', { name: 'Host a live game' }).click();
-  await page.getByLabel('Big screen look').selectOption({ label: 'Party' });
-  await expect(page.locator('main img[src^="data:image"]').first()).toBeVisible();
-  await expect(page.getByRole('contentinfo')).toHaveCount(0);
-  await page.screenshot({ path: `test-results/bigscreen-lobby-${info.project.name}.png` });
 });
 
 test('studio: drag a sticker from the shelf onto the picture', async ({ page }, info) => {

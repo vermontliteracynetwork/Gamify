@@ -28,7 +28,7 @@ export const farmGrowManifest: GameManifest = {
     classic: [
       { id: 'classic-watering-can', name: 'Watering Can', ability: 'jobs', amount: 2, motion: 'bob', often: 2, art: 'watering-can' },
       { id: 'classic-rain-cloud', name: 'Rain Cloud', ability: 'rain', motion: 'bob', often: 1, art: 'rain-cloud' },
-      { id: 'classic-prize-bag', name: 'Treasure Chest', ability: 'bonus', amount: 5, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-prize-bag', name: 'Prize Chest', ability: 'bonus', amount: 5, motion: 'bob', often: 1, art: 'prize-bag' },
     ],
   },
   rounds: { label: 'Days', min: 4, max: 10, default: 6 },

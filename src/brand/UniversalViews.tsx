@@ -777,8 +777,8 @@ export default function UniversalViews() {
   return (
     <section className="grid gap-6">
       <div className="grid gap-1 justify-items-center text-center">
-        <h2 className="font-heading text-2xl">Universal views <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">Every shared screen, the same in every game: the welcome, the start menus (no white panel, cards on the purple ground, settings only under the way they belong to), join, lobbies, the one question screen, trackers, results, settings and pause. Each game&apos;s themable views are on Game mockups. Preview only.</p>
+        <h2 className="font-heading text-2xl">Universal views <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
+        <p className="text-sm font-semibold text-muted max-w-prose">Every shared screen, the same in every game: the welcome, the start menus (no white panel, cards on the purple ground, settings only under the way they belong to), join, lobbies, the one question screen, trackers, results, settings and pause. Each game&apos;s themable views are on Game mockups. Live in every game.</p>
       </div>
       <div className="grid gap-10 lg:grid-cols-2">
         {[...VIEWS.slice(0, 11), ...TABLETS, ...VIEWS.slice(11)].map((v) => (

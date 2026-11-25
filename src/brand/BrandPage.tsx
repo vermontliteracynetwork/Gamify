@@ -56,9 +56,9 @@ export default function BrandPage() {
       <main className="max-w-[84rem] mx-auto px-4 sm:px-8 pt-6 pb-16 grid gap-6">
         <header className="grid gap-1">
           <h1 className="title-bubble text-4xl" style={{ color: 'var(--text)' }}><Title text="Brand Kit" /></h1>
-          <p className="font-semibold text-muted">The Gamify look, motion and sound, live. Preview only.</p>
+          <p className="font-semibold text-muted">The Gamify look, motion and sound. Approved and live on the site.</p>
         </header>
-        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal (proposal)' }, { id: 'public', label: 'Public pages (proposal)' }, { id: 'more', label: 'More screens (proposal)' }, { id: 'approval', label: 'Approval' }]} /></div>
+        <div><Tabs label="Brand kit" value={tab} onChange={setTab} className="mb-0" options={[{ id: 'style', label: 'Style sheet' }, { id: 'sounds', label: 'Sound board' }, { id: 'direction', label: 'New direction' }, { id: 'views', label: 'Universal views' }, { id: 'components', label: 'Game components' }, { id: 'games', label: 'Game mockups' }, { id: 'stickers', label: 'Stickers' }, { id: 'icons', label: 'Icons' }, { id: 'teacher', label: 'Teacher portal' }, { id: 'public', label: 'Public pages' }, { id: 'more', label: 'More screens' }, { id: 'approval', label: 'Approval' }]} /></div>
         {tab === 'style' ? <StyleSheet /> : tab === 'sounds' ? <SoundBoard /> : tab === 'views' ? <UniversalViews /> : tab === 'components' ? <GameComponents /> : tab === 'games' ? <GameMockups /> : tab === 'stickers' ? <Stickers /> : tab === 'icons' ? <IconSet /> : tab === 'teacher' ? <TeacherPortal /> : tab === 'public' ? <PublicPages /> : tab === 'more' ? <MoreScreens /> : tab === 'approval' ? <Coverage onGo={go} /> : <NewDirection />}
       </main>
     </div>

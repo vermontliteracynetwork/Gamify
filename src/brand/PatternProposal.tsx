@@ -445,8 +445,8 @@ export default function PatternProposal() {
   return (
     <section className="grid gap-4 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.periwinkle}` }} aria-labelledby="pat-title" data-testid="pattern-proposal">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, color: PP.ink, border: `2px solid ${PP.ink}` }}>Proposal, not live</span>
-        <h2 id="pat-title" className="font-heading text-xl" style={{ color: PP.ink }}>Universal patterns (proposal)</h2>
+        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, color: PP.ink, border: `2px solid ${PP.ink}` }}>Approved, live</span>
+        <h2 id="pat-title" className="font-heading text-xl" style={{ color: PP.ink }}>Universal patterns</h2>
         <button type="button" aria-pressed={calm} onClick={() => setCalm((v) => !v)} className="ml-auto rounded-full px-4 min-h-11 font-bold"
           style={{ background: calm ? PP.blueCrystal : PP.paper, color: PP.ink, border: `2px solid ${PP.ink}` }}>{calm ? 'Calm version on' : 'Show Calm version'}</button>
         <button type="button" aria-pressed={seams} onClick={() => setSeams((v) => !v)} className="rounded-full px-4 min-h-11 font-bold"

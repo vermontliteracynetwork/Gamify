@@ -1317,8 +1317,8 @@ export default function GameMockups() {
   return (
     <section className="grid gap-8">
       <div className="grid gap-1">
-        <h2 className="font-heading text-2xl">Game mockups <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">The seven live games in the improved universal Classic theme, showing only what a theme can redo: the stage and background, the board and pieces, its power-up moment, its celebration and its themed Live class, student and waiting screens. Every shared screen (welcome, menus, join, lobby, question screen, results, settings) is on Universal views. Preview only: no game changes until you approve.</p>
+        <h2 className="font-heading text-2xl">Game mockups <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
+        <p className="text-sm font-semibold text-muted max-w-prose">The seven live games in the improved universal Classic theme, showing only what a theme can redo: the stage and background, the board and pieces, its power-up moment, its celebration and its themed Live class, student and waiting screens. Every shared screen (welcome, menus, join, lobby, question screen, results, settings) is on Universal views. Approved and live.</p>
       </div>
       <nav aria-label="Jump to a game" className="flex flex-wrap gap-2">
         {GAMES.map((g) => <a key={g.id} href={`#gm-${g.id}`} className="px-3 py-1.5 rounded-full font-bold text-sm border-2 border-black bg-[#fffaf0] hover:bg-[#fdfd94]">{g.name.split(' (')[0]} <span className="text-muted">{(ALL_VIEWS[g.id]?.views.length ?? 0) + 2} views</span></a>)}

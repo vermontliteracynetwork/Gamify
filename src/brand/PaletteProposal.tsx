@@ -81,8 +81,8 @@ export default function PaletteProposal() {
   return (
     <section className="grid gap-4 rounded-[2rem] p-5 sm:p-6" style={{ background: PP.paper, border: `3px dashed ${PP.periwinkle}` }} aria-labelledby="pp-title">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, color: PP.ink, border: `2px solid ${PP.ink}` }}>Proposal, not live</span>
-        <h2 id="pp-title" className="font-heading text-xl" style={{ color: PP.ink }}>Palette update (proposal)</h2>
+        <span className="rounded-full px-3 py-1 text-sm font-bold" style={{ background: PP.lemon, color: PP.ink, border: `2px solid ${PP.ink}` }}>Approved, live</span>
+        <h2 id="pp-title" className="font-heading text-xl" style={{ color: PP.ink }}>Palette</h2>
       </div>
       <p className="text-sm font-semibold max-w-prose" style={{ color: PP.quiet }}>
         Your requests of 2026-11-23: today's Gamify purple stays the main color, a light blue joins it, and every bright color has its pastel. Built from your three references (Violet Syrup, Blue Crystal, the bright crayon and kidcore palettes). Ink text on every color except Grape and Ink. Nothing on the site uses this until you approve.

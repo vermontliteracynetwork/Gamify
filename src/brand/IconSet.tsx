@@ -126,7 +126,7 @@ export default function IconSet() {
   return (
     <section className="grid gap-6">
       <div className="grid gap-1 justify-items-center text-center">
-        <h2 className="font-heading text-2xl">Icons <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
+        <h2 className="font-heading text-2xl">Icons <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
         <p className="text-sm font-semibold text-muted max-w-prose">One library (Phosphor Icons, MIT), one icon for each job, always bold, in ink, inside a round button with a 2px ink edge. The doodle crayon kit is for art inside games, never for buttons.</p>
       </div>
 

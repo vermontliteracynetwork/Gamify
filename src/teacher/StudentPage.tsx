@@ -12,7 +12,6 @@ import type { StringKey } from '../i18n/en';
 import PinGate from '../settings/PinGate';
 import Avatar from '../student/Avatar';
 import { avatarOf } from '../student/pictures';
-import { useMadeThemes } from '../theme/made';
 import { AXIS, ChartContainer, useChartAnimate } from '../ui/chart';
 import { Button, buttonClasses, IconButton } from '../ui/kit';
 import TeacherNav from '../ui/TeacherNav';
@@ -40,11 +39,10 @@ export default function StudentPage() {
   const { value: log = [] } = useAsync(() => data.listQuestionLog({ classroomId: id }), [id]);
   const { value: mine = [] } = useMySets();
   const sets = useMemo(() => [...mine, ...LIBRARY], [mine]);
-  const { themes } = useMadeThemes();
   const animate = useChartAnimate();
   const classroom = classes.find((c) => c.id === id);
   const student = students.find((s) => s.id === sid);
-  const look = themes.find((th) => th.id === classroom?.signInThemeId);
+  const look = undefined; // sign-in picture designs removed (owner, 2026-11-25)
   const [dialog, setDialog] = useState<'pin' | 'supports' | 'avatar' | 'note' | null>(null);
   const [unlocked, setUnlocked] = useState(false);
   const [note, setNote] = useState('');

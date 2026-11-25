@@ -771,8 +771,8 @@ export default function MoreScreens() {
   return (
     <section className="grid gap-8">
       <div className="grid gap-1 justify-items-center text-center">
-        <h2 className="font-heading text-2xl">More screens <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Proposal</span></h2>
-        <p className="text-sm font-semibold text-muted max-w-prose">Every live screen the other tabs did not show yet, in the New direction: student screens on every device, teacher pages laptop first, public pages on a laptop and a phone. Example data. Preview only: no live page changes until you approve.</p>
+        <h2 className="font-heading text-2xl">More screens <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black bg-[#fdfd94]">Approved, live</span></h2>
+        <p className="text-sm font-semibold text-muted max-w-prose">Every live screen the other tabs did not show yet, in the New direction: student screens on every device, teacher pages laptop first, public pages on a laptop and a phone. Example data. Approved and live.</p>
       </div>
       <nav aria-label="Jump to a screen" className="flex flex-wrap justify-center gap-2">{MORE.map((m) => <a key={m.id} href={`#ms-${m.id}`} className="px-3 py-1.5 rounded-full font-bold text-sm border-2 border-black bg-[#fffaf0] hover:bg-[#fdfd94]">{m.name.split(' (')[0]}</a>)}</nav>
       {MORE.map((m) => (

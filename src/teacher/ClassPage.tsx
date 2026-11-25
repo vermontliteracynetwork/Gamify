@@ -7,7 +7,7 @@ import { TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
-import { ALL_MODES, type Classroom, type PlayMode, type QuestionLogEntry, type QuestionSet, type SetAssignment, type Student } from '../data/types';
+import { ALL_MODES, type PlayMode, type QuestionLogEntry, type QuestionSet, type SetAssignment, type Student } from '../data/types';
 import { ModeBadge, SHOWN_MODES } from '../games/ModeBadge';
 import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
@@ -67,8 +67,7 @@ export default function ClassPage() {
     void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
   }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
   useCrumbLabel(classroom?.name);
-  const { themes: madeThemes } = useMadeThemes();
-  const look = madeThemes.find((th) => th.id === classroom?.signInThemeId);
+  const look: GameTheme | undefined = undefined; // sign-in picture designs removed (owner, 2026-11-25)
   if (!classroom) return null;
   const assignTo = (ids: string[]) => { setPreset(ids); setTab('sets'); };
 
@@ -86,9 +85,8 @@ export default function ClassPage() {
       ]} />
       {frozen && <LimitNote className="mb-4">{t('class.frozen')}</LimitNote>}
       <fieldset disabled={frozen} className="contents">
-      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} signInThemeId={classroom.signInThemeId} log={log}
+      {tab === 'students' && <StudentsTab classroomId={id} students={students} reload={reloadStudents} log={log}
         groups={<GroupsSide students={students} log={log} sets={sets} look={look} reload={reloadStudents} onNew={() => setTab('groups')} onAssign={assignTo} />} />}
-      {tab === 'students' && <SignInLook classroom={classroom} onChange={reloadClass} />}
       {tab === 'groups' && <GroupsTab students={students} log={log} sets={sets} look={look} reload={reloadStudents} onAssign={assignTo} />}
       {tab === 'report' && <ClassReport classId={id} className={classroom.name} students={students} />}
       {tab === 'sets' && <SetsTab key={preset.join()} classroomId={id} students={students} assignments={assignments} reload={reloadAssignments} preset={preset} />}
@@ -160,9 +158,8 @@ function TrendMark({ entries }: { entries: QuestionLogEntry[] }) {
   return <span role="img" aria-label={label} className="font-bold text-muted">-</span>;
 }
 
-function StudentsTab({ classroomId, students, reload, signInThemeId, log, groups }: { classroomId: string; students: Student[]; reload: () => void; signInThemeId?: string; log: QuestionLogEntry[]; groups: React.ReactNode }) {
-  const { themes } = useMadeThemes();
-  const look = themes.find((th) => th.id === signInThemeId);
+function StudentsTab({ classroomId, students, reload, log, groups }: { classroomId: string; students: Student[]; reload: () => void; signInThemeId?: string; log: QuestionLogEntry[]; groups: React.ReactNode }) {
+  const look: GameTheme | undefined = undefined;
   const tier = useTier();
   const limit = TIERS[tier].studentsPerClassroom;
   const [names, setNames] = useState('');
@@ -470,21 +467,6 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
       <p className="min-h-6 font-bold text-error" role="alert">{problem}</p>
       <Button variant="primary" onClick={() => void save()}>{t('class.avatarSave')}</Button>
     </Dialog>
-  );
-}
-
-// Which sign-in picture design the class uses (built-in or one made in the
-// Theme Builder).
-function SignInLook({ classroom, onChange }: { classroom: Classroom; onChange: () => void }) {
-  const { themes } = useMadeThemes();
-  const looks = themes.filter((th) => th.gameId === 'sign-in');
-  return (
-    <Panel className="grid gap-2 mb-4">
-      <ChoiceRow label={t('class.signInLook')} value={classroom.signInThemeId ?? 'built-in'}
-        onChange={async (v) => { await data.saveClassroom({ ...classroom, signInThemeId: v === 'built-in' ? undefined : v }); onChange(); }}
-        options={[{ value: 'built-in', label: t('class.signInBuiltIn') }, ...looks.map((th) => ({ value: th.id, label: th.name }))]} />
-      <Link to="/teacher/themes/sign-in" className="font-bold text-sm underline justify-self-start">{t('class.signInDesign')}</Link>
-    </Panel>
   );
 }
 

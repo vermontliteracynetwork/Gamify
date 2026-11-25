@@ -237,13 +237,6 @@ function Room({ game }: { game: GameCode }) {
               {pieceImage(screen.theme, 'mascot') && <img src={pieceImage(screen.theme, 'mascot')} alt="" className="w-32 h-32 object-contain motion-safe:animate-[bounce_2.4s_ease-in-out_infinite]" />}
               {qr && <img src={qr} alt={t('show.qr')} className="w-48 h-48 rounded-input border-heavy border-border" />}
             </div>
-            {screen.themes.length > 1 && (
-              <label className="flex flex-wrap items-center justify-center gap-2 font-bold text-sm">{t('live.screenLook')}
-                <select value={screen.theme.id} onChange={(e) => screen.choose(e.target.value)} className="min-h-11 px-2 rounded-input border-std border-border font-bold bg-surface">
-                  {screen.themes.map((th) => <option key={th.id} value={th.id}>{th.name}</option>)}
-                </select>
-              </label>
-            )}
           </Panel>
           <Panel className="flex flex-col gap-3 min-h-0">
             <div className="flex flex-wrap items-center gap-3">

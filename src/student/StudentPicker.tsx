@@ -6,7 +6,6 @@ import { supabase } from '../data/supabase';
 import { useAsync } from '../data/hooks';
 import type { Student } from '../data/types';
 import { t } from '../i18n';
-import { useMadeThemes } from '../theme/made';
 import Avatar from './Avatar';
 import { avatarOf } from './pictures';
 
@@ -27,9 +26,7 @@ async function loadStudents(classroomId: string): Promise<{ list: Student[]; rem
 export default function StudentPicker({ classroomId, onSignIn }: { classroomId: string; onSignIn: (s: Student) => void }) {
   const { value: loaded } = useAsync(() => loadStudents(classroomId), [classroomId]);
   const students = loaded?.list ?? [];
-  const { value: classes = [] } = useAsync(() => data.listClassrooms());
-  const { themes } = useMadeThemes();
-  const look = themes.find((th) => th.id === classes.find((c) => c.id === classroomId)?.signInThemeId);
+  const look = undefined; // sign-in picture designs removed (owner, 2026-11-25)
   const [who, setWho] = useState<Student | null>(null);
   const [digits, setDigits] = useState('');
   const [wrong, setWrong] = useState(false);
