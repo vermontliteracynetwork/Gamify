@@ -269,6 +269,9 @@ the trend-watch entry wins.
   printable, game demo) with a tracking link.
 - Pins live for months: evergreen ideas, seasonal boards posted 45 to 60 days
   before the season.
+- Boards, the pin kit per game, keywords, rhythm and measurement:
+  `docs/pinterest-plan.md` (dev plan Part 5B, 2026-11-25). Only say "free
+  template" where a Free teacher can download it (today: Game Show).
 
 ### TikTok (reach and personality)
 - 1080 × 1920 (9:16), hook in the first 1 to 2 seconds, on-screen text, captions on.
