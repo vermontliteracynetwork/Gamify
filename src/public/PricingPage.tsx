@@ -19,6 +19,11 @@ import PlanFeatures from '../billing/PlanFeatures';
 // call. Teacher-facing only: student pages never show prices. Every number
 // comes from src/config.ts.
 const fmt = (n: number) => (Number.isFinite(n) ? String(n) : t('pricing.unlimited'));
+// About what a yearly plan costs a school day (180 days), as on the approved mockup.
+const perDay = (year: number) => { const d = year / 180; return d < 1 ? t('pricing.perDayCents', { n: Math.round(d * 100) }) : t('pricing.perDayDollars', { n: d.toFixed(2) }); };
+// One Grow Year size for section titles (the approved /brand Pricing mockup).
+const H2 = 'title-bubble text-[2rem] sm:text-[2.75rem] leading-none';
+const money = (n: number) => (n % 1 ? n.toFixed(2) : String(n));
 const perMonth = (x: Exclude<Tier, 'free'>, b: Billing) => { const m = PRICES_USD[x][b] / billingMonths(b); return m % 1 ? m.toFixed(2) : String(m); };
 
 export default function PricingPage() {
@@ -60,10 +65,10 @@ export default function PricingPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
         <div>
-          <h1 className="title-bubble text-4xl sm:text-5xl mb-3"><Title text={t('pricing.title')} /></h1>
-          <p className="text-lg sm:text-xl font-bold max-w-2xl">{t('pricing.sub')}</p>
-          <ul className="flex flex-wrap gap-2 list-none p-0 mt-4 mb-0">
-            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-1.5 bg-surface border-std border-border rounded-pill px-3 min-h-10 font-bold text-sm"><I weight="fill" size={18} aria-hidden="true" />{text}</li>)}
+          <h1 className="title-bubble mb-4"><Title text={t('pricing.title')} /></h1>
+          <p className="text-lg sm:text-xl font-semibold leading-snug max-w-3xl">{t('pricing.sub')}</p>
+          <ul className="flex flex-wrap gap-3 list-none p-0 mt-5 mb-0">
+            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-2 bg-white border-bold border-border rounded-pill px-4 sm:px-5 min-h-12 font-bold"><I weight="bold" size={18} aria-hidden="true" />{text}</li>)}
           </ul>
         </div>
 
@@ -74,20 +79,20 @@ export default function PricingPage() {
         )}
         <Tabs value={billing} onChange={setBilling} label={t('pricing.billing')} className="justify-self-start mb-0"
           options={BILLINGS.map((b) => ({ id: b.id, label: b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) }) }))} />
-        <div className="grid md:grid-cols-3 gap-4 items-stretch">
+        <div className="grid md:grid-cols-3 gap-5 items-stretch pt-2">
           {tiers.map((x, i) => {
             return (
-              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-bold border-border p-5 grid gap-3 content-start relative ${x === 'plus' ? 'bg-butter md:-mt-3 md:mb-3' : 'bg-surface'}`} style={{ boxShadow: x === 'plus' ? 'var(--shadow-sticker-lg)' : 'var(--shadow-sticker)' }}>
-                {x === 'plus' && <span className="absolute -top-4 right-5 bg-accent text-accent-ink border-std border-border font-bold rounded-pill px-3 py-1 text-sm">{t('upgrade.best')}</span>}
+              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-border grid gap-4 content-start relative [&_li>svg]:text-kelly ${x === 'plus' ? 'bg-butter border-[3.5px] p-6 md:-mt-4 md:mb-4' : 'bg-surface border-bold p-5 sm:p-6'}`} style={{ boxShadow: x === 'plus' ? '0 8px 0 var(--border)' : 'var(--shadow-sticker)' }}>
+                {x === 'plus' && <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-ink border-bold border-border font-bold rounded-pill px-5 py-1.5">{t('pricing.recommended')}</span>}
                 <h2 id={`plan-${x}`} className="title-bubble text-4xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
-                <p className="text-lg font-bold">{t(`pricing.${x}.who` as StringKey)}</p>
+                <p className="text-lg font-semibold leading-snug">{t(`pricing.${x}.who` as StringKey)}</p>
                 {x === 'free'
                   ? <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.free.${n}` as StringKey)}</li>)}</ul>
                   : <PlanFeatures plan={x as 'plus' | 'pro'} />}
-                <div className="mt-1">
+                <div className="grid gap-1 pt-4 border-t-2 border-dashed border-border">
                   {x === 'free'
-                    ? <><p className="font-score text-4xl leading-none">{t('pricing.freeForever')}</p><p className="text-sm font-semibold text-muted">{t('pricing.noCard')}</p></>
-                    : <><p className="font-score text-4xl leading-none">{t('upgrade.price', { m: perMonth(x as 'plus' | 'pro', billing) })} <span className="text-lg whitespace-nowrap">{t('upgrade.perMonth')}</span></p><p className="text-sm font-semibold text-muted">{t(`pricing.renews.${billing}` as StringKey, { n: PRICES_USD[x as 'plus' | 'pro'][billing] })}</p></>}
+                    ? <><p className="font-score text-5xl leading-none tabular-nums m-0">{t('pricing.free.price')}</p><p className="font-semibold m-0">{t('pricing.free.note')}</p></>
+                    : <><p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-score leading-none tabular-nums ${x === 'plus' ? 'text-6xl' : 'text-5xl'}`}>{t('pricing.price', { m: perMonth(x as 'plus' | 'pro', billing) })}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p><p className="font-semibold m-0">{t(`pricing.renews.${billing}` as StringKey, { n: money(PRICES_USD[x as 'plus' | 'pro'][billing]) })}</p>{billing === 'year' && <p className="text-sm font-semibold text-muted m-0">{perDay(PRICES_USD[x as 'plus' | 'pro'].year)}</p>}</>}
                 </div>
                 <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses(x === 'plus' ? 'go' : 'secondary', 'min-h-14 text-lg hover-pop')}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
@@ -113,9 +118,10 @@ export default function PricingPage() {
 
         {/* Phones: each row of the table becomes a small card with the three
             plans side by side, so nothing scrolls sideways (teacher, 2026-11-24). */}
-        <section aria-labelledby="compare-phone" className="sm:hidden grid gap-2">
-          <h2 id="compare-phone" className="font-display text-2xl">{t('pricing.compare')}</h2>
-          <div className="sticky top-14 z-10 grid grid-cols-3 gap-1 bg-surface border-bold border-border rounded-input p-1 text-center font-display text-lg">
+        <section aria-labelledby="compare" className="grid gap-6 mt-4">
+        <h2 id="compare" className={H2}><Title text={t('pricing.compare')} /></h2>
+        <div className="sm:hidden grid gap-2">
+          <div className="sticky top-14 z-10 grid grid-cols-3 gap-1 bg-surface border-bold border-border rounded-input p-1 text-center font-score text-xl">
             {tiers.map((x) => <span key={x} className={`rounded-input py-1 ${x === 'plus' ? 'bg-butter' : ''}`}>{t(`pricing.${x}`)}</span>)}
           </div>
           <ul className="grid gap-2 list-none p-0 m-0">
@@ -134,13 +140,13 @@ export default function PricingPage() {
               </li>
             ))}
           </ul>
-        </section>
-        <div className="hidden sm:block overflow-x-auto bg-surface border-bold border-border rounded-panel">
+        </div>
+        <div className="hidden sm:block overflow-x-auto bg-surface border-bold border-border rounded-panel" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <table className="w-full min-w-[560px] text-left">
             <caption className="sr-only">{t('pricing.compare')}</caption>
             <thead><tr className="border-b-[2px] border-border">
-              <th scope="col" className="p-3 font-display text-xl">{t('pricing.compare')}</th>
-              {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-display text-xl ${x === 'plus' ? 'bg-butter' : ''}`}>{t(`pricing.${x}`)}</th>)}
+              <th scope="col" className="p-3"><span className="sr-only">{t('pricing.compare')}</span></th>
+              {tiers.map((x) => <th key={x} scope="col" className={`p-3 font-score text-2xl font-normal ${x === 'plus' ? 'bg-butter' : ''}`}>{t(`pricing.${x}`)}</th>)}
             </tr></thead>
             <tbody>
               {rows.map((r) => (
@@ -155,15 +161,16 @@ export default function PricingPage() {
             </tbody>
           </table>
         </div>
+        </section>
 
         <SchoolPlans />
 
         {/* What is never behind a paywall, in public (teacher research, 2026-10-31). */}
-        <section aria-labelledby="always-free" className="bg-surface border-bold border-border rounded-panel p-5 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 id="always-free" className="font-display text-3xl flex items-center gap-2"><ShieldCheck weight="fill" size={30} aria-hidden="true" /><Title text={t('pricing.always.title')} /></h2>
+        <section aria-labelledby="always-free" className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <h2 id="always-free" className="font-display text-2xl leading-tight"><Title text={t('pricing.always.title')} /></h2>
           <p className="font-semibold">{t('pricing.always.text')}</p>
-          <ul className="grid sm:grid-cols-2 gap-2 list-none p-0 m-0">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <li key={n} className="flex gap-2 font-bold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.always.${n}` as StringKey)}</li>)}
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 list-none p-0 m-0">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <li key={n} className="flex gap-2.5 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5 text-kelly" aria-hidden="true" />{t(`pricing.always.${n}` as StringKey)}</li>)}
           </ul>
         </section>
 
@@ -179,6 +186,11 @@ export default function PricingPage() {
             </details>
           ))}
         </section>
+
+        <div className="grid justify-items-center gap-3 text-center">
+          <Link to="/login?mode=signup" className={buttonClasses('go', 'hover-pop max-sm:w-full', 'lg')}>{t('public.startFree')}</Link>
+          <p className="font-bold text-muted m-0">{t('pricing.closing')}</p>
+        </div>
       </main>
       <PublicFooter />
     </>
@@ -206,23 +218,23 @@ function SchoolPlans() {
   }
   const field = fieldClasses('md');
   return (
-    <section id="schools" aria-labelledby="school-title" className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-5 scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <div className="grid gap-2">
-        <h2 id="school-title" className="title-bubble text-4xl flex items-center gap-3"><Buildings weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('pricing.schoolTitle')} /></h2>
-        <p className="text-lg font-bold max-w-3xl">{t('pricing.schoolSub')}</p>
-        <Link to="/schools" className="font-bold justify-self-start">{t('pricing.schoolMore')}</Link>
-      </div>
-      <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
-        {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2 font-semibold bg-surface-2 border-std border-border rounded-input p-3"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`pricing.school.${n}` as StringKey)}</li>)}
-      </ul>
-      <div className="grid md:grid-cols-2 gap-5 items-start">
+    <section id="schools" aria-labelledby="school-title" className="bg-mint border-bold border-border rounded-panel p-6 sm:p-10 grid md:grid-cols-[1.2fr_1fr] gap-6 sm:gap-8 items-start scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <div className="grid gap-4 content-start">
+        <span className="w-12 h-12 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover" aria-hidden="true"><Buildings weight="bold" size={24} /></span>
+        <h2 id="school-title" className={H2}><Title text={t('pricing.schoolTitle')} /></h2>
+        <p className="text-lg sm:text-xl font-semibold leading-snug">{t('pricing.schoolSub')}</p>
+        <Link to="/schools" className="font-bold justify-self-start underline underline-offset-4">{t('pricing.schoolMore')}</Link>
+        <ul className="grid gap-2.5 list-none p-0 m-0">
+          {[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-3 items-start font-semibold leading-snug text-lg"><span className="mt-0.5 w-7 h-7 shrink-0 rounded-full bg-kelly border-std border-border flex items-center justify-center" aria-hidden="true"><Check weight="bold" size={15} /></span>{t(`pricing.school.${n}` as StringKey)}</li>)}
+        </ul>
         <div className="bg-butter border-bold border-border rounded-panel p-5 grid gap-3">
           <p className="font-display text-2xl leading-tight">{t('pricing.savingsNoPrice', { min: SCHOOL_MIN_SEATS })}</p>
           <p className="text-sm font-bold">{t('pricing.po')} <Link to="/pricing/purchase-order">{t('po.link')}</Link></p>
           <PrincipalNote />
         </div>
-        <div className="grid gap-3">
-          <h3 className="font-display text-2xl"><Title text={t('pricing.quoteTitle')} /></h3>
+      </div>
+        <div className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-3">
+          <h3 className="font-display text-2xl leading-tight"><Title text={t('pricing.quoteTitle')} /></h3>
           {sent ? (
             <div className="grid gap-2" role="status">
               <p className="text-lg font-bold">{sent === 'emailed' ? t('pricing.quoteEmailed', { email: form.email.trim() }) : t('pricing.quoteQueued', { email: form.email.trim() })}</p>
@@ -241,7 +253,6 @@ function SchoolPlans() {
             </>
           )}
         </div>
-      </div>
     </section>
   );
 }

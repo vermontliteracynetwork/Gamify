@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowArcLeft, ArrowArcRight, Check, DeviceTablet, Lightning, ProjectorScreen, Robot, Star, User, Users } from '@phosphor-icons/react';
+import { ArrowArcLeft, ArrowArcRight, Check } from '@phosphor-icons/react';
 import type { PlayMode } from '../data/types';
 import { SHOWN_MODES } from './ModeBadge';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import Title from '../ui/Title';
-import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
+import { MODE_BRIGHT, MODE_COLORS, MODE_ICONS } from './ModeBadge';
 
 // The four ways to play (teacher, 2026-10-31: "formatted evenly, more
 // interesting and more catching"): four cards built the same way, a little
@@ -54,16 +54,18 @@ function FlipCard({ mode: m }: { mode: PlayMode }) {
   const [back, setBack] = useState(false);
   const Icon = MODE_ICONS[m];
   const face = `${card} [grid-area:1/1] flex flex-col [backface-visibility:hidden] ${reduce ? '' : 'transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]'}`;
-  const turn = (b: boolean) => ({ transform: reduce ? undefined : `rotateY(${b ? 180 : 0}deg)`, visibility: reduce ? (b ? 'hidden' : 'visible') : undefined, boxShadow: 'var(--shadow-sticker)' } as const);
+  const turn = (b: boolean) => ({ background: MODE_COLORS[m], transform: reduce ? undefined : `rotateY(${b ? 180 : 0}deg)`, visibility: reduce ? (b ? 'hidden' : 'visible') : undefined, boxShadow: 'var(--shadow-sticker)' } as const);
   const flipBtn = 'mt-auto self-start inline-flex items-center gap-1.5 min-h-11 px-3 -ml-1 rounded-pill border-std border-border font-bold text-sm hover-pop';
   return (
     <div className="group grid [perspective:1200px]">
       <div className={face} style={turn(back)} aria-hidden={back} {...((back ? { inert: "" } : {}) as object)}>
-        <span className="relative h-32 border-b-[2.5px] border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }} aria-hidden="true"><Scene mode={m} /></span>
-        <span className="grid gap-1.5 p-4 pb-3 flex-1 content-start">
-          <span className="font-display font-bold leading-tight text-2xl flex items-center gap-2"><Icon weight="bold" size={26} aria-hidden="true" /><Title text={t(`mode.${m}` as StringKey)} /></span>
-          <span className="font-bold text-sm">{t(`mode.${m}.hint` as StringKey)}</span>
-          <span className="font-semibold text-sm text-muted">{t(`public.mode.${m}` as StringKey)}</span>
+        {/* The approved /brand Home card (owner, 2026-11-25): the way's pastel,
+            its bright icon on a round badge, the name in Grow Year. */}
+        <span className="grid gap-3 p-5 pb-3 flex-1 content-start">
+          <span className="w-14 h-14 rounded-full border-bold border-border flex items-center justify-center" style={{ background: MODE_BRIGHT[m] }} aria-hidden="true"><Icon weight="bold" size={28} /></span>
+          <span className="title-bubble text-[2rem] leading-none"><Title text={t(`mode.${m}` as StringKey)} /></span>
+          <span className="font-bold">{t(`mode.${m}.hint` as StringKey)}.</span>
+          <span className="font-semibold text-sm">{t(`public.mode.${m}` as StringKey)}</span>
         </span>
         <span className="px-4 pb-4 flex">
           <button type="button" onClick={() => setBack(true)} aria-label={t('ways.flipFor', { mode: t(`mode.${m}` as StringKey) })}
@@ -92,49 +94,5 @@ function FlipCard({ mode: m }: { mode: PlayMode }) {
         </span>
       </div>
     </div>
-  );
-}
-
-// A small picture of each way to play, drawn with icons, with a little
-// motion of its own (teacher, 2026-10-31): tablets bob, team dots hop, the
-// star twinkles, the lightning flashes. CSS loops (.fw-*) in index.css, so
-// calm mode and reduced motion still them.
-function Scene({ mode }: { mode: PlayMode }) {
-  const dot = 'rounded-full border-bold border-border bg-surface flex items-center justify-center';
-  if (mode === 'live') {
-    return (
-      <span className="flex items-end gap-2">
-        {[0, 1, 2].map((k) => (
-          <span key={k} className={k === 1 ? '-translate-y-2' : ''}>
-            <span className={`${dot} !rounded-input w-14 h-[4.5rem] fw-bob`} style={{ animationDelay: `${k * 0.3}s` }}><DeviceTablet weight="fill" size={30} /></span>
-          </span>
-        ))}
-      </span>
-    );
-  }
-  if (mode === 'share') {
-    return (
-      <span className="grid justify-items-center gap-1.5">
-        <span className={`${dot} !rounded-input w-28 h-14`}><ProjectorScreen weight="fill" size={34} /></span>
-        <span className="flex gap-1.5">{['#f6c544', '#5cc3a0', '#6aa9e9', '#f2735f'].map((c, k) => (
-          <span key={c} className="w-5 h-5 rounded-full border-std border-border fw-hop" style={{ background: c, animationDelay: `${k * 0.18}s` }} />
-        ))}</span>
-      </span>
-    );
-  }
-  if (mode === 'solo') {
-    return (
-      <span className="relative">
-        <span className={`${dot} w-[4.5rem] h-[4.5rem]`}><User weight="fill" size={38} /></span>
-        <span className="absolute -top-2 -right-4 fw-twinkle"><Star weight="fill" size={26} color="#f6c544" className="drop-shadow-[0_0_1px_#000]" /></span>
-      </span>
-    );
-  }
-  return (
-    <span className="flex items-center gap-2">
-      <span className={`${dot} w-16 h-16 fw-nudge`}><Users weight="fill" size={32} /></span>
-      <span className="fw-flash"><Lightning weight="fill" size={30} color="#241c3d" /></span>
-      <span className={`${dot} w-16 h-16 fw-nudge-l`}><Robot weight="fill" size={32} /></span>
-    </span>
   );
 }
