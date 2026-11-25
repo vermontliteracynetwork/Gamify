@@ -1,0 +1,16 @@
+# Gamify is an education site for K-12 teachers and students.
+# Public pages may be indexed; student and teacher pages are private.
+User-agent: *
+Allow: /
+Disallow: /join
+Disallow: /choose
+Disallow: /live
+Disallow: /mirror
+Disallow: /look-up
+Disallow: /arcade
+Disallow: /teacher
+Disallow: /owner
+Disallow: /show
+Disallow: /games
+Disallow: /brand
+Disallow: /lab
