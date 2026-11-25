@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { CheckCircle } from '@phosphor-icons/react';
+import { Check, CheckCircle } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import { gradeLabel, matchesFilter, missingDetails, type SetFilter } from '../data/setDetails';
@@ -84,9 +84,9 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   return (
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
-      <div className="flex flex-wrap items-center gap-2 [&>[role=tablist]]:mb-0">
+      <div className="flex flex-wrap items-center justify-center gap-2 [&>[role=tablist]]:mb-0">
         <Tabs size="sm" className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
-        <div className="flex-1 min-w-64"><SetFilterBar compact value={filter} onChange={setFilter} sets={inTab} /></div>
+        <div className="flex-1 min-w-64"><SetFilterBar chips value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
@@ -109,28 +109,33 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                   aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
                   aria-description={t('sets.flipHint')} title={t('sets.flipHint')}
                   onClick={() => tap(s, on)}
-                  className={`group relative w-full rounded-panel border-bold border-border text-left grid gap-2.5 p-4 bg-surface motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-bg -translate-y-1' : ''}`}
-                  style={{ boxShadow: on ? '0 6px 0 var(--ink), 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 var(--ink), 0 10px 18px rgba(36,28,61,0.08)' }}>
+                  className={`group relative w-full rounded-[1.25rem] border-[3px] border-border text-left grid content-start overflow-hidden bg-white motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? '-translate-y-1' : ''} ${back ? 'gap-2.5 p-4' : ''}`}
+                  // Picked: a Paper gap and an ink ring, and a Kelly check (Universal views 4).
+                  style={{ boxShadow: on ? '0 0 0 4px var(--paper), 0 0 0 7px var(--ink), 0 6px 0 7px var(--ink)' : '0 4px 0 var(--ink)' }}>
                   {on && (
-                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-kelly border-std border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
-                      {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
+                    <span className="absolute top-1.5 right-1.5 z-10 w-8 h-8 rounded-full bg-kelly border-[3px] border-border flex items-center justify-center font-display motion-safe:animate-[pop_0.3s_ease-out]">
+                      {max > 1 ? value.indexOf(s.id) + 1 : <Check weight="bold" size={16} />}
                     </span>
                   )}
                   {!back ? (
                     <>
-                      {/* A cover keeps the shape it was uploaded in. */}
-                      {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-std border-border" />}
-                      {/* The subject icon, then the title right beside it, no subject
-                          word (teacher, 2026-11-18). */}
-                      <span className="flex items-start gap-2 min-w-0 pr-8">
-                        <span className="w-7 h-7 mt-0.5 shrink-0 rounded-full border-thin border-border flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform" style={{ background: art.bg }} title={s.subject ?? t('sets.otherSubject')}>
-                          <I weight="fill" size={15} color={art.ink} aria-hidden="true" />
+                      {/* The subject's colored band (Universal views 4, approved 2026-11-25). */}
+                      <span className="min-h-10 pl-3 pr-11 py-1.5 flex items-center gap-2 border-b-[2.5px] border-border font-bold text-sm" style={{ background: art.bg }}>
+                        <span className="w-6 h-6 shrink-0 rounded-full border-std border-border bg-white flex items-center justify-center motion-safe:group-hover:-rotate-12 motion-safe:transition-transform">
+                          <I weight="fill" size={13} color={art.ink} aria-hidden="true" />
                         </span>
-                        <span className="font-bold text-lg leading-snug min-w-0">{s.name || t('sets.untitled')}</span>
+                        {s.subject ?? t('sets.otherSubject')}
                       </span>
-                      <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
-                        <span className="rounded-pill border-thin border-border px-2 py-1 bg-surface-2">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
-                        <span className="rounded-pill border-thin border-border px-2 py-1" style={{ background: art.bg }}>{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+                      <span className="px-3.5 pt-2.5 pb-3.5 grid gap-2 min-w-0">
+                        {/* A cover keeps the shape it was uploaded in. */}
+                        {s.cover && <img src={s.cover} alt="" className="w-full h-auto rounded-input border-std border-border" />}
+                        <span className="font-bold text-lg leading-snug min-w-0">{s.name || t('sets.untitled')}</span>
+                        {/* The first question, so the teacher knows the set at a glance. */}
+                        {q && <span className="text-sm font-semibold leading-snug px-3 py-1.5 rounded-input bg-[#f6f0e4] truncate">{q.prompt}</span>}
+                        <span className="flex flex-wrap gap-1.5 text-xs font-bold leading-none">
+                          <span className="rounded-pill border-std border-border px-2.5 py-1">{t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}</span>
+                          <span className="rounded-pill border-std border-border px-2.5 py-1">{t('setup.count', { count: s.questions.filter(isPlayable).length })}</span>
+                        </span>
                       </span>
                     </>
                   ) : (

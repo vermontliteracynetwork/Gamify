@@ -9,6 +9,9 @@ import { PowerUpCards } from '../engine/PowerUpSwitches';
 // the bottom should appear"): until a card on a choice page is tapped, no card
 // shows as picked, the settings under the cards stay hidden and Next is off.
 export const ChoicePicked = createContext(true);
+// The footer spot between Back and Next, for a step's own button (Teams: Add
+// team, Universal views 6); a step renders into it with a portal.
+export const FooterSlot = createContext<HTMLElement | null>(null);
 const CHOICE_PAGES = ['way', 'class'];
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
@@ -39,6 +42,7 @@ function splitPowers(pages: SetupPage[]): SetupPage[] {
 export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
   const pages = splitPowers(given);
   const [i, setI] = useState(0);
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [part, setPart] = useState(0);
   // How many parts each page splits into (measured when it is shown).
   const [splits, setSplits] = useState<Record<string, number[][]>>({});
@@ -53,7 +57,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
   // Power-up pages have no white box behind the cards (teacher, 2026-11-23).
-  const isCards = (id: string) => ['way', 'players', 'teams', 'board', 'powers'].includes(id) || id.endsWith('-powers');
+  const isCards = (id: string) => ['way', 'class', 'players', 'teams', 'board', 'powers'].includes(id) || id.endsWith('-powers');
   const cardsOnly = isCards(page.id);
   const items = itemsOf(page.content);
   const body = useRef<HTMLDivElement>(null);
@@ -122,8 +126,9 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
           }))}
         </ol>
       </div>
+      <FooterSlot.Provider value={slot}>
       <ChoicePicked.Provider value={!choice}>
-      <div ref={body} onClickCapture={(e) => { if (choice && (e.target as HTMLElement).closest('[role="radio"]')) setPicked((p) => new Set(p).add(page.id)); }} data-unpicked={choice ? '' : undefined} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} data-setup-body="" onClickCapture={(e) => { if (choice && (e.target as HTMLElement).closest('[role="radio"]')) setPicked((p) => new Set(p).add(page.id)); }} data-unpicked={choice ? '' : undefined} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
@@ -131,13 +136,18 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
         ))}
       </div>
       </ChoicePicked.Provider>
-      <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">
+      </FooterSlot.Provider>
+      {/* Back and Next side by side in the middle, under the cards (Universal
+          views, approved 2026-11-25); a step's own extra button (Add team)
+          sits between them. */}
+      <div className="px-6 sm:px-8 pt-2 pb-3 flex flex-wrap-reverse justify-center items-center gap-x-5 gap-y-3">
         <button type="button" onClick={back}
-          className="min-h-11 px-5 rounded-pill border-std border-border bg-white font-bold text-base inline-flex items-center gap-1.5 shadow-[0_3px_0_var(--ink)] motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
-          <ArrowLeft weight="bold" size={18} />{t('setup.back')}
+          className="max-sm:order-1 min-h-12 px-6 rounded-pill border-[3px] border-border bg-white font-bold text-lg inline-flex items-center gap-2 shadow-[0_4px_0_var(--ink)] motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
+          <ArrowLeft weight="bold" size={20} />{t('setup.back')}
         </button>
+        <span ref={setSlot} className="contents" />
         <button type="button" disabled={!ready} onClick={() => (last ? onPlay() : next())}
-          className="min-h-12 px-6 rounded-pill border-std border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 shadow-[0_4px_0_var(--ink)] disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none disabled:translate-y-1 motion-safe:hover:enabled:scale-105 motion-safe:transition-transform">
+          className="max-sm:order-2 min-h-[3.25rem] px-8 rounded-pill border-[3px] border-border bg-accent font-display text-xl font-bold inline-flex items-center gap-2 shadow-[0_5px_0_var(--ink)] disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none disabled:translate-y-1 motion-safe:hover:enabled:scale-105 motion-safe:transition-transform">
           {/* Next stays off, pale and dashed, until a card is picked (rule 9). */}
           {last ? <><Play weight="fill" size={18} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={18} /></>}
         </button>

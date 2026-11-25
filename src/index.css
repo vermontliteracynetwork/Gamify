@@ -954,3 +954,40 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 :root { --text-page-title: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem); }
 .route-shell main h1:not(.hero-title) { font-size: var(--text-page-title); line-height: 1.05; }
 .route-shell main:has(.game-stage) h1, .route-shell .brand-menu h1 { font-size: revert-layer; }
+
+/* The join code's blinking caret in the next empty box (Universal views 17). */
+@keyframes code-caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.code-caret { animation: code-caret 1s steps(1) infinite; }
+html[data-motion="still"] .code-caret { animation: none; }
+
+/* THE question card (Universal views 10, approved 2026-11-25; src/engine/QuestionScreen.tsx).
+   The mockup's drawing sizes in design pixels, scaled by --u to the screen:
+   laptop and iPad landscape drawn at 1280 x 800, iPad portrait at 820 x 1180,
+   phones at 390 x 844. Tiles stay one size; the question block is fixed. */
+.q-card {
+  --u: min(100vw / 1280, 100dvh / 800);
+  --q-w: 1088; --q-pad: 26; --q-radius: 30; --q-gap: 16; --q-gap-y: 20; --q-name: 26; --q-btn: 52; --q-btn-fs: 20;
+  --q-block: 200; --q-fs1: 46; --q-fs2: 36; --q-fs3: 30; --q-fs4: 25;
+  --q-cols: 2; --q-tile: 84; --q-tile-r: 20; --q-tile-fs: 32; --q-badge: 58; --q-badge-fs: 32;
+}
+@media (orientation: portrait) and (min-width: 600px) {
+  .q-card {
+    --u: min(100vw / 820, 100dvh / 1180);
+    --q-w: 697; --q-pad: 28; --q-name: 30; --q-btn: 60; --q-btn-fs: 24;
+    --q-block: 330; --q-fs1: 54; --q-fs2: 44; --q-fs3: 36; --q-fs4: 30;
+    --q-cols: 1; --q-tile: 92; --q-tile-fs: 38; --q-badge: 64; --q-badge-fs: 36;
+  }
+}
+@media (max-width: 599px) {
+  .q-card {
+    --u: min(100vw / 390, 100dvh / 844);
+    --q-w: 358; --q-pad: 14; --q-radius: 24; --q-gap: 10; --q-gap-y: 14; --q-name: 17; --q-btn: 44; --q-btn-fs: 18;
+    --q-block: 200; --q-fs1: 28; --q-fs2: 24; --q-fs3: 21; --q-fs4: 18;
+    --q-cols: 1; --q-tile: 60; --q-tile-r: 16; --q-tile-fs: 22; --q-badge: 42; --q-badge-fs: 24;
+  }
+}
+/* Games whose scene is the frame (Question Tracker's sky, Territory's room)
+   keep a slightly smaller card, so the stars and pieces around it stay in view. */
+.q-card.q-framed { --u: min(100vw / 1280, 100dvh / 800) * 0.8; }
+@media (orientation: portrait) and (min-width: 600px) { .q-card.q-framed { --u: min(100vw / 820, 100dvh / 1180) * 0.85; } }
+@media (max-width: 599px) { .q-card.q-framed { --u: min(100vw / 390, 100dvh / 844) * 0.92; } }

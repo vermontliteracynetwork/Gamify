@@ -18,8 +18,7 @@ import DialogFocus from '../ui/DialogFocus';
 import PopText from '../ui/PopText';
 import { mirrorSend } from '../live/mirror';
 
-const LETTERS = ['A', 'B', 'C', 'D'];
-const TILE_COLORS = ['bg-quiz-yellow', 'bg-quiz-green', 'bg-quiz-blue', 'bg-quiz-orange'];
+import { answerScale, BADGE_COLORS, LETTERS, qfpx, qpx, qStep, TILE_COLORS } from './questionCard';
 
 // How many turns each team has had, to rotate who answers.
 const ANSWERED = new Map<string, number>();
@@ -104,69 +103,82 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
 
   if (!ready && turnCard) return <TurnCard player={player} avatar={avatar} answerer={answerer} onStart={() => setReady(true)} />;
 
+  const still = settings.motion === 'still';
+  // Every tile keeps one size (teacher, 2026-11-24); long answers step their text down together.
+  const ansK = answerScale(q.choices);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface" role="dialog" aria-modal="true" aria-label={q.prompt}>
+    // THE question card over the game (Universal views 10, approved
+    // 2026-11-25): the same card as the solo question screen, read from the
+    // back of the room, with the game still showing around it.
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-[rgba(29,26,51,0.28)]" role="dialog" aria-modal="true" aria-label={q.prompt}>
       <DialogFocus />
       <motion.div
         key={q.id}
-        initial={settings.motion === 'still' ? false : { scale: 0.94, opacity: 0 }}
+        initial={still ? false : { scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.55, ease: 'easeOut' }}
-        // The question big and centered, the four answers filling the rest of
-        // the screen like big game buttons (2026-11-19).
-        className="w-full h-full overflow-y-auto bg-surface px-[clamp(1rem,4vw,3.5rem)] py-[clamp(0.75rem,3vh,2rem)] flex flex-col justify-center gap-[clamp(0.5rem,2.5vh,1.75rem)]"
+        className="q-card max-w-full max-h-full overflow-y-auto bg-white border-heavy border-border flex flex-col"
+        style={{ width: qpx('--q-w'), padding: qpx('--q-pad'), gap: qpx('--q-gap-y'), borderRadius: qpx('--q-radius'), boxShadow: '0 6px 0 var(--ink)' }}
       >
-        <div className="w-full max-w-[90rem] mx-auto flex items-center gap-3 flex-wrap">
-          {/* The player's own animal or picture when the game has one (teacher, 2026-11-01). */}
-          {avatar ? <img src={avatar} alt="" className="w-14 h-14 object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" /> : <TeamBadge colorIndex={player.colorIndex} size={48} />}
-          <span className="grid">
-            <span className="font-display text-fit-turn font-bold">{t('share.whoseTurn', { name: player.name })}</span>
-            {answerer ? <span className="font-bold">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-muted">{player.members.join(', ')}</span>}
+        <div className="flex flex-wrap items-center" style={{ gap: qpx('--q-gap') }}>
+          {/* The player's own animal or team icon and the name as plain text, no pill (teacher, 2026-11-24). */}
+          <span className="flex-1 min-w-[9rem] flex items-center gap-3">
+            {avatar ? <img src={avatar} alt="" className="object-contain shrink-0 drop-shadow-[0_3px_0_rgba(0,0,0,0.2)]" style={{ width: qpx('--q-btn'), height: qpx('--q-btn') }} /> : <TeamBadge colorIndex={player.colorIndex} size={40} />}
+            <span className="grid min-w-0">
+              <b className="font-heading leading-tight line-clamp-2" style={{ fontSize: qfpx('--q-name') }}>{t('share.whoseTurn', { name: player.name })}</b>
+              {answerer ? <span className="font-bold text-sm">{t('share.answerer', { name: answerer })}</span> : player.members && <span className="font-bold text-sm text-muted truncate">{player.members.join(', ')}</span>}
+            </span>
           </span>
-          <span className="flex-1" />
-          {chance && chance.total === Infinity && <span className="font-bold">{t('share.chanceOpen', { n: chance.n })}</span>}
+          {chance && chance.total === Infinity && <span className="font-bold shrink-0">{t('share.chanceOpen', { n: chance.n })}</span>}
           {chance && chance.total > 1 && chance.total !== Infinity && (
-            <span className="inline-flex items-center gap-1.5 font-bold" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
+            <span className="inline-flex items-center gap-1.5 font-bold shrink-0" aria-label={t('share.chance', { n: chance.n, total: chance.total })}>
               {Array.from({ length: chance.total }, (_, k) => <span key={k} aria-hidden="true" className={`w-4 h-4 rounded-full border-std border-border ${k < chance.n - 1 ? 'bg-danger/70' : k === chance.n - 1 ? 'bg-mint' : 'bg-surface'}`} />)}
-              <span className="ml-1">{t('share.chance', { n: chance.n, total: chance.total })}</span>
+              <span className="ml-1 hidden sm:inline">{t('share.chance', { n: chance.n, total: chance.total })}</span>
             </span>
           )}
-          <button type="button" onClick={() => speakQuestion(q, settings)}
-            className="min-h-12 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2">
-            <SpeakerHigh weight="bold" size={22} />{t('q.listen')}
-          </button>
-          {/* Only Listen and Settings on a question (teacher, 2026-11-24); accessibility is in Settings. */}
+          {/* Only Settings and Listen on a question (teacher, 2026-11-24); accessibility is in Settings. */}
           <GearButton small onClick={() => setSettingsOpen(true)} />
           <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+          <button type="button" onClick={() => speakQuestion(q, settings)}
+            className="shrink-0 px-[1em] rounded-pill border-std border-border bg-blue-crystal font-bold inline-flex items-center gap-1.5 active:scale-95"
+            style={{ minHeight: `max(2.75rem, ${qpx('--q-btn')})`, fontSize: `max(1rem, ${qfpx('--q-btn-fs')})`, boxShadow: '0 3px 0 var(--ink)' }}>
+            <SpeakerHigh weight="bold" size="1.15em" />{t('q.listen')}
+          </button>
         </div>
 
-        {player.kind === 'teacher' && <p className="font-bold text-xl">{t('share.teacherTurn')}</p>}
+        {player.kind === 'teacher' && <p className="font-bold text-xl -my-1">{t('share.teacherTurn')}</p>}
 
-        {q.imageUrl && <figure className="m-0 grid justify-items-center"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="max-h-[min(16rem,22dvh)] w-auto mx-auto rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
-        <h2 className={`w-full max-w-[90rem] mx-auto text-center font-body font-bold leading-tight text-balance ${q.prompt.length <= 48 && !q.imageUrl ? 'text-fit-question-big' : 'text-fit-question'}`}>{q.prompt}</h2>
+        {/* A fixed block for the question, its text left aligned (Universal views 10). */}
+        <div className={`shrink-0 flex ${q.imageUrl ? "flex-col justify-center items-start gap-2" : "items-center"} min-h-0 overflow-y-auto`} style={{ height: qpx('--q-block') }}>
+          {q.imageUrl && <figure className="m-0 min-h-0 h-[55%] shrink-0 flex flex-col items-start"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="min-h-0 flex-1 w-auto max-w-full object-contain rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
+          <h2 className="font-body font-bold leading-snug text-left text-pretty" style={{ fontSize: qfpx(qStep(q.prompt.length + (q.imageUrl ? 40 : 0))) }}>{q.prompt}</h2>
+        </div>
 
-        <div className="w-full max-w-[90rem] mx-auto flex-1 min-h-0 max-h-[min(58vh,38rem)] portrait:max-h-[64vh] grid sm:grid-cols-2 auto-rows-fr gap-[clamp(0.5rem,2vh,1.25rem)]">
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(var(--q-cols), minmax(0, 1fr))', gap: qpx('--q-gap') }}>
           {q.choices.map((c, i) => {
             const isRight = shown && i === q.correctIndex;
             const isWrong = picked === i && i !== q.correctIndex;
             return (
               <motion.button key={i} type="button" onClick={() => choose(i)} disabled={picked !== null || !!cpu} data-magnet={magnet && i === q.correctIndex ? 'true' : undefined}
-                animate={isWrong && settings.motion !== 'still' ? { x: [0, -8, 8, -5, 5, 0] } : isRight && picked === i && settings.motion !== 'still' ? { scale: [1, 1.05, 1] } : {}}
-                transition={{ duration: 0.4 }}
-                whileHover={picked === null && !cpu && settings.motion !== 'still' ? { scale: 1.03, transition: { duration: 0.18 } } : undefined}
-                whileTap={picked === null && !cpu && settings.motion !== 'still' ? { scale: 0.95, y: 2 } : undefined}
-                className={`min-h-[clamp(3rem,11vh,8rem)] h-full pl-[clamp(4.25rem,11vh,7rem)] pr-[clamp(1rem,3vw,3rem)] py-[clamp(0.4rem,1.6vh,1rem)] rounded-input border-heavy border-border flex items-center gap-3 font-bold leading-tight ${q.choices.every((ch) => ch.length <= 22) ? 'text-fit-answer-big justify-center text-center' : 'text-fit-answer text-left'} active:scale-[0.98] disabled:cursor-default
-                ${TILE_COLORS[i]} relative ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
-                style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="absolute left-[clamp(0.9rem,2vw,1.75rem)] top-1/2 -translate-y-1/2 w-[clamp(2.75rem,7.5vh,4.25rem)] h-[clamp(2.75rem,7.5vh,4.25rem)] shrink-0 rounded-full bg-surface border-bold border-border flex items-center justify-center font-display text-[clamp(1.2rem,3.6vh,2rem)]">
-                  {isRight ? <Check weight="bold" size={26} aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size={26} aria-label={t('q.notThisMark')} /> : LETTERS[i]}
+                initial={still ? false : { scale: 0.85, opacity: 0 }}
+                animate={isWrong && !still ? { x: [0, -8, 8, -5, 5, 0], scale: 1, opacity: 1 } : isRight && picked === i && !still ? { scale: [1, 1.05, 1], opacity: 1 } : { scale: 1, opacity: 1 }}
+                transition={isWrong || (isRight && picked === i) ? { duration: 0.4 } : { type: 'spring', stiffness: 420, damping: 22, delay: 0.1 + i * 0.05 }}
+                whileHover={picked === null && !cpu && !still ? { y: -3, transition: { duration: 0.18 } } : undefined}
+                whileTap={picked === null && !cpu && !still ? { scale: 0.96, y: 2 } : undefined}
+                className={`relative min-w-0 border-heavy border-border flex items-center font-bold text-left leading-tight disabled:cursor-default
+                ${isRight ? 'bg-mint' : TILE_COLORS[i]} ${shown && !isRight && !isWrong ? 'opacity-40' : ''} ${isRight ? 'ring-[5px] ring-success' : ''} ${isWrong ? 'ring-[5px] ring-danger' : ''} ${magnet && i === q.correctIndex && !shown ? 'ring-[5px] ring-accent' : ''}`}
+                style={{ height: qpx('--q-tile'), gap: qpx('--q-gap'), padding: `0 ${qpx('--q-gap')}`, borderRadius: qpx('--q-tile-r'), fontSize: qfpx('--q-tile-fs', ansK), boxShadow: '0 5px 0 var(--ink)' }}>
+                <span className={`shrink-0 rounded-full border-heavy border-border flex items-center justify-center font-display ${isRight ? 'bg-kelly' : BADGE_COLORS[i]}`}
+                  style={{ width: qpx('--q-badge'), height: qpx('--q-badge'), fontSize: qfpx('--q-badge-fs') }}>
+                  {isRight ? <Check weight="bold" size="0.8em" aria-label={t('q.rightMark')} /> : isWrong ? <X weight="bold" size="0.8em" aria-label={t('q.notThisMark')} /> : LETTERS[i]}
                 </span>
-                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="w-14 h-14 shrink-0 object-cover rounded-input border-std border-border bg-surface" />}
+                {q.choiceImages?.[i] && <img src={q.choiceImages[i]!} alt={q.choiceAlts?.[i] ?? ''} className="shrink-0 object-cover rounded-input border-std border-border bg-surface" style={{ width: qpx('--q-badge'), height: qpx('--q-badge') }} />}
                 <span className="sr-only"> </span>
-                <span className="min-w-0">{c}</span>
-                {isRight && picked === i && settings.motion !== 'still' && <Burst />}
+                <span className="min-w-0 line-clamp-2">{c}</span>
+                {isRight && picked === i && !still && <Burst />}
                 {magnet && i === q.correctIndex && (
                   <motion.img src={magnet} alt={t('cq.magnetHere')} className="absolute -top-7 -right-4 w-16 h-16 object-contain pointer-events-none drop-shadow-[0_3px_0_rgba(0,0,0,0.25)]"
-                    initial={settings.motion === 'still' ? false : { x: 240, y: -260, rotate: -60, opacity: 0, scale: 0.6 }} animate={{ x: 0, y: 0, rotate: [-60, 12, -6, 0], opacity: 1, scale: 1 }}
+                    initial={still ? false : { x: 240, y: -260, rotate: -60, opacity: 0, scale: 0.6 }} animate={{ x: 0, y: 0, rotate: [-60, 12, -6, 0], opacity: 1, scale: 1 }}
                     transition={{ duration: 0.9, delay: 0.5, ease: 'easeOut' }} />
                 )}
               </motion.button>
@@ -174,13 +186,13 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
           })}
         </div>
 
-        <div className="min-h-[3.5rem] flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <div className="min-h-[3.5rem] -mb-1 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
         {cpu ? (
-          <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
+          <p className="font-display text-2xl font-bold text-center" role="status" aria-live="polite">
             {t(cpu === 'thinking' ? 'share.cpuThinking' : cpu === 'right' ? 'share.cpuRight' : 'share.cpuMiss', { name: player.name })}
           </p>
         ) : (
-          <p className="font-display text-3xl font-bold text-center" role="status" aria-live="polite">
+          <p className="font-display text-2xl font-bold text-center" role="status" aria-live="polite">
             {picked === null ? '' : <PopText key={`${picked}-${chance?.n ?? 0}`} text={picked === q.correctIndex ? t('share.tapRight') : chance && chance.n < chance.total ? t('share.tryAnother') : t('share.tapMiss')} gold={picked === q.correctIndex} />}
           </p>
         )}

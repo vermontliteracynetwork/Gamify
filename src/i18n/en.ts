@@ -415,8 +415,9 @@ export const en = {
   'teams.computer': 'Computer',
   'teams.teacher': 'Teacher',
   'teams.start': 'Start',
-  'teams.less': 'Fewer teams',
-  'teams.more': 'More teams',
+  'teams.add': 'Add team',
+  'teams.addPlayer': 'Add player',
+  'teams.remove': 'Remove {name}',
 
   'share.tapRight': 'You got it!',
   'share.tapMiss': 'Not yet. The right answer has a check.',

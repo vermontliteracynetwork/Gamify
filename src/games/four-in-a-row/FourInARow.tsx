@@ -345,13 +345,13 @@ export default function FourInARow() {
       )}
 
       {(phase === 'waiting' || phase === 'joining') && (
-        <div className="grid gap-4 justify-items-center text-center bg-surface border-bold border-border rounded-panel p-6 max-w-lg mx-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }} role="status" aria-live="polite">
+        <div className="grid gap-5 justify-items-center text-center p-6 max-w-3xl mx-auto min-h-[calc(100dvh-8rem)] content-center" role="status" aria-live="polite">
           <motion.span animate={still ? undefined : { y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1.2 }}><Disc who={phase === 'waiting' ? 2 : 1} size="64px" /></motion.span>
           <h2 className="font-display text-3xl"><Title text={phase === 'waiting' ? t('fr.waitingTitle') : t('fr.joiningTitle')} /></h2>
           {phase === 'waiting' && (
             <>
-              <p className="font-bold text-lg">{t('fr.waitingText', { host: window.location.host })}</p>
-              <p className="font-display text-6xl tracking-[0.15em]" aria-label={t('host.codeIs', { code: hostCode })}>{hostCode}</p>
+              {/* Universal views 3 (approved 2026-11-25): only the code, big, on its own paper card, on one line. */}
+              <p className="title-bubble whitespace-nowrap leading-none text-[clamp(3rem,14vw,7.5rem)] tracking-[0.15em] px-[clamp(1rem,3vw,2.5rem)] py-4 rounded-[1.6rem] border-[3px] border-border bg-surface" style={{ boxShadow: '0 6px 0 var(--ink)' }} aria-label={t('host.codeIs', { code: hostCode })}>{hostCode}</p>
               <button type="button" onClick={() => { link.current?.close(); link.current = null; setPhase('setup'); }} className="min-h-12 px-5 rounded-pill border-std border-border bg-white font-bold">{t('setup.back')}</button>
             </>
           )}
@@ -456,7 +456,7 @@ export default function FourInARow() {
               </div>
               {/* The rack's two little legs. */}
               {[0, 1].map((side) => (
-                <span key={side} aria-hidden="true" className="absolute -z-10" style={{ [side ? 'right' : 'left']: s * 0.5, bottom: 0, width: s * 0.4, height: Math.round(s * 0.3) + 4, background: rackShade, border: `${Math.max(2, edge - 1)}px solid var(--ink)`, borderTop: 0, borderRadius: `0 0 ${s * 0.16}px ${s * 0.16}px` }} />
+                <span key={side} aria-hidden="true" className="absolute -z-10" style={{ [side ? 'right' : 'left']: s * 0.5, bottom: 0, width: s * 0.4, height: Math.round(s * 0.3) + 4, background: rackShade, borderStyle: 'solid', borderColor: 'var(--ink)', borderWidth: `0 ${Math.max(2, edge - 1)}px ${Math.max(2, edge - 1)}px`, borderRadius: `0 0 ${s * 0.16}px ${s * 0.16}px` }} />
               ))}
               {phase === 'end' && winner && (
                 <motion.p role="status" className="absolute left-1/2 z-20 whitespace-nowrap rounded-pill border-[3px] border-[var(--ink)] px-[0.9em] py-[0.2em] title-bubble leading-tight" style={{ top: s * 0.5, y: '-50%', x: '-50%', color: 'var(--ink)', background: GOLD, boxShadow: '0 4px 0 var(--ink)', fontSize: Math.max(12, Math.min(s * 0.4, (7.6 * s) / (t('fr.fourWins', { name: winner.name }).length * 0.66))) }}

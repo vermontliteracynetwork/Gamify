@@ -5,6 +5,7 @@ export const matchThreeManifest: GameManifest = {
   id: 'match-three',
   name: 'Match Three',
   description: 'Swap pieces to make rows of 3. Answer questions to keep playing.',
+  tagline: 'Swap pieces to make rows of three. Answer for more moves.',
   modes: ['solo'],
   questionKinds: ['mc'],
   themePieces: [

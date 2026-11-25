@@ -1,8 +1,11 @@
 import { lobbyPickFor } from '../data/gameCodes';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, DiceFive, SpeakerHigh, UserCircle } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
+import { ArrowRight, DiceFive, GearSix, SpeakerHigh, UserCircle } from '@phosphor-icons/react';
+import CodeBoxes from '../ui/CodeBoxes';
+import { SettingsPanel } from '../settings/SettingsPanel';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import { speak } from '../engine/feedback';
 import { useSettings } from '../settings/SettingsContext';
 import { data, newId } from '../data';
@@ -40,6 +43,8 @@ export default function JoinPage() {
   const waiting = waitUntil > now ? Math.ceil((waitUntil - now) / 1000) : 0;
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const reduce = useReducedMotion() || settings.motion === 'still';
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // A code is checked as soon as it has 5 letters; Go shows only for a code
   // that works (teacher, 2026-10-31). Each check counts toward the 5 tries.
@@ -125,31 +130,37 @@ export default function JoinPage() {
     );
   }
 
+  // Universal views 17 (approved /brand, 2026-11-25): no card, straight on
+  // the ground: the title, the line, five big code boxes (codes are 5
+  // letters), then Hear my code and a yellow Go side by side. Go is always
+  // there but stays off (pale, dashed) until the code checks out; Settings
+  // (accessibility inside) sits in the top corner, clear of everything.
+  const go = ready && ready.code === code ? ready : null;
   return (
-    <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid justify-items-center">
-      <div className="w-full bg-surface border-bold border-border rounded-panel px-5 py-8 sm:px-10 sm:py-10 grid gap-5 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      {/* Listen sits at the top right, under Log in (teacher, 2026-10-31). */}
-      <div className="fixed right-4 sm:right-6 top-[4.75rem] z-30">
-        <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="!w-12 !h-12 bg-surface" style={{ boxShadow: 'var(--shadow-sticker)' }}><SpeakerHigh weight="bold" size={24} /></IconButton>
+    <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-10 grid justify-items-center gap-[clamp(1rem,3.5vh,2rem)] text-center min-h-[calc(100dvh-3.5rem)] content-center">
+      <div className="absolute top-3 right-4 sm:right-6">
+        <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t('settings.open')} className="w-12 h-12 rounded-full border-std border-border bg-surface flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <GearSix weight="bold" size={24} />
+        </button>
       </div>
-      <h1 className="title-bubble text-4xl sm:text-5xl whitespace-nowrap"><Title text={t('join.title')} /></h1>
-      <p className="font-bold text-lg">{t('join.sub')}</p>
-      <div className="flex items-center justify-center gap-2 w-full">
-        <motion.input animate={wrong ? { x: [0, -10, 10, -6, 6, 0] } : undefined} value={code} maxLength={5} autoFocus enterKeyHint="go" autoCapitalize="characters" autoComplete="off" autoCorrect="off" spellCheck={false}
-          onChange={(e) => setCode(e.target.value.replace(/[^a-z]/gi, '').toUpperCase())} onKeyDown={(e) => { if (e.key === 'Enter' && ready) void ready.go(); }}
-          aria-label={t('join.code')} placeholder="BKDFT"
-          className="w-full max-w-xs text-center font-display text-5xl tracking-[0.3em] min-h-20 rounded-panel border-heavy border-border bg-surface uppercase" />
-        {code.length > 0 && <IconButton label={t('join.hearCode')} onClick={() => speak(code.split('').join(', '), settings)}><SpeakerHigh weight="bold" size={20} /></IconButton>}
-      </div>
-      <p className="min-h-6 font-bold" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
-      <AnimatePresence>
-        {ready && ready.code === code && (
-          <motion.button type="button" onClick={() => void ready.go()} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-            className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            {t('join.go')}<ArrowRight weight="bold" size={26} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <h1 className="title-bubble text-[clamp(2.5rem,10vw,5rem)] leading-none"><Title text={t('join.title')} /></h1>
+      <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug inline-flex items-center gap-2 justify-center flex-wrap">
+        {t('join.sub')}
+        <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="bg-surface"><SpeakerHigh weight="bold" size={20} /></IconButton>
+      </p>
+      <CodeBoxes length={5} value={code} onChange={setCode} label={t('join.code')} masked={false} letters size="xl" shake={wrong} onEnter={() => { if (go) void go.go(); }} />
+      <p className="min-h-6 font-bold -my-2" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
+      <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+        <button type="button" disabled={!code} onClick={() => speak(code.split('').join(', '), settings)}
+          className="min-h-14 px-4 sm:px-6 rounded-pill border-bold border-border bg-white font-bold text-base sm:text-lg inline-flex items-center gap-2 disabled:opacity-40" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <SpeakerHigh weight="bold" size={24} />{t('join.hearCode')}
+        </button>
+        <motion.button type="button" disabled={!go} onClick={() => { if (go) void go.go(); }}
+          animate={go && !reduce ? { scale: [1, 1.08, 1] } : undefined} transition={{ duration: 0.35 }}
+          className="min-h-16 px-7 sm:px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2 disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none" style={go ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
+          {t('join.go')}<ArrowRight weight="bold" size={26} />
+        </motion.button>
       </div>
     </main>
   );

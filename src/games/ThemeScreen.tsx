@@ -62,9 +62,9 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
             );
           })}
         </div>
-        <div className="px-5 py-3 flex justify-between gap-2">
-          <button type="button" onClick={onBack} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-1.5"><ArrowLeft weight="bold" size={16} />{t('setup.back')}</button>
-          <button type="button" onClick={onNext} className="min-h-11 px-6 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('setup.next')}<ArrowRight weight="bold" size={16} /></button>
+        <div className="px-5 pt-2 pb-3 flex justify-center items-center gap-5">
+          <button type="button" onClick={onBack} className="min-h-12 px-6 rounded-pill border-[3px] border-border bg-white font-bold text-lg inline-flex items-center gap-2 shadow-[0_4px_0_var(--ink)]"><ArrowLeft weight="bold" size={20} />{t('setup.back')}</button>
+          <button type="button" onClick={onNext} className="min-h-[3.25rem] px-8 rounded-pill border-[3px] border-border bg-accent font-display text-xl font-bold inline-flex items-center gap-2 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 5px 0 var(--ink)' }}>{t('setup.next')}<ArrowRight weight="bold" size={20} /></button>
         </div>
       </section>
       {preview && (

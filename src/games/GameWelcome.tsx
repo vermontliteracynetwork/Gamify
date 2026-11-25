@@ -19,12 +19,21 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
   // Centered top to bottom in the space under the menu bar; the corner
   // buttons move down with it so they stay level with the title.
   const box = useRef<HTMLElement>(null);
+  const coverBox = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const el = box.current, main = el?.parentElement;
     if (!el || !main) return;
     const fit = () => {
       const pad = 24;
       const room = window.innerHeight - main.getBoundingClientRect().top - pad * 2;
+      // iPad portrait and phones never scroll (Universal views 1, 2026-11-25):
+      // the cover gives up height (keeping its shape) until the How to play
+      // card and the start button fit under it.
+      const cov = coverBox.current;
+      if (cov && !window.matchMedia('(min-width: 1024px), (min-width: 768px) and (orientation: landscape)').matches) {
+        const max = Math.max(90, Math.min(window.innerHeight * 0.38, cov.offsetHeight + room - el.offsetHeight));
+        el.style.setProperty('--cover-max', `${Math.floor(max)}px`);
+      } else el.style.removeProperty('--cover-max');
       const off = Math.max(0, Math.floor((room - el.offsetHeight) / 2));
       main.style.setProperty('--menu-offset', `${off}px`);
     };
@@ -54,23 +63,23 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           first, then the cover, then How to play, then a narrower, taller start pill. */}
       <div className="wide:hidden grid gap-2">
         <h1 className="title-bubble text-3xl sm:text-4xl pr-40 min-h-11 flex items-center" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-        {game.description && <p className="text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
+        {game.description && <p className="text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.tagline ?? game.description}</p>}
         <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
       </div>
-      <div className="min-w-0 self-start">
-        <GameCover gameId={game.id} className="w-full aspect-[100/62] max-h-[38vh] wide:max-h-[calc(100dvh-6.5rem)] mx-auto rounded-panel border-bold border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
+      <div ref={coverBox} className="min-w-0 self-start wide:self-center">
+        <GameCover gameId={game.id} className="w-[min(100%,calc(var(--cover-max,38vh)*1.613))] wide:w-full aspect-[100/62] wide:max-h-[calc(100dvh-6.5rem)] mx-auto rounded-panel border-bold border-border motion-safe:hover:scale-[1.01] motion-safe:transition-transform" />
       </div>
       {/* Three even groups, title, How to play, start (teacher, 2026-11-16:
           "more professionally spaced"), sized up to fill the column. */}
       {/* The right column is exactly as tall as the cover on big screens
           (teacher, 2026-11-18: "the same size as the preview image"): it adds
           no height of its own, and its text scales with the screen. */}
-      <div className="min-w-0 flex flex-col gap-6 wide:gap-[clamp(0.5rem,2.2vh,1.5rem)] wide:justify-between wide:h-0 wide:min-h-full">
+      <div className="min-w-0 flex flex-col gap-6 wide:gap-[clamp(0.5rem,2.2vh,1.5rem)] wide:justify-between">
         {/* The round buttons have their own row at the top right; the title
             gets one whole line under them (teacher, 2026-11-24). */}
         <div className="hidden wide:grid min-w-0 gap-[clamp(0.4rem,1.6vh,1rem)] pt-[3rem]">
           <h1 className="hidden wide:flex title-bubble text-fit-title min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
-          {game.description && <p className="hidden wide:block text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
+          {game.description && <p className="hidden wide:block text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.tagline ?? game.description}</p>}
           <div className="hidden wide:flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>
         <section aria-label={t('welcome.how')} className="min-h-0">

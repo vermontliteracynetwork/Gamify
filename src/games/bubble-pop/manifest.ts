@@ -11,6 +11,7 @@ export const bubblePopManifest: GameManifest = {
   id: 'bubble-pop',
   name: 'Bubble Pop',
   description: 'Answer questions to load bubbles, then aim and match 3 to pop them.',
+  tagline: 'Answer to load bubbles, then aim and pop.',
   modes: ['solo'],
   questionKinds: ['mc'],
   themePieces: [
