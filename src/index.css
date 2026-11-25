@@ -954,3 +954,7 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 :root { --text-page-title: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem); }
 .route-shell main h1:not(.hero-title) { font-size: var(--text-page-title); line-height: 1.05; }
 .route-shell main:has(.game-stage) h1, .route-shell .brand-menu h1 { font-size: revert-layer; }
+/* The subtext right under a page title runs the full page width on every
+   page (owner, 2026-11-25: "make subtext under plans and pricing full width",
+   "apply to all"). The Home hero keeps its own column. */
+.route-shell main h1:not(.hero-title) + p, .route-shell main h1:not(.hero-title) + p + p { max-width: none; }

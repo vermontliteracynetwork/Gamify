@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Tier } from '../config';
 import { data } from './index';
 import type { QuestionSet } from './types';
+import { withTimeout } from '../lib/withTimeout';
 
 // Loads async data and reloads on demand.
 export function useAsync<T>(load: () => Promise<T>, deps: unknown[] = []): { value: T | undefined; reload: () => void } {
@@ -28,10 +29,16 @@ export function useTier(): Tier {
 }
 
 // The plan, or null while it loads (so a gate never flashes a lock).
+const TIER_CACHE = 'gamify:tier-cache';
 export function useTierLoaded(): Tier | null {
   const [tier, setTier] = useState<Tier | null>(null);
   useEffect(() => {
-    const load = () => void data.getSetting<Tier>('tier').then((v) => setTier(v ?? 'free'));
+    // The last plan this device saw stands in when the cloud does not answer,
+    // so a game page never stays blank (owner, 2026-11-25).
+    const cached = (): Tier => { try { return (localStorage.getItem(TIER_CACHE) as Tier | null) ?? 'free'; } catch { return 'free'; } };
+    const load = () => void withTimeout(data.getSetting<Tier>('tier')).then(
+      (v) => { const tier = v ?? 'free'; try { localStorage.setItem(TIER_CACHE, tier); } catch { /* private window */ } setTier(tier); },
+      (e) => { console.warn('plan not loaded', e); setTier(cached()); });
     load();
     window.addEventListener('gamify-tier', load);
     return () => window.removeEventListener('gamify-tier', load);

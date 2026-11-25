@@ -2,6 +2,7 @@ import { newJoinCode } from '../auth/session';
 import { data } from './index';
 import { LIBRARY } from './library';
 import { supabase } from './supabase';
+import { withTimeout } from '../lib/withTimeout';
 import type { QuestionSet } from './types';
 
 // Game codes (development plan Part 3B, path 2): the teacher picks a set and
@@ -25,6 +26,16 @@ const KEY = 'game-codes';
 export const GAME_CODE_DAYS = 14;
 const fresh = (c: GameCode, now = Date.now()) => (c.due ? now <= Date.parse(`${c.due}T23:59:59`) : now - Date.parse(c.createdAt) < GAME_CODE_DAYS * 86400000);
 
+// Codes made in this tab are found again even when the cloud save failed,
+// so the live lobby always opens (owner, 2026-11-25).
+const MADE = 'gamify:made-codes';
+function rememberMade(c: GameCode) {
+  try { const all = JSON.parse(sessionStorage.getItem(MADE) ?? '[]') as GameCode[]; sessionStorage.setItem(MADE, JSON.stringify([...all.filter((x) => x.code !== c.code), c].slice(-20))); } catch { /* private window */ }
+}
+function madeHere(code: string): GameCode | undefined {
+  try { return (JSON.parse(sessionStorage.getItem(MADE) ?? '[]') as GameCode[]).find((c) => c.code === code.toUpperCase() && fresh(c)); } catch { return undefined; }
+}
+
 export async function listGameCodes(): Promise<GameCode[]> {
   return ((await data.getSetting<GameCode[]>(KEY)) ?? []).filter((c) => fresh(c));
 }
@@ -32,16 +43,18 @@ export async function listGameCodes(): Promise<GameCode[]> {
 // `design`: a code that opens the student theme studio (no Arcade to find it
 // in since 2026-10-31; students get in only with a code).
 export async function makeGameCode(gameId: string, setId: string, kind: 'play' | 'live' | 'versus' | 'mirror' | 'design' = 'play', due?: string, limits: PlayLimits = {}): Promise<GameCode> {
-  const all = await listGameCodes();
+  // A cloud that does not answer never stops the lobby from opening (owner, 2026-11-25).
+  const all = await withTimeout(listGameCodes()).catch((e) => { console.warn('game codes not loaded', e); return [] as GameCode[]; });
   const live = kind === 'live', versus = kind === 'versus', mirror = kind === 'mirror', design = kind === 'design';
   // A two-device game gets a fresh code every time; others reuse theirs.
   const same = versus || mirror || limits.minutes || limits.endAt || limits.goal ? undefined : all.find((c) => c.gameId === gameId && c.setId === setId && !!c.live === live && !c.versus && !!c.design === design && c.due === due);
   if (same) return same;
   // A class list or cloud hiccup never stops a game from opening (teacher, 2026-11-06).
-  const classCodes = (await data.listClassrooms().catch(() => [])).map((c) => c.joinCode ?? '');
+  const classCodes = (await withTimeout(data.listClassrooms()).catch(() => [])).map((c) => c.joinCode ?? '');
   const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }), ...limits };
-  await data.setSetting(KEY, [...all, code]).catch((e) => console.warn('game code not saved', e));
-  await shareToCloud(code, kind).catch((e) => console.warn('game code not shared', e));
+  rememberMade(code);
+  await withTimeout(data.setSetting(KEY, [...all, code])).catch((e) => console.warn('game code not saved', e));
+  await withTimeout(shareToCloud(code, kind), 8000).catch((e) => console.warn('game code not shared', e));
   return code;
 }
 
@@ -91,7 +104,9 @@ export const cloudCodePlaying = () => { try { return sessionStorage.getItem(PLAY
 export function playCloudCode(code: string) { try { if (code) sessionStorage.setItem(PLAYING, code); else sessionStorage.removeItem(PLAYING); } catch { /* this tab only */ } }
 
 export async function findGameCode(code: string): Promise<GameCode | undefined> {
-  const mine = (await listGameCodes()).find((c) => c.code === code.toUpperCase());
+  const made = madeHere(code);
+  if (made) return made;
+  const mine = (await withTimeout(listGameCodes()).catch(() => [] as GameCode[])).find((c) => c.code === code.toUpperCase());
   if (mine || !supabase) return mine;
   const { data: rows } = await supabase.rpc('game_by_code', { c: code });
   const r = (rows as { code: string; game_id: string; set_id: string; kind: string; set_snapshot: QuestionSet; roster_class: string | null; created_at: string }[] | null)?.[0];

@@ -46,7 +46,7 @@ const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl
 export default function LiveHost() {
   const { code = '' } = useParams();
   const [game, setGame] = useState<GameCode | null | undefined>(undefined);
-  useEffect(() => { void findGameCode(code).then((g) => setGame(g?.live ? g : null)); }, [code]);
+  useEffect(() => { void findGameCode(code).then((g) => setGame(g?.live ? g : null), () => setGame(null)); }, [code]);
   if (game === undefined) return null;
   if (!game) return <main className="max-w-lg mx-auto px-4 pt-14 grid gap-4 justify-items-center text-center"><p className="font-bold text-lg">{t('live.noRoom')}</p><Link to="/teacher/sets" className={buttonClasses('secondary')}>{t('live.toSets')}</Link></main>;
   return <Room game={game} />;

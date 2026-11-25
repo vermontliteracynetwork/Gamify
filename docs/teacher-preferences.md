@@ -387,3 +387,4 @@ line that fits, and add each new preference the same turn she says it.
 - Every game cover shows Classic first. A game's library themes appear only when the cover cycles, after Classic (owner rule: Classic is the main design, 2026-10-28).
 - Blog posts and help articles keep the small "Blog / topic" link line at the top, while the full breadcrumb trail stays hidden. Home keeps its fifth Why it works card, "Hard enough to stretch" (owner, 2026-11-25: "keep. sure").
 - No name tags on the home page game covers (owner, 2026-11-25: "remove the name tags for games").
+- The subtext under every page title runs the full page width (owner, 2026-11-25: "make subtext under plans and pricing full width", then "apply to all").
