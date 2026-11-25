@@ -20,7 +20,7 @@ export function TeamBadge({ colorIndex, size = 36 }: { colorIndex: number; size?
       style={{ width: size, height: size, background: TEAM_COLORS[colorIndex % TEAM_COLORS.length] }}
       aria-hidden="true"
     >
-      <Icon weight="fill" size={size * 0.55} color="#241c3d" />
+      <Icon weight="fill" size={size * 0.55} color={TEAM_COLORS[colorIndex % TEAM_COLORS.length] === '#1d1a33' ? '#fffaf0' : '#241c3d'} />
     </span>
   );
 }

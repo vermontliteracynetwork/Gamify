@@ -19,7 +19,8 @@ const cloud = (x: number, y: number, s: number) => `M${x} ${y} c${-8 * s} 0 ${-1
 function parkMarkup(w: number, h: number, still: boolean) {
   const k = Math.max(0.6, Math.min(w, h) / 625);
   const sw = Math.max(3, 4 * k);
-  const flowers = Math.max(6, Math.round(w / 90));
+  // Only in the open strip right of the board, heads and stems inside the frame (Art Director, 2026-11-25).
+  const flowers = 3;
   return {
     sky: <rect width={w} height={h} fill={PK.sky} />,
     sun: (
@@ -40,7 +41,7 @@ function parkMarkup(w: number, h: number, still: boolean) {
       </>
     ),
     flowers: Array.from({ length: flowers }, (_, i) => {
-      const x = (w / flowers) * i + 30 * k, y = Math.min(h * 0.86 + ((i * 29) % 50) * k, h * 0.95 - 10 * k);
+      const x = w * (0.86 + i * 0.05), y = Math.min(h * 0.8 + ((i * 29) % 50) * k, h * 0.9 - 18 * k);
       return (
         <g key={i} className={still ? '' : 'cq-sway'} style={{ transformOrigin: `${x}px ${y + 18 * k}px`, animationDelay: `${-(i % 5) * 0.6}s` }}>
           <path d={`M${x} ${y} v${18 * k}`} stroke={INK} strokeWidth={3 * k} strokeLinecap="round" />

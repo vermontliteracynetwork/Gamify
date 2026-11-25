@@ -16,7 +16,7 @@ const I = STUDIO.ink;
 // small badge in the corner and the card read as one team.
 // Each team color's own pastel pair from the palette (Art Director, 2026-11-25),
 // never a computed tint, in TEAM_COLORS order.
-const TEAM_PASTELS = ['#fff1b8', '#c8f0dc', '#bfdff3', '#ffd9b3', '#ddd6ff', '#ffd3e6', '#e8f0b4', '#c9f1ee', '#ddd6ff', '#fffaf0'];
+const TEAM_PASTELS = ['#fff1b8', '#c8f0dc', '#bfdff3', '#ffd9b3', '#ddd6ff', '#ffd3e6', '#e8f0b4', '#c9f1ee', '#f6f0e4', '#ddd6ff'];
 export const teamPastel = (colorIndex: number) => TEAM_PASTELS[colorIndex % TEAM_COLORS.length];
 
 // Measures a box so the studio is drawn at its real size (curtains never stretch).
