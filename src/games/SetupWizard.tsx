@@ -109,7 +109,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
         {/* Step title left, the step meter right, no "Step x of x" on screen
             (teacher, 2026-11-23); screen readers still hear the step number. */}
         <h2 className="title-bubble text-2xl sm:text-3xl leading-none"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
-        <ol className="ml-auto flex gap-[4px] list-none m-0 w-56 max-w-full rounded-full p-[3px]" style={{ background: '#eeeaf8', border: '2.5px solid var(--color-border)', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
+        <ol className="ml-auto flex gap-[4px] list-none m-0 w-56 max-w-full rounded-full p-[3px]" style={{ background: '#eeeaf8', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (

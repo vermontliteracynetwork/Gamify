@@ -36,15 +36,16 @@ export default function NavBar() {
   // Students (and anyone inside a game without a teacher signed in) get the
   // student form; teachers and site visitors get the adult one with Help.
   const role = student || studentPage || (inGame && !teacher) ? 'student' : 'teacher';
-  const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-std border-border bg-white hover:bg-surface-hover transition-colors';
+  // Top bar buttons sit smaller than the bar with room around them (owner, 2026-11-25).
+  const pill = `hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-text no-underline px-3 ${inGame ? 'min-h-8' : 'min-h-9'} rounded-pill border-std border-border bg-white hover:bg-surface-hover transition-colors`;
   // The current page wears Butter (New direction rule 10, approved 2026-11-25).
-  const navLink = (to: string) => `nav-grow flex min-h-11 px-3 items-center rounded-pill font-bold text-base no-underline text-text ${path === to ? 'bg-butter' : ''}`;
+  const navLink = (to: string) => `nav-grow flex min-h-9 px-3 items-center rounded-pill font-bold text-sm no-underline text-text ${path === to ? 'bg-butter' : ''}`;
   // Student pages and signed-in students: the logo only, nothing to wander to.
   const logoOnly = studentPage || (!!student && !teacher);
   const reportBtn = (cls = '') => (
     <button type="button" onClick={() => setTellOpen(true)} aria-label={t('report.open')} title={t('report.open')}
-      className={`w-11 h-11 rounded-full border-std border-border bg-white hover:bg-surface-hover flex items-center justify-center shrink-0 ${cls}`}>
-      <Flag weight="bold" size={20} />
+      className={`${inGame ? 'w-8 h-8' : 'w-9 h-9'} rounded-full border-std border-border bg-white hover:bg-surface-hover flex items-center justify-center shrink-0 ${cls}`}>
+      <Flag weight="bold" size={18} />
     </button>
   );
   return (
@@ -79,7 +80,7 @@ export default function NavBar() {
 
           {/* Only the owner's own account ever sees this (teacher, 2026-11-23); it opens the developer dashboard. */}
           {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-text hover:!bg-blush hidden md:flex`}>{t('nav.devPortal')}</Link>}
-          <Link to="/teacher" className={`${pill} hidden md:flex`}><ChalkboardTeacher weight="bold" size={16} />{t('nav.teacher')}</Link>
+          <Link to="/teacher" className={`${pill} hidden md:flex`}><ChalkboardTeacher weight="bold" size={15} />{t('nav.teacher')}</Link>
           {!student && <Link to="/play" className={`${pill} hidden md:flex`}><HouseSimple weight="bold" size={16} />{t('nav.allGames')}</Link>}
           {!student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden md:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
           <TeacherMenu path={path} owner={isOwner && !student} student={!!student} wide={!inGame && !student} onReport={() => setTellOpen(true)} />
@@ -135,7 +136,7 @@ function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) 
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
-        className="lg:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
+        className="lg:hidden shrink-0 w-9 h-9 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
         <List weight="bold" size={22} aria-hidden="true" />
       </button>
       <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
@@ -192,7 +193,7 @@ function TeacherMenu({ path, owner, student, wide, onReport }: { path: string; o
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
-        className={`${hide} shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95`}>
+        className={`${hide} shrink-0 w-9 h-9 rounded-full grid place-items-center border-std border-border bg-white active:scale-95`}>
         <List weight="bold" size={22} aria-hidden="true" />
       </button>
       <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
