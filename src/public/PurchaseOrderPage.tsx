@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, Receipt } from '@phosphor-icons/react';
+import { CheckCircle } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import { Button, fieldClasses } from '../ui/kit';
@@ -34,7 +34,7 @@ export default function PurchaseOrderPage() {
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-6">
         <div className="grid gap-2">
-          <h1 className="title-bubble text-4xl sm:text-5xl flex items-center gap-3"><Receipt weight="fill" size={44} aria-hidden="true" /><Title text={t('po.title')} /></h1>
+          <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('po.title')} /></h1>
           <p className="text-lg font-bold">{t('po.sub')}</p>
         </div>
         {sent ? (

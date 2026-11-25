@@ -42,13 +42,13 @@ export default function FaqPage() {
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
-        <header className={`${panel} p-6 sm:p-8 grid gap-3`}>
+        <header className="grid gap-3 justify-items-start text-left">
           <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
           <p className="text-lg font-semibold max-w-3xl">{t('faq.sub')}</p>
-          <label className="relative max-w-3xl">
+          <label className="relative w-full max-w-3xl">
             <MagnifyingGlass weight="bold" size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('faq.search')} aria-label={t('faq.search')}
-              className="w-full min-h-14 pl-12 pr-4 rounded-input border-std border-border bg-surface-2 font-semibold text-lg" />
+              className="w-full min-h-14 pl-12 pr-4 rounded-input border-std border-border bg-surface font-semibold text-lg" />
           </label>
         </header>
 
@@ -63,7 +63,7 @@ export default function FaqPage() {
 
         <div className="grid md:grid-cols-[16rem_minmax(0,1fr)] gap-6 items-start">
           <aside className={`${panel} p-2 md:sticky md:top-24`}>
-            <p className="px-3 pt-2 pb-1 text-xs font-bold uppercase tracking-wider text-muted">{t('help.topics')}</p>
+            <h2 className="px-3 pt-2 pb-1 font-heading font-bold">{t('help.topics')}</h2>
             <div role="tablist" aria-label={t('faq.tabs')} aria-orientation="vertical" className="grid gap-1">
               {FAQ_GROUPS.map((g) => {
                 const I = ICONS[g];

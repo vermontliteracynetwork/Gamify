@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowSquareOut, CheckCircle, Flask, MagnifyingGlass, Printer, RocketLaunch } from '@phosphor-icons/react';
+import { ArrowSquareOut, CheckCircle, MagnifyingGlass, Printer } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import { buttonClasses, Tabs } from '../ui/kit';
 import Title from '../ui/Title';
@@ -26,7 +26,7 @@ export default function ResearchPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-5">
         <div>
-          <h1 className="title-bubble text-5xl flex items-center gap-3"><Flask weight="fill" size={44} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('research.title')} /></h1>
+          <h1 className="title-bubble text-5xl"><Title text={t('research.title')} /></h1>
           <p className="text-xl font-bold mt-2 max-w-3xl">{t('research.sub')}</p>
         </div>
         <Tabs label={t('research.tabs')} value={tab} onChange={(v) => setParams({ tab: v }, { replace: true })} options={[
@@ -42,7 +42,7 @@ export default function ResearchPage() {
                 <motion.article key={f.id} {...enter(i)} className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                   <h2 className="font-display text-3xl leading-tight"><Title text={f.title} /></h2>
                   <p className="text-lg font-semibold leading-relaxed">{f.found}</p>
-                  <p className="text-lg font-bold rounded-input bg-accent border-std border-border p-3"><span className="font-display">{t('research.inGamify')} </span>{f.inGamify}</p>
+                  <p className="text-lg font-bold rounded-input bg-butter border-std border-border p-3"><span className="font-display">{t('research.inGamify')} </span>{f.inGamify}</p>
                   <p className="text-sm font-semibold text-muted"><span className="font-bold">{t('research.goodToKnow')} </span>{f.fair}</p>
                   <ul className="grid gap-1 list-none p-0 m-0">
                     {f.sources.map((s) => (
@@ -93,10 +93,10 @@ export default function ResearchPage() {
 function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }) {
   return (
     <section aria-label={t('research.tab.beta')} className="grid gap-5">
-      <div className="bg-accent border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-        <h2 className="title-bubble text-4xl flex items-center gap-3"><RocketLaunch weight="fill" size={40} aria-hidden="true" className="wiggle-on-hover" /><Title text={t('beta.title')} /></h2>
+      <div className="bg-butter border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <h2 className="title-bubble text-4xl"><Title text={t('beta.title')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('beta.intro')}</p>
-        <Link to="/beta" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}>{t('beta.join')}</Link>
+        <Link to="/beta" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('beta.join')}</Link>
       </div>
       <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
         {BETA_DOING.map((m, i) => (

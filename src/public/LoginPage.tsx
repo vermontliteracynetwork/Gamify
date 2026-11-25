@@ -70,9 +70,9 @@ export default function LoginPage() {
   const bad = (...k: SignUpProblem[]) => k.some((x) => problems.includes(x));
   return (
     <main className="max-w-xl mx-auto px-4 pt-10 pb-16 grid gap-4">
-      <h1 className="title-bubble text-5xl text-center"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
-      <Tabs label={t('login.tabs')} value={mode} onChange={(m) => { setMode(m); setProblems([]); setWrong(false); }} options={[{ id: 'login', label: t('login.tab.login') }, { id: 'signup', label: t('login.tab.signup') }]} />
-      <Panel>
+      <Panel className="grid gap-4">
+        <h1 className="title-bubble text-4xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
+        <Tabs fill className="mb-0" label={t('login.tabs')} value={mode} onChange={(m) => { setMode(m); setProblems([]); setWrong(false); }} options={[{ id: 'login', label: t('login.tab.login') }, { id: 'signup', label: t('login.tab.signup') }]} />
         <form className="grid gap-3" onSubmit={(e) => void submit(e)} noValidate>
           <p className="font-bold flex items-center gap-2"><ChalkboardTeacher weight="bold" size={22} />{t('login.forTeachers')}</p>
           {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-std border-border-soft">{t('login.localNote')}</p>}

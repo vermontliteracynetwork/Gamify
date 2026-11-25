@@ -12,12 +12,11 @@ export default function PermissionSlip() {
   const line = 'border-b-[2px] border-border min-h-10';
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16 grid gap-5 print:pt-0">
-      <div className="no-print flex flex-wrap items-center gap-3">
-        <Button variant="primary" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('permission.print')}</Button>
-        <p className="text-sm font-bold text-muted">{t('permission.draft')}</p>
-      </div>
       <article className="bg-surface border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4 print:border-0 print:p-0">
-        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" />
+          <Button variant="primary" className="no-print" onClick={() => window.print()}><Printer weight="bold" size={18} />{t('permission.print')}</Button>
+        </div>
         <h1 className="font-display text-3xl"><Title text={t('permission.title')} /></h1>
         <p className="text-lg font-semibold">{t('permission.intro')}</p>
         <h2 className="font-display text-2xl">{t('permission.what')}</h2>

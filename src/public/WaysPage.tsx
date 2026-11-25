@@ -44,7 +44,7 @@ export function WaysList() {
             className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
         </div>
         {!tag && (
-          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-accent border-bold border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-butter border-bold border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <PaintBrush weight="fill" size={44} aria-hidden="true" />
             <span className="grid gap-1 flex-1 min-w-60"><span className="font-display text-2xl">{t('guide.listTitle')}</span><span className="font-semibold">{t('guide.listSub')}</span></span>
             <span className={buttonClasses('secondary')}>{t('guide.listOpen')}<ArrowRight weight="bold" size={18} /></span>
@@ -87,10 +87,10 @@ export function WaysPost() {
   return (
     <>
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 grid gap-5">
-        <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-bold border-border" />
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={post.title} /></h1>
         <Meta grades={post.grades} minutes={post.minutes} />
         <p className="text-xl font-bold">{post.summary}</p>
+        <GameCover gameId={post.cover} className="aspect-[21/9] rounded-panel border-bold border-border" />
         {post.body.map((para, i) => <p key={i} className="text-lg leading-relaxed">{para}</p>)}
         {post.lists?.map((l) => (
           <section key={l.heading} className="grid gap-2">
@@ -98,7 +98,7 @@ export function WaysPost() {
             <ul className="grid gap-1 pl-7 m-0 text-lg list-disc">{l.items.map((item) => <li key={item}>{item}</li>)}</ul>
           </section>
         ))}
-        <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section className="bg-butter border-bold border-border rounded-panel p-5 grid gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <h2 className="font-display text-3xl"><Title text={t('ways.tryIt')} /></h2>
           <p className="font-bold">{t('ways.tryItSub')}</p>
           <ol className="grid gap-2 pl-7 m-0 font-semibold text-lg list-decimal marker:font-bold">{post.tryIt.map((s, i) => <li key={i}>{s}</li>)}</ol>

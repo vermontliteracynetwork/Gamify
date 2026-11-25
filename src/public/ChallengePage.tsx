@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { Crown, Medal, PaintBrush, PencilSimpleLine, Trophy } from '@phosphor-icons/react';
+import { Crown, Medal, PaintBrush, PencilSimpleLine } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -17,11 +17,11 @@ export default function ChallengePage() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
-        <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><Trophy weight="fill" size={52} color="#c98a00" aria-hidden="true" className="wiggle-on-hover shrink-0 hidden sm:block" /><Title text={t('challenge.title')} /></h1>
+        <section className="grid gap-4 justify-items-start text-left">
+          <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('challenge.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('challenge.sub')}</p>
           <div className="flex flex-wrap gap-3">
-            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop !bg-text !text-white', 'lg')}><PaintBrush weight="bold" size={20} />{t('challenge.start')}</Link>
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><PaintBrush weight="bold" size={20} />{t('challenge.start')}</Link>
             <Link to="/themes" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('themes.seeAll')}</Link>
           </div>
         </section>
@@ -31,7 +31,7 @@ export default function ChallengePage() {
           <div className="grid md:grid-cols-2 gap-5">
             {(['winner', 'runner'] as const).map((k, i) => (
               <motion.article key={k} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-                className={`${card} hover-lift ${k === 'winner' ? '!bg-[#fff6c9]' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                className={`${card} hover-lift ${k === 'winner' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <h3 className="font-display text-3xl flex items-center gap-2">{k === 'winner' ? <Crown weight="fill" size={32} color="#c98a00" aria-hidden="true" /> : <Medal weight="fill" size={32} color="#6aa9e9" aria-hidden="true" />}<Title text={t(`challenge.${k}` as StringKey)} /></h3>
                 <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`challenge.${k}.${n}` as StringKey)}</li>)}</ul>
               </motion.article>

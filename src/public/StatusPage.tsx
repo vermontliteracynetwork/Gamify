@@ -54,7 +54,7 @@ export default function StatusPage() {
           <Button onClick={() => void run()}>{t('status.again')}</Button>
           <span className="text-sm font-bold text-muted">{t('status.at', { time: at.toLocaleTimeString() })}</span>
         </div>
-        <section className="bg-accent border-bold border-border rounded-panel p-5 grid gap-2">
+        <section className="bg-butter border-bold border-border rounded-panel p-5 grid gap-2">
           <h2 className="font-display text-2xl">{t('status.helpTitle')}</h2>
           <p className="font-semibold">{t('status.help')}</p>
         </section>

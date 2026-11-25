@@ -15,7 +15,7 @@ export default function NotFoundPage() {
         </span>
         <h1 className="font-display text-5xl sm:text-6xl leading-none">This page is not here</h1>
         <p className="text-lg font-semibold">{student ? 'The link may be old. Check the code with your teacher.' : 'The link may be old or typed a little wrong.'}</p>
-        <Link to={student ? '/join' : '/'} className="min-h-14 px-7 rounded-pill border-bold border-border bg-accent font-bold text-lg inline-flex items-center gap-2" style={{ boxShadow: '0 4px 0 #000' }}>
+        <Link to={student ? '/join' : '/'} className="min-h-14 px-7 rounded-pill border-bold border-border bg-accent font-bold text-lg inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {student ? <>Join with a code<ArrowRight weight="bold" size={22} /></> : <><House weight="bold" size={22} />Go to the home page</>}
         </Link>
       </div>

@@ -38,6 +38,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/teacher\/themes/, 'Theme Builder'],
   [/^\/teacher\/account/, 'Account'],
   [/^\/teacher\/activity/, 'Create an Activity'],
+  [/^\/teacher\/achievements/, 'Achievements'],
   [/^\/schools/, 'For schools'],
   [/^\/homeschool/, 'For homeschool'],
   [/^\/student-data/, 'Student data promise'],

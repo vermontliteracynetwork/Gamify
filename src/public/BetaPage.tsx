@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, Printer, RocketLaunch, ShieldCheck } from '@phosphor-icons/react';
+import { CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, Printer, ShieldCheck } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -26,13 +26,13 @@ export default function BetaPage() {
   return (
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-10">
-        <section className="bg-accent border-bold border-border rounded-panel p-6 sm:p-8 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <h1 className="title-bubble text-4xl sm:text-6xl flex items-center gap-3 min-w-0"><RocketLaunch weight="fill" size={52} aria-hidden="true" className="shrink-0 hidden sm:block wiggle-on-hover" /><Title text={t('betaPage.title')} /></h1>
+        <section className="grid gap-4 justify-items-start text-left">
+          <h1 className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t('betaPage.title')} /></h1>
           <p className="text-xl font-bold max-w-3xl">{t('betaPage.sub')}</p>
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
             {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-std border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
           </ul>
-          <a href="#apply" className={buttonClasses('primary', 'justify-self-start hover-pop !bg-text !text-white', 'lg')}>{t('betaPage.apply')}</a>
+          <a href="#apply" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</a>
         </section>
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">

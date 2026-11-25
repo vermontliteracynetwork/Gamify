@@ -94,6 +94,7 @@ const WaysPost = lazyPage(() => import('./public/WaysPage').then((m) => ({ defau
 const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
 const TeacherHome = lazyPage(() => import('./teacher/TeacherHome'));
+const AchievementsPage = lazyPage(() => import('./teacher/AchievementsPage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -189,6 +190,7 @@ function AnimatedRoutes() {
           <Route path="/teacher/themes" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
           <Route path="/teacher/themes/:gameId" element={<RequireTeacher><ThemeBuilderPage /></RequireTeacher>} />
           <Route path="/teacher/themes/:gameId/template" element={<RequireTeacher><TemplatePage /></RequireTeacher>} />
+          <Route path="/teacher/achievements" element={<RequireTeacher><AchievementsPage /></RequireTeacher>} />
           <Route path="/teacher/account" element={<RequireTeacher><AccountPage /></RequireTeacher>} />
           <Route path="/teacher/reports" element={<RequireTeacher><ReportsPage /></RequireTeacher>} />
           <Route path="/teacher/reports/print" element={<RequireTeacher><ReportPrintPage /></RequireTeacher>} />

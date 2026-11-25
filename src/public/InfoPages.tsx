@@ -103,12 +103,12 @@ export function HelpPage() {
   return (
     <>
       <main className="max-w-6xl mx-auto px-6 sm:px-10 pt-8 pb-16 grid gap-8">
-        <section className={`${card} px-6 py-10 sm:py-14 grid gap-4 justify-items-center text-center`}>
+        <section className="px-2 pt-4 grid gap-4 justify-items-center text-center">
           <h1 className="font-display text-4xl sm:text-5xl">{t('help.ask')}</h1>
           <label className="relative w-full max-w-2xl">
             <MagnifyingGlass weight="bold" size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('help.search')} aria-label={t('help.search')}
-              className="w-full min-h-12 pl-11 pr-4 rounded-pill border-thin border-border bg-surface-2 text-base font-semibold" />
+              className="w-full min-h-14 pl-11 pr-4 rounded-pill border-std border-border bg-surface text-lg font-semibold" />
           </label>
           <nav aria-label={t('help.shortcuts')} className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm font-bold">
             {[['/faq', 'public.nav.faq', Question], ['/it', 'public.nav.it', WifiHigh], ['/check', 'public.nav.check', DeviceMobile], ['/beta-kit', 'beta.kit', Printer], ['/blog', 'ways.title', Lightbulb]].map(([to, k, Ic]) => {
