@@ -52,9 +52,9 @@ export default function TeacherHome() {
                 const next = i === nextIdx;
                 return (
                   <li key={s.key} className={`rounded-card p-3 flex flex-wrap items-center gap-3 border-std ${s.done ? 'bg-mint-soft border-transparent' : next ? 'bg-gamify border-border shadow-[0_0_0_0.2rem_var(--color-surface),0_0_0_0.4rem_var(--color-border)]' : 'bg-surface-2 border-transparent'}`}>
-                    <span className={`w-11 h-11 rounded-full grid place-items-center font-bold text-lg shrink-0 border-std border-border ${s.done ? 'bg-success text-white' : 'bg-surface'}`}>{s.done ? <Check weight="bold" size={20} aria-label={t('start.done')} /> : i + 1}</span>
+                    <span className={`w-11 h-11 rounded-full grid place-items-center font-bold text-lg shrink-0 border-std border-border ${s.done ? 'bg-kelly text-text' : 'bg-surface'}`}>{s.done ? <Check weight="bold" size={20} aria-label={t('start.done')} /> : i + 1}</span>
                     <b className="flex-1 min-w-40">{t(`start.step.${s.key}` as StringKey)}</b>
-                    {next && <Link to={s.to} className={buttonClasses('primary')}>{t('teacherHome.next')}<ArrowRight weight="bold" size={16} /></Link>}
+                    {next && <Link to={s.to} className={buttonClasses('main')}>{t('teacherHome.next')}<ArrowRight weight="bold" size={16} /></Link>}
                   </li>
                 );
               })}

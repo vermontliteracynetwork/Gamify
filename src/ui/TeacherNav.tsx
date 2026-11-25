@@ -27,7 +27,7 @@ export default function TeacherNav({ startOpen = true, rail: withRail = true }: 
   useEffect(() => { void surveyDue().then(setSurvey); }, []);
   const showing = open ?? startOpen;
   const link = ({ isActive }: { isActive: boolean }) =>
-    `min-h-9 px-3 rounded-pill font-bold text-xs lg:text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`;
+    `min-h-9 px-3 rounded-pill font-bold text-xs lg:text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-butter text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.
   const onAccount = useLocation().pathname.startsWith('/teacher/account');
   const unfinished = start && start.count < start.steps.length && !onAccount;
@@ -40,7 +40,7 @@ export default function TeacherNav({ startOpen = true, rail: withRail = true }: 
   return (
     <>
       {withRail && <nav aria-label={t('teacherNav.label')} className="teacher-rail no-print hidden min-[1100px]:flex fixed left-0 top-14 bottom-0 z-40 w-[14.5rem] flex-col gap-1.5 px-4 py-5 overflow-y-auto bg-surface border-r-[2.5px] border-border">
-        <NavLink to="/teacher/activity" className="hover-pop min-h-12 mb-2 rounded-pill inline-flex items-center justify-center gap-2 font-bold no-underline text-white bg-grape border-std border-border shadow-[0_0.2rem_0_var(--color-border)]"><Plus weight="bold" size={18} />{t('teacherNav.create')}</NavLink>
+        <NavLink to="/teacher/activity" className="hover-pop min-h-12 mb-2 rounded-pill inline-flex items-center justify-center gap-2 font-bold no-underline text-white bg-grape hover:bg-grape-deep border-std border-border shadow-[0_0.2rem_0_var(--grape-deep)]"><Plus weight="bold" size={18} />{t('teacherNav.create')}</NavLink>
         <NavLink to="/teacher" end className={rail}><House weight="bold" size={20} />{t('teacherNav.home')}</NavLink>
         <NavLink to="/teacher/classes" className={rail}><UsersThree weight="bold" size={20} />{!TIERS[tier].hasClasses ? t('teacherNav.students') : t('teacherNav.classes')}</NavLink>
         <NavLink to="/teacher/sets" className={rail}><Stack weight="bold" size={20} />{t('teacherNav.sets')}</NavLink>
@@ -50,7 +50,7 @@ export default function TeacherNav({ startOpen = true, rail: withRail = true }: 
         <NavLink to="/teacher/account" className={rail}><UserCircle weight="bold" size={20} />{t('teacherNav.account')}</NavLink>
         <span className="flex-1" />
         {unfinished && (
-          <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)} className="min-h-10 px-3 rounded-pill font-bold text-sm inline-flex justify-center items-center gap-1.5 border-std border-border bg-accent text-accent-ink">
+          <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)} className="min-h-10 px-3 rounded-pill font-bold text-sm inline-flex justify-center items-center gap-1.5 border-std border-border bg-butter text-text">
             <RocketLaunch weight="fill" size={16} />{t('start.pill', { done: start.count, total: start.steps.length })}
           </button>
         )}
@@ -70,7 +70,7 @@ export default function TeacherNav({ startOpen = true, rail: withRail = true }: 
         <NavLink to="/teacher/account" className={link}><UserCircle weight="bold" size={16} />{t('teacherNav.account')}</NavLink>
         {unfinished && (
           <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)}
-            className={`min-h-8 px-3 rounded-pill font-bold text-xs inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 border-std border-border ${showing ? 'bg-surface-2' : 'bg-accent text-accent-ink'}`}>
+            className={`min-h-8 px-3 rounded-pill font-bold text-xs inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 border-std border-border ${showing ? 'bg-surface-2' : 'bg-butter text-text'}`}>
             <RocketLaunch weight="fill" size={16} />{t('start.pill', { done: start.count, total: start.steps.length })}
           </button>
         )}

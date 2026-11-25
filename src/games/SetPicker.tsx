@@ -110,9 +110,9 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                   aria-description={t('sets.flipHint')} title={t('sets.flipHint')}
                   onClick={() => tap(s, on)}
                   className={`group relative w-full rounded-panel border-bold border-border text-left grid gap-2.5 p-4 bg-surface motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-bg -translate-y-1' : ''}`}
-                  style={{ boxShadow: on ? '0 6px 0 #000, 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 #000, 0 10px 18px rgba(36,28,61,0.08)' }}>
+                  style={{ boxShadow: on ? '0 6px 0 var(--ink), 0 16px 26px rgba(36,28,61,0.18)' : '0 4px 0 var(--ink), 0 10px 18px rgba(36,28,61,0.08)' }}>
                   {on && (
-                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-accent border-std border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
+                    <span className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-kelly border-std border-border flex items-center justify-center font-display font-bold motion-safe:animate-[pop_0.3s_ease-out]">
                       {max > 1 ? value.indexOf(s.id) + 1 : <CheckCircle weight="fill" size={22} />}
                     </span>
                   )}

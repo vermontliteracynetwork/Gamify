@@ -24,7 +24,17 @@ export default function NavBar() {
   // Students (and anyone inside a game without a teacher signed in) get the
   // student form; teachers and site visitors get the adult one with Help.
   const role = student || studentPage || (inGame && !teacher) ? 'student' : 'teacher';
-  const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-10 tap rounded-pill border-std border-border bg-surface-2 hover:bg-secondary transition-colors';
+  const pill = 'hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm sm:text-base font-bold text-text no-underline px-3.5 min-h-11 rounded-pill border-std border-border bg-white hover:bg-surface-hover transition-colors';
+  // The current page wears Butter (New direction rule 10, approved 2026-11-25).
+  const navLink = (to: string) => `nav-grow flex min-h-11 px-3 items-center rounded-pill font-bold text-base no-underline text-text ${path === to ? 'bg-butter' : ''}`;
+  // Student pages and signed-in students: the logo only, nothing to wander to.
+  const logoOnly = studentPage || (!!student && !teacher);
+  const reportBtn = (cls = '') => (
+    <button type="button" onClick={() => setTellOpen(true)} aria-label={t('report.open')} title={t('report.open')}
+      className={`w-11 h-11 rounded-full border-std border-border bg-white hover:bg-surface-hover flex items-center justify-center shrink-0 ${cls}`}>
+      <Flag weight="bold" size={20} />
+    </button>
+  );
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border`}>
       {studentPage && !any
@@ -32,42 +42,42 @@ export default function NavBar() {
         : <Link to={any ? '/play' : '/'} className="flex items-center min-h-11 shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" />
           </Link>}
-      {!any && !studentPage && <MobileMenu path={path} />}
       {!any && !studentPage && (
         <nav aria-label={t('public.nav.label')} className="hidden md:flex items-center gap-1 sm:gap-2">
-          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.home')}</Link>
-          <Link to="/features" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.features')}</Link>
-          <Link to="/pricing" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.pricing')}</Link>
-          <Link to="/research" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.research')}</Link>
-          <Link to="/blog" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.ideas')}</Link>
-          <Link to="/join" className={pill}>{t('public.nav.join')}</Link>
+          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className={navLink('/')}>{t('public.nav.home')}</Link>
+          <Link to="/features" aria-current={path === '/features' ? 'page' : undefined} className={navLink('/features')}>{t('public.nav.features')}</Link>
+          <Link to="/pricing" aria-current={path === '/pricing' ? 'page' : undefined} className={navLink('/pricing')}>{t('public.nav.pricing')}</Link>
+          <Link to="/research" aria-current={path === '/research' ? 'page' : undefined} className={navLink('/research')}>{t('public.nav.research')}</Link>
+          <Link to="/blog" aria-current={path === '/blog' ? 'page' : undefined} className={navLink('/blog')}>{t('public.nav.ideas')}</Link>
+          <Link to="/join" className={`${pill} !bg-lavender`}>{t('public.nav.join')}</Link>
           <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
         </nav>
       )}
-      {/* Report, for everyone on every page (owner, 2026-11-24). */}
-      <button type="button" onClick={() => setTellOpen(true)} aria-label={t('report.open')} title={t('report.open')}
-        className="w-9 h-9 tap-round rounded-full border-std border-border bg-surface-2 hover:bg-secondary flex items-center justify-center shrink-0">
-        <Flag weight="bold" size={18} />
-      </button>
-      {any && (
+      {/* Phones (rule 10): Log in beside one 44px menu that holds every link and Report. */}
+      {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-accent md:hidden`}>{t('public.nav.login')}</Link>}
+      {!any && !studentPage && <MobileMenu path={path} onReport={() => setTellOpen(true)} />}
+      {/* Report, for everyone on every page (owner, 2026-11-24); student pages show the logo only (rule 10). */}
+      {!logoOnly && reportBtn(teacher || !any ? 'hidden md:flex' : '')}
+      {any && teacher && (
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
               and help (teacher, 2026-10-31). Students never see these. */}
           {/* Not inside a game (teacher, 2026-11-18): just the buttons on the right. */}
-          {teacher && !student && !path.startsWith('/games/') && (
+          {!student && !path.startsWith('/games/') && (
             <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1 mr-1">
-              <Link to="/" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.home')}</Link>
-              <Link to="/features" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.features')}</Link>
-              <Link to="/blog" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.ideas')}</Link>
-              <Link to="/help" className="nav-grow flex min-h-10 tap px-3 items-center font-bold text-base no-underline text-text">{t('public.nav.faq')}</Link>
+              <Link to="/" className={navLink('/')}>{t('public.nav.home')}</Link>
+              <Link to="/features" className={navLink('/features')}>{t('public.nav.features')}</Link>
+              <Link to="/blog" className={navLink('/blog')}>{t('public.nav.ideas')}</Link>
+              <Link to="/help" className={navLink('/help')}>{t('public.nav.faq')}</Link>
             </nav>
           )}
 
           {/* Only the owner's own account ever sees this (teacher, 2026-11-23); it opens the developer dashboard. */}
-          {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-white hover:!bg-error`}>{t('nav.devPortal')}</Link>}
-          {teacher && <Link to="/teacher" className={pill}><ChalkboardTeacher weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.teacher')}</span></Link>}
-          {!student && <Link to="/play" className={pill}><HouseSimple weight="bold" size={16} /><span className="max-[420px]:sr-only">{t('nav.allGames')}</span></Link>}
-          {teacher && !student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden sm:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
+          {isOwner && !student && <Link to="/owner" className={`${pill} !bg-danger !text-text hover:!bg-blush hidden md:flex`}>{t('nav.devPortal')}</Link>}
+          <Link to="/teacher" className={`${pill} hidden md:flex`}><ChalkboardTeacher weight="bold" size={16} />{t('nav.teacher')}</Link>
+          {!student && <Link to="/play" className={`${pill} hidden md:flex`}><HouseSimple weight="bold" size={16} />{t('nav.allGames')}</Link>}
+          {!student && <button type="button" onClick={() => setTeacher(null)} className={`${pill} hidden md:flex`}><SignOut weight="bold" size={16} />{t('nav.logOut')}</button>}
+          <TeacherMenu path={path} owner={isOwner && !student} student={!!student} onReport={() => setTellOpen(true)} />
         </>
       )}
       <TellDialog open={tellOpen} role={role} onClose={() => setTellOpen(false)} />
@@ -86,7 +96,7 @@ function TellDialog({ open, role, onClose }: { open: boolean; role: 'teacher' | 
     <dialog ref={ref} onClose={onClose} aria-label={t('tell.title')}
       className="m-auto w-[min(560px,calc(100vw-32px))] rounded-panel border-bold border-border bg-surface p-4 backdrop:bg-black/40">
       <div className="flex justify-end mb-2">
-        <button type="button" onClick={onClose} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center">
+        <button type="button" onClick={onClose} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center">
           <X weight="bold" size={20} />
         </button>
       </div>
@@ -105,7 +115,7 @@ const SHEET_LINKS = [
   { to: '/schools', key: 'public.nav.schools' }, { to: '/homeschool', key: 'public.nav.homeschool' }, { to: '/help', key: 'public.nav.faq' },
 ] as const;
 
-function MobileMenu({ path }: { path: string }) {
+function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -119,9 +129,9 @@ function MobileMenu({ path }: { path: string }) {
   const close = () => setOpen(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}
-        className="md:hidden flex items-center gap-2 min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold text-base active:scale-95">
-        <List weight="bold" size={22} aria-hidden="true" />{t('public.nav.menu')}
+      <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
+        className="md:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
+        <List weight="bold" size={22} aria-hidden="true" />
       </button>
       <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
         className="md:hidden m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40">
@@ -129,21 +139,76 @@ function MobileMenu({ path }: { path: string }) {
           <div className="h-14 shrink-0 flex items-center px-4 bg-surface border-b-[2.5px] border-border">
             <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto mr-auto" draggable="false" />
             <button type="button" onClick={close} aria-label={t('public.nav.closeMenu')} autoFocus
-              className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center active:scale-95">
+              className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-95">
               <X weight="bold" size={22} />
             </button>
           </div>
           <nav aria-label={t('public.nav.label')} className="px-4 py-4 grid gap-2">
             {SHEET_LINKS.map(({ to, key }) => (
               <Link key={to} to={to} onClick={close} aria-current={path === to ? 'page' : undefined}
-                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border font-bold text-xl no-underline text-text ${path === to ? 'bg-accent' : 'bg-surface'}`}>
+                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border font-bold text-xl no-underline text-text ${path === to ? 'bg-butter' : 'bg-surface'}`}>
                 {t(key)}<ArrowRight weight="bold" size={20} aria-hidden="true" />
               </Link>
             ))}
           </nav>
           <div className="mt-auto px-4 pb-6 pt-2 grid grid-cols-2 gap-3">
-            <Link to="/join" onClick={close} className="flex items-center justify-center min-h-14 rounded-pill border-bold border-border bg-surface-2 font-bold text-lg no-underline text-text">{t('public.nav.join')}</Link>
+            <button type="button" onClick={() => { close(); onReport(); }} className="col-span-2 flex items-center justify-center gap-2 min-h-12 rounded-pill border-std border-border bg-white font-bold text-base"><Flag weight="bold" size={20} aria-hidden="true" />{t('report.open')}</button>
+            <Link to="/join" onClick={close} className="flex items-center justify-center min-h-14 rounded-pill border-bold border-border bg-lavender font-bold text-lg no-underline text-text">{t('public.nav.join')}</Link>
             <Link to="/login" onClick={close} className="flex items-center justify-center gap-2 min-h-14 rounded-pill border-bold border-border bg-accent font-bold text-lg no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}><ChalkboardTeacher weight="bold" size={20} />{t('public.nav.login')}</Link>
+          </div>
+        </div>
+      </dialog>
+    </>
+  );
+}
+
+// Signed-in teachers on phones (rule 10): Teacher, All games, the site links,
+// Report and Log out fold into the same one 44px menu.
+function TeacherMenu({ path, owner, student, onReport }: { path: string; owner: boolean; student: boolean; onReport: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (open && d && !d.open) d.showModal();
+    if (!open && d?.open) d.close();
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+  }, [open]);
+  useEffect(() => { setOpen(false); }, [path]);
+  const close = () => setOpen(false);
+  const links: { to: string; label: string }[] = [
+    { to: '/teacher', label: t('nav.teacher') },
+    ...(student ? [] : [{ to: '/play', label: t('nav.allGames') }]),
+    ...(owner ? [{ to: '/owner', label: t('nav.devPortal') }] : []),
+    { to: '/', label: t('public.nav.home') }, { to: '/features', label: t('public.nav.features') },
+    { to: '/blog', label: t('public.nav.ideas') }, { to: '/help', label: t('public.nav.faq') },
+  ];
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open} aria-label={t('public.nav.menu')}
+        className="md:hidden shrink-0 w-11 h-11 rounded-full grid place-items-center border-std border-border bg-white active:scale-95">
+        <List weight="bold" size={22} aria-hidden="true" />
+      </button>
+      <dialog ref={ref} onClose={close} aria-label={t('public.nav.label')}
+        className="md:hidden m-0 p-0 w-screen max-w-none h-dvh max-h-none bg-bg text-text border-0 backdrop:bg-black/40">
+        <div className="min-h-full flex flex-col">
+          <div className="h-14 shrink-0 flex items-center px-4 bg-white border-b-[2.5px] border-border">
+            <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto mr-auto" draggable="false" />
+            <button type="button" onClick={close} aria-label={t('public.nav.closeMenu')} autoFocus
+              className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-95">
+              <X weight="bold" size={22} />
+            </button>
+          </div>
+          <nav aria-label={t('public.nav.label')} className="px-4 py-4 grid gap-2">
+            {links.map(({ to, label }) => (
+              <Link key={to} to={to} onClick={close} aria-current={path === to ? 'page' : undefined}
+                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border font-bold text-xl no-underline text-text ${path === to ? 'bg-butter' : 'bg-surface'}`}>
+                {label}<ArrowRight weight="bold" size={20} aria-hidden="true" />
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-auto px-4 pb-6 pt-2 grid gap-3">
+            <button type="button" onClick={() => { close(); onReport(); }} className="flex items-center justify-center gap-2 min-h-12 rounded-pill border-std border-border bg-white font-bold text-base"><Flag weight="bold" size={20} aria-hidden="true" />{t('report.open')}</button>
+            {!student && <button type="button" onClick={() => { close(); setTeacher(null); }} className="flex items-center justify-center gap-2 min-h-14 rounded-pill border-bold border-border bg-white font-bold text-lg"><SignOut weight="bold" size={20} aria-hidden="true" />{t('nav.logOut')}</button>}
           </div>
         </div>
       </dialog>

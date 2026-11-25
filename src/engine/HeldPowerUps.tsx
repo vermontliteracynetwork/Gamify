@@ -78,7 +78,7 @@ export function PowerUpTray({ manifest, items, onUse, disabled = false, auto = f
         {ask && (ask.cpu
           ? <PowerUpCard key={ask.id} id={ask.id} item={ask.item} title={who ? t('pu.cpuUses', { name: who, item: ask.item.name }) : t('pu.on', { name: ask.item.name })} text={roleOf(manifest, ask.item)} onClose={use} />
           : <PowerUpCard key={ask.id} id={ask.id} item={ask.item} title={ask.item.name} text={roleOf(manifest, ask.item)} onClose={() => setAsk(null)}
-              actions={<><TapOk onTap={use} label={t('pu.useIt')} /><button type="button" onClick={() => setAsk(null)} className="min-h-[3.5rem] px-5 rounded-pill border-bold border-border bg-surface-2 font-bold text-lg">{t('pu.notNow')}</button></>} />)}
+              actions={<><TapOk onTap={use} label={t('pu.useIt')} /><button type="button" onClick={() => setAsk(null)} className="min-h-[3.5rem] px-5 rounded-pill border-bold border-border bg-white font-bold text-lg">{t('pu.notNow')}</button></>} />)}
       </AnimatePresence>
     </>
   );

@@ -35,11 +35,11 @@ export function PowerUpCard({ id, item, title, text, onClose, actions }: { id: n
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.45 }} onClick={onClose}>
       <DialogFocus onClose={onClose} />
       <motion.div onClick={(e) => e.stopPropagation()} className="relative w-[min(21rem,88vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-10 pb-7 grid justify-items-center gap-3 text-center"
-        style={{ boxShadow: '0 0 0 6px rgba(253,253,148,0.6), 0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }}
+        style={{ boxShadow: '0 0 0 6px rgba(253,253,148,0.6), 0 8px 0 var(--ink), 0 24px 40px rgba(0,0,0,0.25)' }}
         initial={still ? { opacity: 0 } : ENTER[item.motion] ?? ENTER.none} animate={{ scale: 1, opacity: 1, y: 0, x: 0, rotate: 0 }} exit={{ opacity: 0, scale: still ? 1 : 0.85 }}
         transition={still ? { duration: 0.01 } : POP_IN}>
         <button type="button" onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label={t('class.close')}
-          className="absolute top-3 right-3 w-11 h-11 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
+          className="absolute top-3 right-3 w-11 h-11 rounded-full border-bold border-border bg-white flex items-center justify-center motion-safe:hover:scale-110 motion-safe:transition-transform"><X weight="bold" size={20} /></button>
         <span className={still ? '' : 'pu-bob'}><ItemArt item={item} size={128} still={still} /></span>
         <span className="font-display text-3xl leading-tight"><PopText text={title} /></span>
         <span className="font-bold text-lg leading-snug text-balance">{text}</span>

@@ -40,14 +40,14 @@ export default function MediaSearch({ onPick, onClose }: { onPick: (m: PickedMed
       <div className="w-full max-w-4xl max-h-[calc(100dvh-2rem)] bg-surface border-heavy border-border rounded-panel grid grid-rows-[auto_auto_1fr_auto] gap-3 p-5" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center gap-3">
           <h2 className="font-heading font-bold text-xl flex-1">Find a GIF or photo</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={18} /></button>
+          <button type="button" onClick={onClose} aria-label="Close" className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center"><X weight="bold" size={18} /></button>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Tabs label="What to find" value={kind} onChange={setKind} className="mb-0" options={[{ id: 'gif', label: 'GIFs' }, { id: 'photo', label: 'Photos' }]} />
           <form className="flex-1 min-w-[14rem] flex gap-2" onSubmit={(e) => { e.preventDefault(); setSent(q.trim()); }}>
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={kind === 'gif' ? 'Search GIFs (family safe)' : 'Search photos (family safe)'} aria-label="Search words"
               className="flex-1 min-h-11 px-3 rounded-input border-std border-border bg-surface font-semibold" />
-            <Button type="submit" variant="primary"><MagnifyingGlass weight="bold" size={18} />Search</Button>
+            <Button type="submit" variant="main"><MagnifyingGlass weight="bold" size={18} />Search</Button>
           </form>
         </div>
         <div className="min-h-[12rem] overflow-y-auto">

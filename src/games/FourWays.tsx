@@ -21,7 +21,7 @@ export default function FourWays({ compact = false, filter, onFilter }: { compac
     <ul className={`grid list-none p-0 m-0 ${compact ? 'grid-cols-3 gap-2' : 'sm:grid-cols-3 gap-4 sm:auto-rows-fr'}`} aria-label={t('public.modesTitle')}>
       {SHOWN_MODES.map((m, i) => (
         <motion.li key={m} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-          whileHover={reduce ? undefined : { y: -6, rotate: i % 2 ? 0.6 : -0.6 }} className={compact ? '' : 'grid'}>
+          whileHover={reduce ? undefined : { y: -6 }} className={compact ? '' : 'grid'}>
           {compact ? <Compact mode={m} on={filter === m} dim={!!filter && filter !== m} onClick={onFilter ? () => onFilter(filter === m ? null : m) : undefined} /> : <FlipCard mode={m} />}
         </motion.li>
       ))}
@@ -36,7 +36,7 @@ function Compact({ mode: m, on = false, dim = false, onClick }: { mode: PlayMode
   const Tag = onClick ? 'button' : 'span';
   return (
     <Tag {...(onClick ? { type: 'button' as const, onClick, 'aria-pressed': on, 'data-tip': t('ways.filterTip', { mode: t(`mode.${m}` as StringKey) }) } : {})}
-      className={`${card} w-full text-left flex items-center gap-3 p-2 pr-3 h-full motion-safe:transition-[opacity,transform] ${on ? 'ring-4 ring-accent -translate-y-0.5' : ''} ${dim ? 'opacity-55' : ''}`} style={{ boxShadow: on ? '0 5px 0 #000' : 'var(--shadow-sticker)' }}>
+      className={`${card} w-full text-left flex items-center gap-3 p-2 pr-3 h-full motion-safe:transition-[opacity,transform] ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper -translate-y-0.5' : ''} ${dim ? 'opacity-55' : ''}`} style={{ boxShadow: on ? '0 5px 0 var(--ink)' : 'var(--shadow-sticker)' }}>
       <span className="shrink-0 w-12 h-12 rounded-full border-bold border-border flex items-center justify-center" style={{ background: MODE_COLORS[m] }}><Icon weight="fill" size={26} aria-hidden="true" /></span>
       <span className="grid gap-0 min-w-0">
         <span className="font-display font-bold leading-tight text-lg"><Title text={t(`mode.${m}` as StringKey)} /></span>
@@ -67,7 +67,7 @@ function FlipCard({ mode: m }: { mode: PlayMode }) {
         </span>
         <span className="px-4 pb-4 flex">
           <button type="button" onClick={() => setBack(true)} aria-label={t('ways.flipFor', { mode: t(`mode.${m}` as StringKey) })}
-            className={`${flipBtn} bg-accent transition-opacity opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100`}>
+            className={`${flipBtn} bg-white transition-opacity opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100`}>
             {t('ways.flip')}<ArrowArcRight weight="bold" size={18} aria-hidden="true" />
           </button>
         </span>

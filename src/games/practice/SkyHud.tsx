@@ -101,7 +101,7 @@ export function SkyResults({ title, art, score, children, actions }: { title: st
   return (
     <div className="results-box brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-3 overflow-y-auto overflow-x-hidden px-5 pt-6 pb-5 justify-items-center text-center" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
+        className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-3 overflow-y-auto overflow-x-hidden px-5 pt-6 pb-5 justify-items-center text-center" style={{ boxShadow: '0 8px 0 var(--ink), 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
         <h2 className="title-bubble text-4xl text-balance" style={{ color: 'var(--text)' }}><Title text={title} /></h2>
         <div className="relative w-full h-[min(13rem,32dvh)] select-none overflow-hidden grid place-items-center" aria-hidden="true">
           <span className="turn-rays absolute left-1/2 top-1/2 w-[24rem] h-[24rem] -ml-[12rem] -mt-[12rem] rounded-full pointer-events-none" />

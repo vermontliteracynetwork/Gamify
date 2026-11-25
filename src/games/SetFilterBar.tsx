@@ -36,7 +36,7 @@ export default function SetFilterBar({ value, onChange, sets = [], compact = fal
     {(offers.length > 0 || chosen.length > 0) && (
       <div className="flex flex-wrap items-center gap-1.5" aria-label={t('filter.tags')} role="group">
         {chosen.map((tag) => (
-          <button key={tag} type="button" onClick={() => onChange({ ...value, tags: chosen.filter((x) => x !== tag) })} aria-label={t('filter.removeTag', { tag })} className={`${chip} bg-accent`}>#{tag}<X weight="bold" size={14} aria-hidden="true" /></button>
+          <button key={tag} type="button" onClick={() => onChange({ ...value, tags: chosen.filter((x) => x !== tag) })} aria-label={t('filter.removeTag', { tag })} className={`${chip} bg-butter`}>#{tag}<X weight="bold" size={14} aria-hidden="true" /></button>
         ))}
         {offers.map((tag) => (
           <button key={tag} type="button" onClick={() => onChange({ ...value, search: '', tags: [...chosen, tag] })} aria-label={t('filter.useTag', { tag })} className={`${chip} bg-surface-2`}><Hash weight="bold" size={14} aria-hidden="true" />{tag}</button>

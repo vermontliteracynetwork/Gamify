@@ -95,7 +95,7 @@ export default function StudentPage() {
           <Button onClick={() => setDialog(unlocked ? 'supports' : 'pin')}><GearSix weight="bold" size={18} />{t('cv.supports')}</Button>
           <Button onClick={() => setDialog('avatar')}><UserCircle weight="bold" size={18} />{t('cv.avatarPin')}</Button>
           <Button onClick={() => setDialog('note')}><PencilSimple weight="bold" size={18} />{t('sp.addNote')}</Button>
-          <Link to={`/teacher/reports/print?class=${id}&student=${sid}`} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('sp.family')}</Link>
+          <Link to={`/teacher/reports/print?class=${id}&student=${sid}`} className={buttonClasses('main')}><Printer weight="bold" size={18} />{t('sp.family')}</Link>
         </div>
       </div>
 
@@ -127,7 +127,7 @@ export default function StudentPage() {
                 ))}
               </div>
               {lowest && <Takeaway text={t('sp.skillsNext', { standard: lowest.standard, pct: lowest.pct })}
-                action={<Link to={`/teacher/classes/${id}?tab=sets`} className={buttonClasses('primary', '', 'sm')}>{t('sp.assignPractice')}<ArrowRight weight="bold" size={14} /></Link>} />}
+                action={<Link to={`/teacher/classes/${id}?tab=sets`} className={buttonClasses('main', '', 'sm')}>{t('sp.assignPractice')}<ArrowRight weight="bold" size={14} /></Link>} />}
             </>}
           </PortalCard>
         </div>
@@ -176,7 +176,7 @@ export default function StudentPage() {
             <textarea autoFocus value={note} maxLength={500} rows={4} onChange={(e) => setNote(e.target.value)} placeholder={t('sp.notePlaceholder')} className="px-3 py-2 rounded-input border-std border-border font-semibold" />
           </label>
           <p className="text-sm font-semibold text-muted">{t('sp.notePrivate')}</p>
-          <Button variant="primary" disabled={!note.trim()} onClick={() => void saveNote()}>{t('sp.saveNote')}</Button>
+          <Button variant="main" disabled={!note.trim()} onClick={() => void saveNote()}>{t('sp.saveNote')}</Button>
         </Dialog>
       )}
     </main>

@@ -60,7 +60,7 @@ export default function QuestionVoice({ n, audioUrl, onChange }: { n: number; au
   return (
     <>
       {rec ? (
-        <Button variant="primary" onClick={() => rec.stop()} aria-label={t('editor.voice.stop', { n })}>
+        <Button variant="main" onClick={() => rec.stop()} aria-label={t('editor.voice.stop', { n })}>
           <Stop weight="fill" size={16} />{t('editor.voice.stopShort', { secs: MAX_SECONDS - secs })}
         </Button>
       ) : audioUrl ? (

@@ -69,16 +69,16 @@ export function TimesTable() {
     <div className="overflow-x-auto">
       <table className="border-collapse text-sm font-bold tabular-nums" aria-label={t('q.timesTable')}>
         <thead>
-          <tr><th className="w-9 h-9" aria-hidden="true">×</th>{n.map((c) => <th key={c} className={`w-9 h-9 ${pick?.c === c ? 'bg-accent' : 'bg-surface-2'} border border-border-soft`}>{c}</th>)}</tr>
+          <tr><th className="w-9 h-9" aria-hidden="true">×</th>{n.map((c) => <th key={c} className={`w-9 h-9 ${pick?.c === c ? 'bg-mint' : 'bg-surface-2'} border border-border-soft`}>{c}</th>)}</tr>
         </thead>
         <tbody>
           {n.map((r) => (
             <tr key={r}>
-              <th className={`w-9 h-9 ${pick?.r === r ? 'bg-accent' : 'bg-surface-2'} border border-border-soft`}>{r}</th>
+              <th className={`w-9 h-9 ${pick?.r === r ? 'bg-mint' : 'bg-surface-2'} border border-border-soft`}>{r}</th>
               {n.map((c) => (
                 <td key={c} className="p-0 border border-border-soft">
                   <button type="button" onClick={() => setPick({ r, c })} aria-label={`${r} × ${c} = ${r * c}`}
-                    className={`w-9 h-9 ${pick && (pick.r === r || pick.c === c) ? (pick.r === r && pick.c === c ? 'bg-accent' : 'bg-accent/30') : 'bg-surface'}`}>
+                    className={`w-9 h-9 ${pick && (pick.r === r || pick.c === c) ? (pick.r === r && pick.c === c ? 'bg-mint' : 'bg-mint/40') : 'bg-surface'}`}>
                     {r * c}
                   </button>
                 </td>

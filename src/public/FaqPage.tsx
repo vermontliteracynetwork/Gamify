@@ -70,7 +70,7 @@ export default function FaqPage() {
                 const on = !q && g === group;
                 return (
                   <button key={g} type="button" role="tab" aria-selected={on} onClick={() => { setSearch(''); setParams({ for: g }, { replace: true }); }}
-                    className={`min-h-12 px-3 rounded-input font-bold text-left flex items-center gap-2 ${on ? 'bg-accent' : 'hover:bg-surface-2'}`}>
+                    className={`min-h-12 px-3 rounded-input font-bold text-left flex items-center gap-2 ${on ? 'bg-butter' : 'hover:bg-surface-2'}`}>
                     <I weight={on ? 'fill' : 'bold'} size={20} aria-hidden="true" />{t(`faq.group.${g}` as StringKey)}
                   </button>
                 );
@@ -97,7 +97,7 @@ export default function FaqPage() {
                 <h3 className="font-bold text-xl">{t('faq.moreTitle')}</h3>
                 <p className="font-semibold text-muted">{t('faq.more')}</p>
               </div>
-              <Link to={NEXT[group].to} className={buttonClasses('primary', 'min-h-12 px-6')}>{t(NEXT[group].label)}</Link>
+              <Link to={NEXT[group].to} className={buttonClasses(group === 'teachers' || group === 'students' ? 'go' : 'main', 'min-h-12 px-6')}>{t(NEXT[group].label)}</Link>
             </div>
           </section>
         </div>

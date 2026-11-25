@@ -66,8 +66,10 @@ export default function GameWelcome({ game, steps, onStart }: { game: GameManife
           (teacher, 2026-11-18: "the same size as the preview image"): it adds
           no height of its own, and its text scales with the screen. */}
       <div className="min-w-0 flex flex-col gap-6 wide:gap-[clamp(0.5rem,2.2vh,1.5rem)] wide:justify-between wide:h-0 wide:min-h-full">
-        <div className="hidden wide:grid gap-[clamp(0.4rem,1.6vh,1rem)]">
-          <h1 className="hidden wide:flex title-bubble text-fit-title pr-44 min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
+        {/* The round buttons have their own row at the top right; the title
+            gets one whole line under them (teacher, 2026-11-24). */}
+        <div className="hidden wide:grid min-w-0 gap-[clamp(0.4rem,1.6vh,1rem)] pt-[3rem]">
+          <h1 className="hidden wide:flex title-bubble text-fit-title min-h-11 items-center leading-none whitespace-nowrap" style={{ color: 'var(--text)' }}><Title text={game.name} /></h1>
           {game.description && <p className="hidden wide:block text-fit-body font-semibold text-muted leading-snug max-w-prose">{game.description}</p>}
           <div className="hidden wide:flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
         </div>

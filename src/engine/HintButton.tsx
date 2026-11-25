@@ -55,9 +55,9 @@ export default function HintButton({ gameId, tips, small = true }: { gameId?: st
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: still ? 0.01 : 0.3 }} onClick={close}>
             <DialogFocus onClose={close} />
             <motion.div onClick={(e) => e.stopPropagation()} className="brand-menu w-[min(22rem,92vw)] bg-surface border-heavy border-border rounded-panel px-6 pt-6 pb-7 grid justify-items-center gap-3 text-center"
-              style={{ boxShadow: '0 8px 0 #000, 0 24px 40px rgba(0,0,0,0.25)' }}
+              style={{ boxShadow: '0 8px 0 var(--ink), 0 24px 40px rgba(0,0,0,0.25)' }}
               initial={still ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0 }} transition={still ? { duration: 0.15 } : POP_IN}>
-              <span className="w-16 h-16 rounded-full bg-accent border-std border-border grid place-items-center" aria-hidden="true"><Lightbulb weight="bold" size={36} /></span>
+              <span className="w-16 h-16 rounded-full bg-butter border-std border-border grid place-items-center" aria-hidden="true"><Lightbulb weight="bold" size={36} /></span>
               <h2 className="font-display text-3xl leading-tight"><Title text={t('hint.title')} /></h2>
               <ul className="m-0 p-0 list-none grid gap-2 font-bold text-lg leading-snug text-balance">
                 {list.map((line) => <li key={line}>{line}</li>)}

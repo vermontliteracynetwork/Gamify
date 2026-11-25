@@ -67,7 +67,7 @@ export default function QuestionSetsPage() {
           <>
             <Button onClick={() => navigate('/teacher/activity')}><RocketLaunch weight="bold" size={18} />{t('activity.title')}</Button>
             <Button onClick={() => navigate('/teacher/sets/import')} disabled={atLimit}><FileArrowUp weight="bold" size={18} />{t('sets.import')}</Button>
-            <Button variant="primary" onClick={create} disabled={atLimit}><Plus weight="bold" size={18} />{t('sets.new')}</Button>
+            <Button variant="main" onClick={create} disabled={atLimit}><Plus weight="bold" size={18} />{t('sets.new')}</Button>
           </>
         )}
       />
@@ -133,7 +133,7 @@ function MySets({ sets, reload, limit, atLimit, onHost }: { sets: QuestionSet[];
   });
 
   const folderBtn = (on: boolean, drop: boolean) => `w-full min-h-10 px-3 rounded-input flex items-center gap-2 text-sm font-bold text-left border-std ${
-    on ? 'bg-lavender border-border' : drop ? 'bg-accent border-border' : 'bg-surface-2 border-transparent hover:border-border-soft'}`;
+    on ? 'bg-lavender border-border' : drop ? 'bg-butter border-border' : 'bg-surface-2 border-transparent hover:border-border-soft'}`;
 
   return (
     <div className="grid gap-4 min-[1000px]:grid-cols-[15rem_minmax(0,1fr)] items-start">
@@ -263,7 +263,7 @@ function FolderNameDialog({ title, start, taken, onClose, onSave }: { title: str
           <input autoFocus value={name} maxLength={40} onChange={(e) => setName(e.target.value)} className={fieldClasses('md')} aria-invalid={clash} />
         </label>
         {clash && <p className="text-sm font-bold text-error" role="status">{t('sets.folderExists')}</p>}
-        <Button type="submit" variant="primary" disabled={!n || clash || n === start}><FolderSimplePlus weight="bold" size={18} />{start ? t('sets.save') : t('sets.folderMake')}</Button>
+        <Button type="submit" variant="main" disabled={!n || clash || n === start}><FolderSimplePlus weight="bold" size={18} />{start ? t('sets.save') : t('sets.folderMake')}</Button>
       </form>
     </Dialog>
   );
@@ -318,7 +318,7 @@ function SetRow({ set: s, first, stats, confirming, onEdit, onMove, onUse, onHos
           {chips && <span className="@[64rem]:hidden mr-auto">{chips}</span>}
           <Button size="sm" onClick={onEdit} aria-label={t('sets.editN', { name })}><PencilSimple weight="bold" size={14} />{t('sets.edit')}</Button>
           <Button size="sm" onClick={onMove} aria-label={t('sets.moveN', { name })}><FolderSimple weight="bold" size={14} />{t('sets.move')}</Button>
-          <Button size="sm" variant="primary" onClick={onUse} aria-label={t('sets.useN', { name })}>{t('sets.use')}<ArrowRight weight="bold" size={14} /></Button>
+          <Button size="sm" variant="main" onClick={onUse} aria-label={t('sets.useN', { name })}>{t('sets.use')}<ArrowRight weight="bold" size={14} /></Button>
           <IconButton label={t('sets.playN', { name })} onClick={onHost}><Play weight="fill" size={16} /></IconButton>
           <IconButton variant="ghost" label={`${t('sets.delete')}: ${name}`} onClick={onDelete}><Trash weight="bold" size={16} /></IconButton>
         </div>

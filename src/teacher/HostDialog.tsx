@@ -1,7 +1,7 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Broadcast, CalendarCheck, Copy, DeviceTablet, LockSimple, Play, ProjectorScreen, QrCode, ShareNetwork, UsersThree, X } from '@phosphor-icons/react';
+import { Broadcast, CalendarCheck, Copy, LockSimple, Play, QrCode, ShareNetwork, Television, UsersThree, X } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { GAME_CODE_DAYS, gameLink, makeGameCode, type GameCode } from '../data/gameCodes';
@@ -24,9 +24,9 @@ import { supabase } from '../data/supabase';
 // devices with a code (compete or together), or as homework with a due date.
 type Where = 'screen' | 'devices' | 'homework';
 const WHERE = [
-  { id: 'screen' as const, icon: ProjectorScreen },
-  { id: 'devices' as const, icon: DeviceTablet },
-  { id: 'homework' as const, icon: CalendarCheck },
+  { id: 'screen' as const, icon: Television, bg: 'var(--lemon)' },
+  { id: 'devices' as const, icon: Broadcast, bg: 'var(--sky)' },
+  { id: 'homework' as const, icon: CalendarCheck, bg: 'var(--kelly)' },
 ];
 export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose: () => void }) {
   const tier = useTier();
@@ -62,7 +62,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
       <div className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 flex flex-col gap-4 w-full h-full overflow-y-auto" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-2xl"><Title text={t('host.title', { name: set.name || t('sets.untitled') })} /></h2>
-          <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+          <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center"><X weight="bold" size={20} /></button>
         </div>
         {missing.length > 0 ? <p className="font-bold">{t('host.needsDetails')}</p> : (
           <>
@@ -72,7 +72,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                 const open = canPlayGame(tier, g.id);
                 return (
                   <button key={g.id} type="button" role="radio" aria-checked={gameId === g.id} disabled={!open} onClick={() => { setGameId(g.id); setWhere(g.modes.includes('share') ? 'screen' : 'devices'); setCode(null); setStatus(''); }}
-                    className={`rounded-input border-bold overflow-hidden text-left bg-surface ${gameId === g.id ? 'border-border ring-4 ring-accent' : 'border-border-soft'} disabled:opacity-40`}>
+                    className={`rounded-input border-bold overflow-hidden text-left bg-surface ${gameId === g.id ? 'border-border ring-4 ring-border ring-offset-4 ring-offset-paper' : 'border-border-soft'} disabled:opacity-40`}>
                     <span className="relative block"><GameCover gameId={g.id} className="aspect-[100/62]" />{!open && <LockSimple weight="fill" size={28} className="absolute top-2 right-2" />}</span>
                     <span className="p-2.5 flex items-center justify-between gap-2"><span className="font-display text-lg leading-tight">{g.name}</span><span className="flex gap-1 shrink-0">{g.modes.map((m) => <ModeDot key={m} mode={m} />)}</span></span>
                   </button>
@@ -83,10 +83,10 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
               <>
                 <p className="font-bold">{t('host.where')}</p>
                 <div role="radiogroup" aria-label={t('host.where')} className="grid sm:grid-cols-3 gap-2">
-                  {WHERE.map(({ id, icon: Icon }) => (
+                  {WHERE.map(({ id, icon: Icon, bg }) => (
                     <button key={id} type="button" role="radio" aria-checked={where === id} onClick={() => { setWhere(id); setCode(null); setStatus(''); }}
-                      className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-2 items-center ${where === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
-                      <Icon weight="fill" size={30} aria-hidden="true" className="row-span-2" />
+                      className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-2 items-center ${where === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
+                      <span className="row-span-2 w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: bg }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
                       <span className="font-display text-lg leading-tight">{t(`host.where.${id}`)}</span>
                       <span className="text-sm font-semibold text-muted leading-snug">{t(`host.where.${id}Hint`)}</span>
                     </button>
@@ -124,7 +124,7 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                     </label>
                     {Number.isFinite(TIERS[tier].homeworkDaysAhead) && <p className="text-sm font-semibold text-muted">{t('host.dueLimit', { days: TIERS[tier].homeworkDaysAhead })}</p>}
                     {code ? <CodeBox code={code} setName={set.name} onCopied={() => setStatus(t('host.copied'))} />
-                      : <Button variant="primary" className="justify-self-start" disabled={!dueOk} onClick={async () => setCode(await makeGameCode(game.id, set.id, 'play', due))}><QrCode weight="bold" size={18} />{t('host.makeHomework')}</Button>}
+                      : <Button variant="main" className="justify-self-start" disabled={!dueOk} onClick={async () => setCode(await makeGameCode(game.id, set.id, 'play', due))}><QrCode weight="bold" size={18} />{t('host.makeHomework')}</Button>}
                     {classes.length > 0 && (
                       <div className="flex flex-wrap items-center gap-2">
                         <select aria-label={t('reports.class')} value={classId} onChange={(e) => setClassId(e.target.value)} className="min-h-11 px-3 rounded-input border-std border-border font-bold">
@@ -154,7 +154,7 @@ export function Choices<T extends string>({ label, value, options, onChange }: {
       <div role="radiogroup" aria-label={label} className={`grid gap-2 ${options.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         {options.map((o) => (
           <button key={o.id} type="button" role="radio" aria-checked={value === o.id} onClick={() => onChange(o.id)}
-            className={`min-h-14 px-3 py-2 rounded-input border-std text-left ${o.art ? 'flex items-center gap-3' : 'grid'} ${value === o.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+            className={`min-h-14 px-3 py-2 rounded-input border-std text-left ${o.art ? 'flex items-center gap-3' : 'grid'} ${value === o.id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
             {o.art}<span className="grid"><span className="font-bold">{o.title}</span><span className="text-sm font-semibold text-muted">{o.hint}</span></span>
           </button>
         ))}
@@ -170,7 +170,7 @@ export function CodeBox({ code, setName, onCopied, onShow, big = false }: { code
       <p className={`font-display tracking-[0.2em] ${big ? 'text-6xl my-1' : 'text-4xl'}`} aria-label={t('host.codeIs', { code: code.code })}>{code.code}</p>
       <div className={`flex flex-wrap gap-2 ${big ? 'justify-center' : ''}`}>
         <Button onClick={() => { void navigator.clipboard?.writeText(gameLink(code)).catch(() => undefined); onCopied(); }}><Copy weight="bold" size={18} />{t('host.copyLink')}</Button>
-        {onShow && <Button onClick={onShow}><ProjectorScreen weight="bold" size={18} />{t('host.show')}</Button>}
+        {onShow && <Button onClick={onShow}><Television weight="bold" size={18} />{t('host.show')}</Button>}
         <a href={classroomShare(gameLink(code), setName)} target="_blank" rel="noreferrer" className={buttonClasses('secondary')}><ShareNetwork weight="bold" size={18} />{t('host.classroom')}</a>
       </div>
       <p className="text-xs font-bold text-muted">{code.due ? t('host.dueOn', { date: new Date(`${code.due}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) }) : t('host.expires', { days: GAME_CODE_DAYS })}</p>

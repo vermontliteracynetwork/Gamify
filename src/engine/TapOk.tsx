@@ -29,8 +29,8 @@ export default function TapOk({ onTap, label, className = '', keys = true }: { o
   }, [keys]);
   return (
     <button ref={ref} type="button" onClick={(e) => { e.stopPropagation(); onTap(); }} autoFocus
-      className={`tap-ok min-h-[3.5rem] min-w-[9rem] px-7 rounded-pill border-heavy border-border bg-[#FDFD94] text-[#000] font-display font-bold text-2xl inline-flex items-center justify-center gap-2 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-black ${className}`}
-      style={{ boxShadow: '0 5px 0 #000' }}>
+      className={`tap-ok min-h-[3.5rem] min-w-[9rem] px-7 rounded-pill border-heavy border-border bg-accent text-accent-ink font-display font-bold text-2xl inline-flex items-center justify-center gap-2 motion-safe:hover:-translate-y-0.5 motion-safe:transition-transform focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-black ${className}`}
+      style={{ boxShadow: '0 5px 0 var(--ink)' }}>
       {label ?? t('tap.ok')}
     </button>
   );

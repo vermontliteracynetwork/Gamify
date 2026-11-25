@@ -5,11 +5,12 @@ import type { QuestionSet } from '../data/types';
 // A question set's cover: the teacher's picture, or one drawn for its
 // subject (brand colors and a subject icon pattern, no bought art).
 export const ART: Record<Subject, { icon: Icon; bg: string; ink: string }> = {
-  Literacy: { icon: BookOpen, bg: '#fdfd94', ink: '#314677' },
-  Math: { icon: MathOperations, bg: '#ddd6ff', ink: '#000000' },
-  Science: { icon: Flask, bg: '#ddfcc6', ink: '#000000' },
-  'Social studies': { icon: Globe, bg: '#e5635f', ink: '#000000' },
-  Other: { icon: Shapes, bg: '#cdd7fb', ink: '#314677' },
+  // Palette pastels with ink (New direction rule 1, 2026-11-25).
+  Literacy: { icon: BookOpen, bg: '#fff1b8', ink: '#1d1a33' },
+  Math: { icon: MathOperations, bg: '#ddd6ff', ink: '#1d1a33' },
+  Science: { icon: Flask, bg: '#c8f0dc', ink: '#1d1a33' },
+  'Social studies': { icon: Globe, bg: '#ffd9b3', ink: '#1d1a33' },
+  Other: { icon: Shapes, bg: '#bfdff3', ink: '#1d1a33' },
 };
 
 export default function SetCover({ set, className = '' }: { set: QuestionSet; className?: string }) {

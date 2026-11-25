@@ -54,7 +54,7 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
             {list.map(({ id, icon: Icon, label }) => (
               <button key={id} type="button" role="radio" aria-checked={type === id} onClick={() => setType(id)}
                 className={`min-h-24 rounded-input border-std flex flex-col items-center justify-center gap-1 p-2 font-bold text-sm text-center
-                            ${type === id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                            ${type === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                 <Icon weight="bold" size={34} aria-hidden="true" />
                 {label()}
               </button>
@@ -73,7 +73,7 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
               </label>
               {role === 'student' && <p className="text-sm font-bold">{t('tell.noNames')}</p>}
               {type === 'help' && <p className="text-sm font-bold">{t('tell.helpNote')}</p>}
-              <Button variant="primary" className="justify-self-start" onClick={send}>{t('tell.send')}</Button>
+              <Button variant="main" className="justify-self-start" onClick={send}>{t('tell.send')}</Button>
             </>
           )}
         </>

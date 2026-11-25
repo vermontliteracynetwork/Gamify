@@ -126,7 +126,7 @@ function StudentRequests() {
               <p className="font-bold text-sm">{t('builder.requestFor', { game: game?.name ?? '', class: room })}</p>
               {blocked && <div className="flex flex-wrap items-center gap-2"><p className="text-xs font-bold flex items-center gap-1"><LockSimple weight="fill" size={14} />{blocked}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
               <div className="flex flex-wrap gap-2">
-                <Button variant="primary" disabled={!!blocked} onClick={async () => {
+                <Button variant="main" disabled={!!blocked} onClick={async () => {
                   await saveMadeTheme({ ...r.theme, source: 'custom', designedBy: teacherUsername() || room || undefined });
                   await removeThemeRequest(r.id); reload(); reloadRequests();
                   setStatus(t('builder.approved', { name: r.theme.name }));
@@ -299,13 +299,13 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
         <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {mine.map((th) => (
             <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}
-              className={`min-h-9 tap px-3 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
+              className={`min-h-9 tap px-3 rounded-pill border-std font-bold text-sm ${draft.id === th.id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{th.name}</button>
           ))}
           <label className="grid font-bold text-sm w-56 max-w-full"><span className="sr-only">{t('builder.name')}</span>
             <input id="theme-name" value={draft.name} maxLength={40} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder={t('builder.namePlaceholder')}
               className={fieldClasses('sm', 'w-full')} />
           </label>
-          <Button variant="primary" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
+          <Button variant="main" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
           {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
           {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
@@ -326,7 +326,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
             <div ref={previewBox} className="relative w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 3 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} />
             {views.length > 1 && (
               <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
-                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-accent' : 'bg-surface'}`} />)}
+                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-butter' : 'bg-surface'}`} />)}
                 {/* Board sizes say which size is showing. */}
                 {view.startsWith('size:') && <span aria-hidden="true" className="ml-1 font-bold text-xs leading-none whitespace-nowrap">{views.find((v) => v.id === view)?.label}</span>}
               </span>
@@ -353,7 +353,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                       <p className="text-sm font-semibold">{t('builder.dl.printText')}</p>
                       <p className="text-sm font-semibold text-muted">{t('builder.dl.materials')}</p>
                       <div className="flex flex-wrap gap-2">
-                        <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('primary', 'hover-pop')}><Printer weight="bold" size={18} />{t('builder.dl.blank')}</Link>
+                        <Link to={`/teacher/themes/${gameId}/template`} className={buttonClasses('main', 'hover-pop')}><Printer weight="bold" size={18} />{t('builder.dl.blank')}</Link>
                         {GAMES.some((g) => g.id === gameId) && <Link to={`/blog/themes/${gameId}`} className={buttonClasses('secondary', 'hover-pop')}><BookOpen weight="bold" size={18} />{t('builder.dl.guide')}</Link>}
                       </div>
                     </div>
@@ -361,7 +361,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                       <p className="font-display text-lg flex items-center gap-2"><DownloadSimple weight="bold" size={22} aria-hidden="true" />{t('builder.dl.digital')}</p>
                       <p className="text-sm font-semibold">{t('builder.dl.digitalText')}</p>
                       <div className="flex flex-wrap gap-2">
-                        <Button variant="primary" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
+                        <Button variant="main" className="hover-pop" disabled={!!dl && dl !== t('builder.dl.ready')}
                           onClick={async () => {
                             setDl(t('builder.dl.making'));
                             const [{ fileSlug, saveFile }, { templatePieces }, { templatePdf }] = await Promise.all([import('./download'), import('./template'), import('./templatePdf')]);
@@ -407,7 +407,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t('builder.font')}>
                     {APPROVED_FONTS.map((f) => (
                       <button key={f} type="button" role="radio" aria-checked={draft.fonts.display === f} aria-label={f} onClick={() => setDraft({ ...draft, fonts: { ...draft.fonts, display: f } })}
-                        className={`min-h-14 px-3 rounded-input border-std text-left ${draft.fonts.display === f ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        className={`min-h-14 px-3 rounded-input border-std text-left ${draft.fonts.display === f ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                         <span className="block text-xl leading-tight" style={{ fontFamily: THEME_FONTS[f] }}>{game.name}</span>
                         <span className="block text-xs font-bold text-muted">{f}</span>
                       </button>
@@ -418,7 +418,7 @@ function Builder({ gameId, owner }: { gameId: string; owner: boolean; base: stri
                     {SOUND_PACKS.map((p: SoundPack) => (
                       <button key={p} type="button" role="radio" aria-checked={(draft.sounds ?? 'classic') === p}
                         onClick={() => { setDraft({ ...draft, sounds: p }); playEffect('right', settings, p); window.setTimeout(() => playEffect('win', settings, p), 450); }}
-                        className={`min-h-12 px-3 rounded-input border-std font-bold ${(draft.sounds ?? 'classic') === p ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                        className={`min-h-12 px-3 rounded-input border-std font-bold ${(draft.sounds ?? 'classic') === p ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                         {t(`builder.sound.${p}` as StringKey)}
                       </button>
                     ))}
@@ -504,7 +504,7 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
   const ref = useRef<HTMLInputElement>(null);
   const [drag, setDrag] = useState(false);
   return (
-    <div className={`rounded-input border-std p-2 grid grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-1.5 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-accent' : ''}`}
+    <div className={`rounded-input border-std p-2 grid grid-cols-[auto_1fr_auto] items-center gap-x-2 gap-y-1.5 ${image ? 'border-success bg-surface' : 'border-border-soft bg-surface'} ${drag ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`}
       onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)}
       onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files[0]); }}>
       <button type="button" onClick={() => ref.current?.click()} aria-label={t('builder.uploadPiece', { piece: piece.label })}
@@ -522,10 +522,10 @@ function PieceCard({ piece, image, clear, onClearBg, onFile, onDraw, onClear }: 
       </div>
       {/* Small buttons (teacher, 2026-11-16): draw, see-through on or off, remove. */}
       <div className="shrink-0 flex gap-1 col-start-3">
-        <IconButton variant="primary" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
+        <IconButton variant="main" className="!w-8 !h-8" label={t('builder.drawPiece', { piece: piece.label })} onClick={onDraw}><PaintBrush weight="fill" size={15} /></IconButton>
         <button type="button" onClick={onClearBg} aria-pressed={clear} aria-label={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })} data-tip={t(clear ? 'builder.clearPiece' : 'builder.solidPiece', { piece: piece.label })}
           className="shrink-0 w-8 h-8 rounded-full border-std border-border grid place-items-center overflow-hidden active:scale-95 motion-safe:transition"
-          style={clear ? CHECKER : { background: '#fbfcf8' }}>
+          style={clear ? CHECKER : { background: '#fffaf0' }}>
           <span className={`block w-3.5 h-3.5 rounded-[4px] border-std border-border ${clear ? 'bg-transparent border-dashed' : 'bg-[#f6a5c0]'}`} />
         </button>
         {image && <IconButton className="!w-8 !h-8" label={t('builder.removePiece', { piece: piece.label })} onClick={onClear}><Trash weight="bold" size={14} /></IconButton>}
@@ -561,7 +561,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
           power-up pages (teacher, 2026-11-13), so each uploaded page lands on
           the power it was drawn for. Only names and powers: Classic art is never handed out. */}
       {items.length === 0 && (
-        <Button variant="primary" className="justify-self-start" onClick={() => onChange(spec.classic.map((c) => ({ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion, often: c.often })))}>
+        <Button variant="main" className="justify-self-start" onClick={() => onChange(spec.classic.map((c) => ({ id: newId('item'), name: c.name, ability: c.ability, amount: c.amount, motion: c.motion, often: c.often })))}>
           <PaintBrush weight="bold" size={18} />{t('builder.items.fromTemplate', { n: spec.classic.length })}
         </Button>
       )}
@@ -578,7 +578,7 @@ function ItemsTab({ spec, items, onChange, onProblem }: { spec: ItemSlotsSpec; i
               <label className="grid gap-1 font-bold text-sm flex-1">{t('builder.items.name')}
                 <input value={it.name} maxLength={30} onChange={(e) => put(i, { name: e.target.value })} placeholder={t('builder.items.namePlaceholder')} className={field} />
               </label>
-              <IconButton variant="primary" className="self-end" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={20} /></IconButton>
+              <IconButton variant="main" className="self-end" label={t('builder.drawPiece', { piece: it.name || t('builder.items.piece') })} onClick={() => setDrawing(i)}><PaintBrush weight="fill" size={20} /></IconButton>
             </div>
             <label className="grid gap-1 font-bold text-sm">{t('builder.items.ability')}
               <select value={ability.id} onChange={(e) => { const a = spec.abilities.find((x) => x.id === e.target.value)!; put(i, { ability: a.id, amount: a.amount?.default }); }} className={field}>
@@ -660,7 +660,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
   const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
   const ready = saved && !problems;
-  const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`;
+  const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`;
   return (
     <div className="grid gap-3">
       <p className="font-semibold text-muted text-sm">{t('builder.shareHint')}</p>
@@ -701,7 +701,7 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
 function PageTurn({ dir, label, onClick }: { dir: 'prev' | 'next'; label: string; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} data-tip={label}
-      className="shrink-0 w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center hover:bg-accent motion-safe:active:scale-95">
+      className="shrink-0 w-9 h-9 rounded-full border-std border-border bg-surface flex items-center justify-center hover:bg-butter motion-safe:active:scale-95">
       {dir === 'prev' ? <CaretLeft weight="bold" size={18} /> : <CaretRight weight="bold" size={18} />}
     </button>
   );

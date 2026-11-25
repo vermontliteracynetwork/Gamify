@@ -96,12 +96,12 @@ function BetaTab({ card, enter }: { card: string; enter: (i: number) => object }
       <div className="bg-butter border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <h2 className="title-bubble text-4xl"><Title text={t('beta.title')} /></h2>
         <p className="text-lg font-bold max-w-3xl">{t('beta.intro')}</p>
-        <Link to="/beta" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}>{t('beta.join')}</Link>
+        <Link to="/beta" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('beta.join')}</Link>
       </div>
       <ol className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
         {BETA_DOING.map((m, i) => (
           <motion.li key={m.step} {...enter(i)} className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-2xl wiggle-on-hover">{i + 1}</span>
+            <span className="w-12 h-12 rounded-full bg-butter border-bold border-border flex items-center justify-center font-display text-2xl wiggle-on-hover">{i + 1}</span>
             <h3 className="font-display text-2xl"><Title text={m.step} /></h3>
             <p className="font-semibold">{m.text}</p>
           </motion.li>

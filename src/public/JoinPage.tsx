@@ -104,7 +104,7 @@ export default function JoinPage() {
             {rosters.map((c) => <button key={c.id} type="button" onClick={() => setRoster(c.id)} className="min-h-16 rounded-panel border-bold border-border bg-surface font-display text-2xl font-bold active:scale-95" style={{ boxShadow: 'var(--shadow-sticker)' }}>{c.name}</button>)}
           </div>
         )}
-        <button type="button" onClick={() => setGuest(true)} className="justify-self-center min-h-12 px-5 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-2"><UserCircle weight="bold" size={20} />{t('join.notOnList')}</button>
+        <button type="button" onClick={() => setGuest(true)} className="justify-self-center min-h-12 px-5 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2"><UserCircle weight="bold" size={20} />{t('join.notOnList')}</button>
       </main>
     );
   }
@@ -115,7 +115,7 @@ export default function JoinPage() {
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
-        <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-bold border-border bg-surface-2 font-bold text-lg inline-flex items-center gap-2">
+        <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-bold border-border bg-white font-bold text-lg inline-flex items-center gap-2">
           <DiceFive weight="fill" size={26} />{t('join.roll')}
         </button>
         <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>

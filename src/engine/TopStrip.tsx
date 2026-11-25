@@ -19,7 +19,7 @@ export default function TopStrip({ score, player, round, rounds, perRound, left,
       {/* Solo games show no player icon (teacher, 2026-11-23); kept only when a theme designed one. */}
       {player && <img src={player} alt="" aria-hidden="true" className="w-9 h-9 rounded-full border-std border-border bg-surface object-contain shrink-0" />}
       {/* A steady live region, so screen readers hear each new score; only the inner number pops. */}
-      <span className="font-display font-bold text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
+      <span className="font-score text-4xl leading-none tabular-nums min-w-[3ch]" role="status" aria-label={t('share.points', { count: score })}>
         <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.25 }} animate={{ scale: 1 }}>{score}</motion.span>
       </span>
       {/* THE meter (Brand Kit game components, 2026-11-24): one segment per turn
