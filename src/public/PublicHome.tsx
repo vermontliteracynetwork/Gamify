@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Buildings, Check, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, Play, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
+import { ArrowRight, Barbell, Brain, Buildings, Eraser, HandHeart, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, Play, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
+import IconBadge, { type BadgeColor } from '../ui/IconBadge';
 import { Doodle } from '../brand/CrayonKit';
 import { CyclingCover } from '../games/covers';
 import { ModeDot, shownModes } from '../games/ModeBadge';
@@ -18,11 +19,21 @@ import { STARTER_THEMES } from '../theme/starters';
 // The public home page (development plan Part 3A): what Gamify is, the four
 // ways to play, the games, why it works (honest research lines), and the
 // two front doors: teachers start free, students join with a code.
-const FEATURES: { icon: typeof Stack; key: string }[] = [
-  { icon: Stack, key: 'sets' }, { icon: PaintBrush, key: 'themes' }, { icon: Sliders, key: 'supports' },
-  { icon: UsersThree, key: 'classes' }, { icon: ShieldCheck, key: 'privacy' }, { icon: Heart, key: 'access' },
+// Why it works and Made for real classrooms scan at a glance (owner,
+// 2026-11-25: "make more visual and nice/professional for easy scanning"):
+// one icon on its pastel badge, a short headline beside it, one or two lines.
+type Point = { icon: typeof Stack; key: string; bg: BadgeColor };
+const FEATURES: Point[] = [
+  { icon: Stack, key: 'sets', bg: 'butter' }, { icon: PaintBrush, key: 'themes', bg: 'blush' }, { icon: Sliders, key: 'supports', bg: 'mint' },
+  { icon: UsersThree, key: 'classes', bg: 'blue-crystal' }, { icon: ShieldCheck, key: 'privacy', bg: 'aqua' }, { icon: Heart, key: 'access', bg: 'peach' },
 ];
-const WHY = ['practice', 'support', 'mistakes', 'together', 'udl'];
+const WHY: Point[] = [
+  { icon: Brain, key: 'practice', bg: 'lavender' }, { icon: Barbell, key: 'support', bg: 'butter' }, { icon: Eraser, key: 'mistakes', bg: 'mint' },
+  { icon: UsersThree, key: 'together', bg: 'blue-crystal' }, { icon: HandHeart, key: 'udl', bg: 'blush' },
+];
+// Five cards in a tidy grid: three across, then two wider ones (laptop);
+// two across with the last one full width (tablet); one column (phone).
+const WHY_SPAN = ['lg:col-span-2', 'lg:col-span-2', 'lg:col-span-2', 'lg:col-span-3', 'md:col-span-2 lg:col-span-3'];
 
 // The look follows the approved /brand Home mockup (owner, 2026-11-25:
 // "keep the extras on home and pricing"): its section order, How it works,
@@ -31,7 +42,6 @@ const WHY = ['practice', 'support', 'mistakes', 'together', 'udl'];
 const H2 = 'title-bubble text-[2rem] sm:text-[2.75rem] leading-none';
 const CARD = 'bg-surface border-bold border-border rounded-panel';
 const SECTION = 'mt-12 sm:mt-16 grid gap-6';
-const FEATURE_BG: Record<string, string> = { sets: 'bg-butter', themes: 'bg-blush', supports: 'bg-mint', classes: 'bg-blue-crystal', privacy: 'bg-aqua', access: 'bg-peach' };
 const HOW: { icon: typeof Stack; bg: string }[] = [{ icon: Stack, bg: 'bg-butter' }, { icon: Play, bg: 'bg-mint' }, { icon: UsersThree, bg: 'bg-blue-crystal' }];
 const TRUST = ['ads', 'trackers', 'emails', 'access'];
 // The hero title in two halves, split before "becomes" (whole when it is not there).
@@ -79,7 +89,7 @@ export default function PublicHome() {
               <li key={i} className={`hover-lift ${CARD} p-6 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <span className="flex items-center gap-3" aria-hidden="true">
                   <span className={`wiggle-on-hover w-12 h-12 rounded-full ${bg} border-bold border-border flex items-center justify-center`}><Icon weight="bold" size={24} /></span>
-                  <span className="font-score text-3xl leading-none">{i + 1}</span>
+                  <span className="font-score text-3xl leading-none">{t('public.howStep', { n: i + 1 })}</span>
                 </span>
                 <h3 className="font-display text-2xl leading-tight">{t(`public.how.${i + 1}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`public.how.${i + 1}.text` as StringKey)}</p>
@@ -110,16 +120,8 @@ export default function PublicHome() {
 
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.whyTitle')} /></h2>
-          <div className="grid md:grid-cols-2 gap-5">
-            {WHY.map((k) => (
-              <div key={k} className={`hover-lift ${CARD} p-6 flex gap-4 items-start md:last:odd:col-span-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="shrink-0 w-12 h-12 rounded-full bg-lavender border-bold border-border flex items-center justify-center" aria-hidden="true"><Check weight="bold" size={24} /></span>
-                <span className="grid gap-1.5">
-                  <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.why.${k}` as StringKey)} /></h3>
-                  <p className="font-semibold">{t(`public.why.${k}.text` as StringKey)}</p>
-                </span>
-              </div>
-            ))}
+          <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-5">
+            {WHY.map((p, i) => <PointCard key={p.key} point={p} group="why" className={WHY_SPAN[i]} />)}
           </div>
           <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
             {TRUST.map((k) => <li key={k} className="inline-flex items-center justify-center gap-2 rounded-pill bg-white border-bold border-border px-5 min-h-12 font-bold"><ShieldCheck weight="bold" size={20} aria-hidden="true" />{t(`public.trust.${k}` as StringKey)}</li>)}
@@ -130,14 +132,8 @@ export default function PublicHome() {
 
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.featuresTitle')} /></h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon: Icon, key }) => (
-              <div key={key} className={`hover-lift ${CARD} p-6 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className={`wiggle-on-hover w-12 h-12 rounded-full ${FEATURE_BG[key]} border-bold border-border flex items-center justify-center`}><Icon weight="bold" size={24} /></span>
-                <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.feature.${key}` as StringKey)} /></h3>
-                <p className="font-semibold">{t(`public.feature.${key}.text` as StringKey)}</p>
-              </div>
-            ))}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 sm:auto-rows-fr gap-5">
+            {FEATURES.map((p) => <PointCard key={p.key} point={p} group="feature" />)}
           </div>
           <Link to="/features" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('public.allFeatures')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
@@ -162,6 +158,27 @@ export default function PublicHome() {
       </main>
       <PublicFooter />
     </>
+  );
+}
+
+// One scannable card: the icon badge and short headline on one row, the
+// line under them, and the research number big where the page has one.
+function PointCard({ point: { icon: Icon, key, bg }, group, className = '' }: { point: Point; group: 'why' | 'feature'; className?: string }) {
+  const stat = group === 'why' && key === 'practice';
+  return (
+    <div className={`hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <div className="flex items-center gap-4">
+        <span className="wiggle-on-hover"><IconBadge color={bg} size="lg"><Icon weight="bold" size={28} /></IconBadge></span>
+        <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.${group}.${key}` as StringKey)} /></h3>
+      </div>
+      {stat && (
+        <p className="m-0 flex items-baseline gap-2">
+          <span className="font-score text-5xl leading-none">{t('public.why.practice.stat')}</span>
+          <span className="font-bold text-lg">{t('public.why.practice.statLabel')}</span>
+        </p>
+      )}
+      <p className="m-0 font-semibold leading-snug">{t(`public.${group}.${key}.text` as StringKey)}</p>
+    </div>
   );
 }
 

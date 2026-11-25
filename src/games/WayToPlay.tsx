@@ -4,7 +4,7 @@ import { ChoicePicked } from './SetupWizard';
 import type { PlayMode } from '../data/types';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { MODE_COLORS, MODE_ICONS } from './ModeBadge';
+import { WAY_CARD, WAY_SHADOW, WayScene } from './WayCard';
 import { ChoiceRow } from '../ui/fields';
 
 // The first setup step when a game can be played more than one way (teacher,
@@ -28,18 +28,13 @@ export default function WayToPlay({ modes: given, value, onChange }: { modes: Pl
     <div className="way-cards grid gap-6">
     <div role="radiogroup" aria-label={t('way.title')} className="grid gap-5 justify-center" style={{ gridTemplateColumns: `repeat(${modes.length}, min(18rem, 40vh, calc((100% - ${(modes.length - 1) * 1.25}rem) / ${modes.length})))` }}>
       {modes.map((m) => {
-        const Icon = MODE_ICONS[look(m)];
         const on = picked && (value === m || (both && m === 'solo' && value === 'versus'));
         return (
           // A big picture band for each way to play, small text under it (teacher, 2026-11-06).
           <button key={m} type="button" role="radio" aria-checked={on} onClick={() => onChange(m)}
-            className={`group relative aspect-square rounded-panel border-bold border-border overflow-hidden text-left flex flex-col bg-surface motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`}
-            style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-            <span className="relative flex-1 min-h-0 flex items-center justify-center border-b-[2.5px] border-border overflow-hidden" style={{ background: MODE_COLORS[look(m)] }} aria-hidden="true">
-              <Icon weight="fill" className="w-[38%] h-[60%] motion-safe:group-hover:scale-110 motion-safe:group-hover:-rotate-6 motion-safe:transition-transform" />
-              <Icon weight="fill" size={28} className="absolute left-[8%] bottom-[10%] opacity-20 rotate-12" />
-              <Icon weight="fill" size={22} className="absolute right-[10%] top-[12%] opacity-20 -rotate-12" />
-            </span>
+            className={`${WAY_CARD} aspect-square ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`}
+            style={{ boxShadow: on ? '0 6px 0 var(--ink)' : WAY_SHADOW }}>
+            <WayScene mode={look(m)} className="flex-1 min-h-0" />
             {/* The name reads big; the line under it shows on hover with a mouse
                 (teacher, 2026-11-24). Touch screens have no hover, so there it
                 shows under the picked card only (iPad-first rule). */}
