@@ -2,8 +2,6 @@ import { TemplateLock, useTemplateAccess } from './templateAccess';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer } from '@phosphor-icons/react';
 import { GAMES } from '../../games/registry';
-import { signInManifest } from '../../student/pictures';
-import { bigScreenManifest } from '../../live/screenManifest';
 import { t } from '../../i18n';
 import type { ThemePieceSpec } from '../types';
 import { buttonClasses } from '../../ui/kit';
@@ -64,7 +62,7 @@ export function TemplateSheet({ gameName, piece, page, total }: { gameName: stri
 // printed (teacher, 2026-10-28). `guide`: opened from the public guide.
 export default function TemplatePage({ guide = false }: { guide?: boolean }) {
   const { gameId } = useParams();
-  const game = [...GAMES, signInManifest, bigScreenManifest].find((g) => g.id === gameId);
+  const game = [...GAMES].find((g) => g.id === gameId);
   const access = useTemplateAccess(gameId ?? '');
   if (!game) return null;
   const pages = templatePieces(game);

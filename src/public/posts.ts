@@ -183,7 +183,7 @@ export const POSTS: Post[] = [
     slug: 'two-tap-exit-tickets',
     title: 'Two-Tap Exit Tickets for Pre-Readers',
     summary: 'A one-screen class check-in where each student taps a face and an easy or tricky picture. No names, no reading needed.',
-    cover: 'sign-in',
+    cover: 'star-quiz',
     grades: 'K-3',
     minutes: 5,
     body: [

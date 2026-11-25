@@ -7,8 +7,6 @@ import { newId } from '../../data';
 import { useTier } from '../../data/hooks';
 import { GameCover } from '../../games/covers';
 import { GAMES } from '../../games/registry';
-import { signInManifest } from '../../student/pictures';
-import { bigScreenManifest } from '../../live/screenManifest';
 
 import { t } from '../../i18n';
 import { imageFileToDataUrl } from '../../ui/imageFile';
@@ -36,7 +34,8 @@ import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
 const DrawStudio = lazyPage(() => import('./DrawStudio'));
 
 // Everything the builder can design: each game, plus the sign-in pictures.
-export const BUILDER_TARGETS = [...GAMES, signInManifest, bigScreenManifest];
+// Games only (owner, 2026-11-25: Sign-in pictures and Big screen removed everywhere).
+export const BUILDER_TARGETS = [...GAMES];
 
 // The Theme Builder (teacher page, and the owner's developer view): pick a
 // game, then design its theme with a live preview, an upload card per piece
