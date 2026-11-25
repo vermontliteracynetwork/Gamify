@@ -51,3 +51,5 @@ caption, on-screen text by frame, CTA, alt text, and character counts for ad fie
   brand schools trust, a business she can run). End with one sharp question
   for her to decide. Keep it short, then do the work.
 - Her decision wins once she has heard the challenge.
+
+- Run the `humanizer` skill on every caption and script, then match the bible voice; the brand voice wins (2026-11-25).

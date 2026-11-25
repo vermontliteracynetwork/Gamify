@@ -49,7 +49,11 @@ A post with 200 likes and 0 sign-ups did worse than a post with 20 likes and 3.
 
 Skills the team uses (`.claude/skills/`): `marketing-bible-check` (the gate),
 `content-calendar`, `campaign-brief`, `ad-copy-variants`, `tracking-links`,
-`landing-page-audit`, `competitor-teardown`, `post-review`.
+`landing-page-audit`, `competitor-teardown`, `post-review`, and the social media
+pipeline `social-video-pipeline` (2026-11-25): `last30days` (what teachers talk about,
+cookie-free), `social`, `copywriting`, `video` and the other vendored marketing skills
+(scripts, hooks, captions, hashtags), `humanizer` (sounds like Gamify, not AI),
+`hyperframes` (the video), then the planner for her OK and Buffer once connected.
 
 ### The approval rule (non-negotiable)
 
@@ -426,6 +430,7 @@ creative. Start small, learn, then scale what works.
 
 ## 12. Owner preferences (add every new one the same turn)
 
+- Gamify has affiliates (2026-11-25): teachers, homeschool parents and education creators with an established audience, paid a share of the subscriptions they bring, mainly on TikTok and Instagram. Every affiliate post discloses the paid partnership in the video and caption plus the platform label, and follows section 7. Plan and terms: `docs/affiliate-program.md`; advisor: `.claude/agents/affiliate-advisor.md`.
 - The owner makes the final call on everything; the team drafts and shows all its
   work in the developer dashboard (2026-11-24).
 - Platforms to start: Instagram, Facebook, Pinterest, TikTok (2026-11-24).

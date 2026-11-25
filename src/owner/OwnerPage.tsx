@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { ListChecks, ArrowRight, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Handshake, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -32,6 +32,7 @@ import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import MarketingCard from './marketing/MarketingCard';
 import CeoCard from './CeoCard';
 import AstroCard from './AstroCard';
+import AffiliatesCard from './AffiliatesCard';
 import BetaSpec from './BetaSpec';
 import BooksCard from './books/BooksCard';
 import { AccessCard, PlanPreviewCard, SubsCard, useOwnerStats } from './DevCards';
@@ -59,7 +60,7 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro';
+type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro' | 'affiliates';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'overview', label: 'owner.dashboard', icon: SquaresFour },
   { id: 'ceo', label: 'owner.ceo', icon: Crown },
@@ -69,6 +70,7 @@ const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star }[] = [
   { id: 'stripe', label: 'owner.stripe', icon: CreditCard },
   { id: 'waiting', label: 'owner.waiting', icon: ListChecks },
   { id: 'marketing', label: 'owner.marketing', icon: Megaphone },
+  { id: 'affiliates', label: 'owner.affiliates', icon: Handshake },
   { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots },
   { id: 'subs', label: 'owner.subs', icon: CreditCard },
   { id: 'growth', label: 'owner.chart', icon: ChartLineUp },
@@ -111,6 +113,7 @@ function Desktop() {
     beta: <div className="grid gap-6"><BetaSpec /><BetaCard /></div>,
     marketing: <MarketingCard />,
     astro: <AstroCard />,
+    affiliates: <AffiliatesCard />,
   };
   const linkCls = 'dash-nav-item no-underline';
   return (
@@ -232,7 +235,7 @@ function FeedbackCard() {
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('owner.kind')}>
-        {(['all', 'help', 'quote', 'beta', 'bug', 'problem', 'idea'] as const).map((k) => (
+        {(['all', 'help', 'quote', 'beta', 'affiliate', 'bug', 'problem', 'idea'] as const).map((k) => (
           <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => setKind(k)} className={`min-h-10 px-3 rounded-pill border-std font-bold text-sm ${kind === k ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
             {t(`owner.kind.${k}`)} ({k === 'all' ? reports.length : reports.filter((r) => r.kind === k).length})
           </button>

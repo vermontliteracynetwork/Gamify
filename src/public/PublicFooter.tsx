@@ -18,6 +18,7 @@ export default function PublicFooter() {
           <Link to="/research">{t('research.title')}</Link>
           <Link to="/faq">{t('public.nav.faq')}</Link>
           <Link to="/beta">{t('public.nav.beta')}</Link>
+          <Link to="/affiliates">{t('footer.affiliates')}</Link>
         </nav>
         <p className="text-sm font-bold text-muted">{t('legal.copyright', { year: new Date().getFullYear() })}</p>
         <nav aria-label={t('legal.footerNav')} className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-sm max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-3 max-sm:gap-y-0 [&>a]:max-sm:flex [&>a]:pointer-coarse:min-h-11 [&>a]:pointer-coarse:inline-flex [&>a]:items-center">

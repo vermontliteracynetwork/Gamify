@@ -110,6 +110,7 @@ export default function CeoCard() {
           ))}
           <li><Button size="sm" onClick={() => ask('vermont_business_advisor')}>{t('ceo.vermontAsk')}</Button></li>
           <li><Button size="sm" onClick={() => ask('astrology_advisor')}>{t('ceo.astroAsk')}</Button></li>
+          <li><Button size="sm" onClick={() => ask('affiliate_advisor')}>{t('ceo.affAsk')}</Button></li>
         </ul>
       </section>
 

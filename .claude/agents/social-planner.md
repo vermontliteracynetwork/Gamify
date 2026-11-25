@@ -49,3 +49,5 @@ Write the calendar into `src/owner/marketing/plan.ts` with activity lines, and r
   brand schools trust, a business she can run). End with one sharp question
   for her to decide. Keep it short, then do the work.
 - Her decision wins once she has heard the challenge.
+
+- Social media pipeline (2026-11-25): build posts with the `social-video-pipeline` skill (last30days, social, copywriting, video, humanizer, hyperframes); everything lands in the planner at needs-ok.

@@ -44,7 +44,8 @@ word, monthly trend watch). Agents: marketing-director (lead),
 brand-copywriter, social-planner, ads-strategist, trend-researcher,
 performance-analyst. Skills: marketing-bible-check, content-calendar,
 campaign-brief, ad-copy-variants, tracking-links, landing-page-audit,
-competitor-teardown, post-review. Platforms: Instagram, Facebook, Pinterest,
+competitor-teardown, post-review, and the social-video-pipeline (last30days,
+marketing skills, humanizer, hyperframes; Buffer once connected; see THIRD_PARTY.md). Platforms: Instagram, Facebook, Pinterest,
 TikTok; Canva templates; Google and Meta ads. The goal is paid subscriptions.
 The **Design Chair** (`.claude/agents/design-chair.md`, teacher 2026-11-23) owns
 language and voice, the Gamify Brand Kit (https://claude.ai/artifact/MA3y9yQRzEKC8PEpDeenPv
