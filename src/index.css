@@ -599,7 +599,7 @@ html[data-motion="still"] :is(.qt-gold) { animation: none; }
 /* The marquee bulbs glow, growing and shrinking (teacher, 2026-11-06). */
 .gs-bulbs-x.gs-twinkle { animation: gs-bulbs-x 0.9s linear infinite, gs-twinkle 1.3s ease-in-out infinite; }
 .gs-bulbs-y.gs-twinkle { animation: gs-bulbs-y 0.9s linear infinite, gs-twinkle 1.3s ease-in-out infinite; }
-@keyframes gs-twinkle { 0%, 100% { filter: drop-shadow(0 0 1px #fff6b0); } 50% { filter: drop-shadow(0 0 5px #fdfd94) drop-shadow(0 0 9px rgba(253,253,148,0.8)); } }
+@keyframes gs-twinkle { 0%, 100% { filter: drop-shadow(0 0 1px #fff6b0); } 50% { filter: drop-shadow(0 0 5px #fdfd94) drop-shadow(0 0 9px rgba(255,241,184,0.8)); } }
 /* Game Show's marquee bulbs chase: each pair swaps lemon and paper (approved mockup, 2026-11-24). */
 .gs-bulb { animation: gs-bulb 0.9s steps(1, end) infinite; }
 .gs-bulb-b { animation-name: gs-bulb-b; }
@@ -695,13 +695,13 @@ body:has(.results-box) .hint-btn { display: none; }
    soft halo that breathes. Slow and gentle, so it stays on in every motion
    setting; only Still slows it right down. */
 .turn-rays {
-  background: repeating-conic-gradient(from 0deg, rgba(253,253,148,0.95) 0deg 10deg, rgba(253,253,148,0) 10deg 24deg);
+  background: repeating-conic-gradient(from 0deg, rgba(255,241,184,0.95) 0deg 10deg, rgba(255,241,184,0) 10deg 24deg);
   -webkit-mask-image: radial-gradient(circle, #000 28%, transparent 68%);
   mask-image: radial-gradient(circle, #000 28%, transparent 68%);
   animation: turn-spin 10s linear infinite;
 }
 .turn-halo {
-  background: radial-gradient(circle, rgba(253,253,148,0.95) 0%, rgba(253,253,148,0.55) 45%, rgba(253,253,148,0) 70%);
+  background: radial-gradient(circle, rgba(255,241,184,0.95) 0%, rgba(255,241,184,0.55) 45%, rgba(255,241,184,0) 70%);
   animation: turn-breathe 2.4s ease-in-out infinite;
 }
 @keyframes turn-spin { to { transform: rotate(360deg); } }
@@ -897,7 +897,7 @@ body:has(.play-fill) .site-header :is(a, button) svg { width: 14px; height: 14px
 @keyframes toy-bounce { 0%, 100% { transform: translateY(0) scale(1.08, 0.92); } 45%, 55% { transform: translateY(-46px) scale(0.96, 1.04); } }
 
 /* Game Lab (2026-11-22): sun rays behind a power-up card's picture. */
-.pu-rays { background: repeating-conic-gradient(from 0deg, rgba(253,253,148,0.95) 0deg 12deg, transparent 12deg 30deg); animation: pu-rays 8s linear infinite; mask-image: radial-gradient(circle, #000 35%, transparent 70%); -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
+.pu-rays { background: repeating-conic-gradient(from 0deg, rgba(255,241,184,0.95) 0deg 12deg, transparent 12deg 30deg); animation: pu-rays 8s linear infinite; mask-image: radial-gradient(circle, #000 35%, transparent 70%); -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
 @keyframes pu-rays { to { transform: rotate(360deg); } }
 html[data-motion="still"] .pu-rays { animation: none; }
 /* Game Lab boards size to their box (width and height): .lab-board is a

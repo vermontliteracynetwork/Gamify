@@ -215,7 +215,7 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
         <span aria-hidden="true" className="turn-rays absolute left-1/2 top-1/2 w-[min(30rem,70vh)] h-[min(30rem,70vh)] -ml-[min(15rem,35vh)] -mt-[min(15rem,35vh)] rounded-full pointer-events-none" />
         <span aria-hidden="true" className="turn-halo absolute left-1/2 top-1/2 w-[min(22rem,52vh)] h-[min(22rem,52vh)] -ml-[min(11rem,26vh)] -mt-[min(11rem,26vh)] rounded-full pointer-events-none" />
         <motion.span className="relative" animate={still ? undefined : { y: [0, -12, 0], rotate: [-3, 3, -3], scale: [1, 1.06, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ filter: 'drop-shadow(0 0 18px #fdfd94) drop-shadow(0 0 36px rgba(253,253,148,0.7))' }}>
+          style={{ filter: 'drop-shadow(0 0 18px #fff1b8) drop-shadow(0 0 36px rgba(255,241,184,0.7))' }}>
           {avatar ? <img src={avatar} alt="" className="w-[min(18rem,42vh)] h-[min(18rem,42vh)] object-contain" /> : <TeamBadge colorIndex={player.colorIndex} size={220} />}
         </motion.span>
       </div>

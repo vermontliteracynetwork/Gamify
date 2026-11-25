@@ -29,7 +29,7 @@ function parkMarkup(w: number, h: number, still: boolean) {
         <path d={`M${w * 0.92 - 13 * k} ${h * 0.47 - 11 * k} q${6 * k} ${-8 * k} ${14 * k} ${-8 * k}`} stroke="#fff" strokeWidth={5 * k} fill="none" strokeLinecap="round" />
       </g>
     ),
-    clouds: [[0.08, 0.12, 2.2, 0], [0.55, 0.07, 1.6, 1], [0.78, 0.3, 1.3, 2]].map(([x, y, s, i]) => (
+    clouds: [[0.86, 0.16, 1.4, 0], [0.55, 0.07, 1.6, 1], [0.78, 0.3, 1.3, 2]].map(([x, y, s, i]) => (
       <g key={i} className={still ? '' : 'cq-cloud'} style={{ animationDelay: `${-i * 7}s` }}>
         <path d={cloud(w * x, h * y, s * k)} fill={PK.paper} stroke={INK} strokeWidth={sw * 0.9} strokeLinejoin="round" />
       </g>
@@ -76,7 +76,7 @@ const PARK_CSS = `
 // The same park as a CSS background (the Theme Builder's 4:3 preview).
 export const PARK_BG = (() => {
   const w = 1600, h = 1200, k = 1.9, sw = 7;
-  const c = [[0.08, 0.12, 2.2], [0.55, 0.07, 1.6], [0.78, 0.3, 1.3]].map(([x, y, s]) => `<path d="${cloud(w * x, h * y, s * k)}" fill="${PK.paper}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`).join('');
+  const c = [[0.86, 0.16, 1.4], [0.55, 0.07, 1.6], [0.78, 0.3, 1.3]].map(([x, y, s]) => `<path d="${cloud(w * x, h * y, s * k)}" fill="${PK.paper}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`).join('');
   const f = Array.from({ length: 16 }, (_, i) => { const x = (w / 16) * i + 50, y = h * 0.86 + ((i * 29) % 50) * k; return `<path d="M${x} ${y} v${18 * k}" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="${7 * k}" fill="${[PK.pink, PK.paper, PK.lemon][i % 3]}" stroke="${INK}" stroke-width="4"/>`; }).join('');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="${PK.sky}"/><circle cx="${w * 0.9}" cy="${h * 0.12}" r="${h * 0.07}" fill="${PK.lemon}" stroke="${INK}" stroke-width="${sw}"/>${c}<path d="M0 ${h * 0.62} C${w * 0.25} ${h * 0.5} ${w * 0.45} ${h * 0.56} ${w * 0.6} ${h * 0.6} C${w * 0.78} ${h * 0.5} ${w * 0.92} ${h * 0.52} ${w} ${h * 0.58} L${w} ${h} L0 ${h} Z" fill="${PK.lime}" stroke="${INK}" stroke-width="${sw}"/><path d="M0 ${h * 0.78} C${w * 0.3} ${h * 0.7} ${w * 0.6} ${h * 0.82} ${w} ${h * 0.72} L${w} ${h} L0 ${h} Z" fill="${PK.kelly}" stroke="${INK}" stroke-width="${sw}"/>${f}</svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
