@@ -93,12 +93,17 @@ One miss means it is not ready. Short form:
 10. **Learned**: cites at least one past lesson it applies (or says "first test").
 11. **Tracked**: has a tracking link (section 9) and a named test, if any.
 12. **Accessible**: captions on video, alt text on images, contrast, no flashing.
+13. **K-12**: Gamify is presented as K-12, never a narrower band; Live means every
+   student on their own device (section 4, K-12 positioning).
 
 ---
 
 ## 3. Who we sell to
 
-Never "teachers" in general. Pick one per piece.
+Never "teachers" in general. Pick one per piece. The segments below are
+**targeting data** (who sees a piece, which pain it names); they never narrow the
+product. Whatever the segment, the copy presents Gamify as K-12 (owner,
+2026-11-25; section 4, K-12 positioning).
 
 | Buyer | Pains we solve | What makes them act | Plan to sell |
 |---|---|---|---|
@@ -178,6 +183,39 @@ Themes are Gamify's biggest difference; say it the same way everywhere.
   automatic background removal or perfect cut-outs.
 - **Beta**: theme concept ideas and material ideas go out in the regular theme
   emails and on the classroom kit (`src/beta/themeIdeas.ts`).
+
+### K-12 positioning (owner, 2026-11-25)
+Her words: "gamify is k-12 and should always be promoted as k-12 becuase we have
+game difficulty and lots of theme options. live will alwyas be separete devices no
+matter grade." Follow-up, same day: "its okay for the blogs to have different types
+of reccomendations for different grade bands".
+- **The product is always K-12.** Every post, pin, ad, caption, campaign message
+  and landing line presents Gamify as K-12 ("Whole Class Review Game for K-12",
+  "any grade, K-12"). Never a narrower audience for Gamify: no "K-5", "K-3",
+  "grades 2-5", "for elementary", "an elementary game", "for high school".
+- **The reason to give**: adjustable game difficulty and lots of theme options.
+  When naming the difficulty, name a real control in that game: the computer on
+  Easy, Medium or Hard, Territory's slow, normal or fast pace, Board Game's board
+  length, Match Three's rounds, timers on or off, and the teacher's own questions.
+  Themes: the theme library and the Theme Builder are paid features (Free is
+  Classic plus one Game Show theme), so never pair "lots of themes" with "free".
+- **One classroom idea may carry its best-fit grade band.** A blog post, or a pin
+  or post that promotes one blog idea, may recommend that idea for a band, said as
+  the idea's fit ("a K-3 idea", "an idea for grades 8-12"), never as who Gamify is
+  for. The title still says K-12 or names no band.
+- **Live is separate devices, at every grade.** Live always means every student
+  answers on their own device, kindergarten to 12th grade. Never tie a mode to an
+  age ("one screen for little kids", "start slow for younger students"). Share mode
+  (one screen, no student devices) is also for every grade.
+- **Search keywords and hashtags**: K-12 terms first (`k-12 review games`,
+  `#k12teacher`). A grade-specific search term ("3rd grade math games") is allowed
+  only beside a K-12 term in the same piece.
+- **Internal ids stay**: buyer ids and the utm audience part (`k5-teachers`,
+  `612-teachers`) are targeting data (section 9 allows only the section 3 ids). A
+  campaign on a narrow segment says in the planner that its copy stays K-12.
+- The planner test (`plan.test.ts`, "presents Gamify as K-12") checks hooks,
+  captions, on-screen text, Canva briefs, alt text, campaign messages and keyword
+  pairs.
 
 ### Core messages (rotate; one per piece)
 1. **One question set. Dozens of games. Four ways to play.** (the core promise;
@@ -264,8 +302,9 @@ the trend-watch entry wins.
 
 ### Pinterest (search engine for lesson ideas; slow, long-lasting traffic)
 - Standard pins 1000 × 1500 (2:3); video pins 9:16.
-- Titles and descriptions are keywords teachers search ("Friday review game ideas
-  3rd grade"), not hashtags. Every pin links to a real page (blog post, free
+- Titles and descriptions are keywords teachers search ("whole class review game
+  for K-12", "Friday review game ideas"), not hashtags. Gamify is K-12 in every
+  title; a grade-specific keyword only beside a K-12 one (section 4). Every pin links to a real page (blog post, free
   printable, game demo) with a tracking link.
 - Pins live for months: evergreen ideas, seasonal boards posted 45 to 60 days
   before the season.
@@ -373,6 +412,8 @@ creative. Start small, learn, then scale what works.
   underscores between parts):
   `[platform]_[objective]_[funnel]_[audience]_[message]_[yyyymm]`
   e.g. `meta_conv_try_k5-teachers_class-vs-teacher_202608`.
+  The audience part is targeting data, never copy: Gamify stays K-12 in every
+  public line (section 4, K-12 positioning).
   Values: platform `ig fb pin tt meta google`; objective `aware engage traffic conv`;
   funnel `see care try use pay tell`; audience from section 3 (`k5-teachers`,
   `612-teachers`, `sped`, `homeschool`, `admins`).
@@ -437,6 +478,7 @@ creative. Start small, learn, then scale what works.
 - Price talk always leads with value (standing sales rule, 2026-10-25).
 - English only (2026-10-26). No other company's brand anywhere (standing legal rule).
 - Offers (2026-11-24): paid plans bill monthly, every 3 months, every 6 months or yearly, and renew at that interval at the standard price; always say "renews every [interval] until you cancel" next to a price. Standard: Plus $8, Pro $15 a month, 5%, 15% and 20% off 3, 6 and 12 months. The launch sale (Founding Subscriber) is an extra 10% off the first term only, until Jan 1, 2027; never stacked with the beta tester offer, never on student pages.
+- K-12 (2026-11-25): "gamify is k-12 and should always be promoted as k-12 becuase we have game difficulty and lots of theme options. live will alwyas be separete devices no matter grade." and "its okay for the blogs to have different types of reccomendations for different grade bands". Gamify is always K-12; one classroom idea may carry its best-fit band; Live is every student on their own device at every grade. See K-12 positioning in section 4.
 - Themes (2026-11-24): never the word Canva anywhere a customer sees it ("we're going to get sued"); themes are digital design or physical design; promote photo and scan uploads and 3-D materials (clay, modeling dough, textured paint, recycled goods, leaves and sticks), not only pencils and crayons. See Theme language in section 4.
 
 ---

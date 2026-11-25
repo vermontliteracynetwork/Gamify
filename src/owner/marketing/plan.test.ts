@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ACTIVITY, BANNED, CAMPAIGNS, LIMITS, POSTS, STATUSES, shownStatus, teamExport } from './plan';
+import { ACTIVITY, BANNED, CAMPAIGNS, LIMITS, NARROW_GRADE, POSTS, SAYS_K12, STATUSES, shownStatus, teamExport, withoutIdeaBands } from './plan';
 
 // The parts of docs/marketing-bible.md a computer can check. The team runs
 // these after every change to the planner.
@@ -34,6 +34,20 @@ describe('marketing planner', () => {
     for (const p of POSTS) {
       const text = [p.hook, p.caption, ...(p.onScreen ?? []), ...(p.tags ?? []), p.alt ?? ''].join(' ').toLowerCase();
       for (const w of BANNED) expect(text.includes(w), `${p.id}: ${w}`).toBe(false);
+    }
+  });
+
+  it('presents Gamify as K-12, never a narrower band (owner, 2026-11-25)', () => {
+    for (const p of POSTS) {
+      const fields = [p.hook, ...(p.hooksTried ?? []), p.caption, ...(p.onScreen ?? []), p.canva ?? '', p.alt ?? ''];
+      for (const f of fields) expect(withoutIdeaBands(f).match(NARROW_GRADE)?.[0] ?? null, `${p.id}: ${f.slice(0, 60)}`).toBe(null);
+      expect(fields.some((f) => SAYS_K12.test(f)), `${p.id} says K-12`).toBe(true);
+      const tags = p.tags ?? [];
+      if (tags.some((t) => NARROW_GRADE.test(t))) expect(tags.some((t) => SAYS_K12.test(t)), `${p.id}: a grade keyword needs a K-12 keyword beside it`).toBe(true);
+    }
+    for (const c of CAMPAIGNS) {
+      expect(c.message.match(NARROW_GRADE)?.[0] ?? null, c.id).toBe(null);
+      expect(SAYS_K12.test(c.message), `${c.id} says K-12`).toBe(true);
     }
   });
 
