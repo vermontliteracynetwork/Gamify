@@ -386,3 +386,4 @@ line that fits, and add each new preference the same turn she says it.
 - Home and Pricing keep their later extras (sale banner, billing toggle, the class-design and games sections) while matching the mockups otherwise; join codes stay 5 letters with 5 boxes (owner, 2026-11-25: "keep the extras on home and pricing, keep 5 boxes").
 - Every game cover shows Classic first. A game's library themes appear only when the cover cycles, after Classic (owner rule: Classic is the main design, 2026-10-28).
 - Blog posts and help articles keep the small "Blog / topic" link line at the top, while the full breadcrumb trail stays hidden. Home keeps its fifth Why it works card, "Hard enough to stretch" (owner, 2026-11-25: "keep. sure").
+- No name tags on the home page game covers (owner, 2026-11-25: "remove the name tags for games").

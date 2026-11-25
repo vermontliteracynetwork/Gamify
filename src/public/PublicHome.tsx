@@ -61,9 +61,7 @@ export default function PublicHome() {
               <motion.div key={g.id} initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : 0.1 * i }}
                 whileHover={reduce ? undefined : { y: -8, scale: 1.04, transition: { type: 'spring', stiffness: 400, damping: 14 } }}
                 className={`relative ${CARD} overflow-hidden`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <CyclingCover gameId={g.id} className="aspect-[4/3]" />
-                {/* The game's name on a small paper tag (approved mockup). */}
-                <span className="absolute left-2 bottom-2 sm:left-3 sm:bottom-3 max-w-[calc(100%-1rem)] truncate rounded-pill bg-surface border-std border-border px-2.5 sm:px-3 py-0.5 text-xs sm:text-sm font-bold">{g.name}</span>
+                <CyclingCover gameId={g.id} className="aspect-[4/3]" />{/* No name tags on the hero covers (owner, 2026-11-25). */}
               </motion.div>
             ))}
           </div>
