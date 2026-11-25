@@ -94,7 +94,7 @@ Approved: Home.
     browser on every device.
 22. [ ] **Slow-device check:** a test round on a slow school Chromebook and a
     projector (suggested by the build session; needs her or a beta classroom).
-23. [ ] **Rebuild the live site** to the new direction: only when she asks for
+23. [x] **Rebuild the live site** to the new direction: only when she asks for
     the push after approving /brand.
 
 On hold until her explicit approval: Game Lab games, hidden games.
