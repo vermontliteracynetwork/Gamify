@@ -2497,7 +2497,7 @@ export const en = {
   'rx.s.action': 'Group these {count}',
   'rx.s.action.one': 'Plan a 1:1',
   'rx.group.pick': 'Your group',
-  'rx.group.pickTip': 'Pick the students, the goal and the set. Gamify only shows progress toward the goal you set (for example from an intervention plan). Saved on this device.',
+  'rx.group.pickTip': 'Pick the students, the goal and the set. Gamify only shows progress toward the goal you set (for example from an intervention plan). Saved with your account.',
   'rx.group.students': 'Students in the group',
   'rx.group.goal': 'Goal: % right on first try',
   'rx.group.by': 'By',

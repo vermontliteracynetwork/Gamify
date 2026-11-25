@@ -1,3 +1,4 @@
+import { data } from '../data';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowCounterClockwise, ArrowRight, CheckCircle, Info, LinkSimple, Lightbulb, Printer, Target, TrendDown, TrendUp, UsersThree, Warning } from '@phosphor-icons/react';
@@ -393,13 +394,32 @@ export function loadGroup(classId: string): GroupPlan {
   try { const g = JSON.parse(localStorage.getItem(groupKey(classId)) ?? 'null') as GroupPlan | null; if (g && Array.isArray(g.ids)) return g; } catch { /* private window: start fresh */ }
   return { ids: [], goal: 80, by: inDays(28) };
 }
-function saveGroup(classId: string, g: GroupPlan) { try { localStorage.setItem(groupKey(classId), JSON.stringify(g)); } catch { /* not saved; still works this visit */ } }
+// Saved with the teacher's settings (the cloud when signed in; predicted for
+// the owner 2026-11-25, like her marketing decisions), with this browser as a
+// fast copy. The example report's group stays on this device only.
+const GROUPS_SETTING = 'report-groups';
+function saveGroup(classId: string, g: GroupPlan) {
+  try { localStorage.setItem(groupKey(classId), JSON.stringify(g)); } catch { /* not saved here; the account copy still saves */ }
+  if (classId === 'example') return;
+  void data.getSetting<Record<string, GroupPlan>>(GROUPS_SETTING).then((all) => data.setSetting(GROUPS_SETTING, { ...(all ?? {}), [classId || 'all']: g })).catch(() => {});
+}
+async function loadSavedGroup(classId: string): Promise<GroupPlan | undefined> {
+  if (classId === 'example') return undefined;
+  const all = await data.getSetting<Record<string, GroupPlan>>(GROUPS_SETTING).catch(() => undefined);
+  const g = all?.[classId || 'all'];
+  return g && Array.isArray(g.ids) ? g : undefined;
+}
 
 export function SmallGroupView({ log, students, names, classId, example, preset }: ViewInput & { preset?: { ids: string[]; setId?: string; at: number } }) {
   const animate = useChartAnimate();
   const [plan, setPlanState] = useState<GroupPlan>(() => loadGroup(example ? 'example' : classId));
   const storeKey = example ? 'example' : classId;
-  useEffect(() => { setPlanState(loadGroup(storeKey)); }, [storeKey]);
+  useEffect(() => {
+    setPlanState(loadGroup(storeKey));
+    let live = true;
+    void loadSavedGroup(storeKey).then((g) => { if (live && g) setPlanState(g); });
+    return () => { live = false; };
+  }, [storeKey]);
   const setPlan = (g: GroupPlan) => { setPlanState(g); saveGroup(storeKey, g); };
   // "Group these students" on an Activity report fills the group in.
   useEffect(() => { if (preset) { const g = { ...loadGroup(storeKey), ids: preset.ids, setId: preset.setId }; setPlanState(g); saveGroup(storeKey, g); } }, [preset]); // eslint-disable-line react-hooks/exhaustive-deps
