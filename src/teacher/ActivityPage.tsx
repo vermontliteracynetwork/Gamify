@@ -1,6 +1,6 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, DeviceTablet, Info, LockSimple, Play, ProjectorScreen, QrCode, SquaresFour, Sword, UsersThree } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
@@ -41,16 +41,18 @@ const STEPS = ['who', 'how', 'game', 'set', 'go'] as const;
 export default function ActivityPage() {
   const tier = useTier();
   const navigate = useNavigate();
+  // A report's next-step button can fill in the class and the set (?class, ?set).
+  const [query] = useSearchParams();
   const { value: classes = [] } = useAsync(() => data.listClassrooms());
   const { value: mine = [] } = useMySets();
   const sets = [...mine, ...LIBRARY];
   const [step, setStep] = useState(0);
-  const [classId, setClassId] = useState('');
+  const [classId, setClassId] = useState(() => query.get('class') ?? '');
   const [gameId, setGameId] = useState('');
   const [how, setHow] = useState<How | ''>('');
   const [teams, setTeams] = useState<'teacher' | 'random' | 'class'>('teacher');
   const [together, setTogether] = useState<'compete' | 'together'>('compete');
-  const [setId, setSetId] = useState<string[]>([]);
+  const [setId, setSetId] = useState<string[]>(() => (query.get('set') ? [query.get('set')!] : []));
   const [board, setBoard] = useState<string[]>([]);
   // How long they play, and a score that ends the game (teacher, 2026-10-31).
   const [minutes, setMinutes] = useState(0);

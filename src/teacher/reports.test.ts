@@ -60,3 +60,36 @@ describe('weekUsage', () => {
     expect(weekUsage([], 'c1', now)).toEqual({ answered: 0, rightPct: 0, students: 0, topGame: undefined });
   });
 });
+
+describe('report views', () => {
+  it('builds accuracy over time, skills, question and student stats from the log only', async () => {
+    const r = await import('./reports');
+    const log = [
+      row({ studentId: 'ava', setId: 's1', at: '2026-10-01T10:00:00Z' }),
+      row({ studentId: 'ben', setId: 's1', at: '2026-10-01T10:00:00Z', tries: ['b', 'a'] }),
+      row({ studentId: 'ben', setId: 's1', prompt: 'Q2', at: '2026-10-20T10:00:00Z', tries: ['c', 'c'], outcome: 'skipped' }),
+      row({ studentId: 'ava', setId: 's1', prompt: 'Q2', at: '2026-10-20T10:00:00Z' }),
+    ];
+    const time = r.accuracyOverTime(log);
+    expect(time.by).toBe('week');
+    expect(time.points.map((p) => [p.right, p.first])).toEqual([[100, 50], [50, 50]]);
+    expect(r.bySkill(log, (id) => (id === 's1' ? ['L.1.2'] : undefined))).toEqual([{ code: 'L.1.2', answered: 4, first: 50 }]);
+    const q2 = r.questionStats(log).find((q) => q.prompt === 'Q2')!;
+    expect([q2.prompt, q2.first, q2.topWrong, q2.topWrongCount]).toEqual(['Q2', 50, 'c', 1]);
+    const ben = r.studentStats(log)[0];
+    expect([ben.id, ben.first, ben.retryGain]).toEqual(['ben', 0, 1]);
+    expect(r.activityRuns(log).map((a) => [a.day, a.players])).toEqual([['2026-10-20', 2], ['2026-10-01', 2]]);
+    const week = r.playWeek(log, '2026-10-20');
+    expect(week.days).toHaveLength(7);
+    expect(week.daysPlayed.get('ava')).toBe(1);
+  });
+  it('draws the aim line from the first session to the goal and says on track or below', async () => {
+    const r = await import('./reports');
+    const day = (d: string, right: boolean) => row({ studentId: 'ava', at: `${d}T10:00:00Z`, outcome: right ? 'right' : 'skipped', tries: right ? ['a'] : ['b'] });
+    const pts = r.progressSessions([day('2026-11-01', false), day('2026-11-11', true), day('2026-11-21', false)], 80, '2026-11-21');
+    expect(pts.map((p) => p.aim)).toEqual([0, 40, 80]);
+    expect(r.progressStatus(pts)).toBe('below');
+    expect(r.progressStatus(pts.slice(0, 2))).toBe('on');
+    expect(r.progressStatus(pts.slice(0, 1))).toBe('early');
+  });
+});

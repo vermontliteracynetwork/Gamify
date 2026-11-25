@@ -17,11 +17,16 @@ import { supportsText } from './reportDoc';
 import { Link } from 'react-router-dom';
 import { buttonClasses } from '../ui/kit';
 import { EXAMPLE_CLASS, EXAMPLE_STUDENTS, exampleLog } from './exampleReport';
+import { ActivityView, ClassOverview, SmallGroupView } from './reportViews';
 
-// Teacher reports over the question log (development plan Stage 4): group
-// by student, question, set, game, day or team; filter, sort, search, see
-// totals and the most common wrong answer; download a CSV.
+// Teacher reports over the question log (development plan Stage 4). Since the
+// approved /brand Teacher portal (7a, 7b, 7d; teacher 2026-11-25) it opens on
+// the Class overview (accuracy over time, by Common Core skill, most missed
+// questions, time on task), with one Activity and Small groups beside it; the
+// sortable table (group by student, question, set, game, day or team, the
+// most common wrong answer, CSV) stays one tab deeper, in All answers.
 type SortKey = 'label' | 'asked' | 'pct' | 'firstTry' | 'avgSeconds';
+type View = 'overview' | 'activities' | 'groups' | 'table';
 
 export default function ReportsPage() {
   const tier = useTier();
@@ -43,6 +48,8 @@ export default function ReportsPage() {
   const [by, setBy] = useState<GroupBy>('student');
   const [filter, setFilter] = useState<ReportFilter>({});
   const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({ key: 'asked', desc: true });
+  const [view, setView] = useState<View>('overview');
+  const [preset, setPreset] = useState<{ ids: string[]; setId?: string; at: number }>();
 
   const days = TIERS[tier].reportHistoryDays;
   const since = Number.isFinite(days) && !example ? new Date(Date.now() - days * 86400000).toISOString().slice(0, 10) : undefined;
@@ -61,6 +68,8 @@ export default function ReportsPage() {
   const total = rows.grouped.reduce((a, r) => ({ asked: a.asked + r.asked, right: a.right + r.right, firstTry: a.firstTry + r.firstTry }), { asked: 0, right: 0, firstTry: 0 });
   const kept = useMemo(() => retention(rows.kept), [rows.kept]);
   const field = fieldClasses('md');
+  // The overview, Activity and Small group views read the same filtered log.
+  const viewInput = { log: rows.kept, students: filter.studentId ? students.filter((st) => st.id === filter.studentId) : students, names, sets, classId: example ? EXAMPLE_CLASS.id : classId, example };
   const groupLabel = t(`reports.by.${by}`);
 
   function download() {
@@ -90,8 +99,9 @@ export default function ReportsPage() {
         <button type="button" onClick={() => { setExampleOn(!example); setClassId(''); setFilter({}); }} aria-pressed={example}
           className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold">{example ? t('reports.exampleHide') : t('reports.exampleShow')}</button>
       </Panel>
-      <Tabs label={t('reports.groupBy')} value={by} onChange={setBy} options={(['student', 'question', 'set', 'game', 'day', 'team'] as GroupBy[]).map((g) => ({ id: g, label: t(`reports.by.${g}`) }))} />
-      <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4">
+      <Tabs label={t('rx.views')} value={view} onChange={setView} panelIds className="mb-4"
+        options={([['overview', t('rx.overview')], ['activities', t('rx.activities')], ['groups', t('rx.groups')], ['table', t('rx.table')]] as [View, string][]).map(([id, label]) => ({ id, label }))} />
+      <Panel className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 !p-3">
         <select aria-label={t('reports.class')} value={classId} onChange={(e) => { setClassId(e.target.value); setFilter({ ...filter, studentId: undefined }); }} className={field}>
           <option value="">{t('reports.allClasses')}</option>
           {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -108,6 +118,12 @@ export default function ReportsPage() {
         <input type="date" aria-label={t('reports.to')} value={filter.to ?? ''} onChange={(e) => setFilter({ ...filter, to: e.target.value || undefined })} className={field} />
         <input type="search" aria-label={t('reports.search')} placeholder={t('reports.search')} value={filter.search ?? ''} onChange={(e) => setFilter({ ...filter, search: e.target.value })} className={field} />
       </Panel>
+      <div role="tabpanel" id={`panel-${view}`} aria-labelledby={`tab-${view}`}>
+      {view === 'overview' && <ClassOverview {...viewInput} onSeeQuestion={(prompt) => { setBy('question'); setFilter({ ...filter, search: prompt }); setView('table'); }} />}
+      {view === 'activities' && <ActivityView {...viewInput} onGroup={(ids, setId) => { setPreset({ ids, setId, at: Date.now() }); setView('groups'); }} />}
+      {view === 'groups' && <SmallGroupView {...viewInput} preset={preset} />}
+      {view === 'table' && <>
+      <Tabs className="mb-4" label={t('reports.groupBy')} value={by} onChange={setBy} options={(['student', 'question', 'set', 'game', 'day', 'team'] as GroupBy[]).map((g) => ({ id: g, label: t(`reports.by.${g}`) }))} />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
         {[[t('reports.questions'), total.asked], [t('reports.right'), `${percent(total.right, total.asked)}%`], [t('reports.firstTry'), `${percent(total.firstTry, total.asked)}%`], [t('reports.kept'), kept.checked ? `${percent(kept.kept, kept.checked)}%` : '-'], [t('reports.rows'), rows.grouped.length]].map(([label, v]) => (
           <Panel key={String(label)} className="!p-4"><p className="text-xs font-bold uppercase tracking-wider text-muted">{label}</p><p className="font-display text-3xl">{v}</p></Panel>
@@ -150,6 +166,8 @@ export default function ReportsPage() {
           </table>
         </div>
       )}
+      </>}
+      </div>
       {!example && <LiveLog />}
     </main>
   );

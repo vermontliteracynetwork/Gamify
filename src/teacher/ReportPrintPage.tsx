@@ -53,7 +53,7 @@ export default function ReportPrintPage() {
         </button>
         <p className="text-sm font-bold text-muted">{t('rp.printHint')}</p>
       </div>
-      {!loading && <ReportDoc log={log} students={student ? [student] : students} names={names} className={className} student={student} teacher={example ? undefined : getTeacher()?.name} from={from} to={to} />}
+      {!loading && <ReportDoc log={log} students={student ? [student] : students} names={names} standardsOf={(id) => sets.find((s) => s.id === id)?.standards} className={className} student={student} teacher={example ? undefined : getTeacher()?.name} from={from} to={to} />}
     </main>
   );
 }
