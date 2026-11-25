@@ -754,7 +754,7 @@ export const en = {
   'territory.caughtNext': 'A cat caught a mouse!',
   'territory.ready': '{name}\'s cat is ready for the next mouse!',
   'territory.catMove': '{name}: a cat caught a mouse!',
-  'territory.mouseMove': '{name}: a mouse scared a cat out the window!',
+  'territory.mouseMove': '{name}: a mouse scared a cat out of the room!',
   'territory.addCat': '{name} brought in a cat!',
   'territory.addMouse': '{name} brought in a mouse!',
   'territory.team': 'Team',
