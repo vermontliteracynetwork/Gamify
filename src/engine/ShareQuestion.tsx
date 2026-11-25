@@ -227,7 +227,7 @@ export function TurnCard({ player, avatar, answerer, onStart }: { player: TurnPl
 }
 
 // Stars and sparks burst out of the right answer (engagement audit, 2026-11-08).
-const BURST_COLORS = ['#f9cc14', '#ef7d96', '#5cc3a0', '#6aa9e9', '#fffdf6'];
+const BURST_COLORS = ['#fabe37', '#f055a5', '#22b04a', '#4ba3e8', '#fffaf0'];
 function Burst() {
   const bits = useMemo(() => Array.from({ length: 14 }, (_, k) => {
     const a = (k / 14) * Math.PI * 2 + Math.random() * 0.4;

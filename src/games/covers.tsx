@@ -219,7 +219,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       return (
         <RoomArt className={base}>
           {([[30, 84, 0, 20], [48, 90, 3, 22], [16, 92, 5, 21]] as const).map(([x, y, k, h], i) => <CatArt key={i} look={k} className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${x}%`, top: `${y}%`, height: `${h}%`, width: 'auto' }} />)}
-          {([[72, 74, 0], [86, 84, 1], [62, 88, 2]] as const).map(([x, y, k], i) => <MouseArt key={i} look={k} className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${x}%`, top: `${y}%`, height: '9%', width: 'auto' }} />)}
+          {([[72, 74, 0], [86, 84, 1], [62, 88, 2]] as const).map(([x, y, k], i) => <MouseArt key={i} look={k} className="absolute -translate-x-1/2 -translate-y-full" style={{ left: `${x}%`, top: `${y}%`, height: '16%', width: 'auto' }} />)}
           <PoofArt className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: '60%', top: '70%', height: '18%', width: 'auto' }} />
         </RoomArt>
       );

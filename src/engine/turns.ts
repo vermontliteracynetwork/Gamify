@@ -25,7 +25,8 @@ export interface TurnState {
 
 // Team colors each come with an icon (TEAM_ICONS in TeamBadge) so color is
 // never the only way to tell teams apart.
-export const TEAM_COLORS = ['#f6c544', '#5cc3a0', '#6aa9e9', '#f39a6b', '#c58ce8', '#ef7d96', '#9bd35a', '#f0d36b', '#7fd6e3', '#d8a46b'];
+// Palette brights only (Classic Art Director, 2026-11-25), each with its icon.
+export const TEAM_COLORS = ['#fabe37', '#22b04a', '#4ba3e8', '#ff9b28', '#6a45f0', '#f055a5', '#ccd537', '#1fb5a8', '#b4c4fb', '#ffd9b3'];
 
 export function startTurns(players: TurnPlayer[]): TurnState {
   return { players, turn: 0, round: 1, history: [] };

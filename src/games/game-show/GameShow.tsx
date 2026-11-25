@@ -301,7 +301,7 @@ export default function GameShow() {
     if (!turns) return;
     const tier = prizeTier(kind);
     if (tier > 1) playEffect('win', settings); // the correct sound already played
-    if (isGolden(kind) && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 160, spread: 120, origin: { y: 0.45 }, colors: ['#ffd75e', '#f2b705', '#fff3b0', '#ffffff'], disableForReducedMotion: true });
+    if (isGolden(kind) && settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: 160, spread: 120, origin: { y: 0.45 }, colors: ['#fabe37', '#fff1b8', '#ff9b28', '#fffaf0'], disableForReducedMotion: true });
     // Every prize gets a burst of confetti; bigger prizes get more (teacher, 2026-11-01).
     if (settings.celebrations !== 'off' && settings.motion !== 'still') void confetti({ particleCount: (settings.celebrations === 'big' ? 40 : 25) * tier, spread: 60 + tier * 15, origin: { y: 0.45 }, disableForReducedMotion: true });
     const me = current(turns);
@@ -508,7 +508,7 @@ export default function GameShow() {
                     animate={c.open && settings.motion !== 'still' ? { rotateY: [90, 0] } : undefined}
                     transition={{ duration: 0.35 }}
                     className={`relative w-full h-full min-h-0 rounded-[0.9rem] ${flipping === i ? 'overflow-visible z-10' : 'overflow-hidden'} ${!c.open ? 'tile-wiggle' : ''} ${chosen === i ? 'ring-[6px] ring-accent -translate-y-1' : ''}`}
-                    style={{ ...place, border: `3px solid ${flipping === i ? 'transparent' : STUDIO.ink}`, boxShadow: flipping === i ? 'none' : gold ? '0 0 0 4px #f2b705, 0 0 22px 6px rgba(242,183,5,0.7)' : c.open ? 'none' : `0 4px 0 ${STUDIO.ink}` }}
+                    style={{ ...place, border: `3px solid ${flipping === i ? 'transparent' : STUDIO.ink}`, boxShadow: flipping === i ? 'none' : gold ? '0 0 0 4px #fabe37' : c.open ? 'none' : `0 4px 0 ${STUDIO.ink}` }}
                   >
                     {flipping === i ? (
                       // A right answer turns the card over in 3D, then the prize box opens.

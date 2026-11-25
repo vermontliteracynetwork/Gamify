@@ -34,7 +34,7 @@ export const bowlingManifest: GameManifest = {
       { id: 'classic-golden-pin', name: 'Golden Pin', ability: 'double', motion: 'sparkle', often: 2, art: 'golden-pin' },
       { id: 'classic-pin-magnet', name: 'Pin Magnet', ability: 'magnet', motion: 'wiggle', often: 2, image: '/classic/powerups/magnet.webp' },
       { id: 'classic-bumper-rails', name: 'Bumper Rails', ability: 'bumpers', motion: 'bob', often: 2, image: '/classic/powerups/shield.webp' },
-      { id: 'classic-fireball', name: 'Fireball', ability: 'mega', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
+      { id: 'classic-fireball', name: 'Lightning Ball', ability: 'mega', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
       { id: 'classic-pin-twister', name: 'Pin Twister', ability: 'twister', motion: 'spin', often: 2, image: '/classic/powerups/tornado.webp' },
       { id: 'classic-mystery-box', name: 'Mystery Box', ability: 'mystery', motion: 'bob', often: 2, image: '/classic/powerups/mystery.webp' },
     ],

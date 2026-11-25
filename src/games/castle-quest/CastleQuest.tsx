@@ -426,7 +426,7 @@ export default function CastleQuest() {
               className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-accent" aria-label={p.name}>
               <TeamBadge colorIndex={p.colorIndex} size={56} />
               <span className="font-bold">{p.name}</span>
-              {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#3d7fb8]" aria-label={t('cq.shielded')} />}
+              {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#4ba3e8]" aria-label={t('cq.shielded')} />}
             </motion.button>
           ))}
         </div>
@@ -582,7 +582,7 @@ function Token({ player, on, shield, still, hopKey, hopMs }: { player: TurnPlaye
           transition={on && !still ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
           <Piece player={player} size={size} />
         </motion.span>
-        {shield && <span className={`absolute -inset-[18%] rounded-full border-heavy border-[#7fc4ff] bg-[radial-gradient(circle,transparent_55%,rgba(127,196,255,0.5))] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
+        {shield && <span className={`absolute -inset-[18%] rounded-full border-[4px] border-[#4ba3e8] ${still ? '' : 'cq-glow'}`} aria-label={t('cq.shielded')} />}
       </motion.div>
     </div>
   );
@@ -609,7 +609,7 @@ function Racers({ players, now, shield, wide }: { players: TurnPlayer[]; now: nu
             style={{ background: i === now ? 'var(--butter)' : 'var(--paper)', boxShadow: '0 3px 0 var(--color-border)' }}>
             <span className="shrink-0 grid place-items-center" style={{ width: wide ? '1.6rem' : '2.25rem', height: wide ? '1.6rem' : '2.25rem' }}><Piece player={p} size={wide ? 26 : 36} /></span>
             <span className={`flex-1 min-w-0 font-bold leading-tight ${wide ? 'text-xs' : 'text-sm lg:text-base'}`}>{p.name}</span>
-            {shield[i] && <ShieldCheck weight="fill" size={18} className="shrink-0 text-[#1f6fb8]" aria-label={t('cq.shielded')} />}
+            {shield[i] && <ShieldCheck weight="fill" size={18} className="shrink-0 text-[#4ba3e8]" aria-label={t('cq.shielded')} />}
           </li>
         ))}
       </ol>
@@ -635,7 +635,7 @@ function DieToss({ rolls, wait, still, theme, onGo }: { rolls: number[]; wait: b
             animate={still ? undefined : wait ? { x: 0, y: [0, -8, 0], rotate: 360 + (k ? 6 : -6), scale: [1, 1.04, 1] } : { x: [k ? 300 : -300, k ? 40 : -60, 0], y: [-260, 30, -40, 0], rotate: [k ? 60 : -60, 250, 340, 360 + (k ? 6 : -6)], scale: [0.6, 1.15, 1] }}
             transition={wait ? { duration: 1.2, repeat: Infinity } : { duration: 1.1, delay: k * 0.5, times: [0, 0.45, 0.75, 1], ease: 'easeOut' }}
             whileHover={wait && !still ? { scale: 1.08 } : undefined}
-            style={{ width: size, height: size, filter: wait ? 'drop-shadow(0 0 18px #fdfd94)' : undefined }}>
+            style={{ width: size, height: size, filter: wait ? 'drop-shadow(0 0 18px #fff1b8)' : undefined }}>
             <span className="block w-full h-full [&>span]:!w-full [&>span]:!h-full [&_svg]:w-full [&_svg]:h-full"><Die2D value={r} size={300} rolling={!landed} theme={theme} /></span>
           </motion.button>
         ))}
@@ -659,11 +659,11 @@ function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean;
             <circle cx="100" cy="100" r="96" fill={C.ink} />
             <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={C.sage} opacity={spin.done && !spin.forward ? 0.35 : 1} />
             <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={C.red} opacity={spin.done && spin.forward ? 0.35 : 1} />
-            {Array.from({ length: 12 }, (_, k) => <line key={k} x1="100" y1="100" x2={100 + 92 * Math.sin((k * Math.PI) / 6)} y2={100 - 92 * Math.cos((k * Math.PI) / 6)} stroke="#fffdf6" strokeWidth="1" opacity="0.35" />)}
-            <text x="148" y="106" textAnchor="middle" fontSize="20" fill="#fffdf6" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(90 148 100)">{t('cq.forward')}</text>
-            <text x="52" y="106" textAnchor="middle" fontSize="20" fill="#fffdf6" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(-90 52 100)">{t('cq.back')}</text>
+            {Array.from({ length: 12 }, (_, k) => <line key={k} x1="100" y1="100" x2={100 + 92 * Math.sin((k * Math.PI) / 6)} y2={100 - 92 * Math.cos((k * Math.PI) / 6)} stroke="#fffaf0" strokeWidth="1" opacity="0.35" />)}
+            <text x="148" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(90 148 100)">{t('cq.forward')}</text>
+            <text x="52" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(-90 52 100)">{t('cq.back')}</text>
             <circle cx="100" cy="100" r="16" fill={C.yellow} stroke={C.ink} strokeWidth="4" />
-            {Array.from({ length: 16 }, (_, k) => <circle key={`b${k}`} cx={100 + 88 * Math.sin((k * Math.PI) / 8)} cy={100 - 88 * Math.cos((k * Math.PI) / 8)} r="3" fill="#fffdf6" className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />)}
+            {Array.from({ length: 16 }, (_, k) => <circle key={`b${k}`} cx={100 + 88 * Math.sin((k * Math.PI) / 8)} cy={100 - 88 * Math.cos((k * Math.PI) / 8)} r="3" fill="#fffaf0" className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />)}
           </motion.svg>
           {/* The pointer at the top. */}
           <svg viewBox="0 0 40 44" className="absolute left-1/2 -top-[6%] -translate-x-1/2 w-[14%]" aria-hidden="true"><path d="M4 4 H36 L20 40 Z" fill={C.yellow} stroke={C.ink} strokeWidth="4" strokeLinejoin="round" /></svg>
@@ -671,7 +671,7 @@ function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean;
         </motion.div>
         <AnimatePresence>
           {spin.done && (
-            <motion.p className="text-4xl bg-surface border-heavy border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#3f6b2a' : C.red }}
+            <motion.p className="text-4xl bg-surface border-heavy border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#22b04a' : C.red }}
               initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1 }} transition={{ duration: 0.4 }}>
               {t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n })}
             </motion.p>

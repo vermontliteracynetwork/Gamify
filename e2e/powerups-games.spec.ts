@@ -10,7 +10,7 @@ const answers = new Map(LIBRARY.flatMap((s) => s.questions.map((q) => [q.prompt.
 // ball collects, not from a right answer.
 for (const g of [
   { id: 'lunch-rush', first: 'Extra Plate', name: /(Extra Plate|Tip Jar|Double Star)/ },
-  { id: 'bowling', first: 'Golden Pin', name: /(Golden Pin|Pin Magnet|Pin Twister|Bumper Rails|Fireball|Mystery Box|Sneaky Swipe)/ },
+  { id: 'bowling', first: 'Golden Pin', name: /(Golden Pin|Pin Magnet|Pin Twister|Bumper Rails|Lightning Ball|Mystery Box|Sneaky Swipe)/ },
 ]) {
   test(`${g.id}: a right answer can bring a power-up`, async ({ page }, info) => {
     await page.addInitScript(() => { Math.random = () => 0.05; if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });

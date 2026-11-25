@@ -23,9 +23,9 @@ function parkMarkup(w: number, h: number, still: boolean) {
   return {
     sky: <rect width={w} height={h} fill={PK.sky} />,
     sun: (
-      <g className={still ? '' : 'cq-sun'} style={{ transformOrigin: `${w * 0.5}px ${h * 0.07}px` }}>
-        <circle cx={w * 0.5} cy={h * 0.07} r={Math.min(w, h) * 0.05} fill={PK.lemon} stroke={INK} strokeWidth={sw} />
-        <path d={`M${w * 0.5 - 13 * k} ${h * 0.07 - 11 * k} q${6 * k} ${-8 * k} ${14 * k} ${-8 * k}`} stroke="#fff" strokeWidth={5 * k} fill="none" strokeLinecap="round" />
+      <g className={still ? '' : 'cq-sun'} style={{ transformOrigin: `${w * 0.92}px ${h * 0.47}px` }}>
+        <circle cx={w * 0.92} cy={h * 0.47} r={h * 0.05} fill={PK.lemon} stroke={INK} strokeWidth={sw} />
+        <path d={`M${w * 0.92 - 13 * k} ${h * 0.47 - 11 * k} q${6 * k} ${-8 * k} ${14 * k} ${-8 * k}`} stroke="#fff" strokeWidth={5 * k} fill="none" strokeLinecap="round" />
       </g>
     ),
     clouds: [[0.08, 0.12, 2.2, 0], [0.55, 0.07, 1.6, 1], [0.78, 0.3, 1.3, 2]].map(([x, y, s, i]) => (
@@ -40,7 +40,7 @@ function parkMarkup(w: number, h: number, still: boolean) {
       </>
     ),
     flowers: Array.from({ length: flowers }, (_, i) => {
-      const x = (w / flowers) * i + 30 * k, y = Math.min(h * 0.86 + ((i * 29) % 50) * k, h - 30 * k);
+      const x = (w / flowers) * i + 30 * k, y = Math.min(h * 0.86 + ((i * 29) % 50) * k, h * 0.95 - 10 * k);
       return (
         <g key={i} className={still ? '' : 'cq-sway'} style={{ transformOrigin: `${x}px ${y + 18 * k}px`, animationDelay: `${-(i % 5) * 0.6}s` }}>
           <path d={`M${x} ${y} v${18 * k}`} stroke={INK} strokeWidth={3 * k} strokeLinecap="round" />

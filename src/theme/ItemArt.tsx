@@ -8,9 +8,9 @@ import { CrayonPowerUp, type PowerId } from '../brand/CrayonKit';
 // A theme's own picture still wins; only Classic items (id classic-*) map.
 const KIT: Record<string, PowerId> = {
   'Double Roll': 'double-dice', '2x': 'double-points', 'Double Star': 'double-points', Tornado: 'tornado', Wheel: 'spin-wheel',
-  Potion: 'potion', Shield: 'shield', 'Prize Bag': 'treasure-chest', 'Pocket Watch': 'extra-time', Fireball: 'lightning',
+  Potion: 'potion', Shield: 'shield', 'Prize Bag': 'treasure-chest', 'Treasure Chest': 'treasure-chest', 'Pocket Watch': 'extra-time', Fireball: 'lightning', Lightning: 'lightning', 'Lightning Ball': 'lightning',
   'Pin Magnet': 'magnet', 'Jackpot Magnet': 'magnet', 'Bumper Rails': 'shield', 'Golden Pin': 'double-points', 'Golden Ball': 'double-points',
-  'Pin Twister': 'tornado', 'Mystery Box': 'mystery-box', 'Mystery Bottle': 'mystery-box', 'Bubble Bundle': 'one-more', 'Double Drop': 'double-dice',
+  'Pin Twister': 'tornado', 'Mystery Box': 'mystery-box', 'Mystery Bottle': 'mystery-box', 'Bubble Bundle': 'one-more', 'Double Drop': 'double-points',
   'Extra Plate': 'one-more', 'Tip Jar': 'treasure-chest', 'Watering Can': 'one-more', 'Rain Cloud': 'freeze', 'Golden Hook': 'double-points',
   'Super Shooter': 'lightning', 'Bouncy Ball': 'one-more', 'Message in a Bottle': 'mystery-box',
 };

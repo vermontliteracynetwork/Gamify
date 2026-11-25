@@ -36,9 +36,9 @@ export const matchThreeManifest: GameManifest = {
     classic: [
       { id: 'classic-pocket-watch', name: 'Pocket Watch', ability: 'moves', amount: 2, motion: 'wiggle', often: 2, image: '/classic/powerups/time.webp' },
       { id: 'classic-double-star', name: 'Double Star', ability: 'double', motion: 'sparkle', often: 2, art: 'double-star' },
-      { id: 'classic-fireball', name: 'Fireball', ability: 'blast', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
+      { id: 'classic-fireball', name: 'Lightning', ability: 'blast', motion: 'sparkle', often: 1, image: '/classic/powerups/fireball.webp' },
       { id: 'classic-tornado', name: 'Tornado', ability: 'shuffle', motion: 'spin', often: 1, image: '/classic/powerups/tornado.webp' },
-      { id: 'classic-prize-bag', name: 'Prize Bag', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
+      { id: 'classic-prize-bag', name: 'Treasure Chest', ability: 'bonus', amount: 100, motion: 'bob', often: 1, art: 'prize-bag' },
     ],
   },
   hasCpu: false,
