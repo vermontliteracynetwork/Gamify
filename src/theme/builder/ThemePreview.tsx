@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ClassicPiece } from '../../games/match-three/pieces';
 import { Star } from '@phosphor-icons/react';
 import { classicTheme } from '../classic';
@@ -43,7 +43,8 @@ export function previewViews(gameId: string, hasItems: boolean): { id: PreviewVi
 }
 
 // A small live copy of the game screen wearing the theme being built.
-export default function ThemePreview({ theme: own, gameName, view = 'game' }: { theme: GameTheme; gameName: string; view?: PreviewView }) {
+// `corner` takes the Play pill's place (the Themes gallery puts its heart there).
+export default function ThemePreview({ theme: own, gameName, view = 'game', corner }: { theme: GameTheme; gameName: string; view?: PreviewView; corner?: ReactNode }) {
   const theme = withClassicArt(own);
   const c = theme.colors;
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
@@ -58,7 +59,7 @@ export default function ThemePreview({ theme: own, gameName, view = 'game' }: { 
     <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
       <div className="flex items-center justify-between gap-2">
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
-        <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>
+        {corner ?? <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>}
       </div>
       <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
     </div>

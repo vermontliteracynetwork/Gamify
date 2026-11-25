@@ -32,10 +32,14 @@ export default function PurchaseOrderPage() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm({ ...form, [k]: k === 'seats' ? Math.max(1, Number(e.target.value) || 1) : e.target.value });
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-6">
-        <div className="grid gap-2">
-          <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('po.title')} /></h1>
-          <p className="text-lg font-bold">{t('po.sub')}</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16">
+       <div className="max-w-[47.5rem] mx-auto grid gap-6">
+        <div className="grid gap-3">
+          <h1 className="title-bubble"><Title text={t('po.title')} /></h1>
+          <p className="text-lg font-semibold leading-snug">{t('po.sub')}</p>
+          {!sent && <ol className="grid gap-2 list-none p-0 m-0">{[1, 2, 3].map((n) => (
+            <li key={n} className="flex items-start gap-3 font-semibold"><span className="w-8 h-8 shrink-0 rounded-full bg-butter border-std border-border grid place-items-center font-score" aria-hidden="true">{n}</span><span className="pt-1">{t(`po.step.${n}` as 'po.step.1')}</span></li>
+          ))}</ol>}
         </div>
         {sent ? (
           <section className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3 justify-items-start" style={{ boxShadow: 'var(--shadow-sticker)' }} role="status">
@@ -45,8 +49,7 @@ export default function PurchaseOrderPage() {
             <Link to="/pricing" className="font-bold">{t('po.back')}</Link>
           </section>
         ) : (
-          <section className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('po.title')}>
-            <ol className="grid gap-1 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`po.step.${n}` as 'po.step.1')}</li>)}</ol>
+          <section className="bg-surface border-bold border-border rounded-panel p-5 sm:p-7 grid gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }} aria-label={t('po.title')}>
             <div className="grid sm:grid-cols-2 gap-3">
               <label className="grid gap-1 font-bold sm:col-span-2">{t('po.school')}<input value={form.school} onChange={set('school')} maxLength={120} className={field} /></label>
               <label className="grid gap-1 font-bold">{t('po.name')}<input value={form.name} onChange={set('name')} maxLength={80} className={field} /></label>
@@ -62,6 +65,7 @@ export default function PurchaseOrderPage() {
             <Button variant="main" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready || busy} onClick={() => void send()}>{t('po.send')}</Button>
           </section>
         )}
+       </div>
       </main>
       <PublicFooter />
     </>

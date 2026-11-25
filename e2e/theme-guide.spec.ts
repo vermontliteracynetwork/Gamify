@@ -9,7 +9,7 @@ test('Blog theme guides: one per game, every piece with its size, blank download
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
   await page.goto('/blog');
-  await page.getByRole('link', { name: /Design a theme: a guide for every game/ }).click();
+  await page.getByRole('button', { name: 'Themes', exact: true }).click();
   for (const g of GAMES) await expect(page.getByRole('link', { name: new RegExp(`Theme Guide: ${g.name}`) })).toBeVisible();
   await expect(page.getByRole('link', { name: /Designing a Theme File, Step by Step/ })).toBeVisible();
   await page.screenshot({ path: `test-results/guide-list-${info.project.name}.png` });

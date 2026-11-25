@@ -9,7 +9,8 @@ import { creditLine } from '../theme/credit';
 import type { StringKey } from '../i18n/en';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
-import { buttonClasses, fieldClasses } from '../ui/kit';
+import { buttonClasses } from '../ui/kit';
+import PillSelect from '../ui/PillSelect';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
@@ -39,14 +40,13 @@ export default function ThemesPage() {
     // samples keep their showcase order under every sort but Name.
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? b.order - a.order : a.order - b.order));
   const gameName = (id: string) => GAMES.find((g) => g.id === id)?.name ?? id;
-  const field = fieldClasses('md');
 
   return (
     <>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
         <div className="grid gap-3">
-          <h1 className="title-bubble text-5xl sm:text-6xl"><Title text={t('themes.title')} /></h1>
-          <p className="text-xl font-bold max-w-3xl">{t('themes.sub')}</p>
+          <h1 className="title-bubble"><Title text={t('themes.title')} /></h1>
+          <p className="text-lg font-semibold max-w-3xl">{t('themes.sub')}</p>
           <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
             <Link to="/teacher/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkBuilder')}<ArrowRight weight="bold" size={16} /></Link>
             <Link to="/blog/themes/game-show" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkGuides')}<ArrowRight weight="bold" size={16} /></Link>
@@ -62,25 +62,19 @@ export default function ThemesPage() {
           <span className={buttonClasses()}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
-        <div className="grid gap-3 sm:grid-cols-[repeat(3,minmax(0,1fr))_auto] items-end">
-          <label className="grid gap-1 font-bold text-sm">{t('themes.sort')}
-            <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className={field}>
-              {(['trending', 'popular', 'newest', 'name'] as Sort[]).map((s) => <option key={s} value={s}>{t(`themes.sort.${s}` as StringKey)}</option>)}
-            </select>
-          </label>
-          <label className="grid gap-1 font-bold text-sm">{t('themes.game')}
-            <select value={game} onChange={(e) => setGame(e.target.value)} className={field}>
-              <option value="">{t('themes.allGames')}</option>
-              {[...new Set(all.map((x) => x.gameId))].map((id) => <option key={id} value={id}>{gameName(id)}</option>)}
-            </select>
-          </label>
-          <label className="grid gap-1 font-bold text-sm">{t('themes.band')}
-            <select value={band} onChange={(e) => setBand(e.target.value as Band | '')} className={field}>
-              <option value="">{t('themes.allBands')}</option>
-              {BANDS.filter((b) => b !== 'all').map((b) => <option key={b} value={b}>{t(`features.band.${b}` as StringKey)}</option>)}
-            </select>
-          </label>
-          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={`${field} inline-flex items-center gap-2 ${onlyFavs ? '!bg-butter' : ''}`}>
+        <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label={t('themes.filters')}>
+          <PillSelect label={t('themes.game')} value={game} onChange={setGame} active={!!game}>
+            <option value="">{t('themes.allGames')}</option>
+            {[...new Set(all.map((x) => x.gameId))].map((id) => <option key={id} value={id}>{gameName(id)}</option>)}
+          </PillSelect>
+          <PillSelect label={t('themes.band')} value={band} onChange={(v) => setBand(v as Band | '')} active={!!band}>
+            <option value="">{t('themes.allBands')}</option>
+            {BANDS.filter((b) => b !== 'all').map((b) => <option key={b} value={b}>{t(`features.band.${b}` as StringKey)}</option>)}
+          </PillSelect>
+          <PillSelect label={t('themes.sort')} value={sort} onChange={(v) => setSort(v as Sort)}>
+            {(['trending', 'popular', 'newest', 'name'] as Sort[]).map((x) => <option key={x} value={x}>{t(`themes.sort.${x}` as StringKey)}</option>)}
+          </PillSelect>
+          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-2 ${onlyFavs ? 'bg-butter' : 'bg-surface'}`}>
             <Heart weight={onlyFavs ? 'fill' : 'bold'} size={18} aria-hidden="true" />{t('themes.favorites', { count: favorites.length })}
           </button>
         </div>
@@ -92,16 +86,18 @@ export default function ThemesPage() {
             return (
               <motion.li key={x.theme.id} layout={!reduce} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
                 className="hover-lift bg-surface border-bold border-border rounded-panel p-3 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} />
-                <div className="flex items-start gap-2">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="font-display text-2xl leading-tight">{x.name}</h2>
-                    <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
-                  </div>
+                {/* The heart sits in the art's top-right corner (the /brand Themes
+                    mockup), in the spot the preview keeps free for it. */}
+                <div className="relative">
+                  <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} corner={<span className="w-11 h-11 shrink-0" aria-hidden="true" />} />
                   <button type="button" aria-pressed={fav} aria-label={t(fav ? 'themes.unfavorite' : 'themes.favorite', { name: x.name })} onClick={() => toggle(x.theme.id)}
-                    className={`w-11 h-11 shrink-0 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-blush' : 'bg-surface'}`}>
+                    className={`absolute top-3 right-3 w-11 h-11 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-blush' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                     <Heart weight={fav ? 'fill' : 'bold'} size={22} color={fav ? '#d6336c' : undefined} />
                   </button>
+                </div>
+                <div className="grid gap-0.5 px-1">
+                  <h2 className="font-heading font-bold text-xl leading-tight">{x.name}</h2>
+                  <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
