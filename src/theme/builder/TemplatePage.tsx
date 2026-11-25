@@ -81,7 +81,7 @@ export default function TemplatePage({ guide = false }: { guide?: boolean }) {
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">
       <div className="no-print flex flex-wrap items-center gap-3 mb-6">
         <Link to={guide ? `/blog/themes/${game.id}` : `/teacher/themes/${game.id}`} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t(guide ? 'guide.back' : 'builder.backToBuilder')}</Link>
-        <button type="button" onClick={() => window.print()} className={buttonClasses('primary')}><Printer weight="bold" size={18} />{t('builder.print')}</button>
+        <button type="button" onClick={() => window.print()} className={buttonClasses('main')}><Printer weight="bold" size={18} />{t('builder.print')}</button>
         <p className="font-bold">{t('builder.printNote', { count: pages.length })}</p>
       </div>
       <div className="grid gap-6">

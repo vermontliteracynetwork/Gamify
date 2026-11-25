@@ -69,7 +69,7 @@ function GameReview({ onDone }: { onDone: () => void }) {
       </label>
       <p className="text-sm font-semibold text-muted m-0">{t('review.commentHint')}</p>
       <div className="flex justify-center gap-2">
-        <button type="submit" className="min-h-12 px-6 rounded-input border-bold border-border bg-accent font-display text-lg">{comment.trim() ? t('review.send') : t('review.skip')}</button>
+        <button type="submit" className="min-h-12 px-6 rounded-input border-bold border-border bg-grape text-white font-display text-lg">{comment.trim() ? t('review.send') : t('review.skip')}</button>
       </div>
     </form>
   );
@@ -118,7 +118,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         <ChalkboardTeacher weight="fill" size={30} aria-hidden="true" />
         <h2 className="title-bubble text-2xl flex-1" style={{ color: 'var(--text)' }}><Title text={t('rv.title')} /></h2>
         <span className="font-bold tabular-nums">{t('q.progress', { n: i + 1, total: missed.length })}</span>
-        <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-bold border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={24} /></button>
+        <button type="button" onClick={onClose} aria-label={t('class.close')} className="w-12 h-12 rounded-full border-bold border-border bg-white flex items-center justify-center"><X weight="bold" size={24} /></button>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 grid gap-5">
@@ -153,12 +153,12 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 px-4 sm:px-8 py-3 border-t-[2.5px] border-border bg-surface">
-        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-surface-2 font-bold inline-flex items-center gap-2 disabled:opacity-40"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
+        <button type="button" disabled={i === 0} onClick={() => go(i - 1)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-white font-bold inline-flex items-center gap-2 disabled:opacity-40"><CaretLeft weight="bold" size={22} />{t('look.prev')}</button>
         {!shown
-          ? <button type="button" onClick={() => setShown(true)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
+          ? <button type="button" onClick={() => setShown(true)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-grape text-white font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 var(--grape-deep)' }}><Eye weight="bold" size={24} />{t('rv.show')}</button>
           : i < missed.length - 1
-            ? <button type="button" onClick={() => go(i + 1)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 #000' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
-            : <button type="button" onClick={onClose} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-xl font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('rv.done')}</button>}
+            ? <button type="button" onClick={() => go(i + 1)} className="min-h-11 px-7 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('look.next')}<CaretRight weight="bold" size={22} /></button>
+            : <button type="button" onClick={onClose} className="min-h-11 px-7 rounded-pill border-bold border-border bg-grape text-white font-display text-xl font-bold" style={{ boxShadow: '0 4px 0 var(--grape-deep)' }}>{t('rv.done')}</button>}
         <span className="w-24" aria-hidden="true" />
       </div>
     </div>
@@ -180,12 +180,12 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
   const betaTester = useBetaTester();
   const gameId = useLocation().pathname.split('/')[2];
   const [reviewing, setReviewing] = useState(false);
-  const btn = 'min-h-12 px-3 rounded-input border-bold border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
+  const btn = 'min-h-12 px-3 rounded-pill border-bold border-border font-display text-base font-bold inline-flex items-center justify-center gap-1.5 no-underline text-text disabled:opacity-40 motion-safe:hover:-translate-y-0.5 motion-safe:hover:scale-[1.03] motion-safe:transition-transform min-h-14 text-lg';
   return (
     <div className="results-box brand-menu fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35" role="dialog" aria-modal="true" aria-label={title}>
       {!reviewing && <DialogFocus />}
       <motion.div initial={settings.motion === 'still' ? false : { scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={POP_IN}
-        className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 #000, 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
+        className="w-full max-w-xl bg-surface border-heavy border-border rounded-panel grid gap-4 overflow-y-auto overflow-x-hidden" style={{ boxShadow: '0 8px 0 var(--ink), 0 30px 60px rgba(36,28,61,0.35)', maxHeight: 'calc(100dvh - 2rem)' }}>
         {/* THE winner box (Brand Kit, 2026-11-24): the title, the winner in the glow,
             then only the score centered under it, then the buttons. */}
         <div className="grid justify-items-center gap-1 text-center px-5 pt-6">
@@ -195,35 +195,37 @@ export default function ResultsModal({ title, children, missed, againLabel, onAg
         </div>
         {view === 'main' ? (
           <div className="grid grid-cols-2 gap-3 px-5 pb-5">
-            <button type="button" onClick={onAgain} className={`${btn} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ArrowCounterClockwise weight="bold" size={18} />{againLabel}
+            {/* The results box (Universal views 13, rule 9): Play again is the one big
+                yellow go button; every other choice is white. */}
+            <button type="button" onClick={onAgain} className={`${btn} bg-accent col-span-2 !min-h-16 !text-2xl`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <ArrowCounterClockwise weight="bold" size={24} />{againLabel}
             </button>
             {/* Students reach games only with a code (teacher, 2026-10-31). */}
-            <Link to={student ? '/join' : '/play'} className={`${btn} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <Link to={student ? '/join' : '/play'} className={`${btn} bg-white`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <SquaresFour weight="bold" size={18} />{student ? t('results.newCode') : t('results.arcadeShort')}
             </Link>
             <button type="button" onClick={() => setReviewing(true)} disabled={missed.length === 0}
-              aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              aria-label={missed.length ? t('rv.button', { count: missed.length }) : t('rv.none')} className={`${btn} bg-white`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <ChalkboardTeacher weight="bold" size={18} />{t('rv.short')}{missed.length > 0 && <span className="ml-1 min-w-7 h-7 px-1.5 rounded-full bg-surface border-std border-border text-base flex items-center justify-center">{missed.length}</span>}
             </button>
-            <button type="button" onClick={() => setView('rate')} className={`${btn} bg-quiz-green`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <button type="button" onClick={() => setView('rate')} className={`${btn} bg-white`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
               <Smiley weight="bold" size={24} />{t('rv.rate')}
             </button>
             {betaTester && !student && (
-              <button type="button" onClick={() => setView('beta')} className={`${btn} bg-secondary col-span-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+              <button type="button" onClick={() => setView('beta')} className={`${btn} bg-white col-span-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                 <Flask weight="bold" size={20} />{t('bform.open')}
               </button>
             )}
             {missed.length === 0 && <p className="col-span-2 text-sm font-bold text-center text-muted">{t('rv.none')}</p>}
             {/* Report, for everyone (owner, 2026-11-24). */}
-            <button type="button" onClick={() => setView('report')} className="col-span-2 justify-self-center min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5">
+            <button type="button" onClick={() => setView('report')} className="col-span-2 justify-self-center min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-1.5">
               <Flag weight="bold" size={18} />{t('report.open')}
             </button>
           </div>
         ) : (
           <div className="grid gap-2 px-5 pb-5">
             {view === 'beta' ? <BetaGameForm gameId={gameId} onDone={() => setView('main')} /> : view === 'report' ? <TellGamify role={student ? 'student' : 'teacher'} context={gameId} bare /> : <GameReview onDone={() => setView('main')} />}
-            <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-std border-border bg-surface-2 font-bold">{t('rv.back')}</button>
+            <button type="button" onClick={() => setView('main')} className="justify-self-center min-h-11 px-5 rounded-pill border-std border-border bg-white font-bold">{t('rv.back')}</button>
           </div>
         )}
       </motion.div>

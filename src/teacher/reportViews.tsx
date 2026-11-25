@@ -49,7 +49,7 @@ const activityLink = (classId: string, setId?: string) => `/teacher/activity?${n
 type Action = { label: string; icon?: ReactNode; to?: string; onClick?: () => void };
 function ActionButton({ a, main = true }: { a: Action; main?: boolean }) {
   const inner = <>{a.icon ?? <ArrowRight weight="bold" size={16} />}{a.label}</>;
-  const cls = buttonClasses(main ? 'primary' : 'secondary', 'shrink-0', 'sm');
+  const cls = buttonClasses(main ? 'main' : 'secondary', 'shrink-0', 'sm');
   return a.to ? <Link to={a.to} className={cls}>{inner}</Link> : <button type="button" onClick={a.onClick} className={cls}>{inner}</button>;
 }
 

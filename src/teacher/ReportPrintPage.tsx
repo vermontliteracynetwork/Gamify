@@ -48,7 +48,7 @@ export default function ReportPrintPage() {
     <main className="report-page max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-24 print:p-0 print:max-w-none">
       <div className="no-print flex flex-wrap items-center gap-3 mb-5">
         <Link to={back} className={buttonClasses('secondary')}><ArrowLeft weight="bold" size={18} />{t('rp.back')}</Link>
-        <button type="button" onClick={() => window.print()} disabled={loading} className={buttonClasses('primary', 'min-h-12 px-6 text-lg')} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <button type="button" onClick={() => window.print()} disabled={loading} className={buttonClasses('main', 'min-h-12 px-6 text-lg')} style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <Printer weight="bold" size={22} />{t('rp.print')}
         </button>
         <p className="text-sm font-bold text-muted">{t('rp.printHint')}</p>

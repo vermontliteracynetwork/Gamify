@@ -61,7 +61,7 @@ export default function ClassesPage() {
       <TeacherNav startOpen />
       {/* Make class sits beside the title (teacher, 2026-10-31); its name box opens at the top. */}
       <PageHeader title={t('classes.title')} subtitle={t('classes.subtitle')}
-        actions={room ? <Button variant="primary" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />
+        actions={room ? <Button variant="main" onClick={() => setAdding(true)}><Plus weight="bold" size={18} />{t('classes.create')}</Button> : undefined} />
       <div className="grid gap-4">
         {!room && <LimitNote>{t('classes.limit', { limit, count: limit })}</LimitNote>}
         {adding && room && (
@@ -71,7 +71,7 @@ export default function ClassesPage() {
               <input id="class-name" autoFocus value={name} maxLength={40} onChange={(e) => setName(e.target.value)} placeholder={t('classes.namePlaceholder')}
                 onKeyDown={(e) => { if (e.key === 'Enter' && name.trim()) { void create(); setAdding(false); } if (e.key === 'Escape') setAdding(false); }}
                 className="flex-1 min-w-48 min-h-12 px-3 rounded-input border-std border-border font-bold" />
-              <Button variant="primary" disabled={!name.trim()} onClick={() => { void create(); setAdding(false); }}><Plus weight="bold" size={18} />{t('classes.create')}</Button>
+              <Button variant="main" disabled={!name.trim()} onClick={() => { void create(); setAdding(false); }}><Plus weight="bold" size={18} />{t('classes.create')}</Button>
               <Button onClick={() => setAdding(false)}>{t('classes.cancel')}</Button>
             </div>
           </Panel>
@@ -121,7 +121,7 @@ function ClassCard({ c, edge, students, log }: { c: Classroom; edge: string; stu
       </div>
       <WeekLine usage={weekUsage(mine, c.id)} />
       <div className="mt-auto pt-3 flex flex-wrap gap-2">
-        <Link to={`/teacher/classes/${c.id}`} className={buttonClasses('primary', '', 'sm')}>{t('classes.open')}<ArrowRight weight="bold" size={14} /></Link>
+        <Link to={`/teacher/classes/${c.id}`} className={buttonClasses('main', '', 'sm')}>{t('classes.open')}<ArrowRight weight="bold" size={14} /></Link>
         <Link to={`/teacher/reports/print?class=${c.id}`} className={buttonClasses('secondary', '', 'sm')}><Printer weight="bold" size={14} />{t('classes.progress')}</Link>
       </div>
     </article>

@@ -42,10 +42,10 @@ export default function ImportPage() {
               onDragOver={(e) => { e.preventDefault(); setOver(true); }}
               onDragLeave={() => setOver(false)}
               onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) void onFile(f); }}
-              className={`grid justify-items-center gap-2 rounded-card border-[2.5px] border-dashed border-border p-5 text-center cursor-pointer transition-colors ${over ? 'bg-accent' : 'bg-lavender'}`}>
+              className={`grid justify-items-center gap-2 rounded-card border-[2.5px] border-dashed border-border p-5 text-center cursor-pointer transition-colors ${over ? 'bg-butter' : 'bg-lavender'}`}>
               <span className="w-14 h-14 rounded-full grid place-items-center bg-surface border-std border-border"><FileCsv weight="bold" size={28} /></span>
               <b>{t('import.drop')}</b>
-              <span className={buttonClasses('primary', 'pointer-events-none')}><FileArrowUp weight="bold" size={18} />{t('import.pick')}</span>
+              <span className={buttonClasses('main', 'pointer-events-none')}><FileArrowUp weight="bold" size={18} />{t('import.pick')}</span>
               <input type="file" accept=".csv,text/csv" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); }} />
             </label>
             <p className="text-sm font-bold text-muted">{t('import.columns')}</p>
@@ -100,7 +100,7 @@ export default function ImportPage() {
               <span className="flex flex-wrap gap-2">
                 <Button onClick={() => { setResult(null); setName(''); }}><ArrowCounterClockwise weight="bold" size={18} />{t('import.cancel')}</Button>
                 {count > 0 && (
-                  <Button variant="primary" onClick={async () => {
+                  <Button variant="main" onClick={async () => {
                     const set = newSet(name.trim() || t('sets.untitled'), result.questions);
                     await data.saveQuestionSet(set);
                     navigate(`/teacher/sets/${set.id}`);

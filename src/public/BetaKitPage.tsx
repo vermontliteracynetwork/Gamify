@@ -10,7 +10,7 @@ import { MATERIALS, PHOTO_TIPS, THEME_IDEAS } from '../beta/themeIdeas';
 // lesson for the Tell Gamify button and a student poster, both printable on
 // letter paper. Pictures first, so pre-readers can use the poster.
 const CHOICES = [
-  { icon: Bug, key: 'tell.bug', color: '#ed9d75' },
+  { icon: Bug, key: 'tell.bug', color: '#ffd9b3' },
   { icon: SmileySad, key: 'tell.problem', color: '#ddd6ff' },
   { icon: Lightbulb, key: 'tell.idea', color: 'var(--color-butter)' },
 ] as const;
@@ -21,7 +21,7 @@ export default function BetaKitPage() {
       <div className="no-print grid gap-2">
         <h1 className="title-bubble text-4xl sm:text-5xl"><Title text={t('kit.title')} /></h1>
         <p className="font-bold">{t('kit.sub')}</p>
-        <button type="button" onClick={() => window.print()} className={buttonClasses('primary', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('kit.print')}</button>
+        <button type="button" onClick={() => window.print()} className={buttonClasses('main', 'justify-self-start hover-pop')}><Printer weight="bold" size={18} />{t('kit.print')}</button>
       </div>
 
       <section className="template-page bg-white border-bold border-border rounded-panel p-10 grid gap-4 content-start" aria-label={t('kit.lessonTitle')}>

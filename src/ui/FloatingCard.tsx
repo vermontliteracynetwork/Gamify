@@ -46,7 +46,7 @@ export default function FloatingCard({ title, icon, onClose, start, closeLabel, 
         {icon}
         <span className="font-bold flex-1">{title}</span>
         <button type="button" onClick={onClose} onPointerDown={(e) => e.stopPropagation()} aria-label={closeLabel}
-          className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center">
+          className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center">
           <X weight="bold" size={18} />
         </button>
       </div>

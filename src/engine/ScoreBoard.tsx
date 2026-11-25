@@ -53,7 +53,7 @@ export default function ScoreBoard({ turns, playing, round, roundLabel }: { turn
                 <span className="font-bold leading-tight">{p.name}</span>
                 {p.members && <span className="hidden lg:block text-xs font-semibold text-muted" title={p.members.join(', ')}>{p.members.join(', ')}</span>}
               </span>
-              <motion.span key={p.score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-3xl tabular-nums min-w-[2.75rem] text-center" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>
+              <motion.span key={p.score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-score text-3xl tabular-nums min-w-[2.75rem] text-center" aria-label={t('share.points', { count: p.score })}>{p.score}</motion.span>
             </motion.li>
           );
         })}

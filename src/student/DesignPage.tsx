@@ -94,7 +94,7 @@ export default function DesignPage() {
                 <p className="font-semibold">{pieces[piece].hint}</p>
                 {draft.pieces[pieces[piece].id]?.image && <p className="flex items-center gap-2 font-bold"><CheckCircle weight="fill" size={26} color="#1f7a45" aria-hidden="true" />{t('design.done')}</p>}
                 <div className="flex gap-2 flex-wrap">
-                  <button type="button" onClick={() => setDrawing(true)} className={`${big} bg-accent`}><PaintBrush weight="fill" size={26} />{t('design.draw')}</button>
+                  <button type="button" onClick={() => setDrawing(true)} className={`${big} bg-grape text-white`}><PaintBrush weight="fill" size={26} />{t('design.draw')}</button>
                   <button type="button" onClick={() => file.current?.click()} className={`${big} bg-surface-2`}><Camera weight="fill" size={26} />{t('design.addPicture')}</button>
                 </div>
                 {drawing && (
@@ -126,7 +126,7 @@ export default function DesignPage() {
                 <label className="grid gap-2"><span className="font-display text-2xl">{t('design.name')}</span>
                   <input value={draft.name} maxLength={30} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="min-h-14 px-4 rounded-input border-bold border-border font-bold text-xl" />
                 </label>
-                <button type="button" disabled={!draft.name.trim()} onClick={() => void send()} className={`${big} bg-accent justify-self-start disabled:opacity-40`}><PaperPlaneTilt weight="fill" size={24} />{t('design.send')}</button>
+                <button type="button" disabled={!draft.name.trim()} onClick={() => void send()} className={`${big} bg-grape text-white justify-self-start disabled:opacity-40`}><PaperPlaneTilt weight="fill" size={24} />{t('design.send')}</button>
               </>
             )}
           </section>
@@ -137,7 +137,7 @@ export default function DesignPage() {
         <motion.section initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="grid justify-items-center gap-3 py-10 text-center" role="status">
           <Star weight="fill" size={110} color="#ffd166" aria-hidden="true" />
           <p className="font-display text-3xl sm:text-4xl">{t('design.sent')}</p>
-          <button type="button" onClick={() => navigate('/join')} className={`${big} bg-accent`}>{t('design.back')}</button>
+          <button type="button" onClick={() => navigate('/join')} className={`${big} bg-white`}>{t('design.back')}</button>
         </motion.section>
       )}
     </main>

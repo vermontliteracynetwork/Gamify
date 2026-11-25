@@ -48,7 +48,7 @@ export default function LiveHost() {
   const [game, setGame] = useState<GameCode | null | undefined>(undefined);
   useEffect(() => { void findGameCode(code).then((g) => setGame(g?.live ? g : null)); }, [code]);
   if (game === undefined) return null;
-  if (!game) return <main className="max-w-lg mx-auto px-4 pt-14 grid gap-4 justify-items-center text-center"><p className="font-bold text-lg">{t('live.noRoom')}</p><Link to="/teacher/sets" className={buttonClasses('primary')}>{t('live.toSets')}</Link></main>;
+  if (!game) return <main className="max-w-lg mx-auto px-4 pt-14 grid gap-4 justify-items-center text-center"><p className="font-bold text-lg">{t('live.noRoom')}</p><Link to="/teacher/sets" className={buttonClasses('secondary')}>{t('live.toSets')}</Link></main>;
   return <Room game={game} />;
 }
 
@@ -99,7 +99,7 @@ function Room({ game }: { game: GameCode }) {
   approveRef.current = approve;
   const joinUrl = `${window.location.origin}/join/${game.code}`;
 
-  useEffect(() => { void QRCode.toDataURL(joinUrl, { margin: 1, width: 360, color: { dark: '#000000', light: '#fbfcf8' } }).then(setQr); }, [joinUrl]);
+  useEffect(() => { void QRCode.toDataURL(joinUrl, { margin: 1, width: 360, color: { dark: '#000000', light: '#ffffff' } }).then(setQr); }, [joinUrl]);
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 1000); return () => window.clearInterval(id); }, []);
   useEffect(() => {
     const l = openLink(game.code);
@@ -224,7 +224,7 @@ function Room({ game }: { game: GameCode }) {
         <h1 className="font-display text-3xl flex-1 min-w-48"><Title text={t('live.hostTitle', { game: gameName })} /></h1>
         {state.phase === 'lobby' && (
           <button type="button" onClick={() => setSetOpen(true)} aria-label={t('live.settings')} data-tip={t('live.settings')}
-            className="w-11 h-11 rounded-full border-bold border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}><GearSix weight="bold" size={22} /></button>
+            className="w-11 h-11 rounded-full border-bold border-border bg-surface flex items-center justify-center motion-safe:hover:rotate-45 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 var(--ink)' }}><GearSix weight="bold" size={22} /></button>
         )}
       </div>
 
@@ -254,14 +254,14 @@ function Room({ game }: { game: GameCode }) {
               <div className="grid gap-2">
                 <p className="font-bold">{t('live.waiting', { count: pending.length })}</p>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="primary" onClick={() => update((s) => ({ ...s, players: s.players.map((p) => (p.status === 'pending' ? { ...p, status: 'in' } : p)) }))}><Check weight="bold" size={18} />{t('live.letAllIn')}</Button>
+                  <Button variant="main" onClick={() => update((s) => ({ ...s, players: s.players.map((p) => (p.status === 'pending' ? { ...p, status: 'in' } : p)) }))}><Check weight="bold" size={18} />{t('live.letAllIn')}</Button>
                 </div>
               </div>
             )}
             <ul className="grid gap-2 list-none p-0 m-0 content-start flex-1 min-h-0 overflow-y-auto" aria-label={t('live.players')}>
               <AnimatePresence initial={false}>
                 {state.players.filter((p) => p.status !== 'removed').map((p) => (
-                  <motion.li key={p.pid} layout={!reduce} initial={reduce ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`flex flex-wrap items-center gap-2 rounded-input border-std p-2 ${p.status === 'pending' ? 'border-border bg-accent/40' : 'border-border-soft'}`}>
+                  <motion.li key={p.pid} layout={!reduce} initial={reduce ? false : { opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`flex flex-wrap items-center gap-2 rounded-input border-std p-2 ${p.status === 'pending' ? 'border-border bg-butter' : 'border-border-soft'}`}>
                     {editing === p.pid
                       ? <input autoFocus defaultValue={p.name} maxLength={24} aria-label={t('live.renameTo', { name: p.name })} onBlur={(e) => { setPlayer(p.pid, { name: e.target.value.trim() || p.name }); setEditing(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} className="flex-1 min-h-10 px-2 rounded-input border-std border-border font-bold" />
                       : <span className="flex-1 font-bold min-w-32">{p.name}</span>}
@@ -279,7 +279,7 @@ function Room({ game }: { game: GameCode }) {
                     {paid && p.status === 'in' && (
                       <SetSelect value={assignOf(p.pid).setId ?? state.setId} label={t('live.setFor', { name: p.name })} onChange={(v) => setAssign(p.pid, { setId: v })} />
                     )}
-                    {p.status === 'pending' && <Button variant="primary" onClick={() => setPlayer(p.pid, { status: 'in' })}><Check weight="bold" size={16} />{t('live.letIn', { name: p.name })}</Button>}
+                    {p.status === 'pending' && <Button variant="main" onClick={() => setPlayer(p.pid, { status: 'in' })}><Check weight="bold" size={16} />{t('live.letIn', { name: p.name })}</Button>}
                     <button type="button" onClick={() => setEditing(p.pid)} aria-label={t('live.rename', { name: p.name })} className="w-10 h-10 rounded-full border-std border-border bg-surface flex items-center justify-center"><PencilSimple weight="bold" size={16} /></button>
                     <button type="button" onClick={() => setPlayer(p.pid, { status: 'removed' })} aria-label={t('live.remove', { name: p.name })} className="w-10 h-10 rounded-full border-std border-border bg-surface flex items-center justify-center"><Trash weight="bold" size={16} /></button>
                   </motion.li>
@@ -309,9 +309,9 @@ function Room({ game }: { game: GameCode }) {
             <ol className="absolute inset-x-0 top-20 bottom-24 mx-auto max-w-4xl px-6 grid gap-3 content-center list-none m-0" aria-label={t('live.board.leaders')}>
               {leaders.slice(0, 10).map((p, i) => (
                 <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3 stage-text">
-                  <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="#c98a00" aria-label="1" /> : i + 1}</span>
+                  <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="var(--lemon)" aria-label="1" /> : i + 1}</span>
                   <span className="font-bold text-2xl truncate">{p.name}</span>
-                  <span className="h-10 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><motion.span className="block h-full bg-accent" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} /></span>
+                  <span className="h-10 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><motion.span className="block h-full bg-grape" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} /></span>
                   <span className="font-display text-3xl text-right">{p.right}</span>
                 </motion.li>
               ))}
@@ -357,7 +357,7 @@ function Room({ game }: { game: GameCode }) {
               </div>
             </Dialog>
           )}
-          {state.phase === 'paused' && <p className="absolute top-3 left-1/2 -translate-x-1/2 z-10 font-display text-xl bg-accent border-std border-border rounded-pill px-4 py-1" role="status">{t('live.pausedHost')}</p>}
+          {state.phase === 'paused' && <p className="absolute top-3 left-1/2 -translate-x-1/2 z-10 font-display text-xl bg-butter border-std border-border rounded-pill px-4 py-1" role="status">{t('live.pausedHost')}</p>}
 
           {/* Question Tracker: the column on the right (approved mockup):
               Cooperative shows the goal card and who is playing; Competitive
@@ -379,7 +379,7 @@ function Room({ game }: { game: GameCode }) {
                         <span className="w-5 text-center font-display">{i + 1}</span>
                         <StarIcon weight="fill" size={22} color={starColor(state.players, p.pid)} className="drop-shadow-[0_0_1px_#000] shrink-0" aria-hidden="true" />
                         <span className="flex-1 truncate">{p.name}</span>
-                        <span className="font-display text-xl tabular-nums">{p.right}</span>
+                        <span className="font-score text-xl tabular-nums">{p.right}</span>
                       </motion.li>
                     ))}
                   </ol>
@@ -450,16 +450,16 @@ function Room({ game }: { game: GameCode }) {
           {territory ? (
             <div className="flex items-center justify-center gap-6">
               {(['defender', 'invader'] as const).map((sd) => (
-                <span key={sd} className="grid justify-items-center gap-1"><SideBadge side={sd} look={sd === 'defender' ? 0 : 1} size="4.5rem" /><span className="font-display text-4xl tabular-nums">{sd === 'defender' ? state.room?.defenders ?? 0 : state.room?.invaders ?? 0}</span><span className="font-bold">{t(sd === 'defender' ? 'territory.cats' : 'territory.mice')}</span></span>
+                <span key={sd} className="grid justify-items-center gap-1"><SideBadge side={sd} look={sd === 'defender' ? 0 : 1} size="4.5rem" /><span className="font-score text-4xl tabular-nums">{sd === 'defender' ? state.room?.defenders ?? 0 : state.room?.invaders ?? 0}</span><span className="font-bold">{t(sd === 'defender' ? 'territory.cats' : 'territory.mice')}</span></span>
               ))}
             </div>
           ) : state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
             {[1, 0, 2].map((i) => leaders.at(i) && (
               <motion.div key={leaders.at(i)!.pid} initial={reduce ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: reduce ? 0 : 0.2 + (2 - i) * 0.25 }} className="flex-1 grid gap-2 justify-items-center">
-                {i === 0 && (pieceImage(screen.theme, 'trophy') ? <img src={pieceImage(screen.theme, 'trophy')} alt="" className="h-20 object-contain" /> : <Crown weight="fill" size={40} color="#c98a00" aria-hidden="true" />)}
+                {i === 0 && (pieceImage(screen.theme, 'trophy') ? <img src={pieceImage(screen.theme, 'trophy')} alt="" className="h-20 object-contain" /> : <Crown weight="fill" size={40} color="var(--lemon)" aria-hidden="true" />)}
                 <span className="font-display text-xl truncate max-w-full">{leaders.at(i)!.name}</span>
-                <span className={`w-full rounded-t-panel border-heavy border-border flex items-start justify-center pt-2 font-display text-3xl ${i === 0 ? 'h-40 bg-accent' : i === 1 ? 'h-28 bg-[#cfe0ff]' : 'h-20 bg-[#ffd9cf]'}`}>{i + 1}</span>
+                <span className={`w-full rounded-t-panel border-heavy border-border flex items-start justify-center pt-2 font-display text-3xl ${i === 0 ? 'h-40 bg-butter' : i === 1 ? 'h-28 bg-blue-crystal' : 'h-20 bg-peach'}`}>{i + 1}</span>
                 <span className="font-bold">{t('live.rightCount', { count: leaders.at(i)!.right })}</span>
               </motion.div>
             ))}
@@ -481,12 +481,12 @@ function Room({ game }: { game: GameCode }) {
           <div className="max-w-4xl mx-auto px-6 py-6 grid gap-4">
             <div className="flex items-center gap-3">
               <h2 className="font-display text-2xl flex-1"><Title text={t('live.howPlay')} /></h2>
-              <button type="button" onClick={() => setSetOpen(false)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-accent font-bold inline-flex items-center gap-1.5" style={{ boxShadow: '0 3px 0 #000' }}><Check weight="bold" size={18} />{t('teams.done')}</button>
+              <button type="button" onClick={() => setSetOpen(false)} className="min-h-11 px-5 rounded-pill border-bold border-border bg-grape text-white font-bold inline-flex items-center gap-1.5" style={{ boxShadow: '0 3px 0 var(--grape-deep)' }}><Check weight="bold" size={18} />{t('teams.done')}</button>
             </div>
             <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('live.howPlay')}>
               {(['together', 'compete'] as const).map((m) => (
                 <button key={m} type="button" role="radio" aria-checked={(state.mode ?? 'compete') === m} onClick={() => { update((s) => ({ ...s, mode: m })); }}
-                  className={`min-h-16 px-4 rounded-input border-std text-left flex items-center gap-3 ${(state.mode ?? 'compete') === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>
+                  className={`min-h-16 px-4 rounded-input border-std text-left flex items-center gap-3 ${(state.mode ?? 'compete') === m ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                   <ClassModeIcon mode={m} /><span className="grid"><span className="font-bold">{t(`live.mode.${m}`)}</span><span className="text-sm font-semibold text-muted">{t(`live.mode.${m}Hint`)}</span></span>
                 </button>
               ))}
@@ -500,7 +500,7 @@ function Room({ game }: { game: GameCode }) {
                     return (
                       <button key={k} type="button" role="radio" aria-checked={on}
                         onClick={() => update((s) => ({ ...s, endAt: k === 'teacher' ? undefined : k === 'right' ? { right: 10 } : { minutes: 5 } }))}
-                        className={`min-h-11 px-4 rounded-pill border-std font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`live.end.${k}`)}</button>
+                        className={`min-h-11 px-4 rounded-pill border-std font-bold ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`live.end.${k}`)}</button>
                     );
                   })}
                   {state.endAt?.right !== undefined && (
@@ -529,7 +529,7 @@ function Room({ game }: { game: GameCode }) {
                     <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t(`territory.${k}` as 'territory.pace')}>
                       {opts.map((o) => {
                         const on = (state.options?.[k] ?? opts[0]) === o;
-                        return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => update((s) => ({ ...s, options: { ...s.options, [k]: o } }))} className={`min-h-11 px-4 rounded-pill border-std font-bold ${on ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`territory.${k}.${o}` as 'territory.pace.slow')}</button>;
+                        return <button key={o} type="button" role="radio" aria-checked={on} onClick={() => update((s) => ({ ...s, options: { ...s.options, [k]: o } }))} className={`min-h-11 px-4 rounded-pill border-std font-bold ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`territory.${k}.${o}` as 'territory.pace.slow')}</button>;
                       })}
                     </div>
                   </div>

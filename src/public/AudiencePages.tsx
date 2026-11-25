@@ -37,7 +37,7 @@ function Pillars({ items }: { items: { icon: Icon; key: string }[] }) {
       {items.map(({ icon: I, key }, i) => (
         <motion.article key={key} initial={reduce ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.06 }}
           className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <span className="w-12 h-12 rounded-full bg-accent border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
+          <span className="w-12 h-12 rounded-full bg-butter border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={24} aria-hidden="true" /></span>
           <h3 className="font-display text-2xl"><Title text={t(`${key}` as StringKey)} /></h3>
           <p className="font-semibold">{t(`${key}.text` as StringKey)}</p>
         </motion.article>
@@ -66,7 +66,7 @@ export function SchoolsPage() {
     <>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 grid gap-12">
         <Hero icon={Buildings} kicker={t('schools.kicker')} title={t('schools.title')} sub={t('schools.sub')}>
-          <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
+          <Link to="/pricing#schools" className={buttonClasses('main', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
           <Link to="/beta" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('schools.pilot')}</Link>
         </Hero>
 
@@ -93,7 +93,7 @@ export function SchoolsPage() {
           <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4].map((n) => (
               <li key={n} className={`${card} hover-lift`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-11 h-11 rounded-full bg-accent border-bold border-border flex items-center justify-center font-display text-xl">{n}</span>
+                <span className="w-11 h-11 rounded-full bg-butter border-bold border-border flex items-center justify-center font-display text-xl">{n}</span>
                 <h3 className="font-display text-2xl">{t(`schools.step.${n}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`schools.step.${n}.text` as StringKey)}</p>
               </li>
@@ -124,7 +124,7 @@ export function SchoolsPage() {
           <h2 className="title-bubble text-4xl"><Title text={t('schools.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('schools.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/pricing#schools" className={buttonClasses('primary', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
+            <Link to="/pricing#schools" className={buttonClasses('main', 'hover-pop', 'lg')}>{t('schools.quote')}</Link>
             <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
           </div>
         </section>

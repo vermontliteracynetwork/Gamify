@@ -123,7 +123,7 @@ export default function FeaturesPage() {
                 <h3 className="font-display text-3xl">{t(`features.plans.${plan}` as StringKey)}</h3>
                 <p className="font-bold">{t(`pricing.${plan}.who` as StringKey)}</p>
                 <PlanFeatures plan={plan} />
-                <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'primary' : 'secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
+                <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'main' : 'secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
               </div>
             ))}
           </div>
@@ -174,10 +174,10 @@ function QuestionDemo() {
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('features.demo.supports')}>
         <span className="font-bold text-sm">{t('features.demo.supports')}</span>
         <button type="button" className={`${toggle} bg-surface-2`} onClick={() => speak(`${prompt}. ${choices.map((c, i) => `${'ABCD'[i]}: ${c}`).join('. ')}`, settings)}><SpeakerHigh weight="bold" size={18} />{t('q.listen')}</button>
-        <button type="button" aria-pressed={big} className={`${toggle} ${big ? 'bg-accent' : 'bg-surface-2'}`} onClick={() => setBig(!big)}><TextAa weight="bold" size={18} />{t('features.demo.big')}</button>
-        <button type="button" aria-pressed={calm} className={`${toggle} ${calm ? 'bg-accent' : 'bg-surface-2'}`} onClick={() => setCalm(!calm)}><Leaf weight="bold" size={18} />{t('features.demo.calm')}</button>
+        <button type="button" aria-pressed={big} className={`${toggle} ${big ? 'bg-butter' : 'bg-surface-2'}`} onClick={() => setBig(!big)}><TextAa weight="bold" size={18} />{t('features.demo.big')}</button>
+        <button type="button" aria-pressed={calm} className={`${toggle} ${calm ? 'bg-butter' : 'bg-surface-2'}`} onClick={() => setCalm(!calm)}><Leaf weight="bold" size={18} />{t('features.demo.calm')}</button>
       </div>
-      <span className="justify-self-start text-xs font-bold px-2 py-1 rounded-pill border-std border-border bg-surface-2">3.NF.1</span>
+      <span className="justify-self-start text-xs font-bold px-2 py-1 rounded-pill border-std border-border bg-white">3.NF.1</span>
       <p className={`font-body font-bold leading-snug ${big ? 'text-3xl' : 'text-2xl'}`}>{prompt}</p>
       <div className="grid grid-cols-2 gap-3">
         {choices.map((c, i) => {
@@ -209,7 +209,7 @@ function ThemeDemo() {
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('features.demo.pickTheme')}>
         {samples.map((s) => (
           <button key={s.id} type="button" role="radio" aria-checked={pick === s.id} onClick={() => setPick(s.id)}
-            className={`min-h-12 px-3 rounded-input border-std border-border text-left ${pick === s.id ? 'bg-text text-white' : 'bg-surface'}`}>
+            className={`min-h-12 px-3 rounded-input border-std border-border text-left ${pick === s.id ? 'bg-butter' : 'bg-surface'}`}>
             <span className="block font-bold text-sm leading-tight">{s.name}</span>
             <span className="block text-xs font-semibold opacity-80">{t(`features.band.${s.band}` as StringKey)}</span>
           </button>
@@ -229,7 +229,7 @@ function ModesDemo() {
       <div role="tablist" aria-label={t('features.play.modes')} className="flex flex-wrap gap-2">
         {SHOWN_MODES.map((m) => (
           <button key={m} type="button" role="tab" id={`mode-${m}`} aria-controls="mode-panel" aria-selected={mode === m} onClick={() => setMode(m)}
-            className={`min-h-12 px-4 rounded-pill border-std font-display text-lg ${mode === m ? 'bg-accent border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
+            className={`min-h-12 px-4 rounded-pill border-std font-display text-lg ${mode === m ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
         ))}
       </div>
       <div id="mode-panel" role="tabpanel" aria-labelledby={`mode-${mode}`} className="grid md:grid-cols-[1fr_1.4fr] gap-5 items-start">

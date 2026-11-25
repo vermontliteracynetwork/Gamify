@@ -70,7 +70,7 @@ export function HelpPage() {
           <article className={`${card} p-6 sm:p-10 grid gap-6`}>
             <nav aria-label={t('help.backTo')} className="text-sm font-bold"><Link to="/help" className="text-muted no-underline hover:underline">{t('help.backTo')}</Link><span className="text-faint" aria-hidden="true"> / </span><span>{t(article.h as StringKey)}</span></nav>
             <header className="grid gap-3 border-b-[1.5px] border-border-soft pb-5">
-              <span className="w-12 h-12 rounded-full bg-accent border-std border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={24} /></span>
+              <span className="w-12 h-12 rounded-full bg-butter border-std border-border grid place-items-center" aria-hidden="true"><I weight="bold" size={24} /></span>
               <h1 className="font-display text-3xl sm:text-4xl leading-tight">{t(article.h as StringKey)}</h1>
               <p className="text-lg text-muted font-semibold leading-relaxed">{t(`${article.h}.desc` as StringKey)}</p>
               <p className="text-xs font-bold text-faint uppercase tracking-wider">{t('help.updated')}</p>

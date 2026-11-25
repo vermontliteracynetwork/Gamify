@@ -111,7 +111,7 @@ export function ThemeGuidePage() {
               <div className="grid gap-1.5">
                 <h3 className="font-display text-2xl">{i + 1}. {p.label}</h3>
                 <p className="font-bold">{t(`guide.what.${pieceKind(p)}`, { hint: p.hint })}</p>
-                <p className="text-sm font-bold"><span className="inline-block px-2 rounded-pill bg-accent border-std border-border mr-2">{t('guide.size', { w: p.width, h: p.height })}</span>{isRound(p) || ROUND_LOOK.test(p.id) ? t('guide.shapeRound') : t('guide.shapeBox')}</p>
+                <p className="text-sm font-bold"><span className="inline-block px-2 rounded-pill bg-butter border-std border-border mr-2">{t('guide.size', { w: p.width, h: p.height })}</span>{isRound(p) || ROUND_LOOK.test(p.id) ? t('guide.shapeRound') : t('guide.shapeBox')}</p>
                 <ul className="grid gap-1 pl-5 m-0 list-disc text-sm font-semibold">{pieceTips(p).map((tip) => <li key={tip}>{tip}</li>)}</ul>
               </div>
             </li>

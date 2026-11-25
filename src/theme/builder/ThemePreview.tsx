@@ -88,7 +88,7 @@ function PickView({ theme }: { theme: GameTheme }) {
           ))}
           <div className="grid grid-cols-5 gap-1.5 rounded-input border-std border-border p-2 bg-[#e6ebff] justify-items-center">
             {Array.from({ length: 10 }, (_, k) => (
-              <button key={k} type="button" onClick={() => setBig(k)} aria-label={`See picture ${k + 1} big`} className={`rounded-full motion-safe:hover:scale-110 motion-safe:transition-transform ${k === 0 ? 'ring-4 ring-accent' : ''}`}>
+              <button key={k} type="button" onClick={() => setBig(k)} aria-label={`See picture ${k + 1} big`} className={`rounded-full motion-safe:hover:scale-110 motion-safe:transition-transform ${k === 0 ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`}>
                 <TeamBadge colorIndex={k} size={34} />
               </button>
             ))}

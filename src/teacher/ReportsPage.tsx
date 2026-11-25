@@ -92,8 +92,8 @@ export default function ReportsPage() {
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
       <TeacherNav />
       <PageHeader title={t('reports.title')} subtitle={Number.isFinite(days) ? t('reports.historyNote', { days }) : t('reports.subtitle')}
-        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('primary', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
-      <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-accent' : ''}`}>
+        actions={<>{Number.isFinite(days) && <UpgradeButton suggest="pro" label={t('upgrade.history')} className="min-h-11 px-4" />}<Link to={`/teacher/reports/print?${new URLSearchParams(Object.entries({ class: example ? EXAMPLE_CLASS.id : classId, student: filter.studentId ?? '', from: filter.from ?? since ?? '', to: filter.to ?? '' }).filter(([, v]) => v)).toString()}`} className={buttonClasses('main', 'min-h-11 px-4')}><Printer weight="bold" size={18} />{t('rp.print')}</Link><button type="button" onClick={download} disabled={rows.grouped.length === 0} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface font-bold inline-flex items-center gap-2 disabled:opacity-40"><DownloadSimple weight="bold" size={18} />{t('reports.csv')}</button></>} />
+      <Panel className={`mb-4 !p-3 flex flex-wrap items-center gap-3 ${example ? 'bg-butter' : ''}`}>
         <Eye weight="fill" size={24} aria-hidden="true" />
         <p className="font-bold flex-1 min-w-60">{example ? t('reports.exampleOn') : t('reports.exampleOff')}</p>
         <button type="button" onClick={() => { setExampleOn(!example); setClassId(''); setFilter({}); }} aria-pressed={example}
@@ -148,7 +148,7 @@ export default function ReportsPage() {
                     <td className="p-2.5 font-semibold tabular-nums">{r.asked}{r.left > 0 && <span className="text-muted text-sm"> ({t('reports.left', { n: r.left })})</span>}</td>
                     <td className="p-2.5">
                       <span className="inline-flex items-center gap-2 font-bold tabular-nums">
-                        <span className="w-20 h-3 rounded-pill border border-border bg-surface-2 overflow-hidden" aria-hidden="true"><span className="block h-full" style={{ width: `${pct}%`, background: pct >= 80 ? '#9fe7a0' : pct >= 50 ? '#fdfd94' : '#ed9d75' }} /></span>{pct}%
+                        <span className="w-20 h-3 rounded-pill border border-border bg-surface-2 overflow-hidden" aria-hidden="true"><span className="block h-full" style={{ width: `${pct}%`, background: pct >= 80 ? 'var(--kelly)' : pct >= 50 ? 'var(--lemon)' : 'var(--orange-paloma)' }} /></span>{pct}%
                       </span>
                     </td>
                     <td className="p-2.5 font-semibold tabular-nums">{r.firstTry}</td>

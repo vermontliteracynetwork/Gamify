@@ -108,7 +108,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
       <div className="px-6 sm:px-8 pt-1.5 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
         {/* Step title left, the step meter right, no "Step x of x" on screen
             (teacher, 2026-11-23); screen readers still hear the step number. */}
-        <h2 className="font-display text-xl font-bold"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
+        <h2 className="title-bubble text-2xl sm:text-3xl leading-none"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
         <ol className="ml-auto flex gap-[4px] list-none m-0 w-56 max-w-full rounded-full p-[3px]" style={{ background: '#eeeaf8', border: '2.5px solid var(--color-border)', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
@@ -133,12 +133,13 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
       </ChoicePicked.Provider>
       <div className="px-6 sm:px-8 py-2 flex justify-between gap-2">
         <button type="button" onClick={back}
-          className="min-h-8 tap px-3 rounded-pill border-std border-border bg-surface-2 font-bold text-sm inline-flex items-center gap-1 motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
-          <ArrowLeft weight="bold" size={14} />{t('setup.back')}
+          className="min-h-11 px-5 rounded-pill border-std border-border bg-white font-bold text-base inline-flex items-center gap-1.5 shadow-[0_3px_0_var(--ink)] motion-safe:hover:-translate-x-0.5 motion-safe:transition-transform">
+          <ArrowLeft weight="bold" size={18} />{t('setup.back')}
         </button>
         <button type="button" disabled={!ready} onClick={() => (last ? onPlay() : next())}
-          className="min-h-8 tap px-4 rounded-pill border-std border-border bg-accent font-display text-base font-bold inline-flex items-center gap-1 disabled:opacity-40 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 2px 0 #000' }}>
-          {last ? <><Play weight="fill" size={15} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={14} /></>}
+          className="min-h-12 px-6 rounded-pill border-std border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 shadow-[0_4px_0_var(--ink)] disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none disabled:translate-y-1 motion-safe:hover:enabled:scale-105 motion-safe:transition-transform">
+          {/* Next stays off, pale and dashed, until a card is picked (rule 9). */}
+          {last ? <><Play weight="fill" size={18} />{playLabel ?? t('start.play')}</> : <>{t('setup.next')}<ArrowRight weight="bold" size={18} /></>}
         </button>
       </div>
     </section>

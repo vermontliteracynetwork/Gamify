@@ -4,12 +4,21 @@ import Title from './Title';
 // Shared pieces in the platform's sticker style. Touch targets are at least
 // 44px tall (iPad first).
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+// The button colors (New direction rule 9, teacher approved 2026-11-25):
+// 'primary' (alias 'go') is the yellow #FDFD94 go button with ink text, only
+// for go actions (Start, Next, Play, Join, Continue into a game, Play again);
+// 'main' is Grape with white text, every other main action (Save, Create,
+// Add, Import, Print, Download, Assign, Use, Send); 'secondary' is white,
+// for Back and everything else. White text only on Grape (5.6:1, WCAG AA).
+export type Variant = 'primary' | 'go' | 'main' | 'secondary' | 'ghost' | 'danger';
+const GO = 'bg-accent hover:bg-accent-hover text-accent-ink border-border shadow-[0_3px_0_var(--ink)]';
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-accent hover:bg-accent-hover text-accent-ink border-border',
-  secondary: 'bg-surface-2 hover:bg-secondary text-text border-border',
+  primary: GO,
+  go: GO,
+  main: 'bg-grape hover:bg-grape-deep text-white border-border shadow-[0_3px_0_var(--grape-deep)]',
+  secondary: 'bg-white hover:bg-surface-hover text-text border-border shadow-[0_3px_0_var(--ink)]',
   ghost: 'bg-transparent hover:bg-surface-2 text-text border-transparent',
-  danger: 'bg-surface hover:bg-danger text-text border-border',
+  danger: 'bg-white hover:bg-danger text-text border-border',
 };
 
 // Three button sizes (design system, 2026-11-18): sm 36px for compact bars,
@@ -20,7 +29,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 const SIZES: Record<ButtonSize, string> = { sm: 'min-h-9 px-3 text-sm tap', md: 'min-h-11 px-4 text-sm', lg: 'min-h-14 px-6 text-lg' };
 export function buttonClasses(variant: Variant = 'secondary', className = '', size: ButtonSize = 'md'): string {
   return `inline-flex items-center justify-center gap-2 ${SIZES[size]} rounded-pill border-std font-bold no-underline
-          active:scale-95 motion-safe:transition disabled:opacity-40 disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
+          active:scale-95 motion-safe:transition disabled:opacity-40 disabled:shadow-none disabled:pointer-events-none ${VARIANTS[variant]} ${className}`;
 }
 
 export function Button({ variant = 'secondary', size = 'md', className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: ButtonSize }) {
@@ -83,7 +92,7 @@ export function Tabs<T extends string>({ value, options, onChange, label, size =
           aria-controls={panelIds && value === o.id ? `panel-${o.id}` : undefined}
           aria-selected={value === o.id}
           onClick={() => onChange(o.id)}
-          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-sm' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-accent text-accent-ink' : 'text-text hover:bg-surface-2'}`}
+          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-sm' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-butter text-text' : 'text-text hover:bg-surface-2'}`}
         >
           {o.label}
         </button>

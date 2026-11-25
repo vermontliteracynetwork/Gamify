@@ -42,7 +42,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   return (
     <div className="grid">
       <section className="menu-panel max-w-6xl w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 6.5rem)' }}>
-        <h2 className="font-display text-xl font-bold px-5 pt-1 pb-2 min-h-11 flex items-center pr-40"><Title text={t('themeScreen.title')} /></h2>
+        <h2 className="title-bubble text-2xl sm:text-3xl leading-none px-5 pt-1 pb-2 min-h-11 flex items-center pr-40"><Title text={t('themeScreen.title')} /></h2>
         <div role="radiogroup" aria-label={t('theme.pick')} ref={body} className="px-5 py-4 grid gap-5 overflow-hidden min-h-0 flex-1 content-center justify-center" style={{ gridTemplateColumns: `repeat(${fit.cols}, ${fit.w}px)` }}>
           {themes.map((th) => {
             const open = playable(th);
@@ -50,12 +50,12 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
             return (
               <button key={th.id} type="button" role="radio" aria-checked={on} aria-label={open ? th.name : t('theme.locked', { name: th.name })}
                 onClick={() => (open ? onChoose(th.id) : setPreview(th))}
-                className={`tile-wiggle group relative rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on ? 'ring-4 ring-accent' : ''}`} style={{ boxShadow: on ? '0 6px 0 #000' : '0 3px 0 rgba(0,0,0,0.85)' }}>
+                className={`tile-wiggle group relative rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`} style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
                 <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
                 <span className="flex items-center gap-2 font-display text-base font-bold px-1">
                   {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
                   <span className="flex-1">{th.name}</span>
-                  {on && <span className="w-7 h-7 rounded-full bg-accent border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
+                  {on && <span className="w-7 h-7 rounded-full bg-kelly border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
                 </span>
                 {th.designedBy && <span className="text-xs font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
               </button>
@@ -63,8 +63,8 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
           })}
         </div>
         <div className="px-5 py-3 flex justify-between gap-2">
-          <button type="button" onClick={onBack} className="min-h-11 px-4 rounded-pill border-std border-border bg-surface-2 font-bold inline-flex items-center gap-1.5"><ArrowLeft weight="bold" size={16} />{t('setup.back')}</button>
-          <button type="button" onClick={onNext} className="min-h-11 px-6 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 #000' }}>{t('setup.next')}<ArrowRight weight="bold" size={16} /></button>
+          <button type="button" onClick={onBack} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-1.5"><ArrowLeft weight="bold" size={16} />{t('setup.back')}</button>
+          <button type="button" onClick={onNext} className="min-h-11 px-6 rounded-pill border-bold border-border bg-accent font-display text-lg font-bold inline-flex items-center gap-1.5 motion-safe:hover:scale-105 motion-safe:transition-transform" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('setup.next')}<ArrowRight weight="bold" size={16} /></button>
         </div>
       </section>
       {preview && (
@@ -73,7 +73,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
           <div className="bg-surface border-bold border-border rounded-panel p-4 grid gap-3 w-full max-w-md" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             <div className="flex items-center justify-between">
               <span className="font-display text-2xl font-bold flex items-center gap-2"><LockSimple weight="fill" size={22} aria-hidden="true" />{preview.name}</span>
-              <button type="button" onClick={() => setPreview(null)} aria-label={t('theme.close')} className="w-11 h-11 rounded-full border-std border-border bg-surface-2 flex items-center justify-center"><X weight="bold" size={20} /></button>
+              <button type="button" onClick={() => setPreview(null)} aria-label={t('theme.close')} className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center"><X weight="bold" size={20} /></button>
             </div>
             <ThemePreview theme={preview} gameName={gameName} />
           </div>

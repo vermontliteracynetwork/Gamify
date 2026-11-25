@@ -47,7 +47,7 @@ export default function BetaChecklist({ s }: { s: BetaSteps }) {
             ))}
           </ol>
           <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0" aria-label={t('bcheck.gamesLabel')}>
-            {s.games.map((g) => <li key={g.id} className={`px-2.5 py-1 rounded-pill border-std text-xs font-bold ${s.played.includes(g.id) ? 'bg-accent border-border' : 'bg-surface border-border-soft text-muted'}`}>{s.played.includes(g.id) ? '✓ ' : ''}{g.name}</li>)}
+            {s.games.map((g) => <li key={g.id} className={`px-2.5 py-1 rounded-pill border-std text-xs font-bold ${s.played.includes(g.id) ? 'bg-butter border-border' : 'bg-surface border-border-soft text-muted'}`}>{s.played.includes(g.id) ? '✓ ' : ''}{g.name}</li>)}
           </ul>
           <p className="text-sm font-semibold m-0">{t('bcheck.note', { months: BETA.months })} <Link to="/beta-kit">{t('bcheck.kit')}</Link> · <Link to="/it">{t('bcheck.it')}</Link></p>
         </>
@@ -109,7 +109,7 @@ export function BetaTab({ s }: { s: BetaSteps }) {
         })}
       </ol>
       <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0" aria-label={t('bcheck.gamesLabel')}>
-        {s.games.map((g) => <li key={g.id} className={`px-2.5 py-1 rounded-pill border-std text-xs font-bold ${s.played.includes(g.id) ? 'bg-accent border-border' : 'bg-surface border-border-soft text-muted'}`}>{s.played.includes(g.id) ? '✓ ' : ''}{g.name}</li>)}
+        {s.games.map((g) => <li key={g.id} className={`px-2.5 py-1 rounded-pill border-std text-xs font-bold ${s.played.includes(g.id) ? 'bg-butter border-border' : 'bg-surface border-border-soft text-muted'}`}>{s.played.includes(g.id) ? '✓ ' : ''}{g.name}</li>)}
       </ul>
       <p className="text-sm font-semibold m-0">{t('bcheck.note', { months: BETA.months })} <Link to="/beta-kit">{t('bcheck.kit')}</Link> · <Link to="/it">{t('bcheck.it')}</Link></p>
     </Panel>

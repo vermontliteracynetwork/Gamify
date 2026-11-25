@@ -28,14 +28,14 @@ export default function SoloPanel({ score, line, round, dots, status, note, play
         <div className="px-4 py-2 lg:p-4 flex lg:grid items-center gap-x-5 gap-y-2 flex-wrap">
         <div className="flex items-center gap-3">
           {player ? <img src={player} alt="" aria-hidden="true" className="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-bold border-border bg-surface object-contain" /> : <TeamBadge colorIndex={0} size={56} />}
-          <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-4xl lg:text-6xl tabular-nums leading-none">{score}</motion.p>
+          <motion.p key={score} initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} className="font-score text-4xl lg:text-6xl tabular-nums leading-none">{score}</motion.p>
         </div>
         <p className={`font-bold whitespace-nowrap ${round ? 'lg:hidden' : ''}`}>{line}</p>
         {dots && (
           <div className="flex gap-1.5 flex-wrap items-center" role="img" aria-label={dots.label}>
             <span className="hidden lg:block w-full text-xs font-bold uppercase tracking-wider text-muted">{t('solo.left')}</span>
             {Array.from({ length: Math.max(dots.total, dots.left) }, (_, i) => (
-              <span key={i} className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full border-std border-border ${i < dots.left ? 'bg-accent' : 'bg-surface-2'}`} />
+              <span key={i} className={`w-5 h-5 lg:w-6 lg:h-6 rounded-full border-std border-border ${i < dots.left ? 'bg-mint' : 'bg-surface-2'}`} />
             ))}
           </div>
         )}

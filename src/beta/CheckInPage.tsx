@@ -72,7 +72,7 @@ export default function CheckInPage() {
             </section>
           );
         })}
-        <Link to={`/teacher/classes/${id}`} className={buttonClasses('primary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('checkin.back')}</Link>
+        <Link to={`/teacher/classes/${id}`} className={buttonClasses('secondary', 'justify-self-start')}><ArrowLeft weight="bold" size={18} />{t('checkin.back')}</Link>
       </main>
     );
   }

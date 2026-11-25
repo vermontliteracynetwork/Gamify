@@ -34,14 +34,14 @@ export function WaysList() {
         <div role="group" aria-label={t('ways.filter')} className="flex flex-wrap gap-2">
           {BANDS.map((b) => (
             <button key={b.id} type="button" aria-pressed={band.id === b.id} onClick={() => setParams(b.id === 'all' ? {} : { grades: b.id }, { replace: true })}
-              className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-accent' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
+              className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${band.id === b.id && !tag ? 'bg-butter' : 'bg-surface'}`}>{t(`ways.band.${b.id}` as StringKey)}</button>
           ))}
           <button type="button" aria-pressed={tag === 'homeschool'} onClick={() => setParams(tag === 'homeschool' ? {} : { tag: 'homeschool' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-accent' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'homeschool' ? 'bg-butter' : 'bg-surface'}`}>{t('ways.tag.homeschool')}</button>
           <button type="button" aria-pressed={tag === 'howto'} onClick={() => setParams(tag === 'howto' ? {} : { tag: 'howto' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'howto' ? 'bg-accent' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'howto' ? 'bg-butter' : 'bg-surface'}`}>{t('howto.tagFilter')}</button>
           <button type="button" aria-pressed={tag === 'themes'} onClick={() => setParams(tag === 'themes' ? {} : { tag: 'themes' }, { replace: true })}
-            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'themes' ? 'bg-accent' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
+            className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm ${tag === 'themes' ? 'bg-butter' : 'bg-surface'}`}>{t('guide.tagFilter')}</button>
         </div>
         {!tag && (
           <Link to="/blog?tag=themes" className="hover-lift rounded-panel bg-butter border-bold border-border no-underline text-text p-5 flex flex-wrap items-center gap-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>

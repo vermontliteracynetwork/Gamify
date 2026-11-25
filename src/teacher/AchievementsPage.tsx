@@ -76,7 +76,7 @@ export default function AchievementsPage() {
             <h2 className="font-heading font-bold">{t('ach.emptyTitle')}</h2>
             <p className="text-sm font-bold text-muted leading-snug">{t('ach.emptyText')}</p>
           </div>
-          <Link to="/teacher/activity" className={buttonClasses('primary')}>{t('teacherNav.create')}<ArrowRight weight="bold" size={16} /></Link>
+          <Link to="/teacher/activity" className={buttonClasses('main')}>{t('teacherNav.create')}<ArrowRight weight="bold" size={16} /></Link>
         </div>
       )}
       <div ref={board} className="ach-board grid gap-4">

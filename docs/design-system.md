@@ -1,8 +1,9 @@
 # Gamify design system
 
 The look of every menu, setup page and teacher page: the light "sticker"
-style (periwinkle ground, off-white panels, black outlines, pale yellow
-accent). Game stages wear their own themes (`src/theme`); everything here is
+style of the approved /brand New direction (teacher, 2026-11-25): Lavender
+ground, Paper panels, Ink outlines, the yellow go button and Grape for every
+other main action. Game stages wear their own themes (`src/theme`); everything here is
 the standard Gamify look around them. Audited and tidied 2026-11-18.
 
 Rule of thumb: reach for a component first, then a token, and only then a
@@ -12,23 +13,39 @@ its own colors in code; menus and teacher pages may not.
 ## Tokens (`src/index.css`)
 
 ### Colors
+The palette pairs from /brand New direction rule 1: every bright has its named
+pastel; white text only on Grape and Ink, ink text everywhere else (WCAG AA).
+
 | Token (Tailwind) | Value | Use for |
 |---|---|---|
-| `bg` | #b4c4fb | the periwinkle ground |
-| `surface` / `surface-2` / `surface-hover` | #fbfcf8 / #e9eefe / #f2f5ff | panels, wells, hover |
-| `border` / `border-soft` | #000 / #cdd7fb | outlines, quiet outlines and empty dashes |
-| `text` / `muted` / `faint` | #000 / #314677 / #7383ad | body text, hints, placeholders |
-| `accent` / `accent-hover` / `accent-ink` | #fdfd94 / #ffffb8 / #000 | the pick, the main button, "this one" |
-| `secondary` | #ed9d75 | salmon: secondary hover, survey |
-| `success` / `success-ink` | #9fe7a0 / #1f7a45 | done, right, filled meters / green text and icons |
-| `danger` / `error` | #e5635f / #9b2c3a | coral delete hover / error text |
-| `ink-night` | #241c3d | dark badges and overlays |
-| `gold` | #f6c544 | stars earned |
-| `mint-soft` | #c8f0dc | power-up on, answerer chips |
-| `quiz-yellow/green/blue/orange` | answer tile colors | answer tiles A to D |
+| `bg` / `lavender` | #ddd6ff | the Lavender page ground |
+| `surface` / `paper` | #fffaf0 | panels and cards (Paper) |
+| `surface-2` / `surface-hover` | #f1edff / #f7f4ff | wells, hover |
+| `border` / `ink` / `text` | #1d1a33 | outlines and text (Ink) |
+| `border-soft` / `muted` / `faint` | #d6cff0 / #57506e / #7d7696 | quiet outlines, hints, placeholders |
+| `accent` | #fdfd94 | the yellow go button only (Start, Next, Play, Join, Play again) |
+| `grape` / `grape-deep` | #6a45f0 / #4b2fc9 | every other main action, white text; its shadow and hover |
+| `butter` | #fff1b8 | picked chips and tabs, the current page, callouts |
+| `mint` / `kelly` | #c8f0dc / #22b04a | picked cards in game menus, done checks (ink check), Solo, Cooperative |
+| `blue-crystal` / `sky` | #bfdff3 / #4ba3e8 | Live, info |
+| `blush` / `pink` | #ffd3e6 / #f055a5 | Competitive, celebrations |
+| `peach` / `orange` | #ffd9b3 / #ff9b28 | timers, warm accent |
+| `lemon` | #fabe37 | stars, crowns, the current step |
+| `aqua` / `teal` | #c9f1ee / #1fb5a8 | water, cool accent |
+| `success` / `success-ink` | #22b04a / #1f7a45 | right / green text |
+| `danger` / `error` | #f055a5 / #9b2c3a | delete hover / error text |
+| `ink-night` | #1d1a33 | dim overlays (now Ink) |
+| `gold` | #fabe37 | stars earned (now Lemon drop) |
+| `quiz-yellow/green/blue/orange` | Butter, Mint, Blue crystal, Peach | answer tiles A to D |
+
+Ways to play (rule 12): Share is Lemon and Butter (television), Live is Sky and
+Blue crystal (broadcast), Solo is Kelly and Mint (one person); `MODE_COLORS` is
+the pastel, `MODE_BRIGHT` the round icon badge (`src/games/ModeBadge.tsx`). Live
+class modes (rule 11): Cooperative is Kelly and Mint with a heart, Competitive
+Pink and Blush with a spark (`src/live/ClassModeIcon.tsx`).
 
 ### Type
-- Fonts: `font-display` (Grow Year: h1, `.title-bubble`, big numbers and scores), `font-heading` / `font-body` (Inclusive Sans). Grow Year headings are always ALL CAPS (teacher, 2026-11-23); Inclusive Sans keeps sentence case.
+- Two fonts only (rule 8): Grow Year in ALL CAPITALS for titles (h1, `.title-bubble`), scores and prices (`.font-score`) and the tagline; Inclusive Sans (`font-heading` bold for headings and buttons, `font-body` regular) in sentence case. The `.font-display` class is Inclusive Sans bold; Grow Year's "Th" ligature is off site-wide so caps stay caps.
 - The root size follows the screen (the screen-size rule, `src/index.css`): about 16px on a 1440 x 900 laptop, 12 to 14px on short or zoomed windows, 16.5px on big desktops; the page column (`max-w-6xl`) is 84rem; game screens 12 to 26px. Size everything in rem so it all scales together.
 - Tailwind's scale (`text-xs` … `text-6xl`) for most text.
 - Screen-fit sizes, which follow the window height: `text-fit-title`, `text-fit-body`, `text-fit-button` (welcome screens), `text-fit-turn`, `text-fit-question`, `text-fit-answer` (question screens), and `text-fit-question-big` / `text-fit-answer-big` for short questions (48 letters or fewer) and short answers (22 or fewer), bigger again on portrait screens.
@@ -37,7 +54,7 @@ its own colors in code; menus and teacher pages may not.
 ### Shape
 - Corners: `rounded-panel` (26px, panels and cards), `rounded-input` (16px, fields and tiles), `rounded-pill` (buttons and chips), `rounded-full` (round buttons, badges).
 - Borders: `border-thin` 1.5px (chips, small details), `border-std` 2px (buttons, fields, cards), `border-bold` 2.5px (panels, boards), `border-heavy` 3px (big game frames). Side borders (`border-b-[2.5px]`) stay as they are.
-- Shadows: `var(--shadow-sticker)` (0 4px 0 black) for cards and buttons that pop; `var(--shadow-sticker-lg)` for panels and pop-up boxes.
+- Shadows: `var(--shadow-sticker)` (0 4px 0 Ink) for cards and buttons that pop; `var(--shadow-sticker-lg)` for panels and pop-up boxes.
 - Disabled: `disabled:opacity-40` everywhere (sliders too).
 - Touch targets: 44px minimum on touch screens. Compact `sm` controls carry `.tap` (and round ones `.tap-round`), which grow them to 44px when the pointer is a finger.
 
@@ -51,10 +68,17 @@ Motion (`motion/react`) for UI, anime.js (`useAnime`) for timelines, presets in 
 
 | Variant | Use when |
 |---|---|
-| `primary` | the one main action on a screen (yellow) |
-| `secondary` | everything else |
-| `ghost` | quiet actions (Delete this class, Back) |
-| `danger` | destructive actions (coral on hover) |
+| `primary` (alias `go`) | yellow #FDFD94, ink text: only go actions (Start, Next, Play, Set up and play, Join, Keep playing, Play again, Start free, Log in) |
+| `main` | Grape, white text: every other main action (Save, Create, Add, Make, Import, Print, Download, Assign, Use, Send, Get a quote, Upgrade) |
+| `secondary` | white: Back, Cancel and every other button |
+| `ghost` | quiet actions (Delete this class) |
+| `danger` | destructive actions (pink on hover) |
+
+Every kit button wears the sticker press shade (`0 3px 0` Ink, Grape deep under
+`main`); disabled buttons lose it. Next on a card-choice step stays off (pale,
+dashed, no shade) until a card is picked. Round tools are 44px (`IconButton`).
+Selected cards and chips never use the go yellow: Butter on site and teacher
+pages, Mint with an ink ring and a Kelly check in game menus.
 
 | Size | Height | Use when |
 |---|---|---|
@@ -63,6 +87,13 @@ Motion (`motion/react`) for UI, anime.js (`useAnime`) for timelines, presets in 
 | `lg` | 56px | a screen's one big action (Start free, Set up and play) |
 
 States: hover (color), active (shrinks a little), keyboard focus (thick black ring with a white halo, global), disabled (40%, no clicks).
+
+### Top bar (`src/ui/NavBar.tsx`, rule 10)
+White, the real wordmark. Wide screens: the links (current page in Butter), Join
+(Lavender) and Log in (yellow). Phones: Log in beside one 44px round menu that
+holds every link and Report; signed-in teachers fold Teacher, All games, the
+site links, Report and Log out into the same menu. Student pages show the logo
+only.
 
 ### IconButton
 A round 44px button that shows only its icon; `label` becomes its hover text and what screen readers say. Use it for every icon-only action.
@@ -98,7 +129,7 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 | Do | Don't |
 |---|---|
 | Use a component, then a token | Hand-type a hex, a border width or a button height on a menu page |
-| One `primary` button per screen | Two yellow buttons fighting for attention |
+| One go (yellow) or `main` (Grape) button per screen | Yellow on a Save or Create, or two yellow buttons fighting for attention |
 | Put hints in hover text | Add a line of small print under every setting |
 | Size in rem; check a 1190 x 540 window | Fix sizes in px that do not scale with the screen |
 | Use `Dialog` for any new pop-up on a menu or teacher page | Build a new fixed overlay by hand |
