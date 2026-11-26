@@ -55,7 +55,7 @@ export const CRITERIA: Criterion[] = [
   { id: '1.4.11', name: 'Non-text Contrast', level: 'AA', result: 'Supports', remarks: 'Controls have thick black outlines.' },
   { id: '1.4.12', name: 'Text Spacing', level: 'AA', result: 'Supports', remarks: 'Layouts allow extra letter, word and line spacing; a dyslexia-friendly spacing setting is built in.' },
   { id: '1.4.13', name: 'Content on Hover or Focus', level: 'AA', result: 'Supports', remarks: 'No content appears only on hover; standard descriptions open on tap and close with Escape.' },
-  { id: '2.4.5', name: 'Multiple Ways', level: 'AA', result: 'Supports', remarks: 'Top navigation, the teacher tab bar, footer links and search on the Help Center and question sets.' },
+  { id: '2.4.5', name: 'Multiple Ways', level: 'AA', result: 'Supports', remarks: 'Top navigation, the teacher tab bar, footer links and search on the Help page and question sets.' },
   { id: '2.4.6', name: 'Headings and Labels', level: 'AA', result: 'Supports', remarks: 'Headings and labels say what each part is.' },
   { id: '2.4.7', name: 'Focus Visible', level: 'AA', result: 'Supports', remarks: 'A thick focus ring on every control.' },
   { id: '3.1.2', name: 'Language of Parts', level: 'AA', result: 'Supports', remarks: 'All content is English. Teacher-written questions in other languages are not marked by language yet.' },

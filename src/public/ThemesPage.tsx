@@ -11,7 +11,7 @@ import ThemePreview from '../theme/builder/ThemePreview';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { buttonClasses } from '../ui/kit';
 import PillSelect from '../ui/PillSelect';
-import Title from '../ui/Title';
+import { SbDot, SbHead, SbMain, SbMore, sbCard, sbCardLink, sbPill, Words } from './scrapbookA';
 import PublicFooter from './PublicFooter';
 import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
 
@@ -20,7 +20,9 @@ type Sort = 'trending' | 'popular' | 'newest' | 'name';
 // The public Themes page (teacher, 2026-10-25): every shared theme, sortable
 // and filterable, with favorites. Until launch it shows sample themes (always
 // labeled) plus the Gamify library; the Theme Building Challenge winner gets
-// the featured spot at the top.
+// the featured spot at the top. Scrapbook strength A (owner 2026-11-26:
+// "themes=a"): white cards with the ink outline, each theme's own preview
+// as the card's picture band, a Butter featured card with a Grow Year title.
 export default function ThemesPage() {
   const reduce = useReducedMotion();
   const { themes: made } = useMadeThemes();
@@ -43,23 +45,21 @@ export default function ThemesPage() {
 
   return (
     <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
-        <div className="grid gap-3">
-          <h1 className="title-bubble"><Title text={t('themes.title')} /></h1>
-          <p className="text-lg font-semibold max-w-3xl">{t('themes.sub')}</p>
-          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
-            <Link to="/teacher/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkBuilder')}<ArrowRight weight="bold" size={16} /></Link>
-            <Link to="/blog/themes/game-show" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkGuides')}<ArrowRight weight="bold" size={16} /></Link>
+      <SbMain className="!gap-6">
+        <SbHead title={t('themes.title')} sub={t('themes.sub')}>
+          <p className="m-0 flex flex-wrap gap-x-5 gap-y-2">
+            <Link to="/teacher/themes" className="text-text pointer-coarse:min-h-11 inline-flex items-center"><SbMore>{t('themes.linkBuilder')}</SbMore></Link>
+            <Link to="/blog/themes/game-show" className="text-text pointer-coarse:min-h-11 inline-flex items-center"><SbMore>{t('themes.linkGuides')}</SbMore></Link>
           </p>
-        </div>
+        </SbHead>
 
-        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-butter border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="var(--lemon)" aria-hidden="true" /></span>
+        <Link to="/challenge" className={`${sbCardLink} !bg-butter grid sm:grid-cols-[auto_1fr_auto] gap-4 sm:gap-5 items-center p-5 sm:p-6`}>
+          <SbDot bg="bg-lemon" size="lg"><Trophy weight="bold" size={30} /></SbDot>
           <span className="grid gap-1">
-            <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
-            <span className="font-semibold">{t('themes.featuredText')}</span>
+            <span className="title-bubble text-[1.5rem] sm:text-[1.75rem] leading-none"><Words text={t('themes.featuredTitle')} /></span>
+            <span className="font-semibold text-base sm:text-lg">{t('themes.featuredText')}</span>
           </span>
-          <span className={buttonClasses()}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
+          <span className={buttonClasses('secondary', 'justify-self-start', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
         <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label={t('themes.filters')}>
@@ -74,33 +74,34 @@ export default function ThemesPage() {
           <PillSelect label={t('themes.sort')} value={sort} onChange={(v) => setSort(v as Sort)}>
             {(['trending', 'popular', 'newest', 'name'] as Sort[]).map((x) => <option key={x} value={x}>{t(`themes.sort.${x}` as StringKey)}</option>)}
           </PillSelect>
-          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={`hover-pop min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-2 ${onlyFavs ? 'bg-butter' : 'bg-surface'}`}>
+          <button type="button" aria-pressed={onlyFavs} onClick={() => setOnlyFavs(!onlyFavs)} className={sbPill(onlyFavs)}>
             <Heart weight={onlyFavs ? 'fill' : 'bold'} size={18} aria-hidden="true" />{t('themes.favorites', { count: favorites.length })}
           </button>
         </div>
 
         {shown.length === 0 && <p className="font-bold">{onlyFavs ? t('themes.noFavorites') : t('themes.none')}</p>}
-        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 list-none p-0 m-0">
+        <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-[1.375rem] list-none p-0 m-0">
           {shown.map((x, i) => {
             const fav = favorites.includes(x.theme.id);
             return (
               <motion.li key={x.theme.id} layout={!reduce} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
-                className="hover-lift bg-surface border-bold border-border rounded-panel p-3 grid gap-2 content-start" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                {/* The heart sits in the art's top-right corner (the /brand Themes
-                    mockup), in the spot the preview keeps free for it. */}
-                <div className="relative">
+                className={`${sbCard} hover-lift overflow-hidden grid gap-2 content-start pb-4`}>
+                {/* The theme's own preview is the card's picture band, edge to
+                    edge (Scrapbook A); the heart sits in its top-right corner,
+                    in the spot the preview keeps free for it. */}
+                <div className="relative border-b-[3px] border-border [&>div:first-child]:rounded-none [&>div:first-child]:border-0">
                   <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} corner={<span className="w-11 h-11 shrink-0" aria-hidden="true" />} />
                   <button type="button" aria-pressed={fav} aria-label={t(fav ? 'themes.unfavorite' : 'themes.favorite', { name: x.name })} onClick={() => toggle(x.theme.id)}
                     className={`absolute top-3 right-3 w-11 h-11 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-blush' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                     <Heart weight={fav ? 'fill' : 'bold'} size={22} color={fav ? '#d6336c' : undefined} />
                   </button>
                 </div>
-                <div className="grid gap-0.5 px-1">
-                  <h2 className="font-heading font-bold text-xl leading-tight">{x.name}</h2>
-                  <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
+                <div className="grid gap-0.5 px-5 pt-2">
+                  <h2 className="m-0 font-heading font-bold text-xl sm:text-[1.4375rem] leading-tight">{x.name}</h2>
+                  <p className="m-0 text-base font-semibold">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
+                <div className="flex flex-wrap items-center gap-2 px-5">
+                  <span className="text-sm font-bold text-muted">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
                   <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1 max-sm:min-h-11 max-sm:text-base">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>
@@ -109,7 +110,7 @@ export default function ThemesPage() {
           })}
         </ul>
         <p className="text-sm font-bold text-muted">{t('themes.note')}</p>
-      </main>
+      </SbMain>
       <PublicFooter />
     </>
   );

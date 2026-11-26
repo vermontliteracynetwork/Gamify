@@ -117,7 +117,7 @@ function TellDialog({ open, role, onClose }: { open: boolean; role: 'teacher' | 
 const SHEET_LINKS = [
   { to: '/', key: 'public.nav.home' }, { to: '/features', key: 'public.nav.features' }, { to: '/pricing', key: 'public.nav.pricing' },
   { to: '/themes', key: 'public.nav.themes' }, { to: '/research', key: 'public.nav.research' }, { to: '/blog', key: 'public.nav.ideas' },
-  { to: '/schools', key: 'public.nav.schools' }, { to: '/homeschool', key: 'public.nav.homeschool' }, { to: '/help', key: 'public.nav.faq' },
+  { to: '/schools', key: 'public.nav.schools' }, { to: '/homeschool', key: 'public.nav.homeschool' }, { to: '/help', key: 'public.nav.help' },
 ] as const;
 
 function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) {
@@ -187,7 +187,7 @@ function TeacherMenu({ path, owner, student, wide, onReport }: { path: string; o
     { to: '/teacher', label: t('nav.teacher') },
     ...(student ? [] : [{ to: '/play', label: t('nav.allGames') }]),
     ...(owner ? [{ to: '/owner', label: t('nav.devPortal') }] : []),
-    ...BAR_LINKS.map(({ to, key }) => ({ to, label: t(key) })), { to: '/help', label: t('public.nav.faq') },
+    ...BAR_LINKS.map(({ to, key }) => ({ to, label: t(key) })), { to: '/help', label: t('public.nav.help') },
   ];
   return (
     <>

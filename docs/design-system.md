@@ -134,7 +134,7 @@ Game screens keep their own themed overlays (power-up pop, results box, question
 
 ### Tabs
 The one tab bar: `size` sm (36px, 44px on touch screens: question set tabs, Theme Builder) or md (44px page tabs); `fill` stretches the tabs (labels may wrap, never cut); `panelIds` links the selected tab to its panel.
-Special-purpose tab bars that stay hand-built: the Help Center's vertical topic list, the Features page's ways-to-play badges and the Settings panel's vertical tab list (two-across chips on phones).
+Special-purpose tab bars that stay hand-built: the Help page's Quick answers reader pills, the Features page's ways-to-play badges and the Settings panel's vertical tab list (two-across chips on phones).
 
 ### Choices (`src/ui/fields.tsx`)
 - `ChoiceRow`: the one choice control. A sliding yellow pick for words, or white cards when options have `art` (a small picture: board sizes, grid sizes). Each option can have `tip` hover text; on touch screens (no hover) the tip shows on the card, or under the row for the picked word.
