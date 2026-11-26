@@ -9,6 +9,7 @@ import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import { BETA, dollars, fullPrice, offerPrice } from '../beta/spec';
 import { BETA_ASKS } from '../beta/application';
+import { betaOpen } from '../billing/trial';
 
 // Join the Gamify beta test (teacher, 2026-10-25): say exactly what a beta
 // tester does, how long it takes and what they get. Testers get Pro free (owner, 2026-11-24: 3 months, 10 spots);
@@ -18,6 +19,8 @@ const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 
 
 export default function BetaPage() {
   const reduce = useReducedMotion();
+  // The Apply links hide once the beta is full or over (Design Chair, 2026-11-26).
+  const open = betaOpen();
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : Math.min(i, 8) * 0.05 } });
   return (
     <>
@@ -28,7 +31,7 @@ export default function BetaPage() {
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
             {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-std border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
           </ul>
-          <Link to="/beta/apply" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</Link>
+          {open && <Link to="/beta/apply" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</Link>}
         </section>
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">
@@ -95,7 +98,7 @@ export default function BetaPage() {
           </div>
         </section>
 
-        <ApplyCard />
+        {open && <ApplyCard />}
       </main>
       <PublicFooter />
     </>

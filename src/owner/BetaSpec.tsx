@@ -111,7 +111,7 @@ function Applications({ list }: { list: FeedbackReport[] }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <strong className="text-base">{f['Name']}</strong>
                   <span className="dash-tag">{r.at.slice(0, 10)}</span>
-                  <span className={`ml-auto px-2.5 py-0.5 rounded-pill border-std border-border font-bold text-sm ${sc.points >= 4 ? 'bg-mint' : sc.points >= 2 ? 'bg-butter' : 'bg-surface-2'}`}>{t('obeta.score', { n: sc.points, of: sc.of })}</span>
+                  <span className={`ml-auto px-2.5 py-0.5 rounded-pill border-std border-border font-bold text-sm ${sc.points >= sc.of ? 'bg-mint' : sc.points >= sc.of - 1 ? 'bg-butter' : 'bg-surface-2'}`}>{t('obeta.score', { n: sc.points, of: sc.of })}</span>
                 </div>
                 <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0">
                   {sc.signals.map((x) => <li key={x.key} className={`text-xs font-bold px-2 py-0.5 rounded-pill border ${x.ok ? 'border-border bg-mint' : 'border-border-soft bg-surface text-muted line-through'}`}>{t(`obeta.sig.${x.key}` as StringKey)}</li>)}
