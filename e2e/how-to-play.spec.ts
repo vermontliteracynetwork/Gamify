@@ -13,7 +13,7 @@ test('Blog How to Play: every game has an article with screenshots, pieces and r
   for (const h of HOW_TO_PLAY.filter((x) => GAMES.some((g) => g.id === x.gameId))) await expect(page.locator(`a[href="/blog/how-to-play/${h.gameId}"]`).first()).toBeVisible();
 
   await page.goto('/blog/how-to-play/game-show');
-  await expect(page.getByRole('heading', { level: 1, name: /How to Play Game Show/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /How to Play Game Show/i })).toBeVisible();
   for (const name of ['How a Turn Works']) await expect(page.getByRole('heading', { name })).toBeVisible();
   await expect(page.getByText(/One question per turn to earn a card/)).toBeVisible();
   const shots = page.locator('figure img');

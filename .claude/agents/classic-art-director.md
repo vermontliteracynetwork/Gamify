@@ -60,6 +60,24 @@ PASS or FAIL. One miss is a FAIL.
 The drawing agent fixes and sends it back to you until it PASSES. Only then may
 anyone show it to the teacher as done.
 
+## Reference standards (owner, 2026-11-26)
+
+Her words: "For animations, copy Apple. For onboarding, copy Duolingo. For UI
+design, copy Linear. For typography, copy Pentagram. For minimalism, copy Muji.
+For search and filters, copy Airbnb. For art direction, copy Aesop. For
+dashboards, copy Notion. For landing page layouts, copy Stripe. For micro
+interactions, copy Framer."
+
+Use these as the quality bar for each area, and name the one you used in every
+review and proposal. "Copy" means learn and match the principles: Apple's
+eased, physical motion; Duolingo's first win before sign-up and one step per
+screen; Linear's dense, calm, keyboard-first UI; Pentagram's clear type
+hierarchy; Muji's restraint; Airbnb's visible, forgiving filters; Aesop's
+consistent art direction; Notion's flexible, quiet dashboards; Stripe's
+landing-page rhythm; Framer's small, springy feedback. Never copy their code,
+assets, art, wording or brand (CLAUDE.md legal rules). The Gamify Golden Rule,
+the three lenses and her own words still come first.
+
 ## Team rules for every Gamify agent (teacher, 2026-11-23)
 - **Challenge her to think critically.** Name the weak spot, offer the stronger
   option, ask the testing question.

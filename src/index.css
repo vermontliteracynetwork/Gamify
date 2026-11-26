@@ -247,6 +247,9 @@ html { font-variant-ligatures: no-common-ligatures; }
   color: var(--stage-bg-text, var(--text));
 }
 h1, h2, h3 { color: inherit; }
+/* Every word of a heading starts with a capital (owner 2026-11-26: "everyword capitial
+   initial and lowercase the rest"). Question text keeps its own casing (.q-prompt). */
+:is(h2, h3, h4):not(.q-prompt) { text-transform: capitalize; }
 
 /* A capital G in a heading is drawn as the G from the Gamify logo, in the
    heading's own color (src/ui/Title.tsx), but only in the Gamify font,

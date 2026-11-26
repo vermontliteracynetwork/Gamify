@@ -7,7 +7,7 @@ test('Create an activity: pick the game, how they play and the set, then get a c
   page.on('pageerror', (e) => problems.push(e.message));
   await page.goto('/teacher/sets');
   await page.getByRole('button', { name: 'Create an Activity' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: /Create an Activity/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /Create an Activity/i })).toBeVisible();
   await expect(page.getByRole('radio', { name: /Anyone with the code/ })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled();
