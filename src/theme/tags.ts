@@ -14,20 +14,34 @@ const group = (id: string, label: string, labels: string[]): TagGroup => ({ id, 
 
 // One special day each month, one theme, one winner, no runner-up (owner,
 // 2026-11-26). Dates checked on the listofnationaldays.com pages she linked.
-export interface SpecialDay { tag: string; name: string; date: string; theme: string; keywords: string[] }
+// ideas: sub-concepts suggested on the challenge page; keywords: the tags that
+// go with the day (shown as "tags we use").
+export interface SpecialDay { tag: string; name: string; date: string; theme: string; keywords: string[]; ideas: string[] }
 export const SPECIAL_DAYS: SpecialDay[] = [
-  { tag: 'cheesy-socks-day', name: 'Cheesy Socks Day', date: '2027-01-21', theme: 'Funny socks and sock patterns, like an ugly sweater but for socks', keywords: ['socks', 'fun-socks', 'sock-patterns'] },
-  { tag: 'pizza-day', name: 'Pizza Day', date: '2027-02-09', theme: 'Lots of different pizzas and styles, pizzeria style', keywords: ['pizza', 'pizzeria'] },
-  { tag: 'puppy-day', name: 'Puppy Day', date: '2027-03-23', theme: 'Cute puppies doing things, paw prints', keywords: ['puppy', 'dog', 'paw-prints'] },
-  { tag: 'food-faces-day', name: 'Food Faces Day', date: '2027-04-06', theme: 'Faces on food, or faces made from food', keywords: ['food-faces', 'fruit-faces', 'mixed-media'] },
-  { tag: 'world-turtle-day', name: 'World Turtle Day', date: '2027-05-23', theme: 'Turtles and tortoises doing things', keywords: ['turtle', 'tortoise'] },
-  { tag: 'take-your-cat-to-work-day', name: 'Take Your Cat to Work Day', date: '2027-06-19', theme: 'Cats doing jobs: landscapers, teachers, doctors', keywords: ['cat', 'cats-with-jobs'] },
-  { tag: 'ice-cream-sundae-day', name: 'Ice Cream Sundae Day', date: '2027-07-08', theme: 'Sundaes, scoops, toppings and cherries', keywords: ['ice-cream-sundae', 'ice-cream-cone', 'ice-cream'] },
-  { tag: 'potato-day', name: 'Potato Day', date: '2027-08-19', theme: 'Potatoes with personality, or potato dishes like fries and waffle fries', keywords: ['potato', 'french-fries', 'waffle-fries'] },
-  { tag: 'wildlife-day', name: 'Wildlife Day', date: '2027-09-04', theme: 'Any wild animals', keywords: ['wild-animals', 'wildlife', 'squirrels'] },
-  { tag: 'flower-day', name: 'Flower Day', date: '2027-10-07', theme: 'Anything floral, including flowers with personality', keywords: ['flowers', 'floral'] },
-  { tag: 'pickle-day', name: 'Pickle Day', date: '2027-11-14', theme: 'Anything pickles, including pickles with personality', keywords: ['pickles'] },
-  { tag: 'gingerbread-house-day', name: 'Gingerbread House Day', date: '2027-12-12', theme: 'Gingerbread style, gingerbread people, patterns and frosting', keywords: ['gingerbread', 'frosting'] },
+  { tag: 'cheesy-socks-day', name: 'Cheesy Socks Day', date: '2027-01-21', theme: 'Funny socks and sock patterns, like an ugly sweater but for socks', keywords: ['socks', 'fun-socks', 'sock-patterns'],
+    ideas: ['Argyle, stripes and polka dots', 'Mismatched pairs', 'Fuzzy socks and knee socks', 'Toe socks', 'Ugly-sweater patterns on socks', 'Sock puppets', 'A laundry line of socks'] },
+  { tag: 'pizza-day', name: 'Pizza Day', date: '2027-02-09', theme: 'Lots of different pizzas and styles, pizzeria style', keywords: ['pizza', 'pizzeria'],
+    ideas: ['Pepperoni, cheese and veggie toppings', 'Pizza slices and whole pies', 'Pizza boxes', 'A pizzeria sign and counter', 'Pizza chefs tossing dough', 'Deep dish and thin crust', 'Pizza fractions'] },
+  { tag: 'puppy-day', name: 'Puppy Day', date: '2027-03-23', theme: 'Cute puppies doing things, paw prints', keywords: ['puppy', 'dog', 'paw-prints'],
+    ideas: ['Puppies playing fetch', 'Chew toys and dog bowls', 'Paw prints', 'A dog park', 'Puppy school', 'Bath time', 'Dog houses'] },
+  { tag: 'food-faces-day', name: 'Food Faces Day', date: '2027-04-06', theme: 'Faces on food, or faces made from food', keywords: ['food-faces', 'fruit-faces', 'mixed-media'],
+    ideas: ['Fruit faces', 'Veggie faces', 'Toast and pancake faces', 'Lunch-box faces', 'A face made out of food', 'Foods with feelings', 'A photo of real food with a drawn face'] },
+  { tag: 'world-turtle-day', name: 'World Turtle Day', date: '2027-05-23', theme: 'Turtles and tortoises doing things', keywords: ['turtle', 'tortoise'],
+    ideas: ['Sea turtles and coral reefs', 'Box turtles and ponds', 'Tortoises in the desert', 'Shell patterns', 'Slow and steady races', 'Hatchlings on the beach'] },
+  { tag: 'take-your-cat-to-work-day', name: 'Take Your Cat to Work Day', date: '2027-06-19', theme: 'Cats doing jobs: landscapers, teachers, doctors', keywords: ['cat', 'cats-with-jobs'],
+    ideas: ['Cat teachers', 'Cat doctors and nurses', 'Cat landscapers', 'Cat chefs', 'Cat firefighters', 'Cat astronauts', 'Tools and uniforms'] },
+  { tag: 'ice-cream-sundae-day', name: 'Ice Cream Sundae Day', date: '2027-07-08', theme: 'Sundaes, scoops, toppings and cherries', keywords: ['ice-cream-sundae', 'ice-cream-cone', 'ice-cream'],
+    ideas: ['Scoops and sprinkles', 'Hot fudge and whipped cream', 'Cherries on top', 'Banana splits', 'A sundae bar', 'Ice cream cones', 'An ice cream truck'] },
+  { tag: 'potato-day', name: 'Potato Day', date: '2027-08-19', theme: 'Potatoes with personality, or potato dishes like fries and waffle fries', keywords: ['potato', 'french-fries', 'waffle-fries'],
+    ideas: ['Potatoes with faces', 'French fries', 'Waffle fries', 'Mashed and baked potatoes', 'Tater tots', 'A potato sack race', 'A potato farm'] },
+  { tag: 'wildlife-day', name: 'Wildlife Day', date: '2027-09-04', theme: 'Any wild animals', keywords: ['wild-animals', 'wildlife', 'squirrels'],
+    ideas: ['Forest animals: foxes, deer, owls, squirrels', 'Safari: lions, giraffes, elephants', 'Ocean wildlife: whales, dolphins, sea turtles', 'Arctic: polar bears, penguins, arctic foxes', 'Jungle: monkeys, tigers, parrots', 'Animal tracks', 'Habitats and endangered animals'] },
+  { tag: 'flower-day', name: 'Flower Day', date: '2027-10-07', theme: 'Anything floral, including flowers with personality', keywords: ['flowers', 'floral'],
+    ideas: ['Sunflowers, tulips and daisies', 'Wildflowers', 'Flowers with faces', 'Bouquets', 'Pressed flowers', 'Gardens', 'Bees and butterflies'] },
+  { tag: 'pickle-day', name: 'Pickle Day', date: '2027-11-14', theme: 'Anything pickles, including pickles with personality', keywords: ['pickles'],
+    ideas: ['Pickles with faces', 'Pickle jars', 'Cucumbers in a garden', 'Dill and deli', 'A pickle party'] },
+  { tag: 'gingerbread-house-day', name: 'Gingerbread House Day', date: '2027-12-12', theme: 'Gingerbread style, gingerbread people, patterns and frosting', keywords: ['gingerbread', 'frosting'],
+    ideas: ['Gingerbread people', 'Gingerbread houses', 'Frosting patterns', 'Gumdrops and peppermints', 'Cookie cutters', 'A gingerbread town'] },
 ];
 
 export const TAG_GROUPS: TagGroup[] = [
@@ -63,19 +77,24 @@ function eastern(date: string, time: string): Date {
   const dst = (m > 3 && m < 11) || (m === 3 && d >= dstStart) || (m === 11 && d < dstEnd);
   return new Date(`${date}T${time}${dst ? '-04:00' : '-05:00'}`);
 }
-export const ANNOUNCE_AFTER_DAYS = 7;
-export function challengeClose(day: SpecialDay): Date { return eastern(day.date, '23:59:00'); }
-export function winnerDate(day: SpecialDay): string {
-  const d = new Date(`${day.date}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + ANNOUNCE_AFTER_DAYS);
-  return d.toISOString().slice(0, 10);
-}
+// Entries and the public vote close 48 hours before the special day, so the
+// owner can review (owner, 2026-11-26): 11:59 pm Eastern, two days before.
+// The winner is announced on the special day itself (to confirm with her).
+export const CLOSE_DAYS_BEFORE = 2;
+const shift = (iso: string, days: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); };
+export function closeDate(day: SpecialDay): string { return shift(day.date, -CLOSE_DAYS_BEFORE); }
+export function challengeClose(day: SpecialDay): Date { return eastern(closeDate(day), '23:59:00'); }
+export function winnerDate(day: SpecialDay): string { return day.date; }
+export function isOpen(day: SpecialDay, now = new Date()): boolean { return now.getTime() <= challengeClose(day).getTime(); }
+export function nextOpenDay(now = new Date()): SpecialDay { return SPECIAL_DAYS.find((d) => isOpen(d, now)) ?? SPECIAL_DAYS[SPECIAL_DAYS.length - 1]; }
+// Today's date in Eastern time, for one vote per device per day.
+export function easternToday(now = new Date()): string { return now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); }
 
-// The themes that count for a special day: entered in the challenge, tagged
-// with the day or one of its keywords, and saved before entries closed.
-export function challengeEntries<T extends { tags?: string[]; challenge?: boolean; gallery?: { status: string; at: string } }>(themes: T[], day: SpecialDay): T[] {
+// The themes entered for a special day: the challenge switch on, this day
+// picked in the month menu (owner, 2026-11-26: "a drop-down menu to select
+// the 1 month that they're submitting it to"), and shared before the close.
+export function challengeEntries<T extends { challenge?: boolean; challengeDay?: string; gallery?: { status: string; at: string } }>(themes: T[], day: SpecialDay): T[] {
   const close = challengeClose(day).getTime();
-  const match = new Set([day.tag, ...day.keywords]);
-  return themes.filter((th) => th.challenge && th.gallery && th.gallery.status !== 'declined'
-    && (th.tags ?? []).some((x) => match.has(x)) && new Date(th.gallery.at).getTime() <= close);
+  return themes.filter((th) => th.challenge && th.challengeDay === day.tag && th.gallery && th.gallery.status !== 'declined'
+    && new Date(th.gallery.at).getTime() <= close);
 }

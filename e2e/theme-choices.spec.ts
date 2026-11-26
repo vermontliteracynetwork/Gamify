@@ -63,6 +63,8 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await page.getByRole('radio', { name: 'Share in the public gallery' }).click();
   await expect(page.getByText('Sent to the gallery.', { exact: false })).toBeVisible();
   await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeChecked();
+  await expect(page.getByText('Pick a special day so your theme is entered.')).toBeVisible();
+  await page.getByLabel('Which special day are you entering?').selectOption('pizza-day');
   await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
@@ -81,4 +83,15 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await expect(page.getByText('Made by Test Teacher')).toBeVisible();
   await page.getByPlaceholder('Search by name or tag').fill('pizza');
   await expect(page.getByRole('heading', { name: 'Rainbow Room' })).toBeVisible();
+
+  // The ongoing public vote: the Feb tab lists the entry; pick it and vote once a day.
+  await page.clock.setFixedTime(new Date('2027-01-10T15:00:00Z'));
+  await page.goto('/challenge');
+  await page.getByRole('tab', { name: 'Feb' }).click();
+  const entry = page.getByRole('tabpanel').getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Rainbow Room' }) });
+  await entry.getByRole('button', { name: 'Pick' }).click();
+  await page.getByRole('button', { name: 'Vote', exact: true }).click();
+  await expect(page.getByText('Thanks for voting! Come back tomorrow to vote again.')).toBeVisible();
+  await expect(entry.getByText('1 vote', { exact: true })).toBeVisible();
+  await page.screenshot({ path: `test-results/challenge-vote-${info.project.name}.png`, fullPage: true });
 });

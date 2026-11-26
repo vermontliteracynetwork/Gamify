@@ -8,7 +8,7 @@ import type { FeedbackReport } from '../data/types';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
-import { SPECIAL_DAYS, challengeEntries, tagLabel, winnerDate } from '../theme/tags';
+import { SPECIAL_DAYS, challengeEntries, closeDate, tagLabel, winnerDate } from '../theme/tags';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
 import { Button } from '../ui/kit';
@@ -384,7 +384,7 @@ function GalleryCard() {
           {SPECIAL_DAYS.map((d) => <option key={d.tag} value={d.tag}>{d.name} ({d.date})</option>)}
         </select>
       </label>
-      <p className="text-sm font-semibold text-muted">{t('owner.challengeDates', { close: day.date, winner: winnerDate(day) })}</p>
+      <p className="text-sm font-semibold text-muted">{t('owner.challengeDates', { close: closeDate(day), winner: winnerDate(day) })}</p>
       {entries.length
         ? <ul className="grid gap-1 list-disc pl-5 m-0 font-semibold">{entries.map((th) => <li key={th.id}>{th.name} · {creditLine(th)} · {(th.tags ?? []).map(tagLabel).join(', ')}{th.gallery?.status === 'pending' ? ` (${t('owner.galleryPendingShort')})` : ''}</li>)}</ul>
         : <p className="text-sm font-bold">{t('owner.challengeNone')}</p>}

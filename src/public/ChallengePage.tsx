@@ -2,17 +2,19 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import { CalendarStar, Crown, PaintBrush, PencilSimpleLine } from '@phosphor-icons/react';
-import { SPECIAL_DAYS, winnerDate } from '../theme/tags';
+import { SPECIAL_DAYS, closeDate, winnerDate } from '../theme/tags';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
+import ChallengeVote from './ChallengeVote';
 
 // The Theme Building Challenge (teacher, 2026-10-25): a launch campaign that
 // fills the theme library. Since 2026-11-26 (owner): one special day each
-// month with one winner, no runner-up; entries close 11:59 pm on the day and
-// the winner is emailed and posted 7 days later. Official rules come before
+// month with one winner, no runner-up, and an ongoing public vote; entries
+// and votes close 48 hours before the day, and the winner is emailed and
+// posted on the day. Official rules come before
 // the first day (attorney review).
 const day = (iso: string, opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' }) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
@@ -50,13 +52,15 @@ export default function ChallengePage() {
                 <p className="font-bold text-sm uppercase tracking-wide flex items-center gap-1.5"><CalendarStar weight="fill" size={18} aria-hidden="true" />{day(d.date, { month: 'long' })}</p>
                 <h3 className="font-display text-2xl leading-tight">{d.name}</h3>
                 <p className="font-semibold">{d.theme}</p>
-                <p className="text-sm font-bold">{t('challenge.dayCloses', { date: day(d.date) })}</p>
+                <p className="text-sm font-bold">{t('challenge.dayCloses', { date: day(closeDate(d)) })}</p>
                 <p className="text-sm font-bold">{t('challenge.dayWinner', { date: day(winnerDate(d)) })}</p>
                 <p className="text-xs font-bold text-muted">{t('challenge.dayTag', { tag: d.name })}</p>
               </li>
             ))}
           </ol>
         </section>
+
+        <ChallengeVote />
 
         <section aria-labelledby="how" className="grid gap-4">
           <h2 id="how" className="title-bubble text-4xl"><Title text={t('challenge.how')} /></h2>

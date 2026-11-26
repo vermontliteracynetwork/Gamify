@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, searchTags, winnerDate } from './tags';
+import { ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, closeDate, isOpen, nextOpenDay, searchTags, winnerDate } from './tags';
 
 describe('theme tags and special days', () => {
-  it('has one special day a month, each with its own tag and known keyword tags', () => {
+  it('has one special day a month, each with its own tag, known keyword tags and ideas', () => {
+    SPECIAL_DAYS.forEach((d) => expect(d.ideas.length).toBeGreaterThan(3));
     expect(SPECIAL_DAYS.map((d) => Number(d.date.slice(5, 7)))).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
     const ids = new Set(ALL_TAGS.map((x) => x.id));
     for (const d of SPECIAL_DAYS) {
@@ -11,22 +12,25 @@ describe('theme tags and special days', () => {
     }
     expect(ALL_TAGS.length).toBe(new Set(ALL_TAGS.map((x) => x.id)).size);
   });
-  it('closes at 11:59 pm Eastern and announces 7 days later', () => {
+  it('closes entries and votes at 11:59 pm Eastern two days before, winner on the day', () => {
     const socks = SPECIAL_DAYS[0];
-    expect(challengeClose(socks).toISOString()).toBe('2027-01-22T04:59:00.000Z'); // EST
-    const turtle = SPECIAL_DAYS[4];
-    expect(challengeClose(turtle).toISOString()).toBe('2027-05-24T03:59:00.000Z'); // EDT
-    expect(winnerDate(socks)).toBe('2027-01-28');
-    expect(winnerDate(SPECIAL_DAYS[11])).toBe('2027-12-19');
+    expect(closeDate(socks)).toBe('2027-01-19');
+    expect(challengeClose(socks).toISOString()).toBe('2027-01-20T04:59:00.000Z'); // EST
+    expect(challengeClose(SPECIAL_DAYS[4]).toISOString()).toBe('2027-05-22T03:59:00.000Z'); // EDT, May 21
+    expect(winnerDate(socks)).toBe('2027-01-21');
+    expect(isOpen(socks, new Date('2027-01-19T12:00:00Z'))).toBe(true);
+    expect(isOpen(socks, new Date('2027-01-20T12:00:00Z'))).toBe(false);
+    expect(nextOpenDay(new Date('2027-01-20T12:00:00Z')).tag).toBe('pizza-day');
   });
-  it('pulls entries by the day tag or its keywords, entered before the close', () => {
+  it('pulls entries by the month they picked, entered before the close', () => {
     const day = SPECIAL_DAYS[1];
     const themes = [
-      { id: 'a', tags: ['pizza'], challenge: true, gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
-      { id: 'b', tags: ['pizza-day'], challenge: false, gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
-      { id: 'c', tags: ['puppy'], challenge: true, gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
-      { id: 'd', tags: ['pizza-day'], challenge: true, gallery: { status: 'pending', at: '2027-02-11T10:00:00Z' } },
-      { id: 'e', tags: ['pizza-day'], challenge: true, gallery: { status: 'declined', at: '2027-01-05T10:00:00Z' } },
+      { id: 'a', challenge: true, challengeDay: 'pizza-day', gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
+      { id: 'b', challenge: false, challengeDay: 'pizza-day', gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
+      { id: 'c', challenge: true, challengeDay: 'puppy-day', gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
+      { id: 'd', challenge: true, challengeDay: 'pizza-day', gallery: { status: 'pending', at: '2027-02-08T10:00:00Z' } },
+      { id: 'e', challenge: true, challengeDay: 'pizza-day', gallery: { status: 'declined', at: '2027-01-05T10:00:00Z' } },
+      { id: 'f', challenge: true, gallery: { status: 'approved', at: '2027-01-05T10:00:00Z' } },
     ];
     expect(challengeEntries(themes, day).map((x) => x.id)).toEqual(['a']);
   });

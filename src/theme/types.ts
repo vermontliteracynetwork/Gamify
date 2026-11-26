@@ -137,6 +137,8 @@ export interface GameTheme {
   // gallery and used to pull each special day's challenge entries.
   tags?: string[];
   challenge?: boolean;
+  // The one special day (its tag) this theme is entered for (owner, 2026-11-26).
+  challengeDay?: string;
   challengeTrack?: 'hand' | 'studio';
   permissionOnFile?: boolean;
 }
