@@ -256,6 +256,22 @@ test.describe('features page', () => {
     await expect(pictures.getByRole('img', { name: 'Bowling in the Space Lanes theme' })).toBeVisible();
     await expect(pictures.getByText('Made by your class')).toBeVisible();
   });
+  test('Game Show wears its studio in every theme, and Try it redraws the studio from the colors picked', async ({ page }) => {
+    await page.goto('/features');
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Game Show', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Game Show in every theme' });
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    // A sample theme: curtains, stage and the bulb marquee round card backs, no numbered grid.
+    const pic = pictures.getByRole('img', { name: /^Game Show in the .+ theme$/ });
+    await expect(pic.locator('[data-studio]')).toBeVisible();
+    await expect(pic.getByText(/^[1-4]$/)).toHaveCount(0);
+    const tryIt = page.getByRole('img', { name: 'Game Show in the Your look theme' });
+    await expect(tryIt.locator('[data-studio]')).toBeVisible();
+    const before = await tryIt.locator('[data-studio] rect').first().getAttribute('fill');
+    await page.getByRole('radio', { name: 'Night' }).click();
+    await expect(tryIt.locator('[data-studio] rect').first()).not.toHaveAttribute('fill', before!);
+  });
 });
 
 test.describe('buyer pages', () => {

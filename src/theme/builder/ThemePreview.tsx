@@ -253,19 +253,6 @@ function board(theme: GameTheme, size?: number) {
       );
     case 'sign-in':
       return <div className="grid grid-cols-4 gap-2">{PICTURES.map((p) => <PictureBadge key={p.id} id={p.id} theme={theme} size={44} />)}</div>;
-    case 'game-show':
-      return (
-        <div className="grid grid-cols-4 gap-1.5 w-full">
-          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image ?? (theme.gameId === 'bowling' ? theme.pieces[`ball-${k + 1}`]?.image : undefined))}>
-            <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
-          </TeamArt.Provider>
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className="aspect-[4/3] rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
-              {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
-            </span>
-          ))}
-        </div>
-      );
     default:
       return (
         <div className="flex flex-wrap gap-3 justify-center items-center">
