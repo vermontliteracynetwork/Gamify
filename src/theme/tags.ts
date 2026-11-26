@@ -79,12 +79,13 @@ function eastern(date: string, time: string): Date {
 }
 // Entries and the public vote close 48 hours before the special day, so the
 // owner can review (owner, 2026-11-26): 11:59 pm Eastern, two days before.
-// The winner is announced on the special day itself (to confirm with her).
+// The winner is announced at 12:00 am Eastern on the special day (owner, 2026-11-26).
 export const CLOSE_DAYS_BEFORE = 2;
 const shift = (iso: string, days: number) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + days); return d.toISOString().slice(0, 10); };
 export function closeDate(day: SpecialDay): string { return shift(day.date, -CLOSE_DAYS_BEFORE); }
 export function challengeClose(day: SpecialDay): Date { return eastern(closeDate(day), '23:59:00'); }
 export function winnerDate(day: SpecialDay): string { return day.date; }
+export function winnerAt(day: SpecialDay): Date { return eastern(day.date, '00:00:00'); }
 export function isOpen(day: SpecialDay, now = new Date()): boolean { return now.getTime() <= challengeClose(day).getTime(); }
 export function nextOpenDay(now = new Date()): SpecialDay { return SPECIAL_DAYS.find((d) => isOpen(d, now)) ?? SPECIAL_DAYS[SPECIAL_DAYS.length - 1]; }
 // Today's date in Eastern time, for one vote per device per day.

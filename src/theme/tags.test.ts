@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, closeDate, isOpen, nextOpenDay, searchTags, winnerDate } from './tags';
+import { ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, closeDate, isOpen, winnerAt, nextOpenDay, searchTags, winnerDate } from './tags';
 
 describe('theme tags and special days', () => {
   it('has one special day a month, each with its own tag, known keyword tags and ideas', () => {
@@ -18,6 +18,7 @@ describe('theme tags and special days', () => {
     expect(challengeClose(socks).toISOString()).toBe('2027-01-20T04:59:00.000Z'); // EST
     expect(challengeClose(SPECIAL_DAYS[4]).toISOString()).toBe('2027-05-22T03:59:00.000Z'); // EDT, May 21
     expect(winnerDate(socks)).toBe('2027-01-21');
+    expect(winnerAt(socks).toISOString()).toBe('2027-01-21T05:00:00.000Z');
     expect(isOpen(socks, new Date('2027-01-19T12:00:00Z'))).toBe(true);
     expect(isOpen(socks, new Date('2027-01-20T12:00:00Z'))).toBe(false);
     expect(nextOpenDay(new Date('2027-01-20T12:00:00Z')).tag).toBe('pizza-day');
