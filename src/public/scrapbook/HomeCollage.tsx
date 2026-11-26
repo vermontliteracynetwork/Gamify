@@ -37,7 +37,7 @@ function layout({ colW, vw, vh }: Geo) {
   }
   // Sticker sizes follow the collage (the mockup's sizes at a 570px laptop column, a 350px phone).
   const k = phone ? Math.min(1.4, bw / 350) : Math.max(0.62, Math.min(1.05, bw / 570));
-  return { cols, gap, cw, ch, gw, gh, boxH, bw, k, phone, mat: phone ? 4 : 7 };
+  return { cols, gap, cw, ch, gw, gh, boxH, bw, k, phone, tablet: !wide && !phone, mat: phone ? 4 : 7 };
 }
 
 export default function HomeCollage() {
@@ -59,7 +59,7 @@ export default function HomeCollage() {
     <div ref={ref} aria-hidden="true" className="w-full min-w-0">
       {g && (
         <div className="relative mx-auto" style={{ width: g.bw, height: g.boxH }}>
-          <Suspense fallback={null}><Papers /></Suspense>
+          <Suspense fallback={null}><Papers phone={g.phone} /></Suspense>
           <div className="absolute grid" style={{ left: (g.bw - g.gw) / 2, top: (g.boxH - g.gh) / 2, gridTemplateColumns: `repeat(${g.cols}, ${g.cw}px)`, gap: g.gap }}>
             {COVERS.map((id, i) => {
               const rot = tilted ? TILTS[i] : 0;
@@ -73,7 +73,7 @@ export default function HomeCollage() {
               );
             })}
           </div>
-          <Suspense fallback={null}><Stickers bw={g.bw} boxH={g.boxH} phone={g.phone} k={g.k} /></Suspense>
+          <Suspense fallback={null}><Stickers bw={g.bw} boxH={g.boxH} phone={g.phone} tablet={g.tablet} k={g.k} /></Suspense>
         </div>
       )}
     </div>

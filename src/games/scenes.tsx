@@ -5,6 +5,7 @@ import { classicTheme } from '../theme/classic';
 import { houseFor } from '../theme/house';
 import { STARTER_THEMES } from '../theme/starters';
 import ThemePreview from '../theme/builder/ThemePreview';
+import GameShowPreview from '../theme/builder/previews/game-show';
 import type { GameTheme } from '../theme/types';
 import { useSettings } from '../settings/SettingsContext';
 import { t } from '../i18n';
@@ -17,6 +18,7 @@ import { GameCover, ThemeCover } from './covers';
 // Every picture is drawn live from a theme definition (src/theme/types
 // GameTheme), never a saved screenshot, so any theme re-renders it:
 //   Classic          -> the approved Classic cover art (GameCover), the main design;
+//   Game Show        -> the theme's own studio around the Classic cover's 3 x 2 board;
 //   discs or a room  -> the theme's own cover scene (ThemeCover: its pieces or pets);
 //   any other theme  -> the game's live preview from the Theme Builder
 //                       (ThemePreview, bare: the game screen with no name lettering),
@@ -50,6 +52,8 @@ const isClassic = (th: GameTheme) => th.id === classicTheme(th.gameId).id;
 export function GameScene({ theme, className = '' }: { theme: GameTheme; className?: string }) {
   const box = `relative overflow-hidden aspect-[4/3] ${className}`;
   if (isClassic(theme)) return <div className={box}><GameCover gameId={theme.gameId} className="w-full h-full" /></div>;
+  // Game Show keeps the Classic cover's board (3 x 2, no meter) in every theme's studio, so the board never jumps as the picture cycles.
+  if (theme.gameId === 'game-show') return <div className={`${box} [&>*]:!border-0 [&>*]:!rounded-none [&>*]:absolute [&>*]:inset-0`} aria-hidden="true"><GameShowPreview theme={theme} cover /></div>;
   if (theme.discs?.length || theme.itemImages?.length) return <div className={box}><ThemeCover theme={theme} className="w-full h-full" /></div>;
   return (
     <div className={`${box} [&>*]:!border-0 [&>*]:!rounded-none [&>*]:absolute [&>*]:inset-0`} aria-hidden="true">

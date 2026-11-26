@@ -21,24 +21,30 @@ const I = STUDIO.ink;
 // (starter, house, a teacher's or class-made one, the Features page's Try it)
 // gets the same studio drawn from its own colors (owner, 2026-11-26): its
 // background behind the curtains (its pattern or picture too), its accent on
-// the curtains, its grid-square color on the stage floor, the spotlights and
-// the marquee's lit panel tinted from its background. Whatever a theme leaves
-// at Classic keeps Classic's color, and a color that would vanish into the
-// one beside it steps to the next palette color, so every part stays readable.
+// the curtains, its grid-square color on the stage floor. Every color the
+// studio adds itself is a palette color, never a blend (Classic Art Director,
+// 2026-11-26): the rim, spotlights, lit panel, boards and dashes come from the
+// backdrop's and floor's palette pairs, and the rim's shadow is always Ink. A
+// color that would vanish into the one beside it steps to the next palette
+// color, so every part stays readable.
 export interface StudioLook {
-  back: string; beam: string; beamOpacity: number; curtain: string; tie: string; floor: string; boards: string;
+  back: string; beam: string; curtain: string; tie: string; floor: string; boards: string;
+  // Whether the spotlights show (always opaque; off over a picture backdrop so the drawing shows).
+  beams: boolean;
   rim: string; rimShadow: string; inner: string; bulbA: string; bulbB: string;
   // The dashed inset on a closed card, in a color that shows on the card.
   dash: string;
-  // The theme's own backdrop (pattern or picture) behind the studio, when it has one.
+  // The theme's own pattern behind the studio, when it has one.
   ground?: CSSProperties;
+  // The theme's own picture, shown whole in the open stage between the curtains.
+  picture?: CSSProperties;
 }
 export const CLASSIC_STUDIO: StudioLook = {
-  back: STUDIO.grape, beam: STUDIO.lavender, beamOpacity: 1, curtain: STUDIO.pink, tie: STUDIO.lemon, floor: STUDIO.lemon, boards: STUDIO.orange,
+  back: STUDIO.grape, beam: STUDIO.lavender, beams: true, curtain: STUDIO.pink, tie: STUDIO.lemon, floor: STUDIO.lemon, boards: STUDIO.orange,
   rim: STUDIO.grape, rimShadow: STUDIO.grapeDeep, inner: STUDIO.lavender, bulbA: STUDIO.lemon, bulbB: STUDIO.paper, dash: STUDIO.orange,
 };
-// Classic Game Show's own theme colors (src/theme/classic.ts), to tell what a theme changed.
-const CLASSIC_BG = '#6a45f0', CLASSIC_ACCENT = '#fdfd94';
+// Classic Game Show's own accent (src/theme/classic.ts), to tell what a theme changed.
+const CLASSIC_ACCENT = '#fdfd94';
 
 const rgb = (hex: string) => {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
@@ -47,64 +53,88 @@ const rgb = (hex: string) => {
   return [0, 2, 4].map((k) => parseInt(h.slice(k, k + 2), 16));
 };
 const same = (a: string, b: string) => rgb(a).join() === rgb(b).join();
-// Mixes a toward b by f (0..1), as a hex color.
-export function mix(a: string, b: string, f: number): string {
-  const x = rgb(a), y = rgb(b);
-  return `#${x.map((v, k) => Math.round(v + (y[k] - v) * f).toString(16).padStart(2, '0')).join('')}`;
-}
 // How far apart two colors look (a weighted RGB distance, the "redmean" formula).
-function apart(a: string, b: string): number {
+export function apart(a: string, b: string): number {
   const [r1, g1, b1] = rgb(a), [r2, g2, b2] = rgb(b);
   const rm = (r1 + r2) / 2, dr = r1 - r2, dg = g1 - g2, db = b1 - b2;
   return Math.sqrt((2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db);
 }
-const CLEAR = 150;
+export const CLEAR = 150;
+const clears = (c: string, near: string[]) => near.every((n) => apart(c, n) >= CLEAR);
 // The first color that stands apart from every neighbour (or the first one, if none does).
 const pick = (want: (string | undefined)[], near: string[]) => {
   const list = want.filter((c): c is string => !!c);
-  return list.find((c) => near.every((n) => apart(c, n) >= CLEAR)) ?? list[0];
+  return list.find((c) => clears(c, near)) ?? list[0];
 };
 
-// `plain` and `calm` follow the teacher's Backgrounds and Calm settings, as the page backdrop does.
-// A dark ground's spotlight is the palette pastel of its nearest hue (Classic's
-// Grape gets Lavender), never a grey tint of the dark color.
-const PAIRS: [string, string][] = [['#7a88fe', '#b4c4fb'], ['#6a45f0', '#ddd6ff'], ['#4ba3e8', '#bfdff3'], ['#f055a5', '#ffd3e6'], ['#fabe37', '#fff1b8'],
+// The palette pairs (bright, pastel) of the Classic Art rule. Grape first: a
+// grey, white or black ground belongs to Gamify's own pair.
+export const PAIRS: [string, string][] = [['#6a45f0', '#ddd6ff'], ['#7a88fe', '#b4c4fb'], ['#4ba3e8', '#bfdff3'], ['#f055a5', '#ffd3e6'], ['#fabe37', '#fff1b8'],
   ['#ff9b28', '#ffd9b3'], ['#22b04a', '#c8f0dc'], ['#1fb5a8', '#c9f1ee'], ['#ccd537', '#e8f0b4']];
+// The rim on a dark or bright backdrop: Grape, Sky, Pink, Kelly, the first that stands apart.
+const RIMS = [STUDIO.grape, '#4ba3e8', STUDIO.pink, '#22b04a'];
 const hue = (hex: string) => {
   const [r, g, b] = rgb(hex), mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
-  if (!d) return -1;
+  if (d < 32) return -1;
   const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
   return (h * 60 + 360) % 360;
 };
 const dark = (hex: string) => { const [r, g, b] = rgb(hex); return 0.299 * r + 0.587 * g + 0.114 * b < 96; };
-function pastelFor(hex: string): string {
+// A color's palette pair: its own pair when it is a palette color, else the
+// pair of the nearest hue (Grape's for a grey, white or black).
+export function pairOf(hex: string): [string, string] {
+  const own = PAIRS.find((p) => same(p[0], hex) || same(p[1], hex));
+  if (own) return own;
   const h = hue(hex);
-  if (h < 0) return STUDIO.lavender;
+  if (h < 0) return PAIRS[0];
   const gap = (x: number) => Math.min(Math.abs(x - h), 360 - Math.abs(x - h));
-  return PAIRS.reduce((best, p) => (gap(hue(p[0])) < gap(hue(best[0])) ? p : best))[1];
+  return PAIRS.reduce((best, p) => (gap(hue(p[0])) < gap(hue(best[0])) ? p : best));
+}
+// Pastel: light, and nearer its pair's pastel than its bright (white and Paper count).
+export function isPastel(hex: string): boolean {
+  if (dark(hex)) return false;
+  const [b, p] = pairOf(hex);
+  return apart(hex, p) <= apart(hex, b);
 }
 
 export function studioLook(theme: GameTheme, stage?: string, { plain = false, calm = false }: { plain?: boolean; calm?: boolean } = {}): StudioLook {
+  // Classic stays Classic (Classic Art Director, 2026-11-26): a color the
+  // teacher picks replaces the Grape backdrop and nothing else; the spotlights
+  // and lit panel step to Paper only if Lavender would vanish into her color.
+  if (theme.id.endsWith(':classic')) {
+    if (!stage) return CLASSIC_STUDIO;
+    const lit = clears(STUDIO.lavender, [stage]) ? STUDIO.lavender : STUDIO.paper;
+    return { ...CLASSIC_STUDIO, back: stage, beam: lit, inner: lit };
+  }
   const back = stage ?? theme.colors.background;
-  const ownBack = !same(back, CLASSIC_BG);
   const ownAccent = !same(theme.colors.accent, CLASSIC_ACCENT);
   const card = pieceColor(theme, 'card-back', STUDIO.butter);
   const square = theme.pieces.square?.color;
-  const picture = !stage && !plain && theme.backdrop.kind === 'image';
-  const ground = !stage && !plain && theme.backdrop.kind !== 'color' ? backdropStyle(theme, false, calm) : undefined;
-  if (!ownBack && !ownAccent && same(card, STUDIO.butter) && !square && !ground) return CLASSIC_STUDIO;
-  const beam = !ownBack ? STUDIO.lavender : dark(back) ? pastelFor(back) : mix(back, '#ffffff', 0.62);
+  const image = !stage && !plain && theme.backdrop.kind === 'image' ? theme.backdrop : undefined;
+  const ground = !stage && !plain && theme.backdrop.kind !== 'color' && !image ? backdropStyle(theme, false, calm) : undefined;
+  // A picture shows whole in the open stage (cover, a little above center), so the owner's drawing is never cut by the curtains.
+  const picture: CSSProperties | undefined = image && (image.tile
+    ? { background: `${back} 0 0 / 240px repeat url("${image.src}")` }
+    : { backgroundColor: back, backgroundImage: `url("${image.src}")`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'center 35%' });
+  const [bright, soft] = pairOf(back);
+  const light = isPastel(back);
+  // The rim: the backdrop's own bright on a pastel; on a dark or bright
+  // backdrop, the first of Grape, Sky, Pink and Kelly that stands apart from it.
+  const rim = pick(light ? [bright, ...RIMS] : RIMS, [back]);
+  // The spotlights and lit panel: the backdrop's pastel on a bright or dark
+  // backdrop, Paper on one that is already pastel.
+  const beam = light ? STUDIO.paper : soft;
   const curtain = ownAccent ? pick([theme.colors.accent, STUDIO.pink, STUDIO.orange], [back]) : pick([STUDIO.pink, STUDIO.orange, '#4ba3e8', '#22b04a'], [back, card]);
   const floor = pick([square && !same(square, card) ? square : undefined, STUDIO.lemon, STUDIO.orange, STUDIO.paper], [curtain, back]);
-  const rim = ownBack ? mix(back, I, 0.2) : STUDIO.grape;
   return {
-    back, beam, beamOpacity: picture ? 0.45 : 1, curtain,
+    back, beam, beams: !image, curtain,
     tie: pick([STUDIO.lemon, STUDIO.paper, STUDIO.orange], [curtain]),
-    floor, boards: same(floor, STUDIO.lemon) ? STUDIO.orange : mix(floor, I, 0.25),
-    rim, rimShadow: mix(rim, I, 0.6), inner: beam,
+    // The boards: the floor's own bright on a pastel floor (Lemon gets Orange), Ink on a bright one.
+    floor, boards: same(floor, STUDIO.lemon) ? STUDIO.orange : isPastel(floor) ? pairOf(floor)[0] : STUDIO.ink,
+    rim, rimShadow: STUDIO.ink, inner: beam,
     bulbA: pick([STUDIO.lemon, STUDIO.paper], [rim]), bulbB: STUDIO.paper,
-    dash: pick([STUDIO.orange, mix(card, I, 0.45)], [card]),
-    ground,
+    dash: clears(STUDIO.orange, [card]) ? STUDIO.orange : STUDIO.ink,
+    ground, picture,
   };
 }
 
@@ -140,7 +170,7 @@ export function useBoxSize<T extends HTMLElement>() {
 // own background color for this game when she picked one (2026-11-01).
 // `look` is the theme's studio colors (studioLook); Classic by default.
 export function StudioBack({ w, h, rem, back, look = CLASSIC_STUDIO }: { w: number; h: number; rem: number; back?: string; look?: StudioLook }) {
-  const L = back ? { ...look, back, ground: undefined } : look;
+  const L = back ? { ...look, back, ground: undefined, picture: undefined, beams: true } : look;
   if (w < 10 || h < 10) return null;
   // Curtains: about 8.5% of the width each side, never thinner than 2.6rem.
   const c = Math.max(w * 0.085, rem * 2.6);
@@ -166,11 +196,14 @@ export function StudioBack({ w, h, rem, back, look = CLASSIC_STUDIO }: { w: numb
   return (
     <>
     {L.ground && <div className="absolute inset-0 pointer-events-none" style={L.ground} aria-hidden="true" />}
+    {/* A picture backdrop fills the open stage between the curtains, under the valance and over the floor, so it is seen whole. */}
+    {L.picture && <div className="absolute inset-0 pointer-events-none" style={{ background: L.back }} aria-hidden="true" />}
+    {L.picture && <div className="absolute pointer-events-none" style={{ ...L.picture, left: c * 0.7, right: c * 0.7, top: band, height: floor - band }} aria-hidden="true" />}
     <svg className="absolute inset-0 pointer-events-none" width={w} height={h} aria-hidden="true" data-studio="">
-      {!L.ground && <rect width={w} height={h} fill={L.back} />}
-      {/* spotlight beams, opaque lavender, behind everything else */}
-      <path d={`M${w * 0.2} 0 L${w * 0.28} 0 L${w * 0.46} ${floor} L${w * 0.08} ${floor} Z`} fill={L.beam} opacity={L.beamOpacity} />
-      <path d={`M${w * 0.72} 0 L${w * 0.8} 0 L${w * 0.92} ${floor} L${w * 0.54} ${floor} Z`} fill={L.beam} opacity={L.beamOpacity} />
+      {!L.ground && !L.picture && <rect width={w} height={h} fill={L.back} />}
+      {/* spotlight beams, opaque, behind everything else; none over a picture */}
+      {L.beams && <path d={`M${w * 0.2} 0 L${w * 0.28} 0 L${w * 0.46} ${floor} L${w * 0.08} ${floor} Z`} fill={L.beam} />}
+      {L.beams && <path d={`M${w * 0.72} 0 L${w * 0.8} 0 L${w * 0.92} ${floor} L${w * 0.54} ${floor} Z`} fill={L.beam} />}
       {/* the stage floor and its boards */}
       <path d={`M-4 ${floor} C${w * 0.3} ${floor - 8} ${w * 0.7} ${floor + 6} ${w + 4} ${floor - 4} L${w + 4} ${h + 4} L-4 ${h + 4} Z`} fill={L.floor} stroke={I} strokeWidth="4" strokeLinejoin="round" />
       {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${(w / 9) * i + 20} ${floor + 14} l14 ${Math.max(4, h - floor - 22)}`} stroke={L.boards} strokeWidth="5" strokeLinecap="round" />)}
