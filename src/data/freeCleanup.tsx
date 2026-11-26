@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useTier } from './hooks';
+import { useTierLoaded } from './hooks';
 
 // Free saves nothing after today (owner, 2026-11-26: "delete free data
 // nightly"). On this device, every answer logged before today is removed the
@@ -22,7 +22,9 @@ export function purgeBeforeToday(now = new Date()): number {
 }
 
 export default function FreeCleanup() {
-  const tier = useTier();
+  // Wait for the real plan: useTier reads Free while it loads, which would
+  // wipe a paid teacher's history on the first render.
+  const tier = useTierLoaded();
   useEffect(() => { if (tier === 'free') purgeBeforeToday(); }, [tier]);
   return null;
 }

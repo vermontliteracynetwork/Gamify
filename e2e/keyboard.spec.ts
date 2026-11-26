@@ -107,8 +107,10 @@ test('keyboard: Match Three swaps two pieces with Enter', async ({ page }) => {
 
 test('keyboard: pop-up boxes take focus, keep Tab inside, close with Escape and give focus back', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })));
-  await page.goto('/games/memory-match');
-  const upgrade = page.getByRole('button', { name: 'Upgrade' });
+  // Free plays every game now (owner, 2026-11-26), so the Upgrade box opens from
+  // the activity page's Who step, where classes are a paid feature.
+  await page.goto('/teacher/activity');
+  const upgrade = page.getByRole('button', { name: 'Upgrade' }).first();
   await upgrade.focus();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
