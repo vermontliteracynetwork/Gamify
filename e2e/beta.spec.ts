@@ -69,7 +69,7 @@ test('a teacher asks for help with Tell Gamify, and it reaches the owner dashboa
   await page.goto('/teacher/classes');
   await page.getByRole('button', { name: 'Report a problem, idea or request' }).first().click();
   await page.getByRole('radio', { name: 'I need help' }).click();
-  await page.getByLabel('Tell us more (you can skip this)').fill('How do I print the theme template?');
+  await page.getByLabel('Tell us more (optional)').fill('How do I print the theme template?');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
   await expect(page.getByText('Thank you! We read every message.')).toBeVisible();
   await page.goto('/owner');
