@@ -871,7 +871,7 @@ export const en = {
   'builder.permissionLink': 'Print the slip',
   'builder.shareChallenge': 'Enter it in the Theme Building Challenge',
   'builder.shareChallengeOpen': 'Entries are open. Your tags decide which special days your theme enters.',
-  'builder.shareChallengeSoon': 'Each month has a special day, starting with Cheesy Socks Day on January 21, 2027. Your tags decide which special days your theme enters.',
+  'builder.shareChallengeSoon': 'Each month has a special day, starting with Penguin Awareness Day on January 20, 2027. Your tags decide which special days your theme enters.',
   'builder.shareChallengeLink': 'About the challenge',
   'builder.tags': 'Tags',
   'builder.challengeDay': 'Which special day are you entering?',

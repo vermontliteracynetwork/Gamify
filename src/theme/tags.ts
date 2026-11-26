@@ -18,8 +18,10 @@ const group = (id: string, label: string, labels: string[]): TagGroup => ({ id, 
 // go with the day (shown as "tags we use").
 export interface SpecialDay { tag: string; name: string; date: string; theme: string; keywords: string[]; ideas: string[] }
 export const SPECIAL_DAYS: SpecialDay[] = [
-  { tag: 'cheesy-socks-day', name: 'Cheesy Socks Day', date: '2027-01-21', theme: 'Funny socks and sock patterns, like an ugly sweater but for socks', keywords: ['socks', 'fun-socks', 'sock-patterns'],
-    ideas: ['Argyle, stripes and polka dots', 'Mismatched pairs', 'Fuzzy socks and knee socks', 'Toe socks', 'Ugly-sweater patterns on socks', 'Sock puppets', 'A laundry line of socks'] },
+  // January changed from Cheesy Socks Day to Penguin Awareness Day (owner,
+  // 2026-11-26: "change januarys special day to penguin").
+  { tag: 'penguin-awareness-day', name: 'Penguin Awareness Day', date: '2027-01-20', theme: 'Penguins doing things, on the ice and in the water', keywords: ['penguins', 'polar-animals'],
+    ideas: ['Emperor penguins and chicks', 'Penguins sliding and waddling', 'Ice floes and icebergs', 'Penguins swimming and fishing', 'A penguin colony', 'Penguins in cozy hats and scarves', 'Black, white and a pop of orange'] },
   { tag: 'pizza-day', name: 'Pizza Day', date: '2027-02-09', theme: 'Lots of different pizzas and styles, pizzeria style', keywords: ['pizza', 'pizzeria'],
     ideas: ['Pepperoni, cheese and veggie toppings', 'Pizza slices and whole pies', 'Pizza boxes', 'A pizzeria sign and counter', 'Pizza chefs tossing dough', 'Deep dish and thin crust', 'Pizza fractions'] },
   { tag: 'puppy-day', name: 'Puppy Day', date: '2027-03-23', theme: 'Cute puppies doing things, paw prints', keywords: ['puppy', 'dog', 'paw-prints'],

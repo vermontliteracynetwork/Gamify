@@ -13,14 +13,14 @@ describe('theme tags and special days', () => {
     expect(ALL_TAGS.length).toBe(new Set(ALL_TAGS.map((x) => x.id)).size);
   });
   it('closes entries and votes at 11:59 pm Eastern two days before, winner on the day', () => {
-    const socks = SPECIAL_DAYS[0];
-    expect(closeDate(socks)).toBe('2027-01-19');
-    expect(challengeClose(socks).toISOString()).toBe('2027-01-20T04:59:00.000Z'); // EST
+    const socks = SPECIAL_DAYS[0]; // Penguin Awareness Day, Jan 20
+    expect(closeDate(socks)).toBe('2027-01-18');
+    expect(challengeClose(socks).toISOString()).toBe('2027-01-19T04:59:00.000Z'); // EST
     expect(challengeClose(SPECIAL_DAYS[4]).toISOString()).toBe('2027-05-22T03:59:00.000Z'); // EDT, May 21
-    expect(winnerDate(socks)).toBe('2027-01-21');
-    expect(winnerAt(socks).toISOString()).toBe('2027-01-21T05:00:00.000Z');
-    expect(isOpen(socks, new Date('2027-01-19T12:00:00Z'))).toBe(true);
-    expect(isOpen(socks, new Date('2027-01-20T12:00:00Z'))).toBe(false);
+    expect(winnerDate(socks)).toBe('2027-01-20');
+    expect(winnerAt(socks).toISOString()).toBe('2027-01-20T05:00:00.000Z');
+    expect(isOpen(socks, new Date('2027-01-18T12:00:00Z'))).toBe(true);
+    expect(isOpen(socks, new Date('2027-01-19T12:00:00Z'))).toBe(false);
     expect(nextOpenDay(new Date('2027-01-20T12:00:00Z')).tag).toBe('pizza-day');
   });
   it('pulls entries by the month they picked, entered before the close', () => {
