@@ -2,6 +2,8 @@
 
 Things only Kayden can do (money, accounts, legal, going live). The same list shows first on the owner desktop (`/owner`) every time it opens, with a box to tick each one. Source of truth: `src/owner/waiting.ts`; Claudia adds to it in the same change that finds the need.
 
+- **Upgrade strategy: 5 calls (2026-11-26).** Reverse trial yes or no (suggested Plus, 30 days from the first hosted game, no card, then Free); beta filters (host-one-game gate, months 2 and 3 earned by activity); keep or raise the 3-set Free cap; one welcome screen with the beta strip under the plans, and whether "Best fit" leaves the upgrade box; counting paywall views on teacher pages. How: read docs/upgrade-strategy.md section 4 and answer in chat. Campaign c-upgrade on /owner, Marketing.
+
 1. **Reconnect Figma and Canva, and send your design websites (2026-11-22).** The design review and accessibility plugins ran on every Game Lab game; Figma and Canva could not connect from the cloud session, and no list of design websites was found. How: claude.ai Settings, Connectors, reconnect them; paste the design websites into the chat or the dev plan doc.
 2. **Put Gamify under Vermont Literacy Network LLC (your decision, 2026-10-26).** Gamify sells as Vermont Literacy Network LLC for now; the legal drafts already name it. How: Sign a one-page assignment of Gamify to the LLC (your attorney can draft it), register "Gamify" as the LLC's trade name with the Vermont Secretary of State, then open Stripe, the domain and a bank account in the LLC's name.
 4. **Open a Stripe account.** Plus, Pro, school invoices and the Vermont Literacy Network beta code all run through it. How: Create the account in the business's name, confirm prices ($96 and $180 a year), and add the keys to Vercel.
