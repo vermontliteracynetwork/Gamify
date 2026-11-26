@@ -36,10 +36,49 @@ bible's platform section when newer.
 
 | Date | Platform | What changed or is trending | Source opened | Use it? |
 |---|---|---|---|---|
+| 2026-11-26 | All | 2027 forecasts for the Theme Building Challenge. OUT: WGSN and Coloro Colour of the Year 2027 "Luminous Blue" (announced 2025-04-29; theme "interconnectedness", nature and tech, online and offline; S/S 27 key colours Energy Orange, Pop Pink, Meadowland Green, Clay). Pinterest "Creators to Watch 2027" list is out. Third-party 2027 graphic design lists (human craft, collage, mixed media, whimsical, low fidelity, Y2K retro, tactile textures). PENDING: Pinterest Predicts 2027 (past: 2024-12-05, 2025-12-09, so expect early to mid December 2026); Pantone Color of the Year 2027 (Pantone lists a "2027 Experience" event on 2026-12-03, reveal expected early December); Adobe, Canva, Etsy 2027 reports not found (only 2026 versions). Pinterest 2026 signals still useful: "FunHaus" circus decor, Throwback Kid, Pen Pals; Pinterest 2026 Hobbies report: tactile crafts, analog practices, "repair aesthetic" +167%. UNVERIFIED: every page fetch failed (pantone.com, homepagenews.com, kittl.com did not resolve); all of this is from search-result summaries only. | none opened. Search results only: wgsn.com/en/wgsn/press/press-releases/wgsn-and-coloro-reveal-colour-year-2027-luminous-blue-and-s/s-27-key ; newsroom.pinterest.com/news/pinterest-predicts-nonconformity-self-preservation-and-escapism-drive-21-trends-for-2026/ ; community.pinterest.biz/t/pinterest-predict-2025/21903.md ; socialmediatoday.com/news/pinterest-shares-its-first-creators-to-watch-list/874969 ; pantone.com/na/en-us/color-of-the-year ; kittl.com/blogs/?p=27933 ; jukeboxprint.com/blog/the-biggest-graphic-design-trends-for-2027 ; newsroom.pinterest.com/en-ca/news/2026-pinterest-hobbies-trend-report/ | Yes, as low-confidence direction: hand-made, collage, tactile and recycled fit the 2027 challenge. Re-check on 2026-12-15 after Pinterest Predicts and Pantone release, before themes are locked |
+| 2026-11-26 | Pinterest, Google | Seasonal teacher keywords for 2027 challenge themes. No volumes verified: no Pinterest Trends or keyword tool was opened. Old Tailwind summaries (2017 era) name January education terms winter, snow, snowman, snowflake, sensory; Valentine's peaks January to February, St. Patrick's January to March. Phrases such as "valentines classroom activities", "spring bulletin board", "back to school theme", "fall crafts for kids", "leprechaun trap", "100th day of school", "earth day crafts", "pumpkin math" are FROM MEMORY. | none opened. Search results only: tailwindapp.com/blog/what-to-pin-in-february ; tailwindapp.com/blog/?p=2343 ; create.pinterest.com/en-ca/teachers/ | Yes, as guesses: verify each in the Pinterest search bar and Pinterest Trends before titles are written |
+| 2026-11-26 | All | School realities for seasonal themes. Some districts have moved Halloween to "fall" or "harvest" events (one New Jersey district banned costumes in 2023, later left it to principals). December guidance from advocacy groups: teach about religious holidays, do not celebrate them; keep decorations to the winter season. UNVERIFIED: news and advocacy summaries, not opened; district rules vary. | none opened. Search results only: edweek.org/leadership/spooked-by-halloween-some-schools-ban-costumes-but-not-without-pushback/2024/10 ; route-fifty.com/management/2023/10/why-some-schools-are-halting-halloween-celebrations/391630/ ; adl.org/resources/tools-and-strategies/december-dilemma-december-holiday-guidelines-public-school ; action.ajc.org/hubfs/NATIONAL/CEA/CEA-AJC-CEA-Guidance-for-K-12-on-Inclusive-December-Activities.pdf | Yes: every holiday theme gets an inclusive twin ("spooky-cute", "harvest", "winter lights"); no religious-holiday theme names |
 | 2026-11-25 | All | Swapped #elementaryteacher for #k12teacher and grade keywords for K-12 ones (owner rule). How many people search or follow these K-12 terms is UNVERIFIED (from memory; nothing opened). | none opened | Yes, by rule; the analyst compares saves and reach on K-12 terms after 4 weeks |
 | 2026-11-25 | Pinterest | Keyword research for Part 5B. Search results (snippets only) suggest teachers search curriculum-specific phrases (grade + subject + activity), sellers mine the search-bar suggestions and related searches, and the first ~40 title characters matter most. Third-party size guides agree on 1000 x 1500 (2:3) for standard pins; Pinterest's own spec page was not opened. UNVERIFIED: every page fetch was blocked this session. | none opened (help.pinterest.com and create.pinterest.com did not resolve) | Yes, as a guess: grade + subject + "game" titles; verify in the search bar and Trends (mkt-pinterest) |
 | 2026-11-24 | Instagram | Several sources report Instagram limiting hashtags to 5 per post and Reel, rolling out from December 2025; one source says the help page still says 30. Treat 5 as the cap (our planner already limits to 5). | socialmediatoday.com/news/instagrams-implementing-new-limits-on-hashtag-use/808309/ ; later.com/blog/instagram-hashtags ; circleboom.com/blog/how-many-hashtags-should-you-use-on-instagram-in-2026/ (search results, pages not opened in full) | Yes: 3 to 5 specific tags |
 | 2026-11-24 | All | Baseline: specs in bible section 6 written from general knowledge; not yet checked against each platform's help pages. First monthly check due 2026-12-01. | none yet | Check before first post |
+
+### 2026-11-26 2027 Theme Building Challenge: suggestions (TO CONFIRM by the owner)
+
+Trend Researcher. Options only; nothing here is decided. Her words are kept in quotes.
+Evidence is low confidence (search summaries, no page opened; keywords from memory).
+
+- **Q1 Jan-Mar, "like recycled goods"**. Materials: clean cardboard and cereal boxes;
+  bottle caps and plastic lids; paper tubes and scrap paper. Themes: winter (snow day);
+  Valentine's Day (hearts, love, friendship, pinks and reds); Saint Patrick's Day (luck,
+  rainbow, leprechauns, green and gold); leprechaun trap build; kindness club (friendship
+  without the holiday); polar animals; cozy cocoa cafe; junkyard robots; 100th day of
+  school; night sky and stars.
+- **Q2 Apr-Jun, spring, "nature materials and crayons/pastels"**. Materials: fallen
+  leaves and flower petals; sticks, stones and pebbles; crayons and oil pastels (leaf
+  rubbings join the two). Themes: flowers; baby animals; April Fools (mischief, silly,
+  clowns) as a silly circus; April showers; bugs and butterflies; pond and frogs; rock
+  creatures; Earth Day tiny planet; picnic; summer countdown.
+- **Q3 Jul-Sep, "digital designs and scrapbook style"**. Materials: digital drawing
+  (any design app or the Theme Builder studio); torn-paper collage; stickers, stamps
+  and hand lettering. Themes: back to school; all about me; travel postcards; summer
+  camp; ocean and beach; retro pixel arcade (our own art only); comic zine; sticker
+  collection; summer games (never the trademarked games name); apple orchard.
+- **Q4 Oct-Dec, "fall and winter holidays, spooky season, etc."** Materials (she has
+  not named them; suggestion): modeling dough or clay; textured paint; felt, fabric and
+  yarn scraps. Themes: spooky-cute; friendly monsters; harvest and pumpkin patch; fall
+  leaves; night owls and forest animals; haunted library (book characters); gratitude
+  harvest (Thanksgiving twin); winter lights; gingerbread town (flag: some read it as
+  Christmas); first snow.
+- **Flags**: Halloween and December religious holidays are restricted in some districts;
+  offer the twin theme. Easter eggs and bunnies may read as Easter in Q2; keep baby
+  animals farm-based. Clowns scare some young children (from memory); keep them friendly.
+  Mother's Day and Father's Day themes leave out some families; use "people I love".
+  Day of the Dead and Lunar New Year are cultural and religious; teach about, never a
+  costume-style theme. Nature items: fallen only, no unknown plants (allergy, poison ivy).
+- **Open questions for her**: Q3 timing (July has few classes); Halloween name; December
+  names; Q4 materials; lock themes after Pinterest Predicts and Pantone drop in December.
 
 ## Competitor and reference teardowns
 
