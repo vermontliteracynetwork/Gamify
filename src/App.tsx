@@ -71,7 +71,6 @@ const MirrorPage = lazyPage(() => import('./live/MirrorPage'));
 const LiveHost = lazyPage(() => import('./live/LiveHost'));
 const LiveLobby = lazyPage(() => import('./live/LiveStudent'));
 const LiveOverlay = lazyPage(() => import('./live/LiveStudent').then((m) => ({ default: m.LiveOverlay })));
-const FaqPage = lazyPage(() => import('./public/FaqPage'));
 const SchoolsPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.SchoolsPage })));
 const HomeschoolPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.HomeschoolPage })));
 const StudentDataPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.StudentDataPage })));
@@ -100,6 +99,14 @@ const TeacherHome = lazyPage(() => import('./teacher/TeacherHome'));
 const AchievementsPage = lazyPage(() => import('./teacher/AchievementsPage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
+
+// The FAQ lives on the Help page now (owner 2026-11-26: "merge faq and help
+// how to to just help"): old /faq links land on its Quick answers, keeping
+// the reader's group (?for=schools and so on).
+function FaqRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/help${search}#faq`} replace />;
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -140,7 +147,7 @@ function AnimatedRoutes() {
           <Route path="/mirror/:code" element={<MirrorPage />} />
           <Route path="/teacher/live/:code" element={<RequireTeacher><LiveHost /></RequireTeacher>} />
           <Route path="/live/:code" element={<LiveLobby />} />
-          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/faq" element={<FaqRedirect />} />
           <Route path="/schools" element={<SchoolsPage />} />
           <Route path="/homeschool" element={<HomeschoolPage />} />
           <Route path="/student-data" element={<StudentDataPage />} />

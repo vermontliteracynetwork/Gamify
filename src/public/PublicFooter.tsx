@@ -11,7 +11,7 @@ import type { StringKey } from '../i18n/en';
 const COLS: [StringKey, [string, StringKey][]][] = [
   ['footer.col.gamify', [['/features', 'public.nav.features'], ['/pricing', 'public.nav.pricing'], ['/research', 'research.title'], ['/themes', 'public.nav.themes'], ['/blog', 'public.nav.ideas'], ['/status', 'footer.status']]],
   ['footer.col.you', [['/login', 'footer.teachers'], ['/schools', 'footer.schools'], ['/homeschool', 'public.nav.homeschool'], ['/it', 'public.nav.it'], ['/beta', 'public.nav.beta'], ['/affiliates', 'footer.affiliates']]],
-  ['footer.col.trust', [['/student-data', 'public.nav.studentData'], ['/accessibility', 'legal.a11y'], ['/accessibility/report', 'footer.vpat'], ['/privacy', 'legal.privacy'], ['/terms', 'legal.terms'], ['/credits', 'legal.credits'], ['/help', 'public.nav.faq'], ['/faq', 'faq.short']]],
+  ['footer.col.trust', [['/student-data', 'public.nav.studentData'], ['/accessibility', 'legal.a11y'], ['/accessibility/report', 'footer.vpat'], ['/privacy', 'legal.privacy'], ['/terms', 'legal.terms'], ['/credits', 'legal.credits'], ['/help', 'public.nav.help']]],
 ];
 
 export default function PublicFooter() {

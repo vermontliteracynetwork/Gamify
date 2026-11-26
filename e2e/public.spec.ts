@@ -244,14 +244,21 @@ test.describe('buyer pages', () => {
     await expect(page.getByText('Your application is in.', { exact: false })).toBeVisible();
     await page.screenshot({ path: `test-results/beta-page-${info.project.name}.png`, fullPage: true });
   });
-  test('FAQ: tabs for each buyer and a search across all of them', async ({ page }) => {
-    await page.goto('/faq');
+  // The FAQ is merged into Help (owner 2026-11-26): /faq opens Help at Quick answers.
+  test('Help: the old FAQ link lands on Quick answers, with tabs for each buyer and one search for tips and answers', async ({ page }) => {
+    await page.goto('/faq?for=schools');
+    await expect(page).toHaveURL(/\/help\?for=schools#faq$/);
+    await expect(page.getByRole('heading', { level: 1, name: /^Help$/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Schools and districts' })).toHaveAttribute('aria-selected', 'true');
     await page.getByRole('tab', { name: 'Homeschool families' }).click();
     await page.getByText('I teach several ages at once. Does that work?').click();
     await expect(page.getByText('six-year-old practices letters', { exact: false })).toBeVisible();
-    await page.getByLabel('Search every question').fill('purchase order');
+    await page.getByLabel('Search help').fill('purchase order');
     await expect(page.getByText(/answers? found/)).toBeVisible();
     await expect(page.getByText('Can we pay with a purchase order?')).toBeVisible();
+    await page.getByLabel('Search help').fill('');
+    await page.getByRole('link', { name: /Question sets/ }).first().click();
+    await expect(page).toHaveURL(/\/help\/question-sets$/);
   });
   test('schools, homeschool and student data pages link the way buyers need', async ({ page }) => {
     await page.goto('/');
@@ -262,6 +269,12 @@ test.describe('buyer pages', () => {
     await page.goto('/homeschool');
     // The Homeschool plan lives on the Homeschool page, linked from Pricing.
     await expect(page.getByRole('link', { name: 'Start the Homeschool plan' })).toBeVisible();
+    // Three homeschool posts, then View all blog (owner 2026-11-26); no five-day week.
+    await expect(page.locator('main a[href^="/blog/"]')).toHaveCount(3);
+    await expect(page.getByText('One Question Set, Five Different Days')).toHaveCount(0);
+    await page.getByRole('link', { name: 'View all blog' }).click();
+    await expect(page).toHaveURL(/\/blog$/);
+    await page.goto('/homeschool');
     await page.goto('/pricing');
     await page.getByRole('link', { name: /Homeschooling\? See the Homeschool plan/ }).click();
     await expect(page).toHaveURL(/homeschool/);

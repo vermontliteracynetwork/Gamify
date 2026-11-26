@@ -72,7 +72,7 @@ test('Theme Builder studio: draw, fill, sticker search, use the picture', async 
 // (The Big screen design was removed by the owner, 2026-11-25.)
 test('teacher pages have a footer', async ({ page }) => {
   await page.goto('/teacher/sets');
-  await expect(page.getByRole('contentinfo')).toContainText('Help Center');
+  await expect(page.getByRole('contentinfo')).toContainText('Help');
 });
 
 test('studio: drag a sticker from the shelf onto the picture', async ({ page }, info) => {
