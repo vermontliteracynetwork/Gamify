@@ -25,7 +25,9 @@ const Tape = lazy(() => import('../../brand/ScrapbookKit').then((m) => ({ defaul
 type Geo = { colW: number; vw: number; vh: number };
 function layout({ colW, vw, vh }: Geo) {
   const wide = vw >= 1024, phone = vw < 640;
-  const cols = wide ? 2 : 3, rows = 6 / cols, gap = phone ? 10 : 16, frac = wide ? 0.8 : 0.9, fill = wide ? 0.86 : 0.78;
+  // Spaced out (owner 2026-11-26: "space out the hero section (right images and stickers)"):
+  // wider gaps between covers and more room around them for the stickers.
+  const cols = wide ? 2 : 3, rows = 6 / cols, gap = phone ? 14 : wide ? 30 : 22, frac = wide ? 0.74 : 0.84, fill = wide ? 0.78 : 0.72;
   let gw = colW * frac;
   let cw = (gw - (cols - 1) * gap) / cols, ch = cw * 0.9;
   let gh = rows * ch + (rows - 1) * gap, boxH = gh / fill, bw = colW;

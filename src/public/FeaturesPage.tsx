@@ -48,7 +48,7 @@ export default function FeaturesPage() {
   const reduce = useReducedMotion();
   const enter = { initial: reduce ? false : { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.15 } } as const;
   return (
-    <div className="bg-cream">
+    <div>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-4 grid gap-16">
         <section className="grid gap-5" aria-labelledby="features-title">
           <h1 id="features-title" className="title-bubble text-5xl sm:text-6xl"><Title text={t('features.title')} /></h1>

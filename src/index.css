@@ -967,13 +967,13 @@ html[data-area="teacher"] .ambient-ground { background-color: var(--cream) !impo
 /* Scrapbook public shell (owner, 2026-11-26: "home=b pricing=a ... login=a
    join =a top/bottom= a --- no scrapbook on any other live views or in games
    at all"). Opt-in only: a page wrapped in <ScrapbookPage> (src/public/scrapbook)
-   sets html[data-ground="scrapbook"]. The ground is Cream, the top bar stays
+   sets html[data-ground="scrapbook"]. The ground is the site purple, the top bar stays
    pure white (2026-11-24) with the 3px ink rule, the footer is white with the
    same rule, and edge pieces never make the page scroll sideways. */
-html[data-ground="scrapbook"] .ambient-ground { background-color: var(--cream) !important; background-image: none !important; }
+/* Purple ground again (owner 2026-11-26: "return to a purple background replacig the tan/cream color"): the shared ambient ground shows. */
 html[data-ground="scrapbook"] .site-header { border-bottom-width: 3px; }
 html[data-ground="scrapbook"] .public-footer { background: #ffffff; border-top-width: 3px; }
-html[data-ground="scrapbook"], html[data-ground="scrapbook"] body { overflow-x: clip; background: var(--cream); }
+html[data-ground="scrapbook"], html[data-ground="scrapbook"] body { overflow-x: clip; }
 /* A scrapbook card: white, 3px ink edge, 5px ink shadow, the panel radius. */
 .sb-card { background: #ffffff; border: 3px solid var(--color-border); border-radius: var(--radius-panel); box-shadow: 0 5px 0 var(--color-border); }
 
