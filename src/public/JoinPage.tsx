@@ -17,7 +17,6 @@ import type { Classroom, Student } from '../data/types';
 import { setLive } from '../live/session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
-import { IconButton } from '../ui/kit';
 
 // The one join page (product plan): students type a code (letters only).
 // A class code goes to class sign-in. A game code (a link, QR code or hosted
@@ -138,17 +137,18 @@ export default function JoinPage() {
   const go = ready && ready.code === code ? ready : null;
   return (
     <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-10 grid justify-items-center gap-[clamp(1rem,3.5vh,2rem)] text-center min-h-[calc(100dvh-3.5rem)] content-center">
-      <div className="absolute top-3 right-4 sm:right-6">
+      {/* Listen and Settings sit together in the top far right corner (owner, 2026-11-26). */}
+      <div className="fixed top-[4.5rem] right-4 sm:right-6 z-40 flex gap-2">
+        <button type="button" onClick={() => speak(t('join.sub'), settings)} aria-label={t('q.listen')} className="w-12 h-12 rounded-full border-std border-border bg-surface flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <SpeakerHigh weight="bold" size={24} />
+        </button>
         <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t('settings.open')} className="w-12 h-12 rounded-full border-std border-border bg-surface flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           <GearSix weight="bold" size={24} />
         </button>
       </div>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <h1 className="title-bubble text-[clamp(2.5rem,10vw,5rem)] leading-none"><Title text={t('join.title')} /></h1>
-      <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug inline-flex items-center gap-2 justify-center flex-wrap">
-        {t('join.sub')}
-        <IconButton label={t('q.listen')} onClick={() => speak(t('join.sub'), settings)} className="bg-surface"><SpeakerHigh weight="bold" size={20} /></IconButton>
-      </p>
+      <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug">{t('join.sub')}</p>
       <CodeBoxes length={5} value={code} onChange={setCode} label={t('join.code')} masked={false} letters size="xl" shake={wrong} onEnter={() => { if (go) void go.go(); }} />
       <p className="min-h-6 font-bold -my-2" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
       <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">

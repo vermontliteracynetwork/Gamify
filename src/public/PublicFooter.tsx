@@ -20,7 +20,7 @@ export default function PublicFooter() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid gap-8">
         <div className="grid gap-x-4 gap-y-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
           <div className="grid gap-3 content-start col-span-2 md:col-span-3 lg:col-span-1">
-            <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto justify-self-start" />
+            <Link to="/" aria-label={t('nav.home')} className="justify-self-start"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-8 w-auto" /></Link>
             <p className="m-0 font-semibold text-muted max-w-[22rem]">{t('footer.tagline')}</p>
           </div>
           {COLS.map(([head, links]) => (

@@ -50,12 +50,10 @@ export default function NavBar() {
   );
   return (
     <header className={`site-header no-print sticky top-0 z-50 ${inGame ? 'h-12' : 'h-14'} flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border`}>
-      {/* Student pages show the logo only, even with a teacher signed in on this device (rule 10, 2026-11-25). */}
-      {studentPage
-        ? <span className="flex items-center shrink-0 mr-auto"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" /></span>
-        : <Link to={any ? '/play' : '/'} className="flex items-center min-h-11 shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
-            <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" />
-          </Link>}
+      {/* The logo always opens the Gamify home page (owner, 2026-11-26); student pages still show nothing else. */}
+      <Link to="/" className="flex items-center min-h-11 shrink-0 active:scale-95 motion-safe:transition-transform mr-auto" aria-label={t('nav.home')}>
+        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto shrink-0" draggable="false" />
+      </Link>
       {!any && !studentPage && (
         <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1">
           {BAR_LINKS.map(({ to, key }) => <Link key={to} to={to} aria-current={path === to ? 'page' : undefined} className={navLink(to)}>{t(key)}</Link>)}

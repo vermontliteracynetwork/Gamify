@@ -300,7 +300,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
       <div className="shrink-0 mb-3 flex flex-wrap items-center gap-2 bg-surface border-bold border-border rounded-panel p-2 min-w-0" style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <Link to={base} aria-label={owner ? t('builder.allGames') : t('builder.backToBuilder')} title={owner ? t('builder.allGames') : t('builder.backToBuilder')}
           className="w-11 h-11 shrink-0 rounded-full grid place-items-center border-std border-border bg-white hover:bg-surface-hover text-text"><ArrowLeft weight="bold" size={20} /></Link>
-        <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto shrink-0 hidden sm:block" draggable="false" />
+        <Link to="/" aria-label={t('nav.home')} className="shrink-0 hidden sm:flex items-center min-h-11"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 w-auto" draggable="false" /></Link>
         {!blocked && <>
           {mine.map((th) => (
             <button key={th.id} type="button" onClick={() => setParams({ id: th.id })} aria-pressed={draft.id === th.id}

@@ -399,3 +399,5 @@ line that fits, and add each new preference the same turn she says it.
 - Game flow to the approved /brand Universal views (owner, 2026-11-25, "make sure all the /brand updates/proposals are added to main site, all layouts colors pages components"): the question screen is one card over the game (replaces the 2026-11-06 full white screen); Join has five letter boxes with Hear my code and a Go that stays off until the code works; Settings is a centered box with a Grow Year title and a vertical tab list; Teams has Add team between Back and Next and an x on each card; welcome pages show a one-line tagline.
 - 2026-11-25: a Question Tracker power star (mega, rainbow) grows only to the edge of its own spot, never under the question card.
 - 2026-11-26 (owner): an account the owner makes with a starting password must make its own password on first sign-in; test accounts get Pro with payment waived (plan_note).
+- 2026-11-26 (owner): on the Join screen, Listen and Settings sit together in the top far right corner.
+- 2026-11-26 (owner): the Gamify logo in the top bar always opens the Gamify home page (/), on every page, signed in or not.

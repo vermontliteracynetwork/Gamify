@@ -58,7 +58,7 @@ export default function CheckInPage() {
   // check-in): students walk up to this screen, so nothing else to tap.
   const bar = (
     <div className="solo-bar no-print sticky top-0 z-50 h-14 flex items-center gap-2 px-4 sm:px-6 bg-white border-b-[2.5px] border-border">
-      <img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto mr-auto" draggable="false" />
+      <Link to="/" aria-label={t('nav.home')} className="mr-auto flex items-center min-h-11"><img src="/brand/gamify-wordmark.png" alt="Gamify" className="h-7 sm:h-8 w-auto" draggable="false" /></Link>
       <GearButton small onClick={() => setSettingsOpen(true)} />
       <FullScreenButton small />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
