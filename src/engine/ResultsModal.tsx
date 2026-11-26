@@ -124,7 +124,7 @@ function ReviewScreen({ missed, onClose }: { missed: MultipleChoiceQuestion[]; o
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 grid gap-5">
           <p className="font-bold text-muted">{t(shown ? 'rv.afterTip' : 'rv.tip')}</p>
           <div className="flex items-start gap-3">
-            <h3 className="font-body text-4xl sm:text-5xl font-bold leading-tight flex-1 text-balance">{q.prompt}</h3>
+            <h3 className="q-prompt font-body text-4xl sm:text-5xl font-bold leading-tight flex-1 text-balance">{q.prompt}</h3>
             <button type="button" aria-label={`${t('q.listen')}: ${q.prompt}`} onClick={() => speak(`${q.prompt}. ${q.choices.join('. ')}`, settings)}
               className="w-14 h-14 shrink-0 rounded-full border-bold border-border bg-surface flex items-center justify-center"><SpeakerHigh weight="bold" size={26} /></button>
           </div>

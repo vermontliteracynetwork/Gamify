@@ -46,7 +46,7 @@ class modes (rule 11): Cooperative is Kelly and Mint with a heart, Competitive
 Pink and Blush with a spark (`src/live/ClassModeIcon.tsx`).
 
 ### Type
-- Two fonts only (rule 8): Grow Year in ALL CAPITALS for titles (h1, `.title-bubble`), scores and prices (`.font-score`) and the tagline; Inclusive Sans (`font-heading` bold for headings and buttons, `font-body` regular) in sentence case. The `.font-display` class is Inclusive Sans bold; Grow Year's "Th" ligature is off site-wide so caps stay caps.
+- Two fonts only (rule 8): Grow Year in ALL CAPITALS for titles (h1, `.title-bubble`), scores and prices (`.font-score`) and the tagline; Inclusive Sans (`font-heading` bold for headings and buttons, `font-body` regular); headings capitalize every word (owner 2026-11-26: "everyword capitial initial and lowercase the rest"), body text is sentence case. The `.font-display` class is Inclusive Sans bold; Grow Year's "Th" ligature is off site-wide so caps stay caps.
 - The root size follows the screen (the screen-size rule, `src/index.css`): about 16px on a 1440 x 900 laptop, 12 to 14px on short or zoomed windows, 16.5px on big desktops; the page column (`max-w-6xl`) is 84rem; game screens 12 to 26px. Size everything in rem so it all scales together.
 - Tailwind's scale (`text-xs` … `text-6xl`) for most text.
 - Screen-fit sizes, which follow the window height: `text-fit-title`, `text-fit-body`, `text-fit-button` (welcome screens), `text-fit-turn`, `text-fit-question`, `text-fit-answer` (question screens), and `text-fit-question-big` / `text-fit-answer-big` for short questions (48 letters or fewer) and short answers (22 or fewer), bigger again on portrait screens.

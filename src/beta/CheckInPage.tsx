@@ -75,7 +75,7 @@ export default function CheckInPage() {
           const tl = tallies[qq.key]; const max = Math.max(1, ...tl);
           return (
             <section key={qq.key} className="bg-surface border-bold border-border rounded-panel p-4 grid gap-2">
-              <h2 className="font-bold">{t(`checkin.${qq.key}` as StringKey)}</h2>
+              <h2 className="q-prompt font-bold">{t(`checkin.${qq.key}` as StringKey)}</h2>
               {qq.icons.map((I, i) => (
                 <div key={i} className="grid grid-cols-[2.5rem_8rem_1fr_2.5rem] items-center gap-2 font-bold">
                   <I weight="fill" size={30} aria-hidden="true" /><span>{t(`checkin.${qq.key}.${i}` as StringKey)}</span>
