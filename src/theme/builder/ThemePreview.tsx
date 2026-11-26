@@ -44,7 +44,10 @@ export function previewViews(gameId: string, hasItems: boolean): { id: PreviewVi
 
 // A small live copy of the game screen wearing the theme being built.
 // `corner` takes the Play pill's place (the Themes gallery puts its heart there).
-export default function ThemePreview({ theme: own, gameName, view = 'game', corner }: { theme: GameTheme; gameName: string; view?: PreviewView; corner?: ReactNode }) {
+// `bare` drops the title row (the game name and Play pill) so the preview is a
+// picture of the game only, like a cover (owner, 2026-11-26: never a game-name
+// label on the images); the Features page game pictures use it.
+export default function ThemePreview({ theme: own, gameName, view = 'game', corner, bare }: { theme: GameTheme; gameName: string; view?: PreviewView; corner?: ReactNode; bare?: boolean }) {
   const theme = withClassicArt(own);
   const c = theme.colors;
   const sky = theme.gameId === 'star-quiz' ? pieceImage(theme, 'background') : undefined;
@@ -56,11 +59,11 @@ export default function ThemePreview({ theme: own, gameName, view = 'game', corn
   const Own = view === 'game' ? GAME_PREVIEWS[theme.gameId] : undefined;
   if (Own) return <Own theme={theme} />;
   return (
-    <div className="rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid grid-rows-[auto_1fr] gap-2" style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
-      <div className="flex items-center justify-between gap-2">
+    <div className={`rounded-panel border-bold border-border overflow-hidden aspect-[4/3] p-3 grid gap-2 ${bare ? 'grid-rows-1' : 'grid-rows-[auto_1fr]'}`} style={sky ? { background: `center / cover url("${sky}")` } : backdropStyle(theme, false)} aria-label={`Preview of ${theme.name || 'this theme'}`} role="img">
+      {!bare && <div className="flex items-center justify-between gap-2">
         <span className="font-display text-xl font-extrabold truncate" style={{ color: c.backgroundText, fontFamily: THEME_FONTS[theme.fonts.display] }}>{gameName}</span>
         {corner ?? <span className="px-3 py-1 rounded-pill border-std border-border font-bold text-xs" style={{ background: c.accent, color: c.accentText }}>Play</span>}
-      </div>
+      </div>}
       <div className="min-h-0 min-w-0 flex items-center justify-center">{view === 'powers' ? <PowersView theme={theme} /> : board(theme, size)}</div>
     </div>
   );
@@ -250,19 +253,6 @@ function board(theme: GameTheme, size?: number) {
       );
     case 'sign-in':
       return <div className="grid grid-cols-4 gap-2">{PICTURES.map((p) => <PictureBadge key={p.id} id={p.id} theme={theme} size={44} />)}</div>;
-    case 'game-show':
-      return (
-        <div className="grid grid-cols-4 gap-1.5 w-full">
-          <TeamArt.Provider value={Array.from({ length: 10 }, (_, k) => theme.pieces[`team-${k + 1}`]?.image ?? (theme.gameId === 'bowling' ? theme.pieces[`ball-${k + 1}`]?.image : undefined))}>
-            <span className="col-span-4 flex gap-1.5 justify-center">{[0, 1, 2, 3].map((k) => <TeamBadge key={k} colorIndex={k} size={30} />)}</span>
-          </TeamArt.Provider>
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i} className="aspect-[4/3] rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={pieceFill(theme, i < 4 ? 'card-back' : 'square', '#fdfd94')}>
-              {!pieceImage(theme, i < 4 ? 'card-back' : 'square') && (i < 4 ? i + 1 : (i - 3) * 100)}
-            </span>
-          ))}
-        </div>
-      );
     default:
       return (
         <div className="flex flex-wrap gap-3 justify-center items-center">

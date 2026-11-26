@@ -1,4 +1,5 @@
 import { useId, type CSSProperties, type ReactNode } from 'react';
+import { PATTERNS } from '../../brand/PatternProposal';
 
 // The Board Game's Classic world (approved mockup, /brand Game mockups, Board
 // Game, teacher 2026-11-24): a paper-craft park (sky, sun, clouds, two rolling
@@ -82,21 +83,12 @@ export const PARK_BG = (() => {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 })();
 
-// The quiet paper mat under the board (the Brand Kit's "Quiet doodle ground"):
-// a few pastel marks at 65% on cream, so the squares stay the figure.
-export const QUIET_MAT: CSSProperties = (() => {
-  const line = (c: string) => `fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"`;
-  const marks = [
-    `<circle cx="22" cy="30" r="3" fill="${PK.crystal}"/>`, `<path d="M60 18 q6 -6 12 0 t12 0" ${line(PK.blush)}/>`,
-    `<path d="M132 34 a8 8 0 0 1 16 0" ${line(PK.mint)}/>`, `<path d="M176 70 c4 -6 12 -4 10 3 c-2 6 -11 6 -10 -3 Z" fill="${PK.lavender}"/>`,
-    `<path d="M30 92 l3 -8 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 Z" fill="${PK.blush}"/>`, `<circle cx="98" cy="84" r="3" fill="${PK.mint}"/>`,
-    `<path d="M120 130 q6 -6 12 0 t12 0" ${line(PK.crystal)}/>`, `<path d="M62 150 c4 -6 12 -4 10 3 c-2 6 -11 6 -10 -3 Z" fill="${PK.crystal}"/>`,
-    `<circle cx="172" cy="160" r="3" fill="${PK.blush}"/>`, `<path d="M16 176 a8 8 0 0 1 16 0" ${line(PK.lavender)}/>`,
-    `<path d="M150 104 l2.4 -6 l2.4 6 l6 2.4 l-6 2.4 l-2.4 6 l-2.4 -6 l-6 -2.4 Z" fill="${PK.mint}"/>`, `<circle cx="110" cy="188" r="3" fill="${PK.lavender}"/>`,
-  ];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="${PK.cream}"/><g opacity="0.65">${marks.join('')}</g></svg>`;
-  return { backgroundColor: PK.cream, backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, backgroundSize: '200px 200px' };
-})();
+// The quiet paper mat under the board: the Brand Kit's own "Quiet doodle
+// ground" (src/brand/PatternProposal, the /brand Board Game mockup; owner
+// 2026-11-26), with its Calm version (dots only, fainter).
+const quietPattern = PATTERNS.find((p) => p.id === 'quiet')!;
+export const QUIET_MAT: CSSProperties = { backgroundColor: PK.cream, ...quietPattern.make(false) };
+export const quietMat = (calm: boolean): CSSProperties => ({ backgroundColor: PK.cream, ...quietPattern.make(calm) });
 
 // ---- Crayon pieces (the kit's Shell, Wax and Shine) ---------------------------
 

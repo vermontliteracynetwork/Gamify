@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import HintButton from '../../engine/HintButton';
 import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
@@ -9,7 +9,7 @@ const GS = '/sounds/game-show/';
 import { AnimatePresence, motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
+import { CheckCircle, Trophy, UsersThree, X } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -47,7 +47,7 @@ import Title from '../../ui/Title';
 import DialogFocus from '../../ui/DialogFocus';
 import Meter, { METER_H } from '../../ui/Meter';
 import { useStageColor } from '../../theme/stageColor';
-import { Doodle, STUDIO, Marquee, PRIZE_CONFETTI, StudioBack, teamPastel, useBoxSize } from './studio';
+import { ClosedFace, Doodle, isGolden, OpenFace, STUDIO, Marquee, PRIZE_CONFETTI, StudioBack, studioLook, useBoxSize, type StudioLook } from './studio';
 
 
 type Board = 'cards' | 'grid';
@@ -109,9 +109,11 @@ export default function GameShow() {
     // It stays until it is tapped (teacher, 2026-11-24).
     setToasts((x) => [...x, { id, text }]);
   }
-  // Classic wears the approved studio and marquee; a theme's own world sets its own stage.
-  const marquee = theme.id.endsWith(':classic');
+  // Every theme plays in the studio (owner, 2026-11-26): Classic wears the
+  // approved colors, any other theme the same studio drawn from its own colors,
+  // backdrop and card art (studioLook), as its Theme Builder preview shows it.
   const stageColor = useStageColor('game-show');
+  const look = useMemo(() => studioLook(theme, stageColor, { plain: settings.backgrounds === 'plain', calm: settings.calm }), [theme, stageColor, settings.backgrounds, settings.calm]);
   const [stageRef, box] = useBoxSize<HTMLDivElement>();
   const [gridRef, gridBox] = useBoxSize<HTMLDivElement>();
   // A tall screen stands the card grid on its side (4 x 3 shows 3 across, 4 down).
@@ -445,13 +447,13 @@ export default function GameShow() {
         // marquee with the meter on top, the scores in a column beside it (below
         // it on portrait screens), the tools top right on the valance. The board
         // fills the play space, the same in full screen (teacher, 2026-10-31).
-        <div ref={stageRef} className="relative play-fill overflow-hidden" data-gs-stage={marquee ? 'studio' : 'theme'}>
-          {marquee && <StudioBack w={box.w} h={box.h} rem={box.rem} back={stageColor} />}
+        <div ref={stageRef} className="relative play-fill overflow-hidden" data-gs-stage="studio">
+          <StudioBack w={box.w} h={box.h} rem={box.rem} look={look} />
           <div className={`relative h-full grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_clamp(12rem,19vw,17rem)] gap-3 lg:gap-[clamp(1rem,3vw,3rem)] content-center items-center max-w-[110rem] mx-auto
-            [--gs-extra:6rem] lg:[--gs-extra:0rem] ${marquee ? '[--gs-rim:1.05rem] [--gs-inner:0.6rem] [--gs-top:3.1rem] [--gs-bottom:1.25rem]' : '[--gs-rim:0px] [--gs-inner:0px] [--gs-top:0.75rem] [--gs-bottom:0.75rem]'}`}
-            style={{ padding: marquee ? 'var(--gs-top) max(9.5%, 3rem) var(--gs-bottom)' : 'var(--gs-top) clamp(0.75rem, 2.5vw, 2.5rem) var(--gs-bottom)' }}>
+            [--gs-extra:6rem] lg:[--gs-extra:0rem] [--gs-rim:1.05rem] [--gs-inner:0.6rem] [--gs-top:3.1rem] [--gs-bottom:1.25rem]`}
+            style={{ padding: 'var(--gs-top) max(9.5%, 3rem) var(--gs-bottom)' }}>
           <h1 className="sr-only"><Title text={t('tb.title')} /></h1>
-          <div className={`absolute ${marquee ? 'top-[0.45rem] right-[max(1rem,2%)]' : 'top-3 right-3'} flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11`}>
+          <div className={`absolute top-[0.45rem] right-[max(1rem,2%)] flex items-center gap-1.5 z-10 [&_button]:!w-11 [&_button]:!h-11`}>
             {/* One order everywhere (Brand Kit, 2026-11-24): Hint, Settings, Full screen, Close. */}
             <HintButton gameId="game-show" />
             <GearButton small onClick={() => setSettingsOpen(true)} />
@@ -478,9 +480,19 @@ export default function GameShow() {
               <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
             )}
 
-            {/* THE meter on top of the board (approved mockup): it fills as cards are won. */}
-            <Meter width="min(22rem, 60%)" segments={1} done={0} part={progress.total ? progress.done / progress.total : 0}
-              label={`${progress.done}/${progress.total} ${t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')}`} />
+            {/* THE meter on top of the board (approved mockup): it fills as cards are won.
+                At 0 it shows the Lemon start knob and its count on a Paper tag beside it,
+                so it never reads as an empty placeholder pill (Classic Art Director, 2026-11-26). */}
+            <div className="flex items-center gap-2" style={{ width: 'min(25rem, 66%)' }}>
+              <span className="flex-1 min-w-0 flex">
+                <Meter width="100%" segments={1} done={0} part={progress.total ? Math.max(progress.done / progress.total, 0.001) : 0.001}
+                  label={`${progress.done}/${progress.total} ${t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')}`} />
+              </span>
+              <span className="shrink-0 grid place-items-center rounded-pill bg-[var(--paper)] px-2.5 text-sm font-bold leading-none tabular-nums text-[var(--ink)]"
+                style={{ height: METER_H, border: '2.5px solid var(--color-border)', boxShadow: '0 2px 0 var(--color-border)' }} aria-hidden="true">
+                {progress.done}/{progress.total}
+              </span>
+            </div>
 
             {board === 'cards' && (
               // The cards fill the space left on screen, all the same size
@@ -489,7 +501,7 @@ export default function GameShow() {
               // 2026-11-01). On a tall screen the grid stands on its side, so a
               // 4 x 3 board is 3 across and 4 down; rows and columns swap together,
               // so a full row or column is still a full line.
-              <Frame marquee={marquee} bulbs={bulbs} chase={settings.motion === 'full'}>
+              <Frame look={look} bulbs={bulbs} chase={settings.motion === 'full'}>
               <div ref={gridRef} className="grid"
                 style={{ gap, gridTemplateColumns: `repeat(${dCols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${dRows}, minmax(0, 1fr))`,
                   width: `calc(100cqw - 2 * ${FRAME})`,
@@ -515,11 +527,11 @@ export default function GameShow() {
                       <span className="absolute -inset-[3px]" style={{ perspective: 900 }} aria-hidden="true">
                         {/* A CSS keyframe turn (lift, turn, settle): Motion's rotateY jumped straight to the end here. */}
                         <span className="absolute inset-0 gs-flip" style={{ transformStyle: 'preserve-3d', animationDuration: `${0.65 * pace(settings)}s` }}>
-                          <ClosedFace fill={cardBack} art={!cardBackArt} w={cardW} edge style={{ backfaceVisibility: 'hidden' }} />
+                          <ClosedFace fill={cardBack} art={!cardBackArt} dash={look.dash} w={cardW} edge style={{ backfaceVisibility: 'hidden' }} />
                           <OpenFace kind={c.kind} by={player?.colorIndex ?? 0} w={cardW} edge style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', boxShadow: `0 0 24px 6px ${STUDIO.butter}` }} />
                         </span>
                       </span>
-                    ) : c.open && c.by !== undefined ? <OpenFace kind={c.kind} by={c.by} w={cardW} /> : <ClosedFace fill={cardBack} art={!cardBackArt} w={cardW} />}
+                    ) : c.open && c.by !== undefined ? <OpenFace kind={c.kind} by={c.by} w={cardW} /> : <ClosedFace fill={cardBack} art={!cardBackArt} dash={look.dash} w={cardW} />}
                     {/* The lucky card stays a secret until it is won (teacher, 2026-11-06). */}
                   </motion.button>
                   );
@@ -531,7 +543,7 @@ export default function GameShow() {
             {board === 'grid' && (
               // Category squares in the same marquee; room inside the scroll box for
               // the bottom row's outline and shadow (teacher, 2026-10-31: never cut off).
-              <Frame marquee={marquee} bulbs={bulbs} chase={settings.motion === 'full'}>
+              <Frame look={look} bulbs={bulbs} chase={settings.motion === 'full'}>
               <div className="overflow-x-auto p-1.5 -m-1.5" style={{ width: `calc(100cqw - 2 * ${FRAME})` }}>
                 <div className="grid gap-2 min-w-[min(560px,100%)]" style={{ gridTemplateColumns: `repeat(${Math.min(5, chosenSets.length)}, minmax(0, 1fr))` }}>
                   {chosenSets.slice(0, 5).map((s) => (
@@ -655,44 +667,13 @@ const CARD_RATIO = 220 / 300;
 // The marquee's thickness on each side: its ink edge, rim, inner edge and inner pad.
 const FRAME = '(7px + var(--gs-rim) + var(--gs-inner))';
 
-// The bulb marquee round the board on Classic; a theme's own stage gets the board alone.
-function Frame({ marquee, bulbs, chase, children }: { marquee: boolean; bulbs: number; chase: boolean; children: ReactNode }) {
-  return marquee ? <Marquee bulbs={bulbs} chase={chase}>{children}</Marquee> : <div>{children}</div>;
-}
-
-// A closed card (approved mockup): butter with a dashed orange inset and a
-// crayon sparkle, never a number (golden rule: no numbers on spaces). A theme's
-// own card-back art shows instead when it has one.
-function ClosedFace({ fill, art, w, edge, style }: { fill: CSSProperties; art: boolean; w: number; edge?: boolean; style?: CSSProperties }) {
-  return (
-    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ ...fill, borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
-      {art && (
-        <>
-          <span className="absolute" style={{ inset: Math.max(4, w * 0.04), borderRadius: '0.6rem', border: `2px dashed ${STUDIO.orange}` }} />
-          <Doodle kind="sparkle" color={STUDIO.lemon} size={Math.round(Math.max(18, w * 0.3))} />
-        </>
-      )}
-    </span>
-  );
-}
-
-// A won card: the team's pastel, its badge small in the corner and the prize
-// (+points or the power-up), so the board shows who won what at a glance.
-function OpenFace({ kind, by, w, edge, style }: { kind: CardKind; by: number; w: number; edge?: boolean; style?: CSSProperties }) {
-  const gold = isGolden(kind);
-  return (
-    <span className="absolute inset-0 grid place-items-center overflow-hidden" style={{ background: gold ? STUDIO.lemon : teamPastel(by), borderRadius: '0.9rem', ...(edge ? { border: `3px solid ${STUDIO.ink}` } : {}), ...style }}>
-      <span className="absolute" style={{ top: Math.max(3, w * 0.035), left: Math.max(3, w * 0.035) }}><TeamBadge colorIndex={by} size={Math.round(Math.max(16, Math.min(40, w * 0.17)))} /></span>
-      {kind.kind === 'power'
-        ? <ItemArt item={kind.item} size={Math.round(Math.max(24, w * 0.4))} still />
-        : <b className="font-display tabular-nums leading-none" style={{ fontSize: Math.max(16, w * 0.26), color: STUDIO.ink }}>+{kind.points}</b>}
-    </span>
-  );
+// The bulb marquee round the board, in the theme's studio colors.
+function Frame({ look, bulbs, chase, children }: { look: StudioLook; bulbs: number; chase: boolean; children: ReactNode }) {
+  return <Marquee bulbs={bulbs} chase={chase} look={look}>{children}</Marquee>;
 }
 
 // How big a prize is: 1 small, 2 medium, 3 big (40 or more, or a power-up).
 const prizeTier = (k: CardKind) => (k.kind === 'power' ? 3 : k.points >= 40 ? 3 : k.points >= 30 ? 2 : 1);
-const isGolden = (k: CardKind) => k.kind === 'points' && !!k.golden;
 
 function CountUp({ to, still }: { to: number; still: boolean }) {
   const [n, setN] = useState(still ? to : 0);
@@ -715,7 +696,7 @@ const powerAmount = (it: ThemeItem) => it.amount ?? (it.ability === 'bonus' ? 10
 function GridPreview({ cols, rows }: { cols: number; rows: number }) {
   return (
     <span className="grid gap-[2px]" style={{ gridTemplateColumns: `repeat(${cols}, 9px)`, gridAutoRows: '6px' }} aria-hidden="true">
-      {Array.from({ length: cols * rows }, (_, i) => <span key={i} className="rounded-[1.5px] border border-border" style={{ background: '#fdfd94' }} />)}
+      {Array.from({ length: cols * rows }, (_, i) => <span key={i} className="rounded-[1.5px] border border-border" style={{ background: STUDIO.butter }} />)}
     </span>
   );
 }
@@ -723,21 +704,23 @@ function GridPreview({ cols, rows }: { cols: number; rows: number }) {
 function BoardArt({ kind }: { kind: Board }) {
   if (kind === 'cards') {
     return (
-      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
+      // The Classic cards in small (owner, 2026-11-26: the /brand look): Butter
+      // cards with the crayon sparkle on Lavender, one won card in a team pastel.
+      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: STUDIO.lavender }}>
         {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
-            {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
+          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#bfdff3' : STUDIO.butter }}>
+            {i === 2 ? '+30' : <Doodle kind="sparkle" color={STUDIO.lemon} size={16} />}
           </span>
         ))}
       </span>
     );
   }
   return (
-    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
+    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: STUDIO.lavender }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
       {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
-        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: STUDIO.butter }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}
     </span>
   );

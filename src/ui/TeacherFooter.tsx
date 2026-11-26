@@ -8,7 +8,7 @@ export default function TeacherFooter() {
     <footer id="teacher-footer" className="teacher-footer no-print border-t-[2.5px] border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
         <nav aria-label={t('teacherFooter.nav')} className="flex flex-wrap gap-x-4 gap-y-1.5 font-bold">
-          <Link to="/faq">{t('public.nav.faq')}</Link>
+          <Link to="/help">{t('public.nav.help')}</Link>
           <Link to="/blog">{t('public.nav.ideas')}</Link>
           <Link to="/check">{t('teacherFooter.check')}</Link>
           <Link to="/pricing">{t('public.nav.pricing')}</Link>

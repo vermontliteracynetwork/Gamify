@@ -46,7 +46,7 @@ class modes (rule 11): Cooperative is Kelly and Mint with a heart, Competitive
 Pink and Blush with a spark (`src/live/ClassModeIcon.tsx`).
 
 ### Type
-- Two fonts only (rule 8): Grow Year in ALL CAPITALS for titles (h1, `.title-bubble`), scores and prices (`.font-score`) and the tagline; Inclusive Sans (`font-heading` bold for headings and buttons, `font-body` regular) in sentence case. The `.font-display` class is Inclusive Sans bold; Grow Year's "Th" ligature is off site-wide so caps stay caps.
+- Two fonts only (rule 8): Grow Year in ALL CAPITALS for titles (h1, `.title-bubble`), scores and prices (`.font-score`) and the tagline; Inclusive Sans (`font-heading` bold for headings and buttons, `font-body` regular); headings capitalize every word (owner 2026-11-26: "everyword capitial initial and lowercase the rest"), body text is sentence case. The `.font-display` class is Inclusive Sans bold; Grow Year's "Th" ligature is off site-wide so caps stay caps.
 - The root size follows the screen (the screen-size rule, `src/index.css`): about 16px on a 1440 x 900 laptop, 12 to 14px on short or zoomed windows, 16.5px on big desktops; the page column (`max-w-6xl`) is 84rem; game screens 12 to 26px. Size everything in rem so it all scales together.
 - Tailwind's scale (`text-xs` … `text-6xl`) for most text.
 - Screen-fit sizes, which follow the window height: `text-fit-title`, `text-fit-body`, `text-fit-button` (welcome screens), `text-fit-turn`, `text-fit-question`, `text-fit-answer` (question screens), and `text-fit-question-big` / `text-fit-answer-big` for short questions (48 letters or fewer) and short answers (22 or fewer), bigger again on portrait screens.
@@ -134,7 +134,7 @@ Game screens keep their own themed overlays (power-up pop, results box, question
 
 ### Tabs
 The one tab bar: `size` sm (36px, 44px on touch screens: question set tabs, Theme Builder) or md (44px page tabs); `fill` stretches the tabs (labels may wrap, never cut); `panelIds` links the selected tab to its panel.
-Special-purpose tab bars that stay hand-built: the Help Center's vertical topic list, the Features page's ways-to-play badges and the Settings panel's vertical tab list (two-across chips on phones).
+Special-purpose tab bars that stay hand-built: the Help page's Quick answers reader pills, the Features page's ways-to-play badges and the Settings panel's vertical tab list (two-across chips on phones).
 
 ### Choices (`src/ui/fields.tsx`)
 - `ChoiceRow`: the one choice control. A sliding yellow pick for words, or white cards when options have `art` (a small picture: board sizes, grid sizes). Each option can have `tip` hover text; on touch screens (no hover) the tip shows on the card, or under the row for the picked word.
@@ -160,3 +160,22 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 | Size in rem; check a 1190 x 540 window | Fix sizes in px that do not scale with the screen |
 | Use `Dialog` for any new pop-up on a menu or teacher page | Build a new fixed overlay by hand |
 | Use `Accordion` for folded questions and answers | Hand-roll `<details>` rows |
+
+
+## Reference standards for the design crew (owner, 2026-11-26)
+
+Her words: "For animations, copy Apple. For onboarding, copy Duolingo. For UI
+design, copy Linear. For typography, copy Pentagram. For minimalism, copy Muji.
+For search and filters, copy Airbnb. For art direction, copy Aesop. For
+dashboards, copy Notion. For landing page layouts, copy Stripe. For micro
+interactions, copy Framer."
+
+Use these as the quality bar for each area, and name the one you used in every
+review and proposal. "Copy" means learn and match the principles: Apple's
+eased, physical motion; Duolingo's first win before sign-up and one step per
+screen; Linear's dense, calm, keyboard-first UI; Pentagram's clear type
+hierarchy; Muji's restraint; Airbnb's visible, forgiving filters; Aesop's
+consistent art direction; Notion's flexible, quiet dashboards; Stripe's
+landing-page rhythm; Framer's small, springy feedback. Never copy their code,
+assets, art, wording or brand (CLAUDE.md legal rules). The Gamify Golden Rule,
+the three lenses and her own words still come first.

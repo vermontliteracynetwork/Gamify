@@ -1,5 +1,5 @@
 import { useSession } from '../student/session';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ChalkboardTeacher, LockSimple, Student } from '@phosphor-icons/react';
 import { canPlayGame } from '../config';
@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { UpgradeButton } from '../billing/Upgrade';
+import { higherTier, holdPlanForGame } from '../billing/trial';
 
 // The games and the Arcade need a signed-in student or teacher.
 export function RequireSignIn({ children }: { children: ReactNode }) {
@@ -53,7 +54,9 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
   if (!tier) return null;
   // A student plays only the game their code opened (teacher, 2026-10-31).
   if (!teacher && session && session.gameId !== id && !session.board?.gameIds.includes(id)) return <AskForCode />;
-  if (canPlayGame(tier, id)) return <>{children}</>;
+  // A homework link made in the Plus trial keeps its plan until its due date.
+  const plan = !teacher && session?.plan ? higherTier(tier, session.plan) : tier;
+  if (canPlayGame(plan, id)) return teacher ? <HeldGame>{children}</HeldGame> : <>{children}</>;
   const name = getGame(id)?.name ?? '';
   return (
     <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
@@ -67,6 +70,12 @@ export function RequireGame({ id, children }: { id: string; children: ReactNode 
       </div>
     </main>
   );
+}
+
+// A teacher's game: a trial that ends while it is open ends after it.
+function HeldGame({ children }: { children: ReactNode }) {
+  useEffect(() => holdPlanForGame(), []);
+  return <>{children}</>;
 }
 
 export function RequireTeacher({ children }: { children: ReactNode }) {

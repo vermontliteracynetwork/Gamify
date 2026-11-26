@@ -19,6 +19,7 @@ import type { Classroom, Student } from '../data/types';
 import { setLive } from '../live/session';
 import { t } from '../i18n';
 import Title from '../ui/Title';
+import { ScrapbookPage } from './scrapbook/Shell';
 
 // The one join page (product plan): students type a code (letters only).
 // A class code goes to class sign-in. A game code (a link, QR code or hosted
@@ -94,7 +95,7 @@ export default function JoinPage() {
         navigate(`/games/${pick.gameId}?set=${pick.setId}`); return;
       }
     }
-    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits });
+    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits, ...(game.plan && { plan: game.plan }) });
     playCloudCode(game.cloud ? game.code : '');
     if (game.design) { navigate(STUDENT_THEME_BUILDER ? '/arcade/design' : '/join'); return; }
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }
@@ -104,6 +105,7 @@ export default function JoinPage() {
 
   if (game && rosters.length > 0 && !guest) {
     return (
+      <ScrapbookPage strength="A" footer={false} pattern="checker">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
@@ -113,12 +115,15 @@ export default function JoinPage() {
         )}
         <button type="button" onClick={() => setGuest(true)} className="justify-self-center min-h-12 px-5 rounded-pill border-std border-border bg-white font-bold inline-flex items-center gap-2"><UserCircle weight="bold" size={20} />{t('join.notOnList')}</button>
       </main>
+      </ScrapbookPage>
     );
   }
 
   if (game) {
     return (
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-14 pb-16 grid gap-5 justify-items-center text-center">
+      <ScrapbookPage strength="A" footer={false} pattern="checker">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 grid justify-items-center">
+      <div className="sb-card w-full max-w-[42.5rem] p-6 sm:p-10 grid gap-5 justify-items-center text-center">
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
         <p className="font-bold text-lg">{t('join.nameSub')}</p>
         <motion.p key={name} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl" aria-live="polite">{name}</motion.p>
@@ -135,43 +140,51 @@ export default function JoinPage() {
         <button type="button" disabled={!!typed.trim() && isBlockedName(typed)} onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {t('join.play')}<ArrowRight weight="bold" size={26} />
         </button>
+      </div>
       </main>
+      </ScrapbookPage>
     );
   }
 
-  // Universal views 17 (approved /brand, 2026-11-25): no card, straight on
-  // the ground: the title, the line, five big code boxes (codes are 5
-  // letters), then Hear my code and a yellow Go side by side. Go is always
-  // there but stays off (pale, dashed) until the code checks out; Settings
-  // (accessibility inside) sits in the top corner, clear of everything.
+  // The /brand Scrapbook Join mockup in strength A (owner, 2026-11-26:
+  // "join =a"): one centered white card on the Cream ground holding the
+  // title, the line, five big code boxes (codes are 5 letters), then a yellow
+  // Go that pops in once the code works. The whole card is the clean core:
+  // never taped or tilted, no stickers. A student page: the bar shows
+  // the logo only and there is no footer, so there is nowhere to wander.
   const go = ready && ready.code === code ? ready : null;
+  const round = 'w-10 h-10 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-95 motion-safe:transition';
   return (
-    <main className="relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-10 grid justify-items-center gap-[clamp(1rem,3.5vh,2rem)] text-center min-h-[calc(100dvh-3.5rem)] content-center">
-      {/* Listen and Settings sit together in the top far right corner (owner, 2026-11-26). */}
-      <div className="fixed top-[4.5rem] right-4 sm:right-6 z-40 flex gap-2">
-        <button type="button" onClick={() => speak(t('join.sub'), settings)} aria-label={t('q.listen')} className="w-12 h-12 rounded-full border-std border-border bg-surface flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <SpeakerHigh weight="bold" size={24} />
+    <ScrapbookPage strength="A" footer={false} pattern="checker">
+    <main className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-[clamp(0.75rem,3vh,2.5rem)] pb-[clamp(0.75rem,3vh,2.5rem)] grid justify-items-center content-center min-h-[calc(100dvh-3.5rem)]">
+      {/* Listen and Settings sit together in the top far right corner, in the top bar (owner, 2026-11-26; the mockup). */}
+      <div className="fixed top-0 right-4 sm:right-6 z-[60] h-14 flex items-center gap-2">
+        <button type="button" onClick={() => speak(t('join.sub'), settings)} aria-label={t('q.listen')} className={round} style={{ boxShadow: '0 3px 0 var(--border)' }}>
+          <SpeakerHigh weight="bold" size={20} />
         </button>
-        <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t('settings.open')} className="w-12 h-12 rounded-full border-std border-border bg-surface flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <GearSix weight="bold" size={24} />
+        <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t('settings.open')} className={round} style={{ boxShadow: '0 3px 0 var(--border)' }}>
+          <GearSix weight="bold" size={20} />
         </button>
       </div>
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <div className="sb-card w-full max-w-[42.5rem] px-[clamp(1.25rem,4vw,2.75rem)] py-[clamp(1.25rem,4.5vh,2.75rem)] grid justify-items-center gap-[clamp(0.85rem,3vh,1.75rem)] text-center">
       <h1 className="title-bubble text-[clamp(2.5rem,10vw,5rem)] leading-none"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug">{t('join.sub')}</p>
       <CodeBoxes length={5} value={code} onChange={setCode} label={t('join.code')} masked={false} letters size="xl" shake={wrong} onEnter={() => { if (go) void go.go(); }} />
-      <p className="min-h-6 font-bold -my-2" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
-      <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-        <button type="button" disabled={!code} onClick={() => speak(code.split('').join(', '), settings)}
-          className="min-h-14 px-4 sm:px-6 rounded-pill border-bold border-border bg-white font-bold text-base sm:text-lg inline-flex items-center gap-2 disabled:opacity-40" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <SpeakerHigh weight="bold" size={24} />{t('join.hearCode')}
-        </button>
-        <motion.button type="button" disabled={!go} onClick={() => { if (go) void go.go(); }}
-          animate={go && !reduce ? { scale: [1, 1.08, 1] } : undefined} transition={{ duration: 0.35 }}
-          className="min-h-16 px-7 sm:px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2 disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none" style={go ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
-          {t('join.go')}<ArrowRight weight="bold" size={26} />
-        </motion.button>
+      {/* No Hear my code; Go appears only once the code works (owner 2026-11-26).
+          One slot holds the message or Go, so there is no empty band and nothing jumps. */}
+      <div className="min-h-16 flex items-center justify-center">
+        <p className={go ? 'sr-only' : 'font-bold'} role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
+        {go && (
+          <motion.button key={go.code} type="button" onClick={() => void go.go()}
+            initial={reduce ? false : { scale: 0.4, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }}
+            className="min-h-16 px-7 sm:px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            {t('join.go')}<ArrowRight weight="bold" size={26} />
+          </motion.button>
+        )}
+      </div>
       </div>
     </main>
+    </ScrapbookPage>
   );
 }

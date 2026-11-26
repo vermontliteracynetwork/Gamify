@@ -151,7 +151,7 @@ export default function ShareQuestion({ question, player, cpuLevel, onResult, ch
         {/* A fixed block for the question, its text left aligned (Universal views 10). */}
         <div className={`shrink-0 flex ${q.imageUrl ? "flex-col justify-center items-start gap-2" : "items-center"} min-h-0 overflow-y-auto`} style={{ height: qpx('--q-block') }}>
           {q.imageUrl && <figure className="m-0 min-h-0 h-[55%] shrink-0 flex flex-col items-start"><Gif src={q.imageUrl} still={q.imageStill} alt={q.imageAlt ?? ''} className="min-h-0 flex-1 w-auto max-w-full object-contain rounded-input border-std border-border-soft" />{q.imageCredit && <figcaption className="text-[10px] font-semibold text-muted">{q.imageCredit}</figcaption>}</figure>}
-          <h2 className="font-body font-bold leading-snug text-left text-pretty" style={{ fontSize: qfpx(qStep(q.prompt.length + (q.imageUrl ? 40 : 0))) }}>{q.prompt}</h2>
+          <h2 className="q-prompt font-body font-bold leading-snug text-left text-pretty" style={{ fontSize: qfpx(qStep(q.prompt.length + (q.imageUrl ? 40 : 0))) }}>{q.prompt}</h2>
         </div>
 
         <div className="grid" style={{ gridTemplateColumns: 'repeat(var(--q-cols), minmax(0, 1fr))', gap: qpx('--q-gap') }}>

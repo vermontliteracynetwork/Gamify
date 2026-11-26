@@ -4,8 +4,8 @@
 // first to the end wins. Every hop lands on one square.
 
 export type SpaceKind = 'regular' | 'lose' | 'again';
-export type Power = 'double' | 'x2' | 'tornado' | 'wheel' | 'potion' | 'shield';
-export const POWERS: Power[] = ['double', 'x2', 'tornado', 'wheel', 'potion', 'shield'];
+export type Power = 'double' | 'x2' | 'tornado' | 'potion' | 'shield';
+export const POWERS: Power[] = ['double', 'x2', 'tornado', 'potion', 'shield'];
 
 export const TRAILS = ['short', 'medium', 'long', 'xlong'] as const;
 export type Trail = (typeof TRAILS)[number];
@@ -97,11 +97,3 @@ export function tornadoSpots(pos: number[], lifted: boolean[], finish: number, r
   return pos.map((p, i) => { if (!lifted[i]) return p; const s = spots[who.indexOf(i)]; return s === p ? Math.min(finish - 1, s + 1) : s; });
 }
 
-// The wheel (teacher, 2026-11-08): half forward, half back. Where it stops,
-// in degrees, for a result; the pointer sits at the top.
-export function wheelStop(forward: boolean, rnd: Rnd = Math.random, turns = 5): number {
-  // Forward is the right half (0-180 under the pointer), back the left half.
-  const inside = 20 + rnd() * 140;
-  const at = forward ? inside : 180 + inside;
-  return turns * 360 + (360 - at);
-}

@@ -11,14 +11,14 @@ import { PP } from './PaletteProposal';
 // starts Proposed everywhere; tapping a status cycles it on screen only (no
 // saving yet). Approving every row here = approving the live rebuild.
 
-export type BrandTab = 'style' | 'sounds' | 'direction' | 'views' | 'components' | 'games' | 'stickers' | 'icons' | 'teacher' | 'public' | 'more' | 'approval';
+export type BrandTab = 'style' | 'sounds' | 'direction' | 'views' | 'components' | 'games' | 'stickers' | 'icons' | 'teacher' | 'public' | 'more' | 'approval' | 'scrapbook';
 type Where = { tab: BrandTab; view: string; anchor?: string };
 // `added`: first shown on /brand in this round (More screens), for the before/after count.
 type Row = { area: string; screen: string; route: string; where: Where[]; added?: boolean; note?: string };
 
 const TAB_NAME: Record<BrandTab, string> = {
   style: 'Style sheet', sounds: 'Sound board', direction: 'New direction', views: 'Universal views', components: 'Game components', games: 'Game mockups',
-  stickers: 'Stickers', icons: 'Icons', teacher: 'Teacher portal', public: 'Public pages', more: 'More screens', approval: 'Approval',
+  stickers: 'Stickers', icons: 'Icons', teacher: 'Teacher portal', public: 'Public pages', more: 'More screens', approval: 'Approval', scrapbook: 'Scrapbook',
 };
 const uv = (view: string): Where => ({ tab: 'views', view });
 const tp = (n: string, view: string): Where => ({ tab: 'teacher', view, anchor: `tp-${n}` });

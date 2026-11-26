@@ -4,6 +4,8 @@ import type { DataStore } from './store';
 import { normId, supabase, toUuid } from './supabase';
 import type { QuestionLogEntry } from './types';
 import { answererFor } from '../engine/answerer';
+import type { Tier } from '../config';
+import { effectiveTier, gameSince } from '../billing/trial';
 
 // The app's one data store. With cloud accounts on (Supabase keys set), a
 // signed-in teacher's work is saved in the cloud; with nobody signed in (a
@@ -62,7 +64,17 @@ export const data: DataStore = {
     const guest = !e.teamName && e.studentId?.startsWith('guest') ? guestName() : undefined;
     return base.logQuestion(who ? { ...e, teamName: `${e.teamName}: ${who}` } : guest ? { ...e, teamName: guest } : e);
   }) as DataStore['logQuestion'],
-  getSetting: (async (key: string) => (key === 'tier' && previewTier() ? previewTier() : base.getSetting(key))) as DataStore['getSetting'],
+  // 'tier' is the plan she plays on: the saved plan, lifted to Plus during
+  // the 7-day reverse trial (src/billing/trial.ts). 'real-tier' is the saved
+  // plan itself, for the plan cards and the trial banner.
+  getSetting: (async (key: string) => {
+    // A plan preview from the owner dashboard shows that plan with no trial.
+    if ((key === 'tier' || key === 'real-tier') && previewTier()) return previewTier();
+    if (key === 'trial-start' && previewTier()) return undefined;
+    if (key === 'tier') return effectiveTier(await base.getSetting<Tier>('tier'), await base.getSetting<string>('trial-start'), Date.now(), gameSince());
+    if (key === 'real-tier') return base.getSetting('tier');
+    return base.getSetting(key);
+  }) as DataStore['getSetting'],
 };
 
 export function newId(prefix: string): string {

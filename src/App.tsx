@@ -63,6 +63,7 @@ const FeaturesPage = lazyPage(() => import('./public/FeaturesPage'));
 const ThemesPage = lazyPage(() => import('./public/ThemesPage'));
 const ChallengePage = lazyPage(() => import('./public/ChallengePage'));
 const BetaPage = lazyPage(() => import('./public/BetaPage'));
+const BetaApplyPage = lazyPage(() => import('./public/BetaApplyPage'));
 const AffiliatesPage = lazyPage(() => import('./public/AffiliatesPage'));
 const RefLink = lazyPage(() => import('./affiliate/RefLink'));
 const DeviceCheckPage = lazyPage(() => import('./public/DeviceCheckPage'));
@@ -73,7 +74,6 @@ const MirrorPage = lazyPage(() => import('./live/MirrorPage'));
 const LiveHost = lazyPage(() => import('./live/LiveHost'));
 const LiveLobby = lazyPage(() => import('./live/LiveStudent'));
 const LiveOverlay = lazyPage(() => import('./live/LiveStudent').then((m) => ({ default: m.LiveOverlay })));
-const FaqPage = lazyPage(() => import('./public/FaqPage'));
 const SchoolsPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.SchoolsPage })));
 const HomeschoolPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.HomeschoolPage })));
 const StudentDataPage = lazyPage(() => import('./public/AudiencePages').then((m) => ({ default: m.StudentDataPage })));
@@ -100,8 +100,17 @@ const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
 const TeacherHome = lazyPage(() => import('./teacher/TeacherHome'));
 const AchievementsPage = lazyPage(() => import('./teacher/AchievementsPage'));
+const WelcomePage = lazyPage(() => import('./teacher/WelcomePage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
+
+// The FAQ lives on the Help page now (owner 2026-11-26: "merge faq and help
+// how to to just help"): old /faq links land on its Quick answers, keeping
+// the reader's group (?for=schools and so on).
+function FaqRedirect() {
+  const { search } = useLocation();
+  return <Navigate to={`/help${search}#faq`} replace />;
+}
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -136,13 +145,14 @@ function AnimatedRoutes() {
           <Route path="/accessibility/report" element={<ConformanceReport />} />
           <Route path="/status" element={<StatusPage />} />
           <Route path="/beta" element={<BetaPage />} />
+          <Route path="/beta/apply" element={<BetaApplyPage />} />
           <Route path="/affiliates" element={<AffiliatesPage />} />
           <Route path="/a/:code" element={<RefLink />} />
           <Route path="/check" element={<DeviceCheckPage />} />
           <Route path="/mirror/:code" element={<MirrorPage />} />
           <Route path="/teacher/live/:code" element={<RequireTeacher><LiveHost /></RequireTeacher>} />
           <Route path="/live/:code" element={<LiveLobby />} />
-          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/faq" element={<FaqRedirect />} />
           <Route path="/schools" element={<SchoolsPage />} />
           <Route path="/homeschool" element={<HomeschoolPage />} />
           <Route path="/student-data" element={<StudentDataPage />} />
@@ -194,6 +204,7 @@ function AnimatedRoutes() {
           <Route path="/games/match-three" element={<RequireSignIn><RequireGame id="match-three"><MatchThree /></RequireGame></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><TeacherHome /></RequireTeacher>} />
+          <Route path="/teacher/welcome" element={<RequireTeacher><WelcomePage /></RequireTeacher>} />
           <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
           <Route path="/teacher/games" element={<RequireTeacher><TeacherGamesPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
@@ -227,7 +238,7 @@ function AnimatedRoutes() {
       </motion.div>
     </AnimatePresence>
     {/* Full-screen tools (live games, a game's Theme Builder) have no footer, so nothing scrolls (teacher, 2026-10-31). */}
-    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && !location.pathname.endsWith('/check-in') && <TeacherFooter />}
+    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && !location.pathname.endsWith('/check-in') && location.pathname !== '/teacher/welcome' && <TeacherFooter />}
     <UpgradeHost />
     <LiveLayer />
     </>

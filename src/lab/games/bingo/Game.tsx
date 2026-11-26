@@ -369,7 +369,7 @@ function Caller({ call, still, land, cheer, onListen, onSkip }: { call: { q: Mul
               <motion.div key={call.n} className="relative w-full rounded-panel border-heavy border-border bg-white px-4 py-3 grid gap-2 content-center" style={{ boxShadow: '0 6px 0 #000, 0 16px 30px rgba(36,28,61,0.3)', maxHeight: '100%' }}
                 initial={still ? { opacity: 0 } : { scale: 0.6, opacity: 0, rotate: 4 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }}>
                 {call.q.imageUrl && <img src={call.q.imageUrl} alt={call.q.imageAlt ?? ''} className="max-h-[30cqh] object-contain mx-auto" />}
-                <h2 className="m-0 font-bold leading-tight text-balance" style={{ fontSize: len < 30 ? 'clamp(1.3rem, 6cqmin, 3.2rem)' : len < 70 ? 'clamp(1.05rem, 3.8cqmin, 2.2rem)' : 'clamp(0.9rem, 2.8cqmin, 1.6rem)' }}>{call.q.prompt}</h2>
+                <h2 className="q-prompt m-0 font-bold leading-tight text-balance" style={{ fontSize: len < 30 ? 'clamp(1.3rem, 6cqmin, 3.2rem)' : len < 70 ? 'clamp(1.05rem, 3.8cqmin, 2.2rem)' : 'clamp(0.9rem, 2.8cqmin, 1.6rem)' }}>{call.q.prompt}</h2>
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={onListen} className="min-h-11 shrink-0 rounded-pill border-std border-border bg-accent px-3 inline-flex items-center gap-1.5 font-bold motion-safe:hover:scale-105 motion-safe:transition-transform"><SpeakerHigh weight="fill" size={22} aria-hidden="true" />Listen</button>
                   <span className="text-sm font-bold text-muted inline-flex items-center gap-1"><HandTap weight="fill" size={18} aria-hidden="true" />Find it on the card</span>

@@ -19,7 +19,7 @@ export const INK = '#1d1a33';
 const P = {
   paper: '#fffaf0', cream: '#f6f0e4', butter: '#fff1b8', lemon: '#fabe37', peach: '#ffd9b3', orange: '#ff9b28',
   pink: '#f055a5', blush: '#ffd3e6', teal: '#1fb5a8', aqua: '#c9f1ee', kelly: '#22b04a', mint: '#c8f0dc',
-  sky: '#4ba3e8', crystal: '#bfdff3', purple: '#7a88fe', gamify: '#b4c4fb', grape: '#6a45f0', lavender: '#ddd6ff',
+  sky: '#4ba3e8', crystal: '#bfdff3', grape: '#6a45f0', lavender: '#ddd6ff',
 };
 // Nature tones (her pack: brown, gray and white mice; gray and orange cats; a
 // wooden door), kept as named bright/deep pairs and used the same way
@@ -31,9 +31,10 @@ const GRAY = { main: '#aaa6bb', deep: '#5f5a76' };
 const SLATE = { main: '#8c8a9a', deep: '#55536a' }; // the gray mouse: darker than the gray cat (Art Director)
 const ORANGE_DEEP = '#b84300'; // the kit's orange deep shade (src/brand/CrayonKit)
 
-// Team colors: Cats wear Orange with Peach, Mice wear Gamify purple with its pastel.
-export const SIDE_COLOR = { defender: P.orange, invader: P.purple } as const;
-export const SIDE_PASTEL = { defender: P.peach, invader: P.gamify } as const;
+// Team colors: Cats wear Orange with Peach, Mice wear Grape with Lavender (owner,
+// 2026-11-26: the new colors; the old Gamify periwinkle is retired).
+export const SIDE_COLOR = { defender: P.orange, invader: P.grape } as const;
+export const SIDE_PASTEL = { defender: P.peach, invader: P.lavender } as const;
 
 // The hand-drawn wobble on every outline (the kit's CrayonFilter: a small
 // displacement, smooth fills, no grain). `big` is for the room's 1600 grid.

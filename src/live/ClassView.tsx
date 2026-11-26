@@ -217,7 +217,7 @@ export default function ClassView(p: ClassViewProps) {
                     <span className="flex-1" />
                     <b className="text-sm text-muted">{t('live.cv.answered', { count: mine.length, total: inRoom.length })}</b>
                   </header>
-                  <h3 className="font-heading font-bold text-xl m-0 leading-snug text-left">{question.prompt}</h3>
+                  <h3 className="q-prompt font-heading font-bold text-xl m-0 leading-snug text-left">{question.prompt}</h3>
                   <ul className="list-none m-0 p-0 grid gap-2.5">
                     {question.choices.map((c, k) => {
                       const who = mine.filter((pl) => picks[pl.pid].pick === c);

@@ -12,7 +12,7 @@ const KIT: Record<string, PowerId> = {
   'Pin Magnet': 'magnet', 'Jackpot Magnet': 'magnet', 'Bumper Rails': 'shield', 'Golden Pin': 'double-points', 'Golden Ball': 'double-points',
   'Pin Twister': 'tornado', 'Mystery Box': 'mystery-box', 'Mystery Bottle': 'mystery-box', 'Bubble Bundle': 'one-more', 'Double Drop': 'double-points',
   'Extra Plate': 'one-more', 'Tip Jar': 'treasure-chest', 'Watering Can': 'one-more', 'Rain Cloud': 'freeze', 'Golden Hook': 'double-points',
-  'Super Shooter': 'lightning', 'Bouncy Ball': 'one-more', 'Message in a Bottle': 'mystery-box',
+  'Super Shooter': 'lightning', 'Bouncy Ball': 'one-more', 'Message in a Bottle': 'mystery-box', 'Pop Out': 'pop-out',
 };
 export const kitFor = (item: ThemeItem): PowerId | undefined => (item.id.startsWith('classic-') ? KIT[item.name] : undefined);
 

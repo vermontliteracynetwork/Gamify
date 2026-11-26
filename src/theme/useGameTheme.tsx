@@ -55,7 +55,7 @@ export function ThemedPage({ theme, children, menu = false }: { theme: GameTheme
       ['--font-display' as string]: THEME_FONTS[theme.fonts.display] ?? THEME_FONTS['Grow Year'],
       // A theme that picks its own display font wears it on every heading.
       ...(theme.fonts.display !== 'Grow Year' && THEME_FONTS[theme.fonts.display] ? { ['--font-heading' as string]: THEME_FONTS[theme.fonts.display] } : {}),
-      ...(stage ? { background: stage } : backdropStyle(theme, settings.backgrounds === 'plain')),
+      ...(stage ? { background: stage } : backdropStyle(theme, settings.backgrounds === 'plain', settings.calm)),
       ['--stage-bg-text' as string]: stage ? inkFor(stage) : theme.colors.backgroundText,
       ['--color-accent' as string]: theme.colors.accent,
       ['--color-accent-ink' as string]: theme.colors.accentText,

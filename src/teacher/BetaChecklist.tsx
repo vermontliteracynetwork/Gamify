@@ -18,9 +18,9 @@ export default function BetaChecklist({ s }: { s: BetaSteps }) {
   useEffect(() => { void data.getSetting<boolean>(SMALL).then((v) => setSmall(!!v)); }, []);
   const toggle = () => { setSmall(!small); void data.setSetting(SMALL, !small); };
   const steps = [
-    { key: 'set', done: s.sets > 0, to: '/teacher/sets', label: t('bcheck.set') },
+    { key: 'set', done: s.sets >= BETA.questionSets, to: '/teacher/sets', label: t('bcheck.set', { done: Math.min(s.sets, BETA.questionSets), goal: BETA.questionSets }) },
     { key: 'games', done: s.played.length >= s.games.length, to: '/play', label: t('bcheck.games', { done: s.played.length, total: s.games.length }) },
-    { key: 'theme', done: s.themes > 0, to: '/teacher/themes', label: t('bcheck.theme') },
+    { key: 'theme', done: s.themeGames >= BETA.themeGames, to: '/teacher/themes', label: t('bcheck.theme', { done: Math.min(s.themeGames, BETA.themeGames), goal: BETA.themeGames }) },
     { key: 'forms', done: s.forms >= s.games.length, to: '/play', label: t('bcheck.forms', { done: Math.min(s.forms, s.games.length), total: s.games.length }) },
   ];
   const count = steps.filter((x) => x.done).length;
@@ -69,7 +69,7 @@ export function BetaTab({ s }: { s: BetaSteps }) {
     { key: 'set', done: s.sets > 0, to: '/teacher/sets', label: t('bcheck.set') },
     { key: 'theme', done: s.themes > 0, to: '/teacher/themes', label: t('bcheck.theme') },
     { key: 'games', done: s.played.length >= s.games.length, to: '/play', label: t('bcheck.games', { done: s.played.length, total: s.games.length }) },
-    { key: 'host', done: s.hosted >= BETA.hostGames, to: '/teacher/activity', label: t('bcheck.host', { done: Math.min(s.hosted, BETA.hostGames), goal: BETA.hostGames }) },
+    { key: 'host', done: s.weeks >= BETA.hostGames, to: '/teacher/activity', label: t('bcheck.host', { done: Math.min(s.weeks, BETA.hostGames), goal: BETA.hostGames }) },
     { key: 'forms', done: s.forms >= s.games.length, to: '/play', label: t('bcheck.forms', { done: Math.min(s.forms, s.games.length), total: s.games.length }) },
   ];
   const hand = [

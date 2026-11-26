@@ -16,6 +16,7 @@ import { UpgradeButton } from '../billing/Upgrade';
 import { Plus as PlusIcon } from '@phosphor-icons/react';
 import { findGameCode, type GameCode } from '../data/gameCodes';
 import { useTier } from '../data/hooks';
+import { holdPlanForGame } from '../billing/trial';
 import { getGame } from '../games/registry';
 import { t } from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
@@ -56,6 +57,8 @@ export default function LiveHost() {
 }
 
 function Room({ game }: { game: GameCode }) {
+  // Never lock anything mid-live-game: a trial that ends now ends after it.
+  useEffect(() => holdPlanForGame(), []);
   const tier = useTier();
   const canMonitor = TIERS[tier].liveMonitorAndLock;
   const reduce = useReducedMotion();

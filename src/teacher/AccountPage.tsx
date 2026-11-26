@@ -7,7 +7,7 @@ import { PlanCards } from '../billing/Upgrade';
 import { setTeacher, useTeacher } from '../auth/session';
 import { TIERS } from '../config';
 import { data } from '../data';
-import { useAsync, useTier } from '../data/hooks';
+import { useAsync, usePlan, useTier } from '../data/hooks';
 import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { t } from '../i18n';
 import { Button, buttonClasses, PageHeader, Panel, Tabs } from '../ui/kit';
@@ -20,6 +20,10 @@ import AccessCode, { PlanUntil } from './AccessCode';
 export default function AccountPage() {
   const teacher = useTeacher();
   const tier = useTier();
+  // During the Plus trial the plan cards and access code follow the saved plan.
+  const plan = usePlan();
+  const real = plan?.real ?? tier;
+  const inTrial = !!plan?.trial?.active && real === 'free';
   const navigate = useNavigate();
   const [confirm, setConfirm] = useState('');
   const [upgraded, setUpgraded] = useState<string | null>(null);
@@ -89,7 +93,7 @@ export default function AccountPage() {
             </dl>
           </Panel>
           <Panel className="grid gap-2">
-            <h2 className="font-heading font-bold text-xl">{t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
+            <h2 className="font-heading font-bold text-xl">{inTrial ? t('account.planTrial') : t('account.plan', { plan: t(`pricing.${tier}`) })}</h2>
             <p className="font-semibold">{(!TIERS[tier].hasClasses ? t('account.limitsFree', { students: String(TIERS[tier].studentsPerClassroom), sets: String(TIERS[tier].savedQuestionSets) }) : t('account.limits', { classes: String(TIERS[tier].classrooms), sets: String(TIERS[tier].savedQuestionSets) })).replace(/Infinity/g, t('pricing.unlimited'))}</p>
             <p className="font-bold text-lg">{used && used.answers > 0 ? t('account.value', { answers: used.answers, students: used.students, sets: used.sets }) : t('account.valueNew')}</p>
             <PlanUntil />
@@ -99,16 +103,16 @@ export default function AccountPage() {
               <Button aria-expanded={billing} onClick={() => setBilling(!billing)}><Receipt weight="bold" size={18} />{t('account.billing')}</Button>
             </div>
             {billing && <p className="font-semibold text-sm rounded-input bg-butter p-3" role="status">{t('account.billingSoon')}</p>}
-            {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : tier === 'pro' ? (
+            {upgraded ? <p className="font-bold text-lg" role="status">{t('upgrade.done', { plan: upgraded })} {t('upgrade.doneText')}</p> : real === 'pro' ? (
               <p className="font-bold flex items-center gap-2"><Crown weight="fill" size={22} aria-hidden="true" />{t('account.topPlan')}</p>
             ) : (
               <>
-                <p className="font-heading font-bold text-lg mt-2">{tier === 'plus' ? t('account.moreFromPro') : t('account.moreFrom')}</p>
-                <PlanCards suggest={tier === 'plus' ? 'pro' : 'plus'} onDone={(p) => setUpgraded(t(`pricing.${p}`))} />
+                <p className="font-heading font-bold text-lg mt-2">{real === 'plus' ? t('account.moreFromPro') : t('account.moreFrom')}</p>
+                <PlanCards suggest={real === 'plus' ? 'pro' : 'plus'} onDone={(p) => setUpgraded(t(`pricing.${p}`))} />
               </>
             )}
           </Panel>
-          {tier === 'free' && <AccessCode />}
+          {real === 'free' && <AccessCode />}
         </div>
         <div className="grid gap-4">
           <Panel className="grid gap-2">

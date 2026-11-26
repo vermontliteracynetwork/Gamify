@@ -93,7 +93,7 @@ test('settings panel opens from the gear and changes text size', async ({ page }
   await expect(panel.getByLabel('Sound effects')).toHaveValue('1');
   await panel.getByRole('tab', { name: 'Tell us' }).click();
   await panel.getByRole('radio', { name: 'An idea to make it better' }).click();
-  await panel.getByLabel('Tell us more (you can skip this)').fill('More space games please');
+  await panel.getByLabel('Tell us more (optional)').fill('More space games please');
   await panel.getByRole('button', { name: 'Send' }).click();
   await expect(panel.getByText('Thank you! We read every message.')).toBeVisible();
   await page.reload();

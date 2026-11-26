@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { layout, placePowers, spaceKinds, tornadoSpots, TRAIL_SPACES, wheelStop } from './board';
+import { layout, placePowers, spaceKinds, tornadoSpots, TRAIL_SPACES } from './board';
 
 const seeded = (s = 1) => () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
 
@@ -32,14 +32,6 @@ describe('Board Game board', () => {
       expect(out[3]).toBe(20);
       [0, 1, 2].forEach((i) => expect(out[i]).not.toBe(pos[i]));
       expect(new Set(out.slice(0, 3)).size).toBe(3);
-    }
-  });
-  it('wheel stops on the half it picked', () => {
-    for (let s = 1; s < 20; s++) {
-      const fwd = (360 - (wheelStop(true, seeded(s)) % 360)) % 360;
-      const back = (360 - (wheelStop(false, seeded(s)) % 360)) % 360;
-      expect(fwd).toBeLessThan(180);
-      expect(back).toBeGreaterThan(180);
     }
   });
 });

@@ -31,10 +31,16 @@ function Scatter({ icons, colors }: { icons: Icon[]; colors: string[] }) {
   );
 }
 
+// The Brand Kit's universal patterns (src/brand/PatternProposal), as the
+// /brand Game mockups' covers wear them (owner, 2026-11-26).
+const kitPattern = (id: string) => PATTERNS.find((x) => x.id === id)!.make(false);
+
 // The box Match Three's board fills; Four in a Row's rack and Bubble Pop's
 // playfield stand exactly as tall inside it (owner, 2026-11-25: "the same
 // size as the match three (hight)").
-const BOARD_BOX = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] aspect-[5/4]';
+// Every board sits the same height in its cover, whatever the card's shape
+// (owner, 2026-11-26: "fix the sizing of the cover images").
+const BOARD_BOX = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[76%] max-w-[92%] aspect-[5/4]';
 
 export function GameCover({ gameId, className = '' }: { gameId: string; className?: string }) {
   const base = `relative overflow-hidden ${className}`;
@@ -55,7 +61,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
             {Array.from({ length: 14 }, (_, i) => <circle key={`b${i}`} cx={42 + i * 5.8} cy="76.5" r="1.2" fill={i % 2 ? '#fabe37' : '#fffaf0'} />)}
             {Array.from({ length: 6 }, (_, i) => {
               const x = 42 + (i % 3) * 26.5, y = 26 + Math.floor(i / 3) * 24.5;
-              const won = ['', '#c9bcf8', '', '', '#f8b6d6', ''][i];
+              const won = ['', '#ddd6ff', '', '', '#ffd3e6', ''][i];
               return (
                 <g key={i}>
                   <rect x={x} y={y} width="23" height="21" rx="2.5" fill={won || '#fff1b8'} stroke="#1d1a33" strokeWidth="1.1" />
@@ -72,7 +78,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       // Lavender and Blue crystal checker, on the pastel cut-paper desk, three
       // hearts lit in a match (the board only: her cover rule, 2026-11-24).
       return (
-        <div className={base} style={{ backgroundColor: '#f6f0e4', ...PATTERNS.find((x) => x.id === 'cutpaper-pastel')!.make(false) }} aria-hidden="true">
+        <div className={base} style={{ backgroundColor: '#f6f0e4', ...kitPattern('cutpaper-pastel') }} aria-hidden="true">
           <div className={`${BOARD_BOX} rounded-[8%] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] p-[2.5%] grid grid-cols-5 grid-rows-4 shadow-[0_0.25rem_0_#1d1a33]`}>
             {[[4, 3, 0, 1, 2], [5, 1, 1, 1, 3], [2, 0, 4, 5, 1], [3, 2, 5, 0, 4]].map((row, r) => row.map((k, c) => {
               const lit = r === 1 && c >= 1 && c <= 3;
@@ -92,7 +98,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       // (inside the cover now the rack stands as tall as Match Three's board).
       const grid = ['......', '......', '...g..', '..gp..', '.gpp..', 'gpgpp.'];
       return (
-        <div className={base} style={{ background: '#f6f0e4 url(/classic/four-in-a-row/squiggles.svg) repeat center / 45% auto' }} aria-hidden="true">
+        <div className={base} style={{ backgroundColor: '#f6f0e4', ...kitPattern('squiggle-pastel'), backgroundPosition: 'center', backgroundSize: '45% auto' }} aria-hidden="true">
           {/* The rack stands as tall as Match Three's board (owner, 2026-11-25). */}
           <div className={BOARD_BOX}><svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="18 22 64 75" preserveAspectRatio="xMidYMid meet">
             <rect x="24" y="96" width="5" height="4" fill="#2f7fc4" stroke="#1d1a33" strokeWidth="0.8" /><rect x="71" y="96" width="5" height="4" fill="#2f7fc4" stroke="#1d1a33" strokeWidth="0.8" />
@@ -235,7 +241,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       // the top of the pale-blue playfield on the cream doodle stage, the
       // dotted aim line and the loaded bubble.
       return (
-        <div className={base} style={{ background: '#f6f0e4 url(/classic/bubble-pop/doodle.svg) repeat center / 40% auto' }} aria-hidden="true">
+        <div className={base} style={{ backgroundColor: '#f6f0e4', ...kitPattern('doodle'), backgroundPosition: 'center', backgroundSize: '40% auto' }} aria-hidden="true">
           {/* The playfield stands as tall as Match Three's board (owner, 2026-11-25). */}
           <div className={BOARD_BOX}><svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="24 4 52 92" preserveAspectRatio="xMidYMid meet">
             <rect x="24" y="4" width="52" height="92" rx="6" fill="#bfdff3" stroke="#1d1a33" strokeWidth="2" />
@@ -258,7 +264,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       const path: [number, number][] = [...Array.from({ length: 7 }, (_, i) => [i, 0] as [number, number]), [6, 1], ...Array.from({ length: 7 }, (_, i) => [6 - i, 2] as [number, number]), [0, 3], ...Array.from({ length: 7 }, (_, i) => [i, 4] as [number, number])];
       return (
         <div className={base} style={{ background: `${PARK_BG} center / cover` }} aria-hidden="true">
-          <div className="absolute left-1/2 top-[52%] -translate-x-1/2 -translate-y-1/2 w-[78%] aspect-[16/10] rounded-[7%] border-[0.2rem] border-[#1d1a33] shadow-[0_0.2rem_0_#1d1a33]" style={QUIET_MAT}>
+          <div className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 h-[68%] max-w-[84%] aspect-[16/10] rounded-[7%] border-[0.2rem] border-[#1d1a33] shadow-[0_0.2rem_0_#1d1a33]" style={QUIET_MAT}>
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 50">
               {path.map(([c, r], i) => {
                 const x = 4 + c * 10.4, y = 3.5 + r * 9;
@@ -273,10 +279,12 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
               })}
               <path d="M7.4 5.6 l3 1.8 -3 1.8 Z" fill={INK} />
             </svg>
+            {/* Pawns stand centered on their own squares (owner, 2026-11-26): square 2 and square 12. */}
+            <span className="absolute w-[10%]" style={{ left: '23.4%', top: '21%', transform: 'translate(-50%, -86%)' }}><CrayonPawn color={PK.pink} size="100%" /></span>
+            <span className="absolute w-[10%]" style={{ left: '49.4%', top: '57%', transform: 'translate(-50%, -86%)' }}><CrayonPawn color="#6a45f0" size="100%" /></span>
           </div>
-          <span className="absolute left-[22%] top-[14%] w-[11%]"><CrayonPawn color={PK.pink} size="100%" /></span>
-          <span className="absolute left-[50%] top-[34%] w-[11%]"><CrayonPawn color="#6a45f0" size="100%" /></span>
-          <span className="absolute right-[7%] bottom-[8%] w-[13%] rotate-6"><CrayonDieFace value={3} size="100%" /></span>
+          {/* The die rests on the grass beside the board, clear of the finish square (owner, 2026-11-26). */}
+          <span className="absolute right-[1.5%] bottom-[5%] w-[9.5%] rotate-6"><CrayonDieFace value={3} size="100%" /></span>
         </div>
       );
     }
@@ -322,17 +330,10 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
 
 // Covers for Gamify's designed themes (teacher, 2026-10-31): each shows the
 // theme's own art in a small scene of its game.
-// A theme's cover with its title lettering across the bottom when it has one
-// (teacher, 2026-11-13: themes can design their own title).
+// A theme's cover: its art only. Never a game-name label on a cover image
+// (owner, 2026-11-26: "dont ever have a label of the game name on the images").
 export function ThemeCover({ theme, className = '' }: { theme: GameTheme; className?: string }) {
-  const title = theme.pieces.title?.image;
-  if (!title) return <ThemeCoverArt theme={theme} className={className} />;
-  return (
-    <div className={`relative ${className}`}>
-      <ThemeCoverArt theme={theme} className="absolute inset-0 w-full h-full" />
-      <img src={title} alt="" aria-hidden="true" className="absolute inset-x-[6%] bottom-[5%] w-[88%] h-[28%] object-contain drop-shadow-[0_3px_0_rgba(0,0,0,0.35)]" />
-    </div>
-  );
+  return <ThemeCoverArt theme={theme} className={className} />;
 }
 
 function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?: string }) {

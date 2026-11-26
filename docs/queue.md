@@ -33,7 +33,7 @@ plus the hand-off from the "Game recreations" session).
    description of how that style of classroom bowling game plays and reads
    (big lane, clear turn, simple team scores); reimplemented from scratch, no
    copied art, code, names or look (standing legal rule).
-6. [ ] **Territory: her assets, Classic look.** "for terretory, i need you to
+6. [x] **Territory: her assets, Classic look.** (owner 2026-11-26: "territory is good to go") "for terretory, i need you to
    take the assets i uploaded and just apply the classic theme to those, not
    redesign new." Use her uploaded cats, mice and room pieces as they are; only
    apply the Classic treatment (outline, palette, flat fill) to them. No newly
@@ -92,7 +92,7 @@ Approved: Home.
     tap a card before Next); then a GitHub check run.
 21. [x] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
     browser on every device.
-22. [ ] **Slow-device check:** (simulated run passed 2026-11-25, docs/slow-device-check.md) a test round on a slow school Chromebook and a
+22. [x] **Slow-device check:** (owner 2026-11-26: okay) (simulated run passed 2026-11-25, docs/slow-device-check.md) a test round on a slow school Chromebook and a
     projector (suggested by the build session; needs her or a beta classroom).
 23. [x] **Rebuild the live site** to the new direction: only when she asks for
     the push after approving /brand.
@@ -164,3 +164,23 @@ and "the new theme should cover all pages like the mockups".
 36. [x] **Question sets (with folders) and the set editor** to mockups 6a, 6b.
 37. [x] **Reports and the print report** to mockups 7a, 7b, 7d, 7e.
 38. [x] **Achievements page** (mockup 8) and a sweep of every other page still in the old look.
+
+## I. Design crew reference standards (owner, 2026-11-26)
+
+Her words: "tell the design crew to follow this advice- For animations, copy
+Apple. For onboarding, copy Duolingo. For UI design, copy Linear. For
+typography, copy Pentagram. For minimalism, copy Muji. For search and filters,
+copy Airbnb. For art direction, copy Aesop. For dashboards, copy Notion. For
+landing page layouts, copy Stripe. For micro interactions, copy Framer."
+
+39. [x] **Brief the design crew.** The list is in the Design Chair, Classic Art
+    Director and accessibility agent files and in docs/design-system.md.
+    "Copy" means study and match the quality and principles (pacing, layout,
+    restraint, motion feel); we never copy their code, assets, art, wording or
+    brand (legal rules in CLAUDE.md). Every review now names the reference used.
+40. [ ] **Audit against the references:** onboarding and the new sign-up welcome
+    screen against Duolingo (first win before account, one choice per screen);
+    the Home, Features and Pricing layouts against Stripe; the owner and
+    teacher dashboards against Notion; set and theme search/filters against
+    Airbnb; motion against Apple and Framer. Findings go to the owner as a
+    mockup on /brand before anything live changes.

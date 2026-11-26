@@ -8,8 +8,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/pricing/, 'Plans and pricing'],
   [/^\/login/, 'Log in'],
   [/^\/it/, 'For school IT'],
-  [/^\/help/, 'How-to guides'],
-  [/^\/faq/, 'Help Center'],
+  [/^\/(help|faq)/, 'Help'],
   [/^\/(blog|ways)/, 'Blog'],
   [/^\/research/, 'Research'],
   [/^\/challenge\/permission/, 'Challenge permission slip'],
@@ -37,6 +36,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/teacher\/reports/, 'Reports'],
   [/^\/teacher\/themes/, 'Theme Builder'],
   [/^\/teacher\/account/, 'Account'],
+  [/^\/teacher\/welcome/, 'Welcome'],
   [/^\/teacher\/activity/, 'Create an Activity'],
   [/^\/teacher\/achievements/, 'Achievements'],
   [/^\/schools/, 'For schools'],
@@ -44,6 +44,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/student-data/, 'Student data promise'],
   [/^\/themes/, 'Themes'],
   [/^\/beta$/, 'Join the beta test'],
+  [/^\/beta\/apply$/, 'Apply for the beta test'],
   [/^\/owner/, 'Owner'],
 ];
 

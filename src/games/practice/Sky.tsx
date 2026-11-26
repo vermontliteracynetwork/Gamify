@@ -227,17 +227,20 @@ export function pickKinds(spots: SkySpot[], n: number, aspect = 1): number[] {
   return out;
 }
 
-// The rainbow star, drawn here (teacher, 2026-11-06): striped bands in a star.
+// The rainbow star, drawn here (teacher, 2026-11-06): striped bands in a star,
+// in the palette brights with the kit's ink outline (owner, 2026-11-26: the new
+// colors; no off-palette red or navy).
+const STAR_D = 'M50 4 L62 34 L95 37 L70 59 L78 92 L50 75 L22 92 L30 59 L5 37 L38 34 Z';
 function RainbowStar() {
-  const bands = ['#ff1f2d', '#ff9f00', '#ffde00', '#72c456', '#38b8f8', '#005fdf', '#ae1fc4'];
+  const bands = ['#f055a5', '#ff9b28', '#fabe37', '#22b04a', '#1fb5a8', '#4ba3e8', '#6a45f0'];
   return (
-    <svg viewBox="0 0 100 100" className="relative w-full h-full" aria-hidden="true">
+    <svg viewBox="0 0 100 100" className="relative w-full h-full" aria-hidden="true" overflow="visible">
       <defs>
-        <clipPath id="rainbow-star"><path d="M50 4 L62 34 L95 37 L70 59 L78 92 L50 75 L22 92 L30 59 L5 37 L38 34 Z" strokeLinejoin="round" /></clipPath>
+        <clipPath id="rainbow-star"><path d={STAR_D} strokeLinejoin="round" /></clipPath>
       </defs>
       <g clipPath="url(#rainbow-star)">
         {bands.map((c, k) => <path key={c} d={`M0 ${k * 14} Q50 ${k * 14 + 10} 100 ${k * 14 + 2} L100 ${k * 14 + 16} Q50 ${k * 14 + 24} 0 ${k * 14 + 14} Z`} fill={c} />)}
-        <rect x="0" y="96" width="100" height="10" fill="#ae1fc4" />
+        <rect x="0" y="96" width="100" height="10" fill="#6a45f0" />
       </g>
     </svg>
   );

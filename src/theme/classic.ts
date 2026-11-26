@@ -30,18 +30,22 @@ export function classicTheme(gameId: string): GameTheme {
     name: 'Classic',
     source: 'house',
     colors: {
-      background: night ? '#22336e' : alley || big ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle || four ? '#f6f0e4' : '#b4c4fb',
-      backgroundText: night || show || pin ? '#ffffff' : alley || big ? '#1d1a33' : '#000000',
-      surface: '#fbfcf8',
-      text: '#000000',
+      // The palette pairs (owner, 2026-11-26: "new colors for the classic
+      // themes"): Lavender ground (the retired periwinkle #b4c4fb is gone),
+      // Ink text, Paper panels, Kelly right; the yellow go button stays.
+      background: night ? '#22336e' : alley || big ? '#ddd6ff' : show ? '#6a45f0' : pin ? '#25365f' : doodle || four ? '#f6f0e4' : '#ddd6ff',
+      backgroundText: night || show || pin ? '#ffffff' : '#1d1a33',
+      surface: '#fffaf0',
+      text: '#1d1a33',
       accent: '#fdfd94',
-      accentText: '#000000',
-      success: '#1f7a45',
-      miss: '#9b2c3a',
+      accentText: '#1d1a33',
+      success: '#22b04a',
+      miss: '#f055a5',
     },
     fonts: { display: 'Grow Year', body: 'Inclusive Sans' },
-    backdrop: doodle ? { kind: 'image', src: '/classic/bubble-pop/doodle.svg', alt: 'Pastel doodle shapes on cream', tile: true }
-      : four ? { kind: 'image', src: '/classic/four-in-a-row/squiggles.svg', alt: 'Pastel squiggles and flowers on cream', tile: true } : { kind: 'color' },
+    // The Brand Kit's own patterns, as the /brand Game mockups show them
+    // (owner, 2026-11-26: "the patterns ... not on the main site yet").
+    backdrop: doodle ? { kind: 'kit', pattern: 'doodle' } : four ? { kind: 'kit', pattern: 'squiggle-pastel' } : { kind: 'color' },
     celebration: 'confetti',
     // Question Tracker's Classic art is the teacher's own (2026-10-31): a
     // painted night sky and six hand-drawn stars. Seen in the game and the

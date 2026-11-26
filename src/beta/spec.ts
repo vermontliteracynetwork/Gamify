@@ -14,9 +14,12 @@ export const BETA = {
   months: 3,
   // After the free months: this plan, yearly only, at this discount, for this long.
   offer: { tier: 'plus' as Exclude<Tier, 'free'>, discount: 0.2, years: 1 },
-  // Games to host with the class during the beta (Claudia's guess from "play
-  // twice a week" over the 3 free months, owner 2026-11-24; change it here).
-  hostGames: 24,
+  // Owner 2026-11-26: "play one game a week, create a theme for a minimum of 5
+  // games and create 5 question sets". One game a week over the 3 free months.
+  hostGames: 13,
+  gamesPerWeek: 1,
+  themeGames: 5,
+  questionSets: 5,
   teacherFormMinutes: '1 to 3',
   studentFormMinutes: '3 to 5',
 } as const;
@@ -27,9 +30,10 @@ export const dollars = (n: number) => `$${n % 1 ? n.toFixed(2) : n}`;
 
 // What every tester must do (owner, 2026-11-24).
 export const REQUIREMENTS = [
-  'Build at least one question set of their own',
+  'Play at least one game a week with their class',
+  'Build at least 5 question sets of their own',
   'Play every listed game at least once (not every version or setting)',
-  'Design at least one theme in the Theme Builder (digital or physical design) and give Theme Builder feedback',
+  'Design a theme for at least 5 different games in the Theme Builder (digital or physical design) and give Theme Builder feedback',
   'Send the short after-game form (1 to 3 minutes, taps and short answers) after each game',
   'Have students rate each game with three faces, with an optional comment',
   'Teach the Tell Gamify and rating lesson from the classroom kit',

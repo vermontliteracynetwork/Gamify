@@ -134,7 +134,7 @@ export default function TerritoryStage({ theme, players, mode, teams, pace, rule
   const teamSize = (s: Side) => inRoom.filter((p) => (teams[p.pid] ?? 'defender') === s).length;
 
   return (
-    <div className="absolute inset-0 grid grid-rows-[auto_minmax(0,1fr)_auto] portrait:grid-cols-1 landscape:grid-cols-[minmax(0,1fr)_15rem] gap-2 p-2 bg-[#b4c4fb]">
+    <div className="absolute inset-0 grid grid-rows-[auto_minmax(0,1fr)_auto] portrait:grid-cols-1 landscape:grid-cols-[minmax(0,1fr)_15rem] gap-2 p-2 bg-[#ddd6ff]">
       {/* A: top strip, the goal that builds */}
       <div className="landscape:col-span-2 justify-self-center w-[min(44rem,calc(100%-24rem))] min-h-[3.25rem] flex items-center gap-3 px-4 py-2 rounded-pill bg-[#fffaf0] border-[3px] border-[#1d1a33]" style={{ boxShadow: `0 4px 0 ${INK}` }}>
         {mode === 'together' ? (

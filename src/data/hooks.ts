@@ -3,6 +3,7 @@ import type { Tier } from '../config';
 import { data } from './index';
 import type { QuestionSet } from './types';
 import { withTimeout } from '../lib/withTimeout';
+import { trialState, type TrialState } from '../billing/trial';
 
 // Loads async data and reloads on demand.
 export function useAsync<T>(load: () => Promise<T>, deps: unknown[] = []): { value: T | undefined; reload: () => void } {
@@ -47,3 +48,16 @@ export function useTierLoaded(): Tier | null {
 }
 
 export const LOCAL_TEACHER_ID = 'local-teacher';
+
+// The plan with its trial: `tier` is what she plays on, `real` is the saved
+// plan (what the plan cards and Get Plus compare against), `trial` is the
+// reverse trial (null for accounts made before it, or with none).
+export interface PlanState { tier: Tier; real: Tier; trial: TrialState | null }
+export function usePlan(): PlanState | null {
+  const { value, reload } = useAsync<PlanState>(async () => {
+    const [tier, real, start] = await Promise.all([data.getSetting<Tier>('tier'), data.getSetting<Tier>('real-tier'), data.getSetting<string>('trial-start')]);
+    return { tier: tier ?? 'free', real: real ?? 'free', trial: trialState(start) };
+  });
+  useEffect(() => { window.addEventListener('gamify-tier', reload); return () => window.removeEventListener('gamify-tier', reload); }, [reload]);
+  return value ?? null;
+}

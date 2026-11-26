@@ -4,7 +4,7 @@ import { useTierLoaded } from './hooks';
 // Free saves nothing after today (owner, 2026-11-26: "delete free data
 // nightly"). On this device, every answer logged before today is removed the
 // first time the app opens on a new day; in the cloud a nightly job does the
-// same (supabase/migrations/0017_free_history_cleanup.sql).
+// same (supabase/migrations/0018_free_history_cleanup.sql).
 const KEY = 'gamify:log';
 const DONE = 'gamify:free-cleanup-day';
 

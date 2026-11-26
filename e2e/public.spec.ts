@@ -35,7 +35,7 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
 
   // Teacher logs in on this device and makes a class with a join code.
   await page.goto('/login');
-  await signUpTeacher(page);
+  await signUpTeacher(page, 'miss.jen', { trial: false });
   // The teacher lands on Home: the first-day steps and empty states (batch 6).
   await expect(page.getByRole('heading', { name: 'Welcome to Gamify' })).toBeVisible();
   await expect(page.getByText('Get started, 0 of 4 done').first()).toBeVisible();
@@ -60,7 +60,7 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   // A code is checked as it is typed; Go stays off until one works (teacher, 2026-10-31; mockup 17, 2026-11-25).
   await page.getByLabel('Game code').fill('ZZZZZ');
   await expect(page.getByText('That code did not match.', { exact: false })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Go' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Go' })).toHaveCount(0);
   await page.getByLabel('Game code').fill(code.toLowerCase());
   await page.getByRole('button', { name: 'Go' }).click();
   // No student list on Free: the student rolls a name or types their own.
@@ -112,7 +112,7 @@ test('join page: five wrong codes means a short wait; the code screen shows a QR
     await page.waitForTimeout(250);
   }
   await expect(page.getByText(/Too many tries\. Wait \d+ seconds/)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Go' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Go' })).toHaveCount(0);
 });
 
 test.describe('signed in', () => {
@@ -220,44 +220,183 @@ test.describe('footer and legal pages', () => {
 
 test.describe('features page', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  test('three pillars to try: a question with supports, sample themes, and the four ways to play', async ({ page }) => {
+  test('real game pictures cycle every theme, a look to try, a question with supports, and the ways to play', async ({ page }) => {
     await page.goto('/features');
-    await page.getByRole('link', { name: /Theme creation/ }).click();
+    // The real games: pick one, and its live picture flips through every theme it can wear.
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Four in a Row', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Four in a Row in every theme' });
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Classic theme' })).toBeVisible();
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Animal Friends theme' })).toBeVisible();
+    await pictures.getByRole('button', { name: 'Previous theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Classic theme' })).toBeVisible();
+    // A game with only Classic says class themes show up there too.
+    await games.getByRole('button', { name: 'Territory', exact: true }).click();
+    await expect(games.getByText('Themes your class makes for this game show up here too.')).toBeVisible();
+    // Try a look: the picture redraws from the colors picked.
+    await page.getByRole('link', { name: 'Class themes' }).click();
     await expect(page).toHaveURL(/#themes/);
-    await page.getByRole('radio', { name: /Night Arcade/ }).click();
-    await expect(page.getByRole('radio', { name: /Night Arcade/ })).toHaveAttribute('aria-checked', 'true');
+    await page.getByRole('radio', { name: 'Night' }).click();
+    await expect(page.getByRole('radio', { name: 'Night' })).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('button', { name: 'Bigger text' }).click();
     await expect(page.getByRole('button', { name: 'Bigger text' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'A 1/4' }).click();
     await expect(page.getByText('You got it!', { exact: false })).toBeVisible();
-    await page.getByRole('tab', { name: 'Live' }).click();
     await expect(page.getByText('lock screens with one tap', { exact: false })).toBeVisible();
+  });
+  test('a theme made in the Theme Builder joins the game picture cycle', async ({ page }) => {
+    await page.goto('/features');
+    await page.evaluate(() => {
+      const s = JSON.parse(localStorage.getItem('gamify:settings') || '{}');
+      s['made-themes'] = [{ id: 'custom:e2e-bowl', gameId: 'bowling', name: 'Space Lanes', source: 'custom', designedBy: 'msrivera', studentDesigner: 'Ava',
+        colors: { background: '#1d1a33', backgroundText: '#ffffff', surface: '#fffaf0', text: '#1d1a33', accent: '#fdfd94', accentText: '#1d1a33', success: '#22b04a', miss: '#f055a5' },
+        fonts: { display: 'Grow Year', body: 'Inclusive Sans' }, backdrop: { kind: 'pattern', pattern: 'dots' }, celebration: 'stars', pieces: { lane: { color: '#4ba3e8' } } }];
+      localStorage.setItem('gamify:settings', JSON.stringify(s));
+    });
+    await page.reload();
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Bowling', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Bowling in every theme' });
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Bowling in the Space Lanes theme' })).toBeVisible();
+    await expect(pictures.getByText('Made by your class')).toBeVisible();
+  });
+  test('Game Show wears its studio in every theme, and Try it redraws the studio from the colors picked', async ({ page }) => {
+    await page.goto('/features');
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Game Show', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Game Show in every theme' });
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    // A sample theme: curtains, stage and the bulb marquee round card backs, no numbered grid.
+    const pic = pictures.getByRole('img', { name: /^Game Show in the .+ theme$/ });
+    await expect(pic.locator('[data-studio]')).toBeVisible();
+    await expect(pic.getByText(/^[1-4]$/)).toHaveCount(0);
+    const tryIt = page.getByRole('img', { name: 'Game Show in the Your look theme' });
+    await expect(tryIt.locator('[data-studio]')).toBeVisible();
+    const before = await tryIt.locator('[data-studio] rect').first().getAttribute('fill');
+    await page.getByRole('radio', { name: 'Night' }).click();
+    await expect(tryIt.locator('[data-studio] rect').first()).not.toHaveAttribute('fill', before!);
   });
 });
 
 test.describe('buyer pages', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  test('beta test page says exactly what we ask, and the application needs the agreement', async ({ page }, info) => {
+  test('beta test page says exactly what we ask, and its Apply card opens the application or Free', async ({ page }, info) => {
     await page.goto('/beta');
     await expect(page.getByRole('heading', { level: 1, name: /Join the Gamify Beta Test/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Play every game at least once' })).toBeVisible();
-    await page.getByLabel('Your name').fill('Ms. Rivera');
-    await page.getByLabel('Your email').fill('rivera@school.org');
-    const send = page.getByRole('button', { name: 'Apply for the beta test' });
-    await expect(send).toBeDisabled();
-    await page.getByLabel(/I will build a question set, play every Gamify game/).check();
-    await send.click();
-    await expect(page.getByText('Your application is in.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Apply to be a beta tester' }).first()).toHaveAttribute('href', '/beta/apply');
+    const card = page.locator('#apply');
+    await expect(card.getByRole('heading', { name: /Ready to apply/i })).toBeVisible();
+    await expect(card.getByRole('link', { name: 'Not ready to commit? Start free' })).toHaveAttribute('href', '/login?mode=signup');
     await page.screenshot({ path: `test-results/beta-page-${info.project.name}.png`, fullPage: true });
+    await card.getByRole('link', { name: 'Apply to be a beta tester' }).click();
+    await expect(page).toHaveURL(/\/beta\/apply$/);
   });
-  test('FAQ: tabs for each buyer and a search across all of them', async ({ page }) => {
-    await page.goto('/faq');
+  // The formal application (owner, 2026-11-26; five steps, Design Chair):  every ask a
+  // required tick, a 30-character reason, then the owner sees it with a score.
+  test('beta application: five steps with inline checks, then the owner reads it with a score', async ({ page }, info) => {
+    const problems: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
+    await page.goto('/beta/apply');
+    await expect(page.getByRole('heading', { level: 1, name: /Apply for the Beta Test/i })).toBeVisible();
+    await expect(page.getByText('Step 1 of 5', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Start free/ }).first()).toHaveAttribute('href', '/login?mode=signup');
+    const next = page.getByRole('button', { name: 'Next' });
+    // Choice chips: tap the chip, as a finger would; the real input inside it changes.
+    const tick = async (role: 'checkbox' | 'radio', name: string) => {
+      const input = page.getByRole(role, { name, exact: true });
+      await page.locator('label').filter({ has: input }).click();
+      await expect(input).toBeChecked();
+    };
+    await next.click();
+    await expect(page.getByText('Type your name.')).toBeVisible();
+    await expect(page.getByLabel(/Your name/)).toBeFocused();
+    await page.getByLabel(/Your name/).fill('Ms. Rivera');
+    await page.getByLabel(/Your school email/).fill('rivera@lincoln.k12.vt.us');
+    await page.getByLabel(/School name, or Homeschool/).fill('Lincoln Elementary');
+    await page.getByLabel(/^State/).selectOption('Vermont');
+    await tick('checkbox', 'K-2');
+    await page.getByLabel(/About how many students/).fill('22');
+    await next.click();
+    await expect(page.getByText('Step 2 of 5', { exact: false })).toBeVisible();
+    await next.click();
+    await expect(page.getByText('Pick at least one device.')).toBeVisible();
+    await tick('checkbox', 'Chromebooks');
+    await tick('radio', '3 or more times a week');
+    await tick('checkbox', 'Bubble Pop');
+    await next.click();
+    await expect(page.getByText('Step 3 of 5', { exact: false })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'The Asks' })).toBeVisible();
+    const asks = page.locator('fieldset[data-field="asks"] input[type=checkbox]');
+    await expect(asks).toHaveCount(9);
+    await asks.first().check();
+    await next.click();
+    await expect(page.getByText('Tick every ask.', { exact: false })).toBeVisible();
+    for (const c of await asks.all()) await c.check();
+    await next.click();
+    await expect(page.getByText('Step 4 of 5', { exact: false })).toBeVisible();
+    await page.getByLabel(/Why do you want to test Gamify/).fill('Fun!');
+    await next.click();
+    await expect(page.getByText('Write at least 30 characters.')).toBeVisible();
+    // No "earned" or "kept by check-ins" wording: Pro stays as promised (owner, 2026-11-26).
+    await expect(page.getByText(/earned|kept by/i)).toHaveCount(0);
+    const why = 'My first graders love games, and I want to help build one that really teaches reading. We play every morning.';
+    await page.getByLabel(/Why do you want to test Gamify/).fill(why);
+    await page.getByLabel(/I agree to do the asks above/).check();
+    await next.click();
+    await expect(page.getByRole('heading', { name: 'Review and send' })).toBeVisible();
+    await expect(page.getByText('Lincoln Elementary')).toBeVisible();
+    await page.screenshot({ path: `test-results/beta-apply-review-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Send my application' }).click();
+    await expect(page.getByRole('heading', { name: /Application Sent/i })).toBeVisible();
+    await expect(page.getByText('If you are approved', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start free', exact: true })).toHaveAttribute('href', '/login?mode=signup');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    expect(problems).toEqual([]);
+    await page.goto('/owner');
+    await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
+    await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+    await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
+    await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta test' }).click();
+    const app = page.locator('[data-beta-app]').first();
+    await expect(app.getByText('Ms. Rivera')).toBeVisible();
+    await expect(app.getByText('Lincoln Elementary')).toBeVisible();
+    await expect(app.getByText('9/9, agreed')).toBeVisible();
+    await expect(app.getByText('3 of 3 signals')).toBeVisible();
+    await app.screenshot({ path: `test-results/owner-beta-app-${info.project.name}.png` });
+  });
+  // Closed (Design Chair, 2026-11-26): after Feb 28, 2027 Eastern the form
+  // is gone, Start free stays, and /beta hides its Apply links.
+  test('beta closed: after the end date /beta/apply shows a closed card and /beta hides Apply', async ({ page }, info) => {
+    await page.clock.setFixedTime(new Date('2027-03-02T12:00:00-05:00'));
+    await page.goto('/beta/apply');
+    const closed = page.locator('[data-beta-closed]');
+    await expect(closed.getByRole('heading', { level: 1, name: /The Beta Has Ended/i })).toBeVisible();
+    await expect(closed.getByRole('link', { name: 'Start free' })).toHaveAttribute('href', '/login?mode=signup');
+    await expect(page.getByRole('button', { name: 'Next' })).toHaveCount(0);
+    await page.screenshot({ path: `test-results/beta-closed-${info.project.name}.png` });
+    await page.goto('/beta');
+    await expect(page.getByRole('heading', { level: 1, name: /Join the Gamify Beta Test/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Apply to be a beta tester' })).toHaveCount(0);
+    await expect(page.locator('#apply')).toHaveCount(0);
+  });
+  // The FAQ is merged into Help (owner 2026-11-26): /faq opens Help at Quick answers.
+  test('Help: the old FAQ link lands on Quick answers, with tabs for each buyer and one search for tips and answers', async ({ page }) => {
+    await page.goto('/faq?for=schools');
+    await expect(page).toHaveURL(/\/help\?for=schools#faq$/);
+    await expect(page.getByRole('heading', { level: 1, name: /^Help$/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Schools and districts' })).toHaveAttribute('aria-selected', 'true');
     await page.getByRole('tab', { name: 'Homeschool families' }).click();
     await page.getByText('I teach several ages at once. Does that work?').click();
     await expect(page.getByText('six-year-old practices letters', { exact: false })).toBeVisible();
-    await page.getByLabel('Search every question').fill('purchase order');
+    await page.getByLabel('Search help').fill('purchase order');
     await expect(page.getByText(/answers? found/)).toBeVisible();
     await expect(page.getByText('Can we pay with a purchase order?')).toBeVisible();
+    await page.getByLabel('Search help').fill('');
+    await page.getByRole('link', { name: /Question sets/ }).first().click();
+    await expect(page).toHaveURL(/\/help\/question-sets$/);
   });
   test('schools, homeschool and student data pages link the way buyers need', async ({ page }) => {
     await page.goto('/');
@@ -268,6 +407,12 @@ test.describe('buyer pages', () => {
     await page.goto('/homeschool');
     // The Homeschool plan lives on the Homeschool page, linked from Pricing.
     await expect(page.getByRole('link', { name: 'Start the Homeschool plan' })).toBeVisible();
+    // Three homeschool posts, then View all blog (owner 2026-11-26); no five-day week.
+    await expect(page.locator('main a[href^="/blog/"]')).toHaveCount(3);
+    await expect(page.getByText('One Question Set, Five Different Days')).toHaveCount(0);
+    await page.getByRole('link', { name: 'View all blog' }).click();
+    await expect(page).toHaveURL(/\/blog$/);
+    await page.goto('/homeschool');
     await page.goto('/pricing');
     await page.getByRole('link', { name: /Homeschooling\? See the Homeschool plan/ }).click();
     await expect(page).toHaveURL(/homeschool/);

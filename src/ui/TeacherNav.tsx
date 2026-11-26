@@ -14,6 +14,7 @@ import BetaChecklist from '../teacher/BetaChecklist';
 import { useBetaSteps, useBetaTester } from '../beta/tester';
 import { useTier } from '../data/hooks';
 import { TIERS } from '../config';
+import TrialNotes, { TrialChip } from '../billing/TrialNotes';
 
 // The teacher menu, on every teacher page. The get started checklist lives on
 // Teacher Home only (approved /brand teacher portal, owner 2026-11-25); every
@@ -103,7 +104,9 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
             <ChatTeardropText weight="fill" size={16} />{t('survey.pill')}
           </button>
         )}
+        <TrialChip />
       </nav>
+      <TrialNotes />
       {survey && surveyOpen && <TeacherSurvey id={survey} onClose={() => { setSurveyOpen(false); void surveyDue().then(setSurvey); }} />}
       {beta && !onAccount && <BetaChecklist s={beta} />}
       {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => setOpen(false)} />}

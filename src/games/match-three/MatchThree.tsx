@@ -3,7 +3,7 @@ import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsLeftRight, Cookie, Diamond, Question, Sparkle, Star } from '@phosphor-icons/react';
+import { ArrowsLeftRight, Cookie, Diamond, Question, Sparkle } from '@phosphor-icons/react';
 import { PUZZLE_PACK_CLEARED } from '../../config';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -44,7 +44,9 @@ import { clearAndRefill, createGrid, findMatches, fire, hasAnyValidMove, isAdjac
 // Lavender and Blue crystal checker, on a pastel cut-paper desk. Library and
 // class-made themes swap in artwork per piece, board and background.
 const pattern = (id: string, calm: boolean) => PATTERNS.find((p) => p.id === id)!.make(calm);
-const CHECKER = pattern('checker', false);
+// Lemon for a star won; Lavender for the ones still to win, so they read on
+// the Paper meter pill and results box (Classic Art Director, 2026-11-26).
+const STAR_WON = '#fabe37', STAR_EMPTY = '#ddd6ff';
 const SPARK_KINDS: DoodleKind[] = ['sparkle', 'star', 'dot', 'sparkle'];
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 // Combo words grow with the chain (Golden Rule pass, 2026-10-31).
@@ -321,7 +323,7 @@ export default function MatchThree() {
             {note && <p className="absolute left-1/2 -top-4 -translate-x-1/2 z-10 max-w-[90%] text-center rounded-pill border-std border-border bg-surface px-3 py-0.5 text-sm font-bold" role="status">{note}</p>}
             <div className="relative w-full h-full">
             {/* The checker under the pieces: one square per cell (pattern rule). */}
-            <div role="grid" aria-label={t('bm.title')} className="grid w-full h-full select-none touch-none rounded-[1rem]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))`, ...(classicBoard ? { ...CHECKER, backgroundSize: `${200 / COLS}% ${200 / ROWS}%` } : {}) }}>
+            <div role="grid" aria-label={t('bm.title')} className="grid w-full h-full select-none touch-none rounded-[1rem]" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))`, ...(classicBoard ? { ...pattern('checker', settings.calm), backgroundSize: `${200 / COLS}% ${200 / ROWS}%` } : {}) }}>
               {grid.map((row, r) => <div key={r} role="row" className="contents">{row.map((tileItem, c) => {
                 const key = `${r},${c}`;
                 const isSel = selected?.row === r && selected?.col === c;
@@ -404,7 +406,7 @@ export default function MatchThree() {
 
       {phase === 'end' && (
         <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
-          <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Star key={i} weight={stars > i ? 'fill' : 'bold'} size={40} color={stars > i ? '#f6c544' : '#6b7290'} className={stars > i ? 'drop-shadow-[0_0_1px_#000]' : ''} aria-hidden="true" />)}</p>
+          <ResultStars stars={stars} />
         </ResultsModal>
       )}
       {powers.element}
@@ -416,7 +418,8 @@ export default function MatchThree() {
 
 // A small picture of each board size, so the choice reads at a glance
 // (teacher, 2026-11-18: "show board grid sizes"). Same box, more pieces.
-const MOCK = ['#9fd8f0', '#f6a5c0', '#fdfd94', '#a3e6b8', '#c9b6f2', '#f7b267'];
+// The palette's pastel pairs (owner, 2026-11-26: the new colors).
+const MOCK = ['#bfdff3', '#ffd3e6', '#fff1b8', '#c8f0dc', '#ddd6ff', '#ffd9b3'];
 function SizeMock({ n }: { n: number }) {
   return (
     <span className="grid gap-[2px] p-1 rounded-md border-thin border-border bg-white" style={{ gridTemplateColumns: `repeat(${n}, 1fr)`, width: 64, height: 64 }} aria-hidden="true">
@@ -425,14 +428,19 @@ function SizeMock({ n }: { n: number }) {
   );
 }
 
+// The stars won, in the results box.
+export function ResultStars({ stars }: { stars: number }) {
+  return <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={stars > i ? STAR_WON : STAR_EMPTY} size={40} />)}</p>;
+}
+
 // The three stars of the goal, at the right end of the meter pill: Lemon
-// doodle stars when earned, paper ones still to win; each pops as it lands.
+// doodle stars when earned, Lavender ones still to win; each pops as it lands.
 function StarGoal({ score, stars, goals, still }: { score: number; stars: number; goals: number[]; still: boolean }) {
   return (
     <span className="flex gap-1 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
       {goals.map((g, i) => (
         <motion.span key={g} className="grid" animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 25, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-          <Doodle kind="star" color={stars > i ? '#fabe37' : '#fffaf0'} size={30} />
+          <Doodle kind="star" color={stars > i ? STAR_WON : STAR_EMPTY} size={30} />
         </motion.span>
       ))}
     </span>

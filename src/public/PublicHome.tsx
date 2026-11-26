@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Barbell, Brain, Buildings, Eraser, HandHeart, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, Play, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
+import { lazy, Suspense } from 'react';
+import { ArrowRight, Barbell, Brain, Buildings, Eraser, HandHeart, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
 import IconBadge, { type BadgeColor } from '../ui/IconBadge';
-import { Doodle } from '../brand/CrayonKit';
 import { CyclingCover } from '../games/covers';
 import { ModeDot, shownModes } from '../games/ModeBadge';
 import FourWays from '../games/FourWays';
@@ -12,14 +12,16 @@ import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
-import PublicFooter from './PublicFooter';
+import { ScrapbookPage } from './scrapbook/Shell';
+import HomeCollage from './scrapbook/HomeCollage';
+import CardTape from './scrapbook/CardTape';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { STARTER_THEMES } from '../theme/starters';
 
 // The public home page (development plan Part 3A): what Gamify is, the four
 // ways to play, the games, why it works (honest research lines), and the
 // two front doors: teachers start free, students join with a code.
-// Why it works and Made for real classrooms scan at a glance (owner,
+// Why it works and Made for Every Learner scan at a glance (owner,
 // 2026-11-25: "make more visual and nice/professional for easy scanning"):
 // one icon on its pastel badge, a short headline beside it, one or two lines.
 type Point = { icon: typeof Stack; key: string; bg: BadgeColor };
@@ -35,14 +37,22 @@ const WHY: Point[] = [
 // two across with the last one full width (tablet); one column (phone).
 const WHY_SPAN = ['lg:col-span-2', 'lg:col-span-2', 'lg:col-span-2', 'lg:col-span-3', 'md:col-span-2 lg:col-span-3'];
 
-// The look follows the approved /brand Home mockup (owner, 2026-11-25:
-// "keep the extras on home and pricing"): its section order, How it works,
-// cover cards with name tags, pastel icon badges and the Lavender closing
-// card, with the live extras (themes, the games, features, beta) kept.
+// The look is the /brand Scrapbook Home mockup in strength B (owner,
+// 2026-11-26: "home=b"): the Cream ground, the hero collage of real game
+// covers with tape, small tilts, stickers and the one hand-lettered word
+// (hero "keep entirely"). Every other section is plain scrapbook cards:
+// "keep, no stickers ... remove tape boarder from bottom entirely", "remove
+// random stickers from everywhere but the hero top part". In B the text cards
+// stay flat and untaped (tape on cards is strength C only). The live extras
+// (themes, the games, features, beta) stay (owner, 2026-11-25).
 const H2 = 'title-bubble text-[2rem] sm:text-[2.75rem] leading-none';
-const CARD = 'bg-surface border-bold border-border rounded-panel';
+const CARD = 'sb-card';
+const FEATURE_TILT = [-1.2, 1.5, -0.6, 1, -1.6, 0.7];
 const SECTION = 'mt-12 sm:mt-16 grid gap-6';
-const HOW: { icon: typeof Stack; bg: string }[] = [{ icon: Stack, bg: 'bg-butter' }, { icon: Play, bg: 'bg-mint' }, { icon: UsersThree, bg: 'bg-blue-crystal' }];
+// How it works: a Step pill on Butter, Blush and Mint (the mockup).
+const HOW = ['bg-butter', 'bg-blush', 'bg-mint'];
+// The pencil and stars in the left margin of the hero, on wide screens.
+const HeroMargin = lazy(() => import('./scrapbook/HomeHeroArt').then((m) => ({ default: m.HeroMargin })));
 const TRUST = ['ads', 'trackers', 'emails', 'access'];
 // The hero title in two halves, split before "becomes" (whole when it is not there).
 function heroLines() {
@@ -53,9 +63,10 @@ function heroLines() {
 export default function PublicHome() {
   const reduce = useReducedMotion();
   return (
-    <>
+    <ScrapbookPage strength="B">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-10">
-        <section className="grid lg:grid-cols-[46fr_54fr] gap-8 lg:gap-12 items-center lg:min-h-[calc(100svh-7rem)]">
+        <section className="relative grid lg:grid-cols-[46fr_54fr] gap-8 lg:gap-12 items-center lg:min-h-[calc(100svh-7rem)]">
+          <Suspense fallback={null}><HeroMargin /></Suspense>
           <motion.div initial={reduce ? false : { opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="grid gap-6 content-center">
             {/* Two lines on a laptop, as on the mockup: "Every question / becomes a game". */}
             <h1 className="hero-title title-bubble text-[2.6rem] sm:text-6xl lg:text-[3.3rem] xl:text-[3.7rem] leading-none">{heroLines().map((line, i) => <span key={i} className="sm:block sm:whitespace-nowrap">{i ? ' ' : ''}<Title text={line} /></span>)}</h1>
@@ -66,15 +77,7 @@ export default function PublicHome() {
             </div>
             <p className="font-bold text-muted">{t('public.freeNote')}</p>
           </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-5" aria-hidden="true">
-            {GAMES.slice(0, 6).map((g, i) => (
-              <motion.div key={g.id} initial={reduce ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : 0.1 * i }}
-                whileHover={reduce ? undefined : { y: -8, scale: 1.04, transition: { type: 'spring', stiffness: 400, damping: 14 } }}
-                className={`relative ${CARD} overflow-hidden`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <CyclingCover gameId={g.id} className="aspect-[4/3]" />{/* No name tags on the hero covers (owner, 2026-11-25). */}
-              </motion.div>
-            ))}
-          </div>
+          <HomeCollage />
         </section>
 
         <section className={SECTION}>
@@ -85,12 +88,10 @@ export default function PublicHome() {
         <section aria-labelledby="how-it-works" className={SECTION}>
           <h2 id="how-it-works" className={H2}><Title text={t('public.howTitle')} /></h2>
           <ol className="grid md:grid-cols-3 gap-5 list-none p-0 m-0">
-            {HOW.map(({ icon: Icon, bg }, i) => (
-              <li key={i} className={`hover-lift ${CARD} p-6 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="flex items-center gap-3" aria-hidden="true">
-                  <span className={`wiggle-on-hover w-12 h-12 rounded-full ${bg} border-bold border-border flex items-center justify-center`}><Icon weight="bold" size={24} /></span>
-                  <span className="font-score text-3xl leading-none">{t('public.howStep', { n: i + 1 })}</span>
-                </span>
+            {HOW.map((bg, i) => (
+              <li key={i} className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start`}>
+                {i === 0 && <CardTape tone={1} rot={-4} />}
+                <span className={`justify-self-start px-3 py-1 rounded-pill ${bg} border-std border-border font-bold`}>{t('public.howStep', { n: i + 1 })}</span>
                 <h3 className="font-display text-2xl leading-tight">{t(`public.how.${i + 1}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`public.how.${i + 1}.text` as StringKey)}</p>
               </li>
@@ -104,8 +105,8 @@ export default function PublicHome() {
           <h2 className={H2}><Title text={t('public.gamesTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {GAMES.map((g) => (
-              <Link key={g.id} to="/login?mode=signup" className={`hover-lift group block ${CARD} overflow-hidden no-underline text-text`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="block overflow-hidden border-b-[2.5px] border-border"><CyclingCover gameId={g.id} className="aspect-[16/9]" /></span>
+              <Link key={g.id} to="/login?mode=signup" className={`hover-lift group block ${CARD} overflow-hidden no-underline text-text`}>
+                <span className="block overflow-hidden border-b-[3px] border-border"><CyclingCover gameId={g.id} className="aspect-[16/9]" /></span>
                 <div className="p-4 grid gap-2">
                   <h3 className="font-display text-2xl"><Title text={g.name} /></h3>
                   {/* Just the icon in its color, small, in one row (teacher, 2026-11-16). */}
@@ -121,7 +122,7 @@ export default function PublicHome() {
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.whyTitle')} /></h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-5">
-            {WHY.map((p, i) => <PointCard key={p.key} point={p} group="why" className={WHY_SPAN[i]} />)}
+            {WHY.map((p, i) => <PointCard key={p.key} point={p} group="why" className={WHY_SPAN[i]} tape={i === 2 ? 2 : undefined} />)}
           </div>
           <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
             {TRUST.map((k) => <li key={k} className="inline-flex items-center justify-center gap-2 rounded-pill bg-white border-bold border-border px-5 min-h-12 font-bold"><ShieldCheck weight="bold" size={20} aria-hidden="true" />{t(`public.trust.${k}` as StringKey)}</li>)}
@@ -133,40 +134,40 @@ export default function PublicHome() {
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.featuresTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 sm:auto-rows-fr gap-5">
-            {FEATURES.map((p) => <PointCard key={p.key} point={p} group="feature" />)}
+            {/* Tilt and tape scattered by hand (owner 2026-11-26: "tilt and tape randomly for these two sections"). */}
+            {FEATURES.map((p, i) => <PointCard key={p.key} point={p} group="feature" tilt={FEATURE_TILT[i % FEATURE_TILT.length]} tape={i === 1 ? 5 : i === 3 ? 3 : undefined} />)}
           </div>
           <Link to="/features" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('public.allFeatures')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
 
         <WhoFor />
 
-        <Link to="/beta" className={`mt-12 sm:mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center ${CARD} p-6 no-underline text-text`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <Link to="/beta" className={`mt-12 sm:mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center ${CARD} p-6 no-underline text-text`}>
           <span className="w-14 h-14 rounded-full bg-butter border-bold border-border flex items-center justify-center wiggle-on-hover"><RocketLaunch weight="fill" size={28} aria-hidden="true" /></span>
           <span className="grid gap-1"><span className="font-display text-2xl">{t('public.betaTitle')}</span><span className="font-semibold">{t('public.betaText')}</span></span>
           <span className={buttonClasses('main')}>{t('beta.join')}<ArrowRight weight="bold" size={18} /></span>
         </Link>
 
-        <section className="relative overflow-hidden mt-12 sm:mt-16 bg-lavender border-bold border-border rounded-panel px-6 py-10 sm:p-12 grid gap-5 justify-items-center text-center" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <span className="absolute left-4 top-3 sm:left-6 sm:top-5" aria-hidden="true"><Doodle kind="sparkle" color="var(--color-lemon)" size={40} /></span>
-          <span className="absolute right-5 bottom-3 sm:right-8 sm:bottom-6" aria-hidden="true"><Doodle kind="star" color="var(--color-pink)" size={34} /></span>
+        {/* The closing card: a plain white scrapbook card, left aligned, no stickers (the mockup). */}
+        <section className={`mt-12 sm:mt-16 ${CARD} p-6 sm:p-10 grid gap-5 justify-items-start`}>
           <h2 className={H2}><Title text={t('public.ctaTitle')} /></h2>
-          <div className="flex flex-wrap gap-3 justify-center max-sm:grid max-sm:w-full max-sm:[&>a]:w-full">
+          <div className="flex flex-wrap gap-3 max-sm:grid max-sm:w-full max-sm:[&>a]:w-full">
             <Link to="/login?mode=signup" className={buttonClasses('go', 'hover-pop', 'lg')}>{t('public.startFree')}</Link>
             <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}</Link>
           </div>
         </section>
       </main>
-      <PublicFooter />
-    </>
+    </ScrapbookPage>
   );
 }
 
 // One scannable card: the icon badge and short headline on one row, the
 // line under them, and the research number big where the page has one.
-function PointCard({ point: { icon: Icon, key, bg }, group, className = '' }: { point: Point; group: 'why' | 'feature'; className?: string }) {
+function PointCard({ point: { icon: Icon, key, bg }, group, className = '', tape, tilt }: { point: Point; group: 'why' | 'feature'; className?: string; tape?: number; tilt?: number }) {
   const stat = group === 'why' && key === 'practice';
   return (
-    <div className={`hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <div className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`} style={tilt ? { rotate: `${tilt}deg` } : undefined}>
+      {tape !== undefined && <CardTape tone={tape} rot={tilt && tilt < 0 ? -4 : 4} />}
       <div className="flex items-center gap-4">
         <span className="wiggle-on-hover"><IconBadge color={bg} size="lg"><Icon weight="bold" size={28} /></IconBadge></span>
         <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.${group}.${key}` as StringKey)} /></h3>
@@ -189,7 +190,7 @@ function ThemesShowcase() {
   const reduce = useReducedMotion();
   const top = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 4);
   return (
-    <section aria-labelledby="home-themes" className="mt-12 sm:mt-16 bg-butter border-bold border-border rounded-panel p-6 sm:p-10 grid gap-6" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+    <section aria-labelledby="home-themes" className={SECTION}>
       <div className="grid gap-2 max-w-3xl">
         <h2 id="home-themes" className={H2}><Title text={t('public.themesTitle')} /></h2>
         <p className="text-lg sm:text-xl font-semibold leading-snug">{t('public.themesText')}</p>
@@ -198,8 +199,8 @@ function ThemesShowcase() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {top.map((x, i) => (
           <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
-            <Link to="/themes" className="hover-lift block bg-surface border-bold border-border rounded-panel p-2 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-              <ThemePreview theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
+            <Link to="/themes" className={`hover-lift block ${CARD} p-2 no-underline text-text`}>
+              <ThemePreview bare theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
               <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
               <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
             </Link>
@@ -225,8 +226,9 @@ function WhoFor() {
     <section aria-labelledby="who-for" className={SECTION}>
       <h2 id="who-for" className={H2}><Title text={t('public.whoTitle')} /></h2>
       <div className="grid md:grid-cols-3 gap-5">
-        {doors.map(({ key, icon: I, to, bg }) => (
-          <Link key={key} to={to} className={`hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        {doors.map(({ key, icon: I, to, bg }, i) => (
+          <Link key={key} to={to} style={{ rotate: `${[1.1, -1.4, 0.8][i % 3]}deg` }} className={`relative hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`}>
+            {i === 2 && <CardTape tone={4} rot={3} />}
             <span className={`w-12 h-12 rounded-full ${bg} border-bold border-border flex items-center justify-center wiggle-on-hover`}><I weight="bold" size={24} aria-hidden="true" /></span>
             <span className="font-display text-2xl leading-tight">{t(`public.who.${key}` as StringKey)}</span>
             <span className="font-semibold">{t(`public.who.${key}.text` as StringKey)}</span>

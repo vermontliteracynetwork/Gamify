@@ -64,7 +64,8 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Step 1 of \d+:/ })).toBeVisible();
   await finishSetup(page);
-  expect(await page.locator('h1, h2').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
+  // The game's own title (the closed Tell Gamify box's heading sits earlier in the page and keeps the site font).
+  expect(await page.locator('h1').first().evaluate((el) => getComputedStyle(el).fontFamily)).toContain('Georgia');
   // The uploaded card back shows on the card face (inside the card since the studio redraw, batch 7).
   const bg = await page.getByRole('button', { name: /^Card 1(,|$)/ }).evaluate((el) => [el, ...el.querySelectorAll('*')].map((e) => getComputedStyle(e).backgroundImage).find((b) => b.includes('url(')) ?? 'none');
   expect(bg).toContain('url(');

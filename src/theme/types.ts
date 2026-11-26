@@ -34,7 +34,10 @@ export type SoundPack = (typeof SOUND_PACKS)[number];
 export type Backdrop =
   | { kind: 'color' }
   | { kind: 'pattern'; pattern: 'dots' | 'stripes' | 'waves' | 'checks' }
-  | { kind: 'image'; src: string; alt: string; tile?: boolean };
+  | { kind: 'image'; src: string; alt: string; tile?: boolean }
+  // One of the Brand Kit's universal patterns (src/brand/PatternProposal
+  // PATTERNS, by id), drawn in code; Calm mode wears its Calm version.
+  | { kind: 'kit'; pattern: string };
 
 export type Celebration = 'confetti' | 'stars' | 'bubbles' | 'gentle';
 
