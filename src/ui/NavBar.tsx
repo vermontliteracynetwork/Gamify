@@ -66,8 +66,6 @@ export default function NavBar() {
       {/* Phones (rule 10): Log in beside one 44px menu that holds every link and Report. */}
       {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-lavender lg:hidden`}>{t('public.nav.login')}</Link>}
       {!any && !studentPage && <MobileMenu path={path} onReport={() => setTellOpen(true)} />}
-      {/* Report, for everyone on every page (owner, 2026-11-24); student pages show the logo only (rule 10). */}
-      {!logoOnly && reportBtn(teacher ? 'hidden md:flex' : !any ? 'hidden lg:flex' : '')}
       {any && teacher && !studentPage && (
         <>
           {/* Teachers keep a way to the public site: home, features, the blog
@@ -87,6 +85,9 @@ export default function NavBar() {
           <TeacherMenu path={path} owner={isOwner && !student} student={!!student} wide={!inGame && !student} onReport={() => setTellOpen(true)} />
         </>
       )}
+      {/* Report, for everyone on every page (owner, 2026-11-24), always at the far
+          right of the bar (owner, 2026-11-26); student pages show the logo only (rule 10). */}
+      {!logoOnly && reportBtn(teacher ? 'hidden md:flex' : !any ? 'hidden lg:flex' : '')}
       <TellDialog open={tellOpen} role={role} onClose={() => setTellOpen(false)} />
     </header>
   );

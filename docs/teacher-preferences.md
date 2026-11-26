@@ -472,3 +472,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-26 (owner): "space out the hero section (right images and stickers) and return to a purple background replacig the tan/cream color" — the scrapbook public pages sit on the site purple ground again (Log in and Join keep their patterns); the Home hero collage has wider gaps between covers and more room for the stickers.
 - 2026-11-26 (owner): "approved, shrink it to fit and push to main" — the Home hero collage, stickers included, fits the first screen on laptops (1190x540 to 1920x1080).
 - 2026-11-26 (owner): Home, How It Works: no tape on the Step 1 card; the Step chips wear Grow Year.
+- 2026-11-26 (owner): Home hero game cards larger and spaced further apart. The Tell Gamify flag always sits at the far right of the top bar.

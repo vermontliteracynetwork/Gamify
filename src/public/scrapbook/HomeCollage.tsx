@@ -27,13 +27,15 @@ function layout({ colW, vw, vh }: Geo) {
   const wide = vw >= 1024, phone = vw < 640;
   // Spaced out (owner 2026-11-26: "space out the hero section (right images and stickers)"):
   // wider gaps between covers and more room around them for the stickers.
-  const cols = wide ? 2 : 3, rows = 6 / cols, gap = phone ? 14 : wide ? 30 : 22, frac = wide ? 0.74 : 0.84, fill = wide ? 0.78 : 0.72;
+  // Larger cards, spaced further apart (owner 2026-11-26: "make the game cards
+  // larger and space them out").
+  const cols = wide ? 2 : 3, rows = 6 / cols, gap = phone ? 18 : wide ? 44 : 30, frac = wide ? 0.9 : 0.9, fill = wide ? 0.88 : 0.8;
   let gw = colW * frac;
   let cw = (gw - (cols - 1) * gap) / cols, ch = cw * 0.9;
   let gh = rows * ch + (rows - 1) * gap, boxH = gh / fill, bw = colW;
   // Short laptop windows (1190 x 540): fit the screen height.
   // Fit the first screen with the stickers that hang past the edges (owner 2026-11-26: "shrink it to fit").
-  const maxH = Math.max(380, vh - 225);
+  const maxH = Math.max(400, vh - 175);
   if (wide && boxH > maxH) {
     boxH = maxH; gh = boxH * fill; ch = (gh - (rows - 1) * gap) / rows; cw = ch / 0.9;
     gw = cols * cw + (cols - 1) * gap; bw = gw / frac;
