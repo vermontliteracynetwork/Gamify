@@ -33,7 +33,7 @@ plus the hand-off from the "Game recreations" session).
    description of how that style of classroom bowling game plays and reads
    (big lane, clear turn, simple team scores); reimplemented from scratch, no
    copied art, code, names or look (standing legal rule).
-6. [ ] **Territory: her assets, Classic look.** "for terretory, i need you to
+6. [x] **Territory: her assets, Classic look.** (owner 2026-11-26: "territory is good to go") "for terretory, i need you to
    take the assets i uploaded and just apply the classic theme to those, not
    redesign new." Use her uploaded cats, mice and room pieces as they are; only
    apply the Classic treatment (outline, palette, flat fill) to them. No newly
@@ -92,7 +92,7 @@ Approved: Home.
     tap a card before Next); then a GitHub check run.
 21. [x] **Card-choice steps start unpicked** (built 2026-11-24): verify in a
     browser on every device.
-22. [ ] **Slow-device check:** (simulated run passed 2026-11-25, docs/slow-device-check.md) a test round on a slow school Chromebook and a
+22. [x] **Slow-device check:** (owner 2026-11-26: okay) (simulated run passed 2026-11-25, docs/slow-device-check.md) a test round on a slow school Chromebook and a
     projector (suggested by the build session; needs her or a beta classroom).
 23. [x] **Rebuild the live site** to the new direction: only when she asks for
     the push after approving /brand.

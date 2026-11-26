@@ -273,10 +273,12 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
               })}
               <path d="M7.4 5.6 l3 1.8 -3 1.8 Z" fill={INK} />
             </svg>
+            {/* Pawns stand centered on their own squares (owner, 2026-11-26): square 2 and square 12. */}
+            <span className="absolute w-[10%]" style={{ left: '23.4%', top: '21%', transform: 'translate(-50%, -86%)' }}><CrayonPawn color={PK.pink} size="100%" /></span>
+            <span className="absolute w-[10%]" style={{ left: '49.4%', top: '57%', transform: 'translate(-50%, -86%)' }}><CrayonPawn color="#6a45f0" size="100%" /></span>
           </div>
-          <span className="absolute left-[22%] top-[14%] w-[11%]"><CrayonPawn color={PK.pink} size="100%" /></span>
-          <span className="absolute left-[50%] top-[34%] w-[11%]"><CrayonPawn color="#6a45f0" size="100%" /></span>
-          <span className="absolute right-[7%] bottom-[8%] w-[13%] rotate-6"><CrayonDieFace value={3} size="100%" /></span>
+          {/* The die rests on the grass beside the board, clear of the finish square (owner, 2026-11-26). */}
+          <span className="absolute right-[1.5%] bottom-[5%] w-[9.5%] rotate-6"><CrayonDieFace value={3} size="100%" /></span>
         </div>
       );
     }

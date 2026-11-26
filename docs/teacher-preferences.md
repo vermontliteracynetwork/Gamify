@@ -401,3 +401,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-26 (owner): an account the owner makes with a starting password must make its own password on first sign-in; test accounts get Pro with payment waived (plan_note).
 - 2026-11-26 (owner): on the Join screen, Listen and Settings sit together in the top far right corner.
 - 2026-11-26 (owner): the Gamify logo in the top bar always opens the Gamify home page (/), on every page, signed in or not.
+- 2026-11-26 (owner): no "coming soon" label on anything already built; the Board Game cover's pawns stand on their squares and the die sits on the grass, off the finish square.
