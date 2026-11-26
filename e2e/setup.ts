@@ -24,14 +24,30 @@ export async function startTurn(page: Page) {
   if (await start.isVisible()) await start.click();
 }
 
-// A teacher creates an account (email, username, password, confirm).
-export async function signUpTeacher(page: Page, username = 'miss.jen') {
+// A teacher creates an account (email, username, password, confirm), then
+// taps Start Free on the welcome screen (shown once after sign-up, unless a
+// plan was picked on Pricing). `trial: false` makes it an account from before
+// the 7-day Plus trial, for tests of the Free plan itself.
+export async function signUpTeacher(page: Page, username = 'miss.jen', { trial = true }: { trial?: boolean } = {}) {
   await page.getByRole('tab', { name: 'Sign up' }).click();
   await page.getByLabel('Email').fill(`${username}@school.org`);
   await page.getByLabel('Username').fill(username);
   await page.getByLabel('Password', { exact: true }).fill('apples123');
   await page.getByLabel('Confirm password').fill('apples123');
   await page.getByRole('button', { name: 'Create my free account' }).click();
+  await page.waitForURL(/\/teacher/);
+  if (page.url().includes('/teacher/welcome')) {
+    await page.getByRole('button', { name: 'Start Free' }).click();
+    await page.waitForURL(/\/teacher$/);
+  }
+  if (!trial) {
+    await page.evaluate(() => {
+      const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
+      delete s['trial-start'];
+      localStorage.setItem('gamify:settings', JSON.stringify(s));
+    });
+    await page.reload();
+  }
 }
 
 // Every game opens on its cover welcome screen, then the theme screen (when

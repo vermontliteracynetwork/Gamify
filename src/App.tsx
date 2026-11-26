@@ -98,6 +98,7 @@ const HowToPlayPage = lazyPage(() => import('./public/HowToPlayPage'));
 const ThemeGuidePage = lazyPage(() => import('./public/ThemeGuide').then((m) => ({ default: m.ThemeGuidePage })));
 const TeacherHome = lazyPage(() => import('./teacher/TeacherHome'));
 const AchievementsPage = lazyPage(() => import('./teacher/AchievementsPage'));
+const WelcomePage = lazyPage(() => import('./teacher/WelcomePage'));
 const HelpPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.HelpPage })));
 const ItPage = lazyPage(() => import('./public/InfoPages').then((m) => ({ default: m.ItPage })));
 
@@ -201,6 +202,7 @@ function AnimatedRoutes() {
           <Route path="/games/match-three" element={<RequireSignIn><RequireGame id="match-three"><MatchThree /></RequireGame></RequireSignIn>} />
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><TeacherHome /></RequireTeacher>} />
+          <Route path="/teacher/welcome" element={<RequireTeacher><WelcomePage /></RequireTeacher>} />
           <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />
@@ -233,7 +235,7 @@ function AnimatedRoutes() {
       </motion.div>
     </AnimatePresence>
     {/* Full-screen tools (live games, a game's Theme Builder) have no footer, so nothing scrolls (teacher, 2026-10-31). */}
-    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && !location.pathname.endsWith('/check-in') && <TeacherFooter />}
+    {location.pathname.startsWith('/teacher') && !location.pathname.startsWith('/teacher/live') && !/^\/teacher\/themes\/[^/]+\/?$/.test(location.pathname) && !location.pathname.endsWith('/check-in') && location.pathname !== '/teacher/welcome' && <TeacherFooter />}
     <UpgradeHost />
     <LiveLayer />
     </>

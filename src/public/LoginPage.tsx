@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { logIn, signUp, type SignUpProblem } from '../auth/accounts';
@@ -12,6 +12,8 @@ import { openUpgrade } from '../billing/Upgrade';
 import { upgradeTo } from '../billing/upgrade';
 import Title from '../ui/Title';
 import { cleanCode, currentRef, saveRef, validCode } from '../affiliate/program';
+import { data } from '../data';
+import { WELCOME_SEEN } from '../billing/trial';
 
 // Teacher log in and sign up (teacher, 2026-10-26): sign up with email,
 // password, confirm password and a username; log in with username and
@@ -36,13 +38,20 @@ export default function LoginPage() {
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => { setF({ ...f, [k]: e.target.value }); setProblems([]); setWrong(false); setNote(null); };
 
   // Signed in by the confirm-your-email link: straight to the teacher area.
-  useEffect(() => { if (cloudOn && teacher && !busy) navigate('/teacher'); }, [teacher, busy, navigate]);
+  const left = useRef(false);
+  useEffect(() => { if (cloudOn && teacher && !busy && !left.current) navigate('/teacher'); }, [teacher, busy, navigate]);
 
-  function enter(username?: string) {
+  // `fresh`: the account was just made. A new teacher sees the welcome
+  // screen once (How Do You Want To Start?), unless she already picked a
+  // plan on the pricing page: then the plan box opens with it ready.
+  async function enter(username?: string, fresh = false) {
+    left.current = true;
     if (username) setTeacher({ name: username, username, at: new Date().toISOString() });
+    const plan = params.get('plan');
+    if (fresh && !plan) { navigate('/teacher/welcome'); return; }
+    if (fresh) await data.setSetting(WELCOME_SEEN, true);
     navigate('/teacher');
     // Picked a paid plan on the pricing page: the plan box opens with it ready.
-    const plan = params.get('plan');
     if (plan === 'plus' || plan === 'pro') setTimeout(() => openUpgrade(plan), 0);
     // The Homeschool plan is picked on the Homeschool page (no plan box).
     if (plan === 'homeschool') void upgradeTo('homeschool');
@@ -56,11 +65,11 @@ export default function LoginPage() {
         if (validCode(code)) saveRef(code);
         const res = await cloudSignUp(f, validCode(code) ? code : '');
         if (Array.isArray(res)) setProblems(res);
-        else if (res === 'ok') enter();
+        else if (res === 'ok') await enter(undefined, true);
         else setNote(res);
       } else {
         const res = await cloudLogIn(f.username, f.password);
-        if (res === 'ok') enter();
+        if (res === 'ok') void enter();
         else if (res === 'wrong') setWrong(true);
         else setNote(res === 'confirm' ? 'confirmFirst' : res === 'setup' ? 'setup' : 'offline');
       }
@@ -69,10 +78,15 @@ export default function LoginPage() {
     }
     if (mode === 'signup') {
       const res = await signUp(f);
-      if (Array.isArray(res)) setProblems(res); else enter(res.username);
+      if (Array.isArray(res)) setProblems(res);
+      else {
+        // On this device the trial starts now (the cloud sets it on the profile).
+        await data.setSetting('trial-start', res.createdAt);
+        await enter(res.username, true);
+      }
     } else {
       const account = await logIn(f.username, f.password);
-      if (account) enter(account.username); else setWrong(true);
+      if (account) void enter(account.username); else setWrong(true);
     }
   }
   const field = fieldClasses('md');

@@ -177,10 +177,16 @@ export function createCloudStore(db: SupabaseClient): CloudStore {
         if (key === 'plan-info') return ({ tier, until: ended ? null : p?.plan_until ?? null, note: ended ? null : p?.plan_note ?? null }) as T;
         return (tier as Tier | undefined) as T | undefined;
       }
+      // The trial start is set by the database when the account is made
+      // (0017_plus_trial.sql); before 0017 runs there is no trial.
+      if (key === 'trial-start') {
+        const p = ok(await db.from('profiles').select('*').eq('id', await uid()).maybeSingle()) as { trial_started_at?: string | null } | null;
+        return (p?.trial_started_at ?? undefined) as T | undefined;
+      }
       return (await settings())[key] as T | undefined;
     },
     async setSetting<T>(key: string, value: T) {
-      if (key === 'tier') return;
+      if (key === 'tier' || key === 'trial-start') return;
       const owner = await uid();
       ok(await db.from('teacher_settings').upsert({ owner_id: owner, data: { ...(await settings()), [key]: value } }));
     },

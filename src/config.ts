@@ -105,6 +105,21 @@ export const LAUNCH_OFFER = {
   active: true,
 } as const;
 
+// The reverse trial (owner, 2026-11-26: "plus should have 7 day reverse
+// trial"). Every new account plays on Plus for this many days from sign-up,
+// no card, then moves to its real plan (Free unless she paid). Nothing ever
+// bills on its own. Never locks mid-game: a game hosted before the trial ends
+// keeps Plus until it ends; homework links made in the trial work until their
+// due date (src/billing/trial.ts).
+export const TRIAL = { tier: 'plus', days: 7 } as const satisfies { tier: Exclude<Tier, 'free'>; days: number };
+
+// The beta choice shows on the welcome screen from launch until the end of
+// this day, Eastern time (owner, 2026-11-26: the beta ends Feb 28, 2027), and
+// only while spots remain: the owner turns BETA_SPOTS_OPEN off once the last
+// tester is approved (predicted switch; there is no live count yet).
+export const BETA_ENDS = '2027-02-28';
+export const BETA_SPOTS_OPEN = true;
+
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).
 export const SCHOOL_MIN_SEATS = 5;

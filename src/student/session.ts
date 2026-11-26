@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { data } from '../data';
+import type { Tier } from '../config';
 import { useMySets } from '../data/hooks';
 import { LIBRARY } from '../data/library';
 import { remoteSet } from '../data/gameCodes';
@@ -13,7 +14,9 @@ import type { PoolSet } from '../engine/picker';
 // 2026-10-31): `gameId` is the one game that code opened.
 // `endAt` (ms) and `goal` (a score) come from the teacher's activity
 // (2026-10-31): the game ends at that time or that score, whichever first.
-export interface ArcadeSession { classroomId: string; studentId: string; name: string; gameId?: string; board?: { gameIds: string[]; setId: string }; endAt?: number; goal?: number }
+// `plan`: a homework link made during the teacher's Plus trial carries Plus
+// until its due date (owner, 2026-11-26).
+export interface ArcadeSession { classroomId: string; studentId: string; name: string; gameId?: string; board?: { gameIds: string[]; setId: string }; endAt?: number; goal?: number; plan?: Tier }
 const KEY = 'gamify:arcade-session';
 const EVENT = 'gamify-arcade-session';
 

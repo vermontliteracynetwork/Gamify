@@ -35,7 +35,7 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
 
   // Teacher logs in on this device and makes a class with a join code.
   await page.goto('/login');
-  await signUpTeacher(page);
+  await signUpTeacher(page, 'miss.jen', { trial: false });
   // The teacher lands on Home: the first-day steps and empty states (batch 6).
   await expect(page.getByRole('heading', { name: 'Welcome to Gamify' })).toBeVisible();
   await expect(page.getByText('Get started, 0 of 4 done').first()).toBeVisible();
