@@ -19,6 +19,7 @@ import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { useReducedMotion } from '../ui/useReducedMotion';
 import PublicFooter from './PublicFooter';
+import { useScrapbookGround } from './scrapbook/Shell';
 
 // The Features page, rebuilt as the main selling page (owner, 2026-11-26:
 // "features=improve page entirely. this should be a main selling point page
@@ -43,6 +44,7 @@ const MORE: { key: string; items: number }[] = [
 ];
 
 export default function FeaturesPage() {
+  useScrapbookGround(); // owner 2026-11-26: scrapbook A
   const reduce = useReducedMotion();
   const enter = { initial: reduce ? false : { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.15 } } as const;
   return (
