@@ -51,3 +51,4 @@ Things only Kayden can do (money, accounts, legal, going live). The same list sh
 - (2026-11-26, decide) Community themes: own license or CC BY-NC-ND 4.0; teacher agreement plus publish confirmation or family forms; 3 strikes on a paid account: keep the plan or close the account.
 - (2026-11-26, decide) Approve the community theme guidelines and 3-strike rules (docs/community-theme-guidelines.md) before they go public.
 - (2026-11-26, decide) Theme Building Challenge 2027: how rolling entries are judged, materials required or bonus, criteria, prizes for 4 quarters, who screens entries, honorable mentions; then pick each quarter's materials and themes.
+- (2026-11-26, legal) Send the Theme Building Challenge 2027 Official Rules draft to the attorney: https://claude.ai/artifact/3kFyMZWQVdqVEM6i8WCRRs (10 questions at the end; also fill the entry limit, reply deadline, criteria weights, rules URL and contact email).
