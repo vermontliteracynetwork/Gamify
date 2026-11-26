@@ -43,6 +43,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/student-data/, 'Student data promise'],
   [/^\/themes/, 'Themes'],
   [/^\/beta$/, 'Join the beta test'],
+  [/^\/beta\/apply$/, 'Apply for the beta test'],
   [/^\/owner/, 'Owner'],
 ];
 

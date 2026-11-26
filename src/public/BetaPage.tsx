@@ -1,23 +1,19 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, Printer, ShieldCheck } from '@phosphor-icons/react';
-import { data, newId } from '../data';
+import { ArrowRight, CalendarCheck, ChalkboardTeacher, ChatCircleDots, Check, Clock, Gift, Printer, ShieldCheck } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, buttonClasses, fieldClasses } from '../ui/kit';
+import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 import { BETA, dollars, fullPrice, offerPrice } from '../beta/spec';
+import { BETA_ASKS } from '../beta/application';
 
 // Join the Gamify beta test (teacher, 2026-10-25): say exactly what a beta
 // tester does, how long it takes and what they get. Testers get Pro free (owner, 2026-11-24: 3 months, 10 spots);
 // what we need back is honest feedback from real classrooms.
-const ASKS: { key: string; minutes: string }[] = [
-  { key: 'setup', minutes: '15' }, { key: 'questions', minutes: '15-30' }, { key: 'theme', minutes: '20+' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
-  { key: 'checkin', minutes: '3-5' }, { key: 'surveys', minutes: '1-3' }, { key: 'report', minutes: '1' },
-];
+const ASKS = BETA_ASKS;
 const card = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 content-start';
 
 export default function BetaPage() {
@@ -32,7 +28,7 @@ export default function BetaPage() {
           <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
             {(['free', 'time', 'length'] as const).map((k) => <li key={k} className="bg-surface border-std border-border rounded-pill px-3 min-h-10 inline-flex items-center gap-1.5 font-bold text-sm"><Check weight="bold" size={16} aria-hidden="true" />{t(`betaPage.chip.${k}` as StringKey)}</li>)}
           </ul>
-          <a href="#apply" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</a>
+          <Link to="/beta/apply" className={buttonClasses('main', 'justify-self-start hover-pop', 'lg')}>{t('betaPage.apply')}</Link>
         </section>
 
         <section aria-labelledby="what-is" className="grid md:grid-cols-[1.2fr_1fr] gap-5 items-start">
@@ -99,48 +95,24 @@ export default function BetaPage() {
           </div>
         </section>
 
-        <ApplyForm />
+        <ApplyCard />
       </main>
       <PublicFooter />
     </>
   );
 }
 
-// The short application; it reaches the owner dashboard as a Beta request.
-function ApplyForm() {
-  const [form, setForm] = useState({ name: '', email: '', school: '', grades: '', role: 'teacher', devices: '', agree: false });
-  const [sent, setSent] = useState(false);
-  const ready = form.name.trim() && /\S+@\S+\.\S+/.test(form.email) && form.agree;
-  async function send() {
-    if (!ready) return;
-    await data.sendFeedback({
-      id: newId('fb'), at: new Date().toISOString(), kind: 'beta', role: 'teacher', where: '/beta', device: navigator.userAgent,
-      details: `Beta test request: ${form.name.trim()} <${form.email.trim()}>, ${form.role}, ${form.school.trim() || 'no school given'}, grades ${form.grades.trim() || 'not given'}, devices ${form.devices.trim() || 'not given'}. Agreed to the beta tester asks.`.slice(0, 1000),
-    });
-    setSent(true);
-  }
-  const field = fieldClasses('md', 'w-full');
+// The Apply card (owner, 2026-11-26): the formal application is its own
+// page, /beta/apply; anyone not ready to commit can start Free now.
+function ApplyCard() {
   return (
     <section id="apply" aria-labelledby="apply-title" className={`${card} scroll-mt-24 !p-6`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-      <h2 id="apply-title" className="title-bubble text-4xl"><Title text={t('betaPage.applyTitle')} /></h2>
-      <ol className="grid gap-1 pl-6 m-0 list-decimal font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`betaPage.how.${n}` as StringKey)}</li>)}</ol>
-      {sent ? <p className="text-xl font-display" role="status">{t('betaPage.sent')}</p> : (
-        <div className="grid sm:grid-cols-2 gap-3">
-          <label className="grid gap-1 font-bold min-w-0">{t('beta.name')}<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={80} className={field} /></label>
-          <label className="grid gap-1 font-bold min-w-0">{t('betaPage.email')}<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} maxLength={120} className={field} /></label>
-          <label className="grid gap-1 font-bold min-w-0">{t('betaPage.role')}
-            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className={field}>
-              {(['teacher', 'specialist', 'homeschool', 'coop', 'other'] as const).map((r) => <option key={r} value={r}>{t(`betaPage.role.${r}` as StringKey)}</option>)}
-            </select>
-          </label>
-          <label className="grid gap-1 font-bold min-w-0">{t('beta.school')}<input value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} maxLength={120} className={field} /></label>
-          <label className="grid gap-1 font-bold min-w-0">{t('beta.grades')}<input value={form.grades} onChange={(e) => setForm({ ...form, grades: e.target.value })} maxLength={40} className={field} placeholder="K-3" /></label>
-          <label className="grid gap-1 font-bold min-w-0">{t('betaPage.devices')}<input value={form.devices} onChange={(e) => setForm({ ...form, devices: e.target.value })} maxLength={80} className={field} placeholder={t('betaPage.devicesHint')} /></label>
-          <label className="sm:col-span-2 flex items-start gap-2 font-bold"><input type="checkbox" checked={form.agree} onChange={(e) => setForm({ ...form, agree: e.target.checked })} className="w-5 h-5 mt-0.5 shrink-0" />{t('betaPage.agree')}</label>
-          <p className="text-sm font-semibold text-muted sm:col-span-2">{t('beta.privacy')}</p>
-          <Button variant="main" className="justify-self-start min-h-14 px-8 text-lg hover-pop" disabled={!ready} onClick={() => void send()}>{t('betaPage.send')}</Button>
-        </div>
-      )}
+      <h2 id="apply-title" className="title-bubble text-4xl"><Title text={t('betaPage.applyCard')} /></h2>
+      <p className="text-lg font-semibold m-0 max-w-3xl">{t('betaPage.applyCardText', { spots: BETA.spots })}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link to="/beta/apply" className={buttonClasses('main', 'hover-pop', 'lg')}>{t('betaPage.apply')}<ArrowRight weight="bold" size={20} aria-hidden="true" /></Link>
+        <Link to="/login?mode=signup" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('betaPage.applyCardFree')}</Link>
+      </div>
     </section>
   );
 }
