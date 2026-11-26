@@ -42,9 +42,10 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await expect(page.getByText('Assigned sets for each student: up to 1.', { exact: false })).toBeVisible();
   await page.screenshot({ path: `test-results/class-sets-${info.project.name}.png`, fullPage: true });
 
-  // Hide Versus for the class.
+  // Ways to play: Live, Share and Solo (Versus is part of Solo since
+  // 2026-11-23); no student design switch (Theme Builder is teachers only, 2026-11-26).
   await page.getByRole('tab', { name: 'Ways to play' }).click();
-  await page.getByRole('switch').nth(3).click();
+  await expect(page.getByText('Students can design themes')).toHaveCount(0);
 
   // Student sign-in through a game code (no class codes or Arcade, teacher
   // 2026-10-31): tap Ava's avatar, then her PIN (a wrong PIN first).
