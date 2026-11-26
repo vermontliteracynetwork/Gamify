@@ -80,7 +80,7 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
             })}
           </div>
           {chosen && (
-            <motion.div key={chosen.id} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="grid gap-3">
+            <div key={chosen.id} className="grid gap-3">
               <label className="grid gap-1 font-bold">
                 <span>{t('report.titleField')}</span>
                 <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={80} placeholder={t(`report.ph.${chosen.id}` as StringKey)} className={fieldClasses()} />
@@ -93,7 +93,7 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
               {role === 'student' && <p className="text-sm font-bold text-muted">{t('tell.noNames')}</p>}
               {type === 'help' && <p className="text-sm font-bold text-muted">{t('tell.helpNote')}</p>}
               <Button variant="main" className="justify-self-start" onClick={send}>{t('tell.send')}</Button>
-            </motion.div>
+            </div>
           )}
         </>
       )}
