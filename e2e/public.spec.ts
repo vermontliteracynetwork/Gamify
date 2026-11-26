@@ -276,18 +276,84 @@ test.describe('features page', () => {
 
 test.describe('buyer pages', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  test('beta test page says exactly what we ask, and the application needs the agreement', async ({ page }, info) => {
+  test('beta test page says exactly what we ask, and its Apply card opens the application or Free', async ({ page }, info) => {
     await page.goto('/beta');
     await expect(page.getByRole('heading', { level: 1, name: /Join the Gamify Beta Test/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Play every game at least once' })).toBeVisible();
-    await page.getByLabel('Your name').fill('Ms. Rivera');
-    await page.getByLabel('Your email').fill('rivera@school.org');
-    const send = page.getByRole('button', { name: 'Apply for the beta test' });
-    await expect(send).toBeDisabled();
-    await page.getByLabel(/I will build a question set, play every Gamify game/).check();
-    await send.click();
-    await expect(page.getByText('Your application is in.', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Apply to be a beta tester' }).first()).toHaveAttribute('href', '/beta/apply');
+    const card = page.locator('#apply');
+    await expect(card.getByRole('heading', { name: /Ready to apply/i })).toBeVisible();
+    await expect(card.getByRole('link', { name: 'Not ready to commit? Start free' })).toHaveAttribute('href', '/login?mode=signup');
     await page.screenshot({ path: `test-results/beta-page-${info.project.name}.png`, fullPage: true });
+    await card.getByRole('link', { name: 'Apply to be a beta tester' }).click();
+    await expect(page).toHaveURL(/\/beta\/apply$/);
+  });
+  // The formal application (owner, 2026-11-26): four steps, every ask a
+  // required tick, a 30-character reason, then the owner sees it with a score.
+  test('beta application: four steps with inline checks, then the owner reads it with a score', async ({ page }, info) => {
+    const problems: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
+    await page.goto('/beta/apply');
+    await expect(page.getByRole('heading', { level: 1, name: /Apply for the Beta Test/i })).toBeVisible();
+    await expect(page.getByText('Step 1 of 4', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Start free/ }).first()).toHaveAttribute('href', '/login?mode=signup');
+    const next = page.getByRole('button', { name: 'Next' });
+    // Choice chips: tap the chip, as a finger would; the real input inside it changes.
+    const tick = async (role: 'checkbox' | 'radio', name: string) => {
+      const input = page.getByRole(role, { name, exact: true });
+      await page.locator('label').filter({ has: input }).click();
+      await expect(input).toBeChecked();
+    };
+    await next.click();
+    await expect(page.getByText('Type your name.')).toBeVisible();
+    await expect(page.getByLabel(/Your name/)).toBeFocused();
+    await page.getByLabel(/Your name/).fill('Ms. Rivera');
+    await page.getByLabel(/Your school email/).fill('rivera@lincoln.k12.vt.us');
+    await page.getByLabel(/School name, or Homeschool/).fill('Lincoln Elementary');
+    await page.getByLabel(/^State/).selectOption('Vermont');
+    await tick('checkbox', 'K-2');
+    await page.getByLabel(/About how many students/).fill('22');
+    await next.click();
+    await expect(page.getByText('Step 2 of 4', { exact: false })).toBeVisible();
+    await next.click();
+    await expect(page.getByText('Pick at least one device.')).toBeVisible();
+    await tick('checkbox', 'Chromebooks');
+    await tick('radio', '3 or more times a week');
+    await tick('checkbox', 'Bubble Pop');
+    await next.click();
+    await expect(page.getByText('Step 3 of 4', { exact: false })).toBeVisible();
+    const asks = page.locator('fieldset[data-field="asks"] input[type=checkbox]');
+    await expect(asks).toHaveCount(8);
+    await asks.first().check();
+    await page.getByLabel(/Why do you want to test Gamify/).fill('Fun!');
+    await next.click();
+    await expect(page.getByText('Tick every ask.', { exact: false })).toBeVisible();
+    await expect(page.getByText('Write at least 30 characters.')).toBeVisible();
+    for (const c of await asks.all()) await c.check();
+    const why = 'My first graders love games, and I want to help build one that really teaches reading. We play every morning.';
+    await page.getByLabel(/Why do you want to test Gamify/).fill(why);
+    await page.getByLabel(/I agree to do the asks above/).check();
+    await next.click();
+    await expect(page.getByRole('heading', { name: 'Review and send' })).toBeVisible();
+    await expect(page.getByText('Lincoln Elementary')).toBeVisible();
+    await page.screenshot({ path: `test-results/beta-apply-review-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Send my application' }).click();
+    await expect(page.getByRole('heading', { name: /Application Sent/i })).toBeVisible();
+    await expect(page.getByText('If you are approved', { exact: false })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start free', exact: true })).toHaveAttribute('href', '/login?mode=signup');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    expect(problems).toEqual([]);
+    await page.goto('/owner');
+    await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
+    await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
+    await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
+    await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Beta test' }).click();
+    const app = page.locator('[data-beta-app]').first();
+    await expect(app.getByText('Ms. Rivera')).toBeVisible();
+    await expect(app.getByText('Lincoln Elementary')).toBeVisible();
+    await expect(app.getByText('8/8, agreed')).toBeVisible();
+    await expect(app.getByText('4 of 5 signals')).toBeVisible();
+    await app.screenshot({ path: `test-results/owner-beta-app-${info.project.name}.png` });
   });
   // The FAQ is merged into Help (owner 2026-11-26): /faq opens Help at Quick answers.
   test('Help: the old FAQ link lands on Quick answers, with tabs for each buyer and one search for tips and answers', async ({ page }) => {

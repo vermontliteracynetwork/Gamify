@@ -256,7 +256,7 @@ function FeedbackCard() {
                   {(['new', 'looking', 'fixed', 'shipped'] as const).map((s) => <option key={s} value={s}>{t(`owner.status.${s}`)}</option>)}
                 </select>
               </div>
-              <p className="font-semibold">{r.details || t('owner.noDetails')}</p>
+              <p className="font-semibold whitespace-pre-line">{r.details || t('owner.noDetails')}</p>
               {r.kind === 'quote' && quoteFrom(r.details) && <Button className="justify-self-start" onClick={() => downloadQuote(quoteFrom(r.details)!)}>{t('owner.quotePdf')}</Button>}
               {r.role === 'teacher' && <ReplyBox report={r} onSent={reload2} />}
             </li>
