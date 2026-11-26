@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'free-cleanup', kind: 'setup', added: '2026-11-26', title: 'Turn on the nightly delete of Free answers (run 0017)',
+    why: 'You asked for Free data to be deleted nightly. On each device it already happens. In the cloud, a nightly job deletes every Free teacher\'s answers from before today at 3:00 am Eastern, but it needs the pg_cron extension and this migration run once.',
+    how: 'Supabase dashboard: Database, Extensions, turn on pg_cron. Then SQL editor: run supabase/migrations/0017_free_history_cleanup.sql.' },
   { id: 'challenge-2027', kind: 'decide', added: '2026-11-26', title: 'Theme Building Challenge 2027: open questions before January',
     why: 'Decided 2026-11-26: only monthly special-day winners; tags required when sharing (built), challenge switch on by default (built), entries close 11:59 pm on the day and the winner is emailed and posted 7 days later. Also built: the ongoing public vote on /challenge, a month menu per entry, entries and votes closing 48 hours before the day, a year of Pro for each winner. Open in the challenge tab (https://claude.ai/artifact/4p4LxCN1iarjpLcAYjECZE#b3a79e98-2490): Eastern time and the 12:00 am winner (both decided). Also decided: the month locks once shared; judging criteria set; she picks from the public top 10. Still open: shared votes need cloud accounts, judging criteria,. The attorney writes the official rules before Jan 21, 2027.',
     how: 'Answer in the challenge tab or in chat. The Challenge page and the Theme Builder already show the special days, tags and dates.' },

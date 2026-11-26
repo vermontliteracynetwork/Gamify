@@ -65,6 +65,10 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   await page.getByRole('button', { name: 'Go' }).click();
   // No student list on Free: the student rolls a name or types their own.
   await expect(page.getByRole('heading', { name: /pick your game name/i })).toBeVisible();
+  // Blocked words (owner, 2026-11-26): a rude name is refused.
+  await page.getByLabel('Or type your first name').fill('Sh1ttt');
+  await expect(page.getByText('Please pick a different name.')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Play/ }).last()).toBeDisabled();
   await page.getByLabel('Or type your first name').fill('Kai');
   await expect(page.getByText('Kai', { exact: true })).toBeVisible();
 });

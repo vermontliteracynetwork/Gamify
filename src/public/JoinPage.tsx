@@ -1,4 +1,5 @@
 import { STUDENT_THEME_BUILDER } from '../config';
+import { isBlockedName } from '../lib/nameFilter';
 import { lobbyPickFor } from '../data/gameCodes';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -126,10 +127,12 @@ export default function JoinPage() {
         </button>
         {/* Or type a first name or nickname (owner, 2026-11-26): letters and spaces only. */}
         <label className="grid gap-1 font-bold text-lg">{t('join.typeName')}
-          <input value={typed} maxLength={20} autoComplete="off" onChange={(e) => { const v = e.target.value.replace(/[^\p{L} '-]/gu, '').slice(0, 20); setTyped(v); if (v.trim()) setName(v.trim()); }}
+          <input value={typed} maxLength={20} autoComplete="off" onChange={(e) => { const v = e.target.value.replace(/[^\p{L} '-]/gu, '').slice(0, 20); setTyped(v); if (v.trim() && !isBlockedName(v)) setName(v.trim()); }}
             className="min-h-14 px-4 rounded-input border-bold border-border bg-white font-display text-2xl text-center w-72 max-w-full" />
         </label>
-        <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        {/* Blocked words (owner, 2026-11-26): a rude name is never used. */}
+        {typed.trim() && isBlockedName(typed) && <p className="font-bold text-lg" role="alert">{t('join.nameBlocked')}</p>}
+        <button type="button" disabled={!!typed.trim() && isBlockedName(typed)} onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {t('join.play')}<ArrowRight weight="bold" size={26} />
         </button>
       </main>

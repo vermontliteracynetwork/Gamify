@@ -1,4 +1,5 @@
 import NewPasswordGate from './auth/NewPasswordGate';
+import FreeCleanup from './data/freeCleanup';
 import { Suspense, useEffect, useState } from 'react';
 import Loading from './ui/Loading';
 import Breadcrumbs from './ui/Breadcrumbs';
@@ -290,6 +291,7 @@ export default function App() {
         <NewPasswordGate />
         <HoverTips />
         <UiSounds />
+        <FreeCleanup />
         <div id="main-content" tabIndex={-1} className="outline-none flex-1 flex flex-col">
           <AnimatedRoutes />
         </div>

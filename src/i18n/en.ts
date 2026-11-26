@@ -2831,6 +2831,7 @@ export const en = {
   'join.nameSub': 'Roll the dice for a fun name, or type your first name.',
   'join.roll': 'Roll a new name',
   'join.typeName': 'Or type your first name',
+  'join.nameBlocked': 'Please pick a different name.',
   'join.play': 'Play',
   'start.title': 'Get started',
   'start.progress': '{done} of {total} done',
