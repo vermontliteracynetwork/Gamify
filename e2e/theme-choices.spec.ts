@@ -65,6 +65,8 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeChecked();
   await expect(page.getByText('Pick a special day so your theme is entered.')).toBeVisible();
   await page.getByLabel('Which special day are you entering?').selectOption('pizza-day');
+  await expect(page.getByLabel('Which special day are you entering?')).toBeDisabled();
+  await expect(page.getByText('The month is locked once your theme is shared.')).toBeVisible();
   await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 

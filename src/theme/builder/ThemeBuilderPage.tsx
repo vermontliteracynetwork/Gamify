@@ -685,14 +685,15 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
       </label>
       {theme.challenge && (
         <div className="grid gap-2 rounded-input border-std border-border-soft p-3">
-          {/* One month per entry (owner, 2026-11-26). */}
+          {/* One month per entry, locked once shared (owner, 2026-11-26). */}
           <label className="grid gap-1 font-bold">{t('builder.challengeDay')}
-            <select value={theme.challengeDay ?? ''} onChange={(e) => onChange({ ...theme, challengeDay: e.target.value || undefined })} className={fieldClasses('md', 'max-w-md')}>
+            <select value={theme.challengeDay ?? ''} disabled={!!theme.gallery && !!theme.challengeDay} onChange={(e) => onChange({ ...theme, challengeDay: e.target.value || undefined })} className={fieldClasses('md', 'max-w-md')}>
               <option value="">{t('builder.challengeDayPick')}</option>
               {SPECIAL_DAYS.filter((d) => isOpen(d) || d.tag === theme.challengeDay).map((d) => <option key={d.tag} value={d.tag}>{d.name} ({new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })})</option>)}
             </select>
           </label>
-          {!theme.challengeDay && <p className="text-sm font-bold" role="status">{t('builder.challengeDayNeeded')}</p>}
+          {!theme.challengeDay ? <p className="text-sm font-bold" role="status">{t('builder.challengeDayNeeded')}</p>
+            : theme.gallery ? <p className="text-sm font-semibold text-muted">{t('builder.challengeDayLocked')}</p> : null}
           <p className="font-bold">{t('builder.track')}</p>
           <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.track')}>
             {(['studio', 'hand'] as const).map((k) => (
