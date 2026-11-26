@@ -9,8 +9,9 @@ import { useTeacher } from '../auth/session';
 import { creditLine } from '../theme/credit';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { useMadeThemes } from '../theme/made';
-import { SPECIAL_DAYS, challengeEntries, closeDate, isOpen, nextOpenDay, tagLabel, winnerDate } from '../theme/tags';
-import { MAX_PICKS, castVote, tally, useVotes, votedToday } from '../theme/votes';
+import { SPECIAL_DAYS, challengeEntries, closeDate, isOpen, nextOpenDay, tagLabel, winnerAt, winnerDate } from '../theme/tags';
+import { MAX_PICKS, castVote, tally, topTen, useVotes, useWinners, votedToday } from '../theme/votes';
+import { Crown } from '@phosphor-icons/react';
 import { Button, Tabs, buttonClasses } from '../ui/kit';
 import PillSelect from '../ui/PillSelect';
 import Title from '../ui/Title';
@@ -27,6 +28,7 @@ export default function ChallengeVote() {
   const d = SPECIAL_DAYS.find((x) => x.tag === tab) ?? SPECIAL_DAYS[0];
   const { themes } = useMadeThemes();
   const { store, setStore } = useVotes();
+  const { winners } = useWinners();
   const teacher = useTeacher();
   const [classes, setClasses] = useState<Classroom[]>([]);
   const [classId, setClassId] = useState('');
@@ -42,6 +44,10 @@ export default function ChallengeVote() {
     .filter((th) => !filter || (th.tags ?? []).includes(filter))
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? (b.gallery?.at ?? '').localeCompare(a.gallery?.at ?? '') : (counts[b.id] ?? 0) - (counts[a.id] ?? 0)));
   const dayTags = [d.tag, ...d.keywords];
+  // After 12:00 am Eastern on the day: the winner, then the rest of the top 10.
+  const all = challengeEntries(themes, d).filter((th) => th.gallery?.status === 'approved');
+  const winner = Date.now() >= winnerAt(d).getTime() ? all.find((th) => th.id === winners[d.tag]) : undefined;
+  const rest = winner ? topTen(all, counts).filter((th) => th.id !== winner.id).slice(0, 9) : [];
   const voted = votedToday(store, d.tag);
   const classVoted = !!classId && votedToday(store, d.tag, classId);
   const pick = (id: string) => setPicks((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= MAX_PICKS ? cur : [...cur, id]));
@@ -78,6 +84,24 @@ export default function ChallengeVote() {
             <Link to="/teacher/themes" className={buttonClasses('main', 'justify-self-start min-h-12 px-5 hover-pop')}>{t('vote.enter')}</Link>
           </article>
         </div>
+
+        {winner && (
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-4">
+            <article className={`${card} !bg-butter`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+              <h3 className="font-display text-3xl flex items-center gap-2"><Crown weight="fill" size={32} color="var(--lemon)" aria-hidden="true" />{t('vote.winnerIs', { name: winner.name })}</h3>
+              <ThemePreview theme={winner} gameName={gameName(winner.gameId)} />
+              <p className="font-semibold">{gameName(winner.gameId)} · {creditLine(winner)} · {t('vote.points', { count: counts[winner.id] ?? 0 })}</p>
+            </article>
+            {rest.length > 0 && (
+              <article className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <h3 className="font-display text-2xl">{t('vote.topTen')}</h3>
+                <ol className="grid gap-1 pl-6 m-0 font-semibold" start={2}>
+                  {rest.map((th) => <li key={th.id}>{th.name} · {creditLine(th)} · {t('vote.points', { count: counts[th.id] ?? 0 })}</li>)}
+                </ol>
+              </article>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-2.5">
           <PillSelect label={t('themes.sort')} value={sort} onChange={(v) => setSort(v as Sort)}>

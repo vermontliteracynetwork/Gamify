@@ -94,4 +94,17 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await expect(page.getByText('Thanks for voting! Come back tomorrow to vote again.')).toBeVisible();
   await expect(entry.getByText('1 vote', { exact: true })).toBeVisible();
   await page.screenshot({ path: `test-results/challenge-vote-${info.project.name}.png`, fullPage: true });
+
+  // The owner picks the winner from the top 10; it shows at 12:00 am Eastern on the day.
+  await page.goto('/owner');
+  await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
+  await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Gallery review' }).click();
+  await page.getByLabel('Theme Building Challenge: special day').selectOption('pizza-day');
+  await page.getByRole('button', { name: 'Pick as winner' }).click();
+  await expect(page.getByRole('button', { name: 'Winner (tap to undo)' })).toBeVisible();
+  await page.clock.setFixedTime(new Date('2027-02-09T05:30:00Z'));
+  await page.goto('/challenge');
+  await page.getByRole('tab', { name: 'Feb' }).click();
+  await expect(page.getByRole('heading', { name: 'Winner: Rainbow Room' })).toBeVisible();
+  await expect(page.getByText('Voting closed on February 7, 2027.', { exact: false })).toBeVisible();
 });

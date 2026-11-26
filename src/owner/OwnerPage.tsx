@@ -9,6 +9,7 @@ import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
 import { SPECIAL_DAYS, challengeEntries, closeDate, tagLabel, winnerDate } from '../theme/tags';
+import { loadVotes, saveWinner, tally, topTen, useWinners, type VoteStore } from '../theme/votes';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
 import { Button } from '../ui/kit';
@@ -376,6 +377,12 @@ function GalleryCard() {
   const [dayTag, setDayTag] = useState(SPECIAL_DAYS[0].tag);
   const day = SPECIAL_DAYS.find((d) => d.tag === dayTag) ?? SPECIAL_DAYS[0];
   const entries = challengeEntries(themes, day);
+  // Pick the winner from the top 10 by votes (owner, 2026-11-26).
+  const { winners, setWinners } = useWinners();
+  const [votes, setVotes] = useState<VoteStore>({ ballots: [] });
+  useEffect(() => { void loadVotes().then(setVotes); }, []);
+  const counts = tally(votes, day.tag);
+  const top = topTen(entries.filter((th) => th.gallery?.status === 'approved'), counts);
   // Each special day pulls its entries by tag (owner, 2026-11-26).
   const dayPanel = (
     <div className="grid gap-2 rounded-input border-std border-border-soft p-3">
@@ -388,6 +395,21 @@ function GalleryCard() {
       {entries.length
         ? <ul className="grid gap-1 list-disc pl-5 m-0 font-semibold">{entries.map((th) => <li key={th.id}>{th.name} · {creditLine(th)} · {(th.tags ?? []).map(tagLabel).join(', ')}{th.gallery?.status === 'pending' ? ` (${t('owner.galleryPendingShort')})` : ''}</li>)}</ul>
         : <p className="text-sm font-bold">{t('owner.challengeNone')}</p>}
+      {top.length > 0 && (
+        <div className="grid gap-1">
+          <p className="font-bold">{t('owner.challengeTop')}</p>
+          <ol className="grid gap-1 pl-5 m-0 font-semibold">
+            {top.map((th) => (
+              <li key={th.id} className="flex flex-wrap items-center gap-2">
+                <span>{th.name} · {t('vote.points', { count: counts[th.id] ?? 0 })}</span>
+                {winners[day.tag] === th.id
+                  ? <Button size="sm" onClick={async () => setWinners(await saveWinner(day.tag, null))}>{t('owner.challengeUnpick')}</Button>
+                  : <Button size="sm" variant="primary" onClick={async () => setWinners(await saveWinner(day.tag, th.id))}>{t('owner.challengePick')}</Button>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   );
   if (!pending.length) return <div className="grid gap-3">{dayPanel}<p className="font-semibold">{t('owner.galleryNone')}</p></div>;

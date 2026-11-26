@@ -43,3 +43,27 @@ export function useVotes() {
   useEffect(reload, [reload]);
   return { store, setStore };
 }
+
+// The winner the owner picks from the top 10 for each special day (owner,
+// 2026-11-26). Shown at 12:00 am Eastern on the day, with the rest of the top
+// 10 listed under it (no honorable mentions).
+const WINNERS = 'challenge-winners';
+export async function loadWinners(): Promise<Record<string, string>> {
+  return (await data.getSetting<Record<string, string>>(WINNERS)) ?? {};
+}
+export async function saveWinner(day: string, themeId: string | null): Promise<Record<string, string>> {
+  const all = { ...(await loadWinners()) };
+  if (themeId) all[day] = themeId; else delete all[day];
+  await data.setSetting(WINNERS, all);
+  return all;
+}
+export function useWinners() {
+  const [winners, setWinners] = useState<Record<string, string>>({});
+  useEffect(() => { void loadWinners().then(setWinners); }, []);
+  return { winners, setWinners };
+}
+
+// The top 10 by votes (ties keep the earlier entry first).
+export function topTen<T extends { id: string }>(entries: T[], counts: Record<string, number>): T[] {
+  return [...entries].sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0)).slice(0, 10);
+}
