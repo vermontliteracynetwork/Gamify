@@ -38,12 +38,12 @@ export function BubblePatternDefs({ patterns }: { patterns: (string | undefined)
 // One bubble. A theme's picture fills it; Classic is the flat crayon bubble.
 export function drawBubble(patterns: (string | undefined)[], k: number, x: number, y: number, key?: string, cls = '', style?: CSSProperties) {
   const S = SHAPES[k];
-  const m = S === 'dot' ? 1.3 : 0.84; // the dot doodle is small in its box
+  const m = S === 'dot' ? 1.3 : 0.72; // the dot doodle is small in its box
   const art = patterns[k];
   return (
     <g key={key} className={cls} style={style}>
       <circle cx={x} cy={y} r={R * 0.9} fill={art ? `url(#bp-art-${k})` : BUBBLE_COLORS[k]} stroke={INK} strokeWidth={0.15} />
-      {!art && <g transform={`translate(${x + 0.1 - m / 2} ${y + 0.16 - m / 2})`} opacity={0.6}><Doodle kind={S} color={MARK[k]} size={m} /></g>}
+      {!art && <g transform={`translate(${x + 0.1 - m / 2} ${y + 0.16 - m / 2})`}><Doodle kind={S} color={MARK[k]} size={m} /></g>}
       <circle cx={x - 0.34} cy={y - 0.36} r={0.17} fill="#fff" />
     </g>
   );

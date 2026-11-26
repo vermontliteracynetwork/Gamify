@@ -242,7 +242,6 @@ function RainbowStar() {
         {bands.map((c, k) => <path key={c} d={`M0 ${k * 14} Q50 ${k * 14 + 10} 100 ${k * 14 + 2} L100 ${k * 14 + 16} Q50 ${k * 14 + 24} 0 ${k * 14 + 14} Z`} fill={c} />)}
         <rect x="0" y="96" width="100" height="10" fill="#6a45f0" />
       </g>
-      <path d={STAR_D} fill="none" stroke="#1d1a33" strokeWidth="4.5" strokeLinejoin="round" />
     </svg>
   );
 }

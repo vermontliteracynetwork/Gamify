@@ -289,12 +289,14 @@ const ART: Record<PowerId, () => ReactNode> = {
   // Pop Out (Four in a Row, 2026-11-26): a piece lifting out of the rack's
   // empty hole, with motion lines; the piece is the game's own Grape dot disc.
   'pop-out': () => (<>
+    {/* A piece lifting out of its rack hole (Art Director fix, 2026-11-26). */}
     <Wax d={rr(8, 62, 84, 30, 12)} color={ND.cobalt} />
     <Wax d={circ(50, 77, 9)} color={ND.paper} edge={ND.ink} hatch={0} width={3.6} />
-    <Line d="M24 58 L16 49 M76 58 L84 49 M14 66 H4 M86 66 H96" color={ND.ink} w={3.6} />
-    <Wax d={circ(50, 32, 24)} color={ND.violet} />
-    <Wax d={circ(50, 32, 7)} color={ND.paper} edge={ND.ink} hatch={0} width={2.6} />
-    <Shine d="M34 26 C36 19 41 15 47 14" />
+    <Line d="M38 54 V46 M50 56 V46 M62 54 V46" color={ND.ink} w={3.6} />
+    <Wax d={circ(50, 24, 20)} color={ND.violet} />
+    <Wax d={circ(50, 24, 6)} color={ND.paper} edge={ND.ink} hatch={0} width={2.6} />
+    <Line d="M42 12 L50 4 L58 12" color={ND.ink} w={3.6} />
+    <Shine d="M37 19 C39 13 43 10 48 9" />
   </>),
 };
 
