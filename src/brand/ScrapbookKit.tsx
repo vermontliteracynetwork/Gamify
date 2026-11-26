@@ -179,7 +179,7 @@ const HAND = [PP.pink, PP.lemon, PP.sky, PP.kelly, PP.orange, PP.grape];
 export function HandWord({ text, size = 56, label = true, style, className = '' }: { text: string; size?: number; label?: boolean; style?: CSSProperties; className?: string }) {
   let k = 0;
   return (
-    <span role="img" aria-label={text} className={`relative inline-flex items-center ${className}`} style={{ fontSize: size, padding: label ? '0.18em 0.42em 0.26em' : 0, ...style }}>
+    <span role="img" aria-label={text} className={`relative inline-flex items-center ${className}`} style={{ fontSize: size, padding: label ? '0.34em 0.5em 0.38em' : 0, ...style }}>
       {label && (
         <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 200 80" preserveAspectRatio="none" aria-hidden="true">
           <path d={`M6 10 ${Array.from({ length: 12 }, (_, i) => `q8 ${i % 2 ? 5 : -5} 16 0`).join(' ')} V70 ${Array.from({ length: 12 }, (_, i) => `q-8 ${i % 2 ? -5 : 5} -16 0`).join(' ')} Z`}
@@ -188,7 +188,7 @@ export function HandWord({ text, size = 56, label = true, style, className = '' 
       )}
       {text.split('').map((l, i) => l === ' '
         ? <span key={i} aria-hidden="true" style={{ width: '0.3em' }} />
-        : <span key={i} aria-hidden="true" className="relative inline-block" style={{ fontFamily: 'var(--font-display)', lineHeight: 1, color: HAND[k++ % HAND.length], WebkitTextStroke: `${Math.max(2, size * 0.06)}px ${I}`, paintOrder: 'stroke fill', transform: `rotate(${[-6, 5, -3, 7, -5][i % 5]}deg) translateY(${[0, -0.05, 0.03, -0.03, 0.02][i % 5]}em)` }}>{l}</span>)}
+        : <span key={i} aria-hidden="true" className="relative inline-block" style={{ fontFamily: 'var(--font-display)', fontSize: label ? '0.74em' : undefined, lineHeight: 1, color: HAND[k++ % HAND.length], WebkitTextStroke: `${Math.max(2, size * (label ? 0.045 : 0.06))}px ${I}`, paintOrder: 'stroke fill', transform: `rotate(${[-6, 5, -3, 7, -5][i % 5]}deg) translateY(${[0, -0.05, 0.03, -0.03, 0.02][i % 5]}em)` }}>{l}</span>)}
     </span>
   );
 }
@@ -220,27 +220,9 @@ export function Sunburst({ size = 150 }: { size?: number }) {
   );
 }
 
-// ---------------------------------------------------------------- kind-word books
-// A stack of books with kind words on their spines: the line after an answer.
-const BOOKS: [string, string, number][] = [['You tried', PP.blueCrystal, 6], ['Kind', PP.pink, 0], ['Brave', PP.lime, 10], ['Curious', PP.peach, 3], ['Keep going', PP.blush, 8]];
-export function BookStack({ width = 220 }: { width?: number }) {
-  const s = useStrength();
-  const h = Math.round(width * 0.16);
-  return (
-    <span role="img" aria-label="Kind words: you tried, kind, brave, curious, keep going" className="grid gap-[3px]" style={{ width }}>
-      {BOOKS.map(([w, c, off], i) => (
-        <span key={w} aria-hidden="true" className="relative flex items-center justify-center font-bold uppercase rounded-[6px]"
-          style={{ height: h, fontSize: h * 0.42, letterSpacing: '0.06em', background: c, color: I, border: `2.5px solid ${I}`, marginLeft: off * (width / 220), marginRight: (12 - off) * (width / 220), boxShadow: `inset -${h * 0.4}px 0 0 ${PP.paper}, inset -${h * 0.4 + 2.5}px 0 0 ${I}`, transform: s === 'A' ? undefined : `rotate(${[-1.5, 1, -0.6, 1.4, -1][i]}deg)` }}>
-          <span style={{ paddingRight: h * 0.4 }}>{w}</span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
 // ---------------------------------------------------------------- school stickers
 // School things with a white die-cut paper edge, drawn in the crayon kit's
-// smooth style (flat fills, one wobbly ink outline, one white shine).
+// smooth style (flat fills, one wobbly ink outline; only the apple keeps a white shine).
 export type SchoolKind = 'bus' | 'apple' | 'pencil' | 'notebook' | 'crayon' | 'ruler';
 const SCHOOL: Record<SchoolKind, () => ReactNode> = {
   bus: () => (<>
@@ -249,7 +231,6 @@ const SCHOOL: Record<SchoolKind, () => ReactNode> = {
     <Wax d="M72 34 H82 L88 48 H72 Z" color={PP.blueCrystal} width={3} />
     <Wax d="M8 58 H94 V63 H8 Z" color={PP.orange} width={3} />
     <Wax d="M16 76 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0 Z" color={I} width={3} /><Wax d="M66 76 a9 9 0 1 0 18 0 a9 9 0 1 0 -18 0 Z" color={I} width={3} />
-    <Shine d="M16 31 H30" />
   </>),
   apple: () => (<>
     <Wax d="M50 30 C34 18 12 26 14 52 C16 78 34 94 50 86 C66 94 84 78 86 52 C88 26 66 18 50 30 Z" color={PP.kelly} />
@@ -263,24 +244,20 @@ const SCHOOL: Record<SchoolKind, () => ReactNode> = {
     <Wax d="M18 40 H25 V60 H18 Z" color={PP.lavender} width={3} />
     <Wax d="M74 40 L94 50 L74 60 Z" color={PP.peach} width={3.6} />
     <Wax d="M88 47 L94 50 L88 53 Z" color={I} width={2} />
-    <Shine d="M30 45 H62" />
   </g>),
   notebook: () => (<>
     <Wax d="M22 12 H82 Q88 12 88 18 V84 Q88 90 82 90 H22 Z" color={PP.sky} />
     <Wax d="M36 28 H76 V42 H36 Z" color={PP.paper} width={3} />
     {[22, 36, 50, 64, 78].map((y) => <Wax key={y} d={`M16 ${y} a5 5 0 1 0 12 0 a5 5 0 1 0 -12 0 Z`} color={PP.paper} width={2.6} />)}
-    <Shine d="M40 52 H60" />
   </>),
   crayon: () => (<g transform="rotate(30 50 50)">
     <Wax d="M10 40 H72 V60 H10 Z" color={PP.pink} />
     <Wax d="M72 40 Q84 42 92 50 Q84 58 72 60 Z" color={PP.pink} width={3.6} />
     <Wax d="M22 40 H30 V60 H22 Z M56 40 H64 V60 H56 Z" color={PP.blush} width={3} />
-    <Shine d="M34 45 H50" />
   </g>),
   ruler: () => (<g transform="rotate(-20 50 50)">
     <Wax d="M6 38 H94 V62 H6 Z" color={PP.orange} />
     {Array.from({ length: 9 }, (_, i) => <path key={i} d={`M${14 + i * 9} 38 V${i % 2 ? 46 : 51}`} stroke={I} strokeWidth="2.6" strokeLinecap="round" />)}
-    <Shine d="M14 56 H40" />
   </g>),
 };
 const SCHOOL_SEED: Record<SchoolKind, number> = { bus: 81, apple: 83, pencil: 89, notebook: 97, crayon: 101, ruler: 103 };

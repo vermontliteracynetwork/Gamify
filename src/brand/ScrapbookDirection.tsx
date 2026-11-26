@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, Broadcast, Buildings, ChalkboardTeacher, Check, C
 import { PP } from './PaletteProposal';
 import { GAME_COVERS, BoardLaptop, BowlingLaptop, BubbleLaptop, ClassScreen, FourLaptop, GameShowLaptop, MatchThreeLaptop, TerritoryCoop } from './GameMockups';
 import { GO_YELLOW, GText, Laptop, QuestionCard, StudioBack } from './mockKit';
-import { BookStack, Bit, HandWord, Paper, PhotoCorner, PowerSticker, SchoolSticker, Sprinkle, StrengthProvider, Sunburst, Tape, TextCard, PAPER_NAMES, paperCss, useStrength, type PaperId, type SchoolKind, type Strength } from './ScrapbookKit';
+import { Bit, HandWord, Paper, PhotoCorner, PowerSticker, SchoolSticker, Sprinkle, StrengthProvider, Sunburst, Tape, TextCard, PAPER_NAMES, paperCss, useStrength, type PaperId, type SchoolKind, type Strength } from './ScrapbookKit';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { POSTS } from '../public/posts';
@@ -257,7 +257,7 @@ function Home({ w }: W) {
           ))}
         </div>
       </Sec>
-      <Sec w={w} strip={['stars', 'r', 3]} deco={<Margin w={w}><Bit style={{ ...L(w, -6), top: 150 }}><BookStack width={124} /></Bit><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={90} /></Bit><Bit style={{ ...R(w), top: 330 }} tilt={5}><SchoolSticker kind="bus" size={96} /></Bit></Margin>}>
+      <Sec w={w} strip={['stars', 'r', 3]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={90} /></Bit><Bit style={{ ...R(w), top: 330 }} tilt={5}><SchoolSticker kind="bus" size={96} /></Bit></Margin>}>
         <H2 w={w} stk="notebook">{t('public.whyTitle')}</H2>
         <div style={grid(w, 3)}>
           {why.map(([Ic, h, b, bg], i) => (
@@ -372,7 +372,7 @@ function Features({ w }: W) {
         <H2 w={w} stk="notebook">{t('features.play.title')}</H2><P w={w} big>{t('features.play.text')}</P>
         <div style={grid(w, 3)}>{modes.map(([n, Ic, bg, k, best], i) => <TextCard key={n} tilt={[1.2, -1, 1][i]} tone={i + 3} className="grid gap-3 p-6 content-start" style={CARD}><span className="flex items-center gap-3"><Dot bg={bg}><Ic weight="bold" size={24} /></Dot><b style={{ ...GY, fontSize: 30 }}>{n}</b></span><P w={w}>{t(k)}</P><P w={w} quiet>{t(best)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} strip={['gingham-mint', 'l', 5]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={92} /></Bit><Bit style={{ ...L(w, -6), top: 200 }}><BookStack width={124} /></Bit></Margin>}>
+      <Sec w={w} strip={['gingham-mint', 'l', 5]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={92} /></Bit></Margin>}>
         <H2 w={w} stk="apple">{t('features.fair.title')}</H2><P w={w} big>{t('features.fair.text')}</P>
         <div style={grid(w, 3)}>{[1, 2, 3, 4, 5, 6].map((n) => <TextCard key={n} tilt={[-1, 1, -1.2, 0.9, -0.8, 1.1][n - 1]} tone={n} className="grid gap-2 p-5" style={CARD}><span className="flex items-center gap-2.5"><Dot bg={PP.mint} size={40}><Check weight="bold" size={20} /></Dot><H3 w={w}>{t(`features.fair.${n}` as StringKey)}</H3></span><P w={w}>{t(`features.fair.${n}.why` as StringKey)}</P></TextCard>)}</div>
       </Sec>
@@ -424,7 +424,6 @@ function Post({ w }: W) {
         {roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
           <Bit style={{ left: side - 230, top: 40 }} tilt={-7}><HandWord text="Try it!" size={40} /></Bit>
           <Paper id="gingham-pink" seed={19} tilt={-3} tape={{ tone: 0, at: 'top', w: 70 }} style={{ left: side - 230, top: 170, width: 170, height: 210 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="lightning" size={100} /></span></Paper>
-          <Bit style={{ left: side - 200, top: 470 }}><BookStack width={150} /></Bit>
           <Paper id="stars" seed={21} tilt={3} tape={{ tone: 3, at: 'tr', w: 70 }} style={{ left: side + col + 60, top: 120, width: 170, height: 200 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="bus" size={110} /></span></Paper>
           <Bit style={{ left: side + col + 70, top: 400 }} tilt={4}><Sunburst size={140} /></Bit>
           <Bit style={{ left: side + col + 80, top: 620 }} tilt={-5}><SchoolSticker kind="apple" size={100} /></Bit>
@@ -486,7 +485,7 @@ function Homeschool({ w }: W) {
   const price = (k: StringKey) => k === 'hs.plan.homeschool.price' ? t(k, { m: money(PRICES_USD.homeschool.year / 12) }) : k === 'hs.plan.plus.price' ? t(k, { m: money(PRICES_USD.plus.month) }) : t(k);
   return (
     <Page w={w}>
-      <Sec w={w} top={p ? 32 : 52} deco={<Margin w={w}><WordSpot w={w} word="Home!" /><Bit style={{ ...R(w), top: 50 }} tilt={-5}><SchoolSticker kind="apple" size={100} /></Bit><Bit style={{ ...L(w, -6), top: 330 }}><BookStack width={124} /></Bit></Margin>}>
+      <Sec w={w} top={p ? 32 : 52} deco={<Margin w={w}><WordSpot w={w} word="Home!" /><Bit style={{ ...R(w), top: 50 }} tilt={-5}><SchoolSticker kind="apple" size={100} /></Bit></Margin>}>
         <Head w={w} title={t('hs.title')} sub={t('hs.sub')}>
           <div className={`flex gap-3 ${p ? 'flex-col w-full' : ''}`}><Go w={w} wide={p}>{t('hs.start')}</Go><Plain w={w} wide={p}>{t('hs.questions')}</Plain></div>
         </Head>
@@ -962,7 +961,6 @@ function Kit() {
           <figure className="m-0 grid gap-1 justify-items-center"><div className="flex flex-wrap justify-center gap-2"><PowerSticker id="double-points" size={84} /><PowerSticker id="magnet" size={84} /><PowerSticker id="spin-wheel" size={84} /></div><figcaption className="text-xs font-bold">Crayon power-up stickers</figcaption></figure>
           <figure className="m-0 grid gap-1 justify-items-center"><div className="flex flex-wrap justify-center gap-2"><SchoolSticker kind="bus" size={80} /><SchoolSticker kind="apple" size={80} /><SchoolSticker kind="pencil" size={80} /><SchoolSticker kind="notebook" size={80} /><SchoolSticker kind="crayon" size={80} /><SchoolSticker kind="ruler" size={80} /></div><figcaption className="text-xs font-bold">School stickers, paper edge</figcaption></figure>
           <figure className="m-0 grid gap-1 justify-items-center"><Sunburst size={120} /><figcaption className="text-xs font-bold">Sunburst card</figcaption></figure>
-          <figure className="m-0 grid gap-1 justify-items-center"><BookStack width={190} /><figcaption className="text-xs font-bold">Kind-word books</figcaption></figure>
           <figure className="m-0 grid gap-1 justify-items-center"><span className="flex flex-wrap justify-center gap-3 items-center"><HandWord text="Good job!" size={44} /><HandWord text="Yay!" size={44} /></span><figcaption className="text-xs font-bold">Hand-lettered word (one per screen)</figcaption></figure>
           <figure className="m-0 grid gap-1 justify-items-center"><span className="relative block w-56 h-20">{[0, 1, 2, 3, 4, 5].map((k) => <Tape key={k} tone={k} w={84} rot={[-6, 5, -3, 7, -4, 3][k]} style={{ left: (k % 3) * 70, top: k < 3 ? 6 : 46 }} />)}</span><figcaption className="text-xs font-bold">Washi tape (B and C only)</figcaption></figure>
           <figure className="m-0 grid gap-1 justify-items-center"><span className="relative block w-24 h-20 bg-white rounded-lg" style={{ border: `2px solid ${I}` }}><PhotoCorner at="tl" size={26} /><PhotoCorner at="tr" size={26} /><PhotoCorner at="bl" size={26} /><PhotoCorner at="br" size={26} /></span><figcaption className="text-xs font-bold">Photo corners (A mounts art)</figcaption></figure>
@@ -983,7 +981,7 @@ export default function ScrapbookDirection() {
         <h2 className="font-heading text-2xl">Scrapbook direction <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black" style={{ background: PP.blush }}>Mockups: pick A, B or C</span></h2>
         <div className="grid gap-2 rounded-[1.25rem] p-4 text-sm font-semibold max-w-[70rem]" style={{ background: '#ffffff', border: `2px solid ${I}` }}>
           <p><b>Your request (2026-11-26):</b> "there was a style for the public facing pages a while ago that was more colorful, scrapbook style and i want that to be the main art direction for public pages and the classic themes." Then: "give me mockups again for everything and ill decide".</p>
-          <p><b>What changed since 2026-11-24:</b> your rule then was no washi tape, no stacked or tilted cards and no characters (2026-11-23: "remove the washi tape"; "the attatched tape, multilayer card ... need immediately removed"; 2026-11-25: no tilted cards), and /brand showed only the flat direction, so the scrapbook mockups were taken down on 2026-11-24. This tab brings the old style back (cream page, fabric-swatch papers, crayon stickers, the sunburst, hand-lettered praise, kind-word books, school stickers, crayon stars) in today's palette, patterns and crayon kit. Strength A keeps your tape and tilt rule; B and C bring tape and tilt back for you to judge. No characters in any strength, and nothing live changes until you pick.</p>
+          <p><b>What changed since 2026-11-24:</b> your rule then was no washi tape, no stacked or tilted cards and no characters (2026-11-23: "remove the washi tape"; "the attatched tape, multilayer card ... need immediately removed"; 2026-11-25: no tilted cards), and /brand showed only the flat direction, so the scrapbook mockups were taken down on 2026-11-24. This tab brings the old style back (cream page, fabric-swatch papers, crayon stickers, the sunburst, hand-lettered praise, school stickers, crayon stars) in today's palette, patterns and crayon kit. Strength A keeps your tape and tilt rule; B and C bring tape and tilt back for you to judge. No characters in any strength, and nothing live changes until you pick.</p>
           <p><b>Why the clean core stays plain in all three:</b> what a child reads and taps (question card, answer tiles, score board, main button) never sits on a pattern, under tape or on a tilt. Kindergartners taught six science lessons in a lab classroom with heavily decorated walls were more distracted, spent more time off task and learned less than when the decorations were removed (Fisher, Godwin and Seltman, 2014, Psychological Science 25(7), 1362-1370; confirmed by the Design Chair from the published abstract via search, 2026-11-26; a 2022 follow-up found children do not get used to the decor over time). People learn better when interesting material that does not carry the lesson is left out (Mayer's coherence principle, from memory). Text must reach 4.5:1 contrast against the background it actually sits on, 3:1 for large text, and a busy background image behind words is a named failure (WCAG 2.1, 1.4.3 and failure F83, Understanding page opened 2026-11-26); tilt is not a WCAG rule, it is a reading-ease choice.</p>
           <p><b>Fixed after the Classic Art Director and Design Chair reviews (2026-11-26):</b> covers are the approved covers at full size with only the ground swapped and the scrapbook in the 48px margin (no mount, tilt or tape on them); in-play stages wear school stickers only, never power-up look-alikes; Game Show keeps its studio, Board Game its park, Bubble Pop and Four in a Row their Calm grounds; How to play and the blog post body stay flat in every strength; "Start with Pro" is the yellow go button; below 1300px each section title gets a sticker and an edge strip runs between sections, so A, B and C differ on the 1190 laptop, iPad and phone frames too.</p>
           <p><b>The one weak spot to test:</b> C puts tape and tilt on cards that hold words, the place early readers look first. Try B on a projector with a K-2 class before choosing C.</p>
