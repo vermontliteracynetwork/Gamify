@@ -67,7 +67,7 @@ export function searchTags(query: string): ThemeTag[] {
 }
 
 // Entries close at 11:59 pm on the day; the winner is emailed and posted 7
-// days after (owner, 2026-11-26). Times are US Eastern (Vermont): standard
+// days after (owner, 2026-11-26). Times are US Eastern (Vermont; confirmed by the owner 2026-11-26): standard
 // time (-05:00) Nov to mid-March, daylight time (-04:00) in between.
 function eastern(date: string, time: string): Date {
   const [y, m, d] = date.split('-').map(Number);
