@@ -4062,7 +4062,7 @@ export const en = {
   'upgrade.plus.2': 'Your class designs a theme for every game',
   'upgrade.plus.4': 'Unlimited question sets and reports you keep forever',
   'upgrade.plus.3': '3 classes of up to 60 students, with live monitoring',
-  'upgrade.pro.1': 'Every game, and new games before anyone else',
+  'upgrade.pro.1': 'Every game, for every teacher in your school',
   'upgrade.pro.2': 'As many themes for every game as your class can dream up',
   'upgrade.pro.4': 'Every report kept, all year and beyond',
   'upgrade.pro.3': 'Unlimited classes and students',
