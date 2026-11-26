@@ -4203,6 +4203,15 @@ export const en = {
   'cmp.keep.what': 'If a plan ends you move to Free; work past the Free limits stays readable and comes back with an upgrade.',
   'cmp.ads': 'No ads, ever',
   'cmp.ads.what': 'No ads for students or teachers, and no trackers on student pages.',
+  'newPw.title': 'Make Your Own Password',
+  'newPw.sub': 'You signed in with a starting password. Choose your own to keep going.',
+  'newPw.new': 'New password (8 or more characters)',
+  'newPw.again': 'Type it again',
+  'newPw.save': 'Save my password',
+  'newPw.short': 'Use 8 or more characters.',
+  'newPw.match': 'The two passwords are not the same.',
+  'newPw.same': 'Choose a password different from the starting one.',
+  'newPw.offline': 'That did not save. Check your connection and try again.',
 } as const;
 
 export type StringKey = keyof typeof en;

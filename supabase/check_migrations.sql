@@ -16,6 +16,8 @@ from (values
   ('0011_access_codes',             to_regclass('public.access_codes') is not null),
   ('0012_owner_two_step_and_replies', exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'feedback_reports' and column_name = 'reply')),
   ('0013_teach_cards',              exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'question_sets' and column_name = 'teach_card')),
-  ('0014_set_folders',              exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'question_sets' and column_name = 'folder'))
+  ('0014_set_folders',              exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'question_sets' and column_name = 'folder')),
+  ('0015_affiliates',               exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'referred_by')),
+  ('0016_new_password',             exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'must_change_password'))
 ) as m(migration, done)
 order by m.migration;
