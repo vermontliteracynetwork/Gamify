@@ -200,7 +200,7 @@ function ThemesShowcase() {
         {top.map((x, i) => (
           <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
             <Link to="/themes" className={`hover-lift block ${CARD} p-2 no-underline text-text`}>
-              <ThemePreview theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
+              <ThemePreview bare theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
               <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
               <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
             </Link>

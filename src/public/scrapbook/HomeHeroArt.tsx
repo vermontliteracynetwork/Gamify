@@ -28,7 +28,7 @@ export function CollageStickers({ bw, boxH, phone, k }: CollageBox) {
   return (
     <>
       <Bit style={{ left: '-3%', top: '-3%' }} tilt={-8}><PowerSticker id="double-points" size={s(64, 104)} /></Bit>
-      <Bit style={{ right: '-3%', top: '40%' }} tilt={7}><PowerSticker id="spin-wheel" size={s(56, 92)} /></Bit>
+      <Bit style={{ right: '-3%', top: '40%' }} tilt={7}><PowerSticker id="magnet" size={s(56, 92)} /></Bit>
       <Bit style={{ right: '4%', bottom: '-2%' }} tilt={-5}><SchoolSticker kind="bus" size={s(60, 96)} /></Bit>
       <Bit style={{ left: '-2%', bottom: '2%' }} tilt={-6}><HandWord text={t('public.hero.word')} size={s(30, 46)} /></Bit>
       <Sprinkle spots={[[bw * 0.46, -10, s(18, 26), PP.lemon], [bw * 0.94, boxH * 0.1, s(14, 20), PP.pink], [bw * 0.02, boxH * 0.55, s(15, 22), PP.sky], [bw * 0.55, boxH - 18, s(13, 18), PP.kelly, 'dot'], [bw * 0.86, boxH * 0.82, s(15, 22), PP.lemon]]} />

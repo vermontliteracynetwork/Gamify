@@ -105,7 +105,8 @@ export function ThemeCycler({ gameId, gameName, looks, every = 3800, className =
   }, [playing, held, seen, n, at, every, go]);
   const look = looks[at];
   const name = look.theme.name || t('features.look.untitled');
-  const credit = look.theme.studentDesigner ? `${look.theme.designedBy ?? ''} ${t('features.look.and', { name: look.theme.studentDesigner })}`.trim() : '';
+  // No teacher or student names on a public page (owner 2026-10-25: credit is the class, never a student).
+  const credit = '';
   const round = 'shrink-0 w-11 h-11 rounded-full border-std border-border bg-white hover:bg-surface-hover shadow-[0_3px_0_var(--ink)] grid place-items-center active:scale-95 motion-safe:transition';
   return (
     <div ref={box} role="group" aria-roledescription="carousel" aria-label={t('features.cycle.label', { game: gameName })} className={`grid gap-3 ${className}`}

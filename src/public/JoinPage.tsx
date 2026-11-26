@@ -161,10 +161,10 @@ export default function JoinPage() {
       <h1 className="title-bubble text-[clamp(2.5rem,10vw,5rem)] leading-none"><Title text={t('join.title')} /></h1>
       <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug">{t('join.sub')}</p>
       <CodeBoxes length={5} value={code} onChange={setCode} label={t('join.code')} masked={false} letters size="xl" shake={wrong} onEnter={() => { if (go) void go.go(); }} />
-      <p className="min-h-6 font-bold -my-2" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
       {/* No Hear my code; Go appears only once the code works (owner 2026-11-26).
-          The row keeps its height so nothing jumps when Go pops in. */}
+          One slot holds the message or Go, so there is no empty band and nothing jumps. */}
       <div className="min-h-16 flex items-center justify-center">
+        <p className={go ? 'sr-only' : 'font-bold'} role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
         {go && (
           <motion.button key={go.code} type="button" onClick={() => void go.go()}
             initial={reduce ? false : { scale: 0.4, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }}

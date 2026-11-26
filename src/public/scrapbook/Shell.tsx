@@ -38,12 +38,13 @@ export function useScrapbookGround() {
 }
 
 // The body paints over negative z-index layers, so the pattern goes on the
-// body itself while the page is open.
+// page root itself while the page is open.
 function usePatternGround(ground?: CSSProperties) {
   const key = ground ? JSON.stringify(ground) : '';
   useLayoutEffect(() => {
     if (!ground) return;
-    const b = document.body.style, was = b.cssText;
+    // On the root so it fills the whole window and the space down to the footer.
+    const b = document.documentElement.style, was = b.cssText;
     Object.assign(b, ground, { backgroundAttachment: 'fixed' });
     return () => { b.cssText = was; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

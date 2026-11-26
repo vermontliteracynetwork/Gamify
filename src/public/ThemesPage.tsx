@@ -92,7 +92,7 @@ export default function ThemesPage() {
                     edge (Scrapbook A); the heart sits in its top-right corner,
                     in the spot the preview keeps free for it. */}
                 <div className="relative border-b-[3px] border-border [&>div:first-child]:rounded-none [&>div:first-child]:border-0">
-                  <ThemePreview theme={x.theme} gameName={gameName(x.gameId)} corner={<span className="w-11 h-11 shrink-0" aria-hidden="true" />} />
+                  <ThemePreview bare theme={x.theme} gameName={gameName(x.gameId)} corner={<span className="w-11 h-11 shrink-0" aria-hidden="true" />} />
                   <button type="button" aria-pressed={fav} aria-label={t(fav ? 'themes.unfavorite' : 'themes.favorite', { name: x.name })} onClick={() => toggle(x.theme.id)}
                     className={`absolute top-3 right-3 w-11 h-11 rounded-full border-std border-border flex items-center justify-center hover-pop ${fav ? 'bg-blush' : 'bg-surface'}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
                     <Heart weight={fav ? 'fill' : 'bold'} size={22} color={fav ? '#d6336c' : undefined} />

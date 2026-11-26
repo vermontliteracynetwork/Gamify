@@ -12,7 +12,7 @@ import { Keep, sbCardLink } from './scrapbookA';
 // its corners, never under the words. One accent per card helps scanning in a
 // predictable grid; a picture beside the words helps memory (dual coding).
 const CARD_BG = ['bg-butter', 'bg-blush', 'bg-mint', 'bg-blue-crystal', 'bg-peach', 'bg-lavender'];
-const ART: PowerId[] = ['double-points', 'magnet', 'spin-wheel', 'hint', 'shield', 'treasure-chest'];
+const ART: PowerId[] = ['double-points', 'magnet', 'lightning', 'hint', 'shield', 'treasure-chest'];
 const MARKS: [DoodleKind, string, string][] = [['star', '#fabe37', 'left-[1.1rem] top-[0.9rem]'], ['heart', '#f055a5', 'right-[1.4rem] top-[1.4rem]'], ['dot', '#4ba3e8', 'left-[2.5rem] bottom-[1.6rem]'], ['star', '#22b04a', 'right-[1.6rem] bottom-[1.4rem]']];
 export function PostHeader({ i }: { i: number }) {
   return (

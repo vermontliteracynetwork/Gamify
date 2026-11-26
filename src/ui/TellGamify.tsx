@@ -69,8 +69,8 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
               return (
                 <motion.button key={id} type="button" role="radio" aria-checked={on} onClick={() => setType(id)}
                   whileHover={reduce ? undefined : { y: -3 }} whileTap={reduce ? undefined : { scale: 0.95 }}
-                  className={`relative min-h-28 rounded-panel ${bg} flex flex-col items-center justify-center gap-2 p-2 font-bold text-sm leading-tight text-center text-text
-                              ${on ? 'border-heavy border-border' : 'border-std border-border'}`}
+                  className={`relative h-32 rounded-panel ${bg} flex flex-col items-center justify-center gap-2 p-2 font-bold text-sm leading-tight text-center text-text
+                              border-std border-border ${on ? 'ring-[3px] ring-inset ring-border' : ''}`}
                   style={on ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
                   {on && <span className="absolute -top-2.5 -right-2.5 w-7 h-7 rounded-full bg-accent border-std border-border flex items-center justify-center" aria-hidden="true"><Check weight="bold" size={16} /></span>}
                   <span className="w-12 h-12 rounded-full bg-white border-std border-border flex items-center justify-center"><Icon weight="bold" size={28} aria-hidden="true" /></span>
@@ -92,7 +92,8 @@ export function TellGamify({ context, role = 'student', bare = false }: { contex
               </label>
               {role === 'student' && <p className="text-sm font-bold text-muted">{t('tell.noNames')}</p>}
               {type === 'help' && <p className="text-sm font-bold text-muted">{t('tell.helpNote')}</p>}
-              <Button variant="main" className="justify-self-start" onClick={send}>{t('tell.send')}</Button>
+              {/* Either box can be left empty, but not both (Design Chair 2026-11-26). */}
+              <Button variant="main" className="justify-self-start" disabled={!title.trim() && !details.trim()} onClick={send}>{t('tell.send')}</Button>
             </div>
           )}
         </>
