@@ -1,6 +1,8 @@
-import { useLayoutEffect, type ReactNode } from 'react';
+import { useLayoutEffect, type CSSProperties, type ReactNode } from 'react';
 import { StrengthProvider, type Strength } from './strength';
 import PublicFooter from '../PublicFooter';
+import { PATTERNS } from '../../brand/PatternProposal';
+import { useSettings } from '../../settings/SettingsContext';
 
 // ============================================================================
 // THE SCRAPBOOK PUBLIC SHELL (owner, 2026-11-26), the one shared place for it.
@@ -35,9 +37,28 @@ export function useScrapbookGround() {
   }, []);
 }
 
+// The body paints over negative z-index layers, so the pattern goes on the
+// body itself while the page is open.
+function usePatternGround(ground?: CSSProperties) {
+  const key = ground ? JSON.stringify(ground) : '';
+  useLayoutEffect(() => {
+    if (!ground) return;
+    const b = document.body.style, was = b.cssText;
+    Object.assign(b, ground, { backgroundAttachment: 'fixed' });
+    return () => { b.cssText = was; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+}
+
 /** A public page in the scrapbook shell. `footer={false}` for student pages (Join): nowhere to wander. */
-export function ScrapbookPage({ strength = 'A', footer = true, children }: { strength?: Strength; footer?: boolean; children: ReactNode }) {
+// `pattern` lays a Brand Kit pattern over the whole ground in place of plain
+// Cream (owner 2026-11-26: Sprinkles behind Log in, Board checker behind Join).
+// Calm or plain backgrounds get the pattern's calm version.
+export function ScrapbookPage({ strength = 'A', footer = true, pattern, children }: { strength?: Strength; footer?: boolean; pattern?: string; children: ReactNode }) {
   useScrapbookGround();
+  const { settings } = useSettings();
+  const ground = pattern ? PATTERNS.find((p) => p.id === pattern)?.make(settings.calm || settings.backgrounds === 'plain') : undefined;
+  usePatternGround(ground);
   return (
     <StrengthProvider value={strength}>
       {children}

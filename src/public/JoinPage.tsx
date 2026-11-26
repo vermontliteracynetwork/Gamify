@@ -102,7 +102,7 @@ export default function JoinPage() {
 
   if (game && rosters.length > 0 && !guest) {
     return (
-      <ScrapbookPage strength="A" footer={false}>
+      <ScrapbookPage strength="A" footer={false} pattern="checker">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl text-center"><Title text={t('arcade.who')} /></h1>
         {roster ? <StudentPicker classroomId={roster} onSignIn={(s) => play(s)} /> : (
@@ -118,7 +118,7 @@ export default function JoinPage() {
 
   if (game) {
     return (
-      <ScrapbookPage strength="A" footer={false}>
+      <ScrapbookPage strength="A" footer={false} pattern="checker">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 grid justify-items-center">
       <div className="sb-card w-full max-w-[42.5rem] p-6 sm:p-10 grid gap-5 justify-items-center text-center">
         <h1 className="title-bubble text-5xl"><Title text={t('join.nameTitle')} /></h1>
@@ -146,7 +146,7 @@ export default function JoinPage() {
   const go = ready && ready.code === code ? ready : null;
   const round = 'w-10 h-10 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-95 motion-safe:transition';
   return (
-    <ScrapbookPage strength="A" footer={false}>
+    <ScrapbookPage strength="A" footer={false} pattern="checker">
     <main className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-[clamp(0.75rem,3vh,2.5rem)] pb-[clamp(0.75rem,3vh,2.5rem)] grid justify-items-center content-center min-h-[calc(100dvh-3.5rem)]">
       {/* Listen and Settings sit together in the top far right corner, in the top bar (owner, 2026-11-26; the mockup). */}
       <div className="fixed top-0 right-4 sm:right-6 z-[60] h-14 flex items-center gap-2">

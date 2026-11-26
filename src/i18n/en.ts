@@ -1469,7 +1469,7 @@ export const en = {
   'public.mode.solo': 'Students practice on their own with a game code or homework link from you.',
   'public.mode.versus': 'Two players head to head: pairs you choose from the lobby, two on one device, or one student against the computer.',
   'public.gamesTitle': 'The games',
-  'public.featuresTitle': 'Made for real classrooms',
+  'public.featuresTitle': 'Made for Every Learner',
   'public.feature.sets': 'Your questions, any subject',
   'public.feature.sets.text': 'Write or import multiple-choice sets tagged by grade, subject and Common Core standard. Play them in every game.',
   'public.feature.themes': 'Your class designs the game',

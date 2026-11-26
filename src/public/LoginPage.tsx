@@ -79,7 +79,7 @@ export default function LoginPage() {
   const problem = (k: SignUpProblem) => problems.includes(k) && <span id={`p-${k}`} className="text-sm font-bold text-error" role="alert">{t(`login.problem.${k}` as StringKey)}</span>;
   const bad = (...k: SignUpProblem[]) => k.some((x) => problems.includes(x));
   return (
-    <ScrapbookPage strength="A">
+    <ScrapbookPage strength="A" pattern="sprinkles">
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-4 grid justify-items-center">
       <div className="sb-card w-full max-w-[34rem] p-6 sm:p-10 grid gap-5">
         <h1 className="title-bubble text-4xl sm:text-5xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>

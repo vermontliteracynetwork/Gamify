@@ -21,7 +21,7 @@ import { STARTER_THEMES } from '../theme/starters';
 // The public home page (development plan Part 3A): what Gamify is, the four
 // ways to play, the games, why it works (honest research lines), and the
 // two front doors: teachers start free, students join with a code.
-// Why it works and Made for real classrooms scan at a glance (owner,
+// Why it works and Made for Every Learner scan at a glance (owner,
 // 2026-11-25: "make more visual and nice/professional for easy scanning"):
 // one icon on its pastel badge, a short headline beside it, one or two lines.
 type Point = { icon: typeof Stack; key: string; bg: BadgeColor };
@@ -47,6 +47,7 @@ const WHY_SPAN = ['lg:col-span-2', 'lg:col-span-2', 'lg:col-span-2', 'lg:col-spa
 // (themes, the games, features, beta) stay (owner, 2026-11-25).
 const H2 = 'title-bubble text-[2rem] sm:text-[2.75rem] leading-none';
 const CARD = 'sb-card';
+const FEATURE_TILT = [-1.2, 1.5, -0.6, 1, -1.6, 0.7];
 const SECTION = 'mt-12 sm:mt-16 grid gap-6';
 // How it works: a Step pill on Butter, Blush and Mint (the mockup).
 const HOW = ['bg-butter', 'bg-blush', 'bg-mint'];
@@ -133,7 +134,8 @@ export default function PublicHome() {
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.featuresTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 sm:auto-rows-fr gap-5">
-            {FEATURES.map((p, i) => <PointCard key={p.key} point={p} group="feature" tape={i === 1 ? 5 : undefined} />)}
+            {/* Tilt and tape scattered by hand (owner 2026-11-26: "tilt and tape randomly for these two sections"). */}
+            {FEATURES.map((p, i) => <PointCard key={p.key} point={p} group="feature" tilt={FEATURE_TILT[i % FEATURE_TILT.length]} tape={i === 1 ? 5 : i === 3 ? 3 : undefined} />)}
           </div>
           <Link to="/features" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('public.allFeatures')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
@@ -161,11 +163,11 @@ export default function PublicHome() {
 
 // One scannable card: the icon badge and short headline on one row, the
 // line under them, and the research number big where the page has one.
-function PointCard({ point: { icon: Icon, key, bg }, group, className = '', tape }: { point: Point; group: 'why' | 'feature'; className?: string; tape?: number }) {
+function PointCard({ point: { icon: Icon, key, bg }, group, className = '', tape, tilt }: { point: Point; group: 'why' | 'feature'; className?: string; tape?: number; tilt?: number }) {
   const stat = group === 'why' && key === 'practice';
   return (
-    <div className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`}>
-      {tape !== undefined && <CardTape tone={tape} rot={4} />}
+    <div className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`} style={tilt ? { rotate: `${tilt}deg` } : undefined}>
+      {tape !== undefined && <CardTape tone={tape} rot={tilt && tilt < 0 ? -4 : 4} />}
       <div className="flex items-center gap-4">
         <span className="wiggle-on-hover"><IconBadge color={bg} size="lg"><Icon weight="bold" size={28} /></IconBadge></span>
         <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.${group}.${key}` as StringKey)} /></h3>
@@ -225,8 +227,8 @@ function WhoFor() {
       <h2 id="who-for" className={H2}><Title text={t('public.whoTitle')} /></h2>
       <div className="grid md:grid-cols-3 gap-5">
         {doors.map(({ key, icon: I, to, bg }, i) => (
-          <Link key={key} to={to} className={`relative hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`}>
-            {i === 1 && <CardTape tone={4} rot={-3} />}
+          <Link key={key} to={to} style={{ rotate: `${[1.1, -1.4, 0.8][i % 3]}deg` }} className={`relative hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`}>
+            {i === 2 && <CardTape tone={4} rot={3} />}
             <span className={`w-12 h-12 rounded-full ${bg} border-bold border-border flex items-center justify-center wiggle-on-hover`}><I weight="bold" size={24} aria-hidden="true" /></span>
             <span className="font-display text-2xl leading-tight">{t(`public.who.${key}` as StringKey)}</span>
             <span className="font-semibold">{t(`public.who.${key}.text` as StringKey)}</span>
