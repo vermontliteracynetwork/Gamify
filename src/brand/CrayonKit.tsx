@@ -2,7 +2,20 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import { motion } from 'motion/react';
 import { useSettings } from '../settings/SettingsContext';
 import { playClip } from '../engine/music';
-import { ND } from './buddies';
+import { ND as ND0 } from './buddies';
+
+// The kit wears the approved palette pairs (owner, 2026-11-26: "new colors for
+// the classic themes"; classic-art skill: palette pairs only). The old New
+// direction hues (cobalt, violet, coral...) map to their nearest palette
+// bright, so every power-up, die and doodle shares the Classic colors. Hexes
+// are written here (PaletteProposal imports this file, so it cannot be
+// imported back).
+const ND = {
+  ...ND0,
+  pink: '#f055a5', cobalt: '#4ba3e8', green: '#22b04a', yellow: '#fabe37', tangerine: '#ff9b28',
+  violet: '#6a45f0', mint: '#1fb5a8', coral: '#f055a5',
+  cobaltDeep: '#1f6fb8', violetDeep: '#4b2fc9',
+};
 
 // The Gamify crayon kit (proposal, teacher 2026-11-23): "i dont want
 // characters, but rather i want the set powerups that are consistent between
@@ -27,7 +40,7 @@ import { ND } from './buddies';
 
 const deep: Record<string, string> = {
   [ND.cobalt]: ND.cobaltDeep, [ND.pink]: ND.pinkDeep, [ND.green]: ND.greenDeep, [ND.tangerine]: ND.tangDeep,
-  [ND.violet]: ND.violetDeep, [ND.yellow]: '#c98f00', [ND.mint]: '#1f8f7c', [ND.coral]: '#b8322f',
+  [ND.violet]: ND.violetDeep, [ND.yellow]: '#c98f00', [ND.mint]: '#1f8f7c',
 };
 
 // Waxy crayon: wobbly edges (displacement) and paper tooth (tiny holes).
@@ -133,8 +146,8 @@ function DieTumble({ frame }: { frame: number }) {
   const f = TUMBLE[frame % TUMBLE.length];
   const faces: { d: string; fill: string; m: string; n: number }[] = [
     { d: 'M16 32 L50 16 L84 32 L50 48 Z', fill: '#fffaf0', m: faceMatrix([16, 32], [34, -16], [34, 16]), n: f.faces[0] },
-    { d: 'M16 32 L50 48 L50 90 L16 74 Z', fill: '#dfe5fd', m: faceMatrix([16, 32], [34, 16], [0, 42]), n: f.faces[1] },
-    { d: 'M50 48 L84 32 L84 74 L50 90 Z', fill: '#b4c4fb', m: faceMatrix([50, 48], [34, -16], [0, 42]), n: f.faces[2] },
+    { d: 'M16 32 L50 48 L50 90 L16 74 Z', fill: '#ddd6ff', m: faceMatrix([16, 32], [34, 16], [0, 42]), n: f.faces[1] },
+    { d: 'M50 48 L84 32 L84 74 L50 90 Z', fill: '#bfdff3', m: faceMatrix([50, 48], [34, -16], [0, 42]), n: f.faces[2] },
   ];
   return (
     <g>
@@ -154,7 +167,7 @@ function DieTumble({ frame }: { frame: number }) {
 // ---------- The universal power-up set ----------
 export type PowerId =
   | 'magnet' | 'double-dice' | 'double-points' | 'shield' | 'freeze' | 'extra-time' | 'slow-mo' | 'one-more'
-  | 'hint' | 'second-chance' | 'tornado' | 'lightning' | 'mystery-box' | 'treasure-chest' | 'spin-wheel' | 'potion' | 'swap';
+  | 'hint' | 'second-chance' | 'tornado' | 'lightning' | 'mystery-box' | 'treasure-chest' | 'spin-wheel' | 'potion' | 'swap' | 'pop-out';
 
 const ART: Record<PowerId, () => ReactNode> = {
   magnet: () => (<>
@@ -174,7 +187,7 @@ const ART: Record<PowerId, () => ReactNode> = {
   </>),
   shield: () => (<>
     <Wax d="M50 8 L86 21 V48 C86 71 70 85 50 93 C30 85 14 71 14 48 V21 Z" color={ND.cobalt} />
-    <Wax d="M50 8 L14 21 V48 C14 71 30 85 50 93 Z" color={ND.mint} edge={ND.cobaltDeep} />
+    <Wax d="M50 8 L14 21 V48 C14 71 30 85 50 93 Z" color="#bfdff3" edge={ND.cobaltDeep} />
     <Shine d="M24 28 V46" />
   </>),
   freeze: () => (<>
@@ -211,9 +224,9 @@ const ART: Record<PowerId, () => ReactNode> = {
     <Wax d="M50 90 C28 74 8 60 8 38 C8 23 19 12 32 12 C40 12 46 17 50 25 C54 17 60 12 68 12 C81 12 92 23 92 38 C92 60 72 74 50 90 Z" color={ND.pink} />
     <Line d="M50 25 L44 38 L55 48 L45 60 L54 72 L50 90" color={ND.ink} w={4} />
     <g transform="rotate(-28 50 49)">
-      <Wax d={rr(24, 40, 52, 18, 8)} color="#f6d2a8" edge="#c98a52" hatch={0.2} width={3.6} />
-      <Wax d={rr(42, 41.5, 16, 15, 3)} color="#fbe6cc" edge="#c98a52" hatch={0.1} width={2.4} />
-      <Line d="M31 46 V46.5 M31 52 V52.5 M68 46 V46.5 M68 52 V52.5" color="#c98a52" w={3} />
+      <Wax d={rr(24, 40, 52, 18, 8)} color="#ffd9b3" edge="#c47a45" hatch={0.2} width={3.6} />
+      <Wax d={rr(42, 41.5, 16, 15, 3)} color="#fffaf0" edge="#c47a45" hatch={0.1} width={2.4} />
+      <Line d="M31 46 V46.5 M31 52 V52.5 M68 46 V46.5 M68 52 V52.5" color="#c47a45" w={3} />
     </g>
   </>),
   tornado: () => (<>
@@ -273,11 +286,21 @@ const ART: Record<PowerId, () => ReactNode> = {
       </g>
     ))}
   </>),
+  // Pop Out (Four in a Row, 2026-11-26): a piece lifting out of the rack's
+  // empty hole, with motion lines; the piece is the game's own Grape dot disc.
+  'pop-out': () => (<>
+    <Wax d={rr(8, 62, 84, 30, 12)} color={ND.cobalt} />
+    <Wax d={circ(50, 77, 9)} color={ND.paper} edge={ND.ink} hatch={0} width={3.6} />
+    <Line d="M24 58 L16 49 M76 58 L84 49 M14 66 H4 M86 66 H96" color={ND.ink} w={3.6} />
+    <Wax d={circ(50, 32, 24)} color={ND.violet} />
+    <Wax d={circ(50, 32, 7)} color={ND.paper} edge={ND.ink} hatch={0} width={2.6} />
+    <Shine d="M34 26 C36 19 41 15 47 14" />
+  </>),
 };
 
 const SEED: Record<PowerId, number> = {
   magnet: 3, 'double-dice': 5, 'double-points': 7, shield: 11, freeze: 13, 'extra-time': 17, 'slow-mo': 19, 'one-more': 23,
-  hint: 29, 'second-chance': 31, tornado: 37, lightning: 41, 'mystery-box': 43, 'treasure-chest': 47, 'spin-wheel': 53, potion: 59, swap: 61,
+  hint: 29, 'second-chance': 31, tornado: 37, lightning: 41, 'mystery-box': 43, 'treasure-chest': 47, 'spin-wheel': 53, potion: 59, swap: 61, 'pop-out': 73,
 };
 
 function Shell({ size, title, seed, sticker, children }: { size: number; title?: string; seed: number; sticker?: boolean; children: ReactNode }) {
@@ -308,12 +331,14 @@ export function CrayonPawn({ color, size = 48 }: { color: string; size?: number 
 
 // ---------- Doodle world: blob patch and confetti (teacher refs, 2026-11-23) ----------
 // Solid pastel of each piece's main color (opaque, never a see-through tint).
-const PASTEL: Record<PowerId, string> = {
-  magnet: '#ffd3cf', 'double-dice': '#cfdcff', 'double-points': '#fff0a6', shield: '#cfdcff', freeze: '#c6f2e9',
-  'extra-time': '#ffd8c0', 'slow-mo': '#e4d8ff', 'one-more': '#c9efd5', hint: '#cfdcff', 'second-chance': '#ffd3e6',
-  tornado: '#e4d8ff', lightning: '#fff0a6', 'mystery-box': '#ffd3e6', 'treasure-chest': '#ffd8c0', 'spin-wheel': '#fff0a6',
-  potion: '#c9efd5', swap: '#ffd3e6',
+// The palette's own pastels (Lavender, Blue crystal, Blush, Butter, Peach, Mint, Aqua).
+export const KIT_PASTEL: Record<PowerId, string> = {
+  magnet: '#ffd3e6', 'double-dice': '#ddd6ff', 'double-points': '#fff1b8', shield: '#bfdff3', freeze: '#c9f1ee',
+  'extra-time': '#ffd9b3', 'slow-mo': '#ddd6ff', 'one-more': '#c8f0dc', hint: '#bfdff3', 'second-chance': '#ffd3e6',
+  tornado: '#ddd6ff', lightning: '#fff1b8', 'mystery-box': '#ffd3e6', 'treasure-chest': '#ffd9b3', 'spin-wheel': '#fff1b8',
+  potion: '#c8f0dc', swap: '#ffd3e6', 'pop-out': '#ddd6ff',
 };
+const PASTEL = KIT_PASTEL;
 const BLOBS = [
   'M50 6 C72 4 94 20 95 46 C96 72 78 95 50 94 C24 93 4 76 6 50 C7 26 26 8 50 6 Z',
   'M46 5 C70 2 97 18 94 48 C92 76 74 96 47 95 C20 94 3 72 5 46 C7 22 24 7 46 5 Z',
@@ -332,13 +357,15 @@ export function BlobPatch({ color, variant = 0, size }: { color: string; variant
     </svg>
   );
 }
-export type DoodleKind = 'sparkle' | 'star' | 'dot' | 'heart' | 'squiggle';
+export type DoodleKind = 'sparkle' | 'star' | 'dot' | 'heart' | 'squiggle' | 'drop' | 'moon';
 const DOODLE: Record<DoodleKind, (c: string) => ReactNode> = {
   sparkle: (c) => <path d="M12 1 C13 8 16 11 23 12 C16 13 13 16 12 23 C11 16 8 13 1 12 C8 11 11 8 12 1 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
   star: (c) => <path d={starPath(12, 12.5, 10.5, 5)} fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
   dot: (c) => <circle cx="12" cy="12" r="4.5" fill={c} stroke={ND.ink} strokeWidth="1.8" />,
   heart: (c) => <path d="M12 21 C6 17 2 13 2 8.5 C2 5 4.5 3 7.5 3 C9.5 3 11 4.5 12 6.5 C13 4.5 14.5 3 16.5 3 C19.5 3 22 5 22 8.5 C22 13 18 17 12 21 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
   squiggle: () => <path d="M2 14 C5 6 8 6 10 12 C12 18 15 18 17 11 C18 7 20 6 22 8" fill="none" stroke={ND.ink} strokeWidth="2.4" strokeLinecap="round" />,
+  drop: (c) => <path d="M12 2 C15 7 19 11 19 15 C19 19 16 22 12 22 C8 22 5 19 5 15 C5 11 9 7 12 2 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
+  moon: (c) => <path d="M15 2 C9 3 5 8 5 13 C5 18 9 22 14 22 C17 22 20 21 22 18 C16 19 11 15 11 10 C11 6 13 3 15 2 Z" fill={c} stroke={ND.ink} strokeWidth="1.8" strokeLinejoin="round" />,
 };
 export function Doodle({ kind, color = ND.yellow, size = 18, className, style }: { kind: DoodleKind; color?: string; size?: number; className?: string; style?: CSSProperties }) {
   return <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" overflow="visible" className={className} style={style}>{DOODLE[kind](color)}</svg>;
@@ -362,6 +389,7 @@ export const UNIVERSAL_POWERS: { id: PowerId; name: string; job: string; games: 
   { id: 'double-dice', name: 'Double Dice', job: 'Roll two dice and move both.', games: 'Every dice game: Board Game, Snakes and Ladders, Track Race' },
   { id: 'spin-wheel', name: 'Spin Wheel', job: 'Spin to see what happens.', games: 'Board Game' },
   { id: 'potion', name: 'Potion', job: 'A boost for your next few turns.', games: 'Board Game; fits any turn game' },
+  { id: 'pop-out', name: 'Pop Out', job: 'Pulls a piece out of the board.', games: 'Four in a Row' },
 ];
 
 // ---------- The roll demo ----------

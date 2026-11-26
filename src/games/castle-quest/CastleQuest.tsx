@@ -7,7 +7,7 @@ import { CPU_THINK_MS, pace, POP_IN } from '../../engine/pace';
 import TapOk from '../../engine/TapOk';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { ArrowsClockwise, CheckCircle, DiceFive, FlagCheckered, HourglassHigh, ShieldCheck, Trophy } from '@phosphor-icons/react';
+import { ArrowsClockwise, CheckCircle, DiceFive, FlagCheckered, HourglassHigh, Trophy } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { LIBRARY } from '../../data/library';
 import { useMySets } from '../../data/hooks';
@@ -426,7 +426,7 @@ export default function CastleQuest() {
               className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-butter" aria-label={p.name}>
               <TeamBadge colorIndex={p.colorIndex} size={56} />
               <span className="font-bold">{p.name}</span>
-              {shield[i] && i !== me && <ShieldCheck weight="fill" size={20} className="text-[#4ba3e8]" aria-label={t('cq.shielded')} />}
+              {shield[i] && i !== me && <span role="img" aria-label={t('cq.shielded')}><ItemArt item={itemFor('shield')} size={28} still /></span>}
             </motion.button>
           ))}
         </div>
@@ -475,7 +475,7 @@ export default function CastleQuest() {
               the die. Big screens: a column on the right. iPad portrait and
               small screens: one row under the board. */}
           <div className="relative z-20 row-start-2 lg:col-start-2 lg:row-start-1 min-w-0 min-h-0 flex items-center justify-center gap-3 px-3 pb-3 lg:flex-col lg:items-stretch lg:justify-start lg:gap-3 lg:pt-16 lg:pb-3 lg:pl-0 lg:pr-4">
-            <Racers players={turns.players} now={phase === 'play' ? turns.turn : -1} shield={shield} wide={turns.players.length > 6} />
+            <Racers shieldItem={itemFor('shield')} players={turns.players} now={phase === 'play' ? turns.turn : -1} shield={shield} wide={turns.players.length > 6} />
             {/* Held power-ups wait here until they are tapped (teacher, 2026-11-24); always the top layer. */}
             {tray}
             <div className="relative grid justify-items-center content-center gap-2 shrink-0 lg:pt-1">
@@ -526,7 +526,7 @@ export default function CastleQuest() {
               {banner && (
                 <motion.div key={banner.id} className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max max-w-[90%] grid justify-items-center gap-4 text-3xl sm:text-4xl text-center border-heavy border-border rounded-panel px-7 py-5 z-40 ${banner.bad ? 'bg-[var(--blush)]' : 'bg-surface'}`} style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker-lg)' }}
                   initial={still ? { opacity: 0 } : { y: 30, opacity: 0, scale: 0.7 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ opacity: 0, y: 10 }} transition={still ? { duration: 0.01 } : POP_IN} role="dialog" aria-label={banner.text}>
-                  <span className="flex items-center gap-2">{banner.icon === 'lose' && <HourglassHigh weight="fill" size={34} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={34} />}{banner.icon === 'shield' && <ShieldCheck weight="fill" size={34} />}<PopText text={banner.text} /></span>
+                  <span className="flex items-center gap-2">{banner.icon === 'lose' && <HourglassHigh weight="fill" size={34} />}{banner.icon === 'again' && <ArrowsClockwise weight="bold" size={34} />}{banner.icon === 'shield' && <ItemArt item={itemFor('shield')} size={48} still={still} />}<PopText text={banner.text} /></span>
                   <TapOk onTap={() => goRef.current?.()} />
                 </motion.div>
               )}
@@ -599,7 +599,7 @@ function Piece({ player, size }: { player: TurnPlayer; size: number }) {
 // The player rows beside the board (Brand Kit scoreboard row, teacher
 // 2026-11-24): the pawn and the whole name, Butter for whose turn it is (the
 // only turn signal), no points and no "squares to go" (the pawns show the race).
-function Racers({ players, now, shield, wide }: { players: TurnPlayer[]; now: number; shield: boolean[]; wide: boolean }) {
+function Racers({ players, now, shield, wide, shieldItem }: { players: TurnPlayer[]; now: number; shield: boolean[]; wide: boolean; shieldItem: ThemeItem }) {
   const cur = players[now];
   return (
     <div className="min-w-0 shrink lg:shrink-0 max-lg:flex-1 max-lg:max-w-[26rem]">
@@ -609,7 +609,7 @@ function Racers({ players, now, shield, wide }: { players: TurnPlayer[]; now: nu
             style={{ background: i === now ? 'var(--butter)' : 'var(--paper)', boxShadow: '0 3px 0 var(--color-border)' }}>
             <span className="shrink-0 grid place-items-center" style={{ width: wide ? '1.6rem' : '2.25rem', height: wide ? '1.6rem' : '2.25rem' }}><Piece player={p} size={wide ? 26 : 36} /></span>
             <span className={`flex-1 min-w-0 font-bold leading-tight ${wide ? 'text-xs' : 'text-sm lg:text-base'}`}>{p.name}</span>
-            {shield[i] && <ShieldCheck weight="fill" size={18} className="shrink-0 text-[#4ba3e8]" aria-label={t('cq.shielded')} />}
+            {shield[i] && <span role="img" aria-label={t('cq.shielded')} className="shrink-0"><ItemArt item={shieldItem} size={wide ? 22 : 28} still /></span>}
           </li>
         ))}
       </ol>
@@ -657,8 +657,9 @@ function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean;
           <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: !spin.spinning ? 0 : still ? spin.stop % 360 : spin.stop }}
             transition={{ duration: still || !spin.spinning ? 0.01 : 4, ease: [0.15, 0.85, 0.25, 1] }}>
             <circle cx="100" cy="100" r="96" fill={C.ink} />
-            <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={C.sage} opacity={spin.done && !spin.forward ? 0.35 : 1} />
-            <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={C.red} opacity={spin.done && spin.forward ? 0.35 : 1} />
+            {/* The half that did not win turns to its solid pastel pair (never see-through). */}
+            <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={spin.done && !spin.forward ? PK.mint : C.sage} />
+            <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={spin.done && spin.forward ? PK.blush : C.red} />
             {Array.from({ length: 12 }, (_, k) => <line key={k} x1="100" y1="100" x2={100 + 92 * Math.sin((k * Math.PI) / 6)} y2={100 - 92 * Math.cos((k * Math.PI) / 6)} stroke="#fffaf0" strokeWidth="1" opacity="0.35" />)}
             <text x="148" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(90 148 100)">{t('cq.forward')}</text>
             <text x="52" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(-90 52 100)">{t('cq.back')}</text>

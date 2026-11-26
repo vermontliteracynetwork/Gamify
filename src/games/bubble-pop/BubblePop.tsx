@@ -3,7 +3,8 @@ import HintButton from '../../engine/HintButton';
 import { impact } from '../../engine/impact';
 import { AnimatePresence, motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Crosshair, Question, Sparkle, Star } from '@phosphor-icons/react';
+import { Crosshair, Question, Star } from '@phosphor-icons/react';
+import { Doodle } from '../../brand/CrayonKit';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
 import { buzz, playEffect } from '../../engine/feedback';
@@ -29,7 +30,7 @@ import { usePowerUps } from '../../engine/usePowerUps';
 import type { ThemeItem } from '../../theme/types';
 import { powerUpSwitches } from '../../engine/PowerUpSwitches';
 import { BOARD_COLOR, BUBBLE_COLORS, bubblePopManifest } from './manifest';
-import { BubblePatternDefs, bubblePatterns, drawBubble, INK } from './bubbleArt';
+import { BubblePatternDefs, bubblePatterns, drawBubble, INK, PAPER } from './bubbleArt';
 import {
   center, clampAngle, colorsLeft, DANGER_ROW, filled, H, lowestRow, makeBoard, MAX_ROWS, nextColor, nextShot, placeShot, pushRow, R, rescue,
   rowLen, SHOOTER, shotPoints, traceShot, W, type Board, type Hit, type Shot,
@@ -270,22 +271,24 @@ export default function BubblePop() {
 
   const patterns = bubblePatterns(theme);
   const bubble = (k: number, x: number, y: number, key?: string, cls = '', style?: React.CSSProperties) => drawBubble(patterns, k, x, y, key, cls, style);
-  // Special shots: a rainbow bubble (wedges of every color, a white star) and
-  // a star burst (dark with a glowing ring and a sparkle).
+  // Special shots, in the crayon kit's hand (owner, 2026-11-26): a rainbow
+  // bubble (wedges of every bubble color, a paper sparkle doodle) and a star
+  // burst (an Ink bubble with a Lemon ring and a Lemon sparkle doodle).
+  const spark = (x: number, y: number, size: number, color: string) => <g transform={`translate(${x - size / 2} ${y - size / 2})`}><Doodle kind="sparkle" color={color} size={size} /></g>;
   const shotBubble = (shot: Shot, x: number, y: number) => {
     if (typeof shot === 'number') return bubble(shot, x, y);
     if (shot === 'rainbow') return (
       <g>
         {BUBBLE_COLORS.map((col, i) => { const a0 = (i / 6) * Math.PI * 2, a1 = ((i + 1) / 6) * Math.PI * 2, rr = R * 0.94; return <path key={i} d={`M${x} ${y} L${x + Math.cos(a0) * rr} ${y + Math.sin(a0) * rr} A${rr} ${rr} 0 0 1 ${x + Math.cos(a1) * rr} ${y + Math.sin(a1) * rr} Z`} fill={col} />; })}
-        <circle cx={x} cy={y} r={R * 0.94} fill="none" stroke="#000" strokeWidth={0.13} />
-        <Star x={x - 0.5} y={y - 0.5} size={1} weight="fill" color="#fff" />
+        <circle cx={x} cy={y} r={R * 0.94} fill="none" stroke={INK} strokeWidth={0.15} />
+        {spark(x, y, 1.15, PAPER)}
       </g>
     );
     return (
       <g>
-        <circle cx={x} cy={y} r={R * 1.25} fill="none" stroke="#fdfd94" strokeWidth={0.18} opacity={0.8} className={still ? '' : 'bp-ring'} style={{ transformOrigin: `${x}px ${y}px`, transformBox: 'view-box' }} />
-        <circle cx={x} cy={y} r={R * 0.94} fill="#241c3d" stroke="#fdfd94" strokeWidth={0.16} />
-        <Sparkle x={x - 0.55} y={y - 0.55} size={1.1} weight="fill" color="#fdfd94" />
+        <circle cx={x} cy={y} r={R * 1.25} fill="none" stroke="#fabe37" strokeWidth={0.22} className={still ? '' : 'bp-ring'} style={{ transformOrigin: `${x}px ${y}px`, transformBox: 'view-box' }} />
+        <circle cx={x} cy={y} r={R * 0.94} fill={INK} stroke="#fabe37" strokeWidth={0.16} />
+        {spark(x, y, 1.25, '#fabe37')}
       </g>
     );
   };

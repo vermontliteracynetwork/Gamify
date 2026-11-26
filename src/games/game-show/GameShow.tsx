@@ -9,7 +9,7 @@ const GS = '/sounds/game-show/';
 import { AnimatePresence, motion } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Sparkle, Trophy, UsersThree, X } from '@phosphor-icons/react';
+import { CheckCircle, Trophy, UsersThree, X } from '@phosphor-icons/react';
 import { data, newId } from '../../data';
 import { useMySets } from '../../data/hooks';
 import { LIBRARY } from '../../data/library';
@@ -715,7 +715,7 @@ const powerAmount = (it: ThemeItem) => it.amount ?? (it.ability === 'bonus' ? 10
 function GridPreview({ cols, rows }: { cols: number; rows: number }) {
   return (
     <span className="grid gap-[2px]" style={{ gridTemplateColumns: `repeat(${cols}, 9px)`, gridAutoRows: '6px' }} aria-hidden="true">
-      {Array.from({ length: cols * rows }, (_, i) => <span key={i} className="rounded-[1.5px] border border-border" style={{ background: '#fdfd94' }} />)}
+      {Array.from({ length: cols * rows }, (_, i) => <span key={i} className="rounded-[1.5px] border border-border" style={{ background: STUDIO.butter }} />)}
     </span>
   );
 }
@@ -723,21 +723,23 @@ function GridPreview({ cols, rows }: { cols: number; rows: number }) {
 function BoardArt({ kind }: { kind: Board }) {
   if (kind === 'cards') {
     return (
-      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: '#ffe9a8' }}>
+      // The Classic cards in small (owner, 2026-11-26: the /brand look): Butter
+      // cards with the crayon sparkle on Lavender, one won card in a team pastel.
+      <span className="h-full grid grid-cols-4 gap-1.5 p-3" style={{ background: STUDIO.lavender }}>
         {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#ffffff' : '#fdfd94', transform: `rotate(${(i % 3) - 1}deg)` }}>
-            {i === 2 ? <Sparkle weight="fill" size={16} /> : i + 1}
+          <span key={i} className="rounded-md border-std border-border flex items-center justify-center font-display font-bold" style={{ background: i === 2 ? '#bfdff3' : STUDIO.butter }}>
+            {i === 2 ? '+30' : <Doodle kind="sparkle" color={STUDIO.lemon} size={16} />}
           </span>
         ))}
       </span>
     );
   }
   return (
-    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: '#cdd7fb' }}>
+    <span className="h-full grid grid-cols-4 gap-1 p-3" style={{ background: STUDIO.lavender }}>
       {/* Example category names on the headers (teacher, 2026-11-06). */}
       {['Animals', 'Spelling', 'Math', 'Science'].map((c) => <span key={c} className="rounded-sm border-std border-border bg-surface font-bold text-[0.7rem] leading-tight flex items-center justify-center px-0.5">{c}</span>)}
       {Array.from({ length: 12 }, (_, i) => (
-        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: '#fdfd94' }}>{(Math.floor(i / 4) + 1) * 100}</span>
+        <span key={i} className="rounded-sm border-std border-border font-display font-bold text-xs flex items-center justify-center" style={{ background: STUDIO.butter }}>{(Math.floor(i / 4) + 1) * 100}</span>
       ))}
     </span>
   );

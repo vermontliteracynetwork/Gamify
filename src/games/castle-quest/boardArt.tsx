@@ -4,7 +4,8 @@ import { t } from '../../i18n';
 import { pieceImage } from '../../theme/library';
 import type { GameTheme } from '../../theme/types';
 import type { Layout, SpaceKind } from './board';
-import { CrayonDieFace, INK, PARK_BG, PK, QUIET_MAT } from './park';
+import { CrayonDieFace, INK, PARK_BG, PK, quietMat } from './park';
+import { useSettings } from '../../settings/SettingsContext';
 
 // The Board Game's board and die, drawn the same in the game and in the
 // Theme Builder's preview (teacher, 2026-11-16: "ALWAYS show preview as the
@@ -37,6 +38,7 @@ export function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, colo
   const regular = ['space', 'space-2', 'space-3', 'space-4'].map((id) => pieceImage(theme, id) ?? pieceImage(theme, 'space'));
   const art = { regular: pieceImage(theme, 'space'), lose: pieceImage(theme, 'space-lose'), again: pieceImage(theme, 'space-again'), start: pieceImage(theme, 'start'), finish: pieceImage(theme, 'finish') };
   const themed = !!pieceImage(theme, 'background');
+  const { settings } = useSettings();
   // The mat: a quiet paper panel with an ink edge (a theme's background shows through, softened).
   // Never past the box it is drawn in (the Theme Builder preview leaves less room).
   const m = Math.max(4, Math.min(matPad(s), ox - 4, oy - 4));
@@ -44,7 +46,7 @@ export function BoardArt({ L, ox, oy, n, kinds, theme, wobble, still, here, colo
   const edge = Math.max(2, Math.min(3, s * 0.05));
   return (
     <div className="absolute inset-0" role="img" aria-label={t('cq.board', { n })}>
-      <div className="absolute" style={{ left: ox - m, top: oy - m, width: L.cols * s + m * 2, height: L.rows * s + m * 2, borderRadius: Math.max(18, s * 0.42), border: `4px solid ${INK}`, boxShadow: `0 6px 0 ${INK}`, ...(themed ? { background: 'rgba(255,250,240,0.6)' } : QUIET_MAT) }} />
+      <div className="absolute" style={{ left: ox - m, top: oy - m, width: L.cols * s + m * 2, height: L.rows * s + m * 2, borderRadius: Math.max(18, s * 0.42), border: `4px solid ${INK}`, boxShadow: `0 6px 0 ${INK}`, ...(themed ? { background: 'rgba(255,250,240,0.6)' } : quietMat(settings.calm)) }} />
       {L.cells.map((c, i) => {
         const w = wobble[i % wobble.length];
         const kind: SpaceKind | 'start' | 'finish' = i === 0 ? 'start' : i === n - 1 ? 'finish' : kinds[i] ?? 'regular';

@@ -2,6 +2,7 @@ import { classicTheme } from './classic';
 import { startersFor } from './starters';
 import { houseFor } from './house';
 import type { GameTheme } from './types';
+import { PATTERNS } from '../brand/PatternProposal';
 
 // Every game plays Classic free; other themes come from the Theme Builder
 // (the teacher's own designs and library themes made in the owner's
@@ -27,9 +28,14 @@ export function pieceFill(theme: GameTheme | undefined, piece: string, fallback:
 }
 
 // CSS for a theme's backdrop. Patterns are drawn with gradients (no files).
-export function backdropStyle(theme: GameTheme, plain: boolean): React.CSSProperties {
+export function backdropStyle(theme: GameTheme, plain: boolean, calm = false): React.CSSProperties {
   const bg = theme.colors.background;
   if (plain || theme.backdrop.kind === 'color') return { background: bg };
+  if (theme.backdrop.kind === 'kit') {
+    const id = theme.backdrop.pattern;
+    const p = PATTERNS.find((x) => x.id === id);
+    return p ? { backgroundColor: bg, ...p.make(calm) } : { background: bg };
+  }
   if (theme.backdrop.kind === 'image') return { background: theme.backdrop.tile ? `${bg} 0 0 / 240px repeat url("${theme.backdrop.src}")` : `${bg} center / cover no-repeat url("${theme.backdrop.src}")` };
   const ink = theme.backdrop.pattern === 'dots' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.35)';
   switch (theme.backdrop.pattern) {
