@@ -38,7 +38,9 @@ const kitPattern = (id: string) => PATTERNS.find((x) => x.id === id)!.make(false
 // The box Match Three's board fills; Four in a Row's rack and Bubble Pop's
 // playfield stand exactly as tall inside it (owner, 2026-11-25: "the same
 // size as the match three (hight)").
-const BOARD_BOX = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[64%] aspect-[5/4]';
+// Every board sits the same height in its cover, whatever the card's shape
+// (owner, 2026-11-26: "fix the sizing of the cover images").
+const BOARD_BOX = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[76%] max-w-[92%] aspect-[5/4]';
 
 export function GameCover({ gameId, className = '' }: { gameId: string; className?: string }) {
   const base = `relative overflow-hidden ${className}`;
@@ -262,7 +264,7 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
       const path: [number, number][] = [...Array.from({ length: 7 }, (_, i) => [i, 0] as [number, number]), [6, 1], ...Array.from({ length: 7 }, (_, i) => [6 - i, 2] as [number, number]), [0, 3], ...Array.from({ length: 7 }, (_, i) => [i, 4] as [number, number])];
       return (
         <div className={base} style={{ background: `${PARK_BG} center / cover` }} aria-hidden="true">
-          <div className="absolute left-1/2 top-[52%] -translate-x-1/2 -translate-y-1/2 w-[78%] aspect-[16/10] rounded-[7%] border-[0.2rem] border-[#1d1a33] shadow-[0_0.2rem_0_#1d1a33]" style={QUIET_MAT}>
+          <div className="absolute left-1/2 top-[54%] -translate-x-1/2 -translate-y-1/2 h-[68%] max-w-[84%] aspect-[16/10] rounded-[7%] border-[0.2rem] border-[#1d1a33] shadow-[0_0.2rem_0_#1d1a33]" style={QUIET_MAT}>
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 80 50">
               {path.map(([c, r], i) => {
                 const x = 4 + c * 10.4, y = 3.5 + r * 9;
@@ -328,17 +330,10 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
 
 // Covers for Gamify's designed themes (teacher, 2026-10-31): each shows the
 // theme's own art in a small scene of its game.
-// A theme's cover with its title lettering across the bottom when it has one
-// (teacher, 2026-11-13: themes can design their own title).
+// A theme's cover: its art only. Never a game-name label on a cover image
+// (owner, 2026-11-26: "dont ever have a label of the game name on the images").
 export function ThemeCover({ theme, className = '' }: { theme: GameTheme; className?: string }) {
-  const title = theme.pieces.title?.image;
-  if (!title) return <ThemeCoverArt theme={theme} className={className} />;
-  return (
-    <div className={`relative ${className}`}>
-      <ThemeCoverArt theme={theme} className="absolute inset-0 w-full h-full" />
-      <img src={title} alt="" aria-hidden="true" className="absolute inset-x-[6%] bottom-[5%] w-[88%] h-[28%] object-contain drop-shadow-[0_3px_0_rgba(0,0,0,0.35)]" />
-    </div>
-  );
+  return <ThemeCoverArt theme={theme} className={className} />;
 }
 
 function ThemeCoverArt({ theme, className = '' }: { theme: GameTheme; className?: string }) {
