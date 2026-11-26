@@ -595,7 +595,8 @@ function Login({ w }: W) {
     <Page w={w}>
       <section className="relative grid justify-items-center" style={{ padding: `${p ? 40 : 64}px ${gut(w)}px 0` }}>
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none"><CenterDeco w={w} word="Hello!" /></div>
-        <TextCard tilt={-1.2} tone={1} className="grid gap-5 w-full" style={{ ...CARD, maxWidth: 540, padding: p ? 24 : 40 }}>
+        {/* Design Chair 2026-11-26: a form (fields and the Log in button) is clean core, so it stays flat and untaped in every strength. */}
+        <div className="relative grid gap-5 w-full" style={{ ...CARD, maxWidth: 540, padding: p ? 24 : 40 }}>
           <h1 className="text-center" style={{ ...GY, fontSize: p ? 36 : 48 }}><Words text={t("login.title")} /></h1>
           <div className="grid grid-cols-2 p-1.5 rounded-full" style={{ background: PP.cream, border: `2.5px solid ${I}` }} role="tablist">{(['login.tab.login', 'login.tab.signup'] as StringKey[]).map((k, i) => <span key={k} role="tab" aria-selected={i === 0} className="grid place-items-center rounded-full font-bold text-[18px]" style={{ minHeight: 46, ...(i === 0 ? { background: PP.butter, border: `2px solid ${I}` } : {}) }}>{t(k)}</span>)}</div>
           <P w={w}>{t('login.forTeachers')}</P>
@@ -604,7 +605,7 @@ function Login({ w }: W) {
           <Go w={w} wide>{t('login.tab.login')}</Go>
           <span className="text-center font-bold text-[17px] underline underline-offset-4">{t('login.noAccount')}</span>
           <span className="text-center font-semibold text-[16px]" style={{ color: PP.quiet }}>{t('login.students')}</span>
-        </TextCard>
+        </div>
       </section>
     </Page>
   );
@@ -616,7 +617,8 @@ function Join({ w }: W) {
     <Page w={w} student join>
       <section className="relative grid justify-items-center" style={{ padding: `${p ? 40 : 80}px ${gut(w)}px 0` }}>
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none"><CenterDeco w={w} word="Hi!" top={60} half={340} /></div>
-        <TextCard tilt={1} tone={3} className="grid gap-6 justify-items-center text-center w-full" style={{ ...CARD, maxWidth: 680, padding: p ? 24 : 44 }}>
+        {/* Design Chair 2026-11-26: the whole Join card is the clean core (code boxes, Hear my code, Go), so it stays flat and untaped in every strength. */}
+        <div className="relative grid gap-6 justify-items-center text-center w-full" style={{ ...CARD, maxWidth: 680, padding: p ? 24 : 44 }}>
           <h1 style={{ ...GY, fontSize: p ? 42 : 66 }}><Words text={t("join.title")} /></h1>
           <P w={w} big>{t('join.sub')}</P>
           {/* The code boxes, Hear my code and Go are the clean core: never taped or tilted. */}
@@ -624,7 +626,7 @@ function Join({ w }: W) {
             {['B', 'Q', '', '', ''].map((d, i) => <span key={i} className="grid place-items-center" style={{ ...GY, width: box, height: box * 1.15, fontSize: box * 0.6, borderRadius: 16, background: i === 2 ? PP.butter : '#ffffff', border: `3px solid ${I}`, boxShadow: i === 2 ? `0 0 0 4px ${PP.lemon}` : `0 4px 0 ${I}` }}>{d}</span>)}
           </div>
           <div className={`flex gap-3 ${p ? 'flex-col w-full' : ''}`}><Plain w={w} wide={p}><SpeakerHigh weight="bold" size={22} />{t('join.hearCode')}</Plain><Go w={w} wide={p} off>{t('join.go')}<ArrowRight weight="bold" size={22} /></Go></div>
-        </TextCard>
+        </div>
       </section>
     </Page>
   );
@@ -838,7 +840,7 @@ type Mode = Strength | 'all';
 const STRENGTHS: [Strength, string, string][] = [
   ['A', 'Scrapbook, clean', 'Papers, crayon stickers, the sunburst and one hand-lettered word, all at the edges. No washi tape, nothing tilted. Words and buttons flat on cream or white.'],
   ['B', 'Scrapbook, as mocked', 'A, plus washi tape and small tilts (4 degrees at most) on the edge pieces only, never over words or buttons. Closest to the 2026-11-23 mockup.'],
-  ['C', 'Full scrapbook', 'B, plus tape and a small tilt on cards that hold words (plan cards, feature cards, the log in card). The clean core still stays plain.'],
+  ['C', 'Full scrapbook', 'B, plus tape and a small tilt on cards that hold words (plan cards, feature cards, post cards). The clean core (the Join code card, the Log in form, the question card) still stays plain.'],
 ];
 function Tag({ s }: { s: Strength }) {
   const [, name] = STRENGTHS.find((x) => x[0] === s)!;
@@ -898,7 +900,7 @@ export default function ScrapbookDirection() {
         <div className="grid gap-2 rounded-[1.25rem] p-4 text-sm font-semibold max-w-[70rem]" style={{ background: '#ffffff', border: `2px solid ${I}` }}>
           <p><b>Your request (2026-11-26):</b> "there was a style for the public facing pages a while ago that was more colorful, scrapbook style and i want that to be the main art direction for public pages and the classic themes." Then: "give me mockups again for everything and ill decide".</p>
           <p><b>What changed since 2026-11-24:</b> your rule then was no washi tape, no stacked or tilted cards and no characters (2026-11-23: "remove the washi tape"; "the attatched tape, multilayer card ... need immediately removed"; 2026-11-25: no tilted cards), and /brand showed only the flat direction, so the scrapbook mockups were taken down on 2026-11-24. This tab brings the old style back (cream page, fabric-swatch papers, crayon stickers, the sunburst, hand-lettered praise, kind-word books, school stickers, crayon stars) in today's palette, patterns and crayon kit. Strength A keeps your tape and tilt rule; B and C bring tape and tilt back for you to judge. No characters in any strength, and nothing live changes until you pick.</p>
-          <p><b>Why the clean core stays plain in all three:</b> what a child reads and taps (question card, answer tiles, score board, main button) never sits on a pattern, under tape or on a tilt. Kindergartners in a heavily decorated classroom spent more time off task and learned less than in a sparse one (Fisher, Godwin and Seltman, 2014, Psychological Science); people learn better when decoration that does not carry the lesson is kept away from it (Mayer's coherence principle); and words need a plain ground for 4.5:1 contrast (WCAG 2.1, 1.4.3). These are cited from memory; the pages were not opened in this session.</p>
+          <p><b>Why the clean core stays plain in all three:</b> what a child reads and taps (question card, answer tiles, score board, main button) never sits on a pattern, under tape or on a tilt. Kindergartners taught six science lessons in a lab classroom with heavily decorated walls were more distracted, spent more time off task and learned less than when the decorations were removed (Fisher, Godwin and Seltman, 2014, Psychological Science 25(7), 1362-1370; confirmed by the Design Chair from the published abstract via search, 2026-11-26; a 2022 follow-up found children do not get used to the decor over time). People learn better when interesting material that does not carry the lesson is left out (Mayer's coherence principle, from memory). Text must reach 4.5:1 contrast against the background it actually sits on, 3:1 for large text, and a busy background image behind words is a named failure (WCAG 2.1, 1.4.3 and failure F83, Understanding page opened 2026-11-26); tilt is not a WCAG rule, it is a reading-ease choice.</p>
           <p><b>The one weak spot to test:</b> C puts tape and tilt on cards that hold words, the place early readers look first. Try B on a projector with a K-2 class before choosing C.</p>
         </div>
         <div className="grid gap-2 lg:grid-cols-3 max-w-[70rem]">{STRENGTHS.map(([s, n, d]) => <div key={s} className="rounded-[1rem] p-3 text-sm font-semibold grid gap-1" style={{ background: '#ffffff', border: `2px solid ${I}` }}><Tag s={s} /><span>{d}</span><span className="sr-only">{n}</span></div>)}</div>
