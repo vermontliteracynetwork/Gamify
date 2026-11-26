@@ -1444,6 +1444,7 @@ export const en = {
   'home.signIn': 'Sign in: {name}',
   'home.myArcade': "Back to {name}'s Arcade",
   'themeScreen.title': 'Pick a theme',
+  'themeScreen.house': 'A Gamify theme',
   'themeScreen.by': 'Made by {name}',
   'class.signInLook': 'Sign-in pictures',
   'class.signInBuiltIn': 'Built-in pictures',

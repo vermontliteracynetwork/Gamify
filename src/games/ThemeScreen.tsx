@@ -21,7 +21,7 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
   useLayoutEffect(() => {
     const el = body.current;
     if (!el) return;
-    const GAP = 20, LABEL = 56, PAD = 16;
+    const GAP = 20, LABEL = 60, PAD = 0;
     const measure = () => {
       const W = el.clientWidth - 40, H = el.clientHeight - 32;
       let best = { cols: 1, w: 0 };
@@ -48,16 +48,19 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
             const open = playable(th);
             const on = current.id === th.id;
             return (
+              // A choice board card, the same as the game version picker
+              // (PictureChoice; owner 2026-11-26): the theme fills a picture
+              // band, then its name and one line; a green check when picked.
               <button key={th.id} type="button" role="radio" aria-checked={on} aria-label={open ? th.name : t('theme.locked', { name: th.name })}
                 onClick={() => (open ? onChoose(th.id) : setPreview(th))}
-                className={`tile-wiggle group relative rounded-panel border-bold border-border p-2 grid gap-1.5 text-left bg-surface ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : ''}`} style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
-                <span className={open ? '' : 'grayscale opacity-70'}><ThemePreview theme={th} gameName={gameName} /></span>
-                <span className="flex items-center gap-2 font-display text-base font-bold px-1">
-                  {!open && <LockSimple weight="fill" size={18} aria-hidden="true" />}
-                  <span className="flex-1">{th.name}</span>
-                  {on && <span className="w-7 h-7 rounded-full bg-kelly border-std border-border flex items-center justify-center"><Check weight="bold" size={16} /></span>}
+                className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : 'opacity-90 hover:opacity-100'}`}
+                style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
+                <span className={`block border-b-[2.5px] border-border overflow-hidden [&>div]:rounded-none [&>div]:border-0 [&>div]:transition-transform [&>div]:duration-300 motion-safe:group-hover:[&>div]:scale-[1.03] ${open ? '' : 'grayscale opacity-70'}`} aria-hidden="true"><ThemePreview theme={th} gameName={gameName} /></span>
+                <span className="px-3 py-2 grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-0.5">
+                  <span className="col-start-1 font-display text-base font-bold leading-tight flex items-center gap-1.5">{!open && <LockSimple weight="fill" size={16} aria-hidden="true" />}{th.name}</span>
+                  <span className="col-start-1 font-semibold text-xs text-muted leading-snug">{th.designedBy ? t('themeScreen.by', { name: creditLine(th) }) : t('themeScreen.house')}</span>
+                  {on && <span className="col-start-2 row-start-1 row-span-2 shrink-0 w-9 h-9 rounded-full bg-kelly border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
                 </span>
-                {th.designedBy && <span className="text-xs font-bold text-muted px-1">{t('themeScreen.by', { name: creditLine(th) })}</span>}
               </button>
             );
           })}
