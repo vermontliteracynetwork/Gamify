@@ -24,7 +24,7 @@ export async function addFormSent(gameId: string) {
   await data.setSetting(FORMS, [...sent, gameId]);
 }
 
-export interface BetaSteps { sets: number; played: string[]; themes: number; forms: number; hosted: number; games: { id: string; name: string }[] }
+export interface BetaSteps { sets: number; played: string[]; themes: number; themeGames: number; weeks: number; forms: number; hosted: number; games: { id: string; name: string }[] }
 
 // Checklist items the teacher ticks by hand (the lesson, ratings, surveys).
 const MANUAL = 'beta-manual';
@@ -43,8 +43,12 @@ export function useBetaSteps(on: boolean) {
       sets: sets.filter((s) => s.ownerId !== 'gamify' && s.questions.length > 0).length,
       played: GAMES.filter((g) => ids.has(g.id)).map((g) => g.id),
       themes: themes.filter((th) => th.source === 'custom').length,
+      // Games with at least one theme of her own (owner: a theme for 5 games).
+      themeGames: new Set(themes.filter((th) => th.source === 'custom').map((th) => th.gameId)).size,
       forms: (forms ?? []).length,
       hosted,
+      // Weeks with at least one game (owner 2026-11-26: one game a week). A week starts Monday.
+      weeks: new Set(log.map((e) => { const d = new Date(e.at); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7)); return d.toISOString().slice(0, 10); })).size,
       games: GAMES.map((g) => ({ id: g.id, name: g.name })),
     };
   }, [on]);

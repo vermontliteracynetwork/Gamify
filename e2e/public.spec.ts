@@ -324,7 +324,7 @@ test.describe('buyer pages', () => {
     await expect(page.getByText('Step 3 of 5', { exact: false })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'The Asks' })).toBeVisible();
     const asks = page.locator('fieldset[data-field="asks"] input[type=checkbox]');
-    await expect(asks).toHaveCount(8);
+    await expect(asks).toHaveCount(9);
     await asks.first().check();
     await next.click();
     await expect(page.getByText('Tick every ask.', { exact: false })).toBeVisible();
@@ -357,7 +357,7 @@ test.describe('buyer pages', () => {
     const app = page.locator('[data-beta-app]').first();
     await expect(app.getByText('Ms. Rivera')).toBeVisible();
     await expect(app.getByText('Lincoln Elementary')).toBeVisible();
-    await expect(app.getByText('8/8, agreed')).toBeVisible();
+    await expect(app.getByText('9/9, agreed')).toBeVisible();
     await expect(app.getByText('3 of 3 signals')).toBeVisible();
     await app.screenshot({ path: `test-results/owner-beta-app-${info.project.name}.png` });
   });

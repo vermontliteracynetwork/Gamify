@@ -10,7 +10,7 @@
 // What we ask of every tester, as listed on /beta (betaPage.ask.*), with how
 // long each takes. /beta and the application both read this list.
 export const BETA_ASKS: { key: string; minutes: string }[] = [
-  { key: 'setup', minutes: '15' }, { key: 'questions', minutes: '15-30' }, { key: 'theme', minutes: '20+' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
+  { key: 'setup', minutes: '15' }, { key: 'weekly', minutes: '10-20 a week' }, { key: 'questions', minutes: '15-30 each' }, { key: 'theme', minutes: '20+' }, { key: 'lesson', minutes: '10' }, { key: 'play', minutes: '10-20' },
   { key: 'checkin', minutes: '3-5' }, { key: 'surveys', minutes: '1-3' }, { key: 'report', minutes: '1' },
 ];
 
