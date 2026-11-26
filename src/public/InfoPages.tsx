@@ -10,6 +10,7 @@ import { Button, buttonClasses } from '../ui/kit';
 import PublicFooter from './PublicFooter';
 import { FAQ_GROUPS, FAQS, type FaqGroup } from './faq';
 import { SB_PASTELS, SbDot, SbH2, SbHead, SbMain, SbMore, SbSection, sbCard, sbCardLink, sbPill } from './scrapbookA';
+import { useScrapbookGround } from './scrapbook/Shell';
 
 
 // Plain information pages for schools: the IT allow-list and help.
@@ -72,6 +73,7 @@ const searchBox = 'w-full min-h-14 pl-12 pr-4 rounded-pill border-[3px] border-b
 const answers = '!bg-white !border-[3px] shadow-[0_5px_0_var(--ink)]';
 
 export function HelpPage() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const { topic } = useParams();
   const [params, setParams] = useSearchParams();
   const group = (FAQ_GROUPS.includes(params.get('for') as FaqGroup) ? params.get('for') : 'teachers') as FaqGroup;

@@ -14,6 +14,7 @@ import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import { ScrapbookPage } from './scrapbook/Shell';
 import HomeCollage from './scrapbook/HomeCollage';
+import CardTape from './scrapbook/CardTape';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { STARTER_THEMES } from '../theme/starters';
 
@@ -87,7 +88,8 @@ export default function PublicHome() {
           <h2 id="how-it-works" className={H2}><Title text={t('public.howTitle')} /></h2>
           <ol className="grid md:grid-cols-3 gap-5 list-none p-0 m-0">
             {HOW.map((bg, i) => (
-              <li key={i} className={`hover-lift ${CARD} p-6 grid gap-3 content-start`}>
+              <li key={i} className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start`}>
+                {i === 0 && <CardTape tone={1} rot={-4} />}
                 <span className={`justify-self-start px-3 py-1 rounded-pill ${bg} border-std border-border font-bold`}>{t('public.howStep', { n: i + 1 })}</span>
                 <h3 className="font-display text-2xl leading-tight">{t(`public.how.${i + 1}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`public.how.${i + 1}.text` as StringKey)}</p>
@@ -119,7 +121,7 @@ export default function PublicHome() {
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.whyTitle')} /></h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-5">
-            {WHY.map((p, i) => <PointCard key={p.key} point={p} group="why" className={WHY_SPAN[i]} />)}
+            {WHY.map((p, i) => <PointCard key={p.key} point={p} group="why" className={WHY_SPAN[i]} tape={i === 2 ? 2 : undefined} />)}
           </div>
           <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
             {TRUST.map((k) => <li key={k} className="inline-flex items-center justify-center gap-2 rounded-pill bg-white border-bold border-border px-5 min-h-12 font-bold"><ShieldCheck weight="bold" size={20} aria-hidden="true" />{t(`public.trust.${k}` as StringKey)}</li>)}
@@ -131,7 +133,7 @@ export default function PublicHome() {
         <section className={SECTION}>
           <h2 className={H2}><Title text={t('public.featuresTitle')} /></h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 sm:auto-rows-fr gap-5">
-            {FEATURES.map((p) => <PointCard key={p.key} point={p} group="feature" />)}
+            {FEATURES.map((p, i) => <PointCard key={p.key} point={p} group="feature" tape={i === 1 ? 5 : undefined} />)}
           </div>
           <Link to="/features" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t('public.allFeatures')}<ArrowRight weight="bold" size={18} /></Link>
         </section>
@@ -159,10 +161,11 @@ export default function PublicHome() {
 
 // One scannable card: the icon badge and short headline on one row, the
 // line under them, and the research number big where the page has one.
-function PointCard({ point: { icon: Icon, key, bg }, group, className = '' }: { point: Point; group: 'why' | 'feature'; className?: string }) {
+function PointCard({ point: { icon: Icon, key, bg }, group, className = '', tape }: { point: Point; group: 'why' | 'feature'; className?: string; tape?: number }) {
   const stat = group === 'why' && key === 'practice';
   return (
-    <div className={`hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`}>
+    <div className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start ${className}`}>
+      {tape !== undefined && <CardTape tone={tape} rot={4} />}
       <div className="flex items-center gap-4">
         <span className="wiggle-on-hover"><IconBadge color={bg} size="lg"><Icon weight="bold" size={28} /></IconBadge></span>
         <h3 className="font-display text-2xl leading-tight"><Title text={t(`public.${group}.${key}` as StringKey)} /></h3>
@@ -221,8 +224,9 @@ function WhoFor() {
     <section aria-labelledby="who-for" className={SECTION}>
       <h2 id="who-for" className={H2}><Title text={t('public.whoTitle')} /></h2>
       <div className="grid md:grid-cols-3 gap-5">
-        {doors.map(({ key, icon: I, to, bg }) => (
-          <Link key={key} to={to} className={`hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`}>
+        {doors.map(({ key, icon: I, to, bg }, i) => (
+          <Link key={key} to={to} className={`relative hover-lift group ${CARD} p-6 grid gap-3 content-start no-underline text-text`}>
+            {i === 1 && <CardTape tone={4} rot={-3} />}
             <span className={`w-12 h-12 rounded-full ${bg} border-bold border-border flex items-center justify-center wiggle-on-hover`}><I weight="bold" size={24} aria-hidden="true" /></span>
             <span className="font-display text-2xl leading-tight">{t(`public.who.${key}` as StringKey)}</span>
             <span className="font-semibold">{t(`public.who.${key}.text` as StringKey)}</span>

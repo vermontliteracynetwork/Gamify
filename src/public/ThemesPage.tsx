@@ -14,6 +14,7 @@ import PillSelect from '../ui/PillSelect';
 import { SbDot, SbHead, SbMain, SbMore, sbCard, sbCardLink, sbPill, Words } from './scrapbookA';
 import PublicFooter from './PublicFooter';
 import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
+import { useScrapbookGround } from './scrapbook/Shell';
 
 type Sort = 'trending' | 'popular' | 'newest' | 'name';
 
@@ -24,6 +25,7 @@ type Sort = 'trending' | 'popular' | 'newest' | 'name';
 // "themes=a"): white cards with the ink outline, each theme's own preview
 // as the card's picture band, a Butter featured card with a Grow Year title.
 export default function ThemesPage() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const reduce = useReducedMotion();
   const { themes: made } = useMadeThemes();
   const { favorites, toggle } = useFavoriteThemes();

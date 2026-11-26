@@ -11,6 +11,7 @@ import { POSTS } from './posts';
 import { FAQS } from './faq';
 import { BlogCard, PostHeader } from './BlogCard';
 import { SB_PASTELS, SbDot, SbH2, SbH3, SbHead, SbMain, SbMore, SbSection, sbCard, sbCardLink } from './scrapbookA';
+import { useScrapbookGround } from './scrapbook/Shell';
 
 // Pages for each buyer (teacher, 2026-10-25): schools and districts, and
 // homeschool families, plus the student data promise both ask about. Value
@@ -51,6 +52,7 @@ function FaqTeaser({ group }: { group: 'schools' | 'homeschool' }) {
 const buttons = 'flex flex-col sm:flex-row sm:flex-wrap gap-3 w-full sm:w-auto';
 
 export function SchoolsPage() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const committee: [Icon, string, string][] = [[ShieldCheck, 'privacy', '/student-data'], [Stack, 'dpa', '/help?for=schools#faq'], [HandTap, 'a11y', '/accessibility'], [Wrench, 'it', '/it'], [ChartBar, 'research', '/research'], [Buildings, 'price', '/pricing#schools']];
   return (
     <>
@@ -137,6 +139,7 @@ export function SchoolsPage() {
 const HS_POSTS = ['siblings-different-grades-one-game', 'game-time-into-homeschool-records', 'co-op-game-day'];
 
 export function HomeschoolPage() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const home = perMonthUSD(PRICES_USD_PER_YEAR.homeschool);
   const posts = HS_POSTS.map((slug) => ({ p: POSTS.find((x) => x.slug === slug)!, i: POSTS.findIndex((x) => x.slug === slug) })).filter((x) => x.p);
   return (

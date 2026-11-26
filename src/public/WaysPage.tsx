@@ -11,6 +11,7 @@ import { POSTS, type Post } from './posts';
 import { guideGames, ThemeGuideCard } from './ThemeGuide';
 import { HowToPlayCard, howToGames } from './HowToPlayPage';
 import PublicFooter from './PublicFooter';
+import { useScrapbookGround } from './scrapbook/Shell';
 
 // Grade bands for the filter; a post shows when its grades overlap the band.
 const BANDS = [{ id: 'all', lo: 0, hi: 12 }, { id: 'k2', lo: 0, hi: 2 }, { id: '35', lo: 3, hi: 5 }, { id: '68', lo: 6, hi: 8 }, { id: '912', lo: 9, hi: 12 }] as const;
@@ -29,6 +30,7 @@ const topicOf = (p: Post): Exclude<Topic, 'all' | 'howto'> => (p.tags?.includes(
 
 // The public Blog: topic pills and a grade dropdown over a grid of cards.
 export function WaysList() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const [params, setParams] = useSearchParams();
   const band = BANDS.find((b) => b.id === params.get('grades')) ?? BANDS[0];
   const topic: Topic = (TOPICS as readonly string[]).includes(params.get('tag') ?? '') ? (params.get('tag') as Topic) : 'all';
@@ -76,6 +78,7 @@ function Meta({ grades, minutes }: { grades: string; minutes: number }) {
 }
 
 export function WaysPost() {
+  useScrapbookGround(); // owner 2026-11-26: this page is scrapbook A
   const { slug } = useParams();
   const index = POSTS.findIndex((p) => p.slug === slug);
   const post = POSTS[index];
