@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Check, Minus } from '@phosphor-icons/react';
-import { FREE_GAMES, LAUNCH_OFFER, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
+import { FREE_GAMES, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -30,8 +30,6 @@ export function compareGroups(billing: Billing): Group[] {
   const freeNames = GAMES.filter((g) => FREE_GAMES.includes(g.id)).map((g) => g.name);
   const free = freeNames.length;
   const games = GAMES.length;
-  const sale = LAUNCH_OFFER.active && new Date() < new Date(`${LAUNCH_OFFER.endsBefore}T00:00:00`);
-  const off = Math.round(LAUNCH_OFFER.discount * 100);
   const row = (label: StringKey, what: StringKey, value: Row['value'], vars?: Record<string, string | number>): Row => ({ label: t(label), what: t(what, vars), value });
   return [
     { id: 'games', title: t('cmp.s.games'), rows: [
@@ -84,7 +82,7 @@ export function compareGroups(billing: Billing): Group[] {
     { id: 'billing', title: t('cmp.s.billing'), rows: [
       row('cmp.price', 'cmp.price.what', (x) => (x === 'free' ? t('cmp.price.free') : t('cmp.price.paid', { m: money(PRICES_USD[x][billing] / billingMonths(billing)), n: money(PRICES_USD[x][billing]), per: t(`cmp.per.${billing}` as StringKey) }))),
       row('cmp.billing', 'cmp.billing.what', (x) => (x === 'free' ? t('cmp.billing.free') : t('cmp.billing.paid'))),
-      ...(sale ? [row('cmp.sale', 'cmp.sale.what', (x) => (x === 'free' ? false : t('cmp.sale.paid', { off })), { off })] : []),
+      // The launch sale lives in the Marketing campaigns, not the feature chart (owner, 2026-11-26).
       row('cmp.cancel', 'cmp.cancel.what', (x) => (x === 'free' ? t('cmp.cancel.free') : true)),
       row('cmp.keep', 'cmp.keep.what', all),
       row('cmp.ads', 'cmp.ads.what', all),
