@@ -14,6 +14,13 @@ goes public; a 3-strike system can delete themes and revoke theme-making, on
 paid accounts too; free accounts can use every community theme; community
 themes are never sold.
 
+## License (owner, 2026-11-26: "Themes can only be inside Gamify")
+Community themes use Gamify's own Community Theme License, not Creative
+Commons: the teacher keeps ownership and gives Gamify and every Gamify user a
+free right to use the theme unchanged, inside Gamify only. Nobody may sell it
+or use it outside Gamify, and Gamify may remove it (for example after a
+strike). The attorney writes the exact wording.
+
 ## What gets approved
 1. **Yours to share.** Art you, your class (with permission) or Gamify made, or
    art licensed for sharing in a public library. You confirm this when you publish.
