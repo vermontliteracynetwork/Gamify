@@ -6,7 +6,7 @@ describe('school quote PDF', () => {
   it('prices from the school plan', () => {
     const q = quoteDetails(req, new Date('2026-10-27T12:00:00Z'))!;
     expect(q.seats).toBe(12);
-    expect(q.off).toBe(20);
+    expect(q.off).toBe(10);
     expect(q.total).toBe(q.perSeat * 12);
     expect(q.number).toMatch(/^Q-20261027-\d{4}$/);
   });

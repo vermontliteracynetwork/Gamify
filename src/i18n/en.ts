@@ -1896,7 +1896,7 @@ export const en = {
   'hs.plan.coop': 'Co-ops',
   'hs.plan.coop.1': '5 or more families buy like a school',
   'hs.plan.coop.2': 'Pro for every parent-teacher',
-  'hs.plan.coop.3': 'Save 10 to 30%',
+  'hs.plan.coop.3': 'Save 5 to 20%',
   'hs.plan.coop.price': 'Get a co-op quote',
   'hs.neverTitle': 'What Your Children Will Never See',
   'hs.never.1': 'Ads of any kind',

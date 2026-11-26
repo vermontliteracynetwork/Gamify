@@ -1,4 +1,4 @@
-import { PRICES_USD_PER_YEAR, SCHOOL_MIN_SEATS, SCHOOL_SEAT_DISCOUNTS, schoolQuote } from '../config';
+import { SCHOOL_SEAT_BASE_USD, SCHOOL_MIN_SEATS, SCHOOL_SEAT_DISCOUNTS, schoolQuote } from '../config';
 
 // The school quote as a one-page PDF (teacher, 2026-10-26: the price is not
 // on the website; schools get it by email as a PDF). Written by hand, no
@@ -15,7 +15,7 @@ export function quoteDetails(req: QuoteRequest, now = new Date()): QuoteDetails 
   const day = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' });
   const stamp = now.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
   const rand = Math.floor(Math.random() * 9000 + 1000);
-  return { number: `Q-${stamp}-${rand}`, date: day(now), validUntil: day(new Date(now.getTime() + 60 * 86400000)), seats, perSeat: q.perSeat, total: q.total, fullTotal: PRICES_USD_PER_YEAR.pro * seats, off: Math.round(off * 100) };
+  return { number: `Q-${stamp}-${rand}`, date: day(now), validUntil: day(new Date(now.getTime() + 60 * 86400000)), seats, perSeat: q.perSeat, total: q.total, fullTotal: SCHOOL_SEAT_BASE_USD * seats, off: Math.round(off * 100) };
 }
 
 const money = (n: number) => `$${n.toLocaleString('en-US')}`;
@@ -35,7 +35,7 @@ export function quotePdf(req: QuoteRequest, q: QuoteDetails): Uint8Array {
     { text: req.email, size: 11 },
     { text: 'The plan', size: 12, bold: true, gap: 18 },
     { text: `Gamify Pro for ${q.seats} teachers, one year`, size: 11 },
-    { text: `${money(q.perSeat)} per teacher a year (${q.off}% school savings, full price ${money(PRICES_USD_PER_YEAR.pro)})`, size: 11 },
+    { text: `${money(q.perSeat)} per teacher a year (${q.off}% school savings, full price ${money(SCHOOL_SEAT_BASE_USD)})`, size: 11 },
     { text: `Total: ${money(q.total)} a year (full price would be ${money(q.fullTotal)})`, size: 14, bold: true, gap: 4 },
     { text: 'Every teacher gets', size: 12, bold: true, gap: 18 },
     { text: '- Every game, unlimited question sets and students, reports kept for good', size: 11 },

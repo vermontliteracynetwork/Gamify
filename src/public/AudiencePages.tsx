@@ -100,7 +100,7 @@ export function SchoolsPage() {
         <section aria-labelledby="value" className="grid gap-4">
           <h2 id="value" className="title-bubble text-4xl"><Title text={t('schools.valueTitle')} /></h2>
           <p className="text-lg font-semibold max-w-3xl">{t('schools.valueSub')}</p>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {SCHOOL_SEAT_DISCOUNTS.slice().reverse().map((d) => {
               return (
                 <div key={d.minSeats} className={`${card} text-center justify-items-center ${d.minSeats === 10 ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>

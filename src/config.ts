@@ -111,17 +111,23 @@ export const LAUNCH_OFFER = {
 
 // School plans: per-teacher Pro seats with volume discounts; purchase
 // orders yearly, prepaid, net 30, 5-seat minimum (teacher, 2026-10-24).
+// Base and tiers set to the market (owner, 2026-11-26): $133 is the mean of
+// the 5 school plans Beth verified (Gimkit, Wordwall, Kahoot), and the tiers
+// match the only published school tiers she could verify (Kahoot). Research:
+// Marketing and Sales doc, Sales research (Beth), School seat prices.
+export const SCHOOL_SEAT_BASE_USD = 133;
 export const SCHOOL_MIN_SEATS = 5;
 export const SCHOOL_SEAT_DISCOUNTS: { minSeats: number; discount: number }[] = [
-  { minSeats: 25, discount: 0.3 },
-  { minSeats: 10, discount: 0.2 },
-  { minSeats: 5, discount: 0.1 },
+  { minSeats: 20, discount: 0.2 },
+  { minSeats: 15, discount: 0.15 },
+  { minSeats: 10, discount: 0.1 },
+  { minSeats: 5, discount: 0.05 },
 ];
 
 export function schoolQuote(seats: number): { perSeat: number; total: number } | null {
   if (seats < SCHOOL_MIN_SEATS) return null;
   const { discount } = SCHOOL_SEAT_DISCOUNTS.find((d) => seats >= d.minSeats)!;
-  const perSeat = Math.round(PRICES_USD_PER_YEAR.pro * (1 - discount));
+  const perSeat = Math.round(SCHOOL_SEAT_BASE_USD * (1 - discount));
   return { perSeat, total: perSeat * seats };
 }
 
