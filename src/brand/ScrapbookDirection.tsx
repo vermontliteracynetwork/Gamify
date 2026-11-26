@@ -9,7 +9,7 @@ import type { StringKey } from '../i18n/en';
 import { POSTS } from '../public/posts';
 import { FAQS } from '../public/faq';
 import { compareGroups } from '../public/CompareChart';
-import { BILLINGS, LAUNCH_OFFER, PRICES_USD, billingSavings } from '../config';
+import { BILLINGS, PRICES_USD, billingSavings } from '../config';
 
 // The Scrapbook tab (MOCKUPS ONLY, owner 2026-11-26): "there was a style for
 // the public facing pages a while ago that was more colorful, scrapbook style
@@ -294,7 +294,6 @@ function Pricing({ w }: W) {
     <Page w={w} on="public.nav.pricing">
       <Sec w={w} top={p ? 32 : 52} deco={<Margin w={w}><WordSpot w={w} word="Free!" /><Bit style={{ ...R(w), top: 60 }} tilt={5} tape={{ tone: 2, w: 60 }}><Sunburst size={118} /></Bit><Bit style={{ ...L(w), top: 520 }} tilt={-6}><PowerSticker id="mystery-box" size={92} /></Bit><Bit style={{ ...R(w), top: 640 }} tilt={6}><SchoolSticker kind="crayon" size={92} /></Bit><Sprinkle spots={[[30, 300, 22, PP.pink], [100, 420, 18, PP.lemon, 'dot'], [w - 80, 300, 24, PP.lemon]]} /></Margin>}>
         <Head w={w} title={t('pricing.title')} sub={t('pricing.sub')} />
-        <TextCard tilt={0.8} tone={0} className="px-5 py-4 font-bold text-[18px]" style={{ background: PP.butter, border: `3px solid ${I}`, borderRadius: 20 }}>{t('pricing.founding', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}</TextCard>
         <div className="flex flex-wrap gap-2 p-1.5 rounded-full justify-self-start" role="tablist" style={{ background: '#ffffff', border: `2.5px solid ${I}` }}>
           {BILLINGS.map((b) => <span key={b.id} role="tab" aria-selected={b.id === 'year'} className="px-4 rounded-full font-bold inline-flex items-center" style={{ minHeight: 42, fontSize: p ? 15 : 17, ...(b.id === 'year' ? { background: PP.butter, border: `2px solid ${I}` } : {}) }}>{b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) })}</span>)}
         </div>

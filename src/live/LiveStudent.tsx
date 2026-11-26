@@ -8,7 +8,8 @@ import { t } from '../i18n';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
-import { ranked, routeFor, starColor, type LiveState } from './protocol';
+import { pointsOf, ranked, routeFor, SCORE_GAMES, starColor, type LivePlayer, type LiveState } from './protocol';
+import { en, type StringKey } from '../i18n/en';
 import { setLive, useLiveRoom } from './session';
 import { SideBadge } from '../games/territory/art';
 import { lookFor } from '../games/territory/logic';
@@ -87,12 +88,16 @@ export function LiveOverlay() {
   useEffect(() => { if (session && state?.phase === 'lobby' && path.startsWith('/games/')) navigate(`/live/${session.code}`, { replace: true }); }, [state?.phase, path]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { try { if (state && me) sessionStorage.setItem('gamify:live-color', skyColor(state, me.pid) ?? ''); } catch { /* this tab only */ } }, [state, me]);
   if (!session || !state || !me) return null;
+  // Googler counts googly eyes, not right answers (Claudia, 2026-11-26).
+  const byScore = SCORE_GAMES.includes(state.gameId);
+  const pts = (p: LivePlayer) => pointsOf(p, byScore);
+  const W = (key: StringKey): StringKey => (byScore && `gg.${key}` in en ? (`gg.${key}` as StringKey) : key);
   const lockMsg = state.locks[me.pid] ?? state.locks.all;
   const shell = 'fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/55';
   const panel = 'bg-surface border-heavy border-border rounded-panel p-8 grid gap-4 justify-items-center text-center max-w-lg w-full';
   if (state.phase === 'ended') {
-    const top = ranked(state.players).slice(0, 3);
-    const mine = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
+    const top = ranked(state.players, byScore).slice(0, 3);
+    const mine = ranked(state.players, byScore).findIndex((p) => p.pid === me.pid) + 1;
     return (
       <div className={shell} role="dialog" aria-modal="true" aria-label={t('live.endTitle')}>
         <DialogFocus />
@@ -105,10 +110,10 @@ export function LiveOverlay() {
               {state.mode === 'compete' && <p className="flex items-center gap-3 font-display text-3xl"><SideBadge side="defender" size="3rem" />{state.room?.defenders ?? 0}<span className="px-2">·</span>{state.room?.invaders ?? 0}<SideBadge side="invader" look={1} size="3rem" /></p>}
             </div>
           ) : state.mode === 'together' ? (
-            <p className="font-display text-2xl">{t('live.togetherEnd', { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0), goal: state.goal ?? 0, mine: me.right })}</p>
+            <p className="font-display text-2xl">{t(W('live.togetherEnd'), { right: state.players.filter((p) => p.status === 'in').reduce((n, p) => n + pts(p), 0), goal: state.goal ?? 0, mine: pts(me) })}</p>
           ) : <>
-          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-butter' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="var(--lemon)" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t('live.rightCount', { count: p.right })}</span></li>)}</ol>
-          <p className="font-display text-2xl">{t('live.you', { count: me.right, place: mine })}</p>
+          <ol className="grid gap-2 list-none p-0 m-0 w-full">{top.map((p, i) => <li key={p.pid} className={`flex items-center gap-3 rounded-input border-std border-border p-3 font-bold text-lg ${p.pid === me.pid ? 'bg-butter' : 'bg-surface-2'}`}>{i === 0 ? <Crown weight="fill" size={26} color="var(--lemon)" aria-hidden="true" /> : <span className="w-[26px] font-display">{i + 1}</span>}<span className="flex-1 text-left">{p.name}</span><span>{t(W('live.rightCount'), { count: pts(p) })}</span></li>)}</ol>
+          <p className="font-display text-2xl">{t(W('live.you'), { count: pts(me), place: mine })}</p>
           </>}
           <button type="button" autoFocus onClick={() => { setLive(null); navigate('/join'); }} className={buttonClasses('secondary', '', 'lg')}>{t('live.toJoinScreen')}</button>
         </div>
@@ -124,9 +129,9 @@ export function LiveOverlay() {
   // While playing (teacher, 2026-10-31): Together shows the class goal
   // everyone fills; Compete shows the student's own place.
   if (state.phase === 'play' && me.status === 'in') {
-    const classRight = state.players.filter((p) => p.status === 'in').reduce((n, p) => n + p.right, 0);
+    const classRight = state.players.filter((p) => p.status === 'in').reduce((n, p) => n + pts(p), 0);
     const goal = state.goal ?? Math.max(10, state.players.filter((p) => p.status === 'in').length * 10);
-    const place = ranked(state.players).findIndex((p) => p.pid === me.pid) + 1;
+    const place = ranked(state.players, byScore).findIndex((p) => p.pid === me.pid) + 1;
     const left = state.endAt?.minutes && state.startedAt ? Math.max(0, Math.ceil((state.startedAt + state.endAt.minutes * 60000 - now) / 1000)) : null;
     const heads = left !== null && ((left <= 180 && left > 174) || (left <= 60 && left > 54)) ? t(left > 60 ? 'clock.three' : 'clock.one') : '';
     const clock = left !== null && <span className={`inline-flex items-center gap-1 font-display tabular-nums ${left <= 60 ? 'text-danger' : ''}`}><Timer weight="bold" size={18} aria-hidden="true" />{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>;
@@ -138,12 +143,12 @@ export function LiveOverlay() {
           </span>
         ) : state.mode === 'together' ? (
           <div className="grid gap-1 w-[min(22rem,80vw)] px-4 py-2 rounded-pill bg-surface border-bold border-border" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t('live.goalText', { right: Math.min(classRight, goal), goal })}{clock}</span>
+            <span className="font-bold text-sm text-center flex items-center justify-center gap-3">{t(W('live.goalText'), { right: Math.min(classRight, goal), goal })}{clock}</span>
             <span className="h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><span className="block h-full bg-grape" style={{ width: `${Math.min(100, (classRight / goal) * 100)}%`, transition: 'width 0.5s ease-out' }} /></span>
           </div>
         ) : (
           <span className="inline-flex items-center gap-2 px-4 min-h-10 rounded-pill bg-surface border-bold border-border font-bold" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <Crown weight="fill" size={18} color="var(--lemon)" aria-hidden="true" />{t('live.placeNow', { place, count: me.right })}{clock}
+            <Crown weight="fill" size={18} color="var(--lemon)" aria-hidden="true" />{t(W('live.placeNow'), { place, count: pts(me) })}{clock}
           </span>
         )}
         {heads && <p className="mt-2 text-center px-4 py-2 rounded-pill bg-butter border-bold border-border font-display text-xl" style={{ boxShadow: 'var(--shadow-sticker)' }}>{heads}</p>}

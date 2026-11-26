@@ -28,7 +28,7 @@ const TALLY = 'gamify:live-tally';
 type Tally = { round: number; answered: number; right: number };
 let tally: Tally = (() => { try { return JSON.parse(sessionStorage.getItem(TALLY) ?? '') as Tally; } catch { return { round: 0, answered: 0, right: 0 }; } })();
 const saveTally = () => { try { sessionStorage.setItem(TALLY, JSON.stringify(tally)); } catch { /* this tab only */ } };
-function startRound(round: number) { if (tally.round !== round) { tally = { round, answered: 0, right: 0 }; saveTally(); } }
+function startRound(round: number) { if (tally.round !== round) { tally = { round, answered: 0, right: 0 }; saveTally(); lastScore = undefined; } }
 // `q` is the question's id; `pick` the answer tapped first (for the
 // teacher's private view of the whole class on one question).
 export function liveAsked(q?: string) {

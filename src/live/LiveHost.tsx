@@ -88,7 +88,7 @@ function Room({ game }: { game: GameCode }) {
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [qr, setQr] = useState('');
   const [now, setNow] = useState(Date.now());
-  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}), ...(game.gameId === 'territory' ? { teams: {}, options: { pace: startQ.get('pace') ?? 'slow', rule: startQ.get('rule') ?? 'both' }, goal: startPlay.goal ?? 20 } : {}) });
+  const [state, setState] = useState<LiveState>({ code: game.code, gameId: game.gameId, setId: game.setId, phase: 'lobby', players: [], locks: {}, roomLocked: false, at: Date.now(), round: 1, mode: startMode, ...(startPlay.endAt ? { endAt: startPlay.endAt } : {}), ...(startPlay.goal ? { goal: startPlay.goal } : {}), ...(game.gameId === 'googler' ? { options: { drops: startQ.get('drops') ?? '4', per: startQ.get('per') ?? '1', pu: startQ.get('pu') ?? '1', off: startQ.get('off') ?? '' } } : {}), ...(game.gameId === 'territory' ? { teams: {}, options: { pace: startQ.get('pace') ?? 'slow', rule: startQ.get('rule') ?? 'both' }, goal: startPlay.goal ?? 20 } : {}) });
   const link = useRef<LiveLink>();
   const seenAt = useRef<Record<string, number>>({});
   const [log, setLog] = useState<AnswerLog>(() => emptyLog(1));

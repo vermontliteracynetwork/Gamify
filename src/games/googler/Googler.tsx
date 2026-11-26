@@ -40,7 +40,7 @@ import { useSignedIn } from '../../auth/session';
 import { makeGameCode } from '../../data/gameCodes';
 import type { PlayMode } from '../../data/types';
 import ClassPlayOptions, { classPlayQuery, DEFAULT_CLASS_PLAY, type ClassPlay } from '../../live/ClassPlay';
-import { getLive, liveScore } from '../../live/session';
+import { getLive, liveScore, useLiveRoom } from '../../live/session';
 import { googlerManifest } from './manifest';
 import { CrayonBlock, EYES, GooglyEye, INK } from './art';
 import { chooseSpots, clearRows, COLS, createBoard, fullRows, newBlock, place, pushRow, risingRow, ROWS, SHAPES, squish, xpFor, type Block, type Board, type Spot } from './googler';
@@ -83,10 +83,16 @@ export default function Googler() {
   const { ask, cancel, asking, element, missed } = useAsk({ gameId: 'googler', mode: 'solo', pool: game.pool, classroomId: game.classroomId, studentId: game.studentId });
   const [way, setWay] = useState<PlayMode>('solo');
   const [classPlay, setClassPlay] = useState<ClassPlay>({ ...DEFAULT_CLASS_PLAY, goal: 40 });
-  async function openLive() { navigate(`/teacher/live/${(await makeGameCode('googler', setId, 'live')).code}?${classPlayQuery(classPlay)}`); }
+  // The teacher's game settings ride along to every student (Claudia, 2026-11-26).
+  async function openLive() { const q = new URLSearchParams({ drops: String(setup.drops), per: String(setup.perBreak), pu: setup.powerUps ? '1' : '0', off: (setup.powerOff ?? []).join(',') }); navigate(`/teacher/live/${(await makeGameCode('googler', setId, 'live')).code}?${classPlayQuery(classPlay)}&${q}`); }
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('welcome');
   const live = !!getLive();
+  // In Live, the teacher's drops, questions and power-up switches come from the room.
+  const room = useLiveRoom();
+  const opt = live ? room.state?.options : undefined;
+  const puOn = opt ? opt.pu !== '0' : setup.powerUps;
+  const puOff = opt ? (opt.off ? opt.off.split(',') : []) : setup.powerOff ?? [];
   const plan = useRef({ drops: 4, perBreak: 1, endBy: 'eyes' as EndBy | 'live', eyeGoal: 12, minutes: 5, xpGoal: 500 });
 
   const [board, setBoardState] = useState<Board>(() => createBoard(Math.random));
@@ -110,7 +116,8 @@ export default function Googler() {
   const [flash, setFlash] = useState<number[]>([]);
   const [sparks, setSparks] = useState<{ id: number; row: number; col: number; color: string }[]>([]);
   const [callout, setCallout] = useState<{ id: number; text: string; y: number } | null>(null);
-  const [flights, setFlights] = useState<{ id: number; eye: number; from: { x: number; y: number }; slot: number }[]>([]);
+  type Pt = { x: number; y: number };
+  const [flights, setFlights] = useState<{ id: number; eye: number; from: Pt; mid: Pt; to: Pt; size: number }[]>([]);
   const [announce, setAnnounce] = useState<{ id: number; item: ThemeItem } | null>(null);
   const [note, setNote] = useState('');
   const [shake, setShake] = useState(0);
@@ -127,9 +134,9 @@ export default function Googler() {
 
   // Power-ups: held ones come from right answers (the tray, as in every solo
   // game); stack ones sit in the blocks and go off when their row clears.
-  const powers = usePowerUps(googlerManifest, theme, setup.powerUps, setup.powerOff ?? []);
+  const powers = usePowerUps(googlerManifest, theme, puOn, puOff);
   const held = useHeldPowerUps();
-  const stackItems = useMemo(() => (setup.powerUps ? (theme.items?.length ? theme.items : googlerManifest.items!.classic).filter((it) => !(setup.powerOff ?? []).includes(it.id) && allowedItem(it)) : []), [theme, setup.powerUps, setup.powerOff]);
+  const stackItems = useMemo(() => (puOn ? (theme.items?.length ? theme.items : googlerManifest.items!.classic).filter((it) => !puOff.includes(it.id) && allowedItem(it)) : []), [theme, puOn, puOff.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
   const itemFor = (roll: number) => (stackItems.length ? stackItems[roll % stackItems.length] : undefined);
   const amount = (it: ThemeItem) => powers.amount(it);
 
@@ -171,8 +178,10 @@ export default function Googler() {
 
   function start() {
     plan.current = live
-      ? { drops: googlerManifest.rounds!.default, perBreak: 1, endBy: 'live', eyeGoal: 10, minutes: 0, xpGoal: 0 }
+      ? { drops: Math.min(10, Math.max(2, Number(opt?.drops) || googlerManifest.rounds!.default)), perBreak: Math.min(5, Math.max(1, Number(opt?.per) || 1)), endBy: 'live', eyeGoal: 10, minutes: 0, xpGoal: 0 }
       : { drops: setup.drops, perBreak: setup.perBreak, endBy: setup.endBy, eyeGoal: setup.eyeGoal, minutes: setup.minutes, xpGoal: setup.xpGoal };
+    // No flight or pause from an earlier game may land in this one.
+    timers.current.forEach((id) => window.clearTimeout(id)); timers.current = [];
     const b = createBoard(Math.random);
     setBoard(b);
     xpNow.current = 0; eyesNow.current = 0; eyesFlying.current = 0;
@@ -187,7 +196,7 @@ export default function Googler() {
   }
   // In a live game the teacher already chose everything: students go straight in.
   const liveStart = useRef(false);
-  useEffect(() => { if (live && !liveStart.current && phase === 'welcome' && game.pool.length) { liveStart.current = true; start(); } }); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (live && !liveStart.current && phase === 'welcome' && game.pool.length && room.state) { liveStart.current = true; start(); } }); // eslint-disable-line react-hooks/exhaustive-deps
 
   function finish() {
     if (phaseNow.current !== 'play') return;
@@ -204,13 +213,16 @@ export default function Googler() {
     const id = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(id);
   }, [phase, end]);
-  useEffect(() => { if (timeLeft === 0 && phase === 'play') { if (asking) cancel(); else if (!busyNow.current) finish(); } }); // eslint-disable-line react-hooks/exhaustive-deps
-  const playClockEl = usePlayClock({ playing: phase === 'play', score: xp, onTimeUp: () => { if (asking) cancel(); else finish(); } });
+  useEffect(() => { if (timeLeft === 0 && phase === 'play') { if (asking) cancel(); finish(); } }); // eslint-disable-line react-hooks/exhaustive-deps
+  const playClockEl = usePlayClock({ playing: phase === 'play', score: xp, onTimeUp: () => { if (asking) cancel(); finish(); } });
+  // Every await in a turn checks this: the game may have ended meanwhile.
+  const over = () => phaseNow.current !== 'play';
 
   function addXp(n: number) {
     if (!n) return;
     xpNow.current += n;
     setXp(xpNow.current);
+    if (end === 'xp' && xpNow.current >= plan.current.xpGoal) finish();
   }
   function say(text: string, y = 0.4) { setCallout({ id: Date.now() + Math.random(), text, y }); }
 
@@ -221,12 +233,23 @@ export default function Googler() {
     if (!grid || !list.length) return;
     const base = eyesNow.current + eyesFlying.current;
     eyesFlying.current += list.length;
-    setFlights((f) => [...f, ...list.map((e, i) => ({
-      id: Date.now() + Math.random() + i, eye: e.eye, slot: base + i,
-      from: { x: grid.left + ((e.col + 0.5) / COLS) * grid.width, y: grid.top + ((e.row + 0.5) / ROWS) * grid.height },
-    }))]);
+    // The whole arc is worked out once here, so a re-render never restarts a flight (Claudia, 2026-11-26).
+    const made = list.map((e, i) => {
+      const slot = base + i;
+      const idx = end === 'eyes' ? Math.min(slot, slots - 1) : slot % 10;
+      const r = slotRefs.current[idx]?.getBoundingClientRect();
+      const from = { x: grid.left + ((e.col + 0.5) / COLS) * grid.width, y: grid.top + ((e.row + 0.5) / ROWS) * grid.height };
+      const to = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: 40 };
+      const mid = { x: (from.x + to.x) / 2 + (Math.random() - 0.5) * 80, y: Math.min(from.y, to.y) - 90 - Math.random() * 60 };
+      return { id: Date.now() + Math.random() + i, eye: e.eye, from, mid, to, size: Math.max(28, cellPx * 0.8) };
+    });
+    setFlights((f) => [...f, ...made]);
+    // Each eye counts when its flight ends, on a timer of the flight's own
+    // length (the animation's end callback can be skipped by a re-render).
+    made.forEach((f, i) => timers.current.push(window.setTimeout(() => landEye(f.id), (still ? 150 : 950) + i * 90)));
   }
   function landEye(id: number) {
+    if (phaseNow.current !== 'play' && phaseNow.current !== 'end') return;
     setFlights((f) => f.filter((x) => x.id !== id));
     eyesFlying.current = Math.max(0, eyesFlying.current - 1);
     eyesNow.current += 1;
@@ -234,6 +257,7 @@ export default function Googler() {
     playEffect('blip', settings, undefined, 1 + (eyesNow.current % 6) * 0.06);
     buzz(15, settings);
     if (live) liveScore(eyesNow.current);
+    if (goalMet()) finish();
   }
   const flightsDone = async () => { for (let k = 0; k < 40 && eyesFlying.current > 0; k++) await wait(60); };
 
@@ -241,7 +265,7 @@ export default function Googler() {
   // can bring down more). Eyes fly, stack power-ups go off after.
   async function resolve(b: Board, forced: number[] = []): Promise<Board> {
     let first = true;
-    for (let loop = 0; loop < 8; loop++) {
+    for (let loop = 0; loop < 8 && !over(); loop++) {
       const rows = first && forced.length ? [...new Set([...forced, ...fullRows(b)])] : fullRows(b);
       first = false;
       if (!rows.length) break;
@@ -323,6 +347,7 @@ export default function Googler() {
     if (!it) return;
     setBusy(true);
     const b = await firePower(it, boardNow.current, false);
+    if (over()) { setBusy(false); return; }
     if (it.ability === 'blast' || it.ability === 'magnet') { setSpots(chooseSpots(b, block, boosts.current.choices > 0 ? 5 : 3, Math.random)); setSel(0); }
     await flightsDone();
     setBusy(false);
@@ -345,8 +370,12 @@ export default function Googler() {
     playClip(`${SND}jump.mp3`, settings, 0.45);
     buzz(12, settings);
     await wait(170);
+    if (over()) { setBusy(false); return; }
+    // Only a boost that was on for THIS drop is used up (one won in this drop's rows waits for the next).
+    const hadChoices = boosts.current.choices > 0;
     b = await resolve(b);
-    if (boosts.current.choices > 0) { boosts.current.choices -= 1; syncBoosts(); }
+    if (over()) { setBusy(false); return; }
+    if (hadChoices && boosts.current.choices > 0) { boosts.current.choices -= 1; syncBoosts(); }
     // A new row rises from the bottom, unless Freeze holds it back.
     if (boosts.current.freeze > 0) {
       boosts.current.freeze -= 1; syncBoosts();
@@ -368,6 +397,7 @@ export default function Googler() {
       }
     }
     await flightsDone();
+    if (over()) { setBusy(false); return; }
     if (goalMet() || (end === 'time' && Date.now() >= endsAt)) { setBusy(false); finish(); return; }
     const left = dropsLeft - 1;
     if (left <= 0) {
@@ -375,9 +405,10 @@ export default function Googler() {
       setNote(t('gg.answerToGo'));
       held.endTurn();
       await wait(450);
+      if (over()) { setBusy(false); return; }
       const done = await ask({ count: plan.current.perBreak });
       setNote('');
-      if (phaseNow.current !== 'play') return;
+      if (over()) { setBusy(false); return; }
       if (!done && end === 'time' && Date.now() >= endsAt) { setBusy(false); finish(); return; }
       const it = powers.grant(true);
       if (it) held.earn('solo', it);
@@ -420,7 +451,9 @@ export default function Googler() {
     }
     const r = gridRef.current.getBoundingClientRect();
     const col = Math.floor(((e.clientX - r.left) / r.width) * COLS), row = Math.floor(((e.clientY - r.top) / r.height) * ROWS);
-    const hit = spots.findIndex((sp) => sp.cells.some(([rr, cc]) => sp.row + rr === row && sp.col + cc === col));
+    const inSpot = (sp: Spot) => sp.cells.some(([rr, cc]) => sp.row + rr === row && sp.col + cc === col);
+    // The picked spot is drawn on top, so a tap on it always drops it (Claudia, 2026-11-26).
+    const hit = spots[sel] && inSpot(spots[sel]) ? sel : spots.findIndex(inSpot);
     const byCol = hit >= 0 ? hit : spots.findIndex((sp) => sp.cells.some(([, cc]) => sp.col + cc === col));
     if (byCol < 0) return;
     if (byCol === sel) void drop(byCol); else { setSel(byCol); playEffect('tap', settings); }
@@ -490,7 +523,8 @@ export default function Googler() {
             <CloseGameButton />
           </div>
           <p className="sr-only" role="status">{t('gg.meterLabel', { count: dropsLeft })}</p>
-          <div className="gg-stage absolute inset-0 flex flex-col items-center gap-3 px-3 pb-4">
+          {/* Live keeps room under the board for the class pill at the bottom. */}
+          <div className={`gg-stage absolute inset-0 flex flex-col items-center gap-3 px-3 ${live ? 'pb-[4.5rem]' : 'pb-[max(1.25rem,3vh)]'}`}>
             <EyeBar slots={slots} filled={filledSlots} sheets={sheets} eyes={eyes} xp={xp} end={end} plan={plan.current} timeLeft={timeLeft} still={still} slotRefs={slotRefs} />
             <div className="flex-1 min-h-0 w-full flex justify-center items-start gap-3">
               <div className="w-[7rem] shrink-0" aria-hidden="true" />
@@ -507,13 +541,13 @@ export default function Googler() {
                   {phase === 'play' && !busy && spot && [...new Set(spot.cells.map(([, c]) => c))].map((c) => {
                     // A soft Butter lane from the top down to where the block lands.
                     const top = Math.min(...spot.cells.filter(([, cc]) => cc === c).map(([r]) => r)) + spot.row;
-                    return <motion.span key={`lane${sel}-${c}`} aria-hidden="true" className="absolute z-[3] rounded-b-md" style={{ left: `${((spot.col + c) / COLS) * 100}%`, top: 0, width: `${100 / COLS}%`, height: `${(top / ROWS) * 100}%`, background: `linear-gradient(180deg, transparent, ${SPOT_COLORS[sel % SPOT_COLORS.length].fill})`, opacity: 0.8 }} initial={still ? false : { opacity: 0 }} animate={{ opacity: 1 }} />;
+                    return <motion.span key={`lane${sel}-${c}`} aria-hidden="true" className="absolute z-[3] rounded-b-md" style={{ left: `${((spot.col + c) / COLS) * 100}%`, top: 0, width: `${100 / COLS}%`, height: `${(top / ROWS) * 100}%`, background: SPOT_COLORS[sel % SPOT_COLORS.length].fill }} initial={still ? false : { opacity: 0 }} animate={{ opacity: 1 }} />;
                   })}
                   {phase === 'play' && !busy && spots.map((sp, i) => ({ sp, i })).sort((a, b) => Number(a.i === sel) - Number(b.i === sel)).map(({ sp, i }) => sp.cells.map(([r, c]) => (
                     <span key={`s${i}-${r}-${c}`} aria-hidden="true" className={`absolute rounded-[18%] ${i === sel ? 'z-[5]' : 'z-[4]'}`}
                       style={{ left: `${((sp.col + c) / COLS) * 100}%`, top: `${((sp.row + r) / ROWS) * 100}%`, width: `${100 / COLS}%`, height: `${100 / ROWS}%`, padding: '3%',
                         // Each spot its own color pair (teacher, 2026-11-26: "make sure the options are shown in different colors").
-                        border: i === sel ? `3px dashed ${INK}` : `3px dotted ${SPOT_COLORS[i % SPOT_COLORS.length].edge}`, background: SPOT_COLORS[i % SPOT_COLORS.length].fill, opacity: i === sel ? 1 : 0.75, boxShadow: i === sel ? `0 0 0 3px ${SPOT_COLORS[i % SPOT_COLORS.length].edge}` : undefined }} />
+                        border: i === sel ? `3px dashed ${INK}` : `3px dotted ${SPOT_COLORS[i % SPOT_COLORS.length].edge}`, background: SPOT_COLORS[i % SPOT_COLORS.length].fill, boxShadow: i === sel ? `0 0 0 3px ${SPOT_COLORS[i % SPOT_COLORS.length].edge}` : undefined }} />
                   )))}
                   {/* The stack: every unit keeps its id, so a rising row or a fall glides. */}
                   {board.map((row, r) => row.map((x, c) => {
@@ -529,7 +563,7 @@ export default function Googler() {
                         transition={pop ? { duration: still ? 0.05 : 0.45 } : { type: 'spring', stiffness: 360, damping: 22, delay: still ? 0 : c * 0.012 }}>
                         {/* Eyes and power-ups sit alone in their unit, centered, with no block behind
                             (teacher, 2026-11-26); a power-up wiggles gently inside its square. */}
-                        {x.eye !== undefined ? <span className="absolute inset-0 grid place-items-center"><GooglyEye eye={x.eye} still={still} className="w-[84%] drop-shadow-[0_2px_0_rgba(29,26,51,0.35)]" /></span>
+                        {x.eye !== undefined ? <span className="absolute inset-0 grid place-items-center"><GooglyEye eye={x.eye} still={still} className="w-[84%]" /></span>
                           : item ? <PowerCell item={item} size={cellPx * 0.8} still={still || !loop} seed={x.id} />
                           : art ? <img src={art} alt="" draggable={false} className="w-full h-full object-cover rounded-[12%]" /> : <CrayonBlock shape={x.shape} seed={x.id} className="w-full h-full" />}
                       </motion.div>
@@ -600,19 +634,14 @@ export default function Googler() {
 
       {/* Eyes on their way: an arc from the cleared row into the next empty circle. */}
       {createPortal(
-        <div className="fixed inset-0 z-[60] pointer-events-none" aria-hidden="true">
+        <div className="fixed inset-0 z-[60] pointer-events-none" aria-hidden="true" data-gg-flights="">
           {flights.map((f) => {
-            const slotIdx = end === 'eyes' ? Math.min(f.slot, slots - 1) : f.slot % 10;
-            const r = slotRefs.current[slotIdx]?.getBoundingClientRect();
-            const to = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth - 60, y: 120 };
-            const size = Math.max(28, cellPx * 0.8);
-            const mid = { x: (f.from.x + to.x) / 2, y: Math.min(f.from.y, to.y) - 120 - Math.random() * 60 };
+            const { from, mid, to, size } = f;
             return (
               <motion.span key={f.id} className="absolute grid" style={{ width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2 }}
-                initial={{ left: f.from.x, top: f.from.y, scale: 1, rotate: 0 }}
-                animate={{ left: [f.from.x, mid.x, to.x], top: [f.from.y, mid.y, to.y], scale: [1, 1.6, 0.9], rotate: [0, 360, 720] }}
-                transition={{ duration: still ? 0.15 : 0.95, ease: 'easeInOut', times: [0, 0.45, 1] }}
-                onAnimationComplete={() => landEye(f.id)}><GooglyEye eye={f.eye} still={still} className="w-full" /></motion.span>
+                initial={{ left: from.x, top: from.y, scale: 1, rotate: 0 }}
+                animate={{ left: [from.x, mid.x, to.x], top: [from.y, mid.y, to.y], scale: [1, 1.6, 0.9], rotate: [0, 360, 720] }}
+                transition={{ duration: still ? 0.15 : 0.95, ease: 'easeInOut', times: [0, 0.45, 1] }}><GooglyEye eye={f.eye} still={still} className="w-full" /></motion.span>
             );
           })}
         </div>, document.body)}

@@ -2,8 +2,8 @@ import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowDown, ArrowRight, Buildings, House, Check, PaintBrush } from '@phosphor-icons/react';
-import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
+import { ArrowDown, ArrowRight, Buildings, House, Check } from '@phosphor-icons/react';
+import { BILLINGS, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -52,11 +52,7 @@ export default function PricingPage() {
           <p className="text-lg sm:text-xl font-semibold leading-snug">{t('pricing.sub')}</p>
         </div>
 
-        {LAUNCH_OFFER.active && new Date() < new Date(`${LAUNCH_OFFER.endsBefore}T00:00:00`) && (
-          <p className="bg-butter border-[3px] border-border rounded-[1.25rem] px-5 py-4 font-bold text-lg m-0">
-            {t('pricing.founding', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}
-          </p>
-        )}
+        {/* The launch sale banner and the themes card were taken off (owner, 2026-11-26: "remove these"). */}
         <Tabs value={billing} onChange={setBilling} label={t('pricing.billing')} className="justify-self-start mb-0"
           options={BILLINGS.map((b) => ({ id: b.id, label: b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) }) }))} />
         <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
@@ -91,15 +87,6 @@ export default function PricingPage() {
           <span className="grid flex-1 min-w-60"><span className="font-display text-2xl">{t('pricing.homeschoolLink')}</span><span className="font-semibold">{t('pricing.homeschoolLinkText')}</span></span>
           <ArrowRight weight="bold" size={24} aria-hidden="true" />
         </Link>
-
-        <section aria-labelledby="themes-value" className={`${CARD} p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center`}>
-          <span className="w-16 h-16 rounded-full bg-butter border-bold border-border flex items-center justify-center wiggle-on-hover"><PaintBrush weight="fill" size={32} aria-hidden="true" /></span>
-          <div>
-            <h2 id="themes-value" className="font-display text-2xl"><Title text={t('pricing.themesTitle')} /></h2>
-            <p className="font-semibold">{t('pricing.themesText')}</p>
-          </div>
-          <Link to="/features" className={buttonClasses('secondary', 'hover-pop')}>{t('pricing.themesLink')}</Link>
-        </section>
 
         <CompareChart billing={billing} titleClass={H2} />
 
