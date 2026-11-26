@@ -9,20 +9,21 @@ import { SHAPES } from './googler';
 
 export const INK = '#1d1a33';
 // Four wobble outlines, so neighboring units never look stamped.
+// Pushed a few units out of true at each corner (Classic Art Director, 2026-11-26).
 const WOBBLE = [
-  'M12 9 Q50 6 89 10 Q93 50 90 90 Q50 94 10 89 Q7 50 12 9 Z',
-  'M10 11 Q51 8 90 9 Q92 51 89 89 Q49 93 11 90 Q8 49 10 11 Z',
-  'M11 10 Q49 7 88 11 Q93 49 91 89 Q51 92 10 90 Q7 51 11 10 Z',
-  'M9 10 Q50 8 90 11 Q91 50 90 91 Q50 92 11 89 Q8 50 9 10 Z',
+  'M13 8 Q50 4 90 11 Q95 50 88 91 Q50 96 9 88 Q5 50 13 8 Z',
+  'M9 12 Q52 6 91 8 Q94 52 90 88 Q47 95 12 92 Q6 48 9 12 Z',
+  'M12 9 Q48 5 87 12 Q95 48 92 90 Q52 94 8 91 Q5 52 12 9 Z',
+  'M8 11 Q51 7 92 10 Q92 49 89 92 Q49 94 12 88 Q7 51 8 11 Z',
 ];
 
 export function CrayonBlock({ shape, seed = 0, className, style }: { shape: number; seed?: number; className?: string; style?: React.CSSProperties }) {
   const color = SHAPES[shape]?.color ?? '#7a88fe';
   return (
     <svg viewBox="0 0 100 100" className={className} style={style} aria-hidden="true" overflow="visible">
-      <path d={WOBBLE[seed % 4]} fill={color} stroke={INK} strokeWidth="6" strokeLinejoin="round" />
-      {/* An inner bevel line in the same ink, thinner, like a felt-tip doodle. */}
-      <path d="M24 76 Q50 79 77 75" stroke={INK} strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.28" />
+      {/* The kit's ink weight (Wax default 4.8); one solid thin ink line low inside, no see-through layers. */}
+      <path d={WOBBLE[seed % 4]} fill={color} stroke={INK} strokeWidth="4.8" strokeLinejoin="round" />
+      <path d="M26 77 Q50 80 75 76" stroke={INK} strokeWidth="2.4" fill="none" strokeLinecap="round" />
       <path d="M22 34 Q24 22 36 21" stroke="#fff" strokeWidth="7" fill="none" strokeLinecap="round" />
     </svg>
   );
@@ -72,6 +73,30 @@ export function GooglyEye({ eye = 0, still = false, className = '' }: { eye?: nu
       <img src={PART('white')} alt="" draggable={false} className="absolute inset-0 w-full h-full" />
       <motion.img src={PART('pupil')} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ x: useTransform(sx, (v) => `${v}%`), y: useTransform(sy, (v) => `${v}%`), scale: pupil / 0.56 }} />
       <img src={PART('shine')} alt="" draggable={false} className="absolute inset-0 w-full h-full" />
+      <EyeRing />
+    </span>
+  );
+}
+
+// The kit's hand-drawn ink edge around the eye white (Classic Art Director,
+// 2026-11-26), so the eye sits with the rest of the Classic kit.
+function EyeRing() {
+  return (
+    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" overflow="visible" aria-hidden="true">
+      <path d="M50 3.5 C76 3 97 23 96.5 50 C96 77 75 97 49 96.5 C23 96 3 76 3.5 49 C4 24 25 4 50 3.5 Z" fill="none" stroke={INK} strokeWidth="4.8" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// A still eye for pictures (covers, the Theme Builder preview): the same
+// layers and ink ring, the pupil set off center by `look` (-1 to 1).
+export function StillEye({ look = [0.4, 0.3], className = '' }: { look?: [number, number]; className?: string }) {
+  return (
+    <span className={`relative inline-block aspect-square pointer-events-none ${className}`} aria-hidden="true">
+      <img src={PART('white')} alt="" className="absolute inset-0 w-full h-full" />
+      <img src={PART('pupil')} alt="" className="absolute inset-0 w-full h-full" style={{ transform: `translate(${look[0] * 15}%, ${look[1] * 15}%)` }} />
+      <img src={PART('shine')} alt="" className="absolute inset-0 w-full h-full" />
+      <EyeRing />
     </span>
   );
 }
