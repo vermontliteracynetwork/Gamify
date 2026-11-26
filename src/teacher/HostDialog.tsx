@@ -15,6 +15,7 @@ import { t } from '../i18n';
 import { Button, buttonClasses } from '../ui/kit';
 import { classroomShare } from '../data/gameCodes';
 import Title from '../ui/Title';
+import { UpgradeButton } from '../billing/Upgrade';
 import DialogFocus from '../ui/DialogFocus';
 import { supabase } from '../data/supabase';
 
@@ -108,7 +109,9 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                     <Choices label={t('live.howPlay')} value={together} onChange={setTogether}
                       options={(['together', 'compete'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`), art: <ClassModeIcon mode={k} /> }))} />
                     <div className="flex flex-wrap gap-2">
-                      <Button variant="primary" onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>
+                      {TIERS[tier].liveMode
+                        ? <Button variant="primary" onClick={async () => navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`)}><Broadcast weight="bold" size={18} />{t('host.live')}</Button>
+                        : <><p className="font-bold text-sm basis-full">{t('activity.liveOnly')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></>}
                       {!code && <Button onClick={async () => setCode(await makeGameCode(game.id, set.id))}><QrCode weight="bold" size={18} />{t('host.makeCode')}</Button>}
                     </div>
                     <p className="text-sm font-semibold text-muted">{t('host.liveHint')}</p>

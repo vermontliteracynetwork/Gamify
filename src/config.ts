@@ -28,6 +28,9 @@ export interface TierLimits {
   // Homeschool: three designs per game.
   themeBuilder: 'trial' | 'one-per-game' | 'three-per-game' | 'unlimited';
   liveMonitorAndLock: boolean;
+  // Live mode: a class lobby where everyone joins on their own device (owner,
+  // 2026-11-26: "live mode is included in plus but not free").
+  liveMode: boolean;
   reportHistoryDays: number;
   // How far ahead a homework deadline can be set (homework links, coming).
   homeworkDaysAhead: number;
@@ -41,17 +44,17 @@ export const TIERS: Record<Tier, TierLimits> = {
     // Free plays every theme already made (owner, 2026-11-24: "free plan should
     // have access to use all themes created, just can only create a theme for
     // game show").
-    allGames: false, themesPlayable: true, themeBuilder: 'trial', liveMonitorAndLock: false,
+    allGames: false, themesPlayable: true, themeBuilder: 'trial', liveMonitorAndLock: false, liveMode: false,
     reportHistoryDays: 30, homeworkDaysAhead: 14,
   },
   plus: {
     hasClasses: true, classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
-    allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true,
+    allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
   },
   pro: {
     hasClasses: true, classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
-    allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true,
+    allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
   },
   // Homeschool (teacher, 2026-10-26): every game (no early access), 3 theme
@@ -60,7 +63,7 @@ export const TIERS: Record<Tier, TierLimits> = {
   // and Lock predicted on (guess, noted in the development plan).
   homeschool: {
     hasClasses: false, classrooms: 1, studentsPerClassroom: 10, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
-    allGames: true, themesPlayable: true, themeBuilder: 'three-per-game', liveMonitorAndLock: true,
+    allGames: true, themesPlayable: true, themeBuilder: 'three-per-game', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: 14,
   },
 };

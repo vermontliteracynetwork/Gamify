@@ -75,3 +75,15 @@ test('Account: Your plan starts from value and upgrades in one tap', async ({ pa
   await expect(page.getByRole('status').filter({ hasText: /Plus/ })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your Plan: Plus' })).toBeVisible();
 });
+
+// Live mode comes with Plus, not Free (owner, 2026-11-26).
+test('Free plan: Live mode (a class lobby) is locked', async ({ page }, info) => {
+  await page.goto('/teacher/activity');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('radio', { name: /Open a class lobby/ }).click();
+  await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeDisabled();
+  await expect(page.getByText('Live mode, where everyone joins a class lobby on their own device, comes with Plus and Pro.')).toBeVisible();
+  await page.screenshot({ path: `test-results/gate-live-${info.project.name}.png` });
+  await page.goto('/teacher/live/ABCDE');
+  await expect(page.getByText(/comes with Plus and Pro|no live game/i).first()).toBeVisible();
+});

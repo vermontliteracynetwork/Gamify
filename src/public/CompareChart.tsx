@@ -40,6 +40,7 @@ export function compareGroups(billing: Billing): Group[] {
       row('activity.how.screen', 'cmp.screen.what', all),
       row('activity.how.lobby', 'cmp.lobby.what', all),
       row('activity.how.pairs', 'cmp.pairs.what', all),
+      row('cmp.liveMode', 'cmp.liveMode.what', (x) => TIERS[x].liveMode),
       row('pricing.row.lobbyGoal', 'cmp.lobbyGoal.what', paid),
       row('cmp.groups', 'cmp.groups.what', paid),
       row('pricing.row.each', 'cmp.each.what', pro),

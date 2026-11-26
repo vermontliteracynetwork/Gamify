@@ -45,9 +45,12 @@ const TEMPLATES = ['live.tpl.eyes', 'live.tpl.wait', 'live.tpl.break', 'live.tpl
 // a podium at the end.
 export default function LiveHost() {
   const { code = '' } = useParams();
+  const tier = useTier();
   const [game, setGame] = useState<GameCode | null | undefined>(undefined);
   useEffect(() => { void findGameCode(code).then((g) => setGame(g?.live ? g : null), () => setGame(null)); }, [code]);
   if (game === undefined) return null;
+  // Live mode comes with Plus, Pro and Homeschool, not Free (owner, 2026-11-26).
+  if (!TIERS[tier].liveMode) return <main className="max-w-lg mx-auto px-4 pt-14 grid gap-4 justify-items-center text-center"><p className="font-bold text-lg">{t('activity.liveOnly')}</p><UpgradeButton suggest="plus" /></main>;
   if (!game) return <main className="max-w-lg mx-auto px-4 pt-14 grid gap-4 justify-items-center text-center"><p className="font-bold text-lg">{t('live.noRoom')}</p><Link to="/teacher/sets" className={buttonClasses('secondary')}>{t('live.toSets')}</Link></main>;
   return <Room game={game} />;
 }

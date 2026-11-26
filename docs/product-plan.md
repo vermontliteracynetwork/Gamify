@@ -679,7 +679,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | Public question sets (published by others) | Use any | Use any, publish your own | Use any, publish your own | Same |
 | CSV import | Yes (counts toward the 3) | Yes | Yes | Yes |
 | Games | **Free games only** (a set list) | All games | All games | All games |
-| Modes in the games you can use | All four (Live up to your 30 students) | All four | All four | All four |
+| Modes in the games you can use | Share, Solo and Versus; **no Live mode** (owner, 2026-11-26: "live mode is included in plus but not free") | All four | All four | All four |
 | Themes | Classic only; others preview only; **one Game Show theme only** (owner, 2026-11-24; not unlimited) | Full theme library + one Theme Builder design per game | Full library + unlimited Theme Builder designs | + school brand theme |
 | **Live monitor + Lock button** (4E) | **No** | Yes | Yes | Yes |
 | Assignments (code, link, Google Classroom) | Yes, free games only | Yes | Yes | Yes + LMS sync later |
