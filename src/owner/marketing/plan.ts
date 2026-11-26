@@ -90,6 +90,12 @@ export const CAMPAIGNS: Campaign[] = [
     offer: 'Give first (reciprocity): free blog lesson ideas and theme guides; the free tier; the Game Show blank theme template, free with a free teacher account. Templates for the other 6 games come with Plus, Pro and Homeschool, so no pin calls them free. No Classic art is ever a download; printables are blank templates only.',
     start: '2026-12-01', end: '2027-02-28', channels: ['pinterest'],
     budget: 'Organic only. Promoted pins are not proposed until 4 weeks of organic data exist; any spend is the owner\'s decision. Boards, keywords and rhythm: docs/pinterest-plan.md.' },
+  { id: 'c-theme-challenge', name: 'Theme Building Challenge 2027: rolling submissions and the public vote', status: 'planning',
+    goal: 'Owner, 2026-11-26: "we can have posts for submissions, like rolling submissions, like new submission for theme builder challenge, and like post different people\'s art." A steady series all year: a post for each new approved submission, regular showcases of different teachers\' and classes\' art, a call to vote when each quarter\'s public vote opens, and the top 10 and winners. Numbers to set with the Performance Analyst once Q1 entries arrive.',
+    buyer: 'k5-teachers', message: 'Real classes are designing the look of their games. See the newest themes, vote for your favorites, and enter your own any time. K-12, every grade.',
+    offer: 'Free to enter and free to vote; every community theme is free on every plan. Prizes per the challenge rules once the owner sets them.',
+    start: '2027-01-01', end: '2027-12-31', channels: ['instagram', 'facebook', 'pinterest', 'tiktok'],
+    budget: 'Organic first. Only approved community themes are posted, credited to the teacher\'s username only if they chose credit; no student faces, names or voices, and student art only with the teacher\'s publish confirmation plus the marketing media release on the attorney list. Every post waits for the owner\'s OK.' },
 ];
 
 const T = (date: string) => `${date}T09:00:00`;
