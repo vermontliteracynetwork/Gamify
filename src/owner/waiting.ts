@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'business-plan', kind: 'decide', added: '2026-11-26', title: 'Business plan: pick the goal, your pay target and the first focus',
+    why: 'The C-suite wrote the Gamify Business Plan (Claude Doc: https://claude.ai/artifact/4p4LxCN1iarjpLcAYjECZE). Its base case covers costs from 2027 and reaches about $298,000 in 2029, but three calls are yours: a self-funding side business or a salary replacement by 2029, the yearly owner pay that would make it worth your time, and K-3 literacy teachers first or all of K-8. Each chief ends its section with one question.',
+    how: 'Read the plan, answer the questions in the doc (edit or comment), and Claude updates the budget and marketing plan to match.' },
   { id: 'buffer', kind: 'setup', added: '2026-11-25', title: 'Optional: a Buffer account to schedule approved posts',
     why: 'The social media pipeline from your video is set up for the marketing team: find what teachers are talking about, write scripts, hooks, captions and hashtags, make them sound like Gamify, and build the video. The last step, scheduling across Instagram, TikTok, Facebook and Pinterest, can use Buffer. Its free plan covers a few channels with a limited queue; paid plans cost per channel each month (check buffer.com/pricing). Nothing is scheduled without your OK either way.',
     how: 'Only if you want it: make a Buffer account in the business name, connect the Gamify Instagram, TikTok, Facebook and Pinterest accounts, then tell Claude. Claude asks for access through a secure form, never in chat. Until then, approved posts use the planner\'s own auto-post queue or you post them by hand.' },
