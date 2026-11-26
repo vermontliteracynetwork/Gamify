@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { Crown, Medal, PaintBrush, PencilSimpleLine } from '@phosphor-icons/react';
+import { CalendarStar, Crown, PaintBrush, PencilSimpleLine } from '@phosphor-icons/react';
+import { SPECIAL_DAYS, winnerDate } from '../theme/tags';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { buttonClasses } from '../ui/kit';
@@ -9,8 +10,13 @@ import Title from '../ui/Title';
 import PublicFooter from './PublicFooter';
 
 // The Theme Building Challenge (teacher, 2026-10-25): a launch campaign that
-// fills the theme library. One winner and a set of runners up (no 1st, 2nd,
-// 3rd). Dates and official rules come before entries open (attorney review).
+// fills the theme library. Since 2026-11-26 (owner): one special day each
+// month with one winner, no runner-up; entries close 11:59 pm on the day and
+// the winner is emailed and posted 7 days later. Official rules come before
+// the first day (attorney review).
+const day = (iso: string, opts: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' }) =>
+  new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
+
 export default function ChallengePage() {
   const reduce = useReducedMotion();
   const card = 'bg-surface border-bold border-border rounded-panel p-6 grid gap-3 content-start';
@@ -28,15 +34,28 @@ export default function ChallengePage() {
 
         <section aria-labelledby="prizes" className="grid gap-4">
           <h2 id="prizes" className="title-bubble text-4xl"><Title text={t('challenge.prizes')} /></h2>
-          <div className="grid md:grid-cols-2 gap-5">
-            {(['winner', 'runner'] as const).map((k, i) => (
-              <motion.article key={k} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-                className={`${card} hover-lift ${k === 'winner' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <h3 className="font-display text-3xl flex items-center gap-2">{k === 'winner' ? <Crown weight="fill" size={32} color="var(--lemon)" aria-hidden="true" /> : <Medal weight="fill" size={32} color="var(--sky)" aria-hidden="true" />}<Title text={t(`challenge.${k}` as StringKey)} /></h3>
-                <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`challenge.${k}.${n}` as StringKey)}</li>)}</ul>
-              </motion.article>
+          <motion.article initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            className={`${card} hover-lift !bg-butter max-w-2xl`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            <h3 className="font-display text-3xl flex items-center gap-2"><Crown weight="fill" size={32} color="var(--lemon)" aria-hidden="true" /><Title text={t('challenge.winner')} /></h3>
+            <ul className="grid gap-2 pl-6 m-0 list-disc text-lg font-semibold">{[1, 2, 3].map((n) => <li key={n}>{t(`challenge.winner.${n}` as StringKey)}</li>)}</ul>
+          </motion.article>
+        </section>
+
+        <section aria-labelledby="days" className="grid gap-4">
+          <h2 id="days" className="title-bubble text-4xl"><Title text={t('challenge.days')} /></h2>
+          <p className="text-lg font-semibold">{t('challenge.daysSub')}</p>
+          <ol className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
+            {SPECIAL_DAYS.map((d) => (
+              <li key={d.tag} className={`${card} hover-lift !gap-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <p className="font-bold text-sm uppercase tracking-wide flex items-center gap-1.5"><CalendarStar weight="fill" size={18} aria-hidden="true" />{day(d.date, { month: 'long' })}</p>
+                <h3 className="font-display text-2xl leading-tight">{d.name}</h3>
+                <p className="font-semibold">{d.theme}</p>
+                <p className="text-sm font-bold">{t('challenge.dayCloses', { date: day(d.date) })}</p>
+                <p className="text-sm font-bold">{t('challenge.dayWinner', { date: day(winnerDate(d)) })}</p>
+                <p className="text-xs font-bold text-muted">{t('challenge.dayTag', { tag: d.name })}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </section>
 
         <section aria-labelledby="how" className="grid gap-4">

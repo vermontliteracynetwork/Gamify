@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Heart, Trophy } from '@phosphor-icons/react';
+import { ArrowRight, Heart, MagnifyingGlass, Trophy } from '@phosphor-icons/react';
+import { tagLabel } from '../theme/tags';
+import { fieldClasses } from '../ui/kit';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
@@ -29,13 +31,17 @@ export default function ThemesPage() {
   const [game, setGame] = useState('');
   const [band, setBand] = useState<Band | ''>('');
   const [onlyFavs, setOnlyFavs] = useState(false);
+  // Search by name or tag (owner, 2026-11-26: tags "so that people can search for them").
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const matches = (x: StarterTheme) => !q || x.name.toLowerCase().includes(q) || (x.theme.tags ?? []).some((id) => id.includes(q.replace(/\s+/g, '-')) || tagLabel(id).toLowerCase().includes(q));
   // Gamify library themes, and class themes approved for the public gallery
   // (on this device until cloud accounts share them with every teacher).
   const shared = made.filter((th) => th.source === 'library' || th.gallery?.status === 'approved');
   const library: StarterTheme[] = shared.map((th, i) => ({ id: th.id, name: th.name, gameId: th.gameId, band: 'all', interest: '', order: -100 + i, theme: th }));
   const all = [...library, ...STARTER_THEMES];
   const shown = all
-    .filter((x) => (!game || x.gameId === game) && (!band || x.band === band || x.band === 'all') && (!onlyFavs || favorites.includes(x.theme.id)))
+    .filter((x) => (!game || x.gameId === game) && (!band || x.band === band || x.band === 'all') && (!onlyFavs || favorites.includes(x.theme.id)) && matches(x))
     // Plays, hearts and dates come with cloud accounts; until then the
     // samples keep their showcase order under every sort but Name.
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? b.order - a.order : a.order - b.order));
@@ -63,6 +69,11 @@ export default function ThemesPage() {
         </Link>
 
         <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label={t('themes.filters')}>
+          <label className="relative">
+            <span className="sr-only">{t('themes.search')}</span>
+            <MagnifyingGlass size={18} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('themes.search')} className={fieldClasses('md', 'pl-9 rounded-pill w-60')} />
+          </label>
           <PillSelect label={t('themes.game')} value={game} onChange={setGame} active={!!game}>
             <option value="">{t('themes.allGames')}</option>
             {[...new Set(all.map((x) => x.gameId))].map((id) => <option key={id} value={id}>{gameName(id)}</option>)}
@@ -99,6 +110,13 @@ export default function ThemesPage() {
                   <h2 className="font-heading font-bold text-xl leading-tight">{x.name}</h2>
                   <p className="text-sm font-semibold text-muted">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
                 </div>
+                {(x.theme.tags ?? []).length > 0 && (
+                  <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0 px-1" aria-label={t('themes.tags')}>
+                    {(x.theme.tags ?? []).slice(0, 6).map((id) => (
+                      <li key={id}><button type="button" onClick={() => setQuery(tagLabel(id))} className="min-h-8 px-2.5 rounded-pill border-std border-border-soft bg-surface-2 text-xs font-bold hover-pop max-sm:min-h-11">{tagLabel(id)}</button></li>
+                    ))}
+                  </ul>
+                )}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />

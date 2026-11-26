@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test';
+import { STUDENT_THEME_BUILDER } from '../src/config';
+
+// The Theme Builder is teachers only for now (owner, 2026-11-26): no student
+// design code. The student flow below runs again once STUDENT_THEME_BUILDER
+// is switched back on (maybe mid-2027).
+test('Theme Builder is teachers only: no student design switch or code on the class page', async ({ page }) => {
+  test.skip(STUDENT_THEME_BUILDER, 'student access is on');
+  await page.addInitScript(() => {
+    if (localStorage.getItem('gamify:classrooms')) return;
+    localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '', joinCode: 'BCDFG' }]));
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' }));
+  });
+  await page.goto('/teacher/classes/c1');
+  await page.getByRole('tab', { name: 'Ways to play' }).click();
+  await expect(page.getByText('Students can design themes')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Make a design code' })).toHaveCount(0);
+});
 
 test('student design mode: a student sends a theme, the teacher approves it, it is playable and credited to the class', async ({ page }, info) => {
+  test.skip(!STUDENT_THEME_BUILDER, 'Theme Builder is teachers only for now (owner, 2026-11-26)');
   test.setTimeout(90_000);
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });

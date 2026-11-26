@@ -25,6 +25,7 @@ import { cutPhotoForPiece } from './scan';
 import { loadDraft, loadOriginal, saveDraft, saveOriginal } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
+import TagPicker from './TagPicker';
 import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
@@ -662,19 +663,23 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
   const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
   const ready = saved && !problems;
+  const tags = theme.tags ?? [];
   const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`;
   return (
     <div className="grid gap-3">
       <p className="font-semibold text-muted text-sm">{t('builder.shareHint')}</p>
+      <TagPicker value={tags} onChange={(next) => onChange({ ...theme, tags: next })} />
       <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.shareTitle')}>
         <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
-        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() } })}>{t('builder.shareGallery')}</button>
+        {/* Entering the challenge is on by default when sharing (owner, 2026-11-26). */}
+        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready || !tags.length} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() }, challenge: true })}>{t('builder.shareGallery')}</button>
       </div>
       {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
-        : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p> : null}
+        : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p>
+        : !tags.length && !inGallery ? <p className="text-sm font-bold">{t('builder.tagsFirst')}</p> : null}
       {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}</p>}
-      <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${CHALLENGE_OPEN && inGallery ? '' : 'opacity-60'}`}>
-        <input type="checkbox" className="w-5 h-5" disabled={!CHALLENGE_OPEN || !inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
+      <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${inGallery ? '' : 'opacity-60'}`}>
+        <input type="checkbox" className="w-5 h-5" disabled={!inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
         {t('builder.shareChallenge')}
       </label>
       {theme.challenge && (

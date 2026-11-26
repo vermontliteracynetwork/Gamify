@@ -47,8 +47,6 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   // Double-tap a color's circle to open its picker and hex box (teacher, 2026-11-19).
   await page.getByRole('button', { name: /^Main color: double-tap/ }).dblclick();
   await page.getByLabel('Main color hex code').fill('#7ad3f5');
-  await page.getByRole('tab', { name: 'Share' }).click();
-  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
   await page.getByRole('tab', { name: 'Style' }).click();
   await page.getByRole('radio', { name: 'Storybook' }).click();
   await page.getByRole('radio', { name: 'Chimes' }).click();
@@ -60,7 +58,7 @@ test('Theme Builder: upload a piece, save, and play the game in it', async ({ pa
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   await page.getByRole('radio', { name: 'Ocean Party' }).click();
-  await expect(page.getByText('Made by Test Teacher, designed by Ava')).toBeVisible();
+  await expect(page.getByText('Made by Test Teacher')).toBeVisible();
   await expect(page).toHaveTitle('Game Show | Gamify');
   await page.screenshot({ path: `test-results/theme-screen-made-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next', exact: true }).click();

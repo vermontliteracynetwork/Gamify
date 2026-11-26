@@ -133,6 +133,9 @@ export interface GameTheme {
   // Entered in the Theme Building Challenge, in one of its two tracks
   // (teacher, 2026-10-26): drawn by hand (needs a signed permission slip for
   // each student artist) or built in the Theme Builder studio.
+  // Tags from the fixed list in tags.ts (owner, 2026-11-26): searched in the
+  // gallery and used to pull each special day's challenge entries.
+  tags?: string[];
   challenge?: boolean;
   challengeTrack?: 'hand' | 'studio';
   permissionOnFile?: boolean;

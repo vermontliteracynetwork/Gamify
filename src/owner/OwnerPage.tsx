@@ -8,6 +8,7 @@ import type { FeedbackReport } from '../data/types';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import { creditLine } from '../theme/credit';
+import { SPECIAL_DAYS, challengeEntries, tagLabel, winnerDate } from '../theme/tags';
 import PinGate from '../settings/PinGate';
 import { Slider } from '../ui/fields';
 import { Button } from '../ui/kit';
@@ -372,8 +373,26 @@ function GalleryCard() {
     await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined }, challenge: status === 'declined' ? false : th.challenge });
     reload();
   }
-  if (!pending.length) return <p className="font-semibold">{t('owner.galleryNone')}</p>;
+  const [dayTag, setDayTag] = useState(SPECIAL_DAYS[0].tag);
+  const day = SPECIAL_DAYS.find((d) => d.tag === dayTag) ?? SPECIAL_DAYS[0];
+  const entries = challengeEntries(themes, day);
+  // Each special day pulls its entries by tag (owner, 2026-11-26).
+  const dayPanel = (
+    <div className="grid gap-2 rounded-input border-std border-border-soft p-3">
+      <label className="grid gap-1 font-bold max-w-sm">{t('owner.challengeDay')}
+        <select value={dayTag} onChange={(e) => setDayTag(e.target.value)} className="min-h-11 px-2 rounded-input border-std border-border font-bold">
+          {SPECIAL_DAYS.map((d) => <option key={d.tag} value={d.tag}>{d.name} ({d.date})</option>)}
+        </select>
+      </label>
+      <p className="text-sm font-semibold text-muted">{t('owner.challengeDates', { close: day.date, winner: winnerDate(day) })}</p>
+      {entries.length
+        ? <ul className="grid gap-1 list-disc pl-5 m-0 font-semibold">{entries.map((th) => <li key={th.id}>{th.name} · {creditLine(th)} · {(th.tags ?? []).map(tagLabel).join(', ')}{th.gallery?.status === 'pending' ? ` (${t('owner.galleryPendingShort')})` : ''}</li>)}</ul>
+        : <p className="text-sm font-bold">{t('owner.challengeNone')}</p>}
+    </div>
+  );
+  if (!pending.length) return <div className="grid gap-3">{dayPanel}<p className="font-semibold">{t('owner.galleryNone')}</p></div>;
   return (
+    <div className="grid gap-3">{dayPanel}
     <ul className="grid gap-3 list-none p-0 m-0">
       {pending.map((th) => (
         <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-std border-border-soft p-2">
@@ -381,6 +400,7 @@ function GalleryCard() {
           <div className="grid gap-2 content-start">
             <p className="font-display text-xl">{th.name}</p>
             <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
+            {(th.tags ?? []).length > 0 && <p className="text-sm font-semibold">{t('owner.galleryTags', { tags: (th.tags ?? []).map(tagLabel).join(', ') })}</p>}
             <div className="flex flex-wrap gap-2 items-center">
               <Button variant="primary" onClick={() => void decide(th, 'approved')}>{t('owner.approve')}</Button>
               <select aria-label={t('owner.declineWhy')} value={why[th.id] ?? 'other'} onChange={(e) => setWhy({ ...why, [th.id]: e.target.value as GalleryReason })} className="min-h-11 px-2 rounded-input border-std border-border font-bold text-sm">
@@ -392,6 +412,7 @@ function GalleryCard() {
         </li>
       ))}
     </ul>
+    </div>
   );
 }
 

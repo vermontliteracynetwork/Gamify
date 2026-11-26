@@ -53,14 +53,16 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
 test('share a class theme in the gallery: owner approves, and it shows on the Themes page', async ({ page }, info) => {
   await page.goto('/teacher/themes/game-show');
   await page.getByLabel('Theme name').fill('Rainbow Room');
-  await page.getByRole('tab', { name: 'Share' }).click();
-  await page.getByLabel('Student first name or nickname (optional)').fill('Ava');
   await page.getByRole('button', { name: 'Save theme' }).click();
   await expect(page.getByText('Saved Rainbow Room.', { exact: false })).toBeVisible();
   await page.getByRole('tab', { name: 'Share' }).click();
+  // Tags come first (owner, 2026-11-26), then sharing enters the challenge by default.
+  await expect(page.getByRole('radio', { name: 'Share in the public gallery' })).toBeDisabled();
+  await page.getByPlaceholder('Search tags').fill('pizza');
+  await page.getByRole('button', { name: 'Pizza Day', exact: true }).click();
   await page.getByRole('radio', { name: 'Share in the public gallery' }).click();
   await expect(page.getByText('Sent to the gallery.', { exact: false })).toBeVisible();
-  await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeDisabled();
+  await expect(page.getByLabel('Enter it in the Theme Building Challenge')).toBeChecked();
   await page.screenshot({ path: `test-results/builder-share-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - (document.getElementById('teacher-footer')?.getBoundingClientRect().height ?? 0))).toBeLessThanOrEqual(1);
 
@@ -69,10 +71,14 @@ test('share a class theme in the gallery: owner approves, and it shows on the Th
   await expect(page.getByText('Type the same PIN again', { exact: false })).toBeVisible();
   await page.locator('input[autocomplete="one-time-code"]').last().fill('2468');
   await page.getByRole('navigation', { name: 'Dashboard sections' }).getByRole('button', { name: 'Gallery review' }).click();
+  await page.getByLabel('Theme Building Challenge: special day').selectOption('pizza-day');
+  await expect(page.getByText(/Rainbow Room · Test Teacher · Pizza Day/)).toBeVisible();
   await page.getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByText('No themes waiting for review.')).toBeVisible();
 
   await page.goto('/themes');
   await expect(page.getByRole('heading', { name: 'Rainbow Room' })).toBeVisible();
-  await expect(page.getByText('Made by Test Teacher, designed by Ava')).toBeVisible();
+  await expect(page.getByText('Made by Test Teacher')).toBeVisible();
+  await page.getByPlaceholder('Search by name or tag').fill('pizza');
+  await expect(page.getByRole('heading', { name: 'Rainbow Room' })).toBeVisible();
 });
