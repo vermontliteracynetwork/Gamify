@@ -138,10 +138,9 @@ export default function JoinPage() {
 
   // The /brand Scrapbook Join mockup in strength A (owner, 2026-11-26:
   // "join =a"): one centered white card on the Cream ground holding the
-  // title, the line, five big code boxes (codes are 5 letters), then Hear my
-  // code and a yellow Go side by side. The whole card is the clean core:
-  // never taped or tilted, no stickers. Go is always there but stays off
-  // (pale, dashed) until the code checks out. A student page: the bar shows
+  // title, the line, five big code boxes (codes are 5 letters), then a yellow
+  // Go that pops in once the code works. The whole card is the clean core:
+  // never taped or tilted, no stickers. A student page: the bar shows
   // the logo only and there is no footer, so there is nowhere to wander.
   const go = ready && ready.code === code ? ready : null;
   const round = 'w-10 h-10 rounded-full border-std border-border bg-white flex items-center justify-center active:scale-95 motion-safe:transition';
@@ -163,16 +162,16 @@ export default function JoinPage() {
       <p className="font-bold text-[clamp(1.15rem,4.5vw,1.75rem)] leading-snug">{t('join.sub')}</p>
       <CodeBoxes length={5} value={code} onChange={setCode} label={t('join.code')} masked={false} letters size="xl" shake={wrong} onEnter={() => { if (go) void go.go(); }} />
       <p className="min-h-6 font-bold -my-2" role="status" aria-live="polite">{waiting ? t('join.tooMany', { seconds: waiting }) : wrong ? t('join.wrong') : ''}</p>
-      <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-        <button type="button" disabled={!code} onClick={() => speak(code.split('').join(', '), settings)}
-          className="min-h-14 px-4 sm:px-6 rounded-pill border-bold border-border bg-white font-bold text-base sm:text-lg inline-flex items-center gap-2 disabled:opacity-40" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <SpeakerHigh weight="bold" size={24} />{t('join.hearCode')}
-        </button>
-        <motion.button type="button" disabled={!go} onClick={() => { if (go) void go.go(); }}
-          animate={go && !reduce ? { scale: [1, 1.08, 1] } : undefined} transition={{ duration: 0.35 }}
-          className="min-h-16 px-7 sm:px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2 disabled:bg-surface disabled:text-muted disabled:border-dashed disabled:shadow-none" style={go ? { boxShadow: 'var(--shadow-sticker)' } : undefined}>
-          {t('join.go')}<ArrowRight weight="bold" size={26} />
-        </motion.button>
+      {/* No Hear my code; Go appears only once the code works (owner 2026-11-26).
+          The row keeps its height so nothing jumps when Go pops in. */}
+      <div className="min-h-16 flex items-center justify-center">
+        {go && (
+          <motion.button key={go.code} type="button" onClick={() => void go.go()}
+            initial={reduce ? false : { scale: 0.4, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }}
+            className="min-h-16 px-7 sm:px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+            {t('join.go')}<ArrowRight weight="bold" size={26} />
+          </motion.button>
+        )}
       </div>
       </div>
     </main>

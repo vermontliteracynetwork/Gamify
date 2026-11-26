@@ -12,5 +12,6 @@ test('join page reads aloud; classes have no join code of their own', async ({ p
   await page.goto('/join');
   await expect(page.getByRole('button', { name: 'Listen' })).toBeVisible();
   await page.getByLabel('Class or game code', { exact: false }).or(page.getByRole('textbox')).first().fill('bcd');
-  await expect(page.getByRole('button', { name: 'Hear my code' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Hear my code' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Go' })).toHaveCount(0);
 });
