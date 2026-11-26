@@ -44,6 +44,9 @@ import { clearAndRefill, createGrid, findMatches, fire, hasAnyValidMove, isAdjac
 // Lavender and Blue crystal checker, on a pastel cut-paper desk. Library and
 // class-made themes swap in artwork per piece, board and background.
 const pattern = (id: string, calm: boolean) => PATTERNS.find((p) => p.id === id)!.make(calm);
+// Lemon for a star won; Lavender for the ones still to win, so they read on
+// the Paper meter pill and results box (Classic Art Director, 2026-11-26).
+const STAR_WON = '#fabe37', STAR_EMPTY = '#ddd6ff';
 const SPARK_KINDS: DoodleKind[] = ['sparkle', 'star', 'dot', 'sparkle'];
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
 // Combo words grow with the chain (Golden Rule pass, 2026-10-31).
@@ -403,7 +406,7 @@ export default function MatchThree() {
 
       {phase === 'end' && (
         <ResultsModal winners={pieceImage(theme, 'player') ? [{ name: t('mm.you'), colorIndex: 0, art: pieceImage(theme, 'player') }] : undefined} title={t('bm.done', { score })} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
-          <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={stars > i ? '#fabe37' : '#fffaf0'} size={40} />)}</p>
+          <ResultStars stars={stars} />
         </ResultsModal>
       )}
       {powers.element}
@@ -425,14 +428,19 @@ function SizeMock({ n }: { n: number }) {
   );
 }
 
+// The stars won, in the results box.
+export function ResultStars({ stars }: { stars: number }) {
+  return <p className="flex items-center justify-center gap-1" aria-label={t('m3.goal', { stars })}>{[0, 1, 2].map((i) => <Doodle key={i} kind="star" color={stars > i ? STAR_WON : STAR_EMPTY} size={40} />)}</p>;
+}
+
 // The three stars of the goal, at the right end of the meter pill: Lemon
-// doodle stars when earned, paper ones still to win; each pops as it lands.
+// doodle stars when earned, Lavender ones still to win; each pops as it lands.
 function StarGoal({ score, stars, goals, still }: { score: number; stars: number; goals: number[]; still: boolean }) {
   return (
     <span className="flex gap-1 shrink-0" role="meter" aria-label={t('m3.goal', { stars })} aria-valuenow={Math.min(score, goals[2])} aria-valuemin={0} aria-valuemax={goals[2]}>
       {goals.map((g, i) => (
         <motion.span key={g} className="grid" animate={stars > i && !still ? { scale: [1, 1.6, 1], rotate: [0, 25, 0] } : { scale: 1 }} transition={{ duration: 0.5 }}>
-          <Doodle kind="star" color={stars > i ? '#fabe37' : '#fffaf0'} size={30} />
+          <Doodle kind="star" color={stars > i ? STAR_WON : STAR_EMPTY} size={30} />
         </motion.span>
       ))}
     </span>

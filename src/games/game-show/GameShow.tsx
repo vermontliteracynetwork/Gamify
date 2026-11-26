@@ -478,9 +478,19 @@ export default function GameShow() {
               <p className="sr-only" aria-live="polite">{step === 'pick' && !question ? (board === 'cards' ? t('tb.pickCard', { name: player.name }) : t('tb.pickCell', { name: player.name })) : t('share.whoseTurn', { name: player.name })}</p>
             )}
 
-            {/* THE meter on top of the board (approved mockup): it fills as cards are won. */}
-            <Meter width="min(22rem, 60%)" segments={1} done={0} part={progress.total ? progress.done / progress.total : 0}
-              label={`${progress.done}/${progress.total} ${t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')}`} />
+            {/* THE meter on top of the board (approved mockup): it fills as cards are won.
+                At 0 it shows the Lemon start knob and its count on a Paper tag beside it,
+                so it never reads as an empty placeholder pill (Classic Art Director, 2026-11-26). */}
+            <div className="flex items-center gap-2" style={{ width: 'min(25rem, 66%)' }}>
+              <span className="flex-1 min-w-0 flex">
+                <Meter width="100%" segments={1} done={0} part={progress.total ? Math.max(progress.done / progress.total, 0.001) : 0.001}
+                  label={`${progress.done}/${progress.total} ${t(board === 'cards' ? 'tb.cardsWord' : 'tb.squaresWord')}`} />
+              </span>
+              <span className="shrink-0 grid place-items-center rounded-pill bg-[var(--paper)] px-2.5 text-sm font-bold leading-none tabular-nums text-[var(--ink)]"
+                style={{ height: METER_H, border: '2.5px solid var(--color-border)', boxShadow: '0 2px 0 var(--color-border)' }} aria-hidden="true">
+                {progress.done}/{progress.total}
+              </span>
+            </div>
 
             {board === 'cards' && (
               // The cards fill the space left on screen, all the same size

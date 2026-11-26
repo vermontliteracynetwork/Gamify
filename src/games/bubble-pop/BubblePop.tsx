@@ -354,9 +354,11 @@ export default function BubblePop() {
             </span>
           </div>
 
-          {/* The score as a big number, the held power-ups under it, centered on it. */}
+          {/* The score as a big number on a Paper pill (Classic Art Director,
+              2026-11-26: never straight on a pattern blob), the held power-ups
+              under it, centered on it. */}
           <div className="bp-side absolute z-20 grid justify-items-center content-start gap-3 pointer-events-none">
-            <span className="bp-gy tabular-nums text-[3.5rem] sm:text-[4.25rem] text-[var(--ink)]" role="status" aria-label={t('share.points', { count: score })}>
+            <span className="bp-gy tabular-nums text-[3.5rem] sm:text-[4.25rem] text-[var(--ink)] rounded-pill bg-[var(--paper)] px-[0.4em] pt-[0.08em] pb-[0.02em] min-w-[1.4em] text-center" style={{ border: `3px solid ${INK}`, boxShadow: `0 3px 0 ${INK}` }} role="status" aria-label={t('share.points', { count: score })}>
               <motion.span key={score} className="inline-block" initial={still ? false : { scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }}>{score}</motion.span>
             </span>
             <div className="pointer-events-auto max-w-[7rem] portrait:max-w-none">
