@@ -39,7 +39,8 @@ export default function NavBar() {
   // Top bar buttons sit smaller than the bar with room around them (owner, 2026-11-25).
   const pill = `hover-pop flex items-center gap-1.5 whitespace-nowrap text-sm font-bold text-text no-underline px-3 ${inGame ? 'min-h-8' : 'min-h-9'} rounded-pill border-std border-border bg-white hover:bg-surface-hover transition-colors`;
   // The current page wears Butter (New direction rule 10, approved 2026-11-25).
-  const navLink = (to: string) => `nav-grow flex min-h-9 px-3 items-center rounded-pill font-bold text-sm no-underline text-text ${path === to ? 'bg-butter' : ''}`;
+  // The page you are on is shown by bold text only: no highlight, no underline (owner 2026-11-26).
+  const navLink = (to: string) => `flex min-h-9 px-3 items-center rounded-pill text-sm no-underline text-text ${path === to ? 'font-bold' : 'nav-grow font-medium'}`;
   // Student pages and signed-in students: the logo only, nothing to wander to.
   const logoOnly = studentPage || (!!student && !teacher);
   const reportBtn = (cls = '') => (
@@ -57,12 +58,12 @@ export default function NavBar() {
       {!any && !studentPage && (
         <nav aria-label={t('public.nav.label')} className="hidden lg:flex items-center gap-1">
           {BAR_LINKS.map(({ to, key }) => <Link key={to} to={to} aria-current={path === to ? 'page' : undefined} className={navLink(to)}>{t(key)}</Link>)}
-          <Link to="/join" className={`${pill} !bg-lavender`}>{t('public.nav.join')}</Link>
-          <Link to="/login" className={`${pill} !bg-accent`}><ChalkboardTeacher weight="bold" size={16} />{t('public.nav.login')}</Link>
+          <Link to="/join" className={`${pill} !bg-accent`}>{t('public.nav.join')}</Link>
+          <Link to="/login" className={`${pill} !bg-lavender`}>{t('public.nav.login')}</Link>
         </nav>
       )}
       {/* Phones (rule 10): Log in beside one 44px menu that holds every link and Report. */}
-      {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-accent lg:hidden`}>{t('public.nav.login')}</Link>}
+      {!any && !studentPage && path !== '/login' && <Link to="/login" className={`${pill} !bg-lavender lg:hidden`}>{t('public.nav.login')}</Link>}
       {!any && !studentPage && <MobileMenu path={path} onReport={() => setTellOpen(true)} />}
       {/* Report, for everyone on every page (owner, 2026-11-24); student pages show the logo only (rule 10). */}
       {!logoOnly && reportBtn(teacher ? 'hidden md:flex' : !any ? 'hidden lg:flex' : '')}
@@ -151,15 +152,15 @@ function MobileMenu({ path, onReport }: { path: string; onReport: () => void }) 
           <nav aria-label={t('public.nav.label')} className="px-4 py-4 grid gap-2">
             {SHEET_LINKS.map(({ to, key }) => (
               <Link key={to} to={to} onClick={close} aria-current={path === to ? 'page' : undefined}
-                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border font-bold text-xl no-underline text-text ${path === to ? 'bg-butter' : 'bg-surface'}`}>
+                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border text-xl no-underline text-text bg-surface ${path === to ? 'font-bold' : 'font-medium'}`}>
                 {t(key)}<ArrowRight weight="bold" size={20} aria-hidden="true" />
               </Link>
             ))}
           </nav>
           <div className="mt-auto px-4 pb-6 pt-2 grid grid-cols-2 gap-3">
             <button type="button" onClick={() => { close(); onReport(); }} className="col-span-2 flex items-center justify-center gap-2 min-h-12 rounded-pill border-std border-border bg-white font-bold text-base"><Flag weight="bold" size={20} aria-hidden="true" />{t('report.open')}</button>
-            <Link to="/join" onClick={close} className="flex items-center justify-center min-h-14 rounded-pill border-bold border-border bg-lavender font-bold text-lg no-underline text-text">{t('public.nav.join')}</Link>
-            <Link to="/login" onClick={close} className="flex items-center justify-center gap-2 min-h-14 rounded-pill border-bold border-border bg-accent font-bold text-lg no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}><ChalkboardTeacher weight="bold" size={20} />{t('public.nav.login')}</Link>
+            <Link to="/join" onClick={close} className="flex items-center justify-center min-h-14 rounded-pill border-bold border-border bg-accent font-bold text-lg no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>{t('public.nav.join')}</Link>
+            <Link to="/login" onClick={close} className="flex items-center justify-center gap-2 min-h-14 rounded-pill border-bold border-border bg-lavender font-bold text-lg no-underline text-text">{t('public.nav.login')}</Link>
           </div>
         </div>
       </dialog>
@@ -208,7 +209,7 @@ function TeacherMenu({ path, owner, student, wide, onReport }: { path: string; o
           <nav aria-label={t('public.nav.label')} className="px-4 py-4 grid gap-2">
             {links.map(({ to, label }) => (
               <Link key={to} to={to} onClick={close} aria-current={path === to ? 'page' : undefined}
-                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border font-bold text-xl no-underline text-text ${path === to ? 'bg-butter' : 'bg-surface'}`}>
+                className={`flex items-center justify-between min-h-14 px-5 rounded-panel border-bold border-border text-xl no-underline text-text bg-surface ${path === to ? 'font-bold' : 'font-medium'}`}>
                 {label}<ArrowRight weight="bold" size={20} aria-hidden="true" />
               </Link>
             ))}
