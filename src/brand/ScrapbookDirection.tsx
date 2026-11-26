@@ -726,11 +726,11 @@ function ScrapCover({ g }: { g: Game }) {
     <div className="absolute inset-0 overflow-hidden" style={{ background: PP.cream }}>
       {g.ground?.(CW, CH)}
       <div className={`absolute left-0 ${paper ? 'sb-cover' : ''}`} style={{ top: (CH - 648) / 2, width: CW, height: 648 }}>{COVER(g.id).cover}</div>
-      {g.id === 'bowling' && <BowlWall w={CW} h={(CH - 648) / 2 + 188} />}
+      {g.id === 'bowling' && <BowlWall w={CW} h={(CH - 648) / 2 + 188} tape={false} />}
       {/* margin pieces: each fits the 48px band */}
       {paper && g.id !== 'game-show' && <>
-        <Paper id="gingham-lavender" seed={43} tilt={-2} tape={{ tone: 1, w: 40, pos: { left: -10, top: 30 }, rot: 70 }} style={{ left: 4, top: 190, width: M - 12, height: 210 }} />
-        <Paper id="gingham-pink" seed={44} tilt={2} tape={{ tone: 3, w: 40, pos: { right: 40, top: -10 }, rot: -6 }} style={{ left: 200, bottom: 6, width: 300, height: M - 14 }} />
+        <Paper id="gingham-lavender" seed={43} style={{ left: 4, top: 190, width: M - 12, height: 210 }} />
+        <Paper id="gingham-pink" seed={44} style={{ left: 200, bottom: 6, width: 300, height: M - 14 }} />
       </>}
       {paper && <Bit style={{ left: 6, top: 6 }} tilt={-4}><Sunburst size={M - 8} /></Bit>}
       <Bit style={{ right: 6, top: 4 }} tilt={5}><SchoolSticker kind={g.stickers[0]} size={M - 6} /></Bit>
@@ -851,22 +851,22 @@ function FourBack() {
   </div>);
 }
 // Bubble Pop: the approved Calm doodle scatter, pastel papers only; the left
-// paper is plain Butter with the sunburst and nothing else.
+// paper is plain Butter with one school sticker (no sunburst on a stage).
 function BubbleBack() {
   return (<div className="absolute inset-0" style={paperCss('doodle-calm')}>
-    <Paper id="butter" seed={65} tilt={-3} tape={{ tone: 1, at: 'top', w: 80 }} style={{ left: 30, top: 110, width: 230, height: 470 }}><span className="absolute inset-0 grid place-items-center"><Sunburst size={150} /></span></Paper>
+    <Paper id="butter" seed={65} tilt={-3} tape={{ tone: 1, at: 'top', w: 80 }} style={{ left: 30, top: 110, width: 230, height: 470 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="apple" size={110} /></span></Paper>
     <Paper id="gingham-blue" seed={66} tilt={3} tape={{ tone: 5, w: 70, pos: { right: 14, top: -10 }, rot: 30 }} style={{ left: 740, top: 360, width: 230, height: 230 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="notebook" size={110} /></span></Paper>
   </div>);
 }
 // Bowling: only the wall band above the lane (the lane, pins and rail stay the
 // game's own): Blush gingham behind the pin deck, checker only at the far ends
 // (7% each, 14% in all).
-function BowlWall({ w, h }: { w: number; h: number }) {
+function BowlWall({ w, h, tape = true }: { w: number; h: number; tape?: boolean }) {
   const end = Math.round(w * 0.07);
   return (<div className="absolute left-0 right-0 top-0 overflow-hidden" style={{ height: h }}>
     <div className="absolute inset-0" style={paperCss('gingham-pink')} />
-    <Paper id="checker" seed={68} tilt={-1} tape={{ tone: 3, w: 46, pos: { right: -18, top: h * 0.4 }, rot: 80 }} style={{ left: -10, top: -8, width: end + 10, height: h + 16 }} />
-    <Paper id="checker" seed={69} tilt={1} tape={{ tone: 5, w: 46, pos: { left: -18, top: h * 0.4 }, rot: -80 }} style={{ right: -10, top: -8, width: end + 10, height: h + 16 }} />
+    <Paper id="checker" seed={68} tilt={tape ? -1 : 0} tape={tape ? { tone: 3, w: 46, pos: { right: -18, top: h * 0.4 }, rot: 80 } : undefined} style={{ left: -10, top: -8, width: end + 10, height: h + 16 }} />
+    <Paper id="checker" seed={69} tilt={tape ? 1 : 0} tape={tape ? { tone: 5, w: 46, pos: { left: -18, top: h * 0.4 }, rot: -80 } : undefined} style={{ right: -10, top: -8, width: end + 10, height: h + 16 }} />
   </div>);
 }
 function BowlBack() {
