@@ -5,6 +5,10 @@ export const APP_NAME = 'Gamify';
 // Placeholder until the domain is bought (development plan, defaults table).
 export const APP_DOMAIN = 'learngamify.com'; // owner, 2026-11-26
 
+// The Theme Builder is for teachers only for now (owner, 2026-11-26): no design
+// code for students. Students may get it in mid-2027 if teachers ask for it.
+export const STUDENT_THEME_BUILDER = false;
+
 // Homeschool is its own plan (teacher, 2026-10-26), shown on the Homeschool
 // page, not on the main Pricing table.
 export type Tier = 'free' | 'plus' | 'pro' | 'homeschool';

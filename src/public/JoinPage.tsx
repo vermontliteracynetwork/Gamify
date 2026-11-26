@@ -1,3 +1,4 @@
+import { STUDENT_THEME_BUILDER } from '../config';
 import { lobbyPickFor } from '../data/gameCodes';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -93,7 +94,7 @@ export default function JoinPage() {
     }
     setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits });
     playCloudCode(game.cloud ? game.code : '');
-    if (game.design) { navigate('/arcade/design'); return; }
+    if (game.design) { navigate(STUDENT_THEME_BUILDER ? '/arcade/design' : '/join'); return; }
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }
     if (game.versus) { navigate(`/games/${game.gameId}?set=${game.setId}&versus=${game.code}`); return; }
     navigate(`/games/${game.gameId}?set=${game.setId}`);

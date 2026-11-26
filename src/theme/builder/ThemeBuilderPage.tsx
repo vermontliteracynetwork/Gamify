@@ -269,7 +269,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
     else setStatus(draft.pieces[piece.id]?.image ? `${msg} ${t('builder.clearReupload')}` : msg);
   }
   async function save() {
-    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: owner ? undefined : draft.studentDesigner?.trim() || undefined };
+    const theme = { ...draft, name: draft.name.trim(), designedBy: owner ? 'Gamify' : teacherUsername() || undefined, studentDesigner: undefined };
     await saveMadeTheme(theme);
     setDraft(theme); // keep what was saved (credit names) in the open design
     reload();
@@ -397,10 +397,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                   {/* Credit (moved here from the top, 2026-10-31). */}
                   <div className="grid gap-1">
                     <p className="font-bold">{t('builder.creditedTo', { name: teacherUsername() })}</p>
-                    <label className="grid gap-1 font-bold text-sm">{t('builder.studentDesigner')}
-                      <input id="theme-student" value={draft.studentDesigner ?? ''} maxLength={20} onChange={(e) => setDraft({ ...draft, studentDesigner: e.target.value || undefined })} placeholder={t('builder.studentDesignerPlaceholder')}
-                        className="min-h-11 px-3 rounded-input border-std border-border font-bold w-full max-w-72" />
-                    </label>
+                    {/* Credit is only the teacher's username (owner, 2026-11-26). */}
                   </div>
                   <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
                 </>

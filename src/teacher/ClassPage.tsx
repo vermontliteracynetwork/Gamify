@@ -3,7 +3,7 @@ import { useCrumbLabel } from '../ui/Breadcrumbs';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { DiceFive, Eye, EyeSlash, GearSix, Heart, Lightbulb, Minus, PencilSimple, Plus, Printer, Star, Trash, TrendDown, TrendUp, UploadSimple, UsersThree } from '@phosphor-icons/react';
-import { TIERS } from '../config';
+import { STUDENT_THEME_BUILDER, TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
 import { LIBRARY } from '../data/library';
@@ -110,7 +110,7 @@ export default function ClassPage() {
               </div>
             );
           })}
-          <div className="flex flex-wrap items-center gap-3 border-t-[2px] border-border-soft pt-3">
+          {STUDENT_THEME_BUILDER && <div className="flex flex-wrap items-center gap-3 border-t-[2px] border-border-soft pt-3">
             <div className="grid"><span className="font-bold">{t('class.studentDesign')}</span><span className="text-sm font-semibold text-muted">{t('class.studentDesignHint')}</span></div>
             <div className="ml-auto min-w-40">
               <Toggle label={classroom.studentDesign ? t('class.modeOn') : t('class.modeOff')} value={!!classroom.studentDesign} onChange={async (v) => { await data.saveClassroom({ ...classroom, studentDesign: v }); reloadClass(); }} />
@@ -125,7 +125,7 @@ export default function ClassPage() {
                 </>}
               </div>
             )}
-          </div>
+          </div>}
         </Panel>
       )}
       </fieldset>

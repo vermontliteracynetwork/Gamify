@@ -1,5 +1,7 @@
 # Community theme guidelines (DRAFT, not public)
 
+Naming (owner, 2026-11-26): always say "Theme Builder", never "design studio". Only teachers use it for now; students may get access in mid-2027 if teachers ask.
+
 Status: draft written by the C-suite and the Design Chair, 2026-11-26, for the
 owner to approve. Nothing here is public until she says publish, and the
 attorney reads the removal and strike terms before they go in the Terms of Use.
@@ -45,5 +47,15 @@ themes are never sold.
 - **Open for the owner:** a paid teacher at strike 3 keeps the paid plan and
   only loses theme-making, or the account closes (refund question for the CFO
   and the attorney).
-- **Open for the owner:** the Theme Reviewer recommends each strike, and the
-  owner confirms it, until she decides otherwise.
+
+## Three lanes (owner, 2026-11-26: "theme reviewer should have standard for auto strikes, the rest should be pushed to me for review if flagged. also we will have rules for good to push automatically")
+
+The lanes are hers; the lists in each lane are proposals **(to confirm)**.
+
+| Lane | What happens | Proposed rules |
+| --- | --- | --- |
+| Auto-approve | Published at once, no owner review | Every piece passes the contrast and flashing checks; built only from Gamify's approved art, or the teacher ticked the rights and permission box; no words other than the theme name and description, or the words pass the word filter; not a near-copy of a library theme; teacher has no strike in the last 12 months |
+| Auto-strike | Removed with a strike, email sent, no owner review | A clear match: a photo of a real child's face; a full name or contact details; a word on the blocked-words list; a near-copy of another theme; a known brand logo or character the image check recognizes |
+| Flag for the owner | Held; the owner decides | Anything else the Reviewer is unsure of: possible copyrighted art, scary or violent content, borderline words, a first strike for a theme with many student contributors, every appeal |
+
+A teacher can appeal an auto-strike once; the appeal goes to the owner.

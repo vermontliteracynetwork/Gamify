@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Check, Minus } from '@phosphor-icons/react';
-import { FREE_GAMES, LAUNCH_OFFER, PRICES_USD, TIERS, billingMonths, type Billing, type Tier } from '../config';
+import { FREE_GAMES, LAUNCH_OFFER, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -58,7 +58,7 @@ export function compareGroups(billing: Billing): Group[] {
     ] },
     { id: 'themes', title: t('cmp.s.themes'), rows: [
       row('pricing.row.themes', 'cmp.builder.what', (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder]),
-      row('cmp.studio', 'cmp.studio.what', (x) => (TIERS[x].themeBuilder === 'trial' ? t('cmp.studio.free') : t('cmp.studio.paid'))),
+      ...(STUDENT_THEME_BUILDER ? [row('cmp.studio', 'cmp.studio.what', (x) => (TIERS[x].themeBuilder === 'trial' ? t('cmp.studio.free') : t('cmp.studio.paid')))] : []),
       row('pricing.row.library', 'cmp.libraryThemes.what', (x) => TIERS[x].themesPlayable),
       row('pricing.row.guides', 'cmp.guides.what', (x) => (x === 'free' ? t('cmp.guides.free') : true)),
     ] },

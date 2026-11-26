@@ -58,7 +58,10 @@ before it is called done; whoever drew it never grades it.
 The **Theme Reviewer** (`.claude/agents/theme-reviewer.md`, owner 2026-11-26)
 reviews every teacher-published community theme against
 `docs/community-theme-guidelines.md` before it goes public and recommends
-strikes (3 strikes revoke theme-making on any plan); the owner confirms them. The Design Chair's
+strikes (3 strikes revoke theme-making on any plan): it auto-approves and
+auto-strikes only on the published rules and flags the rest to the owner.
+Always say "Theme Builder", never "design studio"; it is teachers only, no
+student code, until the owner releases student access (maybe mid-2027). The Design Chair's
 research and design skills (`social-*`, `brand`, `design`, `design-system`,
 `banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
 
@@ -151,8 +154,8 @@ teacher no control or educational value is not done.
 - Question sets are teacher-authored/imported, never a fixed bank.
 - Students reach games only through a code or a link from their teacher
   (teacher, 2026-10-31): no open student Arcade, no fixed class join codes,
-  nowhere for a student to wander. A code opens one game (or the design
-  studio); class students tap their name, then play or wait in the lobby.
+  nowhere for a student to wander. A code opens one game (the Theme Builder
+  is teachers only for now, 2026-11-26); class students tap their name, then play or wait in the lobby.
 - "Activity" is the word for a game + question set + who plays it
   (teacher, 2026-10-31). Teachers start one from Create an Activity
   (`/teacher/activity`): who, how, game, questions, then start, a code or
