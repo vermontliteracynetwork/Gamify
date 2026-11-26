@@ -160,3 +160,22 @@ Special-purpose tab bars that stay hand-built: the Help Center's vertical topic 
 | Size in rem; check a 1190 x 540 window | Fix sizes in px that do not scale with the screen |
 | Use `Dialog` for any new pop-up on a menu or teacher page | Build a new fixed overlay by hand |
 | Use `Accordion` for folded questions and answers | Hand-roll `<details>` rows |
+
+
+## Reference standards for the design crew (owner, 2026-11-26)
+
+Her words: "For animations, copy Apple. For onboarding, copy Duolingo. For UI
+design, copy Linear. For typography, copy Pentagram. For minimalism, copy Muji.
+For search and filters, copy Airbnb. For art direction, copy Aesop. For
+dashboards, copy Notion. For landing page layouts, copy Stripe. For micro
+interactions, copy Framer."
+
+Use these as the quality bar for each area, and name the one you used in every
+review and proposal. "Copy" means learn and match the principles: Apple's
+eased, physical motion; Duolingo's first win before sign-up and one step per
+screen; Linear's dense, calm, keyboard-first UI; Pentagram's clear type
+hierarchy; Muji's restraint; Airbnb's visible, forgiving filters; Aesop's
+consistent art direction; Notion's flexible, quiet dashboards; Stripe's
+landing-page rhythm; Framer's small, springy feedback. Never copy their code,
+assets, art, wording or brand (CLAUDE.md legal rules). The Gamify Golden Rule,
+the three lenses and her own words still come first.
