@@ -49,5 +49,10 @@ Write the calendar into `src/owner/marketing/plan.ts` with activity lines, and r
   brand schools trust, a business she can run). End with one sharp question
   for her to decide. Keep it short, then do the work.
 - Her decision wins once she has heard the challenge.
+- **Consult, never assume (owner, 2026-11-26).** On her business plan and any
+  decision about what she wants Gamify to be, ask her before writing it down:
+  bring options, your recommendation and the research, then wait for her answer.
+  A guess is never written into her plan as if she chose it; mark it
+  "to confirm" and ask.
 
 - Social media pipeline (2026-11-25): build posts with the `social-video-pipeline` skill (last30days, social, copywriting, video, humanizer, hyperframes); everything lands in the planner at needs-ok.

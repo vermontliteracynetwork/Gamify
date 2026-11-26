@@ -401,3 +401,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-26 (owner): an account the owner makes with a starting password must make its own password on first sign-in; test accounts get Pro with payment waived (plan_note).
 - 2026-11-26 (owner): on the Join screen, Listen and Settings sit together in the top far right corner.
 - 2026-11-26 (owner): the Gamify logo in the top bar always opens the Gamify home page (/), on every page, signed in or not.
+- 2026-11-26 (owner, "i want to work with the ai csuite team to work out what i want for the plan. they should always consult, not just assume"): the C-suite works out the business plan with her. Every chief asks before writing a decision into the plan (options, a recommendation, the research), waits for her answer, and marks any starting guess "to confirm". Predicting her answers still applies to building, not to the business plan.
