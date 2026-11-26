@@ -54,7 +54,11 @@ media. Run a Design Chair brand check on every new part, theme or feature, and t
 `classic-art` skill before making any Classic asset (one pencil/crayon style).
 The **Classic Art Director** (`.claude/agents/classic-art-director.md`, teacher
 2026-11-24) must PASS every Classic theme asset and scene on real screenshots
-before it is called done; whoever drew it never grades it. The Design Chair's
+before it is called done; whoever drew it never grades it.
+The **Theme Reviewer** (`.claude/agents/theme-reviewer.md`, owner 2026-11-26)
+reviews every teacher-published community theme against
+`docs/community-theme-guidelines.md` before it goes public and recommends
+strikes (3 strikes revoke theme-making on any plan); the owner confirms them. The Design Chair's
 research and design skills (`social-*`, `brand`, `design`, `design-system`,
 `banner-design`, `ui-ux-pro-max`) are vendored MIT tools (see THIRD_PARTY.md).
 

@@ -3,7 +3,7 @@
 
 export const APP_NAME = 'Gamify';
 // Placeholder until the domain is bought (development plan, defaults table).
-export const APP_DOMAIN = 'joingamify.com';
+export const APP_DOMAIN = 'learngamify.com'; // owner, 2026-11-26
 
 // Homeschool is its own plan (teacher, 2026-10-26), shown on the Homeschool
 // page, not on the main Pricing table.

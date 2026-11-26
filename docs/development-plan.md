@@ -47,7 +47,7 @@ Status marks: `[ ]` not started, `[~]` in progress, `[x]` done (with date),
 ### 1.3 Defaults for open decisions (used until the teacher says otherwise)
 | Open decision (product plan section 9) | Default used for building |
 |---|---|
-| Product name / domain | "Gamify"; domain kept in one config value (`APP_DOMAIN`), placeholder `joingamify.com` |
+| Product name / domain | "Gamify"; domain kept in one config value (`APP_DOMAIN`), `learngamify.com` (owner, 2026-11-26) |
 | First three games | Peg Drop, Team Board, Match Up |
 | Themes scope | Themes skin the game stage only; menus and teacher pages keep the Gamify brand |
 | Free games list | Team Board, Match Up, Peg Drop, Four in a Row |

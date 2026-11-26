@@ -10,8 +10,18 @@ describe('school quote PDF', () => {
     expect(q.total).toBe(q.perSeat * 12);
     expect(q.number).toMatch(/^Q-20261027-\d{4}$/);
   });
+  it('gives schools the launch sale on the first year before it ends', () => {
+    const q = quoteDetails(req, new Date('2026-12-15T12:00:00Z'))!;
+    expect(q.sale?.off).toBe(10);
+    expect(q.sale?.renewTotal).toBe(q.sale!.renewPerSeat * 12);
+    expect(q.perSeat).toBe(Math.round(q.sale!.renewPerSeat * 0.9));
+    const text = new TextDecoder().decode(quotePdf(req, q));
+    expect(text).toContain(`First-year total: $${q.total.toLocaleString('en-US')}`);
+    expect(text).toContain('December 31, 2026');
+  });
   it('is a well-formed one-page PDF with the school and the total', () => {
-    const q = quoteDetails(req)!;
+    const q = quoteDetails(req, new Date('2027-02-01T12:00:00Z'))!;
+    expect(q.sale).toBeUndefined();
     const text = new TextDecoder().decode(quotePdf(req, q));
     expect(text.startsWith('%PDF-1.4')).toBe(true);
     expect(text.trimEnd().endsWith('%%EOF')).toBe(true);

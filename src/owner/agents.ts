@@ -96,6 +96,10 @@ export const TEAM: TeamAgent[] = [
     status: 'idle', updated: '2026-11-23', reportsTo: 'design-chair', workingOn: [], needsYou: [],
   },
   {
+    id: 'theme-reviewer', name: 'Theme Reviewer', role: 'Reviews every community theme before it goes public; recommends strikes', file: '.claude/agents/theme-reviewer.md', color: '#a7e3c9',
+    status: 'waiting', updated: '2026-11-26', reportsTo: 'design-chair', workingOn: ['Draft community theme guidelines and 3-strike rules (docs/community-theme-guidelines.md)'], needsYou: [{ text: 'Approve the theme guidelines and strike rules before they go public' }],
+  },
+  {
     id: 'classic-art-director', name: 'Classic Art Director', role: 'Passes or fails every Classic theme asset on screenshots', file: '.claude/agents/classic-art-director.md', color: '#b4c4fb',
     status: 'waiting', updated: '2026-11-24', reportsTo: 'design-chair', workingOn: ['Territory: waiting for your uploaded cats and mice'], needsYou: [{ text: 'Upload the Territory cats and mice again (the pictures from your earlier chat are not in the project)' }],
   },

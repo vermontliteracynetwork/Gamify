@@ -694,6 +694,7 @@ Competitor cross-comparison and the reasoning behind each line:
 | Privacy paperwork | Standard terms | Standard terms | Standard terms | Signed data privacy agreement |
 
 Notes:
+- Community themes (owner, 2026-11-26): every plan, Free included, can use themes teachers publish to the community library. Only teachers publish (students have no accounts); no remixing; credit is optional and only the teacher's username; every theme is reviewed first against public guidelines (docs/community-theme-guidelines.md), with 3 strikes revoking theme-making on any plan.
 - Removing or renaming a player and the bad-word filter stay free, so a
   free teacher can still handle an inappropriate name without the Lock
   button.
@@ -712,7 +713,7 @@ Owner's words: "the marketing team at launch should have a campaign discount tha
 | 6 months | 6 months | 15% | $40.80 | $76.50 | $36.72 | $68.85 |
 | 1 year | year | 20% | $76.80 | $144 | $69.12 | $129.60 |
 
-Homeschool is priced like Plus. The launch sale (Founding Subscriber, code FOUNDING10, Claudia's guess for the name and code) is an extra 10% off the first term only, for subscriptions started before Jan 1, 2027, and does not renew: the plan renews at the standard price for the same length unless the teacher cancels. Price, renewal length and online cancel are shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Teacher and parent pages only, never student pages. Beta testers get their own offer (Pro free for 3 months, src/beta/spec.ts); the two never stack. School quotes start from the Pro yearly price, now $144 (owner to confirm). Code: src/config.ts (PRICES_USD, LAUNCH_OFFER).
+Owner decisions 2026-11-26: school invoices and purchase orders get the launch sale too (first year, orders before Jan 1, 2027); Plus holds at $76.80 a year, with short real sales run often through the year instead of a lower price (each sale has a true end date, ROSCA and state renewal rules apply). Homeschool is priced like Plus. The launch sale (Founding Subscriber, code FOUNDING10, Claudia's guess for the name and code) is an extra 10% off the first term only, for subscriptions started before Jan 1, 2027, and does not renew: the plan renews at the standard price for the same length unless the teacher cancels. Price, renewal length and online cancel are shown before checkout, with reminders before longer plans renew (ROSCA, state automatic-renewal laws). Teacher and parent pages only, never student pages. Beta testers get their own offer (Pro free for 3 months, src/beta/spec.ts); the two never stack. School quotes start from the Pro yearly price, now $144 (owner to confirm). Code: src/config.ts (PRICES_USD, LAUNCH_OFFER).
 
 **School/district plans matter most:** a single district purchase order is
 worth hundreds of individual card subscriptions, and districts are who ask

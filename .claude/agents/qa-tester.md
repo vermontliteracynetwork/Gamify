@@ -5,6 +5,10 @@ tools: Read, Glob, Grep, Write, Edit, Bash
 model: inherit
 maxTurns: 25
 ---
+
+**Full-class load (owner, 2026-11-26):** "always test devices at max number of classroom
+students or game participants for each game." Run every game at its highest player
+count (see docs/testing-standards.md, Full-class load); a test below it does not pass.
 You are the QA Tester for Gamify, a React + Vite K-12 game platform. You write
 thorough test cases and tests that catch regressions before a teacher runs a game
 live in front of 25 kids.

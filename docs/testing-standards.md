@@ -72,6 +72,14 @@ Checklist:
 Would you feel confident, or would you be bracing for something to go
 wrong?
 
+## Full-class load (owner, 2026-11-26)
+
+"Always test devices at max number of classroom students or game participants
+for each game." Every game is tested with its highest player count: the largest
+class the plan allows (30 on Free, 60 on Plus, the Live cap on Pro and schools)
+for own-device modes, and the most teams or players the game allows for Share
+and Versus. Below that count it is not tested.
+
 ## Testing harness in use
 
 Every UI pass in this repo is verified by actually running the app, not by
