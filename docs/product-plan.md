@@ -793,7 +793,7 @@ for the privacy and accessibility paperwork in section 6.
   plan) need a simple permission/release before their work ships in a
   paid product. Student work also needs parent permission.
 
-**DECIDE:** who is the seller and owner of record.
+**DECIDED (owner, 2026-11-26):** a new single-member Gamify LLC, owned and run by the owner alone, is the seller and owner of record (replaces the 2026-10-26 choice of Vermont Literacy Network LLC). No hiring ever; professionals and a help-desk service later are fine.
 
 ### 6.5 Teacher-uploaded content
 - Terms of Service: teachers keep ownership of their questions and images
