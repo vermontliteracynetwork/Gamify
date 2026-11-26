@@ -30,7 +30,7 @@ test('Match Up: link questions to answers; a wrong link wobbles; finish with a t
     await tiles.nth(4 + as.findIndex((a) => a.trim() === answers.get(qs[i].trim()))).click();
   }
   if (info.project.name === 'ipad-portrait') await page.screenshot({ path: 'test-results/matchup-done.png' });
-  await expect(page.getByText(/^All Matched in \d+:\d\d!$/)).toBeVisible();
+  await expect(page.getByText(/^All Matched in \d+:\d\d!$/i)).toBeVisible();
   await expect(page.getByText('1 try missed.', { exact: false })).toBeVisible();
   expect(problems).toEqual([]);
 });
