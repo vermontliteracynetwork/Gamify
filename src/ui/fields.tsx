@@ -116,7 +116,7 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
   label: string; value: T; options: { value: T; title: string; hint: string; art: ReactNode }[]; onChange: (v: T) => void;
 }) {
   return (
-    // The pictures are the main view (teacher, 2026-11-06): big art, small text.
+    // The pictures are the main view (teacher, 2026-11-06): big art, a big title.
     <div role="radiogroup" aria-label={label} className="grid sm:grid-cols-2 gap-4">
       {options.map((o) => {
         const on = value === o.value;
@@ -125,9 +125,12 @@ export function PictureChoice<T extends string>({ label, value, options, onChang
             className={`group relative rounded-panel border-bold border-border overflow-hidden text-left grid bg-white motion-safe:transition-transform motion-safe:hover:-translate-y-1 ${on ? 'ring-4 ring-border ring-offset-4 ring-offset-paper' : 'opacity-90 hover:opacity-100'}`}
             style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
             <span className="block h-[clamp(5rem,30vh,18rem)] border-b-[2.5px] border-border overflow-hidden motion-safe:group-hover:[&>*]:scale-[1.03] [&>*]:transition-transform [&>*]:duration-300" aria-hidden="true">{o.art}</span>
-            <span className="px-3 py-2 grid gap-0.5">
-              <span className="font-display text-base font-bold leading-tight">{o.title}</span>
-              <span className="font-semibold text-xs text-muted leading-snug">{o.hint}</span>
+            {/* Picture cards (owner rule, 2026-11-26): the title reads large and
+                the subtext shows only once the card is picked (screen readers
+                always hear it). */}
+            <span className="px-4 py-2.5 grid gap-1">
+              <span className="font-display text-xl sm:text-2xl font-bold leading-tight">{o.title}</span>
+              <span className={on ? 'font-semibold text-sm text-muted leading-snug motion-safe:animate-[pop_0.25s_ease-out]' : 'sr-only'}>{o.hint}</span>
             </span>
             {on && <span className="absolute top-2 right-2 w-8 h-8 rounded-full bg-kelly border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
           </button>

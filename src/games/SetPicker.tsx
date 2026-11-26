@@ -84,9 +84,10 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
   return (
     <div ref={wrap} className="grid grid-cols-[minmax(0,1fr)] gap-3 min-w-0 w-full">
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
-      <div className="flex flex-wrap items-center justify-center gap-2 [&>[role=tablist]]:mb-0">
-        <Tabs size="sm" className="shrink-0" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
-        <div className="flex-1 min-w-64"><SetFilterBar chips value={filter} onChange={setFilter} sets={inTab} /></div>
+      {/* One even row: the sets toggle, a large search, Filters (owner, 2026-11-26). */}
+      <div className="flex items-start gap-2 min-w-0 [&>[role=tablist]]:mb-0">
+        <Tabs size="sm" className="shrink-0 !min-h-11 items-center" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
+        <div className="flex-1 min-w-0"><SetFilterBar chips value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}

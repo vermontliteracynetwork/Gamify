@@ -184,3 +184,28 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
     teacher dashboards against Notion; set and theme search/filters against
     Airbnb; motion against Apple and Framer. Findings go to the owner as a
     mockup on /brand before anything live changes.
+
+## J. Owner requests, 2026-11-26 (evening)
+
+41. [ ] **Developer portal redesign.** "i need the design team to improve my
+    developer portal. i need it spaced out simpler, card style dashboard. make
+    the views more visual and make it simple, adhd friendly. do research and
+    apply simple views. use figma where you can and other"
+42. [x] **Make a join code does nothing.** "make a join code doesnt work on
+    click" (Game Show, How Will You Play, Share a join code).
+43. [x] **Picture cards: big title, subtext on tap.** "set as rule that when
+    cards are like this that the title text shows larger and subtext only shows
+    when the card is clicked. aslo, shorten category subtext." (Game Show
+    Board step: Surprise cards, Category grid.) Universal rule.
+44. [x] **Question set picker bar in one row.** "this bar needs to be even in
+    one row. make a new button called filters that will include subjects,
+    grades, tags, etc. and replace those on the current bar. it should just be
+    the sets toggle, search, filters. search should be large and fill the space
+    between the two"
+45. [ ] **Live link is not the approved menus.** "what is currently live on the
+    link is NOT the approved menus !!!!!!!!!!!!!!" Compare every live menu to
+    its approved /brand mockup and fix each difference.
+46. [x] **Tell Gamify flag at the far right** of the top bar.
+47. [x] **Home hero cards larger and spaced out.**
+48. [x] **Home How It Works:** no tape; Step chips in Grow Year.
+49. [x] **Compare Every Feature** doc table updated to her plan rules.

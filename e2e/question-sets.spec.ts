@@ -84,11 +84,14 @@ test('game set picker: cover cards, filters, and only sets with details', async 
   await expect(page.getByRole('radio')).toHaveCount(1);
   await page.getByRole('button', { name: 'Stop filtering by doubles' }).click();
   await page.getByLabel('Search titles and tags').fill('');
-  await page.getByLabel('Standard code').fill('1.OA');
+  // Subjects, grade, standard and tags sit behind one Filters button (owner, 2026-11-26).
+  await page.getByRole('button', { name: 'Filters' }).click();
+  const filters = page.getByRole('dialog', { name: 'Filters' });
+  await filters.getByLabel('Standard code').fill('1.OA');
   await expect(page.getByRole('radio', { name: /Doubles facts/ })).toBeVisible();
-  await page.getByLabel('Standard code').fill('');
-  // Subjects are toggle chips in the game picker (Universal views 4, 2026-11-25).
-  await page.getByRole('group', { name: 'Subject' }).getByRole('button', { name: 'Science', exact: true }).click();
+  await filters.getByLabel('Standard code').fill('');
+  await filters.getByRole('group', { name: 'Subject' }).getByRole('button', { name: 'Science', exact: true }).click();
+  await filters.getByRole('button', { name: 'Done' }).click();
   // Ready-made sets live on the Public sets tab (teacher, 2026-11-06).
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await expect(page.getByRole('radio', { name: /Animals and habitats/ })).toBeVisible();

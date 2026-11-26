@@ -61,7 +61,7 @@ test('Get Plus on the welcome screen opens the plan box with Plus ready', async 
   await expect(page.getByText(/Plus trial:/)).toHaveCount(0);
 });
 
-test('day 8: one card says what Free leaves out; Stay on Free locks Plus games again', async ({ page }) => {
+test('day 8: one card says what Free leaves out; Stay on Free keeps every game', async ({ page }) => {
   await page.addInitScript(() => {
     if (sessionStorage.getItem('seeded')) return;
     sessionStorage.setItem('seeded', '1');
@@ -77,13 +77,14 @@ test('day 8: one card says what Free leaves out; Stay on Free locks Plus games a
   await page.goto('/teacher');
   const card = page.getByRole('dialog');
   await expect(card.getByRole('heading', { name: 'Your Plus Trial Has Ended' })).toBeVisible();
-  await expect(card.getByText('Board Game, Bubble Pop, Bowling and Territory')).toBeVisible();
+  await expect(card.getByText('Live mode: a class lobby where everyone plays on their own device')).toBeVisible();
   await card.getByRole('button', { name: 'Stay on Free' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Your Plus Trial Has Ended' })).toHaveCount(0);
+  // Free plays every game (owner, 2026-11-26).
   await page.goto('/games/bubble-pop');
-  await expect(page.getByText('Bubble Pop is ready for you on Plus', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Set up and play' })).toBeVisible();
 });
 
 test('3 days left: the reminder shows once, on teacher pages only', async ({ page }) => {

@@ -473,3 +473,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-26 (owner): "approved, shrink it to fit and push to main" — the Home hero collage, stickers included, fits the first screen on laptops (1190x540 to 1920x1080).
 - 2026-11-26 (owner): Home, How It Works: no tape on the Step 1 card; the Step chips wear Grow Year.
 - 2026-11-26 (owner): Home hero game cards larger and spaced further apart. The Tell Gamify flag always sits at the far right of the top bar.
+- 2026-11-26 (owner rule): picture choice cards (art on top, words under it, like the Board and How Will You Play steps) show the title large; the subtext shows only once the card is picked, and stays short. Category grid hint shortened.

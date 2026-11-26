@@ -57,8 +57,8 @@ export default function ThemeScreen({ gameName, current, themes, playable, onCho
                 style={{ boxShadow: on ? '0 6px 0 var(--ink)' : '0 3px 0 rgba(0,0,0,0.85)' }}>
                 <span className={`block border-b-[2.5px] border-border overflow-hidden [&>div]:rounded-none [&>div]:border-0 [&>div]:transition-transform [&>div]:duration-300 motion-safe:group-hover:[&>div]:scale-[1.03] ${open ? '' : 'grayscale opacity-70'}`} aria-hidden="true"><ThemePreview theme={th} gameName={gameName} /></span>
                 <span className="px-3 py-2 grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-0.5">
-                  <span className="col-start-1 font-display text-base font-bold leading-tight flex items-center gap-1.5">{!open && <LockSimple weight="fill" size={16} aria-hidden="true" />}{th.name}</span>
-                  <span className="col-start-1 font-semibold text-xs text-muted leading-snug">{th.designedBy ? t('themeScreen.by', { name: creditLine(th) }) : t('themeScreen.house')}</span>
+                  <span className="col-start-1 font-display text-xl font-bold leading-tight flex items-center gap-1.5">{!open && <LockSimple weight="fill" size={16} aria-hidden="true" />}{th.name}</span>
+                  <span className={on ? 'col-start-1 font-semibold text-sm text-muted leading-snug' : 'sr-only'}>{th.designedBy ? t('themeScreen.by', { name: creditLine(th) }) : t('themeScreen.house')}</span>
                   {on && <span className="col-start-2 row-start-1 row-span-2 shrink-0 w-9 h-9 rounded-full bg-kelly border-std border-border flex items-center justify-center motion-safe:animate-[pop_0.3s_ease-out]" aria-hidden="true"><Check weight="bold" size={18} /></span>}
                 </span>
               </button>
