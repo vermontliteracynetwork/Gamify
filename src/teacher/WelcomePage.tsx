@@ -68,11 +68,12 @@ export default function WelcomePage() {
           <motion.button type="button" {...press} onClick={() => void done('plus')} className="min-h-14 rounded-pill border-std border-border bg-white text-grape-deep font-bold text-lg inline-flex items-center justify-center gap-2 shadow-[0_3px_0_var(--ink)] hover:bg-surface-hover">
             {t('welcome.getPlus')}<ArrowRight weight="bold" size={20} aria-hidden="true" />
           </motion.button>
-          <p className="m-0 font-heading font-bold">{t('welcome.plus.lead')}</p>
+          <p className="m-0 -mt-1.5 text-sm font-semibold text-center">{t('welcome.billingNote')}</p>
+          <h3 className="m-0 font-heading font-bold text-base">{t('welcome.plus.lead')}</h3>
           <ul className="grid gap-1.5 list-none p-0 m-0">
             {plusLines.map((l) => <li key={l} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{l}</li>)}
           </ul>
-          {sale && <p className="m-0 text-xs sm:text-sm font-semibold rounded-input bg-white/15 p-2.5">{t('welcome.sale', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}</p>}
+          {sale && <p className="m-0 text-sm font-semibold rounded-input bg-grape-deep text-white p-2.5">{t('welcome.sale', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}</p>}
         </motion.section>
 
         {/* Pro: same layout, the quieter card. */}
@@ -85,7 +86,8 @@ export default function WelcomePage() {
           <motion.button type="button" {...press} onClick={() => void done('pro')} className={buttonClasses('main', 'min-h-14 !text-lg', 'lg')}>
             {t('welcome.getPro')}<ArrowRight weight="bold" size={20} aria-hidden="true" />
           </motion.button>
-          <p className="m-0 font-heading font-bold">{t('welcome.pro.lead')}</p>
+          <p className="m-0 -mt-1.5 text-sm font-semibold text-center text-muted">{t('welcome.billingNote')}</p>
+          <h3 className="m-0 font-heading font-bold text-base">{t('welcome.pro.lead')}</h3>
           <ul className="grid gap-1.5 list-none p-0 m-0">
             {proLines.map((k) => <li key={k} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(k)}</li>)}
           </ul>
@@ -106,11 +108,10 @@ export default function WelcomePage() {
       )}
 
       {/* Start Free: always in view at the foot of the screen, one tap. */}
-      <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2.5 pb-3 bg-cream border-t-[2.5px] border-border grid gap-1.5 justify-items-center">
+      <div className="sticky bottom-0 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-2.5 pb-3 bg-cream border-t-[2.5px] border-border grid justify-items-center">
         <motion.button type="button" {...press} onClick={() => void done()} className={buttonClasses('go', 'w-full max-w-xl !text-xl', 'lg')}>
           {t('welcome.free')}
         </motion.button>
-        <p className="m-0 text-xs sm:text-sm font-semibold text-center">{t('welcome.freeNote', { days: TRIAL.days })}</p>
       </div>
     </main>
   );

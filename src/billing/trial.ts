@@ -52,6 +52,10 @@ export function trialReminder(s: TrialState | null): 3 | 1 | null {
 // February, UTC-5), and only while spots remain.
 export const betaEndsAt = () => Date.parse(`${BETA_ENDS}T23:59:59.999-05:00`);
 export const betaOpen = (now = Date.now(), spotsOpen: boolean = BETA_SPOTS_OPEN) => spotsOpen && now <= betaEndsAt();
+// Why the beta is closed, for the closed card on /beta/apply: past the end
+// date it has ended; before it, with spots off, it is full.
+export const betaClosed = (now = Date.now(), spotsOpen: boolean = BETA_SPOTS_OPEN): 'ended' | 'full' | null =>
+  now > betaEndsAt() ? 'ended' : !spotsOpen ? 'full' : null;
 
 // Saved settings for the one-time screens (teacher pages only).
 export const WELCOME_SEEN = 'welcome-seen';

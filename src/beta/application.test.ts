@@ -12,7 +12,9 @@ describe('beta application', () => {
     const a = emptyApplication();
     expect(stepProblems(a, 0)).toEqual(['name', 'email', 'school', 'state', 'grades']);
     expect(stepProblems(a, 1)).toEqual(['devices', 'often']);
-    expect(stepProblems(a, 2)).toEqual(['asks', 'reason', 'agree']);
+    expect(stepProblems(a, 2)).toEqual(['asks']);
+    expect(stepProblems(a, 3)).toEqual(['reason', 'agree']);
+    expect(stepProblems(a, 4)).toEqual([]);
     expect(problems(full())).toEqual([]);
     expect(problems({ ...full(), asks: ['setup'] })).toEqual(['asks']);
     expect(problems({ ...full(), reason: 'Fun!' })).toEqual(['reason']);
@@ -28,9 +30,14 @@ describe('beta application', () => {
   });
   it('scores follow-through signals without rejecting anyone', () => {
     const strong = scoreApplication(readApplication(applicationText({ ...full(), reason: 'a'.repeat(130) }, labels))!);
-    expect(strong.points).toBe(5);
+    expect(strong.points).toBe(3);
+    expect(strong.signals.map((x) => x.key)).toEqual(['reason', 'often', 'email']);
+    // Either answer to how often passes; no games or commitment signal.
     const light = scoreApplication(readApplication(applicationText({ ...full(), email: 'r@gmail.com', games: [], often: '1-2' }, { ...labels, often: '1 to 2 times a week' }))!);
-    expect(light.points).toBe(1);
+    expect(light.points).toBe(2);
+    expect(light.signals.find((s) => s.key === 'often')!.ok).toBe(true);
+    const short = scoreApplication(readApplication(applicationText({ ...full(), reason: 'a'.repeat(29) }, labels))!);
+    expect(short.signals.find((s) => s.key === 'reason')!.ok).toBe(false);
     const home = scoreApplication(readApplication(applicationText({ ...full(), email: 'r@gmail.com' }, { ...labels, role: 'Homeschool parent' }))!);
     expect(home.signals.find((s) => s.key === 'email')!.ok).toBe(true);
   });

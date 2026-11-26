@@ -39,7 +39,7 @@ export const validEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.tri
 
 // The steps and what each one needs before Next works.
 export type Problem = 'name' | 'email' | 'school' | 'state' | 'grades' | 'devices' | 'often' | 'asks' | 'reason' | 'agree';
-export const STEP_FIELDS: Problem[][] = [['name', 'email', 'school', 'state', 'grades'], ['devices', 'often'], ['asks', 'reason', 'agree'], []];
+export const STEP_FIELDS: Problem[][] = [['name', 'email', 'school', 'state', 'grades'], ['devices', 'often'], ['asks'], ['reason', 'agree'], []];
 export function problems(a: BetaApplication): Problem[] {
   const out: Problem[] = [];
   if (!a.name.trim()) out.push('name');
@@ -98,16 +98,18 @@ export function readApplication(details: string): Record<string, string> | null 
 const FREE_MAIL = /@(gmail|yahoo|hotmail|outlook|aol|icloud|me|live|msn|proton|protonmail)\./i;
 
 export interface Score { points: number; of: number; signals: { key: string; ok: boolean }[] }
-/** Five plain signals that a tester will follow through. Information only. */
+/**
+ * Three plain signals that a tester will follow through. Information only.
+ * No beta filters beyond her approval (owner, 2026-11-26): no games or
+ * commitment signal, the reason bar is the form's own minimum, and either
+ * answer to how often passes.
+ */
 export function scoreApplication(f: Record<string, string>): Score {
-  const [done, all] = (f['Commitments'] ?? '').split(/[/,]/).map((s) => parseInt(s, 10));
   const why = f['Why'] ?? '';
   const homeschool = /homeschool/i.test(f['Role'] ?? '');
   const signals = [
-    { key: 'commit', ok: !!all && done === all && /agreed/.test(f['Commitments'] ?? '') },
-    { key: 'reason', ok: why.length >= 120 },
-    { key: 'often', ok: /3/.test(f['Can play'] ?? '') },
-    { key: 'games', ok: !!f['Games'] && f['Games'] !== 'not given' },
+    { key: 'reason', ok: why.length >= REASON_MIN },
+    { key: 'often', ok: !!(f['Can play'] ?? '').trim() },
     { key: 'email', ok: homeschool || !FREE_MAIL.test(f['Email'] ?? '') },
   ];
   return { points: signals.filter((s) => s.ok).length, of: signals.length, signals };

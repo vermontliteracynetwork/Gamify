@@ -24,6 +24,9 @@ test('sign-up opens the welcome screen once; Start Free keeps the 7 days of Plus
   await expect(page.getByText('$76.80 a year. Renews every year until you cancel.')).toBeVisible();
   await expect(page.getByText('$144 a year. Renews every year until you cancel.')).toBeVisible();
   await expect(page.getByText(/Best fit|Recommended/)).toHaveCount(0);
+  // Billing is plain under both Get buttons; the leads are h3s.
+  await expect(page.getByText('Billing starts when your free days end.')).toHaveCount(2);
+  await expect(page.getByRole('heading', { level: 3, name: /What Plus Adds To Free/i })).toBeVisible();
   const free = page.getByRole('button', { name: 'Start Free' });
   await expect(free).toBeInViewport();
   // The beta strip asks before it gives, and links to the application.
@@ -47,7 +50,10 @@ test('Get Plus on the welcome screen opens the plan box with Plus ready', async 
   await expect(page).toHaveURL(/\/teacher$/);
   const dialog = page.getByRole('dialog');
   // During the trial Get Plus still works (it keeps Plus after the 7 days).
+  await expect(dialog.getByRole('heading', { name: 'Pick Your Plan' })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Get Plus now' })).toBeEnabled();
+  await expect(dialog.getByText('Billing starts when your free days end.').first()).toBeVisible();
+  await expect(dialog.getByText(/Only \$/)).toHaveCount(0);
   await expect(dialog.getByText('$76.80 a year. Renews every year until you cancel.')).toBeVisible();
   await dialog.getByRole('button', { name: 'Get Plus now' }).click();
   await dialog.getByRole('button', { name: 'Keep going' }).click();
@@ -62,6 +68,12 @@ test('day 8: one card says what Free leaves out; Stay on Free locks Plus games a
     const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
     localStorage.setItem('gamify:settings', JSON.stringify({ ...s, 'trial-start': new Date(Date.now() - 8 * 86400000).toISOString(), 'welcome-seen': true }));
   });
+  // Never on a screen the class can see, and not by itself away from Home and Account.
+  await page.goto('/teacher/activity');
+  await expect(page.getByRole('heading', { name: 'Create an Activity', exact: false }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your Plus Trial Has Ended' })).toHaveCount(0);
+  await page.goto('/teacher/sets');
+  await expect(page.getByRole('heading', { name: 'Your Plus Trial Has Ended' })).toHaveCount(0);
   await page.goto('/teacher');
   const card = page.getByRole('dialog');
   await expect(card.getByRole('heading', { name: 'Your Plus Trial Has Ended' })).toBeVisible();
@@ -85,7 +97,31 @@ test('3 days left: the reminder shows once, on teacher pages only', async ({ pag
   await expect(page.getByText('3 days of Plus left')).toBeVisible();
   await page.getByRole('button', { name: 'Got it' }).click();
   await expect(page.getByText('Plus trial: 3 days left')).toBeVisible();
+  // Not on Create an Activity: the class can see the code there.
+  await page.goto('/teacher/activity');
+  await expect(page.locator('[data-trial-banner]')).toHaveCount(0);
   // Students never see the trial, a price or a plan.
   await page.goto('/join');
   await expect(page.getByText(/trial|Plus|\$/)).toHaveCount(0);
+});
+
+test('phones: after the full banner once, other pages fold it into a Plus chip; Home keeps the banner', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    const s = JSON.parse(localStorage.getItem('gamify:settings') ?? '{}');
+    localStorage.setItem('gamify:settings', JSON.stringify({ ...s, 'trial-start': new Date(Date.now() - 1 * 86400000).toISOString(), 'welcome-seen': true }));
+  });
+  await page.goto('/teacher');
+  await expect(page.locator('[data-trial-banner]')).toBeVisible();
+  await page.goto('/teacher/sets');
+  const chip = page.locator('[data-trial-chip]');
+  await expect(chip).toHaveText('Plus: 6 days');
+  await expect(page.locator('[data-trial-banner]')).toBeHidden();
+  await chip.click();
+  await expect(page.locator('[data-trial-banner]')).toBeVisible();
+  await page.goto('/teacher');
+  await expect(page.locator('[data-trial-banner]')).toBeVisible();
+  await expect(page.locator('[data-trial-chip]')).toHaveCount(0);
 });

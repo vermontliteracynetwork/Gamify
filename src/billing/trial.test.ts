@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { TRIAL } from '../config';
-import { betaEndsAt, betaOpen, effectiveTier, gameSince, higherTier, holdPlanForGame, trialEndsAt, trialReminder, trialState } from './trial';
+import { betaClosed, betaEndsAt, betaOpen, effectiveTier, gameSince, higherTier, holdPlanForGame, trialEndsAt, trialReminder, trialState } from './trial';
 
 const H = 3_600_000;
 const D = 24 * H;
@@ -79,5 +79,8 @@ describe('beta window', () => {
     expect(betaOpen(Date.parse('2027-03-01T00:00:01-05:00'))).toBe(false);
     expect(betaEndsAt()).toBe(Date.parse('2027-03-01T04:59:59.999Z'));
     expect(betaOpen(Date.parse('2026-12-01T12:00:00Z'), false)).toBe(false);
+    expect(betaClosed(Date.parse('2026-12-01T12:00:00Z'), true)).toBeNull();
+    expect(betaClosed(Date.parse('2026-12-01T12:00:00Z'), false)).toBe('full');
+    expect(betaClosed(Date.parse('2027-03-01T00:00:01-05:00'), true)).toBe('ended');
   });
 });

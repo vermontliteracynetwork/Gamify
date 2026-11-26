@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Check, CheckCircle, Clock, PaperPlaneTilt, PencilSimple, Printer, Rocket, SealCheck, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Check, CheckCircle, Clock, HandHeart, PaperPlaneTilt, PencilSimple, Printer, Rocket, SealCheck, UsersThree } from '@phosphor-icons/react';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -11,21 +11,23 @@ import { useReducedMotion } from '../ui/useReducedMotion';
 import { ScrapbookPage } from './scrapbook/Shell';
 import { GAMES } from '../games/registry';
 import { BETA } from '../beta/spec';
+import { betaClosed } from '../billing/trial';
 import {
   BETA_ASKS, DEVICES, GRADE_BANDS, HOW_OFTEN, REASON_MIN, ROLES, US_STATES, applicationText, emptyApplication, stepProblems,
   type BetaApplication, type Problem,
 } from '../beta/application';
 
 // The formal beta application (owner, 2026-11-26: "we need to have a formal
-// form page for beta sign up then"). Four short steps, one at a time, with a
-// step meter (onboarding paced like Duolingo, one clear step per screen,
+// form page for beta sign up then"). Short steps, one at a time, with a
+// step meter (five since the Design Chair split the asks from the agreement,
+// 2026-11-26; onboarding paced like Duolingo, one clear step per screen,
 // docs/queue.md section I). Every ask is a required tick, copied from /beta;
 // the person building Gamify approves the 10 testers. Anyone not ready to
 // commit gets a plain way to start Free now, so non-testers still sign up.
 // It sends a 'beta' feedback item (src/beta/application.ts) to the owner
 // inbox. Teacher data only: no student information is asked for.
 
-const STEPS = 4;
+const STEPS = 5;
 const FREE = '/login?mode=signup';
 
 export default function BetaApplyPage() {
@@ -87,6 +89,9 @@ export default function BetaApplyPage() {
   const field = fieldClasses('md', 'w-full');
   const motionProps = reduce ? {} : { initial: { opacity: 0, x: 40 * dir }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -40 * dir }, transition: { duration: 0.22 } };
 
+  const closed = betaClosed();
+  if (closed) return <Closed why={closed} />;
+
   return (
     <ScrapbookPage strength="A">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10 grid gap-6">
@@ -97,7 +102,7 @@ export default function BetaApplyPage() {
         </header>
 
         <div className="grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
-          <section aria-label={t('apply.title')} className="sb-card p-5 sm:p-8 grid gap-5 min-w-0 order-2 lg:order-1">
+          <section aria-label={t('apply.title')} className="sb-card p-5 sm:p-8 grid gap-5 min-w-0 order-1">
             {state === 'sent' ? (
               <Thanks name={a.name.trim()} headRef={head} />
             ) : (
@@ -184,6 +189,11 @@ export default function BetaApplyPage() {
                           </ul>
                           {msg('asks')}
                         </fieldset>
+                      </div>
+                    )}
+
+                    {step === 3 && (
+                      <div className="grid gap-5">
                         <Field id="reason" label={t('apply.reason')} required msg={msg('reason')}>
                           <textarea id="f-reason" rows={4} value={a.reason} onChange={(e) => set('reason', e.target.value)} onBlur={blur('reason')} maxLength={600} required className={`${field} py-2`} {...aria('reason')} aria-describedby={`c-reason${err('reason') ? ' e-reason' : ''}`} />
                           <span id="c-reason" className={`text-sm font-bold ${a.reason.trim().length >= REASON_MIN ? 'text-success-ink' : 'text-muted'}`} aria-live="polite">
@@ -200,7 +210,7 @@ export default function BetaApplyPage() {
                       </div>
                     )}
 
-                    {step === 3 && <Review a={a} edit={(s) => go(s)} />}
+                    {step === 4 && <Review a={a} edit={(s) => go(s)} />}
                   </motion.div>
                 </AnimatePresence>
 
@@ -216,10 +226,10 @@ export default function BetaApplyPage() {
             )}
           </section>
 
-          <aside className="grid gap-4 order-1 lg:order-2 min-w-0">
+          <aside className="grid gap-4 order-2 min-w-0">
             <div className="sb-card p-5 grid gap-3">
               <ul className="grid gap-3 list-none p-0 m-0">
-                {([[SealCheck, t('apply.fact.approve')], [UsersThree, t('apply.fact.spots', { spots: BETA.spots })], [Rocket, t('apply.fact.earn')]] as const).map(([Icon, text]) => (
+                {([[SealCheck, t('apply.fact.approve')], [UsersThree, t('apply.fact.spots', { spots: BETA.spots })], [Rocket, t('apply.fact.earn', { months: BETA.months })]] as const).map(([Icon, text]) => (
                   <li key={text} className="flex gap-3 items-start font-bold leading-snug">
                     <span className="w-10 h-10 shrink-0 rounded-full bg-mint border-std border-border flex items-center justify-center"><Icon weight="fill" size={20} aria-hidden="true" /></span>
                     <span className="pt-2">{text}</span>
@@ -241,12 +251,12 @@ export default function BetaApplyPage() {
   );
 }
 
-// The step meter: four segments, the done ones filled, no outline (owner, 2026-11-25).
+// The step meter: five segments, the done ones filled, no outline (owner, 2026-11-25).
 function Meter({ step }: { step: number }) {
   return (
     <div className="grid gap-2">
       <p className="m-0 text-sm font-bold" aria-live="polite">{t('apply.stepOf', { n: step + 1, total: STEPS })}: {t(`apply.step.${step + 1}` as StringKey)}</p>
-      <ol aria-label={t('apply.steps')} className="grid grid-cols-4 gap-2 list-none p-0 m-0">
+      <ol aria-label={t('apply.steps')} className="grid grid-cols-5 gap-2 list-none p-0 m-0">
         {Array.from({ length: STEPS }, (_, i) => (
           <li key={i} aria-current={i === step ? 'step' : undefined} className="grid gap-1 min-w-0">
             <span className={`h-3 rounded-pill motion-safe:transition-colors ${i <= step ? 'bg-grape' : 'bg-surface-2'}`} />
@@ -298,7 +308,8 @@ function Review({ a, edit }: { a: BetaApplication; edit: (step: number) => void 
   const groups: { step: number; rows: [string, string][] }[] = [
     { step: 0, rows: [[t('apply.name'), a.name], [t('apply.email'), a.email], [t('apply.role'), t(`betaPage.role.${a.role}` as StringKey)], [t('apply.school'), a.school], [t('apply.state'), a.state], [t('apply.grades'), a.grades.join(', ')], [t('apply.classSize'), a.classSize || none], [t('apply.subjects'), a.subjects || none]] },
     { step: 1, rows: [[t('apply.devices'), a.devices.map((d) => t(`apply.device.${d}` as StringKey)).join(', ')], [t('apply.often'), t(`apply.often.${a.often}` as StringKey)], [t('apply.games'), a.games.join(', ') || none], [t('apply.network'), a.network || none]] },
-    { step: 2, rows: [[t('apply.asks'), `${a.asks.length} of ${BETA_ASKS.length}`], [t('apply.reason'), a.reason]] },
+    { step: 2, rows: [[t('apply.asks'), `${a.asks.length} of ${BETA_ASKS.length}`]] },
+    { step: 3, rows: [[t('apply.reason'), a.reason]] },
   ];
   return (
     <div className="grid gap-3">
@@ -314,6 +325,23 @@ function Review({ a, edit }: { a: BetaApplication; edit: (step: number) => void 
         </section>
       ))}
     </div>
+  );
+}
+
+// The closed card (Design Chair, 2026-11-26): after Feb 28, 2027 Eastern, or
+// once BETA_SPOTS_OPEN is off, the form is gone and Start free stays.
+function Closed({ why }: { why: 'ended' | 'full' }) {
+  return (
+    <ScrapbookPage strength="A">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10 grid gap-6">
+        <section data-beta-closed aria-labelledby="closed-title" className="sb-card p-5 sm:p-8 grid gap-4 justify-items-start max-w-3xl">
+          <span className="w-14 h-14 rounded-full bg-butter border-std border-border flex items-center justify-center"><HandHeart weight="fill" size={28} aria-hidden="true" /></span>
+          <h1 id="closed-title" className="title-bubble text-4xl sm:text-6xl min-w-0"><Title text={t(why === 'ended' ? 'apply.closedEnded' : 'apply.closedFull')} /></h1>
+          <p className="text-lg font-semibold m-0">{t(why === 'ended' ? 'apply.closedEndedText' : 'apply.closedFullText', { spots: BETA.spots })}</p>
+          <Link to={FREE} className={buttonClasses('go', 'hover-pop', 'lg')}>{t('apply.startFree')}<ArrowRight weight="bold" size={20} aria-hidden="true" /></Link>
+        </section>
+      </main>
+    </ScrapbookPage>
   );
 }
 
