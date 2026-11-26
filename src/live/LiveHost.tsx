@@ -338,7 +338,7 @@ function Room({ game }: { game: GameCode }) {
               and 5b): a full private view over the big screen. */}
           {monOpen && state.phase !== 'ended' && (
             <ClassView state={state} gameName={gameName} setName={allSets.find((x) => x.id === state.setId)?.name || t('sets.untitled')} sets={setsInUse} log={log} seenAt={seenAt.current} now={now}
-              canMonitor={canMonitor} paid={paid} message={message} setMessage={setMessage} templates={TEMPLATES.map((k) => t(k))} lock={lock}
+              canMonitor={canMonitor} customMessage={TIERS[tier].customLockMessage} paid={paid} message={message} setMessage={setMessage} templates={TEMPLATES.map((k) => t(k))} lock={lock}
               onPause={() => update((s) => ({ ...s, phase: s.phase === 'paused' ? 'play' : 'paused' }))} onEnd={() => setConfirmEnd(true)} onClose={() => setMonOpen(false)}
               setSelect={(pl) => <SetSelect value={assignOf(pl.pid).setId ?? state.setId} label={t('live.setFor', { name: pl.name })} onChange={(v) => setAssign(pl.pid, { setId: v })} />}
               timeLeft={timeLeft !== null ? clock(timeLeft) : null} goal={goal} classRight={classRight} reveal={reveal} setReveal={setReveal}

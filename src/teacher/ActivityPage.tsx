@@ -70,12 +70,16 @@ export default function ActivityPage() {
   const set = sets.find((s) => s.id === setId[0]);
   const pro = tier === 'pro';
   const live = TIERS[tier].liveMode;
+  // Plan rules (owner, 2026-11-26): homework and choice boards are Pro; Plus
+  // and Homeschool give each student a question set, Pro also a game.
+  const lim = TIERS[tier];
+  const locked = (id: How) => (id === 'lobby' && !live) || (id === 'homework' && !lim.homework) || (id === 'board' && !pro) || (id === 'each' && !lim.setPerStudent);
   const hows = HOWS.filter((h) => (h.id === 'each' || h.id === 'board' ? !!classId : true) && GAMES.some((g) => g.modes.includes(h.mode!)));
   // A game for each student and the choice board take solo games and
   // two-player games played against the computer (teacher, 2026-10-31).
   const ownDevice = (g: (typeof GAMES)[number]) => g.modes.includes('solo') || g.modes.includes('versus');
   const fits = (g: (typeof GAMES)[number]) => !how || (how === 'each' || how === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === how)!.mode!));
-  const ready = [true, !!how && (how !== 'each' && how !== 'board' || pro) && (how !== 'lobby' || live), how === 'board' ? board.length > 1 : !!game, !!set, true][step];
+  const ready = [true, !!how && !locked(how), how === 'board' ? board.length > 1 : !!game, !!set, true][step];
   const showClasses = TIERS[tier].hasClasses && classes.length > 0;
 
   async function finish() {
@@ -223,13 +227,16 @@ export default function ActivityPage() {
                   className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-3 items-center ${how === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
                   {/* Icons (rule 7): Phosphor bold, ink on a round badge in the way's color (rule 12). */}
                   <span className="row-span-2 w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: mode ? MODE_BRIGHT[mode] : 'var(--lavender)' }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
-                  <span className="font-display text-lg leading-tight flex items-center gap-2">{t(`activity.how.${id}`)}{(id === 'each' || id === 'board') && !pro && <LockSimple weight="fill" size={18} aria-label={t('activity.proOnly')} />}{id === 'lobby' && !live && <LockSimple weight="fill" size={18} aria-label={t('activity.liveOnly')} />}</span>
+                  <span className="font-display text-lg leading-tight flex items-center gap-2">{t(`activity.how.${id}`)}{locked(id) && <LockSimple weight="fill" size={18} aria-label={t(id === 'lobby' ? 'activity.liveOnly' : 'activity.locked')} />}</span>
                   <span className="text-sm font-semibold text-muted leading-snug">{t(`activity.how.${id}Hint`)}</span>
                 </button>
               ))}
             </div>
             {how === 'lobby' && !live && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.liveOnly')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></div>}
-            {(how === 'each' || how === 'board') && !pro && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.proOnly')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
+            {how === 'homework' && !lim.homework && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.homeworkPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
+            {how === 'each' && !lim.setPerStudent && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.eachPlus')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></div>}
+            {how === 'each' && lim.setPerStudent && !lim.gamePerStudent && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.eachGamePro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
+            {how === 'board' && !pro && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.proOnly')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'screen' && <Choices label={t('host.teams')} value={teams} onChange={setTeams} options={(['teacher', 'random', 'class'] as const).map((k) => ({ id: k, title: t(`host.teams.${k}`), hint: t(`host.teams.${k}Hint`) }))} />}
             {how === 'lobby' && <Choices label={t('live.howPlay')} value={together} onChange={setTogether} options={(['together', 'compete'] as const).map((k) => ({ id: k, title: t(`live.mode.${k}`), hint: t(`live.mode.${k}Hint`), art: <ClassModeIcon mode={k} /> }))} />}
             {(how === 'code' || how === 'homework' || how === 'each' || how === 'board') && (
@@ -276,7 +283,7 @@ export default function ActivityPage() {
               <div className="grid gap-2">
                 <p className="font-bold">{t('activity.eachPlan')}</p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <select aria-label={t('activity.groupGame')} id="group-game" className="min-h-11 px-3 rounded-input border-std border-border font-bold bg-surface" defaultValue={game.id}>
+                  <select aria-label={t('activity.groupGame')} id="group-game" disabled={!lim.gamePerStudent} className="min-h-11 px-3 rounded-input border-std border-border font-bold bg-surface disabled:opacity-50" defaultValue={game.id}>
                     {GAMES.filter((g) => ownDevice(g) && canPlayGame(tier, g.id)).map((g) => <option key={g.id} value={g.id}>{g.name}{g.modes.includes('solo') ? '' : ` (${t('activity.vsComputer')})`}</option>)}
                   </select>
                   <select aria-label={t('activity.groupSet')} id="group-set" className="min-h-11 px-3 rounded-input border-std border-border font-bold bg-surface max-w-64" defaultValue={set.id}>

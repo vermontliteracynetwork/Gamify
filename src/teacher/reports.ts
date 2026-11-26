@@ -246,3 +246,20 @@ export function questionPlayStats(log: QuestionLogEntry[], setId: string): Map<s
   for (const [prompt, rows] of byPrompt) { const s = playStats(rows); if (s.answered) out.set(prompt, s); }
   return out;
 }
+
+// Free's whole report (owner, 2026-11-26): each student's total accuracy and
+// raw score, correct out of the questions they tried. Questions the game
+// never reached ('left') don't count as tried.
+export interface StudentScore { name: string; right: number; tried: number; pct: number }
+export function studentScores(log: QuestionLogEntry[], nameOf: (e: QuestionLogEntry) => string): StudentScore[] {
+  const by = new Map<string, { right: number; tried: number }>();
+  for (const e of log) {
+    if (e.outcome === 'left') continue;
+    const name = nameOf(e);
+    const s = by.get(name) ?? { right: 0, tried: 0 };
+    s.tried += 1;
+    if (e.outcome === 'right') s.right += 1;
+    by.set(name, s);
+  }
+  return [...by.entries()].map(([name, s]) => ({ name, ...s, pct: s.tried ? Math.round((s.right / s.tried) * 100) : 0 })).sort((a, b) => a.name.localeCompare(b.name));
+}

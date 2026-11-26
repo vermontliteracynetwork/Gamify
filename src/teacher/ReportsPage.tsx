@@ -11,7 +11,7 @@ import { PageHeader, Panel, Tabs } from '../ui/kit';
 import { listLiveEvents } from '../live/events';
 
 import TeacherNav from '../ui/TeacherNav';
-import { filterLog, groupLog, percent, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
+import { filterLog, groupLog, percent, studentScores, toCsv, type GroupBy, type ReportFilter, type ReportRow, retention } from './reports';
 import { UpgradeButton } from '../billing/Upgrade';
 import { supportsText } from './reportDoc';
 import { Link } from 'react-router-dom';
@@ -111,6 +111,28 @@ export default function ReportsPage() {
       </button>
     </th>
   );
+
+  // Free (owner, 2026-11-26): nothing is saved, no question-by-question
+  // reports; each student's accuracy and raw score for today's games only.
+  if (!TIERS[tier].questionReports) {
+    const today = new Date().toISOString().slice(0, 10);
+    const scores = studentScores((realLog ?? []).filter((e) => e.at.slice(0, 10) >= today), (e) => e.teamName ?? names.student(e.studentId));
+    return (
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+        <TeacherNav />
+        <PageHeader title={t('reports.title')} subtitle={t('reports.freeSub')} actions={<UpgradeButton suggest="plus" label={t('reports.freeUpgrade')} className="min-h-11 px-4" />} />
+        <Panel>
+          {scores.length === 0 ? <p className="font-bold">{t('reports.freeNone')}</p> : (
+            <table className="w-full text-left border-collapse">
+              <caption className="sr-only">{t('reports.freeTitle')}</caption>
+              <thead><tr className="border-b-[2px] border-border"><th scope="col" className="p-2.5 font-bold">{t('rp.student')}</th><th scope="col" className="p-2.5 font-bold">{t('reports.freePct')}</th><th scope="col" className="p-2.5 font-bold">{t('reports.freeRaw')}</th></tr></thead>
+              <tbody>{scores.map((s) => <tr key={s.name} className="border-b border-border-soft"><th scope="row" className="p-2.5 font-bold">{s.name}</th><td className="p-2.5 font-semibold tabular-nums">{s.pct}%</td><td className="p-2.5 font-semibold tabular-nums">{t('reports.freeRawIs', { right: s.right, tried: s.tried })}</td></tr>)}</tbody>
+            </table>
+          )}
+        </Panel>
+      </main>
+    );
+  }
 
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">

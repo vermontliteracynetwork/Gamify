@@ -37,6 +37,10 @@ function switching(cloud: DataStore): DataStore {
   return out as unknown as DataStore;
 }
 
+function guestName(): string | undefined {
+  try { return (JSON.parse(sessionStorage.getItem('gamify:arcade-session') ?? 'null') as { name?: string } | null)?.name; } catch { return undefined; }
+}
+
 const base: DataStore = supabase ? switching(createCloudStore(supabase)) : local;
 
 // Plan preview from the owner dashboard: this tab acts as if on another plan
@@ -53,7 +57,10 @@ export const data: DataStore = {
   // ("Owls: Maya"), so reports show each student, not only the team.
   logQuestion: (async (e: QuestionLogEntry) => {
     const who = e.mode === 'share' && e.teamName ? answererFor(e.teamName) : undefined;
-    return base.logQuestion(who ? { ...e, teamName: `${e.teamName}: ${who}` } : e);
+    // A student with no class list (every Free game, owner 2026-11-26) types a
+    // name or rolls one: keep it on the answer so the score shows by name.
+    const guest = !e.teamName && e.studentId?.startsWith('guest') ? guestName() : undefined;
+    return base.logQuestion(who ? { ...e, teamName: `${e.teamName}: ${who}` } : guest ? { ...e, teamName: guest } : e);
   }) as DataStore['logQuestion'],
   getSetting: (async (key: string) => (key === 'tier' && previewTier() ? previewTier() : base.getSetting(key))) as DataStore['getSetting'],
 };

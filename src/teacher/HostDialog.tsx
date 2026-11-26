@@ -119,7 +119,12 @@ export default function HostDialog({ set, onClose }: { set: QuestionSet; onClose
                   </div>
                 )}
 
-                {where === 'homework' && (
+                {where === 'homework' && !TIERS[tier].homework && (
+                  <div className="rounded-input border-std border-border-soft p-3 flex flex-wrap items-center gap-2">
+                    <p className="font-bold">{t('activity.homeworkPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" />
+                  </div>
+                )}
+                {where === 'homework' && TIERS[tier].homework && (
                   <div className="rounded-input border-std border-border-soft p-3 grid gap-3">
                     <label className="flex flex-wrap items-center gap-2 font-bold">{t('host.due')}
                       <input type="date" value={due} min={today} max={lastDue} onChange={(e) => { setDue(e.target.value); setCode(null); }}

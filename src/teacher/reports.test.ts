@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QuestionLogEntry } from '../data/types';
-import { filterLog, groupLog, percent, questionPlayStats, setPlayStats, toCsv } from './reports';
+import { filterLog, groupLog, percent, questionPlayStats, setPlayStats, studentScores, toCsv } from './reports';
 
 const row = (p: Partial<QuestionLogEntry>): QuestionLogEntry => ({
   id: Math.random().toString(), at: '2026-10-24T10:00:00Z', gameId: 'star-quiz', mode: 'solo', prompt: 'Q1', answer: 'a', tries: ['a'], ms: 2000, outcome: 'right', ...p,
@@ -114,5 +114,13 @@ describe('how a set played', () => {
     expect(q.get('Q1')).toMatchObject({ answered: 2, firstTry: 1, pct: 50, topWrong: 'b', topWrongCount: 1 });
     expect(q.get('Q2')).toMatchObject({ answered: 1, pct: 0, topWrong: 'c', topWrongCount: 1 });
     expect(q.has('Q9')).toBe(false);
+  });
+});
+
+describe('studentScores (Free)', () => {
+  it('gives each student accuracy and correct out of tried, skipping questions never reached', () => {
+    const e = (teamName: string, outcome: 'right' | 'skipped' | 'left' | 'timeout') => ({ id: Math.random().toString(), at: '', gameId: 'g', mode: 'solo' as const, prompt: 'q', answer: 'a', tries: [], ms: 1, outcome, teamName });
+    const out = studentScores([e('Ava', 'right'), e('Ava', 'timeout'), e('Ava', 'left'), e('Ben', 'right')], (x) => x.teamName ?? '');
+    expect(out).toEqual([{ name: 'Ava', right: 1, tried: 2, pct: 50 }, { name: 'Ben', right: 1, tried: 1, pct: 100 }]);
   });
 });

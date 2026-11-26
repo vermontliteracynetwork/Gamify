@@ -31,6 +31,18 @@ export interface TierLimits {
   // Live mode: a class lobby where everyone joins on their own device (owner,
   // 2026-11-26: "live mode is included in plus but not free").
   liveMode: boolean;
+  // Plan rules (owner, 2026-11-26, comment on the Compare every feature
+  // table). Free has no class or student list: students type a name or get a
+  // random one each time, and nothing is kept after today.
+  studentList: boolean;
+  customPictures: boolean;
+  customLockMessage: boolean;
+  homework: boolean;
+  themeChoices: boolean;
+  setPerStudent: boolean;
+  gamePerStudent: boolean;
+  questionReports: boolean;
+  reportsByStudent: boolean;
   reportHistoryDays: number;
   // How far ahead a homework deadline can be set (homework links, coming).
   homeworkDaysAhead: number;
@@ -40,31 +52,41 @@ const UNLIMITED = Number.POSITIVE_INFINITY;
 
 export const TIERS: Record<Tier, TierLimits> = {
   free: {
-    hasClasses: false, classrooms: 1, studentsPerClassroom: 30, savedQuestionSets: 3, assignedSetsPerStudent: 1,
+    hasClasses: false, classrooms: 0, studentsPerClassroom: 0, savedQuestionSets: 3, assignedSetsPerStudent: 0,
     // Free plays every theme already made (owner, 2026-11-24: "free plan should
     // have access to use all themes created, just can only create a theme for
     // game show").
     allGames: false, themesPlayable: true, themeBuilder: 'trial', liveMonitorAndLock: false, liveMode: false,
-    reportHistoryDays: 30, homeworkDaysAhead: 14,
+    // Nothing is saved on Free (owner, 2026-11-26): today's scores only.
+    reportHistoryDays: 1, homeworkDaysAhead: 0,
+    studentList: false, customPictures: false, customLockMessage: false, homework: false, themeChoices: false,
+    setPerStudent: false, gamePerStudent: false, questionReports: false, reportsByStudent: false,
   },
   plus: {
-    hasClasses: true, classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
+    hasClasses: true, classrooms: 3, studentsPerClassroom: 60, savedQuestionSets: 25, assignedSetsPerStudent: 1,
     allGames: true, themesPlayable: true, themeBuilder: 'one-per-game', liveMonitorAndLock: true, liveMode: true,
-    reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
+    reportHistoryDays: UNLIMITED, homeworkDaysAhead: 0,
+    studentList: true, customPictures: false, customLockMessage: false, homework: false, themeChoices: false,
+    setPerStudent: true, gamePerStudent: false, questionReports: true, reportsByStudent: true,
   },
   pro: {
     hasClasses: true, classrooms: UNLIMITED, studentsPerClassroom: UNLIMITED, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: UNLIMITED,
     allGames: true, themesPlayable: true, themeBuilder: 'unlimited', liveMonitorAndLock: true, liveMode: true,
     reportHistoryDays: UNLIMITED, homeworkDaysAhead: UNLIMITED,
+    studentList: true, customPictures: true, customLockMessage: true, homework: true, themeChoices: true,
+    setPerStudent: true, gamePerStudent: true, questionReports: true, reportsByStudent: true,
   },
   // Homeschool (teacher, 2026-10-26): every game (no early access), 3 theme
   // designs per game, library themes, up to 10 students, 5 sets assigned at
   // a time, homework up to 14 days ahead, all-time reports. Live monitor
   // and Lock predicted on (guess, noted in the development plan).
   homeschool: {
-    hasClasses: false, classrooms: 1, studentsPerClassroom: 10, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 5,
-    allGames: true, themesPlayable: true, themeBuilder: 'three-per-game', liveMonitorAndLock: true, liveMode: true,
-    reportHistoryDays: UNLIMITED, homeworkDaysAhead: 14,
+    hasClasses: false, classrooms: 1, studentsPerClassroom: 10, savedQuestionSets: UNLIMITED, assignedSetsPerStudent: 1,
+    // No live monitor and Lock on Homeschool (owner, 2026-11-26).
+    allGames: true, themesPlayable: true, themeBuilder: 'three-per-game', liveMonitorAndLock: false, liveMode: true,
+    reportHistoryDays: UNLIMITED, homeworkDaysAhead: 0,
+    studentList: true, customPictures: false, customLockMessage: false, homework: false, themeChoices: false,
+    setPerStudent: true, gamePerStudent: false, questionReports: true, reportsByStudent: true,
   },
 };
 

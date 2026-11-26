@@ -5,6 +5,8 @@ test('reports group the question log, show the most common wrong answer, and dow
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
   await page.addInitScript(() => {
     if (localStorage.getItem('gamify:log')) return;
+    // Question-by-question reports need a paid plan (owner, 2026-11-26).
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' }));
     const now = new Date().toISOString();
     localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 9', ownerId: 'local-teacher', createdAt: now, joinCode: 'BCDFG' }]));
     localStorage.setItem('gamify:students', JSON.stringify([{ id: 'ava', classroomId: 'c1', name: 'Ava', picturePassword: ['cat', 'dog'] }, { id: 'ben', classroomId: 'c1', name: 'Ben', picturePassword: ['sun', 'moon'] }]));
@@ -70,8 +72,15 @@ test('classes list shows each class\'s week at a glance', async ({ page }) => {
   await expect(page.getByText('This week: 4 questions answered, 75% right, 2 students played. Most played: Game Show.')).toBeVisible();
 });
 
-test('the example report shows 20 students on every plan, even with no class data', async ({ page }, info) => {
+test('Free shows only today\'s score for each student; paid plans get the example report', async ({ page }) => {
   await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'free' })); });
+  await page.goto('/teacher/reports');
+  await expect(page.getByText('Today\'s scores for each student. Free saves nothing after today.')).toBeVisible();
+  await expect(page.getByText('No games played today yet.', { exact: false })).toBeVisible();
+});
+
+test('the example report shows 20 students on paid plans, even with no class data', async ({ page }, info) => {
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' })); });
   await page.goto('/teacher/reports');
   await expect(page.getByText(/This is an example: 20 students/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'By skill (Common Core)' })).toBeVisible();

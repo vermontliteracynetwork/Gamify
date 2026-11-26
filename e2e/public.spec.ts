@@ -39,18 +39,17 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   // The teacher lands on Home: the first-day steps and empty states (batch 6).
   await expect(page.getByRole('heading', { name: 'Welcome to Gamify' })).toBeVisible();
   await expect(page.getByText('Get started, 0 of 4 done').first()).toBeVisible();
-  // Free has no classes: the menu opens their student list.
+  // Free has no class or student list (owner, 2026-11-26): the Students page says so.
   await page.getByRole('navigation', { name: 'Teacher pages' }).getByRole('link', { name: 'Students' }).click();
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
-  await page.getByLabel('Add students (type or paste names, one per line)').fill('Kai');
-  await page.getByRole('button', { name: 'Add 1 student' }).click();
+  await expect(page.getByText('Student lists come with Plus, Pro and Homeschool.')).toBeVisible();
   // Students get in only with a game code (teacher, 2026-10-31).
   await expect(page.getByText(/Join code/)).toHaveCount(0);
   const code = 'BKDFG';
   await seedGameCode(page, code);
   await page.goto('/teacher/classes');
-  // Adding Kai and making a game code finish two steps (Create an activity counts codes).
-  await expect(page.getByRole('button', { name: 'Get started 2/4' })).toBeVisible();
+  // Making a game code finishes a step (Create an activity counts codes).
+  await expect(page.getByRole('button', { name: /^Get started [1-4]\/4$/ })).toBeVisible();
   await page.screenshot({ path: `test-results/get-started.png` });
   await page.getByRole('button', { name: 'Log out' }).click();
 
@@ -64,7 +63,10 @@ test('the games need sign-in; a student joins with a game code', async ({ page }
   await expect(page.getByRole('button', { name: 'Go' })).toBeDisabled();
   await page.getByLabel('Game code').fill(code.toLowerCase());
   await page.getByRole('button', { name: 'Go' }).click();
-  await expect(page.getByRole('button', { name: 'Kai', exact: true })).toBeVisible();
+  // No student list on Free: the student rolls a name or types their own.
+  await expect(page.getByRole('heading', { name: /pick your game name/i })).toBeVisible();
+  await page.getByLabel('Or type your first name').fill('Kai');
+  await expect(page.getByText('Kai', { exact: true })).toBeVisible();
 });
 
 test('teacher hosts one set with a game code; a student joins by link and plays that set', async ({ page }, info) => {
@@ -84,7 +86,7 @@ test('teacher hosts one set with a game code; a student joins by link and plays 
   await page.getByRole('button', { name: 'Log out' }).click();
 
   await page.goto(`/join/${code}`);
-  await expect(page.getByRole('heading', { name: 'Pick Your Game Name' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /pick your game name/i })).toBeVisible();
   await page.getByRole('button', { name: 'Roll a new name' }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.getByRole('button', { name: 'Set up and play' }).click();
@@ -321,8 +323,8 @@ test('every new page opens at the top, and the comparison chart lists every plan
   const chart = page.getByRole('table', { name: 'Compare Every Feature' });
   await expect(chart).toBeVisible();
   for (const row of ['Games', 'New games before anyone else', 'Theme Builder designs', 'Classes', 'Students', 'Live monitor and Lock', 'Saved question sets', 'Report history',
-    'Class lobby: leaderboard or one class goal', 'Groups in the lobby, each with its own game', 'Sets assigned per student', 'Library themes', 'Theme guide templates',
-    'Student sign-in pictures', 'How far ahead a due date can be', 'A game for each student', 'Choice boards', 'A fresh class lobby code each time', 'Read-aloud']) {
+    'Live mode (class lobby)', 'Class lobby: leaderboard or one class goal', 'Groups in the lobby, each with its own game', 'Sets assigned per student', 'Library themes', 'Theme guide templates',
+    'Student sign-in pictures', 'A question set for each student', 'A game for each student', 'Choice boards', 'Theme choices', 'Reports by student', 'Your own Lock message', 'A fresh class lobby code each time', 'Read-aloud']) {
     await expect(chart.getByRole('rowheader', { name: new RegExp(`^${row.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) })).toHaveCount(1);
   }
   await expect(chart.getByRole('row', { name: /^Choice boards/ }).getByRole('cell').nth(2)).toHaveText('Included');

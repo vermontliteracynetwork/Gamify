@@ -1,8 +1,8 @@
 import { makeGameCode } from '../data/gameCodes';
 import { useCrumbLabel } from '../ui/Breadcrumbs';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { DiceFive, Eye, EyeSlash, GearSix, Heart, Lightbulb, Minus, PencilSimple, Plus, Printer, Star, Trash, TrendDown, TrendUp, UploadSimple, UsersThree } from '@phosphor-icons/react';
+import { GearSix, Heart, Lightbulb, Minus, PencilSimple, Plus, Printer, Star, Trash, TrendDown, TrendUp, UploadSimple, UsersThree } from '@phosphor-icons/react';
 import { STUDENT_THEME_BUILDER, TIERS } from '../config';
 import { data, newId } from '../data';
 import { useAsync, useMySets, useTier } from '../data/hooks';
@@ -13,7 +13,7 @@ import SetPicker from '../games/SetPicker';
 import { t } from '../i18n';
 import PinGate from '../settings/PinGate';
 import { DEFAULT_SETTINGS } from '../settings/settings';
-import { avatarOf, isUploadedAvatar, newPicturePassword, newPin, PICTURES, PIN_RULE } from '../student/pictures';
+import { avatarOf, isUploadedAvatar, newPicturePassword, PICTURES } from '../student/pictures';
 import Avatar from '../student/Avatar';
 import { imageFileToDataUrl } from '../ui/imageFile';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
@@ -59,15 +59,20 @@ export default function ClassPage() {
   const frozen = readOnlyIds(classes, TIERS[tier].classrooms).has(id);
   const free = !TIERS[tier].hasClasses;
   const [confirmDelete, setConfirmDelete] = useState(false);
-  useEffect(() => {
-    // Students added before PIN sign-in get a PIN now.
-    const missing = students.filter((s) => !s.pin);
-    if (!missing.length) return;
-    const taken = students.map((s) => s.pin ?? '');
-    void Promise.all(missing.map((s) => { const pin = newPin(taken); taken.push(pin); return data.saveStudent({ ...s, pin }); })).then(reloadStudents);
-  }, [students]); // eslint-disable-line react-hooks/exhaustive-deps
   useCrumbLabel(classroom?.name);
   const look: GameTheme | undefined = undefined; // sign-in picture designs removed (owner, 2026-11-25)
+  // Free has no class or student list (owner, 2026-11-26): students type a
+  // name or roll a random one every time they play.
+  if (!TIERS[tier].studentList) return (
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24">
+      <TeacherNav />
+      <PageHeader title={t('roster.title')} subtitle={t('roster.freeSub')} />
+      <Panel className="grid gap-3 justify-items-start">
+        <p className="font-bold text-lg">{t('roster.freeText')}</p>
+        <UpgradeButton suggest="plus" />
+      </Panel>
+    </main>
+  );
   if (!classroom) return null;
   const assignTo = (ids: string[]) => { setPreset(ids); setTab('sets'); };
 
@@ -167,8 +172,6 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
   const [editing, setEditing] = useState<Student | null>(null);
   const [asking, setAsking] = useState<Student | null>(null);
   const [picking, setPicking] = useState<Student | null>(null);
-  // PINs stay hidden until the teacher asks (portal 3b): the page may be on the projector.
-  const [showPins, setShowPins] = useState(false);
   // The paste box waits behind Add students once the class has names
   // (approved /brand "3b", 2026-11-25); an empty class shows it right away.
   const [adding, setAdding] = useState(false);
@@ -178,17 +181,14 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
 
   async function add() {
     const taken = students.map((s) => s.picturePassword);
-    const pins = students.map((s) => s.pin ?? '');
     // Each new student gets the built-in picture used least so far.
     const uses = new Map(PICTURES.map((p) => [p.id, students.filter((s) => avatarOf(s) === p.id).length]));
     for (const name of toAdd.slice(0, room)) {
       const pw = newPicturePassword(taken);
       taken.push(pw);
-      const pin = newPin(pins);
-      pins.push(pin);
       const avatar = [...uses.entries()].sort((a, b) => a[1] - b[1])[0][0];
       uses.set(avatar, (uses.get(avatar) ?? 0) + 1);
-      await data.saveStudent({ id: newId('stu'), classroomId, name: name.slice(0, 30), picturePassword: pw, avatar, pin });
+      await data.saveStudent({ id: newId('stu'), classroomId, name: name.slice(0, 30), picturePassword: pw, avatar });
     }
     setNames('');
     setAdding(false);
@@ -201,7 +201,6 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
       <div className="grid gap-4 items-start xl:grid-cols-[minmax(0,1fr)_20rem]">
         <PortalCard labelledBy="roster-title" title={t('class.studentCount', { count: students.length })} tip={t('class.rosterTip')}
           right={<>
-            {students.length > 0 && <Button size="sm" aria-pressed={showPins} onClick={() => setShowPins(!showPins)}>{showPins ? <EyeSlash weight="bold" size={16} /> : <Eye weight="bold" size={16} />}{showPins ? t('class.hidePins') : t('class.showPins')}</Button>}
             <Button size="sm" onClick={() => { if (students.length) setAdding(true); else document.getElementById('student-names')?.focus(); }}><Plus weight="bold" size={16} />{t('class.addStudentsShort')}</Button>
           </>}>
           {students.length === 0 ? <p className="font-bold">{t('class.noStudents')}</p> : (
@@ -211,7 +210,6 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
                 <thead>
                   <tr className="text-left text-[0.8125rem] text-muted">
                     <th scope="col" className="font-bold pb-1.5 pr-2">{t('rp.student')}</th>
-                    <th scope="col" className="font-bold pb-1.5 pr-2">{t('class.pinCol')}</th>
                     <th scope="col" className="font-bold pb-1.5 pr-2">{t('reports.supports')}</th>
                     <th scope="col" className="font-bold pb-1.5 pr-2 hidden md:table-cell">{t('rp.last')}</th>
                     <th scope="col" className="font-bold pb-1.5 pr-2">{t('rp.firstTry')}</th>
@@ -232,9 +230,6 @@ function StudentsTab({ classroomId, students, reload, log, groups }: { classroom
                             <Link to={`/teacher/classes/${classroomId}/students/${s.id}`} className="text-text underline-offset-2 hover:underline break-words">{s.name}</Link>
                           </span>
                         </th>
-                        <td className="pr-2 font-bold tabular-nums tracking-widest text-muted whitespace-nowrap">
-                          {showPins ? <><span className="sr-only">{t('class.pinIs', { pin: '' })}</span>{s.pin}</> : <span role="img" aria-label={t('class.pinHidden')}>••••</span>}
-                        </td>
                         <td className="pr-2 py-1"><span className="flex flex-wrap gap-1">{chips.map((c) => <Chip key={c} bg="var(--blue-crystal)">{c}</Chip>)}</span></td>
                         <td className="pr-2 font-semibold whitespace-nowrap hidden md:table-cell">{fmtDay(lastDay(mine)) || <span className="text-muted">{t('class.notYet')}</span>}</td>
                         <td className="pr-2">{ft.answered ? <FirstTryBar pct={ft.pct} label={t('classes.firstTryIs', { pct: ft.pct })} /> : <span className="text-muted font-semibold">-</span>}</td>
@@ -432,21 +427,18 @@ function GroupsTab({ students, log, sets, look, reload, onAssign }: { students: 
 }
 
 // A student's avatar and PIN (teacher, 2026-10-26): a built-in picture on
-// every plan, or an uploaded picture on Plus and Pro; a PIN the teacher types
-// or rolls, different from everyone else's on the list.
+// every plan, or an uploaded picture on Pro (owner, 2026-11-26: custom
+// sign-in pictures are Pro; no PIN sign-in at all).
 export function AvatarDialog({ student, others, look, onClose }: { student: Student; others: Student[]; look?: Parameters<typeof Avatar>[0]['theme']; onClose: () => void }) {
   const tier = useTier();
   const [avatar, setAvatar] = useState(avatarOf(student));
-  const [pin, setPin] = useState(student.pin ?? '');
   const [problem, setProblem] = useState('');
-  const taken = others.map((o) => o.pin ?? '');
+  void others;
   async function upload(file: File) {
     try { setAvatar(await imageFileToDataUrl(file, 256)); setProblem(''); } catch (e) { setProblem((e as Error).message); }
   }
   async function save() {
-    if (!PIN_RULE.test(pin)) { setProblem(t('class.pinRule')); return; }
-    if (taken.includes(pin)) { setProblem(t('class.pinTaken')); return; }
-    await data.saveStudent({ ...student, avatar, pin });
+    await data.saveStudent({ ...student, avatar });
     onClose();
   }
   return (
@@ -458,21 +450,14 @@ export function AvatarDialog({ student, others, look, onClose }: { student: Stud
             className={`rounded-full p-1 ${avatar === p.id ? 'bg-butter ring-[3px] ring-border' : ''}`}><Avatar avatar={p.id} theme={look} size={52} /></button>
         ))}
       </div>
-      {tier === 'free' ? (
-        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.avatarUploadPlus')}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>
+      {!TIERS[tier].customPictures ? (
+        <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.avatarUploadPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>
       ) : (
         <label className={buttonClasses('secondary', 'justify-self-start cursor-pointer')}>
           <UploadSimple weight="bold" size={18} />{isUploadedAvatar(avatar) ? t('class.avatarReplace') : t('class.avatarUpload')}
           <input type="file" accept="image/*" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); }} />
         </label>
       )}
-      <label className="grid gap-1 font-bold">{t('class.pin')}
-        <span className="flex gap-2">
-          <input value={pin} inputMode="numeric" maxLength={4} onChange={(e) => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setProblem(''); }}
-            className="w-32 min-h-12 px-3 rounded-input border-std border-border font-display text-2xl tracking-[0.3em] tabular-nums" />
-          <Button onClick={() => { setPin(newPin([...taken, pin])); setProblem(''); }}><DiceFive weight="bold" size={18} />{t('class.pinRoll')}</Button>
-        </span>
-      </label>
       <p className="min-h-6 font-bold text-error" role="alert">{problem}</p>
       <Button variant="main" onClick={() => void save()}>{t('class.avatarSave')}</Button>
     </Dialog>
@@ -560,7 +545,8 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
       <Panel className="grid gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-2xl font-bold"><Title text={t('class.assignNew')} /></h2>
-          <Button variant="main" disabled={setId.length === 0 || targets.length === 0 || full} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
+          {/* Theme choices: none, or 2 to 10 (owner, 2026-11-26). */}
+          <Button variant="main" disabled={setId.length === 0 || targets.length === 0 || full || themeIds.length === 1} onClick={() => void assign()}><Plus weight="bold" size={18} />{t('class.assign')}</Button>
         </div>
         <p className="font-bold -mt-2" aria-live="polite">{setId.length ? t('class.picked', { name: name(setId[0]) }) : t('class.pickBelow')}</p>
         {full && Number.isFinite(limit) && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('class.setLimit', { limit })}</p><UpgradeButton className="min-h-10 px-3 text-sm" /></div>}
@@ -573,6 +559,7 @@ function SetsTab({ classroomId, students, assignments, reload, preset = [] }: { 
             </div>
           </div>
           <ThemeChoices value={themeIds} onChange={setThemeIds} />
+          {themeIds.length === 1 && <p className="text-sm font-bold md:col-start-2" role="status">{t('class.themesMin')}</p>}
         </div>
         {who === 'some' && (
           <div className="flex flex-wrap gap-2">
@@ -601,6 +588,13 @@ function ThemeChoices({ value, onChange }: { value: string[]; onChange: (ids: st
   const options = GAMES.flatMap((g) => themesFor(g.id, made).slice(1).map((th) => ({ th, game: g.name })))
     .filter(({ th }) => th.source !== 'library' || TIERS[tier].themesPlayable)
     .sort((a, b) => Number(favorites.includes(b.th.id)) - Number(favorites.includes(a.th.id)));
+  // Theme choices are Pro (owner, 2026-11-26).
+  if (!TIERS[tier].themeChoices) return (
+    <fieldset className="grid gap-2">
+      <legend className="font-bold">{t('class.themes')}</legend>
+      <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-bold">{t('class.themesPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>
+    </fieldset>
+  );
   return (
     <fieldset className="grid gap-2">
       <legend className="font-bold">{t('class.themes')}</legend>

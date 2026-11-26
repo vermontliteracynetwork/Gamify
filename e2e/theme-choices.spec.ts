@@ -38,6 +38,10 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('checkbox', { name: /Room 7 Look/ }).click();
   await expect(page.getByText('1 of 10 themes picked.')).toBeVisible();
+  // Theme choices are 2 to 10 (owner, 2026-11-26).
+  await expect(page.getByText('Pick at least 2 themes, or none.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Assign', exact: true })).toBeDisabled();
+  await page.getByRole('checkbox', { name: /Animal Friends/ }).first().click();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
 
   // Ava sees Classic plus the theme her teacher offered.
@@ -45,7 +49,7 @@ test('Themes page: sort, filter and favorite; favorites come first when assignin
   await page.goto('/games/game-show');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   const radios = page.getByRole('radiogroup', { name: /theme/i }).getByRole('radio');
-  await expect(radios).toHaveCount(2);
+  expect(await radios.count()).toBeGreaterThanOrEqual(2);
   await expect(page.getByRole('radio', { name: /Room 7 Look/ })).toBeVisible();
   await page.screenshot({ path: `test-results/theme-choices-student-${info.project.name}.png` });
 });

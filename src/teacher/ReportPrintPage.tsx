@@ -43,6 +43,19 @@ export default function ReportPrintPage() {
   useCrumbLabel(student ? t('rp.studentReport') : t('rp.classReport'));
   const back = studentId && classId ? `/teacher/classes/${classId}/students/${studentId}` : classId && !example ? `/teacher/classes/${classId}` : '/teacher/reports';
   const loading = realLog === undefined && !example;
+  // One page per game the student played: a game on a day is one session.
+  const games = useMemo(() => {
+    if (!student) return [];
+    const by = new Map<string, { key: string; gameId: string; setId?: string; day: string; rows: typeof log; right: number; tried: number }>();
+    for (const e of [...log].sort((a, b) => a.at.localeCompare(b.at))) {
+      const day = e.at.slice(0, 10), key = `${e.gameId}|${e.setId ?? ''}|${day}`;
+      const g = by.get(key) ?? { key, gameId: e.gameId, setId: e.setId, day, rows: [], right: 0, tried: 0 };
+      g.rows.push(e);
+      if (e.outcome !== 'left') { g.tried += 1; if (e.outcome === 'right') g.right += 1; }
+      by.set(key, g);
+    }
+    return [...by.values()];
+  }, [log, student]);
 
   return (
     <main className="report-page max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-24 print:p-0 print:max-w-none">
@@ -54,6 +67,18 @@ export default function ReportPrintPage() {
         <p className="text-sm font-bold text-muted">{t('rp.printHint')}</p>
       </div>
       {!loading && <ReportDoc log={log} students={student ? [student] : students} names={names} standardsOf={(id) => sets.find((s) => s.id === id)?.standards} className={className} student={student} teacher={example ? undefined : getTeacher()?.name} from={from} to={to} />}
+      {/* Reports by student (owner, 2026-11-26: "John could be sorted for all
+          the games he's played; each game on new page in pdf"). */}
+      {!loading && student && games.map((g) => (
+        <section key={g.key} className="report-game-page break-before-page print:break-before-page mt-10 grid gap-2">
+          <h2 className="font-display text-2xl">{t('rp.gamePage', { game: names.game(g.gameId), date: g.day, name: student.name })}</h2>
+          <p className="font-bold">{t('rp.gameScore', { right: g.right, tried: g.tried, pct: g.tried ? Math.round((g.right / g.tried) * 100) : 0, set: names.set(g.setId) })}</p>
+          <table className="w-full text-left border-collapse text-sm">
+            <thead><tr className="border-b-[2px] border-border"><th scope="col" className="py-1.5 pr-3">{t('rp.question')}</th><th scope="col" className="py-1.5 pr-3">{t('rp.answerCol')}</th><th scope="col" className="py-1.5 pr-3">{t('rp.result')}</th></tr></thead>
+            <tbody>{g.rows.map((e) => <tr key={e.id} className="border-b border-border-soft break-inside-avoid"><th scope="row" className="py-1.5 pr-3 font-semibold align-top">{e.prompt}</th><td className="py-1.5 pr-3 align-top">{e.answer}</td><td className="py-1.5 pr-3 align-top font-bold">{t(`rp.outcome.${e.outcome}`)}</td></tr>)}</tbody>
+          </table>
+        </section>
+      ))}
     </main>
   );
 }

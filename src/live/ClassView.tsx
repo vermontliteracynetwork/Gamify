@@ -29,7 +29,7 @@ const TILE: Record<Need, string> = { stuck: 'bg-secondary border-border', guess:
 
 export interface ClassViewProps {
   state: LiveState; gameName: string; setName: string; sets: QuestionSet[]; log: AnswerLog; seenAt: Record<string, number>; now: number;
-  canMonitor: boolean; paid: boolean; message: string; setMessage: (m: string) => void; templates: readonly string[];
+  canMonitor: boolean; customMessage?: boolean; paid: boolean; message: string; setMessage: (m: string) => void; templates: readonly string[];
   lock: (pid: string, on: boolean) => void; onPause: () => void; onEnd: () => void; onClose: () => void;
   setSelect: (p: LivePlayer) => ReactNode; timeLeft: string | null; screenNow: string; goal: number; classRight: number;
   reveal: string | null; setReveal: (q: string | null) => void;
@@ -117,8 +117,11 @@ export default function ClassView(p: ClassViewProps) {
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Button variant="main" onClick={p.onPause}>{state.phase === 'paused' ? <Play weight="fill" size={18} /> : <Pause weight="fill" size={18} />}{state.phase === 'paused' ? t('live.resume') : t('live.pauseAll')}</Button>
           {p.canMonitor && <>
-            <input value={p.message} onChange={(e) => p.setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className={fieldClasses('md', 'flex-1 min-w-[14rem] max-w-[22rem]')} />
-            {p.templates.map((k) => <button key={k} type="button" onClick={() => p.setMessage(k)} className="min-h-9 px-3 rounded-pill border-std border-border-soft bg-surface font-bold text-sm hover:border-border">{k}</button>)}
+            {/* Typing your own Lock message is Pro; Plus picks a ready-made one (owner, 2026-11-26). */}
+            {p.customMessage
+              ? <input value={p.message} onChange={(e) => p.setMessage(e.target.value)} maxLength={80} placeholder={t('live.messagePlaceholder')} aria-label={t('live.message')} className={fieldClasses('md', 'flex-1 min-w-[14rem] max-w-[22rem]')} />
+              : <span className="font-bold text-sm" role="status">{p.message || t('live.messagePick')}</span>}
+            {p.templates.map((k) => <button key={k} type="button" aria-pressed={p.message === k} onClick={() => p.setMessage(p.message === k ? '' : k)} className={`min-h-9 px-3 rounded-pill border-std font-bold text-sm hover:border-border ${p.message === k ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{k}</button>)}
             <Button onClick={() => p.lock('all', !allLocked)}>{allLocked ? <LockSimpleOpen weight="bold" size={18} /> : <LockSimple weight="fill" size={18} />}{allLocked ? t('live.unlockAll') : t('live.lockAll')}</Button>
           </>}
           <span className="flex-1" />

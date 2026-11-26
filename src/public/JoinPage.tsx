@@ -31,6 +31,7 @@ export default function JoinPage() {
   const [wrong, setWrong] = useState(false);
   const [game, setGame] = useState<GameCode | null>(null);
   const [name, setName] = useState(() => rollName());
+  const [typed, setTyped] = useState('');
   // The teacher's student lists that have students, for avatar + PIN sign-in.
   const [rosters, setRosters] = useState<Classroom[]>([]);
   const [roster, setRoster] = useState<string | null>(null);
@@ -123,6 +124,11 @@ export default function JoinPage() {
         <button type="button" onClick={() => setName(rollName(Math.random, [name]))} className="min-h-14 px-6 rounded-pill border-bold border-border bg-white font-bold text-lg inline-flex items-center gap-2">
           <DiceFive weight="fill" size={26} />{t('join.roll')}
         </button>
+        {/* Or type a first name or nickname (owner, 2026-11-26): letters and spaces only. */}
+        <label className="grid gap-1 font-bold text-lg">{t('join.typeName')}
+          <input value={typed} maxLength={20} autoComplete="off" onChange={(e) => { const v = e.target.value.replace(/[^\p{L} '-]/gu, '').slice(0, 20); setTyped(v); if (v.trim()) setName(v.trim()); }}
+            className="min-h-14 px-4 rounded-input border-bold border-border bg-white font-display text-2xl text-center w-72 max-w-full" />
+        </label>
         <button type="button" onClick={() => play()} className="min-h-16 px-10 rounded-pill border-bold border-border bg-accent font-display text-2xl inline-flex items-center gap-2" style={{ boxShadow: 'var(--shadow-sticker)' }}>
           {t('join.play')}<ArrowRight weight="bold" size={26} />
         </button>

@@ -5,6 +5,8 @@ import { test, expect } from '@playwright/test';
 test('Play or share: big screen teams, own devices, homework with a due date', async ({ page }, info) => {
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
+  // Homework codes are Pro (owner, 2026-11-26).
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' })); });
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByRole('button', { name: 'Play or share' }).first().click();
@@ -20,8 +22,7 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
 
   await dialog.getByRole('radio', { name: /As homework/ }).click();
   const date = dialog.getByLabel('Due');
-  const max = await date.getAttribute('max');
-  expect(max).toBeTruthy(); // Free plan: 14 days ahead.
+  await expect(date).toBeVisible(); // Pro: any date ahead.
   await dialog.getByRole('button', { name: 'Make the homework link' }).click();
   await expect(dialog.getByText(/^Works through /)).toBeVisible();
   await page.screenshot({ path: `test-results/host-homework-${info.project.name}.png` });

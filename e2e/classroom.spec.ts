@@ -8,16 +8,18 @@ function watch(page: Page) {
   return problems;
 }
 
-test('Free: the teacher adds students (no class), assigns a set, sets supports; a student signs in with avatar and PIN and plays it', async ({ page }, info) => {
+test('Homeschool: the teacher adds students (no class), assigns a set, sets supports; a student taps their name and plays it', async ({ page }, info) => {
   test.setTimeout(120_000);
   const problems = watch(page);
+  // Free has no student list at all since 2026-11-26; Homeschool keeps one list.
+  await page.addInitScript(() => { if (!localStorage.getItem('gamify:settings')) localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'homeschool' })); });
   await page.goto('/teacher/classes');
-  // Classes are Plus and Pro only: Free opens the teacher's student list.
+  // Classes are Plus and Pro only: Homeschool opens the teacher's student list.
   await expect(page.getByRole('heading', { name: 'My Students' })).toBeVisible();
   await expect(page.getByLabel('New class name')).toHaveCount(0);
   await page.getByLabel('Add students (type or paste names, one per line)').fill('Ava\nBen');
   await page.getByRole('button', { name: 'Add 2 students' }).click();
-  await expect(page.getByText('2 of 30 students')).toBeVisible();
+  await expect(page.getByText('2 of 10 students')).toBeVisible();
   await page.screenshot({ path: `test-results/class-students-${info.project.name}.png`, fullPage: true });
 
   // Supports for Ava, behind the teacher PIN (chosen here the first time).
@@ -38,7 +40,7 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await page.getByRole('radio', { name: /^Animals and habitats/ }).click();
   await page.getByRole('button', { name: 'Assign', exact: true }).click();
   await expect(page.getByText('Whole class').first()).toBeVisible();
-  // Free plan: one assigned set.
+  // Homeschool: one assigned set per student.
   await expect(page.getByText('Assigned sets for each student: up to 1.', { exact: false })).toBeVisible();
   await page.screenshot({ path: `test-results/class-sets-${info.project.name}.png`, fullPage: true });
 
@@ -48,20 +50,12 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   await expect(page.getByText('Students can design themes')).toHaveCount(0);
 
   // Student sign-in through a game code (no class codes or Arcade, teacher
-  // 2026-10-31): tap Ava's avatar, then her PIN (a wrong PIN first).
+  // 2026-10-31): tap Ava's name and picture (no PIN, owner 2026-11-26).
   await seedGameCode(page, 'BKDFG');
   await page.evaluate(() => localStorage.removeItem('gamify:teacher-session')); // the student's own turn on this device
   await joinWithCode(page, 'BKDFG');
   await page.screenshot({ path: `test-results/arcade-signin-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Ava' }).click();
-  const pin = await page.evaluate(() => JSON.parse(localStorage.getItem('gamify:students')!).find((s: { name: string }) => s.name === 'Ava').pin as string);
-  expect(pin).toMatch(/^\d{4}$/);
-  const wrong = pin === '1111' ? '2222' : '1111';
-  await page.locator('input[autocomplete="one-time-code"]').last().fill(wrong);
-  await expect(page.getByText('Not quite. Try your PIN again.')).toBeVisible();
-  await page.screenshot({ path: `test-results/arcade-pin-${info.project.name}.png` });
-  await page.waitForTimeout(800);
-  await page.locator('input[autocomplete="one-time-code"]').last().fill(pin);
   // The code opens its game for Ava, and no other.
   await expect(page).toHaveURL(/\/games\/star-quiz/);
   await page.goto('/games/game-show');
@@ -80,27 +74,25 @@ test('Free: the teacher adds students (no class), assigns a set, sets supports; 
   expect(problems).toEqual([]);
 });
 
-test('Plus: upload a student picture and set a PIN; a game link asks students for their avatar and PIN', async ({ page }, info) => {
+test('Pro: upload a student picture; a game link asks students to tap their name and picture (no PIN)', async ({ page }, info) => {
   await page.addInitScript(() => {
     if (localStorage.getItem('gamify:classrooms')) return;
-    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' }));
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'pro' }));
     localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'r1', name: 'Room 1', ownerId: 'local-teacher', createdAt: '2026-10-01', joinCode: 'BCDFG' }]));
     localStorage.setItem('gamify:students', JSON.stringify([{ id: 's1', classroomId: 'r1', name: 'Mia', picturePassword: ['sun', 'moon'] }]));
   });
   const problems = watch(page);
   await page.goto('/teacher/classes/r1');
-  await page.getByRole('button', { name: 'Picture and PIN for Mia' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Picture and PIN for Mia' });
+  await page.getByRole('button', { name: 'Sign-in picture for Mia' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Sign-in picture for Mia' });
   const png = await page.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d')!; x.fillStyle = '#2a9df4'; x.fillRect(0, 0, 64, 64); return c.toDataURL('image/png').split(',')[1]; });
   await dialog.locator('input[type=file]').setInputFiles({ name: 'mia.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') });
-  await dialog.getByLabel('PIN (4 numbers)').fill('4826');
   await dialog.screenshot({ path: `test-results/avatar-dialog-${info.project.name}.png` });
   await dialog.getByRole('button', { name: 'Save', exact: true }).click();
-  // PINs stay hidden in the roster until the teacher shows them (teacher portal 3b).
-  await page.getByRole('button', { name: 'Show PINs' }).click();
-  await expect(page.getByText('PIN 4826')).toBeVisible();
+  // No PIN column anywhere (owner, 2026-11-26).
+  await expect(page.getByRole('button', { name: 'Show PINs' })).toHaveCount(0);
 
-  // A hosted game code: Mia taps her picture and types her PIN.
+  // A hosted game code: Mia taps her name and picture.
   await page.goto('/teacher/sets');
   await page.getByRole('tab', { name: 'Public sets' }).click();
   await page.getByLabel('Search titles and tags').fill('habitats');
@@ -113,7 +105,6 @@ test('Plus: upload a student picture and set a PIN; a game link asks students fo
   await expect(page.getByRole('heading', { name: "Who's Playing?" })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Mia' }).locator('img')).toHaveCount(1);
   await page.getByRole('button', { name: 'Mia' }).click();
-  await page.locator('input[autocomplete="one-time-code"]').last().fill('4826');
   await page.getByRole('button', { name: 'Set up and play' }).click();
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('gamify:arcade-session')!).name)).toBe('Mia');
   expect(problems).toEqual([]);

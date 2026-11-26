@@ -41,19 +41,21 @@ export function compareGroups(billing: Billing): Group[] {
       row('cmp.liveMode', 'cmp.liveMode.what', (x) => TIERS[x].liveMode),
       row('pricing.row.lobbyGoal', 'cmp.lobbyGoal.what', paid),
       row('cmp.groups', 'cmp.groups.what', paid),
-      row('pricing.row.each', 'cmp.each.what', pro),
+      row('cmp.setEach', 'cmp.setEach.what', (x) => TIERS[x].setPerStudent),
+      row('pricing.row.each', 'cmp.each.what', (x) => TIERS[x].gamePerStudent),
       row('pricing.row.board', 'cmp.board.what', pro),
+      row('cmp.themeChoices', 'cmp.themeChoices.what', (x) => TIERS[x].themeChoices),
     ] },
     { id: 'classes', title: t('cmp.s.classes'), rows: [
-      row('pricing.row.classes', 'cmp.classes.what', (x) => (TIERS[x].hasClasses ? fmt(TIERS[x].classrooms) : t('cmp.classes.free'))),
-      row('pricing.row.students', 'cmp.students.what', (x) => (!Number.isFinite(TIERS[x].studentsPerClassroom) ? t('pricing.unlimited') : TIERS[x].hasClasses ? t('cmp.students.plus', { n: TIERS[x].studentsPerClassroom }) : t('cmp.students.free', { n: TIERS[x].studentsPerClassroom }))),
-      row('cmp.signin', 'cmp.signin.what', all),
-      row('pricing.row.pictures', 'cmp.pictures.what', (x) => (x === 'free' ? t('pricing.pictures.free') : t('pricing.pictures.paid'))),
+      row('pricing.row.classes', 'cmp.classes.what', (x) => (!TIERS[x].studentList ? t('cmp.classes.none') : fmt(TIERS[x].classrooms))),
+      row('pricing.row.students', 'cmp.students.what', (x) => (!TIERS[x].studentList ? t('cmp.students.none') : !Number.isFinite(TIERS[x].studentsPerClassroom) ? t('pricing.unlimited') : t('cmp.students.plus', { n: TIERS[x].studentsPerClassroom }))),
+      row('cmp.signin', 'cmp.signin.what', (x) => (TIERS[x].studentList ? t('cmp.signin.list') : t('cmp.signin.free'))),
+      row('pricing.row.pictures', 'cmp.pictures.what', (x) => (TIERS[x].customPictures ? t('pricing.pictures.paid') : t('pricing.pictures.free'))),
     ] },
     { id: 'sets', title: t('cmp.s.sets'), rows: [
       row('pricing.row.sets', 'cmp.sets.what', (x) => fmt(TIERS[x].savedQuestionSets)),
       row('cmp.library', 'cmp.library.what', all),
-      row('pricing.row.assigned', 'cmp.assigned.what', (x) => fmt(TIERS[x].assignedSetsPerStudent)),
+      row('pricing.row.assigned', 'cmp.assigned.what', (x) => (TIERS[x].assignedSetsPerStudent ? fmt(TIERS[x].assignedSetsPerStudent) : false)),
     ] },
     { id: 'themes', title: t('cmp.s.themes'), rows: [
       row('pricing.row.themes', 'cmp.builder.what', (x) => ({ trial: t('pricing.themeTrial'), 'one-per-game': t('pricing.themeOne'), 'three-per-game': t('pricing.themeThree'), unlimited: t('pricing.unlimited') })[TIERS[x].themeBuilder]),
@@ -63,8 +65,11 @@ export function compareGroups(billing: Billing): Group[] {
     ] },
     { id: 'live', title: t('cmp.s.live'), rows: [
       row('pricing.row.live', 'cmp.live.what', (x) => TIERS[x].liveMonitorAndLock),
-      row('cmp.results', 'cmp.results.what', all),
-      row('pricing.row.reports', 'cmp.reports.what', (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('pricing.days', { n: TIERS[x].reportHistoryDays }) : t('pricing.allTime'))),
+      row('cmp.lockMessage', 'cmp.lockMessage.what', (x) => (TIERS[x].customLockMessage ? true : TIERS[x].liveMonitorAndLock ? t('cmp.lockMessage.preset') : false)),
+      row('cmp.scores', 'cmp.scores.what', all),
+      row('cmp.results', 'cmp.results.what', (x) => TIERS[x].questionReports),
+      row('cmp.byStudent', 'cmp.byStudent.what', (x) => TIERS[x].reportsByStudent),
+      row('pricing.row.reports', 'cmp.reports.what', (x) => (Number.isFinite(TIERS[x].reportHistoryDays) ? t('cmp.reports.today') : t('pricing.allTime'))),
     ] },
     { id: 'access', title: t('cmp.s.access'), note: t('cmp.s.accessNote'), rows: [
       row('cmp.readAloud', 'cmp.readAloud.what', all),
@@ -74,8 +79,7 @@ export function compareGroups(billing: Billing): Group[] {
     ] },
     { id: 'homework', title: t('cmp.s.homework'), rows: [
       row('activity.how.code', 'cmp.code.what', all),
-      row('cmp.homework', 'cmp.homework.what', all),
-      row('cmp.due', 'cmp.due.what', (x) => (Number.isFinite(TIERS[x].homeworkDaysAhead) ? t('cmp.due.free', { n: TIERS[x].homeworkDaysAhead }) : t('cmp.due.paid'))),
+      row('cmp.homework', 'cmp.homework.what', (x) => TIERS[x].homework),
       row('cmp.freshCode', 'cmp.freshCode.what', pro),
       row('cmp.blog', 'cmp.blog.what', all),
     ] },
@@ -84,7 +88,7 @@ export function compareGroups(billing: Billing): Group[] {
       row('cmp.billing', 'cmp.billing.what', (x) => (x === 'free' ? t('cmp.billing.free') : t('cmp.billing.paid'))),
       // The launch sale lives in the Marketing campaigns, not the feature chart (owner, 2026-11-26).
       row('cmp.cancel', 'cmp.cancel.what', (x) => (x === 'free' ? t('cmp.cancel.free') : true)),
-      row('cmp.keep', 'cmp.keep.what', all),
+      row('cmp.keep', 'cmp.keep.what', (x) => x !== 'free'),
       row('cmp.ads', 'cmp.ads.what', all),
     ] },
   ];
