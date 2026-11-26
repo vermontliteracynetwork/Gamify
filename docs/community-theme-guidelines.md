@@ -37,7 +37,8 @@ strike). The attorney writes the exact wording.
 - Sexual content, hate, slurs, bullying, or content that mocks any group.
 - Drugs, alcohol, tobacco or vaping, gambling.
 - Ads, links, prices, or anything that sells something.
-- Political campaign or advocacy messages **(to confirm)**.
+- Anything tied to a political party or campaign (owner, 2026-11-26: careful with Presidents' Day).
+- Sensitive cultural costumes or caricatures, such as pilgrim hats (owner, 2026-11-26: flag for review).
 - Copies or near-copies of a theme already in the library (spam).
 
 ## Strikes (to confirm)
