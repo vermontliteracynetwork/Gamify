@@ -58,4 +58,8 @@ describe('Game Show studio look', () => {
     expect(look.back).toBe('#22336e');
     expect(look.ground).toBeUndefined();
   });
+  it('a blank draft built from Classic colors is the Classic studio (Art Director 2026-11-26)', () => {
+    const l = studioLook({ ...classicTheme('game-show'), id: 'draft-1' });
+    for (const k of ['rim', 'beam', 'curtain', 'floor', 'boards'] as const) expect(l[k]).toBe(CLASSIC_STUDIO[k]);
+  });
 });

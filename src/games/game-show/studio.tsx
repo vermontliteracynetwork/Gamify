@@ -116,6 +116,11 @@ export function studioLook(theme: GameTheme, stage?: string, { plain = false, ca
   const picture: CSSProperties | undefined = image && (image.tile
     ? { background: `${back} 0 0 / 240px repeat url("${image.src}")` }
     : { backgroundColor: back, backgroundImage: `url("${image.src}")`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundPosition: 'center 35%' });
+  // A blank draft still on Classic's Grape and accent is Classic: start from
+  // the approved studio and layer only the theme's own ground, picture and card dash.
+  if (!stage && same(back, STUDIO.grape) && !ownAccent) {
+    return { ...CLASSIC_STUDIO, beams: !image, ground, picture, dash: clears(STUDIO.orange, [card]) ? STUDIO.orange : STUDIO.ink };
+  }
   const [bright, soft] = pairOf(back);
   const light = isPastel(back);
   // The rim: the backdrop's own bright on a pastel; on a dark or bright

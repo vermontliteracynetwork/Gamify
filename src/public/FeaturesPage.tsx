@@ -283,8 +283,9 @@ const TRY_GAMES: { id: string; pieces: string[] }[] = [
   { id: 'bubble-pop', pieces: ['board'] },
   { id: 'bowling', pieces: ['lane'] },
 ];
-const GROUNDS: [string, string][] = [['mint', '#c8f0dc'], ['sky', '#bfdff3'], ['blush', '#ffd3e6'], ['butter', '#fff1b8'], ['night', '#2b2462'], ['kelly', '#22b04a']];
-const PIECES: [string, string][] = [['pink', '#f055a5'], ['yellow', '#fdfd94'], ['blue', '#4ba3e8'], ['orange', '#ff9b28'], ['grape', '#6a45f0'], ['white', '#ffffff']];
+// Palette colors only (Classic Art Director, 2026-11-26).
+export const GROUNDS: [string, string][] = [['mint', '#c8f0dc'], ['sky', '#bfdff3'], ['blush', '#ffd3e6'], ['butter', '#fff1b8'], ['night', '#1d1a33'], ['kelly', '#22b04a']];
+export const PIECES: [string, string][] = [['pink', '#f055a5'], ['yellow', '#fabe37'], ['blue', '#4ba3e8'], ['orange', '#ff9b28'], ['grape', '#6a45f0'], ['white', '#fffaf0']];
 
 function LookDemo() {
   const [gameId, setGameId] = useState(TRY_GAMES[0].id);
@@ -320,9 +321,9 @@ function Swatches({ label, list, at, set }: { label: string; list: [string, stri
     <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-2">
       <span className="font-bold text-sm w-full sm:w-auto sm:min-w-[8.5rem]">{label}</span>
       {list.map(([id, hex], k) => (
-        <button key={id} type="button" role="radio" aria-checked={k === at} aria-label={t(`features.color.${id}` as StringKey)} data-tip={t(`features.color.${id}` as StringKey)} onClick={() => set(k)}
+        <button key={id} type="button" role="radio" aria-checked={k === at} aria-label={t(`features.color.${id}` as StringKey)} onClick={() => set(k)}
           className={`w-11 h-11 rounded-full border-std border-border grid place-items-center motion-safe:transition-transform hover:scale-105 ${k === at ? 'ring-[3px] ring-offset-2 ring-ink' : ''}`} style={{ background: hex }}>
-          {k === at && <Check weight="bold" size={18} color={hex === '#2b2462' || hex === '#6a45f0' || hex === '#22b04a' ? '#ffffff' : '#1d1a33'} aria-hidden="true" />}
+          {k === at && <Check weight="bold" size={18} color={hex === '#1d1a33' || hex === '#6a45f0' || hex === '#22b04a' ? '#ffffff' : '#1d1a33'} aria-hidden="true" />}
         </button>
       ))}
     </div>
