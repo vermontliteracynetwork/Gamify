@@ -1,61 +1,71 @@
-import { useState } from 'react';
-import PlanFeatures from '../billing/PlanFeatures';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Brain, Check, ChalkboardTeacher, GameController, PaintBrush, Sparkle, SpeakerHigh, Star, TextAa, Leaf, X } from '@phosphor-icons/react';
+import { ArrowRight, ChalkboardTeacher, ChartBar, Check, FileText, Leaf, Lock, PaintBrush, SortAscending, SpeakerHigh, Star, TextAa, X, type Icon } from '@phosphor-icons/react';
+import PlanFeatures from '../billing/PlanFeatures';
 import type { PlayMode } from '../data/types';
 import { speak } from '../engine/feedback';
-import { CyclingCover } from '../games/covers';
-import { ModeBadge, SHOWN_MODES, shownModes } from '../games/ModeBadge';
+import { GameCover } from '../games/covers';
+import { MODE_BRIGHT, MODE_COLORS, MODE_ICONS, ModeBadge, SHOWN_MODES, shownModes } from '../games/ModeBadge';
 import { GAMES } from '../games/registry';
+import { GameScene, showcaseThemes, ThemeCycler } from '../games/scenes';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
-import ThemePreview from '../theme/builder/ThemePreview';
-import { STARTER_THEMES } from '../theme/starters';
+import { classicTheme } from '../theme/classic';
+import { useMadeThemes } from '../theme/made';
+import type { GameTheme } from '../theme/types';
 import { buttonClasses } from '../ui/kit';
 import Title from '../ui/Title';
+import { useReducedMotion } from '../ui/useReducedMotion';
 import PublicFooter from './PublicFooter';
 
-// The Features page (teacher, 2026-10-25): three pillars, each with
-// something to try, because people value what they have touched. Gamified
-// learning (try a question with supports on), theme creation (re-skin a game
-// for different ages; the reason to subscribe) and game play (the four ways
-// to play). Benefits lead, details follow, and every section ends with one
-// clear next step. The full feature list sits folded at the bottom.
-const PILLARS = [
-  { id: 'learning', icon: Brain },
-  { id: 'themes', icon: PaintBrush },
-  { id: 'play', icon: GameController },
-] as const;
+// The Features page, rebuilt as the main selling page (owner, 2026-11-26:
+// "features=improve page entirely. this should be a main selling point page
+// and real pictures of the games should be added. make sure the image mockups
+// of the games can be replicated and cycled through with the other themes
+// people create"). Scrapbook strength A (/brand?tab=scrapbook&sb=A): cream
+// ground, clean white cards, no stickers or tape (those live only in the Home
+// hero). The order sells: the outcome for teachers, the real games (live
+// pictures that cycle every theme, src/games/scenes.tsx), the learning, class
+// themes to try, the ways to play, the teacher's own view, fair play, the
+// research, then plans and one clear Start free. Every line describes
+// something built.
+//
+// The top bar and footer belong to the shared public shell; this page only
+// brings its own cream ground so it sits cleanly on that shell.
+
+const card = 'bg-white border-bold border-border rounded-panel';
+const lift: CSSProperties = { boxShadow: '0 5px 0 var(--ink)' };
+const JUMPS = ['games', 'learning', 'themes', 'play', 'view', 'fair'] as const;
 const MORE: { key: string; items: number }[] = [
   { key: 'sets', items: 5 }, { key: 'classes', items: 7 }, { key: 'supports', items: 6 }, { key: 'safety', items: 5 },
 ];
-const card = 'bg-surface border-bold border-border rounded-panel';
 
 export default function FeaturesPage() {
   const reduce = useReducedMotion();
-  const enter = { initial: reduce ? false : { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.2 } } as const;
+  const enter = { initial: reduce ? false : { opacity: 0, y: 18 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.15 } } as const;
   return (
-    <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-14">
-        <section className="grid gap-5">
-          <h1 className="title-bubble text-5xl sm:text-6xl"><Title text={t('features.title')} /></h1>
-          <p className="text-xl font-bold max-w-3xl">{t('features.sub')}</p>
-          <nav aria-label={t('features.jump')} className="grid sm:grid-cols-3 gap-3">
-            {PILLARS.map(({ id, icon: I }, i) => (
-              <motion.a key={id} href={`#${id}`} initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduce ? 0 : i * 0.08 }}
-                className={`${card} hover-lift p-5 grid gap-2 no-underline text-text ${id === 'themes' ? '!bg-butter' : ''}`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <span className="w-14 h-14 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><I weight="fill" size={30} aria-hidden="true" /></span>
-                <span className="font-display text-2xl">{t(`features.p.${id}` as StringKey)}</span>
-                <span className="font-semibold">{t(`features.p.${id}.short` as StringKey)}</span>
-              </motion.a>
+    <div className="bg-cream">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-4 grid gap-16">
+        <section className="grid gap-5" aria-labelledby="features-title">
+          <h1 id="features-title" className="title-bubble text-5xl sm:text-6xl"><Title text={t('features.title')} /></h1>
+          <p className="text-xl font-bold">{t('features.sub')}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+            <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
+            <Link to="/pricing" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.seePlans')}<ArrowRight weight="bold" size={20} /></Link>
+            <span className="font-semibold">{t('features.hero.free')}</span>
+          </div>
+          <nav aria-label={t('features.jump')} className="flex flex-wrap gap-2">
+            {JUMPS.map((id) => (
+              <a key={id} href={`#${id}`} className="min-h-11 px-4 rounded-pill border-std border-border bg-white font-bold no-underline text-text inline-flex items-center hover:bg-butter motion-safe:transition">{t(`features.jump.${id}` as StringKey)}</a>
             ))}
           </nav>
         </section>
 
-        <motion.section id="learning" {...enter} aria-labelledby="learning-title" className="grid lg:grid-cols-2 gap-6 items-center scroll-mt-24">
+        <GamesShowcase />
+
+        <motion.section id="learning" {...enter} aria-labelledby="learning-title" className="grid lg:grid-cols-2 gap-8 items-center scroll-mt-24">
           <div className="grid gap-4">
             <h2 id="learning-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.learn.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.learn.text')}</p>
@@ -64,47 +74,64 @@ export default function FeaturesPage() {
           <QuestionDemo />
         </motion.section>
 
-        <motion.section id="themes" {...enter} aria-labelledby="themes-title" className={`${card} !bg-butter p-5 sm:p-8 grid lg:grid-cols-2 gap-6 items-center scroll-mt-24`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <ThemeDemo />
-          <div className="grid gap-4">
+        <motion.section id="themes" {...enter} aria-labelledby="themes-title" className="grid lg:grid-cols-2 gap-8 items-center scroll-mt-24">
+          <LookDemo />
+          <div className="grid gap-4 lg:order-first">
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <p className="text-lg font-semibold">{t('features.theme.text')}</p>
             <Points prefix="features.theme" n={4} />
-            <p className="font-bold bg-surface border-std border-border rounded-input p-3 flex gap-2"><Sparkle weight="fill" size={22} className="shrink-0" aria-hidden="true" />{t('features.theme.challenge')}</p>
+            <p className="font-semibold bg-butter border-std border-border rounded-input p-3">{t('features.theme.challenge')}</p>
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'justify-self-start hover-pop', 'lg')}><PaintBrush weight="bold" size={20} />{t('features.theme.cta')}</Link>
           </div>
         </motion.section>
 
         <motion.section id="play" {...enter} aria-labelledby="play-title" className="grid gap-5 scroll-mt-24">
           <h2 id="play-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.play.title')} /></h2>
-          <p className="text-lg font-semibold max-w-3xl">{t('features.play.text')}</p>
-          <ModesDemo />
+          <p className="text-lg font-semibold">{t('features.play.text')}</p>
+          <ul className="grid md:grid-cols-3 gap-4 list-none p-0 m-0">
+            {SHOWN_MODES.map((m) => <ModeCard key={m} mode={m} />)}
+          </ul>
+        </motion.section>
+
+        <motion.section id="view" {...enter} aria-labelledby="view-title" className="grid gap-5 scroll-mt-24">
+          <h2 id="view-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.view.title')} /></h2>
+          <p className="text-lg font-semibold">{t('features.view.text')}</p>
+          <ul className="grid sm:grid-cols-2 gap-4 list-none p-0 m-0">
+            {([[SortAscending, 'var(--color-blue-crystal)'], [ChartBar, 'var(--color-butter)'], [Lock, 'var(--color-blush)'], [FileText, 'var(--color-mint)']] as [Icon, string][]).map(([I, bg], k) => (
+              <li key={k} className={`${card} p-5 flex gap-4 items-start`} style={lift}>
+                <Dot bg={bg}><I weight="bold" size={26} aria-hidden="true" /></Dot>
+                <span className="grid gap-1"><b className="font-heading text-xl leading-snug">{t(`features.view.${k + 1}` as StringKey)}</b><span className="font-semibold">{t(`features.view.${k + 1}.text` as StringKey)}</span></span>
+              </li>
+            ))}
+          </ul>
         </motion.section>
 
         {/* Fair play, built in (teacher, 2026-11-24: "add the no stealing as a selling
             point ... psychology first marketing"). Each line answers a weak spot the
             research found on other classroom game sites (docs/marketing-bible.md,
             the edge list); never names another site. */}
-        <section aria-labelledby="fair-title" className={`${card} p-5 sm:p-8 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section id="fair" aria-labelledby="fair-title" className="grid gap-5 scroll-mt-24">
           <h2 id="fair-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.fair.title')} /></h2>
-          <p className="text-lg font-semibold max-w-3xl">{t('features.fair.text')}</p>
-          <ul className="grid sm:grid-cols-2 gap-3 list-none p-0 m-0">
+          <p className="text-lg font-semibold">{t('features.fair.text')}</p>
+          <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none p-0 m-0">
             {[1, 2, 3, 4, 5, 6].map((n) => (
-              <li key={n} className="flex gap-3 items-start rounded-input border-std border-border bg-surface p-4">
-                <Check weight="bold" size={22} className="shrink-0 mt-0.5" aria-hidden="true" />
-                <span className="grid gap-0.5"><b className="text-lg leading-snug">{t(`features.fair.${n}` as StringKey)}</b><span className="font-semibold text-muted">{t(`features.fair.${n}.why` as StringKey)}</span></span>
+              <li key={n} className={`${card} p-5 grid gap-2 content-start`} style={lift}>
+                <span className="flex items-center gap-3"><Dot bg="var(--color-mint)" size="2.5rem"><Check weight="bold" size={20} aria-hidden="true" /></Dot><b className="font-heading text-lg leading-snug">{t(`features.fair.${n}` as StringKey)}</b></span>
+                <span className="font-semibold">{t(`features.fair.${n}.why` as StringKey)}</span>
               </li>
             ))}
           </ul>
         </section>
 
+        <Proof />
+
         <section aria-labelledby="more-title" className="grid gap-4">
-          <h2 id="more-title" className="font-display text-3xl"><Title text={t('features.moreTitle')} /></h2>
+          <h2 id="more-title" className="title-bubble text-4xl leading-tight"><Title text={t('features.moreTitle')} /></h2>
           {/* Each box opens on its own; its neighbor keeps its size (teacher, 2026-10-31). */}
           <div className="grid sm:grid-cols-2 gap-3 items-start">
             {MORE.map((g) => (
               <details key={g.key} className={`${card} p-4`}>
-                <summary className="font-display text-2xl cursor-pointer">{t(`features.${g.key}` as StringKey)}</summary>
+                <summary className="font-heading font-bold text-xl cursor-pointer min-h-8">{t(`features.${g.key}` as StringKey)}</summary>
                 <ul className="grid gap-2 list-none p-0 mt-3 mb-0">
                   {Array.from({ length: g.items }, (_, i) => <li key={i} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`features.${g.key}.${i + 1}` as StringKey)}</li>)}
                 </ul>
@@ -115,23 +142,23 @@ export default function FeaturesPage() {
 
         {/* Plus and Pro, described by what they open up (teacher, 2026-10-31). */}
         <section aria-labelledby="plans-title" className="grid gap-4">
-          <h2 id="plans-title" className="title-bubble text-4xl"><Title text={t('features.plans.title')} /></h2>
-          <p className="text-lg font-semibold max-w-3xl">{t('features.plans.text')}</p>
+          <h2 id="plans-title" className="title-bubble text-4xl leading-tight"><Title text={t('features.plans.title')} /></h2>
+          <p className="text-lg font-semibold">{t('features.plans.text')}</p>
           <div className="grid md:grid-cols-2 gap-4">
             {(['plus', 'pro'] as const).map((plan) => (
-              <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-                <h3 className="font-display text-3xl">{t(`features.plans.${plan}` as StringKey)}</h3>
+              <div key={plan} className={`${card} p-5 grid gap-3 content-start`} style={lift}>
+                <h3 className="font-heading font-bold text-2xl">{t(`features.plans.${plan}` as StringKey)}</h3>
                 <p className="font-bold">{t(`pricing.${plan}.who` as StringKey)}</p>
                 <PlanFeatures plan={plan} />
-                <Link to="/pricing" className={buttonClasses(plan === 'plus' ? 'main' : 'secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
+                <Link to="/pricing" className={buttonClasses('secondary', 'justify-self-start hover-pop')}>{t(`features.plans.see.${plan}` as StringKey)}<ArrowRight weight="bold" size={18} /></Link>
               </div>
             ))}
           </div>
           <p className="font-semibold text-sm">{t('features.plans.free')}</p>
         </section>
 
-        <section className={`${card} p-6 sm:p-8 grid gap-4 justify-items-center text-center`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-          <h2 className="title-bubble text-4xl"><Title text={t('features.endTitle')} /></h2>
+        <section aria-labelledby="end-title" className={`${card} p-6 sm:p-8 grid gap-4 justify-items-center text-center`} style={lift}>
+          <h2 id="end-title" className="title-bubble text-4xl"><Title text={t('features.endTitle')} /></h2>
           <p className="text-lg font-semibold max-w-2xl">{t('features.endText')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link to="/login?mode=signup" className={buttonClasses('primary', 'hover-pop', 'lg')}><ChalkboardTeacher weight="bold" size={22} />{t('public.startFree')}</Link>
@@ -139,9 +166,14 @@ export default function FeaturesPage() {
           </div>
         </section>
       </main>
+      <div className="h-12" />
       <PublicFooter />
-    </>
+    </div>
   );
+}
+
+function Dot({ children, bg, size = '3.25rem' }: { children: ReactNode; bg: string; size?: string }) {
+  return <span className="shrink-0 rounded-full border-std border-border grid place-items-center" style={{ width: size, height: size, background: bg }}>{children}</span>;
 }
 
 function Points({ prefix, n }: { prefix: string; n: number }) {
@@ -150,10 +182,50 @@ function Points({ prefix, n }: { prefix: string; n: number }) {
       {Array.from({ length: n }, (_, i) => (
         <li key={i} className="flex gap-3">
           <Check weight="bold" size={22} className="shrink-0 mt-1" aria-hidden="true" />
-          <span><span className="font-display text-xl block">{t(`${prefix}.${i + 1}` as StringKey)}</span><span className="font-semibold">{t(`${prefix}.${i + 1}.text` as StringKey)}</span></span>
+          <span><span className="font-heading font-bold text-lg block">{t(`${prefix}.${i + 1}` as StringKey)}</span><span className="font-semibold">{t(`${prefix}.${i + 1}.text` as StringKey)}</span></span>
         </li>
       ))}
     </ul>
+  );
+}
+
+// The real games: pick one, and its live picture cycles every theme it can
+// wear, the visitor's own Theme Builder themes included.
+function GamesShowcase() {
+  const { themes: made } = useMadeThemes();
+  const [id, setId] = useState(GAMES[0].id);
+  const game = GAMES.find((g) => g.id === id) ?? GAMES[0];
+  const looks = useMemo(() => showcaseThemes(game.id, made), [game.id, made]);
+  return (
+    <section id="games" aria-labelledby="games-title" className={`${card} p-4 sm:p-6 lg:p-8 grid gap-5 lg:gap-x-8 items-start scroll-mt-24 [grid-template-areas:'head'_'pic'_'list'_'info'] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:grid-rows-[auto_auto_1fr] lg:[grid-template-areas:'head_pic'_'list_pic'_'list_info']`} style={lift}>
+      {/* Phones and iPads see the picture right under the title, before the game list. */}
+      <div className="grid gap-4 content-start [grid-area:head]">
+        <h2 id="games-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.games.title')} /></h2>
+        <p className="text-lg font-semibold">{t('features.games.text')}</p>
+      </div>
+      <div role="group" aria-label={t('features.games.pick')} className="grid grid-cols-4 gap-2 sm:gap-3 content-start [grid-area:list]">
+          {GAMES.map((g) => {
+            const on = g.id === game.id;
+            return (
+              <button key={g.id} type="button" aria-pressed={on} onClick={() => setId(g.id)}
+                className={`group rounded-input border-std border-border p-1 grid gap-1 content-start text-center motion-safe:transition ${on ? 'bg-butter ring-[3px] ring-ink' : 'bg-white hover:bg-surface-hover'}`}>
+                <span className="block overflow-hidden rounded-[0.6rem] border border-border motion-safe:transition-transform group-hover:scale-[1.03]" aria-hidden="true"><GameCover gameId={g.id} className="aspect-[4/3]" /></span>
+                <span className="font-bold text-xs sm:text-sm leading-tight min-h-[2.5em] grid place-items-center">{g.name}</span>
+              </button>
+            );
+          })}
+      </div>
+      <ThemeCycler gameId={game.id} gameName={game.name} looks={looks} className="min-w-0 [grid-area:pic]" />
+      <div className="grid gap-3 min-w-0 [grid-area:info]">
+          <p className="text-lg font-bold"><span className="font-heading">{game.name}:</span> {game.tagline}</p>
+          <div className="flex flex-wrap gap-2">{shownModes(game.modes).map((m) => <ModeBadge key={m} mode={m} />)}</div>
+          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
+            <Link to={`/blog/how-to-play/${game.id}`} className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('features.games.howTo')}<ArrowRight weight="bold" size={16} /></Link>
+            <Link to={`/blog/themes/${game.id}`} className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('features.games.guide')}<ArrowRight weight="bold" size={16} /></Link>
+            <Link to="/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.seeAll')}<ArrowRight weight="bold" size={16} /></Link>
+          </p>
+      </div>
+    </section>
   );
 }
 
@@ -170,12 +242,12 @@ function QuestionDemo() {
   const tiles = calm ? ['bg-surface-2', 'bg-surface-2', 'bg-surface-2', 'bg-surface-2'] : ['bg-butter', 'bg-mint-soft', 'bg-quiz-blue', 'bg-blush'];
   const toggle = 'min-h-11 px-3 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-1.5';
   return (
-    <div className={`${card} p-5 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <div className={`${card} p-5 grid gap-4`} style={lift}>
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('features.demo.supports')}>
         <span className="font-bold text-sm">{t('features.demo.supports')}</span>
-        <button type="button" className={`${toggle} bg-surface-2`} onClick={() => speak(`${prompt}. ${choices.map((c, i) => `${'ABCD'[i]}: ${c}`).join('. ')}`, settings)}><SpeakerHigh weight="bold" size={18} />{t('q.listen')}</button>
-        <button type="button" aria-pressed={big} className={`${toggle} ${big ? 'bg-butter' : 'bg-surface-2'}`} onClick={() => setBig(!big)}><TextAa weight="bold" size={18} />{t('features.demo.big')}</button>
-        <button type="button" aria-pressed={calm} className={`${toggle} ${calm ? 'bg-butter' : 'bg-surface-2'}`} onClick={() => setCalm(!calm)}><Leaf weight="bold" size={18} />{t('features.demo.calm')}</button>
+        <button type="button" className={`${toggle} bg-white`} onClick={() => speak(`${prompt}. ${choices.map((c, i) => `${'ABCD'[i]}: ${c}`).join('. ')}`, settings)}><SpeakerHigh weight="bold" size={18} />{t('q.listen')}</button>
+        <button type="button" aria-pressed={big} className={`${toggle} ${big ? 'bg-butter' : 'bg-white'}`} onClick={() => setBig(!big)}><TextAa weight="bold" size={18} />{t('features.demo.big')}</button>
+        <button type="button" aria-pressed={calm} className={`${toggle} ${calm ? 'bg-butter' : 'bg-white'}`} onClick={() => setCalm(!calm)}><Leaf weight="bold" size={18} />{t('features.demo.calm')}</button>
       </div>
       <span className="justify-self-start text-xs font-bold px-2 py-1 rounded-pill border-std border-border bg-white">3.NF.1</span>
       <p className={`font-body font-bold leading-snug ${big ? 'text-3xl' : 'text-2xl'}`}>{prompt}</p>
@@ -192,61 +264,113 @@ function QuestionDemo() {
           );
         })}
       </div>
-      <p className="min-h-7 font-display text-xl text-center flex items-center justify-center gap-2" role="status" aria-live="polite">
-        {picked === null ? t('features.demo.tryIt') : picked === right ? <><Star weight="fill" size={24} color="#f6c544" aria-hidden="true" />{t('features.demo.right')}</> : t('features.demo.again')}
+      <p className="min-h-7 font-heading font-bold text-xl text-center flex items-center justify-center gap-2" role="status" aria-live="polite">
+        {picked === null ? t('features.demo.tryIt') : picked === right ? <><Star weight="fill" size={24} color="#fabe37" aria-hidden="true" />{t('features.demo.right')}</> : t('features.demo.again')}
       </p>
     </div>
   );
 }
 
-function ThemeDemo() {
-  const samples = STARTER_THEMES.filter((x) => x.gameId === 'game-show').sort((a, b) => a.order - b.order);
-  const [pick, setPick] = useState('ocean');
-  const sample = samples.find((s) => s.id === pick)!;
+// Try a theme: pick a game, a background and a board color, and the game's
+// real picture redraws from that theme, the same way the Theme Builder's
+// colors do (people value what they have touched; teacher, 2026-10-25).
+const TRY_GAMES: { id: string; pieces: string[] }[] = [
+  { id: 'game-show', pieces: ['card-back', 'square'] },
+  { id: 'match-three', pieces: ['board'] },
+  { id: 'four-in-a-row', pieces: ['board'] },
+  { id: 'bubble-pop', pieces: ['board'] },
+  { id: 'bowling', pieces: ['lane'] },
+];
+const GROUNDS: [string, string][] = [['mint', '#c8f0dc'], ['sky', '#bfdff3'], ['blush', '#ffd3e6'], ['butter', '#fff1b8'], ['night', '#2b2462'], ['kelly', '#22b04a']];
+const PIECES: [string, string][] = [['pink', '#f055a5'], ['yellow', '#fdfd94'], ['blue', '#4ba3e8'], ['orange', '#ff9b28'], ['grape', '#6a45f0'], ['white', '#ffffff']];
+
+function LookDemo() {
+  const [gameId, setGameId] = useState(TRY_GAMES[0].id);
+  const [ground, setGround] = useState(0);
+  const [piece, setPiece] = useState(0);
+  const spec = TRY_GAMES.find((g) => g.id === gameId)!;
+  const theme = useMemo<GameTheme>(() => {
+    const base = classicTheme(gameId);
+    const [, bg] = GROUNDS[ground], [, pc] = PIECES[piece];
+    const dark = bg === '#2b2462' || bg === '#22b04a';
+    return { ...base, id: `try:${gameId}`, name: t('features.try.name'), source: 'custom', backdrop: { kind: 'color' }, colors: { ...base.colors, background: bg, backgroundText: dark ? '#ffffff' : '#1d1a33' }, pieces: { ...base.pieces, ...Object.fromEntries(spec.pieces.map((p) => [p, { color: pc }])) } };
+  }, [gameId, ground, piece, spec]);
+  const name = (id: string) => GAMES.find((g) => g.id === id)?.name ?? id;
+  const chip = (on: boolean) => `min-h-11 px-3 rounded-pill border-std border-border font-bold text-sm ${on ? 'bg-butter ring-[3px] ring-ink' : 'bg-white hover:bg-surface-hover'}`;
   return (
-    <div className="grid gap-3">
-      <ThemePreview theme={sample.theme} gameName={t('features.demo.gameName')} />
-      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('features.demo.pickTheme')}>
-        {samples.map((s) => (
-          <button key={s.id} type="button" role="radio" aria-checked={pick === s.id} onClick={() => setPick(s.id)}
-            className={`min-h-12 px-3 rounded-input border-std border-border text-left ${pick === s.id ? 'bg-butter' : 'bg-surface'}`}>
-            <span className="block font-bold text-sm leading-tight">{s.name}</span>
-            <span className="block text-xs font-semibold opacity-80">{t(`features.band.${s.band}` as StringKey)}</span>
-          </button>
-        ))}
+    <div className={`${card} p-4 sm:p-5 grid gap-4`} style={lift}>
+      <h3 className="font-heading font-bold text-2xl leading-tight">{t('features.try.title')}</h3>
+      <div className="overflow-hidden rounded-[1.25rem] border-bold border-border" role="img" aria-label={t('features.cycle.picture', { game: name(gameId), theme: t('features.try.name') })}>
+        <GameScene theme={theme} />
       </div>
-      <p className="text-xs font-bold">{t('features.demo.samples')} <Link to="/themes">{t('themes.seeAll')}</Link></p>
+      <div role="group" aria-label={t('features.try.game')} className="flex flex-wrap gap-2">
+        {TRY_GAMES.map((g) => <button key={g.id} type="button" aria-pressed={g.id === gameId} onClick={() => setGameId(g.id)} className={chip(g.id === gameId)}>{name(g.id)}</button>)}
+      </div>
+      <Swatches label={t('features.try.ground')} list={GROUNDS} at={ground} set={setGround} />
+      <Swatches label={t('features.try.pieces')} list={PIECES} at={piece} set={setPiece} />
+      <p className="font-semibold text-sm">{t('features.try.more')}</p>
     </div>
   );
 }
 
-// The four ways to play as tabs, with the games that play each way.
-function ModesDemo() {
-  const [mode, setMode] = useState<PlayMode>('share');
-  const games = GAMES.filter((g) => shownModes(g.modes).includes(mode));
+function Swatches({ label, list, at, set }: { label: string; list: [string, string][]; at: number; set: (n: number) => void }) {
   return (
-    <div className={`${card} p-5 grid gap-4`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-      <div role="tablist" aria-label={t('features.play.modes')} className="flex flex-wrap gap-2">
-        {SHOWN_MODES.map((m) => (
-          <button key={m} type="button" role="tab" id={`mode-${m}`} aria-controls="mode-panel" aria-selected={mode === m} onClick={() => setMode(m)}
-            className={`min-h-12 px-4 rounded-pill border-std font-display text-lg ${mode === m ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{t(`mode.${m}` as StringKey)}</button>
-        ))}
-      </div>
-      <div id="mode-panel" role="tabpanel" aria-labelledby={`mode-${mode}`} className="grid md:grid-cols-[1fr_1.4fr] gap-5 items-start">
-        <div className="grid gap-3">
-          <ModeBadge mode={mode} withHint />
-          <p className="text-lg font-semibold">{t(`features.mode.${mode}` as StringKey)}</p>
-          <p className="font-bold bg-surface-2 border-std border-border-soft rounded-input p-3">{t(`features.mode.${mode}.best` as StringKey)}</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {games.map((g) => (
-            <Link key={g.id} to="/login?mode=signup" className="hover-lift rounded-input border-std border-border overflow-hidden bg-surface no-underline text-text">
-              <CyclingCover gameId={g.id} className="aspect-[4/3]" />
-              <span className="block px-2 py-1 font-bold text-sm">{g.name}</span>
-            </Link>
-          ))}
-        </div>
-      </div>
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-2">
+      <span className="font-bold text-sm w-full sm:w-auto sm:min-w-[8.5rem]">{label}</span>
+      {list.map(([id, hex], k) => (
+        <button key={id} type="button" role="radio" aria-checked={k === at} aria-label={t(`features.color.${id}` as StringKey)} data-tip={t(`features.color.${id}` as StringKey)} onClick={() => set(k)}
+          className={`w-11 h-11 rounded-full border-std border-border grid place-items-center motion-safe:transition-transform hover:scale-105 ${k === at ? 'ring-[3px] ring-offset-2 ring-ink' : ''}`} style={{ background: hex }}>
+          {k === at && <Check weight="bold" size={18} color={hex === '#2b2462' || hex === '#6a45f0' || hex === '#22b04a' ? '#ffffff' : '#1d1a33'} aria-hidden="true" />}
+        </button>
+      ))}
     </div>
+  );
+}
+
+// A way to play: its own pastel and icon (New direction rule 12), what it is,
+// when it fits, and the games that play that way.
+function ModeCard({ mode }: { mode: PlayMode }) {
+  const I = MODE_ICONS[mode];
+  const games = GAMES.filter((g) => shownModes(g.modes).includes(mode)).map((g) => g.name).join(', ');
+  return (
+    <li className={`${card} overflow-hidden grid content-start`} style={lift}>
+      <span className="flex items-center gap-3 px-5 py-4 border-b-2 border-border" style={{ background: MODE_COLORS[mode] }}>
+        <Dot bg={MODE_BRIGHT[mode]}><I weight="bold" size={26} aria-hidden="true" /></Dot>
+        <h3 className="title-bubble text-3xl">{t(`mode.${mode}` as StringKey)}</h3>
+      </span>
+      <span className="p-5 grid gap-3">
+        <span className="font-semibold">{t(`features.mode.${mode}` as StringKey)}</span>
+        <span className="font-bold">{t(`features.mode.${mode}.best` as StringKey)}</span>
+        <span className="text-sm font-semibold text-muted">{t('features.play.games', { games })}</span>
+      </span>
+    </li>
+  );
+}
+
+// Proof: the research behind the design, in the Home page's own approved words.
+function Proof() {
+  return (
+    <section aria-labelledby="proof-title" className="grid gap-5">
+      <h2 id="proof-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.proof.title')} /></h2>
+      <div className="grid lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] gap-4">
+        <div className="bg-butter border-bold border-border rounded-panel p-6 grid gap-2 content-center" style={lift}>
+          <span className="title-bubble text-7xl leading-none">{t('public.why.practice.stat')}</span>
+          <b className="font-heading text-xl">{t('public.why.practice.statLabel')}</b>
+          <span className="font-semibold">{t('public.why.practice.text')}</span>
+        </div>
+        <ul className="grid sm:grid-cols-2 gap-4 list-none p-0 m-0">
+          {(['mistakes', 'together', 'support', 'udl'] as const).map((k) => (
+            <li key={k} className={`${card} p-5 grid gap-1 content-start`} style={lift}>
+              <b className="font-heading text-lg leading-snug">{t(`public.why.${k}` as StringKey)}</b>
+              <span className="font-semibold">{t(`public.why.${k}.text` as StringKey)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="flex flex-wrap items-center gap-x-5 gap-y-2 font-semibold text-sm">
+        <span>{t('public.whyNote')}</span>
+        <Link to="/research" className="inline-flex items-center gap-1.5 font-bold text-base text-text underline underline-offset-4">{t('features.proof.link')}<ArrowRight weight="bold" size={16} /></Link>
+      </p>
+    </section>
   );
 }

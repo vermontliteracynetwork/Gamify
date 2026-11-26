@@ -214,18 +214,47 @@ test.describe('footer and legal pages', () => {
 
 test.describe('features page', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
-  test('three pillars to try: a question with supports, sample themes, and the four ways to play', async ({ page }) => {
+  test('real game pictures cycle every theme, a look to try, a question with supports, and the ways to play', async ({ page }) => {
     await page.goto('/features');
-    await page.getByRole('link', { name: /Theme creation/ }).click();
+    // The real games: pick one, and its live picture flips through every theme it can wear.
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Four in a Row', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Four in a Row in every theme' });
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Classic theme' })).toBeVisible();
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Animal Friends theme' })).toBeVisible();
+    await pictures.getByRole('button', { name: 'Previous theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Four in a Row in the Classic theme' })).toBeVisible();
+    // A game with only Classic says class themes show up there too.
+    await games.getByRole('button', { name: 'Territory', exact: true }).click();
+    await expect(games.getByText('Themes your class makes for this game show up here too.')).toBeVisible();
+    // Try a look: the picture redraws from the colors picked.
+    await page.getByRole('link', { name: 'Class themes' }).click();
     await expect(page).toHaveURL(/#themes/);
-    await page.getByRole('radio', { name: /Night Arcade/ }).click();
-    await expect(page.getByRole('radio', { name: /Night Arcade/ })).toHaveAttribute('aria-checked', 'true');
+    await page.getByRole('radio', { name: 'Night' }).click();
+    await expect(page.getByRole('radio', { name: 'Night' })).toHaveAttribute('aria-checked', 'true');
     await page.getByRole('button', { name: 'Bigger text' }).click();
     await expect(page.getByRole('button', { name: 'Bigger text' })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: 'A 1/4' }).click();
     await expect(page.getByText('You got it!', { exact: false })).toBeVisible();
-    await page.getByRole('tab', { name: 'Live' }).click();
     await expect(page.getByText('lock screens with one tap', { exact: false })).toBeVisible();
+  });
+  test('a theme made in the Theme Builder joins the game picture cycle', async ({ page }) => {
+    await page.goto('/features');
+    await page.evaluate(() => {
+      const s = JSON.parse(localStorage.getItem('gamify:settings') || '{}');
+      s['made-themes'] = [{ id: 'custom:e2e-bowl', gameId: 'bowling', name: 'Space Lanes', source: 'custom', designedBy: 'msrivera', studentDesigner: 'Ava',
+        colors: { background: '#1d1a33', backgroundText: '#ffffff', surface: '#fffaf0', text: '#1d1a33', accent: '#fdfd94', accentText: '#1d1a33', success: '#22b04a', miss: '#f055a5' },
+        fonts: { display: 'Grow Year', body: 'Inclusive Sans' }, backdrop: { kind: 'pattern', pattern: 'dots' }, celebration: 'stars', pieces: { lane: { color: '#4ba3e8' } } }];
+      localStorage.setItem('gamify:settings', JSON.stringify(s));
+    });
+    await page.reload();
+    const games = page.locator('#games');
+    await games.getByRole('button', { name: 'Bowling', exact: true }).click();
+    const pictures = games.getByRole('group', { name: 'Bowling in every theme' });
+    await pictures.getByRole('button', { name: 'Next theme' }).click();
+    await expect(pictures.getByRole('img', { name: 'Bowling in the Space Lanes theme' })).toBeVisible();
+    await expect(pictures.getByText('Made by your class')).toBeVisible();
   });
 });
 
