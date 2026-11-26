@@ -659,7 +659,7 @@ function Join({ w }: W) {
   );
 }
 function Bars({ w }: W) {
-  return <div style={{ width: w, background: PP.cream, color: I }}><TopBar w={w} on="public.nav.home" /><div style={{ height: 40 }} /><PaperBand w={w} /><Footer w={w} /></div>;
+  return <div style={{ width: w, background: PP.cream, color: I }}><TopBar w={w} on="public.nav.home" /><div style={{ height: 40 }} /><Footer w={w} /></div>;
 }
 
 // ---------------------------------------------------------------- frames
