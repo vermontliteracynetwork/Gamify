@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Check, Minus } from '@phosphor-icons/react';
-import { FREE_GAMES, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
+import { isFreeGame, PRICES_USD, STUDENT_THEME_BUILDER, TIERS, billingMonths, type Billing, type Tier } from '../config';
 import { GAMES } from '../games/registry';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
@@ -27,7 +27,7 @@ const paid = (x: Plan) => x !== 'free';
 const pro = (x: Plan) => x === 'pro';
 
 export function compareGroups(billing: Billing): Group[] {
-  const freeNames = GAMES.filter((g) => FREE_GAMES.includes(g.id)).map((g) => g.name);
+  const freeNames = GAMES.filter((g) => isFreeGame(g.id)).map((g) => g.name);
   const free = freeNames.length;
   const games = GAMES.length;
   const row = (label: StringKey, what: StringKey, value: Row['value'], vars?: Record<string, string | number>): Row => ({ label: t(label), what: t(what, vars), value });

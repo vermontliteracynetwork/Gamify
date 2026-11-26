@@ -1,33 +1,33 @@
 import { test, expect } from '@playwright/test';
 import { signUpTeacher } from './setup';
 
-test('Free plan: a Plus game opened by its address shows a lock, never the game', async ({ page }, info) => {
-  await page.goto('/games/memory-match');
-  await expect(page.getByText('Memory Match is ready for you on Plus', { exact: false })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'See the plans' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Set up and play' })).toHaveCount(0);
-  await page.screenshot({ path: `test-results/gate-teacher-${info.project.name}.png` });
-  // A student sees only the lock and "ask your teacher": no plans or prices.
-  await page.addInitScript(() => {
-    localStorage.removeItem('gamify:teacher-session');
-    if (!localStorage.getItem('gamify:classrooms')) localStorage.setItem('gamify:classrooms', JSON.stringify([{ id: 'c1', name: 'Room 7', ownerId: 'local-teacher', createdAt: '' }]));
-    sessionStorage.setItem('gamify:arcade-session', JSON.stringify({ classroomId: 'c1', studentId: 's1', name: 'Ava', gameId: 'memory-match' }));
-  });
-  await page.goto('/games/memory-match');
-  await expect(page.getByText('This game is locked. Ask your teacher!')).toBeVisible();
-  await expect(page.getByText(/plan|price|\$/i)).toHaveCount(0);
+// Free plays every game but the few made for paid plans (owner, 2026-11-26).
+// The paid-only lock is covered in src/config.test.ts until that game exists.
+test('Free plan: every game opens, with no lock or upgrade', async ({ page }) => {
+  for (const id of ['memory-match', 'bubble-pop']) {
+    await page.goto(`/games/${id}`);
+    await expect(page.getByRole('button', { name: 'Set up and play' })).toBeVisible();
+    await expect(page.getByText(/ready for you on Plus/)).toHaveCount(0);
+  }
 });
 
-test('Upgrade is one tap from a limit: a locked game opens right after choosing Plus', async ({ page }, info) => {
-  await page.goto('/games/memory-match');
-  await page.getByRole('button', { name: 'Upgrade' }).click();
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
-  await page.waitForTimeout(600);
-  await page.screenshot({ path: `test-results/upgrade-dialog-${info.project.name}.png` });
-  await dialog.getByRole('button', { name: /Plus now/ }).click();
-  await dialog.getByRole('button', { name: 'Keep going' }).click();
-  await expect(page.getByRole('button', { name: 'Set up and play' })).toBeVisible();
+test('Teacher Games tab: every game, each starts an activity with it picked', async ({ page }, info) => {
+  await page.goto('/teacher/games');
+  await expect(page.getByRole('heading', { name: 'Bubble Pop' })).toBeVisible();
+  await expect(page.getByLabel(/is on paid plans/)).toHaveCount(0);
+  await page.screenshot({ path: `test-results/teacher-games-${info.project.name}.png` });
+  await page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: 'Bubble Pop' }) }).getByRole('link', { name: 'Start an activity' }).click();
+  await expect(page).toHaveURL(/\/teacher\/activity\?game=bubble-pop/);
+});
+
+test('Themes page: a Public themes tab shows the shared gallery', async ({ page }, info) => {
+  await page.goto('/teacher/themes');
+  await page.getByRole('tab', { name: 'Public themes' }).click();
+  await expect(page).toHaveURL(/view=public/);
+  await expect(page.getByRole('search').or(page.getByPlaceholder(/search/i)).first()).toBeVisible();
+  await page.screenshot({ path: `test-results/teacher-public-themes-${info.project.name}.png` });
+  await page.getByRole('tab', { name: 'Make a theme' }).click();
+  await expect(page.getByRole('link', { name: /Game Show/ }).first()).toBeVisible();
 });
 
 test('Upgrade from the Question sets limit lifts the cap', async ({ page }) => {

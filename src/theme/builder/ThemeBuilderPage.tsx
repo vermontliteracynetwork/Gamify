@@ -26,6 +26,7 @@ import { loadDraft, loadOriginal, saveDraft, saveOriginal } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
 import TagPicker from './TagPicker';
+import { ThemeGallery } from '../../public/ThemesPage';
 import { SPECIAL_DAYS, entryLimitReached, isOpen, type EntryTier } from '../tags';
 import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
@@ -72,9 +73,16 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
 function GamePicker({ owner, base }: { owner: boolean; base: string }) {
   const { themes } = useMadeThemes();
   const tier = useTier();
+  // Public themes tab (owner, 2026-11-26: "give me the ability in the theme
+  // tab to view public themes"): the same gallery as the public Themes page.
+  const [params, setParams] = useSearchParams();
+  const view = !owner && params.get('view') === 'public' ? 'public' : 'make';
   return (
     <>
       <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} subtitle={owner ? t('builder.ownerSubtitle') : t('builder.subtitle')} />
+      {!owner && <Tabs label={t('teacherNav.themes')} value={view} onChange={(v) => setParams(v === 'public' ? { view: 'public' } : {}, { replace: true })}
+        options={[{ id: 'make', label: t('builder.tab.make') }, { id: 'public', label: t('builder.tab.public') }]} />}
+      {view === 'public' ? <ThemeGallery signedIn /> : <>
       {!owner && TIERS[tier].themeBuilder === 'trial' && <LimitNote className="mb-4">{t('builder.trialNote')}</LimitNote>}
       {!owner && <StudentRequests />}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -92,6 +100,7 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
           );
         })}
       </div>
+      </>}
     </>
   );
 }

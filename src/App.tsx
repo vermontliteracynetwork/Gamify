@@ -35,6 +35,7 @@ const QuestionSetsPage = lazyPage(() => import('./teacher/QuestionSetsPage'));
 const TeacherTimePage = lazyPage(() => import('./student/TeacherTimePage'));
 const ChoosePage = lazyPage(() => import('./student/ChoosePage'));
 const ActivityPage = lazyPage(() => import('./teacher/ActivityPage'));
+const TeacherGamesPage = lazyPage(() => import('./teacher/GamesPage'));
 const SetEditorPage = lazyPage(() => import('./teacher/SetEditorPage'));
 const ImportPage = lazyPage(() => import('./teacher/ImportPage'));
 const StarQuiz = lazyPage(() => import('./games/practice/StarQuiz'));
@@ -194,6 +195,7 @@ function AnimatedRoutes() {
           <Route path="/games/four-in-a-row" element={<RequireSignIn><RequireGame id="four-in-a-row"><FourInARow /></RequireGame></RequireSignIn>} />
           <Route path="/teacher" element={<RequireTeacher><TeacherHome /></RequireTeacher>} />
           <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
+          <Route path="/teacher/games" element={<RequireTeacher><TeacherGamesPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />
           <Route path="/teacher/sets/:id" element={<RequireTeacher><SetEditorPage /></RequireTeacher>} />

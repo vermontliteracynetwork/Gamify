@@ -181,6 +181,8 @@ test('sets: folders, filters, first-try results and Use', async ({ page }, info)
   const problems = watchConsole(page);
   await page.addInitScript(() => {
     if (localStorage.getItem('gamify:sets')) return;
+    // Plus keeps past results; Free clears everything before today (owner, 2026-11-26).
+    localStorage.setItem('gamify:settings', JSON.stringify({ tier: 'plus' }));
     const q = (id: string, prompt: string) => ({ id, kind: 'mc', prompt, choices: ['yes', 'no'], correctIndex: 0 });
     const base = { ownerId: 'local-teacher', visibility: 'private', createdAt: '', updatedAt: '' };
     localStorage.setItem('gamify:sets', JSON.stringify([

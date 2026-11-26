@@ -156,9 +156,12 @@ export function schoolQuote(seats: number): { perSeat: number; total: number } |
   return { perSeat, total: perSeat * seats };
 }
 
-// Games playable on the Free plan (game ids from the registry). Not capped
-// at four: new free games are added over time (teacher, 2026-10-24).
-export const FREE_GAMES = ['game-show', 'pinball', 'cast-catch', 'match-three', 'four-in-a-row', 'star-quiz', 'flashcards'];
+// Free plays every game (owner, 2026-11-26: "free gets all games (except for
+// new googler game that im creating. that should be locked for plus and
+// pro)"). Games listed here are for paid plans only (Plus, Pro, Homeschool).
+// 'googler' is a placeholder id until her game is built.
+export const PAID_ONLY_GAMES = ['googler'];
+export const isFreeGame = (gameId: string) => !PAID_ONLY_GAMES.includes(gameId);
 
 // The one game Free teachers can try the Theme Builder on. Developer's
 // choice; Game Show predicted (the flagship group game).
@@ -169,7 +172,7 @@ export const THEME_TRIAL_GAME = 'game-show';
 export const CHALLENGE_OPEN = false;
 
 export function canPlayGame(tier: Tier, gameId: string): boolean {
-  return TIERS[tier].allGames || FREE_GAMES.includes(gameId);
+  return TIERS[tier].allGames || isFreeGame(gameId);
 }
 
 // The Puzzle Games Graphics Pack (Match Three gems, Bubble Pop balls): the

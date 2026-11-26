@@ -9,9 +9,11 @@ describe('plans', () => {
     expect(schoolQuote(15)?.perSeat).toBe(113);
     expect(schoolQuote(30)?.perSeat).toBe(106);
   });
-  it('free teachers play free games only', () => {
+  it('free teachers play every game but the paid-only ones', () => {
     expect(canPlayGame('free', 'game-show')).toBe(true);
-    expect(canPlayGame('free', 'bubble-pop')).toBe(false);
-    expect(canPlayGame('plus', 'bubble-pop')).toBe(true);
+    expect(canPlayGame('free', 'bubble-pop')).toBe(true);
+    expect(canPlayGame('free', 'googler')).toBe(false);
+    expect(canPlayGame('plus', 'googler')).toBe(true);
+    expect(canPlayGame('homeschool', 'googler')).toBe(true);
   });
 });

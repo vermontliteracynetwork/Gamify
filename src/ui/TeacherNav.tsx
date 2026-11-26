@@ -56,6 +56,7 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
         <NavLink to="/teacher/activity" className="hover-pop min-h-12 mb-2 rounded-pill inline-flex items-center justify-center gap-2 font-bold no-underline text-white bg-grape hover:bg-grape-deep border-std border-border shadow-[0_0.2rem_0_var(--grape-deep)]"><Plus weight="bold" size={18} />{t('teacherNav.create')}</NavLink>
         <NavLink to="/teacher" end className={rail}><House weight="bold" size={20} />{t('teacherNav.home')}</NavLink>
         <NavLink to="/teacher/classes" className={rail}><UsersThree weight="bold" size={20} />{!TIERS[tier].hasClasses ? t('teacherNav.students') : t('teacherNav.classes')}</NavLink>
+        <NavLink to="/teacher/games" className={rail}><GameController weight="bold" size={20} />{t('teacherNav.games')}</NavLink>
         <NavLink to="/teacher/sets" className={rail}><Stack weight="bold" size={20} />{t('teacherNav.sets')}</NavLink>
         <NavLink to="/teacher/reports" className={rail}><ChartBar weight="bold" size={20} />{t('teacherNav.reports')}</NavLink>
         <NavLink to="/teacher/themes" className={rail}><PaintBrush weight="bold" size={20} />{t('teacherNav.themes')}</NavLink>
@@ -84,6 +85,7 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
       <nav aria-label={t('teacherNav.label')} className={`${withRail ? 'min-[1100px]:hidden ' : ''}flex-wrap w-full gap-0.5 p-0.5 rounded-[1.5rem] bg-surface border-std border-border mb-3`}>
         <NavLink to="/teacher" end className={link}><House weight="bold" size={16} />{t('teacherNav.home')}</NavLink>
         <NavLink to="/teacher/classes" className={link}><UsersThree weight="bold" size={16} />{!TIERS[tier].hasClasses ? t('teacherNav.students') : t('teacherNav.classes')}</NavLink>
+        <NavLink to="/teacher/games" className={link}><GameController weight="bold" size={16} />{t('teacherNav.games')}</NavLink>
         <NavLink to="/teacher/sets" className={link}><Stack weight="bold" size={16} />{t('teacherNav.sets')}</NavLink>
         <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
         <NavLink to="/teacher/themes" className={link}><PaintBrush weight="bold" size={16} />{t('teacherNav.themes')}</NavLink>

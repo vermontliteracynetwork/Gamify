@@ -28,7 +28,7 @@ export const FAQS: Record<FaqGroup, Faq[]> = {
     { q: 'What happens to our work if our subscription changes?', a: 'Everything stays safe. Teachers move to the Gamify Free plan and nothing is deleted; classes and question sets beyond the Free limits stay readable and come back in full with a renewal.' },
   ],
   teachers: [
-    { q: 'What does the Gamify Free plan include?', a: 'The Gamify Free plan is free forever: one class of up to 30 students, the free games, every accessibility feature, and one Game Show theme you design. It needs no credit card.' },
+    { q: 'What does the Gamify Free plan include?', a: 'The Gamify Free plan is free forever: every game, every theme, every public question set, one Game Show theme you design and every accessibility feature. Students type a first name to play. It needs no credit card.' },
     { q: 'What do Plus and Pro add?', a: 'Plus unlocks every game, a theme your class designs for each game, 3 classes of up to 60 students and unlimited question sets, for $8 a month, or $6.40 a month on a yearly plan. Pro removes every limit and adds early access to new games and unlimited theme creations per game, for $15 a month, or $12 a month on a yearly plan.' },
     { q: 'How long does it take to get started?', a: 'About five minutes: make a class, paste your class list, pick a ready-made set or write your own, then share a game code. The Get Started steps walk you through it.' },
     { q: 'Does Gamify give points for answering fastest?', a: 'No. In every Gamify game a right answer counts the same whether it takes five seconds or fifty, so careful readers and students who need more time are never punished for thinking. Timers are optional, and calm mode can turn them off.' },

@@ -71,7 +71,7 @@
   --color-blush: #ffd3e6;
   --color-gamify: #ddd6ff; /* Lavender (teacher, 2026-11-24: the old periwinkle is retired) */
   --color-butter: #fff1b8;
-  --color-cream: #f6f0e4; /* the teacher pages' ground (approved portal Shell, 2026-11-25) */
+  --color-cream: #f6f0e4; /* chips and soft fills on teacher pages */
 
   --color-quiz-yellow: #fff1b8;
   --color-quiz-green: #c8f0dc;
@@ -217,6 +217,16 @@ h1.font-display { font-family: var(--font-display); font-weight: 400; }
    grow year font, i prefer capitiizlizing every letter rather than sentence case"). */
 h1:not(.font-body), .title-bubble { text-transform: uppercase; }
 .dev-dash h1 { text-transform: none; }
+/* Inside the teacher portal, titles wear the professional heading font,
+   Inclusive Sans bold, in normal case (owner, 2026-11-26: "inside the teacher
+   portal, use less of the grow year font and more of the professional style
+   inclusive sans"). Grow Year stays in the logo, the public site, game menus
+   and game stages. The portal is any page with the teacher menu. */
+body:has(.teacher-rail) main :is(h1, .title-bubble):not(.font-body) {
+  font-family: var(--font-heading); font-weight: 700; text-transform: none; letter-spacing: -0.01em;
+}
+body:has(.teacher-rail) main :is(h1, .title-bubble) .logo-g { display: none; }
+body:has(.teacher-rail) main :is(h1, .title-bubble) .logo-g-text { display: inline; }
 /* Question and answer text reads in the body font, even in a heading
    (teacher, 2026-10-24: "questions should be in standard font"). */
 h1.font-body, h2.font-body, h3.font-body { font-family: var(--font-body); font-synthesis: weight style; letter-spacing: normal; }
@@ -958,8 +968,9 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 /* Full-screen teacher tools with their own one bar (the Theme Builder editor,
    the class check-in) hide the site bar on every screen. */
 body:has(.solo-bar) .site-header { display: none; }
-/* Teacher pages stand on Cream (approved portal Shell, 2026-11-25). */
-html[data-area="teacher"] .ambient-ground { background-color: var(--cream) !important; background-image: none !important; }
+/* Signed-in teacher pages stand on light purple (owner, 2026-11-26: "logged
+   in teacher background should be light purple"; was Cream). */
+html[data-area="teacher"] .ambient-ground { background-color: var(--lavender) !important; background-image: none !important; }
 
 /* Achievements on the big screen (Show on the big screen = fullscreen). */
 .ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }
@@ -971,6 +982,11 @@ html[data-area="teacher"] .ambient-ground { background-color: var(--cream) !impo
 :root { --text-page-title: clamp(2.1rem, 1.3rem + 2.2vw, 3.1rem); }
 .route-shell main h1:not(.hero-title) { font-size: var(--text-page-title); line-height: 1.05; }
 .route-shell main:has(.game-stage) h1, .route-shell .brand-menu h1 { font-size: revert-layer; }
+/* Sized by sight, not only by pixels (owner, 2026-11-26: "size font not just
+   by pixel but also sight"). Inclusive Sans in mixed case reads larger and
+   heavier than Grow Year capitals at the same size, so teacher portal titles
+   step down until they look the same weight on the page. */
+body:has(.teacher-rail) .route-shell main h1:not(.hero-title, .font-body) { font-size: calc(var(--text-page-title) * 0.8); line-height: 1.1; }
 /* The subtext right under a page title runs the full page width on every
    page (owner, 2026-11-25: "make subtext under plans and pricing full width",
    "apply to all"). The Home hero keeps its own column. */

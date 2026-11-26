@@ -24,6 +24,38 @@ type Sort = 'trending' | 'popular' | 'newest' | 'name';
 // labeled) plus the Gamify library; the Theme Building Challenge winner gets
 // the featured spot at the top.
 export default function ThemesPage() {
+  return (
+    <>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
+        <div className="grid gap-3">
+          <h1 className="title-bubble"><Title text={t('themes.title')} /></h1>
+          <p className="text-lg font-semibold max-w-3xl">{t('themes.sub')}</p>
+          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
+            <Link to="/teacher/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkBuilder')}<ArrowRight weight="bold" size={16} /></Link>
+            <Link to="/blog/themes/game-show" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkGuides')}<ArrowRight weight="bold" size={16} /></Link>
+          </p>
+        </div>
+
+        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-butter border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="var(--lemon)" aria-hidden="true" /></span>
+          <span className="grid gap-1">
+            <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
+            <span className="font-semibold">{t('themes.featuredText')}</span>
+          </span>
+          <span className={buttonClasses()}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
+        </Link>
+
+        <ThemeGallery />
+      </main>
+      <PublicFooter />
+    </>
+  );
+}
+
+// The shared theme gallery: filters, search, favorites and the cards. Also on
+// the teacher Themes page's Public themes tab (owner, 2026-11-26: "give me the
+// ability in the theme tab to view public themes").
+export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
   const reduce = useReducedMotion();
   const { themes: made } = useMadeThemes();
   const { favorites, toggle } = useFavoriteThemes();
@@ -48,26 +80,7 @@ export default function ThemesPage() {
   const gameName = (id: string) => GAMES.find((g) => g.id === id)?.name ?? id;
 
   return (
-    <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
-        <div className="grid gap-3">
-          <h1 className="title-bubble"><Title text={t('themes.title')} /></h1>
-          <p className="text-lg font-semibold max-w-3xl">{t('themes.sub')}</p>
-          <p className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
-            <Link to="/teacher/themes" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkBuilder')}<ArrowRight weight="bold" size={16} /></Link>
-            <Link to="/blog/themes/game-show" className="inline-flex items-center gap-1.5 text-text underline underline-offset-4">{t('themes.linkGuides')}<ArrowRight weight="bold" size={16} /></Link>
-          </p>
-        </div>
-
-        <Link to="/challenge" className="hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center bg-butter border-bold border-border rounded-panel p-5 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
-          <span className="w-16 h-16 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover"><Trophy weight="fill" size={34} color="var(--lemon)" aria-hidden="true" /></span>
-          <span className="grid gap-1">
-            <span className="font-display text-2xl">{t('themes.featuredTitle')}</span>
-            <span className="font-semibold">{t('themes.featuredText')}</span>
-          </span>
-          <span className={buttonClasses()}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
-        </Link>
-
+    <div className="grid gap-6">
         <div className="flex flex-wrap items-center gap-2.5" role="group" aria-label={t('themes.filters')}>
           <label className="relative">
             <span className="sr-only">{t('themes.search')}</span>
@@ -120,15 +133,13 @@ export default function ThemesPage() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-pill border-std border-border-soft">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
                   <span className="flex-1" />
-                  <Link to="/login?mode=signup" className="text-sm font-bold inline-flex items-center gap-1 max-sm:min-h-11 max-sm:text-base">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
+                  <Link to={signedIn ? `/teacher/activity?game=${x.gameId}` : '/login?mode=signup'} className="text-sm font-bold inline-flex items-center gap-1 max-sm:min-h-11 max-sm:text-base">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>
               </motion.li>
             );
           })}
         </ul>
         <p className="text-sm font-bold text-muted">{t('themes.note')}</p>
-      </main>
-      <PublicFooter />
-    </>
+    </div>
   );
 }

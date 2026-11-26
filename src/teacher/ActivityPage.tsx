@@ -48,7 +48,7 @@ export default function ActivityPage() {
   const sets = [...mine, ...LIBRARY];
   const [step, setStep] = useState(0);
   const [classId, setClassId] = useState(() => query.get('class') ?? '');
-  const [gameId, setGameId] = useState('');
+  const [gameId, setGameId] = useState(() => query.get('game') ?? '');
   const [how, setHow] = useState<How | ''>('');
   const [teams, setTeams] = useState<'teacher' | 'random' | 'class'>('teacher');
   const [together, setTogether] = useState<'compete' | 'together'>('compete');
