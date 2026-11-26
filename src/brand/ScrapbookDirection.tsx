@@ -304,7 +304,7 @@ function Pricing({ w }: W) {
             const best = x === 'plus';
             return (
               <TextCard key={x} tilt={[-1.2, 0.9, 1.3][i]} tone={i + 1} tapeAt={best ? 'tr' : 'top'} className="grid gap-4 content-start p-6" style={{ ...CARD, background: best ? PP.butter : '#ffffff', border: `${best ? 3.5 : 3}px solid ${I}`, boxShadow: `0 ${best ? 8 : 5}px 0 ${I}`, marginTop: best && !p ? -14 : 0 }}>
-                {best && <span className="absolute -top-5 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full font-bold text-[17px] whitespace-nowrap" style={{ background: GO_YELLOW, border: `2.5px solid ${I}` }}>{t('pricing.recommended')}</span>}
+                {/* No Recommended label (owner 2026-11-26: "pricing=a but remove the recommended label"). */}
                 <b style={{ ...GY, fontSize: 40 }}><GText>{t(`pricing.${x}` as StringKey)}</GText></b>
                 <P w={w}>{t(`pricing.${x}.who` as StringKey)}</P>
                 <ul className="m-0 p-0 list-none grid gap-2">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-2.5 items-start font-semibold leading-snug text-[17px]"><Check weight="bold" size={20} className="mt-0.5 shrink-0" color={PP.kelly} />{t((x === 'free' ? `pricing.free.${n}` : `upgrade.${x}.${n}`) as StringKey)}</li>)}</ul>

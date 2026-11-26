@@ -16,7 +16,7 @@ const COLS: [StringKey, [string, StringKey][]][] = [
 
 export default function PublicFooter() {
   return (
-    <footer className="mt-16 border-t-[2.5px] border-border bg-surface">
+    <footer className="public-footer mt-16 border-t-[2.5px] border-border bg-surface">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid gap-8">
         <div className="grid gap-x-4 gap-y-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
           <div className="grid gap-3 content-start col-span-2 md:col-span-3 lg:col-span-1">

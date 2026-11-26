@@ -1460,6 +1460,8 @@ export const en = {
   'public.heroSub': 'Gamify turns your own question sets into classroom games. Multiplayer on one big screen, live on every student device, solo, or head to head.',
   'public.startFree': 'Start free',
   'public.joinCode': 'Join with a code',
+  // The one hand-lettered word in the Home hero collage (scrapbook, owner 2026-11-26).
+  'public.hero.word': 'Play!',
   'public.freeNote': 'Free forever for one class of 30. No card needed.',
   'public.modesTitle': 'Three ways to play',
   'public.mode.live': 'Every student plays on their own device while you watch the whole class live.',
@@ -1989,7 +1991,6 @@ export const en = {
   'pricing.freeForever': 'Free forever',
   'pricing.noCard': 'No card needed',
   'pricing.startWith': 'Start with {plan}',
-  'pricing.recommended': 'Recommended',
   'pricing.free.price': '$0',
   'pricing.free.note': 'Free forever. No card needed.',
   'pricing.price': '${m}',
