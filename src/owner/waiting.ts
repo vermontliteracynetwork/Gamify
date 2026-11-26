@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'scrapbook-strength', kind: 'decide', added: '2026-11-26', title: 'Pick the scrapbook strength: A, B or C',
+    why: 'You asked for the colorful scrapbook style as the main art direction for public pages and the Classic themes. /brand, Scrapbook shows every public page and every live game in three strengths: A (papers and stickers at the edges, no tape, no tilt), B (plus washi tape and small tilts at the edges) and C (tape and tilt also on cards with words). The question card, answers, score board and main button stay plain in all three. Nothing live changes until you pick.',
+    how: 'Open /brand, Scrapbook, use the A, B, C switch, then say A, B or C (and any page you want different). Also say whether public pages keep the Lavender ground or go to the cream scrapbook page shown.' },
   { id: 'buffer', kind: 'setup', added: '2026-11-25', title: 'Optional: a Buffer account to schedule approved posts',
     why: 'The social media pipeline from your video is set up for the marketing team: find what teachers are talking about, write scripts, hooks, captions and hashtags, make them sound like Gamify, and build the video. The last step, scheduling across Instagram, TikTok, Facebook and Pinterest, can use Buffer. Its free plan covers a few channels with a limited queue; paid plans cost per channel each month (check buffer.com/pricing). Nothing is scheduled without your OK either way.',
     how: 'Only if you want it: make a Buffer account in the business name, connect the Gamify Instagram, TikTok, Facebook and Pinterest accounts, then tell Claude. Claude asks for access through a secure form, never in chat. Until then, approved posts use the planner\'s own auto-post queue or you post them by hand.' },

@@ -135,11 +135,11 @@ function GSPop({ scale = 1 }: { scale?: number }) {
 }
 const GS_SCORES = [70, 160, 50, 10];
 
-function GameShowLaptop({ vs, noPop }: { vs?: boolean; noPop?: boolean }) {
+export function GameShowLaptop({ vs, noPop, back }: { vs?: boolean; noPop?: boolean; back?: ReactNode }) {
   const teams = vs ? VS : TEAMS;
   return (
     <div className="w-full h-full relative overflow-hidden">
-      <StudioBack w={1000} h={625} />
+      {back ?? <StudioBack w={1000} h={625} />}
       <Corner dark />
       <div className="absolute left-[96px] top-[52px] w-[600px] grid justify-items-center gap-3">
         <Meter segments={3} done={1} part={0.5} width={340} label="Round 2 of 3" />
@@ -255,10 +255,10 @@ function MiniRace({ compact, teams = TEAMS, now = 1 }: { compact?: boolean; team
     </div>
   ))}</>;
 }
-function BoardLaptop({ vs }: { vs?: boolean }) {
+export function BoardLaptop({ vs, back }: { vs?: boolean; back?: ReactNode }) {
   return (
     <div className="w-full h-full relative overflow-hidden">
-      <ParkBack w={1000} h={625} />
+      {back ?? <ParkBack w={1000} h={625} />}
       <Corner dark />
       <div className="absolute left-6 top-[74px] w-[690px] h-[520px] grid place-items-center" style={{ ...quiet, border: `4px solid ${I}`, borderRadius: 28, boxShadow: `0 6px 0 ${I}` }}>
         <BoardGrid w={650} h={480} celebrate={!vs} pawns={vs ? [{ t: 0, at: 17 }, { t: 3, at: 11 }] : undefined} />
@@ -313,8 +313,8 @@ function BoardPhone({ vs }: { vs?: boolean }) {
 // ================= batch 2: shared parts =================
 const pat = (id: string) => PATTERNS.find((p) => p.id === id)!.make(false);
 // A busy pattern ground for the stage edges; words never sit on it, only on paper.
-function PatternStage({ id, children }: { id: string; children: ReactNode }) {
-  return <div className="w-full h-full relative overflow-hidden" style={pat(id)}>{children}</div>;
+function PatternStage({ id, children, back }: { id: string; children: ReactNode; back?: ReactNode }) {
+  return <div className="w-full h-full relative overflow-hidden" style={back ? undefined : pat(id)}>{back}{children}</div>;
 }
 // THE solo board-game layout (teacher, 2026-11-24, Match Three first, then
 // Bubble Pop and every future solo board game): the meter with the moves runs
@@ -397,9 +397,9 @@ function M3Board({ s, bare }: { s: number; bare?: boolean }) {
   );
 }
 const M3_HELD: { id: PowerId; name: string }[] = [{ id: 'extra-time', name: 'Pocket Watch' }, { id: 'tornado', name: 'Tornado' }];
-function MatchThreeLaptop() {
+export function MatchThreeLaptop({ back }: { back?: ReactNode }) {
   return (
-    <PatternStage id="cutpaper-pastel">
+    <PatternStage id="cutpaper-pastel" back={back}>
       <Corner />
       {/* The meter sits over the board, clear of the tool buttons. */}
       <div className="absolute left-[300px] -translate-x-1/2 top-4 z-10"><SoloMeter label="2 moves left" segments={10} done={8} width={240} goal={<StarGoal got={2} />} /></div>
@@ -490,9 +490,9 @@ function F4Player({ i, now, held, name }: { i: number; now?: boolean; held?: { i
     </div>
   );
 }
-function FourLaptop({ vs }: { vs?: boolean }) {
+export function FourLaptop({ vs, back }: { vs?: boolean; back?: ReactNode }) {
   return (
-    <PatternStage id="squiggle-pastel">
+    <PatternStage id="squiggle-pastel" back={back}>
       <Corner />
       <div className="absolute left-[44px] top-[150px] w-[170px]"><F4Player i={0} name={vs ? 'You' : undefined} now={vs} held={{ id: 'double-dice', name: 'Double Drop' }} /></div>
       <div className="absolute right-[44px] top-[150px] w-[170px]"><F4Player i={1} name={vs ? cpuName(1) : undefined} now={!vs} /></div>
@@ -579,9 +579,9 @@ function BubbleBoard({ w, bare, cols = BCOLS }: { w: number; bare?: boolean; col
   );
 }
 const BP_HELD: { id: PowerId; name: string }[] = [{ id: 'double-points', name: 'Double Star' }];
-function BubbleLaptop() {
+export function BubbleLaptop({ back }: { back?: ReactNode }) {
   return (
-    <PatternStage id="doodle">
+    <PatternStage id="doodle" back={back}>
       <Corner />
       <div className="absolute left-1/2 -translate-x-1/2 top-4 z-10"><SoloMeter label="3 bubbles left" segments={5} done={2} width={260} /></div>
       <div className="absolute w-max left-1/2 -translate-x-1/2 top-[92px]"><BubbleBoard w={390} /></div>
@@ -735,10 +735,11 @@ function BowlTop({ frame, k = 1 }: { frame: number; k?: number }) {
     </div>
   );
 }
-function BowlingLaptop({ solo }: { solo?: boolean }) {
+export function BowlingLaptop({ solo, back }: { solo?: boolean; back?: ReactNode }) {
   const frame = solo ? 5 : 4;
   return (
     <AlleyStage w={1000} h={625} top={150}>
+      {back}
       <BowlTop frame={frame} />
       <div className="absolute left-4 top-[84px] z-10"><BowlBoard rows={solo ? BOWL_SOLO : BOWL} now={solo ? 0 : 1} frame={frame} w={220} /></div>
       <div className="absolute right-5 top-[96px] z-10"><HeldTray items={BW_HELD} size={80} /></div>
@@ -826,7 +827,7 @@ function SkyGoal({ got = SKY_GOT }: { got?: number }) {
     </div>
   );
 }
-function ClassScreen({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+export function ClassScreen({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
   const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   return (
     phone ? (
@@ -950,7 +951,7 @@ function TeamCounts() {
     </div>
   );
 }
-function TerritoryCoop({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
+export function TerritoryCoop({ w: w0 = 1000, h: h0 = 625 }: { w?: number; h?: number }) {
   const phone = usePhone(); const w = phone ? 390 : w0, h = phone ? 844 : h0;
   return (
     <div className="relative overflow-hidden" style={{ width: w, height: h }}>

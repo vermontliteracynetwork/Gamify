@@ -67,7 +67,7 @@ const cleanId = (s: string) => s.replace(/[^a-zA-Z0-9]/g, '');
 
 // One filled crayon shape: base wax, scribble strokes in the deep shade,
 // a felt-tip ink outline (edge only tints the scribble).
-function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.8 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
+export function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.8 }: { d: string; color: string; edge?: string; rule?: 'evenodd'; hatch?: number; width?: number }) {
   const clip = 'c' + cleanId(useId());
   const e = edge && edge !== ND.ink ? edge : deep[color] ?? ND.quiet;
   return (
@@ -80,11 +80,11 @@ function Wax({ d, color, edge, rule, hatch = 0.3, width = 4.8 }: { d: string; co
   );
 }
 // ink: an ink outline under a colored line, so thick lines read as shapes.
-function Line({ d, color, w = 5, o = 1, ink }: { d: string; color: string; w?: number; o?: number; ink?: boolean }) {
+export function Line({ d, color, w = 5, o = 1, ink }: { d: string; color: string; w?: number; o?: number; ink?: boolean }) {
   const line = <path d={d} stroke={color} strokeWidth={w} opacity={o} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
   return ink ? <g><path d={d} stroke={ND.ink} strokeWidth={w + 8} fill="none" strokeLinecap="round" strokeLinejoin="round" />{line}</g> : line;
 }
-const Shine = ({ d }: { d: string }) => <Line d={d} color="#ffffff" w={5} />;
+export const Shine = ({ d }: { d: string }) => <Line d={d} color="#ffffff" w={5} />;
 const circ = (cx: number, cy: number, r: number) => `M${cx - r} ${cy} a${r} ${r} 0 1 0 ${2 * r} 0 a${r} ${r} 0 1 0 ${-2 * r} 0 Z`;
 const rr = (x: number, y: number, w: number, h: number, r: number) =>
   `M${x + r} ${y} H${x + w - r} Q${x + w} ${y} ${x + w} ${y + r} V${y + h - r} Q${x + w} ${y + h} ${x + w - r} ${y + h} H${x + r} Q${x} ${y + h} ${x} ${y + h - r} V${y + r} Q${x} ${y} ${x + r} ${y} Z`;
@@ -280,7 +280,7 @@ const SEED: Record<PowerId, number> = {
   hint: 29, 'second-chance': 31, tornado: 37, lightning: 41, 'mystery-box': 43, 'treasure-chest': 47, 'spin-wheel': 53, potion: 59, swap: 61,
 };
 
-function Shell({ size, title, seed, sticker, children }: { size: number; title?: string; seed: number; sticker?: boolean; children: ReactNode }) {
+export function Shell({ size, title, seed, sticker, children }: { size: number; title?: string; seed: number; sticker?: boolean; children: ReactNode }) {
   const f = 'f' + cleanId(useId());
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true} overflow="visible" className="shrink-0">
