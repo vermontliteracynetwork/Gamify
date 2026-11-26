@@ -15,7 +15,7 @@ import TapOk from './TapOk';
 const HOW_KEYS: Record<string, string> = {
   'game-show': 'tb', pinball: 'pb', 'castle-quest': 'cq', 'cast-catch': 'cc', 'match-three': 'bm',
   'four-in-a-row': 'fr', 'memory-match': 'mm', 'match-up': 'mu', 'bubble-pop': 'bp', bowling: 'sb',
-  'road-hop': 'rh', 'lunch-rush': 'lr', 'farm-grow': 'fg', 'star-quiz': 'practice', territory: 'territory', flashcards: 'fc',
+  'road-hop': 'rh', 'lunch-rush': 'lr', 'farm-grow': 'fg', 'star-quiz': 'practice', territory: 'territory', flashcards: 'fc', googler: 'gg',
 };
 
 export function gameTips(gameId: string): string[] {

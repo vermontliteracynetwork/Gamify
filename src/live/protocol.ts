@@ -8,7 +8,9 @@ import type { QuestionSet } from '../data/types';
 // except names and scores.
 
 export type PlayerStatus = 'pending' | 'in' | 'removed';
-export interface LivePlayer { pid: string; name: string; status: PlayerStatus; answered: number; right: number; askedAt: number | null; lastSeen: number }
+// `score`: a game's own count when it ranks by something other than right
+// answers (Googler: googly eyes collected, teacher 2026-11-26).
+export interface LivePlayer { pid: string; name: string; status: PlayerStatus; answered: number; right: number; askedAt: number | null; lastSeen: number; score?: number }
 export type LivePhase = 'lobby' | 'play' | 'paused' | 'ended';
 export interface LiveState {
   code: string; gameId: string; setId: string; phase: LivePhase;
@@ -68,7 +70,7 @@ export type ToHost =
   // just answered and the answer tapped first (the teacher's whole class on
   // one question, 2026-11-24). Both stay on the teacher's device: they are
   // never put in the state every student receives.
-  | { t: 'progress'; pid: string; round: number; answered: number; right: number; askedAt: number | null; q?: string; last?: { q: string; pick: string; right: boolean } };
+  | { t: 'progress'; pid: string; round: number; answered: number; right: number; askedAt: number | null; q?: string; last?: { q: string; pick: string; right: boolean }; score?: number };
 // Question sets go out once (not in every state update): each student's own.
 export type ToPlayers = { t: 'state'; state: LiveState } | { t: 'closed'; pid: string } | { t: 'sets'; sets: QuestionSet[] };
 export type LiveMsg = ToHost | ToPlayers;
@@ -81,8 +83,11 @@ export function openLink(code: string): LiveLink {
   return openChannel<LiveMsg>(`live-${code}`);
 }
 
-// The leaderboard: most right answers first, then fewest answered (accuracy).
-export const ranked = (players: LivePlayer[]) => players.filter((p) => p.status === 'in').sort((a, b) => b.right - a.right || a.answered - b.answered || a.name.localeCompare(b.name));
+// Games that rank the class by their own count instead of right answers.
+export const SCORE_GAMES = ['googler'];
+export const pointsOf = (p: LivePlayer, byScore: boolean) => (byScore ? p.score ?? 0 : p.right);
+// The leaderboard: most right answers (or the game's own count) first, then fewest answered (accuracy).
+export const ranked = (players: LivePlayer[], byScore = false) => players.filter((p) => p.status === 'in').sort((a, b) => pointsOf(b, byScore) - pointsOf(a, byScore) || a.answered - b.answered || a.name.localeCompare(b.name));
 
 // Fold one student message into the host's state (pure, so it is tested).
 export function reduceHost(s: LiveState, m: ToHost, approveNames: boolean, now = Date.now()): LiveState {
@@ -95,7 +100,7 @@ export function reduceHost(s: LiveState, m: ToHost, approveNames: boolean, now =
       return { ...s, players: [...s.players, { pid: m.pid, name, status: approveNames ? 'pending' : 'in', answered: 0, right: 0, askedAt: null, lastSeen: now }], at: now };
     }
     case 'leave': return { ...s, players: s.players.filter((p) => p.pid !== m.pid || p.status === 'removed'), at: now };
-    case 'progress': if (m.round !== s.round) return s; return { ...s, players: s.players.map((p) => (p.pid === m.pid ? { ...p, answered: m.answered, right: m.right, askedAt: m.askedAt, lastSeen: now } : p)), at: now };
+    case 'progress': if (m.round !== s.round) return s; return { ...s, players: s.players.map((p) => (p.pid === m.pid ? { ...p, answered: m.answered, right: m.right, askedAt: m.askedAt, lastSeen: now, ...(m.score !== undefined ? { score: m.score } : {}) } : p)), at: now };
     default: return s;
   }
 }

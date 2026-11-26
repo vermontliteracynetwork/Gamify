@@ -5,6 +5,7 @@ import { houseFor } from '../theme/house';
 import type { GameTheme } from '../theme/types';
 import { CatArt, MouseArt, PoofArt, RoomArt } from './territory/art';
 import { ClassicPiece } from './match-three/pieces';
+import { CrayonBlock, EYES } from './googler/art';
 import { CrayonDieFace, CrayonPawn, INK, PARK_BG, PK, QUIET_MAT } from './castle-quest/park';
 import { BUBBLE_COLORS } from './bubble-pop/manifest';
 import { PATTERNS } from '../brand/PatternProposal';
@@ -91,6 +92,38 @@ export function GameCover({ gameId, className = '' }: { gameId: string; classNam
           </div>
         </div>
       );
+    case 'googler': {
+      // The Classic board as it plays (her cover rule, 2026-11-01): crayon
+      // blocks stacked on the paper grid, googly eyes in a few, a Tee block
+      // hovering over its dashed landing spot, the eye counter beside it.
+      const stack = ['........', '........', '........', '....  ..', '.  1....', '33.15...', '3255.666', '22.44466', '01110.66'];
+      const eyes = new Set(['6-1', '7-5', '8-3', '5-4']);
+      return (
+        <div className={base} style={{ backgroundColor: '#f6f0e4', ...kitPattern('cutpaper-pastel') }} aria-hidden="true">
+          <div className={`${BOARD_BOX} flex items-stretch justify-center gap-[4%]`}>
+            <div className="relative h-full aspect-[8/9] rounded-[8%] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] p-[2%] shadow-[0_0.25rem_0_#1d1a33]">
+              <div className="relative w-full h-full" style={{ backgroundImage: 'linear-gradient(#ddd6ff 1px, transparent 1px), linear-gradient(90deg, #ddd6ff 1px, transparent 1px)', backgroundSize: '12.5% 11.11%' }}>
+                {stack.flatMap((row, r) => row.split('').map((ch, c) => {
+                  const k = Number(ch);
+                  if (Number.isNaN(k) || ch === '.' || ch === ' ') return null;
+                  return (
+                    <span key={`${r}-${c}`} className="absolute" style={{ left: `${c * 12.5}%`, top: `${r * 11.11}%`, width: '12.5%', height: '11.11%' }}>
+                      <CrayonBlock shape={k} seed={r + c} className="w-full h-full" />
+                      {eyes.has(`${r}-${c}`) && <img src={EYES[(r + c) % 5]} alt="" className="absolute inset-[14%] w-[72%] h-[72%]" style={{ transform: `rotate(${r * 40}deg)` }} />}
+                    </span>
+                  );
+                }))}
+                {[[3, 4], [3, 5], [3, 6], [4, 5]].map(([r, c]) => <span key={`g${r}${c}`} className="absolute rounded-[18%] border-[2px] border-dashed border-[#1d1a33] bg-[#fff1b8]/80" style={{ left: `${c * 12.5}%`, top: `${r * 11.11}%`, width: '12.5%', height: '11.11%' }} />)}
+                {[[0, 4], [0, 5], [0, 6], [1, 5]].map(([r, c]) => <span key={`h${r}${c}`} className="absolute" style={{ left: `${c * 12.5}%`, top: `${r * 11.11}%`, width: '12.5%', height: '11.11%' }}><CrayonBlock shape={2} seed={c} className="w-full h-full" /></span>)}
+              </div>
+            </div>
+            <div className="h-full w-[16%] rounded-[1rem] border-[0.25rem] border-[#1d1a33] bg-[#fffaf0] shadow-[0_0.25rem_0_#1d1a33] grid content-evenly justify-items-center py-[3%]">
+              {[0, 1, 2, 3, 4, 5].map((i) => <span key={i} className="w-[70%] aspect-square rounded-full border-[0.15rem] border-[#1d1a33] grid place-items-center" style={{ borderStyle: i < 3 ? 'solid' : 'dashed', background: i < 3 ? '#fff1b8' : 'transparent' }}>{i < 3 && <img src={EYES[i]} alt="" className="w-[90%] h-[90%]" />}</span>)}
+            </div>
+          </div>
+        </div>
+      );
+    }
     case 'four-in-a-row': {
       // The approved rack (batch 7, 2026-11-24): a bright blue rack with cream
       // holes on the cream squiggle stage, purple dot and gold star pieces, a

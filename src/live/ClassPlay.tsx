@@ -30,7 +30,9 @@ export function readClassPlay(search: string): { endAt?: { right?: number; minut
   };
 }
 
-export default function ClassPlayOptions({ value, onChange }: { value: ClassPlay; onChange: (v: ClassPlay) => void }) {
+// `unit`: what the class counts. Right answers, or a game's own count (Googler's googly eyes).
+export default function ClassPlayOptions({ value, onChange, unit = 'right' }: { value: ClassPlay; onChange: (v: ClassPlay) => void; unit?: 'right' | 'eyes' }) {
+  const eyes = unit === 'eyes';
   const set = (p: Partial<ClassPlay>) => onChange({ ...value, ...p });
   // Starts unpicked in setup (teacher, 2026-11-24): the cards first, the rest after a tap.
   const picked = useContext(ChoicePicked);
@@ -65,12 +67,12 @@ export default function ClassPlayOptions({ value, onChange }: { value: ClassPlay
       {picked && (
         <div className="w-full max-w-2xl px-[clamp(1rem,3vw,2rem)] py-[clamp(0.75rem,2vh,1.25rem)] grid gap-4 justify-items-stretch rounded-[1.5rem] border-[3px] border-border bg-surface" style={{ boxShadow: '0 5px 0 var(--ink)' }}>
           {value.mode === 'together' ? (
-            <Slider label={t('live.goalLabel')} hint={t('classPlay.goalHint')} min={10} max={300} value={value.goal} onChange={(goal) => set({ goal })} />
+            <Slider label={t(eyes ? 'gg.live.goalLabel' : 'live.goalLabel')} hint={t(eyes ? 'gg.live.goalHint' : 'classPlay.goalHint')} min={10} max={300} value={value.goal} onChange={(goal) => set({ goal })} />
           ) : (
             <>
               <ChoiceRow label={t('classPlay.ends')} value={value.end} onChange={(end) => set({ end, n: end === 'minutes' ? 5 : 10 })}
-                options={[{ value: 'teacher', label: t('live.end.teacher') }, { value: 'right', label: t('live.end.right') }, { value: 'minutes', label: t('live.end.minutes') }]} />
-              {value.end === 'right' && <Slider label={t('live.end.rightN')} min={1} max={500} value={value.n} onChange={(n) => set({ n })} />}
+                options={[{ value: 'teacher', label: t('live.end.teacher') }, { value: 'right', label: t(eyes ? 'gg.live.endRight' : 'live.end.right') }, { value: 'minutes', label: t('live.end.minutes') }]} />
+              {value.end === 'right' && <Slider label={t(eyes ? 'gg.live.endRightN' : 'live.end.rightN')} min={1} max={500} value={value.n} onChange={(n) => set({ n })} />}
               {value.end === 'minutes' && <Slider label={t('live.end.minutesN')} min={1} max={30} value={value.n} onChange={(n) => set({ n })} />}
             </>
           )}

@@ -19,13 +19,14 @@ import { useTier } from '../data/hooks';
 import { holdPlanForGame } from '../billing/trial';
 import { getGame } from '../games/registry';
 import { t } from '../i18n';
+import { en, type StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
 import { Button, buttonClasses, Panel } from '../ui/kit';
 import Title from '../ui/Title';
 import DialogFocus from '../ui/DialogFocus';
 import Dialog from '../ui/Dialog';
 import { logLiveEvent } from './events';
-import { emptyLog, foldAnswer, openLink, ranked, reduceHost, starColor, type AnswerLog, type LiveLink, type LivePlayer, type LiveState } from './protocol';
+import { emptyLog, foldAnswer, openLink, pointsOf, ranked, reduceHost, SCORE_GAMES, starColor, type AnswerLog, type LiveLink, type LivePlayer, type LiveState } from './protocol';
 import ClassView, { RevealCard } from './ClassView';
 import Sky from '../games/practice/Sky';
 import { PAPER, RESULT_BTN, SkyBurst, SkyCode, SkyGoalCard, SkyPlaying, SkyResults, skyStar, useBoxPct } from '../games/practice/SkyHud';
@@ -72,6 +73,10 @@ function Room({ game }: { game: GameCode }) {
   // Territory's living room (teacher, 2026-11-24): its own class screen, the
   // teacher's pace and Compete rule, and two teams in Compete.
   const territory = game.gameId === 'territory';
+  // Googler ranks and adds up googly eyes, not right answers (teacher, 2026-11-26).
+  const byScore = SCORE_GAMES.includes(game.gameId);
+  const pts = (p: LivePlayer) => pointsOf(p, byScore);
+  const W = (key: StringKey): StringKey => (byScore && `gg.${key}` in en ? (`gg.${key}` as StringKey) : key);
   const { theme: roomTheme } = useGameTheme('territory');
   const startQ = new URLSearchParams(search);
   // The big-screen look (Theme Builder, Big screen); the teacher picks it here.
@@ -150,9 +155,9 @@ function Room({ game }: { game: GameCode }) {
   const setPlayer = (pid: string, patch: Partial<LivePlayer>) => update((s) => ({ ...s, players: s.players.map((p) => (p.pid === pid ? { ...p, ...patch } : p)) }));
   const inRoom = state.players.filter((p) => p.status === 'in');
   const pending = state.players.filter((p) => p.status === 'pending');
-  const leaders = useMemo(() => ranked(state.players), [state.players]);
+  const leaders = useMemo(() => ranked(state.players, byScore), [state.players, byScore]);
   const goal = state.goal ?? Math.max(10, inRoom.length * 10);
-  const classRight = inRoom.reduce((n, p) => n + p.right, 0);
+  const classRight = inRoom.reduce((n, p) => n + pts(p), 0);
   function lock(pid: string, on: boolean) {
     const who = pid === 'all' ? t('live.everyone') : state.players.find((p) => p.pid === pid)?.name ?? '';
     void logLiveEvent({ at: new Date().toISOString(), code: game.code, gameId: game.gameId, kind: on ? 'lock' : 'unlock', who, message: on ? message.trim() || undefined : undefined });
@@ -196,7 +201,7 @@ function Room({ game }: { game: GameCode }) {
   const timeLeft = state.endAt?.minutes && state.startedAt && state.phase !== 'ended' ? Math.max(0, state.startedAt + state.endAt.minutes * 60000 - now) : null;
   useEffect(() => {
     if (state.phase !== 'play' || state.mode === 'together') return;
-    if ((state.endAt?.right && leaders[0]?.right >= state.endAt.right) || timeLeft === 0) end();
+    if ((state.endAt?.right && leaders[0] && pts(leaders[0]) >= state.endAt.right) || timeLeft === 0) end();
   }); // eslint-disable-line react-hooks/exhaustive-deps
   // Territory Compete: everyone in gets a side, evenly, as they come in.
   const inKey = inRoom.map((p) => p.pid).join('|');
@@ -300,15 +305,15 @@ function Room({ game }: { game: GameCode }) {
               filled={state.mode === 'together' ? Math.min(classRight, goal) : skyOrder.length}
               total={state.mode === 'together' ? goal : Math.max(skyOrder.length, (state.endAt?.right ?? 10) * Math.max(1, inRoom.length))}
               colors={state.mode === 'together' ? undefined : skyOrder.map((pid) => starColor(state.players, pid))}
-              label={state.mode === 'together' ? t('live.goalText', { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
+              label={state.mode === 'together' ? t(W('live.goalText'), { right: classRight, goal }) : t('live.skyLabel', { count: skyOrder.length })} />
           ) : state.mode !== 'together' && (
             <ol className="absolute inset-x-0 top-20 bottom-24 mx-auto max-w-4xl px-6 grid gap-3 content-center list-none m-0" aria-label={t('live.board.leaders')}>
               {leaders.slice(0, 10).map((p, i) => (
                 <motion.li key={p.pid} layout={!reduce} className="grid grid-cols-[3rem_minmax(8rem,16rem)_1fr_4rem] items-center gap-3 stage-text">
                   <span className="font-display text-3xl text-center">{i === 0 ? <Crown weight="fill" size={28} color="var(--lemon)" aria-label="1" /> : i + 1}</span>
                   <span className="font-bold text-2xl truncate">{p.name}</span>
-                  <span className="h-10 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><motion.span className="block h-full bg-grape" initial={{ width: 0 }} animate={{ width: `${leaders[0].right ? (p.right / leaders[0].right) * 100 : 0}%` }} /></span>
-                  <span className="font-display text-3xl text-right">{p.right}</span>
+                  <span className="h-10 rounded-pill bg-surface-2 border-std border-border overflow-hidden"><motion.span className="block h-full bg-grape" initial={{ width: 0 }} animate={{ width: `${pts(leaders[0]) ? (pts(p) / pts(leaders[0])) * 100 : 0}%` }} /></span>
+                  <span className="font-display text-3xl text-right">{pts(p)}</span>
                 </motion.li>
               ))}
             </ol>
@@ -363,12 +368,12 @@ function Room({ game }: { game: GameCode }) {
             <div ref={skyCol} className="absolute right-3 top-[4.25rem] z-10 w-[min(15rem,30vw)] grid gap-3 content-start max-h-[calc(100%-5rem)] overflow-hidden">
               {state.mode === 'together' ? (
                 <>
-                  <SkyGoalCard theme={skyTheme} got={Math.min(classRight, goal)} goal={goal} label={t('live.goalText', { right: Math.min(classRight, goal), goal })} />
+                  <SkyGoalCard theme={skyTheme} got={Math.min(classRight, goal)} goal={goal} label={t(W('live.goalText'), { right: Math.min(classRight, goal), goal })} />
                   <SkyPlaying names={inRoom.map((p) => p.name)} />
                 </>
               ) : (
                 <>
-                  <p className="m-0 p-3 font-display text-lg leading-tight text-center" style={PAPER}>{state.endAt?.right ? t('live.firstTo', { n: state.endAt.right }) : t('sky.playing', { count: inRoom.length })}</p>
+                  <p className="m-0 p-3 font-display text-lg leading-tight text-center" style={PAPER}>{state.endAt?.right ? t(W('live.firstTo'), { n: state.endAt.right }) : t('sky.playing', { count: inRoom.length })}</p>
                   <ol className="grid gap-1.5 list-none m-0 p-3" style={PAPER} aria-label={t('live.board.leaders')}>
                     {leaders.slice(0, 8).map((p, i) => (
                       <motion.li key={p.pid} layout={!reduce} className="flex items-center gap-2 font-bold text-base">
@@ -397,13 +402,13 @@ function Room({ game }: { game: GameCode }) {
           {!territory && !skyGame && <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 w-[min(36rem,calc(100%-2rem))] grid gap-1 justify-items-center px-4 py-2 rounded-panel bg-surface/90 border-std border-border">
             {state.mode === 'together' ? (
               <>
-                <p className="font-display text-lg">{t('live.goalText', { right: classRight, goal })}</p>
+                <p className="font-display text-lg">{t(W('live.goalText'), { right: classRight, goal })}</p>
                 <div className="w-full h-3 rounded-pill bg-surface-2 border-std border-border overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={goal} aria-valuenow={Math.min(classRight, goal)} aria-label={t('live.board.goal')}>
                   <motion.div className="h-full bg-[#7dd3a8]" initial={{ width: 0 }} animate={{ width: `${Math.min(100, (classRight / goal) * 100)}%` }} transition={{ duration: reduce ? 0 : 0.6 }} />
                 </div>
               </>
             ) : (
-              <p className="font-display text-lg">{state.endAt?.right ? t('live.firstTo', { n: state.endAt.right }) : t('live.lateCode', { code: game.code })}</p>
+              <p className="font-display text-lg">{state.endAt?.right ? t(W('live.firstTo'), { n: state.endAt.right }) : t('live.lateCode', { code: game.code })}</p>
             )}
           </div>}
         </div>
@@ -430,12 +435,12 @@ function Room({ game }: { game: GameCode }) {
               : winners.map((p) => <StarIcon key={p.pid} weight="fill" size={winners.length > 1 ? 96 : 130} color={starColor(state.players, p.pid)} style={{ filter: 'drop-shadow(0 3px 0 var(--color-border))' }} />)}
             score={state.mode === 'together' ? t('sky.score', { count: Math.min(classRight, goal) }) : winners.length ? winners.map((p) => p.name).join(', ') : t('sky.score', { count: classRight })}
             actions={<>
-              <button type="button" className={`${RESULT_BTN} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }} onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}><ArrowCounterClockwise weight="bold" size={18} />{t('live.again')}</button>
+              <button type="button" className={`${RESULT_BTN} bg-accent`} style={{ boxShadow: 'var(--shadow-sticker)' }} onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, score: 0, askedAt: null })) }))}><ArrowCounterClockwise weight="bold" size={18} />{t('live.again')}</button>
               <Link to="/teacher/activity" className={`${RESULT_BTN} bg-surface-2`} style={{ boxShadow: 'var(--shadow-sticker)' }}><SquaresFour weight="bold" size={18} />{t('results.arcadeShort')}</Link>
               <Link to="/teacher/reports" className={`${RESULT_BTN} bg-quiz-blue`} style={{ boxShadow: 'var(--shadow-sticker)' }}><ChartBar weight="bold" size={18} />{t('live.reports')}</Link>
             </>}>
             {state.mode !== 'together' && winners.length > 0 && <p className="font-bold">{t('live.rightCount', { count: top })}</p>}
-            <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t('live.classTotal', { right: classRight, count: inRoom.length })}</p>
+            <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t(W('live.classTotal'), { right: classRight, count: inRoom.length })}</p>
           </SkyResults>
         );
       })()}
@@ -449,21 +454,21 @@ function Room({ game }: { game: GameCode }) {
                 <span key={sd} className="grid justify-items-center gap-1"><SideBadge side={sd} look={sd === 'defender' ? 0 : 1} size="4.5rem" /><span className="font-score text-4xl tabular-nums">{sd === 'defender' ? state.room?.defenders ?? 0 : state.room?.invaders ?? 0}</span><span className="font-bold">{t(sd === 'defender' ? 'territory.cats' : 'territory.mice')}</span></span>
               ))}
             </div>
-          ) : state.mode === 'together' ? <p className="font-display text-3xl">{t(classRight >= goal ? 'live.togetherMet' : 'live.goalText', { right: classRight, goal })}</p> : (
+          ) : state.mode === 'together' ? <p className="font-display text-3xl">{t(W(classRight >= goal ? 'live.togetherMet' : 'live.goalText'), { right: classRight, goal })}</p> : (
           <div className="flex items-end justify-center gap-3 w-full max-w-xl">
             {[1, 0, 2].map((i) => leaders.at(i) && (
               <motion.div key={leaders.at(i)!.pid} initial={reduce ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: reduce ? 0 : 0.2 + (2 - i) * 0.25 }} className="flex-1 grid gap-2 justify-items-center">
                 {i === 0 && (pieceImage(screen.theme, 'trophy') ? <img src={pieceImage(screen.theme, 'trophy')} alt="" className="h-20 object-contain" /> : <Crown weight="fill" size={40} color="var(--lemon)" aria-hidden="true" />)}
                 <span className="font-display text-xl truncate max-w-full">{leaders.at(i)!.name}</span>
                 <span className={`w-full rounded-t-panel border-heavy border-border flex items-start justify-center pt-2 font-display text-3xl ${i === 0 ? 'h-40 bg-butter' : i === 1 ? 'h-28 bg-blue-crystal' : 'h-20 bg-peach'}`}>{i + 1}</span>
-                <span className="font-bold">{t('live.rightCount', { count: leaders.at(i)!.right })}</span>
+                <span className="font-bold">{t(W('live.rightCount'), { count: pts(leaders.at(i)!) })}</span>
               </motion.div>
             ))}
           </div>
           )}
-          <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t('live.classTotal', { right: classRight, count: inRoom.length })}</p>
+          <p className="font-bold flex items-center gap-2"><UsersThree weight="fill" size={20} aria-hidden="true" />{t(W('live.classTotal'), { right: classRight, count: inRoom.length })}</p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Button variant="primary" onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, askedAt: null })) }))}>{t('live.again')}</Button>
+            <Button variant="primary" onClick={() => update((s) => ({ ...s, phase: 'lobby', round: s.round + 1, room: undefined, players: s.players.map((p) => ({ ...p, answered: 0, right: 0, score: 0, askedAt: null })) }))}>{t('live.again')}</Button>
             <Link to="/teacher/reports" className={buttonClasses('secondary')}>{t('live.reports')}</Link>
           </div>
         </Panel>

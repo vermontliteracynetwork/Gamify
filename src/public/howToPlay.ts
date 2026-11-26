@@ -154,6 +154,29 @@ export const HOW_TO_PLAY: HowToPlay[] = [
     tips: ['Pair students at a similar level, or play the computer on Easy for confidence.'],
   },
   {
+    gameId: 'googler',
+    goal: 'Drop falling blocks to fill rows. Clear a row with a googly eye in it and the eye flies to your counter.',
+    steps: [
+      'A block waits at the top. Three outlines, each in its own color, show the spots it can land on.',
+      'Swipe left or right (or press the arrow keys, or A and D) to pick a spot.',
+      'Swipe down (or press the down arrow, S or Space) to drop it. Tap a spot to pick it; tap it again to drop.',
+      'Fill a whole row to clear it. Googly eyes in that row fly into the counter.',
+      'After every drop a new row pushes up from the bottom, so keep clearing!',
+      'After a few drops, answer questions to earn power-ups.',
+    ],
+    pieces: [
+      { name: 'Blocks', what: 'Seven four-square shapes: a long line, a square, a tee, a zig, a zag, an L and a J. Each has its own color.' },
+      { name: 'Googly eyes', what: 'Some squares are a googly eye that watches your finger or mouse. Clear the row to collect it.' },
+      { name: 'Eye bar', what: 'Empty circles across the top fill as eyes land in them, with your XP at the right.' },
+      { name: 'Stack power-ups', what: 'Some squares hold a wiggling power-up. Clear the row and it goes off right away.' },
+      { name: 'XP', what: 'Clearing rows earns XP (more for two or more at once), and every googly eye earns more.' },
+      { name: 'Power-ups', what: 'Lucky Key (five spots to pick from), Lightning (clears the bottom row), Magnet (pulls eyes to the counter), Freeze (no new rows for a few drops), Double Star (double XP) and Tornado (a new block).' },
+    ],
+    rules: ['You can only drop on one of the offered spots.', 'Too full? The top gets squished away and play goes on.'],
+    settings: ['When the game ends: googly eyes collected, time or XP.', 'Drops before questions.', 'Questions each time.', 'Power-ups on or off.', 'Live: Cooperative adds every student\'s eyes into one class goal; Competitive ranks students by eyes collected.'],
+    tips: ['Ask students to say which spot clears a row before they drop: it turns the puzzle into a talk-through of their thinking.'],
+  },
+  {
     gameId: 'bubble-pop',
     goal: 'Answer questions to load your bubbles, then aim and shoot to match three of the same and pop them.',
     steps: [

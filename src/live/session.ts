@@ -12,6 +12,7 @@ export function getLive(): LiveSession | null {
 export function setLive(s: LiveSession | null) {
   try { if (s) sessionStorage.setItem(KEY, JSON.stringify(s)); else sessionStorage.removeItem(KEY); sessionStorage.removeItem('gamify:live-tally'); } catch { /* this tab only */ }
   tally = { round: 0, answered: 0, right: 0 };
+  lastScore = undefined;
   window.dispatchEvent(new Event(EVENT));
 }
 
@@ -39,7 +40,16 @@ export function liveAnswered(right: boolean, last?: { q: string; pick: string })
   if (!s) return;
   tally = { ...tally, answered: tally.answered + 1, right: tally.right + (right ? 1 : 0) };
   saveTally();
-  linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: null, ...(last ? { last: { ...last, right } } : {}) });
+  linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: null, ...(last ? { last: { ...last, right } } : {}), ...(lastScore !== undefined ? { score: lastScore } : {}) });
+}
+
+// A game's own count (Googler's googly eyes) for the class leaderboard or goal.
+let lastScore: number | undefined;
+export function liveScore(score: number) {
+  const s = getLive();
+  if (!s) return;
+  lastScore = score;
+  linkFor(s.code).send({ t: 'progress', pid: s.pid, ...tally, askedAt: null, score });
 }
 
 // The student's view of the room: the host's latest state, asked for on open.
