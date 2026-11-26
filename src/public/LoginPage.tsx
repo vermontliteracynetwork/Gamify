@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChalkboardTeacher, Student } from '@phosphor-icons/react';
+import { Link } from 'react-router-dom';
 import { logIn, signUp, type SignUpProblem } from '../auth/accounts';
 import { setTeacher, useTeacher } from '../auth/session';
 import { cloudLogIn, cloudOn, cloudSignUp } from '../auth/cloudAuth';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
-import { Button, Panel, Tabs, fieldClasses } from '../ui/kit';
+import { Button, Tabs, fieldClasses } from '../ui/kit';
+import { ScrapbookPage } from './scrapbook/Shell';
 import { openUpgrade } from '../billing/Upgrade';
 import { upgradeTo } from '../billing/upgrade';
 import Title from '../ui/Title';
@@ -16,6 +17,10 @@ import { cleanCode, currentRef, saveRef, validCode } from '../affiliate/program'
 // password, confirm password and a username; log in with username and
 // password. With cloud accounts on (Stage 5) the account is in Supabase;
 // without the keys (local builds) it is kept on this device.
+// The look is the /brand Scrapbook Log in mockup in strength A (owner,
+// 2026-11-26: "login=a"): one centered white card on the Cream ground. The
+// form is the clean core, so it is never taped or tilted, and the page has
+// no stickers (owner, 2026-11-26).
 export default function LoginPage() {
   const [params] = useSearchParams();
   const [mode, setMode] = useState<'login' | 'signup'>(params.get('mode') === 'signup' ? 'signup' : 'login');
@@ -74,12 +79,13 @@ export default function LoginPage() {
   const problem = (k: SignUpProblem) => problems.includes(k) && <span id={`p-${k}`} className="text-sm font-bold text-error" role="alert">{t(`login.problem.${k}` as StringKey)}</span>;
   const bad = (...k: SignUpProblem[]) => k.some((x) => problems.includes(x));
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-16 grid gap-4">
-      <Panel className="grid gap-4">
-        <h1 className="title-bubble text-4xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
+    <ScrapbookPage strength="A">
+    <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-4 grid justify-items-center">
+      <div className="sb-card w-full max-w-[34rem] p-6 sm:p-10 grid gap-5">
+        <h1 className="title-bubble text-4xl sm:text-5xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
         <Tabs fill className="mb-0" label={t('login.tabs')} value={mode} onChange={(m) => { setMode(m); setProblems([]); setWrong(false); }} options={[{ id: 'login', label: t('login.tab.login') }, { id: 'signup', label: t('login.tab.signup') }]} />
         <form className="grid gap-3" onSubmit={(e) => void submit(e)} noValidate>
-          <p className="font-bold flex items-center gap-2"><ChalkboardTeacher weight="bold" size={22} />{t('login.forTeachers')}</p>
+          <p className="font-semibold text-lg leading-snug">{t('login.forTeachers')}</p>
           {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-std border-border-soft">{t('login.localNote')}</p>}
           {mode === 'signup' && (
             <label className="grid gap-1 font-bold">{t('login.email')}
@@ -110,15 +116,13 @@ export default function LoginPage() {
           )}
           {wrong && <p className="font-bold text-error" role="alert">{t('login.wrong')}</p>}
           {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-error'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}
-          <Button type="submit" disabled={busy} variant="primary" className="min-h-14 text-lg">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
+          <Button type="submit" disabled={busy} variant="go" className="min-h-14 text-lg hover-pop">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
           {mode === 'login' && <button type="button" onClick={() => setMode('signup')} className="font-bold underline justify-self-center min-h-11">{t('login.noAccount')}</button>}
         </form>
-      </Panel>
-      <Panel className="flex flex-wrap items-center gap-3 bg-surface-2">
-        <Student weight="bold" size={28} aria-hidden="true" />
-        <p className="font-bold flex-1">{t('login.students')}</p>
-        <Button onClick={() => navigate('/join')}>{t('public.joinCode')}</Button>
-      </Panel>
+        {/* Students: the quiet line from the mockup, with the way to Join. */}
+        <p className="m-0 text-center font-semibold text-muted">{t('login.students')} <Link to="/join" className="font-bold text-text underline underline-offset-4 whitespace-nowrap">{t('public.joinCode')}</Link></p>
+      </div>
     </main>
+    </ScrapbookPage>
   );
 }

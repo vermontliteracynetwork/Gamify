@@ -2,14 +2,14 @@ import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowDown, ArrowRight, Buildings, House, Check, CreditCard, Heart, PaintBrush, ShieldCheck, Trash } from '@phosphor-icons/react';
+import { ArrowDown, ArrowRight, Buildings, House, Check, PaintBrush } from '@phosphor-icons/react';
 import { BILLINGS, LAUNCH_OFFER, PRICES_USD, SCHOOL_MIN_SEATS, billingMonths, billingSavings, type Billing, type Tier } from '../config';
 import { data, newId } from '../data';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { Button, Tabs, buttonClasses, fieldClasses } from '../ui/kit';
 import Title from '../ui/Title';
-import PublicFooter from './PublicFooter';
+import { ScrapbookPage } from './scrapbook/Shell';
 import Accordion from '../ui/Accordion';
 import CompareChart from './CompareChart';
 
@@ -19,6 +19,11 @@ import CompareChart from './CompareChart';
 // happens if you leave, and schools get a price and a quote without a sales
 // call. Teacher-facing only: student pages never show prices. Every number
 // comes from src/config.ts.
+// The look is the /brand Scrapbook Pricing mockup in strength A (owner,
+// 2026-11-26: "pricing=a but remove the recommended label"): the Cream
+// ground, plain white scrapbook cards, nothing taped or tilted, no stickers.
+// Plus keeps its Butter card and deeper shadow, with no label on it.
+const CARD = 'sb-card';
 // About what a yearly plan costs a school day (180 days), as on the approved mockup.
 const perDay = (year: number) => { const d = year / 180; return d < 1 ? t('pricing.perDayCents', { n: Math.round(d * 100) }) : t('pricing.perDayDollars', { n: d.toFixed(2) }); };
 // One Grow Year size for section titles (the approved /brand Pricing mockup).
@@ -36,36 +41,32 @@ export default function PricingPage() {
   // "Compare every feature" glides down to the chart.
   const toChart = (e: MouseEvent) => { e.preventDefault(); document.getElementById('compare')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }); history.replaceState(null, '', '#compare'); };
   const enter = (i: number) => ({ initial: reduce ? false : { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { delay: reduce ? 0 : i * 0.06 } });
-  const trust = [
-    { icon: CreditCard, text: t('pricing.trust.card') },
-    { icon: Heart, text: t('pricing.trust.cancel') },
-    { icon: Trash, text: t('pricing.trust.keep') },
-    { icon: ShieldCheck, text: t('pricing.trust.access') },
-  ];
+  const trust = [t('pricing.trust.card'), t('pricing.trust.cancel'), t('pricing.trust.keep'), t('pricing.trust.access')];
 
   return (
-    <>
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-8">
+    <ScrapbookPage strength="A">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 grid gap-6">
+        {/* The mockup's order: title, the line, the sale, the billing switch, the promises, the plans. */}
         <div>
           <h1 className="title-bubble mb-4"><Title text={t('pricing.title')} /></h1>
           <p className="text-lg sm:text-xl font-semibold leading-snug">{t('pricing.sub')}</p>
-          <ul className="flex flex-wrap gap-3 list-none p-0 mt-5 mb-0">
-            {trust.map(({ icon: I, text }) => <li key={text} className="inline-flex items-center gap-2 bg-white border-bold border-border rounded-pill px-4 sm:px-5 min-h-12 font-bold"><I weight="bold" size={18} aria-hidden="true" />{text}</li>)}
-          </ul>
         </div>
 
         {LAUNCH_OFFER.active && new Date() < new Date(`${LAUNCH_OFFER.endsBefore}T00:00:00`) && (
-          <p className="bg-secondary border-bold border-border rounded-panel p-4 font-bold text-lg m-0" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <p className="bg-butter border-[3px] border-border rounded-[1.25rem] px-5 py-4 font-bold text-lg m-0">
             {t('pricing.founding', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}
           </p>
         )}
         <Tabs value={billing} onChange={setBilling} label={t('pricing.billing')} className="justify-self-start mb-0"
           options={BILLINGS.map((b) => ({ id: b.id, label: b.id === 'month' ? t('pricing.billing.month') : t(`pricing.billing.${b.id}` as StringKey, { off: billingSavings('plus', b.id) }) }))} />
+        <ul className="flex flex-wrap gap-3 list-none p-0 m-0 max-sm:grid">
+          {trust.map((text) => <li key={text} className="inline-flex items-center gap-2 bg-white border-std border-border rounded-pill px-4 min-h-11 font-bold"><Check weight="bold" size={18} className="text-kelly shrink-0" aria-hidden="true" />{text}</li>)}
+        </ul>
         <div className="grid md:grid-cols-3 gap-5 items-stretch pt-2">
           {tiers.map((x, i) => {
             return (
-              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-border grid gap-4 content-start relative [&_li>svg]:text-kelly ${x === 'plus' ? 'bg-butter border-[3.5px] p-6 md:-mt-4 md:mb-4' : 'bg-surface border-bold p-5 sm:p-6'}`} style={{ boxShadow: x === 'plus' ? '0 8px 0 var(--border)' : 'var(--shadow-sticker)' }}>
-                {x === 'plus' && <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-accent text-accent-ink border-bold border-border font-bold rounded-pill px-5 py-1.5">{t('pricing.recommended')}</span>}
+              <motion.section key={x} {...enter(i)} aria-labelledby={`plan-${x}`} className={`hover-lift rounded-panel border-border grid gap-4 content-start relative [&_li>svg]:text-kelly ${x === 'plus' ? 'bg-butter border-[3.5px] p-6 md:-mt-3.5 md:mb-3.5' : 'bg-white border-[3px] p-5 sm:p-6'}`} style={{ boxShadow: x === 'plus' ? '0 8px 0 var(--border)' : '0 5px 0 var(--border)' }}>
+                {/* No Recommended label (owner, 2026-11-26); Plus still stands out by its Butter card. */}
                 <h2 id={`plan-${x}`} className="title-bubble text-4xl flex items-center gap-2"><Title text={t(`pricing.${x}`)} /></h2>
                 <p className="text-lg font-semibold leading-snug">{t(`pricing.${x}.who` as StringKey)}</p>
                 {/* The four lines that sell it, then the full chart (teacher,
@@ -78,20 +79,20 @@ export default function PricingPage() {
                     ? <><p className="font-score text-5xl leading-none tabular-nums m-0">{t('pricing.free.price')}</p><p className="font-semibold m-0">{t('pricing.free.note')}</p></>
                     : <><p className="m-0 flex flex-wrap items-baseline gap-x-2"><span className={`font-score leading-none tabular-nums ${x === 'plus' ? 'text-6xl' : 'text-5xl'}`}>{t('pricing.price', { m: perMonth(x as 'plus' | 'pro', billing) })}</span><span className="text-lg font-bold">{t('upgrade.perMonth')}</span></p><p className="font-semibold m-0">{t(`pricing.renews.${billing}` as StringKey, { n: money(PRICES_USD[x as 'plus' | 'pro'][billing]) })}</p>{billing === 'year' && <p className="text-sm font-semibold text-muted m-0">{perDay(PRICES_USD[x as 'plus' | 'pro'].year)}</p>}</>}
                 </div>
-                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses(x === 'plus' ? 'go' : 'secondary', 'min-h-14 text-lg hover-pop')}>
+                <Link to={x === 'free' ? '/login?mode=signup' : `/login?mode=signup&plan=${x}`} className={buttonClasses('go', 'min-h-14 text-lg hover-pop')}>
                   {x === 'free' ? t('public.startFree') : t('pricing.startWith', { plan: t(`pricing.${x}`) })}
                 </Link>
               </motion.section>
             );
           })}
         </div>
-        <Link to="/homeschool" className="hover-lift flex flex-wrap items-center gap-3 bg-surface border-bold border-border rounded-panel p-4 no-underline text-text" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <Link to="/homeschool" className={`hover-lift flex flex-wrap items-center gap-3 ${CARD} p-4 no-underline text-text`}>
           <House weight="fill" size={30} aria-hidden="true" />
           <span className="grid flex-1 min-w-60"><span className="font-display text-2xl">{t('pricing.homeschoolLink')}</span><span className="font-semibold">{t('pricing.homeschoolLinkText')}</span></span>
           <ArrowRight weight="bold" size={24} aria-hidden="true" />
         </Link>
 
-        <section aria-labelledby="themes-value" className="bg-surface border-bold border-border rounded-panel p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section aria-labelledby="themes-value" className={`${CARD} p-5 grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center`}>
           <span className="w-16 h-16 rounded-full bg-butter border-bold border-border flex items-center justify-center wiggle-on-hover"><PaintBrush weight="fill" size={32} aria-hidden="true" /></span>
           <div>
             <h2 id="themes-value" className="font-display text-2xl"><Title text={t('pricing.themesTitle')} /></h2>
@@ -105,7 +106,7 @@ export default function PricingPage() {
         <SchoolPlans />
 
         {/* What is never behind a paywall, in public (teacher research, 2026-10-31). */}
-        <section aria-labelledby="always-free" className="bg-surface border-bold border-border rounded-panel p-6 grid gap-3" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <section aria-labelledby="always-free" className={`${CARD} p-6 grid gap-3`}>
           <h2 id="always-free" className="font-display text-2xl leading-tight"><Title text={t('pricing.always.title')} /></h2>
           <p className="font-semibold">{t('pricing.always.text')}</p>
           <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5 list-none p-0 m-0">
@@ -126,8 +127,7 @@ export default function PricingPage() {
           <p className="font-bold text-muted m-0">{t('pricing.closing')}</p>
         </div>
       </main>
-      <PublicFooter />
-    </>
+    </ScrapbookPage>
   );
 }
 
@@ -152,7 +152,7 @@ function SchoolPlans() {
   }
   const field = fieldClasses('md');
   return (
-    <section id="schools" aria-labelledby="school-title" className="bg-mint border-bold border-border rounded-panel p-6 sm:p-10 grid md:grid-cols-[1.2fr_1fr] gap-6 sm:gap-8 items-start scroll-mt-24" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+    <section id="schools" aria-labelledby="school-title" className={`${CARD} !bg-mint p-6 sm:p-10 grid md:grid-cols-[1.2fr_1fr] gap-6 sm:gap-8 items-start scroll-mt-24`}>
       <div className="grid gap-4 content-start">
         <span className="w-12 h-12 rounded-full bg-surface border-bold border-border flex items-center justify-center wiggle-on-hover" aria-hidden="true"><Buildings weight="bold" size={24} /></span>
         <h2 id="school-title" className={H2}><Title text={t('pricing.schoolTitle')} /></h2>
@@ -167,7 +167,7 @@ function SchoolPlans() {
           <PrincipalNote />
         </div>
       </div>
-        <div className="bg-surface border-bold border-border rounded-panel p-5 sm:p-6 grid gap-3">
+        <div className="bg-white border-[3px] border-border rounded-panel p-5 sm:p-6 grid gap-3">
           <h3 className="font-display text-2xl leading-tight"><Title text={t('pricing.quoteTitle')} /></h3>
           {sent ? (
             <div className="grid gap-2" role="status">

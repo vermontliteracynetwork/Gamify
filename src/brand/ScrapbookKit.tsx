@@ -1,6 +1,7 @@
-import { createContext, useContext, useId, type CSSProperties, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 import { PP } from './PaletteProposal';
 import { PATTERNS } from './PatternProposal';
+import { StrengthProvider, useStrength, type Strength } from '../public/scrapbook/strength';
 import { CrayonPowerUp, Doodle, Line, Shell, Shine, Wax, type DoodleKind, type PowerId } from './CrayonKit';
 
 // The scrapbook kit, restored (MOCKUP ONLY, owner 2026-11-26: "there was a
@@ -21,10 +22,8 @@ import { CrayonPowerUp, Doodle, Line, Shell, Shine, Wax, type DoodleKind, type P
 // The clean core (question card, answer tiles, score board, main button) is
 // never taped or tilted, in any strength: nothing here wraps it.
 
-export type Strength = 'A' | 'B' | 'C';
-const Ctx = createContext<Strength>('A');
-export const StrengthProvider = Ctx.Provider;
-export const useStrength = () => useContext(Ctx);
+// The strength switch is shared with the live public pages (src/public/scrapbook).
+export { StrengthProvider, useStrength, type Strength };
 const MAX_TILT = 4;
 const clampTilt = (d: number) => Math.max(-MAX_TILT, Math.min(MAX_TILT, d));
 

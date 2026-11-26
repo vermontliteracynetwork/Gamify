@@ -961,6 +961,19 @@ body:has(.solo-bar) .site-header { display: none; }
 /* Teacher pages stand on Cream (approved portal Shell, 2026-11-25). */
 html[data-area="teacher"] .ambient-ground { background-color: var(--cream) !important; background-image: none !important; }
 
+/* Scrapbook public shell (owner, 2026-11-26: "home=b pricing=a ... login=a
+   join =a top/bottom= a --- no scrapbook on any other live views or in games
+   at all"). Opt-in only: a page wrapped in <ScrapbookPage> (src/public/scrapbook)
+   sets html[data-ground="scrapbook"]. The ground is Cream, the top bar stays
+   pure white (2026-11-24) with the 3px ink rule, the footer is white with the
+   same rule, and edge pieces never make the page scroll sideways. */
+html[data-ground="scrapbook"] .ambient-ground { background-color: var(--cream) !important; background-image: none !important; }
+html[data-ground="scrapbook"] .site-header { border-bottom-width: 3px; }
+html[data-ground="scrapbook"] .public-footer { background: #ffffff; border-top-width: 3px; }
+html[data-ground="scrapbook"], html[data-ground="scrapbook"] body { overflow-x: clip; background: var(--cream); }
+/* A scrapbook card: white, 3px ink edge, 5px ink shadow, the panel radius. */
+.sb-card { background: #ffffff; border: 3px solid var(--color-border); border-radius: var(--radius-panel); box-shadow: 0 5px 0 var(--color-border); }
+
 /* Achievements on the big screen (Show on the big screen = fullscreen). */
 .ach-board:fullscreen { background: var(--color-bg); padding: 2.5rem; overflow: auto; align-content: start; }
 
