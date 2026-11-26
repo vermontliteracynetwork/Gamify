@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, ChalkboardTeacher, Flag, HouseSimple, List, SignOut, X } from '@phosphor-icons/react';
 import { setTeacher, useSignedIn } from '../auth/session';
 import { t } from '../i18n';
+import Title from './Title';
 import { TellGamify } from './TellGamify';
 import { useIsOwner } from '../owner/useIsOwner';
 
@@ -100,13 +101,14 @@ function TellDialog({ open, role, onClose }: { open: boolean; role: 'teacher' | 
   }, [open]);
   return (
     <dialog ref={ref} onClose={onClose} aria-label={t('tell.title')}
-      className="m-auto w-[min(560px,calc(100vw-32px))] rounded-panel border-bold border-border bg-surface p-4 backdrop:bg-black/40">
-      <div className="flex justify-end mb-2">
-        <button type="button" onClick={onClose} aria-label={t('tell.close')} className="w-11 h-11 rounded-full border-std border-border bg-white flex items-center justify-center">
+      className="m-auto w-[min(640px,calc(100vw-32px))] rounded-panel border-bold border-border bg-surface p-5 backdrop:bg-black/40" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h2 className="font-display text-2xl font-bold"><Title text={t('tell.title')} /></h2>
+        <button type="button" onClick={onClose} aria-label={t('tell.close')} className="w-11 h-11 shrink-0 rounded-full border-std border-border bg-white flex items-center justify-center">
           <X weight="bold" size={20} />
         </button>
       </div>
-      {open && <TellGamify role={role} />}
+      {open && <TellGamify role={role} bare />}
     </dialog>
   );
 }
