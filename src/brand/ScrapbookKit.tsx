@@ -161,7 +161,8 @@ export function TextCard({ children, style, className = '', tilt = -1.2, tone = 
   return (
     <Tag className={`relative ${className}`} style={{ ...style, transform: c ? `rotate(${clampTilt(tilt)}deg)` : style?.transform }}>
       {children}
-      {c && (tapeAt === 'tr' ? <Tape tone={tone} w={96} rot={36} style={{ right: -30, top: 4 }} /> : <Tape tone={tone} w={96} rot={tilt > 0 ? 4 : -4} style={{ left: '50%', top: -15, marginLeft: -48 }} />)}
+      {/* Tape is a pop accent, not on every card (owner 2026-11-26): about one card in three. */}
+      {c && tone % 3 === 1 && (tapeAt === 'tr' ? <Tape tone={tone} w={96} rot={36} style={{ right: -30, top: 4 }} /> : <Tape tone={tone} w={96} rot={tilt > 0 ? 4 : -4} style={{ left: '50%', top: -15, marginLeft: -48 }} />)}
     </Tag>
   );
 }

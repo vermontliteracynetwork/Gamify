@@ -57,7 +57,8 @@ function H1({ children, w, size }: W & { children: string; size?: number }) {
 // differ on a 1190 laptop, an iPad and a phone.
 function H2({ children, w, stk }: W & { children: string; stk?: SchoolKind }) {
   const h = <h2 style={{ ...GY, fontSize: isPh(w) ? 30 : 42, lineHeight: 1 }}><Words text={children} /></h2>;
-  if (!stk || roomy(w)) return h;
+  // No sticker beside section titles (owner 2026-11-26).
+  if (!stk || roomy(w) || h) return h;
   return <div className="flex items-center gap-3">{h}<Lean tilt={children.length % 2 ? 4 : -4}><SchoolSticker kind={stk} size={isPh(w) ? 46 : 62} /></Lean></div>;
 }
 // An inline edge piece that leans from B on (A is flat).
@@ -69,6 +70,8 @@ function Lean({ children, tilt }: { children: ReactNode; tilt: number }) {
 // edge, in the gap above a section title, never under words.
 type StripDef = [PaperId, 'l' | 'r', number];
 function Strip({ w, d, top }: W & { d: StripDef; top: number }) {
+  // No edge strips between sections (owner 2026-11-26: no random stickers).
+  if (w) return null;
   const [id, side, seed] = d, sw = Math.min(Math.round(w * (isPh(w) ? 0.5 : 0.34)), 340), tw = isPh(w) ? 40 : 50;
   return <Paper id={id} seed={seed} tilt={side === 'l' ? -2 : 2} tape={{ tone: seed, w: tw, pos: side === 'l' ? { right: -tw * 0.35, top: -6 } : { left: -tw * 0.35, top: -6 }, rot: side === 'l' ? 24 : -24 }}
     style={{ [side === 'l' ? 'left' : 'right']: -16, top, width: sw, height: isPh(w) ? 20 : 26 }} />;
@@ -114,7 +117,8 @@ function WordSpot({ w, word, top = 240 }: W & { word: string; top?: number }) {
 // Edge-piece positions in the side margins.
 const L = (w: number, x = 0): CSSProperties => ({ left: Math.max(4, (gut(w) - 120) / 2 + x) });
 const R = (w: number, x = 0): CSSProperties => ({ right: Math.max(4, (gut(w) - 120) / 2 + x) });
-function Margin({ w, children }: W & { children: ReactNode }) { return roomy(w) ? <>{children}</> : null; }
+// Owner 2026-11-26: no random stickers anywhere but the Home hero (`keep`).
+function Margin({ w, children, keep }: W & { children: ReactNode; keep?: boolean }) { return keep && roomy(w) ? <>{children}</> : null; }
 
 // ---------------------------------------------------------------- top bar and footer
 const LINKS: StringKey[] = ['public.nav.home', 'public.nav.features', 'public.nav.pricing', 'public.nav.research', 'public.nav.themes', 'public.nav.ideas'];
@@ -136,16 +140,6 @@ function TopBar({ w, on, student, join }: W & { on?: StringKey; student?: boolea
               <span className="ml-2 flex gap-2">{pill(PP.lavender, t('public.nav.join'))}{pill(GO_YELLOW, t('public.nav.login'))}</span>
             </nav>}
     </header>
-  );
-}
-// A row of paper swatches above the footer: a scrapbook edge for every page.
-const BAND: PaperId[] = ['gingham', 'stripes', 'polka', 'stars', 'checker', 'plaid', 'gingham-pink', 'flowers', 'pinstripe', 'gingham-mint', 'dots', 'blocks'];
-function PaperBand({ w }: W) {
-  const n = isPh(w) ? 5 : 10, sw = w / n;
-  return (
-    <div aria-hidden="true" className="relative mt-16" style={{ height: isPh(w) ? 34 : 44 }}>
-      {Array.from({ length: n }, (_, i) => <Paper key={i} id={BAND[i % BAND.length]} seed={i + 30} tilt={[-3, 2, -1.5, 3, -2.5][i % 5]} tape={i % 4 === 1 ? { tone: i, at: 'top', w: 56 } : undefined} style={{ left: i * sw - 6, top: [6, 0, 10, 2, 8][i % 5], width: sw + 14, height: isPh(w) ? 30 : 40 }} />)}
-    </div>
   );
 }
 type Col = [StringKey, StringKey[]];
@@ -171,7 +165,7 @@ function Footer({ w, student }: W & { student?: boolean }) {
   );
 }
 function Page({ w, on, student, join, children }: W & { on?: StringKey; student?: boolean; join?: boolean; children: ReactNode }) {
-  return <div className="relative overflow-hidden" style={{ width: w, background: PP.cream, color: I }}><TopBar w={w} on={on} student={student} join={join} />{children}<PaperBand w={w} /><Footer w={w} student={student} /></div>;
+  return <div className="relative overflow-hidden" style={{ width: w, background: PP.cream, color: I }}><TopBar w={w} on={on} student={student} join={join} />{children}<div className="h-16" /><Footer w={w} student={student} /></div>;
 }
 
 // A game cover as a photo (the Classic cover art, never redrawn), on a white mat.
@@ -232,7 +226,7 @@ function Home({ w }: W) {
   const who: [Icon, StringKey, StringKey, StringKey, string][] = [[ChalkboardTeacher, 'public.who.teachers', 'public.who.teachers.text', 'public.who.teachers.go', PP.butter], [Buildings, 'public.who.schools', 'public.who.schools.text', 'public.who.schools.go', PP.mint], [House, 'public.who.homeschool', 'public.who.homeschool.text', 'public.who.homeschool.go', PP.blush]];
   return (
     <Page w={w} on="public.nav.home">
-      <Sec w={w} top={p ? 28 : 44} deco={<Margin w={w}><Bit style={{ ...L(w), top: 360 }} tilt={-5}><SchoolSticker kind="pencil" size={92} /></Bit><Sprinkle spots={[[30, 560, 24, PP.lemon], [96, 640, 18, PP.pink]]} /></Margin>}>
+      <Sec w={w} top={p ? 28 : 44} deco={<Margin w={w} keep><Bit style={{ ...L(w), top: 360 }} tilt={-5}><SchoolSticker kind="pencil" size={92} /></Bit><Sprinkle spots={[[30, 560, 24, PP.lemon], [96, 640, 18, PP.pink]]} /></Margin>}>
         <div className="grid items-center" style={{ gridTemplateColumns: p || tab ? '1fr' : '0.48fr 0.52fr', gap: p ? 28 : 56 }}>{text}<HomeCollage w={w} colW={colW} /></div>
       </Sec>
       <Sec w={w} strip={['stripes', 'r', 1]} deco={<Margin w={w}><Paper id="polka" seed={7} tilt={-3} tape={{ tone: 1, at: 'top', w: 64 }} style={{ ...L(w), top: 120, width: 120, height: 150 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="magnet" size={84} /></span></Paper><Bit style={{ ...R(w), top: 200 }} tilt={6}><SchoolSticker kind="notebook" size={96} /></Bit></Margin>}>
@@ -421,7 +415,7 @@ function Post({ w }: W) {
             2026-11-26); the scrapbook sits in the wide margins beside it, or, below
             1300px where there are no margins, as one edge strip above the title. */}
         {!roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none"><Strip w={w} d={['gingham-pink', 'r', 2]} top={p ? 4 : 10} /></div>}
-        {roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        {false && roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
           <Bit style={{ left: side - 230, top: 40 }} tilt={-7}><HandWord text="Try it!" size={40} /></Bit>
           <Paper id="gingham-pink" seed={19} tilt={-3} tape={{ tone: 0, at: 'top', w: 70 }} style={{ left: side - 230, top: 170, width: 170, height: 210 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="lightning" size={100} /></span></Paper>
           <Paper id="stars" seed={21} tilt={3} tape={{ tone: 3, at: 'tr', w: 70 }} style={{ left: side + col + 60, top: 120, width: 170, height: 200 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="bus" size={110} /></span></Paper>
@@ -596,6 +590,8 @@ function Field({ label, value, w, hint }: W & { label: string; value: string; hi
 // outside (A and B); only in C does the card itself tilt and wear tape.
 function CenterDeco({ w, word, top = 40, h = 560, half = 270 }: W & { word: string; top?: number; h?: number; half?: number }) {
   const p = isPh(w), cx = w / 2, lx = cx - half - 280, rx = cx + half + 50;
+  // Owner 2026-11-26: no random stickers around Log in and Join either.
+  if (w) return null;
   if (p) return (
     <>
       <Strip w={w} d={['gingham', 'l', 1]} top={8} />
