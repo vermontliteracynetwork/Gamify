@@ -32,7 +32,8 @@ function layout({ colW, vw, vh }: Geo) {
   let cw = (gw - (cols - 1) * gap) / cols, ch = cw * 0.9;
   let gh = rows * ch + (rows - 1) * gap, boxH = gh / fill, bw = colW;
   // Short laptop windows (1190 x 540): fit the screen height.
-  const maxH = Math.max(420, vh - 110);
+  // Fit the first screen with the stickers that hang past the edges (owner 2026-11-26: "shrink it to fit").
+  const maxH = Math.max(380, vh - 225);
   if (wide && boxH > maxH) {
     boxH = maxH; gh = boxH * fill; ch = (gh - (rows - 1) * gap) / rows; cw = ch / 0.9;
     gw = cols * cw + (cols - 1) * gap; bw = gw / frac;
