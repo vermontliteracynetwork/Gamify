@@ -26,7 +26,7 @@ import { loadDraft, loadOriginal, saveDraft, saveOriginal } from './draftStore';
 import { isRound, isSolid } from './template';
 import ThemePreview, { previewViews, type PreviewView } from './ThemePreview';
 import TagPicker from './TagPicker';
-import { SPECIAL_DAYS, isOpen } from '../tags';
+import { SPECIAL_DAYS, entryLimitReached, isOpen, type EntryTier } from '../tags';
 import Title from '../../ui/Title';
 import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
@@ -401,7 +401,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
                     <p className="font-bold">{t('builder.creditedTo', { name: teacherUsername() })}</p>
                     {/* Credit is only the teacher's username (owner, 2026-11-26). */}
                   </div>
-                  <ShareTab theme={draft} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
+                  <ShareTab theme={draft} mine={themes} tier={tier} saved={!isNew} problems={problems.length > 0} onChange={async (next) => { setDraft(next); if (!isNew) { await saveMadeTheme(next); reload(); } }} />
                 </>
               )}
               {tab === 'style' && (
@@ -661,7 +661,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 // Share a saved class theme in the public gallery (reviewed by the owner
 // before anyone sees it) and, once entries open, enter the challenge
 // (teacher, 2026-10-25). Credit is the class name, never a student's.
-function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
+function ShareTab({ theme, mine, tier, saved, problems, onChange }: { theme: GameTheme; mine: GameTheme[]; tier: EntryTier; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
   const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
   const ready = saved && !problems;
   const tags = theme.tags ?? [];
@@ -689,9 +689,14 @@ function ShareTab({ theme, saved, problems, onChange }: { theme: GameTheme; save
           <label className="grid gap-1 font-bold">{t('builder.challengeDay')}
             <select value={theme.challengeDay ?? ''} disabled={!!theme.gallery && !!theme.challengeDay} onChange={(e) => onChange({ ...theme, challengeDay: e.target.value || undefined })} className={fieldClasses('md', 'max-w-md')}>
               <option value="">{t('builder.challengeDayPick')}</option>
-              {SPECIAL_DAYS.filter((d) => isOpen(d) || d.tag === theme.challengeDay).map((d) => <option key={d.tag} value={d.tag}>{d.name} ({new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })})</option>)}
+              {SPECIAL_DAYS.filter((d) => isOpen(d) || d.tag === theme.challengeDay).map((d) => {
+                // Entry limits per plan (owner, 2026-11-26).
+                const full = d.tag !== theme.challengeDay && entryLimitReached(mine, tier, d.tag, theme.gameId, theme.id);
+                return <option key={d.tag} value={d.tag} disabled={full}>{d.name} ({new Date(`${d.date}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' })}){full ? ` ${t('builder.challengeDayFull')}` : ''}</option>;
+              })}
             </select>
           </label>
+          <p className="text-xs font-semibold text-muted">{t(`builder.challengeLimit.${tier}` as StringKey)}</p>
           {!theme.challengeDay ? <p className="text-sm font-bold" role="status">{t('builder.challengeDayNeeded')}</p>
             : theme.gallery ? <p className="text-sm font-semibold text-muted">{t('builder.challengeDayLocked')}</p> : null}
           <p className="font-bold">{t('builder.track')}</p>

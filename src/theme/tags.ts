@@ -99,3 +99,16 @@ export function challengeEntries<T extends { challenge?: boolean; challengeDay?:
   return themes.filter((th) => th.challenge && th.challengeDay === day.tag && th.gallery && th.gallery.status !== 'declined'
     && new Date(th.gallery.at).getTime() <= close);
 }
+
+// Entries per teacher per special day (owner, 2026-11-26): Free one in all;
+// Plus one per game; Pro up to five per game. Homeschool is priced like Plus,
+// so it counts like Plus (to confirm). School seats are Pro.
+export type EntryTier = 'free' | 'plus' | 'pro' | 'homeschool';
+export function entryLimitReached<T extends { id: string; gameId: string; challenge?: boolean; challengeDay?: string; gallery?: { status: string } }>(
+  mine: T[], tier: EntryTier, dayTag: string, gameId: string, selfId: string,
+): boolean {
+  const entered = mine.filter((th) => th.id !== selfId && th.challenge && th.challengeDay === dayTag && th.gallery && th.gallery.status !== 'declined');
+  if (tier === 'free') return entered.length >= 1;
+  const sameGame = entered.filter((th) => th.gameId === gameId).length;
+  return sameGame >= (tier === 'pro' ? 5 : 1);
+}

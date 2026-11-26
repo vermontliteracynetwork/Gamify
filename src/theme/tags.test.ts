@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, closeDate, isOpen, winnerAt, nextOpenDay, searchTags, winnerDate } from './tags';
+import { entryLimitReached, ALL_TAGS, SPECIAL_DAYS, challengeClose, challengeEntries, closeDate, isOpen, winnerAt, nextOpenDay, searchTags, winnerDate } from './tags';
 
 describe('theme tags and special days', () => {
   it('has one special day a month, each with its own tag, known keyword tags and ideas', () => {
@@ -38,5 +38,15 @@ describe('theme tags and special days', () => {
   it('finds tags by word', () => {
     expect(searchTags('ice cream').map((x) => x.id)).toContain('ice-cream-sundae');
     expect(searchTags('')).toEqual([]);
+  });
+  it('limits entries per plan: Free 1 in all, Plus 1 per game, Pro 5 per game', () => {
+    const e = (id: string, gameId: string) => ({ id, gameId, challenge: true, challengeDay: 'pizza-day', gallery: { status: 'approved' } });
+    expect(entryLimitReached([e('a', 'bowling')], 'free', 'pizza-day', 'game-show', 'x')).toBe(true);
+    expect(entryLimitReached([e('a', 'bowling')], 'plus', 'pizza-day', 'game-show', 'x')).toBe(false);
+    expect(entryLimitReached([e('a', 'game-show')], 'plus', 'pizza-day', 'game-show', 'x')).toBe(true);
+    const four = ['a', 'b', 'c', 'd'].map((id) => e(id, 'game-show'));
+    expect(entryLimitReached(four, 'pro', 'pizza-day', 'game-show', 'x')).toBe(false);
+    expect(entryLimitReached([...four, e('f', 'game-show')], 'pro', 'pizza-day', 'game-show', 'x')).toBe(true);
+    expect(entryLimitReached([e('a', 'game-show')], 'free', 'pizza-day', 'game-show', 'a')).toBe(false);
   });
 });
