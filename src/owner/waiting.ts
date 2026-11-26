@@ -7,6 +7,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'challenge-2027', kind: 'decide', added: '2026-11-26', title: 'Theme Building Challenge 2027: six questions before January',
+    why: 'Your plan is in the business plan doc, Theme Building Challenge 2027 tab (https://claude.ai/artifact/4p4LxCN1iarjpLcAYjECZE#b3a79e98-2490). The marketing team is adding 2027 trend and keyword suggestions for each quarter. Open: how rolling entries are judged, whether the 3 materials are required, the criteria and weights, prizes for 4 quarters (4 lifetime Pro plans and 8 free years a year), who screens entries, and honorable mentions.',
+    how: 'Answer in the doc or in chat, then pick each quarter\'s 3 materials and 10 themes from the suggestions. The Challenge page copy changes only after you decide.' },
   { id: 'business-plan', kind: 'decide', added: '2026-11-26', title: 'Business plan: three questions on community themes',
     why: 'Your answers so far are in the plan (https://claude.ai/artifact/4p4LxCN1iarjpLcAYjECZE). Still open: Gamify\'s own license for community themes or Creative Commons BY-NC-ND 4.0; a teacher agreement at sign-up plus a confirmation box when publishing (with a free family permission slip) or a signed family form for every contributor; and whether a paid teacher at 3 strikes keeps the paid plan or loses the account.',
     how: 'Answer in chat or in the plan. The C-suite asks before writing any decision in.' },
