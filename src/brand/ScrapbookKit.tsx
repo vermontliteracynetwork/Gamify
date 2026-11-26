@@ -29,7 +29,7 @@ const MAX_TILT = 4;
 const clampTilt = (d: number) => Math.max(-MAX_TILT, Math.min(MAX_TILT, d));
 
 const I = PP.ink;
-export const SB = { ...PP, white: '#ffffff', wood: '#8a4f2a', gray: '#aaa6bb' };
+export const SB = { ...PP, white: '#ffffff', wood: '#8a4f2a' };
 
 // ---------------------------------------------------------------- papers
 // Scrapbook papers like fabric swatches. Gingham, dots, stars, flowers and the
@@ -38,12 +38,33 @@ export const SB = { ...PP, white: '#ffffff', wood: '#8a4f2a', gray: '#aaa6bb' };
 // redrawn here in the palette pairs (opaque, no grain).
 const enc = (w: number, h: number, body: string) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${body}</svg>`)}")`;
 const tile = (w: number, h: number, bg: string, body: string): CSSProperties => ({ backgroundColor: bg, backgroundImage: enc(w, h, body), backgroundSize: `${w}px ${h}px` });
-const bank = (id: string): CSSProperties => PATTERNS.find((p) => p.id === id)!.make(false);
+const bank = (id: string, calm = false): CSSProperties => PATTERNS.find((p) => p.id === id)!.make(calm);
 const STRIPES = [PP.pink, PP.lemon, PP.kelly, PP.sky, PP.orange, PP.grape];
 const wave = (y: number, c: string) => `<path d="M-4 ${y} q20 -4 44 0 t44 0 v9 q-20 4 -44 0 t-44 0 z" fill="${c}"/>`;
 
-export type PaperId = 'gingham' | 'gingham-pink' | 'gingham-mint' | 'gingham-blue' | 'gingham-lavender' | 'stripes' | 'stars' | 'checker' | 'pinstripe' | 'polka' | 'plaid' | 'flowers' | 'dots' | 'blocks' | 'windowpane' | 'sprinkles' | 'cream' | 'paper';
-const PAPER_CSS: Record<PaperId, () => CSSProperties> = {
+// Checker and pinstripe are hand-cut, not ruled (Classic Art Director,
+// 2026-11-26): every square and stripe wobbles a little, from the paper's seed.
+const fx = (n: number) => n.toFixed(1);
+function wobblyChecker(seed: number) {
+  const r = rand(seed * 31 + 7), j = () => (r() - 0.5) * 2.6, c = 20, n = 4, out: string[] = [];
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    if ((x + y) % 2) continue;
+    const a = x * c, b = y * c;
+    out.push(`<path d="M${fx(a + j())} ${fx(b + j())} Q${fx(a + c / 2)} ${fx(b + j())} ${fx(a + c + j())} ${fx(b + j())} Q${fx(a + c + j())} ${fx(b + c / 2)} ${fx(a + c + j())} ${fx(b + c + j())} Q${fx(a + c / 2)} ${fx(b + c + j())} ${fx(a + j())} ${fx(b + c + j())} Q${fx(a + j())} ${fx(b + c / 2)} ${fx(a + j())} ${fx(b + j())} Z" fill="${PP.pink}"/>`);
+  }
+  return tile(c * n, c * n, PP.paper, out.join(''));
+}
+function wobblyPinstripe(seed: number) {
+  const r = rand(seed * 17 + 3), h = 72, out: string[] = [];
+  for (let k = 0; k < 3; k++) {
+    const x = k * 18 + 7, a = (r() - 0.5) * 2.4, b = (r() - 0.5) * 2.4;
+    out.push(`<path d="M${fx(x)} -2 C${fx(x + a)} ${h * 0.3} ${fx(x + b)} ${h * 0.7} ${fx(x)} ${h + 2}" stroke="${PP.paper}" stroke-width="${fx(2.6 + r() * 0.9)}" stroke-linecap="round" fill="none"/>`);
+  }
+  return tile(54, h, PP.grape, out.join(''));
+}
+
+export type PaperId = 'gingham' | 'gingham-pink' | 'gingham-mint' | 'gingham-blue' | 'gingham-lavender' | 'stripes' | 'stars' | 'checker' | 'pinstripe' | 'polka' | 'plaid' | 'flowers' | 'dots' | 'blocks' | 'windowpane' | 'sprinkles' | 'doodle-calm' | 'squiggle-calm' | 'aqua' | 'butter' | 'cream' | 'paper';
+const PAPER_CSS: Record<PaperId, (seed: number) => CSSProperties> = {
   gingham: () => bank('gingham-butter'),
   'gingham-pink': () => bank('gingham-pink'),
   'gingham-mint': () => bank('gingham-mint'),
@@ -51,8 +72,8 @@ const PAPER_CSS: Record<PaperId, () => CSSProperties> = {
   'gingham-lavender': () => bank('gingham-lavender'),
   stripes: () => tile(88, STRIPES.length * 24, PP.paper, STRIPES.map((c, i) => wave(i * 24 + 8, c)).join('')),
   stars: () => bank('stars'),
-  checker: () => tile(40, 40, PP.paper, `<rect width="20" height="20" fill="${PP.pink}"/><rect x="20" y="20" width="20" height="20" fill="${PP.pink}"/>`),
-  pinstripe: () => tile(18, 18, PP.grape, `<rect width="3" height="18" fill="${PP.paper}"/>`),
+  checker: (seed) => wobblyChecker(seed),
+  pinstripe: (seed) => wobblyPinstripe(seed),
   polka: () => tile(34, 34, PP.paper, `<circle cx="8" cy="8" r="6" fill="${PP.pink}"/><circle cx="25" cy="25" r="6" fill="${PP.kelly}"/>`),
   plaid: () => tile(48, 48, PP.butter, `<rect x="6" width="12" height="48" fill="${PP.blush}"/><rect y="6" width="48" height="12" fill="${PP.blush}"/><rect x="6" y="6" width="12" height="12" fill="${PP.pink}"/><rect x="31" width="4" height="48" fill="${PP.kelly}"/><rect y="31" width="48" height="4" fill="${PP.sky}"/>`),
   flowers: () => bank('flowers'),
@@ -60,10 +81,15 @@ const PAPER_CSS: Record<PaperId, () => CSSProperties> = {
   blocks: () => bank('blocks'),
   windowpane: () => bank('windowpane'),
   sprinkles: () => bank('sprinkles'),
+  // The approved Calm stage grounds (Bubble Pop doodle scatter, Four in a Row squiggles).
+  'doodle-calm': () => bank('doodle', true),
+  'squiggle-calm': () => bank('squiggle-pastel', true),
+  aqua: () => ({ background: PP.aqua }),
+  butter: () => ({ background: PP.butter }),
   cream: () => ({ background: PP.cream }),
   paper: () => ({ background: PP.paper }),
 };
-export const paperCss = (id: PaperId) => PAPER_CSS[id]();
+export const paperCss = (id: PaperId, seed = 1) => PAPER_CSS[id](seed);
 export const PAPER_NAMES: [PaperId, string][] = [
   ['gingham', 'Gingham, Butter'], ['stripes', 'Watercolor stripes'], ['stars', 'Star print'], ['checker', 'Checker'],
   ['pinstripe', 'Pinstripe, Grape'], ['polka', 'Polka dot'], ['plaid', 'Plaid'], ['gingham-pink', 'Gingham, Blush'],
@@ -99,17 +125,19 @@ export function Tape({ tone = 0, w = 92, rot = -6, style, className = '' }: { to
 
 // ---------------------------------------------------------------- paper
 // One sheet of scrapbook paper at the edges. Tilt and tape show from B on.
-export function Paper({ id, style, className = '', tilt = 0, tape, seed = 1, children }: { id: PaperId; style?: CSSProperties; className?: string; tilt?: number; tape?: { tone?: number; at?: 'top' | 'tl' | 'tr' | 'bl' | 'br'; w?: number }; seed?: number; children?: ReactNode }) {
+// `tape.pos` and `tape.rot` place the tape by hand, so it lands inside the
+// screen when the paper bleeds off an edge (B must show its tape).
+export function Paper({ id, style, className = '', tilt = 0, tape, seed = 1, children }: { id: PaperId; style?: CSSProperties; className?: string; tilt?: number; tape?: { tone?: number; at?: 'top' | 'tl' | 'tr' | 'bl' | 'br'; w?: number; pos?: CSSProperties; rot?: number }; seed?: number; children?: ReactNode }) {
   const s = useStrength();
   const t = s === 'A' ? 0 : clampTilt(tilt);
   const at = tape?.at ?? 'top', tw = tape?.w ?? 84;
   const pos: CSSProperties = at === 'top' ? { left: '50%', top: -tw * 0.14, marginLeft: -tw / 2 } : at === 'tl' ? { left: -tw * 0.3, top: tw * 0.02 } : at === 'tr' ? { right: -tw * 0.3, top: tw * 0.02 } : at === 'bl' ? { left: -tw * 0.3, bottom: tw * 0.02 } : { right: -tw * 0.3, bottom: tw * 0.02 };
-  const rot = at === 'top' ? -4 : at === 'tl' || at === 'br' ? -38 : 38;
+  const rot = tape?.rot ?? (at === 'top' ? -4 : at === 'tl' || at === 'br' ? -38 : 38);
   return (
     <div aria-hidden="true" className={`absolute ${className}`} style={{ filter: 'drop-shadow(0 4px 0 rgba(29,26,51,0.16))', transform: t ? `rotate(${t}deg)` : undefined, ...style }}>
-      <div className="absolute inset-0" style={{ ...paperCss(id), clipPath: deckle(seed) }} />
+      <div className="absolute inset-0" style={{ ...paperCss(id, seed), clipPath: deckle(seed) }} />
       {children && <div className="relative w-full h-full">{children}</div>}
-      {s !== 'A' && tape && <Tape tone={tape.tone} w={tw} rot={rot} style={pos} />}
+      {s !== 'A' && tape && <Tape tone={tape.tone} w={tw} rot={rot} style={tape.pos ?? pos} />}
     </div>
   );
 }
@@ -166,7 +194,8 @@ export function HandWord({ text, size = 56, label = true, style, className = '' 
 }
 
 // ---------------------------------------------------------------- sunburst
-// The sunburst card: rays in the brights around a lemon sun (no face).
+// The sunburst card: rays in the brights around a lemon sun (no face), with
+// the kit's 3px ink edge so it reads as one cut card like every other piece.
 export function Sunburst({ size = 150 }: { size?: number }) {
   const f = 's' + useId().replace(/[^a-zA-Z0-9]/g, '');
   const rays = [PP.pink, PP.orange, PP.lemon, PP.kelly, PP.sky, PP.grape];
@@ -185,6 +214,7 @@ export function Sunburst({ size = 150 }: { size?: number }) {
             <path d="M62 68 q6 -10 16 -12" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" fill="none" />
           </g>
         </g>
+        <rect x={160 / size * 1.5} y={160 / size * 1.5} width={160 - 160 / size * 3} height={160 - 160 / size * 3} rx="13" fill="none" stroke={I} strokeWidth="3" vectorEffect="non-scaling-stroke" />
       </svg>
     </span>
   );
@@ -230,7 +260,7 @@ const SCHOOL: Record<SchoolKind, () => ReactNode> = {
   pencil: () => (<g transform="rotate(-35 50 50)">
     <Wax d="M18 40 H74 V60 H18 Z" color={PP.lemon} />
     <Wax d="M8 40 Q4 40 4 44 V56 Q4 60 8 60 H18 V40 Z" color={PP.blush} width={3.6} />
-    <Wax d="M18 40 H25 V60 H18 Z" color={SB.gray} width={3} />
+    <Wax d="M18 40 H25 V60 H18 Z" color={PP.lavender} width={3} />
     <Wax d="M74 40 L94 50 L74 60 Z" color={PP.peach} width={3.6} />
     <Wax d="M88 47 L94 50 L88 53 Z" color={I} width={2} />
     <Shine d="M30 45 H62" />

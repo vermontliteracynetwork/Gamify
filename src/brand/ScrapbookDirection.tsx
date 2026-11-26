@@ -2,8 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 import { ArrowRight, BookOpen, Broadcast, Buildings, ChalkboardTeacher, Check, CornersOut, GearSix, GraduationCap, Heart, House, Lifebuoy, MagnifyingGlass, Minus, PaintBrush, Play, Question, Rocket, ShieldCheck, SpeakerHigh, Stack, Star, Trophy, UsersThree, Wrench, CaretDown, Clock, ChartBar, HandTap, Lightning, Television, User } from '@phosphor-icons/react';
 import { PP } from './PaletteProposal';
 import { GAME_COVERS, BoardLaptop, BowlingLaptop, BubbleLaptop, ClassScreen, FourLaptop, GameShowLaptop, MatchThreeLaptop, TerritoryCoop } from './GameMockups';
-import { GO_YELLOW, GText, Laptop, QuestionCard } from './mockKit';
-import { BookStack, Bit, HandWord, Paper, PhotoCorner, PowerSticker, SchoolSticker, Sprinkle, StrengthProvider, Sunburst, Tape, TextCard, PAPER_NAMES, paperCss, useStrength, type PaperId, type Strength } from './ScrapbookKit';
+import { GO_YELLOW, GText, Laptop, QuestionCard, StudioBack } from './mockKit';
+import { BookStack, Bit, HandWord, Paper, PhotoCorner, PowerSticker, SchoolSticker, Sprinkle, StrengthProvider, Sunburst, Tape, TextCard, PAPER_NAMES, paperCss, useStrength, type PaperId, type SchoolKind, type Strength } from './ScrapbookKit';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { POSTS } from '../public/posts';
@@ -51,8 +51,27 @@ function Words({ text }: { text: string }) {
 function H1({ children, w, size }: W & { children: string; size?: number }) {
   return <h1 style={{ ...GY, fontSize: size ?? (isPh(w) ? 42 : w < 1000 ? 58 : 70), lineHeight: 0.98 }}>{children.split('\n').map((l, i) => <span key={i} className="block"><Words text={l} /></span>)}</h1>;
 }
-function H2({ children, w }: W & { children: string }) {
-  return <h2 style={{ ...GY, fontSize: isPh(w) ? 30 : 42, lineHeight: 1 }}><Words text={children} /></h2>;
+// Below 1300px the side margins are too narrow for edge pieces (Design Chair,
+// 2026-11-26), so a section title wears one school sticker beside it instead,
+// and an edge paper strip runs between sections (see Sec). A, B and C still
+// differ on a 1190 laptop, an iPad and a phone.
+function H2({ children, w, stk }: W & { children: string; stk?: SchoolKind }) {
+  const h = <h2 style={{ ...GY, fontSize: isPh(w) ? 30 : 42, lineHeight: 1 }}><Words text={children} /></h2>;
+  if (!stk || roomy(w)) return h;
+  return <div className="flex items-center gap-3">{h}<Lean tilt={children.length % 2 ? 4 : -4}><SchoolSticker kind={stk} size={isPh(w) ? 46 : 62} /></Lean></div>;
+}
+// An inline edge piece that leans from B on (A is flat).
+function Lean({ children, tilt }: { children: ReactNode; tilt: number }) {
+  const s = useStrength();
+  return <span aria-hidden="true" className="shrink-0 inline-block" style={{ transform: s === 'A' ? undefined : `rotate(${tilt}deg)` }}>{children}</span>;
+}
+// The edge paper strip between sections (below 1300px only): from the page
+// edge, in the gap above a section title, never under words.
+type StripDef = [PaperId, 'l' | 'r', number];
+function Strip({ w, d, top }: W & { d: StripDef; top: number }) {
+  const [id, side, seed] = d, sw = Math.min(Math.round(w * (isPh(w) ? 0.5 : 0.34)), 340), tw = isPh(w) ? 40 : 50;
+  return <Paper id={id} seed={seed} tilt={side === 'l' ? -2 : 2} tape={{ tone: seed, w: tw, pos: side === 'l' ? { right: -tw * 0.35, top: -6 } : { left: -tw * 0.35, top: -6 }, rot: side === 'l' ? 24 : -24 }}
+    style={{ [side === 'l' ? 'left' : 'right']: -16, top, width: sw, height: isPh(w) ? 20 : 26 }} />;
 }
 function H3({ children, w }: W & { children: ReactNode }) {
   return <h3 className="font-heading font-bold leading-tight" style={{ fontSize: isPh(w) ? 20 : 23 }}>{children}</h3>;
@@ -68,10 +87,12 @@ function Dot({ children, bg, size = 48 }: { children: ReactNode; bg: string; siz
 }
 // A section: the content keeps the page width; edge pieces sit in the side
 // margins (deco), never under words or buttons.
-function Sec({ w, children, deco, top }: W & { children: ReactNode; deco?: ReactNode; top?: number }) {
+function Sec({ w, children, deco, top, strip }: W & { children: ReactNode; deco?: ReactNode; top?: number; strip?: StripDef }) {
+  const pad = top ?? (isPh(w) ? 40 : 60);
+  const st = strip && !roomy(w);
   return (
-    <section className="relative" style={{ padding: `${top ?? (isPh(w) ? 40 : 60)}px ${gut(w)}px 0` }}>
-      {deco && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">{deco}</div>}
+    <section className="relative" style={{ padding: `${pad}px ${gut(w)}px 0` }}>
+      {(deco || st) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">{deco}{st && <Strip w={w} d={strip} top={pad / 2 - (isPh(w) ? 10 : 13)} />}</div>}
       <div className="relative grid gap-6">{children}</div>
     </section>
   );
@@ -214,8 +235,8 @@ function Home({ w }: W) {
       <Sec w={w} top={p ? 28 : 44} deco={<Margin w={w}><Bit style={{ ...L(w), top: 360 }} tilt={-5}><SchoolSticker kind="pencil" size={92} /></Bit><Sprinkle spots={[[30, 560, 24, PP.lemon], [96, 640, 18, PP.pink]]} /></Margin>}>
         <div className="grid items-center" style={{ gridTemplateColumns: p || tab ? '1fr' : '0.48fr 0.52fr', gap: p ? 28 : 56 }}>{text}<HomeCollage w={w} colW={colW} /></div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="polka" seed={7} tilt={-3} tape={{ tone: 1, at: 'top', w: 64 }} style={{ ...L(w), top: 120, width: 120, height: 150 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="magnet" size={84} /></span></Paper><Bit style={{ ...R(w), top: 200 }} tilt={6}><SchoolSticker kind="notebook" size={96} /></Bit></Margin>}>
-        <H2 w={w}>{t('public.modesTitle')}</H2>
+      <Sec w={w} strip={['stripes', 'r', 1]} deco={<Margin w={w}><Paper id="polka" seed={7} tilt={-3} tape={{ tone: 1, at: 'top', w: 64 }} style={{ ...L(w), top: 120, width: 120, height: 150 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="magnet" size={84} /></span></Paper><Bit style={{ ...R(w), top: 200 }} tilt={6}><SchoolSticker kind="notebook" size={96} /></Bit></Margin>}>
+        <H2 w={w} stk="bus">{t('public.modesTitle')}</H2>
         <div style={grid(w, 3)}>
           {WAYS.map(([n, Ic, bright, soft, k], i) => (
             <TextCard key={n} tilt={[-1.4, 1.2, -0.8][i]} tone={i + 2} className="overflow-hidden" style={{ ...CARD }}>
@@ -225,8 +246,8 @@ function Home({ w }: W) {
           ))}
         </div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...R(w), top: 90 }} tilt={4} tape={{ tone: 4, w: 64 }}><Sunburst size={124} /></Bit><Sprinkle spots={[[40, 120, 22, PP.pink], [70, 240, 18, PP.sky, 'dot']]} /></Margin>}>
-        <H2 w={w}>{t('public.howTitle')}</H2>
+      <Sec w={w} strip={['gingham-pink', 'l', 2]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 90 }} tilt={4} tape={{ tone: 4, w: 64 }}><Sunburst size={124} /></Bit><Sprinkle spots={[[40, 120, 22, PP.pink], [70, 240, 18, PP.sky, 'dot']]} /></Margin>}>
+        <H2 w={w} stk="apple">{t('public.howTitle')}</H2>
         <div style={grid(w, 3)}>
           {[1, 2, 3].map((n) => (
             <TextCard key={n} tilt={[1, -1.3, 0.9][n - 1]} tone={n} className="grid gap-2 p-6 content-start" style={CARD}>
@@ -236,8 +257,8 @@ function Home({ w }: W) {
           ))}
         </div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...L(w, -6), top: 150 }}><BookStack width={124} /></Bit><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={90} /></Bit><Bit style={{ ...R(w), top: 330 }} tilt={5}><SchoolSticker kind="ruler" size={96} /></Bit></Margin>}>
-        <H2 w={w}>{t('public.whyTitle')}</H2>
+      <Sec w={w} strip={['stars', 'r', 3]} deco={<Margin w={w}><Bit style={{ ...L(w, -6), top: 150 }}><BookStack width={124} /></Bit><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={90} /></Bit><Bit style={{ ...R(w), top: 330 }} tilt={5}><SchoolSticker kind="bus" size={96} /></Bit></Margin>}>
+        <H2 w={w} stk="notebook">{t('public.whyTitle')}</H2>
         <div style={grid(w, 3)}>
           {why.map(([Ic, h, b, bg], i) => (
             <TextCard key={h} tilt={[-1, 1.2, -1.4, 0.8, -0.9][i]} tone={i} className="grid gap-3 p-6 content-start" style={CARD}>
@@ -249,8 +270,8 @@ function Home({ w }: W) {
         </div>
         <P w={w} quiet>{t('public.whyNote')}</P>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="stripes" seed={9} tilt={3} tape={{ tone: 5, at: 'tr', w: 60 }} style={{ ...L(w), top: 110, width: 118, height: 170 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="double-dice" size={80} /></span></Paper></Margin>}>
-        <H2 w={w}>{t('public.whoTitle')}</H2>
+      <Sec w={w} strip={['gingham-mint', 'l', 4]} deco={<Margin w={w}><Paper id="stripes" seed={9} tilt={3} tape={{ tone: 5, at: 'tr', w: 60 }} style={{ ...L(w), top: 110, width: 118, height: 170 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="double-dice" size={80} /></span></Paper></Margin>}>
+        <H2 w={w} stk="bus">{t('public.whoTitle')}</H2>
         <div style={grid(w, 3)}>
           {who.map(([Ic, h, b, go, bg], i) => (
             <TextCard key={h} tilt={[1.2, -1, 1.4][i]} tone={i + 3} className="grid gap-3 p-6 content-start" style={CARD}>
@@ -259,7 +280,7 @@ function Home({ w }: W) {
           ))}
         </div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...R(w), top: 70 }} tilt={-7}><PowerSticker id="treasure-chest" size={96} /></Bit><Sprinkle spots={[[gut(w) * 0.3, 90, 26, PP.lemon], [gut(w) * 0.6, 170, 18, PP.pink, 'heart']]} /></Margin>}>
+      <Sec w={w} strip={['polka', 'r', 5]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 70 }} tilt={-7}><PowerSticker id="treasure-chest" size={96} /></Bit><Sprinkle spots={[[gut(w) * 0.3, 90, 26, PP.lemon], [gut(w) * 0.6, 170, 18, PP.pink, 'heart']]} /></Margin>}>
         <TextCard tilt={-0.8} tone={1} className="grid gap-4 justify-items-start" style={{ ...CARD, padding: p ? 24 : 40 }}>
           <H2 w={w}>{t('public.ctaTitle')}</H2>
           <div className={`flex gap-3 ${p ? 'flex-col w-full' : ''}`}><Go w={w} wide={p}>{t('public.startFree')}</Go><Plain w={w} wide={p}>{t('public.seePlans')}</Plain></div>
@@ -300,15 +321,15 @@ function Pricing({ w }: W) {
                     ? <><b style={{ ...GY, fontSize: 52 }}>{t('pricing.free.price')}</b><span className="font-semibold text-[16px]">{t('pricing.free.note')}</span></>
                     : <><span className="flex items-baseline gap-2"><b className="tabular-nums" style={{ ...GY, fontSize: best ? 60 : 52 }}>{t('pricing.price', { m: money(PRICES_USD[x].year / 12) })}</b><b className="text-[18px]">{t('upgrade.perMonth')}</b></span><span className="font-semibold text-[16px]">{t('pricing.renews.year', { n: money(PRICES_USD[x].year) })}</span></>}
                 </div>
-                {x === 'free' ? <Go w={w} wide>{t('public.startFree')}</Go> : best ? <Go w={w} wide>{t('pricing.startWith', { plan: t('pricing.plus') })}</Go> : <Plain w={w} wide>{t('pricing.startWith', { plan: t('pricing.pro') })}</Plain>}
+                {x === 'free' ? <Go w={w} wide>{t('public.startFree')}</Go> : <Go w={w} wide>{t('pricing.startWith', { plan: t(`pricing.${x}` as StringKey) })}</Go>}
               </TextCard>
             );
           })}
         </div>
         <span className="font-bold text-[17px] underline underline-offset-4">{t('pricing.homeschoolLink')}</span>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="plaid" seed={11} tilt={-3} tape={{ tone: 4, at: 'top', w: 60 }} style={{ ...L(w), top: 140, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="shield" size={78} /></span></Paper><Bit style={{ ...R(w), top: 260 }} tilt={4}><SchoolSticker kind="notebook" size={90} /></Bit></Margin>}>
-        <H2 w={w}>{t('pricing.compareAll')}</H2>
+      <Sec w={w} strip={['gingham', 'l', 1]} deco={<Margin w={w}><Paper id="plaid" seed={11} tilt={-3} tape={{ tone: 4, at: 'top', w: 60 }} style={{ ...L(w), top: 140, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="shield" size={78} /></span></Paper><Bit style={{ ...R(w), top: 260 }} tilt={4}><SchoolSticker kind="notebook" size={90} /></Bit></Margin>}>
+        <H2 w={w} stk="notebook">{t('pricing.compareAll')}</H2>
         {/* The chart is the clean core of this page: never taped or tilted. */}
         <div className="overflow-hidden" style={{ ...CARD, borderRadius: 22 }}>
           <div className="grid" style={{ gridTemplateColumns: p ? '1.4fr repeat(3, 1fr)' : '2.4fr repeat(3, 1fr)' }}>
@@ -338,21 +359,21 @@ function Features({ w }: W) {
         <Head w={w} title={t('features.title')} sub={t('features.sub')} />
         <div style={grid(w, 3)}>{['learning', 'themes', 'play'].map((k, i) => { const [Ic, h, s, bg] = pill(k); return <TextCard key={k} tilt={[-1, 1.1, -0.9][i]} tone={i} className="flex gap-3 items-start p-5" style={CARD}><Dot bg={bg}><Ic weight="bold" size={24} /></Dot><span className="grid gap-1"><H3 w={w}>{t(h)}</H3><P w={w}>{t(s)}</P></span></TextCard>; })}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="gingham" seed={13} tilt={3} tape={{ tone: 3, at: 'tl', w: 60 }} style={{ ...R(w), top: 120, width: 118, height: 170 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="hint" size={80} /></span></Paper><Sprinkle spots={[[40, 160, 24, PP.lemon], [80, 300, 18, PP.sky, 'dot']]} /></Margin>}>
-        <H2 w={w}>{t('features.learn.title')}</H2><P w={w} big>{t('features.learn.text')}</P>
+      <Sec w={w} strip={['stripes', 'r', 2]} deco={<Margin w={w}><Paper id="gingham" seed={13} tilt={3} tape={{ tone: 3, at: 'tl', w: 60 }} style={{ ...R(w), top: 120, width: 118, height: 170 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="hint" size={80} /></span></Paper><Sprinkle spots={[[40, 160, 24, PP.lemon], [80, 300, 18, PP.sky, 'dot']]} /></Margin>}>
+        <H2 w={w} stk="apple">{t('features.learn.title')}</H2><P w={w} big>{t('features.learn.text')}</P>
         <div style={grid(w, 2)}>{[1, 2, 3, 4].map((n) => <TextCard key={n} tilt={[1, -1.2, 0.8, -1][n - 1]} tone={n} className="grid gap-2 p-6" style={CARD}><H3 w={w}>{t(`features.learn.${n}` as StringKey)}</H3><P w={w}>{t(`features.learn.${n}.text` as StringKey)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...L(w), top: 100 }} tilt={-4} tape={{ tone: 0, w: 60 }}><Sunburst size={120} /></Bit><Bit style={{ ...R(w), top: 300 }} tilt={5}><SchoolSticker kind="crayon" size={96} /></Bit></Margin>}>
-        <H2 w={w}>{t('features.theme.title')}</H2><P w={w} big>{t('features.theme.text')}</P>
+      <Sec w={w} strip={['gingham-pink', 'l', 3]} deco={<Margin w={w}><Bit style={{ ...L(w), top: 100 }} tilt={-4} tape={{ tone: 0, w: 60 }}><Sunburst size={120} /></Bit><Bit style={{ ...R(w), top: 300 }} tilt={5}><SchoolSticker kind="notebook" size={96} /></Bit></Margin>}>
+        <H2 w={w} stk="bus">{t('features.theme.title')}</H2><P w={w} big>{t('features.theme.text')}</P>
         <div style={grid(w, 2)}>{[1, 2, 3, 4].map((n) => <TextCard key={n} tilt={[-1.1, 1, -0.8, 1.2][n - 1]} tone={n + 1} className="grid gap-2 p-6" style={CARD}><H3 w={w}>{t(`features.theme.${n}` as StringKey)}</H3><P w={w}>{t(`features.theme.${n}.text` as StringKey)}</P></TextCard>)}</div>
         <div className={`flex gap-3 items-center ${p ? 'flex-col items-stretch' : ''}`}><Go w={w} wide={p}>{t('features.theme.cta')}</Go><P w={w} quiet>{t('features.theme.challenge')}</P></div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="polka" seed={15} tilt={-2} tape={{ tone: 2, at: 'top', w: 60 }} style={{ ...L(w), top: 140, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="freeze" size={80} /></span></Paper></Margin>}>
-        <H2 w={w}>{t('features.play.title')}</H2><P w={w} big>{t('features.play.text')}</P>
+      <Sec w={w} strip={['stars', 'r', 4]} deco={<Margin w={w}><Paper id="polka" seed={15} tilt={-2} tape={{ tone: 2, at: 'top', w: 60 }} style={{ ...L(w), top: 140, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="freeze" size={80} /></span></Paper></Margin>}>
+        <H2 w={w} stk="notebook">{t('features.play.title')}</H2><P w={w} big>{t('features.play.text')}</P>
         <div style={grid(w, 3)}>{modes.map(([n, Ic, bg, k, best], i) => <TextCard key={n} tilt={[1.2, -1, 1][i]} tone={i + 3} className="grid gap-3 p-6 content-start" style={CARD}><span className="flex items-center gap-3"><Dot bg={bg}><Ic weight="bold" size={24} /></Dot><b style={{ ...GY, fontSize: 30 }}>{n}</b></span><P w={w}>{t(k)}</P><P w={w} quiet>{t(best)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={92} /></Bit><Bit style={{ ...L(w, -6), top: 200 }}><BookStack width={124} /></Bit></Margin>}>
-        <H2 w={w}>{t('features.fair.title')}</H2><P w={w} big>{t('features.fair.text')}</P>
+      <Sec w={w} strip={['gingham-mint', 'l', 5]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-6}><SchoolSticker kind="apple" size={92} /></Bit><Bit style={{ ...L(w, -6), top: 200 }}><BookStack width={124} /></Bit></Margin>}>
+        <H2 w={w} stk="apple">{t('features.fair.title')}</H2><P w={w} big>{t('features.fair.text')}</P>
         <div style={grid(w, 3)}>{[1, 2, 3, 4, 5, 6].map((n) => <TextCard key={n} tilt={[-1, 1, -1.2, 0.9, -0.8, 1.1][n - 1]} tone={n} className="grid gap-2 p-5" style={CARD}><span className="flex items-center gap-2.5"><Dot bg={PP.mint} size={40}><Check weight="bold" size={20} /></Dot><H3 w={w}>{t(`features.fair.${n}` as StringKey)}</H3></span><P w={w}>{t(`features.fair.${n}.why` as StringKey)}</P></TextCard>)}</div>
       </Sec>
     </Page>
@@ -396,8 +417,11 @@ function Post({ w }: W) {
   return (
     <Page w={w} on="public.nav.ideas">
       <section className="relative" style={{ padding: `${p ? 28 : 48}px ${gut(w)}px 0` }}>
-        {/* The reading column stays plain; the scrapbook sits in the wide margins beside it. */}
-        {!p && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        {/* The reading column stays plain and flat in every strength (Design Chair,
+            2026-11-26); the scrapbook sits in the wide margins beside it, or, below
+            1300px where there are no margins, as one edge strip above the title. */}
+        {!roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none"><Strip w={w} d={['gingham-pink', 'r', 2]} top={p ? 4 : 10} /></div>}
+        {roomy(w) && <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
           <Bit style={{ left: side - 230, top: 40 }} tilt={-7}><HandWord text="Try it!" size={40} /></Bit>
           <Paper id="gingham-pink" seed={19} tilt={-3} tape={{ tone: 0, at: 'top', w: 70 }} style={{ left: side - 230, top: 170, width: 170, height: 210 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="lightning" size={100} /></span></Paper>
           <Bit style={{ left: side - 200, top: 470 }}><BookStack width={150} /></Bit>
@@ -411,14 +435,14 @@ function Post({ w }: W) {
           <H1 w={w}>{x.title}</H1>
           <P w={w} big>{x.summary}</P>
           <span className="flex flex-wrap gap-3 text-[16px] font-bold" style={{ color: PP.quiet }}><span className="inline-flex items-center gap-1"><GraduationCap weight="bold" size={17} />{t('ways.grades', { grades: x.grades })}</span><span className="inline-flex items-center gap-1"><Clock weight="bold" size={17} />{t('ways.minutes', { minutes: x.minutes })}</span></span>
-          <div aria-hidden="true" className="relative overflow-hidden rounded-[22px] grid place-items-center" style={{ height: p ? 170 : 260, border: `3px solid ${I}`, ...paperCss('stripes') }}><span className="rounded-[18px] p-3 bg-white" style={{ border: `3px solid ${I}` }}><CoverPhoto id={x.cover} cw={p ? 170 : 250} /></span></div>
+          <div aria-hidden="true" className="relative overflow-hidden rounded-[22px] grid place-items-center" style={{ height: p ? 170 : 260, border: `3px solid ${I}`, background: PP.butter }}><span className="rounded-[18px] p-3 bg-white" style={{ border: `3px solid ${I}` }}><CoverPhoto id={x.cover} cw={p ? 170 : 250} /></span></div>
           {x.body.map((b, i) => <p key={i} className="leading-relaxed" style={{ fontSize: p ? 18 : 20 }}>{b}</p>)}
-          <TextCard tilt={-1} tone={2} className="grid gap-3 p-6" style={{ ...CARD, background: PP.mint }}>
+          <div className="grid gap-3 p-6" style={{ ...CARD, background: PP.mint }}>
             <h2 className="font-heading font-bold" style={{ fontSize: p ? 24 : 30 }}>{t('ways.tryIt')}</h2>
             <ol className="m-0 pl-6 grid gap-1.5 font-semibold text-[18px] list-decimal">{x.tryIt.map((s) => <li key={s}>{s}</li>)}</ol>
             <P w={w}>{t('ways.tryItSub')}</P>
             <span><Grape w={w}>{t('ways.start')}<ArrowRight weight="bold" size={20} /></Grape></span>
-          </TextCard>
+          </div>
         </article>
       </section>
     </Page>
@@ -437,16 +461,16 @@ function Schools({ w }: W) {
           <div className={`flex gap-3 ${p ? 'flex-col w-full' : ''}`}><Grape w={w} wide={p}>{t('schools.quote')}</Grape><Plain w={w} wide={p}>{t('schools.pilot')}</Plain></div>
         </Head>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-4} tape={{ tone: 4, w: 60 }}><Sunburst size={118} /></Bit></Margin>}>
-        <H2 w={w}>{t('schools.whyTitle')}</H2>
+      <Sec w={w} strip={['gingham-blue', 'r', 1]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 120 }} tilt={-4} tape={{ tone: 4, w: 60 }}><Sunburst size={118} /></Bit></Margin>}>
+        <H2 w={w} stk="apple">{t('schools.whyTitle')}</H2>
         <div style={grid(w, 2)}>{why.map(([Ic, bg], i) => <TextCard key={i} tilt={[-1, 1.1, -1.2, 0.9][i]} tone={i} className="grid gap-2 p-6" style={CARD}><span className="flex items-center gap-3"><Dot bg={bg}><Ic weight="bold" size={24} /></Dot><H3 w={w}>{t(`schools.p${i + 1}` as StringKey)}</H3></span><P w={w}>{t(`schools.p${i + 1}.text` as StringKey)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...L(w), top: 140 }} tilt={-6}><SchoolSticker kind="ruler" size={100} /></Bit><Bit style={{ ...R(w), top: 300 }} tilt={6}><PowerSticker id="treasure-chest" size={90} /></Bit></Margin>}>
-        <H2 w={w}>{t('schools.committeeTitle')}</H2><P w={w} big>{t('schools.committeeSub')}</P>
+      <Sec w={w} strip={['stripes', 'l', 2]} deco={<Margin w={w}><Bit style={{ ...L(w), top: 140 }} tilt={-6}><SchoolSticker kind="ruler" size={100} /></Bit><Bit style={{ ...R(w), top: 300 }} tilt={6}><PowerSticker id="treasure-chest" size={90} /></Bit></Margin>}>
+        <H2 w={w} stk="notebook">{t('schools.committeeTitle')}</H2><P w={w} big>{t('schools.committeeSub')}</P>
         <div style={grid(w, 3)}>{com.map(([Ic, k], i) => <TextCard key={k} tilt={[1, -1, 1.2, -0.8, 1, -1.2][i]} tone={i + 1} className="grid gap-2 p-5 content-start" style={CARD}><span className="flex items-center gap-3"><Dot bg={[PP.butter, PP.blush, PP.mint, PP.blueCrystal, PP.lavender, PP.peach][i]} size={42}><Ic weight="bold" size={22} /></Dot><H3 w={w}>{t(`schools.c.${k}` as StringKey)}</H3></span><P w={w}>{t(`schools.c.${k}.text` as StringKey)}</P><Link_>{t(`schools.c.${k}` as StringKey)}</Link_></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="gingham-mint" seed={25} tilt={3} tape={{ tone: 1, at: 'tr', w: 60 }} style={{ ...L(w), top: 120, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="one-more" size={80} /></span></Paper></Margin>}>
-        <H2 w={w}>{t('schools.rolloutTitle')}</H2>
+      <Sec w={w} strip={['stars', 'r', 3]} deco={<Margin w={w}><Paper id="gingham-mint" seed={25} tilt={3} tape={{ tone: 1, at: 'tr', w: 60 }} style={{ ...L(w), top: 120, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="one-more" size={80} /></span></Paper></Margin>}>
+        <H2 w={w} stk="bus">{t('schools.rolloutTitle')}</H2>
         <div style={grid(w, 4)}>{[1, 2, 3, 4].map((n) => <TextCard key={n} tilt={[-1.2, 1, -0.9, 1.1][n - 1]} tone={n} className="grid gap-2 p-5 content-start" style={CARD}><span className="justify-self-start px-3 py-1 rounded-full font-bold text-[16px]" style={{ background: PP.butter, border: `2px solid ${I}` }}>{t('help.steps', { n })}</span><H3 w={w}>{t(`schools.step.${n}` as StringKey)}</H3><P w={w}>{t(`schools.step.${n}.text` as StringKey)}</P></TextCard>)}</div>
         <TextCard tilt={0.8} tone={3} className="grid gap-3 justify-items-start p-8" style={{ ...CARD, background: PP.mint }}>
           <H2 w={w}>{t('schools.endTitle')}</H2><P w={w} big>{t('schools.endText')}</P>
@@ -467,16 +491,16 @@ function Homeschool({ w }: W) {
           <div className={`flex gap-3 ${p ? 'flex-col w-full' : ''}`}><Go w={w} wide={p}>{t('hs.start')}</Go><Plain w={w} wide={p}>{t('hs.questions')}</Plain></div>
         </Head>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Paper id="flowers" seed={27} tilt={-3} tape={{ tone: 5, at: 'top', w: 60 }} style={{ ...R(w), top: 120, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="double-dice" size={80} /></span></Paper></Margin>}>
-        <H2 w={w}>{t('hs.fitTitle')}</H2>
+      <Sec w={w} strip={['gingham-pink', 'r', 1]} deco={<Margin w={w}><Paper id="flowers" seed={27} tilt={-3} tape={{ tone: 5, at: 'top', w: 60 }} style={{ ...R(w), top: 120, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="double-dice" size={80} /></span></Paper></Margin>}>
+        <H2 w={w} stk="apple">{t('hs.fitTitle')}</H2>
         <div style={grid(w, 2)}>{[1, 2, 3, 4].map((n) => <TextCard key={n} tilt={[1, -1.1, 1.2, -0.9][n - 1]} tone={n} className="grid gap-2 p-6" style={CARD}><H3 w={w}>{t(`hs.p${n}` as StringKey)}</H3><P w={w}>{t(`hs.p${n}.text` as StringKey)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...L(w), top: 110 }} tilt={4} tape={{ tone: 0, w: 60 }}><Sunburst size={118} /></Bit><Sprinkle spots={[[w - 100, 160, 24, PP.lemon], [w - 60, 260, 18, PP.pink, 'heart']]} /></Margin>}>
-        <H2 w={w}>{t('hs.weekTitle')}</H2><P w={w} big>{t('hs.weekSub')}</P>
+      <Sec w={w} strip={['stripes', 'l', 2]} deco={<Margin w={w}><Bit style={{ ...L(w), top: 110 }} tilt={4} tape={{ tone: 0, w: 60 }}><Sunburst size={118} /></Bit><Sprinkle spots={[[w - 100, 160, 24, PP.lemon], [w - 60, 260, 18, PP.pink, 'heart']]} /></Margin>}>
+        <H2 w={w} stk="bus">{t('hs.weekTitle')}</H2><P w={w} big>{t('hs.weekSub')}</P>
         <div style={grid(w, 5)}>{[1, 2, 3, 4, 5].map((n) => <TextCard key={n} tilt={[-1.3, 1, -0.8, 1.2, -1][n - 1]} tone={n} className="grid gap-2 p-5 content-start" style={{ ...CARD, background: [PP.butter, PP.blush, PP.mint, PP.blueCrystal, PP.peach][n - 1] }}><b style={{ ...GY, fontSize: 26 }}>{t(`hs.day.${n}` as StringKey)}</b><P w={w}>{t(`hs.day.${n}.text` as StringKey)}</P></TextCard>)}</div>
       </Sec>
-      <Sec w={w} deco={<Margin w={w}><Bit style={{ ...R(w), top: 200 }} tilt={6}><SchoolSticker kind="crayon" size={96} /></Bit></Margin>}>
-        <H2 w={w}>{t('hs.plansTitle')}</H2>
+      <Sec w={w} strip={['gingham-mint', 'r', 3]} deco={<Margin w={w}><Bit style={{ ...R(w), top: 200 }} tilt={6}><SchoolSticker kind="crayon" size={96} /></Bit></Margin>}>
+        <H2 w={w} stk="notebook">{t('hs.plansTitle')}</H2>
         <div style={{ ...grid(w, 4), alignItems: 'stretch' }}>{plans.map(([k, n, pr, best], i) => (
           <TextCard key={k} tilt={[-1, 1.2, -1.1, 0.9][i]} tone={i + 2} className="grid gap-3 p-5 content-start" style={{ ...CARD, background: best ? PP.butter : '#ffffff' }}>
             <b style={{ ...GY, fontSize: 30 }}><GText>{t(k)}</GText></b>
@@ -522,7 +546,7 @@ function Help({ w }: W) {
       <Sec w={w} top={p ? 32 : 52} deco={<Margin w={w}><WordSpot w={w} word="Help!" /><Bit style={{ ...R(w), top: 40 }} tilt={-6}><SchoolSticker kind="pencil" size={100} /></Bit><Paper id="gingham-blue" seed={31} tilt={3} tape={{ tone: 3, at: 'tl', w: 60 }} style={{ ...L(w), top: 360, width: 118, height: 160 }}><span className="absolute inset-0 grid place-items-center"><PowerSticker id="second-chance" size={80} /></span></Paper><Bit style={{ ...R(w), top: 560 }} tilt={5}><PowerSticker id="extra-time" size={92} /></Bit></Margin>}>
         <Head w={w} title={t('help.title')} sub={t('help.sub')} />
         <span className="flex items-center gap-3 rounded-full px-5 bg-white font-semibold text-[18px]" style={{ minHeight: 56, border: `2.5px solid ${I}`, color: PP.quiet }}><MagnifyingGlass weight="bold" size={22} color={I} />{t('help.search')}</span>
-        <H2 w={w}>{t('help.topics')}</H2>
+        <H2 w={w} stk="notebook">{t('help.topics')}</H2>
         <div style={grid(w, 3)}>{topics.map(([k, Ic, bg], i) => <TextCard key={k} tilt={[-1, 1.1, -1.2, 0.9, -0.8, 1.2, -1, 1, -1.1, 0.8][i]} tone={i} className="flex gap-3 items-start p-5" style={CARD}><Dot bg={bg}><Ic weight="bold" size={24} /></Dot><span className="grid gap-1"><H3 w={w}>{t(`help.${k}` as StringKey)}</H3><P w={w}>{t(`help.${k}.desc` as StringKey)}</P></span></TextCard>)}</div>
         <TextCard tilt={1} tone={4} className="grid gap-2 p-6" style={{ ...CARD, background: PP.butter }}><H3 w={w}>{t('help.stillStuck')}</H3><P w={w}>{t('help.stillText')}</P></TextCard>
       </Sec>
@@ -575,7 +599,15 @@ function CenterDeco({ w, word, top = 40, h = 560, half = 270 }: W & { word: stri
   const p = isPh(w), cx = w / 2, lx = cx - half - 280, rx = cx + half + 50;
   if (p) return (
     <>
-      <Sprinkle spots={[[8, 10, 20, PP.lemon], [w - 34, h + 60, 18, PP.pink]]} />
+      <Strip w={w} d={['gingham', 'l', 1]} top={8} />
+      <Sprinkle spots={[[w - 34, 10, 20, PP.lemon], [w - 34, h + 60, 18, PP.pink]]} />
+    </>
+  );
+  if (w < 1000) return (
+    <>
+      <Strip w={w} d={['gingham', 'l', 1]} top={16} />
+      <Strip w={w} d={['stripes', 'r', 3]} top={16} />
+      <Sprinkle spots={[[18, top + 40, 20, PP.lemon], [w - 38, top + 40, 18, PP.pink]]} />
     </>
   );
   return (
@@ -679,27 +711,31 @@ function Lazy({ children, ratio }: { children: ReactNode; ratio: number }) {
 // and one in-play view. Only the theme parts (cover, stage ground, edges) wear
 // the scrapbook; the score board, question card, answer tiles and main button
 // are the clean core and stay plain in every strength.
-type Game = { id: string; name: string; word: string; ground: PaperId; papers: [PaperId, PaperId]; stickers: [Parameters<typeof PowerSticker>[0]['id'], Parameters<typeof SchoolSticker>[0]['kind']]; steps: [Icon, Icon, Icon]; play: (s: Strength) => ReactNode; own?: boolean };
+type Game = { id: string; name: string; word: string; stickers: [SchoolKind, SchoolKind]; steps: [Icon, Icon, Icon]; play: () => ReactNode; ground?: (w: number, h: number) => ReactNode; own?: boolean };
+// The welcome cover (Classic Art Director, 2026-11-26): the approved cover at
+// full size, its board at its approved size and place. Only the background is
+// swapped for the game's scrapbook ground (the cover's own ground is hidden by
+// the .sb-cover rule); the papers, stickers, sunburst and the one hand-lettered
+// word sit in the 48px safe margin round the board, never over it. No white
+// mount, photo corners, tilt or tape on the cover itself. Bowling's lane and
+// her own art (Question Tracker, Territory) keep their ground.
+const CW = 720, CH = 656, M = 48;
 function ScrapCover({ g }: { g: Game }) {
-  const s = useStrength();
-  const mw = 540, mh = 492, ml = 90, mt = 52;
+  const paper = !!g.ground;
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ ...paperCss(g.ground) }}>
-      <Paper id={g.papers[0]} seed={41} tilt={-4} tape={{ tone: 1, at: 'tl', w: 90 }} style={{ left: -24, top: 280, width: 230, height: 300 }} />
-      <Paper id={g.papers[1]} seed={42} tilt={3} tape={{ tone: 3, at: 'br', w: 90 }} style={{ right: -20, top: -20, width: 250, height: 260 }} />
-      <Bit style={{ left: 18, top: 16 }} tilt={-4}><Sunburst size={150} /></Bit>
-      {/* The Classic cover art, mounted like a photo (never redrawn). */}
-      <div className="absolute" style={{ left: ml, top: mt, width: mw, height: mh, transform: s === 'A' ? undefined : 'rotate(-2deg)' }}>
-        <div className="absolute inset-0 bg-white rounded-[18px]" style={{ border: `3px solid ${I}`, boxShadow: '0 6px 0 rgba(29,26,51,0.25)' }} />
-        <div className="absolute overflow-hidden rounded-[10px]" style={{ left: 14, top: 14, width: mw - 28, height: mh - 28, border: `2.5px solid ${I}` }}>
-          <div className="absolute top-0 left-0 origin-top-left" style={{ width: 720, height: 648, transform: `scale(${(mw - 28) / 720})` }}>{COVER(g.id).cover}</div>
-        </div>
-        {s === 'A' ? <><PhotoCorner at="tl" /><PhotoCorner at="tr" /><PhotoCorner at="bl" /><PhotoCorner at="br" /></> : <><Tape tone={0} w={110} rot={-30} style={{ left: -36, top: 8 }} /><Tape tone={4} w={110} rot={32} style={{ right: -36, top: 8 }} /></>}
-      </div>
-      <Bit style={{ left: 30, bottom: 30 }} tilt={-8}><PowerSticker id={g.stickers[0]} size={110} /></Bit>
-      <Bit style={{ right: 26, top: 250 }} tilt={7}><SchoolSticker kind={g.stickers[1]} size={100} /></Bit>
-      <Bit style={{ right: 40, bottom: 24 }} tilt={-5}><HandWord text={g.word} size={58} /></Bit>
-      <Sprinkle spots={[[660, 120, 28, PP.lemon], [40, 220, 22, PP.pink], [620, 470, 22, PP.sky, 'dot'], [300, 600, 26, PP.lemon], [180, 590, 18, PP.pink, 'heart']]} />
+    <div className="absolute inset-0 overflow-hidden" style={{ background: PP.cream }}>
+      {g.ground?.(CW, CH)}
+      <div className={`absolute left-0 ${paper ? 'sb-cover' : ''}`} style={{ top: (CH - 648) / 2, width: CW, height: 648 }}>{COVER(g.id).cover}</div>
+      {g.id === 'bowling' && <BowlWall w={CW} h={(CH - 648) / 2 + 188} />}
+      {/* margin pieces: each fits the 48px band */}
+      {paper && g.id !== 'game-show' && <>
+        <Paper id="gingham-lavender" seed={43} tilt={-2} tape={{ tone: 1, w: 40, pos: { left: -10, top: 30 }, rot: 70 }} style={{ left: 4, top: 190, width: M - 12, height: 210 }} />
+        <Paper id="gingham-pink" seed={44} tilt={2} tape={{ tone: 3, w: 40, pos: { right: 40, top: -10 }, rot: -6 }} style={{ left: 200, bottom: 6, width: 300, height: M - 14 }} />
+      </>}
+      {paper && <Bit style={{ left: 6, top: 6 }} tilt={-4}><Sunburst size={M - 8} /></Bit>}
+      <Bit style={{ right: 6, top: 4 }} tilt={5}><SchoolSticker kind={g.stickers[0]} size={M - 6} /></Bit>
+      <Bit style={{ left: 6, bottom: 4 }} tilt={-5}><SchoolSticker kind={g.stickers[1]} size={M - 6} /></Bit>
+      <Bit style={{ right: 10, bottom: 6 }} tilt={-4}><HandWord text={g.word} size={24} /></Bit>
     </div>
   );
 }
@@ -719,10 +755,11 @@ function Welcome({ g }: { g: Game }) {
           <div className="flex justify-end gap-3">{rnd(<CornersOut weight="bold" size={24} />, 'Full screen')}{rnd(<GearSix weight="bold" size={24} />, t('settings.open'))}</div>
           <div className="grid gap-3"><h1 style={{ ...GY, fontSize: g.name.length > 12 ? 52 : 64, lineHeight: 0.95 }}><Words text={g.name} /></h1><p className="font-semibold text-[24px] leading-snug">{c.desc}</p></div>
           <div className="flex flex-wrap gap-2.5">{c.modes.map((m) => <span key={m} className="px-5 h-[43px] inline-flex items-center rounded-full font-bold text-[18px]" style={{ background: m === 'Live' ? PP.blueCrystal : m === 'Share' ? PP.butter : PP.mint, border: `2.5px solid ${I}` }}>{m}</span>)}</div>
-          <TextCard tilt={-1.2} tone={2} className="rounded-[26px] px-6 py-4 grid gap-3" style={{ background: '#ffffff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
+          {/* How to play is part of the start menu: plain and flat in every strength (menus never tilt). */}
+          <div className="rounded-[26px] px-6 py-4 grid gap-3" style={{ background: '#ffffff', border: `3px solid ${I}`, boxShadow: `0 5px 0 ${I}` }}>
             <h2 style={{ ...GY, fontSize: 26 }}>How to play</h2>
             {c.steps.map((st, i) => { const Ic = g.steps[i]; return <div key={st} className="flex items-center gap-4 font-bold text-[22px] leading-tight"><Dot bg={[PP.butter, PP.blush, PP.aqua][i]} size={40}><Ic weight="bold" size={20} /></Dot>{st}</div>; })}
-          </TextCard>
+          </div>
           {/* The start button is the clean core: never taped or tilted. */}
           <span className="w-full rounded-full font-display font-bold inline-flex items-center justify-center gap-3" style={{ height: 72, fontSize: 30, background: GO_YELLOW, border: `3px solid ${I}`, boxShadow: `0 6px 0 ${I}` }}><Play weight="fill" size={32} />Set up and play</span>
         </div>
@@ -731,65 +768,112 @@ function Welcome({ g }: { g: Game }) {
   );
 }
 // Stage grounds for the in-play views (1000 x 625), drawn under the game's own
-// board, score board and buttons (the clean core, unchanged).
-const cream = <div className="absolute inset-0" style={{ background: PP.cream }} />;
-function GameShowBack() {
-  return (<div className="absolute inset-0">{cream}
-    <Paper id="pinstripe" seed={51} style={{ left: 60, top: 26, width: 880, height: 548 }} />
-    <Paper id="gingham-pink" seed={52} tilt={-2} tape={{ tone: 0, at: 'tl', w: 70 }} style={{ left: -14, top: -16, width: 96, height: 660 }} />
-    <Paper id="gingham-pink" seed={53} tilt={2} tape={{ tone: 0, at: 'tr', w: 70 }} style={{ right: -14, top: 70, width: 92, height: 600 }} />
-    <Paper id="stars" seed={54} tilt={-1} style={{ left: 50, bottom: -18, width: 900, height: 76 }} />
-    <Bit style={{ left: 4, bottom: 8 }} tilt={-6}><PowerSticker id="treasure-chest" size={70} /></Bit>
-    <Bit style={{ right: 8, bottom: 6 }} tilt={5}><SchoolSticker kind="apple" size={64} /></Bit>
-    <Sprinkle spots={[[30, 120, 20, PP.lemon], [26, 300, 16, PP.paper], [960, 460, 18, PP.lemon]]} />
+// board, score board and buttons (the clean core, unchanged). In-play stages
+// wear school stickers only (bus, apple, notebook, one of pencil/crayon/ruler),
+// never a power-up look-alike, so a child never mistakes a sticker for a
+// power-up she can use (Classic Art Director, 2026-11-26).
+
+// Game Show: the approved studio (pink curtains, lavender spotlights, lemon
+// stage on Grape) is the stage; the scrapbook only frames it: Blush gingham at
+// the outer 8% of each side, star paper as the front apron, a school sticker
+// in each bottom corner at about 11% of the stage height.
+function StudioScrap({ w, h, side, apron, sticker }: { w: number; h: number; side: number; apron: number; sticker?: number }) {
+  return (<div className="absolute inset-0" style={paperCss('gingham-pink')}>
+    <div className="absolute top-0" style={{ left: side, width: w - 2 * side, height: h - apron + 10, borderLeft: `3px solid ${I}`, borderRight: `3px solid ${I}`, overflow: 'hidden' }}><StudioBack w={w - 2 * side - 6} h={h - apron + 10} /></div>
+    <Paper id="stars" seed={54} tilt={-0.6} tape={{ tone: 0, w: Math.max(40, apron), pos: { left: side + 16, top: -8 }, rot: -5 }} style={{ left: -8, bottom: -8, width: w + 16, height: apron + 10 }} />
+    {sticker && <>
+      <Bit style={{ left: (side - sticker) / 2, bottom: 6 }} tilt={-5}><SchoolSticker kind="apple" size={sticker} /></Bit>
+      <Bit style={{ right: (side - sticker) / 2, bottom: 6 }} tilt={5}><SchoolSticker kind="bus" size={sticker} /></Bit>
+    </>}
+  </div>);
+}
+const GameShowBack = () => <StudioScrap w={1000} h={625} side={80} apron={58} sticker={69} />;
+
+// Board Game: the approved park, cut from paper: a Gingham Blue sky, the sun
+// and clouds kept, hills with a deckle edge (Sage far, Gingham Mint near) and
+// the park's own flowers.
+function hillPts(w: number, h: number, y0: number, amp: number, ph: number, seed: number) {
+  let a = seed;
+  const r = () => { a = (a * 16807) % 2147483647; return a / 2147483647; };
+  const n = 40;
+  return Array.from({ length: n + 1 }, (_, k) => { const x = (k / n) * w; return [x, h * (y0 + amp * Math.sin((k / n) * Math.PI * 2 * 0.9 + ph)) + (r() - 0.5) * 4] as const; });
+}
+function Hill({ w, h, y0, amp, ph, seed, paper, tape }: { w: number; h: number; y0: number; amp: number; ph: number; seed: number; paper: PaperId | string; tape?: number }) {
+  const s = useStrength();
+  const pts = hillPts(w, h, y0, amp, ph, seed);
+  const clip = `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(', ')}, ${w}px ${h}px, 0px ${h}px)`;
+  const fill: CSSProperties = paper.startsWith('#') ? { background: paper } : paperCss(paper as PaperId, seed);
+  const [tx, ty] = pts[Math.round(pts.length * 0.78)];
+  return (<>
+    <div className="absolute inset-0" style={{ ...fill, clipPath: clip }} />
+    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true"><polyline points={pts.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')} fill="none" stroke={I} strokeWidth="4" strokeLinejoin="round" strokeLinecap="round" /></svg>
+    {s !== 'A' && tape !== undefined && <Tape tone={tape} w={64} rot={-8} style={{ left: tx - 32, top: ty - 10 }} />}
+  </>);
+}
+function ParkScrap({ w, h, flowers = true }: { w: number; h: number; flowers?: boolean }) {
+  const cloud = (x: number, y: number, k: number) => <path d={`M${x} ${y} c${-8 * k} 0 ${-12 * k} ${-10 * k} ${-4 * k} ${-14 * k} c${2 * k} ${-12 * k} ${18 * k} ${-14 * k} ${22 * k} ${-4 * k} c${8 * k} ${-8 * k} ${22 * k} ${-2 * k} ${20 * k} ${8 * k} c${8 * k} ${2 * k} ${8 * k} ${10 * k} 0 ${10 * k} Z`} fill={PP.paper} stroke={I} strokeWidth="3.5" strokeLinejoin="round" />;
+  return (<div className="absolute inset-0" style={paperCss('gingham-blue')}>
+    <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">
+      <circle cx={w * 0.9} cy={h * 0.12} r={Math.min(w, h) * 0.07} fill={PP.lemon} stroke={I} strokeWidth="4" />
+      <path d={`M${w * 0.9 - 18} ${h * 0.12 - 16} q6 -8 14 -8`} stroke="#fff" strokeWidth="5" fill="none" strokeLinecap="round" />
+      {cloud(w * 0.08, h * 0.12, 2.2)}{cloud(w * 0.55, h * 0.07, 1.6)}{cloud(w * 0.78, h * 0.3, 1.3)}
+    </svg>
+    <Hill w={w} h={h} y0={0.58} amp={0.035} ph={0.6} seed={57} paper={PP.sage} />
+    <Hill w={w} h={h} y0={0.76} amp={0.04} ph={2.2} seed={58} paper="gingham-mint" />
+    {flowers && <svg className="absolute inset-0" width={w} height={h} aria-hidden="true">{Array.from({ length: 12 }, (_, i) => { const x = (w / 12) * i + 30, y = h * 0.86 + ((i * 29) % 50); return <g key={i}><path d={`M${x} ${y} v18`} stroke={I} strokeWidth="3" strokeLinecap="round" /><circle cx={x} cy={y} r="7" fill={[PP.pink, PP.paper, PP.lemon][i % 3]} stroke={I} strokeWidth="2.5" /></g>; })}</svg>}
   </div>);
 }
 function BoardBack() {
-  return (<div className="absolute inset-0">{cream}
-    <Paper id="gingham-blue" seed={55} style={{ left: -10, top: -10, width: 1020, height: 330 }} />
-    <Paper id="gingham-mint" seed={56} style={{ left: -10, top: 300, width: 1020, height: 340 }} />
-    <Paper id="flowers" seed={57} tilt={3} tape={{ tone: 5, at: 'tr', w: 70 }} style={{ right: 6, bottom: -14, width: 260, height: 110 }} />
-    <Bit style={{ left: 8, top: 6 }} tilt={-6}><SchoolSticker kind="pencil" size={64} /></Bit>
-    <Bit style={{ left: 480, top: 2 }} tilt={4} tape={{ tone: 1, w: 50 }}><Sunburst size={62} /></Bit>
+  return (<div className="absolute inset-0"><ParkScrap w={1000} h={625} />
+    <Bit style={{ right: 24, bottom: 14 }} tilt={5}><SchoolSticker kind="bus" size={66} /></Bit>
     <Sprinkle spots={[[200, 16, 20, PP.lemon], [330, 30, 16, PP.pink, 'heart'], [600, 22, 18, PP.paper]]} />
   </div>);
 }
+// Match Three: Butter gingham, the polka paper under the score column (no
+// strip between board and column).
 function MatchBack() {
-  return (<div className="absolute inset-0">{cream}
-    <Paper id="gingham" seed={58} style={{ left: -10, top: -10, width: 1020, height: 645 }} />
+  return (<div className="absolute inset-0" style={paperCss('gingham')}>
     <Paper id="polka" seed={59} tilt={3} tape={{ tone: 0, at: 'tr', w: 70 }} style={{ left: 640, top: 430, width: 330, height: 170 }} />
-    <Paper id="checker" seed={60} tilt={-2} tape={{ tone: 3, at: 'tl', w: 60 }} style={{ left: 560, top: 70, width: 70, height: 300 }} />
-    <Bit style={{ left: 690, top: 470 }} tilt={-6}><PowerSticker id="tornado" size={96} /></Bit>
+    <Bit style={{ left: 690, top: 470 }} tilt={-6}><SchoolSticker kind="apple" size={90} /></Bit>
     <Bit style={{ left: 820, top: 480 }} tilt={5}><SchoolSticker kind="crayon" size={90} /></Bit>
     <Sprinkle spots={[[16, 40, 20, PP.pink], [20, 560, 22, PP.lemon], [600, 590, 18, PP.sky, 'dot']]} />
   </div>);
 }
+// Four in a Row: the approved Calm pastel squiggle ground, nothing ruled
+// through the player cards; Gingham Mint and stripes papers in the bottom corners.
 function FourBack() {
-  return (<div className="absolute inset-0">{cream}
-    <Paper id="windowpane" seed={61} style={{ left: -10, top: -10, width: 1020, height: 645 }} />
-    <Paper id="plaid" seed={62} tilt={-3} tape={{ tone: 2, at: 'tl', w: 70 }} style={{ left: 20, top: 400, width: 200, height: 200 }} />
-    <Paper id="stripes" seed={63} tilt={3} tape={{ tone: 4, at: 'tr', w: 70 }} style={{ right: 20, top: 400, width: 200, height: 200 }} />
-    <Bit style={{ left: 70, top: 440 }} tilt={-5}><PowerSticker id="double-dice" size={100} /></Bit>
+  return (<div className="absolute inset-0" style={paperCss('squiggle-calm')}>
+    <Paper id="gingham-mint" seed={62} tilt={-3} tape={{ tone: 2, w: 70, pos: { left: 6, top: -8 }, rot: -28 }} style={{ left: 20, top: 400, width: 200, height: 200 }} />
+    <Paper id="stripes" seed={63} tilt={3} tape={{ tone: 4, w: 70, pos: { right: 6, top: -8 }, rot: 28 }} style={{ right: 20, top: 400, width: 200, height: 200 }} />
+    <Bit style={{ left: 70, top: 446 }} tilt={-5}><SchoolSticker kind="bus" size={100} /></Bit>
     <Bit style={{ right: 66, top: 446 }} tilt={6}><SchoolSticker kind="ruler" size={100} /></Bit>
     <Sprinkle spots={[[30, 40, 22, PP.lemon], [220, 60, 18, PP.pink, 'heart'], [760, 60, 18, PP.sky]]} />
   </div>);
 }
+// Bubble Pop: the approved Calm doodle scatter, pastel papers only; the left
+// paper is plain Butter with the sunburst and nothing else.
 function BubbleBack() {
-  return (<div className="absolute inset-0">{cream}
-    <Paper id="dots" seed={64} style={{ left: -10, top: -10, width: 1020, height: 645 }} />
-    <Paper id="stripes" seed={65} tilt={-3} tape={{ tone: 1, at: 'top', w: 80 }} style={{ left: 30, top: 110, width: 230, height: 470 }}><span className="absolute inset-0 grid content-center justify-items-center gap-6"><Sunburst size={150} /><PowerSticker id="lightning" size={110} /></span></Paper>
-    <Paper id="stars" seed={66} tilt={3} tape={{ tone: 5, at: 'tr', w: 70 }} style={{ left: 740, top: 360, width: 230, height: 230 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="notebook" size={110} /></span></Paper>
+  return (<div className="absolute inset-0" style={paperCss('doodle-calm')}>
+    <Paper id="butter" seed={65} tilt={-3} tape={{ tone: 1, at: 'top', w: 80 }} style={{ left: 30, top: 110, width: 230, height: 470 }}><span className="absolute inset-0 grid place-items-center"><Sunburst size={150} /></span></Paper>
+    <Paper id="gingham-blue" seed={66} tilt={3} tape={{ tone: 5, w: 70, pos: { right: 14, top: -10 }, rot: 30 }} style={{ left: 740, top: 360, width: 230, height: 230 }}><span className="absolute inset-0 grid place-items-center"><SchoolSticker kind="notebook" size={110} /></span></Paper>
+  </div>);
+}
+// Bowling: only the wall band above the lane (the lane, pins and rail stay the
+// game's own): Blush gingham behind the pin deck, checker only at the far ends
+// (7% each, 14% in all).
+function BowlWall({ w, h }: { w: number; h: number }) {
+  const end = Math.round(w * 0.07);
+  return (<div className="absolute left-0 right-0 top-0 overflow-hidden" style={{ height: h }}>
+    <div className="absolute inset-0" style={paperCss('gingham-pink')} />
+    <Paper id="checker" seed={68} tilt={-1} tape={{ tone: 3, w: 46, pos: { right: -18, top: h * 0.4 }, rot: 80 }} style={{ left: -10, top: -8, width: end + 10, height: h + 16 }} />
+    <Paper id="checker" seed={69} tilt={1} tape={{ tone: 5, w: 46, pos: { left: -18, top: h * 0.4 }, rot: -80 }} style={{ right: -10, top: -8, width: end + 10, height: h + 16 }} />
   </div>);
 }
 function BowlBack() {
-  // Only the wall band above the lane (the lane, pins and rail stay the game's own).
-  return (<div className="absolute left-0 right-0 top-0 overflow-hidden" style={{ height: 138 }}>
-    <div className="absolute inset-0" style={{ background: PP.cream }} />
-    <Paper id="gingham-pink" seed={67} tilt={-2} style={{ left: -10, top: -6, width: 360, height: 150 }} />
-    <Paper id="checker" seed={68} tilt={1} style={{ left: 330, top: -8, width: 340, height: 150 }} />
-    <Paper id="stars" seed={69} tilt={2} style={{ left: 650, top: -6, width: 370, height: 150 }} />
+  return (<div className="absolute left-0 right-0 top-0" style={{ height: 138 }}>
+    <BowlWall w={1000} h={138} />
     <Bit style={{ left: 300, top: 70 }} tilt={-5}><SchoolSticker kind="pencil" size={58} /></Bit>
-    <Bit style={{ left: 640, top: 66 }} tilt={5}><PowerSticker id="magnet" size={62} /></Bit>
+    <Bit style={{ left: 640, top: 66 }} tilt={5}><SchoolSticker kind="bus" size={60} /></Bit>
   </div>);
 }
 // Her own art (Question Tracker night sky, Territory room) is never redrawn: the
@@ -803,33 +887,31 @@ function Mount({ children, stickers }: { children: ReactNode; stickers?: ReactNo
         {s === 'A'
           ? <><PhotoCorner at="tl" size={36} color={PP.pink} /><PhotoCorner at="tr" size={36} color={PP.pink} /><PhotoCorner at="bl" size={48} color={PP.pink} /><PhotoCorner at="br" size={48} color={PP.pink} /></>
           // Tape only at the bottom corners: the code and the tool buttons sit in the top corners.
-          : <><PhotoCorner at="tl" size={36} color={PP.pink} /><PhotoCorner at="tr" size={36} color={PP.pink} /><Tape tone={1} w={120} rot={35} style={{ left: -34, bottom: 12 }} /><Tape tone={5} w={120} rot={-35} style={{ right: -34, bottom: 12 }} /></>}
+          : <><PhotoCorner at="tl" size={36} color={PP.pink} /><PhotoCorner at="tr" size={36} color={PP.pink} /><Tape tone={1} w={110} rot={35} style={{ left: -18, bottom: 20 }} /><Tape tone={5} w={110} rot={-35} style={{ right: -18, bottom: 20 }} /></>}
         {stickers}
       </div>
     </div>
   );
 }
 const GAMES: Game[] = [
-  { id: 'castle-quest', name: 'Board Game', word: 'Roll!', ground: 'gingham-mint', papers: ['stripes', 'flowers'], stickers: ['double-dice', 'pencil'], steps: [Question, Star, Trophy], play: () => <BoardLaptop back={<BoardBack />} /> },
-  { id: 'game-show', name: 'Game Show', word: 'Pick!', ground: 'pinstripe', papers: ['gingham-pink', 'stars'], stickers: ['treasure-chest', 'apple'], steps: [Question, HandTap, Trophy], play: () => <GameShowLaptop back={<GameShowBack />} /> },
-  { id: 'match-three', name: 'Match Three', word: 'Match!', ground: 'gingham', papers: ['polka', 'checker'], stickers: ['tornado', 'crayon'], steps: [HandTap, Star, Question], play: () => <MatchThreeLaptop back={<MatchBack />} /> },
-  { id: 'four-in-a-row', name: 'Four in a Row', word: 'Drop!', ground: 'windowpane', papers: ['plaid', 'stripes'], stickers: ['double-dice', 'ruler'], steps: [Question, HandTap, Trophy], play: () => <FourLaptop back={<FourBack />} /> },
-  { id: 'bubble-pop', name: 'Bubble Pop', word: 'Pop!', ground: 'dots', papers: ['stripes', 'stars'], stickers: ['lightning', 'notebook'], steps: [Question, HandTap, Star], play: () => <BubbleLaptop back={<BubbleBack />} /> },
-  { id: 'bowling', name: 'Bowling', word: 'Strike!', ground: 'gingham-pink', papers: ['checker', 'stars'], stickers: ['magnet', 'pencil'], steps: [Question, HandTap, Trophy], play: () => <BowlingLaptop back={<BowlBack />} /> },
-  { id: 'star-quiz', name: 'Question Tracker', word: 'Stars!', ground: 'pinstripe', papers: ['stars', 'gingham-blue'], stickers: ['double-points', 'notebook'], steps: [Question, Star, Trophy], own: true,
-    play: () => <Mount stickers={<><Bit style={{ right: 40, bottom: 26 }} tilt={-6}><SchoolSticker kind="apple" size={70} /></Bit><Bit style={{ right: 130, bottom: 20 }} tilt={5}><PowerSticker id="double-points" size={66} /></Bit></>}><ClassScreen /></Mount> },
-  { id: 'territory', name: 'Territory', word: 'Catch!', ground: 'gingham-blue', papers: ['plaid', 'gingham'], stickers: ['shield', 'bus'], steps: [Question, HandTap, Trophy], own: true, play: () => <Mount><TerritoryCoop /></Mount> },
+  { id: 'castle-quest', name: 'Board Game', word: 'Roll!', stickers: ['bus', 'apple'], steps: [Question, Star, Trophy], ground: (w, h) => <ParkScrap w={w} h={h} flowers={false} />, play: () => <BoardLaptop back={<BoardBack />} /> },
+  { id: 'game-show', name: 'Game Show', word: 'Pick!', stickers: ['notebook', 'apple'], steps: [Question, HandTap, Trophy], ground: (w, h) => <StudioScrap w={w} h={h} side={M - 6} apron={M - 6} />, play: () => <GameShowLaptop back={<GameShowBack />} /> },
+  { id: 'match-three', name: 'Match Three', word: 'Match!', stickers: ['notebook', 'crayon'], steps: [HandTap, Star, Question], ground: () => <div className="absolute inset-0" style={paperCss('gingham')} />, play: () => <MatchThreeLaptop back={<MatchBack />} /> },
+  { id: 'four-in-a-row', name: 'Four in a Row', word: 'Drop!', stickers: ['bus', 'ruler'], steps: [Question, HandTap, Trophy], ground: () => <div className="absolute inset-0" style={paperCss('squiggle-calm')} />, play: () => <FourLaptop back={<FourBack />} /> },
+  { id: 'bubble-pop', name: 'Bubble Pop', word: 'Pop!', stickers: ['notebook', 'apple'], steps: [Question, HandTap, Star], ground: () => <div className="absolute inset-0" style={paperCss('doodle-calm')} />, play: () => <BubbleLaptop back={<BubbleBack />} /> },
+  { id: 'bowling', name: 'Bowling', word: 'Strike!', stickers: ['bus', 'pencil'], steps: [Question, HandTap, Trophy], play: () => <BowlingLaptop back={<BowlBack />} /> },
+  { id: 'star-quiz', name: 'Question Tracker', word: 'Stars!', stickers: ['notebook', 'apple'], steps: [Question, Star, Trophy], own: true,
+    play: () => <Mount stickers={<><Bit style={{ right: 40, bottom: 26 }} tilt={-6}><SchoolSticker kind="apple" size={70} /></Bit><Bit style={{ right: 130, bottom: 20 }} tilt={5}><SchoolSticker kind="bus" size={66} /></Bit></>}><ClassScreen /></Mount> },
+  { id: 'territory', name: 'Territory', word: 'Catch!', stickers: ['bus', 'apple'], steps: [Question, HandTap, Trophy], own: true, play: () => <Mount><TerritoryCoop /></Mount> },
 ];
-// The question card over a scrapbook stage: the clean core, plain in every strength.
+// The question card over a real game stage (the Board Game park): the clean
+// core, plain in every strength; one apple and one pencil at the side edges.
 function QuestionStage() {
   return (
-    <div className="relative overflow-hidden" style={{ width: 1280, height: 800, background: PP.cream, color: I }}>
-      <Paper id="gingham-pink" seed={71} tilt={-3} tape={{ tone: 1, at: 'tl' }} style={{ left: -30, top: -20, width: 260, height: 220 }} />
-      <Paper id="stripes" seed={72} tilt={3} tape={{ tone: 3, at: 'tr' }} style={{ right: -30, top: -24, width: 240, height: 200 }} />
-      <Paper id="stars" seed={73} tilt={2} tape={{ tone: 5, at: 'bl' }} style={{ left: -24, bottom: -30, width: 250, height: 190 }} />
-      <Paper id="polka" seed={74} tilt={-2} tape={{ tone: 0, at: 'br' }} style={{ right: -24, bottom: -30, width: 250, height: 180 }} />
-      <Bit style={{ left: 20, top: 360 }} tilt={-6}><PowerSticker id="hint" size={74} /></Bit>
-      <Bit style={{ right: 18, top: 370 }} tilt={6}><SchoolSticker kind="pencil" size={74} /></Bit>
+    <div className="relative overflow-hidden" style={{ width: 1280, height: 800, color: I }}>
+      <ParkScrap w={1280} h={800} />
+      <Bit style={{ left: 22, top: 380 }} tilt={-6}><SchoolSticker kind="apple" size={80} /></Bit>
+      <Bit style={{ right: 20, top: 390 }} tilt={6}><SchoolSticker kind="pencil" size={80} /></Bit>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"><QuestionCard /></div>
     </div>
   );
@@ -895,12 +977,15 @@ export default function ScrapbookDirection() {
   const [mode, setMode] = useState<Mode>(() => { const m = new URLSearchParams(window.location.search).get('sb'); return m === 'A' || m === 'B' || m === 'C' ? m : 'all'; });
   return (
     <section className="grid gap-8">
+      {/* A paper-ground cover keeps its board and hides only its own ground. */}
+      <style>{'.sb-cover>div>div:first-child{visibility:hidden}'}</style>
       <div className="grid gap-3">
         <h2 className="font-heading text-2xl">Scrapbook direction <span className="text-base align-middle px-2 py-0.5 rounded-full border-2 border-black" style={{ background: PP.blush }}>Mockups: pick A, B or C</span></h2>
         <div className="grid gap-2 rounded-[1.25rem] p-4 text-sm font-semibold max-w-[70rem]" style={{ background: '#ffffff', border: `2px solid ${I}` }}>
           <p><b>Your request (2026-11-26):</b> "there was a style for the public facing pages a while ago that was more colorful, scrapbook style and i want that to be the main art direction for public pages and the classic themes." Then: "give me mockups again for everything and ill decide".</p>
           <p><b>What changed since 2026-11-24:</b> your rule then was no washi tape, no stacked or tilted cards and no characters (2026-11-23: "remove the washi tape"; "the attatched tape, multilayer card ... need immediately removed"; 2026-11-25: no tilted cards), and /brand showed only the flat direction, so the scrapbook mockups were taken down on 2026-11-24. This tab brings the old style back (cream page, fabric-swatch papers, crayon stickers, the sunburst, hand-lettered praise, kind-word books, school stickers, crayon stars) in today's palette, patterns and crayon kit. Strength A keeps your tape and tilt rule; B and C bring tape and tilt back for you to judge. No characters in any strength, and nothing live changes until you pick.</p>
           <p><b>Why the clean core stays plain in all three:</b> what a child reads and taps (question card, answer tiles, score board, main button) never sits on a pattern, under tape or on a tilt. Kindergartners taught six science lessons in a lab classroom with heavily decorated walls were more distracted, spent more time off task and learned less than when the decorations were removed (Fisher, Godwin and Seltman, 2014, Psychological Science 25(7), 1362-1370; confirmed by the Design Chair from the published abstract via search, 2026-11-26; a 2022 follow-up found children do not get used to the decor over time). People learn better when interesting material that does not carry the lesson is left out (Mayer's coherence principle, from memory). Text must reach 4.5:1 contrast against the background it actually sits on, 3:1 for large text, and a busy background image behind words is a named failure (WCAG 2.1, 1.4.3 and failure F83, Understanding page opened 2026-11-26); tilt is not a WCAG rule, it is a reading-ease choice.</p>
+          <p><b>Fixed after the Classic Art Director and Design Chair reviews (2026-11-26):</b> covers are the approved covers at full size with only the ground swapped and the scrapbook in the 48px margin (no mount, tilt or tape on them); in-play stages wear school stickers only, never power-up look-alikes; Game Show keeps its studio, Board Game its park, Bubble Pop and Four in a Row their Calm grounds; How to play and the blog post body stay flat in every strength; "Start with Pro" is the yellow go button; below 1300px each section title gets a sticker and an edge strip runs between sections, so A, B and C differ on the 1190 laptop, iPad and phone frames too.</p>
           <p><b>The one weak spot to test:</b> C puts tape and tilt on cards that hold words, the place early readers look first. Try B on a projector with a K-2 class before choosing C.</p>
         </div>
         <div className="grid gap-2 lg:grid-cols-3 max-w-[70rem]">{STRENGTHS.map(([s, n, d]) => <div key={s} className="rounded-[1rem] p-3 text-sm font-semibold grid gap-1" style={{ background: '#ffffff', border: `2px solid ${I}` }}><Tag s={s} /><span>{d}</span><span className="sr-only">{n}</span></div>)}</div>
@@ -921,9 +1006,11 @@ export default function ScrapbookDirection() {
         <article key={p.id} id={`sb-${p.id}`} className="grid gap-3 scroll-mt-24 pt-5 border-t-2 border-black/10">
           <h4 className="font-heading text-xl">{p.name}</h4>
           <ByStrength mode={mode}>
-            {(s) => p.phone && mode !== 'all'
-              ? <div className="flex gap-4 items-start"><div className="min-w-0" style={{ flex: '3 1 0' }}><PageFrame w={1440} label={`${s}: laptop 1440`}>{p.render(1440)}</PageFrame></div><div className="min-w-0" style={{ flex: '1 1 0' }}><PageFrame w={390} label={`${s}: phone 390`}>{p.render(390)}</PageFrame></div></div>
-              : <PageFrame w={1440} label={`${s}: laptop 1440`}>{p.render(1440)}</PageFrame>}
+            {(s) => mode === 'all'
+              ? <PageFrame w={1440} label={`${s}: laptop 1440`}>{p.render(1440)}</PageFrame>
+              // One strength at a time: the same page on a short laptop, an iPad and (where the page has one) a phone.
+              : <div className="grid gap-4"><PageFrame w={1440} label={`${s}: laptop 1440`}>{p.render(1440)}</PageFrame>
+                  <div className="flex gap-4 items-start">{[1190, 820, ...(p.phone ? [390] : [])].map((dw) => <div key={dw} className="min-w-0" style={{ flex: `${dw} 1 0` }}><PageFrame w={dw} label={`${s}: ${dw === 1190 ? 'laptop 1190' : dw === 820 ? 'iPad 820' : 'phone 390'}`}>{p.render(dw)}</PageFrame></div>)}</div></div>}
           </ByStrength>
         </article>
       ))}
@@ -941,7 +1028,7 @@ export default function ScrapbookDirection() {
             {(s) => (
               <div className="grid gap-4 md:grid-cols-2">
                 <figure className="m-0 grid gap-1"><Lazy ratio={1.6}><Laptop w={1280}><Welcome g={g} /></Laptop></Lazy><figcaption className="text-xs font-bold text-muted text-center">{s}: welcome and cover</figcaption></figure>
-                <figure className="m-0 grid gap-1"><Lazy ratio={1.6}><Laptop w={1000}>{g.play(s)}</Laptop></Lazy><figcaption className="text-xs font-bold text-muted text-center">{s}: in play</figcaption></figure>
+                <figure className="m-0 grid gap-1"><Lazy ratio={1.6}><Laptop w={1000}>{g.play()}</Laptop></Lazy><figcaption className="text-xs font-bold text-muted text-center">{s}: in play</figcaption></figure>
               </div>
             )}
           </ByStrength>
