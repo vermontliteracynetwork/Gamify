@@ -90,8 +90,8 @@ export default function PublicHome() {
           <ol className="grid md:grid-cols-3 gap-5 list-none p-0 m-0">
             {HOW.map((bg, i) => (
               <li key={i} className={`relative hover-lift ${CARD} p-6 grid gap-3 content-start`}>
-                {i === 0 && <CardTape tone={1} rot={-4} />}
-                <span className={`justify-self-start px-3 py-1 rounded-pill ${bg} border-std border-border font-bold`}>{t('public.howStep', { n: i + 1 })}</span>
+                {/* No tape here; the Step chip wears Grow Year (owner, 2026-11-26). */}
+                <span className={`justify-self-start px-3 py-1 rounded-pill ${bg} border-std border-border font-score text-lg leading-none tracking-wide`}>{t('public.howStep', { n: i + 1 })}</span>
                 <h3 className="font-display text-2xl leading-tight">{t(`public.how.${i + 1}` as StringKey)}</h3>
                 <p className="font-semibold">{t(`public.how.${i + 1}.text` as StringKey)}</p>
               </li>
