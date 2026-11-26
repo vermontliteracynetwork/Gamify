@@ -44,10 +44,10 @@ import { useHostTeams, useSavedSetup } from '../useSavedSetup';
 import { castleQuestManifest } from './manifest';
 import { BoardArt, boardGround, C, CHICLE, Die2D, matPad, PARTY_COLORS, SQUARE_COLORS, WOBBLE } from './boardArt';
 import { CrayonPawn, ParkScene, PK } from './park';
-import { layout, placePowers, POWERS, roll, spaceKinds, tornadoSpots, TRAIL_SPACES, trailOf, TRAILS, wheelStop, type Layout, type Power, type SpaceKind } from './board';
+import { layout, placePowers, POWERS, roll, spaceKinds, tornadoSpots, TRAIL_SPACES, trailOf, TRAILS, type Layout, type Power, type SpaceKind } from './board';
 
 type Phase = 'welcome' | 'theme' | 'setup' | 'play' | 'end';
-type Step = 'question' | 'roll' | 'busy' | 'pick';
+type Step = 'question' | 'roll' | 'busy';
 const JUMP = '/sounds/board/jump.mp3';
 const DICE = '/sounds/board/dice.mp3';
 // Classic look (approved mockup, teacher 2026-11-24): the park, pastel squares,
@@ -86,11 +86,10 @@ export default function CastleQuest() {
   const [swirl, setSwirl] = useState<{ id: number; to: number[]; lifted: boolean[] } | null>(null);
   const [die, setDie] = useState(1);
   const [toss, setToss] = useState<{ id: number; rolls: number[]; mult: number; wait: boolean } | null>(null);
-  // Click to go on (teacher, 2026-11-13): the die, the wheel and power-up cards wait for a tap.
+  // Click to go on (teacher, 2026-11-13): the die and power-up cards wait for a tap.
   const goRef = useRef<(() => void) | null>(null);
   // Every pop-up waits for a tap, the computer's too (teacher, 2026-11-24): one tap from the class goes on.
   const tapToGo = () => new Promise<void>((res) => { goRef.current = () => { goRef.current = null; res(); }; });
-  const [wheel, setWheel] = useState<{ id: number; stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean } | null>(null);
   const [shield, setShield] = useState<boolean[]>([]);
   const [skip, setSkip] = useState<boolean[]>([]);
   const [potion, setPotion] = useState<number[]>([]); // doubled rolls left
@@ -106,7 +105,6 @@ export default function CastleQuest() {
   const potionRef = useRef<number[]>([]); potionRef.current = potion;
   const boostRef = useRef(boost); boostRef.current = boost;
   const skipRef = useRef<boolean[]>([]); skipRef.current = skip;
-  const pickRef = useRef<((who: number) => void) | null>(null);
   const held = useHeldPowerUps();
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
 
@@ -181,10 +179,10 @@ export default function CastleQuest() {
     // No power-up that moves another player back (no stealing, teacher 2026-11-24).
     const allowed = POWERS.filter((p) => !NO_STEAL_ABILITIES.has(p) && !(setup.powerOff ?? []).includes(itemFor(p).id));
     setN(size); setKinds(k);
-    setPowers(setup.powerUps ? placePowers(k, ps.length < 2 ? allowed.filter((p) => p !== 'wheel' && p !== 'shield') : allowed) : new Map());
+    setPowers(setup.powerUps ? placePowers(k, ps.length < 2 ? allowed.filter((p) => p !== 'shield') : allowed) : new Map());
     const state = startTurns(ps);
     turnsRef.current = state;
-    setTurns(state); setMissed([]); setWinner(null); setSwirl(null); setWheel(null);
+    setTurns(state); setMissed([]); setWinner(null); setSwirl(null);
     place(ps.map(() => 0));
     setShield(ps.map(() => false)); setSkip(ps.map(() => false)); setPotion(ps.map(() => 0));
     held.reset();
@@ -308,7 +306,6 @@ export default function CastleQuest() {
     if (a === 'x2') setBoost((b) => ({ ...b, x2: true }));
     if (a === 'potion') setPotion((v) => v.map((x, k) => (k === me ? 2 : x)));
     if (a === 'tornado') { setStep('busy'); await sleep(ms(1400)); await blowAway(); }
-    if (a === 'wheel') { setStep('busy'); await sleep(ms(1400)); await spinWheel(); }
   }
   // Tornado (teacher, 2026-11-08): every piece is lifted, swirled round and
   // dropped evenly spaced, never back on its own square. A shield holds you down.
@@ -324,41 +321,6 @@ export default function CastleQuest() {
     await sleep(ms(500));
     setSwirl(null);
     await say(t('cq.tornadoDone'));
-    setStep('roll');
-  }
-  // Wheel (teacher, 2026-11-08): pick a player, roll, then a spinning wheel
-  // split in half decides: forward or back that many squares.
-  async function spinWheel() {
-    const s = turnsRef.current!;
-    let target = me;
-    if (s.players.length > 1) {
-      if (current(s).kind === 'cpu') {
-        // The computer picks whoever is furthest ahead (not itself).
-        target = posRef.current.map((p, i) => [p, i]).filter(([, i]) => i !== me).sort((a, b) => b[0] - a[0])[0][1];
-        await say(t('cq.wheelPicks', { name: s.players[target].name }));
-      } else {
-        setStep('pick');
-        target = await new Promise<number>((res) => { pickRef.current = res; });
-        pickRef.current = null;
-        setStep('busy');
-      }
-    }
-    const [n1] = await throwDie(1, 1);
-    const forward = Math.random() < 0.5;
-        // Tap the wheel to spin it, and tap again to go on (teacher, 2026-11-13).
-    setWheel({ id: Date.now(), stop: wheelStop(forward), forward, n: n1, name: s.players[target].name, done: false, spinning: false });
-    await tapToGo();
-    setWheel((w) => (w ? { ...w, spinning: true } : w));
-    playEffect('whoosh', settings);
-    await sleep(still ? 500 : 4200);
-    setWheel((w) => (w ? { ...w, done: true } : w));
-    playEffect(forward ? 'win' : 'miss', settings);
-    impact(settings);
-    await tapToGo();
-    setWheel(null);
-    if (target !== me && shieldRef.current[target]) { await say(t('cq.shieldBlocks'), 'shield'); setStep('roll'); return; }
-    await walk(target, Math.max(0, Math.min(finish, posRef.current[target] + (forward ? n1 : -n1))));
-    if (posRef.current.some((p) => p >= finish)) return endTurn();
     setStep('roll');
   }
 
@@ -414,26 +376,6 @@ export default function CastleQuest() {
       <Die2D value={die} size={size} rolling={false} theme={theme} />
     </motion.button>
   );
-  const picker = step === 'pick' && turns && (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-ink-night/35 p-4" role="dialog" aria-label={t('cq.wheelPick')}>
-      <motion.div className="bg-surface border-heavy border-border rounded-panel p-5 grid gap-4 justify-items-center max-w-[min(40rem,94vw)]" style={{ boxShadow: 'var(--shadow-sticker-lg)' }}
-        initial={still ? false : { scale: 0.6, rotate: -4 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 16 }}>
-        <ItemArt item={itemFor('wheel')} size={72} still={still} />
-        <p className="font-display text-2xl font-bold text-center">{t('cq.wheelPick')}</p>
-        <div className="flex flex-wrap gap-3 justify-center">
-          {turns.players.map((p, i) => (
-            <motion.button key={p.id} type="button" onClick={() => pickRef.current?.(i)} whileHover={still ? undefined : { scale: 1.05 }}
-              className="grid justify-items-center gap-1 rounded-panel border-bold border-border bg-surface-2 px-4 py-3 min-w-28 hover:bg-butter" aria-label={p.name}>
-              <TeamBadge colorIndex={p.colorIndex} size={56} />
-              <span className="font-bold">{p.name}</span>
-              {shield[i] && i !== me && <span role="img" aria-label={t('cq.shielded')}><ItemArt item={itemFor('shield')} size={28} still /></span>}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-    </div>
-  );
-
   return (
     <ThemedPage theme={theme} menu={phase !== 'play' && phase !== 'end'}>
     <main className={phase === 'play' || phase === 'end' ? '!p-0' : 'w-full px-4 sm:px-6 pt-6 pb-6'}>
@@ -547,11 +489,9 @@ export default function CastleQuest() {
           </div>
           <AnimatePresence>
             {toss && <DieToss key={toss.id} rolls={toss.rolls} wait={toss.wait} still={still} theme={theme} onGo={() => goRef.current?.()} />}
-            {wheel && <Wheel key={wheel.id} spin={wheel} still={still} onTap={() => goRef.current?.()} />}
           </AnimatePresence>
         </div>
       )}
-      {picker}
       {question && player && phase === 'play' && <ShareQuestion key={question.q.id} question={question.q} player={player} cpuLevel={team.level} onResult={onResult} />}
       {phase === 'end' && turns && (
         <ResultsModal winners={winner ? [winner] : undefined} title={winner ? t('cq.won', { name: winner.name }) : t('share.tie')} missed={missed} againLabel={t('share.again')} onAgain={() => setPhase('welcome')}>
@@ -644,44 +584,6 @@ function DieToss({ rolls, wait, still, theme, onGo }: { rolls: number[]; wait: b
   );
 }
 
-// ---- The wheel: half forward, half back; a pointer at the top --------------
-function Wheel({ spin, still, onTap }: { spin: { stop: number; forward: boolean; n: number; name: string; done: boolean; spinning: boolean }; still: boolean; onTap: () => void }) {
-  const size = 'min(62vmin, 440px)';
-  return (
-    <motion.div className={`absolute inset-0 z-40 grid place-items-center bg-ink-night/40 ${!spin.spinning || spin.done ? 'cursor-pointer' : ''}`} onClick={!spin.spinning || spin.done ? onTap : undefined} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="status" aria-live="polite"
-      aria-label={spin.done ? t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n }) : t('cq.wheelSpinning')}>
-      <div className="grid justify-items-center gap-3">
-        <p className="text-3xl bg-surface border-heavy border-border rounded-pill px-5 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)' }}>{spin.name}: {spin.n}</p>
-        <motion.div className="relative" style={{ width: size, height: size }} whileHover={!spin.spinning && !still ? { scale: 1.04 } : undefined}
-          animate={!spin.spinning && !still ? { rotate: [0, -4, 4, 0] } : { rotate: 0 }} transition={!spin.spinning ? { duration: 1.4, repeat: Infinity } : { duration: 0.2 }}>
-          <motion.svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full drop-shadow-[0_6px_0_rgba(0,0,0,0.35)]" initial={{ rotate: 0 }} animate={{ rotate: !spin.spinning ? 0 : still ? spin.stop % 360 : spin.stop }}
-            transition={{ duration: still || !spin.spinning ? 0.01 : 4, ease: [0.15, 0.85, 0.25, 1] }}>
-            <circle cx="100" cy="100" r="96" fill={C.ink} />
-            {/* The half that did not win turns to its solid pastel pair (never see-through). */}
-            <path d="M100 100 L100 8 A92 92 0 0 1 100 192 Z" fill={spin.done && !spin.forward ? PK.mint : C.sage} />
-            <path d="M100 100 L100 192 A92 92 0 0 1 100 8 Z" fill={spin.done && spin.forward ? PK.blush : C.red} />
-            {Array.from({ length: 12 }, (_, k) => <line key={k} x1="100" y1="100" x2={100 + 92 * Math.sin((k * Math.PI) / 6)} y2={100 - 92 * Math.cos((k * Math.PI) / 6)} stroke="#fffaf0" strokeWidth="1" opacity="0.35" />)}
-            <text x="148" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(90 148 100)">{t('cq.forward')}</text>
-            <text x="52" y="106" textAnchor="middle" fontSize="20" fill="#fffaf0" stroke={C.ink} strokeWidth="0.8" style={CHICLE} transform="rotate(-90 52 100)">{t('cq.back')}</text>
-            <circle cx="100" cy="100" r="16" fill={C.yellow} stroke={C.ink} strokeWidth="4" />
-            {Array.from({ length: 16 }, (_, k) => <circle key={`b${k}`} cx={100 + 88 * Math.sin((k * Math.PI) / 8)} cy={100 - 88 * Math.cos((k * Math.PI) / 8)} r="3" fill="#fffaf0" className={still ? '' : 'cq-blink'} style={{ animationDelay: `${k * 0.08}s` }} />)}
-          </motion.svg>
-          {/* The pointer at the top. */}
-          <svg viewBox="0 0 40 44" className="absolute left-1/2 -top-[6%] -translate-x-1/2 w-[14%]" aria-hidden="true"><path d="M4 4 H36 L20 40 Z" fill={C.yellow} stroke={C.ink} strokeWidth="4" strokeLinejoin="round" /></svg>
-          {!spin.spinning && <button type="button" onClick={(e) => { e.stopPropagation(); onTap(); }} aria-label={t('cq.wheelSpin')} className="absolute inset-0 rounded-full" />}
-        </motion.div>
-        <AnimatePresence>
-          {spin.done && (
-            <motion.p className="text-4xl bg-surface border-heavy border-border rounded-pill px-6 py-1" style={{ ...CHICLE, boxShadow: 'var(--shadow-sticker)', color: spin.forward ? '#22b04a' : C.red }}
-              initial={{ scale: 0.3, opacity: 0 }} animate={{ scale: [0.3, 1.2, 1], opacity: 1 }} transition={{ duration: 0.4 }}>
-              {t(spin.forward ? 'cq.wheelForward' : 'cq.wheelBack', { name: spin.name, n: spin.n })}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
-}
 
 // The tornado itself, sweeping across the board while the pieces swirl.
 function Twister({ item, w, h }: { item: ThemeItem; w: number; h: number }) {
