@@ -25,7 +25,7 @@ export function useCrumbLabel(label: string | undefined) {
   }, [label, pathname]);
 }
 
-const NONE = /^\/($|join|choose|look-up|games\/|live\/|teacher\/live|mirror\/|show\/|owner|arcade|check$|teacher\/classes\/?$|teacher\/?$|teacher\/themes\/[^/]+|teacher\/classes\/[^/]+\/check-in|blog\/themes\/[^/]+\/print)/;
+const NONE = /^\/($|join|choose|look-up|games\/|live\/|teacher\/live|mirror\/|show\/|owner|arcade|check$|teacher\/classes\/?$|teacher\/?$|teacher\/welcome|teacher\/themes\/[^/]+|teacher\/classes\/[^/]+\/check-in|blog\/themes\/[^/]+\/print)/;
 
 const humanize = (slug: string) => { const s = slug.replace(/-/g, ' '); return s.charAt(0).toUpperCase() + s.slice(1); };
 

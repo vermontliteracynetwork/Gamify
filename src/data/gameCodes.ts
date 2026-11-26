@@ -4,12 +4,14 @@ import { LIBRARY } from './library';
 import { supabase } from './supabase';
 import { withTimeout } from '../lib/withTimeout';
 import type { QuestionSet } from './types';
+import type { Tier } from '../config';
 
 // Game codes (development plan Part 3B, path 2): the teacher picks a set and
 // a game, Gamify makes a letters-only code and a link with it built in.
 // Saved on this device until cloud accounts (Stage 5) share them.
 // `due` (YYYY-MM-DD) makes it homework: the code works through that day.
-export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby; minutes?: number; endAt?: number; goal?: number }
+// `plan`: homework made during the Plus trial keeps Plus until its due date.
+export interface GameCode { code: string; gameId: string; setId: string; createdAt: string; live?: boolean; versus?: boolean; mirror?: boolean; design?: boolean; rosterClass?: string; cloud?: boolean; due?: string; lobby?: ClassLobby; minutes?: number; endAt?: number; goal?: number; plan?: Tier }
 // The teacher's clock (2026-10-31): `minutes` each student plays, or
 // `endAt` (ms) when every game ends together; `goal` ends a game at a score.
 export interface PlayLimits { minutes?: number; endAt?: number; goal?: number }
@@ -51,11 +53,19 @@ export async function makeGameCode(gameId: string, setId: string, kind: 'play' |
   if (same) return same;
   // A class list or cloud hiccup never stops a game from opening (teacher, 2026-11-06).
   const classCodes = (await withTimeout(data.listClassrooms()).catch(() => [])).map((c) => c.joinCode ?? '');
-  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }), ...limits };
+  // Homework made during the Plus trial keeps Plus until it is due.
+  const trialPlan = due ? await trialPlanNow() : undefined;
+  const code: GameCode = { code: newJoinCode([...classCodes, ...all.map((c) => c.code)]), gameId, setId, createdAt: new Date().toISOString(), ...(live && { live: true }), ...(versus && { versus: true }), ...(mirror && { mirror: true }), ...(design && { design: true }), ...(due && { due }), ...(trialPlan && { plan: trialPlan }), ...limits };
   rememberMade(code);
   await withTimeout(data.setSetting(KEY, [...all, code])).catch((e) => console.warn('game code not saved', e));
   await withTimeout(shareToCloud(code, kind), 8000).catch((e) => console.warn('game code not shared', e));
   return code;
+}
+
+// The trial's plan, when the plan she plays on is above her saved plan.
+async function trialPlanNow(): Promise<Tier | undefined> {
+  const [tier, real] = await Promise.all([data.getSetting<Tier>('tier'), data.getSetting<Tier>('real-tier')]).catch(() => [undefined, undefined]);
+  return tier && tier !== (real ?? 'free') ? tier : undefined;
 }
 
 // A Pro class lobby gets a fresh code every time it opens.

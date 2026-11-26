@@ -92,7 +92,7 @@ export default function JoinPage() {
         navigate(`/games/${pick.gameId}?set=${pick.setId}`); return;
       }
     }
-    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits });
+    setSession({ classroomId: student?.classroomId ?? '', studentId, name: who, gameId: game.design ? 'design' : game.gameId, ...limits, ...(game.plan && { plan: game.plan }) });
     playCloudCode(game.cloud ? game.code : '');
     if (game.design) { navigate('/arcade/design'); return; }
     if (game.live) { setLive({ code: game.code, pid: studentId, name: who }); navigate(`/live/${game.code}`); return; }

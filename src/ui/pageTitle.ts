@@ -36,6 +36,7 @@ const PAGES: [RegExp, string][] = [
   [/^\/teacher\/reports/, 'Reports'],
   [/^\/teacher\/themes/, 'Theme Builder'],
   [/^\/teacher\/account/, 'Account'],
+  [/^\/teacher\/welcome/, 'Welcome'],
   [/^\/teacher\/activity/, 'Create an Activity'],
   [/^\/teacher\/achievements/, 'Achievements'],
   [/^\/schools/, 'For schools'],

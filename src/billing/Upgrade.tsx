@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import confetti from 'canvas-confetti';
 import { Check, Sparkle } from '@phosphor-icons/react';
-import { PRICES_USD_PER_YEAR, perMonthUSD } from '../config';
-import { useTier } from '../data/hooks';
+import { LAUNCH_OFFER, PRICES_USD_PER_YEAR, perMonthUSD } from '../config';
+import { usePlan, useTier } from '../data/hooks';
 import { t } from '../i18n';
 import type { StringKey } from '../i18n/en';
 import { useSettings } from '../settings/SettingsContext';
@@ -35,7 +35,9 @@ export function UpgradeDialog({ suggest = 'plus', onClose }: { suggest?: Plan; o
 // on the Account page (teacher, 2026-10-26: make upgrading really easy there).
 export function PlanCards({ suggest = 'plus', onDone }: { suggest?: Plan; onDone: (plan: Plan) => void }) {
   const { settings } = useSettings();
-  const tier = useTier();
+  // The saved plan, not the trial: during the Plus trial, Get Plus still
+  // works (it keeps Plus after the trial).
+  const tier = usePlan()?.real ?? 'free';
   async function go(plan: Plan) {
     await upgradeTo(plan);
     onDone(plan);
@@ -46,17 +48,23 @@ export function PlanCards({ suggest = 'plus', onDone }: { suggest?: Plan; onDone
           <div className="grid sm:grid-cols-2 gap-3">
             {plans.map((p) => (
               <div key={p} className={`rounded-panel border-bold border-border p-4 grid gap-3 content-start ${p === suggest ? 'bg-butter' : 'bg-surface'}`}>
-                <p className="font-display text-2xl flex items-center gap-2">{t(`pricing.${p}` as StringKey)}{p === suggest && <span className="text-xs font-bold bg-surface border-std border-border rounded-pill px-2 py-0.5">{t('upgrade.best')}</span>}</p>
-                <div><p className="font-display text-5xl leading-none">{t('upgrade.price', { m: perMonthUSD(PRICES_USD_PER_YEAR[p]) })}</p><p className="font-display text-xl">{t('upgrade.perMonth')}</p><p className="text-sm font-semibold text-muted">{t('upgrade.billed', { n: PRICES_USD_PER_YEAR[p] })}</p></div>
+                {/* No "Best fit" label: the brighter card is the hint (owner removed "Recommended" on Pricing, 2026-11-26). */}
+                <p className="font-display text-2xl">{t(`pricing.${p}` as StringKey)}</p>
+                {/* Every price carries its renewal line (marketing, 2026-11-26; ROSCA clear terms). */}
+                <div><p className="font-display text-5xl leading-none">{t('upgrade.price', { m: perMonthUSD(PRICES_USD_PER_YEAR[p]) })}</p><p className="font-display text-xl">{t('upgrade.perMonth')}</p><p className="text-sm font-semibold text-muted">{t('pricing.renews.year', { n: PRICES_USD_PER_YEAR[p].toFixed(2).replace(/\.00$/, '') })}</p></div>
                 <ul className="grid gap-1 list-none p-0 m-0">{[1, 2, 3, 4].map((n) => <li key={n} className="flex gap-1.5 font-semibold text-sm"><Check weight="bold" size={18} className="shrink-0" aria-hidden="true" />{t(`upgrade.${p}.${n}` as StringKey)}</li>)}</ul>
                 <button type="button" disabled={tier === p || (tier === 'pro' && p === 'plus')} onClick={() => void go(p)}
                   className={buttonClasses(p === suggest ? 'main' : 'secondary', 'min-h-14 text-lg hover-pop')}>{tier === p ? t('upgrade.current') : t('upgrade.go', { plan: t(`pricing.${p}` as StringKey) })}</button>
               </div>
             ))}
+            {saleOn() && <p className="text-sm font-semibold sm:col-span-2 m-0">{t('pricing.founding', { name: LAUNCH_OFFER.name, off: Math.round(LAUNCH_OFFER.discount * 100) })}</p>}
             <p className="text-sm font-semibold text-muted sm:col-span-2">{t('upgrade.cancelAnytime')}</p>
           </div>
   );
 }
+
+// The launch sale line shows only while the sale is real (no fake timers).
+export const saleOn = (now = Date.now()) => LAUNCH_OFFER.active && now < Date.parse(`${LAUNCH_OFFER.endsBefore}T00:00:00-05:00`);
 
 // One dialog for the whole app, so it stays open (with its thank-you) even
 // when the limit that opened it goes away the moment the plan changes.

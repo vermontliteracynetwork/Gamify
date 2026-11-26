@@ -18,6 +18,7 @@ from (values
   ('0013_teach_cards',              exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'question_sets' and column_name = 'teach_card')),
   ('0014_set_folders',              exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'question_sets' and column_name = 'folder')),
   ('0015_affiliates',               exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'referred_by')),
-  ('0016_new_password',             exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'must_change_password'))
+  ('0016_new_password',             exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'must_change_password')),
+  ('0017_plus_trial',               exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'trial_started_at'))
 ) as m(migration, done)
 order by m.migration;

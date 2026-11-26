@@ -7,6 +7,12 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'supabase-0017', kind: 'setup', added: '2026-11-26', title: 'Run 0017 so new accounts get the 7-day Plus trial',
+    why: 'You asked for a 7-day Plus reverse trial. The app is built: a new account plays on Plus for 7 days, then on Free unless it pays (no card, nothing bills on its own). In the cloud the trial start is saved on the profile, which needs this one database change; until it runs, cloud accounts get no trial (nothing breaks). Accounts made before it runs get no trial.',
+    how: 'Supabase SQL Editor: run supabase/migrations/0017_plus_trial.sql (safe to run twice). Check with supabase/check_migrations.sql.' },
+  { id: 'welcome-guesses', kind: 'decide', added: '2026-11-26', title: 'Welcome screen and trial: confirm the guesses',
+    why: 'Built from your rules and predicted where you had not said: one welcome screen (not two pop-ups), the beta strip under the plans (asks first, then gives), no "Best fit" label in the upgrade box (to match Pricing), no host-one-game gate for the beta, the Free cap unchanged, and no counting of which lock sells yet. The trial starts at sign-up (not at the first hosted game), and the beta strip shows until Feb 28, 2027 Eastern while BETA_SPOTS_OPEN is on in src/config.ts (there is no live spot count yet).',
+    how: 'Sign up a test account and look at the welcome screen; say yes, or change any of these.' },
   { id: 'scrapbook-strength', kind: 'decide', added: '2026-11-26', title: 'Pick the scrapbook strength: A, B or C',
     why: 'You asked for the colorful scrapbook style as the main art direction for public pages and the Classic themes. /brand, Scrapbook shows every public page and every live game in three strengths: A (papers and stickers at the edges, no tape, no tilt), B (plus washi tape and small tilts at the edges) and C (tape and tilt also on cards with words). The question card, answers, score board and main button stay plain in all three. Nothing live changes until you pick.',
     how: 'Open /brand, Scrapbook, use the A, B, C switch, then say A, B or C (and any page you want different). Also say whether public pages keep the Lavender ground or go to the cream scrapbook page shown.' },
