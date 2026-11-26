@@ -287,11 +287,11 @@ const ART: Record<PowerId, () => ReactNode> = {
     ))}
   </>),
   // Pop Out (Four in a Row, 2026-11-26): a piece lifting out of the rack's
-  // empty hole, with motion lines; the piece is the game's own Grape dot disc.
+  // empty hole, with pop lines splaying up from the hole (no side ticks: at 48px they merged with the rack); the piece is the game's own Grape dot disc.
   'pop-out': () => (<>
     <Wax d={rr(8, 62, 84, 30, 12)} color={ND.cobalt} />
     <Wax d={circ(50, 77, 9)} color={ND.paper} edge={ND.ink} hatch={0} width={3.6} />
-    <Line d="M24 58 L16 49 M76 58 L84 49 M14 66 H4 M86 66 H96" color={ND.ink} w={3.6} />
+    <Line d="M24 58 L15 48 M76 58 L85 48 M36 61 L32 55 M64 61 L68 55" color={ND.ink} w={3.6} />
     <Wax d={circ(50, 32, 24)} color={ND.violet} />
     <Wax d={circ(50, 32, 7)} color={ND.paper} edge={ND.ink} hatch={0} width={2.6} />
     <Shine d="M34 26 C36 19 41 15 47 14" />
