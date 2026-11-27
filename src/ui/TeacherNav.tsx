@@ -33,7 +33,9 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
   const link = ({ isActive }: { isActive: boolean }) =>
     `min-h-9 px-3 rounded-pill font-bold text-xs lg:text-sm inline-flex flex-1 justify-center whitespace-nowrap items-center gap-1.5 no-underline ${isActive ? 'bg-butter text-accent-ink' : 'text-text hover:bg-surface-2'}`;
   // Not on Account (teacher, 2026-10-26): that page is for the plan and settings.
-  const onAccount = useLocation().pathname.startsWith('/teacher/account');
+  const path = useLocation().pathname;
+  const onAccount = path.startsWith('/teacher/account');
+  const onBeta = path.startsWith('/teacher/beta');
   const unfinished = start && start.count < start.steps.length && !onAccount;
   // The left rail (approved teacher portal Shell, 2026-11-25): on wide screens
   // it replaces the public top bar, with the logo on top, Create an Activity
@@ -110,7 +112,7 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
       </nav>
       <TrialNotes />
       {survey && surveyOpen && <TeacherSurvey id={survey} onClose={() => { setSurveyOpen(false); void surveyDue().then(setSurvey); }} />}
-      {beta && !onAccount && <BetaChecklist s={beta} />}
+      {beta && !onAccount && !onBeta && <BetaChecklist s={beta} />}
       {unfinished && showing && <GetStarted steps={start.steps} count={start.count} onFold={() => setOpen(false)} />}
     </>
   );

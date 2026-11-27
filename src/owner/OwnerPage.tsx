@@ -26,7 +26,7 @@ import HomeCards from './HomeCards';
 import { HOME } from './homeCopy';
 
 import OwnerGate from './OwnerGate';
-import { ChecklistsCard, DoFirstCard, DoFirstStrip, DraftsCard, UrgentPopup } from './FocusCards';
+import { ChecklistsCard, DoFirstCard, DoFirstStrip, DoLinks, DraftsCard, UrgentPopup } from './FocusCards';
 import TeamCard from './TeamCard';
 import { GrowthChartCard } from './GrowthChart';
 import { supabase } from '../data/supabase';
@@ -313,7 +313,7 @@ function GalleryCard() {
   const [why, setWhy] = useState<Record<string, GalleryReason>>({});
   const [viewing, setViewing] = useState<GameTheme | null>(null);
   async function decide(th: GameTheme, status: 'approved' | 'declined' | 'revise', note?: string) {
-    await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined, note: note?.trim() || undefined }, challenge: status === 'declined' ? false : th.challenge });
+    await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined, note: note?.trim() || undefined, by: 'owner' }, challenge: status === 'declined' ? false : th.challenge });
     setViewing(null);
     reload();
   }
@@ -461,6 +461,7 @@ function WaitingCard() {
                 <p className={`font-display text-lg leading-tight ${ticked ? 'line-through' : ''}`}>{w.title}</p>
                 <p className="text-sm font-semibold">{w.why}</p>
                 <p className="text-sm font-semibold text-muted"><span className="font-bold">{t('owner.waitingHow')} </span>{w.how}</p>
+                {!ticked && <DoLinks w={w} small />}
                 <p className="text-xs font-bold text-muted">{t(`owner.waitingKind.${w.kind}` as StringKey)} · {t('owner.waitingAdded', { date: w.added })}</p>
               </div>
             </li>

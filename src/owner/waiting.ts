@@ -8,6 +8,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'supabase-0019', kind: 'setup', added: '2026-11-27', title: 'Run 0019 so Home counts teachers\' question sets',
+    why: 'The Home card now shows question sets made by teachers (not you) for today, this week, this month, this year and all time. It reads one new database function.',
+    how: 'Supabase SQL Editor: run supabase/migrations/0019_owner_set_counts.sql (safe to run twice).' },
   { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', urgent: true, title: 'Beta photo release form (faces, or hands and work only)',
     why: 'You want real photos of classes playing and making themes for the Pricing carousel and promotion. Faces of children need a signed release from a parent or guardian; hands, the back of a head or the work only need the school and teacher OK. The shot list and rules are in docs/photo-brief.md. The 13 example photos you sent were found online, so they are references only and never ship.',
     how: 'A draft is ready in docs/photo-release.md (parent choice of face, hands and work only, or no; uses; withdrawal; teacher and school part; five questions for the attorney). Send it to the attorney, then say yes to adding it as a beta requirement. Then beta teachers send photos with the release tag.' },
@@ -168,3 +171,37 @@ export const WAITING: WaitingItem[] = [
     why: 'Claudia predicted these from your past answers and built them; change any you disagree with.',
     how: 'Homeschool co-ops of 5+ families buy like a school; school plans include a free online kickoff for teachers; we sign district data privacy agreements; school invoices go out within one school day; starter themes play on Plus and Pro; Pro\'s early access means new games open to Pro a few weeks early.' },
 ];
+
+// Where to go to do each thing (owner, 2026-11-27: "on any and all lists
+// telling me to do things, link in the text or with the button on click to
+// where i need to go to do the thing ... when its sql, give me a github
+// link"). Files named in the steps become GitHub links on main; services
+// named in them link to their dashboards; portal views link inside the app.
+export interface DoLink { label: string; href: string; external: boolean }
+const REPO = 'https://github.com/vermontliteracynetwork/Gamify/blob/main/';
+const SERVICES: [RegExp, string, string][] = [
+  [/supabase/i, 'Open Supabase', 'https://supabase.com/dashboard'],
+  [/vercel/i, 'Open Vercel', 'https://vercel.com/dashboard'],
+  [/stripe/i, 'Open Stripe', 'https://dashboard.stripe.com'],
+  [/buffer/i, 'Open Buffer', 'https://buffer.com'],
+  [/canva/i, 'Open Canva', 'https://www.canva.com'],
+];
+const VIEWS: [RegExp, string, string][] = [
+  [/photo-release|photo release/i, 'Open the draft', '/owner?s=drafts'],
+  [/\/owner, Affiliates|affiliates page/i, 'Open Affiliates', '/owner?s=affiliates'],
+  [/Marketing|campaign/i, 'Open Marketing', '/owner?s=marketing'],
+  [/\bbeta\b/i, 'Open Beta test', '/owner?s=beta'],
+  [/challenge/i, 'Open Gallery review', '/owner?s=gallery'],
+  [/welcome screen|sign up a test account/i, 'Open sign-up', '/login?mode=signup'],
+  [/business plan/i, 'Open the business plan', 'https://claude.ai/artifact/4p4LxCN1iarjpLcAYjECZE'],
+];
+export function doLinks(w: Pick<WaitingItem, 'how' | 'why' | 'title'>): DoLink[] {
+  const text = `${w.title} ${w.how} ${w.why}`;
+  const out: DoLink[] = [];
+  const seen = new Set<string>();
+  const add = (l: DoLink) => { if (!seen.has(l.href)) { seen.add(l.href); out.push(l); } };
+  for (const m of w.how.match(/\b(?:supabase|docs|src)\/[\w./-]+\.(?:sql|md|ts|tsx)\b/g) ?? []) add({ label: m.endsWith('.sql') ? `SQL on GitHub: ${m.split('/').pop()}` : `${m.split('/').pop()} on GitHub`, href: REPO + m, external: true });
+  for (const [re, label, href] of SERVICES) if (re.test(w.how)) add({ label, href, external: true });
+  for (const [re, label, href] of VIEWS) if (re.test(text)) add({ label, href, external: href.startsWith('http') });
+  return out.slice(0, 4);
+}

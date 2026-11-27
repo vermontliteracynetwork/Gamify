@@ -387,3 +387,24 @@ want in the carosel and promotional otherwise."
     card and matching KPI numbers on the clean white look. A Figma-referenced
     pass on every portal page is next (owner: "use referncing sites, things
     like figma, to get visual and simple views for all pages").
+86. [ ] **Every to-do links to where it is done** ("link in the text or with the
+    button on click to where i need to go ... when its sql, give me a github
+    link"): Waiting on you, Do first, the pop-up and the checklists show Go
+    buttons (SQL and files open on GitHub, services open their dashboards,
+    portal views open inside). The pop-up shows on every portal visit until
+    each urgent item is done or removed from it.
+87. [ ] **Astrology as an advisor** ("more narrative/interpretive ... line art
+    visuals of constelations"): short advisor sentences for the day, the
+    week's Moon path, the month and year as advice, with a line-art
+    constellation of the sign in focus.
+88. [ ] **Home cards** ("question sets created by users (not me) (filter ...
+    day, week, month, year to date, all time)" and "a visual progression ...
+    for the themes"): the answers card is now teacher-made question sets
+    with a Day/Week/Month/YTD/All switch (needs supabase/migrations/0019);
+    the themes card shows a bar: AI approved, You approved, Held for review,
+    Auto struck. The AI reviewer that fills "AI approved" and "Auto struck"
+    is still to build (the Theme Reviewer agent rules).
+89. [ ] **Floating developer menu** (magenta, double-click to open, X to
+    collapse; owner only): see every page as Free, Plus, Pro or Homeschool;
+    send 1 to 40 pretend students into a live code at a chosen accuracy; quick
+    links. Built; to check with a real live game.

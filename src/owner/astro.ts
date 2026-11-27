@@ -158,3 +158,42 @@ export const MOON_DAY: Record<(typeof SIGNS)[number], { focus: string; money: st
   Aquarius: { focus: 'New ideas: write them down, do not start them all.', money: 'Your 2nd house of money: check income and subscriptions.' },
   Pisces: { focus: 'Creative day: themes, art, sound. Rest if tired.', money: 'Avoid rose-colored plans; read the numbers twice.' },
 };
+
+// The advisor's voice for each Moon sign (owner, 2026-11-27: "more
+// narrative/interpretive (short text, sentences) ... as if the astrological
+// advisor is just that, an advisor, giving me wisdom on what to do").
+export const MOON_STORY: Record<(typeof SIGNS)[number], string> = {
+  Aries: 'The Moon runs hot in Aries. Your energy comes in bursts today, so spend the first one on the hardest thing on your list.',
+  Taurus: 'In Taurus the Moon slows everything down, in a good way. Finish and polish rather than start; what you steady today lasts.',
+  Gemini: 'Gemini Moon loosens your words. Write the post, the help page, the email to a principal while the sentences come easily.',
+  Cancer: 'The Moon is home in Cancer, and so is your Jupiter. Tend your people today: answer teachers, check on the beta, and let money decisions wait for patience.',
+  Leo: 'Leo Moon wants you seen. Put your face next to Gamify today, a demo or a short video. Spend only on what gets you seen with a clear goal.',
+  Virgo: 'A Virgo Moon is a fixer. Small bugs, loose checklists and receipts are where the day wants you. Tidy work now saves big work later.',
+  Libra: 'Libra Moon brings partners into view. Talk to a school or a collaborator, and put any promise in writing before you make it.',
+  Scorpio: 'The Moon joins your Sun and Moon in Scorpio. This is your deepest focus of the month: one big problem, no distractions, no snap spending.',
+  Sagittarius: 'Sagittarius Moon is a teacher. Share what you know in public, a Blog post or a research note, and plan far ahead without signing anything today.',
+  Capricorn: 'The Moon crosses your rising sign. Plan, set deadlines and make the hard call you have been putting off. Budgets and prices land well today.',
+  Aquarius: 'Aquarius Moon fills your money house with ideas. Write every one down, start none of them, and check your income and subscriptions.',
+  Pisces: 'Pisces Moon softens the edges. A day for themes, art and sound, or for rest. Read any number twice before you trust it.',
+};
+export function phaseStory(p: number) {
+  if (p < 0.03 || p > 0.97) return 'A New Moon: plant one clear intention for Gamify and write it where you will see it.';
+  if (p < 0.47) return 'The Moon is growing, so this is a building stretch: launch, send, ask.';
+  if (p < 0.53) return 'A Full Moon: results show. Celebrate one win and notice what needs to change.';
+  return 'The Moon is waning, a finishing stretch: wrap up, review and let go of what is not working.';
+}
+// Simple line-art constellations for each sign (stylized for art, not a star map).
+export const CONSTELLATIONS: Record<(typeof SIGNS)[number], { stars: [number, number][]; lines: [number, number][] }> = {
+  Aries: { stars: [[10, 60], [38, 40], [62, 36], [86, 48]], lines: [[0, 1], [1, 2], [2, 3]] },
+  Taurus: { stars: [[8, 20], [30, 40], [48, 52], [62, 46], [86, 24], [58, 70], [76, 84]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [2, 5], [5, 6]] },
+  Gemini: { stars: [[20, 12], [24, 40], [26, 70], [14, 90], [62, 10], [66, 40], [70, 70], [84, 90]], lines: [[0, 1], [1, 2], [2, 3], [4, 5], [5, 6], [6, 7], [1, 5]] },
+  Cancer: { stars: [[50, 14], [48, 44], [22, 70], [76, 76], [52, 56]], lines: [[0, 1], [1, 4], [4, 2], [4, 3]] },
+  Leo: { stars: [[70, 14], [58, 20], [54, 36], [64, 46], [40, 56], [16, 66], [30, 84], [62, 70]], lines: [[0, 1], [1, 2], [2, 3], [3, 7], [7, 4], [4, 5], [5, 6], [6, 7]] },
+  Virgo: { stars: [[12, 22], [30, 34], [46, 30], [56, 48], [40, 64], [72, 62], [86, 84], [24, 82]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [3, 5], [5, 6], [4, 7]] },
+  Libra: { stars: [[50, 12], [20, 40], [80, 40], [28, 78], [72, 80]], lines: [[0, 1], [0, 2], [1, 2], [1, 3], [2, 4]] },
+  Scorpio: { stars: [[10, 20], [22, 30], [34, 36], [44, 48], [50, 62], [56, 76], [70, 86], [84, 80], [90, 66]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8]] },
+  Sagittarius: { stars: [[20, 70], [38, 52], [56, 60], [50, 34], [70, 30], [84, 14], [76, 78]], lines: [[0, 1], [1, 2], [2, 6], [1, 3], [3, 4], [4, 5], [4, 2]] },
+  Capricorn: { stars: [[12, 30], [30, 44], [50, 64], [70, 74], [88, 40], [64, 34]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0]] },
+  Aquarius: { stars: [[10, 30], [26, 22], [42, 34], [58, 26], [74, 38], [50, 58], [40, 82], [70, 80]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [2, 5], [5, 6], [5, 7]] },
+  Pisces: { stars: [[12, 18], [22, 40], [30, 62], [46, 84], [64, 70], [80, 58], [90, 40], [80, 26]], lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 5]] },
+};

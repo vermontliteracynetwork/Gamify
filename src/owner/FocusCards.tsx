@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, Circle, DownloadSimple, Siren, X } from '@phosphor-icons/react';
+import { ArrowRight, ArrowSquareOut, CheckCircle, Circle, DownloadSimple, Siren, Trash, X } from '@phosphor-icons/react';
 import { data } from '../data';
-import { WAITING, type WaitingItem } from './waiting';
+import { Link } from 'react-router-dom';
+import { WAITING, doLinks, type WaitingItem } from './waiting';
 import { FOCUS_KEY, FOCUS_LISTS } from './focus';
 import photoRelease from '../../docs/photo-release.md?raw';
 
@@ -10,7 +11,6 @@ import photoRelease from '../../docs/photo-release.md?raw';
 // Do first view (urgent items, big and colored), the saved checklists, and
 // drafts to keep (the photo release).
 const DONE_KEY = 'owner-waiting-done';
-const SEEN_KEY = 'owner-urgent-seen';
 
 export function useUrgent() {
   const [done, setDone] = useState<string[] | null>(null);
@@ -20,27 +20,51 @@ export function useUrgent() {
   return { urgent, tick, ready: done !== null };
 }
 
-// Opens once a day while something urgent is open.
-export function UrgentPopup({ onOpen }: { onOpen: () => void }) {
-  const { urgent, ready } = useUrgent();
-  const today = new Date().toISOString().slice(0, 10);
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    if (!ready || !urgent.length) return;
-    void data.getSetting<string>(SEEN_KEY).then((v) => { if (v !== today) setShow(true); });
-  }, [ready, urgent.length, today]);
-  if (!show) return null;
-  const close = () => { setShow(false); void data.setSetting(SEEN_KEY, today); };
+// Where to go: buttons for each item (GitHub for SQL and files, the service's
+// dashboard, or the portal view).
+export function DoLinks({ w, small = false }: { w: WaitingItem; small?: boolean }) {
+  const links = doLinks(w);
+  if (!links.length) return null;
+  const cls = `${small ? 'min-h-9 px-3 text-sm' : 'min-h-11 px-4'} rounded-full border-2 border-[#1d1a33] bg-white font-bold inline-flex items-center gap-1.5 no-underline text-[#1d1a33] hover:bg-[#ede9fe]`;
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="urgent-title" className="fixed inset-0 z-50 grid place-items-center bg-[rgba(29,26,51,0.45)] p-4">
-      <div className="w-full max-w-lg bg-white rounded-[1.5rem] border-[3px] border-[#1d1a33] p-6 grid gap-4" style={{ boxShadow: '0 8px 0 #1d1a33' }}>
+    <span className="flex flex-wrap gap-2">
+      {links.map((l) => l.external
+        ? <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className={cls}>{l.label}<ArrowSquareOut weight="bold" size={14} aria-hidden="true" /></a>
+        : <Link key={l.href} to={l.href} className={cls}>{l.label}<ArrowRight weight="bold" size={14} aria-hidden="true" /></Link>)}
+    </span>
+  );
+}
+
+// Opens every time the portal opens (each login) while any urgent item is
+// neither done nor removed from the pop-up (owner, 2026-11-27: "pop up with
+// messages like this on login until all completed or closed out/deleted").
+const GONE_KEY = 'owner-urgent-dismissed';
+export function UrgentPopup({ onOpen }: { onOpen: () => void }) {
+  const { urgent, tick, ready } = useUrgent();
+  const [gone, setGone] = useState<string[] | null>(null);
+  const [closed, setClosed] = useState(false);
+  useEffect(() => { void data.getSetting<string[]>(GONE_KEY).then((v) => setGone(v ?? [])); }, []);
+  const left = urgent.filter((w) => !(gone ?? []).includes(w.id));
+  if (!ready || gone === null || closed || !left.length) return null;
+  const remove = (id: string) => { const next = [...gone, id]; setGone(next); void data.setSetting(GONE_KEY, next); };
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="urgent-title" className="fixed inset-0 z-50 grid place-items-center bg-[rgba(29,26,51,0.45)] p-4 overflow-auto">
+      <div className="w-full max-w-xl bg-white rounded-[1.5rem] border-[3px] border-[#1d1a33] p-6 grid gap-4" style={{ boxShadow: '0 8px 0 #1d1a33' }}>
         <div className="flex items-center gap-3">
           <span className="w-12 h-12 rounded-full bg-[#f055a5] text-white grid place-items-center shrink-0"><Siren weight="fill" size={26} aria-hidden="true" /></span>
           <h2 id="urgent-title" className="text-2xl font-bold flex-1 m-0">Do these first</h2>
-          <button type="button" onClick={close} aria-label="Close" className="w-11 h-11 rounded-full border-2 border-[#1d1a33] grid place-items-center"><X weight="bold" size={18} /></button>
+          <button type="button" onClick={() => setClosed(true)} aria-label="Close for now" className="w-11 h-11 rounded-full border-2 border-[#1d1a33] grid place-items-center"><X weight="bold" size={18} /></button>
         </div>
-        <ol className="grid gap-2 list-none p-0 m-0">{urgent.map((w, i) => <li key={w.id} className="flex items-center gap-3 rounded-[1rem] bg-[#fff1b8] border-2 border-[#1d1a33] px-4 py-3 font-bold"><span className="w-8 h-8 rounded-full bg-white border-2 border-[#1d1a33] grid place-items-center shrink-0">{i + 1}</span>{w.title}</li>)}</ol>
-        <button type="button" onClick={() => { close(); onOpen(); }} className="min-h-14 rounded-full bg-[#6a45f0] text-white font-bold text-lg">Open Do first</button>
+        <ol className="grid gap-2 list-none p-0 m-0">{left.map((w, i) => (
+          <li key={w.id} className="grid gap-2 rounded-[1rem] bg-[#fff1b8] border-2 border-[#1d1a33] px-4 py-3">
+            <span className="flex items-center gap-3 font-bold"><span className="w-8 h-8 rounded-full bg-white border-2 border-[#1d1a33] grid place-items-center shrink-0">{i + 1}</span><span className="flex-1">{w.title}</span>
+              <button type="button" onClick={() => tick(w.id)} aria-label={`Done: ${w.title}`} title="Done" className="w-10 h-10 rounded-full bg-white border-2 border-[#1d1a33] grid place-items-center"><CheckCircle weight="bold" size={18} /></button>
+              <button type="button" onClick={() => remove(w.id)} aria-label={`Remove from the pop-up: ${w.title}`} title="Remove from the pop-up" className="w-10 h-10 rounded-full bg-white border-2 border-[#1d1a33] grid place-items-center"><Trash weight="bold" size={18} /></button>
+            </span>
+            <DoLinks w={w} small />
+          </li>
+        ))}</ol>
+        <button type="button" onClick={() => { setClosed(true); onOpen(); }} className="min-h-14 rounded-full bg-[#6a45f0] text-white font-bold text-lg">Open Do first</button>
       </div>
     </div>
   );
@@ -52,6 +76,7 @@ function UrgentRow({ w, n, onTick }: { w: WaitingItem; n: number; onTick: () => 
       <span className="w-12 h-12 rounded-full bg-[#f055a5] text-white grid place-items-center font-bold text-xl">{n}</span>
       <div className="grid gap-1 min-w-0">
         <p className="font-bold text-xl leading-tight m-0">{w.title}</p>
+        <DoLinks w={w} />
         <details><summary className="cursor-pointer font-bold text-sm">What to do</summary><p className="text-sm font-semibold mt-1 mb-0">{w.how}</p><p className="text-sm text-[#57506e] mt-1 mb-0">{w.why}</p></details>
       </div>
       <button type="button" onClick={onTick} className="min-h-12 px-5 rounded-full bg-white border-2 border-[#1d1a33] font-bold inline-flex items-center gap-2"><CheckCircle weight="bold" size={20} />Done</button>
@@ -96,9 +121,9 @@ export function ChecklistsCard({ compact = false }: { compact?: boolean }) {
                 {l.items.map((x) => {
                   const on = done.includes(x.id);
                   return (
-                    <li key={x.id}><button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x.id)} className={`w-full min-h-11 rounded-[0.8rem] border-2 px-3 flex items-center gap-2 text-left font-semibold ${on ? 'border-transparent bg-[#c8f0dc]' : 'border-[#d6cff0] bg-white'}`}>
+                    <li key={x.id} className="flex items-center gap-1.5"><button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x.id)} className={`flex-1 min-h-11 rounded-[0.8rem] border-2 px-3 flex items-center gap-2 text-left font-semibold ${on ? 'border-transparent bg-[#c8f0dc]' : 'border-[#d6cff0] bg-white'}`}>
                       {on ? <CheckCircle weight="fill" size={22} color="#22b04a" aria-hidden="true" /> : <Circle weight="bold" size={22} aria-hidden="true" />}<span className={on ? 'line-through' : ''}>{x.label}</span>
-                    </button></li>
+                    </button>{x.to && <Link to={x.to} aria-label={`Go to: ${x.label}`} title="Go there" className="w-11 h-11 shrink-0 rounded-full border-2 border-[#1d1a33] grid place-items-center text-[#1d1a33]"><ArrowRight weight="bold" size={16} /></Link>}</li>
                   );
                 })}
               </ul>

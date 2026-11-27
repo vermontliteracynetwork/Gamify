@@ -29,6 +29,7 @@ import { t } from './i18n';
 // iPads and school networks.
 import TeacherFooter from './ui/TeacherFooter';
 import { PreviewBanner } from './owner/DevCards';
+import DevDock from './owner/DevDock';
 import ErrorBoundary from './ui/ErrorBoundary';
 import HoverTips from './ui/HoverTips';
 const QuestionSetsPage = lazyPage(() => import('./teacher/QuestionSetsPage'));
@@ -305,6 +306,7 @@ export default function App() {
         <NavBar />
         <Supports />
         <PreviewBanner />
+        <DevDock />
         <NewPasswordGate />
         <HoverTips />
         <UiSounds />

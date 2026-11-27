@@ -133,7 +133,7 @@ export interface GameTheme {
   // Sharing beyond the teacher's own classes (teacher, 2026-10-25): sent to
   // the public gallery, where the owner reviews it before anyone sees it.
   // revise: sent back with the owner's notes (owner, 2026-11-27); the teacher fixes it and sends it again.
-  gallery?: { status: 'pending' | 'approved' | 'declined' | 'revise'; at: string; reason?: GalleryReason; note?: string };
+  gallery?: { status: 'pending' | 'approved' | 'declined' | 'revise'; at: string; reason?: GalleryReason; note?: string; by?: 'ai' | 'owner' };
   // Entered in the Theme Building Challenge, in one of its two tracks
   // (teacher, 2026-10-26): drawn by hand (needs a signed permission slip for
   // each student artist) or built in the Theme Builder studio.

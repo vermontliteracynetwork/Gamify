@@ -14,9 +14,10 @@ import { useReducedMotion } from '../ui/useReducedMotion';
 // Teacher and parent pages only, never student pages.
 const INK = '#1d1a33';
 const BITS: [number, number, string, number, 'dot' | 'tri' | 'bar' | 'star'][] = [
-  [4, 14, 'var(--color-pink)', -12, 'tri'], [18, 78, 'var(--color-sky)', 20, 'bar'], [36, 8, 'var(--color-teal)', 0, 'dot'],
-  [52, 86, 'var(--color-pink)', 30, 'star'], [64, 10, 'var(--color-grape)', -24, 'bar'], [78, 80, 'var(--color-kelly)', 10, 'tri'],
-  [90, 18, 'var(--color-sky)', 0, 'star'], [96, 64, 'var(--color-pink)', 0, 'dot'], [28, 50, 'var(--color-orange)', 45, 'dot'],
+  // Only along the edges, never over the words.
+  [1.5, 8, 'var(--color-pink)', -12, 'tri'], [2, 84, 'var(--color-sky)', 20, 'bar'], [40, 3, 'var(--color-teal)', 0, 'dot'],
+  [55, 92, 'var(--color-pink)', 30, 'star'], [70, 3, 'var(--color-grape)', -24, 'bar'], [82, 90, 'var(--color-kelly)', 10, 'tri'],
+  [97, 6, 'var(--color-sky)', 0, 'star'], [97.5, 88, 'var(--color-pink)', 0, 'dot'],
 ];
 
 export function saleLive(now = Date.now()) {

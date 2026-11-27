@@ -500,3 +500,7 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-27 (owner): portal stays clean with Gamify colors as accents on charts and visuals; theme approvals happen on a full preview screen with notes and Send for revisions.
 - 2026-11-27 (owner): her astrology lives on the portal Home as a card she can page through (day, week, month, year), with career and money steps for Gamify.
 - 2026-11-27 (owner): game pickers can be bare covers (no labels) that wiggle, freeze on hover and glow when picked; Classic crayon power-up art everywhere.
+- 2026-11-27 (owner): every to-do list item links to where it is done (SQL on GitHub); urgent pop-ups show on every portal visit until done or removed.
+- 2026-11-27 (owner): the astrology advisor speaks in short interpretive sentences with constellation line art.
+- 2026-11-27 (owner): the portal home counts question sets made by teachers (not her) with day/week/month/YTD/all; the theme review shows as a progression (AI approved, held for review, auto struck: rare, usually hold for review).
+- 2026-11-27 (owner): a floating magenta developer menu (double-click to open) for plan views on every page and pretend students in live games.
