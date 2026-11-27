@@ -36,3 +36,20 @@ export const STARTERS_IN_GAMES = false;
 
 // The starter themes a game can wear (Classic is added by themesFor).
 export const startersFor = (gameId: string) => (STARTERS_IN_GAMES ? STARTER_THEMES.filter((x) => x.gameId === gameId && x.id !== 'classic').map((x) => x.theme) : []);
+
+// Template looks to fill the Themes page to at least a full page of 25
+// (owner, 2026-11-27): one game at a time, a few palettes each, labeled as
+// Gamify templates. They show on the page only; games wear Classic.
+const PALETTES: [string, string, string, string][] = [
+  ['sunny', 'Sunny Day', '#ffd166', '#ffffff'], ['berry', 'Berry Pop', '#f055a5', '#fff1b8'], ['forest', 'Forest Walk', '#5fae6e', '#fff3a6'],
+  ['sky', 'Sky High', '#7cc8f0', '#ffffff'], ['grape', 'Grape Soda', '#6a45f0', '#fdfd94'], ['mint', 'Mint Chip', '#c8f0dc', '#ffffff'],
+];
+export function templateFill(gameIds: string[], need: number): StarterTheme[] {
+  const out: StarterTheme[] = [];
+  for (let k = 0; out.length < need && k < PALETTES.length * gameIds.length; k++) {
+    const g = gameIds[k % gameIds.length];
+    const [id, name, bg, accent] = PALETTES[Math.floor(k / gameIds.length) % PALETTES.length];
+    out.push(sample(`tpl-${g}-${id}`, name, g, 'all', 'Template', 200 + k, () => ({ colors: { background: bg, accent } as GameTheme['colors'] })));
+  }
+  return out;
+}

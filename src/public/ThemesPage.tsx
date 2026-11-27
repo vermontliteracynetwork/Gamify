@@ -15,7 +15,11 @@ import { buttonClasses } from '../ui/kit';
 import PillSelect from '../ui/PillSelect';
 import { SbHead, SbMain, SbMore, sbCard, sbPill, Words } from './scrapbookA';
 import PublicFooter from './PublicFooter';
-import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
+import { BANDS, STARTER_THEMES, templateFill, type Band, type StarterTheme } from '../theme/starters';
+import { classicTheme } from '../theme/classic';
+import { HOUSE_THEMES } from '../theme/house';
+
+const PAGE = 25;
 import { useScrapbookGround } from './scrapbook/Shell';
 
 type Sort = 'trending' | 'popular' | 'newest' | 'name';
@@ -69,12 +73,24 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
   // (on this device until cloud accounts share them with every teacher).
   const shared = made.filter((th) => th.source === 'library' || th.gallery?.status === 'approved');
   const library: StarterTheme[] = shared.map((th, i) => ({ id: th.id, name: th.name, gameId: th.gameId, band: 'all', interest: '', order: -100 + i, theme: th }));
-  const all = [...library, ...STARTER_THEMES];
-  const shown = all
+  // Every game's Classic first, then her library themes and approved class
+  // themes, then the starters, topped up with templates to a full page of 25
+  // (owner, 2026-11-27: "show all clasic themes ... and any others ive made
+  // ... min of 25 showing ... pages of 25").
+  const classics: StarterTheme[] = GAMES.map((g, i) => ({ id: `classic-${g.id}`, name: 'Classic', gameId: g.id, band: 'all', interest: '', order: -200 + i, theme: { ...classicTheme(g.id), id: `classic:${g.id}` } }));
+  const house: StarterTheme[] = HOUSE_THEMES.map((th, i) => ({ id: th.id, name: th.name, gameId: th.gameId, band: 'all', interest: '', order: -150 + i, theme: th }));
+  const base = [...classics, ...library, ...house, ...STARTER_THEMES.filter((x) => x.id !== 'classic')];
+  const all = [...base, ...templateFill(GAMES.map((g) => g.id), Math.max(0, PAGE - base.length))];
+  const [page, setPage] = useState(0);
+  useEffect(() => { setPage(0); }, [game, band, onlyFavs, q, sort]);
+  const filtered = all
     .filter((x) => (!game || x.gameId === game) && (!band || x.band === band || x.band === 'all') && (!onlyFavs || favorites.includes(x.theme.id)) && matches(x))
     // Plays, hearts and dates come with cloud accounts; until then the
     // samples keep their showcase order under every sort but Name.
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? b.order - a.order : a.order - b.order));
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE));
+  const pg = Math.min(page, pages - 1);
+  const shown = filtered.slice(pg * PAGE, pg * PAGE + PAGE);
   const gameName = (id: string) => GAMES.find((g) => g.id === id)?.name ?? id;
 
   return (
@@ -139,7 +155,11 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
             );
           })}
         </ul>
-        <p className="text-sm font-bold text-muted">{t('themes.note')}</p>
+        {pages > 1 && (
+          <nav aria-label={t('themes.pages')} className="flex flex-wrap items-center justify-center gap-2">
+            {Array.from({ length: pages }, (_, i) => <button key={i} type="button" aria-current={i === pg ? 'page' : undefined} onClick={() => { setPage(i); window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); }} className={sbPill(i === pg)}>{i + 1}</button>)}
+          </nav>
+        )}
     </div>
   );
 }

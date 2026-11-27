@@ -1806,6 +1806,7 @@ export const en = {
   'themes.challengePrize': 'Win a free year of Pro',
   'themes.challengeYours': 'Your class here?',
   'themes.challengeAsk': 'What will you design?',
+  'themes.pages': 'Theme pages',
   'themes.sort': 'Sort',
   'themes.filters': 'Filter and sort themes',
   'themes.sort.trending': 'Trending',

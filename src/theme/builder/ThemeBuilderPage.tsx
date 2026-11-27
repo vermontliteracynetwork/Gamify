@@ -33,6 +33,7 @@ import { listThemeRequests, removeThemeRequest } from '../requests';
 import { data as store } from '../../data';
 import { useAsync } from '../../data/hooks';
 import { LimitNote, UpgradeButton } from '../../billing/Upgrade';
+import { autoReview } from '../autoReview';
 
 const DrawStudio = lazyPage(() => import('./DrawStudio'));
 
@@ -683,7 +684,7 @@ function ShareTab({ theme, mine, tier, saved, problems, onChange }: { theme: Gam
       <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t('builder.shareTitle')}>
         <button type="button" role="radio" aria-checked={!inGallery} className={opt(!inGallery)} onClick={() => onChange({ ...theme, gallery: undefined, challenge: false })}>{t('builder.shareClass')}</button>
         {/* Entering the challenge is on by default when sharing (owner, 2026-11-26). */}
-        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready || !tags.length} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => onChange({ ...theme, gallery: { status: 'pending', at: new Date().toISOString() }, challenge: true })}>{t('builder.shareGallery')}</button>
+        <button type="button" role="radio" aria-checked={inGallery} disabled={!ready || !tags.length} className={`${opt(inGallery)} disabled:opacity-40`} onClick={() => { const r = autoReview(theme); onChange({ ...theme, gallery: { status: r.lane === 'approve' ? 'approved' : r.lane === 'strike' ? 'declined' : 'pending', at: new Date().toISOString(), by: r.lane === 'hold' ? undefined : 'ai', note: r.lane === 'hold' ? undefined : r.why, reason: r.lane === 'strike' ? 'other' : undefined }, challenge: r.lane !== 'strike' }); }}>{t('builder.shareGallery')}</button>
       </div>
       {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
         : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p>

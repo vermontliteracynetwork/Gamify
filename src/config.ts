@@ -125,6 +125,10 @@ export function billingSavings(tier: Exclude<Tier, 'free'>, b: Billing): number 
 // any plan, for subscriptions started before Jan 1, 2027. It does not renew:
 // the plan then renews at the standard price for the same length. Beta testers get their own offer instead (src/beta/spec.ts); the
 // two never stack. Applied with a Stripe promotion code once Stripe is set up.
+// Since 2026-11-27 (owner: "5% + 10% = 15%") the 10% comes off the standard
+// monthly price, so it adds to the length saving (yearly 20% + 10% = 30% off
+// the monthly price for the first term). Stripe needs an amount-off coupon per
+// plan and length to match (Waiting on you).
 export const LAUNCH_OFFER = {
   // Renamed from Founding Subscriber (owner, 2026-11-27: "no subscriber, think more cute about like first gamers sale").
   name: 'Player One Sale',

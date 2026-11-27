@@ -8,6 +8,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'sale-adds-up', kind: 'money', added: '2026-11-27', title: 'Player One Sale now adds up: confirm the new first-term prices',
+    why: 'You asked for 5% + 10% to read 15%. To keep the page true, the 10% now comes off the standard monthly price, so it adds to the length saving. First terms: Plus $7.20 a month, $20.40 for 3 months, $36.00 for 6 months, $67.20 a year; Pro $13.50, $38.25, $67.50, $126.00. That is a little more off than before (Plus yearly was $69.12).',
+    how: 'Say yes or no. When Stripe is set up, the sale needs an amount-off coupon for each plan and length (not one 10% coupon), so checkout matches the page.' },
   { id: 'early-access-game', kind: 'decide', added: '2026-11-27', title: 'Pick the first Pro early-access game',
     why: 'The chart promises Pro "All games, and early access". Early access is built: a game on the list in src/config.ts (EARLY_ACCESS_GAMES) opens to Pro first and shows locked on other plans. The list is empty, so nothing is early yet. The Game Lab games are the natural first picks, but they are on hold until you approve them.',
     how: 'Say which game opens to Pro first (for example a Game Lab game once approved), and for how long before everyone gets it.' },

@@ -437,3 +437,23 @@ want in the carosel and promotional otherwise."
     fails on the commit before today's work, so it is older): Share a join
     code starts a local game instead of the Waiting for Your Friend screen.
     To fix next.
+97. [x] **Homework student choices** (95): Create an Activity, Homework, "What
+    students choose": One game, one look / One game, a few themes (students
+    pick from the themes you choose) / Any game, any theme (a choice board of
+    every game they can play alone, due like homework).
+98. [x] **Pro early access** (78): EARLY_ACCESS_GAMES in src/config.ts opens a
+    game to Pro first; the first game is a Waiting on you decision.
+99. [x] **Automatic theme reviewer** (88): sharing a theme runs the three
+    lanes from the community guidelines: approve (clean name, own art),
+    hold for you (brands, characters, politics, costumes, photos, little
+    art), strike (clear slurs or sexual words only). Unit tests added.
+100. [ ] **Themes page** (owner): every game's Classic first, her library and
+    approved themes, the house and starter themes, topped up with templates to
+    at least 25, in pages of 25; the starter note is gone. The Quirky
+    Capybaras theme is still pending in her account: approve it in Gallery
+    review (it then shows here).
+101. [x] **Pricing lines and total** ("3 months 5% off", "Player One Sale 10%
+    off", the pill shows the sum): the sale now comes off the standard monthly
+    price so the sum is true (Waiting on you: confirm the prices).
+102. [ ] **Still open:** the Figma-guided portal pass (85), the design
+    reference audit (40), the Four in a Row two-device bug (96).
