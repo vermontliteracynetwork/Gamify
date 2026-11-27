@@ -512,3 +512,12 @@ describe the pain the teacher feels instead. Only list what ships today.
 | Accessibility free on every plan | Weak accessibility; features behind paywalls | Reciprocity; fairness; ADA Title II buying point | Features, Pricing | Live |
 | Live view of the whole class on one question | Teachers cannot see whole-class answers to one question live; question reports are paid | Formative assessment (Black and Wiliam); immediate feedback | Planned (teacher portal) | Mockup 2026-11-24 |
 | Keep editing after you cancel; clear billing reminders | No editing after cancelling; billing confusion and hard cancels | Endowment effect handled honestly; trust | Planned (billing) | Not built: needs Stripe |
+
+### Physical or digital, any medium (owner, 2026-11-27, whole team)
+
+Themes are never "drawn by hand" only. A big reason themes are made from
+photos is so classes can use 3D materials, found items and any art medium:
+paint, collage, clay, scrapbook paper, junk journal style, nature, recycled
+things and more. Every page, post, guide and agent says "create physically or
+design digitally" (or close to it), never "draw it by hand" or "draw on paper"
+alone. Promote the mediums.

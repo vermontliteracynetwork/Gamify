@@ -323,3 +323,16 @@ want in the carosel and promotional otherwise."
     frame with a bobbing trophy, the Win lifetime Pro chip and See the
     challenge. Built; to check. (Her "change this setting" is read as this
     section; to confirm.)
+68. [ ] **Physical or digital, everywhere** (owner to the whole team: "We are
+    not saying that it needs to be drawn by hand ... the language everywhere
+    says like something like create physically or design digitally"): every
+    "drawn by hand" / "draw on paper" line rewritten with the mediums (paint,
+    collage, clay, scrapbook paper, junk journal, found objects, nature);
+    rule stored in CLAUDE.md, the marketing bible, the Design Chair and
+    teacher preferences. Built.
+69. [ ] **Challenge months** ("should not have the tag shown ... a cover image
+    above the cards ... auto cycles ... When you click on each card, it
+    should show on another page all of the submissions for that month ...
+    easy to vote"): month cards with cycling covers open /challenge/:tag; the
+    vote page drops the tags, has big numbered heart Vote buttons and a send
+    bar that sticks to the bottom. Built; to check.

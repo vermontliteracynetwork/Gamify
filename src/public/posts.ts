@@ -161,19 +161,19 @@ export const POSTS: Post[] = [
   {
     slug: 'design-a-theme-as-a-class',
     title: 'Design a Theme as a Class, Then Play Fractions',
-    summary: 'Every student draws one piece of the game. The class photographs the pages, and the game wears their art the same day.',
+    summary: 'Every student makes one piece of the game, with any materials. The class photographs the pieces, and the game wears their art the same day.',
     cover: 'game-show',
     grades: 'K-8',
     minutes: 45,
     body: [
-      'Kids care about a game more when they made part of it. The Theme Builder turns that into a lesson plan: print the template, hand each student a page, and let them design one piece of the game, like a card back, a team picture or the background.',
-      'When the drawings are done, take a photo of each page with an iPad or phone. Gamify finds the outline on every page, straightens it, and cuts out the drawing, so the pieces drop into place without any cropping by hand.',
+      'Kids care about a game more when they made part of it. The Theme Builder turns that into a lesson plan: print the template, hand each student a page, and let them create one piece of the game with any materials (paint, collage, clay, scrapbook paper, found objects or leaves), or design it digitally, like a card back, a team picture or the background.',
+      'When the pieces are done, take a photo of each one with an iPad or phone. Gamify finds the outline on every page, straightens it, and cuts out the art, so the pieces drop into place without any cropping by hand.',
       'Then play. We like pairing a new theme with a fractions set in Game Show: teams pick a card, tap the right answer, and the card turns over to show points. The art on every card is theirs, and you will hear about it.',
       'The theme is credited to your username, and you can add the designer\'s first name or a nickname, never a full name.',
     ],
     tryIt: [
       'Open Theme Builder, pick Game Show, and print the template.',
-      'Give each student one page and 15 minutes to draw inside the outline.',
+      'Give each student one page and 15 minutes to make their piece inside the outline, in any material.',
       'Photograph the pages and add them on the Upload tab.',
       'Type a theme name and your class name, then save.',
       'Start Game Show with a fractions set and pick your new theme.',

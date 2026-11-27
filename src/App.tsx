@@ -62,6 +62,7 @@ const OwnerPage = lazyPage(() => import('./owner/OwnerPage'));
 const FeaturesPage = lazyPage(() => import('./public/FeaturesPage'));
 const ThemesPage = lazyPage(() => import('./public/ThemesPage'));
 const ChallengePage = lazyPage(() => import('./public/ChallengePage'));
+const ChallengeMonthPage = lazyPage(() => import('./public/ChallengeMonthPage'));
 const BetaPage = lazyPage(() => import('./public/BetaPage'));
 const BetaApplyPage = lazyPage(() => import('./public/BetaApplyPage'));
 const AffiliatesPage = lazyPage(() => import('./public/AffiliatesPage'));
@@ -142,6 +143,7 @@ function AnimatedRoutes() {
           <Route path="/themes" element={<ThemesPage />} />
           <Route path="/challenge" element={<ChallengePage />} />
           <Route path="/challenge/permission" element={<PermissionSlip />} />
+          <Route path="/challenge/:tag" element={<ChallengeMonthPage />} />
           <Route path="/accessibility/report" element={<ConformanceReport />} />
           <Route path="/status" element={<StatusPage />} />
           <Route path="/beta" element={<BetaPage />} />

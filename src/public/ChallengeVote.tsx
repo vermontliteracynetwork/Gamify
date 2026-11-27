@@ -9,7 +9,7 @@ import { useTeacher } from '../auth/session';
 import { creditLine } from '../theme/credit';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { useMadeThemes } from '../theme/made';
-import { SPECIAL_DAYS, challengeEntries, closeDate, isOpen, nextOpenDay, tagLabel, winnerAt, winnerDate } from '../theme/tags';
+import { SPECIAL_DAYS, challengeEntries, closeDate, isOpen, nextOpenDay, winnerAt, winnerDate } from '../theme/tags';
 import { MAX_PICKS, castVote, tally, topTen, useVotes, useWinners, votedToday } from '../theme/votes';
 import { Crown } from '@phosphor-icons/react';
 import { Button, Tabs, buttonClasses } from '../ui/kit';
@@ -23,8 +23,12 @@ const month = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('
 // The ongoing public vote (owner, 2026-11-26): one tab per special day, its
 // ideas and tags, and every approved entry for that month, sortable and
 // filterable by tag. Visitors pick a top 3 a day; teachers can add a class vote.
-export default function ChallengeVote() {
-  const [tab, setTab] = useState(nextOpenDay().tag);
+// One month's page (owner, 2026-11-27): /challenge/:tag shows every entry for
+// that month, easy to look at and easy to vote: no tags shown, big Vote
+// buttons, and the send bar stuck to the bottom while picks are made.
+export default function ChallengeVote({ tag }: { tag?: string }) {
+  const [tab, setTab] = useState(tag ?? nextOpenDay().tag);
+  useEffect(() => { if (tag) setTab(tag); }, [tag]);
   const d = SPECIAL_DAYS.find((x) => x.tag === tab) ?? SPECIAL_DAYS[0];
   const { themes } = useMadeThemes();
   const { store, setStore } = useVotes();
@@ -34,16 +38,13 @@ export default function ChallengeVote() {
   const [classId, setClassId] = useState('');
   const [picks, setPicks] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>('votes');
-  const [filter, setFilter] = useState('');
   useEffect(() => { if (teacher) void data.listClassrooms().then(setClasses).catch(() => setClasses([])); }, [teacher]);
-  useEffect(() => { setPicks([]); setFilter(''); }, [tab]);
+  useEffect(() => { setPicks([]); }, [tab]);
 
   const open = isOpen(d);
   const counts = tally(store, d.tag);
   const entries = challengeEntries(themes, d).filter((th) => th.gallery?.status === 'approved')
-    .filter((th) => !filter || (th.tags ?? []).includes(filter))
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? (b.gallery?.at ?? '').localeCompare(a.gallery?.at ?? '') : (counts[b.id] ?? 0) - (counts[a.id] ?? 0)));
-  const dayTags = [d.tag, ...d.keywords];
   // After 12:00 am Eastern on the day: the winner, then the rest of the top 10.
   const all = challengeEntries(themes, d).filter((th) => th.gallery?.status === 'approved');
   const winner = Date.now() >= winnerAt(d).getTime() ? all.find((th) => th.id === winners[d.tag]) : undefined;
@@ -58,8 +59,8 @@ export default function ChallengeVote() {
     <section aria-labelledby="vote" className="grid gap-4">
       <h2 id="vote" className="title-bubble text-4xl"><Title text={t('vote.title')} /></h2>
       <p className="text-lg font-semibold max-w-3xl">{t('vote.sub')}</p>
-      <Tabs label={t('vote.months')} value={tab} onChange={setTab} size="sm" className="mb-0" panelIds
-        options={SPECIAL_DAYS.map((x) => ({ id: x.tag, label: month(x.date) }))} />
+      {!tag && <Tabs label={t('vote.months')} value={tab} onChange={setTab} size="sm" className="mb-0" panelIds
+        options={SPECIAL_DAYS.map((x) => ({ id: x.tag, label: month(x.date) }))} />}
 
       <div id={`panel-${d.tag}`} role="tabpanel" aria-labelledby={`tab-${d.tag}`} className="grid gap-4">
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-4">
@@ -71,16 +72,10 @@ export default function ChallengeVote() {
             <ul className="grid gap-1 pl-6 m-0 list-disc font-semibold">{d.ideas.map((x) => <li key={x}>{x}</li>)}</ul>
           </article>
           <article className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
-            <p className="font-bold">{t('vote.tagsWeUse')}</p>
-            <ul className="flex flex-wrap gap-2 list-none p-0 m-0">
-              {dayTags.map((id) => (
-                <li key={id}><button type="button" aria-pressed={filter === id} onClick={() => setFilter(filter === id ? '' : id)}
-                  className={`min-h-11 px-3 rounded-pill border-std font-bold text-sm hover-pop ${filter === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{tagLabel(id)}</button></li>
-              ))}
+            <ul className="grid gap-2 list-none p-0 m-0 font-bold">
+              <li>{t('vote.closes', { date: day(closeDate(d)) })}</li>
+              <li>{t('vote.winner', { date: day(winnerDate(d)) })}</li>
             </ul>
-            <p className="text-sm font-semibold">{t('vote.howToEnter', { name: d.name })}</p>
-            <p className="text-sm font-bold">{t('vote.closes', { date: day(closeDate(d)) })}</p>
-            <p className="text-sm font-bold">{t('vote.winner', { date: day(winnerDate(d)) })}</p>
             <Link to="/teacher/themes" className={buttonClasses('main', 'justify-self-start min-h-12 px-5 hover-pop')}>{t('vote.enter')}</Link>
           </article>
         </div>
@@ -111,7 +106,7 @@ export default function ChallengeVote() {
         </div>
 
         {entries.length === 0 ? (
-          <p className="font-bold">{filter ? t('vote.noneTag') : t('vote.none', { name: d.name })}</p>
+          <p className="font-bold">{t('vote.none', { name: d.name })}</p>
         ) : (
           <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 list-none p-0 m-0">
             {entries.map((th) => {
@@ -122,15 +117,14 @@ export default function ChallengeVote() {
                   <div className="grid gap-0.5 px-1">
                     <h4 className="font-heading font-bold text-xl leading-tight">{th.name}</h4>
                     <p className="text-sm font-semibold text-muted">{gameName(th.gameId)} · {creditLine(th)}</p>
-                    <p className="text-xs font-bold">{(th.tags ?? []).map(tagLabel).join(', ')}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{t('vote.points', { count: counts[th.id] ?? 0 })}</span>
                     <span className="flex-1" />
                     {open && (
                       <button type="button" aria-pressed={on} onClick={() => pick(th.id)} disabled={!on && picks.length >= MAX_PICKS}
-                        className={`min-h-11 px-4 rounded-pill border-std border-border font-bold text-sm inline-flex items-center gap-1.5 hover-pop disabled:opacity-40 ${on ? 'bg-blush' : 'bg-surface'}`}>
-                        <Heart weight={on ? 'fill' : 'bold'} size={18} aria-hidden="true" />{t(on ? 'vote.picked' : 'vote.pick')}
+                        className={`min-h-12 px-5 rounded-pill border-std border-border font-bold inline-flex items-center gap-2 hover-pop disabled:opacity-40 ${on ? 'bg-pink text-white' : 'bg-surface'}`} style={{ boxShadow: '0 3px 0 var(--ink)' }}>
+                        <Heart weight={on ? 'fill' : 'bold'} size={22} aria-hidden="true" />{on ? `${picks.indexOf(th.id) + 1}` : t('vote.pick')}
                       </button>
                     )}
                   </div>
@@ -141,7 +135,7 @@ export default function ChallengeVote() {
         )}
 
         {open ? (
-          <div className={`${card} sm:grid-cols-[1fr_auto] items-center`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <div className={`${card} sm:grid-cols-[1fr_auto] items-center sticky bottom-3 z-20 !bg-butter`} style={{ boxShadow: 'var(--shadow-sticker-lg)' }}>
             <p className="font-bold" role="status">{voted ? t('vote.thanks') : t('vote.picks', { count: picks.length, max: MAX_PICKS })}</p>
             <Button variant="primary" disabled={voted || !picks.length} onClick={async () => { setStore(await castVote(d.tag, picks)); setPicks([]); }}>
               <CheckCircle weight="bold" size={20} />{t('vote.cast')}

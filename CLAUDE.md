@@ -84,6 +84,15 @@ briefly; never invented. The Design Chair always adds the psychology
 (concepts, facts, research, methods) and concrete UI/UX advice. The rule
 block lives at the end of each file in `.claude/agents/`.
 
+## Physical or digital, any medium (owner, 2026-11-27, whole team)
+
+Themes are never "drawn by hand" only. A big reason themes are made from
+photos is so classes can use 3D materials, found items and any art medium:
+paint, collage, clay, scrapbook paper, junk journal style, nature, recycled
+things and more. Every page, post, guide and agent says "create physically or
+design digitally" (or close to it), never "draw it by hand" or "draw on paper"
+alone. Promote the mediums.
+
 ## Design system
 
 `docs/design-system.md` is the look of every menu and teacher page: the
