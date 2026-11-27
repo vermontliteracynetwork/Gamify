@@ -1,3 +1,5 @@
+import DashEmpty from './DashEmpty';
+import { CloudSlash, HourglassMedium, Ticket } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Eye, X } from '@phosphor-icons/react';
 import { PRICES_USD_PER_YEAR, TIERS, type Tier } from '../config';
@@ -36,7 +38,7 @@ const money = (n: number) => `$${Math.round(n).toLocaleString()}`;
 const PAID: Exclude<Tier, 'free'>[] = ['homeschool', 'plus', 'pro'];
 
 export function SubsCard({ stats, problem }: { stats: OwnerStats | null; problem: string }) {
-  if (!stats) return <p className="font-semibold">{problem || t('owner.loading')}</p>;
+  if (!stats) return <DashEmpty text={problem || t('owner.loading')} icon={problem ? CloudSlash : HourglassMedium} />;
   const yearly = PAID.reduce((n, k) => n + (stats.tiers[k] ?? 0) * PRICES_USD_PER_YEAR[k], 0);
   const tiles: [string, number | string][] = [
     [t('owner.plan.free'), stats.tiers.free ?? 0], [t('owner.plan.homeschool'), stats.tiers.homeschool ?? 0],
@@ -125,7 +127,7 @@ export function AccessCard() {
   }
   const field = fieldClasses('md');
   const plans = ['plus', 'pro', 'homeschool'] as const;
-  if (problem) return <p className="font-semibold">{problem}</p>;
+  if (problem) return <DashEmpty text={problem} icon={Ticket} />;
   return (
     <div className="grid gap-4">
       <div className="grid gap-2">

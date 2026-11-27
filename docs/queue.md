@@ -506,4 +506,10 @@ want in the carosel and promotional otherwise."
     (Castle Quest) are gone because Tornado moved other players. "How often"
     is gone from the Theme Builder; teachers switch power-ups on or off in
     the game menus.
-112. [ ] **Figma-guided portal pass** (85) is next.
+112. [x] **Portal pass, first round** (85): every portal page checked on
+    screen. Pages now fit their content (no tall empty white box), and empty
+    or waiting pages (Subscriptions, Growth chart, Access codes, CEO Agent,
+    Tell Gamify reports, Gallery review) show an icon and one bold line in a
+    short card. The "1 to 3 more themes" checklist no longer says "age bands"
+    (themes are never for one grade). Next round: Marketing and Agent team are
+    dense lists to turn into cards.

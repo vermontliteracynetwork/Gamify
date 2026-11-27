@@ -1,3 +1,4 @@
+import DashEmpty from './DashEmpty';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -184,7 +185,7 @@ function FeedbackCard() {
           </button>
         ))}
       </div>
-      {shown.length === 0 && <p className="font-semibold">{t('owner.noFeedback')}</p>}
+      {shown.length === 0 && <DashEmpty text={t('owner.noFeedback')} icon={ChatCircleDots} />}
       <ul className="grid gap-2 list-none p-0 m-0 max-h-96 overflow-y-auto">
         {shown.map((r) => {
           const m = meta[r.id] ?? { status: 'new', social: false };
@@ -355,7 +356,7 @@ function GalleryCard() {
       )}
     </div>
   );
-  if (!pending.length) return <div className="grid gap-3">{dayPanel}<p className="font-semibold">{t('owner.galleryNone')}</p></div>;
+  if (!pending.length) return <div className="grid gap-3">{dayPanel}<DashEmpty text={t('owner.galleryNone')} icon={PaintBrush} /></div>;
   return (
     <div className="grid gap-3">{dayPanel}
     <ul className="grid gap-3 list-none p-0 m-0">

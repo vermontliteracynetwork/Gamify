@@ -15,7 +15,7 @@ const perGame = (prefix: string, label: (name: string) => string, to: (id: strin
 export const FOCUS_LISTS: FocusList[] = [
   { id: 'final', title: 'Final check before release', why: 'Play each game start to finish on iPad and laptop.', items: perGame('final', (n) => n, (id) => `/games/${id}`) },
   { id: 'classic', title: 'Approve each Classic theme', why: 'Look at the Classic look of each game and approve it.', items: perGame('classic', (n) => n, (id) => `/blog/themes/${id}`) },
-  { id: 'extra', title: '1 to 3 more themes per game', why: 'Different styles: physical art, digital, age bands.', items: GAMES.flatMap((g) => [1, 2, 3].map((k) => ({ id: `extra:${g.id}:${k}`, label: `${g.name}: theme ${k}${k > 1 ? ' (optional)' : ''}`, to: `/owner/themes/${g.id}` }))) },
+  { id: 'extra', title: '1 to 3 more themes per game', why: 'Different styles and mediums: paint, collage, clay, found things, digital. Never for one grade.', items: GAMES.flatMap((g) => [1, 2, 3].map((k) => ({ id: `extra:${g.id}:${k}`, label: `${g.name}: theme ${k}${k > 1 ? ' (optional)' : ''}`, to: `/owner/themes/${g.id}` }))) },
   { id: 'training', title: 'Student training', why: 'What students learn on day one.', items: [
     { id: 'training:join', label: 'Joining with a code and tapping their name', to: '/beta-kit' },
     { id: 'training:play', label: 'Answering, power-ups and turns', to: '/blog' },

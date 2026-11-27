@@ -1,3 +1,4 @@
+import DashEmpty from './DashEmpty';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowSquareOut, Crown, PaperPlaneRight } from '@phosphor-icons/react';
@@ -88,10 +89,10 @@ export default function CeoCard() {
 
   if (view.k !== 'ready') {
     const msg: Record<string, StringKey> = { loading: 'owner.loading', offline: 'ceo.offline', owner: 'ceo.ownerOnly' };
-    return <section className="dash-card"><p className="dash-empty">{t(msg[view.k])}</p></section>;
+    return <section className="dash-card"><DashEmpty text={t(msg[view.k])} icon={Crown} /></section>;
   }
   const s = view.s;
-  if (!s.configured) return <section className="dash-card"><p className="dash-empty">{t('ceo.notConfigured')}</p></section>;
+  if (!s.configured) return <section className="dash-card"><DashEmpty text={t('ceo.notConfigured')} icon={Crown} /></section>;
   const live = new Set((s.departments ?? []).map((d) => d.department));
   const count = (s.departments ?? []).reduce((n, d) => n + d.agents.length, 0);
 

@@ -1,3 +1,5 @@
+import DashEmpty from './DashEmpty';
+import { ChartLineUp } from '@phosphor-icons/react';
 import { Bar, BarChart, XAxis } from 'recharts';
 import { t } from '../i18n';
 import { AXIS, BAR, ChartContainer, ChartTooltip, ChartTooltipContent, useChartAnimate, type ChartConfig } from '../ui/chart';
@@ -7,7 +9,7 @@ import type { OwnerStats } from './DevCards';
 // Its own file so Recharts stays out of the main bundle (App imports
 // DevCards for the preview banner).
 export function GrowthChartCard({ stats, problem, height = 150 }: { stats: OwnerStats | null; problem: string; height?: number }) {
-  if (!stats) return <p className="font-semibold">{problem || t('owner.loading')}</p>;
+  if (!stats) return <DashEmpty text={problem || t('owner.loading')} icon={ChartLineUp} />;
   return (
     <div className="grid gap-4">
       <WeekBars title={t('owner.chartSignups')} rows={stats.signups} color="var(--chart-1)" height={height} />
