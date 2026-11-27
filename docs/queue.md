@@ -479,3 +479,12 @@ want in the carosel and promotional otherwise."
     me to move the card"): the button stays put and becomes the close button;
     the menu hangs above it; drag the button or the menu's top bar to move both.
 106. [x] **Sticky note solid light yellow.**
+107. [x] **Create an Activity: game second** (owner): who, game, how, questions,
+    start; ways the picked game can't play show "Not in this game"; the
+    choice board picks its games on the How step, starting with the game.
+108. [ ] **Theme Builder at big sizes** ("the shift from laptop to big screen
+    sizing ... easier to navigate. specifically the previews"): the builder
+    uses the full width on big screens (up to 112rem), the preview gets more
+    room on very wide screens, and the tiny dots under the preview are now
+    named buttons (Game, Team icons, Power-ups, board sizes) that jump to that
+    screen. Checked at 1190x540, 1280x800, 1920x1080 and 2560x1440.

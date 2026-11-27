@@ -841,6 +841,7 @@ export const en = {
   'builder.colorOpen': '{name}: double-tap to change the color',
   'builder.colorPick': 'Pick the {name} color',
   'builder.colorDone': 'Done',
+  'builder.views': 'Preview screens',
   'builder.prevView': 'Show the screen before',
   'builder.nextView': 'Show the next screen',
   'builder.filled': '{filled} of {total} pictures added. Anything left empty keeps the Classic look.',

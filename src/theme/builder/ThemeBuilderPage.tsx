@@ -64,7 +64,7 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
     // the preview and the tabs share the space left under the menu.
     // The editor's own bar is the only bar (approved /brand Theme Builder,
     // 2026-11-25), so the site bar steps aside (`solo-bar`).
-    <main className={`max-w-7xl mx-auto px-4 sm:px-6 ${game ? 'solo-bar w-full pt-3 pb-4 h-dvh flex flex-col' : 'pt-4 pb-6'}`}>
+    <main className={`mx-auto px-4 sm:px-6 ${game ? 'max-w-[min(112rem,100%)] solo-bar w-full pt-3 pb-4 h-dvh flex flex-col' : 'max-w-7xl pt-4 pb-6'}`}>
       {/* The owner sees exactly what teachers see (owner, 2026-11-27: "needs to be the exact same as what users are seeing"); only where her themes save differs (the Gamify library). */}
       {!game && <div className="shrink-0"><TeacherNav /></div>}
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
@@ -332,7 +332,7 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
         </>}
       </div>
 
-      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+      <div className="flex-1 min-h-0 grid gap-4 lg:gap-6 grid-rows-[minmax(0,0.38fr)_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
         {/* The preview, as big as the space allows, with arrows that turn
             between the screens the pieces show up on (teacher, 2026-11-18:
             no Game / Power-ups buttons, no count line). */}
@@ -341,13 +341,16 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
           <div className="flex-1 min-w-0 grid justify-items-center">
             {/* The dots hang under the preview, so the preview itself sits in
                 the middle and the panel beside it can match its height. */}
-            <div ref={previewBox} className="relative w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 3 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} />
+            <div ref={previewBox} className="relative w-full" style={{ maxWidth: `calc((100cqh - ${views.length > 1 ? 3.75 : 0}rem) * 4 / 3)` }}><ThemePreview theme={draft} gameName={game.name} view={view} />
             {views.length > 1 && (
-              <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 flex items-center gap-1.5" role="status" aria-label={views.find((v) => v.id === view)?.label}>
-                {views.map((v) => <span key={v.id} aria-hidden="true" className={`w-2.5 h-2.5 rounded-full border-thin border-border ${v.id === view ? 'bg-butter' : 'bg-surface'}`} />)}
-                {/* Board sizes say which size is showing. */}
-                {view.startsWith('size:') && <span aria-hidden="true" className="ml-1 font-bold text-xs leading-none whitespace-nowrap">{views.find((v) => v.id === view)?.label}</span>}
-              </span>
+              // Named screens under the preview, tap one to jump to it (owner, 2026-11-27:
+              // "easier to navigate. specifically the previews"); replaces the tiny dots.
+              <div className="absolute left-0 right-0 top-full mt-2 flex flex-wrap justify-center gap-1.5" role="group" aria-label={t('builder.views')}>
+                {views.map((v) => (
+                  <button key={v.id} type="button" aria-pressed={v.id === view} onClick={() => setView(v.id)}
+                    className={`min-h-8 px-3 rounded-pill border-std text-xs font-bold whitespace-nowrap hover-pop ${v.id === view ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>{v.label}</button>
+                ))}
+              </div>
             )}
             </div>
           </div>
