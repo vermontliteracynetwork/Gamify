@@ -217,9 +217,8 @@ function ThemesShowcase() {
           </AnimatePresence>
         </div>
         <div className="bg-paper border-t-[3px] lg:border-t-0 lg:border-l-[3px] border-border p-6 sm:p-8 grid content-center gap-4">
-          <p className="font-display text-[2.4rem] sm:text-[3rem] leading-[0.95] uppercase m-0">{x.name}</p>
+          <p className="title-bubble normal-case text-[clamp(1.9rem,3.6vw,3rem)] leading-[0.95] m-0 line-clamp-2"><Title text={x.name} /></p>
           <p className="flex flex-wrap gap-2 m-0">
-            <span className="rounded-pill bg-butter border-std border-border px-3 min-h-9 inline-flex items-center font-bold">{t(`features.band.${x.band}` as StringKey)}</span>
             <span className="rounded-pill bg-lavender border-std border-border px-3 min-h-9 inline-flex items-center font-bold">{game}</span>
           </p>
           <ul className="list-none m-0 p-0 grid grid-cols-6 gap-2" aria-label={t('public.themesPick')}>

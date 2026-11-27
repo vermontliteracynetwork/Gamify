@@ -63,10 +63,10 @@ export const TEAM: TeamAgent[] = [
     needsYou: [{ text: 'Read the Vermont reminders and tell me which steps are already done', link: '/owner?s=ceo' }],
   },
   {
-    id: 'affiliate-advisor', name: 'Affiliate Program Advisor', role: 'Affiliate and creator partner programs: terms, language, FTC and platform rules, vetting, payouts, expectations', file: '.claude/agents/affiliate-advisor.md', color: '#f7c873',
+    id: 'affiliate-advisor', name: 'Affiliate Program Chair', role: 'Runs the affiliate program (owner, 2026-11-27): research, terms, terms, language, FTC and platform rules, vetting, payouts, expectations', file: '.claude/agents/affiliate-advisor.md', color: '#f7c873',
     status: 'waiting', updated: '2026-11-25', reportsTo: CEO_ID,
-    workingOn: ['Affiliate program built: /affiliates apply page, referral links and codes, Affiliates page in the Developer Portal, payouts into Books', 'Plan and vetting checklist: docs/affiliate-program.md', 'In the CEO Agent chat: @affiliate_advisor'],
-    needsYou: [{ text: 'Approve or change the affiliate terms (25% of the first 12 months, 60-day window, $25 minimum)', link: '/owner?s=affiliates' }],
+    workingOn: ['Researched 20 affiliate programs (13 education or family): docs/affiliate-research.md', 'Affiliate program built: /affiliates apply page, referral links and codes, Affiliates page in the Developer Portal, payouts into Books', 'Plan and vetting checklist: docs/affiliate-program.md', 'In the CEO Agent chat: @affiliate_advisor'],
+    needsYou: [{ text: 'Pick the commission after the research (recommended: 25% of the first 12 months, never lifetime)', link: '/owner?s=affiliates' }, { text: 'Name the payout tool (you chose a tool; recommended: in-house Stripe codes for the first 10 to 20 partners, then a tool)' }],
   },
   {
     id: 'astrology-advisor', name: 'Astrology Advisor', role: 'Private: your natal chart and real planetary timing turned into career and money advice for Gamify', file: '.claude/agents/astrology-advisor.md', color: '#8c7ae6',

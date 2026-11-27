@@ -8,6 +8,9 @@
 export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
+  { id: 'affiliate-decide', kind: 'decide', added: '2026-11-27', title: 'Affiliates: 5 decisions from the research',
+    why: 'The Affiliate Program Chair compared 20 programs (docs/affiliate-research.md). Education subscriptions pay 20 to 25%, usually for the first year; lifetime deals are being cut back. You chose: teachers with a following plus refer-a-friend for every teacher (and "something else": who?), 10% off for followers, and a payout tool. The page now shows the details.',
+    how: 'Answer in chat: 1) 25% for 12 months (recommended) or 30%? 2) No commission when the affiliate\'s own school buys (recommended yes)? 3) What counts as "active" for free Pro? 4) Paid ads on the Gamify name: never, or with written OK? 5) The refer-a-friend reward (for example a free month for both)? And who else can join ("something else").' },
   { id: 'sale-adds-up', kind: 'money', added: '2026-11-27', title: 'Player One Sale now adds up: confirm the new first-term prices',
     why: 'You asked for 5% + 10% to read 15%. To keep the page true, the 10% now comes off the standard monthly price, so it adds to the length saving. First terms: Plus $7.20 a month, $20.40 for 3 months, $36.00 for 6 months, $67.20 a year; Pro $13.50, $38.25, $67.50, $126.00. That is a little more off than before (Plus yearly was $69.12).',
     how: 'Say yes or no. When Stripe is set up, the sale needs an amount-off coupon for each plan and length (not one 10% coupon), so checkout matches the page.' },
@@ -46,7 +49,7 @@ export const WAITING: WaitingItem[] = [
     how: 'Open /owner, Affiliates, read the terms (and docs/affiliate-program.md), then say yes or change a number. Also pick how you pay affiliates: PayPal, bank transfer, or a paid affiliate tool (a money decision).' },
   { id: 'affiliate-legal', kind: 'legal', added: '2026-11-25', title: 'Affiliates: attorney writes the agreement; accountant on W-9s and 1099s',
     why: 'Gamify can be held responsible for what affiliates post (FTC Endorsement Guides), so every affiliate signs an agreement with the disclosure rules, approved claims and how pay and ending work. Payments need a W-9 first, and 1099-NEC forms above the IRS threshold (it changed for 2026; the accountant confirms the number). The privacy policy needs a line about referral codes.',
-    how: 'Add to the attorney list: the affiliate agreement and program terms, and the privacy policy line. Ask the accountant: W-9 before the first payout, the 1099-NEC threshold, and how commissions are booked.' },
+    how: 'Add to the attorney list: the affiliate agreement and program terms, and the privacy policy line; whether a public-school teacher may take a commission when their own school or district buys; and the commission hold tied to the refund policy. Ask the accountant: W-9 before the first payout, the 1099-NEC threshold, and how commissions are booked.' },
   { id: 'tester-account', kind: 'setup', added: '2026-11-26', title: 'Make the payment-waived Pro test account',
     why: 'A tester gets the top plan (Pro, payment waived) with a starting password and must make their own on first sign-in.',
     how: 'Supabase: run supabase/migrations/0016_new_password.sql; Authentication, Users, Add user (email, the starting password, Auto Confirm on); then run supabase/tester_account.sql.' },

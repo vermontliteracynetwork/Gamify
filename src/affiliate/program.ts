@@ -17,11 +17,14 @@ export const AFFILIATE = {
   followerOffer: 0.1,    // followers get 10% off their first term (never stacked with another sale)
   minFollowers: 1000,    // or a smaller community that is clearly engaged (a group, a newsletter)
   proWhileActive: true,  // affiliates get Pro free while they are active, and say so in posts
+  referAFriend: true,    // owner 2026-11-27: every Gamify teacher also gets a refer-a-friend link (reward to decide)
 };
 
 // What one paid customer earns an affiliate, for the public page and the math.
 export function commission(plan: 'plus' | 'pro' | 'homeschool', billing: 'month' | 'year'): number {
-  const paid = billing === 'year' ? PRICES_USD[plan].year : PRICES_USD[plan].month * AFFILIATE.months;
+  // On what the customer actually pays, after the follower offer on the first term (research, 2026-11-27).
+  const first = billing === 'year' ? PRICES_USD[plan].year : PRICES_USD[plan].month;
+  const paid = billing === 'year' ? first * (1 - AFFILIATE.followerOffer) : first * (1 - AFFILIATE.followerOffer) + PRICES_USD[plan].month * (AFFILIATE.months - 1);
   return Math.round(paid * AFFILIATE.rate * 100) / 100;
 }
 

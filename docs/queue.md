@@ -457,3 +457,14 @@ want in the carosel and promotional otherwise."
     price so the sum is true (Waiting on you: confirm the prices).
 102. [ ] **Still open:** the Figma-guided portal pass (85), the design
     reference audit (40), the Four in a Row two-device bug (96).
+103. [ ] **Affiliate program** (owner: "add a page for the affiliate program
+    where itll have all the details. research ... a minimum of 10 companies
+    ... we need to have a chair in charge"): the Affiliate Program Chair
+    (was the Advisor) compared 20 programs in docs/affiliate-research.md
+    (every figure from search summaries; outside pages were blocked, so each
+    number is to confirm on the live page). /affiliates now has The details
+    (commission on what the customer pays, window, hold, payouts through a
+    tool, follower 10%, free Pro), the stricter rules, and Refer a friend.
+    Her answers: decide pay after research; teachers with a following, every
+    teacher by refer-a-friend, and "something else" (to ask); 10% for
+    followers; a payout tool. Five decisions in Waiting on you.

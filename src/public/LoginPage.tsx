@@ -99,7 +99,6 @@ export default function LoginPage() {
         <h1 className="title-bubble text-4xl sm:text-5xl text-center whitespace-nowrap"><Title text={mode === 'signup' ? t('login.signupTitle') : t('login.title')} /></h1>
         <Tabs fill className="mb-0" label={t('login.tabs')} value={mode} onChange={(m) => { setMode(m); setProblems([]); setWrong(false); }} options={[{ id: 'login', label: t('login.tab.login') }, { id: 'signup', label: t('login.tab.signup') }]} />
         <form className="grid gap-3" onSubmit={(e) => void submit(e)} noValidate>
-          <p className="font-semibold text-lg leading-snug">{t('login.forTeachers')}</p>
           {!cloudOn && <p className="text-sm font-semibold bg-surface-2 rounded-input p-3 border-std border-border-soft">{t('login.localNote')}</p>}
           {mode === 'signup' && (
             <label className="grid gap-1 font-bold">{t('login.email')}
@@ -131,11 +130,10 @@ export default function LoginPage() {
           {wrong && <p className="font-bold text-error" role="alert">{t('login.wrong')}</p>}
           {note && <p className={`font-bold ${note === 'checkEmail' ? '' : 'text-error'}`} role={note === 'checkEmail' ? 'status' : 'alert'}>{t(`login.${note}`)}</p>}
           <Button type="submit" disabled={busy} variant="go" className="min-h-14 text-lg hover-pop">{mode === 'signup' ? t('login.create') : t('login.tab.login')}</Button>
+          {/* Students: one magenta button the size of Log in, right under it (owner, 2026-11-27). */}
+          <Link to="/join" className={buttonClasses('main', 'min-h-14 hover-pop justify-center !bg-[#c2185b] !text-white no-underline font-score !text-2xl')}>{t('login.joinGame')}</Link>
           {mode === 'login' && <button type="button" onClick={() => setMode('signup')} className="font-bold underline justify-self-center min-h-11">{t('login.noAccount')}</button>}
         </form>
-        {/* Students: the quiet line from the mockup, with the way to Join. */}
-        {/* Students: one magenta button the size of Log in (owner, 2026-11-27). */}
-        <Link to="/join" className={buttonClasses('main', 'min-h-14 hover-pop justify-center !bg-[#c2185b] !text-white no-underline font-score !text-2xl')}>{t('login.joinGame')}</Link>
       </div>
     </main>
     </ScrapbookPage>

@@ -15,7 +15,7 @@ import { buttonClasses } from '../ui/kit';
 import PillSelect from '../ui/PillSelect';
 import { SbHead, SbMain, SbMore, sbCard, sbPill, Words } from './scrapbookA';
 import PublicFooter from './PublicFooter';
-import { BANDS, STARTER_THEMES, templateFill, type Band, type StarterTheme } from '../theme/starters';
+import { STARTER_THEMES, templateFill, type StarterTheme } from '../theme/starters';
 import { classicTheme } from '../theme/classic';
 import { HOUSE_THEMES } from '../theme/house';
 
@@ -63,7 +63,6 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
   const { favorites, toggle } = useFavoriteThemes();
   const [sort, setSort] = useState<Sort>('trending');
   const [game, setGame] = useState('');
-  const [band, setBand] = useState<Band | ''>('');
   const [onlyFavs, setOnlyFavs] = useState(false);
   // Search by name or tag (owner, 2026-11-26: tags "so that people can search for them").
   const [query, setQuery] = useState('');
@@ -82,9 +81,9 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
   const base = [...classics, ...library, ...house, ...STARTER_THEMES.filter((x) => x.id !== 'classic')];
   const all = [...base, ...templateFill(GAMES.map((g) => g.id), Math.max(0, PAGE - base.length))];
   const [page, setPage] = useState(0);
-  useEffect(() => { setPage(0); }, [game, band, onlyFavs, q, sort]);
+  useEffect(() => { setPage(0); }, [game, onlyFavs, q, sort]);
   const filtered = all
-    .filter((x) => (!game || x.gameId === game) && (!band || x.band === band || x.band === 'all') && (!onlyFavs || favorites.includes(x.theme.id)) && matches(x))
+    .filter((x) => (!game || x.gameId === game) && (!onlyFavs || favorites.includes(x.theme.id)) && matches(x))
     // Plays, hearts and dates come with cloud accounts; until then the
     // samples keep their showcase order under every sort but Name.
     .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : sort === 'newest' ? b.order - a.order : a.order - b.order));
@@ -105,10 +104,7 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
             <option value="">{t('themes.allGames')}</option>
             {[...new Set(all.map((x) => x.gameId))].map((id) => <option key={id} value={id}>{gameName(id)}</option>)}
           </PillSelect>
-          <PillSelect label={t('themes.band')} value={band} onChange={(v) => setBand(v as Band | '')} active={!!band}>
-            <option value="">{t('themes.allBands')}</option>
-            {BANDS.filter((b) => b !== 'all').map((b) => <option key={b} value={b}>{t(`features.band.${b}` as StringKey)}</option>)}
-          </PillSelect>
+          {/* No age or grade filter: themes are never for a grade (owner, 2026-11-27). */}
           <PillSelect label={t('themes.sort')} value={sort} onChange={(v) => setSort(v as Sort)}>
             {(['trending', 'popular', 'newest', 'name'] as Sort[]).map((x) => <option key={x} value={x}>{t(`themes.sort.${x}` as StringKey)}</option>)}
           </PillSelect>

@@ -3,10 +3,10 @@ import { cleanCode, commission, currentRef, saveRef, validCode } from './program
 
 describe('affiliate program', () => {
   beforeEach(() => localStorage.clear());
-  it('pays 25% of the first year', () => {
-    expect(commission('plus', 'year')).toBe(19.2);
-    expect(commission('pro', 'year')).toBe(36);
-    expect(commission('plus', 'month')).toBe(24);
+  it('pays 25% of what the customer pays in the first year (after the follower offer)', () => {
+    expect(commission('plus', 'year')).toBe(17.28);
+    expect(commission('pro', 'year')).toBe(32.4);
+    expect(commission('plus', 'month')).toBe(23.8);
   });
   it('cleans codes to capitals and numbers', () => {
     expect(cleanCode(' @ms.rivera_3 ')).toBe('MSRIVERA3');

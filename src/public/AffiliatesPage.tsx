@@ -50,8 +50,26 @@ export default function AffiliatesPage() {
           </div>
           <div className={card} style={{ boxShadow: 'var(--shadow-sticker)' }}>
             <h2 className="font-display text-2xl flex items-center gap-2"><Handshake weight="fill" size={26} aria-hidden="true" /><Title text={t('affPage.rulesTitle')} /></h2>
-            <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4, 5].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`affPage.rule.${n}` as StringKey)}</li>)}</ul>
+            <ul className="grid gap-2 list-none p-0 m-0">{[1, 2, 3, 4, 6, 7, 5].map((n) => <li key={n} className="flex gap-2 font-semibold"><Check weight="bold" size={20} className="shrink-0 mt-0.5" aria-hidden="true" />{t(`affPage.rule.${n}` as StringKey)}</li>)}</ul>
           </div>
+        </section>
+
+        {/* Every detail in one scannable table (owner, 2026-11-27: "a page for the affiliate program where it'll have all the details"). */}
+        <section aria-labelledby="aff-details" className="grid gap-4">
+          <h2 id="aff-details" className="title-bubble text-4xl"><Title text={t('affPage.detailsTitle')} /></h2>
+          <dl className="grid sm:grid-cols-2 gap-3 m-0">
+            {(['rate', 'school', 'window', 'hold', 'how', 'offer', 'pro'] as const).map((k) => (
+              <div key={k} className={`${card} !gap-1`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+                <dt className="font-heading font-bold text-lg">{t(`affPage.d.${k}` as StringKey)}</dt>
+                <dd className="m-0 font-semibold">{t(`affPage.d.${k}V` as StringKey, terms)}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section aria-labelledby="aff-friend" className={`${card} !bg-mint`} style={{ boxShadow: 'var(--shadow-sticker)' }}>
+          <h2 id="aff-friend" className="font-display text-2xl"><Title text={t('affPage.friendTitle')} /></h2>
+          <p className="m-0 font-semibold">{t('affPage.friendText')}</p>
         </section>
 
         <ApplyForm />
