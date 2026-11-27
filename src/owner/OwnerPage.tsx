@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import ProductionLine from './ProductionLine';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ListChecks, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Handshake, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
+import { CheckSquare, FileText, Siren, ListChecks, ChartLineUp, ChatCircleDots, CreditCard, Crown, CurrencyDollar, Eye, Factory, GameController, Handshake, Megaphone, MoonStars, Notebook, PaintBrush, SquaresFour, Robot, Star, Ticket, UsersThree } from '@phosphor-icons/react';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
 import type { FeedbackReport } from '../data/types';
@@ -26,6 +26,7 @@ import HomeCards from './HomeCards';
 import { HOME } from './homeCopy';
 
 import OwnerGate from './OwnerGate';
+import { ChecklistsCard, DoFirstCard, DoFirstStrip, DraftsCard, UrgentPopup } from './FocusCards';
 import TeamCard from './TeamCard';
 import { GrowthChartCard } from './GrowthChart';
 import { supabase } from '../data/supabase';
@@ -33,6 +34,7 @@ import { quoteDetails, quotePdf, type QuoteRequest } from '../lib/quotePdf';
 import MarketingCard from './marketing/MarketingCard';
 import CeoCard from './CeoCard';
 import AstroCard from './AstroCard';
+import AstroHomeCard from './AstroHomeCard';
 import AffiliatesCard from './AffiliatesCard';
 import BetaSpec from './BetaSpec';
 import BooksCard from './books/BooksCard';
@@ -61,9 +63,11 @@ export default function OwnerPage(_props: { view?: 'line' } = {}) {
   return inner;
 }
 
-type SectionId = 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro' | 'affiliates';
+type SectionId = 'focus' | 'checklists' | 'drafts' | 'overview' | 'ceo' | 'team' | 'release' | 'forecast' | 'stripe' | 'waiting' | 'feedback' | 'subs' | 'growth' | 'usage' | 'income' | 'books' | 'access' | 'preview' | 'gallery' | 'beta' | 'marketing' | 'astro' | 'affiliates';
 const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star; group: NavGroup }[] = [
   { id: 'overview', label: 'owner.dashboard', icon: SquaresFour, group: 'home' },
+  { id: 'focus', label: 'owner.focus', icon: Siren, group: 'today' },
+  { id: 'checklists', label: 'owner.checklists', icon: CheckSquare, group: 'today' },
   { id: 'waiting', label: 'owner.waiting', icon: ListChecks, group: 'today' },
   { id: 'feedback', label: 'owner.feedback', icon: ChatCircleDots, group: 'today' },
   { id: 'release', label: 'owner.release', icon: Factory, group: 'today' },
@@ -81,6 +85,7 @@ const SECTIONS: { id: SectionId; label: StringKey; icon: typeof Star; group: Nav
   { id: 'beta', label: 'owner.beta', icon: UsersThree, group: 'team' },
   { id: 'access', label: 'owner.access', icon: Ticket, group: 'tools' },
   { id: 'preview', label: 'owner.preview', icon: Eye, group: 'tools' },
+  { id: 'drafts', label: 'owner.drafts', icon: FileText, group: 'tools' },
   { id: 'astro', label: 'owner.astro', icon: MoonStars, group: 'tools' },
 ];
 // The side menu in the same four groups as the home cards (chunking: a
@@ -101,7 +106,10 @@ function Desktop() {
   const owner = useOwnerStats();
   const current = SECTIONS.find((x) => x.id === section)!;
   const body: Record<SectionId, ReactNode> = {
-    overview: <HomeCards owner={owner} go={(x) => go(x as SectionId)} />,
+    focus: <DoFirstCard go={(x) => go(x as SectionId)} />,
+    checklists: <ChecklistsCard />,
+    drafts: <DraftsCard />,
+    overview: <div className="grid gap-8"><DoFirstStrip go={(x) => go(x as SectionId)} /><AstroHomeCard onMore={() => go('astro')} /><HomeCards owner={owner} go={(x) => go(x as SectionId)} /></div>,
     ceo: <CeoCard />,
     team: <TeamCard />,
     release: <ProductionLine section="release" />,
@@ -125,6 +133,7 @@ function Desktop() {
   const linkCls = 'dash-nav-item no-underline';
   return (
     <main className="dev-dash">
+      <UrgentPopup onOpen={() => go('focus')} />
       <nav aria-label={t('owner.sections')} className="dash-side">
         <p className="dash-brand">{t('owner.title')}</p>
         {NAV_GROUPS.map((g) => (
@@ -302,8 +311,10 @@ function GalleryCard() {
   const { themes, reload } = useMadeThemes();
   const pending = themes.filter((th) => th.gallery?.status === 'pending');
   const [why, setWhy] = useState<Record<string, GalleryReason>>({});
-  async function decide(th: GameTheme, status: 'approved' | 'declined') {
-    await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined }, challenge: status === 'declined' ? false : th.challenge });
+  const [viewing, setViewing] = useState<GameTheme | null>(null);
+  async function decide(th: GameTheme, status: 'approved' | 'declined' | 'revise', note?: string) {
+    await saveMadeTheme({ ...th, gallery: { status, at: new Date().toISOString(), reason: status === 'declined' ? why[th.id] ?? 'other' : undefined, note: note?.trim() || undefined }, challenge: status === 'declined' ? false : th.challenge });
+    setViewing(null);
     reload();
   }
   const [dayTag, setDayTag] = useState(SPECIAL_DAYS[0].tag);
@@ -350,9 +361,10 @@ function GalleryCard() {
     <ul className="grid gap-3 list-none p-0 m-0">
       {pending.map((th) => (
         <li key={th.id} className="grid sm:grid-cols-[10rem_1fr] gap-3 rounded-input border-std border-border-soft p-2">
-          <ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} />
+          {/* Tap the picture or the name for the full review screen (owner, 2026-11-27). */}
+          <button type="button" onClick={() => setViewing(th)} aria-label={t('owner.reviewOpen', { name: th.name })} className="block text-left cursor-zoom-in"><ThemePreview theme={th} gameName={GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId} /></button>
           <div className="grid gap-2 content-start">
-            <p className="font-display text-xl">{th.name}</p>
+            <button type="button" onClick={() => setViewing(th)} className="font-display text-xl text-left underline underline-offset-4 decoration-2 justify-self-start">{th.name}</button>
             <p className="text-sm font-semibold text-muted">{creditLine(th)}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
             {(th.tags ?? []).length > 0 && <p className="text-sm font-semibold">{t('owner.galleryTags', { tags: (th.tags ?? []).map(tagLabel).join(', ') })}</p>}
             <div className="flex flex-wrap gap-2 items-center">
@@ -366,6 +378,62 @@ function GalleryCard() {
         </li>
       ))}
     </ul>
+    {viewing && <ThemeReview th={viewing} onClose={() => setViewing(null)} onDecide={(status, note) => void decide(viewing, status, note)} why={why[viewing.id] ?? 'other'} setWhy={(r) => setWhy({ ...why, [viewing.id]: r })} />}
+    </div>
+  );
+}
+
+// The full theme review screen (owner, 2026-11-27: "click the name and/or
+// image to view in a full theme preview screen. this is where i will be able
+// to give specific feedback and send for revisions or approve for public").
+// The big preview, every piece the teacher made, notes, and three choices.
+function ThemeReview({ th, onClose, onDecide, why, setWhy }: { th: GameTheme; onClose: () => void; onDecide: (s: 'approved' | 'declined' | 'revise', note?: string) => void; why: GalleryReason; setWhy: (r: GalleryReason) => void }) {
+  const [note, setNote] = useState('');
+  const game = GAMES.find((g) => g.id === th.gameId)?.name ?? th.gameId;
+  const pieces = Object.entries(th.pieces ?? {}).filter(([, p]) => p.image || p.color);
+  useEffect(() => { const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k); }, [onClose]);
+  return (
+    <div role="dialog" aria-modal="true" aria-labelledby="review-title" className="fixed inset-0 z-50 bg-[rgba(29,26,51,0.55)] p-3 sm:p-6 overflow-auto">
+      <div className="max-w-6xl mx-auto bg-white rounded-[1.5rem] border-[3px] border-[#1d1a33] p-5 sm:p-7 grid gap-5" style={{ boxShadow: '0 8px 0 #1d1a33' }}>
+        <div className="flex items-start gap-3">
+          <div className="flex-1 grid gap-1">
+            <h2 id="review-title" className="text-3xl font-bold m-0">{th.name}</h2>
+            <p className="font-semibold text-[#57506e] m-0">{game}{creditLine(th) ? ` · ${creditLine(th)}` : ''}{th.challenge ? ` · ${t('owner.galleryEntry')}` : ''}</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label={t('owner.reviewClose')} className="w-12 h-12 rounded-full border-2 border-[#1d1a33] grid place-items-center font-bold text-xl">×</button>
+        </div>
+        <div className="grid lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-6 items-start">
+          <div className="grid gap-4 min-w-0">
+            <ThemePreview theme={th} gameName={game} />
+            {pieces.length > 0 && (
+              <details open>
+                <summary className="cursor-pointer font-bold">{t('owner.reviewPieces', { count: pieces.length })}</summary>
+                <ul className="grid grid-cols-3 sm:grid-cols-5 gap-2 list-none p-0 mt-3 mb-0">
+                  {pieces.map(([id, p]) => (
+                    <li key={id} className="grid gap-1 text-center">
+                      <span className="aspect-square rounded-[0.8rem] border-2 border-[#d6cff0] grid place-items-center overflow-hidden" style={{ background: p.image ? '#f6f0e4' : p.color }}>{p.image && <img src={p.image} alt={p.alt ?? id} className="max-w-full max-h-full object-contain" />}</span>
+                      <span className="text-xs font-bold break-words">{id}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+          <div className="grid gap-4 content-start lg:sticky lg:top-4">
+            <label className="grid gap-1.5 font-bold">{t('owner.reviewNotes')}
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={6} maxLength={1000} placeholder={t('owner.reviewNotesHint')} className="rounded-[0.9rem] border-2 border-[#1d1a33] p-3 font-semibold" />
+            </label>
+            <button type="button" onClick={() => onDecide('approved', note)} className="min-h-14 rounded-full bg-[#22b04a] text-white font-bold text-lg border-2 border-[#1d1a33]">{t('owner.reviewApprove')}</button>
+            <button type="button" onClick={() => onDecide('revise', note)} disabled={!note.trim()} className="min-h-14 rounded-full bg-[#fabe37] font-bold text-lg border-2 border-[#1d1a33] disabled:opacity-40">{t('owner.reviewRevise')}</button>
+            <div className="grid gap-2 border-t-2 border-[#d6cff0] pt-4">
+              <select aria-label={t('owner.declineWhy')} value={why} onChange={(e) => setWhy(e.target.value as GalleryReason)} className="min-h-11 px-2 rounded-[0.8rem] border-2 border-[#1d1a33] font-bold text-sm">
+                {GALLERY_REASONS.map((r) => <option key={r} value={r}>{t(`gallery.reason.${r}` as StringKey)}</option>)}
+              </select>
+              <button type="button" onClick={() => onDecide('declined', note)} className="min-h-12 rounded-full bg-white font-bold border-2 border-[#1d1a33]">{t('owner.decline')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

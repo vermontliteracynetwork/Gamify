@@ -39,13 +39,15 @@ export default function OwnerGate({ children }: { children: ReactNode }) {
     setStep({ k: 'open' });
   }
   if (step.k === 'open') return <>{children}</>;
-  const box = 'max-w-md mx-auto px-4 pt-10 pb-24';
-  const panel = 'bg-surface border-bold border-border rounded-panel p-5 grid gap-3 justify-items-center text-center';
+  // Sized and placed by eye (owner, 2026-11-27: "make my developer portal input larger and format not only by pixel but by sight"):
+  // a wider card sitting a little above the true middle (optical center), the title fitting inside, a big code box and button.
+  const box = 'max-w-xl mx-auto px-4 min-h-[calc(100svh-6rem)] grid place-items-center pb-[12svh] pt-6';
+  const panel = 'w-full bg-surface border-bold border-border rounded-panel p-7 sm:p-10 grid gap-5 justify-items-center text-center';
   return (
     <main className={box}>
       <div className={panel} style={{ boxShadow: 'var(--shadow-sticker)' }}>
         <ShieldCheck weight="fill" size={48} aria-hidden="true" />
-        <h1 className="font-display text-2xl">{t('owner.title')}</h1>
+        <h1 className="title-bubble text-[2.4rem] sm:text-[3rem] leading-[0.95] break-normal">{t('owner.title')}</h1>
         {step.k === 'loading' && <p className="font-semibold">{t('owner.loading')}</p>}
         {step.k === 'signin' && <><p className="font-semibold">{t('ownerGate.signIn')}</p><Link to="/login" className={buttonClasses('primary')}>{t('ownerGate.toLogin')}</Link></>}
         {step.k === 'notOwner' && <p className="font-semibold">{t('ownerGate.notOwner')}</p>}
@@ -58,10 +60,10 @@ export default function OwnerGate({ children }: { children: ReactNode }) {
         )}
         {step.k === 'verify' && <p className="font-semibold">{t('ownerGate.verify')}</p>}
         {(step.k === 'enroll' || step.k === 'verify') && (
-          <form className="flex flex-wrap justify-center gap-2" onSubmit={(e) => { e.preventDefault(); void verify(step.factorId); }}>
+          <form className="grid gap-3 w-full max-w-sm" onSubmit={(e) => { e.preventDefault(); void verify(step.factorId); }}>
             <input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" autoComplete="one-time-code" aria-label={t('ownerGate.code')} placeholder="123456"
-              className="min-h-12 w-36 px-3 rounded-input border-std border-border font-bold text-xl tracking-[0.3em] text-center" />
-            <Button variant="primary" type="submit" disabled={code.length !== 6}>{t('ownerGate.go')}</Button>
+              className="min-h-16 w-full px-4 rounded-input border-bold border-border bg-white font-bold text-3xl tracking-[0.4em] text-center" />
+            <Button variant="primary" size="lg" className="w-full justify-center" type="submit" disabled={code.length !== 6}>{t('ownerGate.go')}</Button>
           </form>
         )}
         {problem && <p className="font-bold" role="alert">{problem}</p>}

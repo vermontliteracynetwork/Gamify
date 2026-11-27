@@ -106,3 +106,55 @@ export const WINDOWS: AstroWindow[] = [
     advice: 'The classic test of what you have built. Plans made now pay off then.',
     step: 'Set a five-year goal for Gamify now and review it each solar return (your birthday).' },
 ];
+
+// Start and end dates for each timing window (from the same 2026-11-25 run),
+// so the dashboard can show what is active this month and this year.
+export const WINDOW_DATES: Record<string, [string, string]> = {
+  'saturn-venus': ['2026-11-01', '2027-01-15'], 'saturn-mars': ['2027-02-10', '2027-02-28'],
+  'jupiter-sun': ['2027-02-01', '2027-06-30'], 'saturn-pluto': ['2027-03-01', '2027-03-31'],
+  'jupiter-venus': ['2027-09-01', '2027-09-12'], 'pluto-venus': ['2027-09-20', '2028-06-30'],
+  'saturn-uranus': ['2027-12-01', '2028-01-10'], 'pluto-neptune': ['2026-11-01', '2028-06-30'],
+  'saturn-return': ['2031-05-01', '2031-07-31'],
+};
+
+// The Moon and Sun, low precision (about a degree; Meeus, Astronomical
+// Algorithms, short series), enough for the sign of the day.
+const rad = Math.PI / 180;
+const norm = (x: number) => ((x % 360) + 360) % 360;
+function daysSinceJ2000(d: Date) { return (d.getTime() - Date.UTC(2000, 0, 1, 12)) / 86_400_000; }
+export function moonLongitude(d: Date) {
+  const n = daysSinceJ2000(d);
+  const L = norm(218.316 + 13.176396 * n), M = norm(134.963 + 13.064993 * n), F = norm(93.272 + 13.22935 * n);
+  const D = norm(297.85 + 12.190749 * n), Ms = norm(357.529 + 0.98560028 * n);
+  return norm(L + 6.289 * Math.sin(M * rad) + 1.274 * Math.sin((2 * D - M) * rad) + 0.658 * Math.sin(2 * D * rad) + 0.214 * Math.sin(2 * M * rad) - 0.186 * Math.sin(Ms * rad) - 0.114 * Math.sin(2 * F * rad));
+}
+export function sunLongitude(d: Date) {
+  const n = daysSinceJ2000(d);
+  const g = norm(357.529 + 0.98560028 * n), q = norm(280.459 + 0.98564736 * n);
+  return norm(q + 1.915 * Math.sin(g * rad) + 0.02 * Math.sin(2 * g * rad));
+}
+export const SIGNS = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'] as const;
+export const signOf = (lon: number) => SIGNS[Math.floor(norm(lon) / 30)];
+// Moon phase, 0 new to 0.5 full to 1 new.
+export const phaseOf = (d: Date) => norm(moonLongitude(d) - sunLongitude(d)) / 360;
+export function phaseName(p: number) {
+  return p < 0.03 || p > 0.97 ? 'New Moon' : p < 0.22 ? 'Waxing crescent' : p < 0.28 ? 'First quarter' : p < 0.47 ? 'Waxing gibbous' : p < 0.53 ? 'Full Moon' : p < 0.72 ? 'Waning gibbous' : p < 0.78 ? 'Last quarter' : 'Waning crescent';
+}
+
+// The Moon's sign each day, read for her chart (Scorpio Sun at the career
+// point, Capricorn rising, Jupiter in Cancer for money): a work focus and a
+// money note, each a real business step.
+export const MOON_DAY: Record<(typeof SIGNS)[number], { focus: string; money: string }> = {
+  Aries: { focus: 'Start the hard task first; short bursts work today.', money: 'Skip impulse buys: use your 48-hour rule.' },
+  Taurus: { focus: 'Slow, steady building. Polish one finished thing.', money: 'Good day to review prices and recurring costs.' },
+  Gemini: { focus: 'Write: posts, help pages, emails to schools.', money: 'Compare two options before you pay for any tool.' },
+  Cancer: { focus: 'Care for your teachers: answer feedback and beta check-ins.', money: 'Your Jupiter sign: patient money moves pay off.' },
+  Leo: { focus: 'Be seen: film a demo or post your face with Gamify.', money: 'Spend on visibility only if it has a clear goal.' },
+  Virgo: { focus: 'Fix bugs, tidy checklists, finish the small stuff.', money: 'Reconcile Books and receipts.' },
+  Libra: { focus: 'Partners and design: talk to a school or collaborator.', money: 'Agree terms in writing before anything is promised.' },
+  Scorpio: { focus: 'Your Sun and Moon sign: deep focus on the one big thing.', money: 'Strong for research and strategy, not snap spending.' },
+  Sagittarius: { focus: 'Teach in public: a Blog post or research note.', money: 'Think long range: plan next quarter, do not sign today.' },
+  Capricorn: { focus: 'Your rising sign: plan, set deadlines, make the hard call.', money: 'Good day for budgets and pricing decisions.' },
+  Aquarius: { focus: 'New ideas: write them down, do not start them all.', money: 'Your 2nd house of money: check income and subscriptions.' },
+  Pisces: { focus: 'Creative day: themes, art, sound. Rest if tired.', money: 'Avoid rose-colored plans; read the numbers twice.' },
+};

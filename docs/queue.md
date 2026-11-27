@@ -336,3 +336,54 @@ want in the carosel and promotional otherwise."
     easy to vote"): month cards with cycling covers open /challenge/:tag; the
     vote page drops the tags, has big numbered heart Vote buttons and a send
     bar that sticks to the bottom. Built; to check.
+70. [ ] **Beta test tab in the teacher portal** ("a list form checklist where
+    it'll auto check off each step"): /teacher/beta, in the side menu for beta
+    testers only; groups Before you start (art permission slips, photo
+    releases, the first lesson on the Report button and feedback form), Make
+    (5 question sets, themes for 5 games, one physical theme, enter the
+    challenge), Play (one game a week, every game, after-game forms, ratings),
+    Tell us (surveys, IT blocks). Auto steps tick themselves. Built; to check.
+71. [ ] **Beta language: physical mediums and the challenge** ("recommend
+    different themes and art mediums, especially recommend the Theme Builder
+    Challenge ... recognition on our site ... gather as many physical art
+    mediums as possible"): the beta tab's art card and the beta page ask.
+72. [ ] **Developer portal executive functioning** ("someone who is
+    specifically responsible for making sure that everything that is pushed to
+    me with urgency is completed ... pop-ups and visual indications"): the
+    Chief of Staff agent; an urgent pop-up once a day; a Do first view and a
+    pink urgent bar on Home; urgent flags in waiting.ts (3 at most).
+73. [ ] **Saved checklists** (final check per game, approve each Classic
+    theme, 1 to 3 more themes per game, student training, help pages): the
+    Checklists view; ticks are saved.
+74. [ ] **Photo release in the developer portal** ("save photo release draft in
+    my developer portal"): Drafts view with download and copy.
+75. [ ] **Features: The Games in arches** (covers tilted in two bowed arches,
+    wiggling with a light, freeze on hover, glow when picked, no labels; only
+    the board and info on white). Built; to check.
+76. [ ] **Crayon power-ups on an orange tile** in Every Game ("show my power up
+    icons ... the classic crayon style should be applied everywhere"). Done on
+    Features; other places with pack art (Game Lab) still to sweep.
+77. [ ] **Features Plus and Pro as short icon tiles** (different words from
+    Pricing). Built.
+78. [ ] **Pro: "All games, and early access"** in the chart (owner's call;
+    there is no early-access setting in the code yet, to build).
+79. [ ] **Themes page challenge as an award frame** ("seriously improve"):
+    Lemon card with turning rays, real looks cycling in a gold frame, "Your
+    class here?" ribbon and a medal. Built; to check.
+80. [ ] **Themes cards**: smaller search text; no age or interest line; no
+    "Starter theme"; the maker's name only when it is not Gamify.
+81. [ ] **Owner sign-in sized by eye**: wider card, big code box and button,
+    sitting a little above center.
+82. [ ] **Theme review screen**: tap a pending theme's picture or name for a
+    full preview with every piece, notes, Approve for public, Send for
+    revisions (teacher sees the notes and can send again), or Decline.
+83. [ ] **Astrology on the portal Home**: a card with arrows for Today, This
+    week, This month, This year (Moon of the day through her chart, timing
+    windows), each with a work and money step.
+84. [ ] **Owner Theme Builder is the teacher's** ("needs to be the exact same
+    as what users are seeing"): same menu, tabs, requests, Try it and Share;
+    only the save goes to the Gamify library.
+85. [ ] **Portal colors**: brand brights on chart colors, a colored top edge per
+    card and matching KPI numbers on the clean white look. A Figma-referenced
+    pass on every portal page is next (owner: "use referncing sites, things
+    like figma, to get visual and simple views for all pages").

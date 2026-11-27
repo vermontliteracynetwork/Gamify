@@ -32,6 +32,7 @@ import { PreviewBanner } from './owner/DevCards';
 import ErrorBoundary from './ui/ErrorBoundary';
 import HoverTips from './ui/HoverTips';
 const QuestionSetsPage = lazyPage(() => import('./teacher/QuestionSetsPage'));
+const TeacherBetaPage = lazyPage(() => import('./teacher/BetaPage'));
 const TeacherTimePage = lazyPage(() => import('./student/TeacherTimePage'));
 const ChoosePage = lazyPage(() => import('./student/ChoosePage'));
 const ActivityPage = lazyPage(() => import('./teacher/ActivityPage'));
@@ -210,6 +211,7 @@ function AnimatedRoutes() {
           <Route path="/teacher/activity" element={<RequireTeacher><ActivityPage /></RequireTeacher>} />
           <Route path="/teacher/games" element={<RequireTeacher><TeacherGamesPage /></RequireTeacher>} />
           <Route path="/teacher/sets" element={<RequireTeacher><QuestionSetsPage /></RequireTeacher>} />
+          <Route path="/teacher/beta" element={<RequireTeacher><TeacherBetaPage /></RequireTeacher>} />
           <Route path="/teacher/sets/import" element={<RequireTeacher><ImportPage /></RequireTeacher>} />
           <Route path="/teacher/sets/:id" element={<RequireTeacher><SetEditorPage /></RequireTeacher>} />
           <Route path="/teacher/library/:id" element={<RequireTeacher><SetEditorPage library /></RequireTeacher>} />

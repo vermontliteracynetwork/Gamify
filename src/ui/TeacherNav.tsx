@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, CaretUp, ChartBar, ChatTeardropText, Flag, GameController, House, PaintBrush, Plus, Question, Sticker, RocketLaunch, SignOut, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
+import { ArrowRight, CaretUp, ChartBar, ChatTeardropText, Flag, Flask, GameController, House, PaintBrush, Plus, Question, Sticker, RocketLaunch, SignOut, Stack, UserCircle, UsersThree } from '@phosphor-icons/react';
 import { setTeacher } from '../auth/session';
 import { data } from '../data';
 import { useAsync } from '../data/hooks';
@@ -62,6 +62,7 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
         <NavLink to="/teacher/reports" className={rail}><ChartBar weight="bold" size={20} />{t('teacherNav.reports')}</NavLink>
         <NavLink to="/teacher/themes" className={rail}><PaintBrush weight="bold" size={20} />{t('teacherNav.themes')}</NavLink>
         <NavLink to="/teacher/achievements" className={rail}><Sticker weight="bold" size={20} />{t('teacherNav.achievements')}</NavLink>
+        {betaOn && <NavLink to="/teacher/beta" className={rail}><Flask weight="bold" size={20} />{t('teacherNav.beta')}</NavLink>}
         <NavLink to="/teacher/account" className={rail}><UserCircle weight="bold" size={20} />{t('teacherNav.account')}</NavLink>
         <span className="flex-1" />
         {unfinished && (
@@ -91,6 +92,7 @@ export default function TeacherNav({ startOpen = false, rail: withRail = true }:
         <NavLink to="/teacher/reports" className={link}><ChartBar weight="bold" size={16} />{t('teacherNav.reports')}</NavLink>
         <NavLink to="/teacher/themes" className={link}><PaintBrush weight="bold" size={16} />{t('teacherNav.themes')}</NavLink>
         <NavLink to="/teacher/achievements" className={link}><Sticker weight="bold" size={16} />{t('teacherNav.achievements')}</NavLink>
+        {betaOn && <NavLink to="/teacher/beta" className={link}><Flask weight="bold" size={16} />{t('teacherNav.beta')}</NavLink>}
         <NavLink to="/teacher/account" className={link}><UserCircle weight="bold" size={16} />{t('teacherNav.account')}</NavLink>
         {unfinished && (
           <button type="button" aria-expanded={showing} onClick={() => setOpen(!showing)}

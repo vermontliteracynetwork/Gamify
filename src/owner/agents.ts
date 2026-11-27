@@ -30,6 +30,12 @@ export const TEAM: TeamAgent[] = [
     needsYou: [{ text: 'Add OPENROUTER_API_KEY in Vercel for stronger answers (free models work until then)' }],
   },
   {
+    id: 'chief-of-staff', name: 'Chief of Staff', role: 'Executive functioning support: makes sure every urgent item gets done', file: '.claude/agents/chief-of-staff.md', color: '#f055a5',
+    status: 'working', reportsTo: CEO_ID, updated: '2026-11-27',
+    workingOn: ['The urgent three: pop-up when the portal opens, first on Do first', 'Your checklists: final game checks, Classic approvals, extra themes, student training, help pages'],
+    needsYou: [{ text: 'Open Do first and tick each urgent item when it is done' }],
+  },
+  {
     id: 'design-chair', name: 'Design Chair', role: 'Brand, voice, Brand Kit, sound, templates, social media', file: '.claude/agents/design-chair.md', color: '#c58ce8',
     status: 'working', updated: '2026-11-23', reportsTo: CEO_ID,
     workingOn: ['New direction: playful flat shapes for the site and Classic themes (from your moodboards)', 'Gamify Brand Kit doc and the live /brand page', 'Universal sound pack (sound board picks)', 'Piece templates and sizes for every game'],

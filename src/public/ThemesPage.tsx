@@ -83,7 +83,7 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
           <label className="relative">
             <span className="sr-only">{t('themes.search')}</span>
             <MagnifyingGlass size={18} weight="bold" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
-            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('themes.search')} className={fieldClasses('md', 'pl-9 rounded-pill w-60')} />
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('themes.search')} className={fieldClasses('md', 'pl-9 rounded-pill w-60 !text-sm')} />
           </label>
           <PillSelect label={t('themes.game')} value={game} onChange={setGame} active={!!game}>
             <option value="">{t('themes.allGames')}</option>
@@ -120,7 +120,7 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
                 </div>
                 <div className="grid gap-0.5 px-5 pt-2">
                   <h2 className="m-0 font-heading font-bold text-xl sm:text-[1.4375rem] leading-tight">{x.name}</h2>
-                  <p className="m-0 text-base font-semibold">{gameName(x.gameId)} · {t(`features.band.${x.band}` as StringKey)}{x.interest ? ` · ${x.interest}` : ''}</p>
+                  <p className="m-0 text-base font-semibold">{gameName(x.gameId)}</p>
                 </div>
                 {(x.theme.tags ?? []).length > 0 && (
                   <ul className="flex flex-wrap gap-1.5 list-none p-0 m-0 px-5" aria-label={t('themes.tags')}>
@@ -130,7 +130,8 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
                   </ul>
                 )}
                 <div className="flex flex-wrap items-center gap-2 px-5">
-                  <span className="text-sm font-bold text-muted">{x.theme.id.startsWith('starter:') ? t('themes.starter') : x.theme.source === 'custom' ? t('themes.madeBy', { name: creditLine(x.theme) }) : t('themes.byGamify')}</span>
+                  {/* The maker's name only when it is not Gamify (owner, 2026-11-27). */}
+                  <span className="text-sm font-bold text-muted">{x.theme.source === 'custom' && creditLine(x.theme) ? t('themes.madeBy', { name: creditLine(x.theme) }) : ''}</span>
                   <span className="flex-1" />
                   <Link to={signedIn ? `/teacher/activity?game=${x.gameId}` : '/login?mode=signup'} className="text-sm font-bold inline-flex items-center gap-1 max-sm:min-h-11 max-sm:text-base">{t('themes.use')}<ArrowRight weight="bold" size={14} /></Link>
                 </div>

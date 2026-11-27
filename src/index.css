@@ -814,7 +814,8 @@ html[data-motion="still"] .belt-move { animation: none; }
   --shadow-sticker: none; --shadow-sticker-lg: none; --stroke: 1px;
   --radius-panel: 14px; --radius-input: 10px;
   --font-display: var(--font-body);
-  --chart-1: #7c3aed; --chart-2: #a1a1aa; --chart-3: #c4b5fd; --chart-4: #52525b; --chart-5: #8b5cf6; --chart-6: #d4d4d8;
+  /* Gamify brights as accents on a clean ground (owner, 2026-11-27: "keep the clean look ... apply more of the gamify colors to accent the colors in charts and visuals"). */
+  --chart-1: #6a45f0; --chart-2: #22b04a; --chart-3: #ff9b28; --chart-4: #4ba3e8; --chart-5: #f055a5; --chart-6: #fabe37;
 
   display: grid; grid-template-columns: 17rem minmax(0, 1fr);
   height: var(--play-h); min-height: 34rem; overflow: hidden;
@@ -852,6 +853,17 @@ html[data-motion="still"] .belt-move { animation: none; }
 .dash-kpi-label { color: var(--text-muted); font-weight: 600; font-size: 0.85rem; }
 .dash-kpi-value { font-weight: 700; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .dash-kpis li:first-child .dash-kpi-value { color: var(--dash-purple); }
+/* Each card wears one brand color on its top edge, and KPI numbers take the same color, so the eye can find a card by color (preattentive cue) while the page stays white. */
+.dev-dash .dash-card { border-top: 4px solid var(--dash-accent, var(--dash-purple)); }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+1) { --dash-accent: #6a45f0; }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+2) { --dash-accent: #22b04a; }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+3) { --dash-accent: #ff9b28; }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+4) { --dash-accent: #4ba3e8; }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+5) { --dash-accent: #f055a5; }
+.dev-dash :is(.dash-kpis, .dash-grid, .grid) > :nth-child(6n+6) { --dash-accent: #fabe37; }
+.dev-dash .dash-kpis li .dash-kpi-value { color: var(--dash-accent, var(--text)); }
+.dev-dash .dash-kpis li:nth-child(6n+6) .dash-kpi-value { color: #b7860b; }
+.dev-dash .dash-dot { background: var(--dash-accent, var(--dash-purple)); }
 .dash-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; min-height: 0; }
 .dash-chart .grid { gap: 1rem; }
 .dash-card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }

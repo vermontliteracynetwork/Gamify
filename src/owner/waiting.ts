@@ -4,13 +4,14 @@
 // adds to this list in the same change that finds the need; ticks are saved
 // on this device. Mirrors "Waiting on you" in the development plan doc and
 // docs/waiting-on-you.md.
-export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide' }
+// urgent: the Chief of Staff's top three (pop-up on open, first on Do first).
+export interface WaitingItem { id: string; title: string; why: string; how: string; added: string; kind: 'setup' | 'money' | 'legal' | 'people' | 'decide'; urgent?: boolean }
 
 export const WAITING: WaitingItem[] = [
-  { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', title: 'Beta photo release form (faces, or hands and work only)',
+  { id: 'beta-photo-release', kind: 'legal', added: '2026-11-27', urgent: true, title: 'Beta photo release form (faces, or hands and work only)',
     why: 'You want real photos of classes playing and making themes for the Pricing carousel and promotion. Faces of children need a signed release from a parent or guardian; hands, the back of a head or the work only need the school and teacher OK. The shot list and rules are in docs/photo-brief.md. The 13 example photos you sent were found online, so they are references only and never ship.',
     how: 'A draft is ready in docs/photo-release.md (parent choice of face, hands and work only, or no; uses; withdrawal; teacher and school part; five questions for the attorney). Send it to the attorney, then say yes to adding it as a beta requirement. Then beta teachers send photos with the release tag.' },
-  { id: 'free-cleanup', kind: 'setup', added: '2026-11-26', title: 'Turn on the nightly delete of Free answers (run 0018)',
+  { id: 'free-cleanup', kind: 'setup', added: '2026-11-26', urgent: true, title: 'Turn on the nightly delete of Free answers (run 0018)',
     why: 'You asked for Free data to be deleted nightly. On each device it already happens. In the cloud, a nightly job deletes every Free teacher\'s answers from before today at 3:00 am Eastern, but it needs the pg_cron extension and this migration run once.',
     how: 'Supabase dashboard: Database, Extensions, turn on pg_cron. Then SQL editor: run supabase/migrations/0018_free_history_cleanup.sql.' },
   { id: 'challenge-2027', kind: 'decide', added: '2026-11-26', title: 'Theme Building Challenge 2027: open questions before January',
@@ -25,7 +26,7 @@ export const WAITING: WaitingItem[] = [
   { id: 'mkt-upgrade-strategy', kind: 'decide', added: '2026-11-26', title: 'Upgrade strategy: 2 calls left on locked features, the welcome screen and the beta',
     why: 'You asked for a way to make locked features wanted and paid plans obvious at sign-up, without beta freeloaders. The plan (docs/upgrade-strategy.md, campaign c-upgrade on /owner, Marketing) keeps every locked feature visible with a lock and a Plus or Pro chip, opens a short preview on tap, and shows one welcome screen after sign-up: Plus, Pro, Start Free, then the beta strip. Five calls are yours: (1) a reverse trial, yes or no (suggested: Plus free for 30 days from the first hosted game, no card, then Free); (2) beta filters: a "host one game first" gate and/or months 2 and 3 earned by activity (this changes the public "Pro free for 3 months" promise); (3) keep the Free cap at 3 saved question sets or raise it (our own research found tight free caps draw the most complaints); (4) one welcome screen with the beta strip under the plans, or the beta pop-up first, and whether "Best fit" leaves the upgrade box to match your Pricing call; (5) counting paywall views and keeping the link source through sign-up, teacher pages only, so we learn which lock sells.',
     how: 'Read docs/upgrade-strategy.md section 4 and answer the five in chat (for example "1 yes 30 days Plus, 2 gate only, 3 keep, 4 one screen and drop Best fit, 5 yes"). Answered so far: a 7-day Plus reverse trial; no beta filters beyond approval; Free keeps 3 saved sets (2026-11-26). Still open: one welcome screen with the beta strip under the plans and no Best fit label; counting paywall views on teacher pages. Nothing else is built until you answer.' },
-  { id: 'supabase-0017', kind: 'setup', added: '2026-11-26', title: 'Run 0017 so new accounts get the 7-day Plus trial',
+  { id: 'supabase-0017', kind: 'setup', added: '2026-11-26', urgent: true, title: 'Run 0017 so new accounts get the 7-day Plus trial',
     why: 'You asked for a 7-day Plus reverse trial. The app is built: a new account plays on Plus for 7 days, then on Free unless it pays (no card, nothing bills on its own). In the cloud the trial start is saved on the profile, which needs this one database change; until it runs, cloud accounts get no trial (nothing breaks). Accounts made before it runs get no trial.',
     how: 'Supabase SQL Editor: run supabase/migrations/0017_plus_trial.sql (safe to run twice). Check with supabase/check_migrations.sql.' },
   { id: 'welcome-guesses', kind: 'decide', added: '2026-11-26', title: 'Welcome screen and trial: confirm the guesses',

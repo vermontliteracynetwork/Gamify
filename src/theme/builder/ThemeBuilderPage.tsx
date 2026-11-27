@@ -64,7 +64,8 @@ export default function ThemeBuilderPage({ owner = false }: { owner?: boolean })
     // The editor's own bar is the only bar (approved /brand Theme Builder,
     // 2026-11-25), so the site bar steps aside (`solo-bar`).
     <main className={`max-w-7xl mx-auto px-4 sm:px-6 ${game ? 'solo-bar w-full pt-3 pb-4 h-dvh flex flex-col' : 'pt-4 pb-6'}`}>
-      {!game && <div className="shrink-0">{owner ? <Link to="/owner" className={buttonClasses('secondary', 'mb-4')}><ArrowLeft weight="bold" size={18} />{t('owner.back')}</Link> : <TeacherNav />}</div>}
+      {/* The owner sees exactly what teachers see (owner, 2026-11-27: "needs to be the exact same as what users are seeing"); only where her themes save differs (the Gamify library). */}
+      {!game && <div className="shrink-0"><TeacherNav /></div>}
       {game ? <Builder key={game.id} gameId={game.id} owner={owner} base={base} /> : <GamePicker owner={owner} base={base} />}
     </main>
   );
@@ -76,15 +77,15 @@ function GamePicker({ owner, base }: { owner: boolean; base: string }) {
   // Public themes tab (owner, 2026-11-26: "give me the ability in the theme
   // tab to view public themes"): the same gallery as the public Themes page.
   const [params, setParams] = useSearchParams();
-  const view = !owner && params.get('view') === 'public' ? 'public' : 'make';
+  const view = params.get('view') === 'public' ? 'public' : 'make';
   return (
     <>
-      <PageHeader title={owner ? t('builder.ownerTitle') : t('builder.title')} />
-      {!owner && <Tabs label={t('teacherNav.themes')} value={view} onChange={(v) => setParams(v === 'public' ? { view: 'public' } : {}, { replace: true })}
+      <PageHeader title={t('builder.title')} />
+      {<Tabs label={t('teacherNav.themes')} value={view} onChange={(v) => setParams(v === 'public' ? { view: 'public' } : {}, { replace: true })}
         options={[{ id: 'make', label: t('builder.tab.make') }, { id: 'public', label: t('builder.tab.public') }]} />}
       {view === 'public' ? <ThemeGallery signedIn /> : <>
       {!owner && TIERS[tier].themeBuilder === 'trial' && <LimitNote className="mb-4">{t('builder.trialNote')}</LimitNote>}
-      {!owner && <StudentRequests />}
+      <StudentRequests />
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {BUILDER_TARGETS.map((g) => {
           const mine = themes.filter((th) => th.gameId === g.id && (owner ? th.source === 'library' : th.source === 'custom'));
@@ -322,11 +323,11 @@ function Builder({ gameId, owner, base }: { gameId: string; owner: boolean; base
               className={fieldClasses('sm', 'w-full')} />
           </label>
           <Button variant="main" size="sm" disabled={!!blocked || problems.length > 0 || !draft.name.trim()} onClick={() => void save()}><FloppyDisk weight="bold" size={18} />{t('builder.save')}</Button>
-          {!isNew && !owner && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
+          {!isNew && game.modes.length > 0 && <IconButton label={t('builder.tryIt')} onClick={() => navigate(`/games/${gameId}`)}><Play weight="fill" size={18} /></IconButton>}
           {!isNew && <IconButton variant="danger" label={t('builder.delete')} onClick={() => { if (window.confirm(t('builder.deleteConfirm', { name: draft.name }))) void remove(); }}><Trash weight="bold" size={18} /></IconButton>}
           {/* Paper, pictures and colors are tabs, and long lists turn pages, so the builder never scrolls. */}
           <Tabs size="sm" fill panelIds className="flex-1 basis-full lg:basis-auto min-w-0 lg:min-w-[22rem]" label={t('builder.tabsLabel')} value={tab} onChange={setTab}
-            options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', ...(owner ? [] : ['share' as const])] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
+            options={(['download', 'upload', ...(game.items ? ['items' as const] : []), 'colors', 'style', 'share'] as const).map((k) => ({ id: k, label: t(`builder.${k}Title`) }))} />
         </>}
       </div>
 
@@ -671,7 +672,7 @@ function ColorField({ label, hint, value, onChange }: { label: string; hint: str
 // before anyone sees it) and, once entries open, enter the challenge
 // (teacher, 2026-10-25). Credit is the class name, never a student's.
 function ShareTab({ theme, mine, tier, saved, problems, onChange }: { theme: GameTheme; mine: GameTheme[]; tier: EntryTier; saved: boolean; problems: boolean; onChange: (th: GameTheme) => void }) {
-  const inGallery = !!theme.gallery && theme.gallery.status !== 'declined';
+  const inGallery = !!theme.gallery && theme.gallery.status !== 'declined' && theme.gallery.status !== 'revise';
   const ready = saved && !problems;
   const tags = theme.tags ?? [];
   const opt = (on: boolean) => `min-h-12 px-4 rounded-input border-std font-bold text-left ${on ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`;
@@ -687,7 +688,7 @@ function ShareTab({ theme, mine, tier, saved, problems, onChange }: { theme: Gam
       {!saved ? <p className="text-sm font-bold">{t('builder.shareSaveFirst')}</p>
         : problems ? <p className="text-sm font-bold">{t('builder.shareProblems')}</p>
         : !tags.length && !inGallery ? <p className="text-sm font-bold">{t('builder.tagsFirst')}</p> : null}
-      {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}</p>}
+      {theme.gallery && <p className="text-sm font-bold rounded-input bg-surface-2 p-2" role="status">{t(`builder.gallery.${theme.gallery.status}` as StringKey)}{theme.gallery.reason ? ` ${t(`gallery.reason.${theme.gallery.reason}` as StringKey)}` : ''}{theme.gallery.note ? ` ${t('builder.gallery.note', { note: theme.gallery.note })}` : ''}</p>}
       <label className={`inline-flex items-center gap-2 font-bold min-h-11 ${inGallery ? '' : 'opacity-60'}`}>
         <input type="checkbox" className="w-5 h-5" disabled={!inGallery} checked={!!theme.challenge} onChange={(e) => onChange({ ...theme, challenge: e.target.checked })} />
         {t('builder.shareChallenge')}
