@@ -309,3 +309,17 @@ want in the carosel and promotional otherwise."
     plain section titles, short list items with the detail under a caret,
     Ways to Play cards as three-item lists with a Best for chip and More,
     the Class Themes demo moved to the left. Built; to check.
+65. [ ] **Home Trending Themes one at a time** ("if you are showing trending
+    themes, make the layout show one at a time ... make it something people
+    want to look at"): one big preview on a color stage, name large, band and
+    game chips, picture buttons and arrows, turns on its own; no subtext.
+66. [ ] **Beta test off Research, onto Home** ("remove the beta test from the
+    research. on the home page, add a section about joining our beta test"):
+    Research keeps Why it works and Sources; Home has a Grape beta card with a
+    3 months free sticker, You get / You do lists, the spots chip and Join.
+67. [ ] **Themes page challenge spotlight** ("remove the subtext. make the
+    display for the challenge larger and more visually nice ... intreguing to
+    click on"): subtext gone; a big Grape card with sparkles, an empty gold
+    frame with a bobbing trophy, the Win lifetime Pro chip and See the
+    challenge. Built; to check. (Her "change this setting" is read as this
+    section; to confirm.)

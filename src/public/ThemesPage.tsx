@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { ArrowRight, Heart, MagnifyingGlass, Trophy } from '@phosphor-icons/react';
+import { ArrowRight, Heart, MagnifyingGlass, Sparkle, Trophy } from '@phosphor-icons/react';
 import { tagLabel } from '../theme/tags';
 import { fieldClasses } from '../ui/kit';
 import { GAMES } from '../games/registry';
@@ -13,7 +13,7 @@ import ThemePreview from '../theme/builder/ThemePreview';
 import { useFavoriteThemes, useMadeThemes } from '../theme/made';
 import { buttonClasses } from '../ui/kit';
 import PillSelect from '../ui/PillSelect';
-import { SbDot, SbHead, SbMain, SbMore, sbCard, sbCardLink, sbPill, Words } from './scrapbookA';
+import { SbHead, SbMain, SbMore, sbCard, sbPill, Words } from './scrapbookA';
 import PublicFooter from './PublicFooter';
 import { BANDS, STARTER_THEMES, type Band, type StarterTheme } from '../theme/starters';
 import { useScrapbookGround } from './scrapbook/Shell';
@@ -31,21 +31,17 @@ export default function ThemesPage() {
   return (
     <>
       <SbMain className="!gap-6">
-        <SbHead title={t('themes.title')} sub={t('themes.sub')}>
+        <SbHead title={t('themes.title')}>
           <p className="m-0 flex flex-wrap gap-x-5 gap-y-2">
             <Link to="/teacher/themes" className="text-text pointer-coarse:min-h-11 inline-flex items-center"><SbMore>{t('themes.linkBuilder')}</SbMore></Link>
             <Link to="/blog/themes/game-show" className="text-text pointer-coarse:min-h-11 inline-flex items-center"><SbMore>{t('themes.linkGuides')}</SbMore></Link>
           </p>
         </SbHead>
 
-        <Link to="/challenge" className={`${sbCardLink} !bg-butter grid sm:grid-cols-[auto_1fr_auto] gap-4 sm:gap-5 items-center p-5 sm:p-6`}>
-          <SbDot bg="bg-lemon" size="lg"><Trophy weight="bold" size={30} /></SbDot>
-          <span className="grid gap-1">
-            <span className="title-bubble text-[1.5rem] sm:text-[1.75rem] leading-none"><Words text={t('themes.featuredTitle')} /></span>
-            <span className="font-semibold text-base sm:text-lg">{t('themes.featuredText')}</span>
-          </span>
-          <span className={buttonClasses('secondary', 'justify-self-start', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={18} /></span>
-        </Link>
+        {/* The challenge as a spotlight (owner, 2026-11-27: "make the display for the
+            challenge larger and more visually nice to look and intreguing to click on"):
+            an empty gold frame waiting for a class's theme, a big trophy and the prize. */}
+        <ChallengeSpot />
 
         <ThemeGallery />
       </SbMain>
@@ -144,5 +140,36 @@ export function ThemeGallery({ signedIn = false }: { signedIn?: boolean }) {
         </ul>
         <p className="text-sm font-bold text-muted">{t('themes.note')}</p>
     </div>
+  );
+}
+
+function ChallengeSpot() {
+  const reduce = useReducedMotion();
+  const sparks: [number, number, string, number][] = [[8, 18, 'var(--color-pink)', 26], [22, 78, 'var(--color-sky)', 20], [88, 14, 'var(--color-lime)', 24], [94, 70, 'var(--color-paper)', 18], [55, 8, 'var(--color-paper)', 16]];
+  return (
+    <Link to="/challenge" className="group relative block rounded-[1.9rem] border-[3.5px] border-border bg-grape text-white overflow-hidden no-underline hover-lift" style={{ boxShadow: '0 8px 0 var(--ink)' }}>
+      {sparks.map(([x, y, c, z], i) => (
+        <motion.span key={i} aria-hidden="true" className="absolute" style={{ left: `${x}%`, top: `${y}%`, color: c }}
+          animate={reduce ? undefined : { rotate: [0, 20, 0], scale: [1, 1.2, 1] }} transition={{ duration: 2.4 + i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
+          <Sparkle weight="fill" size={z} />
+        </motion.span>
+      ))}
+      <div className="relative grid gap-6 p-6 sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] items-center">
+        <div className="grid gap-4 justify-items-start">
+          <span className="rounded-pill bg-pink border-std border-border px-4 min-h-10 inline-flex items-center gap-2 font-bold"><Trophy weight="fill" size={20} aria-hidden="true" />{t('themes.challengeKicker')}</span>
+          <span className="title-bubble text-[2.2rem] sm:text-[3rem] leading-[0.98] text-white"><Words text={t('themes.featuredTitle')} /></span>
+          <span className="rounded-pill bg-lemon text-text border-std border-border px-4 min-h-11 inline-flex items-center font-bold text-lg" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{t('themes.challengePrize')}</span>
+          <span className={buttonClasses('go', 'group-hover:scale-105 motion-safe:transition-transform', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={20} /></span>
+        </div>
+        {/* The empty frame: a dashed gold spotlight with the trophy, waiting for the winning theme. */}
+        <div className="relative aspect-[16/10] rounded-[1.4rem] border-[6px] border-lemon bg-[radial-gradient(circle_at_50%_40%,#fff6cf_0%,#ffd76a_35%,#4b2fc9_75%)] grid place-items-center" style={{ boxShadow: '0 6px 0 var(--ink), inset 0 0 0 3px var(--ink)' }} aria-hidden="true">
+          <span className="absolute inset-3 rounded-[1rem] border-[3px] border-dashed border-text/40" />
+          <motion.span className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-lemon border-[3.5px] border-border grid place-items-center text-text" style={{ boxShadow: '0 6px 0 var(--ink)' }}
+            animate={reduce ? undefined : { y: [0, -10, 0], rotate: [-4, 4, -4] }} transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}>
+            <Trophy weight="fill" size={64} />
+          </motion.span>
+        </div>
+      </div>
+    </Link>
   );
 }

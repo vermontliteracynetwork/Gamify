@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useReducedMotion } from '../ui/useReducedMotion';
-import { lazy, Suspense } from 'react';
-import { ArrowRight, Barbell, Brain, Buildings, Eraser, HandHeart, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { ArrowRight, CaretLeft, CaretRight, Check, Barbell, Brain, Buildings, Eraser, HandHeart, House, RocketLaunch, ChalkboardTeacher, Heart, PaintBrush, ShieldCheck, Sliders, Stack, UsersThree } from '@phosphor-icons/react';
 import IconBadge, { type BadgeColor } from '../ui/IconBadge';
 import { CyclingCover } from '../games/covers';
 import { ModeDot, shownModes } from '../games/ModeBadge';
@@ -17,6 +17,8 @@ import HomeCollage from './scrapbook/HomeCollage';
 import CardTape from './scrapbook/CardTape';
 import ThemePreview from '../theme/builder/ThemePreview';
 import { STARTER_THEMES } from '../theme/starters';
+import { BETA } from '../beta/spec';
+import { betaOpen } from '../billing/trial';
 
 // The public home page (development plan Part 3A): what Gamify is, the four
 // ways to play, the games, why it works (honest research lines), and the
@@ -142,11 +144,7 @@ export default function PublicHome() {
 
         <WhoFor />
 
-        <Link to="/beta" className={`mt-12 sm:mt-16 hover-lift grid sm:grid-cols-[auto_1fr_auto] gap-4 items-center ${CARD} p-6 no-underline text-text`}>
-          <span className="w-14 h-14 rounded-full bg-butter border-bold border-border flex items-center justify-center wiggle-on-hover"><RocketLaunch weight="fill" size={28} aria-hidden="true" /></span>
-          <span className="grid gap-1"><span className="font-display text-2xl">{t('public.betaTitle')}</span><span className="font-semibold">{t('public.betaText')}</span></span>
-          <span className={buttonClasses('main')}>{t('beta.join')}<ArrowRight weight="bold" size={18} /></span>
-        </Link>
+        <BetaSection />
 
         {/* The closing card: a plain white scrapbook card, left aligned, no stickers (the mockup). */}
         <section className={`mt-12 sm:mt-16 ${CARD} p-6 sm:p-10 grid gap-5 justify-items-start`}>
@@ -183,33 +181,88 @@ function PointCard({ point: { icon: Icon, key, bg }, group, className = '', tape
   );
 }
 
-// Themes are what make Gamify stand out and what Plus and Pro are built on
-// (teacher, 2026-10-25): a showcase of trending looks (samples until launch)
-// that opens into the full Themes page.
+// Trending themes, one at a time (owner, 2026-11-27: "if you are showing
+// trending themes, make the layout show one at a time ... if you are
+// highlighting, make it something people want to look at"). One big preview
+// on a bright stage, its name large, the grade band and game as chips, and
+// a row of picture thumbnails to jump between them; it turns on its own.
+const STAGE = ['var(--color-sky)', 'var(--color-kelly)', 'var(--color-pink)', 'var(--color-lemon)', 'var(--color-grape)', 'var(--color-teal)'];
 function ThemesShowcase() {
   const reduce = useReducedMotion();
-  const top = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 4);
+  const top = [...STARTER_THEMES].sort((a, b) => a.order - b.order).slice(0, 6);
+  const [at, setAt] = useState(0);
+  const [hold, setHold] = useState(false);
+  useEffect(() => {
+    if (reduce || hold || top.length < 2) return;
+    const id = window.setTimeout(() => setAt((i) => (i + 1) % top.length), 4500);
+    return () => window.clearTimeout(id);
+  });
+  const x = top[at];
+  if (!x) return null;
+  const game = GAMES.find((g) => g.id === x.gameId)?.name ?? '';
+  const go = (d: number) => setAt((i) => (i + d + top.length) % top.length);
   return (
-    <section aria-labelledby="home-themes" className={SECTION}>
-      <div className="grid gap-2 max-w-3xl">
-        <h2 id="home-themes" className={H2}><Title text={t('public.themesTitle')} /></h2>
-        <p className="text-lg sm:text-xl font-semibold leading-snug">{t('public.themesText')}</p>
+    <section aria-labelledby="home-themes" className={SECTION} onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
+      <h2 id="home-themes" className={H2}><Title text={t('public.themesTrending')} /></h2>
+      <div className="relative rounded-[1.9rem] border-[3.5px] border-border overflow-hidden grid lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]" style={{ boxShadow: '0 8px 0 var(--ink)', background: STAGE[at % STAGE.length], transition: reduce ? undefined : 'background 0.5s' }}>
+        <div className="p-5 sm:p-8 grid place-items-center">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={x.id} className="w-full max-w-2xl" initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.92, rotate: -2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, rotate: 2 }} transition={reduce ? { duration: 0.15 } : { type: 'spring', stiffness: 260, damping: 22 }}>
+              <Link to="/themes" aria-label={x.name} className={`block ${CARD} p-2 no-underline hover-lift`}><ThemePreview bare theme={x.theme} gameName={game} /></Link>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <div className="bg-paper border-t-[3px] lg:border-t-0 lg:border-l-[3px] border-border p-6 sm:p-8 grid content-center gap-4">
+          <p className="font-display text-[2.4rem] sm:text-[3rem] leading-[0.95] uppercase m-0">{x.name}</p>
+          <p className="flex flex-wrap gap-2 m-0">
+            <span className="rounded-pill bg-butter border-std border-border px-3 min-h-9 inline-flex items-center font-bold">{t(`features.band.${x.band}` as StringKey)}</span>
+            <span className="rounded-pill bg-lavender border-std border-border px-3 min-h-9 inline-flex items-center font-bold">{game}</span>
+          </p>
+          <ul className="list-none m-0 p-0 grid grid-cols-6 gap-2" aria-label={t('public.themesPick')}>
+            {top.map((y, i) => (
+              <li key={y.id}><button type="button" onClick={() => setAt(i)} aria-label={y.name} aria-current={i === at ? 'true' : undefined}
+                className={`tap w-full aspect-square rounded-[0.8rem] border-std border-border grid place-items-center motion-safe:transition-transform ${i === at ? 'scale-110' : 'opacity-70 hover:opacity-100'}`}
+                style={{ background: STAGE[i % STAGE.length], boxShadow: i === at ? '0 3px 0 var(--ink)' : undefined }}><PaintBrush weight={i === at ? 'fill' : 'bold'} size={18} aria-hidden="true" /></button></li>
+            ))}
+          </ul>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => go(-1)} aria-label={t('gallery.prev')} className="tap w-12 h-12 rounded-full bg-surface border-std border-border grid place-items-center hover-pop"><CaretLeft weight="bold" size={20} /></button>
+            <button type="button" onClick={() => go(1)} aria-label={t('gallery.next')} className="tap w-12 h-12 rounded-full bg-surface border-std border-border grid place-items-center hover-pop"><CaretRight weight="bold" size={20} /></button>
+            <Link to="/themes" className={buttonClasses('main', 'hover-pop ml-auto')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={18} /></Link>
+          </div>
+        </div>
       </div>
-      <p className="font-display text-2xl">{t('public.themesTrending')}</p>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {top.map((x, i) => (
-          <motion.div key={x.id} initial={reduce ? false : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: reduce ? 0 : i * 0.07 }}>
-            <Link to="/themes" className={`hover-lift block ${CARD} p-2 no-underline text-text`}>
-              <ThemePreview bare theme={x.theme} gameName={GAMES.find((g) => g.id === x.gameId)?.name ?? ''} />
-              <span className="block px-1 pt-2 font-display text-xl">{x.name}</span>
-              <span className="block px-1 pb-1 text-sm font-semibold text-muted">{t(`features.band.${x.band}` as StringKey)} · {t('themes.starter')}</span>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-3 max-sm:grid max-sm:[&>a]:w-full">
-        <Link to="/themes" className={buttonClasses('main', 'hover-pop', 'lg')}>{t('themes.seeAll')}<ArrowRight weight="bold" size={20} /></Link>
-        <Link to="/challenge" className={buttonClasses('secondary', 'hover-pop', 'lg')}>{t('public.themesChallenge')}</Link>
+    </section>
+  );
+}
+
+// The beta test on Home (owner, 2026-11-27: "on the home page, add a section
+// about joining our beta test"): a bold Grape card with the offer as a big
+// sticker, what testers get and do as short lists, and one button. Shown
+// only while the beta window is open and spots remain.
+function BetaSection() {
+  if (!betaOpen()) return null;
+  const gets = [t('home.beta.get.1', { months: BETA.months }), t('home.beta.get.2'), t('home.beta.get.3')];
+  const does = [t('home.beta.do.1'), t('home.beta.do.2', { n: BETA.themeGames }), t('home.beta.do.3')];
+  return (
+    <section aria-labelledby="home-beta" className={`${SECTION}`}>
+      <div className="relative rounded-[1.9rem] border-[3.5px] border-border bg-grape text-white overflow-hidden p-6 sm:p-10 grid gap-6 lg:grid-cols-[auto_minmax(0,1fr)_auto] items-center" style={{ boxShadow: '0 8px 0 var(--ink)' }}>
+        <span className="justify-self-start w-36 h-36 sm:w-40 sm:h-40 rounded-full bg-lemon text-text border-[3.5px] border-border grid place-items-center text-center -rotate-6" style={{ boxShadow: '0 6px 0 var(--ink)' }} aria-hidden="true">
+          <span className="grid leading-none"><span className="font-display text-[3.2rem] leading-[0.9]">{BETA.months}</span><span className="font-display text-xl leading-none">{t('home.beta.sticker')}</span></span>
+        </span>
+        <div className="grid gap-4 min-w-0">
+          <h2 id="home-beta" className="title-bubble text-[2rem] sm:text-[2.75rem] leading-none text-white"><Title text={t('home.beta.title')} /></h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[[t('home.beta.gets'), gets], [t('home.beta.does'), does]].map(([h, items]) => (
+              <div key={h as string} className="grid gap-2">
+                <b className="font-heading text-lg">{h as string}</b>
+                <ul className="list-none m-0 p-0 grid gap-1.5">{(items as string[]).map((x) => <li key={x} className="flex items-center gap-2 font-semibold"><span className="w-6 h-6 rounded-full bg-mint text-text border-[2px] border-border grid place-items-center shrink-0" aria-hidden="true"><Check weight="bold" size={13} /></span>{x}</li>)}</ul>
+              </div>
+            ))}
+          </div>
+          <span className="justify-self-start rounded-pill bg-pink border-std border-border px-3 min-h-9 inline-flex items-center font-bold text-sm">{t('home.beta.spots', { n: BETA.spots })}</span>
+        </div>
+        <Link to="/beta" className={buttonClasses('go', 'hover-pop justify-self-start', 'lg')}><RocketLaunch weight="fill" size={22} />{t('beta.join')}</Link>
       </div>
     </section>
   );
