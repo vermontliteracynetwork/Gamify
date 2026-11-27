@@ -45,7 +45,8 @@ test('Board Game Versus: one player against the computer', async ({ page }) => {
   }
   // Solo (Versus) already makes player 2 the computer (2026-11-23).
   await expect(page.getByRole('combobox', { name: 'Computer level' })).toBeVisible();
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  // Power-ups come last, then Play (Universal views 6, 7).
+  await finishSetup(page);
   await expect(page.getByRole('img', { name: /^A game board of \d+ squares/ })).toBeVisible();
   await expect(page.getByLabel(new RegExp(`^(${CPU_NAMES.join('|')}) on the board`)).first()).toBeAttached();
 });

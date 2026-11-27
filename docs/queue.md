@@ -187,7 +187,7 @@ landing page layouts, copy Stripe. For micro interactions, copy Framer."
 
 ## J. Owner requests, 2026-11-26 (evening)
 
-41. [ ] **Developer portal redesign.** "i need the design team to improve my
+41. [x] **Developer portal redesign.** "i need the design team to improve my
     developer portal. i need it spaced out simpler, card style dashboard. make
     the views more visual and make it simple, adhd friendly. do research and
     apply simple views. use figma where you can and other"

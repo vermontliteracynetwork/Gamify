@@ -61,7 +61,7 @@ test('Pinball Versus: the computer shoots and play comes back to the player', as
     await next.click();
   }
   await page.getByRole('button', { name: 'Person' }).click(); // player 2 becomes the computer
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await finishSetup(page); // power-ups come last, then Play
   await answerShare(page, true);
   await page.getByRole('button', { name: 'Shoot up lane 2' }).click();
   // The computer's turn: its question, its lane, its shot, then back to us.
