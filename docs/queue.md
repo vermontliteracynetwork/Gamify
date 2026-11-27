@@ -302,3 +302,10 @@ want in the carosel and promotional otherwise."
     shift the next section menu higher"): title and the two buttons only, no
     jump tabs, no intro lines under the section titles, the games start
     higher. Built; to check.
+64. [ ] **Features page scannable** (owner: "I don't want unnecessary subtext
+    underneath the title ... Lists are always great. Shorten the words ...
+    more details, small text with an open caret"; "remove plays this way
+    entirely"; "swap the sides of the visual for the second section"):
+    plain section titles, short list items with the detail under a caret,
+    Ways to Play cards as three-item lists with a Best for chip and More,
+    the Class Themes demo moved to the left. Built; to check.

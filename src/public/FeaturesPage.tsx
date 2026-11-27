@@ -74,7 +74,7 @@ export default function FeaturesPage() {
 
         <motion.section id="themes" {...enter} aria-labelledby="themes-title" className="grid lg:grid-cols-2 gap-8 items-center scroll-mt-24">
           <LookDemo />
-          <div className="grid gap-4 lg:order-first">
+          <div className="grid gap-4">
             <h2 id="themes-title" className="title-bubble text-4xl sm:text-5xl leading-tight"><Title text={t('features.theme.title')} /></h2>
             <Points prefix="features.theme" n={4} />
             <p className="font-semibold bg-butter border-std border-border rounded-input p-3">{t('features.theme.challenge')}</p>
@@ -98,7 +98,10 @@ export default function FeaturesPage() {
             {([[SortAscending, 'var(--color-blue-crystal)'], [ChartBar, 'var(--color-butter)'], [Lock, 'var(--color-blush)'], [FileText, 'var(--color-mint)']] as [Icon, string][]).map(([I, bg], k) => (
               <li key={k} className={`${card} p-5 flex gap-4 items-start`} style={lift}>
                 <Dot bg={bg}><I weight="bold" size={26} aria-hidden="true" /></Dot>
-                <span className="grid gap-1"><b className="font-heading text-xl leading-snug">{t(`features.view.${k + 1}` as StringKey)}</b><span className="font-semibold">{t(`features.view.${k + 1}.text` as StringKey)}</span></span>
+                <details className="group flex-1 self-center">
+                  <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-3"><b className="font-heading text-xl leading-snug flex-1">{t(`features.view.${k + 1}` as StringKey)}</b><CaretDown weight="bold" size={18} className="shrink-0 motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" /></summary>
+                  <p className="text-sm font-semibold text-muted mt-1 mb-0">{t(`features.view.${k + 1}.text` as StringKey)}</p>
+                </details>
               </li>
             ))}
           </ul>
@@ -163,9 +166,16 @@ function Points({ prefix, n }: { prefix: string; n: number }) {
   return (
     <ul className="grid gap-3 list-none p-0 m-0">
       {Array.from({ length: n }, (_, i) => (
-        <li key={i} className="flex gap-3">
-          <Check weight="bold" size={22} className="shrink-0 mt-1" aria-hidden="true" />
-          <span><span className="font-heading font-bold text-lg block">{t(`${prefix}.${i + 1}` as StringKey)}</span><span className="font-semibold">{t(`${prefix}.${i + 1}.text` as StringKey)}</span></span>
+        <li key={i}>
+          {/* A short title that scans; the detail is small text under a caret (owner, 2026-11-27). */}
+          <details className="group">
+            <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center gap-3">
+              <Check weight="bold" size={22} className="shrink-0" aria-hidden="true" />
+              <span className="font-heading font-bold text-lg flex-1">{t(`${prefix}.${i + 1}` as StringKey)}</span>
+              <CaretDown weight="bold" size={18} className="shrink-0 motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" />
+            </summary>
+            <p className="text-sm font-semibold text-muted mt-1 mb-0 pl-[2.125rem]">{t(`${prefix}.${i + 1}.text` as StringKey)}</p>
+          </details>
         </li>
       ))}
     </ul>
@@ -314,17 +324,22 @@ function Swatches({ label, list, at, set }: { label: string; list: [string, stri
 // when it fits, and the games that play that way.
 function ModeCard({ mode }: { mode: PlayMode }) {
   const I = MODE_ICONS[mode];
-  const games = GAMES.filter((g) => shownModes(g.modes).includes(mode)).map((g) => g.name).join(', ');
   return (
     <li className={`${card} overflow-hidden grid content-start`} style={lift}>
       <span className="flex items-center gap-3 px-5 py-4 border-b-2 border-border" style={{ background: MODE_COLORS[mode] }}>
         <Dot bg={MODE_BRIGHT[mode]}><I weight="bold" size={26} aria-hidden="true" /></Dot>
         <h3 className="title-bubble text-3xl">{t(`mode.${mode}` as StringKey)}</h3>
       </span>
-      <span className="p-5 grid gap-3">
-        <span className="font-semibold">{t(`features.mode.${mode}` as StringKey)}</span>
-        <span className="font-bold">{t(`features.mode.${mode}.best` as StringKey)}</span>
-        <span className="text-sm font-semibold text-muted">{t('features.play.games', { games })}</span>
+      {/* A short list, the best-for chip, and the full line under a caret (owner, 2026-11-27: "lists are always great. shorten the words"). */}
+      <span className="p-5 grid gap-4">
+        <ul className="grid gap-2 list-none p-0 m-0">
+          {[1, 2, 3].map((n) => <li key={n} className="flex items-center gap-2.5 font-bold"><Check weight="bold" size={20} className="shrink-0" aria-hidden="true" />{t(`features.mode.${mode}.${n}` as StringKey)}</li>)}
+        </ul>
+        <span className="justify-self-start rounded-pill border-std border-border px-3 min-h-9 inline-flex items-center gap-1.5 text-sm font-bold" style={{ background: MODE_COLORS[mode] }}>{t('features.bestFor')}: {t(`features.mode.${mode}.best` as StringKey)}</span>
+        <details className="group">
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1 text-sm font-bold text-muted">{t('features.more')}<CaretDown weight="bold" size={14} className="motion-safe:transition-transform group-open:rotate-180" aria-hidden="true" /></summary>
+          <p className="text-sm font-semibold text-muted mt-1 mb-0">{t(`features.mode.${mode}` as StringKey)}</p>
+        </details>
       </span>
     </li>
   );
