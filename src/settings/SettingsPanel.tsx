@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTeacher } from '../auth/session';
 import { ChalkboardTeacher, ChatCircleDots, CornersIn, CornersOut, GameController, GearSix, Leaf, PersonArmsSpread, Sparkle, SpeakerHigh, TextAa, X, type Icon } from '@phosphor-icons/react';
 import { canVibrate } from '../engine/feedback';
 import HintButton from '../engine/HintButton';
@@ -59,15 +61,34 @@ export function GearButton({ onClick, small = false }: { onClick: () => void; sm
   );
 }
 
+// Close leaves the game for the teacher's game list; students have nowhere
+// to wander (standing rule), so they never see it.
+function CloseButton() {
+  const navigate = useNavigate();
+  const teacher = useTeacher();
+  if (!teacher) return null;
+  return (
+    <button type="button" onClick={() => navigate('/play')} aria-label={t('settings.closeGame')} title={t('settings.closeGame')} className="w-14 h-14 bg-surface border-bold border-border shrink-0 rounded-full flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+      <X weight="bold" size={28} />
+    </button>
+  );
+}
+
 // A game's top row: gear in the player's corner, anything else beside it.
 // `hint` (a game id, or the tip lines) adds the lightbulb tips button beside the gear (teacher, 2026-11-24).
 export function GameTopRow({ onSettings, children, hint }: { onSettings: () => void; children?: ReactNode; hint?: string | string[] }) {
   const { settings } = useSettings();
   return (
+    // Settings, Full screen, then Close (Universal views, approved 2026-11-25);
+    // Report rides beside them on every game (owner, 2026-11-24).
     <div className={`game-top flex items-center gap-2 mb-4 ${settings.leftHanded ? 'flex-row' : 'flex-row-reverse'}`}>
-      <GearButton onClick={onSettings} />
-      {hint && <HintButton {...(typeof hint === 'string' ? { gameId: hint } : { tips: hint })} small={false} />}
+      <CloseButton />
+      <ReportButton />
       <FullScreenButton />
+      {hint && <HintButton {...(typeof hint === 'string' ? { gameId: hint } : { tips: hint })} small={false} />}
+      <button type="button" onClick={onSettings} aria-label={t('settings.open')} className="w-14 h-14 bg-surface border-bold border-border shrink-0 rounded-full flex items-center justify-center active:scale-95 motion-safe:transition" style={{ boxShadow: 'var(--shadow-sticker)' }}>
+        <GearSix weight="bold" size={30} />
+      </button>
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );

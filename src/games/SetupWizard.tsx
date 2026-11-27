@@ -1,4 +1,5 @@
 import { Children, createContext, Fragment, isValidElement, useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react';
+import JoinCodeCard from './JoinCodeCard';
 import { ArrowLeft, ArrowRight, Play } from '@phosphor-icons/react';
 import { t } from '../i18n';
 import Title from '../ui/Title';
@@ -13,6 +14,10 @@ export const ChoicePicked = createContext(true);
 // team, Universal views 6); a step renders into it with a portal.
 export const FooterSlot = createContext<HTMLElement | null>(null);
 const CHOICE_PAGES = ['way', 'class'];
+// "Share a join code" (Universal views 3): the Way step's Share choice turns
+// on its own step with the code big on one paper card. It comes after the
+// questions, because a code carries its question set.
+export const ShareChoice = createContext<{ want: boolean; setWant: (v: boolean) => void } | null>(null);
 
 export interface SetupPage { id: string; title: string; content: ReactNode; ready?: boolean }
 
@@ -39,8 +44,18 @@ function splitPowers(pages: SetupPage[]): SetupPage[] {
   });
 }
 
-export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string }) {
-  const pages = splitPowers(given);
+export default function SetupWizard({ pages: given, onBack, onPlay, playLabel, share }: { pages: SetupPage[]; onBack: () => void; onPlay: () => void; playLabel?: string; share?: { gameId: string; setId?: string } }) {
+  const [wantCode, setWantCode] = useState(false);
+  const withCode = (list: SetupPage[]): SetupPage[] => {
+    if (!share || !wantCode) return list;
+    const at = Math.max(list.findIndex((p) => p.id === 'questions'), list.findIndex((p) => p.id === 'way'));
+    const codePage: SetupPage = { id: 'share-code', title: t('share.codeTitle'), content: <JoinCodeCard gameId={share.gameId} setId={share.setId} /> };
+    return [...list.slice(0, at + 1), codePage, ...list.slice(at + 1)];
+  };
+  // Power-ups come last, after Teams, and the last step plays (Universal views 6, 7).
+  const split = splitPowers(withCode(given));
+  const isPowers = (p: SetupPage) => p.id === 'powers' || p.id.endsWith('-powers');
+  const pages = [...split.filter((p) => !isPowers(p)), ...split.filter(isPowers)];
   const [i, setI] = useState(0);
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [part, setPart] = useState(0);
@@ -50,6 +65,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // The question sets scroll inside their own gallery, so that page never
   // shows a second scroll bar (teacher, 2026-11-16).
   const [tall, setTall] = useState(false);
+  const [bw, setBw] = useState(0);
   const page = pages[i];
   const [picked, setPicked] = useState<Set<string>>(() => new Set());
   const choice = CHOICE_PAGES.includes(page.id) && !picked.has(page.id);
@@ -57,9 +73,11 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
   // Pages of just cards (players, teams, boards, power-ups) sit in the middle of the
   // box, the same in every game (teacher, 2026-11-16).
   // Power-up pages have no white box behind the cards (teacher, 2026-11-23).
-  const isCards = (id: string) => ['way', 'class', 'players', 'teams', 'board', 'powers'].includes(id) || id.endsWith('-powers');
+  const isCards = (id: string) => ['way', 'class', 'players', 'teams', 'board', 'powers', 'share-code'].includes(id) || id.endsWith('-powers');
   const cardsOnly = isCards(page.id);
   const items = itemsOf(page.content);
+  const twoUp = page.id !== 'questions' && !cardsOnly && items.length > 1;
+  const cols = (w: number) => (twoUp && w >= 860 ? 2 : 1);
   const body = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   useLayoutEffect(() => {
@@ -74,11 +92,17 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
       const foot = (card.lastElementChild as HTMLElement | null)?.offsetHeight ?? 0;
       const room = maxH - head - foot - 48 - 6; // the body's padding and the card's border
       const hs = items.map((_, k) => refs.current[k]?.offsetHeight ?? 0);
+      // Option cards sit two side by side on wide screens (Universal views 5),
+      // so a page holds rows of two.
+      setBw(box.clientWidth);
+      const per = cols(box.clientWidth);
       const groups: number[][] = [];
-      let cur: number[] = [], used = 0;
+      let cur: number[] = [], used = 0, rowH = 0;
       hs.forEach((h, k) => {
-        const need = (cur.length ? GAP : 0) + h;
-        if (cur.length && used + need > room) { groups.push(cur); cur = [k]; used = h; } else { cur.push(k); used += need; }
+        const newRow = cur.length % per === 0;
+        const need = newRow ? (cur.length ? GAP : 0) + h : Math.max(0, h - rowH);
+        if (cur.length && newRow && used + need > room) { groups.push(cur); cur = [k]; used = h; rowH = h; }
+        else { cur.push(k); used += need; rowH = newRow ? h : Math.max(rowH, h); }
       });
       if (cur.length) groups.push(cur);
       setTall((v) => (v === hs.some((h) => h > room) ? v : !v));
@@ -105,30 +129,37 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
     <div className="grid">
     {/* Roomy, never cramped (teacher, 2026-10-31): full width up to a big
         card, a generous minimum height, larger text and controls. */}
-    <section className="setup-roomy menu-panel w-full max-w-6xl mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 6.5rem)' }}>
+    <section className="setup-roomy menu-panel w-full mx-auto flex flex-col overflow-hidden" style={{ height: 'calc(100dvh - 6.5rem)' }}>
       {/* The step title and its progress line sit on one row, centered
           with the corner buttons (teacher, 2026-11-06). The question set
           search and filters lock right under it. */}
-      <div className="px-6 sm:px-8 pt-1.5 pb-3 min-h-11 flex flex-wrap items-center gap-x-6 gap-y-2 pr-40 sm:pr-44">
+      <div className="setup-head px-6 sm:px-8 pt-1.5 pb-3 min-h-12 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] max-sm:grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2">
         {/* Step title left, the step meter right, no "Step x of x" on screen
             (teacher, 2026-11-23); screen readers still hear the step number. */}
-        <h2 className="title-bubble text-2xl sm:text-3xl leading-none"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
-        <ol className="ml-auto flex gap-[4px] list-none m-0 w-56 max-w-full rounded-full p-[3px]" style={{ background: '#eeeaf8', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
+        <h2 className="title-bubble text-[1.9rem] sm:text-[2.4rem] leading-none"><span className="sr-only">{t('setup.stepTitle', { n: stepNo, total, title: '' })}</span><Title text={page.title} /></h2>
+        {/* THE meter (approved 2026-11-24): one rounded track with an ink edge,
+            done steps Kelly, the current one Lemon with a glowing knob. */}
+        <ol className="flex gap-[4px] list-none m-0 rounded-full p-[3px] box-border" style={{ width: `min(${Math.max(total, 3) * 3}rem, 40vw)`, height: 22, background: '#eeeaf8', border: '2.5px solid var(--ink)', boxShadow: 'inset 0 2px 4px rgba(29,26,51,0.22)' }} aria-label={t('setup.steps')}>
           {pages.flatMap((p, k) => Array.from({ length: partsOf(p) }, (_, q) => {
             const n = pages.slice(0, k).reduce((m, x) => m + partsOf(x), 0) + q + 1;
             return (
               <li key={`${p.id}-${q}`} className="flex-1">
                 <button type="button" onClick={() => goTo(k, q)} disabled={k > i && pages.slice(i, k).some((x) => x.ready === false || (CHOICE_PAGES.includes(x.id) && !picked.has(x.id)))}
                   aria-current={n === stepNo ? 'step' : undefined} aria-label={t('setup.stepOf', { n, total, title: p.title })}
-                  className="w-full h-3 rounded-full motion-safe:transition-colors" style={{ background: n < stepNo ? 'var(--kelly)' : n === stepNo ? 'var(--lemon)' : 'rgba(29,26,51,0.06)' }} />
+                  className="relative block w-full h-full rounded-full motion-safe:transition-colors" style={{ background: n < stepNo ? 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%), var(--kelly)' : n === stepNo ? 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 55%), var(--lemon)' : 'rgba(29,26,51,0.06)' }}>
+                  {n === stepNo && <span aria-hidden="true" className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-[18px] h-[18px] rounded-full bg-paper border-[2.5px] border-border" style={{ boxShadow: '0 0 0 3px rgba(250,190,55,0.55), 0 0 10px 3px rgba(250,190,55,0.6)' }} />}
+                </button>
               </li>
             );
           }))}
         </ol>
+        {/* The round buttons (Settings, Full screen, Close) sit here, level with the title. */}
+        <span className="max-sm:hidden" aria-hidden="true" />
       </div>
+      <ShareChoice.Provider value={share ? { want: wantCode, setWant: setWantCode } : null}>
       <FooterSlot.Provider value={slot}>
       <ChoicePicked.Provider value={!choice}>
-      <div ref={body} data-setup-body="" onClickCapture={(e) => { if (choice && (e.target as HTMLElement).closest('[role="radio"]')) setPicked((p) => new Set(p).add(page.id)); }} data-unpicked={choice ? '' : undefined} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly ? 'content-center' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+      <div ref={body} data-setup-body="" onClickCapture={(e) => { if (choice && (e.target as HTMLElement).closest('[role="radio"]')) setPicked((p) => new Set(p).add(page.id)); }} data-unpicked={choice ? '' : undefined} style={cols(bw) === 2 ? { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', maxWidth: '64rem', marginInline: 'auto', width: '100%' } : undefined} className={`relative px-6 sm:px-8 grid gap-5 min-h-0 ${cardsOnly || twoUp ? 'content-center items-start' : 'content-start'} pt-2 pb-4 flex-1 text-base ${tall && page.id !== 'questions' ? 'overflow-y-auto' : 'overflow-hidden'}`}>
         {items.map((it, k) => (
           // Settings on other parts stay mounted (so nothing resets) but out of sight.
           // Centered with wide side margins, like a game-show settings page (teacher, 2026-11-06).
@@ -137,6 +168,7 @@ export default function SetupWizard({ pages: given, onBack, onPlay, playLabel }:
       </div>
       </ChoicePicked.Provider>
       </FooterSlot.Provider>
+      </ShareChoice.Provider>
       {/* Back and Next side by side in the middle, under the cards (Universal
           views, approved 2026-11-25); a step's own extra button (Add team)
           sits between them. */}

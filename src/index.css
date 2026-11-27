@@ -710,7 +710,8 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 @keyframes cq-spin-slow { to { transform: rotate(360deg); } }
 
 
-.game-stage.brand-menu { background: radial-gradient(120% 80% at 50% 0%, #f7f4ff 0%, #ebe6ff 60%, #ddd6ff 100%); }
+/* Start menus stand on the site's marbled purple ground (Universal views, approved 2026-11-25). */
+.game-stage.brand-menu { background: transparent; }
 /* Each setting sits on its own white card with a soft lift (teacher, 2026-11-13: dimension, professional). */
 .brand-menu .setup-item { background: var(--surface); border: 2.5px solid var(--ink); border-radius: var(--radius-panel, 1.25rem); padding: 1.25rem 1.5rem; box-shadow: 0 5px 0 var(--ink), 0 16px 30px rgba(36, 28, 61, 0.10); }
 .brand-menu > main { position: relative; padding-top: 1.5rem !important; }
@@ -723,6 +724,8 @@ html[data-motion="still"] :is(.m3-spin, .m3-glow, .m3-pulse, .pb-blink, .pb-chas
 .brand-menu .game-top > .hint-btn { display: none; }
 /* Tips are strictly for game play: never under the results box (teacher, 2026-11-24). */
 body:has(.results-box) .hint-btn { display: none; }
+/* Site links in the top bar on a game's start menus only, not during play. */
+body:not(:has(.game-stage.brand-menu)) .menu-only-links { display: none !important; }
 
 /* Turn card glow (teacher, 2026-11-06): sun rays that spin clockwise and a
    soft halo that breathes. Slow and gentle, so it stays on in every motion
@@ -973,7 +976,8 @@ html, body, body * { overflow-wrap: normal; word-break: normal; hyphens: manual;
 body:has(.solo-bar) .site-header { display: none; }
 /* Signed-in teacher pages stand on light purple (owner, 2026-11-26: "logged
    in teacher background should be light purple"; was Cream). */
-html[data-area="teacher"] .ambient-ground { background-color: var(--lavender) !important; background-image: none !important; }
+/* Only on teacher portal pages (the ones with the teacher menu), never on game menus. */
+body:has(.teacher-rail) .ambient-ground { background-color: var(--lavender) !important; background-image: none !important; }
 
 /* Scrapbook public shell (owner, 2026-11-26: "home=b pricing=a ... login=a
    join =a top/bottom= a --- no scrapbook on any other live views or in games

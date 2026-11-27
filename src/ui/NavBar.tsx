@@ -71,8 +71,10 @@ export default function NavBar() {
           {/* Teachers keep a way to the public site: home, features, the blog
               and help (teacher, 2026-10-31). Students never see these. */}
           {/* Not inside a game (teacher, 2026-11-18): just the buttons on the right. */}
-          {!student && !path.startsWith('/games/') && (
-            <nav aria-label={t('public.nav.label')} className="hidden xl:flex items-center gap-1 mr-1">
+          {/* In a game, the site links show on its start menus only, never in play
+              (owner 2026-11-24: the site's top menu runs across every start menu). */}
+          {!student && (
+            <nav aria-label={t('public.nav.label')} className={`hidden xl:flex items-center gap-1 mr-1 ${path.startsWith('/games/') ? 'menu-only-links' : ''}`}>
               {BAR_LINKS.map(({ to, key }) => <Link key={to} to={to} aria-current={path === to ? 'page' : undefined} className={navLink(to)}>{t(key)}</Link>)}
             </nav>
           )}

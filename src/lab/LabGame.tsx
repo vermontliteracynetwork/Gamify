@@ -194,8 +194,8 @@ export default function LabGame({ def }: { def: LabDef }) {
         <div className={playing ? 'absolute right-3 sm:right-5 top-2 z-20 [&_.game-top]:mb-0' : ''}><GameTopRow hint={playing ? def.how.map((h) => h.text) : undefined} onSettings={() => setSettingsOpen(true)} /></div>
         {phase === 'welcome' && <LabWelcome def={def} still={still} onStart={() => setPhase('setup')} />}
         {phase === 'setup' && (
-          <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} pages={[
-            ...(ways.length > 1 ? [{ id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={ways} value={way} onChange={(m) => change({ who: m })} />{way === 'share' && <ShareHow gameId={`lab/${def.id}`} setId={setId} />}</div> }] : []),
+          <SetupWizard onBack={() => setPhase('welcome')} onPlay={begin} share={way === 'share' ? { gameId: `lab/${def.id}`, setId } : undefined} pages={[
+            ...(ways.length > 1 ? [{ id: 'way', title: t('way.title'), content: <div className="grid gap-6"><WayToPlay modes={ways} value={way} onChange={(m) => change({ who: m })} />{way === 'share' && <ShareHow />}</div> }] : []),
             ...(game.assigned ? [] : [{ id: 'questions', title: t('setup.questions'), content: <SetPicker sets={sets} value={[setId]} onChange={(ids) => change({ setId: ids[0] })} /> }]),
             
             { id: 'options', title: t('setup.options'), content: <Slider label={def.rounds.label} min={def.rounds.min} max={def.rounds.max} value={setup.rounds} onChange={(v) => change({ rounds: v })} /> },

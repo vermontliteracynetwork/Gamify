@@ -86,31 +86,29 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
       {max > 1 && <p className="font-bold text-base">{t('setup.pickSets', { max })}</p>}
       {/* One even row: the sets toggle, a large search, Filters (owner, 2026-11-26). */}
       <div className="flex items-start gap-2 min-w-0 [&>[role=tablist]]:mb-0">
-        <Tabs size="sm" className="shrink-0 !min-h-11 items-center" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
+        <Tabs size="sm" tone="mint" className="shrink-0 !min-h-11 items-center" label={t('sets.tabs')} value={tab} onChange={setTab} options={(['mine', 'library'] as const).map((v) => ({ id: v, label: t(v === 'mine' ? 'sets.mine' : 'sets.library') }))} />
         <div className="flex-1 min-w-0"><SetFilterBar chips value={filter} onChange={setFilter} sets={inTab} /></div>
       </div>
       {hidden > 0 && <p className="text-sm font-bold text-muted">{t('filter.needDetails', { count: hidden })}</p>}
       {shown.length === 0 && <p className="font-bold">{t('filter.none')}</p>}
       <div ref={gallery} className="overflow-y-auto overscroll-contain -mx-4 px-4 pt-2 pb-4" style={{ maxHeight: high ?? '68vh' }}>
-        {/* An uneven gallery (teacher, 2026-11-16): each card as tall as its
-            words and cover need, with room between cards. */}
-        <div className="grid items-start" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: COL_GAP }}>
-          {Array.from({ length: cols }, (_, col) => (
-          <div key={col} className="grid gap-[18px] min-w-0">
-          {shown.filter((_, k) => k % cols === col).map((s) => {
+        {/* Even rows of short cards, three across at most (Universal views 4,
+            approved 2026-11-25). */}
+        <div className="grid items-stretch" style={{ gridTemplateColumns: `repeat(${Math.min(cols, 3)}, minmax(0, 1fr))`, gap: COL_GAP }}>
+          {shown.map((s) => {
             const on = value.includes(s.id);
             const art = ART[s.subject ?? 'Other'];
             const I = art.icon;
             const back = flipped.has(s.id);
             const q = s.questions.find(isPlayable);
             return (
-              <div key={s.id} className="[perspective:900px]">
+              <div key={s.id} className="[perspective:900px] grid">
                 <motion.button key={back ? 'back' : 'front'} type="button" role={max > 1 ? 'checkbox' : 'radio'} aria-checked={on}
                   initial={still ? false : { rotateY: back ? -90 : 90 }} animate={{ rotateY: 0 }} transition={{ duration: 0.28, ease: 'easeOut' }}
                   aria-label={`${s.name || t('sets.untitled')}, ${s.subject ?? t('sets.otherSubject')}, ${t('filter.gradesShort', { grades: gradeLabel(s.grades!) })}, ${t('setup.count', { count: s.questions.filter(isPlayable).length })}`}
                   aria-description={t('sets.flipHint')} title={t('sets.flipHint')}
                   onClick={() => tap(s, on)}
-                  className={`group relative w-full rounded-[1.25rem] border-[3px] border-border text-left grid content-start overflow-hidden bg-white motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? '-translate-y-1' : ''} ${back ? 'gap-2.5 p-4' : ''}`}
+                  className={`group relative w-full h-full rounded-[1.25rem] border-[3px] border-border text-left grid content-start overflow-hidden bg-white motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-y-1 ${on ? '-translate-y-1' : ''} ${back ? 'gap-2.5 p-4' : ''}`}
                   // Picked: a Paper gap and an ink ring, and a Kelly check (Universal views 4).
                   style={{ boxShadow: on ? '0 0 0 4px var(--paper), 0 0 0 7px var(--ink), 0 6px 0 7px var(--ink)' : '0 4px 0 var(--ink)' }}>
                   {on && (
@@ -126,6 +124,8 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
                           <I weight="fill" size={13} color={art.ink} aria-hidden="true" />
                         </span>
                         {s.subject ?? t('sets.otherSubject')}
+                        {/* When it was made, at the band's right (Universal views 4). */}
+                        {s.createdAt && <span className="ml-auto text-xs font-bold whitespace-nowrap">{t('sets.madeOn', { date: new Date(s.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) })}</span>}
                       </span>
                       <span className="px-3.5 pt-2.5 pb-3.5 grid gap-2 min-w-0">
                         {/* A cover keeps the shape it was uploaded in. */}
@@ -163,8 +163,6 @@ export default function SetPicker({ sets, value, onChange, max = 1 }: {
               </div>
             );
           })}
-          </div>
-          ))}
         </div>
       </div>
     </div>

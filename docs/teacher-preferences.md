@@ -474,3 +474,4 @@ line that fits, and add each new preference the same turn she says it.
 - 2026-11-26 (owner): Home, How It Works: no tape on the Step 1 card; the Step chips wear Grow Year.
 - 2026-11-26 (owner): Home hero game cards larger and spaced further apart. The Tell Gamify flag always sits at the far right of the top bar.
 - 2026-11-26 (owner rule): picture choice cards (art on top, words under it, like the Board and How Will You Play steps) show the title large; the subtext shows only once the card is picked, and stays short. Category grid hint shortened.
+- 2026-11-27 (owner: "what is currently live on the link is NOT the approved menus"): every game start menu follows /brand Universal views 1-7 exactly: marbled purple ground, one title row (title left, the approved meter centered, round buttons right incl. Close), Share a join code as its own step after the questions, the set picker in even rows of three, option cards two side by side, power-ups last before Play.

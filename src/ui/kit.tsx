@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { Check } from '@phosphor-icons/react';
 import Title from './Title';
 
 // Shared pieces in the platform's sticker style. Touch targets are at least
@@ -78,8 +79,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 // The one tab bar (design system, 2026-11-18). size sm for compact bars
 // (question set tabs), md for page tabs; fill stretches the tabs across the
 // bar; panelIds links each tab to its panel (`tab-<id>` / `panel-<id>`).
-export function Tabs<T extends string>({ value, options, onChange, label, size = 'md', fill = false, panelIds = false, className = 'mb-5' }: {
-  value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string; size?: 'sm' | 'md'; fill?: boolean; panelIds?: boolean; className?: string;
+export function Tabs<T extends string>({ value, options, onChange, label, size = 'md', fill = false, panelIds = false, className = 'mb-5', tone = 'butter' }: {
+  value: T; options: { id: T; label: string }[]; onChange: (v: T) => void; label: string; size?: 'sm' | 'md'; fill?: boolean; panelIds?: boolean; className?: string; tone?: 'butter' | 'mint';
 }) {
   return (
     <div role="tablist" aria-label={label} className={`${fill ? 'flex' : 'inline-flex flex-wrap max-w-full'} ${size === 'sm' ? 'gap-0.5 p-0.5' : 'gap-1 p-1'} rounded-[1.75rem] bg-surface border-std border-border ${className}`}>
@@ -92,9 +93,9 @@ export function Tabs<T extends string>({ value, options, onChange, label, size =
           aria-controls={panelIds && value === o.id ? `panel-${o.id}` : undefined}
           aria-selected={value === o.id}
           onClick={() => onChange(o.id)}
-          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-sm' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? 'bg-butter text-text' : 'text-text hover:bg-surface-2'}`}
+          className={`${size === 'sm' ? `min-h-9 tap ${fill ? 'px-2 text-sm' : 'px-3 text-sm'}` : 'min-h-11 px-4 text-sm'} rounded-pill font-bold whitespace-nowrap ${fill ? 'flex-auto' : ''} motion-safe:transition-colors ${value === o.id ? (tone === 'mint' ? 'bg-mint text-text shadow-[inset_0_0_0_1.5px_var(--ink)]' : 'bg-butter text-text') : 'text-text hover:bg-surface-2'}`}
         >
-          {o.label}
+          {tone === 'mint' && value === o.id && <Check weight="bold" size={14} className="inline -mt-0.5 mr-1" aria-hidden="true" />}{o.label}
         </button>
       ))}
     </div>

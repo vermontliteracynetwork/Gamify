@@ -65,7 +65,8 @@ export function ChoiceRow<T extends string>({ label, value, options, onChange }:
               {on && <motion.span layoutId={still ? undefined : `pick-${id}`} transition={{ type: 'spring', stiffness: 520, damping: 30 }}
                 className={`absolute inset-0 ${o.art ? 'rounded-input' : 'rounded-pill'} bg-mint border-std border-border`} style={{ boxShadow: '0 2px 0 var(--ink)' }} aria-hidden="true" />}
               {o.art && <span className="relative">{o.art}</span>}
-              <span className="relative">{o.label}</span>
+              {/* The picked pill is Mint with an ink check (Universal views 2b, 5). */}
+              <span className="relative inline-flex items-center gap-1.5">{on && !o.art && <Check weight="bold" size={16} aria-hidden="true" />}{o.label}</span>
             </button>
           );
         })}

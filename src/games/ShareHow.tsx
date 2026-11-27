@@ -1,32 +1,20 @@
-import { useState } from 'react';
-import { makeGameCode } from '../data/gameCodes';
+import { useContext, useEffect, useState } from 'react';
 import { ChoiceRow } from '../ui/fields';
-import { Button } from '../ui/kit';
+import { t } from '../i18n';
+import { ShareChoice } from './SetupWizard';
 
 // After Share is picked (teacher, 2026-11-23): play on this same device, or
 // share a join code so the game opens on another shared device with the same
-// question set.
-export default function ShareHow({ gameId, setId }: { gameId: string; setId: string }) {
-  const [how, setHow] = useState<'here' | 'code'>('here');
-  const [code, setCode] = useState<string | null>(null);
-  // The button shows it is working and never fails silently (owner, 2026-11-26:
-  // "make a join code doesnt work on click"): the cloud can take seconds.
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const make = async () => {
-    setBusy(true); setFailed(false);
-    try { setCode((await makeGameCode(gameId, setId, 'play')).code); } catch (e) { console.warn('join code not made', e); setFailed(true); } finally { setBusy(false); }
-  };
+// question set. The question sits on its own paper card (Universal views 2b);
+// "Share a join code" adds the Share a join code step, after the questions.
+export default function ShareHow() {
+  const ctx = useContext(ShareChoice);
+  const [how, setHow] = useState<'here' | 'code'>(ctx?.want ? 'code' : 'here');
+  useEffect(() => { ctx?.setWant(how === 'code'); }, [how]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="grid gap-3 justify-items-center text-center">
-      <ChoiceRow label="How do you share?" value={how} onChange={setHow} options={[{ value: 'here', label: 'Same device' }, { value: 'code', label: 'Share a join code' }]} />
-      {/* A code carries its question set, so it waits until one is picked
-          (a code made with no set sent players to an empty game). */}
-      {how === 'code' && !setId && <p className="font-bold">Pick your questions first: come back to this step and tap Make a join code.</p>}
-      {how === 'code' && !!setId && (code
-        ? <p className="font-bold">Join code: <span className="font-display text-3xl tracking-widest">{code}</span><br /><span className="text-sm text-muted">Players go to the Join page and type it.</span></p>
-        : <span className="grid justify-items-center gap-1"><Button variant="main" disabled={busy} aria-busy={busy} onClick={() => void make()}>{busy ? 'Making your code...' : 'Make a join code'}</Button>
-            {failed && <span role="alert" className="text-sm font-bold">That did not work. Check the internet and tap again.</span>}</span>)}
+    <div className="justify-self-center grid gap-2 justify-items-center text-center px-6 py-4 [&_[role=radiogroup]]:justify-self-center rounded-panel border-std border-border bg-paper" style={{ boxShadow: '0 4px 0 var(--ink)' }}>
+      <ChoiceRow label={t('share.how')} value={how} onChange={setHow} options={[{ value: 'here', label: t('share.here') }, { value: 'code', label: t('share.code') }]} />
+      {how === 'code' && <p className="m-0 text-sm font-semibold text-muted">{t('share.after')}</p>}
     </div>
   );
 }
