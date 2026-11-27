@@ -532,4 +532,11 @@ want in the carosel and promotional otherwise."
     "Free: one list of 0" and "the last 1 days", and Plus "unlocks every
     game" (Free plays every game); now Live mode leads Plus and early access
     leads Pro.
+116. [x] **Help pages refresh** (owner checklist): how-to guides match today:
+    Get Started is on Home, trying a game starts from Create an Activity,
+    students on Free type a name and class lists tap name and picture (no
+    PIN), homework is As homework on the How step, Tell Gamify is the flag
+    button, results say New game (no Arcade), uploads are photos of any
+    medium, and canceling turns extra items read-only (no "nothing is
+    deleted").
 
