@@ -335,7 +335,7 @@ function Library({ atLimit, onCopied, onHost }: { atLimit: boolean; onCopied: (i
   return (
     <div className="grid gap-4 min-[900px]:grid-cols-[16rem_minmax(0,1fr)] items-start">
       <section aria-labelledby="lib-search" className="bg-surface border-bold border-border rounded-panel overflow-hidden min-[900px]:sticky min-[900px]:top-4" style={{ boxShadow: 'var(--shadow-sticker)' }}>
-        <h2 id="lib-search" className="bg-grape text-white font-heading font-bold text-lg text-center px-4 py-3 border-b-[2.5px] border-border">{t('sets.searchLibrary')}</h2>
+        <h2 id="lib-search" style={{ color: '#fff' }} className="bg-grape-deep font-heading font-bold text-lg text-center px-4 py-3 border-b-[2.5px] border-border">{t('sets.searchLibrary')}</h2>
         <div className="p-3 grid gap-3">
           <SetFilterBar value={filter} onChange={setFilter} sets={LIBRARY} stacked />
           <p className="text-sm font-semibold text-muted">{t('sets.copyNote')}</p>

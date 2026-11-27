@@ -10,7 +10,7 @@ import { saleLive } from './LaunchSaleBanner';
 // bright minus line, then the total in Grow Year. One short renewal line
 // stays under it: a price must say what it renews at (ROSCA and state
 // automatic-renewal rules, the marketing bible).
-const BRIGHT = '#e0218a';
+const BRIGHT = '#c2185b';
 export default function StackedPrice({ plan, billing }: { plan: Exclude<Tier, 'free'>; billing: Billing }) {
   const months = billingMonths(billing);
   const standard = PRICES_USD[plan].month;

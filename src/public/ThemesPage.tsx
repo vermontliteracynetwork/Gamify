@@ -196,7 +196,7 @@ function ChallengeSpot() {
       ))}
       <div className="relative grid gap-8 p-6 sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] items-center">
         <div className="grid gap-4 justify-items-start">
-          <span className="rounded-pill bg-pink text-white border-std border-border px-4 min-h-10 inline-flex items-center gap-2 font-bold" style={{ boxShadow: '0 3px 0 var(--ink)' }}><Trophy weight="fill" size={20} aria-hidden="true" />{t('themes.challengeKicker')}</span>
+          <span className="rounded-pill bg-[#c2185b] text-white border-std border-border px-4 min-h-10 inline-flex items-center gap-2 font-bold" style={{ boxShadow: '0 3px 0 var(--ink)' }}><Trophy weight="fill" size={20} aria-hidden="true" />{t('themes.challengeKicker')}</span>
           <span className="title-bubble text-[2.3rem] sm:text-[3.2rem] leading-[0.95]"><Words text={t('themes.featuredTitle')} /></span>
           <span className="rounded-pill bg-grape text-white border-std border-border px-4 min-h-11 inline-flex items-center gap-2 font-bold text-lg" style={{ boxShadow: '0 3px 0 var(--ink)' }}><Crown weight="fill" size={20} aria-hidden="true" />{t('themes.challengePrize')}</span>
           <span className={buttonClasses('main', 'group-hover:scale-105 motion-safe:transition-transform', 'lg')}>{t('themes.challengeLink')}<ArrowRight weight="bold" size={20} /></span>
@@ -218,7 +218,7 @@ function ChallengeSpot() {
               </AnimatePresence>
             </div>
           </div>
-          <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-[0.6rem] bg-pink text-white border-std border-border px-4 py-1.5 font-display text-xl whitespace-nowrap -rotate-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{slide.look ? slide.maker : t('themes.challengeAsk')}</span>
+          <span className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-[0.6rem] bg-[#c2185b] text-white border-std border-border px-4 py-1.5 font-display text-xl whitespace-nowrap -rotate-2" style={{ boxShadow: '0 3px 0 var(--ink)' }}>{slide.look ? slide.maker : t('themes.challengeAsk')}</span>
           <motion.span className="absolute -bottom-6 -right-4 sm:-right-6 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-sky border-[3.5px] border-border grid place-items-center text-white" style={{ boxShadow: '0 6px 0 var(--ink)' }}
             animate={reduce ? undefined : { rotate: [-8, 8, -8] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
             <span className="absolute inset-2 rounded-full border-[3px] border-dashed border-white/70" />

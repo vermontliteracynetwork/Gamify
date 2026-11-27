@@ -40,7 +40,8 @@ test('Play or share: big screen teams, own devices, homework with a due date', a
     if (await next.isDisabled()) await ((await page.getByRole('radio', { name: /^Share/ }).count()) ? page.getByRole('radio', { name: /^Share/ }) : page.getByRole('radio')).first().click();
     await next.click();
   }
-  await expect(page.getByRole('radiogroup', { name: 'Who is the other side?' })).toBeVisible();
+  // Teams are people; there is no other-side choice (owner, 2026-11-27).
+  await expect(page.getByRole('heading', { name: /Teams$/ })).toBeVisible();
   expect(problems).toEqual([]);
 });
 

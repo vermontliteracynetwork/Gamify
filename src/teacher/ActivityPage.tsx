@@ -1,7 +1,7 @@
 import ClassModeIcon from '../live/ClassModeIcon';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, Info, LockSimple, Play, QrCode, SquaresFour, Sword, Television, User, UsersThree } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, Broadcast, CalendarCheck, Check, Info, LockSimple, Play, QrCode, SquaresFour, Television, User, UsersThree } from '@phosphor-icons/react';
 import { canPlayGame, TIERS } from '../config';
 import { data, newId } from '../data';
 import { makeGameCode, makeLobbyCode, type GameCode, type LobbyPick } from '../data/gameCodes';
@@ -25,12 +25,12 @@ import { ThemeChoices } from './ClassPage';
 // the game, how they play (big screen with teams, a class lobby on their own
 // devices, a code to play solo, pairs, or homework by a date), the question
 // set, then the code or the game itself.
-type How = 'screen' | 'lobby' | 'code' | 'pairs' | 'homework' | 'each' | 'board';
+// Pairs are gone (owner, 2026-11-27: "remove pairs option entirely ... can be done with two person teams").
+type How = 'screen' | 'lobby' | 'code' | 'homework' | 'each' | 'board';
 const HOWS: { id: How; icon: typeof Play; mode?: 'share' | 'live' | 'solo' | 'versus' }[] = [
   { id: 'screen', icon: Television, mode: 'share' },
   { id: 'lobby', icon: Broadcast, mode: 'live' },
   { id: 'code', icon: User, mode: 'solo' },
-  { id: 'pairs', icon: Sword, mode: 'versus' },
   { id: 'homework', icon: CalendarCheck, mode: 'solo' },
   // Pro with a class (teacher, 2026-10-31): a game for each student or group,
   // or a choice board of games students pick from.
@@ -81,12 +81,15 @@ export default function ActivityPage() {
   // and Homeschool give each student a question set, Pro also a game.
   const lim = TIERS[tier];
   const locked = (id: How) => (id === 'lobby' && !live) || (id === 'homework' && !lim.homework) || (id === 'board' && !pro) || (id === 'each' && !lim.setPerStudent);
-  const hows = HOWS.filter((h) => (h.id === 'each' || h.id === 'board' ? !!classId : true) && GAMES.some((g) => g.modes.includes(h.mode!)));
+  // Every way shows on every plan (owner, 2026-11-27: "show the options as locked or available"); ways that need a class say so.
+  const hows = HOWS.filter((h) => GAMES.some((g) => g.modes.includes(h.mode!)));
+  const needsClass = (id: How) => (id === 'each' || id === 'board') && !classId;
+  const planFor = (id: How): string | null => (id === 'lobby' && !live ? 'Plus' : id === 'homework' && !lim.homework ? 'Pro' : id === 'board' && !pro ? 'Pro' : id === 'each' && !lim.setPerStudent ? 'Plus' : null);
   // A game for each student and the choice board take solo games and
   // two-player games played against the computer (teacher, 2026-10-31).
   const ownDevice = (g: (typeof GAMES)[number]) => g.modes.includes('solo') || g.modes.includes('versus');
   const fits = (g: (typeof GAMES)[number]) => !how || (how === 'each' || how === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === how)!.mode!));
-  const ready = [true, !!how && !locked(how) && !(how === 'homework' && hwChoice !== 'one' && !classId) && !(how === 'homework' && hwChoice === 'themes' && hwThemes.length < 2), how === 'board' ? board.length > 1 : anyGame || !!game, !!set, true][step];
+  const ready = [true, !!how && !locked(how) && !needsClass(how) && !(how === 'homework' && hwChoice !== 'one' && !classId) && !(how === 'homework' && hwChoice === 'themes' && hwThemes.length < 2), how === 'board' ? board.length > 1 : anyGame || !!game, !!set, true][step];
   const showClasses = TIERS[tier].hasClasses && classes.length > 0;
 
   async function finish() {
@@ -104,7 +107,7 @@ export default function ActivityPage() {
     if (how === 'screen') { navigate(`/games/${game.id}?set=${set.id}&teams=${teams}`); return; }
     if (how === 'each') { setCode(await makeLobbyCode({ classId, all: { gameId: game.id, setId: set.id }, plan }, limits)); return; }
     if (how === 'lobby') { navigate(`/teacher/live/${(await makeGameCode(game.id, set.id, 'live')).code}?mode=${together}`); return; }
-    const made = await makeGameCode(game.id, set.id, how === 'pairs' ? 'versus' : 'play', how === 'homework' ? due : undefined, limits);
+    const made = await makeGameCode(game.id, set.id, 'play', how === 'homework' ? due : undefined, limits);
     if (how === 'homework' && classId) {
       await data.saveAssignment({ id: newId('asg'), classroomId: classId, setId: set.id, starred: false, endsOn: due, ...(hwChoice === 'themes' && hwThemes.length ? { themeIds: hwThemes } : {}) });
     }
@@ -235,17 +238,31 @@ export default function ActivityPage() {
 
         {STEPS[step] === 'how' && (
           <div className="grid gap-4">
-            <div role="radiogroup" aria-label={t('activity.q.how')} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {hows.map(({ id, icon: Icon, mode }) => (
-                <button key={id} type="button" role="radio" aria-checked={how === id} onClick={() => { setHow(id); setGameId(''); setBoard([]); }}
-                  className={`min-h-20 p-3 rounded-input border-bold text-left grid grid-cols-[auto_1fr] gap-x-3 items-center ${how === id ? 'bg-butter border-border' : 'bg-surface border-border-soft'}`}>
-                  {/* Icons (rule 7): Phosphor bold, ink on a round badge in the way's color (rule 12). */}
-                  <span className="row-span-2 w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: mode ? MODE_BRIGHT[mode] : 'var(--lavender)' }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
-                  <span className="font-display text-lg leading-tight flex items-center gap-2">{t(`activity.how.${id}`)}{locked(id) && <LockSimple weight="fill" size={18} aria-label={t(id === 'lobby' ? 'activity.liveOnly' : 'activity.locked')} />}</span>
-                  <span className="text-sm font-semibold text-muted leading-snug">{t(`activity.how.${id}Hint`)}</span>
-                </button>
-              ))}
-            </div>
+            {/* Two plain groups, big picture cards, a lock and the plan name on what this
+                plan does not have yet (owner, 2026-11-27: "confusing on how to set
+                everything up ... show the options as locked or available"). */}
+            {([['together', ['screen', 'lobby', 'each', 'board']], ['own', ['code', 'homework']]] as const).map(([g, ids]) => (
+              <div key={g} className="grid gap-2">
+                <h3 className="m-0 font-heading font-bold text-lg">{t(`activity.group.${g}`)}</h3>
+                <div role="radiogroup" aria-label={t(`activity.group.${g}`)} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {hows.filter((h) => (ids as readonly string[]).includes(h.id)).map(({ id, icon: Icon, mode }) => {
+                    const plan = planFor(id);
+                    const off = !!plan || needsClass(id);
+                    return (
+                      <button key={id} type="button" role="radio" aria-checked={how === id} onClick={() => { setHow(id); setBoard([]); const g = GAMES.find((x) => x.id === gameId); if (g && !(id === 'each' || id === 'board' ? ownDevice(g) : g.modes.includes(HOWS.find((h) => h.id === id)!.mode!))) setGameId(''); }}
+                        className={`relative min-h-36 p-4 rounded-[1.1rem] border-bold text-left grid content-start gap-2 hover-pop ${how === id ? 'bg-butter border-border shadow-[0_4px_0_var(--ink)]' : 'bg-surface border-border-soft'} ${off ? 'opacity-80' : ''}`}>
+                        <span className="w-12 h-12 rounded-full border-std border-border grid place-items-center" style={{ background: mode ? MODE_BRIGHT[mode] : 'var(--lavender)' }}><Icon weight="bold" size={26} aria-hidden="true" /></span>
+                        <span className="font-display text-lg leading-tight">{t(`activity.how.${id}`)}</span>
+                        <span className="text-sm font-semibold text-muted leading-snug">{t(`activity.how.${id}Hint`)}</span>
+                        {plan && <span className="absolute top-3 right-3 rounded-pill bg-[#1d1a33] text-white px-2.5 min-h-7 inline-flex items-center gap-1 text-xs font-bold"><LockSimple weight="fill" size={12} aria-hidden="true" />{plan}</span>}
+                        {!plan && needsClass(id) && <span className="absolute top-3 right-3 rounded-pill bg-surface-2 border-std border-border-soft px-2.5 min-h-7 inline-flex items-center text-xs font-bold">{t('activity.needsClass')}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+            {how && needsClass(how) && <p className="font-bold m-0" role="status">{t('activity.needsClassNote')} <button type="button" className="underline" onClick={() => goTo(0)}>{t('activity.pickClass')}</button></p>}
             {how === 'lobby' && !live && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.liveOnly')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'homework' && !lim.homework && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.homeworkPro')}</p><UpgradeButton suggest="pro" className="min-h-10 px-3 text-sm" /></div>}
             {how === 'each' && !lim.setPerStudent && <div className="flex flex-wrap items-center gap-2"><p className="font-bold">{t('activity.eachPlus')}</p><UpgradeButton suggest="plus" className="min-h-10 px-3 text-sm" /></div>}

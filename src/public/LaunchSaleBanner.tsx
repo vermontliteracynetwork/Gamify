@@ -57,7 +57,7 @@ export default function LaunchSaleBanner() {
       </motion.div>
 
       <div className="relative grid gap-2 min-w-0">
-        <span className="justify-self-start inline-flex items-center gap-2 rounded-pill bg-pink text-white border-std border-border px-4 min-h-10 font-display text-xl sm:text-2xl leading-none uppercase" style={{ boxShadow: `0 3px 0 ${INK}` }}>
+        <span className="justify-self-start inline-flex items-center gap-2 rounded-pill bg-[#c2185b] text-white border-std border-border px-4 min-h-10 font-display text-xl sm:text-2xl leading-none uppercase" style={{ boxShadow: `0 3px 0 ${INK}` }}>
           <GameController weight="fill" size={24} aria-hidden="true" />{LAUNCH_OFFER.name}
         </span>
         <h2 id="sale-title" className="title-bubble text-[2rem] sm:text-[2.75rem] leading-[1.02] m-0">{t('sale.title')}</h2>

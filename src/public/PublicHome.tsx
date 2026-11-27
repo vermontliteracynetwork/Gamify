@@ -212,7 +212,7 @@ function ThemesShowcase() {
         <div className="p-5 sm:p-8 grid place-items-center">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={x.id} className="w-full max-w-2xl" initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.92, rotate: -2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, rotate: 2 }} transition={reduce ? { duration: 0.15 } : { type: 'spring', stiffness: 260, damping: 22 }}>
-              <Link to="/themes" aria-label={x.name} className={`block ${CARD} p-2 no-underline hover-lift`}><ThemePreview bare theme={x.theme} gameName={game} /></Link>
+              <Link to="/themes" className={`block ${CARD} p-2 no-underline hover-lift`}><ThemePreview bare theme={x.theme} gameName={game} /></Link>
             </motion.div>
           </AnimatePresence>
         </div>

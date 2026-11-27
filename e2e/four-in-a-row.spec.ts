@@ -11,7 +11,8 @@ test('Four in a Row: a player answers, drops a piece, and the computer moves', a
   page.on('pageerror', (e) => problems.push(e.message));
   // A power-up won on the answer would wait for a tap before the drop; this test is the plain turn.
   await noPowerUps(page, 'four-in-a-row');
-  await openSetup(page, '/games/four-in-a-row');
+  // Solo plays the computer (owner, 2026-11-27: no person/computer switch).
+  await openSetup(page, '/games/four-in-a-row', /^Solo/);
   await page.getByRole('combobox', { name: 'Computer level' }).selectOption('easy');
   await finishSetup(page);
   for (let turn = 0; turn < 2; turn++) {
@@ -84,7 +85,8 @@ test('Four in a Row: a right answer can bring Double Drop, and it drops two piec
   const problems: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error') problems.push(m.text()); });
   page.on('pageerror', (e) => problems.push(e.message));
-  await openSetup(page, '/games/four-in-a-row');
+  // Solo plays the computer (owner, 2026-11-27: no person/computer switch).
+  await openSetup(page, '/games/four-in-a-row', /^Solo/);
   await page.getByRole('combobox', { name: 'Computer level' }).selectOption('easy');
   await finishSetup(page);
   const answer = async () => {

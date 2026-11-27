@@ -123,7 +123,7 @@ export default function ChallengeVote({ tag }: { tag?: string }) {
                     <span className="flex-1" />
                     {open && (
                       <button type="button" aria-pressed={on} onClick={() => pick(th.id)} disabled={!on && picks.length >= MAX_PICKS}
-                        className={`min-h-12 px-5 rounded-pill border-std border-border font-bold inline-flex items-center gap-2 hover-pop disabled:opacity-40 ${on ? 'bg-pink text-white' : 'bg-surface'}`} style={{ boxShadow: '0 3px 0 var(--ink)' }}>
+                        className={`min-h-12 px-5 rounded-pill border-std border-border font-bold inline-flex items-center gap-2 hover-pop disabled:opacity-40 ${on ? 'bg-[#c2185b] text-white' : 'bg-surface'}`} style={{ boxShadow: '0 3px 0 var(--ink)' }}>
                         <Heart weight={on ? 'fill' : 'bold'} size={22} aria-hidden="true" />{on ? `${picks.indexOf(th.id) + 1}` : t('vote.pick')}
                       </button>
                     )}

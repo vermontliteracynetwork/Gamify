@@ -210,13 +210,14 @@ function GameIcon({ g, i, on, side, onPick }: { g: (typeof GAMES)[number]; i: nu
   const reduce = useReducedMotion();
   const tilt = TILTS[i % TILTS.length];
   return (
-    <motion.button type="button" aria-pressed={on} aria-label={g.name} onClick={onPick}
+    <motion.button type="button" aria-pressed={on} onClick={onPick}
       className="relative block w-full rounded-[1.1rem] border-std border-border overflow-hidden bg-white cursor-pointer"
       style={{ x: `${BOW[i % 4] * side * 1.6}rem`, rotate: tilt }}
       animate={reduce ? { rotate: tilt } : { rotate: [tilt - 2.5, tilt + 2.5, tilt - 2.5], y: [0, -3, 0], boxShadow: on ? ['0 0 0 4px var(--color-lemon), 0 0 18px 6px rgba(250,190,55,0.55), 0 6px 0 var(--ink)', '0 0 0 4px var(--color-lemon), 0 0 30px 12px rgba(250,190,55,0.75), 0 6px 0 var(--ink)', '0 0 0 4px var(--color-lemon), 0 0 18px 6px rgba(250,190,55,0.55), 0 6px 0 var(--ink)'] : '0 6px 0 var(--ink), 0 10px 18px rgba(29,26,51,0.22)' }}
       transition={{ duration: 2.6 + (i % 3) * 0.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.21 }}
       whileHover={reduce ? undefined : { rotate: tilt, y: -6, scale: 1.08, transition: { duration: 0.2 } }}>
       <GameCover gameId={g.id} className="aspect-[4/3]" />
+      <span className="sr-only">{g.name}</span>
       {/* A soft light sweeping across the cover as it wiggles. */}
       <span aria-hidden="true" className="absolute inset-0 pointer-events-none bg-[linear-gradient(115deg,rgba(255,255,255,0)_30%,rgba(255,255,255,0.45)_50%,rgba(255,255,255,0)_70%)] mix-blend-screen" />
     </motion.button>
